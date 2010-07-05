@@ -66,7 +66,7 @@ void FindMode_VAR_csminwel(TStateModel *model, TEstimateInfo *estimate)
   size_Q=NumberFreeParametersQ(model);
   pos_VAR=0;
   pos_Q=size_VAR;
-  x=(double*)malloc((size_VAR + size_Q)*sizeof(double));
+  x=(double*)swzMalloc((size_VAR + size_Q)*sizeof(double));
 
 /*    //=== Set starting value ===   ansi-c*/
   ConvertQToFreeParameters(model,x+pos_Q);
@@ -142,7 +142,7 @@ void FindMode_VAR_csminwel(TStateModel *model, TEstimateInfo *estimate)
           }
 
       for (j=10, i=1; total_iteration >= j; j*=10, i++);
-      sprintf(header=(char*)malloc(strlen(fmt) + i - 1),fmt,total_iteration);
+      sprintf(header=(char*)swzMalloc(strlen(fmt) + i - 1),fmt,total_iteration);
       WriteTransitionMatrices(f_out,(char*)NULL,header,model);
       Write_VAR_Parameters(f_out,(char*)NULL,header,model);
       free(header);
@@ -191,7 +191,7 @@ void FindMode_VAR_csminwel(TStateModel *model, TEstimateInfo *estimate)
       fflush(f_out);
 
       for (j=10, i=1; total_iteration >= j; j*=10, i++);
-      sprintf(header=(char*)malloc(strlen(fmt) + i - 1),fmt,total_iteration);
+      sprintf(header=(char*)swzMalloc(strlen(fmt) + i - 1),fmt,total_iteration);
       WriteTransitionMatrices(f_out,(char*)NULL,header,model);
       Write_VAR_Parameters(f_out,(char*)NULL,header,model);
       free(header);
@@ -275,7 +275,7 @@ int GetLastIteration(FILE *f_in, TStateModel *model, TEstimateInfo *estimate)
   while (1)
     {
       for (j=10, i=1; k+1 >= j; j*=10, i++);
-      sprintf(id=(char*)malloc(strlen(fmt) + i - 1),fmt,k+1);
+      sprintf(id=(char*)swzMalloc(strlen(fmt) + i - 1),fmt,k+1);
 
       if (!dw_SetFilePosition(f_in,id))
     {
@@ -286,7 +286,7 @@ int GetLastIteration(FILE *f_in, TStateModel *model, TEstimateInfo *estimate)
           while (k > 0)
         {
           for (j=10, i=1; k >= j; j*=10, i++);
-          sprintf(header=(char*)malloc(strlen(fmt) + i - 1),fmt,k);
+          sprintf(header=(char*)swzMalloc(strlen(fmt) + i - 1),fmt,k);
           if (ReadTransitionMatrices(f_in,(char*)NULL,header,model) && Read_VAR_Parameters(f_in,(char*)NULL,header,model))
         {
           printf("Using intermediate output - %s\n",header);
@@ -357,7 +357,7 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
   d1=dw_ParseString_String(nargs,args,"di","");
   if (d1[0] && d1[strlen(d1)-1] != '/')
     {
-      d2=(char*)malloc(strlen(d1)+2);
+      d2=(char*)swzMalloc(strlen(d1)+2);
       strcat(strcpy(d2,d1),"/");
       d1=d2;
     }
@@ -367,7 +367,7 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
   if (tag=dw_ParseString_String(nargs,args,"ft",(char*)NULL))
     {
       fmt="%sest_final_%s.dat";
-      sprintf(filename=(char*)malloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
+      sprintf(filename=(char*)swzMalloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
       if (f_in=fopen(filename,"rt"))
     {
       model=Read_VAR_Specification(f_in,(char*)NULL);
@@ -385,7 +385,7 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
       free(filename);
 
       fmt="%sinit_%s.dat";
-      sprintf(filename=(char*)malloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
+      sprintf(filename=(char*)swzMalloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
       if (f_in=fopen(filename,"rt"))
     {
       model=Read_VAR_Specification(f_in,(char*)NULL);
@@ -393,7 +393,7 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
       fclose(f_in);
 
       fmt="%sest_intermediate_%s.dat";
-      sprintf(filename=(char*)malloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
+      sprintf(filename=(char*)swzMalloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
           if (f_in=fopen(filename,"rt"))
         {
               if (GetLastIteration(f_in,model,estimate))
@@ -408,7 +408,7 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
       free(filename);
 
       fmt="%sinit_%s.dat";
-      sprintf(filename=(char*)malloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
+      sprintf(filename=(char*)swzMalloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
       if (f_in=fopen(filename,"rt"))
         {
           header=dw_ParseString_String(nargs,args,"rh","Initial: ");
@@ -433,13 +433,13 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
 
   if (tag=dw_ParseString_String(nargs,args,"fs",(char*)NULL))
     {
-      sprintf(filename=(char*)malloc(strlen(d1) + strlen(tag) + 1),"%s%s",d1,tag);
+      sprintf(filename=(char*)swzMalloc(strlen(d1) + strlen(tag) + 1),"%s%s",d1,tag);
       model=Read_VAR_Specification((FILE*)NULL,filename);
       estimate->specification_filename=filename;
 
       if (!(tag=dw_ParseString_String(nargs,args,"fr",(char*)NULL)))
     tag=dw_ParseString_String(nargs,args,"fs",(char*)NULL);
-      sprintf(filename=(char*)malloc(strlen(d1) + strlen(tag) + 1),"%s%s",d1,tag);
+      sprintf(filename=(char*)swzMalloc(strlen(d1) + strlen(tag) + 1),"%s%s",d1,tag);
       header=dw_ParseString_String(nargs,args,"rh","");
       ReadTransitionMatrices((FILE*)NULL,filename,header,model);
       Read_VAR_Parameters((FILE*)NULL,filename,header,model);
@@ -506,13 +506,13 @@ TEstimateInfo* GetEstimateInfoFromCommandLine(int nargs, char **args) //, TState
   TEstimateInfo *estimate;
   char *d1, *d2, *tag, *fmt;
 
-  estimate=(TEstimateInfo*)malloc(sizeof(TEstimateInfo));
+  estimate=(TEstimateInfo*)swzMalloc(sizeof(TEstimateInfo));
 
   // Output directory
   d1=dw_ParseString_String(nargs,args,"di","");
   if (d1[0] && d1[strlen(d1)-1] != '/')
     {
-      d2=(char*)malloc(strlen(d1)+2);
+      d2=(char*)swzMalloc(strlen(d1)+2);
       strcat(strcpy(d2,d1),"/");
       d1=d2;
     }
@@ -523,13 +523,13 @@ TEstimateInfo* GetEstimateInfoFromCommandLine(int nargs, char **args) //, TState
   if (!(tag=dw_ParseString_String(nargs,args,"fo",(char*)NULL)))
     tag=dw_ParseString_String(nargs,args,"ft","default");
   fmt="%sest_csminwel_%s.dat";
-  sprintf(estimate->csminwel_output_filename=(char*)malloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
+  sprintf(estimate->csminwel_output_filename=(char*)swzMalloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
   fmt="%sest_intermediate_%s.dat";
-  sprintf(estimate->intermediate_output_filename=(char*)malloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
+  sprintf(estimate->intermediate_output_filename=(char*)swzMalloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
   fmt="%sest_final_%s.dat";
-  sprintf(estimate->final_output_filename=(char*)malloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
+  sprintf(estimate->final_output_filename=(char*)swzMalloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
   fmt="%sest_aux_%s.dat";
-  sprintf(estimate->aux_output_filename=(char*)malloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
+  sprintf(estimate->aux_output_filename=(char*)swzMalloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
   if (d2) free(d2);
 
   // Posterior mode or MLE
@@ -555,7 +555,7 @@ static TStateModel* SetupFromCommandLine(int nargs, char **args, TEstimateInfo *
 {
   TEstimateInfo *info;
 
-  if (!(*p_info)) *p_info=(TEstimateInfo*)malloc(sizeof(TEstimateInfo));
+  if (!(*p_info)) *p_info=(TEstimateInfo*)swzMalloc(sizeof(TEstimateInfo));
   info=*p_info;
 
   info->cmd=Base_VARCommandLine(nargs,args,(TVARCommandLine*)NULL);

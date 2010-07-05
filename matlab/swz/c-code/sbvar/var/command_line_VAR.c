@@ -26,7 +26,7 @@ char* CreateFilenameFromTag(char *fmt, char *tag, char *dir)
   char *filename;
   if (!tag) tag="";
   if (!dir) dir="";
-  sprintf(filename=(char*)malloc(strlen(dir) + strlen(fmt) + strlen(tag) - 3),fmt,dir,tag);
+  sprintf(filename=(char*)swzMalloc(strlen(dir) + strlen(fmt) + strlen(tag) - 3),fmt,dir,tag);
   return filename;
 }
 
@@ -43,7 +43,7 @@ char* CreatePath(char *path)
   n=(int)strlen(path);
   if (path[0] && path[n-1] != DIR_DELIMITER)
     {
-      memcpy(fullpath=(char*)malloc(n+2),path,n);
+      memcpy(fullpath=(char*)swzMalloc(n+2),path,n);
       fullpath[n]=DIR_DELIMITER;
       fullpath[n+1]='\0';
     }
@@ -170,7 +170,7 @@ void PrintHelpMessages(FILE *f, char **include, char **additional)
 
 TVARCommandLine* Create_VARCommandLine(void)
 {
-  TVARCommandLine *cmd=(TVARCommandLine*)malloc(sizeof(TVARCommandLine));
+  TVARCommandLine *cmd=(TVARCommandLine*)swzMalloc(sizeof(TVARCommandLine));
   if (cmd)
     {
        cmd->out_directory=(char*)NULL;
@@ -367,7 +367,7 @@ int GetLastIteration(TStateModel *model, TVARCommandLine *cmd)
   do
     {
       for (j=10, i=1; k >= j; j*=10, i++);
-      sprintf(header=(char*)malloc(strlen(fmt) + i - 1),fmt,k);
+      sprintf(header=(char*)swzMalloc(strlen(fmt) + i - 1),fmt,k);
       if (ReadTransitionMatrices(f_in,(char*)NULL,header,model)
                           && Read_VAR_Parameters(f_in,(char*)NULL,header,model))
         {
@@ -384,7 +384,7 @@ int GetLastIteration(TStateModel *model, TVARCommandLine *cmd)
    {
      k--;
      for (j=10, i=1; k >= j; j*=10, i++);
-     sprintf(header=(char*)malloc(strlen(fmt) + i - 1),fmt,k);
+     sprintf(header=(char*)swzMalloc(strlen(fmt) + i - 1),fmt,k);
      if (ReadTransitionMatrices(f_in,(char*)NULL,header,model) && Read_VAR_Parameters(f_in,(char*)NULL,header,model))
        {
          if (cmd->parameters_filename_actual) free(cmd->parameters_filename_actual);

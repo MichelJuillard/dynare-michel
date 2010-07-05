@@ -69,7 +69,7 @@ void* dw_get_generator_state(void)
 {
 #if defined(USE_IMSL_RNG)
   int *state=(int*)NULL;
-  if (state=(int*)malloc(1566*sizeof(int)))
+  if (state=(int*)swzMalloc(1566*sizeof(int)))
     {
       imsls_random_GFSR_table_get(&state,IMSLS_RETURN_USER,state,0);
       state[1565]=imsls_random_seed_get();
@@ -77,7 +77,7 @@ void* dw_get_generator_state(void)
   return state;
 #elif defined (USE_NR1_RNG)
   int *state=(int*)NULL;
-  if (state=(int*)malloc((NTAB+2)*sizeof(int)))
+  if (state=(int*)swzMalloc((NTAB+2)*sizeof(int)))
     {
       memcpy(state,iv,NTAB*sizeof(int));
       state[NTAB]=iy;
@@ -86,7 +86,7 @@ void* dw_get_generator_state(void)
   return state;
 #elif defined (USE_NR2_RNG)
   int *state=(int*)NULL;
-  if (state=(int*)malloc((NTAB+3)*sizeof(int)))
+  if (state=(int*)swzMalloc((NTAB+3)*sizeof(int)))
     {
       memcpy(state,iv,NTAB*sizeof(int));
       state[NTAB]=iy;
@@ -170,7 +170,7 @@ void dw_read_generator_state(FILE *f)
     {
 #if defined(USE_IMSL_RNG)
   int i, *state;
-  if (state=(int*)malloc(1566*sizeof(int)))
+  if (state=(int*)swzMalloc(1566*sizeof(int)))
     {
       for (i=0; i < 1566; i++) fscanf(f," %d ",state+i);
       dw_set_generator_state(state);
@@ -178,7 +178,7 @@ void dw_read_generator_state(FILE *f)
     }
 #elif defined (USE_NR1_RNG)
   int i, *state;
-  if (state=(int*)malloc((NTAB+2)*sizeof(int)))
+  if (state=(int*)swzMalloc((NTAB+2)*sizeof(int)))
     {
       for (i=0; i < NTAB+2; i++) fscanf(f," %d ",state+i);
       dw_set_generator_state(state);
@@ -186,7 +186,7 @@ void dw_read_generator_state(FILE *f)
     }
 #elif defined (USE_NR2_RNG)
   int i, *state;
-  if (state=(int*)malloc((NTAB+3)*sizeof(int)))
+  if (state=(int*)swzMalloc((NTAB+3)*sizeof(int)))
     {
       for (i=0; i < NTAB+3; i++) fscanf(f," %d ",state+i);
       dw_set_generator_state(state);

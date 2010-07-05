@@ -34,7 +34,7 @@ void SetupObjectiveFunction_new(TStateModel *model, int FreeTheta_Idx, int FreeQ
   Model=model;
   NumberFreeParameters_Q=NumberFreeParametersQ(model);
   NumberFreeParameters_Theta=model->routines->pNumberFreeParametersTheta(model);
-  buffer=(PRECISION*)malloc((NumberFreeParameters_Q + NumberFreeParameters_Theta)*sizeof(PRECISION));
+  buffer=(PRECISION*)swzMalloc((NumberFreeParameters_Q + NumberFreeParameters_Theta)*sizeof(PRECISION));
 
   FreeParameters_Q=buffer+FreeQ_Idx;
   FreeParameters_Theta=buffer+FreeTheta_Idx;

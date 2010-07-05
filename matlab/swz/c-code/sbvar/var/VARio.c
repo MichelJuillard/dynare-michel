@@ -20,7 +20,7 @@ static int strlen_int(int n)
 static void ReadError_VARio(char *id)
 {
   char *errmsg, *fmt="Error after line identifier ""%s""";
-  sprintf(errmsg=(char*)malloc(strlen(fmt) + strlen(id) - 1),fmt,id);
+  sprintf(errmsg=(char*)swzMalloc(strlen(fmt) + strlen(id) - 1),fmt,id);
   dw_UserError(errmsg);
   free(errmsg);
 }
@@ -63,7 +63,7 @@ static FILE* OpenFile_VARio(FILE *f, char *filename)
     else
       if (!(f=fopen(filename,"rt")))
         {
-          sprintf(errmsg=(char*)malloc(strlen(fmt) + strlen(filename) - 1),fmt,filename);
+          sprintf(errmsg=(char*)swzMalloc(strlen(fmt) + strlen(filename) - 1),fmt,filename);
           dw_UserError(errmsg);
           free(errmsg);
         }
@@ -127,7 +127,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
   for (j=0; j < nvars; j++)
     {
       fmt="//== U[%d] ==//";
-      sprintf(id=(char*)malloc(strlen(fmt) + strlen_int(j+1) - 1),fmt,j+1);
+      sprintf(id=(char*)swzMalloc(strlen(fmt) + strlen_int(j+1) - 1),fmt,j+1);
       ReadMatrix_VARio(f_in,id,U[j]=CreateMatrix(nvars,IV[j]));
       free(id);
     }
@@ -140,7 +140,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
     if (IV[j] > 0)
       {
     fmt="//== V[%d] ==//";
-    sprintf(id=(char*)malloc(strlen(fmt) + strlen_int(j+1) - 1),fmt,j+1);
+    sprintf(id=(char*)swzMalloc(strlen(fmt) + strlen_int(j+1) - 1),fmt,j+1);
     ReadMatrix_VARio(f_in,id,V[j]=CreateMatrix(npre,IV[j]));
     free(id);
       }
@@ -153,7 +153,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
     if (IV[j])
       {
     fmt="//== W[%d] ==//";
-    sprintf(id=(char*)malloc(strlen(fmt) + strlen_int(j+1) - 1),fmt,j+1);
+    sprintf(id=(char*)swzMalloc(strlen(fmt) + strlen_int(j+1) - 1),fmt,j+1);
     ReadMatrix_VARio(f_in,id,W[j]=CreateMatrix(npre,nvars));
     free(id);
       }
@@ -167,7 +167,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
   for (j=0; j < nvars; j++)
     {
       fmt="//== Variance of Gaussian prior on column %d of A0 ==//";
-      sprintf(id=(char*)malloc(strlen(fmt) + strlen_int(j+1) - 1),fmt,j+1);
+      sprintf(id=(char*)swzMalloc(strlen(fmt) + strlen_int(j+1) - 1),fmt,j+1);
       ReadMatrix_VARio(f_in,id,A0_prior[j]=CreateMatrix(nvars,nvars));
       free(id);
     }
@@ -176,7 +176,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
   for (j=0; j < nvars; j++)
     {
       fmt="//== Variance of Gaussian prior on column %d of Aplus ==//";
-      sprintf(id=(char*)malloc(strlen(fmt) + strlen_int(j+1) - 1),fmt,j+1);
+      sprintf(id=(char*)swzMalloc(strlen(fmt) + strlen_int(j+1) - 1),fmt,j+1);
       ReadMatrix_VARio(f_in,id,Aplus_prior[j]=CreateMatrix(npre,npre));
       free(id);
     }
@@ -419,7 +419,7 @@ int Read_VAR_Parameters(FILE *f, char *filename, char *header, TStateModel *mode
   for (s=0; s < p->nstates; s++)
     {
       fmt="//== %sA0[%d] ==//";
-      sprintf(idbuffer=(char*)malloc(strlen(fmt)+strlen(header)+strlen_int(s+1)-3),fmt,header,s+1);
+      sprintf(idbuffer=(char*)swzMalloc(strlen(fmt)+strlen(header)+strlen_int(s+1)-3),fmt,header,s+1);
       if (!dw_SetFilePosition(f_in,idbuffer) || !dw_ReadMatrix(f_in,A0[s]=CreateMatrix(p->nvars,p->nvars)))
     {
       ReadError_VARio(idbuffer);
@@ -429,7 +429,7 @@ int Read_VAR_Parameters(FILE *f, char *filename, char *header, TStateModel *mode
       free(idbuffer);
 
       fmt="//== %sAplus[%d] ==//";
-      sprintf(idbuffer=(char*)malloc(strlen(fmt)+strlen(header)+strlen_int(s+1)-3),fmt,header,s+1);
+      sprintf(idbuffer=(char*)swzMalloc(strlen(fmt)+strlen(header)+strlen_int(s+1)-3),fmt,header,s+1);
       if (!dw_SetFilePosition(f_in,idbuffer) || !dw_ReadMatrix(f_in,Aplus[s]=CreateMatrix(p->npre,p->nvars)))
     {
       ReadError_VARio(idbuffer);
@@ -439,7 +439,7 @@ int Read_VAR_Parameters(FILE *f, char *filename, char *header, TStateModel *mode
       free(idbuffer);
 
       fmt="//== %sZeta[%d] ==//";
-      sprintf(idbuffer=(char*)malloc(strlen(fmt)+strlen(header)+strlen_int(s+1)-3),fmt,header,s+1);
+      sprintf(idbuffer=(char*)swzMalloc(strlen(fmt)+strlen(header)+strlen_int(s+1)-3),fmt,header,s+1);
       if (!dw_SetFilePosition(f_in,idbuffer) || !dw_ReadMatrix(f_in,Zeta[s]=CreateMatrix(p->nvars,p->nvars)))
     {
       ReadError_VARio(idbuffer);
@@ -677,7 +677,7 @@ void ReadAllParameters(FILE *f, char *filename, char *id, TStateModel *model)
 
   if (!id) id="";
 
-  sprintf(buffer=(char*)malloc(strlen(fmt) + strlen(id) - 1),fmt,id);
+  sprintf(buffer=(char*)swzMalloc(strlen(fmt) + strlen(id) - 1),fmt,id);
   ReadArray_VARio(f_in,buffer,model->sv->S);
   free(buffer);
 

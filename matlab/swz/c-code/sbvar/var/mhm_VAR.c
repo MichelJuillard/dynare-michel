@@ -116,7 +116,7 @@ T_MHM* CreateMHM(void)
   T_MHM* mhm;
 
 /*    // Allocate structure   ansi-c*/
-  mhm=(T_MHM*)malloc(sizeof(T_MHM));
+  mhm=(T_MHM*)swzMalloc(sizeof(T_MHM));
 
   mhm->alpha_scales=(TVector)NULL;
 
@@ -425,7 +425,7 @@ void ComputeModifiedHarmonicMean(T_MHM *mhm, int period)
 static int ReadError_MHMio(char *id)
 {
   char *errmsg, *fmt="Error involving line identifier \"%s\"";
-  sprintf(errmsg=(char*)malloc(strlen(fmt) + strlen(id) - 1),fmt,id);
+  sprintf(errmsg=(char*)swzMalloc(strlen(fmt) + strlen(id) - 1),fmt,id);
   dw_UserError(errmsg);
   free(errmsg);
   return 0;

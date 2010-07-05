@@ -13,7 +13,7 @@
 static int ReadError_VARio_matlab(char *id)
 {
   char *errmsg, *fmt="Error after line identifier ""%s""";
-  sprintf(errmsg=(char*)malloc(strlen(fmt) + strlen(id) - 1),fmt,id);
+  sprintf(errmsg=(char*)swzMalloc(strlen(fmt) + strlen(id) - 1),fmt,id);
   dw_UserError(errmsg);
   free(errmsg);
   return 1;

@@ -41,10 +41,10 @@ static void ReadError(char *idformat, char *trailer, int error)
       return;
     }
   if (trailer)
-    sprintf(idbuffer=(char*)malloc(strlen(idformat)+strlen(trailer)-1),idformat,trailer);
+    sprintf(idbuffer=(char*)swzMalloc(strlen(idformat)+strlen(trailer)-1),idformat,trailer);
   else
     idbuffer=idformat;
-  sprintf(errmsg=(char*)malloc(strlen(format)+strlen(idbuffer)-1),format,idbuffer);
+  sprintf(errmsg=(char*)swzMalloc(strlen(format)+strlen(idbuffer)-1),format,idbuffer);
   dw_UserError(errmsg);
   free(errmsg);
   if (idbuffer != idformat) free(idbuffer);
@@ -66,7 +66,7 @@ static int SetFilePosition(FILE *f_in, char *format, char *str)
   char *buffer;
   int rtrn;
   if (str)
-    sprintf(buffer=(char*)malloc(strlen(format)+strlen(str)-1),format,str);
+    sprintf(buffer=(char*)swzMalloc(strlen(format)+strlen(str)-1),format,str);
   else
     buffer=format;
   rtrn=dw_SetFilePosition(f_in,buffer);
@@ -151,9 +151,9 @@ TMarkovStateVariable* ReadMarkovSpecification_SV(FILE *f_in, char *idstring, int
     {
 /*        // Construct trailer   ansi-c*/
       if (idstring[0])
-    sprintf(trailer=(char*)malloc(24+strlen(idstring)),"for state_variable%s ==//",idstring);
+    sprintf(trailer=(char*)swzMalloc(24+strlen(idstring)),"for state_variable%s ==//",idstring);
       else
-    strcpy(trailer=(char*)malloc(5),"==//");
+    strcpy(trailer=(char*)swzMalloc(5),"==//");
 
 /*        // Read number of state variables   ansi-c*/
       if (!(err=ReadInteger(f_in,idformat="//== Number independent state variables %s",trailer,&n_state_variables)))
@@ -162,7 +162,7 @@ TMarkovStateVariable* ReadMarkovSpecification_SV(FILE *f_in, char *idstring, int
         {
           sv_array=(TMarkovStateVariable**)dw_CreateArray_pointer(n_state_variables,(void (*)(void*))FreeMarkovStateVariable);
           for (j=10, i=1; n_state_variables/j > 0; j*=10, i++);
-          strcpy(idstring_new=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring);
+          strcpy(idstring_new=(char*)swzMalloc((j=(int)strlen(idstring))+i+3),idstring);
           for (i=0; i < n_state_variables; i++)
         {
           sprintf(idstring_new+j,"[%d]",i+1);
@@ -259,14 +259,14 @@ int WriteMarkovSpecification_SV(FILE *f_out, TMarkovStateVariable *sv, char *ids
   if (idstring[0])
     {
 /*        // 24 characters in "for state_variable ==//" plus null character   ansi-c*/
-      trailer=(char*)malloc(24+strlen(idstring));
+      trailer=(char*)swzMalloc(24+strlen(idstring));
       sprintf(trailer,"for state_variable%s ==//",idstring);
 
       fprintf(f_out,"//****** Specification %s ******//\n\n",trailer);
     }
   else
     {
-      trailer=(char*)malloc(5);
+      trailer=(char*)swzMalloc(5);
       strcpy(trailer,"==//");
 
       fprintf(f_out,"//== Number observations ==//\n%d\n\n",sv->nobs);
@@ -279,7 +279,7 @@ int WriteMarkovSpecification_SV(FILE *f_out, TMarkovStateVariable *sv, char *ids
     {
       fprintf(f_out,"//******************************************//\n\n");
       for (j=10, i=1; sv->n_state_variables >= j; j*=10, i++);
-      strcpy(idbuffer=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring);
+      strcpy(idbuffer=(char*)swzMalloc((j=(int)strlen(idstring))+i+3),idstring);
       for (i=0; i < sv->n_state_variables; i++)
     {
       sprintf(idbuffer+j,"[%d]",i+1);
@@ -381,7 +381,7 @@ int ReadTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *header
   if (sv->n_state_variables > 1)
     {
       for (j=10, i=1; sv->n_state_variables >= j; j*=10, i++);
-      strcpy(idbuffer=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring);
+      strcpy(idbuffer=(char*)swzMalloc((j=(int)strlen(idstring))+i+3),idstring);
       for (i=sv->n_state_variables-1; i >= 0; i--)
     {
       sprintf(idbuffer+j,"[%d]",i+1);
@@ -400,13 +400,13 @@ int ReadTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *header
 /*        // Read transition matrix   ansi-c*/
       if (!header) header="";
       format="//== %sTransition matrix%s ==//";
-      sprintf(idbuffer=(char*)malloc(strlen(header) + strlen(format) + strlen(idstring) - 3),format,header,idstring);
+      sprintf(idbuffer=(char*)swzMalloc(strlen(header) + strlen(format) + strlen(idstring) - 3),format,header,idstring);
       if (err=ReadMatrix(f_in,idbuffer,(char*)NULL,sv->Q))
     if (!idstring[0])
       {
         free(idbuffer);
         idstring="[1]";
-        sprintf(idbuffer=(char*)malloc(strlen(header) + strlen(format) + strlen(idstring) - 3),format,header,idstring);
+        sprintf(idbuffer=(char*)swzMalloc(strlen(header) + strlen(format) + strlen(idstring) - 3),format,header,idstring);
         err=ReadMatrix(f_in,idbuffer,(char*)NULL,sv->Q);
       }
       free(idbuffer);
@@ -504,7 +504,7 @@ int ReadBaseTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *he
   if (sv->n_state_variables > 1)
     {
       for (j=10, i=1; sv->n_state_variables >= j; j*=10, i++);
-      strcpy(idbuffer=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring);
+      strcpy(idbuffer=(char*)swzMalloc((j=(int)strlen(idstring))+i+3),idstring);
       for (i=sv->n_state_variables-1; i >= 0; i--)
     {
       sprintf(idbuffer+j,"[%d]",i+1);
@@ -524,13 +524,13 @@ int ReadBaseTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *he
       Q=CreateMatrix(sv->nbasestates,sv->nbasestates);
       if (!header) header="";
       format="//== %sBase transition matrix%s ==//";
-      sprintf(idbuffer=(char*)malloc(strlen(header) + strlen(format) + strlen(idstring) - 3),format,header,idstring);
+      sprintf(idbuffer=(char*)swzMalloc(strlen(header) + strlen(format) + strlen(idstring) - 3),format,header,idstring);
       if (err=ReadMatrix(f_in,idbuffer,(char*)NULL,Q))
     if (!idstring[0])
       {
         free(idbuffer);
         idstring="[1]";
-        sprintf(idbuffer=(char*)malloc(strlen(header) + strlen(format) + strlen(idstring) - 3),format,header,idstring);
+        sprintf(idbuffer=(char*)swzMalloc(strlen(header) + strlen(format) + strlen(idstring) - 3),format,header,idstring);
         err=ReadMatrix(f_in,idbuffer,(char*)NULL,Q);
       }
       free(idbuffer);
@@ -606,7 +606,7 @@ int WriteTransitionMatrices_SV(FILE *f_out, TMarkovStateVariable* sv, char *head
   if (sv->n_state_variables > 1)
     {
       for (j=10, i=1; sv->n_state_variables >= j; j*=10, i++);
-      strcpy(idbuffer=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring);
+      strcpy(idbuffer=(char*)swzMalloc((j=(int)strlen(idstring))+i+3),idstring);
       for (i=0; i < sv->n_state_variables; i++)
     {
       sprintf(idbuffer+j,"[%d]",i+1);
@@ -657,7 +657,7 @@ int WriteBaseTransitionMatrices_SV(FILE *f_out, TMarkovStateVariable* sv, char *
   if (sv->n_state_variables > 1)
     {
       for (j=10, i=1; sv->n_state_variables >= j; j*=10, i++);
-      strcpy(idbuffer=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring);
+      strcpy(idbuffer=(char*)swzMalloc((j=(int)strlen(idstring))+i+3),idstring);
       for (i=0; i < sv->n_state_variables; i++)
     {
       sprintf(idbuffer+j,"[%d]",i+1);
@@ -696,7 +696,7 @@ void WriteBaseTransitionMatricesFlat_Headers_SV(FILE *f_out, TMarkovStateVariabl
   if (sv->n_state_variables > 1)
     {
       for (j=10, i=1; sv->n_state_variables >= j; j*=10, i++);
-      strcpy(idbuffer=(char*)malloc((j=(int)strlen(idstring))+i+3),idstring);
+      strcpy(idbuffer=(char*)swzMalloc((j=(int)strlen(idstring))+i+3),idstring);
       for (i=0; i < sv->n_state_variables; i++)
     {
       sprintf(idbuffer+j,"[%d]",i+1);

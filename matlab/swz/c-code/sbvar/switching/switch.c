@@ -141,7 +141,7 @@ TMarkovStateVariable* CreateMarkovStateVariable_Single(int nstates, int nobs, TM
       exit(0);
     }
 
-  if (!(sv=(TMarkovStateVariable*)malloc(sizeof(TMarkovStateVariable))))
+  if (!(sv=(TMarkovStateVariable*)swzMalloc(sizeof(TMarkovStateVariable))))
     {
       swz_fprintf_err("CreateMarkovStateVariable(): out of memory\n");
       exit(0);
@@ -266,7 +266,7 @@ TMarkovStateVariable* CreateMarkovStateVariable_Multiple(int nobs, int n_state_v
       exit(0);
     }
 
-  if (!(sv=(TMarkovStateVariable*)malloc(sizeof(TMarkovStateVariable))))
+  if (!(sv=(TMarkovStateVariable*)swzMalloc(sizeof(TMarkovStateVariable))))
     {
       printf("CreateMarkovStateVariable_Multiple(): out of memory\n");
       exit(0);
@@ -527,7 +527,7 @@ TMarkovStateVariable* RestrictMarkovStateVariable(TMarkovStateVariable *sv, int 
 
   if (nstates == sv->nstates) return DuplicateMarkovStateVariable(sv);
 
-  free_translation=(int*)malloc(DimV(sv->B)*sizeof(int));
+  free_translation=(int*)swzMalloc(DimV(sv->B)*sizeof(int));
 
 /*    // free_translation[i] = 1 if B[i] is accessed   ansi-c*/
   for (i=DimV(sv->B)-1; i >= 0; i--) free_translation[i]=0;
@@ -1353,7 +1353,7 @@ int** CreateTranslationMatrix_Flat(int **states, TMarkovStateVariable *sv)
 /*******************************************************************************/
 ThetaRoutines* CreateThetaRoutines_empty(void)
 {
-  ThetaRoutines* pRoutines=(ThetaRoutines*)malloc(sizeof(ThetaRoutines));
+  ThetaRoutines* pRoutines=(ThetaRoutines*)swzMalloc(sizeof(ThetaRoutines));
 
   if (pRoutines)
     {
@@ -1415,7 +1415,7 @@ TStateModel* CreateStateModel_new(TMarkovStateVariable *sv, ThetaRoutines *routi
   int t;
   TStateModel *model;
 
-  if (!(model=(TStateModel*)malloc(sizeof(TStateModel))))
+  if (!(model=(TStateModel*)swzMalloc(sizeof(TStateModel))))
     {
       swz_fprintf_err("CreateStateModel():  Out of memory\n");
       exit(0);
@@ -1444,7 +1444,7 @@ TStateModel* CreateStateModel_new(TMarkovStateVariable *sv, ThetaRoutines *routi
 
 /*    //=== Obsolete fields ===   ansi-c*/
   model->parameters=theta;
-  model->p=(TParameters*)malloc(sizeof(TParameters));
+  model->p=(TParameters*)swzMalloc(sizeof(TParameters));
   model->p->pLogConditionalLikelihood=model->routines->pLogConditionalLikelihood;
   model->p->pParameterDestructor=model->routines->pDestructor;
   model->p->pLogPrior=model->routines->pLogPrior;
@@ -1726,7 +1726,7 @@ int NormalizeStates(TStateModel *model)
 
 /*   if (!(model->NormalizeStates)) return 1; */
 
-/*   if (p=(int*)malloc(model->sv->nstates)) */
+/*   if (p=(int*)swzMalloc(model->sv->nstates)) */
 /*     { */
 /*       if (model->routines->pGetNormalization(p,model)) */
 /*     if (Permute_SV(p,model->sv)) */
@@ -2994,7 +2994,7 @@ TParameters* CreateParameters(PRECISION (*pLogConditionalLikelihood)(int,int,str
                               void (*pDrawParameters)(struct TStateModel_tag*),
                               void *parameters)
 {
-  TParameters* p=(TParameters*)malloc(sizeof(TParameters));
+  TParameters* p=(TParameters*)swzMalloc(sizeof(TParameters));
   if (p)
     {
       p->pLogConditionalLikelihood=pLogConditionalLikelihood;

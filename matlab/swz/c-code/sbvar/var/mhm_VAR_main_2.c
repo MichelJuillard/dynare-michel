@@ -1947,9 +1947,9 @@ int main(int nargs, char **args)
     }
 
   fmt="mhm_draws_%s.dat";
-  sprintf(mhm_filename=(char*)malloc(strlen(tag)+strlen(fmt)-1),fmt,tag);
+  sprintf(mhm_filename=(char*)swzMalloc(strlen(tag)+strlen(fmt)-1),fmt,tag);
   fmt="est_final_%s.dat";
-  sprintf(spec_filename=(char*)malloc(strlen(tag)+strlen(fmt)-1),fmt,tag);
+  sprintf(spec_filename=(char*)swzMalloc(strlen(tag)+strlen(fmt)-1),fmt,tag);
 
 /*    // get number of proposal draws - default 100000   ansi-c*/
   ndraws_proposal=dw_ParseInteger_String(nargs,args,"d",100000);

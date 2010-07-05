@@ -74,7 +74,7 @@ void* dw_CreateArray(TElementSpecification *specs, int dim)
   if (dim <= 0)
     dw_Error(ARG_ERR);
   else
-    if (!(a=malloc(dim*specs->size + specs->offset)))
+    if (!(a=swzMalloc(dim*specs->size + specs->offset)))
       dw_Error(MEM_ERR);
     else
       {
@@ -349,7 +349,7 @@ void* dw_CopyArray(void* d, void* s)
     Assumes
       Both d and s are valid pointers and both *d and *s are either null or a
       null terminated string.  If *d is a null terminated string, then it must
-      have been created via a call to malloc(), calloc() or realloc().
+      have been created via a call to swzMalloc(), calloc() or realloc().
 
     Returns
       Returns one upon success and zero upon failure.
@@ -361,7 +361,7 @@ void* dw_CopyArray(void* d, void* s)
 
     Notes
       It is critical that this function be called only if the destination string
-      was dynamically created via a call to malloc(), calloc() or realloc().  If
+      was dynamically created via a call to swzMalloc(), calloc() or realloc().  If
       this is not the case, then servere memory problems can result.
 */
 static int dw_CopyString(void *d, void *s)
@@ -406,7 +406,7 @@ void* dw_CreateMultidimensionalArrayList(TElementSpecification *specs, int depth
   va_list ap;
   int i, *dim;
   void *a=(void*)NULL;
-  if (dim=(int*)malloc(depth*sizeof(int)))
+  if (dim=(int*)swzMalloc(depth*sizeof(int)))
     {
       va_start(ap,depth);
       for (i=0; i < depth; i++) dim[i]=va_arg(ap,int);
@@ -422,7 +422,7 @@ void* dw_CreateMultidimensionalArrayList_string(int depth, ...)
   va_list ap;
   int i, *dim;
   void *a=(void*)NULL;
-  if (dim=(int*)malloc(depth*sizeof(int)))
+  if (dim=(int*)swzMalloc(depth*sizeof(int)))
     {
       va_start(ap,depth);
       for (i=0; i < depth; i++) dim[i]=va_arg(ap,int);
@@ -438,7 +438,7 @@ void* dw_CreateMultidimensionalArrayList_int(int depth, ...)
   va_list ap;
   int i, *dim;
   void *a=(void*)NULL;
-  if (dim=(int*)malloc(depth*sizeof(int)))
+  if (dim=(int*)swzMalloc(depth*sizeof(int)))
     {
       va_start(ap,depth);
       for (i=0; i < depth; i++) dim[i]=va_arg(ap,int);
@@ -454,7 +454,7 @@ void* dw_CreateMultidimensionalArrayList_double(int depth, ...)
   va_list ap;
   int i, *dim;
   void *a=(void*)NULL;
-  if (dim=(int*)malloc(depth*sizeof(int)))
+  if (dim=(int*)swzMalloc(depth*sizeof(int)))
     {
       va_start(ap,depth);
       for (i=0; i < depth; i++) dim[i]=va_arg(ap,int);
@@ -470,7 +470,7 @@ void* dw_CreateMultidimensionalArrayList_float(int depth, ...)
   va_list ap;
   int i, *dim;
   void *a=(void*)NULL;
-  if (dim=(int*)malloc(depth*sizeof(int)))
+  if (dim=(int*)swzMalloc(depth*sizeof(int)))
     {
       va_start(ap,depth);
       for (i=0; i < depth; i++) dim[i]=va_arg(ap,int);
@@ -486,7 +486,7 @@ void* dw_CreateMultidimensionalArrayList_char(int depth, ...)
   va_list ap;
   int i, *dim;
   void *a=(void*)NULL;
-  if (dim=(int*)malloc(depth*sizeof(int)))
+  if (dim=(int*)swzMalloc(depth*sizeof(int)))
     {
       va_start(ap,depth);
       for (i=0; i < depth; i++) dim[i]=va_arg(ap,int);
@@ -553,7 +553,7 @@ int dw_InitializeArray_char(void *a, char x) { return dw_InitializeArray(a,&x); 
 TElementSpecification* CreateArraySpecification_pointer(void (*destructor)(void *))
 {
   TElementSpecification *specs;
-  if (specs=(TElementSpecification*)malloc(sizeof(TElementSpecification)))
+  if (specs=(TElementSpecification*)swzMalloc(sizeof(TElementSpecification)))
     {
       specs->flag=dw_ARRAY_POINTER | dw_ARRAY_DELETE_SPECS;
       specs->size=sizeof(void*);

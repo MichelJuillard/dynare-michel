@@ -568,7 +568,7 @@ TStateModel* CreateStateModel(TMarkovStateVariable *sv, TParameters *p);
         techniques are used and the following must be true.
 
           All of pElementV(BA[i]), pElementM(QA[i]), and pElementIV(SA[i]) were
-          allocated with malloc(), can be freed with free(), and none of
+          allocated with swzMalloc(), can be freed with free(), and none of
           FreeVector(BA[i]), FreeMatrix(QA[i]), or FreeIntMatrix(SA[i]) attempt
           to free pElemementV(BA[i]), pElementM(QA[i]), or pElementIV(SA[i]) if
           these are null pointers.

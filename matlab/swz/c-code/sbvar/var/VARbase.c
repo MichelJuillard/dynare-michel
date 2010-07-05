@@ -191,7 +191,7 @@ T_VAR_Parameters* CreateTheta_VAR(int flag, int nvars, int nlags, int nexg, int 
     }
 
 /*    //=== Allocate memory for T_VAR_Parameters ===   ansi-c*/
-  if (!(p=(T_VAR_Parameters*)malloc(sizeof(T_VAR_Parameters))))
+  if (!(p=(T_VAR_Parameters*)swzMalloc(sizeof(T_VAR_Parameters))))
     {
       swz_fprintf_err("Out of memory\n");
       exit(0);
@@ -611,8 +611,8 @@ int **ExpandTranslationTable(int **table, TMarkovStateVariable *sv, TMarkovState
   dw_InitializeArray_int(rtable=dw_CreateRectangularArray_int(dw_DimA(table),nstates),0);
 
 /*    // Fill table   ansi-c*/
-  idx=(int*)malloc(sv->nstates*sizeof(int));
-  master=(int*)malloc(nstates*sizeof(int));
+  idx=(int*)swzMalloc(sv->nstates*sizeof(int));
+  master=(int*)swzMalloc(nstates*sizeof(int));
   for (k=i=0; k < sv->nstates; k++)
     {
       for (j=sv->n_state_variables-1; j >= 0; j--)
@@ -1314,7 +1314,7 @@ void AdaptiveMetropolisScale(TStateModel *model, int iterations, int period, int
       Adaptive[j]=(struct TAdaptive**)dw_CreateArray_pointer(p->n_coef_states[j],free);
       for (k=p->n_coef_states[j]-1; k >= 0; k--)
     {
-      Adaptive[j][k]=((struct TAdaptive*)malloc(sizeof(struct TAdaptive)));
+      Adaptive[j][k]=((struct TAdaptive*)swzMalloc(sizeof(struct TAdaptive)));
       Adaptive[j][k]->begin_jump_ratio=p->A0_Metropolis_Jumps[j][k];
       Adaptive[j][k]->iterations=period;
       Adaptive[j][k]->end_iteration_count=period;

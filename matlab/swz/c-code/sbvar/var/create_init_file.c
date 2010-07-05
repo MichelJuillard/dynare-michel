@@ -32,7 +32,7 @@ int main(int nargs, char **args)
 
   model=Combine_matlab_standard(args[1],args[2]);
   ReadConstantParameters(args[1],model);
-  sprintf(filename=(char*)malloc(strlen(fmt) + strlen(args[3]) - 1),fmt,args[3]);
+  sprintf(filename=(char*)swzMalloc(strlen(fmt) + strlen(args[3]) - 1),fmt,args[3]);
   f_out=dw_CreateTextFile(filename);
   Write_VAR_Specification(f_out,(char*)NULL,model);
   WriteTransitionMatrices(f_out,(char*)NULL,header,model);

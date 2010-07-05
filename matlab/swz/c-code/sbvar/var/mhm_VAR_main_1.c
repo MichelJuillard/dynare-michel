@@ -19,7 +19,7 @@
 static void ReadError_MHMio(char *id)
 {
   char *errmsg, *fmt="Error after line identifier ""%s""";
-  sprintf(errmsg=(char*)malloc(strlen(fmt) + strlen(id) - 1),fmt,id);
+  sprintf(errmsg=(char*)swzMalloc(strlen(fmt) + strlen(id) - 1),fmt,id);
   dw_UserError(errmsg);
   free(errmsg);
 }
@@ -34,12 +34,12 @@ static char* AddSlash(char *d)
   int k=strlen(d);
   if (d[0] && d[k-1] != '/')
     {
-      d_out=(char*)malloc(k+2);
+      d_out=(char*)swzMalloc(k+2);
       strcat(strcpy(d_out,d),"/");
     }
   else
     {
-      d_out=(char*)malloc(k+2);
+      d_out=(char*)swzMalloc(k+2);
       strcpy(d_out,d);
     }
   return d_out;
@@ -246,7 +246,7 @@ T_MHM* CreateMHM_CommandLine(int nargs, char **args)
   if (filename=dw_ParseString_String(nargs,args,"fi",(char*)NULL))
     {
       fmt="%s%s";
-      sprintf(mhm_filename=(char*)malloc(strlen(d_in) + strlen(fmt) + strlen(filename) - 3),fmt,d_in,filename);
+      sprintf(mhm_filename=(char*)swzMalloc(strlen(d_in) + strlen(fmt) + strlen(filename) - 3),fmt,d_in,filename);
       mhm=ReadMHM_Input((FILE*)NULL,mhm_filename,(T_MHM*)NULL);
       mhm->mhm_filename=mhm_filename;
     }
@@ -254,21 +254,21 @@ T_MHM* CreateMHM_CommandLine(int nargs, char **args)
   if (tag=dw_ParseString_String(nargs,args,"ft",(char*)NULL))
     {
       fmt="%smhm_final_%s.dat";
-      sprintf(spec_filename=(char*)malloc(strlen(d_in) + strlen(fmt) + strlen(tag) - 3),fmt,d_in,tag);
+      sprintf(spec_filename=(char*)swzMalloc(strlen(d_in) + strlen(fmt) + strlen(tag) - 3),fmt,d_in,tag);
       if (rtrn=RestartFromFinalFile(spec_filename,mhm))
     mhm=rtrn;
       else
     {
       free(spec_filename);
       fmt="%smhm_intermediate_%s.dat";
-      sprintf(spec_filename=(char*)malloc(strlen(d_in) + strlen(fmt) + strlen(tag) - 3),fmt,d_in,tag);
+      sprintf(spec_filename=(char*)swzMalloc(strlen(d_in) + strlen(fmt) + strlen(tag) - 3),fmt,d_in,tag);
       if (rtrn=RestartFromIntermediateFile(spec_filename,mhm))
         mhm=rtrn;
       else
         {
           free(spec_filename);
           fmt="%sest_final_%s.dat";
-          sprintf(spec_filename=(char*)malloc(strlen(d_in) + strlen(fmt) + strlen(tag) - 3),fmt,d_in,tag);
+          sprintf(spec_filename=(char*)swzMalloc(strlen(d_in) + strlen(fmt) + strlen(tag) - 3),fmt,d_in,tag);
           if (!(f_in=fopen(spec_filename,"rt")))
         {
           swz_fprintf_err("CreateMHM_CommandLine:  Unable to create model from %s tag.\n",tag);
@@ -294,11 +294,11 @@ T_MHM* CreateMHM_CommandLine(int nargs, char **args)
     if (mhm)
       {
         fmt="%s%s";
-        sprintf(mhm->spec_filename=(char*)malloc(strlen(d_in) + strlen(fmt) + strlen(filename) - 3),fmt,d_in,filename);
+        sprintf(mhm->spec_filename=(char*)swzMalloc(strlen(d_in) + strlen(fmt) + strlen(filename) - 3),fmt,d_in,filename);
         model=Read_VAR_Specification((FILE*)NULL,mhm->spec_filename);
         if (!(filename=dw_ParseString_String(nargs,args,"fp",(char*)NULL)))
           filename=dw_ParseString_String(nargs,args,"fs",(char*)NULL);
-        sprintf(mhm->parameter_filename=(char*)malloc(strlen(d_in) + strlen(fmt) + strlen(filename) - 3),fmt,d_in,filename);
+        sprintf(mhm->parameter_filename=(char*)swzMalloc(strlen(d_in) + strlen(fmt) + strlen(filename) - 3),fmt,d_in,filename);
         mhm->parameter_header=dw_ParseString_String(nargs,args,"ph","Posterior mode: ");
         ReadTransitionMatrices((FILE*)NULL,mhm->parameter_filename,mhm->parameter_header,model);
         Read_VAR_Parameters((FILE*)NULL,mhm->parameter_filename,mhm->parameter_header,model);
@@ -322,17 +322,17 @@ T_MHM* CreateMHM_CommandLine(int nargs, char **args)
   if (!(tag=dw_ParseString_String(nargs,args,"fo",(char*)NULL)))
     tag=dw_ParseString_String(nargs,args,"ft","default");
   fmt="%smhm_intermediate_%s.dat";
-  sprintf(mhm->intermediate_output_filename=(char*)malloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);
+  sprintf(mhm->intermediate_output_filename=(char*)swzMalloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);
   fmt="%smhm_final_%s.dat";
-  sprintf(mhm->final_output_filename=(char*)malloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);
+  sprintf(mhm->final_output_filename=(char*)swzMalloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);
   fmt="%smhm_intermediate_draws_%s.dat";
-  sprintf(mhm->intermediate_draws_output_filename=(char*)malloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);
+  sprintf(mhm->intermediate_draws_output_filename=(char*)swzMalloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);
   fmt="%smhm_draws_%s.dat";
-  sprintf(mhm->draws_output_filename=(char*)malloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);
+  sprintf(mhm->draws_output_filename=(char*)swzMalloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);
   fmt="%smhm_regime_counts_%s.dat";
-  sprintf(mhm->regime_counts_filename=(char*)malloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);
+  sprintf(mhm->regime_counts_filename=(char*)swzMalloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);
 /*    //fmt="%smhm_draws_states_not_integrated_%s.dat";   ansi-c*/
-/*    //sprintf(mhm->states_not_integrated_out_filename=(char*)malloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);   ansi-c*/
+/*    //sprintf(mhm->states_not_integrated_out_filename=(char*)swzMalloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);   ansi-c*/
 
   free(d_in);
   free(d_out);

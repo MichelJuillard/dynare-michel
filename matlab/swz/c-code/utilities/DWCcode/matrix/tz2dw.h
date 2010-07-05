@@ -36,7 +36,7 @@ typedef struct
 
 
 /*  // memory management   ansi-c*/
-#define tzMalloc(elt_count,type)  (type *)malloc((elt_count)*sizeof(type))
+#define tzMalloc(elt_count,type)  (type *)swzMalloc((elt_count)*sizeof(type))
 #define tzDestroy(x)   {if (x) { free((x)); (x) = NULL; }}
 
 /*  // i/o   ansi-c*/

@@ -74,7 +74,7 @@ FILE *dw_AppendTextFile(char *filename)
      the buffer containing the file and resets *n if necessary.  The if the
      passed buffer is null or is not large enough to contain the line, buffer is
      freed and a new buffer is allocated.  Because of this, the passed buffer
-     must either null or allocated with malloc(), realloc(), or calloc() and the
+     must either null or allocated with swzMalloc(), realloc(), or calloc() and the
      calling routine is responsible for eventually freeing the memory if the
      return value is not null.
 
@@ -86,7 +86,7 @@ char* dw_ReadLine(FILE *f, char *buffer, int *n)
 {
   char *ptr, *nbuffer;
   int i, k=0;
-  if (!buffer && !(buffer=(char*)malloc(*n=SIZE_INCREMENT)))
+  if (!buffer && !(buffer=(char*)swzMalloc(*n=SIZE_INCREMENT)))
     {
       *n=0;
       return (char*)NULL;
@@ -138,7 +138,7 @@ char** dw_ParseDelimitedString(char *buffer, char delimiter, int flag)
         m=n-1;
       if ((m >= 0) || !(flag & REMOVE_EMPTY_FIELDS))
         {
-          ptr=(struct StringList*)malloc(sizeof(struct StringList));
+          ptr=(struct StringList*)swzMalloc(sizeof(struct StringList));
           ptr->string=buffer;
           ptr->length=m+1;
           ptr->next=head;
@@ -149,7 +149,7 @@ char** dw_ParseDelimitedString(char *buffer, char delimiter, int flag)
   v=dw_CreateArray_string(k);
   while (--k >= 0)
     {
-      v[k]=(char*)malloc(head->length+1);
+      v[k]=(char*)swzMalloc(head->length+1);
       if (head->length > 0) memcpy(v[k],head->string,head->length);
       v[k][head->length]='\0';
       ptr=head;
@@ -222,7 +222,7 @@ char*** dw_ReadDelimitedFile(FILE *f, char* filename, char delimiter, int flag)
       while (buffer=dw_ReadLine(f_in,buffer,&n))
     if (v=dw_ParseDelimitedString(buffer,delimiter,flag))
           {
-        ptr=(struct LineList*)malloc(sizeof(struct LineList));
+        ptr=(struct LineList*)swzMalloc(sizeof(struct LineList));
         ptr->line=v;
             ptr->next=head;
             head=ptr;
@@ -443,6 +443,6 @@ int dw_SetFilePositionBySection(FILE *f, int n, ...)
 char* dw_DuplicateString(char *buffer)
 {
   char *rtrn=(char*)NULL;
-  if (buffer && (rtrn=(char*)malloc(strlen(buffer)+1))) strcpy(rtrn,buffer);
+  if (buffer && (rtrn=(char*)swzMalloc(strlen(buffer)+1))) strcpy(rtrn,buffer);
   return rtrn;
 }

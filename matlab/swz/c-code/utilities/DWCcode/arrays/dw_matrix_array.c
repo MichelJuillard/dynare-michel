@@ -120,7 +120,7 @@ TMatrix MatrixTensor(TMatrix X, TMatrix* Y)
       rtrn=X;
   if (dw_DimA(Y) > 2)
     {
-      if (!(Z=(PRECISION*)malloc(r*c*sizeof(PRECISION))))
+      if (!(Z=(PRECISION*)swzMalloc(r*c*sizeof(PRECISION))))
     {
       if (!X) FreeMatrix(rtrn);
       return (TMatrix)NULL;
@@ -211,7 +211,7 @@ TVector VectorTensor(TVector x, TVector* y)
       rtrn=x;
   if (dw_DimA(y) > 2)
     {
-      if (!(z=(PRECISION*)malloc(d*sizeof(PRECISION))))
+      if (!(z=(PRECISION*)swzMalloc(d*sizeof(PRECISION))))
     {
       if (!x) FreeVector(rtrn);
       return (TVector)NULL;

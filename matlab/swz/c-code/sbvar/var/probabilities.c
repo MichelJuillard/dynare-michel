@@ -51,19 +51,19 @@ int main(int nargs, char **args)
 
 /*    // specification filename   ansi-c*/
   if (buffer=dw_ParseString_String(nargs,args,"fs",(char*)NULL))
-    strcpy(spec=(char*)malloc(strlen(buffer)+1),buffer);
+    strcpy(spec=(char*)swzMalloc(strlen(buffer)+1),buffer);
 
 /*    // output filename   ansi-c*/
   if (buffer=dw_ParseString_String(nargs,args,"fo",(char*)NULL))
-    strcpy(out=(char*)malloc(strlen(buffer)+1),buffer);
+    strcpy(out=(char*)swzMalloc(strlen(buffer)+1),buffer);
 
 /*    // parameter filename   ansi-c*/
   if (buffer=dw_ParseString_String(nargs,args,"fp",(char*)NULL))
-    strcpy(parm=(char*)malloc(strlen(buffer)+1),buffer);
+    strcpy(parm=(char*)swzMalloc(strlen(buffer)+1),buffer);
 
 /*    // header   ansi-c*/
   if (buffer=dw_ParseString_String(nargs,args,"ph",(char*)NULL))
-    strcpy(head=(char*)malloc(strlen(buffer)+1),buffer);
+    strcpy(head=(char*)swzMalloc(strlen(buffer)+1),buffer);
 
 /*    // file tag   ansi-c*/
   if (buffer=dw_ParseString_String(nargs,args,"ft",(char*)NULL))
@@ -72,17 +72,17 @@ int main(int nargs, char **args)
 
 /*        // specification filename   ansi-c*/
       if (!spec)
-    sprintf(spec=(char*)malloc(strlen(fmt) + strlen(buffer) - 1),fmt,buffer);
+    sprintf(spec=(char*)swzMalloc(strlen(fmt) + strlen(buffer) - 1),fmt,buffer);
 
 /*        // parameter filename   ansi-c*/
       if (!parm)
-    sprintf(parm=(char*)malloc(strlen(fmt) + strlen(buffer) - 1),fmt,buffer);
+    sprintf(parm=(char*)swzMalloc(strlen(fmt) + strlen(buffer) - 1),fmt,buffer);
 
 /*        // output filename   ansi-c*/
       if (!out)
     {
       fmt="probabilities_%s.dat";
-      sprintf(out=(char*)malloc(strlen(fmt) + strlen(buffer) - 1),fmt,buffer);
+      sprintf(out=(char*)swzMalloc(strlen(fmt) + strlen(buffer) - 1),fmt,buffer);
     }
     }
 
@@ -100,18 +100,18 @@ int main(int nargs, char **args)
     }
 
   if (!parm)
-    strcpy(parm=(char*)malloc(strlen(spec)+1),spec);
+    strcpy(parm=(char*)swzMalloc(strlen(spec)+1),spec);
 
   if (!head)
     {
       buffer="Posterior mode: ";
-      strcpy(head=(char*)malloc(strlen(buffer)+1),buffer);
+      strcpy(head=(char*)swzMalloc(strlen(buffer)+1),buffer);
     }
 
   if (!out)
     {
       buffer="probabilities.dat";
-      strcpy(out=(char*)malloc(strlen(buffer)+1),buffer);
+      strcpy(out=(char*)swzMalloc(strlen(buffer)+1),buffer);
     }
 
   model=Read_VAR_Specification((FILE*)NULL,spec);

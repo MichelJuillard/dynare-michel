@@ -67,7 +67,7 @@ void fn_DisplayError(char *msg_s)
 /*  //-----------------   ansi-c*/
 void *m_alloc(size_t size) {
    void *new_mem;
-   if ( (new_mem = malloc(size)) == NULL )  fn_DisplayError("Out of Memory!");
+   if ( (new_mem = swzMalloc(size)) == NULL )  fn_DisplayError("Out of Memory!");
    return(new_mem);
 }
 /*  //+   ansi-c*/

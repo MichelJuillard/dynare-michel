@@ -53,7 +53,7 @@ TVector CreateVector(int m)
    dw_Error(SIZE_ERR);
    return (TVector)NULL;
   }
- if (x=(TVector)malloc(sizeof(TVectorStructure) + (m-1)*sizeof(PRECISION)))
+ if (x=(TVector)swzMalloc(sizeof(TVectorStructure) + (m-1)*sizeof(PRECISION)))
    DimV(x)=m;
   else
    dw_Error(MEM_ERR);
@@ -73,7 +73,7 @@ TMatrix CreateMatrix(int m, int n)
    dw_Error(SIZE_ERR);
    return (TMatrix)NULL;
   }
- if (X=(TMatrix)malloc(sizeof(TMatrixStructure) + (m*n-1)*sizeof(PRECISION)))
+ if (X=(TMatrix)swzMalloc(sizeof(TMatrixStructure) + (m*n-1)*sizeof(PRECISION)))
    {
     RowM(X)=m;
     ColM(X)=n;
@@ -96,7 +96,7 @@ TPermutation CreatePermutation(int m)
    dw_Error(SIZE_ERR);
    return (TPermutation)NULL;
   }
- if (X=(TPermutation)malloc(sizeof(TPermutationStructure) + (m-1)*sizeof(int)))
+ if (X=(TPermutation)swzMalloc(sizeof(TPermutationStructure) + (m-1)*sizeof(int)))
    {
      X->dim=m;
      X->use=0;
@@ -122,8 +122,8 @@ TVector CreateVector(int m)
    dw_Error(SIZE_ERR);
    return (TVector)NULL;
   }
- if (x=(TVector)malloc(sizeof(TVectorStructure)))
-   if (x->x=(PRECISION*)malloc(m*sizeof(PRECISION)))
+ if (x=(TVector)swzMalloc(sizeof(TVectorStructure)))
+   if (x->x=(PRECISION*)swzMalloc(m*sizeof(PRECISION)))
      DimV(x)=m;
    else
      {
@@ -153,8 +153,8 @@ TMatrix CreateMatrix(int m, int n)
    dw_Error(SIZE_ERR);
    return (TMatrix)NULL;
   }
- if (X=(TMatrix)malloc(sizeof(TMatrixStructure)))
-   if (X->x=(PRECISION*)malloc(m*n*sizeof(PRECISION)))
+ if (X=(TMatrix)swzMalloc(sizeof(TMatrixStructure)))
+   if (X->x=(PRECISION*)swzMalloc(m*n*sizeof(PRECISION)))
      {
        RowM(X)=m;
        ColM(X)=n;
@@ -190,8 +190,8 @@ TPermutation CreatePermutation(int m)
    dw_Error(SIZE_ERR);
    return (TPermutation)NULL;
   }
- if (X=(TPermutation)malloc(sizeof(TPermutationStructure)))
-   if (X->x=(int*)malloc(m*sizeof(int)))
+ if (X=(TPermutation)swzMalloc(sizeof(TPermutationStructure)))
+   if (X->x=(int*)swzMalloc(m*sizeof(int)))
      {
        X->dim=m;
        X->use=0;
@@ -227,7 +227,7 @@ TVector CreateVector(int m)
    dw_Error(SIZE_ERR);
    return (TVector)NULL;
   }
- if (x=(TVector)((int *)malloc(m*sizeof(PRECISION)+sizeof(int))+1))
+ if (x=(TVector)((int *)swzMalloc(m*sizeof(PRECISION)+sizeof(int))+1))
    V_DIM(x)=m;
   else
    dw_Error(MEM_ERR);
@@ -248,7 +248,7 @@ TMatrix CreateMatrix(int m, int n)
    dw_Error(SIZE_ERR);
    return (TMatrix)NULL;
   }
- if (X=(TMatrix)((int *)malloc(m*(sizeof(PRECISION *)+n*sizeof(PRECISION))+2*sizeof(int))+2))
+ if (X=(TMatrix)((int *)swzMalloc(m*(sizeof(PRECISION *)+n*sizeof(PRECISION))+2*sizeof(int))+2))
    {
     M_ROW(X)=m;
     M_COL(X)=n;
@@ -273,7 +273,7 @@ TPermutation CreatePermutation(int m)
    dw_Error(SIZE_ERR);
    return (TPermutation)NULL;
   }
- if (X=(TPermutation)malloc((m+2)*sizeof(int)))
+ if (X=(TPermutation)swzMalloc((m+2)*sizeof(int)))
    {
     X[0]=m;
     X[1]=0;
@@ -302,8 +302,8 @@ TVector CreateVector(int m)
    dw_Error(SIZE_ERR);
    return (TVector)NULL;
   }
- if (x=(TVector)malloc(sizeof(TSdvector)))
-   if (!(pElementV(x)=(PRECISION*)malloc(m*sizeof(PRECISION))))
+ if (x=(TVector)swzMalloc(sizeof(TSdvector)))
+   if (!(pElementV(x)=(PRECISION*)swzMalloc(m*sizeof(PRECISION))))
      {
        free(x);
        dw_Error(MEM_ERR);
@@ -336,8 +336,8 @@ TMatrix CreateMatrix(int m, int n)
    dw_Error(SIZE_ERR);
    return (TMatrix)NULL;
   }
- if (X=(TMatrix)malloc(sizeof(TSdmatrix)))
-   if (!(pElementM(X)=(PRECISION*)malloc(m*n*sizeof(PRECISION))))
+ if (X=(TMatrix)swzMalloc(sizeof(TSdmatrix)))
+   if (!(pElementM(X)=(PRECISION*)swzMalloc(m*n*sizeof(PRECISION))))
      {
        free(X);
        dw_Error(MEM_ERR);
@@ -362,7 +362,7 @@ TPermutation CreatePermutation(int m)
    dw_Error(SIZE_ERR);
    return (TPermutation)NULL;
   }
- if (X=(TPermutation)malloc(sizeof(TPermutationStructure) + (m-1)*sizeof(int)))
+ if (X=(TPermutation)swzMalloc(sizeof(TPermutationStructure) + (m-1)*sizeof(int)))
    {
      X->dim=m;
      X->use=0;
@@ -1381,7 +1381,7 @@ TMatrix UpdateMS(TMatrix X, TMatrix Y, PRECISION a)
     bLinearUpdateScalar(pElementM(X),pElementM(Y),a,RowM(Y)*ColM(Y));
   else
     {
-      if (!(z=(PRECISION*)malloc(RowM(Y)*ColM(Y)*sizeof(PRECISION))))
+      if (!(z=(PRECISION*)swzMalloc(RowM(Y)*ColM(Y)*sizeof(PRECISION))))
     {
       dw_Error(MEM_ERR);
       return (TMatrix)NULL;
@@ -1489,7 +1489,7 @@ TMatrix LinearCombinationMM(TMatrix X, PRECISION a, TMatrix Y, PRECISION b, TMat
   else
     if (X == Z)
       {
-    if (!(p=(PRECISION*)malloc(RowM(Y)*ColM(Y)*sizeof(PRECISION))))
+    if (!(p=(PRECISION*)swzMalloc(RowM(Y)*ColM(Y)*sizeof(PRECISION))))
       {
         dw_Error(MEM_ERR);
         if (!W) FreeMatrix(X);
@@ -1502,7 +1502,7 @@ TMatrix LinearCombinationMM(TMatrix X, PRECISION a, TMatrix Y, PRECISION b, TMat
     else
       if (X == Y)
     {
-      if (!(p=(PRECISION*)malloc(RowM(Z)*ColM(Z)*sizeof(PRECISION))))
+      if (!(p=(PRECISION*)swzMalloc(RowM(Z)*ColM(Z)*sizeof(PRECISION))))
         {
           dw_Error(MEM_ERR);
           if (!W) FreeMatrix(X);
@@ -1647,7 +1647,7 @@ TVector ProductVM(TVector x, TVector y, TMatrix Z)
      }
     if (x == y)
       {
-       if (!(ptr=(PRECISION*)malloc(DimV(x)*sizeof(PRECISION))))
+       if (!(ptr=(PRECISION*)swzMalloc(DimV(x)*sizeof(PRECISION))))
         {
          dw_Error(MEM_ERR);
          return (TVector)NULL;
@@ -1705,7 +1705,7 @@ TVector ProductMV(TVector x, TMatrix Y, TVector z)
      }
     if (x == z)
       {
-       if (!(ptr=(PRECISION*)malloc(DimV(x)*sizeof(PRECISION))))
+       if (!(ptr=(PRECISION*)swzMalloc(DimV(x)*sizeof(PRECISION))))
         {
          dw_Error(MEM_ERR);
          return (TVector)NULL;
@@ -1765,7 +1765,7 @@ TMatrix ProductMM(TMatrix X, TMatrix Y, TMatrix Z)
      }
     if ((X == Y) || (X == Z))
       {
-       if (!(ptr=(PRECISION*)malloc(RowM(X)*ColM(X)*sizeof(PRECISION))))
+       if (!(ptr=(PRECISION*)swzMalloc(RowM(X)*ColM(X)*sizeof(PRECISION))))
         {
          dw_Error(MEM_ERR);
          return (TMatrix)NULL;
@@ -1831,7 +1831,7 @@ TMatrix TransposeProductMM(TMatrix X, TMatrix Y, TMatrix Z)
      }
     if ((X == Y) || (X == Z))
       {
-       if (!(ptr=(PRECISION*)malloc(RowM(X)*ColM(X)*sizeof(PRECISION))))
+       if (!(ptr=(PRECISION*)swzMalloc(RowM(X)*ColM(X)*sizeof(PRECISION))))
         {
          dw_Error(MEM_ERR);
          return (TMatrix)NULL;
@@ -1891,7 +1891,7 @@ TMatrix ProductTransposeMM(TMatrix X, TMatrix Y, TMatrix Z)
      }
     if ((X == Y) || (X == Z))
       {
-       if (!(ptr=(PRECISION*)malloc(RowM(X)*ColM(X)*sizeof(PRECISION))))
+       if (!(ptr=(PRECISION*)swzMalloc(RowM(X)*ColM(X)*sizeof(PRECISION))))
         {
          dw_Error(MEM_ERR);
          return (TMatrix)NULL;
@@ -1942,11 +1942,11 @@ TVector InverseProductMV(TVector x, TMatrix Y, TVector z)
    if ((RowM(Y) != ColM(Y)) || (ColM(Y) != DimV(z)))
      dw_Error(SIZE_ERR);
     else
-     if (!(p=(int*)malloc(RowM(Y)*sizeof(int))))
+     if (!(p=(int*)swzMalloc(RowM(Y)*sizeof(int))))
        dw_Error(MEM_ERR);
       else
        {
-        if (!(LU=(PRECISION*)malloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
+        if (!(LU=(PRECISION*)swzMalloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
           dw_Error(MEM_ERR);
          else
           {
@@ -2073,11 +2073,11 @@ TMatrix InverseProductMM(TMatrix X, TMatrix Y, TMatrix Z)
    if ((RowM(Y) != ColM(Y)) || (ColM(Y) != RowM(Z)))
      dw_Error(SIZE_ERR);
     else
-     if (!(p=(int*)malloc((q=(RowM(Y) < ColM(Y)) ? RowM(Y) : ColM(Y))*sizeof(int))))
+     if (!(p=(int*)swzMalloc((q=(RowM(Y) < ColM(Y)) ? RowM(Y) : ColM(Y))*sizeof(int))))
        dw_Error(MEM_ERR);
       else
        {
-        if (!(LU=(PRECISION*)malloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
+        if (!(LU=(PRECISION*)swzMalloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
           dw_Error(MEM_ERR);
          else
           {
@@ -2129,7 +2129,7 @@ TMatrix InverseProductUM(TMatrix X, TMatrix Y, TMatrix Z)
      dw_Error(SIZE_ERR);
     else
      if (X == Y)
-       if (!(ptr=(PRECISION*)malloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
+       if (!(ptr=(PRECISION*)swzMalloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
          dw_Error(MEM_ERR);
         else
          {
@@ -2184,7 +2184,7 @@ TMatrix InverseProductLM(TMatrix X, TMatrix Y, TMatrix Z)
      dw_Error(SIZE_ERR);
     else
      if (X == Y)
-       if (!(ptr=(PRECISION*)malloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
+       if (!(ptr=(PRECISION*)swzMalloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
          dw_Error(MEM_ERR);
         else
          {
@@ -2239,11 +2239,11 @@ TVector ProductInverseVM(TVector x, TVector y, TMatrix Z)
    if ((RowM(Z) != ColM(Z)) || (DimV(y) != RowM(Z)))
      dw_Error(SIZE_ERR);
     else
-     if (!(p=(int*)malloc(RowM(Z)*sizeof(int))))
+     if (!(p=(int*)swzMalloc(RowM(Z)*sizeof(int))))
        dw_Error(MEM_ERR);
       else
        {
-        if (!(LU=(PRECISION*)malloc(RowM(Z)*RowM(Z)*sizeof(PRECISION))))
+        if (!(LU=(PRECISION*)swzMalloc(RowM(Z)*RowM(Z)*sizeof(PRECISION))))
           dw_Error(MEM_ERR);
          else
           {
@@ -2370,11 +2370,11 @@ TMatrix ProductInverseMM(TMatrix X, TMatrix Y, TMatrix Z)
    if ((RowM(Z) != ColM(Z)) || (ColM(Y) != RowM(Z)))
      dw_Error(SIZE_ERR);
     else
-     if (!(p=(int*)malloc(RowM(Z)*sizeof(int))))
+     if (!(p=(int*)swzMalloc(RowM(Z)*sizeof(int))))
        dw_Error(MEM_ERR);
       else
        {
-        if (!(LU=(PRECISION*)malloc(RowM(Z)*RowM(Z)*sizeof(PRECISION))))
+        if (!(LU=(PRECISION*)swzMalloc(RowM(Z)*RowM(Z)*sizeof(PRECISION))))
           dw_Error(MEM_ERR);
          else
           {
@@ -2426,7 +2426,7 @@ TMatrix ProductInverseMU(TMatrix X, TMatrix Y, TMatrix Z)
      dw_Error(SIZE_ERR);
     else
      if (X == Z)
-       if (!(ptr=(PRECISION*)malloc(RowM(Z)*RowM(Z)*sizeof(PRECISION))))
+       if (!(ptr=(PRECISION*)swzMalloc(RowM(Z)*RowM(Z)*sizeof(PRECISION))))
          dw_Error(MEM_ERR);
         else
          {
@@ -2481,7 +2481,7 @@ TMatrix ProductInverseML(TMatrix X, TMatrix Y, TMatrix Z)
      dw_Error(SIZE_ERR);
     else
      if (X == Z)
-       if (!(ptr=(PRECISION*)malloc(RowM(Z)*RowM(Z)*sizeof(PRECISION))))
+       if (!(ptr=(PRECISION*)swzMalloc(RowM(Z)*RowM(Z)*sizeof(PRECISION))))
          dw_Error(MEM_ERR);
         else
          {
@@ -2540,11 +2540,11 @@ TMatrix Inverse_LU(TMatrix X, TMatrix Y)
    if (RowM(Y) != ColM(Y))
      dw_Error(SIZE_ERR);
     else
-     if (!(p=(int*)malloc(RowM(Y)*sizeof(int))))
+     if (!(p=(int*)swzMalloc(RowM(Y)*sizeof(int))))
        dw_Error(MEM_ERR);
       else
        {
-        if (!(LU=(PRECISION*)malloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
+        if (!(LU=(PRECISION*)swzMalloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
           dw_Error(MEM_ERR);
          else
           {
@@ -2593,15 +2593,15 @@ TMatrix Inverse_SVD(TMatrix X, TMatrix Y)
     if (RowM(Y) != ColM(Y))
       dw_Error(SIZE_ERR);
     else
-      if (!(U=(PRECISION*)malloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
+      if (!(U=(PRECISION*)swzMalloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
     dw_Error(MEM_ERR);
       else
     {
-      if (!(V=(PRECISION*)malloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
+      if (!(V=(PRECISION*)swzMalloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
         dw_Error(MEM_ERR);
       else
         {
-          if (!(d=(PRECISION*)malloc(RowM(Y)*sizeof(PRECISION))))
+          if (!(d=(PRECISION*)swzMalloc(RowM(Y)*sizeof(PRECISION))))
         dw_Error(MEM_ERR);
           else
         {
@@ -2674,7 +2674,7 @@ TMatrix Inverse_Cholesky(TMatrix X, TMatrix Y)
    if (RowM(Y) != ColM(Y))
      dw_Error(SIZE_ERR);
     else
-     if (!(ptr=(PRECISION*)malloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
+     if (!(ptr=(PRECISION*)swzMalloc(RowM(Y)*RowM(Y)*sizeof(PRECISION))))
        dw_Error(MEM_ERR);
       else
        {
@@ -2739,7 +2739,7 @@ TMatrix Inverse_UT(TMatrix X, TMatrix T)
   else
    if (X == T)
      {
-      if (!(ptr=(PRECISION*)malloc(RowM(T)*RowM(T)*sizeof(PRECISION))))
+      if (!(ptr=(PRECISION*)swzMalloc(RowM(T)*RowM(T)*sizeof(PRECISION))))
        {
         dw_Error(MEM_ERR);
         return (TMatrix)NULL;
@@ -2808,7 +2808,7 @@ TMatrix Inverse_LT(TMatrix X, TMatrix T)
   else
    if (X == T)
      {
-      if (!(ptr=(PRECISION*)malloc(RowM(T)*RowM(T)*sizeof(PRECISION))))
+      if (!(ptr=(PRECISION*)swzMalloc(RowM(T)*RowM(T)*sizeof(PRECISION))))
        {
         dw_Error(MEM_ERR);
         return (TMatrix)NULL;
@@ -2906,7 +2906,7 @@ PRECISION MatrixNorm(TMatrix X)
    dw_Error(NULL_ERR);
    return 0.0;
    }
- if (!(d=(PRECISION*)malloc(((RowM(X) < ColM(X)) ? RowM(X) : ColM(X))*sizeof(PRECISION))))
+ if (!(d=(PRECISION*)swzMalloc(((RowM(X) < ColM(X)) ? RowM(X) : ColM(X))*sizeof(PRECISION))))
    {
      dw_Error(MEM_ERR);
      return 0.0;
@@ -3043,11 +3043,11 @@ PRECISION Determinant_LU(TMatrix X)
    if (RowM(X) != ColM(X))
      dw_Error(SIZE_ERR);
     else
-     if (!(p=(int*)malloc(RowM(X)*sizeof(int))))
+     if (!(p=(int*)swzMalloc(RowM(X)*sizeof(int))))
        dw_Error(MEM_ERR);
       else
        {
-        if (!(LU=(PRECISION*)malloc(RowM(X)*RowM(X)*sizeof(PRECISION))))
+        if (!(LU=(PRECISION*)swzMalloc(RowM(X)*RowM(X)*sizeof(PRECISION))))
           dw_Error(MEM_ERR);
          else
           {
@@ -3099,11 +3099,11 @@ PRECISION LogAbsDeterminant_LU(TMatrix X)
    if (RowM(X) != ColM(X))
      dw_Error(SIZE_ERR);
     else
-     if (!(p=(int*)malloc(RowM(X)*sizeof(int))))
+     if (!(p=(int*)swzMalloc(RowM(X)*sizeof(int))))
        dw_Error(MEM_ERR);
       else
        {
-        if (!(LU=(PRECISION*)malloc(RowM(X)*RowM(X)*sizeof(PRECISION))))
+        if (!(LU=(PRECISION*)swzMalloc(RowM(X)*RowM(X)*sizeof(PRECISION))))
           dw_Error(MEM_ERR);
          else
           {
@@ -3151,7 +3151,7 @@ PRECISION Determinant_QR(TMatrix X)
    if (RowM(X) != ColM(X))
      dw_Error(SIZE_ERR);
     else
-     if (!(R=(PRECISION*)malloc(RowM(X)*RowM(X)*sizeof(PRECISION))))
+     if (!(R=(PRECISION*)swzMalloc(RowM(X)*RowM(X)*sizeof(PRECISION))))
        dw_Error(MEM_ERR);
       else
        {
@@ -3463,7 +3463,7 @@ TMatrix NullSpace(TMatrix Y)
       return (TMatrix)NULL;
     }
   q=(RowM(Y) < ColM(Y)) ? RowM(Y) : ColM(Y);
-  d=(PRECISION*)malloc(q*sizeof(PRECISION));
+  d=(PRECISION*)swzMalloc(q*sizeof(PRECISION));
   v=CreateMatrix(ColM(Y),ColM(Y));
   if (d && v)
     {
@@ -3537,7 +3537,7 @@ TMatrix GeneralizedInverse(TMatrix X, TMatrix Y)
     return (TMatrix)NULL;
       }
   q=(RowM(Y) < ColM(Y)) ? RowM(Y) : ColM(Y);
-  d=(PRECISION*)malloc(q*sizeof(PRECISION));
+  d=(PRECISION*)swzMalloc(q*sizeof(PRECISION));
   u=CreateMatrix(RowM(Y),q);
   v=CreateMatrix(ColM(Y),q);
   if (d && u && v)
@@ -3966,7 +3966,7 @@ TVector InVector(FILE *f, TVector x)
 
  if (precision != sizeof(PRECISION))
    {
-    if (!(y=malloc(i*precision))) dw_Error(MEM_ERR);
+    if (!(y=swzMalloc(i*precision))) dw_Error(MEM_ERR);
     if (fread(y,i*precision,1,f) != 1) goto EXIT_ERROR;
     if (precision == sizeof(float))
       while (--i >= 0) ElementV(x,i)=((float*)y)[i];
@@ -4032,7 +4032,7 @@ TMatrix InMatrix(FILE *f, TMatrix X)
 
  if (precision != sizeof(PRECISION))
    {
-    if (!(Y=malloc(i*precision))) dw_Error(MEM_ERR);
+    if (!(Y=swzMalloc(i*precision))) dw_Error(MEM_ERR);
     if (fread(Y,i*precision,1,f) != 1) goto EXIT_ERROR;
     if (precision == sizeof(float))
       while (--i >= 0) pElementM(X)[i]=((float*)Y)[i];
@@ -4545,7 +4545,7 @@ int QR(TMatrix Q, TMatrix R, TMatrix X)
     }
       else
     if ((RowM(R) == ColM(X)) && (ColM(X) < RowM(X)))
-      if (!(ptr=(PRECISION*)malloc(RowM(X)*ColM(X)*sizeof(PRECISION))))
+      if (!(ptr=(PRECISION*)swzMalloc(RowM(X)*ColM(X)*sizeof(PRECISION))))
         {
           dw_Error(MEM_ERR);
           return 0;
@@ -4730,7 +4730,7 @@ TVector LU_SolveRowM(TVector x, TVector y, TMatrix LU, TPermutation P)
     if ((DimV(x) != DimV(y)) || (RowM(LU) != DimV(y)) || (ColM(LU) != DimV(y)) || (DimP(P) != DimV(y)))
      { dw_Error(SIZE_ERR); return (TVector)NULL; }
 
- if (!(z=(PRECISION*)malloc(sizeof(PRECISION)*DimV(y)))) { dw_Error(SIZE_ERR); return (TVector)NULL; }
+ if (!(z=(PRECISION*)swzMalloc(sizeof(PRECISION)*DimV(y)))) { dw_Error(SIZE_ERR); return (TVector)NULL; }
 
  for (j=0; j < DimV(y); j++)
   {

@@ -805,7 +805,7 @@ int bLU(int *p, PRECISION *x, int m, int n, int xt)
    }
  else
    {
-     if (!( y=(PRECISION*)malloc(m*n*sizeof(PRECISION)))) return MEM_ERR;
+     if (!( y=(PRECISION*)swzMalloc(m*n*sizeof(PRECISION)))) return MEM_ERR;
      bTranspose(y,x,m,n,0);
 
 #if PRECISION_SIZE == 4
@@ -1529,7 +1529,7 @@ static int bSVD_NumericalRecipes(PRECISION *U, PRECISION *d, PRECISION *V, int m
  int flag, i, its, j, jj, k, l, nm;
  PRECISION  anorm, c, f, g, h, s, scale, x, y, z, *rv1, tmp;
 
- rv1=(PRECISION*)malloc(n*sizeof(PRECISION));
+ rv1=(PRECISION*)swzMalloc(n*sizeof(PRECISION));
  if (!rv1) return MEM_ERR;
  g=scale=anorm=0.0;
 
@@ -1829,7 +1829,7 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
   int jobu, jobv, jobt, k=-1, info, err, m_, n_, qu_, qv_, transpose;
   PRECISION  *A_, *U_, *V_, *work, opt_size;
 
-  A_=(PRECISION*)malloc(m*n*sizeof(PRECISION));
+  A_=(PRECISION*)swzMalloc(m*n*sizeof(PRECISION));
 
   jobu=jobv=compact ? 'S' : 'A';
 
@@ -1879,8 +1879,8 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
       qu_=m_=n;
       qv_=n_=m;
     }
-      U_=vt ? V : (PRECISION*)malloc(m_*qu_*sizeof(PRECISION));
-      V_=ut ? (PRECISION*)malloc(qv_*n_*sizeof(PRECISION)) : U;
+      U_=vt ? V : (PRECISION*)swzMalloc(m_*qu_*sizeof(PRECISION));
+      V_=ut ? (PRECISION*)swzMalloc(qv_*n_*sizeof(PRECISION)) : U;
     }
   else
     {
@@ -1899,13 +1899,13 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
       qu_=m_=m;
       qv_=n_=n;
     }
-      U_=ut ? U : (PRECISION*)malloc(m_*qu_*sizeof(PRECISION));
-      V_=vt ? (PRECISION*)malloc(qv_*n_*sizeof(PRECISION)) : V;
+      U_=ut ? U : (PRECISION*)swzMalloc(m_*qu_*sizeof(PRECISION));
+      V_=vt ? (PRECISION*)swzMalloc(qv_*n_*sizeof(PRECISION)) : V;
     }
 
 /*    // compute singular value decomposition   ansi-c*/
   gesvd(&jobu,&jobv,&m_,&n_,A_,&m_,d,U_,&m_,V_,&qv_,&opt_size,&k,&info);
-  if (info || !(work=(PRECISION*)malloc((k=(int)opt_size)*sizeof(PRECISION))))
+  if (info || !(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION))))
     err=info ? BLAS_LAPACK_ERR : MEM_ERR;
   else
     {
@@ -1977,7 +1977,7 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
     }
   else
     if (m < n)
-      if (!(NU=(PRECISION*)malloc(m*n*sizeof(PRECISION))))
+      if (!(NU=(PRECISION*)swzMalloc(m*n*sizeof(PRECISION))))
     rtrn=MEM_ERR;
       else
     {
@@ -1991,7 +1991,7 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
         if (NU[i*m+i] < 0)
           for (j=(n-1)*n+i; j >= 0; j-=n) V[j]=-V[j];
       rtrn=NO_ERR;
-/*       if (!(nd=(PRECISION*)malloc(n*sizeof(PRECISION)))) */
+/*       if (!(nd=(PRECISION*)swzMalloc(n*sizeof(PRECISION)))) */
 /*         rtrn=MEM_ERR; */
 /*       else */
 /*         { */
@@ -2008,7 +2008,7 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
       free(NU);
     }
     else
-      if (!(NU=(PRECISION*)malloc(m*n*sizeof(PRECISION))))
+      if (!(NU=(PRECISION*)swzMalloc(m*n*sizeof(PRECISION))))
     rtrn=MEM_ERR;
       else
     {
@@ -2105,9 +2105,9 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
 #endif
   int jobz='A', k, *iwork, info;
   PRECISION *X, *work, opt_size;
-  if (!(X=(PRECISION*)malloc(m*n*sizeof(PRECISION)))) return MEM_ERR;
+  if (!(X=(PRECISION*)swzMalloc(m*n*sizeof(PRECISION)))) return MEM_ERR;
   memcpy(X,A,m*n*sizeof(PRECISION));
-  if (!(iwork=(int*)malloc(8*((m < n) ? m : n)*sizeof(int))))
+  if (!(iwork=(int*)swzMalloc(8*((m < n) ? m : n)*sizeof(int))))
     {
       free(X);
       return MEM_ERR;
@@ -2116,7 +2116,7 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
   if (at)
     {
 /*       gesdd(&jobz,&m,&n,X,&m,d,U,&m,V,&n,&opt_size,&k,iwork,&info); */
-/*       if (info || !(work=(PRECISION*)malloc((k=(int)opt_size)*sizeof(PRECISION)))) */
+/*       if (info || !(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION)))) */
 /*     { */
 /*       free(iwork); */
 /*       free(X); */
@@ -2129,7 +2129,7 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
       memcpy(X,A,m*n*sizeof(PRECISION));
       k=-1;
       gesvd(&jobz,&jobz,&m,&n,X,&m,d,U,&m,V,&n,&opt_size,&k,&info);
-      if (info || !(work=(PRECISION*)malloc((k=(int)opt_size)*sizeof(PRECISION))))
+      if (info || !(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION))))
         {
           free(iwork);
           free(X);
@@ -2151,7 +2151,7 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
   else
     {
 /*       gesdd(&jobz,&n,&m,X,&n,d,V,&n,U,&m,&opt_size,&k,iwork,&info); */
-/*       if (!(work=(PRECISION*)malloc((k=(int)opt_size)*sizeof(PRECISION)))) */
+/*       if (!(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION)))) */
 /*     { */
 /*       free(iwork); */
 /*       free(X); */
@@ -2164,7 +2164,7 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
       memcpy(X,A,m*n*sizeof(PRECISION));
       k=-1;
       gesvd(&jobz,&jobz,&n,&m,X,&n,d,V,&n,U,&m,&opt_size,&k,&info);
-      if (info || !(work=(PRECISION*)malloc((k=(int)opt_size)*sizeof(PRECISION))))
+      if (info || !(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION))))
         {
           free(iwork);
           free(X);
@@ -2210,7 +2210,7 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
     }
   else
     if (m < n)
-      if (!(NU=(PRECISION*)malloc(m*n*sizeof(PRECISION))))
+      if (!(NU=(PRECISION*)swzMalloc(m*n*sizeof(PRECISION))))
     rtrn=MEM_ERR;
       else
     {
@@ -2224,7 +2224,7 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
         if (NU[i*m+i] < 0)
           for (j=(n-1)*n+i; j >= 0; j-=n) V[j]=-V[j];
       rtrn=NO_ERR;
-/*       if (!(nd=(PRECISION*)malloc(n*sizeof(PRECISION)))) */
+/*       if (!(nd=(PRECISION*)swzMalloc(n*sizeof(PRECISION)))) */
 /*         rtrn=MEM_ERR; */
 /*       else */
 /*         { */
@@ -2241,7 +2241,7 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
       free(NU);
     }
     else
-      if (!(NU=(PRECISION*)malloc(m*n*sizeof(PRECISION))))
+      if (!(NU=(PRECISION*)swzMalloc(m*n*sizeof(PRECISION))))
     rtrn=MEM_ERR;
       else
     {
@@ -2304,7 +2304,7 @@ static int bQR_NumericalRecipes(PRECISION *Q, PRECISION *R, int m, int n)
 
  if (Q)
    {
-    if (!(diag=(PRECISION*)malloc(2*s*sizeof(PRECISION)))) return MEM_ERR;
+    if (!(diag=(PRECISION*)swzMalloc(2*s*sizeof(PRECISION)))) return MEM_ERR;
     norm=diag+s;
 
     for (k=0; k < s; k++)
@@ -2482,7 +2482,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 #if defined USE_BLAS_LAPACK
   int i, j, k, l, lwork, info, p=(m < n) ? m : n;
   PRECISION *tau, *work, *ptr, opt_size;
-  if (!(tau=(PRECISION*)malloc(p*sizeof(PRECISION)))) return MEM_ERR;
+  if (!(tau=(PRECISION*)swzMalloc(p*sizeof(PRECISION)))) return MEM_ERR;
   if (xt)
     {
       lwork=-1;
@@ -2491,7 +2491,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 #else
       dgeqrf(&m,&n,X,&m,tau,&opt_size,&lwork,&info);
 #endif
-      if (!(work=(PRECISION*)malloc((lwork=(int)opt_size)*sizeof(PRECISION))))
+      if (!(work=(PRECISION*)swzMalloc((lwork=(int)opt_size)*sizeof(PRECISION))))
     {
       free(tau);
       return MEM_ERR;
@@ -2512,7 +2512,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
       if (qt)
         ptr=Q;
       else
-        if (!(ptr=(PRECISION*)malloc(m*q*sizeof(PRECISION))))
+        if (!(ptr=(PRECISION*)swzMalloc(m*q*sizeof(PRECISION))))
           {
         free(tau);
         return MEM_ERR;
@@ -2524,7 +2524,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 #else
       dorgqr(&m,&q,&p,ptr,&m,tau,&opt_size,&lwork,&info);
 #endif
-      if (!(work=(PRECISION*)malloc((lwork=(int)opt_size)*sizeof(PRECISION))))
+      if (!(work=(PRECISION*)swzMalloc((lwork=(int)opt_size)*sizeof(PRECISION))))
         {
           if (!qt) free(ptr);
           free(tau);
@@ -2573,7 +2573,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 #else
       dgelqf(&n,&m,X,&n,tau,&opt_size,&lwork,&info);
 #endif
-      if (!(work=(PRECISION*)malloc((lwork=(int)opt_size)*sizeof(PRECISION))))
+      if (!(work=(PRECISION*)swzMalloc((lwork=(int)opt_size)*sizeof(PRECISION))))
     {
       free(tau);
       return MEM_ERR;
@@ -2594,7 +2594,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
       if (!qt)
         ptr=Q;
       else
-        if (!(ptr=(PRECISION*)malloc(m*q*sizeof(PRECISION))))
+        if (!(ptr=(PRECISION*)swzMalloc(m*q*sizeof(PRECISION))))
           {
         free(tau);
         return MEM_ERR;
@@ -2616,7 +2616,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 #else
       dorglq(&q,&m,&p,ptr,&q,tau,&opt_size,&lwork,&info);
 #endif
-      if (!(work=(PRECISION*)malloc((lwork=(int)opt_size)*sizeof(PRECISION))))
+      if (!(work=(PRECISION*)swzMalloc((lwork=(int)opt_size)*sizeof(PRECISION))))
         {
           if (!qt) free(ptr);
           free(tau);
@@ -2665,7 +2665,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 
   if (Q && (q != m))
     {
-      if (!(NQ=(PRECISION*)malloc(m*m*sizeof(PRECISION))))
+      if (!(NQ=(PRECISION*)swzMalloc(m*m*sizeof(PRECISION))))
     return MEM_ERR;
     }
   else
@@ -2673,7 +2673,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 
   if (rt || (q != m))
     {
-      if (!(NR=(PRECISION*)malloc(m*n*sizeof(PRECISION))))
+      if (!(NR=(PRECISION*)swzMalloc(m*n*sizeof(PRECISION))))
     {
       if (NQ != Q) free(NQ);
       return MEM_ERR;
@@ -3583,9 +3583,9 @@ dest2:   fstp PRECISION_WORD ptr [edx]                      // pop accumulated v
 
 /*   int jobz='A', k, *iwork, info; */
 /*   PRECISION *X, *work, opt_size; */
-/*   if (!(X=(PRECISION*)malloc(m*n*sizeof(PRECISION)))) return MEM_ERR; */
+/*   if (!(X=(PRECISION*)swzMalloc(m*n*sizeof(PRECISION)))) return MEM_ERR; */
 /*   memcpy(X,A,m*n*sizeof(PRECISION)); */
-/*   if (!(iwork=(int*)malloc(8*((m < n) ? m : n)*sizeof(int)))) */
+/*   if (!(iwork=(int*)swzMalloc(8*((m < n) ? m : n)*sizeof(int)))) */
 /*     { */
 /*       free(X); */
 /*       return MEM_ERR; */
@@ -3598,7 +3598,7 @@ dest2:   fstp PRECISION_WORD ptr [edx]                      // pop accumulated v
 /* #else */
 /*       dgesdd(&jobz,&m,&n,X,&m,d,U,&m,V,&n,&opt_size,&k,iwork,&info); */
 /* #endif */
-/*       if (info || !(work=(PRECISION*)malloc((k=(int)opt_size)*sizeof(PRECISION)))) */
+/*       if (info || !(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION)))) */
 /*     { */
 /*       free(iwork); */
 /*       free(X); */
@@ -3619,7 +3619,7 @@ dest2:   fstp PRECISION_WORD ptr [edx]                      // pop accumulated v
 /* #else */
 /*       dgesvd(&jobz,&jobz,&m,&n,X,&m,d,U,&m,V,&n,&opt_size,&k,&info); */
 /* #endif */
-/*       if (info || !(work=(PRECISION*)malloc((k=(int)opt_size)*sizeof(PRECISION)))) */
+/*       if (info || !(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION)))) */
 /*         { */
 /*           free(iwork); */
 /*           free(X); */
@@ -3649,7 +3649,7 @@ dest2:   fstp PRECISION_WORD ptr [edx]                      // pop accumulated v
 /* #else */
 /*       dgesdd(&jobz,&n,&m,X,&n,d,V,&n,U,&m,&opt_size,&k,iwork,&info); */
 /* #endif */
-/*       if (!(work=(PRECISION*)malloc((k=(int)opt_size)*sizeof(PRECISION)))) */
+/*       if (!(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION)))) */
 /*     { */
 /*       free(iwork); */
 /*       free(X); */
@@ -3670,7 +3670,7 @@ dest2:   fstp PRECISION_WORD ptr [edx]                      // pop accumulated v
 /* #else */
 /*       dgesvd(&jobz,&jobz,&n,&m,X,&n,d,V,&n,U,&m,&opt_size,&k,&info); */
 /* #endif */
-/*       if (info || !(work=(PRECISION*)malloc((k=(int)opt_size)*sizeof(PRECISION)))) */
+/*       if (info || !(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION)))) */
 /*         { */
 /*           free(iwork); */
 /*           free(X); */

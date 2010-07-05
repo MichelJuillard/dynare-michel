@@ -342,7 +342,7 @@ static void b_qsort_matrix_columns_ascending_real(PRECISION *x, int m, int n, in
 {
   PRECISION *y, c;
   int j, k, p, s;
-  y=(PRECISION*)malloc(s=m*sizeof(PRECISION));
+  y=(PRECISION*)swzMalloc(s=m*sizeof(PRECISION));
   if (n > 10)
     {
 /*        // quick sort   ansi-c*/
@@ -410,7 +410,7 @@ static void b_qsort_matrix_columns_descending_real(PRECISION *x, int m, int n, i
 {
   PRECISION *y, c;
   int j, k, p, s;
-  y=(PRECISION*)malloc(s=m*sizeof(PRECISION));
+  y=(PRECISION*)swzMalloc(s=m*sizeof(PRECISION));
   if (n > 10)
     {
 /*        // quick sort   ansi-c*/
