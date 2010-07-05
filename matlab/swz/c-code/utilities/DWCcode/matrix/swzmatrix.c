@@ -62,7 +62,7 @@ TVector CreateVector(int m)
 /**/
 void FreeVector(TVector x)
 {
- if (x) free(x);
+ if (x) swzFree(x);
 }
 /**/
 TMatrix CreateMatrix(int m, int n)
@@ -85,7 +85,7 @@ TMatrix CreateMatrix(int m, int n)
 /**/
 void FreeMatrix(TMatrix X)
 {
- if (X) free(X);
+ if (X) swzFree(X);
 }
 /**/
 TPermutation CreatePermutation(int m)
@@ -108,7 +108,7 @@ TPermutation CreatePermutation(int m)
 /**/
 void FreePermutation(TPermutation X)
 {
- if (X) free(X);
+ if (X) swzFree(X);
 }
 #endif
 /*-----------------------------------------------------------------------------*/
@@ -127,7 +127,7 @@ TVector CreateVector(int m)
      DimV(x)=m;
    else
      {
-       free(x);
+       swzFree(x);
        dw_Error(MEM_ERR);
        return (TVector)NULL;
      }
@@ -140,8 +140,8 @@ void FreeVector(TVector x)
 {
  if (x)
    {
-     if (x->x) free(x->x);
-     free(x);
+     if (x->x) swzFree(x->x);
+     swzFree(x);
    }
 }
 /**/
@@ -164,7 +164,7 @@ TMatrix CreateMatrix(int m, int n)
      }
    else
      {
-       free(X);
+       swzFree(X);
        dw_Error(MEM_ERR);
        return (TMatrix)NULL;
      }
@@ -177,8 +177,8 @@ void FreeMatrix(TMatrix X)
 {
  if (X)
    {
-     if (X->x) free(X->x);
-     free(X);
+     if (X->x) swzFree(X->x);
+     swzFree(X);
    }
 }
 /**/
@@ -198,7 +198,7 @@ TPermutation CreatePermutation(int m)
      }
    else
      {
-       free(X);
+       swzFree(X);
        dw_Error(MEM_ERR);
        return (TPermutation)NULL;
      }
@@ -211,8 +211,8 @@ void FreePermutation(TPermutation X)
 {
  if (X)
    {
-     if (X->x) free(X->x);
-     free(X);
+     if (X->x) swzFree(X->x);
+     swzFree(X);
    }
 }
 #endif
@@ -236,7 +236,7 @@ TVector CreateVector(int m)
 /**/
 void FreeVector(TVector x)
 {
- if (x) free((int *)x-1);
+ if (x) swzFree((int *)x-1);
 }
 /**/
 TMatrix CreateMatrix(int m, int n)
@@ -262,7 +262,7 @@ TMatrix CreateMatrix(int m, int n)
 /**/
 void FreeMatrix(TMatrix X)
 {
- if (X) free((int *)X-2);
+ if (X) swzFree((int *)X-2);
 }
 /**/
 TPermutation CreatePermutation(int m)
@@ -288,7 +288,7 @@ void FreePermutation(TPermutation X)
  if (!X)
    dw_Error(NULL_ERR);
   else
-   free(X-2);
+   swzFree(X-2);
 }
 #endif
 /*-----------------------------------------------------------------------------*/
@@ -305,7 +305,7 @@ TVector CreateVector(int m)
  if (x=(TVector)swzMalloc(sizeof(TSdvector)))
    if (!(pElementV(x)=(PRECISION*)swzMalloc(m*sizeof(PRECISION))))
      {
-       free(x);
+       swzFree(x);
        dw_Error(MEM_ERR);
        return (TVector)NULL;
      }
@@ -323,8 +323,8 @@ void FreeVector(TVector x)
 {
  if (x)
    {
-     if (pElementV(x)) free(pElementV(x));
-     free(x);
+     if (pElementV(x)) swzFree(pElementV(x));
+     swzFree(x);
    }
 }
 /**/
@@ -339,7 +339,7 @@ TMatrix CreateMatrix(int m, int n)
  if (X=(TMatrix)swzMalloc(sizeof(TSdmatrix)))
    if (!(pElementM(X)=(PRECISION*)swzMalloc(m*n*sizeof(PRECISION))))
      {
-       free(X);
+       swzFree(X);
        dw_Error(MEM_ERR);
        return (TMatrix)NULL;
      }
@@ -374,15 +374,15 @@ TPermutation CreatePermutation(int m)
 /**/
 void FreePermutation(TPermutation X)
 {
- if (X) free(X);
+ if (X) swzFree(X);
 }
 /**/
 void FreeMatrix(TMatrix X)
 {
   if (X)
     {
-      if (pElementM(X)) free(pElementM(X));
-      free(X);
+      if (pElementM(X)) swzFree(pElementM(X));
+      swzFree(X);
     }
 }
 #endif
@@ -1388,7 +1388,7 @@ TMatrix UpdateMS(TMatrix X, TMatrix Y, PRECISION a)
     }
       bTranspose(z,pElementM(Y),RowM(Y),ColM(Y),MajorForm(Y));
       bLinearUpdateScalar(pElementM(X),z,a,RowM(Y)*ColM(Y));
-      free(z);
+      swzFree(z);
     }
   return X;
 }
@@ -1497,7 +1497,7 @@ TMatrix LinearCombinationMM(TMatrix X, PRECISION a, TMatrix Y, PRECISION b, TMat
       }
     bTranspose(p,pElementM(Y),RowM(Y),ColM(Y),MajorForm(Y));
     bLinearCombination(pElementM(X),a,p,b,pElementM(Z),RowM(Z)*ColM(Z));
-    free(p);
+    swzFree(p);
       }
     else
       if (X == Y)
@@ -1510,7 +1510,7 @@ TMatrix LinearCombinationMM(TMatrix X, PRECISION a, TMatrix Y, PRECISION b, TMat
         }
       bTranspose(p,pElementM(Z),RowM(Z),ColM(Z),MajorForm(Z));
       bLinearCombination(pElementM(X),a,pElementM(Y),b,p,RowM(Z)*ColM(Z));
-      free(p);
+      swzFree(p);
     }
       else
     {
@@ -1654,7 +1654,7 @@ TVector ProductVM(TVector x, TVector y, TMatrix Z)
         }
        bMatrixMultiply(ptr,pElementV(y),pElementM(Z),1,DimV(x),DimV(y),0,0,MajorForm(Z));
        memcpy(pElementV(x),ptr,DimV(x)*sizeof(PRECISION));
-       free(ptr);
+       swzFree(ptr);
        return x;
       }
    }
@@ -1712,7 +1712,7 @@ TVector ProductMV(TVector x, TMatrix Y, TVector z)
         }
        bMatrixMultiply(ptr,pElementM(Y),pElementV(z),DimV(x),1,DimV(z),1,MajorForm(Y),1);
        memcpy(pElementV(x),ptr,DimV(x)*sizeof(PRECISION));
-       free(ptr);
+       swzFree(ptr);
        return x;
       }
    }
@@ -1772,7 +1772,7 @@ TMatrix ProductMM(TMatrix X, TMatrix Y, TMatrix Z)
         }
        bMatrixMultiply(ptr,pElementM(Y),pElementM(Z),RowM(X),ColM(X),ColM(Y),MajorForm(X),MajorForm(Y),MajorForm(Z));
        memcpy(pElementM(X),ptr,RowM(X)*ColM(X)*sizeof(PRECISION));
-       free(ptr);
+       swzFree(ptr);
        return X;
       }
    }
@@ -1838,7 +1838,7 @@ TMatrix TransposeProductMM(TMatrix X, TMatrix Y, TMatrix Z)
         }
        bMatrixMultiply(ptr,pElementM(Y),pElementM(Z),RowM(X),ColM(X),RowM(Y),MajorForm(X),1^MajorForm(Y),MajorForm(Z));
        memcpy(pElementM(X),ptr,RowM(X)*ColM(X)*sizeof(PRECISION));
-       free(ptr);
+       swzFree(ptr);
        return X;
       }
    }
@@ -1898,7 +1898,7 @@ TMatrix ProductTransposeMM(TMatrix X, TMatrix Y, TMatrix Z)
         }
        bMatrixMultiply(ptr,pElementM(Y),pElementM(Z),RowM(X),ColM(X),ColM(Y),MajorForm(X),MajorForm(Y),1^MajorForm(Z));
        memcpy(pElementM(X),ptr,RowM(X)*ColM(X)*sizeof(PRECISION));
-       free(ptr);
+       swzFree(ptr);
        return X;
       }
    }
@@ -1960,9 +1960,9 @@ TVector InverseProductMV(TVector x, TMatrix Y, TVector z)
                bSolveUnitTriangular(LU,pElementV(rtrn),DimV(rtrn),1,0,MajorForm(Y),1);
                bSolveTriangular(LU,pElementV(rtrn),DimV(rtrn),1,1,MajorForm(Y),1);
               }
-           free(LU);
+           swzFree(LU);
           }
-        free(p);
+        swzFree(p);
        }
  return rtrn;
 }
@@ -2092,9 +2092,9 @@ TMatrix InverseProductMM(TMatrix X, TMatrix Y, TMatrix Z)
                bSolveUnitTriangular(LU,pElementM(rtrn),RowM(rtrn),ColM(rtrn),0,MajorFormLU,MajorForm(rtrn));
                bSolveTriangular(LU,pElementM(rtrn),RowM(rtrn),ColM(rtrn),1,MajorFormLU,MajorForm(rtrn));
               }
-           free(LU);
+           swzFree(LU);
           }
-        free(p);
+        swzFree(p);
        }
  return rtrn;
 }
@@ -2141,7 +2141,7 @@ TMatrix InverseProductUM(TMatrix X, TMatrix Y, TMatrix Z)
              rtrn=(TMatrix)NULL;
              dw_Error(err);
             }
-          free(ptr);
+          swzFree(ptr);
          }
       else
        if (rtrn=((X == Z) ? X : EquateMatrix(X,Z)))
@@ -2196,7 +2196,7 @@ TMatrix InverseProductLM(TMatrix X, TMatrix Y, TMatrix Z)
              rtrn=(TMatrix)NULL;
              dw_Error(err);
             }
-          free(ptr);
+          swzFree(ptr);
          }
       else
        if (rtrn=((X == Z) ? X : EquateMatrix(X,Z)))
@@ -2257,9 +2257,9 @@ TVector ProductInverseVM(TVector x, TVector y, TMatrix Z)
                bSolveUnitTriangular(LU,pElementV(rtrn),DimV(rtrn),1,1,1^MajorForm(Z),0);
                bPermutationMultiply(p,pElementV(rtrn),DimV(rtrn),1,RowM(Z),0,0);
               }
-           free(LU);
+           swzFree(LU);
           }
-        free(p);
+        swzFree(p);
        }
  return rtrn;
 }
@@ -2389,9 +2389,9 @@ TMatrix ProductInverseMM(TMatrix X, TMatrix Y, TMatrix Z)
                bSolveUnitTriangular(LU,pElementM(rtrn),ColM(rtrn),RowM(rtrn),1,1^MajorFormLU,1^MajorForm(rtrn));
                bPermutationMultiply(p,pElementM(rtrn),ColM(rtrn),RowM(rtrn),ColM(rtrn),0,1^MajorForm(rtrn));
               }
-           free(LU);
+           swzFree(LU);
           }
-        free(p);
+        swzFree(p);
        }
  return rtrn;
 }
@@ -2438,7 +2438,7 @@ TMatrix ProductInverseMU(TMatrix X, TMatrix Y, TMatrix Z)
              rtrn=(TMatrix)NULL;
              dw_Error(err);
             }
-          free(ptr);
+          swzFree(ptr);
          }
       else
        if (rtrn=((X == Y) ? X : EquateMatrix(X,Y)))
@@ -2493,7 +2493,7 @@ TMatrix ProductInverseML(TMatrix X, TMatrix Y, TMatrix Z)
              rtrn=(TMatrix)NULL;
              dw_Error(err);
             }
-          free(ptr);
+          swzFree(ptr);
          }
       else
        if (rtrn=((X == Y) ? X : EquateMatrix(X,Y)))
@@ -2558,9 +2558,9 @@ TMatrix Inverse_LU(TMatrix X, TMatrix Y)
                bSolveUnitTriangular(LU,pElementM(rtrn),RowM(rtrn),ColM(rtrn),0,MajorForm(Y),MajorForm(rtrn));
                bSolveTriangular(LU,pElementM(rtrn),RowM(rtrn),ColM(rtrn),1,MajorForm(Y),MajorForm(rtrn));
               }
-           free(LU);
+           swzFree(LU);
           }
-        free(p);
+        swzFree(p);
        }
  return rtrn;
 }
@@ -2617,9 +2617,9 @@ TMatrix Inverse_SVD(TMatrix X, TMatrix Y)
               if (d[j] < tolerance)
                 {
                   dw_Error(SING_ERR);
-                  free(U);
-                  free(V);
-                  free(d);
+                  swzFree(U);
+                  swzFree(V);
+                  swzFree(d);
                   return (TMatrix)NULL;
                 }
               scale=1.0/d[j];
@@ -2637,11 +2637,11 @@ TMatrix Inverse_SVD(TMatrix X, TMatrix Y)
             if (rtrn=CreateMatrix(RowM(Y),RowM(Y)))
               bMatrixMultiply(pElementM(rtrn),V,U,RowM(Y),RowM(Y),RowM(Y),MajorForm(rtrn),1^MajorForm(Y),1^MajorForm(Y));
             }
-          free(d);
+          swzFree(d);
         }
-          free(V);
+          swzFree(V);
         }
-      free(U);
+      swzFree(U);
     }
   return rtrn;
 }
@@ -2690,7 +2690,7 @@ TMatrix Inverse_Cholesky(TMatrix X, TMatrix Y)
              memcpy(pElementM(rtrn),ptr,RowM(Y)*RowM(Y)*sizeof(PRECISION));
             }
           }
-        free(ptr);
+        swzFree(ptr);
        }
  return rtrn;
 }
@@ -2749,10 +2749,10 @@ TMatrix Inverse_UT(TMatrix X, TMatrix T)
        if (err=bSolveTriangular(ptr,pElementM(X),RowM(T),RowM(T),1,MajorForm(T),MajorForm(X)))
         {
          dw_Error(err);
-         free(ptr);
+         swzFree(ptr);
          return (TMatrix)NULL;
         }
-      free(ptr);
+      swzFree(ptr);
      }
     else
      if (X=IdentityMatrix(X,RowM(T)))
@@ -2818,10 +2818,10 @@ TMatrix Inverse_LT(TMatrix X, TMatrix T)
        if (err=bSolveTriangular(ptr,pElementM(X),RowM(T),RowM(T),0,MajorForm(T),MajorForm(X)))
         {
          dw_Error(err);
-         free(ptr);
+         swzFree(ptr);
          return (TMatrix)NULL;
         }
-      free(ptr);
+      swzFree(ptr);
      }
     else
      if (X=IdentityMatrix(X,RowM(T)))
@@ -2918,7 +2918,7 @@ PRECISION MatrixNorm(TMatrix X)
      return 0.0;
    }
  result=d[0];
- free(d);
+ swzFree(d);
  return result;
 }
 
@@ -3070,9 +3070,9 @@ PRECISION Determinant_LU(TMatrix X)
              rtrn=(i >= 0) ? 0.0 : sgn*exp(rtrn);
             }
            dw_ClearError();
-           free(LU);
+           swzFree(LU);
           }
-        free(p);
+        swzFree(p);
        }
  return rtrn;
 }
@@ -3123,9 +3123,9 @@ PRECISION LogAbsDeterminant_LU(TMatrix X)
           }
          dw_ClearError();
             }
-           free(LU);
+           swzFree(LU);
           }
-        free(p);
+        swzFree(p);
        }
  return rtrn;
 }
@@ -3173,12 +3173,12 @@ PRECISION Determinant_QR(TMatrix X)
                 rtrn+=log(R[i]);
                else
                 {
-                 free(R);
+                 swzFree(R);
                  return 0.0;
                 }
            rtrn=sgn*exp(rtrn);
           }
-        free(R);
+        swzFree(R);
        }
   return rtrn;
 }
@@ -3470,14 +3470,14 @@ TMatrix NullSpace(TMatrix Y)
       if (bSVD_new((PRECISION*)NULL,d,pElementM(v),pElementM(Y),RowM(Y),ColM(Y),1,MajorForm(v),MajorForm(Y),0) != NO_ERR)
     {
       FreeMatrix(v);
-      free(d);
+      swzFree(d);
       dw_Error(BLAS_LAPACK_ERR);
       return (TMatrix)NULL;
     }
       dw_ClearError();
       if (d[0] < SQRT_MACHINE_EPSILON)
     {
-      free(d);
+      swzFree(d);
       return v;
     }
       small=d[0]*SQRT_MACHINE_EPSILON*sqrt(q);
@@ -3485,13 +3485,13 @@ TMatrix NullSpace(TMatrix Y)
     if (d[i] > small) break;
       null=(++i == ColM(Y)) ? (TMatrix)NULL : SubMatrix((TMatrix)NULL,v,0,i,ColM(Y),ColM(Y)-i);
       FreeMatrix(v);
-      free(d);
+      swzFree(d);
       return null;
     }
   else
     {
       if (v) FreeMatrix(v);
-      if (d) free(d);
+      if (d) swzFree(d);
       dw_Error(MEM_ERR);
       return (TMatrix)NULL;
     }
@@ -3546,7 +3546,7 @@ TMatrix GeneralizedInverse(TMatrix X, TMatrix Y)
     {
       FreeMatrix(v);
       FreeMatrix(u);
-      free(d);
+      swzFree(d);
       dw_Error(BLAS_LAPACK_ERR);
       return (TMatrix)NULL;
     }
@@ -3567,7 +3567,7 @@ TMatrix GeneralizedInverse(TMatrix X, TMatrix Y)
       FreeMatrix(w);
       FreeMatrix(u);
       FreeMatrix(v);
-      free(d);
+      swzFree(d);
 
       return X;
     }
@@ -3575,7 +3575,7 @@ TMatrix GeneralizedInverse(TMatrix X, TMatrix Y)
     {
       if (v) FreeMatrix(v);
       if (u) FreeMatrix(u);
-      if (d) free(d);
+      if (d) swzFree(d);
       dw_Error(MEM_ERR);
       return (TMatrix)NULL;
     }
@@ -3972,7 +3972,7 @@ TVector InVector(FILE *f, TVector x)
       while (--i >= 0) ElementV(x,i)=((float*)y)[i];
      else
       while (--i >= 0) ElementV(x,i)=((double*)y)[i];
-    free(y);
+    swzFree(y);
    }
   else
    if (fread(pElementV(x),i*sizeof(PRECISION),1,f) != 1) goto EXIT_ERROR;
@@ -3982,7 +3982,7 @@ TVector InVector(FILE *f, TVector x)
 EXIT_ERROR:
  fseek(f,position,SEEK_SET);
  if (del) FreeVector(x);
- if (y) free(y);
+ if (y) swzFree(y);
  return (TVector)NULL;
 }
 
@@ -4038,7 +4038,7 @@ TMatrix InMatrix(FILE *f, TMatrix X)
       while (--i >= 0) pElementM(X)[i]=((float*)Y)[i];
      else
       while (--i >= 0) pElementM(X)[i]=((double*)Y)[i];
-    free(Y);
+    swzFree(Y);
    }
   else
    if (fread(pElementM(X),i*sizeof(PRECISION),1,f) != 1) goto EXIT_ERROR;
@@ -4048,7 +4048,7 @@ TMatrix InMatrix(FILE *f, TMatrix X)
 EXIT_ERROR:
  fseek(f,position,SEEK_SET);
  if (del) FreeMatrix(X);
- if (Y) free(Y);
+ if (Y) swzFree(Y);
  return (TMatrix)NULL;
 }
 /*******************************************************************************/
@@ -4575,7 +4575,7 @@ int QR(TMatrix Q, TMatrix R, TMatrix X)
     }
       else
     err=bQR(pElementM(Q),pElementM(R),ptr,RowM(X),ColM(X),RowM(R),MajorForm(Q),MajorForm(R),MajorForm(X));
-  if (ptr != pElementM(R)) free(ptr);
+  if (ptr != pElementM(R)) swzFree(ptr);
   if (!err) return 1;
   dw_Error(err);
   return 0;
@@ -4748,7 +4748,7 @@ TVector LU_SolveRowM(TVector x, TVector y, TMatrix LU, TPermutation P)
   }
 
  for (i=UseP(P)-1; i >= 0; i--) ElementV(x,ElementP(P,i))=z[i];
- free(z);
+ swzFree(z);
  return x;
 }
 

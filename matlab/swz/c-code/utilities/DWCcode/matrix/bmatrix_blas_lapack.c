@@ -532,12 +532,12 @@ int bLU(int *p, PRECISION *x, int m, int n, int xt)
      getrf(&m2,&n2,y,&m2,p2,&info);
 
      bTranspose(x,y,m,n,1);
-     free(y);
+     swzFree(y);
    }
 
  for(i=0; i<minmn; i++)
    p[i] = p2[i];
- free(p2);
+ swzFree(p2);
 
  for (i=(m < n) ? m-1 : n-1; i >= 0; i--) p[i]--;
  return (info < 0) ? SING_ERR : NO_ERR;
@@ -989,7 +989,7 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
       else
     if (!(U_=(PRECISION*)swzMalloc(m*qu*sizeof(PRECISION))))
       {
-        free(A_);
+        swzFree(A_);
         return MEM_ERR;
       }
     }
@@ -1017,8 +1017,8 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
       else
     if (!(V_=(PRECISION*)swzMalloc(n*qv*sizeof(PRECISION))))
       {
-        free(A_);
-        if (U_ && (U_ != U)) free(U_);
+        swzFree(A_);
+        if (U_ && (U_ != U)) swzFree(U_);
         return MEM_ERR;
       }
     }
@@ -1037,7 +1037,7 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
     else
       {
     gesvd(&jobu,&jobv,&m2,&n2,A_,&m2,d,U_,&m2,V_,&qv2,work,&k,&info);
-    free(work);
+    swzFree(work);
     if (info)
       err=BLAS_LAPACK_ERR;
     else
@@ -1048,9 +1048,9 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
       }
       }
 
-  free(A_);
-  if (U_ && (U_ != U)) free(U_);
-  if (V_ && (V_ != V)) free(V_);
+  swzFree(A_);
+  if (U_ && (U_ != U)) swzFree(U_);
+  if (V_ && (V_ != V)) swzFree(V_);
   return err;
 
 
@@ -1139,7 +1139,7 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
 /*   else */
 /*     { */
 /*       gesvd(&jobu,&jobv,&m_,&n_,A_,&m_,d,U_,&m_,V_,&qv_,work,&k,&info); */
-/*       free(work); */
+/*       swzFree(work); */
 /*       if (info) */
 /*     err=BLAS_LAPACK_ERR; */
 /*       else */
@@ -1164,23 +1164,23 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
 /*     } */
 /*     } */
 
-/*   free(A_); */
+/*   swzFree(A_); */
 
 /*   if (transpose) */
 /*     { */
 /*       if (U != V_) */
-/*     free(V_); */
+/*     swzFree(V_); */
 /*       else */
 /*     if (V != U_) */
-/*       free(U_); */
+/*       swzFree(U_); */
 /*     } */
 /*   else */
 /*     { */
 /*       if (U != U_) */
-/*     free(U_); */
+/*     swzFree(U_); */
 /*       else */
 /*     if (V != V_) */
-/*       free(V_); */
+/*       swzFree(V_); */
 /*     } */
 
 /*   return err; */
@@ -1270,7 +1270,7 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
   memcpy(X,A,m*n*sizeof(PRECISION));
   if (!(iwork=(int*)swzMalloc(8*((m < n) ? m : n)*sizeof(int))))
     {
-      free(X);
+      swzFree(X);
       return MEM_ERR;
     }
   k=-1;
@@ -1283,16 +1283,16 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
       gesvd(&jobz,&jobz,&m2,&n2,X,&m2,d,U,&m2,V,&n2,&opt_size,&k,&info);
       if (info || !(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION))))
     {
-      free(iwork);
-      free(X);
+      swzFree(iwork);
+      swzFree(X);
       return info ? BLAS_LAPACK_ERR : MEM_ERR;
     }
       gesvd(&jobz,&jobz,&m2,&n2,X,&m2,d,U,&m2,V,&n2,work,&k,&info);
       if (info)
     {
-      free(work);
-      free(iwork);
-      free(X);
+      swzFree(work);
+      swzFree(iwork);
+      swzFree(X);
       return BLAS_LAPACK_ERR;
     }
       if (!ut)
@@ -1307,16 +1307,16 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
       gesvd(&jobz,&jobz,&n2,&m2,X,&n2,d,V,&n2,U,&m2,&opt_size,&k,&info);
       if (info || !(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION))))
     {
-      free(iwork);
-      free(X);
+      swzFree(iwork);
+      swzFree(X);
       return info ? BLAS_LAPACK_ERR : MEM_ERR;
     }
       gesvd(&jobz,&jobz,&n2,&m2,X,&n2,d,V,&n2,U,&m2,work,&k,&info);
       if (info)
     {
-      free(work);
-      free(iwork);
-      free(X);
+      swzFree(work);
+      swzFree(iwork);
+      swzFree(X);
       return BLAS_LAPACK_ERR;
     }
       if (!vt)
@@ -1324,9 +1324,9 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
       if (ut)
     bTransposeInPlace(U,m);
     }
-  free(work);
-  free(iwork);
-  free(X);
+  swzFree(work);
+  swzFree(iwork);
+  swzFree(X);
   return NO_ERR;
 
 #undef gesvd
@@ -1343,7 +1343,7 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
 /*   memcpy(X,A,m*n*sizeof(PRECISION)); */
 /*   if (!(iwork=(int*)swzMalloc(8*((m < n) ? m : n)*sizeof(int)))) */
 /*     { */
-/*       free(X); */
+/*       swzFree(X); */
 /*       return MEM_ERR; */
 /*     } */
 /*   k=-1;   */
@@ -1352,16 +1352,16 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
 /*       gesdd(&jobz,&m,&n,X,&m,d,U,&m,V,&n,&opt_size,&k,iwork,&info); */
 /*       if (info || !(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION)))) */
 /*     { */
-/*       free(iwork); */
-/*       free(X); */
+/*       swzFree(iwork); */
+/*       swzFree(X); */
 /*       return info ? BLAS_LAPACK_ERR : MEM_ERR; */
 /*     } */
 /*       gesdd(&jobz,&m,&n,X,&m,d,U,&m,V,&n,work,&k,iwork,&info); */
 /*       if (info) */
 /*     { */
-/*       free(work); */
-/*       free(iwork); */
-/*       free(X); */
+/*       swzFree(work); */
+/*       swzFree(iwork); */
+/*       swzFree(X); */
 /*       return BLAS_LAPACK_ERR; */
 /*     } */
 /*       if (!ut)  */
@@ -1374,16 +1374,16 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
 /*       gesdd(&jobz,&n,&m,X,&n,d,V,&n,U,&m,&opt_size,&k,iwork,&info); */
 /*       if (!(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION)))) */
 /*           { */
-/*             free(iwork); */
-/*             free(X); */
+/*             swzFree(iwork); */
+/*             swzFree(X); */
 /*             return MEM_ERR; */
 /*           } */
 /*       gesdd(&jobz,&n,&m,X,&n,d,V,&n,U,&m,work,&k,iwork,&info); */
 /*       if (info) */
 /*           { */
-/*             free(work); */
-/*       free(iwork); */
-/*       free(X); */
+/*             swzFree(work); */
+/*       swzFree(iwork); */
+/*       swzFree(X); */
 /*       return BLAS_LAPACK_ERR; */
 /*     } */
 /*       if (!vt)  */
@@ -1391,9 +1391,9 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
 /*       if (ut)  */
 /*     bTransposeInPlace(U,m); */
 /*     } */
-/*   free(work); */
-/*   free(iwork); */
-/*   free(X); */
+/*   swzFree(work); */
+/*   swzFree(iwork); */
+/*   swzFree(X); */
 /*   return NO_ERR; */
 
 /* #undef gesdd    */
@@ -1493,16 +1493,16 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 
       if (!(work=(PRECISION*)swzMalloc((lwork=(int)opt_size)*sizeof(PRECISION))))
     {
-      free(tau);
+      swzFree(tau);
       return MEM_ERR;
     }
 
       geqrf(&m2,&n2,X,&m2,tau,work,&lwork,&info);
 
-      free(work);
+      swzFree(work);
       if (info)
     {
-      free(tau);
+      swzFree(tau);
       return ARG_ERR;
     }
       if (Q)
@@ -1512,7 +1512,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
       else
         if (!(ptr=(PRECISION*)swzMalloc(m*q*sizeof(PRECISION))))
           {
-        free(tau);
+        swzFree(tau);
         return MEM_ERR;
           }
       memcpy(ptr,X,m*p*sizeof(PRECISION));
@@ -1524,24 +1524,24 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 
       if (!(work=(PRECISION*)swzMalloc((lwork=(int)opt_size)*sizeof(PRECISION))))
         {
-          if (!qt) free(ptr);
-          free(tau);
+          if (!qt) swzFree(ptr);
+          swzFree(tau);
           return MEM_ERR;
         }
 
       orgqr(&m2,&q2,&p2,ptr,&m2,tau,work,&lwork,&info);
 
-      free(work);
+      swzFree(work);
       if (!qt)
         {
           bTranspose(Q,ptr,m,q,1);
-          free(ptr);
+          swzFree(ptr);
         }
-      free(tau);
+      swzFree(tau);
       if (info) return ARG_ERR;
     }
       else
-    free(tau);
+    swzFree(tau);
       if (R != X)
     if (rt)
       for (k=q*n, j=n-1; j >= 0; j--)
@@ -1570,16 +1570,16 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 
       if (!(work=(PRECISION*)swzMalloc((lwork=(int)opt_size)*sizeof(PRECISION))))
     {
-      free(tau);
+      swzFree(tau);
       return MEM_ERR;
     }
 
       gelqf(&n2,&m2,X,&n2,tau,work,&lwork,&info);
 
-      free(work);
+      swzFree(work);
       if (info)
     {
-      free(tau);
+      swzFree(tau);
       return ARG_ERR;
     }
       if (Q)
@@ -1589,7 +1589,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
       else
         if (!(ptr=(PRECISION*)swzMalloc(m*q*sizeof(PRECISION))))
           {
-        free(tau);
+        swzFree(tau);
         return MEM_ERR;
           }
       if (q == n)
@@ -1612,24 +1612,24 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 
       if (!(work=(PRECISION*)swzMalloc((lwork=(int)opt_size)*sizeof(PRECISION))))
         {
-          if (!qt) free(ptr);
-          free(tau);
+          if (!qt) swzFree(ptr);
+          swzFree(tau);
           return MEM_ERR;
         }
 
       orglq(&q2,&m2,&p2,ptr,&q2,tau,work,&lwork,&info);
 
-      free(work);
+      swzFree(work);
       if (qt)
         {
           bTranspose(Q,ptr,q,m,1);
-          free(ptr);
+          swzFree(ptr);
         }
-      free(tau);
+      swzFree(tau);
       if (info) return ARG_ERR;
     }
       else
-    free(tau);
+    swzFree(tau);
       if (R != X)
     if (rt)
       for (k=n*q, i=n-1; i >= 0; i--)
@@ -1759,7 +1759,7 @@ int bQZ_real(PRECISION *Q, PRECISION *Z, PRECISION *S, PRECISION *T, PRECISION *
           }
         else
           rtrn=BLAS_LAPACK_ERR;
-        free(work);
+        swzFree(work);
       }
       else
     rtrn=BLAS_LAPACK_ERR;
@@ -1767,9 +1767,9 @@ int bQZ_real(PRECISION *Q, PRECISION *Z, PRECISION *S, PRECISION *T, PRECISION *
   else
     rtrn=MEM_ERR;
 
-  if (!alpha_r && palpha_r) free(palpha_r);
-  if (!alpha_i && palpha_i) free(palpha_i);
-  if (!beta && pbeta) free(pbeta);
+  if (!alpha_r && palpha_r) swzFree(palpha_r);
+  if (!alpha_i && palpha_i) swzFree(palpha_i);
+  if (!beta && pbeta) swzFree(pbeta);
 
   return rtrn;
 
@@ -1914,16 +1914,16 @@ int bReorderQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PR
           }
         else
           rtrn=BLAS_LAPACK_ERR;
-        free(work);
+        swzFree(work);
       }
       else
     rtrn=BLAS_LAPACK_ERR;
     }
 
-  if (!alpha_r && palpha_r) free(palpha_r);
-  if (!alpha_i && palpha_i) free(palpha_i);
-  if (!beta && pbeta) free(pbeta);
-  free(select2);
+  if (!alpha_r && palpha_r) swzFree(palpha_r);
+  if (!alpha_i && palpha_i) swzFree(palpha_i);
+  if (!beta && pbeta) swzFree(pbeta);
+  swzFree(select2);
 
   return rtrn;
 
@@ -2138,7 +2138,7 @@ int bSortQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PRECI
 
           }
 
-        free(work);
+        swzFree(work);
 
         if (rtrn == NO_ERR)
           {
@@ -2150,8 +2150,8 @@ int bSortQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PRECI
       }
     }
 
-  if (pairs) free(pairs);
-  if (gev) free(gev);
+  if (pairs) swzFree(pairs);
+  if (gev) swzFree(gev);
 
   return rtrn;
 

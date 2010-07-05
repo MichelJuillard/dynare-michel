@@ -46,8 +46,8 @@ static void ReadError(char *idformat, char *trailer, int error)
     idbuffer=idformat;
   sprintf(errmsg=(char*)swzMalloc(strlen(format)+strlen(idbuffer)-1),format,idbuffer);
   dw_UserError(errmsg);
-  free(errmsg);
-  if (idbuffer != idformat) free(idbuffer);
+  swzFree(errmsg);
+  if (idbuffer != idformat) swzFree(idbuffer);
 }
 
 /*
@@ -70,7 +70,7 @@ static int SetFilePosition(FILE *f_in, char *format, char *str)
   else
     buffer=format;
   rtrn=dw_SetFilePosition(f_in,buffer);
-  if (buffer != format) free(buffer);
+  if (buffer != format) swzFree(buffer);
   return rtrn;
 }
 
@@ -168,7 +168,7 @@ TMarkovStateVariable* ReadMarkovSpecification_SV(FILE *f_in, char *idstring, int
           sprintf(idstring_new+j,"[%d]",i+1);
           if (!(sv_array[i]=ReadMarkovSpecification_SV(f_in,idstring_new,nobs))) break;
         }
-          free(idstring_new);
+          swzFree(idstring_new);
           if (i == n_state_variables)
         sv=CreateMarkovStateVariable_Multiple(nobs,n_state_variables,sv_array);
           else
@@ -247,7 +247,7 @@ TMarkovStateVariable* ReadMarkovSpecification_SV(FILE *f_in, char *idstring, int
     }
     }
   if (err) ReadError(idformat,trailer,err);
-  if (trailer) free(trailer);
+  if (trailer) swzFree(trailer);
   return sv;
 }
 
@@ -285,11 +285,11 @@ int WriteMarkovSpecification_SV(FILE *f_out, TMarkovStateVariable *sv, char *ids
       sprintf(idbuffer+j,"[%d]",i+1);
       if (!WriteMarkovSpecification_SV(f_out,sv->state_variable[i],idbuffer))
             {
-          free(idbuffer);
+          swzFree(idbuffer);
           return 0;
         }
     }
-      free(idbuffer);
+      swzFree(idbuffer);
     }
   else
     {
@@ -319,7 +319,7 @@ int WriteMarkovSpecification_SV(FILE *f_out, TMarkovStateVariable *sv, char *ids
       fprintf(f_out,"//******************************************//\n\n");
     }
 
-  free(trailer);
+  swzFree(trailer);
   return 1;
 }
 
@@ -387,11 +387,11 @@ int ReadTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *header
       sprintf(idbuffer+j,"[%d]",i+1);
       if (!ReadTransitionMatrices_SV(f_in,sv->state_variable[i],header,idbuffer))
             {
-          free(idbuffer);
+          swzFree(idbuffer);
           return sv->valid_transition_matrix=0;
         }
     }
-      free(idbuffer);
+      swzFree(idbuffer);
       MatrixTensor(sv->Q,sv->QA);
       return sv->valid_transition_matrix=1;
     }
@@ -404,12 +404,12 @@ int ReadTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *header
       if (err=ReadMatrix(f_in,idbuffer,(char*)NULL,sv->Q))
     if (!idstring[0])
       {
-        free(idbuffer);
+        swzFree(idbuffer);
         idstring="[1]";
         sprintf(idbuffer=(char*)swzMalloc(strlen(header) + strlen(format) + strlen(idstring) - 3),format,header,idstring);
         err=ReadMatrix(f_in,idbuffer,(char*)NULL,sv->Q);
       }
-      free(idbuffer);
+      swzFree(idbuffer);
       if (!err)
     {
 /*        // Scale the columns of Q - loose requirement on sumation to one   ansi-c*/
@@ -510,11 +510,11 @@ int ReadBaseTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *he
       sprintf(idbuffer+j,"[%d]",i+1);
       if (!ReadBaseTransitionMatrices_SV(f_in,sv->state_variable[i],header,idbuffer))
             {
-          free(idbuffer);
+          swzFree(idbuffer);
           return 0;
         }
     }
-      free(idbuffer);
+      swzFree(idbuffer);
       MatrixTensor(sv->Q,sv->QA);
       return 1;
     }
@@ -528,12 +528,12 @@ int ReadBaseTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *he
       if (err=ReadMatrix(f_in,idbuffer,(char*)NULL,Q))
     if (!idstring[0])
       {
-        free(idbuffer);
+        swzFree(idbuffer);
         idstring="[1]";
         sprintf(idbuffer=(char*)swzMalloc(strlen(header) + strlen(format) + strlen(idstring) - 3),format,header,idstring);
         err=ReadMatrix(f_in,idbuffer,(char*)NULL,Q);
       }
-      free(idbuffer);
+      swzFree(idbuffer);
       if (!err)
     {
 /*        // Scale the columns of Q - loose requirement on sumation to one   ansi-c*/
@@ -612,7 +612,7 @@ int WriteTransitionMatrices_SV(FILE *f_out, TMarkovStateVariable* sv, char *head
       sprintf(idbuffer+j,"[%d]",i+1);
       WriteTransitionMatrices_SV(f_out,sv->state_variable[i],header,idbuffer);
     }
-      free(idbuffer);
+      swzFree(idbuffer);
     }
 
   return 1;
@@ -663,7 +663,7 @@ int WriteBaseTransitionMatrices_SV(FILE *f_out, TMarkovStateVariable* sv, char *
       sprintf(idbuffer+j,"[%d]",i+1);
       WriteBaseTransitionMatrices_SV(f_out,sv->state_variable[i],header,idbuffer);
     }
-      free(idbuffer);
+      swzFree(idbuffer);
     }
 
   return 1;
@@ -702,7 +702,7 @@ void WriteBaseTransitionMatricesFlat_Headers_SV(FILE *f_out, TMarkovStateVariabl
       sprintf(idbuffer+j,"[%d]",i+1);
       WriteBaseTransitionMatricesFlat_Headers_SV(f_out,sv->state_variable[i],idbuffer);
     }
-      free(idbuffer);
+      swzFree(idbuffer);
     }
   else
     {

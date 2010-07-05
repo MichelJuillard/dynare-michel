@@ -78,7 +78,7 @@ int main(int nargs, char **args)
 /*    //=== Open header file and print headers   ansi-c*/
   filename=CreateFilenameFromTag("%sheader_%s.dat",cmd->out_tag,cmd->out_directory);
   f_out=fopen(filename,"wt");
-  free(filename);
+  swzFree(filename);
   WriteBaseTransitionMatricesFlat_Headers_SV(f_out,model->sv,"");
   Write_VAR_ParametersFlat_Headers(f_out,model);
   fprintf(f_out,"\n");
@@ -87,7 +87,7 @@ int main(int nargs, char **args)
 /*    //=== Open output file   ansi-c*/
   filename=CreateFilenameFromTag("%sdraws_%s.dat",cmd->out_tag,cmd->out_directory);
   f_out=fopen(filename,"wt");
-  free(filename);
+  swzFree(filename);
 
 /*    // Burn-in period with calibration of jumping parameters   ansi-c*/
   printf("Calibrating jumping parameters - %d draws\n",tuning);

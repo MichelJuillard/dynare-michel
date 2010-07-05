@@ -844,7 +844,7 @@ void ReprintInputData(FILE *fptr_in, FILE *fptr_out)
    while (fgets(inpbuffer,BUFFERLEN,fptr_in))
       fprintf(fptr_out, "%s", inpbuffer);
    fprintf(fptr_out, "\n\n\n\n\n//------------------------------- Output Data Begin Here -------------------------------\n");
-   free(inpbuffer);
+   swzFree(inpbuffer);
 }
 #undef BUFFERLEN
 

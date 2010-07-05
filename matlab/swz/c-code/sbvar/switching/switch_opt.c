@@ -19,7 +19,7 @@ static int NumberFreeParameters_Theta=0;
 
 void SetupObjectiveFunction(TStateModel *model, PRECISION *Modified, PRECISION *FreeQ, PRECISION *FreeTheta)
 {
-  if (buffer) free(buffer);
+  if (buffer) swzFree(buffer);
   Model=model;
   FreeParameters_Q=FreeQ;
   NumberFreeParameters_Q=NumberFreeParametersQ(model);
@@ -30,7 +30,7 @@ void SetupObjectiveFunction(TStateModel *model, PRECISION *Modified, PRECISION *
 
 void SetupObjectiveFunction_new(TStateModel *model, int FreeTheta_Idx, int FreeQ_Idx, int Modified_Idx)
 {
-  if (buffer) free(buffer);
+  if (buffer) swzFree(buffer);
   Model=model;
   NumberFreeParameters_Q=NumberFreeParametersQ(model);
   NumberFreeParameters_Theta=model->routines->pNumberFreeParametersTheta(model);

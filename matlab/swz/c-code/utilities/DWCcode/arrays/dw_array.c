@@ -50,8 +50,8 @@ void dw_FreeArray(void* a)
       for (i=(size=dw_ElementSizeA(a))*(dw_DimA(a)-1); i >= 0; i-=size)
         Destructor((void*)(((char*)a) + i));
       offset=dw_GetOffsetA(a);
-      if (dw_DeleteSpecsA(a)) free(dw_SpecsA(a));
-      free((void*)(((char*)a) - offset));
+      if (dw_DeleteSpecsA(a)) swzFree(dw_SpecsA(a));
+      swzFree((void*)(((char*)a) - offset));
     }
 }
 
@@ -375,7 +375,7 @@ static int dw_CopyString(void *d, void *s)
   else
     if (*((char**)d))
       {
-    free(*((char**)d));
+    swzFree(*((char**)d));
     *((char**)d)=(char*)NULL;
       }
   return 1;
@@ -412,7 +412,7 @@ void* dw_CreateMultidimensionalArrayList(TElementSpecification *specs, int depth
       for (i=0; i < depth; i++) dim[i]=va_arg(ap,int);
       va_end(ap);
       a=dw_CreateMultidimensionalArray(specs,depth,dim);
-      free(dim);
+      swzFree(dim);
     }
   return a;
 }
@@ -428,7 +428,7 @@ void* dw_CreateMultidimensionalArrayList_string(int depth, ...)
       for (i=0; i < depth; i++) dim[i]=va_arg(ap,int);
       va_end(ap);
       a=dw_CreateMultidimensionalArray_string(depth,dim);
-      free(dim);
+      swzFree(dim);
     }
   return a;
 }
@@ -444,7 +444,7 @@ void* dw_CreateMultidimensionalArrayList_int(int depth, ...)
       for (i=0; i < depth; i++) dim[i]=va_arg(ap,int);
       va_end(ap);
       a=dw_CreateMultidimensionalArray_int(depth,dim);
-      free(dim);
+      swzFree(dim);
     }
   return a;
 }
@@ -460,7 +460,7 @@ void* dw_CreateMultidimensionalArrayList_double(int depth, ...)
       for (i=0; i < depth; i++) dim[i]=va_arg(ap,int);
       va_end(ap);
       a=dw_CreateMultidimensionalArray_double(depth,dim);
-      free(dim);
+      swzFree(dim);
     }
   return a;
 }
@@ -476,7 +476,7 @@ void* dw_CreateMultidimensionalArrayList_float(int depth, ...)
       for (i=0; i < depth; i++) dim[i]=va_arg(ap,int);
       va_end(ap);
       a=dw_CreateMultidimensionalArray_float(depth,dim);
-      free(dim);
+      swzFree(dim);
     }
   return a;
 }
@@ -492,7 +492,7 @@ void* dw_CreateMultidimensionalArrayList_char(int depth, ...)
       for (i=0; i < depth; i++) dim[i]=va_arg(ap,int);
       va_end(ap);
       a=dw_CreateMultidimensionalArray_char(depth,dim);
-      free(dim);
+      swzFree(dim);
     }
   return a;
 }
@@ -625,7 +625,7 @@ TElementSpecification dw_StringSpecs =
     dw_ARRAY_POINTER,
     sizeof(char*),
     sizeof(char*)*((sizeof(int)+sizeof(TElementSpecification*)+sizeof(char*)-1)/sizeof(char*)),
-    free,
+    swzFree,
     DefaultPointerConstructor,
     NULL,
     dw_CopyString,

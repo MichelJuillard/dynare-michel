@@ -143,7 +143,7 @@ void dw_print_generator_state(FILE *f)
     {
       for (i=0; i < 1566; i++) fprintf(f,"%d ",state[i]);
       fprintf(f,"\n");
-      free(state);
+      swzFree(state);
     }
 #elif defined (USE_NR1_RNG)
       int i, *state;
@@ -151,7 +151,7 @@ void dw_print_generator_state(FILE *f)
     {
       for (i=0; i < NTAB+2; i++) fprintf(f,"%d ",state[i]);
       fprintf(f,"\n");
-      free(state);
+      swzFree(state);
     }
 #elif defined (USE_NR2_RNG)
       int i, *state;
@@ -159,7 +159,7 @@ void dw_print_generator_state(FILE *f)
     {
       for (i=0; i < NTAB+3; i++) fprintf(f,"%d ",state[i]);
       fprintf(f,"\n");
-      free(state);
+      swzFree(state);
     }
 #endif
   }
@@ -174,7 +174,7 @@ void dw_read_generator_state(FILE *f)
     {
       for (i=0; i < 1566; i++) fscanf(f," %d ",state+i);
       dw_set_generator_state(state);
-      free(state);
+      swzFree(state);
     }
 #elif defined (USE_NR1_RNG)
   int i, *state;
@@ -182,7 +182,7 @@ void dw_read_generator_state(FILE *f)
     {
       for (i=0; i < NTAB+2; i++) fscanf(f," %d ",state+i);
       dw_set_generator_state(state);
-      free(state);
+      swzFree(state);
     }
 #elif defined (USE_NR2_RNG)
   int i, *state;
@@ -190,7 +190,7 @@ void dw_read_generator_state(FILE *f)
     {
       for (i=0; i < NTAB+3; i++) fscanf(f," %d ",state+i);
       dw_set_generator_state(state);
-      free(state);
+      swzFree(state);
     }
 #endif
   }

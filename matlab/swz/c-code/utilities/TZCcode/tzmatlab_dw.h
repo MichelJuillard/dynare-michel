@@ -189,7 +189,7 @@
    #define tzMalloc(elt_count, type)           (type *)m_alloc((elt_count)*sizeof(type))
    #define tzCalloc(elt_count, type)           (type *)c_alloc((elt_count), sizeof(type))
    #define tzDestroy(x)   {if ((x)) { \
-                             free((x)); \
+                             swzFree((x)); \
                              (x) = NULL; \
                           }}
    #define tzFclose(x)   {if ((x)) { \

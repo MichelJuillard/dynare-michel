@@ -63,7 +63,7 @@ void FreeMHM(T_MHM *mhm)
       dw_FreeArray(mhm->BaseAlpha);
       dw_FreeArray(mhm->Alpha);
 
-      free(mhm);
+      swzFree(mhm);
     }
 }
 
@@ -427,7 +427,7 @@ static int ReadError_MHMio(char *id)
   char *errmsg, *fmt="Error involving line identifier \"%s\"";
   sprintf(errmsg=(char*)swzMalloc(strlen(fmt) + strlen(id) - 1),fmt,id);
   dw_UserError(errmsg);
-  free(errmsg);
+  swzFree(errmsg);
   return 0;
 }
 

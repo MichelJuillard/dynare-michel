@@ -21,7 +21,7 @@ static void ReadError_MHMio(char *id)
   char *errmsg, *fmt="Error after line identifier ""%s""";
   sprintf(errmsg=(char*)swzMalloc(strlen(fmt) + strlen(id) - 1),fmt,id);
   dw_UserError(errmsg);
-  free(errmsg);
+  swzFree(errmsg);
 }
 
 /*
@@ -259,14 +259,14 @@ T_MHM* CreateMHM_CommandLine(int nargs, char **args)
     mhm=rtrn;
       else
     {
-      free(spec_filename);
+      swzFree(spec_filename);
       fmt="%smhm_intermediate_%s.dat";
       sprintf(spec_filename=(char*)swzMalloc(strlen(d_in) + strlen(fmt) + strlen(tag) - 3),fmt,d_in,tag);
       if (rtrn=RestartFromIntermediateFile(spec_filename,mhm))
         mhm=rtrn;
       else
         {
-          free(spec_filename);
+          swzFree(spec_filename);
           fmt="%sest_final_%s.dat";
           sprintf(spec_filename=(char*)swzMalloc(strlen(d_in) + strlen(fmt) + strlen(tag) - 3),fmt,d_in,tag);
           if (!(f_in=fopen(spec_filename,"rt")))
@@ -334,8 +334,8 @@ T_MHM* CreateMHM_CommandLine(int nargs, char **args)
 /*    //fmt="%smhm_draws_states_not_integrated_%s.dat";   ansi-c*/
 /*    //sprintf(mhm->states_not_integrated_out_filename=(char*)swzMalloc(strlen(d_out) + strlen(fmt) + strlen(tag) - 3),fmt,d_out,tag);   ansi-c*/
 
-  free(d_in);
-  free(d_out);
+  swzFree(d_in);
+  swzFree(d_out);
   return mhm;
 }
 #undef LOG_TWO_PI

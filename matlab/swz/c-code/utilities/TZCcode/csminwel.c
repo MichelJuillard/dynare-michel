@@ -787,11 +787,11 @@ static void bfgsi(double *H, double *dg, double *dx, int n, int nn) {
       m = 1+times(dg,Hdg,n)*dgdx;
       for (i=0; i<nn; i++, H++, dxdx++, dxHdg++, Hdgdx++)
          *H += (m*(*dxdx)-(*dxHdg)-(*Hdgdx))*dgdx;
-      free(Hdgdx-nn);
+      swzFree(Hdgdx-nn);
       Hdgdx=NULL;       /*  DDDDDebugging.   ansi-c*/
-      free(dxHdg-nn);
+      swzFree(dxHdg-nn);
       dxHdg = NULL;
-      free(dxdx-nn);
+      swzFree(dxdx-nn);
       dxdx = NULL;
    }
    else {

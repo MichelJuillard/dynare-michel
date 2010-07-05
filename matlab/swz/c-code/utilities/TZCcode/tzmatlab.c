@@ -93,8 +93,8 @@ TSvoidvector *CreateVector_void(int _n)
 TSvoidvector *DestroyVector_void(TSvoidvector *x_voidv)
 {
    if (x_voidv) {
-      free(x_voidv->v);
-      free(x_voidv);
+      swzFree(x_voidv->v);
+      swzFree(x_voidv);
       return ((TSvoidvector *)NULL);
    }
    else  return (x_voidv);
@@ -114,8 +114,8 @@ TScvector *CreateVector_c(int _n)
 TScvector *DestroyVector_c(TScvector *x_cv)
 {
    if (x_cv) {
-      free(x_cv->v);
-      free(x_cv);
+      swzFree(x_cv->v);
+      swzFree(x_cv);
       return ((TScvector *)NULL);
    }
    else  return (x_cv);
@@ -133,8 +133,8 @@ TSivector *CreateVector_int(int _n)
 TSivector *DestroyVector_int(TSivector *x_iv)
 {
    if (x_iv) {
-      free(x_iv->v);
-      free(x_iv);
+      swzFree(x_iv->v);
+      swzFree(x_iv);
       return ((TSivector *)NULL);
    }
    else  return (x_iv);
@@ -152,8 +152,8 @@ TSimatrix *CreateMatrix_int(int nrows, int ncols)
 TSimatrix *DestroyMatrix_int(TSimatrix *x_im)
 {
    if (x_im) {
-      free(x_im->M);
-      free(x_im);
+      swzFree(x_im->M);
+      swzFree(x_im);
         return ((TSimatrix *)NULL);
    }
     else  return  (x_im);
@@ -176,8 +176,8 @@ TSicellvec *DestroyCellvec_int(TSicellvec *x_icv)
    int _i;
    if (x_icv) {
       for (_i=0; _i<x_icv->ncells; _i++)  DestroyVector_int(x_icv->C[_i]);
-      free(x_icv->C);
-      free(x_icv);
+      swzFree(x_icv->C);
+      swzFree(x_icv);
       return ((TSicellvec *)NULL);
    }
    else  return (x_icv);
@@ -204,7 +204,7 @@ TSicell *DestroyCell_int(TSicell *x_ic)
    if (x_ic) {
       for (_i=x_ic->ncells-1; _i>=0; _i--)   x_ic->C[_i] = DestroyMatrix_int(x_ic->C[_i]);
       tzDestroy(x_ic->C);
-      free(x_ic);
+      swzFree(x_ic);
       return ((TSicell *)NULL);
    }
    else  return (x_ic);
@@ -225,8 +225,8 @@ TSdvector *CreateVector_lf(int _n)
 TSdvector *DestroyVector_lf(TSdvector *x_dv)
 {
    if (x_dv) {
-      free(x_dv->v);
-      free(x_dv);
+      swzFree(x_dv->v);
+      swzFree(x_dv);
       return ((TSdvector *)NULL);
    }
    else  return (x_dv);
@@ -245,8 +245,8 @@ TSdmatrix *CreateMatrix_lf(int nrows, int ncols)
 TSdmatrix *DestroyMatrix_lf(TSdmatrix *x_dm)
 {
    if (x_dm) {
-      free(x_dm->M);
-      free(x_dm);
+      swzFree(x_dm->M);
+      swzFree(x_dm);
       return ((TSdmatrix *)NULL);
    }
    else  return (x_dm);
@@ -275,7 +275,7 @@ TSdcell *DestroyCell_lf(TSdcell *x_dc)
    if (x_dc) {
       for (_i=x_dc->ncells-1; _i>=0; _i--)  x_dc->C[_i] = DestroyMatrix_lf(x_dc->C[_i]);
       tzDestroy(x_dc->C);
-      free(x_dc);
+      swzFree(x_dc);
       return ((TSdcell *)NULL);
    }
    else  return (x_dc);
@@ -297,8 +297,8 @@ TSdcellvec *DestroyCellvec_lf(TSdcellvec *x_dcv) {
    int _i;
    if (x_dcv) {
       for (_i=x_dcv->ncells-1; _i>=0; _i--)  DestroyVector_lf(x_dcv->C[_i]);
-      free(x_dcv->C);
-      free(x_dcv);
+      swzFree(x_dcv->C);
+      swzFree(x_dcv);
       return ((TSdcellvec *)NULL);
    }
    else  return (x_dcv);
@@ -321,8 +321,8 @@ TSdfourth *DestroyFourth_lf(TSdfourth *x_d4) {
    int _i;
    if (x_d4) {
       for (_i=x_d4->ndims-1; _i>=0; _i--)  DestroyCell_lf(x_d4->F[_i]);
-      free(x_d4->F);
-      free(x_d4);
+      swzFree(x_d4->F);
+      swzFree(x_d4);
       return ((TSdfourth *)NULL);
    }
     else  return (x_d4);
@@ -347,8 +347,8 @@ TSdfourthvec *DestroyFourthvec_lf(TSdfourthvec *x_d4v)
    int _i;
    if (x_d4v) {
       for (_i=x_d4v->ndims-1; _i>=0; _i--)  DestroyCellvec_lf(x_d4v->F[_i]);
-      free(x_d4v->F);
-      free(x_d4v);
+      swzFree(x_d4v->F);
+      swzFree(x_d4v);
       return ((TSdfourthvec *)NULL);
    }
     else  return (x_d4v);
@@ -366,7 +366,7 @@ TSdzvector *DestroyVector_dz(TSdzvector *x_dzv)
    if (x_dzv) {
       DestroyVector_lf(x_dzv->real);
       DestroyVector_lf(x_dzv->imag);
-      free(x_dzv);
+      swzFree(x_dzv);
       return ((TSdzvector *)NULL);
    }
    else  return (x_dzv);
@@ -383,7 +383,7 @@ TSdzmatrix *DestroyMatrix_dz(TSdzmatrix *x_dzm)
    if (x_dzm) {
       DestroyMatrix_lf(x_dzm->real);
       DestroyMatrix_lf(x_dzm->imag);
-      free(x_dzm);
+      swzFree(x_dzm);
       return ((TSdzmatrix *)NULL);
    }
    else  return (x_dzm);

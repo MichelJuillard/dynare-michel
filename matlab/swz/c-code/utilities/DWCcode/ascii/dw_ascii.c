@@ -98,7 +98,7 @@ char* dw_ReadLine(FILE *f, char *buffer, int *n)
     else
       if (!(nbuffer=(char*)swzRealloc(buffer,*n+=SIZE_INCREMENT)))
     {
-      free(buffer);
+      swzFree(buffer);
       *n=0;
       return (char*)NULL;
     }
@@ -108,7 +108,7 @@ char* dw_ReadLine(FILE *f, char *buffer, int *n)
     return buffer;
   else
     {
-      free(buffer);
+      swzFree(buffer);
       *n=0;
       return (char*)NULL;
     }
@@ -154,7 +154,7 @@ char** dw_ParseDelimitedString(char *buffer, char delimiter, int flag)
       v[k][head->length]='\0';
       ptr=head;
       head=head->next;
-      free(ptr);
+      swzFree(ptr);
     }
   return v;
 }
@@ -182,7 +182,7 @@ char** dw_ReadDelimitedLine(FILE *f, char delimiter, int flag)
   if (buffer)
     {
       v=dw_ParseDelimitedString(buffer,delimiter,flag);
-      free(buffer);
+      swzFree(buffer);
     }
   return v;
 }
@@ -237,7 +237,7 @@ char*** dw_ReadDelimitedFile(FILE *f, char* filename, char delimiter, int flag)
               M[n]=head->line;
               ptr=head;
               head=head->next;
-              free(ptr);
+              swzFree(ptr);
             }
         }
     }
@@ -382,7 +382,7 @@ int dw_SetFilePosition(FILE *f, char *id)
       while (buffer=dw_ReadLine(f,buffer,&m))
     if (!memcmp(buffer,id,n))
       {
-        free(buffer);
+        swzFree(buffer);
         return 1;
       }
       if (pos > 0)
@@ -391,10 +391,10 @@ int dw_SetFilePosition(FILE *f, char *id)
       while ((ftell(f) < pos) && (buffer=dw_ReadLine(f,buffer,&m)))
         if (!memcmp(buffer,id,n))
           {
-        free(buffer);
+        swzFree(buffer);
         return 1;
           }
-      if (buffer) free(buffer);
+      if (buffer) swzFree(buffer);
     }
     }
   return 0;

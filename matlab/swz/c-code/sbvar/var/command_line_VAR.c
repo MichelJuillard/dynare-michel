@@ -195,17 +195,17 @@ void Free_VARCommandLine(TVARCommandLine *cmd)
 {
   if (cmd)
     {
-      if (cmd->out_directory) free(cmd->out_directory);
-      if (cmd->in_directory) free(cmd->in_directory);
-      if (cmd->in_tag) free(cmd->in_tag);
-      if (cmd->out_tag) free(cmd->out_tag);
-      if (cmd->out_header) free(cmd->out_header);
-      if (cmd->specification_filename) free(cmd->specification_filename);
-      if (cmd->parameters_filename) free(cmd->parameters_filename);
-      if (cmd->parameters_header) free(cmd->parameters_header);
-      if (cmd->specification_filename_actual) free(cmd->specification_filename_actual);
-      if (cmd->parameters_filename_actual) free(cmd->parameters_filename_actual);
-      if (cmd->parameters_header_actual) free(cmd->parameters_header_actual);
+      if (cmd->out_directory) swzFree(cmd->out_directory);
+      if (cmd->in_directory) swzFree(cmd->in_directory);
+      if (cmd->in_tag) swzFree(cmd->in_tag);
+      if (cmd->out_tag) swzFree(cmd->out_tag);
+      if (cmd->out_header) swzFree(cmd->out_header);
+      if (cmd->specification_filename) swzFree(cmd->specification_filename);
+      if (cmd->parameters_filename) swzFree(cmd->parameters_filename);
+      if (cmd->parameters_header) swzFree(cmd->parameters_header);
+      if (cmd->specification_filename_actual) swzFree(cmd->specification_filename_actual);
+      if (cmd->parameters_filename_actual) swzFree(cmd->parameters_filename_actual);
+      if (cmd->parameters_header_actual) swzFree(cmd->parameters_header_actual);
     }
 }
 
@@ -296,7 +296,7 @@ TStateModel* CreateTStateModelFromEstimateFinal(int nargs, char **args, TVARComm
       filename=CreateFilenameFromTag("%s%s",cmd->specification_filename,cmd->in_directory);
       if (!(model=Read_VAR_Specification((FILE*)NULL,filename)))
         {
-          free(filename);
+          swzFree(filename);
           return (TStateModel*)NULL;
         }
     }
@@ -306,14 +306,14 @@ TStateModel* CreateTStateModelFromEstimateFinal(int nargs, char **args, TVARComm
         filename=CreateFilenameFromTag("%sest_final_%s.dat",cmd->in_tag,cmd->in_directory);
         if (!(model=Read_VAR_Specification((FILE*)NULL,filename)))
           {
-            free(filename);
+            swzFree(filename);
             return (TStateModel*)NULL;
           }
       }
     else
       return (TStateModel*)NULL;
 
-  if (cmd->specification_filename_actual) free(cmd->specification_filename_actual);
+  if (cmd->specification_filename_actual) swzFree(cmd->specification_filename_actual);
   cmd->specification_filename_actual=filename;
 
   filename=(cmd->parameters_filename)
@@ -323,14 +323,14 @@ TStateModel* CreateTStateModelFromEstimateFinal(int nargs, char **args, TVARComm
   if (!ReadTransitionMatrices((FILE*)NULL,filename,cmd->parameters_header,model)
               || !Read_VAR_Parameters((FILE*)NULL,filename,cmd->parameters_header,model))
     {
-      free(filename);
+      swzFree(filename);
       FreeStateModel(model);
       return (TStateModel*)NULL;
     }
 
-  if (cmd->parameters_filename_actual) free(cmd->parameters_filename_actual);
+  if (cmd->parameters_filename_actual) swzFree(cmd->parameters_filename_actual);
   cmd->parameters_filename_actual=filename;
-  if (cmd->parameters_header_actual) free(cmd->parameters_header_actual);
+  if (cmd->parameters_header_actual) swzFree(cmd->parameters_header_actual);
   cmd->parameters_header_actual=dw_DuplicateString(cmd->parameters_header);
 
   return model;
@@ -358,7 +358,7 @@ int GetLastIteration(TStateModel *model, TVARCommandLine *cmd)
   filename=CreateFilenameFromTag("%sest_intermediate_%s.dat",cmd->in_tag,cmd->in_directory);
   if (!(f_in=fopen(filename,"rt")))
     {
-      free(filename);
+      swzFree(filename);
       return 0;
     }
 
@@ -372,7 +372,7 @@ int GetLastIteration(TStateModel *model, TVARCommandLine *cmd)
                           && Read_VAR_Parameters(f_in,(char*)NULL,header,model))
         {
           cont=1;
-          free(header);
+          swzFree(header);
           k++;
         }
       else
@@ -387,9 +387,9 @@ int GetLastIteration(TStateModel *model, TVARCommandLine *cmd)
      sprintf(header=(char*)swzMalloc(strlen(fmt) + i - 1),fmt,k);
      if (ReadTransitionMatrices(f_in,(char*)NULL,header,model) && Read_VAR_Parameters(f_in,(char*)NULL,header,model))
        {
-         if (cmd->parameters_filename_actual) free(cmd->parameters_filename_actual);
+         if (cmd->parameters_filename_actual) swzFree(cmd->parameters_filename_actual);
          cmd->parameters_filename_actual=filename;
-         if (cmd->parameters_header_actual) free(cmd->parameters_header_actual);
+         if (cmd->parameters_header_actual) swzFree(cmd->parameters_header_actual);
          cmd->parameters_header_actual=header;
          dw_SetTerminalErrors(terminal_errors);
          return 1;
@@ -400,16 +400,16 @@ int GetLastIteration(TStateModel *model, TVARCommandLine *cmd)
      header="Initial: ";
      if (ReadTransitionMatrices(f_in,(char*)NULL,header,model)  && Read_VAR_Parameters(f_in,(char*)NULL,header,model))
        {
-         if (cmd->parameters_filename_actual) free(cmd->parameters_filename_actual);
+         if (cmd->parameters_filename_actual) swzFree(cmd->parameters_filename_actual);
          cmd->parameters_filename_actual=filename;
-         if (cmd->parameters_header_actual) free(cmd->parameters_header_actual);
+         if (cmd->parameters_header_actual) swzFree(cmd->parameters_header_actual);
          cmd->parameters_header_actual=dw_DuplicateString(header);
          dw_SetTerminalErrors(terminal_errors);
          return 1;
        }
    }
 
- free(filename);
+ swzFree(filename);
  dw_SetTerminalErrors(terminal_errors);
  return 0;
 }
@@ -452,7 +452,7 @@ TStateModel* CreateTStateModelForEstimate(int nargs, char **args, TVARCommandLin
       filename=CreateFilenameFromTag("%s%s",cmd->specification_filename,cmd->in_directory);
       if (!(model=Read_VAR_Specification((FILE*)NULL,filename)))
         {
-          free(filename);
+          swzFree(filename);
           dw_SetTerminalErrors(terminal_errors);
           return (TStateModel*)NULL;
         }
@@ -463,11 +463,11 @@ TStateModel* CreateTStateModelForEstimate(int nargs, char **args, TVARCommandLin
         filename=CreateFilenameFromTag("%sest_final_%s.dat",cmd->in_tag,cmd->in_directory);
         if (!(model=Read_VAR_Specification((FILE*)NULL,filename)))
           {
-            free(filename);
+            swzFree(filename);
             filename=CreateFilenameFromTag("%sinit_%s.dat",cmd->in_tag,cmd->in_directory);
             if (!(model=Read_VAR_Specification((FILE*)NULL,filename)))
               {
-                free(filename);
+                swzFree(filename);
                 dw_SetTerminalErrors(terminal_errors);
                 return (TStateModel*)NULL;
               }
@@ -479,7 +479,7 @@ TStateModel* CreateTStateModelForEstimate(int nargs, char **args, TVARCommandLin
         return (TStateModel*)NULL;
       }
 
-  if (cmd->specification_filename_actual) free(cmd->specification_filename_actual);
+  if (cmd->specification_filename_actual) swzFree(cmd->specification_filename_actual);
   cmd->specification_filename_actual=filename;
 
   if (cmd->parameters_filename)
@@ -489,7 +489,7 @@ TStateModel* CreateTStateModelForEstimate(int nargs, char **args, TVARCommandLin
       if (!ReadTransitionMatrices((FILE*)NULL,filename,header,model)
           || !Read_VAR_Parameters((FILE*)NULL,filename,header,model))
         {
-          free(filename);
+          swzFree(filename);
           FreeStateModel(model);
           dw_SetTerminalErrors(terminal_errors);
           return (TStateModel*)NULL;
@@ -503,7 +503,7 @@ TStateModel* CreateTStateModelForEstimate(int nargs, char **args, TVARCommandLin
         if (!ReadTransitionMatrices((FILE*)NULL,filename,header,model)
             || !Read_VAR_Parameters((FILE*)NULL,filename,header,model))
           {
-            free(filename);
+            swzFree(filename);
             FreeStateModel(model);
             dw_SetTerminalErrors(terminal_errors);
             return (TStateModel*)NULL;
@@ -517,7 +517,7 @@ TStateModel* CreateTStateModelForEstimate(int nargs, char **args, TVARCommandLin
           if (!ReadTransitionMatrices((FILE*)NULL,filename,header,model)
                       || !Read_VAR_Parameters((FILE*)NULL,filename,header,model))
             {
-              free(filename);
+              swzFree(filename);
               if (GetLastIteration(model,cmd))
                 {
                   dw_SetTerminalErrors(terminal_errors);
@@ -538,9 +538,9 @@ TStateModel* CreateTStateModelForEstimate(int nargs, char **args, TVARCommandLin
             }
         }
 
-  if (cmd->parameters_filename_actual) free(cmd->parameters_filename_actual);
+  if (cmd->parameters_filename_actual) swzFree(cmd->parameters_filename_actual);
   cmd->parameters_filename_actual=filename;
-  if (cmd->parameters_header_actual) free(cmd->parameters_header_actual);
+  if (cmd->parameters_header_actual) swzFree(cmd->parameters_header_actual);
   cmd->parameters_header_actual=dw_DuplicateString(header);
 
   dw_SetTerminalErrors(terminal_errors);

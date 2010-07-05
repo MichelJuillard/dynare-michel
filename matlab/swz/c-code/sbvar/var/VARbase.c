@@ -152,7 +152,7 @@ void FreeTheta_VAR(T_VAR_Parameters *p)
       dw_FreeArray(p->X);
 
 /*        // Free pointer   ansi-c*/
-      free(p);
+      swzFree(p);
     }
 }
 
@@ -340,7 +340,7 @@ T_VAR_Parameters* CreateTheta_VAR(int flag, int nvars, int nlags, int nexg, int 
       for (j=nvars-1; j >= 0; j--)
     {
       p->constant[j]=CreateVector(p->n_coef_states[j]);
-      free(pElementV(p->constant[j]));
+      swzFree(pElementV(p->constant[j]));
       pElementV(p->constant[j])=pElementV(p->psi[j]) + npre - 1;
     }
 /*        //--------------------------------------   ansi-c*/
@@ -632,8 +632,8 @@ int **ExpandTranslationTable(int **table, TMarkovStateVariable *sv, TMarkovState
       for (k=nstates-1; k >= 0; k--)
     rtable[j][k]=idx[table[j][master[k]]];
     }
-  free(master);
-  free(idx);
+  swzFree(master);
+  swzFree(idx);
 
 /*    // verbose   ansi-c*/
 /*    //dw_PrintArray(stdout,rtable,(char*)NULL); printf("\n"); dw_PrintArray(stdout,table,(char*)NULL); getchar();   ansi-c*/
@@ -1311,7 +1311,7 @@ void AdaptiveMetropolisScale(TStateModel *model, int iterations, int period, int
   Adaptive=(struct TAdaptive***)dw_CreateArray_array(p->nvars);
   for (j=p->nvars-1; j >= 0; j--)
     {
-      Adaptive[j]=(struct TAdaptive**)dw_CreateArray_pointer(p->n_coef_states[j],free);
+      Adaptive[j]=(struct TAdaptive**)dw_CreateArray_pointer(p->n_coef_states[j],swzFree);
       for (k=p->n_coef_states[j]-1; k >= 0; k--)
     {
       Adaptive[j][k]=((struct TAdaptive*)swzMalloc(sizeof(struct TAdaptive)));

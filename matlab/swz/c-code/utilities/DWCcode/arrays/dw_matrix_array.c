@@ -149,7 +149,7 @@ TMatrix MatrixTensor(TMatrix X, TMatrix* Y)
       U=V;
       V=W;
     }
-      free(Z);
+      swzFree(Z);
     }
   else
     if (dw_DimA(Y) > 1)
@@ -237,7 +237,7 @@ TVector VectorTensor(TVector x, TVector* y)
       u=v;
       v=w;
     }
-      free(z);
+      swzFree(z);
     }
   else
     if (dw_DimA(y) > 1)

@@ -85,8 +85,8 @@ TSminpack *DestroyTSminpack(TSminpack *minpack_ps)
    if (minpack_ps) {
 /*        //$$$$WARNING: Note the following vectors themselves are NOT allocated memory, but only the POINTERs.  Used within the minimization problem.   ansi-c*/
 /*        //$$$$         See minobj_csminwelwrap() as an example.   ansi-c*/
-      free(minpack_ps->xtemp_dv);
-      free(minpack_ps->gtemp_dv);
+      swzFree(minpack_ps->xtemp_dv);
+      swzFree(minpack_ps->gtemp_dv);
 
 
       DestroyVector_lf(minpack_ps->x_dv);
@@ -96,7 +96,7 @@ TSminpack *DestroyTSminpack(TSminpack *minpack_ps)
       if ( minpack_ps->package & MIN_CSMINWEL )  DestroyTSetc_csminwel((TSetc_csminwel *)minpack_ps->etc_package_ps);
 
 /*        //===   ansi-c*/
-      free(minpack_ps);
+      swzFree(minpack_ps);
       return ((TSminpack *)NULL);
    }
    else  return (minpack_ps);
@@ -162,7 +162,7 @@ static TSetc_csminwel *DestroyTSetc_csminwel(TSetc_csminwel *etc_csminwel_ps)
       DestroyMatrix_lf(etc_csminwel_ps->Hx_dm);
 
 /*        //===   ansi-c*/
-      free(etc_csminwel_ps);
+      swzFree(etc_csminwel_ps);
       return ((TSetc_csminwel *)NULL);
    }
    else  return (etc_csminwel_ps);
@@ -276,7 +276,7 @@ struct TSargs_blockcsminwel_tag *DestroyTSargs_blockcsminwel(struct TSargs_block
    if (args_blockcsminwel)
    {
 /*        //===   ansi-c*/
-      free(args_blockcsminwel);
+      swzFree(args_blockcsminwel);
       return ((struct TSargs_blockcsminwel_tag *)NULL);
    }
    else
@@ -316,7 +316,7 @@ struct TSetc_minproj_tag *DestroyTSetc_minproj(struct TSetc_minproj_tag *etc_min
 /*               //If destroy function is active, destroy it here; ohterwise, it will be destroyed somewhere else.   ansi-c*/
 
 /*        //===   ansi-c*/
-      free(etc_minproj_ps);
+      swzFree(etc_minproj_ps);
       return ((struct TSetc_minproj_tag *)NULL);
    }
    else  return (etc_minproj_ps);
@@ -760,7 +760,7 @@ struct TSpackage_imslconlin_tag *DestroyTSpackagae_imslconlin(struct TSpackage_i
       DestroyVector_lf(XIMSL_DV);
 
 /*        //===   ansi-c*/
-      free(package_imslconlin_ps);
+      swzFree(package_imslconlin_ps);
       return ((struct TSpackage_imslconlin_tag *)NULL);
    }
    else  return (package_imslconlin_ps);
@@ -977,7 +977,7 @@ struct TSpackage_congrad1_tag *DestroyTSpackage_congrad1(struct TSpackage_congra
    if (package_congrad1_ps)
    {
 /*        //===   ansi-c*/
-      free(package_congrad1_ps);
+      swzFree(package_congrad1_ps);
       return ((struct TSpackage_congrad1_tag *)NULL);
    }
    else  return (package_congrad1_ps);

@@ -22,7 +22,7 @@ static void ReadError_VARio(char *id)
   char *errmsg, *fmt="Error after line identifier ""%s""";
   sprintf(errmsg=(char*)swzMalloc(strlen(fmt) + strlen(id) - 1),fmt,id);
   dw_UserError(errmsg);
-  free(errmsg);
+  swzFree(errmsg);
 }
 
 static int ReadInteger_VARio(FILE *f_in, char *id)
@@ -65,7 +65,7 @@ static FILE* OpenFile_VARio(FILE *f, char *filename)
         {
           sprintf(errmsg=(char*)swzMalloc(strlen(fmt) + strlen(filename) - 1),fmt,filename);
           dw_UserError(errmsg);
-          free(errmsg);
+          swzFree(errmsg);
         }
   return f;
 }
@@ -129,7 +129,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
       fmt="//== U[%d] ==//";
       sprintf(id=(char*)swzMalloc(strlen(fmt) + strlen_int(j+1) - 1),fmt,j+1);
       ReadMatrix_VARio(f_in,id,U[j]=CreateMatrix(nvars,IV[j]));
-      free(id);
+      swzFree(id);
     }
   dw_FreeArray(IV);
 
@@ -142,7 +142,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
     fmt="//== V[%d] ==//";
     sprintf(id=(char*)swzMalloc(strlen(fmt) + strlen_int(j+1) - 1),fmt,j+1);
     ReadMatrix_VARio(f_in,id,V[j]=CreateMatrix(npre,IV[j]));
-    free(id);
+    swzFree(id);
       }
   dw_FreeArray(IV);
 
@@ -155,7 +155,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
     fmt="//== W[%d] ==//";
     sprintf(id=(char*)swzMalloc(strlen(fmt) + strlen_int(j+1) - 1),fmt,j+1);
     ReadMatrix_VARio(f_in,id,W[j]=CreateMatrix(npre,nvars));
-    free(id);
+    swzFree(id);
       }
   dw_FreeArray(IV);
 
@@ -169,7 +169,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
       fmt="//== Variance of Gaussian prior on column %d of A0 ==//";
       sprintf(id=(char*)swzMalloc(strlen(fmt) + strlen_int(j+1) - 1),fmt,j+1);
       ReadMatrix_VARio(f_in,id,A0_prior[j]=CreateMatrix(nvars,nvars));
-      free(id);
+      swzFree(id);
     }
 
   Aplus_prior=dw_CreateArray_matrix(nvars);
@@ -178,7 +178,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
       fmt="//== Variance of Gaussian prior on column %d of Aplus ==//";
       sprintf(id=(char*)swzMalloc(strlen(fmt) + strlen_int(j+1) - 1),fmt,j+1);
       ReadMatrix_VARio(f_in,id,Aplus_prior[j]=CreateMatrix(npre,npre));
-      free(id);
+      swzFree(id);
     }
 
 /*    //=== Specification ===//   ansi-c*/
@@ -423,30 +423,30 @@ int Read_VAR_Parameters(FILE *f, char *filename, char *header, TStateModel *mode
       if (!dw_SetFilePosition(f_in,idbuffer) || !dw_ReadMatrix(f_in,A0[s]=CreateMatrix(p->nvars,p->nvars)))
     {
       ReadError_VARio(idbuffer);
-      free(idbuffer);
+      swzFree(idbuffer);
       return 0;
     }
-      free(idbuffer);
+      swzFree(idbuffer);
 
       fmt="//== %sAplus[%d] ==//";
       sprintf(idbuffer=(char*)swzMalloc(strlen(fmt)+strlen(header)+strlen_int(s+1)-3),fmt,header,s+1);
       if (!dw_SetFilePosition(f_in,idbuffer) || !dw_ReadMatrix(f_in,Aplus[s]=CreateMatrix(p->npre,p->nvars)))
     {
       ReadError_VARio(idbuffer);
-      free(idbuffer);
+      swzFree(idbuffer);
       return 0;
     }
-      free(idbuffer);
+      swzFree(idbuffer);
 
       fmt="//== %sZeta[%d] ==//";
       sprintf(idbuffer=(char*)swzMalloc(strlen(fmt)+strlen(header)+strlen_int(s+1)-3),fmt,header,s+1);
       if (!dw_SetFilePosition(f_in,idbuffer) || !dw_ReadMatrix(f_in,Zeta[s]=CreateMatrix(p->nvars,p->nvars)))
     {
       ReadError_VARio(idbuffer);
-      free(idbuffer);
+      swzFree(idbuffer);
       return 0;
     }
-      free(idbuffer);
+      swzFree(idbuffer);
     }
 
 /*    // Set A0, Aplus, and Zeta   ansi-c*/
@@ -679,7 +679,7 @@ void ReadAllParameters(FILE *f, char *filename, char *id, TStateModel *model)
 
   sprintf(buffer=(char*)swzMalloc(strlen(fmt) + strlen(id) - 1),fmt,id);
   ReadArray_VARio(f_in,buffer,model->sv->S);
-  free(buffer);
+  swzFree(buffer);
 
   ReadTransitionMatrices(f_in,(char*)NULL,id,model);
   Read_VAR_Parameters(f_in,(char*)NULL,id,model);

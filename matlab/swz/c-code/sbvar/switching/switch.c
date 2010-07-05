@@ -93,7 +93,7 @@ void FreeMarkovStateVariable(TMarkovStateVariable *sv)
       dw_FreeArray(sv->Prior_ba);
     }
 
-      free(sv);
+      swzFree(sv);
     }
 }
 /*******************************************************************************/
@@ -176,7 +176,7 @@ TMarkovStateVariable* CreateMarkovStateVariable_Single(int nstates, int nobs, TM
     {
       sv->b[k]=CreateVector(FreeDim[k]);
 /*        // seting up non-standard memory management   ansi-c*/
-      free(pElementV(sv->b[k]));
+      swzFree(pElementV(sv->b[k]));
       pElementV(sv->b[k])=pElementV(sv->B)+q;
       q+=FreeDim[k];
     }
@@ -196,7 +196,7 @@ TMarkovStateVariable* CreateMarkovStateVariable_Single(int nstates, int nobs, TM
     {
       sv->Prior_b[k]=CreateVector(FreeDim[k]);
 /*        // seting up non-standard memory management   ansi-c*/
-      free(pElementV(sv->Prior_b[k]));
+      swzFree(pElementV(sv->Prior_b[k]));
       pElementV(sv->Prior_b[k])=pElementV(sv->Prior_B)+q;
       q+=FreeDim[k];
     }
@@ -603,7 +603,7 @@ TMarkovStateVariable* RestrictMarkovStateVariable(TMarkovStateVariable *sv, int 
   FreeMatrix(MQ);
   dw_FreeArray(NonZeroIndex);
   dw_FreeArray(FreeDim);
-  free(free_translation);
+  swzFree(free_translation);
 
   return rsv;
 }
@@ -1391,13 +1391,13 @@ void FreeStateModel(TStateModel *model)
         {
           if (model->routines->pDestructor)
             model->routines->pDestructor(model->theta);
-          free(model->routines);
+          swzFree(model->routines);
         }
       FreeMarkovStateVariable(model->sv);
       dw_FreeArray(model->V);
       dw_FreeArray(model->Z);
       dw_FreeArray(model->states_count);
-      free(model);
+      swzFree(model);
     }
 }
 /*******************************************************************************/
@@ -1732,7 +1732,7 @@ int NormalizeStates(TStateModel *model)
 /*     if (Permute_SV(p,model->sv)) */
 /*       if (model->routiens->pPermuteTheta(p,model)) */
 /*         rtrn=1; */
-/*       free(p); */
+/*       swzFree(p); */
 /*     } */
 
 /*   return rtrn; */
@@ -2975,7 +2975,7 @@ void FreeParameters(TParameters *p)
   if (p)
     {
       if (p->pParameterDestructor) p->pParameterDestructor(p->p);
-      free(p);
+      swzFree(p);
     }
 }
 

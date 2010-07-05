@@ -145,7 +145,7 @@ void FindMode_VAR_csminwel(TStateModel *model, TEstimateInfo *estimate)
       sprintf(header=(char*)swzMalloc(strlen(fmt) + i - 1),fmt,total_iteration);
       WriteTransitionMatrices(f_out,(char*)NULL,header,model);
       Write_VAR_Parameters(f_out,(char*)NULL,header,model);
-      free(header);
+      swzFree(header);
       fflush(f_out);
 
       if (estimate->type == FIND_POSTERIOR_MODE)
@@ -194,7 +194,7 @@ void FindMode_VAR_csminwel(TStateModel *model, TEstimateInfo *estimate)
       sprintf(header=(char*)swzMalloc(strlen(fmt) + i - 1),fmt,total_iteration);
       WriteTransitionMatrices(f_out,(char*)NULL,header,model);
       Write_VAR_Parameters(f_out,(char*)NULL,header,model);
-      free(header);
+      swzFree(header);
       fflush(f_out);
 
       if (estimate->type == FIND_POSTERIOR_MODE)
@@ -204,7 +204,7 @@ void FindMode_VAR_csminwel(TStateModel *model, TEstimateInfo *estimate)
     }
 
 /*    //=== Free memory ===   ansi-c*/
-  free(x);
+  swzFree(x);
   dw_FreeArray(block);
 
 /*    //=== Close File ===   ansi-c*/
@@ -279,7 +279,7 @@ int GetLastIteration(FILE *f_in, TStateModel *model, TEstimateInfo *estimate)
 
       if (!dw_SetFilePosition(f_in,id))
     {
-      free(id);
+      swzFree(id);
       terminal_errors=dw_SetTerminalErrors(ALL_ERRORS & (~USER_ERR));
 
       fmt="Iteration %d: ";
@@ -294,7 +294,7 @@ int GetLastIteration(FILE *f_in, TStateModel *model, TEstimateInfo *estimate)
           dw_SetTerminalErrors(terminal_errors);
           return 1;
         }
-          free(header);
+          swzFree(header);
           k--;
         }
 
@@ -302,7 +302,7 @@ int GetLastIteration(FILE *f_in, TStateModel *model, TEstimateInfo *estimate)
       return 0;
     }
 
-      free(id);
+      swzFree(id);
       k++;
     }
 }
@@ -379,10 +379,10 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
       estimate->specification_filename=filename;
       estimate->initialization_filename=filename;
       estimate->initialization_header=header;
-      if (d2) free(d2);
+      if (d2) swzFree(d2);
       return model;
     }
-      free(filename);
+      swzFree(filename);
 
       fmt="%sinit_%s.dat";
       sprintf(filename=(char*)swzMalloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
@@ -400,12 +400,12 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
         {
           fclose(f_in);
           estimate->initialization_filename=filename;
-          if (d2) free(d2);
+          if (d2) swzFree(d2);
           return model;
         }
           fclose(f_in);
         }
-      free(filename);
+      swzFree(filename);
 
       fmt="%sinit_%s.dat";
       sprintf(filename=(char*)swzMalloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
@@ -418,15 +418,15 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
           printf("Using initial data\n");
           estimate->initialization_filename=filename;
           estimate->initialization_header=header;
-          if (d2) free(d2);
+          if (d2) swzFree(d2);
           return model;
         }
 
       FreeStateModel(model);
     }
-      free(filename);
+      swzFree(filename);
 
-      //if (d2) free(d2);
+      //if (d2) swzFree(d2);
       //swz_fprintf_err("GetModelFromCommandLine():  Unable to create model.\n");
       goto ERROR;
     }
@@ -446,12 +446,12 @@ TStateModel* GetModelFromCommandLine(int nargs, char **args, TEstimateInfo *esti
       estimate->initialization_filename=filename;
       estimate->initialization_header=header;
 
-      if (d2) free(d2);
+      if (d2) swzFree(d2);
       return model;
     }
 
  ERROR:
-  if (d2) free(d2);
+  if (d2) swzFree(d2);
   //swz_fprintf_err("GetModelFromCommandLine():  No specification file defined.\n");
   return (TStateModel*)NULL;
 }
@@ -530,7 +530,7 @@ TEstimateInfo* GetEstimateInfoFromCommandLine(int nargs, char **args) //, TState
   sprintf(estimate->final_output_filename=(char*)swzMalloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
   fmt="%sest_aux_%s.dat";
   sprintf(estimate->aux_output_filename=(char*)swzMalloc(strlen(d1) + strlen(fmt) + strlen(tag) - 3),fmt,d1,tag);
-  if (d2) free(d2);
+  if (d2) swzFree(d2);
 
   // Posterior mode or MLE
   estimate->type=(dw_FindArgument_String(nargs,args,"MLE") >= 0) ? FIND_LIKELIHOOD_MODE : FIND_POSTERIOR_MODE;
@@ -658,7 +658,7 @@ int main(int nargs, char **args)
 
           fclose(f_out);
         }
-      free(filename);
+      swzFree(filename);
 
 /*        // Write flat file   ansi-c*/
       filename=CreateFilenameFromTag("%sest_flat_header_%s.dat",estimate->cmd->out_tag,estimate->cmd->out_directory);
@@ -669,7 +669,7 @@ int main(int nargs, char **args)
           fprintf(f_out,"\n");
           fclose(f_out);
         }
-      free(filename);
+      swzFree(filename);
       filename=CreateFilenameFromTag("%sest_flat_%s.dat",estimate->cmd->out_tag,estimate->cmd->out_directory);
       if (f_out=fopen(filename,"wt"))
         {
@@ -681,7 +681,7 @@ int main(int nargs, char **args)
           fprintf(f_out,"\n");
           fclose(f_out);
         }
-       free(filename);
+       swzFree(filename);
 
 /*        // Write aux output   ansi-c*/
       filename=CreateFilenameFromTag("%sest_aux_%s.dat",estimate->cmd->out_tag,estimate->cmd->out_directory);
@@ -702,7 +702,7 @@ int main(int nargs, char **args)
           FreeVector(y);
           fclose(f_out);
         }
-      free(filename);
+      swzFree(filename);
 
 /*        // Free memory   ansi-c*/
       FreeStateModel(model);
@@ -714,7 +714,7 @@ int main(int nargs, char **args)
       if (estimate)
         {
           if (estimate->cmd) Free_VARCommandLine(estimate->cmd);
-          free(estimate);
+          swzFree(estimate);
         }
     }
 

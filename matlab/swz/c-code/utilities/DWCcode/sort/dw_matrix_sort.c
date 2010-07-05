@@ -388,7 +388,7 @@ static void b_qsort_matrix_columns_ascending_real(PRECISION *x, int m, int n, in
         memcpy(x+k+m-idx,y,s);
       }
     }
-  free(y);
+  swzFree(y);
 }
 
 /*
@@ -456,7 +456,7 @@ static void b_qsort_matrix_columns_descending_real(PRECISION *x, int m, int n, i
         memcpy(x+k+m-idx,y,s);
       }
     }
-  free(y);
+  swzFree(y);
 }
 
 /*

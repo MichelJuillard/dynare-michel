@@ -105,7 +105,7 @@ TSkalcvfurw *DestroyTSkalcvfurw(TSkalcvfurw *kalcvfurw_ps)
       DestroyCell_lf(kalcvfurw_ps->Ppred_dc);
       DestroyVector_lf(kalcvfurw_ps->ylhtranpred_dv);
 
-      free(kalcvfurw_ps);
+      swzFree(kalcvfurw_ps);
       return ((TSkalcvfurw *)NULL);
    }
    else  return (kalcvfurw_ps);

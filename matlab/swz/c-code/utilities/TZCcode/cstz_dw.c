@@ -51,11 +51,11 @@ TSdp2m5 *CreateP2m5(const double p, const double bound)
 TSdp2m5 *DestroyP2m5(TSdp2m5 *x_dp2m5)
 {
    if (x_dp2m5) {
-      free(x_dp2m5->m);
-      free(x_dp2m5->q);
-      free(x_dp2m5->p);
+      swzFree(x_dp2m5->m);
+      swzFree(x_dp2m5->q);
+      swzFree(x_dp2m5->p);
 
-      free(x_dp2m5);
+      swzFree(x_dp2m5);
       return ((TSdp2m5 *)NULL);
    }
    else  return (x_dp2m5);
@@ -80,9 +80,9 @@ TSdvectorp2m5 *DestroyVectorP2m5(TSdvectorp2m5 *x_dvp2m5)
    if (x_dvp2m5) {
       for (_i=x_dvp2m5->n-1; _i>=0; _i--)
          x_dvp2m5->v[_i] = DestroyP2m5(x_dvp2m5->v[_i]);
-      free(x_dvp2m5->v);
+      swzFree(x_dvp2m5->v);
 
-      free(x_dvp2m5);
+      swzFree(x_dvp2m5);
       return ((TSdvectorp2m5 *)NULL);
    }
    else  return (x_dvp2m5);
@@ -108,9 +108,9 @@ TSdmatrixp2m5 *DestroyMatrixP2m5(TSdmatrixp2m5 *X_dmp2m5)
    if (X_dmp2m5) {
       for (_i=X_dmp2m5->nrows*X_dmp2m5->ncols-1; _i>=0; _i--)
          X_dmp2m5->M[_i] = DestroyP2m5(X_dmp2m5->M[_i]);
-      free(X_dmp2m5->M);
+      swzFree(X_dmp2m5->M);
 
-      free(X_dmp2m5);
+      swzFree(X_dmp2m5);
       return ((TSdmatrixp2m5 *)NULL);
    }
    else  return (X_dmp2m5);
@@ -141,9 +141,9 @@ TSdcellp2m5 *DestroyCellP2m5(TSdcellp2m5 *X_dcp2m5)
    if (X_dcp2m5) {
       for (_i=X_dcp2m5->ncells-1; _i>=0; _i--)
          X_dcp2m5->C[_i] = DestroyMatrixP2m5(X_dcp2m5->C[_i]);
-      free(X_dcp2m5->C);
+      swzFree(X_dcp2m5->C);
 
-      free(X_dcp2m5);
+      swzFree(X_dcp2m5);
       return ((TSdcellp2m5 *)NULL);
    }
    else  return (X_dcp2m5);
@@ -173,9 +173,9 @@ TSdfourthp2m5 *DestroyFourthP2m5(TSdfourthp2m5 *X_d4p2m5)
    if (X_d4p2m5) {
       for (_i=X_d4p2m5->ndims-1; _i>=0; _i--)
          X_d4p2m5->F[_i] = DestroyCellP2m5(X_d4p2m5->F[_i]);
-      free(X_d4p2m5->F);
+      swzFree(X_d4p2m5->F);
 
-      free(X_d4p2m5);
+      swzFree(X_d4p2m5);
       return ((TSdfourthp2m5 *)NULL);
    }
    else  return (X_d4p2m5);
@@ -1518,7 +1518,7 @@ struct TSveclogsum_tag *DestroyVeclogsum(struct TSveclogsum_tag *veclogsum_ps)
       DestroyVector_lf(veclogsum_ps->logmax_dv);
 
 /*        //===   ansi-c*/
-      free(veclogsum_ps);
+      swzFree(veclogsum_ps);
       return ((struct TSveclogsum_tag *)NULL);
    }
    else  return (veclogsum_ps);
@@ -2562,7 +2562,7 @@ void fn_ergodp(double **aop, int *aod, mxArray *cp) {
       (*aop)[ki] = gpim_p[n*eigmaxindx+ki]*tmpd0;                 // Normalized eigmaxindx_th column as ergodic probabilities.
    }
 
-   mxDestroyArray(gpim);                // ????? free(gpim_p)
+   mxDestroyArray(gpim);                // ????? swzFree(gpim_p)
    mxDestroyArray(gpid);
 }
 /**/
@@ -2594,11 +2594,11 @@ TSdp2m5 *CreateP2m5(const double p)
 TSdp2m5 *DestroyP2m5(TSdp2m5 *x_dp2m5)
 {
    if (x_dp2m5) {
-      free(x_dp2m5->m);
-      free(x_dp2m5->q);
-      free(x_dp2m5->p);
+      swzFree(x_dp2m5->m);
+      swzFree(x_dp2m5->q);
+      swzFree(x_dp2m5->p);
 
-      free(x_dp2m5);
+      swzFree(x_dp2m5);
       return ((TSdp2m5 *)NULL);
    }
    else  return (x_dp2m5);
@@ -2623,9 +2623,9 @@ TSdvectorp2m5 *DestroyVectorP2m5(TSdvectorp2m5 *x_dvp2m5)
    if (x_dvp2m5) {
       for (_i=x_dvp2m5->n-1; _i>=0; _i--)
          x_dvp2m5->v[_i] = DestroyP2m5(x_dvp2m5->v[_i]);
-      free(x_dvp2m5->v);
+      swzFree(x_dvp2m5->v);
 
-      free(x_dvp2m5);
+      swzFree(x_dvp2m5);
       return ((TSdvectorp2m5 *)NULL);
    }
    return  (x_dvp2m5);
@@ -2651,9 +2651,9 @@ TSdmatrixp2m5 *DestroyMatrixP2m5(TSdmatrixp2m5 *X_dmp2m5)
    if (X_dmp2m5) {
       for (_i=X_dmp2m5->nrows*X_dmp2m5->ncols-1; _i>=0; _i--)
          X_dmp2m5->M[_i] = DestroyP2m5(X_dmp2m5->M[_i]);
-      free(X_dmp2m5->M);
+      swzFree(X_dmp2m5->M);
 
-      free(X_dmp2m5);
+      swzFree(X_dmp2m5);
       return ((TSdmatrixp2m5 *)NULL);
    }
    else  return (X_dmp2m5);
@@ -2684,9 +2684,9 @@ TSdcellp2m5 *DestroyCellP2m5(TSdcellp2m5 *X_dcp2m5)
    if (X_dcp2m5) {
       for (_i=X_dcp2m5->ncells-1; _i>=0; _i--)
          X_dcp2m5->C[_i] = DestroyMatrixP2m5(X_dcp2m5->C[_i]);
-      free(X_dcp2m5->C);
+      swzFree(X_dcp2m5->C);
 
-      free(X_dcp2m5);
+      swzFree(X_dcp2m5);
       return ((TSdcellp2m5 *)NULL);
    }
    else  return (X_dcp2m5);

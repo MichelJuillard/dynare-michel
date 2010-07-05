@@ -815,7 +815,7 @@ int bLU(int *p, PRECISION *x, int m, int n, int xt)
 #endif
 
      bTranspose(x,y,m,n,1);
-     free(y);
+     swzFree(y);
    }
  for (i=(m < n) ? m-1 : n-1; i >= 0; i--) p[i]--;
  return (info < 0) ? SING_ERR : NO_ERR;
@@ -1710,7 +1710,7 @@ static int bSVD_NumericalRecipes(PRECISION *U, PRECISION *d, PRECISION *V, int m
 
      if (its >= MAX_ITER)
       {
-       free(rv1);
+       swzFree(rv1);
        return ITERATION_ERR;
       }
 
@@ -1776,7 +1776,7 @@ static int bSVD_NumericalRecipes(PRECISION *U, PRECISION *d, PRECISION *V, int m
   }
  }
 
- free(rv1);
+ swzFree(rv1);
 
  return 0;
 }
@@ -1910,7 +1910,7 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
   else
     {
       gesvd(&jobu,&jobv,&m_,&n_,A_,&m_,d,U_,&m_,V_,&qv_,work,&k,&info);
-      free(work);
+      swzFree(work);
       if (info)
     err=BLAS_LAPACK_ERR;
       else
@@ -1935,23 +1935,23 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
     }
     }
 
-  free(A_);
+  swzFree(A_);
 
   if (transpose)
     {
       if (U != V_)
-    free(V_);
+    swzFree(V_);
       else
     if (V != U_)
-      free(U_);
+      swzFree(U_);
     }
   else
     {
       if (U != U_)
-    free(U_);
+    swzFree(U_);
       else
     if (V != V_)
-      free(V_);
+      swzFree(V_);
     }
 
   return err;
@@ -2003,9 +2003,9 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
 /*           for (i=m-1; i >= 0; i--) memcpy(U+i*m,NU+i*n,m*sizeof(PRECISION)); */
 /*           memcpy(d,nd,m*sizeof(PRECISION)); */
 /*           rtrn=NO_ERR; */
-/*           free(nd); */
+/*           swzFree(nd); */
 /*         } */
-      free(NU);
+      swzFree(NU);
     }
     else
       if (!(NU=(PRECISION*)swzMalloc(m*n*sizeof(PRECISION))))
@@ -2022,7 +2022,7 @@ int bSVD_new(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int 
         if (NU[i*n+i] < 0)
           for (j=(m-1)*m+i; j >= 0; j-=m) U[j]=-U[j];
       rtrn=NO_ERR;
-      free(NU);
+      swzFree(NU);
     }
   if (vt) bTransposeInPlace(V,n);
   if (ut) bTransposeInPlace(U,m);
@@ -2109,7 +2109,7 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
   memcpy(X,A,m*n*sizeof(PRECISION));
   if (!(iwork=(int*)swzMalloc(8*((m < n) ? m : n)*sizeof(int))))
     {
-      free(X);
+      swzFree(X);
       return MEM_ERR;
     }
   k=-1;
@@ -2118,28 +2118,28 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
 /*       gesdd(&jobz,&m,&n,X,&m,d,U,&m,V,&n,&opt_size,&k,iwork,&info); */
 /*       if (info || !(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION)))) */
 /*     { */
-/*       free(iwork); */
-/*       free(X); */
+/*       swzFree(iwork); */
+/*       swzFree(X); */
 /*       return info ? BLAS_LAPACK_ERR : MEM_ERR; */
 /*     } */
 /*       gesdd(&jobz,&m,&n,X,&m,d,U,&m,V,&n,work,&k,iwork,&info); */
 /*       if (info) */
 /*     { */
-/*       free(work); */
+/*       swzFree(work); */
       memcpy(X,A,m*n*sizeof(PRECISION));
       k=-1;
       gesvd(&jobz,&jobz,&m,&n,X,&m,d,U,&m,V,&n,&opt_size,&k,&info);
       if (info || !(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION))))
         {
-          free(iwork);
-          free(X);
+          swzFree(iwork);
+          swzFree(X);
           return info ? BLAS_LAPACK_ERR : MEM_ERR;
         }
       gesvd(&jobz,&jobz,&m,&n,X,&m,d,U,&m,V,&n,work,&k,&info);
       if (info)
         {
-          free(iwork);
-          free(X);
+          swzFree(iwork);
+          swzFree(X);
           return BLAS_LAPACK_ERR;
         }
 /*     } */
@@ -2153,28 +2153,28 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
 /*       gesdd(&jobz,&n,&m,X,&n,d,V,&n,U,&m,&opt_size,&k,iwork,&info); */
 /*       if (!(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION)))) */
 /*     { */
-/*       free(iwork); */
-/*       free(X); */
+/*       swzFree(iwork); */
+/*       swzFree(X); */
 /*       return MEM_ERR; */
 /*     } */
 /*       gesdd(&jobz,&n,&m,X,&n,d,V,&n,U,&m,work,&k,iwork,&info); */
 /*       if (info) */
 /*     { */
-/*       free(work); */
+/*       swzFree(work); */
       memcpy(X,A,m*n*sizeof(PRECISION));
       k=-1;
       gesvd(&jobz,&jobz,&n,&m,X,&n,d,V,&n,U,&m,&opt_size,&k,&info);
       if (info || !(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION))))
         {
-          free(iwork);
-          free(X);
+          swzFree(iwork);
+          swzFree(X);
           return info ? BLAS_LAPACK_ERR : MEM_ERR;
         }
       gesvd(&jobz,&jobz,&n,&m,X,&n,d,V,&n,U,&m,work,&k,&info);
       if (info)
         {
-          free(iwork);
-          free(X);
+          swzFree(iwork);
+          swzFree(X);
           return BLAS_LAPACK_ERR;
         }
 /*     } */
@@ -2183,9 +2183,9 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
       if (ut)
     bTransposeInPlace(U,m);
     }
-  free(work);
-  free(iwork);
-  free(X);
+  swzFree(work);
+  swzFree(iwork);
+  swzFree(X);
   return NO_ERR;
 #undef gesdd
 #undef gesvd
@@ -2236,9 +2236,9 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
 /*           for (i=m-1; i >= 0; i--) memcpy(U+i*m,NU+i*n,m*sizeof(PRECISION)); */
 /*           memcpy(d,nd,m*sizeof(PRECISION)); */
 /*           rtrn=NO_ERR; */
-/*           free(nd); */
+/*           swzFree(nd); */
 /*         } */
-      free(NU);
+      swzFree(NU);
     }
     else
       if (!(NU=(PRECISION*)swzMalloc(m*n*sizeof(PRECISION))))
@@ -2255,7 +2255,7 @@ int bSVD(PRECISION *U, PRECISION *d, PRECISION *V, PRECISION *A, int m, int n, i
         if (NU[i*n+i] < 0)
           for (j=(m-1)*m+i; j >= 0; j-=m) U[j]=-U[j];
       rtrn=NO_ERR;
-      free(NU);
+      swzFree(NU);
     }
   if (vt) bTransposeInPlace(V,n);
   if (ut) bTransposeInPlace(U,m);
@@ -2359,7 +2359,7 @@ static int bQR_NumericalRecipes(PRECISION *Q, PRECISION *R, int m, int n)
      for (i=k+1; i < m; i++)
       R[i*n+k]=0;
 
-    free(diag);
+    swzFree(diag);
 
     return 0;
    }
@@ -2493,7 +2493,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 #endif
       if (!(work=(PRECISION*)swzMalloc((lwork=(int)opt_size)*sizeof(PRECISION))))
     {
-      free(tau);
+      swzFree(tau);
       return MEM_ERR;
     }
 #if (PRECISION_SIZE == 4)
@@ -2501,10 +2501,10 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 #else
       dgeqrf(&m,&n,X,&m,tau,work,&lwork,&info);
 #endif
-      free(work);
+      swzFree(work);
       if (info)
     {
-      free(tau);
+      swzFree(tau);
       return ARG_ERR;
     }
       if (Q)
@@ -2514,7 +2514,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
       else
         if (!(ptr=(PRECISION*)swzMalloc(m*q*sizeof(PRECISION))))
           {
-        free(tau);
+        swzFree(tau);
         return MEM_ERR;
           }
       memcpy(ptr,X,m*p*sizeof(PRECISION));
@@ -2526,8 +2526,8 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 #endif
       if (!(work=(PRECISION*)swzMalloc((lwork=(int)opt_size)*sizeof(PRECISION))))
         {
-          if (!qt) free(ptr);
-          free(tau);
+          if (!qt) swzFree(ptr);
+          swzFree(tau);
           return MEM_ERR;
         }
 #if (PRECISION_SIZE == 4)
@@ -2535,17 +2535,17 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 #else
       dorgqr(&m,&q,&p,ptr,&m,tau,work,&lwork,&info);
 #endif
-      free(work);
+      swzFree(work);
       if (!qt)
         {
           bTranspose(Q,ptr,m,q,1);
-          free(ptr);
+          swzFree(ptr);
         }
-      free(tau);
+      swzFree(tau);
       if (info) return ARG_ERR;
     }
       else
-    free(tau);
+    swzFree(tau);
       if (R != X)
     if (rt)
       for (k=q*n, j=n-1; j >= 0; j--)
@@ -2575,7 +2575,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 #endif
       if (!(work=(PRECISION*)swzMalloc((lwork=(int)opt_size)*sizeof(PRECISION))))
     {
-      free(tau);
+      swzFree(tau);
       return MEM_ERR;
     }
 #if (PRECISION_SIZE == 4)
@@ -2583,10 +2583,10 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 #else
       dgelqf(&n,&m,X,&n,tau,work,&lwork,&info);
 #endif
-      free(work);
+      swzFree(work);
       if (info)
     {
-      free(tau);
+      swzFree(tau);
       return ARG_ERR;
     }
       if (Q)
@@ -2596,7 +2596,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
       else
         if (!(ptr=(PRECISION*)swzMalloc(m*q*sizeof(PRECISION))))
           {
-        free(tau);
+        swzFree(tau);
         return MEM_ERR;
           }
       if (q == n)
@@ -2618,8 +2618,8 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 #endif
       if (!(work=(PRECISION*)swzMalloc((lwork=(int)opt_size)*sizeof(PRECISION))))
         {
-          if (!qt) free(ptr);
-          free(tau);
+          if (!qt) swzFree(ptr);
+          swzFree(tau);
           return MEM_ERR;
         }
 #if (PRECISION_SIZE == 4)
@@ -2627,17 +2627,17 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
 #else
       dorglq(&q,&m,&p,ptr,&q,tau,work,&lwork,&info);
 #endif
-      free(work);
+      swzFree(work);
       if (qt)
         {
           bTranspose(Q,ptr,q,m,1);
-          free(ptr);
+          swzFree(ptr);
         }
-      free(tau);
+      swzFree(tau);
       if (info) return ARG_ERR;
     }
       else
-    free(tau);
+    swzFree(tau);
       if (R != X)
     if (rt)
       for (k=n*q, i=n-1; i >= 0; i--)
@@ -2675,7 +2675,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
     {
       if (!(NR=(PRECISION*)swzMalloc(m*n*sizeof(PRECISION))))
     {
-      if (NQ != Q) free(NQ);
+      if (NQ != Q) swzFree(NQ);
       return MEM_ERR;
     }
       if (xt)
@@ -2704,7 +2704,7 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
           *pQ=NQ[i];
     else
       for (i=m-1; i >= 0; i--) memcpy(Q+i*n,NQ+i*m,n*sizeof(PRECISION));
-    free(NQ);
+    swzFree(NQ);
       }
     else
       if (qt)
@@ -2713,13 +2713,13 @@ int bQR(PRECISION *Q, PRECISION *R, PRECISION *X, int m, int n, int q, int qt, i
   if (rt)
     {
       bTranspose(R,NR,q,n,0);
-      free(NR);
+      swzFree(NR);
     }
   else
     if (q != m)
       {
     memcpy(R,NR,n*n*sizeof(PRECISION));
-    free(NR);
+    swzFree(NR);
       }
 
   return NO_ERR;
@@ -3587,7 +3587,7 @@ dest2:   fstp PRECISION_WORD ptr [edx]                      // pop accumulated v
 /*   memcpy(X,A,m*n*sizeof(PRECISION)); */
 /*   if (!(iwork=(int*)swzMalloc(8*((m < n) ? m : n)*sizeof(int)))) */
 /*     { */
-/*       free(X); */
+/*       swzFree(X); */
 /*       return MEM_ERR; */
 /*     } */
 /*   k=-1;   */
@@ -3600,8 +3600,8 @@ dest2:   fstp PRECISION_WORD ptr [edx]                      // pop accumulated v
 /* #endif */
 /*       if (info || !(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION)))) */
 /*     { */
-/*       free(iwork); */
-/*       free(X); */
+/*       swzFree(iwork); */
+/*       swzFree(X); */
 /*       return info ? BLAS_LAPACK_ERR : MEM_ERR; */
 /*     } */
 /* #if (PRECISION_SIZE == 4) */
@@ -3611,7 +3611,7 @@ dest2:   fstp PRECISION_WORD ptr [edx]                      // pop accumulated v
 /* #endif */
 /*       if (info) */
 /*     { */
-/*       free(work); */
+/*       swzFree(work); */
 /*       memcpy(X,A,m*n*sizeof(PRECISION)); */
 /*       k=-1; */
 /* #if (PRECISION_SIZE == 4) */
@@ -3621,8 +3621,8 @@ dest2:   fstp PRECISION_WORD ptr [edx]                      // pop accumulated v
 /* #endif */
 /*       if (info || !(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION)))) */
 /*         { */
-/*           free(iwork); */
-/*           free(X); */
+/*           swzFree(iwork); */
+/*           swzFree(X); */
 /*           return info ? BLAS_LAPACK_ERR : MEM_ERR; */
 /*         } */
 /* #if (PRECISION_SIZE == 4) */
@@ -3632,8 +3632,8 @@ dest2:   fstp PRECISION_WORD ptr [edx]                      // pop accumulated v
 /* #endif */
 /*       if (info) */
 /*         { */
-/*           free(iwork); */
-/*           free(X); */
+/*           swzFree(iwork); */
+/*           swzFree(X); */
 /*           return BLAS_LAPACK_ERR; */
 /*         } */
 /*     } */
@@ -3651,8 +3651,8 @@ dest2:   fstp PRECISION_WORD ptr [edx]                      // pop accumulated v
 /* #endif */
 /*       if (!(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION)))) */
 /*     { */
-/*       free(iwork); */
-/*       free(X); */
+/*       swzFree(iwork); */
+/*       swzFree(X); */
 /*       return MEM_ERR; */
 /*     } */
 /* #if (PRECISION_SIZE == 4) */
@@ -3662,7 +3662,7 @@ dest2:   fstp PRECISION_WORD ptr [edx]                      // pop accumulated v
 /* #endif */
 /*       if (info) */
 /*     { */
-/*       free(work); */
+/*       swzFree(work); */
 /*       memcpy(X,A,m*n*sizeof(PRECISION)); */
 /*       k=-1; */
 /* #if (PRECISION_SIZE == 4) */
@@ -3672,8 +3672,8 @@ dest2:   fstp PRECISION_WORD ptr [edx]                      // pop accumulated v
 /* #endif */
 /*       if (info || !(work=(PRECISION*)swzMalloc((k=(int)opt_size)*sizeof(PRECISION)))) */
 /*         { */
-/*           free(iwork); */
-/*           free(X); */
+/*           swzFree(iwork); */
+/*           swzFree(X); */
 /*           return info ? BLAS_LAPACK_ERR : MEM_ERR; */
 /*         } */
 /* #if (PRECISION_SIZE == 4) */
@@ -3683,8 +3683,8 @@ dest2:   fstp PRECISION_WORD ptr [edx]                      // pop accumulated v
 /* #endif */
 /*       if (info) */
 /*         { */
-/*           free(iwork); */
-/*           free(X); */
+/*           swzFree(iwork); */
+/*           swzFree(X); */
 /*           return BLAS_LAPACK_ERR; */
 /*         } */
 /*     } */
@@ -3693,7 +3693,7 @@ dest2:   fstp PRECISION_WORD ptr [edx]                      // pop accumulated v
 /*       if (ut)  */
 /*     bTransposeInPlace(U,m); */
 /*     } */
-/*   free(work); */
-/*   free(iwork); */
-/*   free(X); */
+/*   swzFree(work); */
+/*   swzFree(iwork); */
+/*   swzFree(X); */
 /*   return NO_ERR; */

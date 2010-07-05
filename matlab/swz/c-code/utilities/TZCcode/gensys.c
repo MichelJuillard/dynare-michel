@@ -125,7 +125,7 @@ TSgensys *DestroyTSgensys(TSgensys *gensys_ps)
       DestroyMatrix_lf(gensys_ps->Psi_dm);  /*  n-by-m.   ansi-c*/
       DestroyMatrix_lf(gensys_ps->Pi_dm);   /*  n-by-k where k is the number of expectational errors.   ansi-c*/
 
-      free(gensys_ps);
+      swzFree(gensys_ps);
 
       return ((TSgensys *)NULL);
    }

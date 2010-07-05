@@ -130,9 +130,9 @@ int main(int nargs, char **args)
       fprintf(f_out,"\n");
     }
 
-  free(spec);
-  free(out);
-  free(head);
-  free(parm);
+  swzFree(spec);
+  swzFree(out);
+  swzFree(head);
+  swzFree(parm);
 
 }

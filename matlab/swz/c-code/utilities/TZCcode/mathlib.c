@@ -61,7 +61,7 @@ int lurgen(TSdmatrix *lu_dm, TSivector *pivot_dv, TSdmatrix *x_dm) {
       for(i=0; i<mindim; i++)
         pivot_dv->v[i] = pivot_p[i];
    }
-   free(pivot_p);    /*  Frees the memory belonging to this function.   ansi-c*/
+   swzFree(pivot_p);    /*  Frees the memory belonging to this function.   ansi-c*/
    errflag = errflag2;
 
    return( errflag );   /*  (1) If errflag = 0, success.  (2) If errorflag = -i, the ith parameter has an illegal value.   ansi-c*/
@@ -549,8 +549,8 @@ int invrgen(TSdmatrix *X_dm, TSdmatrix *A_dm)
      errflag = errflag2;
       if (errflag) {
 /*  //         A_dm->flag = M_UNDEF;   ansi-c*/
-         free(ipivot);
-         free(work);
+         swzFree(ipivot);
+         swzFree(work);
          return errflag;
       }
       lwork2 = lwork;
@@ -559,8 +559,8 @@ int invrgen(TSdmatrix *X_dm, TSdmatrix *A_dm)
       if (work[0]>lwork) printf("Warning for /mathlib.c/invrgen(); when calling MKL dgetri_(), we need at least %d workspace for good performance "
                                     "but lwork is allocated with only %d space!\n", (int)work[0], lwork);
       if (errflag) {
-         free(ipivot);
-         free(work);
+         swzFree(ipivot);
+         swzFree(work);
          return (errflag);   /*  A_dm->flag = M_UNDEF;   ansi-c*/
       }
    }
@@ -572,8 +572,8 @@ int invrgen(TSdmatrix *X_dm, TSdmatrix *A_dm)
       errflag = errflag2;
       if (errflag) {
 /*  //         X_dm->flag = M_UNDEF;   ansi-c*/
-         free(ipivot);
-         free(work);
+         swzFree(ipivot);
+         swzFree(work);
          return errflag;
       }
       lwork2 = lwork;
@@ -582,15 +582,15 @@ int invrgen(TSdmatrix *X_dm, TSdmatrix *A_dm)
       if (work[0]>lwork) printf("Warning for /mathlib.c/invrgen(); when calling MKL dgetri_(), we need at least %d workspace for good performance "
                                     "but lwork is allocated with only %d space!\n", (int)work[0], lwork);
       if (errflag) {
-         free(ipivot);
-         free(work);
+         swzFree(ipivot);
+         swzFree(work);
          return (errflag);   /*  X_dm->flag = M_UNDEF;   ansi-c*/
       }
       else  X_dm->flag = A_dm->flag;
    }
 /*     //=== Frees memory allocated in this function.   ansi-c*/
-   free(ipivot);
-   free(work);
+   swzFree(ipivot);
+   swzFree(work);
 
    return errflag;    /*  (1) If errflag = 0, success.  (2) If errorflag = -i, the ith parameter has an illegal value.   ansi-c*/
 /*                       //(3) If errflag = i, U_{ii}=0.0.  The LU factorization U is literally singular and the inversion   ansi-c*/
@@ -1017,7 +1017,7 @@ void Aldivb_spd(TSdvector *x_dv, TSdmatrix *A_dm, TSdvector *b_dv, char an) {
 /*     // if (errflag<0) fn_DisplayError("Some element has an illegal value");   ansi-c*/
 /*     // else if (errflag>0) fn_DisplayError("The leadding minor of some order, hence the entire matrix, is not positive definite");   ansi-c*/
 
-   if ( (an=='N') || (an=='n') )  free(W);
+   if ( (an=='N') || (an=='n') )  swzFree(W);
 }
 #else
 /*  //No default routine yet.   ansi-c*/
@@ -1229,8 +1229,8 @@ int eigrgen_decomp(double *evalr_v, double *evali_v, double *revecr_m, double *r
 /*     //---------------------------   ansi-c*/
    if (work_p[0]>lwork) printf("Warning for /mathlib.c/eigrgen_decomp(): needs at least %d workspace for good performance "
                                  "but lwork is allocated with only %d space!\n", (int)work_p[0], lwork);
-   if (work_p) free(work_p);
-   if (tmpd0_m) free(tmpd0_m);
+   if (work_p) swzFree(work_p);
+   if (tmpd0_m) swzFree(tmpd0_m);
 
 /*     //---------------------------   ansi-c*/
 /*     // Checks error conditions.   ansi-c*/
@@ -5286,13 +5286,13 @@ double *alloc_ergodp2(const double *cp_m, const int _n) {
 
 
 /*     //=== Frees up allocated memory.   ansi-c*/
-   if (absval_v) free(absval_v);
-   if (evalr_v) free(evalr_v);
-   if (evali_v) free(evali_v);
-   if (revecr_m) free(revecr_m);
-   if (reveci_m) free(reveci_m);
-   if (levecr_m) free(levecr_m);
-   if (leveci_m) free(leveci_m);
+   if (absval_v) swzFree(absval_v);
+   if (evalr_v) swzFree(evalr_v);
+   if (evali_v) swzFree(evali_v);
+   if (revecr_m) swzFree(revecr_m);
+   if (reveci_m) swzFree(reveci_m);
+   if (levecr_m) swzFree(levecr_m);
+   if (leveci_m) swzFree(leveci_m);
 
    return (p_v);
 }
@@ -5372,8 +5372,8 @@ double *fn_ergodp2(const double *cp_m, const int _n) {
    for (ki=0;ki<_n;ki++) p_v[ki] = evec_m[_n*eigmaxindx+ki]*tmpd0;      // Normalized eigmaxindx_th column as ergodic probabilities.
 
    //=== Frees up allocated memory.
-   free(eval_v);
-   free(evec_m);
+   swzFree(eval_v);
+   swzFree(evec_m);
 
 
    return p_v;

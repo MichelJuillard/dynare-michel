@@ -57,7 +57,7 @@ mexFunction(int nlhs, mxArray *plhs[],
       strncpy(args[nargs++], beginarg, n);
       beginarg += (isspace(beginarg[n]) || isblank(beginarg[n]) ? ++n : n);
     }
-  free(argument);
+  swzFree(argument);
 
   /*
    * Call top_level function (formerly main)
@@ -68,6 +68,6 @@ mexFunction(int nlhs, mxArray *plhs[],
    * free memory
    */
   for (n=0; n<nargs; n++)
-    free(args[n]);
-  free(args);
+    swzFree(args[n]);
+  swzFree(args);
 }
