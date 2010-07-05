@@ -5620,7 +5620,7 @@ void permute_matrix(double *a, int n, int *indx) {
    double *b;
    int nn=n*n;
    register int i;
-   b = calloc(nn,sizeof(double));
+   b = swzCalloc(nn,sizeof(double));
    memcpy(b, a, nn*sizeof(double));
    for (i=0; i<nn; i++, a++)
       *a = b[indx[i%n]+indx[i/n]*n];

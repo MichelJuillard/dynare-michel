@@ -34,15 +34,15 @@ mexFunction(int nlhs, mxArray *plhs[],
    * Allocate memory
    */
   maxnargs = (int)(mxGetN(prhs[0])/2+1);
-  argument = (char *)calloc(mxGetN(prhs[0])+1, sizeof(char));
-  args = (char **)calloc(maxnargs, sizeof(char *));
+  argument = (char *)swzCalloc(mxGetN(prhs[0])+1, sizeof(char));
+  args = (char **)swzCalloc(maxnargs, sizeof(char *));
   if (argument==NULL || args==NULL)
     mexErrMsgTxt("In swz_mex: could not allocate memory. (1)");
 
   /*
    * Create argument string from prhs and parse to create args / nargs
    */
-  if (!(args[nargs] = (char *)calloc(strlen(mainarg)+1, sizeof(char))))
+  if (!(args[nargs] = (char *)swzCalloc(strlen(mainarg)+1, sizeof(char))))
     mexErrMsgTxt("In swz_mex: could not allocate memory. (2)");
   strncpy(args[nargs++], mainarg, strlen(mainarg));
 
@@ -52,7 +52,7 @@ mexFunction(int nlhs, mxArray *plhs[],
   beginarg = &argument[0];
   while(n=strcspn(beginarg, " "))
     {
-      if (!(args[nargs] = (char *)calloc(n+1, sizeof(char))))
+      if (!(args[nargs] = (char *)swzCalloc(n+1, sizeof(char))))
         mexErrMsgTxt("In swz_mex: could not allocate memory. (3)");
       strncpy(args[nargs++], beginarg, n);
       beginarg += (isspace(beginarg[n]) || isblank(beginarg[n]) ? ++n : n);

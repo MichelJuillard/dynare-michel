@@ -514,7 +514,7 @@ int bLU(int *p, PRECISION *x, int m, int n, int xt)
 
  int minmn = (m < n) ? m : n;
 
- if(!(p2 = (lapack_int *)calloc(minmn, sizeof(lapack_int))))
+ if(!(p2 = (lapack_int *)swzCalloc(minmn, sizeof(lapack_int))))
    return MEM_ERR;
 
  for(i=0; i<minmn; i++)
@@ -1839,7 +1839,7 @@ int bReorderQZ_real(int *select, PRECISION *QQ, PRECISION *ZZ, PRECISION *SS, PR
   ijob = 0;
   liwork=1;
 
-  if(!(select2 = (lapack_int *)calloc(n, sizeof(lapack_int))))
+  if(!(select2 = (lapack_int *)swzCalloc(n, sizeof(lapack_int))))
     return MEM_ERR;
 
   for(i=0; i<n; i++)

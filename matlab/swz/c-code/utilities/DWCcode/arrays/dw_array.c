@@ -349,7 +349,7 @@ void* dw_CopyArray(void* d, void* s)
     Assumes
       Both d and s are valid pointers and both *d and *s are either null or a
       null terminated string.  If *d is a null terminated string, then it must
-      have been created via a call to swzMalloc(), calloc() or realloc().
+      have been created via a call to swzMalloc(), swzCalloc() or realloc().
 
     Returns
       Returns one upon success and zero upon failure.
@@ -361,7 +361,7 @@ void* dw_CopyArray(void* d, void* s)
 
     Notes
       It is critical that this function be called only if the destination string
-      was dynamically created via a call to swzMalloc(), calloc() or realloc().  If
+      was dynamically created via a call to swzMalloc(), swzCalloc() or realloc().  If
       this is not the case, then servere memory problems can result.
 */
 static int dw_CopyString(void *d, void *s)

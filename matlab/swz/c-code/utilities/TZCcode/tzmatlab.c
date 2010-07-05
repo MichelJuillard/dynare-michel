@@ -73,7 +73,7 @@ void *m_alloc(size_t size) {
 /*  //+   ansi-c*/
 void *c_alloc(size_t elt_count, size_t elt_size) {
    void *new_mem;
-   if ( (new_mem = calloc(elt_count, elt_size)) == NULL )  fn_DisplayError("Out of Memory!");
+   if ( (new_mem = swzCalloc(elt_count, elt_size)) == NULL )  fn_DisplayError("Out of Memory!");
    return(new_mem);
 }
 

@@ -159,11 +159,11 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
    *fcount = -1;  /* fcount: number of evaluations of the function */
 
    for (i=0; i<4; i++)
-      x[i] = tzMalloc(n, double);   /*  x[i] = calloc(n, sizeof(double)); Commented out by TZ.   ansi-c*/
+      x[i] = tzMalloc(n, double);   /*  x[i] = swzCalloc(n, sizeof(double)); Commented out by TZ.   ansi-c*/
    memcpy(x[0],xh,n*sizeof(double));
 
    for (i=0; i<4; i++)
-      g[i] = tzMalloc(n, double);     /*  calloc(n, sizeof(double));  Commented out by TZ.   ansi-c*/
+      g[i] = tzMalloc(n, double);     /*  swzCalloc(n, sizeof(double));  Commented out by TZ.   ansi-c*/
 
    f[0] = fcn(x[0],n,args,dims);
 
@@ -207,7 +207,7 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
          /* Bad gradient or back and forth on step length.
             Possibly at cliff edge. Try perturbing search direction. */
          if (badg[1]) {
-            double *Hcliff = tzMalloc(nn, double);    /*  calloc(nn,sizeof(double));  Commented out by TZ.   ansi-c*/
+            double *Hcliff = tzMalloc(nn, double);    /*  swzCalloc(nn,sizeof(double));  Commented out by TZ.   ansi-c*/
             double randmax=1.0/(double)RAND_MAX;     /*  03/10/2006, changed from 1/ to 1.0/ to make randmax a legal double.   ansi-c*/
             /* if stuck, give it another try by perturbing Hessian */
             memcpy(Hcliff,H,nn*sizeof(double));
@@ -224,7 +224,7 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
             if (f[2] < f[0]) {
                badg[2] = peakwall(g[2],retcode[1],x[2],n,gfcn,fcn,args,dims);
                if (badg[2]) {
-                  double *xx = tzMalloc(n, double), nx;    /*  calloc(n,sizeof(double)), nx;  Commented out by TZ.   ansi-c*/
+                  double *xx = tzMalloc(n, double), nx;    /*  swzCalloc(n,sizeof(double)), nx;  Commented out by TZ.   ansi-c*/
 
                   #ifdef VERBOSE_WARNINGS
                   printf("Cliff again.  Try traversing.\n");
@@ -239,8 +239,8 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
                      badg[3] = 1;
                      retcode[2] = 101;
                   } else {
-                     double *gcliff = tzMalloc(n, double),   /*  calloc(n,sizeof(double)),  Commented out by TZ.   ansi-c*/
-                            *eye = tzMalloc(nn, double);   /*  calloc(n,sizeof(double));  Bugs of Iskander.  Changed from n to nn. 03/10/06.   ansi-c*/
+                     double *gcliff = tzMalloc(n, double),   /*  swzCalloc(n,sizeof(double)),  Commented out by TZ.   ansi-c*/
+                            *eye = tzMalloc(nn, double);   /*  swzCalloc(n,sizeof(double));  Bugs of Iskander.  Changed from n to nn. 03/10/06.   ansi-c*/
                      double dfnx = (f[2]-f[1])/nx;
                      for (i=0; i<n; i++) {
                         gcliff[i] = dfnx*xx[i];
@@ -588,7 +588,7 @@ static void csminit(double *fhat, double *xhat, int *fcount, int *retcode,
    else {
       /* with badg 1, we don't try to match rate of improvement to directional
          derivative.  We're satisfied just to get some improvement in f. */
-      dx = tzMalloc(n, double);    /*  dx = calloc(n, sizeof(double));  Commented out by TZ.   ansi-c*/
+      dx = tzMalloc(n, double);    /*  dx = swzCalloc(n, sizeof(double));  Commented out by TZ.   ansi-c*/
 /*        //if (!dx) printf("Dynamic memory allocation error.\n");  Commnted out by TZ.   ansi-c*/
       for (i=0; i<n; i++)
          dx[i] = -times(&H0[i*n],g,n);
@@ -622,7 +622,7 @@ static void csminit(double *fhat, double *xhat, int *fcount, int *retcode,
       printf("Predicted improvement: %18.9f, Norm of gradient: %18.9f\n", -dfhat*0.5, gnorm);
       #endif
 
-      dxtest = tzMalloc(n, double);   /*  calloc(n, sizeof(double));  Commented out by TZ.   ansi-c*/
+      dxtest = tzMalloc(n, double);   /*  swzCalloc(n, sizeof(double));  Commented out by TZ.   ansi-c*/
       while (!done) {
          for (i=0; i<n; i++)
             dxtest[i] = x0[i]+dx[i]*lambda;
@@ -772,7 +772,7 @@ static void bfgsi(double *H, double *dg, double *dx, int n, int nn) {
    int i;
    TSdmatrix *H_dm = NULL;
 
-   Hdg = tzMalloc(n, double);   /*  calloc(n, sizeof(double));  Commented out by TZ.   ansi-c*/
+   Hdg = tzMalloc(n, double);   /*  swzCalloc(n, sizeof(double));  Commented out by TZ.   ansi-c*/
 /*     //if (!Hdg) printf("Dynamic memory allocation error.\n");  Commented out by TZ.   ansi-c*/
 
    /* Hdg = H0*dg; */
@@ -817,7 +817,7 @@ static double *mtimes(double *x, double *y, int n, int nn) {
    double *x0;
    double *z;
    int i, j;
-   z = tzMalloc(nn, double);   /*  calloc(nn, sizeof(double));  Commented out by TZ.   ansi-c*/
+   z = tzMalloc(nn, double);   /*  swzCalloc(nn, sizeof(double));  Commented out by TZ.   ansi-c*/
    for (i=0, x0=x; i<n; i++, y++)
       for (j=0, x=x0; j<n; j++, x++, z++)
          *z = (*x)*(*y);
@@ -827,7 +827,7 @@ static double *mtimes(double *x, double *y, int n, int nn) {
 static double *mminus(double *x, double *y, int n) {
    double *z;
    int i;
-   z = tzMalloc(n, double);   /*  calloc(n, sizeof(double));  Commented out by TZ.   ansi-c*/
+   z = tzMalloc(n, double);   /*  swzCalloc(n, sizeof(double));  Commented out by TZ.   ansi-c*/
    for (i=0; i<n; i++, x++, y++, z++)
       *z = (*x)-(*y);
    return z-n;
