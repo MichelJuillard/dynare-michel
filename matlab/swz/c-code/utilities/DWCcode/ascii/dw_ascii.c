@@ -74,7 +74,7 @@ FILE *dw_AppendTextFile(char *filename)
      the buffer containing the file and resets *n if necessary.  The if the
      passed buffer is null or is not large enough to contain the line, buffer is
      freed and a new buffer is allocated.  Because of this, the passed buffer
-     must either null or allocated with swzMalloc(), realloc(), or swzCalloc() and the
+     must either null or allocated with swzMalloc(), swzRealloc(), or swzCalloc() and the
      calling routine is responsible for eventually freeing the memory if the
      return value is not null.
 
@@ -96,7 +96,7 @@ char* dw_ReadLine(FILE *f, char *buffer, int *n)
     if (ptr[(i=(int)strlen(ptr))-1] == '\n')
       return buffer;
     else
-      if (!(nbuffer=(char*)realloc(buffer,*n+=SIZE_INCREMENT)))
+      if (!(nbuffer=(char*)swzRealloc(buffer,*n+=SIZE_INCREMENT)))
     {
       free(buffer);
       *n=0;
@@ -310,7 +310,7 @@ int dw_PrintDelimitedArray(FILE *f, void* array, char delimiter)
 /*     { */
 /*       //=== reallocate memory if necessary */
 /*       if (k+1 > *n) */
-/*     if (!(ptr=(char*)realloc(buffer,*n+=INCREMENT))) */
+/*     if (!(ptr=(char*)swzRealloc(buffer,*n+=INCREMENT))) */
 /*       { */
 /*         *n-=INCREMENT; */
 /*         return 0; */

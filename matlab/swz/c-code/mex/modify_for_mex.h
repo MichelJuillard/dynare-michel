@@ -25,12 +25,11 @@ extern int constant_seed;
 
 #define swz_fprintf_stdout mexPrintf
 
-#undef realloc
 #undef free
 
 #define swzMalloc mxMalloc
 #define swzCalloc mxCalloc
-#define realloc mxRealloc
+#define swzRealloc mxRealloc
 #define free mxFree
 
 
@@ -38,4 +37,5 @@ extern int constant_seed;
 #define swz_fprintf_stdout printf
 #define swzMalloc malloc
 #define swzCalloc calloc
+#define swzRealloc realloc
 #endif
