@@ -120,6 +120,8 @@ main(int argc, char **argv)
   Matrix yView(nobs,192); // dummy
   yView.setAll(0.2);
   const MatrixConstView dataView(yView, 0,  0, nobs, yView.getCols() ); // dummy
+  Matrix yDetrendView(nobs,yView.getCols()); // dummy
+  MatrixView dataDetrendView(yDetrendView, 0,  0, nobs, yDetrendView.getCols() ); // dummy
   Vector vll(yView.getCols());
   VectorView vwll(vll,0,vll.getSize());
  
@@ -131,7 +133,7 @@ main(int argc, char **argv)
 
   size_t start=0, period=0;
   double ll=kalman.compute(dataView, steadyStateVW,  Q, H, deepParams,
-                                   vwll, start, period, penalty, info);
+                                   vwll, dataDetrendView, start, period, penalty, info);
 
   std::cout << "ll: " << std::endl << ll << std::endl;
 }

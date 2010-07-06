@@ -128,10 +128,15 @@ main(int argc, char **argv)
 
   double lyapunov_tol = 1e-16;
   int info = 0;
-  const MatrixConstView 
-  dataView(&lyapunov_tol, 1, 1, 1); // dummy
-  Matrix 
-  yView(dataView.getRows(),dataView.getCols()); // dummy
+  size_t nobs = 2;
+  Matrix yView(nobs,192); // dummy
+  yView.setAll(0.2);
+  const MatrixConstView dataView(yView, 0,  0, nobs, yView.getCols() ); // dummy
+  Matrix yDetrendView(nobs,yView.getCols()); // dummy
+  MatrixView dataDetrendView(yDetrendView, 0,  0, nobs, yDetrendView.getCols() ); // dummy
+
+
+
   const Vector
   xparams1(0); // dummy
   double penalty = 1e8;
@@ -145,7 +150,7 @@ main(int argc, char **argv)
   std::cout << "Initialize KF with Q: " << std::endl << Q << std::endl;
 
   initializeKalmanFilter.initialize(steadyStateVW, deepParams, R, Q, RQRt, T, Pstar, Pinf,
-                                    penalty, dataView, yView, info);
+                                    penalty, dataView, dataDetrendView, info);
 
   std::cout << "Matrix T: " << std::endl << T << std::endl;
   std::cout << "Matrix R: " << std::endl << R << std::endl;
