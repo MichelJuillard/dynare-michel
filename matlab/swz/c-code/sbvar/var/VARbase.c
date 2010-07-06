@@ -187,14 +187,14 @@ T_VAR_Parameters* CreateTheta_VAR(int flag, int nvars, int nlags, int nexg, int 
   if ((nvars <= 0) || (nlags < 0) || (nexg < 0))
     {
       swz_fprintf_err("CreateTheta_VAR():  Invalid arguments passed.\n");
-      exit(0);
+      swzExit(0);
     }
 
 /*    //=== Allocate memory for T_VAR_Parameters ===   ansi-c*/
   if (!(p=(T_VAR_Parameters*)swzMalloc(sizeof(T_VAR_Parameters))))
     {
       swz_fprintf_err("Out of memory\n");
-      exit(0);
+      swzExit(0);
     }
 
 /*    //=== Model Specification ===   ansi-c*/
@@ -525,7 +525,7 @@ void SetPriors_VAR_SimsZha(T_VAR_Parameters *theta, TMatrix* A0_prior, TMatrix* 
   else
     {
       printf("Error SetPriors_VAR_SimsZha(): specification flag not set to SPEC_SIM_ZHA\n");
-      exit(0);
+      swzExit(0);
     }
 }
 
@@ -1494,7 +1494,7 @@ static void GetProposedJump_A0(TVector b, int j, int k, T_VAR_Parameters *p)
       dw_PrintMatrix(stdout,p->inverse_b0_prior[j],"%lg ");
       printf("S =\n");
       dw_PrintMatrix(stdout,S,"%lg ");
-      exit(1);
+      swzExit(1);
     }
   dw_SetTerminalErrors(terminal_errors);
 /*   else */
@@ -2260,7 +2260,7 @@ void Update_bplus_from_lambda_psi(T_VAR_Parameters *p)
   if (!(p->Specification & SPEC_SIMS_ZHA))
     {
       swz_fprintf_err("Update_bplus_from_lambda_psi() called without Sims-Zha specification\n");
-      exit(0);
+      swzExit(0);
     }
   for (j=p->nvars-1; j >= 0; j--)
     {
@@ -2731,7 +2731,7 @@ void SetLogPriorConstant_VAR(T_VAR_Parameters *p)
       break;
     default:
       printf("Unknown normalization type\n");
-      exit(1);
+      swzExit(1);
     }
 }
 #undef LN_TWO_PI
@@ -3038,7 +3038,7 @@ int Normalize_VAR(T_VAR_Parameters *p)
     case VAR_NORMALIZATION_NONE: return 0;
     default:
       printf("Unknown normalization type\n");
-      exit(1);
+      swzExit(1);
     }
 }
 
@@ -3221,7 +3221,7 @@ int WZ_Normalize(T_VAR_Parameters *p)
 /*       if (!InverseProductMM(A,A,Ref)) */
 /*     { */
 /*       printf("\nNormalize_WZ():  A0 not invertible\n"); */
-/*       exit(0); */
+/*       swzExit(0); */
 /*     } */
 
 /*       for (j=p->nvars-1; j >= 0; j--) */

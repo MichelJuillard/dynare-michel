@@ -1596,7 +1596,7 @@ void ComputeMarginal_TruncatedGaussianProposal(int ndraws_proposal, TMatrix X, T
 /*       return SetupSphericalFromPosterior_Table(X,n); */
 /*     default: */
 /*       swz_fprintf_err("Unknown proposal type\n"); */
-/*       exit(0); */
+/*       swzExit(0); */
 /*     } */
 /* } */
 
@@ -1622,7 +1622,7 @@ void ComputeMarginal_TruncatedGaussianProposal(int ndraws_proposal, TMatrix X, T
 /*       break; */
 /*     default: */
 /*       swz_fprintf_err("Unknown proposal type\n"); */
-/*       exit(0); */
+/*       swzExit(0); */
 /*     } */
 /*   f_out=dw_CreateTextFile(filename); */
 
@@ -1936,14 +1936,14 @@ int main(int nargs, char **args)
              "\n                     -u <upper tail truncation>"
              "\n                     -l <center region truncation>"
              "\n\n");
-      exit(0);
+      swzExit(0);
     }
 
 /*    // setup filenames   ansi-c*/
   if (!(tag=dw_ParseString_String(nargs,args,"ft",(char*)NULL)))
     {
       printf("Tag not specified.  Usage: -ft <file tag name>\n\n");
-      exit(0);
+      swzExit(0);
     }
 
   fmt="mhm_draws_%s.dat";
@@ -1990,7 +1990,7 @@ int main(int nargs, char **args)
           if (!line)
         {
           printf("Not enough lines - %d\n",i+1);
-          exit(0);
+          swzExit(0);
         }
           if (dw_DimA(line) != n_fields)
         {
@@ -2001,7 +2001,7 @@ int main(int nargs, char **args)
           dw_FreeArray(line);
         }
     }
-      exit(0);
+      swzExit(0);
     }
   fclose(f_in);
 

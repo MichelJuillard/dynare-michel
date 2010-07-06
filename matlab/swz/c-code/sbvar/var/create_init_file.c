@@ -27,7 +27,7 @@ int main(int nargs, char **args)
   if (nargs != 4)
     {
       swz_fprintf_err("Syntax:\n  create_init_file <matlab filename> <specs filename> <file tag>\n");
-      exit(0);
+      swzExit(0);
     }
 
   model=Combine_matlab_standard(args[1],args[2]);

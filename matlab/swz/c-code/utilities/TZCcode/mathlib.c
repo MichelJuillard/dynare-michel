@@ -1048,7 +1048,7 @@ double detspd(TSdmatrix *S_dm)
 
    if (errflag) {
 /*        //printf("\nFatal Error in .../mathlib.c/detspd() when calling chol() with error flag %d\n", errflag);   ansi-c*/
-/*        //exit(EXIT_FAILURE);   ansi-c*/
+/*        //swzExit(EXIT_FAILURE);   ansi-c*/
       DestroyMatrix_lf(Work_dm);
       return (-1.0);
    }
@@ -1089,7 +1089,7 @@ double logdetspd(TSdmatrix *S_dm)
 
    if (errflag) {
 /*        //printf("\nFatal Error in .../mathlib.c/logdetspd() when calling chol() with error flag %d\n", errflag);   ansi-c*/
-/*        //exit(EXIT_FAILURE);   ansi-c*/
+/*        //swzExit(EXIT_FAILURE);   ansi-c*/
       DestroyMatrix_lf(Work_dm);
       printf("----- errflag for chol() when calling logdetspd() in mathlib.c = %d -----", errflag);
       return (log(-1.0));

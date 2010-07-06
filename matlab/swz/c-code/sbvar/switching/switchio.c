@@ -1031,13 +1031,13 @@ TMarkovStateVariable* CreateMarkovStateVariable_File(FILE *f, char *filename, in
       if (!dw_SetFilePosition(f_in,id))
         {
           swz_fprintf_err("Line identifier ""%s"" not found.\n",id);
-          exit(0);
+          swzExit(0);
         }
       fscanf(f_in," %d ",&nobs);
       if (nobs <= 0)
         {
           swz_fprintf_err("Number Observations must be positive\n");
-          exit(0);
+          swzExit(0);
         }
     }
 
@@ -1045,13 +1045,13 @@ TMarkovStateVariable* CreateMarkovStateVariable_File(FILE *f, char *filename, in
       if (!dw_SetFilePosition(f_in,id))
         {
           swz_fprintf_err("Line identifier ""%s"" not found.\n",id);
-          exit(0);
+          swzExit(0);
         }
       fscanf(f_in," %d ",&n_state_variables);
       if (n_state_variables <= 0)
     {
       swz_fprintf_err("Number Independent State Variables must be positive\n");
-      exit(0);
+      swzExit(0);
     }
 
       sv=(TMarkovStateVariable**)dw_CreateArray_pointer(n_state_variables,(void (*)(void*))FreeMarkovStateVariable);
@@ -1061,20 +1061,20 @@ TMarkovStateVariable* CreateMarkovStateVariable_File(FILE *f, char *filename, in
       if (!dw_SetFilePosition(f_in,id_buffer))
         {
           swz_fprintf_err("Line identifier ""%s"" not found.\n",id_buffer);
-          exit(0);
+          swzExit(0);
         }
       fscanf(f_in," %d ",&nstates);
       if (nstates <= 0)
         {
           swz_fprintf_err("Number of states for state_variable[%d] must be positive\n",i+1);
-          exit(0);
+          swzExit(0);
         }
 
       sprintf(id_buffer,"//== Transition matrix prior for state_variable[%d]. (n_states x n_states) ==//",i+1);
       if (!dw_SetFilePosition(f_in,id_buffer))
         {
           swz_fprintf_err("Line identifier ""%s"" not found.\n",id_buffer);
-          exit(0);
+          swzExit(0);
         }
       dw_ReadMatrix(f_in,prior=CreateMatrix(nstates,nstates));
 
@@ -1089,7 +1089,7 @@ TMarkovStateVariable* CreateMarkovStateVariable_File(FILE *f, char *filename, in
           if (!dw_SetFilePosition(f_in,id_buffer))
         {
           swz_fprintf_err("Line identifier ""%s"" not found.\n",id_buffer);
-          exit(0);
+          swzExit(0);
         }
           restrictions=dw_CreateArray_matrix(nstates);
           for (j=0; j < nstates; j++)
@@ -1098,7 +1098,7 @@ TMarkovStateVariable* CreateMarkovStateVariable_File(FILE *f, char *filename, in
         else
           {
             swz_fprintf_err("Free Dirichet dimensions for column %d of state_variable[%d] must be positive\n",j+1,i+1);
-            exit(0);
+            swzExit(0);
           }
 
           sv[i]=CreateMarkovStateVariable_SimpleRestrictions(nstates,nobs,prior,restrictions);

@@ -75,7 +75,7 @@ swz_fprintf_err(char *str, ...)
 }
 
 void
-swz_exit(int status)
+swzExit(int status)
 {
 #if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
   mexErrMsgTxt("Error in mexfile.\n");

@@ -309,13 +309,13 @@ T_MHM* CreateMHM_CommandLine(int nargs, char **args)
       {
     swz_fprintf_err("CreateMHM_CommandLine():  No specification file given.\n");
     if (mhm) FreeMHM(mhm);
-    exit(0);
+    swzExit(0);
       }
 
   if (!mhm)
     {
       swz_fprintf_err("CreateMHM_CommandLine:  No mhm input data file specified.\n");
-      exit(0);
+      swzExit(0);
     }
 
 /*    // Output filenames   ansi-c*/

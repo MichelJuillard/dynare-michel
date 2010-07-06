@@ -98,7 +98,7 @@ void frprmn(double p[], int n, int *iter, double *fret,
       if ( !(fptr_interesults = fopen(filename_sp3vecs,"w")) ) {
          printf("\n\nUnable to create the starting point data file %s in congradmin.c!\n", filename_sp3vecs);
          getchar();
-         exit(EXIT_FAILURE);
+         swzExit(EXIT_FAILURE);
       }
 /*        // rewind(fptr_interesults);   //Must put the pointer at the beginning of the file.   ansi-c*/
 /*        //=== Prints out the line search direction.   ansi-c*/

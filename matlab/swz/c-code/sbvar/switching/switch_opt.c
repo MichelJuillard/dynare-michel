@@ -64,7 +64,7 @@ PRECISION PosteriorObjectiveFunction(PRECISION *x, int n)
 /*    //    fprintf(f_out,"LogLikelihood_StatesIntegratedOut(): %le\n",li);   ansi-c*/
 /*    //    fprintf(f_out,"Posterior: %le\n\n",lp_Q+lp_Theta+li);   ansi-c*/
 /*    //    fclose(f_out);   ansi-c*/
-/*    //    exit(0);   ansi-c*/
+/*    //    swzExit(0);   ansi-c*/
 /*    //  }   ansi-c*/
 /*    //return -(lp_Q+lp_Theta+li);   ansi-c*/
 }

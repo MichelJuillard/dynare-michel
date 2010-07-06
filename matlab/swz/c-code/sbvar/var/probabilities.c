@@ -96,7 +96,7 @@ int main(int nargs, char **args)
                       "  -fp : parameters filename (specification filename)\n"
                       "  -fh : parameter header (Posterior mode: )\n"
                       );
-      exit(1);
+      swzExit(1);
     }
 
   if (!parm)

@@ -123,13 +123,13 @@ TMarkovStateVariable* CreateMarkovStateVariable_Single(int nstates, int nobs, TM
   if (!CheckRestrictions(FreeDim,NonZeroIndex,MQ,nstates))
     {
       swz_fprintf_err("CreateMarkovStateVariable_Single(): Error in restrictions\n");
-      exit(0);
+      swzExit(0);
     }
 
   if (!CheckPrior(Prior,nstates) || !CheckPriorOnFreeParameters(Prior,NonZeroIndex,nstates))
     {
       swz_fprintf_err("CreateMarkovStateVariable_Single(): Error in priors\n");
-      exit(0);
+      swzExit(0);
     }
 
 /*    //=== Compute total number of free transition matrix parameters   ansi-c*/
@@ -138,13 +138,13 @@ TMarkovStateVariable* CreateMarkovStateVariable_Single(int nstates, int nobs, TM
   if ((nstates <= 0) || (nobs <= 0))
     {
       swz_fprintf_err("CreateMarkovStateVariable(): improper argument values\n");
-      exit(0);
+      swzExit(0);
     }
 
   if (!(sv=(TMarkovStateVariable*)swzMalloc(sizeof(TMarkovStateVariable))))
     {
       swz_fprintf_err("CreateMarkovStateVariable(): out of memory\n");
-      exit(0);
+      swzExit(0);
     }
 
 /*    //=== Set flags ===   ansi-c*/
@@ -263,13 +263,13 @@ TMarkovStateVariable* CreateMarkovStateVariable_Multiple(int nobs, int n_state_v
   if ((n_state_variables <= 1) || (nobs <= 0) || !state_variable || (dw_DimA(state_variable) != n_state_variables))
     {
       printf("CreateMarkovStateVariable_Multiple(): invalid arguments\n");
-      exit(0);
+      swzExit(0);
     }
 
   if (!(sv=(TMarkovStateVariable*)swzMalloc(sizeof(TMarkovStateVariable))))
     {
       printf("CreateMarkovStateVariable_Multiple(): out of memory\n");
-      exit(0);
+      swzExit(0);
     }
 
 /*    //=== Set to terminate on memory error ===   ansi-c*/
@@ -697,7 +697,7 @@ TMarkovStateVariable* CreateMarkovStateVariable_Lags(int nlags, TMarkovStateVari
   if (base->n_state_variables > 1)
     {
       swz_fprintf_err("CreateMarkovStateVariable_Lags():  multiple state variable for base.");
-      exit(0);
+      swzExit(0);
     }
 
   if (nlags > 0)
@@ -802,13 +802,13 @@ void Swap_SV(TMarkovStateVariable *sv, int i, int j)
   if (sv->n_state_variables > 1)
     {
       swz_fprintf_err("Swap(): Can only swap indices for terminal state variables.\n");
-      exit(0);
+      swzExit(0);
     }
 
   if ((i < 0) || (j < 0) || (i >= sv->nbasestates) || (j >= sv->nbasestates))
     {
       swz_fprintf_err("Swap(): Indicies out of range.\n");
-      exit(0);
+      swzExit(0);
     }
 
   X=TranspositionPermutation((TPermutation)NULL,i,j,sv->nbasestates);
@@ -830,7 +830,7 @@ void Swap_SV(TMarkovStateVariable *sv, int i, int j)
   if (!Update_B_from_Q_SV(sv))
     {
       swz_fprintf_err("Swap(): Restrictions violated.\n");
-      exit(0);
+      swzExit(0);
     }
   PropagateSwap_SV(sv);
 }
@@ -908,7 +908,7 @@ void DrawTransitionMatrix_SV(TMarkovStateVariable *sv)
     if (!DrawDirichletVector(sv->b[k],sv->b[k]))
       {
         swz_fprintf_err("Error drawing Dirichlet vector\n");
-        exit(0);
+        swzExit(0);
       }
 
 /*        // Compute Q   ansi-c*/
@@ -951,7 +951,7 @@ void DrawTransitionMatrixFromPrior_SV(TMarkovStateVariable *sv)
     if (!DrawDirichletVector(sv->b[j],sv->b[j]))
       {
         swz_fprintf_err("Error drawing Dirichlet vector\n");
-        exit(0);
+        swzExit(0);
       }
 
 /*        // Compute P   ansi-c*/
@@ -1010,7 +1010,7 @@ void DrawStatesFromTransitionMatrix_SV(TMarkovStateVariable *sv)
   if (!sv->valid_transition_matrix)
     {
       printf("DrawStatesFromTransitionMatrix_SV():  Invalid transition matrix.\n");
-      exit(0);
+      swzExit(0);
     }
 
 /*    //=== Draw initial state from ergodic or uniform distribution ===   ansi-c*/
@@ -1020,7 +1020,7 @@ void DrawStatesFromTransitionMatrix_SV(TMarkovStateVariable *sv)
       if (!(v=Ergodic((TVector)NULL,sv->Q)))
     {
       printf("DrawStatesFromTransitionMatrix_SV():  Ergodic distribution does not exists.\n");
-      exit(0);
+      swzExit(0);
     }
       if ((u=dw_uniform_rnd()) >= (s=ElementV(v,i=sv->nstates-1)))
     while (--i > 0)
@@ -1287,7 +1287,7 @@ int* CreateStateIndex(TMarkovStateVariable* sv, TMarkovStateVariable** list, int
   if (!(index=dw_CreateArray_int(sv->nstates)))
     {
       printf("CreateStateIndex():  Out of memory.\n");
-      exit(0);
+      swzExit(0);
     }
   for (i=sv->nstates-1; i >= 0; i--)
     {
@@ -1295,7 +1295,7 @@ int* CreateStateIndex(TMarkovStateVariable* sv, TMarkovStateVariable** list, int
     if ((k=IncrementIndex(k,i,sv,list[j])) == -1)
       {
         printf("CreateStateIndex():  Unable to find required state variable.\n");
-        exit(0);
+        swzExit(0);
       }
      index[i]=k;
     }
@@ -1418,7 +1418,7 @@ TStateModel* CreateStateModel_new(TMarkovStateVariable *sv, ThetaRoutines *routi
   if (!(model=(TStateModel*)swzMalloc(sizeof(TStateModel))))
     {
       swz_fprintf_err("CreateStateModel():  Out of memory\n");
-      exit(0);
+      swzExit(0);
     }
 
   model->sv=sv;
@@ -1509,7 +1509,7 @@ void ForwardRecursion(TStateModel *model)
     if (!Ergodic(model->V[0],sv->Q))
       {
     printf("ForwardRecursion():  Ergodic distribution does not exist.\n");
-    exit(0);
+    swzExit(0);
       }
 
 /*    //====== forward recursion ======   ansi-c*/
@@ -2137,7 +2137,7 @@ void ConvertQToFreeParameters(TStateModel *model, PRECISION *f)
   if (!(model->sv->valid_transition_matrix))
     {
       swz_fprintf_err("ConvertQToFreeParameters():  Transition matrices not valid.\n");
-      exit(0);
+      swzExit(0);
     }
   for (i=0; i < dw_DimA(ba); f+=k, i++)
     memcpy(f,pElementV(ba[i]),(k=DimV(ba[i])-1)*sizeof(PRECISION));
@@ -2211,7 +2211,7 @@ void ConvertQToLogFreeParameters(TStateModel *model, PRECISION *f)
   if (!(model->sv->valid_transition_matrix))
     {
       swz_fprintf_err("ConvertQToFreeParameters():  Transition matrices not valid.\n");
-      exit(0);
+      swzExit(0);
     }
 
   for (i=0; i < dw_DimA(ba); f+=k, i++)

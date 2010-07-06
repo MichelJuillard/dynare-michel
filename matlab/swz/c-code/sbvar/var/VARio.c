@@ -188,7 +188,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename)
     case 0: spec=0; break;
     case 1: spec=SPEC_SIMS_ZHA | SPEC_RANDOM_WALK; break;
     case 2: spec=SPEC_RANDOM_WALK; break;
-    default: ReadError_VARio("//== Specification (0=default  1=Sims-Zha  2=Random Walk) ==//"); exit(0);
+    default: ReadError_VARio("//== Specification (0=default  1=Sims-Zha  2=Random Walk) ==//"); swzExit(0);
     }
   if (spec & SPEC_SIMS_ZHA)
     lambda_prior=ReadScalar_VARio(f_in,"//== Variance of Gaussian prior on lambda ==//");

@@ -129,7 +129,7 @@ int dw_SetError(int err, char *msg)
     break;
       }
   if (VerboseErrors & ERROR) fprintf(f_err ? f_err : stderr,"%s\n",ERROR_MESSAGE);
-  if (TerminalErrors & ERROR) exit(ERROR);
+  if (TerminalErrors & ERROR) swzExit(ERROR);
   return rtrn;
 }
 

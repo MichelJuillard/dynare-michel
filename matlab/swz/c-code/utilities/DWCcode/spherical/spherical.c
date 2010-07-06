@@ -127,14 +127,14 @@ void SetupSpherical_Table(int n, PRECISION *table, int m)
   if (SPHERICAL_TABLE_VALUES[0] != 0.0)
     {
       printf("First entry of inverse cumulative spherical table must be zero\n");
-      exit(0);
+      swzExit(0);
     }
   for (i=1; i < SPHERICAL_TABLE_LENGTH; i++)
     if (SPHERICAL_TABLE_VALUES[i-1] >= SPHERICAL_TABLE_VALUES[i])
       {
     printf("Inverse cumulative spherical table must be strictly increasing\n");
     for (i=0; i <= m; i++) printf("%lf\n",table[i]);
-    exit(0);
+    swzExit(0);
       }
 }
 
@@ -164,7 +164,7 @@ PRECISION DrawSpherical(TVector x)
       return r;
     default:
       swz_fprintf_err("Unknown spherical type\n");
-      exit(0);
+      swzExit(0);
     }
 }
 
@@ -187,7 +187,7 @@ PRECISION LogSphericalDensity(PRECISION r)
       return ((r < SPHERICAL_LOWER_TRUNCATE) || (r > SPHERICAL_UPPER_TRUNCATE)) ? MINUS_INFINITY : -0.5*r*r + SPHERICAL_CONSTANT;
     default:
       swz_fprintf_err("Unknown spherical type\n");
-      exit(0);
+      swzExit(0);
     }
 }
 

@@ -365,7 +365,7 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
       if ( !(fptr_interesults = fopen(filename_sp2vecs,"w")) ) {
          printf("\n\nUnable to create the starting point data file %s in csminwel.c!\n", filename_sp2vecs);
          getchar();
-         exit(EXIT_FAILURE);
+         swzExit(EXIT_FAILURE);
       }
       fprintf(fptr_interesults, "========= Only one block at a time if more-than-one blocks are used. ========== \n");
       fprintf(fptr_interesults, "--------Numerical gradient---------\n");
@@ -435,7 +435,7 @@ void csminwel(double (*fcn)(double *x, int n, double **args, int *dims),
    if ( !(fptr_interesults = fopen(filename_sp2vecs,"w")) ) {
       printf("\n\nUnable to create the starting point data file %s in csminwel.c!\n", filename_sp2vecs);
       getchar();
-      exit(EXIT_FAILURE);
+      swzExit(EXIT_FAILURE);
    }
    fprintf(fptr_interesults, "========= Only a block at a time if more-than-one blocks are used. ========== \n");
    fprintf(fptr_interesults, "--------Numerical gradient---------\n");

@@ -219,7 +219,7 @@ void ReadConstantParameters(char *filename, TStateModel *model)
   if (!(f_in=fopen(filename,"rt")))
     {
       printf("Unable to read the input data file: %s\n", filename);
-      exit(0);
+      swzExit(0);
     }
 
 /*    // A0   ansi-c*/
@@ -281,7 +281,7 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
   if (!(f_in=fopen(filename,"rt")))
     {
       printf("Unable to read the input data file: %s\n", filename);
-      exit(0);
+      swzExit(0);
     }
 
 /*    //=== Read sizes ===//   ansi-c*/
@@ -312,7 +312,7 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
     if (IV[j] != npre)
       {
     swz_fprintf_err("V[%d] not %d x %d\n",j,npre,npre);
-    exit(0);
+    swzExit(0);
       }
   V=dw_CreateArray_matrix(nvars);
   for (j=nvars-1; j >= 0; j--)
@@ -363,10 +363,10 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
     break;
       case 4:
     swz_fprintf_err("Case %d not implimented.\n",4);
-    exit(0);
+    swzExit(0);
       default:
     swz_fprintf_err("Unknown type.\n");
-    exit(0);
+    swzExit(0);
       }
   dw_FreeArray(IM);
 
@@ -442,7 +442,7 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
 /*       FreeMatrix(YY); */
 /*       getc(stdin); */
 /*     } */
-/*   //exit(0); */
+/*   //swzExit(0); */
 
 /*   id="//== nps: nvar-by-1 ==//"; */
 /*   if (!dw_SetFilePosition(f_in,id) || !dw_ReadArray(f_in,n0s=dw_CreateArray_int(nvars))) ReadError_VARio_matlab(id); */
@@ -482,7 +482,7 @@ TStateModel* CreateStateModel_VAR_matlab(char *filename)
 /*       FreeMatrix(YY); */
 /*       getc(stdin); */
 /*     } */
-/*   exit(0); */
+/*   swzExit(0); */
 /*   //=========================== Checks */
 
 /*    // Initialize Y   ansi-c*/

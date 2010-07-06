@@ -57,7 +57,7 @@ void fn_DisplayError(char *msg_s)
       mexErrMsgTxt(".");
    #else
 /*        //getchar();   ansi-c*/
-      exit( EXIT_FAILURE );                           /*   This exits the entire C program.   ansi-c*/
+      swzExit( EXIT_FAILURE );                           /*   This exits the entire C program.   ansi-c*/
    #endif
 }
 
@@ -823,7 +823,7 @@ FILE *tzFopen(char *filename, char *mode) {
       if ( !(fptr_dummy = fopen(filename,mode)) ) {
          printf("\n\n...tzmatlab.c/tzFopen(): Fatal Error -- unable to write, read, or append the file %s!\n", filename);
 /*           //getchar();   ansi-c*/
-         exit(EXIT_FAILURE);
+         swzExit(EXIT_FAILURE);
       }
    }
    else  fn_DisplayError(".../tzmatlab.c/tzFopen(): the input filename must exit");

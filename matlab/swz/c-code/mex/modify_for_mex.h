@@ -18,10 +18,8 @@ extern int constant_seed;
 /*#define fflush(stdout) mexEvalString("drawnow;");*/
 
 #undef printf
-#undef exit
 
 #define printf mexPrintf
-#define exit swz_exit
 
 #define swz_fprintf_stdout mexPrintf
 

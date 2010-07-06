@@ -1468,7 +1468,7 @@ void fn_wznormalization(TSdvector *wznmlz_dv, TSdmatrix *A0draw_dm, TSdmatrix *A
 
    if ( errflag=BdivA_rgens(X_dm, A0peak_dm, '\\', A0draw_dm) ) {
       printf(".../cstz.c/fn_wznormalization(): errors when calling BdivA_rgens() with error flag %d", errflag);
-      exit(EXIT_FAILURE);
+      swzExit(EXIT_FAILURE);
    }
 
    if (wznmlz_dv) {
@@ -2117,11 +2117,11 @@ void fn_ctfals_policyonly(TSdmatrix *ctfalstran_dm, TSdvector *xprimeminus1_dv, 
       if ( errflag=BdivA_rgens(tf_Bs_dc->C[si], tf_Aps_dc->C[si], '/', tf_A0sinv_dc->C[si]) ) {
          //tf_A0sinv_dc is at this moment tf_A0s_dc.
          printf(".../cstz.c/fn_ctfals_policyonly(): tf_Bs_dc->C[si] -- errors when calling BdivA_rgens() with error flag %d", errflag);
-         exit(EXIT_FAILURE);
+         swzExit(EXIT_FAILURE);
       }
       if ( errflag=invrgen(tf_A0sinv_dc->C[si], tf_A0sinv_dc->C[si]) ) {
          printf(".../cstz.c/fn_ctfals_policyonly(): tf_A0sinv_dc->C -- errors when calling invrgen() with error flag %d", errflag);
-         exit(EXIT_FAILURE);
+         swzExit(EXIT_FAILURE);
       }
    }
 

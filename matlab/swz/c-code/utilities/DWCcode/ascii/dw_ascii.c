@@ -19,7 +19,7 @@ FILE *dw_OpenTextFile(char *filename)
   if (!f)
     {
       printf("Unable to open %s\n",filename);
-      exit(0);
+      swzExit(0);
     }
   return (f);
 }
@@ -35,7 +35,7 @@ FILE *dw_CreateTextFile(char *filename)
   if (!f)
     {
       printf("Unable to open %s\n",filename);
-      exit(0);
+      swzExit(0);
     }
   return (f);
 }
@@ -52,7 +52,7 @@ FILE *dw_AppendTextFile(char *filename)
   if (!f)
     {
       printf("Unable to open %s\n",filename);
-      exit(0);
+      swzExit(0);
     }
   return (f);
 }

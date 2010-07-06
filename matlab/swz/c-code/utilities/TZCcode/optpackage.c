@@ -378,7 +378,7 @@ void InitializeForMinproblem(struct TSminpack_tag *minpack_ps, char *filename_sp
          if (fscanf(fptr_sp, " %lf ", x_dv->v+_i) != 1)
          {
             printf("Error: optpackage.c/InitializeForMinproblem() -- cannot read the number from the file %s.  Check the data file", filename_sp);
-            exit(EXIT_FAILURE);
+            swzExit(EXIT_FAILURE);
          }
       x_dv->flag = V_DEF;
 
@@ -399,7 +399,7 @@ void InitializeForMinproblem(struct TSminpack_tag *minpack_ps, char *filename_sp
 //      printf("  optpackage.c/InitializeForMinproblem(): Bad initialization. All parameters must be in the reasonable range.\n"
 //             "    Most likely, the parameters get stuck in the following line in swz2_confuns.c:\n"
 //             " if ((tmpd1mPhi=1.0-fn_normalcdf(xid * (log(mt-boundthetamt_1) - logdbar))) <= 0.0)  logvalue = -NEARINFINITY;\n");
-//      exit(EXIT_FAILURE);
+//      swzExit(EXIT_FAILURE);
    }
 }
 /**/
@@ -572,7 +572,7 @@ void minfinder_blockcsminwel(struct TSminpack_tag *minpack_ps, int indx_findMLE)
       if ( !(fptr_interesults = fopen(filename_printout,"w")) ) {
          printf("\n\nUnable to open the starting point data file %s in minfinder_blockcsminwel() in optpackage.c!\n", filename_printout);
          getchar();
-         exit(EXIT_FAILURE);
+         swzExit(EXIT_FAILURE);
       }
       fprintf(fptr_interesults, "========= All blocks are reported here. ========== \n");
       fprintf(fptr_interesults, "--------Numerical gradient---------\n");
@@ -651,7 +651,7 @@ void InitializeForMinproblem_const(struct TSminpack_tag *minpack_ps, char *filen
          if (fscanf(fptr_sp, " %lf ", x_dv->v+_i) != 1)
          {
             printf("Error: optpackage.c/InitializeForMinproblem_const() -- cannot read the number from the file %s.  Check the data file", filename_sp);
-            exit(EXIT_FAILURE);
+            swzExit(EXIT_FAILURE);
          }
       x_dv->flag = V_DEF;
 

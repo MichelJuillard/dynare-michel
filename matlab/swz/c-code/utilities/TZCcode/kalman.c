@@ -186,7 +186,7 @@ void kalcvf_urw(TSkalcvfurw *kalcvfurw_ps, void *dummy_ps)
       workdenominv = 1.0/(sigmasq_fix*square(kalcvfurw_ps->z10_dv->v[0]) + VectorDotVector(&xt_sdv, workkxby1_dv));   //1/[sigma^2 + x_t' P_{t|t-1} x_t];
    else {
       printf(".../kalman.c/kalcvf_urw(): Have not got time to deal with kalcvfurw_ps->indx_tvsigmasq defined in kalman.h other than 0 or 1");
-      exit(EXIT_FAILURE);
+      swzExit(EXIT_FAILURE);
    }
 
 
@@ -218,7 +218,7 @@ void kalcvf_urw(TSkalcvfurw *kalcvfurw_ps, void *dummy_ps)
          workdenominv = 1.0/(sigmasq_fix*square(zbefore_sdv.v[0]) + VectorDotVector(&xt_sdv, workkxby1_dv));   //1/[sigma^2 + x_t' P_{t|t-1} x_t]
       else {
          printf(".../kalman.c/kalcvf_urw(): Have not got time to deal with kalcvfurw_ps->indx_tvsigmasq defined in kalman.h other than 0 or 1");
-         exit(EXIT_FAILURE);
+         swzExit(EXIT_FAILURE);
       }
       //--- Updating z_{t+1|t}.
       CopyVector0(&zafter_sdv, &zbefore_sdv);
@@ -780,7 +780,7 @@ double tz_kalfiltv(struct TSkalfiltv_tag *kalfiltv_ps)
          printf("Fatal error: tz_kalfiltv() in kalman.c: the system is non-stationary solutions\n"
                          "    and the initial conditions must be supplied by, say, input arguments");
          fflush(stdout);
-         exit( EXIT_FAILURE );
+         swzExit( EXIT_FAILURE );
       }
    }
    CopySubvector2matrix(zt_tm1_dm, 0, 0, z0_dv, 0, z0_dv->n);
@@ -1026,7 +1026,7 @@ double tz_logTimetCondLH_kalfiltv(int st, int inpt, struct TSkalfiltv_tag *kalfi
             fprintf(FPTR_DEBUG, "Fatal error: tz_logTimetCondLH_kalfiltv() in kalman.c: the system is non-stationary solutions\n"
                                 "   and thus the initial conditions must be supplied by, say, input arguments");
             fflush(FPTR_DEBUG);
-            exit( EXIT_FAILURE );
+            swzExit( EXIT_FAILURE );
         }
       }
       CopySubvector2matrix(zt_tm1_dm, 0, 0, z0_dv, 0, z0_dv->n);
