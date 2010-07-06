@@ -160,7 +160,7 @@ static int dw_PrintInt(FILE* f, void* element, char *format)
 {
   if(f==stdout)
     {
-      swz_fprintf_stdout(format ? format : "%d ",*((int*)element));
+      printf(format ? format : "%d ",*((int*)element));
       return 1;
     }
   else
@@ -171,7 +171,7 @@ static int dw_PrintDouble(FILE* f, void* element, char *format)
 {
   if(f==stdout)
     {
-      swz_fprintf_stdout(format ? format : "%lf ",*((double*)element));
+      printf(format ? format : "%lf ",*((double*)element));
       return 1;
     }
   else
@@ -182,7 +182,7 @@ static int dw_PrintFloat(FILE* f, void* element, char *format)
 {
   if(f==stdout)
     {
-      swz_fprintf_stdout(format ? format : "%f ",*((float*)element));
+      printf(format ? format : "%f ",*((float*)element));
       return 1;
     }
   else
@@ -193,7 +193,7 @@ static int dw_PrintChar(FILE* f, void* element, char *format)
 {
   if(f==stdout)
     {
-      swz_fprintf_stdout(format ? format : "%c ",*((char*)element));
+      printf(format ? format : "%c ",*((char*)element));
       return 1;
     }
   else
@@ -204,7 +204,7 @@ static int dw_PrintString(FILE* f, void* element, char *format)
 {
   if(f==stdout)
     {
-      swz_fprintf_stdout(format ? format : "%s\t",(char*)element);
+      printf(format ? format : "%s\t",(char*)element);
       return 1;
     }
   else
