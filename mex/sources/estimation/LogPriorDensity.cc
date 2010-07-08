@@ -24,7 +24,6 @@
 ///////////////////////////////////////////////////////////
 
 #include "LogPriorDensity.hh"
-
 LogPriorDensity::~LogPriorDensity()
 {
 };
@@ -38,10 +37,10 @@ double
 LogPriorDensity::compute(const Vector &ep)
 {
   assert(estParsDesc.estParams.size() == ep.getSize());
-
+  double logPriorDensity=0;
   for (size_t i = 0; i <  ep.getSize(); ++i)
     {
-      logPriorDensity += ((*(estParsDesc.estParams[i]).prior)).pdf(ep(i));
+      logPriorDensity += log(((*(estParsDesc.estParams[i]).prior)).pdf(ep(i)));
       if (std::isinf(abs(logPriorDensity)))
         return logPriorDensity;
     }

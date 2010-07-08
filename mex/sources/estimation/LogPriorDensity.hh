@@ -18,15 +18,9 @@ public:
   virtual ~LogPriorDensity();
 
   double compute(const Vector &estParams);
-  double
-  getLogPriorDensity()
-  {
-    return logPriorDensity;
-  };
   void computeNewParams(Vector &newParams);
 
 private:
-  double logPriorDensity;
   const EstimatedParametersDescription &estParsDesc;
 
 };

@@ -24,7 +24,7 @@
 
 #include "Vector.hh"
 #include "Matrix.hh"
-#include "LogLikelihoodMain.hh"
+#include "LogPosteriorDensity.hh"
 
 #include "mex.h"
 
@@ -32,8 +32,34 @@ void
 fillEstParamsInfo(const mxArray *estim_params_info, EstimatedParameter::pType type,
                   std::vector<EstimatedParameter> &estParamsInfo)
 {
+  // execute once only
+  static const mxArray *bayestopt_ = mexGetVariablePtr("global", "bayestopt_");
+  static const mxArray *bayestopt_ubp = mxGetField(bayestopt_, 0, "ub"); // upper bound
+  static const mxArray *bayestopt_lbp = mxGetField(bayestopt_, 0, "lb"); // lower bound
+  static const mxArray *bayestopt_p1p = mxGetField(bayestopt_, 0, "p1"); // prior mean
+  static const mxArray *bayestopt_p2p = mxGetField(bayestopt_, 0, "p2"); // prior standard deviation
+  static const mxArray *bayestopt_p3p = mxGetField(bayestopt_, 0, "p3"); // lower bound
+  static const mxArray *bayestopt_p4p = mxGetField(bayestopt_, 0, "p4"); // upper bound
+  static const mxArray *bayestopt_p6p = mxGetField(bayestopt_, 0, "p6"); // first hyper-parameter (\alpha for the BETA and GAMMA distributions, s for the INVERSE GAMMAs, expectation for the GAUSSIAN distribution, lower bound for the UNIFORM distribution).
+  static const mxArray *bayestopt_p7p = mxGetField(bayestopt_, 0, "p7"); // second hyper-parameter (\beta for the BETA and GAMMA distributions, \nu for the INVERSE GAMMAs, standard deviation for the GAUSSIAN distribution, upper bound for the UNIFORM distribution).
+  static const mxArray *bayestopt_jscalep = mxGetField(bayestopt_, 0, "jscale"); // MCMC jump scale
+
+  static const size_t bayestopt_size = mxGetM(bayestopt_);
+  static const VectorConstView bayestopt_ub(mxGetPr(bayestopt_ubp), bayestopt_size, 1);
+  static const VectorConstView bayestopt_lb(mxGetPr(bayestopt_lbp), bayestopt_size, 1);
+  static const VectorConstView bayestopt_p1(mxGetPr(bayestopt_p1p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p1");
+  static const VectorConstView bayestopt_p2(mxGetPr(bayestopt_p2p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p2");
+  static const VectorConstView bayestopt_p3(mxGetPr(bayestopt_p3p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p3");
+  static const VectorConstView bayestopt_p4(mxGetPr(bayestopt_p4p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p4");
+  static const VectorConstView bayestopt_p6(mxGetPr(bayestopt_p6p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p6");
+  static const VectorConstView bayestopt_p7(mxGetPr(bayestopt_p7p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p7");
+  static const VectorConstView bayestopt_jscale(mxGetPr(bayestopt_jscalep), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "jscale");
+
+  // loop processsing
   size_t m = mxGetM(estim_params_info), n = mxGetN(estim_params_info);
   MatrixConstView epi(mxGetPr(estim_params_info), m, n, m);
+  size_t bayestopt_count = estParamsInfo.size();
+
   for (size_t i = 0; i < m; i++)
     {
       size_t col = 0;
@@ -42,30 +68,31 @@ fillEstParamsInfo(const mxArray *estim_params_info, EstimatedParameter::pType ty
       if (type == EstimatedParameter::shock_Corr
           || type == EstimatedParameter::measureErr_Corr)
         id2 = (size_t) epi(i, col++) - 1;
-      col++; // Skip init_val
-      double low_bound = epi(i, col++);
-      double up_bound = epi(i, col++);
+      col++; // Skip init_val #2 or #3
+      double par_low_bound =  bayestopt_lb(bayestopt_count); col++; //#3 epi(i, col++);
+      double par_up_bound =  bayestopt_ub(bayestopt_count); col++; //#4 epi(i, col++);
       Prior::pShape shape = (Prior::pShape) epi(i, col++);
       double mean = epi(i, col++);
       double std = epi(i, col++);
-      double p3 = epi(i, col++);
-      double p4 = epi(i, col++);
+      double low_bound =  bayestopt_p3(bayestopt_count);
+      double up_bound =  bayestopt_p4(bayestopt_count);
+      double fhp =  bayestopt_p6(bayestopt_count); // double p3 = epi(i, col++);
+      double shp =  bayestopt_p7(bayestopt_count); // double p4 = epi(i, col++);
 
-      //      Prior *p = Prior::constructPrior(shape, mean, std, low_bound, up_bound, p3, p4);
-      Prior *p = NULL;
+      Prior *p = Prior::constructPrior(shape, mean, std, low_bound, up_bound, fhp, shp); //1.0,INFINITY);//p3, p4);
 
       // Only one subsample
       std::vector<size_t> subSampleIDs;
       subSampleIDs.push_back(0);
-
       estParamsInfo.push_back(EstimatedParameter(type, id1, id2, subSampleIDs,
-                                                 low_bound, up_bound, p));
+                                                 par_low_bound, par_up_bound, p));
+      bayestopt_count++;
     }
 }
 
 double
-loglikelihood(const VectorConstView &estParams, const MatrixConstView &data,
-              const std::string &mexext)
+logposterior(const VectorConstView &estParams, const MatrixConstView &data,
+             const std::string &mexext)
 {
   // Retrieve pointers to global variables
   const mxArray *M_ = mexGetVariablePtr("global", "M_");
@@ -77,7 +104,7 @@ loglikelihood(const VectorConstView &estParams, const MatrixConstView &data,
   char *fName = mxArrayToString(mxGetField(M_, 0, "fname"));
   std::string dynamicDllFile(fName);
   mxFree(fName);
-  dynamicDllFile += "_dynamic" + mexext;
+  dynamicDllFile += "_dynamic." + mexext;
 
   size_t n_endo = (size_t) *mxGetPr(mxGetField(M_, 0, "endo_nbr"));
   size_t n_exo = (size_t) *mxGetPr(mxGetField(M_, 0, "exo_nbr"));
@@ -89,6 +116,7 @@ loglikelihood(const VectorConstView &estParams, const MatrixConstView &data,
   MatrixConstView lli(mxGetPr(lli_mx), mxGetM(lli_mx), mxGetN(lli_mx), mxGetM(lli_mx));
   if (lli.getRows() != 3 || lli.getCols() != n_endo)
     mexErrMsgTxt("Incorrect lead/lag incidence matrix");
+
   for (size_t i = 0; i < n_endo; i++)
     {
       if (lli(0, i) == 0 && lli(2, i) == 0)
@@ -115,7 +143,7 @@ loglikelihood(const VectorConstView &estParams, const MatrixConstView &data,
 
   if (data.getRows() != n_varobs)
     mexErrMsgTxt("Data has not as many rows as there are observed variables");
-  
+
   std::vector<EstimationSubsample> estSubsamples;
   estSubsamples.push_back(EstimationSubsample(0, data.getCols() - 1));
 
@@ -133,10 +161,10 @@ loglikelihood(const VectorConstView &estParams, const MatrixConstView &data,
 
   EstimatedParametersDescription epd(estSubsamples, estParamsInfo);
 
-  // Allocate LogLikelihoodMain object
+  // Allocate LogPosteriorDensity object
   int info;
-  LogLikelihoodMain llm(dynamicDllFile, epd, n_endo, n_exo, zeta_fwrd, zeta_back, zeta_mixed, zeta_static,
-                        qz_criterium, varobs, riccati_tol, lyapunov_tol, info);
+  LogPosteriorDensity lpd(dynamicDllFile, epd, n_endo, n_exo, zeta_fwrd, zeta_back, zeta_mixed, zeta_static,
+      qz_criterium, varobs, riccati_tol, lyapunov_tol, info);
 
   // Construct arguments of compute() method
   Matrix steadyState(n_endo, 1);
@@ -155,17 +183,15 @@ loglikelihood(const VectorConstView &estParams, const MatrixConstView &data,
   else
     H = MatrixConstView(mxGetPr(mxGetField(M_, 0, "H")), n_varobs, n_varobs, 1);
 
-  // Compute the likelihood
-  double lik = llm.compute(steadyState, estParams2, deepParams, data, Q, H, 0, info);
+  // Compute the posterior
+  double logPD = lpd.compute(steadyState, estParams2, deepParams, data, Q, H, 0, info);
 
   // Cleanups
-  /*
   for (std::vector<EstimatedParameter>::iterator it = estParamsInfo.begin();
        it != estParamsInfo.end(); it++)
     delete it->prior;
-  */
 
-  return lik;
+  return logPD;
 }
 
 void
@@ -173,32 +199,33 @@ mexFunction(int nlhs, mxArray *plhs[],
             int nrhs, const mxArray *prhs[])
 {
   if (nrhs != 3)
-    mexErrMsgTxt("loglikelihood: exactly three arguments are required.");
+    mexErrMsgTxt("logposterior: exactly three arguments are required.");
   if (nlhs != 1)
-    mexErrMsgTxt("loglikelihood: exactly one return argument is required.");
+    mexErrMsgTxt("logposterior: exactly one return argument is required.");
 
   // Check and retrieve the arguments
 
   if (!mxIsDouble(prhs[0]) || mxGetN(prhs[0]) != 1)
-    mexErrMsgTxt("First argument must be a column vector of double-precision numbers");
+    mexErrMsgTxt("logposterior: First argument must be a column vector of double-precision numbers");
 
   VectorConstView estParams(mxGetPr(prhs[0]), mxGetM(prhs[0]), 1);
 
   if (!mxIsDouble(prhs[1]))
-    mexErrMsgTxt("Second argument must be a matrix of double-precision numbers");
+    mexErrMsgTxt("logposterior: Second argument must be a matrix of double-precision numbers");
 
   MatrixConstView data(mxGetPr(prhs[1]), mxGetM(prhs[1]), mxGetN(prhs[1]), mxGetM(prhs[1]));
 
   if (!mxIsChar(prhs[2]))
-    mexErrMsgTxt("Third argument must be a character string");
+    mexErrMsgTxt("logposterior: Third argument must be a character string");
 
   char *mexext_mx = mxArrayToString(prhs[2]);
-  std::string mexext(mexext_mx);
+  std::string
+  mexext(mexext_mx);
   mxFree(mexext_mx);
 
   // Compute and return the value
-  double lik = loglikelihood(estParams, data, mexext);
+  double lik = logposterior(estParams, data, mexext);
 
-  plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL); 
+  plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
   *mxGetPr(plhs[0]) = lik;
 }

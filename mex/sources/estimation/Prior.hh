@@ -153,7 +153,7 @@ public:
 };
 
 //  X ~ IG1(s,nu) if X = sqrt(Y) where Y ~ IG2(s,nu) and Y = inv(Z) with Z ~ G(nu/2,2/s) (Gamma distribution)
-// lpdfig1(x,s,n)= lpdfgam(1/(x*x),n/2,2/s)-2*log(x*x)
+// i.e. Dynare lpdfig1(x,s,n)= lpdfgam(1/(x*x),n/2,2/s)-2*log(x*x)+log(2*x)
 struct InvGamma1_Prior : public Prior
 {
 public:
@@ -175,7 +175,7 @@ public:
   {
     double scalled = ((x- lower_bound)*(x-lower_bound));
     if (x > lower_bound)
-      return boost::math::pdf(distribution, 1/scalled) / (scalled*scalled);
+      return (boost::math::pdf(distribution, 1/scalled) / (scalled*scalled))*2*(x-lower_bound);
     else
       return 0;
   };
@@ -187,6 +187,7 @@ public:
 };
 
 // If x~InvGamma(a,b) , then  1/x ~Gamma(a,1/b) distribution
+// i.e. Dynare lpdfig2(x*x,n,s) = lpdfgam(1/(x*x),s/2,2/n) - 2*log(x*x) 
 struct InvGamma2_Prior : public Prior
 {
 public:

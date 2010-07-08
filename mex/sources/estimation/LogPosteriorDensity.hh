@@ -39,7 +39,6 @@ class LogPosteriorDensity {
 private:
   LogPriorDensity logPriorDensity;
   LogLikelihoodMain logLikelihoodMain;
-  double logPosteriorDensity;
 
 public:
   virtual ~LogPosteriorDensity();
@@ -51,7 +50,6 @@ public:
   double compute(Matrix &steadyState, const Vector &estParams, Vector &deepParams,
                  const MatrixConstView &data, Matrix &Q, Matrix &H, size_t presampleStart, int &info);
   Vector&getLikVector();
-  double getLogPosteriorDensity();
 
 };
 
