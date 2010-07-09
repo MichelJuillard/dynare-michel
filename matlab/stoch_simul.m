@@ -54,10 +54,12 @@ end
 
 check_model;
 
+oo_.dr=set_state_space(dr,M_);
+
 if PI_PCL_solver
     [oo_.dr, info] = PCL_resol(oo_.steady_state,0);
 else
-    [oo_.dr, info] = resol(oo_.steady_state,0);
+    [oo_.dr, info] = resol(oo_.dr,oo_.steady_state,0);
 end
 
 if info(1)
