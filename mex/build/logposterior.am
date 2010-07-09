@@ -4,9 +4,9 @@ vpath %.hh $(top_srcdir)/../../sources/estimation $(top_srcdir)/../../sources/es
 CPPFLAGS += -I$(top_srcdir)/../../sources/estimation/libmat -I$(top_srcdir)/../../sources/estimation/utils $(BOOST_CPPFLAGS)
 LDFLAGS += $(BOOST_LDFLAGS)
 
-noinst_PROGRAMS = loglikelihood
+noinst_PROGRAMS = logposterior
 
-loglikelihood_LDADD = $(LIBADD_DLOPEN)
+logposterior_LDADD = $(LIBADD_DLOPEN)
 
 MAT_SRCS = \
 	Matrix.hh \
@@ -25,7 +25,7 @@ MAT_SRCS = \
 	VDVEigDecomposition.cc \
 	VDVEigDecomposition.hh
 
-nodist_loglikelihood_SOURCES = \
+nodist_logposterior_SOURCES = \
 	$(MAT_SRCS) \
 	DecisionRules.cc \
 	DecisionRules.hh \
@@ -46,11 +46,13 @@ nodist_loglikelihood_SOURCES = \
 	LogLikelihoodMain.hh \
 	LogLikelihoodMain.cc \
 	LogPosteriorDensity.cc \
+	LogPosteriorDensity.hh \
 	LogPriorDensity.cc \
+	LogPriorDensity.hh \
 	ModelSolution.cc \
 	ModelSolution.hh \
 	Prior.cc \
 	Prior.hh \
 	dynamic_dll.cc \
 	dynamic_dll.hh \
-	loglikelihood.cc
+	logposterior.cc

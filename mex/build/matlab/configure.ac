@@ -112,6 +112,6 @@ AC_CONFIG_FILES([Makefile
                  k_order_perturbation/Makefile
                  dynare_simul_/Makefile
                  swz/Makefile
-                 loglikelihood/Makefile])
+                 logposterior/Makefile])
 
 AC_OUTPUT
