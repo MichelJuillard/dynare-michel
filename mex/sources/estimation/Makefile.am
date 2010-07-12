@@ -21,15 +21,19 @@ EXTRA_DIST = \
 	InitializeKalmanFilter.hh \
 	KalmanFilter.cc \
 	KalmanFilter.hh \
-	LogLikelihoodSubSample.cc \
-	LogLikelihoodSubSample.hh \
 	LogLikelihoodMain.hh \
 	LogLikelihoodMain.cc \
+	LogLikelihoodSubSample.cc \
+	LogLikelihoodSubSample.hh \
+	logposterior.cc \
+	LogPosteriorDensity.cc \
+	LogPosteriorDensity.hh \
+	LogPriorDensity.cc \
+	LogPriorDensity.hh \
 	ModelSolution.cc \
 	ModelSolution.hh \
 	Prior.cc \
 	Prior.hh \
-	loglikelihood.cc \
 	utils/dynamic_dll.cc \
 	utils/dynamic_dll.hh \
 	utils/ts_exception.h
