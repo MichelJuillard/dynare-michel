@@ -22,7 +22,7 @@ mhm_spec_path=[swz_root '/mhm_specification'];
 %== Processing control
 %==========================================================================
 % 1 to use standalone, 0 to use mex
-options_.ms.standalone = 1;
+options_.ms.standalone = 0;
 
 %==========================================================================
 %== Output control
