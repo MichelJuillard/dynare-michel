@@ -172,7 +172,8 @@ extern "C" {
     mxFldp = mxGetField(M_, 0, "NNZDerivatives");
     dparams = (double *) mxGetData(mxFldp);
     Vector NNZD(dparams, (int) mxGetM(mxFldp));
-
+    if (NNZD[kOrder-1] == -1)
+      mexErrMsgTxt("The derivatives were not computed for the required order. Make sure that you used the right order option inside the stoch_simul command");
     const int jcols = nExog+nEndo+nsPred+nsForw; // Num of Jacobian columns
 
     mxFldp = mxGetField(M_, 0, "var_order_endo_names");
