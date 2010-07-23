@@ -27,7 +27,7 @@ Mem_Mngr::Mem_Mngr()
 void
 Mem_Mngr::Print_heap()
 {
-  int i;
+  unsigned int i;
   mexPrintf("i   :");
   for (i = 0; i < CHUNK_SIZE; i++)
     mexPrintf("%3d ", i);
@@ -61,7 +61,7 @@ Mem_Mngr::init_CHUNK_BLCK_SIZE(int u_count)
 NonZeroElem *
 Mem_Mngr::mxMalloc_NZE()
 {
-  long int i;
+  long unsigned int i;
   if (!Chunk_Stack.empty())           /*An unused block of memory available inside the heap*/
     {
       NonZeroElem *p1 = Chunk_Stack.back();
@@ -102,7 +102,7 @@ Mem_Mngr::mxMalloc_NZE()
 void
 Mem_Mngr::mxFree_NZE(void *pos)
 {
-  int i;
+  unsigned int i;
   size_t gap;
   for (i = 0; i < Nb_CHUNK; i++)
     {

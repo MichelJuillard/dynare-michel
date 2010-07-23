@@ -33,7 +33,10 @@ using namespace std;
 
 #ifdef _MSC_VER
 # include <limits>
-
+#include <boost/math/special_functions/erf.hpp>
+#define M_SQRT2 1.4142135623730950488016887242097
+#define M_PI 3.1415926535897932384626433832795
+#define erf(x) boost::math::erf(x)
 extern unsigned long _nan[2];
 extern double NAN;
 
@@ -100,18 +103,23 @@ class SparseMatrix
 {
 public:
   SparseMatrix();
-  int simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, bool cvg, int &iter, int minimal_solving_periods, int Block_number);
-  bool simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter, bool steady_state, int Block_number);
+  int simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, bool cvg, int &iter, int minimal_solving_periods, int Block_number, int stack_solve_algo);
+  bool simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter, bool steady_state, int Block_number, int solve_algo);
   void Direct_Simulate(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, int iter);
   void fixe_u(double **u, int u_count_int, int max_lag_plus_max_lead_plus_1);
-  void Read_SparseMatrix(string file_name, const int Size, int periods, int y_kmin, int y_kmax, bool steady_state, bool two_boundaries);
+  void Read_SparseMatrix(string file_name, const int Size, int periods, int y_kmin, int y_kmax, bool steady_state, bool two_boundaries, int stack_solve_algo, int solve_algo);
   void Read_file(string file_name, int periods, int u_size1, int y_size, int y_kmin, int y_kmax, int &nb_endo, int &u_count, int &u_count_init, double *u);
   double g0, gp0, glambda2, try_at_iteration;
+
 private:
-  void Init(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM);
-  void ShortInit(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM);
+  void Init_GE(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM);
+  void Init_Matlab_Sparse(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM, mxArray *A_m, mxArray *b_m);
+  void Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>, int> &IM, mxArray *A_m, mxArray *b_m);
   void Simple_Init(int it_, int y_kmin, int y_kmax, int Size, std::map<std::pair<std::pair<int, int>, int>, int> &IM);
-  void End(int Size);
+  void End_GE(int Size);
+  void Solve_Matlab_LU_UMFPack(mxArray* A_m, mxArray* b_m, int Size, double slowc_l);
+  void Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double slowc, int block);
+  void Solve_Matlab_BiCGStab(mxArray* A_m, mxArray* b_m, int Size, double slowc, int block);
   bool compare(int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, long int nop4,  int Size
 #ifdef PROFILER
                , long int *ndiv, long int *nsub
@@ -173,6 +181,8 @@ private:
 protected:
   int u_count_alloc, u_count_alloc_save;
   double *u, *y, *ya;
+  vector<double*> jac;
+  double *jcb;
   double res1, res2, max_res, max_res_idx;
   double slowc, slowc_save, prev_slowc_save, markowitz_c;
   int y_kmin, y_kmax, y_size, periods, y_decal;
@@ -184,6 +194,8 @@ protected:
   int restart;
   bool error_not_printed;
   double g_lambda1, g_lambda2, gp_0;
+  double lu_inc_tol;
+  bool reduced;
 };
 
 #endif

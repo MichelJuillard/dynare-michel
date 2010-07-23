@@ -43,7 +43,7 @@ if size(oo_.endo_simul,2) < M_.maximum_lag+M_.maximum_lead+options_.periods
         positions = [positions ; strmatch(chopped,M_.endo_names,'exact')];
     end
     Values=fscanf(fid,'%f',inf);
-    Values=reshape(Values,M_.endo_nbr,size(Values,1)/M_.endo_nbr);
+    Values=reshape(Values,M_.orig_endo_nbr,size(Values,1)/M_.orig_endo_nbr);
     oo_.endo_simul=Values(positions,:);
     fclose(fid);
 end

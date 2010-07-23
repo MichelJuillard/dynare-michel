@@ -38,7 +38,7 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
                          double *direction_arg, int y_size_arg,
                          int nb_row_x_arg, int nb_row_xd_arg, int periods_arg, int y_kmin_arg, int y_kmax_arg,
                          int maxit_arg_, double solve_tolf_arg, int size_of_direction_arg, double slowc_arg, int y_decal_arg, double markowitz_c_arg,
-                         string &filename_arg, int minimal_solving_periods_arg)
+                         string &filename_arg, int minimal_solving_periods_arg, int stack_solve_algo_arg, int solve_algo_arg)
 {
   params = params_arg;
   y = y_arg;
@@ -64,6 +64,8 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
   T = NULL;
   error_not_printed = true;
   minimal_solving_periods = minimal_solving_periods_arg;
+  stack_solve_algo = stack_solve_algo_arg;
+  solve_algo = solve_algo_arg;
 }
 
 string
@@ -105,7 +107,7 @@ Interpreter::add_underscore_to_fpe(string str)
 
 
 string
-Interpreter::get_variable(SymbolType variable_type, int variable_num)
+Interpreter::get_variable(SymbolType variable_type, unsigned int variable_num)
 {
   ostringstream res;
 #ifndef DEBUG_EX
@@ -364,6 +366,9 @@ Interpreter::print_expression(it_code_type it_code, bool evaluate)
               dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
               dvar3 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
               break;
+            default:
+              mexPrintf("Dérivatives %d not implemented yet\n", it_code->first);
+              mexErrMsgTxt("end of bytecode\n");
             }
           break;
         case FLDV:
@@ -1098,15 +1103,31 @@ Interpreter::print_expression(it_code_type it_code, bool evaluate)
 }
 
 void
-Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
+Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int size, bool steady_state)
 {
-  int var, lag = 0, op;
+  int var = 0, lag = 0, op;
+  unsigned int eq, pos_col;
   ostringstream tmp_out;
   double v1, v2, v3;
   bool go_on = true;
   double ll;
-
+  double rr;
+  double *jacob = NULL, *jacob_other_endo = NULL, *jacob_exo = NULL, *jacob_exo_det = NULL;
   EQN_block = block_num;
+#ifdef DEBUG
+  mexPrintf("compute_block_time\n");
+#endif
+  #ifndef DEBUG_EX
+  if (evaluate && !steady_state)
+    {
+      jacob = mxGetPr(jacobian_block[block_num]);
+      mexPrintf("jacobian_block[%d]=%x\n",block_num, jacobian_block[block_num]);
+      jacob_other_endo = mxGetPr(jacobian_other_endo_block[block_num]);
+      jacob_exo = mxGetPr(jacobian_exo_block[block_num]);
+      jacob_exo_det = mxGetPr(jacobian_det_exo_block[block_num]);
+    }
+  #endif
+
   //feclearexcept (FE_ALL_EXCEPT);
   while (go_on)
     {
@@ -1114,41 +1135,74 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
       switch (it_code->first)
         {
         case FNUMEXPR:
+#ifdef DEBUG
+          mexPrintf("FNUMEXPR\n");
+#endif
           it_code_expr = it_code;
           switch (((FNUMEXPR_ *) it_code->second)->get_expression_type())
             {
             case TemporaryTerm:
+#ifdef DEBUG
+              mexPrintf("TemporaryTerm\n");
+#endif
               EQN_type = TemporaryTerm;
               EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
               break;
             case ModelEquation:
+#ifdef DEBUG
+              mexPrintf("ModelEquation\n");
+#endif
               EQN_type = ModelEquation;
               EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
               break;
             case FirstEndoDerivative:
+#ifdef DEBUG
+              mexPrintf("FirstEndoDerivative\n");
+#endif
               EQN_type = FirstEndoDerivative;
               EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
               EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
               EQN_lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
               break;
+            case FirstOtherEndoDerivative:
+#ifdef DEBUG
+              mexPrintf("FirstOtherEndoDerivative\n");
+#endif
+              EQN_type = FirstOtherEndoDerivative;
+              EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
+              EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
+              EQN_lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
+              break;
             case FirstExoDerivative:
+#ifdef DEBUG
+              mexPrintf("FirstExoDerivative\n");
+#endif
               EQN_type = FirstExoDerivative;
               EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
               EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
               EQN_lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
               break;
             case FirstExodetDerivative:
+#ifdef DEBUG
+              mexPrintf("FirstExodetDerivative\n");
+#endif
               EQN_type = FirstExodetDerivative;
               EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
               EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
               EQN_lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
               break;
             case FirstParamDerivative:
+#ifdef DEBUG
+              mexPrintf("FirstParamDerivative\n");
+#endif
               EQN_type = FirstParamDerivative;
               EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
               EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
               break;
             case SecondEndoDerivative:
+#ifdef DEBUG
+              mexPrintf("SecondEndoDerivative\n");
+#endif
               EQN_type = SecondEndoDerivative;
               EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
               EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
@@ -1157,6 +1211,9 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
               EQN_lag2 = ((FNUMEXPR_ *) it_code->second)->get_lag2();
               break;
             case SecondExoDerivative:
+#ifdef DEBUG
+              mexPrintf("SecondExoDerivative\n");
+#endif
               EQN_type = SecondExoDerivative;
               EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
               EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
@@ -1165,6 +1222,9 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
               EQN_lag2 = ((FNUMEXPR_ *) it_code->second)->get_lag2();
               break;
             case SecondExodetDerivative:
+#ifdef DEBUG
+              mexPrintf("SecondExodetDerivative\n");
+#endif
               EQN_type = SecondExodetDerivative;
               EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
               EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
@@ -1173,12 +1233,18 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
               EQN_lag2 = ((FNUMEXPR_ *) it_code->second)->get_lag2();
               break;
             case SecondParamDerivative:
+#ifdef DEBUG
+              mexPrintf("SecondParamDerivative\n");
+#endif
               EQN_type = SecondParamDerivative;
               EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
               EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
               EQN_dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
               break;
             case ThirdEndoDerivative:
+#ifdef DEBUG
+              mexPrintf("ThirdEndoDerivative\n");
+#endif
               EQN_type = ThirdEndoDerivative;
               EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
               EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
@@ -1189,6 +1255,9 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
               EQN_lag3 = ((FNUMEXPR_ *) it_code->second)->get_lag3();
               break;
             case ThirdExoDerivative:
+#ifdef DEBUG
+              mexPrintf("ThirdExoDerivative\n");
+#endif
               EQN_type = ThirdExoDerivative;
               EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
               EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
@@ -1199,6 +1268,9 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
               EQN_lag3 = ((FNUMEXPR_ *) it_code->second)->get_lag3();
               break;
             case ThirdExodetDerivative:
+#ifdef DEBUG
+              mexPrintf("ThirdExodetDerivative\n");
+#endif
               EQN_type = ThirdExodetDerivative;
               EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
               EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
@@ -1209,6 +1281,9 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
               EQN_lag3 = ((FNUMEXPR_ *) it_code->second)->get_lag3();
               break;
             case ThirdParamDerivative:
+#ifdef DEBUG
+              mexPrintf("ThirdParamDerivative\n");
+#endif
               EQN_type = ThirdParamDerivative;
               EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
               EQN_dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
@@ -1223,14 +1298,18 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
             {
             case eParameter:
               var = ((FLDV_ *) it_code->second)->get_pos();
-              Stack.push(params[var]);
 #ifdef DEBUG
+              mexPrintf("FLDV Param[var=%d]\n",var);
               tmp_out << " params[" << var << "](" << params[var] << ")";
 #endif
+              Stack.push(params[var]);
               break;
             case eEndogenous:
               var = ((FLDV_ *) it_code->second)->get_pos();
               lag = ((FLDV_ *) it_code->second)->get_lead_lag();
+#ifdef DEBUG
+              mexPrintf("FLDV y[var=%d, lag=%d, it_=%d], y_size=%d evaluate=%d\n",var, lag, it_, y_size, evaluate);
+#endif
               if (evaluate)
                 Stack.push(ya[(it_+lag)*y_size+var]);
               else
@@ -1242,10 +1321,11 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
             case eExogenous:
               var = ((FLDV_ *) it_code->second)->get_pos();
               lag = ((FLDV_ *) it_code->second)->get_lead_lag();
-              Stack.push(x[it_+lag+var*nb_row_x]);
 #ifdef DEBUG
+              mexPrintf("FLDV x[var=%d, lag=%d, it_=%d], nb_row_x=%d evaluate=%d\n",var, lag, it_, nb_row_x, evaluate);
               tmp_out << " x[" << it_+lag << ", " << var << "](" << x[it_+lag+var*nb_row_x] << ")";
 #endif
+              Stack.push(x[it_+lag+var*nb_row_x]);
               break;
             case eExogenousDet:
               var = ((FLDV_ *) it_code->second)->get_pos();
@@ -1268,18 +1348,16 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
             {
             case eParameter:
               var = ((FLDSV_ *) it_code->second)->get_pos();
-              Stack.push(params[var]);
 #ifdef DEBUG
+              mexPrintf("FLDSV Param[var=%d]\n",var);
               tmp_out << " params[" << var << "](" << params[var] << ")";
 #endif
+              Stack.push(params[var]);
               break;
             case eEndogenous:
               var = ((FLDSV_ *) it_code->second)->get_pos();
-              if (evaluate)
-                Stack.push(ya[var]);
-              else
-                Stack.push(y[var]);
 #ifdef DEBUG
+              mexPrintf("FLDSV y[var=%d]\n",var);
               tmp_out << " y[" << var << "](" << y[var] << ")";
               if(var<0 || var>= y_size)
                 {
@@ -1287,16 +1365,24 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
                   mexErrMsgTxt("End of bytecode");
                 }
 #endif
+              if (evaluate)
+                Stack.push(ya[var]);
+              else
+                Stack.push(y[var]);
               break;
             case eExogenous:
               var = ((FLDSV_ *) it_code->second)->get_pos();
-              Stack.push(x[var]);
 #ifdef DEBUG
+              mexPrintf("FLDSV x[var=%d]\n",var);
               tmp_out << " x[" << var << "](" << x[var] << ")";
 #endif
+              Stack.push(x[var]);
               break;
             case eExogenousDet:
               var = ((FLDSV_ *) it_code->second)->get_pos();
+#ifdef DEBUG
+              mexPrintf("FLDSV xd[var=%d]\n",var);
+#endif
               Stack.push(x[var]);
               break;
             case eModelLocalVariable:
@@ -1316,28 +1402,28 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
             case eParameter:
               var = ((FLDVS_ *) it_code->second)->get_pos();
 #ifdef DEBUG
-              mexPrintf("params[%d]=%f\n", var, params[var]);
+              mexPrintf("params[%d]\n", var);
 #endif
               Stack.push(params[var]);
               break;
             case eEndogenous:
               var = ((FLDVS_ *) it_code->second)->get_pos();
 #ifdef DEBUG
-              mexPrintf(" steady_y[%d]=%f\n", var, steady_y[var]);
+              mexPrintf("FLDVS steady_y[%d]\n", var);
 #endif
               Stack.push(steady_y[var]);
               break;
             case eExogenous:
               var = ((FLDVS_ *) it_code->second)->get_pos();
 #ifdef DEBUG
-              mexPrintf(" x[%d] = %f\n", var, x[var]);
+              mexPrintf("FLDVS x[%d] \n", var);
 #endif
               Stack.push(x[var]);
               break;
             case eExogenousDet:
               var = ((FLDVS_ *) it_code->second)->get_pos();
 #ifdef DEBUG
-              mexPrintf(" xd[%d] = %f\n", var, x[var]);
+              mexPrintf("FLDVS xd[%d]\n", var);
 #endif
               Stack.push(x[var]);
               break;
@@ -1364,6 +1450,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
           //load a temporary variable in the processor
           var = ((FLDST_ *) it_code->second)->get_pos();
 #ifdef DEBUG
+          mexPrintf("FLDST T[%d]\n",var);
           tmp_out << " T[" << var << "](" << T[var] << ")";
 #endif
           Stack.push(T[var]);
@@ -1373,6 +1460,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
           var = ((FLDU_ *) it_code->second)->get_pos();
           var += Per_u_;
 #ifdef DEBUG
+          mexPrintf("FLDU u[%d]\n",var);
           tmp_out << " u[" << var << "](" << u[var] << ")";
 #endif
           Stack.push(u[var]);
@@ -1381,6 +1469,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
           //load u variable in the processor
           var = ((FLDSU_ *) it_code->second)->get_pos();
 #ifdef DEBUG
+          mexPrintf("FLDSU u[%d]\n",var);
           tmp_out << " u[" << var << "](" << u[var] << ")";
 #endif
           Stack.push(u[var]);
@@ -1388,10 +1477,16 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
         case FLDR:
           //load u variable in the processor
           var = ((FLDR_ *) it_code->second)->get_pos();
+#ifdef DEBUG
+          mexPrintf("FLDR r[%d]\n",var);
+#endif
           Stack.push(r[var]);
           break;
         case FLDZ:
           //load 0 in the processor
+#ifdef DEBUG
+          mexPrintf("FLDZ\n");
+#endif
           Stack.push(0.0);
 #ifdef DEBUG
           tmp_out << " 0";
@@ -1401,6 +1496,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
           //load a numerical constant in the processor
           ll = ((FLDC_ *) it_code->second)->get_value();
 #ifdef DEBUG
+          mexPrintf("FLDC = %f\n",ll);
           tmp_out << " " << ll;
 #endif
 
@@ -1412,6 +1508,9 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
             {
             case eParameter:
               var = ((FSTPV_ *) it_code->second)->get_pos();
+#ifdef DEBUG
+              mexPrintf("FSTPV params[%d]\n",var);
+#endif
               params[var] = Stack.top();
               Stack.pop();
               break;
@@ -1559,6 +1658,63 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
 #endif
           Stack.pop();
           break;
+
+        case FSTPG3:
+          //store in derivative (g) variable from the processor
+#ifdef DEBUG
+          mexPrintf("FSTPG3\n");
+          mexEvalString("drawnow;");
+#endif
+          rr = Stack.top();
+          switch(EQN_type)
+            {
+            case FirstEndoDerivative:
+              eq = ((FSTPG3_ *) it_code->second)->get_row();
+              var = ((FSTPG3_ *) it_code->second)->get_col();
+              lag = ((FSTPG3_ *) it_code->second)->get_lag();
+              pos_col = ((FSTPG3_ *) it_code->second)->get_col_pos();
+              mexPrintf("jacob[%d(size=%d*pos_col=%d + eq=%d )]=%f\n",eq + size*pos_col, size, pos_col, eq, rr);
+              jacob[eq + size*pos_col] = rr;
+              break;
+            case FirstOtherEndoDerivative:
+              //eq = ((FSTPG3_ *) it_code->second)->get_row();
+              eq = EQN_equation;
+              var = ((FSTPG3_ *) it_code->second)->get_col();
+              lag = ((FSTPG3_ *) it_code->second)->get_lag();
+              pos_col = ((FSTPG3_ *) it_code->second)->get_col_pos();
+              mexPrintf("jacob_other_endo[%d(size=%d*pos_col=%d + eq=%d)]=%f\n",size*pos_col + eq, size, pos_col, eq, rr);
+              jacob_other_endo[eq + size*pos_col] = rr;
+              break;
+            case FirstExoDerivative:
+              //eq = ((FSTPG3_ *) it_code->second)->get_row();
+              eq = EQN_equation;
+              var = ((FSTPG3_ *) it_code->second)->get_col();
+              lag = ((FSTPG3_ *) it_code->second)->get_lag();
+              pos_col = ((FSTPG3_ *) it_code->second)->get_col_pos();
+              mexPrintf("jacob_exo[%d(size=%d*pos_col=%dr + eq=%d)]=%f\n",size*pos_col+eq, size, pos_col, eq, rr);
+              jacob_exo[eq + size*pos_col] = rr;
+              break;
+            case FirstExodetDerivative:
+              //eq = ((FSTPG3_ *) it_code->second)->get_row();
+              eq = EQN_equation;
+              var = ((FSTPG3_ *) it_code->second)->get_col();
+              lag = ((FSTPG3_ *) it_code->second)->get_lag();
+              pos_col = ((FSTPG3_ *) it_code->second)->get_col_pos();
+              mexPrintf("jacob_exo_det[%d(size=%d*pos_col=%dr + eq=%d)]=%f\n",size*pos_col+eq, size, pos_col, eq, rr);
+              jacob_exo_det[eq + size*pos_col] = rr;
+              break;
+            default:
+              mexPrintf("Variable %d not used yet\n", EQN_type);
+              mexErrMsgTxt("end of bytecode\n");
+            }
+#ifdef DEBUG
+          tmp_out << "=>";
+          mexPrintf(" g1[%d](%f)=%s\n", var, g1[var], tmp_out.str().c_str());
+          tmp_out.str("");
+#endif
+          Stack.pop();
+          break;
+
         case FBINARY:
           op = ((FBINARY_ *) it_code->second)->get_op_type();
           v2 = Stack.top();
@@ -1691,7 +1847,6 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
               Stack.push(log1(v1, evaluate));
               if (isnan(res1))
                 go_on = false;
-
 #ifdef DEBUG
               tmp_out << " |log(" << v1 << ")|";
 #endif
@@ -1808,10 +1963,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
           switch (op)
             {
               case oNormcdf:
-#ifndef _MSC_VER
-                //mexPrintf("normcdf(v1=%f, v2=%f, v3=%f)=%f\n", v1, v2, v3, 0.5*(1+erf((v1-v2)/v3/M_SQRT2)));
-                Stack.push(0.5*(1+erf((v1-v2)/v3/M_SQRT2)));
-# ifdef DEBUG
+#ifndef _MSC_VER                Stack.push(0.5*(1+erf((v1-v2)/v3/M_SQRT2)));# ifdef DEBUG
                 tmp_out << " |normcdf(" << v1 << ", " << v2 << ", " << v3 << ")|";
 # endif
 #else
@@ -1837,9 +1989,29 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
           break;
         case FENDBLOCK:
           //it's the block end
+#ifdef DEBUG
+          mexPrintf("FENDBLOCK\n");
+#endif
           go_on = false;
           break;
         case FENDEQU:
+          break;
+        case FJMPIFEVAL:
+          if (evaluate)
+            {
+#ifdef DEBUG
+              mexPrintf("FJMPIFEVAL length=%d\n",((FJMPIFEVAL_ *) it_code->second)->get_pos());
+              mexEvalString("drawnow;");
+#endif
+              it_code += ((FJMPIFEVAL_ *) it_code->second)->get_pos()/* - 1*/;
+            }
+          break;
+        case FJMP:
+#ifdef DEBUG
+          mexPrintf("FJMP length=%d\n",((FJMP_ *) it_code->second)->get_pos());
+          mexEvalString("drawnow;");
+#endif
+          it_code += ((FJMP_ *) it_code->second)->get_pos() /*- 1 */;
           break;
         case FOK:
           op = ((FOK_ *) it_code->second)->get_arg();
@@ -1856,18 +2028,23 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num)
         }
       it_code++;
     }
+#ifdef DEBUG
+  mexPrintf("==> end of compute_block_time Block = %d\n",block_num);
+  mexEvalString("drawnow;");
+#endif
 }
 
 void
 Interpreter::evaluate_a_block(const int size, const int type, string bin_basename, bool steady_state, int block_num,
-                              const bool is_linear, const int symbol_table_endo_nbr, const int Block_List_Max_Lag, const int Block_List_Max_Lead, const int u_count_int)
+                              const bool is_linear, const int symbol_table_endo_nbr, const int Block_List_Max_Lag,
+                              const int Block_List_Max_Lead, const int u_count_int)
 {
   it_code_type begining;
   switch (type)
     {
     case EVALUATE_FORWARD:
       if (steady_state)
-        compute_block_time(0, true, block_num);
+        compute_block_time(0, true, block_num, size, steady_state);
       else
         {
           begining = it_code;
@@ -1875,7 +2052,7 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
             {
               it_code = begining;
               Per_y_ = it_*y_size;
-              compute_block_time(0, true, block_num);
+              compute_block_time(0, true, block_num, size, steady_state);
             }
         }
       break;
@@ -1884,7 +2061,7 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
       r = (double *) mxMalloc(size*sizeof(double));
       if (steady_state)
         {
-          compute_block_time(0, true, block_num);
+          compute_block_time(0, true, block_num, size, steady_state);
           for (int j = 0; j < size; j++)
             y[Block_Contain[j].Variable] += r[j];
         }
@@ -1894,9 +2071,8 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
           for (it_ = y_kmin; it_ < periods+y_kmin; it_++)
             {
               it_code = begining;
-              it_code = begining;
               Per_y_ = it_*y_size;
-              compute_block_time(0, true, block_num);
+              compute_block_time(0, true, block_num, size, steady_state);
               for (int j = 0; j < size; j++)
                 y[it_*y_size+Block_Contain[j].Variable] += r[j];
             }
@@ -1906,11 +2082,11 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
       break;
     case SOLVE_FORWARD_COMPLETE:
       fixe_u(&u, u_count_int, u_count_int);
-      Read_SparseMatrix(bin_basename, size, 1, 0, 0, steady_state, false);
+      Read_SparseMatrix(bin_basename, size, 1, 0, 0, steady_state, false, stack_solve_algo, solve_algo);
       r = (double *) mxMalloc(size*sizeof(double));
       if (steady_state)
         {
-          compute_block_time(0, true, block_num);
+          compute_block_time(0, true, block_num, size, steady_state);
           for (int j = 0; j < size; j++)
             y[Block_Contain[j].Variable] += r[j];
         }
@@ -1921,7 +2097,7 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
             {
               it_code = begining;
               Per_y_ = it_*y_size;
-              compute_block_time(0, true, block_num);
+              compute_block_time(0, true, block_num, size, steady_state);
               for (int j = 0; j < size; j++)
                 y[it_*y_size+Block_Contain[j].Variable] += r[j];
             }
@@ -1930,7 +2106,7 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
       break;
     case EVALUATE_BACKWARD:
       if (steady_state)
-        compute_block_time(0, true, block_num);
+        compute_block_time(0, true, block_num, size, steady_state);
       else
         {
           begining = it_code;
@@ -1938,7 +2114,7 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
             {
               it_code = begining;
               Per_y_ = it_*y_size;
-              compute_block_time(0, true, block_num);
+              compute_block_time(0, true, block_num, size, steady_state);
             }
         }
       break;
@@ -1947,7 +2123,7 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
       r = (double *) mxMalloc(size*sizeof(double));
       if (steady_state)
         {
-          compute_block_time(0, true, block_num);
+          compute_block_time(0, true, block_num, size, steady_state);
           for (int j = 0; j < size; j++)
             y[Block_Contain[j].Variable] += r[j];
         }
@@ -1958,7 +2134,7 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
             {
               it_code = begining;
               Per_y_ = it_*y_size;
-              compute_block_time(0, true, block_num);
+              compute_block_time(0, true, block_num, size, steady_state);
               for (int j = 0; j < size; j++)
                 y[it_*y_size+Block_Contain[j].Variable] += r[j];
             }
@@ -1968,11 +2144,11 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
       break;
     case SOLVE_BACKWARD_COMPLETE:
       fixe_u(&u, u_count_int, u_count_int);
-      Read_SparseMatrix(bin_basename, size, 1, 0, 0, steady_state, false);
+      Read_SparseMatrix(bin_basename, size, 1, 0, 0, steady_state, false, stack_solve_algo, solve_algo);
       r = (double *) mxMalloc(size*sizeof(double));
       if (steady_state)
         {
-          compute_block_time(0, true, block_num);
+          compute_block_time(0, true, block_num, size, steady_state);
           for (int j = 0; j < size; j++)
             y[Block_Contain[j].Variable] += r[j];
         }
@@ -1983,7 +2159,7 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
             {
               it_code = begining;
               Per_y_ = it_*y_size;
-              compute_block_time(0, true, block_num);
+              compute_block_time(0, true, block_num, size, steady_state);
               for (int j = 0; j < size; j++)
                 y[it_*y_size+Block_Contain[j].Variable] += r[j];
             }
@@ -1993,7 +2169,7 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
     case SOLVE_TWO_BOUNDARIES_SIMPLE:
     case SOLVE_TWO_BOUNDARIES_COMPLETE:
       fixe_u(&u, u_count_int, u_count_int);
-      Read_SparseMatrix(bin_basename, size, periods, y_kmin, y_kmax, steady_state, true);
+      Read_SparseMatrix(bin_basename, size, periods, y_kmin, y_kmax, steady_state, true, stack_solve_algo, solve_algo);
       u_count = u_count_int*(periods+y_kmax+y_kmin);
       r = (double *) mxMalloc(size*sizeof(double));
       begining = it_code;
@@ -2002,7 +2178,7 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
           Per_u_ = (it_-y_kmin)*u_count_int;
           Per_y_ = it_*y_size;
           it_code = begining;
-          compute_block_time(Per_u_, true, block_num);
+          compute_block_time(Per_u_, true, block_num, size, steady_state);
           for (int j = 0; j < size; j++)
             y[it_*y_size+Block_Contain[j].Variable] += r[j];
         }
@@ -2021,11 +2197,18 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
   int giter;
   bool result = true;
   double *y_save;
+  res1 = 0;
+#ifdef DEBUG
+  mexPrintf("simulate_a_block\n");
+#endif
   switch (type)
     {
     case EVALUATE_FORWARD:
+#ifdef DEBUG
+      mexPrintf("EVALUATE_FORWARD\n");
+#endif
       if (steady_state)
-        compute_block_time(0, false, block_num);
+        compute_block_time(0, false, block_num, size, steady_state);
       else
         {
           begining = it_code;
@@ -2033,13 +2216,16 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
             {
               it_code = begining;
               Per_y_ = it_*y_size;
-              compute_block_time(0, false, block_num);
+              compute_block_time(0, false, block_num, size, steady_state);
             }
         }
       break;
     case EVALUATE_BACKWARD:
+#ifdef DEBUG
+      mexPrintf("EVALUATE_BACKWARD\n");
+#endif
       if (steady_state)
-        compute_block_time(0, false, block_num);
+        compute_block_time(0, false, block_num, size, steady_state);
       else
         {
           begining = it_code;
@@ -2047,11 +2233,14 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
             {
               it_code = begining;
               Per_y_ = it_*y_size;
-              compute_block_time(0, false, block_num);
+              compute_block_time(0, false, block_num, size, steady_state);
             }
         }
       break;
     case SOLVE_FORWARD_SIMPLE:
+#ifdef DEBUG
+      mexPrintf("SOLVE_FORWARD_SIMPLE size=%d\n",size);
+#endif
       g1 = (double *) mxMalloc(size*size*sizeof(double));
       r = (double *) mxMalloc(size*sizeof(double));
       begining = it_code;
@@ -2063,7 +2252,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
             {
               it_code = begining;
               Per_y_ = it_*y_size;
-              compute_block_time(0, false, block_num);
+              compute_block_time(0, false, block_num, size, steady_state);
               double rr;
               rr = r[0];
               cvg = (fabs(rr) < solve_tolf);
@@ -2099,7 +2288,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 {
                   it_code = begining;
                   Per_y_ = it_*y_size;
-                  compute_block_time(0, false, block_num);
+                  compute_block_time(0, false, block_num, size, steady_state);
                   double rr;
                   if (fabs(1+y[Per_y_+Block_Contain[0].Variable]) > eps)
                     rr = r[0]/(1+y[Per_y_+Block_Contain[0].Variable]);
@@ -2131,6 +2320,9 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
       mxFree(r);
       break;
     case SOLVE_BACKWARD_SIMPLE:
+#ifdef DEBUG
+      mexPrintf("SOLVE_BACKWARD_SIMPLE\n");
+#endif
       g1 = (double *) mxMalloc(size*size*sizeof(double));
       r = (double *) mxMalloc(size*sizeof(double));
       begining = it_code;
@@ -2142,7 +2334,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
             {
               it_code = begining;
               Per_y_ = it_*y_size;
-              compute_block_time(0, false, block_num);
+              compute_block_time(0, false, block_num, size, steady_state);
               double rr;
               rr = r[0];
               cvg = (fabs(rr) < solve_tolf);
@@ -2177,7 +2369,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 {
                   it_code = begining;
                   Per_y_ = it_*y_size;
-                  compute_block_time(0, false, block_num);
+                  compute_block_time(0, false, block_num, size, steady_state);
                   double rr;
                   if (fabs(1+y[Per_y_+Block_Contain[0].Variable]) > eps)
                     rr = r[0]/(1+y[Per_y_+Block_Contain[0].Variable]);
@@ -2209,8 +2401,11 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
       mxFree(r);
       break;
     case SOLVE_FORWARD_COMPLETE:
+#ifdef DEBUG
+      mexPrintf("SOLVE_FORWARD_COMPLETE\n");
+#endif
       fixe_u(&u, u_count_int, u_count_int);
-      Read_SparseMatrix(bin_basename, size, 1, 0, 0, steady_state, false);
+      Read_SparseMatrix(bin_basename, size, 1, 0, 0, steady_state, false, stack_solve_algo, solve_algo);
       g1 = (double *) mxMalloc(size*size*sizeof(double));
       r = (double *) mxMalloc(size*sizeof(double));
       begining = it_code;
@@ -2231,7 +2426,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   res2 = 0;
                   res1 = 0;
                   max_res = 0;
-                  compute_block_time(0, false, block_num);
+                  compute_block_time(0, false, block_num, size, steady_state);
                   if (!(isnan(res1) || isinf(res1)))
                     {
                       for (i = 0; i < size; i++)
@@ -2253,7 +2448,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   if (cvg)
                     continue;
                   int prev_iter = iter;
-                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number);
+                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number, solve_algo);
                   iter++;
                   if (iter > prev_iter)
                     {
@@ -2273,11 +2468,14 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               it_code = begining;
               Per_y_ = it_*y_size;
               iter = 0;
-              res1 = res2 = max_res = 0; max_res_idx = 0;
+              res1 = 0;
+              res2 = 0;
+              max_res = 0;
+              max_res_idx = 0;
               error_not_printed = true;
-              compute_block_time(0, false, block_num);
+              compute_block_time(0, false, block_num, size, steady_state);
               cvg = false;
-              result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number);
+              result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number, solve_algo);
               if (!result)
                 {
                   mexPrintf("Convergence not achieved in block %d\n", Block_Count);
@@ -2304,7 +2502,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                       res2 = 0;
                       res1 = 0;
                       max_res = 0;
-                      compute_block_time(0, false, block_num);
+                      compute_block_time(0, false, block_num, size, steady_state);
                       if (!(isnan(res1) || isinf(res1)))
                         {
                           for (i = 0; i < size; i++)
@@ -2329,7 +2527,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                       if (cvg)
                         continue;
                       int prev_iter = iter;
-                      result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, EQN_block_number);
+                      result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, EQN_block_number, solve_algo);
                       iter++;
                       if (iter > prev_iter)
                         {
@@ -2352,11 +2550,13 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   it_code = begining;
                   Per_y_ = it_*y_size;
                   iter = 0;
-                  res1 = res2 = max_res = 0; max_res_idx = 0;
+                  res1 = 0;
+                  res2 = 0;
+                  max_res = 0; max_res_idx = 0;
                   error_not_printed = true;
-                  compute_block_time(0, false, block_num);
+                  compute_block_time(0, false, block_num, size, steady_state);
                   cvg = false;
-                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, EQN_block_number);
+                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, EQN_block_number, solve_algo);
                 }
             }
         }
@@ -2368,8 +2568,11 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
       mxFree(u);
       break;
     case SOLVE_BACKWARD_COMPLETE:
+#ifdef DEBUG
+      mexPrintf("SOLVE_BACKWARD_COMPLETE\n");
+#endif
       fixe_u(&u, u_count_int, u_count_int);
-      Read_SparseMatrix(bin_basename, size, 1, 0, 0, steady_state, false);
+      Read_SparseMatrix(bin_basename, size, 1, 0, 0, steady_state, false, stack_solve_algo, solve_algo);
       g1 = (double *) mxMalloc(size*size*sizeof(double));
       r = (double *) mxMalloc(size*sizeof(double));
       begining = it_code;
@@ -2389,7 +2592,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   res2 = 0;
                   res1 = 0;
                   max_res = 0;
-                  compute_block_time(0, false, block_num);
+                  compute_block_time(0, false, block_num, size, steady_state);
                   if (!(isnan(res1) || isinf(res1)))
                     {
                       for (i = 0; i < size; i++)
@@ -2411,7 +2614,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   if (cvg)
                     continue;
                   int prev_iter = iter;
-                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number);
+                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number, solve_algo);
                   iter++;
                   if (iter > prev_iter)
                     {
@@ -2431,11 +2634,13 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               it_code = begining;
               Per_y_ = it_*y_size;
               iter = 0;
-              res1 = res2 = max_res = 0; max_res_idx = 0;
+              res1 = 0;
+              res2 = 0;
+              max_res = 0; max_res_idx = 0;
               error_not_printed = true;
-              compute_block_time(0, false, block_num);
+              compute_block_time(0, false, block_num, size, steady_state);
               cvg = false;
-              result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number);
+              result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number, solve_algo);
               if (!result)
                 {
                   mexPrintf("Convergence not achieved in block %d\n", Block_Count);
@@ -2462,7 +2667,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                       res2 = 0;
                       res1 = 0;
                       max_res = 0;
-                      compute_block_time(0, false, block_num);
+                      compute_block_time(0, false, block_num, size, steady_state);
                       if (!(isnan(res1) || isinf(res1)))
                         {
                           for (i = 0; i < size; i++)
@@ -2487,7 +2692,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                       if (cvg)
                         continue;
                       int prev_iter = iter;
-                      result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, EQN_block_number);
+                      result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, EQN_block_number, solve_algo);
                       iter++;
                       if (iter > prev_iter)
                         {
@@ -2510,9 +2715,9 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   it_code = begining;
                   Per_y_ = it_*y_size;
                   error_not_printed = true;
-                  compute_block_time(0, false, block_num);
+                  compute_block_time(0, false, block_num, size, steady_state);
                   cvg = false;
-                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, EQN_block_number);
+                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, EQN_block_number, solve_algo);
                 }
             }
         }
@@ -2525,13 +2730,16 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
       break;
     case SOLVE_TWO_BOUNDARIES_SIMPLE:
     case SOLVE_TWO_BOUNDARIES_COMPLETE:
+#ifdef DEBUG
+      mexPrintf("SOLVE_TWO_BOUNDARIES\n");
+#endif
       if (steady_state)
         {
           mexPrintf("SOLVE_TWO_BOUNDARIES in a steady state model: impossible case\n");
           return false;
         }
       fixe_u(&u, u_count_int, u_count_int);
-      Read_SparseMatrix(bin_basename, size, periods, y_kmin, y_kmax, steady_state, true);
+      Read_SparseMatrix(bin_basename, size, periods, y_kmin, y_kmax, steady_state, true, stack_solve_algo, solve_algo);
       u_count = u_count_int*(periods+y_kmax+y_kmin);
       r = (double *) mxMalloc(size*sizeof(double));
       y_save = (double *) mxMalloc(y_size*sizeof(double)*(periods+y_kmax+y_kmin));
@@ -2560,7 +2768,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   Per_y_ = it_*y_size;
                   it_code = begining;
                   error_not_printed = true;
-                  compute_block_time(Per_u_, false, block_num);
+                  compute_block_time(Per_u_, false, block_num, size, steady_state);
                   if (isnan(res1) || isinf(res1))
                     {
                       memcpy(y, y_save, y_size*sizeof(double)*(periods+y_kmax+y_kmin));
@@ -2588,7 +2796,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 cvg = (max_res < solve_tolf);
               u_count = u_count_saved;
               int prev_iter = iter;
-              simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods, EQN_block_number);
+              simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods, EQN_block_number, stack_solve_algo);
               iter++;
               if (iter > prev_iter)
                 {
@@ -2605,13 +2813,15 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
         }
       else
         {
-          res1 = res2 = max_res = 0; max_res_idx = 0;
+          res1 = 0;
+          res2 = 0;
+          max_res = 0; max_res_idx = 0;
           for (it_ = y_kmin; it_ < periods+y_kmin; it_++)
             {
               Per_u_ = (it_-y_kmin)*u_count_int;
               Per_y_ = it_*y_size;
               it_code = begining;
-              compute_block_time(Per_u_, false, block_num);
+              compute_block_time(Per_u_, false, block_num, size, steady_state);
               for (i = 0; i < size; i++)
                 {
                   double rr;
@@ -2626,7 +2836,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 }
             }
           cvg = false;
-          simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods, EQN_block_number);
+          simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods, EQN_block_number, stack_solve_algo);
         }
       mxFree(r);
       mxFree(y_save);
@@ -2644,7 +2854,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
 }
 
 bool
-Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_state, bool evaluate)
+Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_state, bool evaluate, bool block, int &nb_blocks)
 {
 
   bool result = true;
@@ -2686,8 +2896,23 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
             Block_Contain = fb->get_Block_Contain();
             it_code++;
             if (evaluate)
-              evaluate_a_block(fb->get_size(), fb->get_type(), bin_basename, steady_state, Block_Count,
-                               fb->get_is_linear(), fb->get_endo_nbr(), fb->get_Max_Lag(), fb->get_Max_Lead(), fb->get_u_count_int());
+              {
+#ifndef DEBUG_EX
+                if (!steady_state)
+                  {
+                    jacobian_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_nb_col_jacob(),mxREAL));
+                    mexPrintf("at block = %d, mxCreateDoubleMatrix(%d, %d, mxREAL) jacobian_block.size()=%d\n",Block_Count, fb->get_size(), fb->get_nb_col_jacob(), sizeof(jacobian_block[Block_Count]));
+                    jacobian_exo_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_exo_size(),mxREAL));
+                    mexPrintf("at block = %d, mxCreateDoubleMatrix(%d, %d, mxREAL) jacobian_exo_block.size()=%d fb->get_exo_size()=%d\n",Block_Count, fb->get_size(), fb->get_exo_size(), sizeof(jacobian_exo_block[Block_Count]), fb->get_exo_size());
+                    jacobian_det_exo_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_det_exo_size(),mxREAL));
+                    mexPrintf("at block = %d, mxCreateDoubleMatrix(%d, %d, mxREAL) jacobian_det_exo_block.size()=%d\n",Block_Count, fb->get_size(), fb->get_det_exo_size(), sizeof(jacobian_det_exo_block[Block_Count]));
+                    jacobian_other_endo_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_nb_col_other_endo_jacob(),mxREAL));
+                    mexPrintf("at block = %d, mxCreateDoubleMatrix(%d, %d, mxREAL) jacobian_other_endo_block.size()=%d\n",Block_Count, fb->get_size(), fb->get_nb_col_other_endo_jacob(), sizeof(jacobian_other_endo_block[Block_Count]));
+                  }
+#endif
+                evaluate_a_block(fb->get_size(), fb->get_type(), bin_basename, steady_state, Block_Count,
+                                 fb->get_is_linear(), fb->get_endo_nbr(), fb->get_Max_Lag(), fb->get_Max_Lead(), fb->get_u_count_int());
+              }
             else
               result = simulate_a_block(fb->get_size(), fb->get_type(), file_name, bin_basename, true, steady_state, Block_Count,
                                         fb->get_is_linear(), fb->get_endo_nbr(), fb->get_Max_Lag(), fb->get_Max_Lead(), fb->get_u_count_int());
@@ -2724,13 +2949,14 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
           it_code++;
           break;
         default:
-          mexPrintf("Unknown command \n");
+          mexPrintf("Unknown command %d\n",it_code->first);
           mexEvalString("drawnow;");
           mexErrMsgTxt("End of bytecode");
           break;
         }
     }
   mxFree(Init_Code->second);
+  nb_blocks = Block_Count+1;
   if (T)
     mxFree(T);
   return result;

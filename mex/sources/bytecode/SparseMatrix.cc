@@ -46,6 +46,8 @@ SparseMatrix::SparseMatrix()
   start_compare = 0;
   restart = 0;
   IM_i.clear();
+  lu_inc_tol = 1e-10;
+  reduced = true;
 }
 
 int
@@ -278,7 +280,7 @@ SparseMatrix::Insert(const int r, const int c, const int u_index, const int lag_
 }
 
 void
-SparseMatrix::Read_SparseMatrix(string file_name, const int Size, int periods, int y_kmin, int y_kmax, bool steady_state, bool two_boundaries)
+SparseMatrix::Read_SparseMatrix(string file_name, const int Size, int periods, int y_kmin, int y_kmax, bool steady_state, bool two_boundaries, int stack_solve_algo, int solve_algo)
 {
   unsigned int eq, var;
   int i, j, lag;
@@ -303,26 +305,57 @@ SparseMatrix::Read_SparseMatrix(string file_name, const int Size, int periods, i
   IM_i.clear();
   if (two_boundaries)
     {
-      for (i = 0; i < u_count_init-Size; i++)
+      if (stack_solve_algo == 5)
         {
-          SaveCode.read(reinterpret_cast<char *>(&eq), sizeof(eq));
-          SaveCode.read(reinterpret_cast<char *>(&var), sizeof(var));
-          SaveCode.read(reinterpret_cast<char *>(&lag), sizeof(lag));
-          SaveCode.read(reinterpret_cast<char *>(&j), sizeof(j));
-          IM_i[make_pair(make_pair(eq, var), lag)] = j;
+          for (i = 0; i < u_count_init-Size; i++)
+            {
+              SaveCode.read(reinterpret_cast<char *>(&eq), sizeof(eq));
+              SaveCode.read(reinterpret_cast<char *>(&var), sizeof(var));
+              SaveCode.read(reinterpret_cast<char *>(&lag), sizeof(lag));
+              SaveCode.read(reinterpret_cast<char *>(&j), sizeof(j));
+              IM_i[make_pair(make_pair(eq, var), lag)] = j;
+            }
+          for (j = 0; j < Size; j++)
+            IM_i[make_pair(make_pair(j, Size*(periods+y_kmax)), 0)] = j;
         }
-      for (j = 0; j < Size; j++)
-        IM_i[make_pair(make_pair(j, Size*(periods+y_kmax)), 0)] = j;
+      else if (stack_solve_algo >= 1 || stack_solve_algo <= 4)
+        {
+          for (i = 0; i < u_count_init-Size; i++)
+            {
+              SaveCode.read(reinterpret_cast<char *>(&eq), sizeof(eq));
+              SaveCode.read(reinterpret_cast<char *>(&var), sizeof(var));
+              SaveCode.read(reinterpret_cast<char *>(&lag), sizeof(lag));
+              SaveCode.read(reinterpret_cast<char *>(&j), sizeof(j));
+              IM_i[make_pair(make_pair(var - lag*Size, -lag), eq)] = j;
+            }
+          for (j = 0; j < Size; j++)
+            IM_i[make_pair(make_pair(Size*(periods+y_kmax), 0), j)] = j;
+        }
+
     }
   else
     {
-      for (i = 0; i < u_count_init; i++)
+      if ((stack_solve_algo == 5 && !steady_state) || (solve_algo == 5 && steady_state))
         {
-          SaveCode.read(reinterpret_cast<char *>(&eq), sizeof(eq));
-          SaveCode.read(reinterpret_cast<char *>(&var), sizeof(var));
-          SaveCode.read(reinterpret_cast<char *>(&lag), sizeof(lag));
-          SaveCode.read(reinterpret_cast<char *>(&j), sizeof(j));
-          IM_i[make_pair(make_pair(eq, var), lag)] = j;
+          for (i = 0; i < u_count_init; i++)
+            {
+              SaveCode.read(reinterpret_cast<char *>(&eq), sizeof(eq));
+              SaveCode.read(reinterpret_cast<char *>(&var), sizeof(var));
+              SaveCode.read(reinterpret_cast<char *>(&lag), sizeof(lag));
+              SaveCode.read(reinterpret_cast<char *>(&j), sizeof(j));
+              IM_i[make_pair(make_pair(eq, var), lag)] = j;
+            }
+        }
+      else if ( ((stack_solve_algo >= 1 || stack_solve_algo <= 4) && !steady_state) || ((solve_algo >= 1 || solve_algo <= 4) && steady_state) )
+        {
+          for (i = 0; i < u_count_init; i++)
+            {
+              SaveCode.read(reinterpret_cast<char *>(&eq), sizeof(eq));
+              SaveCode.read(reinterpret_cast<char *>(&var), sizeof(var));
+              SaveCode.read(reinterpret_cast<char *>(&lag), sizeof(lag));
+              SaveCode.read(reinterpret_cast<char *>(&j), sizeof(j));
+              IM_i[make_pair(make_pair(var - lag*Size, -lag), eq)] = j;
+            }
         }
     }
   index_vara = (int *) mxMalloc(Size*(periods+y_kmin+y_kmax)*sizeof(int));
@@ -415,7 +448,230 @@ SparseMatrix::Simple_Init(int it_, int y_kmin, int y_kmax, int Size, map<pair<pa
 }
 
 void
-SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM)
+SparseMatrix::Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>, int> &IM, mxArray *A_m, mxArray *b_m)
+{
+  int i, eq, var;
+  double *b = mxGetPr(b_m);
+  if (!b)
+    {
+      mexPrintf("Can't retrieve b vector in LU solver\n");
+      mexErrMsgTxt("end of bytecode\n");
+    }
+  mwIndex *Ai = mxGetIr(A_m);
+  if (!Ai)
+    {
+      mexPrintf("Can't allocate Ai index vector in LU solver\n");
+      mexErrMsgTxt("end of bytecode\n");
+    }
+  mwIndex *Aj = mxGetJc(A_m);
+  if (!Aj)
+    {
+      mexPrintf("Can't allocate Aj index vector in LU solver\n");
+      mexErrMsgTxt("end of bytecode\n");
+    }
+  double *A = mxGetPr(A_m);
+  if (!A)
+    {
+      mexPrintf("Can't retrieve A matrix in LU solver\n");
+      mexErrMsgTxt("end of bytecode\n");
+    }
+  map<pair<pair<int, int>, int>, int>::iterator it4;
+  for (i = 0; i < y_size*(periods+y_kmin); i++)
+    ya[i] = y[i];
+#if DEBUG
+  unsigned int max_nze = mxGetNzmax(A_m);
+#endif
+  unsigned int NZE = 0;
+  int last_var = 0;
+  for (i = 0; i < Size; i++)
+    b[i] = u[i];
+  Aj[0] = 0;
+  last_var = 0;
+  it4 = IM.begin();
+  while (it4 != IM.end())
+    {
+      var = it4->first.first.first;
+      if (var != last_var)
+        {
+          Aj[1+last_var ] = NZE;
+          last_var = var;
+        }
+      eq = it4->first.second;
+      int index = it4->second;
+#if DEBUG
+      if (index<0 || index >= u_count_alloc)
+        {
+          mexPrintf("index (%d) out of range for u vector (0)\n",index);
+          mexErrMsgTxt("end of bytecode\n");
+        }
+      if (NZE >= max_nze)
+        {
+          mexPrintf("Exceeds the capacity of A_m sparse matrix in LU (0)\n");
+          mexErrMsgTxt("end of bytecode\n");
+        }
+#endif
+      A[NZE] = u[index];
+      Ai[NZE] = eq;
+      NZE++;
+#if DEBUG
+      if ((index+lag*u_count_init) < 0 || (index+lag*u_count_init) >= u_count_alloc)
+        {
+          mexPrintf("index (%d) out of range for u vector (1)\n",index+lag*u_count_init);
+          mexErrMsgTxt("end of bytecode\n");
+        }
+      if (eq < 0 || eq >= (Size*periods))
+        {
+          mexPrintf("index (%d) out of range for b vector (0)\n",eq);
+          mexErrMsgTxt("end of bytecode\n");
+         }
+      if (var+Size*(y_kmin+t+lag) < 0 || var+Size*(y_kmin+t+lag) >= Size*(periods+y_kmin+y_kmax))
+        {
+          mexPrintf("index (%d) out of range for index_vara vector (0)\n",var+Size*(y_kmin+t+lag));
+          mexErrMsgTxt("end of bytecode\n");
+        }
+      if (index_vara[var+Size*(y_kmin+t+lag)] < 0 || index_vara[var+Size*(y_kmin+t+lag)] >= y_size*(periods+y_kmin+y_kmax))
+        {
+          mexPrintf("index (%d) out of range for y vector max=%d (0)\n",index_vara[var+Size*(y_kmin+t+lag)], y_size*(periods+y_kmin+y_kmax));
+          mexErrMsgTxt("end of bytecode\n");
+        }
+#endif
+      it4++;
+   }
+  Aj[Size] = NZE;
+}
+
+
+
+void
+SparseMatrix::Init_Matlab_Sparse(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM, mxArray *A_m, mxArray *b_m)
+{
+  int t, i, eq, var, lag, ti_y_kmin, ti_y_kmax;
+  double *b = mxGetPr(b_m);
+  if (!b)
+    {
+      mexPrintf("Can't retrieve b vector in LU solver\n");
+      mexErrMsgTxt("end of bytecode\n");
+    }
+  mwIndex *Ai = mxGetIr(A_m);
+  if (!Ai)
+    {
+      mexPrintf("Can't allocate Ai index vector in LU solver\n");
+      mexErrMsgTxt("end of bytecode\n");
+    }
+  mwIndex *Aj = mxGetJc(A_m);
+  if (!Aj)
+    {
+      mexPrintf("Can't allocate Aj index vector in LU solver\n");
+      mexErrMsgTxt("end of bytecode\n");
+    }
+  double *A = mxGetPr(A_m);
+  if (!A)
+    {
+      mexPrintf("Can't retrieve A matrix in LU solver\n");
+      mexErrMsgTxt("end of bytecode\n");
+    }
+  map<pair<pair<int, int>, int>, int>::iterator it4;
+  for (i = 0; i < y_size*(periods+y_kmin); i++)
+    ya[i] = y[i];
+#if DEBUG
+  unsigned int max_nze = mxGetNzmax(A_m);
+#endif
+  unsigned int NZE = 0;
+  int last_var = 0;
+  for (i = 0; i < periods*Size; i++)
+    b[i] = 0;
+  Aj[0] = 0;
+  for (t = 0; t < periods; t++)
+    {
+      last_var = 0;
+      it4 = IM.begin();
+      while (it4 != IM.end())
+        {
+          var = it4->first.first.first;
+          if (var != last_var)
+            {
+              Aj[1+last_var + t * Size] = NZE;
+              last_var = var;
+            }
+          eq = it4->first.second+Size*t;
+          lag = -it4->first.first.second;
+          int index = it4->second+ (t-lag) * u_count_init;
+          if (var < (periods+y_kmax)*Size)
+            {
+              ti_y_kmin = -min(t, y_kmin);
+              ti_y_kmax = min(periods-(t +1 ), y_kmax);
+              int ti_new_y_kmax = min(t, y_kmax);
+              int ti_new_y_kmin = -min(periods-(t+1), y_kmin);
+              if (lag <= ti_new_y_kmax && lag >= ti_new_y_kmin)   /*Build the index for sparse matrix containing the jacobian : u*/
+                {
+#if DEBUG
+                  if (index<0 || index >= u_count_alloc)
+                    {
+                      mexPrintf("index (%d) out of range for u vector (0)\n",index);
+                      mexErrMsgTxt("end of bytecode\n");
+                    }
+                  if (NZE >= max_nze)
+                    {
+                      mexPrintf("Exceeds the capacity of A_m sparse matrix in LU (0)\n");
+                      mexErrMsgTxt("end of bytecode\n");
+                    }
+#endif
+                  A[NZE] = u[index];
+                  Ai[NZE] = eq - lag * Size;
+                  NZE++;
+                }
+              if (lag > ti_y_kmax || lag < ti_y_kmin)
+                {
+#if DEBUG
+                  if ((index+lag*u_count_init) < 0 || (index+lag*u_count_init) >= u_count_alloc)
+                    {
+                      mexPrintf("index (%d) out of range for u vector (1)\n",index+lag*u_count_init);
+                      mexErrMsgTxt("end of bytecode\n");
+                    }
+                  if (eq < 0 || eq >= (Size*periods))
+                    {
+                      mexPrintf("index (%d) out of range for b vector (0)\n",eq);
+                      mexErrMsgTxt("end of bytecode\n");
+                    }
+                  if (var+Size*(y_kmin+t+lag) < 0 || var+Size*(y_kmin+t+lag) >= Size*(periods+y_kmin+y_kmax))
+                    {
+                      mexPrintf("index (%d) out of range for index_vara vector (0)\n",var+Size*(y_kmin+t+lag));
+                      mexErrMsgTxt("end of bytecode\n");
+                    }
+                  if (index_vara[var+Size*(y_kmin+t+lag)] < 0 || index_vara[var+Size*(y_kmin+t+lag)] >= y_size*(periods+y_kmin+y_kmax))
+                    {
+                      mexPrintf("index (%d) out of range for y vector max=%d (0)\n",index_vara[var+Size*(y_kmin+t+lag)], y_size*(periods+y_kmin+y_kmax));
+                      mexErrMsgTxt("end of bytecode\n");
+                    }
+#endif
+                  b[eq]  += u[index+lag*u_count_init]*y[index_vara[var+Size*(y_kmin+t+lag)]];
+                }
+            }
+          else           /* ...and store it in the u vector*/
+            {
+#if DEBUG
+              if (index < 0 || index >= u_count_alloc)
+                {
+                  mexPrintf("index (%d) out of range for u vector (2)\n",index);
+                  mexErrMsgTxt("end of bytecode\n");
+                }
+              if (eq < 0 || eq >= (Size*periods))
+                {
+                  mexPrintf("index (%d) out of range for b vector (1)\n",eq);
+                  mexErrMsgTxt("end of bytecode\n");
+                }
+#endif
+              b[eq]  += u[index];
+            }
+          it4++;
+        }
+    }
+  Aj[Size*periods] = NZE;
+}
+
+
+void
+SparseMatrix::Init_GE(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM)
 {
   int t, i, eq, var, lag, ti_y_kmin, ti_y_kmax;
   double tmp_b = 0.0;
@@ -524,47 +780,6 @@ SparseMatrix::Init(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<
   mxFree(temp_NZE_C);
 }
 
-void
-SparseMatrix::ShortInit(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM)
-{
-  int t, eq, var, lag, ti_y_kmin, ti_y_kmax;
-  double tmp_b = 0.0;
-  map<pair<pair<int, int>, int>, int>::iterator it4;
-  //#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) ordered private(it4, ti_y_kmin, ti_y_kmax, eq, var, lag, tmp_b) schedule(dynamic)
-  for (t = 0; t < periods; t++)
-    {
-      ti_y_kmin = -min(t, y_kmin);
-      ti_y_kmax = min(periods-(t+1), y_kmax);
-      it4 = IM.begin();
-      eq = -1;
-      while (it4 != IM.end())
-        {
-          var = it4->first.first.second;
-          if (eq != it4->first.first.first+Size*t)
-            tmp_b = 0;
-          eq = it4->first.first.first+Size*t;
-          if (var < (periods+y_kmax)*Size)
-            {
-              lag = it4->first.second;
-              if (lag <= ti_y_kmax && lag >= ti_y_kmin)
-                {
-                  var += Size*t;
-                }
-              else
-                {
-                  tmp_b += u[it4->second+u_count_init*t]*y[index_vara[var+Size*(y_kmin+t)]];
-                }
-            }
-          else
-            {
-              b[eq] = it4->second+u_count_init*t;
-              u[b[eq]] += tmp_b;
-            }
-          it4++;
-        }
-    }
-}
-
 int
 SparseMatrix::Get_u()
 {
@@ -619,7 +834,7 @@ SparseMatrix::Print_u()
 }
 
 void
-SparseMatrix::End(int Size)
+SparseMatrix::End_GE(int Size)
 {
   mem_mngr.Free_All();
   mxFree(FNZE_R);
@@ -995,7 +1210,7 @@ SparseMatrix::simple_bksub(int it_, int Size, double slowc_l)
 }
 
 bool
-SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter, bool steady_state, int Block_number)
+SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter, bool steady_state, int Block_number, int solve_algo)
 {
   int i, j, k;
   int pivj = 0, pivk = 0;
@@ -1005,6 +1220,7 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
   int *pivj_v, *pivk_v, *NR;
   int l, N_max;
   bool one;
+  mxArray *b_m, *A_m;
   Clear_u();
   piv_v = (double *) mxMalloc(Size*sizeof(double));
   pivj_v = (int *) mxMalloc(Size*sizeof(int));
@@ -1131,230 +1347,209 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
       mexPrintf("      abs. error=%.10e       \n", double (res1));
       mexPrintf("-----------------------------------\n");
     }
-  Simple_Init(it_, y_kmin, y_kmax, Size, IM_i);
-  NonZeroElem **bc;
-  bc = (NonZeroElem **) mxMalloc(Size*sizeof(*bc));
-  for (i = 0; i < Size; i++)
-    {
-      /*finding the max-pivot*/
-      double piv = piv_abs = 0;
-      int nb_eq = At_Col(i, &first);
-      l = 0; N_max = 0;
-      one = false;
-      piv_abs = 0;
-      for (j = 0; j < nb_eq; j++)
-        {
-          if (!line_done[first->r_index])
-            {
-              k = first->u_index;
-              int jj = first->r_index;
-              int NRow_jj = NRow(jj);
 
-              piv_v[l] = u[k];
-              double piv_fabs = fabs(u[k]);
-              pivj_v[l] = jj;
-              pivk_v[l] = k;
-              NR[l] = NRow_jj;
-              if (NRow_jj == 1 && !one)
+  if (solve_algo == 5)
+    Simple_Init(it_, y_kmin, y_kmax, Size, IM_i);
+  else
+    {
+      b_m = mxCreateDoubleMatrix(Size,1,mxREAL);
+      if (!b_m)
+        {
+          mexPrintf("Can't allocate b_m matrix in LU solver\n");
+          mexErrMsgTxt("end of bytecode\n");
+        }
+      A_m = mxCreateSparse(Size, Size, IM_i.size()*2, mxREAL);
+      if (!A_m)
+        {
+          mexPrintf("Can't allocate A_m matrix in LU solver\n");
+          mexErrMsgTxt("end of bytecode\n");
+        }
+      Init_Matlab_Sparse_Simple(Size, IM_i, A_m, b_m);
+    }
+  if (solve_algo == 5)
+    {
+      NonZeroElem **bc;
+      bc = (NonZeroElem **) mxMalloc(Size*sizeof(*bc));
+      for (i = 0; i < Size; i++)
+        {
+          /*finding the max-pivot*/
+          double piv = piv_abs = 0;
+          int nb_eq = At_Col(i, &first);
+          l = 0; N_max = 0;
+          one = false;
+          piv_abs = 0;
+          for (j = 0; j < nb_eq; j++)
+            {
+              if (!line_done[first->r_index])
                 {
-                  one = true;
-                  piv_abs = piv_fabs;
-                  N_max = NRow_jj;
-                }
-              if (!one)
-                {
-                  if (piv_fabs > piv_abs)
-                    piv_abs = piv_fabs;
-                  if (NRow_jj > N_max)
-                    N_max = NRow_jj;
-                }
-              else
-                {
-                  if (NRow_jj == 1)
+                  k = first->u_index;
+                  int jj = first->r_index;
+                  int NRow_jj = NRow(jj);
+
+                  piv_v[l] = u[k];
+                  double piv_fabs = fabs(u[k]);
+                  pivj_v[l] = jj;
+                  pivk_v[l] = k;
+                  NR[l] = NRow_jj;
+                  if (NRow_jj == 1 && !one)
+                    {
+                      one = true;
+                      piv_abs = piv_fabs;
+                      N_max = NRow_jj;
+                    }
+                  if (!one)
                     {
                       if (piv_fabs > piv_abs)
                         piv_abs = piv_fabs;
                       if (NRow_jj > N_max)
                         N_max = NRow_jj;
                     }
+                  else
+                    {
+                      if (NRow_jj == 1)
+                        {
+                          if (piv_fabs > piv_abs)
+                            piv_abs = piv_fabs;
+                          if (NRow_jj > N_max)
+                            N_max = NRow_jj;
+                        }
+                    }
+                  l++;
                 }
-              l++;
+              first = first->NZE_C_N;
             }
-          first = first->NZE_C_N;
-        }
-      if (piv_abs < eps)
-        {
-          if (Block_number > 1)
-            mexPrintf("Error: singular system in Simulate_NG in block %d\n", blck+1);
+          if (piv_abs < eps)
+            {
+              if (Block_number > 1)
+                mexPrintf("Error: singular system in Simulate_NG in block %d\n", blck+1);
+              else
+                mexPrintf("Error: singular system in Simulate_NG\n");
+              mexEvalString("drawnow;");
+              mxFree(piv_v);
+              mxFree(pivj_v);
+              mxFree(pivk_v);
+              mxFree(NR);
+              mxFree(bc);
+              if (steady_state)
+                return false;
+              else
+                {
+                  mexEvalString("st=fclose('all');clear all;");
+                  filename += " stopped";
+                  mexErrMsgTxt(filename.c_str());
+                }
+            }
+          double markovitz = 0, markovitz_max = -9e70;
+          int NR_max = 0;
+          if (!one)
+            {
+              for (j = 0; j < l; j++)
+                {
+                  if (N_max > 0 && NR[j] > 0)
+                    {
+                      if (fabs(piv_v[j]) > 0)
+                        {
+                          if (markowitz_c > 0)
+                            markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double (NR[j])/double (N_max)));
+                          else
+                            markovitz = fabs(piv_v[j])/piv_abs;
+                        }
+                      else
+                        markovitz = 0;
+                    }
+                  else
+                    markovitz = fabs(piv_v[j])/piv_abs;
+                  if (markovitz > markovitz_max)
+                    {
+                      piv = piv_v[j];
+                      pivj = pivj_v[j];   //Line number
+                      pivk = pivk_v[j];   //positi
+                      markovitz_max = markovitz;
+                      NR_max = NR[j];
+                    }
+                }
+            }
           else
-            mexPrintf("Error: singular system in Simulate_NG\n");
-          mexEvalString("drawnow;");
-          mxFree(piv_v);
-          mxFree(pivj_v);
-          mxFree(pivk_v);
-          mxFree(NR);
-          mxFree(bc);
-          if (steady_state)
-            return false;
-          else
             {
-              mexEvalString("st=fclose('all');clear all;");
-              filename += " stopped";
-              mexErrMsgTxt(filename.c_str());
-            }
-        }
-      double markovitz = 0, markovitz_max = -9e70;
-      int NR_max = 0;
-      if (!one)
-        {
-          for (j = 0; j < l; j++)
-            {
-              if (N_max > 0 && NR[j] > 0)
+              for (j = 0; j < l; j++)
                 {
-                  if (fabs(piv_v[j]) > 0)
+                  if (N_max > 0 && NR[j] > 0)
                     {
-                      if (markowitz_c > 0)
-                        markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double (NR[j])/double (N_max)));
+                      if (fabs(piv_v[j]) > 0)
+                        {
+                          if (markowitz_c > 0)
+                            markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double (NR[j])/double (N_max)));
+                          else
+                            markovitz = fabs(piv_v[j])/piv_abs;
+                        }
                       else
-                        markovitz = fabs(piv_v[j])/piv_abs;
+                        markovitz = 0;
                     }
                   else
-                    markovitz = 0;
-                }
-              else
-                markovitz = fabs(piv_v[j])/piv_abs;
-              if (markovitz > markovitz_max)
-                {
-                  piv = piv_v[j];
-                  pivj = pivj_v[j];   //Line number
-                  pivk = pivk_v[j];   //positi
-                  markovitz_max = markovitz;
-                  NR_max = NR[j];
-                }
-            }
-        }
-      else
-        {
-          for (j = 0; j < l; j++)
-            {
-              if (N_max > 0 && NR[j] > 0)
-                {
-                  if (fabs(piv_v[j]) > 0)
+                    markovitz = fabs(piv_v[j])/piv_abs;
+                  if (NR[j] == 1)
                     {
-                      if (markowitz_c > 0)
-                        markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double (NR[j])/double (N_max)));
-                      else
-                        markovitz = fabs(piv_v[j])/piv_abs;
+                      piv = piv_v[j];
+                      pivj = pivj_v[j];   //Line number
+                      pivk = pivk_v[j];   //positi
+                      markovitz_max = markovitz;
+                      NR_max = NR[j];
                     }
-                  else
-                    markovitz = 0;
-                }
-              else
-                markovitz = fabs(piv_v[j])/piv_abs;
-              if (NR[j] == 1)
-                {
-                  piv = piv_v[j];
-                  pivj = pivj_v[j];   //Line number
-                  pivk = pivk_v[j];   //positi
-                  markovitz_max = markovitz;
-                  NR_max = NR[j];
                 }
             }
-        }
-      /*if (fabs(piv) < eps)
-        mexPrintf("==> Error NR_max=%d, N_max=%d and piv=%f, piv_abs=%f, markovitz_max=%f\n",NR_max, N_max, piv, piv_abs, markovitz_max);
-      if (NR_max == 0)
-        mexPrintf("==> Error NR_max=0 and piv=%f, markovitz_max=%f\n",piv, markovitz_max);*/
-      pivot[i] = pivj;
-      pivotk[i] = pivk;
-      pivotv[i] = piv;
-      line_done[pivj] = true;
+          pivot[i] = pivj;
+          pivotk[i] = pivk;
+          pivotv[i] = piv;
+          line_done[pivj] = true;
 
-      /*divide all the non zeros elements of the line pivj by the max_pivot*/
-      int nb_var = At_Row(pivj, &first);
-      for (j = 0; j < nb_var; j++)
-        {
-          u[first->u_index] /= piv;
-          first = first->NZE_R_N;
-        }
-      u[b[pivj]] /= piv;
-      /*substract the elements on the non treated lines*/
-      nb_eq = At_Col(i, &first);
-      NonZeroElem *first_piva;
-      int nb_var_piva = At_Row(pivj, &first_piva);
-      int nb_eq_todo = 0;
-      for (j = 0; j < nb_eq && first; j++)
-        {
-          if (!line_done[first->r_index])
-            bc[nb_eq_todo++] = first;
-          first = first->NZE_C_N;
-        }
-      //#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-      for (j = 0; j < nb_eq_todo; j++)
-        {
-          first = bc[j];
-          int row = first->r_index;
-          double first_elem = u[first->u_index];
-
-          int nb_var_piv = nb_var_piva;
-          NonZeroElem *first_piv = first_piva;
-          NonZeroElem *first_sub;
-          int nb_var_sub = At_Row(row, &first_sub);
-          int l_sub = 0, l_piv = 0;
-          int sub_c_index = first_sub->c_index, piv_c_index = first_piv->c_index;
-          while (l_sub < nb_var_sub || l_piv < nb_var_piv)
+          /*divide all the non zeros elements of the line pivj by the max_pivot*/
+          int nb_var = At_Row(pivj, &first);
+          for (j = 0; j < nb_var; j++)
             {
-              if (l_sub < nb_var_sub && (sub_c_index < piv_c_index || l_piv >= nb_var_piv))
+              u[first->u_index] /= piv;
+              first = first->NZE_R_N;
+            }
+          u[b[pivj]] /= piv;
+          /*substract the elements on the non treated lines*/
+          nb_eq = At_Col(i, &first);
+          NonZeroElem *first_piva;
+          int nb_var_piva = At_Row(pivj, &first_piva);
+          int nb_eq_todo = 0;
+          for (j = 0; j < nb_eq && first; j++)
+            {
+              if (!line_done[first->r_index])
+                bc[nb_eq_todo++] = first;
+              first = first->NZE_C_N;
+            }
+          //#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
+          for (j = 0; j < nb_eq_todo; j++)
+            {
+              first = bc[j];
+              int row = first->r_index;
+              double first_elem = u[first->u_index];
+
+              int nb_var_piv = nb_var_piva;
+              NonZeroElem *first_piv = first_piva;
+              NonZeroElem *first_sub;
+              int nb_var_sub = At_Row(row, &first_sub);
+              int l_sub = 0, l_piv = 0;
+              int sub_c_index = first_sub->c_index, piv_c_index = first_piv->c_index;
+              while (l_sub < nb_var_sub || l_piv < nb_var_piv)
                 {
-                  first_sub = first_sub->NZE_R_N;
-                  if (first_sub)
-                    sub_c_index = first_sub->c_index;
-                  else
-                    sub_c_index = Size;
-                  l_sub++;
-                }
-              else if (sub_c_index > piv_c_index || l_sub >= nb_var_sub)
-                {
-                  int tmp_u_count = Get_u();
-                  Insert(row, first_piv->c_index, tmp_u_count, 0);
-                  u[tmp_u_count] = -u[first_piv->u_index]*first_elem;
-                  first_piv = first_piv->NZE_R_N;
-                  if (first_piv)
-                    piv_c_index = first_piv->c_index;
-                  else
-                    piv_c_index = Size;
-                  l_piv++;
-                }
-              else
-                {
-                  if (i == sub_c_index)
+                  if (l_sub < nb_var_sub && (sub_c_index < piv_c_index || l_piv >= nb_var_piv))
                     {
-                      firsta = first;
-                      first_suba = first_sub->NZE_R_N;
-                      Delete(first_sub->r_index, first_sub->c_index);
-                      first = firsta->NZE_C_N;
-                      first_sub = first_suba;
-                      if (first_sub)
-                        sub_c_index = first_sub->c_index;
-                      else
-                        sub_c_index = Size;
-                      l_sub++;
-                      first_piv = first_piv->NZE_R_N;
-                      if (first_piv)
-                        piv_c_index = first_piv->c_index;
-                      else
-                        piv_c_index = Size;
-                      l_piv++;
-                    }
-                  else
-                    {
-                      u[first_sub->u_index] -= u[first_piv->u_index]*first_elem;
                       first_sub = first_sub->NZE_R_N;
                       if (first_sub)
                         sub_c_index = first_sub->c_index;
                       else
                         sub_c_index = Size;
                       l_sub++;
+                    }
+                  else if (sub_c_index > piv_c_index || l_sub >= nb_var_sub)
+                    {
+                      int tmp_u_count = Get_u();
+                      Insert(row, first_piv->c_index, tmp_u_count, 0);
+                      u[tmp_u_count] = -u[first_piv->u_index]*first_elem;
                       first_piv = first_piv->NZE_R_N;
                       if (first_piv)
                         piv_c_index = first_piv->c_index;
@@ -1362,22 +1557,66 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
                         piv_c_index = Size;
                       l_piv++;
                     }
+                  else
+                    {
+                      if (i == sub_c_index)
+                        {
+                          firsta = first;
+                          first_suba = first_sub->NZE_R_N;
+                          Delete(first_sub->r_index, first_sub->c_index);
+                          first = firsta->NZE_C_N;
+                          first_sub = first_suba;
+                          if (first_sub)
+                            sub_c_index = first_sub->c_index;
+                          else
+                            sub_c_index = Size;
+                          l_sub++;
+                          first_piv = first_piv->NZE_R_N;
+                          if (first_piv)
+                            piv_c_index = first_piv->c_index;
+                          else
+                            piv_c_index = Size;
+                          l_piv++;
+                        }
+                      else
+                        {
+                          u[first_sub->u_index] -= u[first_piv->u_index]*first_elem;
+                          first_sub = first_sub->NZE_R_N;
+                          if (first_sub)
+                            sub_c_index = first_sub->c_index;
+                          else
+                            sub_c_index = Size;
+                          l_sub++;
+                          first_piv = first_piv->NZE_R_N;
+                          if (first_piv)
+                            piv_c_index = first_piv->c_index;
+                          else
+                            piv_c_index = Size;
+                          l_piv++;
+                        }
+                    }
                 }
+              u[b[row]] -= u[b[pivj]]*first_elem;
             }
-          u[b[row]] -= u[b[pivj]]*first_elem;
         }
+      double slowc_lbx = slowc, res1bx;
+      for (i = 0; i < y_size; i++)
+        ya[i+it_*y_size] = y[i+it_*y_size];
+      slowc_save = slowc;
+      res1bx = simple_bksub(it_, Size, slowc_lbx);
+      End_GE(Size);
+      mxFree(piv_v);
+      mxFree(pivj_v);
+      mxFree(pivk_v);
+      mxFree(NR);
+      mxFree(bc);
     }
-  double slowc_lbx = slowc, res1bx;
-  for (i = 0; i < y_size; i++)
-    ya[i+it_*y_size] = y[i+it_*y_size];
-  slowc_save = slowc;
-  res1bx = simple_bksub(it_, Size, slowc_lbx);
-  End(Size);
-  mxFree(piv_v);
-  mxFree(pivj_v);
-  mxFree(pivk_v);
-  mxFree(NR);
-  mxFree(bc);
+  else if (solve_algo == 1 || solve_algo == 4)
+    Solve_Matlab_LU_UMFPack(A_m, b_m, Size, slowc);
+  else if (solve_algo == 2)
+    Solve_Matlab_GMRES(A_m, b_m, Size, slowc, blck);
+  else if (solve_algo == 3)
+    Solve_Matlab_BiCGStab(A_m, b_m, Size, slowc, blck);
   return true;
 }
 
@@ -1456,7 +1695,7 @@ void
 SparseMatrix::Check_the_Solution(int periods, int y_kmin, int y_kmax, int Size, double *u, int *pivot, int *b)
 {
   const double epsilon = 1e-10;
-  Init(periods, y_kmin, y_kmax, Size, IM_i);
+  Init_GE(periods, y_kmin, y_kmax, Size, IM_i);
   NonZeroElem *first;
   int cal_y = y_kmin*Size;
   mexPrintf("     ");
@@ -1492,8 +1731,170 @@ SparseMatrix::Check_the_Solution(int periods, int y_kmin, int y_kmax, int Size, 
   mexErrMsgTxt(filename.c_str());
 }
 
+void
+SparseMatrix::Solve_Matlab_LU_UMFPack(mxArray* A_m, mxArray* b_m, int Size, double slowc_l)
+{
+  int n = mxGetM(A_m);
+  mxArray *z;
+  mxArray *rhs[2];
+  rhs[0] = A_m;
+  rhs[1] = b_m;
+  mexCallMATLAB(1,&z,2, rhs, "mldivide");
+  double *res = mxGetPr(z);
+  for (int i = 0; i < n; i++)
+    {
+      int eq = index_vara[i+Size*y_kmin];
+      double yy = - (res[i] + y[eq]);
+      direction[eq] = yy;
+      y[eq] += slowc_l * yy;
+    }
+  mxDestroyArray(A_m);
+  mxDestroyArray(b_m);
+  mxDestroyArray(z);
+}
+
+void
+SparseMatrix::Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double slowc, int block)
+{
+  int n = mxGetM(A_m);
+  /*[L1, U1]=luinc(g1a,luinc_tol);*/
+  mxArray *lhs0[2];
+  mxArray *rhs0[2];
+  rhs0[0] = A_m;
+  rhs0[1] = mxCreateDoubleScalar(lu_inc_tol);
+  mexCallMATLAB(2, lhs0, 2, rhs0, "luinc");
+  mxArray *L1 = lhs0[0];
+  mxArray *U1 = lhs0[1];
+  /*[za,flag1] = gmres(g1a,b,Blck_size,1e-6,Blck_size*periods,L1,U1);*/
+  mxArray *rhs[7];
+  rhs[0] = A_m;
+  rhs[1] = b_m;
+  rhs[2] = mxCreateDoubleScalar(Size);
+  rhs[3] = mxCreateDoubleScalar(1e-6);
+  rhs[4] = mxCreateDoubleScalar(n);
+  rhs[5] = L1;
+  rhs[6] = U1;
+  mxArray *lhs[2];
+  mexCallMATLAB(2,lhs, 7, rhs, "gmres");
+  mxArray *z = lhs[0];
+  mxArray *flag = lhs[1];
+  double *flag1 = mxGetPr(flag);
+  mxDestroyArray(rhs0[1]);
+  mxDestroyArray(rhs[2]);
+  mxDestroyArray(rhs[3]);
+  mxDestroyArray(rhs[4]);
+  mxDestroyArray(rhs[5]);
+  mxDestroyArray(rhs[6]);
+  if (*flag1 > 0 || reduced)
+    {
+      ostringstream tmp;
+      if (*flag1 == 1)
+        {
+          tmp << "Error in simul: No convergence inside GMRES, in block " << block;
+          mexWarnMsgTxt(tmp.str().c_str());
+        }
+      else if (*flag1 == 2)
+        {
+          tmp << "Error in simul: Preconditioner is ill-conditioned, in block " << block;
+          mexWarnMsgTxt(tmp.str().c_str());
+        }
+      else if (*flag1 == 3)
+        {
+          tmp << "Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block " << block;
+          mexWarnMsgTxt(tmp.str().c_str());
+        }
+      lu_inc_tol /= 10;
+      reduced = false;
+    }
+  else
+    {
+      double *res = mxGetPr(z);
+      for (int i = 0; i < n; i++)
+        {
+          int eq = index_vara[i+Size*y_kmin];
+          double yy = - (res[i] + y[eq]);
+          direction[eq] = yy;
+          y[eq] += slowc * yy;
+        }
+    }
+  mxDestroyArray(A_m);
+  mxDestroyArray(b_m);
+  mxDestroyArray(z);
+  mxDestroyArray(flag);
+}
+
+
+void
+SparseMatrix::Solve_Matlab_BiCGStab(mxArray* A_m, mxArray* b_m, int Size, double slowc, int block)
+{
+  int n = mxGetM(A_m);
+  /*[L1, U1]=luinc(g1a,luinc_tol);*/
+  mxArray *lhs0[2];
+  mxArray *rhs0[2];
+  rhs0[0] = A_m;
+  rhs0[1] = mxCreateDoubleScalar(lu_inc_tol);
+  mexCallMATLAB(2, lhs0, 2, rhs0, "luinc");
+  mxArray *L1 = lhs0[0];
+  mxArray *U1 = lhs0[1];
+  /*[za,flag1] = bicgstab(g1a,b,1e-6,Blck_size*periods,L1,U1);*/
+  mxArray *rhs[6];
+  rhs[0] = A_m;
+  rhs[1] = b_m;
+  rhs[2] = mxCreateDoubleScalar(1e-6);
+  rhs[3] = mxCreateDoubleScalar(n);
+  rhs[4] = L1;
+  rhs[5] = U1;
+  mxArray *lhs[2];
+  mexCallMATLAB(2,lhs, 6, rhs, "bicgstab");
+  mxArray *z = lhs[0];
+  mxArray *flag = lhs[1];
+  double *flag1 = mxGetPr(flag);
+  mxDestroyArray(rhs0[1]);
+  mxDestroyArray(rhs[2]);
+  mxDestroyArray(rhs[3]);
+  mxDestroyArray(rhs[4]);
+  mxDestroyArray(rhs[5]);
+  if (*flag1 > 0 || reduced)
+    {
+      ostringstream tmp;
+      if (*flag1 == 1)
+        {
+          tmp << "Error in simul: No convergence inside BiCGStab, in block " << block;
+          mexWarnMsgTxt(tmp.str().c_str());
+        }
+      else if (*flag1 == 2)
+        {
+          tmp << "Error in simul: Preconditioner is ill-conditioned, in block " << block;
+          mexWarnMsgTxt(tmp.str().c_str());
+        }
+      else if (*flag1 == 3)
+        {
+          tmp << "Error in simul: BiCGStab stagnated (Two consecutive iterates were the same.), in block " << block;
+          mexWarnMsgTxt(tmp.str().c_str());
+        }
+      lu_inc_tol /= 10;
+      reduced = false;
+    }
+  else
+    {
+      double *res = mxGetPr(z);
+      for (int i = 0; i < n; i++)
+        {
+          int eq = index_vara[i+Size*y_kmin];
+          double yy = - (res[i] + y[eq]);
+          direction[eq] = yy;
+          y[eq] += slowc * yy;
+        }
+    }
+  mxDestroyArray(A_m);
+  mxDestroyArray(b_m);
+  mxDestroyArray(z);
+  mxDestroyArray(flag);
+}
+
+
 int
-SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, bool cvg, int &iter, int minimal_solving_periods, int Block_number)
+SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, bool cvg, int &iter, int minimal_solving_periods, int Block_number, int stack_solve_algo)
 {
   /*Triangularisation at each period of a block using a simple gaussian Elimination*/
   t_save_op_s *save_op_s;
@@ -1513,6 +1914,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
   clock_t t1 = clock();
   nop1 = 0;
   error_not_printed = true;
+  mxArray *b_m, *A_m;
   if (iter > 0)
     {
       mexPrintf("Sim : %f ms\n", (1000.0*(double (clock())-double (time00)))/double (CLOCKS_PER_SEC));
@@ -1565,7 +1967,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
           filename += " stopped";
           mexErrMsgTxt(filename.c_str());
         }
-      if(!(isnan(res1) || isinf(res1)) && !(isnan(g0) || isinf(g0)))
+      if(!(isnan(res1) || isinf(res1)) && !(isnan(g0) || isinf(g0)) && (stack_solve_algo == 1 || stack_solve_algo == 5))
         {
           if (try_at_iteration == 0)
             {
@@ -1583,6 +1985,16 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
             }
           glambda2 = res2;
           try_at_iteration ++;
+          if (slowc_save<=0.1)
+            {
+              for (i = 0; i < y_size*(periods+y_kmin); i++)
+                y[i] = ya[i]+direction[i];
+              g0 = res2;
+              gp0 = -res2;
+              try_at_iteration = 0;
+              iter--;
+              return 0;
+            }
         }
       else
         {
@@ -1596,7 +2008,7 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
       iter--;
       return 0;
     }
-  /*if (isnan(res1) || isinf(res1))
+  if (isnan(res1) || isinf(res1))
     {
       if (iter == 0)
         {
@@ -1629,48 +2041,75 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
         y[i] = ya[i]+slowc_save*direction[i];
       iter--;
       return (0);
-    }*/
-  u_count += u_count_init;
-  if (alt_symbolic && alt_symbolic_count < alt_symbolic_count_max)
-    {
-      mexPrintf("Pivoting method will be applied only to the first periods.\n");
-      alt_symbolic = false;
-      symbolic = true;
-      markowitz_c = markowitz_c_s;
-      alt_symbolic_count++;
     }
-  if (((res1/res1a-1) > -0.3) && symbolic && iter > 0)
+  u_count += u_count_init;
+  if (stack_solve_algo == 5)
     {
-      if (restart > 2)
+      if (alt_symbolic && alt_symbolic_count < alt_symbolic_count_max)
         {
-          mexPrintf("Divergence or slowdown occured during simulation.\nIn the next iteration, pivoting method will be applied to all periods.\n");
-          symbolic = false;
-          alt_symbolic = true;
-          markowitz_c_s = markowitz_c;
-          markowitz_c = 0;
+          mexPrintf("Pivoting method will be applied only to the first periods.\n");
+          alt_symbolic = false;
+          symbolic = true;
+          markowitz_c = markowitz_c_s;
+          alt_symbolic_count++;
+        }
+      if (((res1/res1a-1) > -0.3) && symbolic && iter > 0)
+        {
+          if (restart > 2)
+            {
+              mexPrintf("Divergence or slowdown occured during simulation.\nIn the next iteration, pivoting method will be applied to all periods.\n");
+              symbolic = false;
+              alt_symbolic = true;
+              markowitz_c_s = markowitz_c;
+              markowitz_c = 0;
+            }
+          else
+            {
+              mexPrintf("Divergence or slowdown occured during simulation.\nIn the next iteration, pivoting method will be applied for a longer period.\n");
+              start_compare = min(tbreak_g, periods);
+              restart++;
+            }
         }
       else
         {
-          mexPrintf("Divergence or slowdown occured during simulation.\nIn the next iteration, pivoting method will be applied for a longer period.\n");
-          start_compare = min(tbreak_g, periods);
-          restart++;
+          start_compare = max(y_kmin, minimal_solving_periods);
+          restart = 0;
         }
-    }
-  else
-    {
-      start_compare = max(y_kmin, minimal_solving_periods);
-      restart = 0;
     }
   res1a = res1;
 
   if (print_it)
     {
+      if (iter == 0)
+        {
+          switch(stack_solve_algo)
+            {
+              case 1:
+                mexPrintf("MODEL SIMULATION: (method=Sparse LU)\n");
+                break;
+              case 2:
+                mexPrintf("MODEL SIMULATION: (method=GMRES)\n");
+                break;
+              case 3:
+                mexPrintf("MODEL SIMULATION: (method=BiCGStab)\n");
+                break;
+              case 4:
+                mexPrintf("MODEL SIMULATION: (method=Sparse LU & optimal path length)\n");
+                break;
+              case 5:
+                mexPrintf("MODEL SIMULATION: (method=ByteCode own solver)\n");
+                break;
+              default:
+                mexPrintf("MODEL SIMULATION: (method=Unknown - %d - )\n", stack_solve_algo);
+            }
+        }
       mexPrintf("-----------------------------------\n");
       mexPrintf("      Simulate iteration no %d     \n", iter+1);
       mexPrintf("      max. error=%.10e       \n", double (max_res));
       mexPrintf("      sqr. error=%.10e       \n", double (res2));
       mexPrintf("      abs. error=%.10e       \n", double (res1));
       mexPrintf("-----------------------------------\n");
+      mexEvalString("drawnow;");
     }
   if (cvg)
     {
@@ -1678,250 +2117,173 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
     }
   else
     {
-      Init(periods, y_kmin, y_kmax, Size, IM_i);
-      double *piv_v;
-      int *pivj_v, *pivk_v, *NR;
-      piv_v = (double *) mxMalloc(Size*sizeof(double));
-      pivj_v = (int *) mxMalloc(Size*sizeof(int));
-      pivk_v = (int *) mxMalloc(Size*sizeof(int));
-      NR = (int *) mxMalloc(Size*sizeof(int));
-      for (int t = 0; t < periods; t++)
+      if (stack_solve_algo == 5)
+        Init_GE(periods, y_kmin, y_kmax, Size, IM_i);
+      else
         {
-          if (record && symbolic)
+          b_m = mxCreateDoubleMatrix(periods*Size,1,mxREAL);
+          if (!b_m)
             {
-              if (save_op)
-                {
-                  mxFree(save_op);
-                  save_op = NULL;
-                }
-              save_op = (int *) mxMalloc(nop*sizeof(int));
-              nopa = nop;
+              mexPrintf("Can't allocate b_m matrix in LU solver\n");
+              mexErrMsgTxt("end of bytecode\n");
             }
-          nop = 0;
-          Clear_u();
-          int ti = t*Size;
-          for (i = ti; i < Size+ti; i++)
+          A_m = mxCreateSparse(periods*Size, periods*Size, IM_i.size()* periods*2, mxREAL);
+          if (!A_m)
             {
-              /*finding the max-pivot*/
-              double piv = piv_abs = 0;
-              int nb_eq = At_Col(i, 0, &first);
-              if ((symbolic && t <= start_compare) || !symbolic)
+              mexPrintf("Can't allocate A_m matrix in LU solver\n");
+              mexErrMsgTxt("end of bytecode\n");
+            }
+          Init_Matlab_Sparse(periods, y_kmin, y_kmax, Size, IM_i, A_m, b_m);
+        }
+      if (stack_solve_algo == 5)
+        {
+          double *piv_v;
+          int *pivj_v, *pivk_v, *NR;
+          piv_v = (double *) mxMalloc(Size*sizeof(double));
+          pivj_v = (int *) mxMalloc(Size*sizeof(int));
+          pivk_v = (int *) mxMalloc(Size*sizeof(int));
+          NR = (int *) mxMalloc(Size*sizeof(int));
+          for (int t = 0; t < periods; t++)
+            {
+              if (record && symbolic)
                 {
-                  int l = 0, N_max = 0;
-                  bool one = false;
-                  piv_abs = 0;
-                  for (j = 0; j < nb_eq; j++)
+                  if (save_op)
                     {
-                      if (!line_done[first->r_index])
+                      mxFree(save_op);
+                      save_op = NULL;
+                    }
+                  save_op = (int *) mxMalloc(nop*sizeof(int));
+                  nopa = nop;
+                }
+              nop = 0;
+              Clear_u();
+              int ti = t*Size;
+              for (i = ti; i < Size+ti; i++)
+                {
+                  /*finding the max-pivot*/
+                  double piv = piv_abs = 0;
+                  int nb_eq = At_Col(i, 0, &first);
+                  if ((symbolic && t <= start_compare) || !symbolic)
+                    {
+                      int l = 0, N_max = 0;
+                      bool one = false;
+                      piv_abs = 0;
+                      for (j = 0; j < nb_eq; j++)
                         {
-                          k = first->u_index;
-                          int jj = first->r_index;
-                          int NRow_jj = NRow(jj);
-                          piv_v[l] = u[k];
-                          double piv_fabs = fabs(u[k]);
-                          pivj_v[l] = jj;
-                          pivk_v[l] = k;
-                          NR[l] = NRow_jj;
-                          if (NRow_jj == 1 && !one)
+                          if (!line_done[first->r_index])
                             {
-                              one = true;
-                              piv_abs = piv_fabs;
-                              N_max = NRow_jj;
-                            }
-                          if (!one)
-                            {
-                              if (piv_fabs > piv_abs)
-                                piv_abs = piv_fabs;
-                              if (NRow_jj > N_max)
-                                N_max = NRow_jj;
-                            }
-                          else
-                            {
-                              if (NRow_jj == 1)
+                              k = first->u_index;
+                              int jj = first->r_index;
+                              int NRow_jj = NRow(jj);
+                              piv_v[l] = u[k];
+                              double piv_fabs = fabs(u[k]);
+                              pivj_v[l] = jj;
+                              pivk_v[l] = k;
+                              NR[l] = NRow_jj;
+                              if (NRow_jj == 1 && !one)
+                                {
+                                  one = true;
+                                  piv_abs = piv_fabs;
+                                  N_max = NRow_jj;
+                                }
+                              if (!one)
                                 {
                                   if (piv_fabs > piv_abs)
                                     piv_abs = piv_fabs;
                                   if (NRow_jj > N_max)
                                     N_max = NRow_jj;
                                 }
-                            }
-                          l++;
-                        }
-                      first = first->NZE_C_N;
-                    }
-                  double markovitz = 0, markovitz_max = -9e70;
-                  int NR_max = 0;
-                  if (!one)
-                    {
-                      for (j = 0; j < l; j++)
-                        {
-                          if (N_max > 0 && NR[j] > 0)
-                            {
-                              if (fabs(piv_v[j]) > 0)
+                              else
                                 {
-                                  if (markowitz_c > 0)
-                                    markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double (NR[j])/double (N_max)));
+                                  if (NRow_jj == 1)
+                                    {
+                                      if (piv_fabs > piv_abs)
+                                        piv_abs = piv_fabs;
+                                      if (NRow_jj > N_max)
+                                        N_max = NRow_jj;
+                                    }
+                                }
+                              l++;
+                            }
+                          first = first->NZE_C_N;
+                        }
+                      double markovitz = 0, markovitz_max = -9e70;
+                      int NR_max = 0;
+                      if (!one)
+                        {
+                          for (j = 0; j < l; j++)
+                            {
+                              if (N_max > 0 && NR[j] > 0)
+                                {
+                                  if (fabs(piv_v[j]) > 0)
+                                    {
+                                      if (markowitz_c > 0)
+                                        markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double (NR[j])/double (N_max)));
+                                      else
+                                        markovitz = fabs(piv_v[j])/piv_abs;
+                                    }
                                   else
-                                    markovitz = fabs(piv_v[j])/piv_abs;
+                                    markovitz = 0;
                                 }
                               else
-                                markovitz = 0;
-                            }
-                          else
-                            markovitz = fabs(piv_v[j])/piv_abs;
-                          if (markovitz > markovitz_max)
-                            {
-                              piv = piv_v[j];
-                              pivj = pivj_v[j];   //Line number
-                              pivk = pivk_v[j];   //positi
-                              markovitz_max = markovitz;
-                              NR_max = NR[j];
+                                markovitz = fabs(piv_v[j])/piv_abs;
+                              if (markovitz > markovitz_max)
+                                {
+                                  piv = piv_v[j];
+                                  pivj = pivj_v[j];   //Line number
+                                  pivk = pivk_v[j];   //positi
+                                  markovitz_max = markovitz;
+                                  NR_max = NR[j];
+                                }
                             }
                         }
+                      else
+                        {
+                          for (j = 0; j < l; j++)
+                            {
+                              if (N_max > 0 && NR[j] > 0)
+                                {
+                                  if (fabs(piv_v[j]) > 0)
+                                    {
+                                      if (markowitz_c > 0)
+                                        markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double (NR[j])/double (N_max)));
+                                      else
+                                        markovitz = fabs(piv_v[j])/piv_abs;
+                                    }
+                                  else
+                                    markovitz = 0;
+                                }
+                              else
+                                markovitz = fabs(piv_v[j])/piv_abs;
+                              if (NR[j] == 1)
+                                {
+                                  piv = piv_v[j];
+                                  pivj = pivj_v[j];   //Line number
+                                  pivk = pivk_v[j];   //positi
+                                  markovitz_max = markovitz;
+                                  NR_max = NR[j];
+                                }
+                            }
+                        }
+                      if (fabs(piv) < eps)
+                        mexPrintf("==> Error NR_max=%d, N_max=%d and piv=%f, piv_abs=%f, markovitz_max=%f\n",NR_max, N_max, piv, piv_abs, markovitz_max);
+                      if (NR_max == 0)
+                        mexPrintf("==> Error NR_max=0 and piv=%f, markovitz_max=%f\n",piv, markovitz_max);
+                      pivot[i] = pivj;
+                      pivot_save[i] = pivj;
+                      pivotk[i] = pivk;
+                      pivotv[i] = piv;
                     }
                   else
                     {
-                      for (j = 0; j < l; j++)
-                        {
-                          if (N_max > 0 && NR[j] > 0)
-                            {
-                              if (fabs(piv_v[j]) > 0)
-                                {
-                                  if (markowitz_c > 0)
-                                    markovitz = exp(log(fabs(piv_v[j])/piv_abs)-markowitz_c*log(double (NR[j])/double (N_max)));
-                                  else
-                                    markovitz = fabs(piv_v[j])/piv_abs;
-                                }
-                              else
-                                markovitz = 0;
-                            }
-                          else
-                            markovitz = fabs(piv_v[j])/piv_abs;
-                          if (NR[j] == 1)
-                            {
-                              piv = piv_v[j];
-                              pivj = pivj_v[j];   //Line number
-                              pivk = pivk_v[j];   //positi
-                              markovitz_max = markovitz;
-                              NR_max = NR[j];
-                            }
-                        }
+                      pivj = pivot[i-Size]+Size;
+                      pivot[i] = pivj;
+                      At_Pos(pivj, i, &first);
+                      pivk = first->u_index;
+                      piv = u[pivk];
+                      piv_abs = fabs(piv);
                     }
-                  if (fabs(piv) < eps)
-                    mexPrintf("==> Error NR_max=%d, N_max=%d and piv=%f, piv_abs=%f, markovitz_max=%f\n",NR_max, N_max, piv, piv_abs, markovitz_max);
-                  if (NR_max == 0)
-                    mexPrintf("==> Error NR_max=0 and piv=%f, markovitz_max=%f\n",piv, markovitz_max);
-                  pivot[i] = pivj;
-                  pivot_save[i] = pivj;
-                  pivotk[i] = pivk;
-                  pivotv[i] = piv;
-                }
-              else
-                {
-                  pivj = pivot[i-Size]+Size;
-                  pivot[i] = pivj;
-                  At_Pos(pivj, i, &first);
-                  pivk = first->u_index;
-                  piv = u[pivk];
-                  piv_abs = fabs(piv);
-                }
-              line_done[pivj] = true;
-              if (symbolic)
-                {
-                  if (record)
-                    {
-                      if (nop+1 >= nopa)
-                        {
-                          nopa = long (mem_increasing_factor*(double)nopa);
-                          save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
-                        }
-                      save_op_s = (t_save_op_s *)(&(save_op[nop]));
-                      save_op_s->operat = IFLD;
-                      save_op_s->first = pivk;
-                      save_op_s->lag = 0;
-                    }
-                  nop += 2;
-                }
-              if (piv_abs < eps)
-                {
-                  if (Block_number>1)
-                    mexPrintf("Error: singular system in Simulate_NG1 in block %d\n", blck);
-                  else
-                    mexPrintf("Error: singular system in Simulate_NG1\n");
-                  mexEvalString("drawnow;");
-                  filename += " stopped";
-                  mexErrMsgTxt(filename.c_str());
-                }
-              /*divide all the non zeros elements of the line pivj by the max_pivot*/
-              int nb_var = At_Row(pivj, &first);
-              NonZeroElem **bb;
-              bb = (NonZeroElem **) mxMalloc(nb_var*sizeof(first));
-              for (j = 0; j < nb_var; j++)
-                {
-                  bb[j] = first;
-                  first = first->NZE_R_N;
-                }
-
-              for (j = 0; j < nb_var; j++)
-                {
-                  first = bb[j];
-                  u[first->u_index] /= piv;
-                  if (symbolic)
-                    {
-                      if (record)
-                        {
-                          if (nop+j*2+1 >= nopa)
-                            {
-                              nopa = long (mem_increasing_factor*(double)nopa);
-                              save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
-                            }
-                          save_op_s = (t_save_op_s *)(&(save_op[nop+j*2]));
-                          save_op_s->operat = IFDIV;
-                          save_op_s->first = first->u_index;
-                          save_op_s->lag = first->lag_index;
-                        }
-                    }
-                }
-              mxFree(bb);
-              nop += nb_var*2;
-              u[b[pivj]] /= piv;
-              if (symbolic)
-                {
-                  if (record)
-                    {
-                      if (nop+1 >= nopa)
-                        {
-                          nopa = long (mem_increasing_factor*(double)nopa);
-                          save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
-                        }
-                      save_op_s = (t_save_op_s *)(&(save_op[nop]));
-                      save_op_s->operat = IFDIV;
-                      save_op_s->first = b[pivj];
-                      save_op_s->lag = 0;
-                    }
-                  nop += 2;
-                }
-              /*substract the elements on the non treated lines*/
-              nb_eq = At_Col(i, &first);
-              NonZeroElem *first_piva;
-              int nb_var_piva = At_Row(pivj, &first_piva);
-
-              NonZeroElem **bc;
-              bc = (NonZeroElem **) mxMalloc(nb_eq*sizeof(first));
-              int nb_eq_todo = 0;
-              for (j = 0; j < nb_eq && first; j++)
-                {
-                  if (!line_done[first->r_index])
-                    bc[nb_eq_todo++] = first;
-                  first = first->NZE_C_N;
-                }
-              //#pragma omp parallel for num_threads(2) shared(nb_var_piva, first_piva, nopa, nop, save_op, record)
-              for (j = 0; j < nb_eq_todo; j++)
-                {
-                  t_save_op_s *save_op_s_l;
-                  first = bc[j];
-                  int row = first->r_index;
-                  double first_elem = u[first->u_index];
+                  line_done[pivj] = true;
                   if (symbolic)
                     {
                       if (record)
@@ -1931,123 +2293,158 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                               nopa = long (mem_increasing_factor*(double)nopa);
                               save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
                             }
-                          save_op_s_l = (t_save_op_s *)(&(save_op[nop]));
-                          save_op_s_l->operat = IFLD;
-                          save_op_s_l->first = first->u_index;
-                          save_op_s_l->lag = abs(first->lag_index);
+                          save_op_s = (t_save_op_s *)(&(save_op[nop]));
+                          save_op_s->operat = IFLD;
+                          save_op_s->first = pivk;
+                          save_op_s->lag = 0;
                         }
                       nop += 2;
                     }
-
-                  int nb_var_piv = nb_var_piva;
-                  NonZeroElem *first_piv = first_piva;
-                  NonZeroElem *first_sub;
-                  int nb_var_sub = At_Row(row, &first_sub);
-                  int l_sub = 0;
-                  int l_piv = 0;
-                  int sub_c_index = first_sub->c_index;
-                  int piv_c_index = first_piv->c_index;
-                  int tmp_lag = first_sub->lag_index;
-                  while (l_sub < nb_var_sub || l_piv < nb_var_piv)
+                  if (piv_abs < eps)
                     {
-                      if (l_sub < nb_var_sub && (sub_c_index < piv_c_index || l_piv >= nb_var_piv))
-                        {
-                          //There is no nonzero element at row pivot for this column=> Nothing to do for the current element got to next column
-                          first_sub = first_sub->NZE_R_N;
-                          if (first_sub)
-                            sub_c_index = first_sub->c_index;
-                          else
-                            sub_c_index = Size*periods;
-                          l_sub++;
-                        }
-                      else if (sub_c_index > piv_c_index || l_sub >= nb_var_sub)
-                        {
-                          // There is an nonzero element at row pivot but not at the current row=> insert a negative element in the current row
-                          tmp_u_count = Get_u();
-                          lag = first_piv->c_index/Size-row/Size;
-                          //#pragma omp critical
-                          {
-                            Insert(row, first_piv->c_index, tmp_u_count, lag);
-                          }
-                          u[tmp_u_count] = -u[first_piv->u_index]*first_elem;
-                          if (symbolic)
-                            {
-                              if (record)
-                                {
-                                  if (nop+2 >= nopa)
-                                    {
-                                      nopa = long (mem_increasing_factor*(double)nopa);
-                                      save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
-                                    }
-                                  save_op_s_l = (t_save_op_s *)(&(save_op[nop]));
-                                  save_op_s_l->operat = IFLESS;
-                                  save_op_s_l->first = tmp_u_count;
-                                  save_op_s_l->second = first_piv->u_index;
-                                  save_op_s_l->lag = max(first_piv->lag_index, abs(tmp_lag));
-                                }
-                              nop += 3;
-                            }
-                          first_piv = first_piv->NZE_R_N;
-                          if (first_piv)
-                            piv_c_index = first_piv->c_index;
-                          else
-                            piv_c_index = Size*periods;
-                          l_piv++;
-                        }
-                      else /*first_sub->c_index==first_piv->c_index*/
-                        {
-                          if (i == sub_c_index)
-                            {
+                      if (Block_number>1)
+                        mexPrintf("Error: singular system in Simulate_NG1 in block %d\n", blck);
+                      else
+                        mexPrintf("Error: singular system in Simulate_NG1\n");
+                      mexEvalString("drawnow;");
+                      filename += " stopped";
+                      mexErrMsgTxt(filename.c_str());
+                    }
+                  /*divide all the non zeros elements of the line pivj by the max_pivot*/
+                  int nb_var = At_Row(pivj, &first);
+                  NonZeroElem **bb;
+                  bb = (NonZeroElem **) mxMalloc(nb_var*sizeof(first));
+                  for (j = 0; j < nb_var; j++)
+                    {
+                      bb[j] = first;
+                      first = first->NZE_R_N;
+                    }
 
-                              //#pragma omp barrier
-                              //#pragma omp single
-                              //#pragma omp critical
-                              {
-                                NonZeroElem *firsta = first;
-                                NonZeroElem *first_suba = first_sub->NZE_R_N;
-                                Delete(first_sub->r_index, first_sub->c_index);
-                                first = firsta->NZE_C_N;
-                                first_sub = first_suba;
-                              }
-
-                              if (first_sub)
-                                sub_c_index = first_sub->c_index;
-                              else
-                                sub_c_index = Size*periods;
-                              l_sub++;
-                              first_piv = first_piv->NZE_R_N;
-                              if (first_piv)
-                                piv_c_index = first_piv->c_index;
-                              else
-                                piv_c_index = Size*periods;
-                              l_piv++;
-                            }
-                          else
+                  for (j = 0; j < nb_var; j++)
+                    {
+                      first = bb[j];
+                      u[first->u_index] /= piv;
+                      if (symbolic)
+                        {
+                          if (record)
                             {
-                              u[first_sub->u_index] -= u[first_piv->u_index]*first_elem;
-                              if (symbolic)
+                              if (nop+j*2+1 >= nopa)
                                 {
-                                  if (record)
-                                    {
-                                      if (nop+3 >= nopa)
-                                        {
-                                          nopa = long (mem_increasing_factor*(double)nopa);
-                                          save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
-                                        }
-                                      save_op_s_l = (t_save_op_s *)(&(save_op[nop]));
-                                      save_op_s_l->operat = IFSUB;
-                                      save_op_s_l->first = first_sub->u_index;
-                                      save_op_s_l->second = first_piv->u_index;
-                                      save_op_s_l->lag = max(abs(tmp_lag), first_piv->lag_index);
-                                    }
-                                  nop += 3;
+                                  nopa = long (mem_increasing_factor*(double)nopa);
+                                  save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
                                 }
+                              save_op_s = (t_save_op_s *)(&(save_op[nop+j*2]));
+                              save_op_s->operat = IFDIV;
+                              save_op_s->first = first->u_index;
+                              save_op_s->lag = first->lag_index;
+                            }
+                        }
+                    }
+                  mxFree(bb);
+                  nop += nb_var*2;
+                  u[b[pivj]] /= piv;
+                  if (symbolic)
+                    {
+                      if (record)
+                        {
+                          if (nop+1 >= nopa)
+                            {
+                              nopa = long (mem_increasing_factor*(double)nopa);
+                              save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
+                            }
+                          save_op_s = (t_save_op_s *)(&(save_op[nop]));
+                          save_op_s->operat = IFDIV;
+                          save_op_s->first = b[pivj];
+                          save_op_s->lag = 0;
+                        }
+                      nop += 2;
+                    }
+                  /*substract the elements on the non treated lines*/
+                  nb_eq = At_Col(i, &first);
+                  NonZeroElem *first_piva;
+                  int nb_var_piva = At_Row(pivj, &first_piva);
+
+                  NonZeroElem **bc;
+                  bc = (NonZeroElem **) mxMalloc(nb_eq*sizeof(first));
+                  int nb_eq_todo = 0;
+                  for (j = 0; j < nb_eq && first; j++)
+                    {
+                      if (!line_done[first->r_index])
+                        bc[nb_eq_todo++] = first;
+                      first = first->NZE_C_N;
+                    }
+                  //#pragma omp parallel for num_threads(2) shared(nb_var_piva, first_piva, nopa, nop, save_op, record)
+                  for (j = 0; j < nb_eq_todo; j++)
+                    {
+                      t_save_op_s *save_op_s_l;
+                      first = bc[j];
+                      int row = first->r_index;
+                      double first_elem = u[first->u_index];
+                      if (symbolic)
+                        {
+                          if (record)
+                            {
+                              if (nop+1 >= nopa)
+                                {
+                                  nopa = long (mem_increasing_factor*(double)nopa);
+                                  save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
+                                }
+                              save_op_s_l = (t_save_op_s *)(&(save_op[nop]));
+                              save_op_s_l->operat = IFLD;
+                              save_op_s_l->first = first->u_index;
+                              save_op_s_l->lag = abs(first->lag_index);
+                            }
+                          nop += 2;
+                        }
+
+                      int nb_var_piv = nb_var_piva;
+                      NonZeroElem *first_piv = first_piva;
+                      NonZeroElem *first_sub;
+                      int nb_var_sub = At_Row(row, &first_sub);
+                      int l_sub = 0;
+                      int l_piv = 0;
+                      int sub_c_index = first_sub->c_index;
+                      int piv_c_index = first_piv->c_index;
+                      int tmp_lag = first_sub->lag_index;
+                      while (l_sub < nb_var_sub || l_piv < nb_var_piv)
+                        {
+                          if (l_sub < nb_var_sub && (sub_c_index < piv_c_index || l_piv >= nb_var_piv))
+                            {
+                              //There is no nonzero element at row pivot for this column=> Nothing to do for the current element got to next column
                               first_sub = first_sub->NZE_R_N;
                               if (first_sub)
                                 sub_c_index = first_sub->c_index;
                               else
                                 sub_c_index = Size*periods;
                               l_sub++;
+                            }
+                          else if (sub_c_index > piv_c_index || l_sub >= nb_var_sub)
+                            {
+                              // There is an nonzero element at row pivot but not at the current row=> insert a negative element in the current row
+                              tmp_u_count = Get_u();
+                              lag = first_piv->c_index/Size-row/Size;
+                              //#pragma omp critical
+                              {
+                                Insert(row, first_piv->c_index, tmp_u_count, lag);
+                              }
+                              u[tmp_u_count] = -u[first_piv->u_index]*first_elem;
+                              if (symbolic)
+                                {
+                                  if (record)
+                                    {
+                                      if (nop+2 >= nopa)
+                                        {
+                                          nopa = long (mem_increasing_factor*(double)nopa);
+                                          save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
+                                        }
+                                      save_op_s_l = (t_save_op_s *)(&(save_op[nop]));
+                                      save_op_s_l->operat = IFLESS;
+                                      save_op_s_l->first = tmp_u_count;
+                                      save_op_s_l->second = first_piv->u_index;
+                                      save_op_s_l->lag = max(first_piv->lag_index, abs(tmp_lag));
+                                    }
+                                  nop += 3;
+                                }
                               first_piv = first_piv->NZE_R_N;
                               if (first_piv)
                                 piv_c_index = first_piv->c_index;
@@ -2055,108 +2452,169 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                                 piv_c_index = Size*periods;
                               l_piv++;
                             }
-                        }
-                    }
-                  u[b[row]] -= u[b[pivj]]*first_elem;
-
-                  if (symbolic)
-                    {
-                      if (record)
-                        {
-                          if (nop+3 >= nopa)
+                          else /*first_sub->c_index==first_piv->c_index*/
                             {
-                              nopa = long (mem_increasing_factor*(double)nopa);
-                              save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
+                              if (i == sub_c_index)
+                                {
+                                  NonZeroElem *firsta = first;
+                                  NonZeroElem *first_suba = first_sub->NZE_R_N;
+                                  Delete(first_sub->r_index, first_sub->c_index);
+                                  first = firsta->NZE_C_N;
+                                  first_sub = first_suba;
+                                  if (first_sub)
+                                    sub_c_index = first_sub->c_index;
+                                  else
+                                    sub_c_index = Size*periods;
+                                  l_sub++;
+                                  first_piv = first_piv->NZE_R_N;
+                                  if (first_piv)
+                                    piv_c_index = first_piv->c_index;
+                                  else
+                                    piv_c_index = Size*periods;
+                                  l_piv++;
+                                }
+                              else
+                                {
+                                  u[first_sub->u_index] -= u[first_piv->u_index]*first_elem;
+                                  if (symbolic)
+                                    {
+                                      if (record)
+                                        {
+                                          if (nop+3 >= nopa)
+                                            {
+                                              nopa = long (mem_increasing_factor*(double)nopa);
+                                              save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
+                                            }
+                                          save_op_s_l = (t_save_op_s *)(&(save_op[nop]));
+                                          save_op_s_l->operat = IFSUB;
+                                          save_op_s_l->first = first_sub->u_index;
+                                          save_op_s_l->second = first_piv->u_index;
+                                          save_op_s_l->lag = max(abs(tmp_lag), first_piv->lag_index);
+                                        }
+                                      nop += 3;
+                                    }
+                                  first_sub = first_sub->NZE_R_N;
+                                  if (first_sub)
+                                    sub_c_index = first_sub->c_index;
+                                  else
+                                    sub_c_index = Size*periods;
+                                  l_sub++;
+                                  first_piv = first_piv->NZE_R_N;
+                                  if (first_piv)
+                                    piv_c_index = first_piv->c_index;
+                                  else
+                                    piv_c_index = Size*periods;
+                                  l_piv++;
+                                }
                             }
-                          save_op_s_l = (t_save_op_s *)(&(save_op[nop]));
-                          save_op_s_l->operat = IFSUB;
-                          save_op_s_l->first = b[row];
-                          save_op_s_l->second = b[pivj];
-                          save_op_s_l->lag = abs(tmp_lag);
                         }
-                      nop += 3;
-                    }
-                }
-              mxFree(bc);
-            }
-          if (symbolic)
-            {
-              if (record && (nop == nop1))
-                {
-                  if (save_opa && save_opaa)
-                    {
-                      if (compare(save_op, save_opa, save_opaa, t, periods, nop, Size))
+                      u[b[row]] -= u[b[pivj]]*first_elem;
+
+                      if (symbolic)
                         {
-                          tbreak = t;
-                          tbreak_g = tbreak;
-                          break;
+                          if (record)
+                            {
+                              if (nop+3 >= nopa)
+                                {
+                                  nopa = long (mem_increasing_factor*(double)nopa);
+                                  save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
+                                }
+                              save_op_s_l = (t_save_op_s *)(&(save_op[nop]));
+                              save_op_s_l->operat = IFSUB;
+                              save_op_s_l->first = b[row];
+                              save_op_s_l->second = b[pivj];
+                              save_op_s_l->lag = abs(tmp_lag);
+                            }
+                          nop += 3;
                         }
                     }
-                  if (save_opa)
-                    {
-                      if (save_opaa)
-                        {
-                          mxFree(save_opaa);
-                          save_opaa = NULL;
-                        }
-                      save_opaa = (int *) mxMalloc(nop1*sizeof(int));
-                      memcpy(save_opaa, save_opa, nop1*sizeof(int));
-                    }
-                  if (save_opa)
-                    {
-                      mxFree(save_opa);
-                      save_opa = NULL;
-                    }
-                  save_opa = (int *) mxMalloc(nop*sizeof(int));
-                  memcpy(save_opa, save_op, nop*sizeof(int));
+                  mxFree(bc);
                 }
-              else
+              if (symbolic)
                 {
-                  if (nop == nop1)
-                    record = true;
-                  else
+                  if (record && (nop == nop1))
                     {
-                      record = false;
+                      if (save_opa && save_opaa)
+                        {
+                          if (compare(save_op, save_opa, save_opaa, t, periods, nop, Size))
+                            {
+                              tbreak = t;
+                              tbreak_g = tbreak;
+                              break;
+                            }
+                        }
+                      if (save_opa)
+                        {
+                          if (save_opaa)
+                            {
+                              mxFree(save_opaa);
+                              save_opaa = NULL;
+                            }
+                          save_opaa = (int *) mxMalloc(nop1*sizeof(int));
+                          memcpy(save_opaa, save_opa, nop1*sizeof(int));
+                        }
                       if (save_opa)
                         {
                           mxFree(save_opa);
                           save_opa = NULL;
                         }
-                      if (save_opaa)
+                      save_opa = (int *) mxMalloc(nop*sizeof(int));
+                      memcpy(save_opa, save_op, nop*sizeof(int));
+                    }
+                  else
+                    {
+                      if (nop == nop1)
+                        record = true;
+                      else
                         {
-                          mxFree(save_opaa);
-                          save_opaa = NULL;
+                          record = false;
+                          if (save_opa)
+                            {
+                              mxFree(save_opa);
+                              save_opa = NULL;
+                            }
+                          if (save_opaa)
+                            {
+                              mxFree(save_opaa);
+                              save_opaa = NULL;
+                            }
                         }
                     }
+                  nop2 = nop1;
+                  nop1 = nop;
                 }
-              nop2 = nop1;
-              nop1 = nop;
             }
-        }
-      mxFree(piv_v);
-      mxFree(pivj_v);
-      mxFree(pivk_v);
-      mxFree(NR);
-    }
-  nop_all += nop;
-  if (symbolic)
-    {
-      if (save_op)
-        mxFree(save_op);
-      if (save_opa)
-        mxFree(save_opa);
-      if (save_opaa)
-        mxFree(save_opaa);
-    }
+          mxFree(piv_v);
+          mxFree(pivj_v);
+          mxFree(pivk_v);
+          mxFree(NR);
+          nop_all += nop;
+          if (symbolic)
+            {
+              if (save_op)
+                mxFree(save_op);
+              if (save_opa)
+                mxFree(save_opa);
+              if (save_opaa)
+                mxFree(save_opaa);
+            }
 
-  /*The backward substitution*/
-  double slowc_lbx = slowc, res1bx;
-  for (i = 0; i < y_size*(periods+y_kmin); i++)
-    ya[i] = y[i];
-  slowc_save = slowc;
-  res1bx = bksub(tbreak, last_period, Size, slowc_lbx);
-  t01 = clock();
-  End(Size);
+          /*The backward substitution*/
+          double slowc_lbx = slowc, res1bx;
+          for (i = 0; i < y_size*(periods+y_kmin); i++)
+            ya[i] = y[i];
+          slowc_save = slowc;
+          res1bx = bksub(tbreak, last_period, Size, slowc_lbx);
+          t01 = clock();
+          End_GE(Size);
+        }
+      else if (stack_solve_algo == 1 || stack_solve_algo == 4)
+        Solve_Matlab_LU_UMFPack(A_m, b_m, Size, slowc);
+      else if (stack_solve_algo == 2)
+        Solve_Matlab_GMRES(A_m, b_m, Size, slowc, blck);
+      else if (stack_solve_algo == 3)
+        Solve_Matlab_BiCGStab(A_m, b_m, Size, slowc, blck);
+    }
   if (print_it)
     {
       clock_t t2 = clock();

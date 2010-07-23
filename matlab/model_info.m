@@ -34,7 +34,7 @@ if(isfield(M_,'block_structure'))
         end;
         for j=1:size_block
             if(j==1)
-                fprintf('| %3d (%4d) | %10d | %30s | %14d | %-6d %24s |\n',i,M_.block_structure.block(i).num,size_block,Sym_type(M_.block_structure.block(i).Simulation_Type),M_.block_structure.block(i).equation(j),M_.block_structure.block(i).variable(j),M_.endo_names(M_.block_structure.block(i).variable(j),:));
+                fprintf('| %10d | %10d | %30s | %14d | %-6d %24s |\n',i,size_block,Sym_type(M_.block_structure.block(i).Simulation_Type),M_.block_structure.block(i).equation(j),M_.block_structure.block(i).variable(j),M_.endo_names(M_.block_structure.block(i).variable(j),:));
             else
                 fprintf('| %10s | %10s | %30s | %14d | %-6d %24s |\n','','','',M_.block_structure.block(i).equation(j),M_.block_structure.block(i).variable(j),M_.endo_names(M_.block_structure.block(i).variable(j),:));
             end;

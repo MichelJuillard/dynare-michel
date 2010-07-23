@@ -29,7 +29,8 @@ function steady_()
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 global M_ oo_ it_ options_
 
-if options_.bytecode && options_.solve_algo ~= 5
+if options_.bytecode && ...
+  (options_.solve_algo ~= 1 && options_.solve_algo ~= 2 && options_.solve_algo ~= 3 && options_.solve_algo ~= 4 && options_.solve_algo ~= 5)
     error('STEADY: for the moment, you must use solve_algo=5 with bytecode option')
 end
 if ~options_.bytecode && options_.solve_algo == 5
@@ -75,7 +76,9 @@ if options_.steadystate_flag
                 check1 = 1;
             end
         elseif options_.block && options_.bytecode
-            [residuals, check1] = bytecode('evaluate','static');
+            [residuals, check1] = bytecode('evaluate','static',oo_.steady_state,...
+                                   [oo_.exo_steady_state; ...
+                                oo_.exo_det_steady_state], M_.params, 1);
         else
             check1 = 0;
             check1 = max(abs(feval([M_.fname '_static'],...
