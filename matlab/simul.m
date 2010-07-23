@@ -81,7 +81,9 @@ else
     if(options_.bytecode)
         oo_.endo_simul=bytecode('dynamic');
     else
-        if M_.maximum_endo_lag ==1 & M_.maximum_endo_lead <= 1
+        if M_.maximum_endo_lead == 0
+            error('simul doesn''t simulate purely backward models')
+        elseif M_.maximum_endo_lag == 1 && M_.maximum_endo_lead == 1
             sim1 ;
         else
             simk ;
