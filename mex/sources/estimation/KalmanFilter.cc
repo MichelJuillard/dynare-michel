@@ -65,7 +65,7 @@ KalmanFilter::compute_zeta_varobs_back_mixed(const std::vector<size_t> &zeta_bac
             zeta_mixed_arg.begin(), zeta_mixed_arg.end(),
             back_inserter(zeta_back_mixed));
   set_union(zeta_back_mixed.begin(), zeta_back_mixed.end(),
-            varobs_arg.begin(), varobs_arg.end(),
+            varobs_sorted.begin(), varobs_sorted.end(),
             back_inserter(zeta_varobs_back_mixed));
   return zeta_varobs_back_mixed;
 }
@@ -95,7 +95,6 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
 {
   double loglik=0.0, ll, logFdet, Fdet;
   size_t p = Finv.getRows();
-
   bool nonstationary = true;
   for (size_t t = 0; t < detrendedDataView.getCols(); ++t)
     {
@@ -130,7 +129,12 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
           blas::gemm("N", "N", 1.0, T, Pstar, 0.0, Ptmp);
           // 3) Pt+1= Ptmp*T' +RQR'
           Pstar = RQRt;
-          blas::gemm("N", "T", 1.0, Ptmp, T, 1.0, Pstar);
+          //blas::gemm("N", "T", 1.0, Ptmp, T, 1.0, Pstar);
+          //enforce Pstar symmetry with P=(P+P')/2=0.5P+0.5P'
+          blas::gemm("N", "T", 0.5, Ptmp, T, 0.5, Pstar);
+          mat::transpose(Ptmp, Pstar);
+          mat::add(Pstar,Ptmp);
+
           if (t>0)
             nonstationary = mat::isDiff(KFinv, oldKFinv, riccati_tol);
           oldKFinv=KFinv;
@@ -139,6 +143,7 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
       // err= Yt - Za
       MatrixConstView yt(detrendedDataView, 0, t, detrendedDataView.getRows(), 1); // current observation vector
       vt = yt;
+   
       blas::gemm("N", "N", -1.0, Z, a_init, 1.0, vt);
       // at+1= T(at+ KFinv *err)
       blas::gemm("N", "N", 1.0, KFinv, vt, 1.0, a_init);
