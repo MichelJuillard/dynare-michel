@@ -230,8 +230,9 @@ if M_.maximum_endo_lead == 0
         end
     else % use original Dynare solver
         [k1,junk,k2] = find(kstate(:,4));
-        dr.ghx(:,k1) = -b\jacobia_(:,k2); 
-        if M_.exo_nbr
+        dr.ghx(:,k1) = -b\jacobia_(:,k2);
+        % with simul, the Jacobian doesn't contain derivatives w.r. to shocks
+        if size(jacobia_,2) > nz
             dr.ghu = -b\jacobia_(:,nz+1:end);
         end
     end % if not use AIM or not...
@@ -360,16 +361,27 @@ else  % use original Dynare solver
     end
 
     if nba ~= nyf
-        temp = sort(abs(dr.eigval));
-        if nba > nyf
-            temp = temp(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
-            info(1) = 3;
-        elseif nba < nyf;
-            temp = temp(nd-nyf+1:nd-nba)-1-options_.qz_criterium;
-            info(1) = 4;
+        sorted_roots = sort(abs(dr.eigval));
+        if isfield(options_,'indeterminacy_continuity')
+            if options_.indeterminacy_msv == 1
+                [ss,tt,w,q] = qz(e',d');
+                [ss,tt,w,q] = reorder(ss,tt,w,q);
+                ss = ss';
+                tt = tt';
+                w  = w';
+                nba = nyf;
+            end
+        else
+            if nba > nyf
+                temp = sorted_roots(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
+                info(1) = 3;
+            elseif nba < nyf;
+                temp = sorted_roots(nd-nyf+1:nd-nba)-1-options_.qz_criterium;
+                info(1) = 4;
+            end
+            info(2) = temp'*temp;
+            return
         end
-        info(2) = temp'*temp;
-        return
     end
 
     np = nd - nyf;
