@@ -1,5 +1,5 @@
-function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel(fcn,x0,H0,grad,crit,nit,method,epsilon,varargin)
-%[fhat,xhat,ghat,Hhat,itct,fcount,retcodehat] = csminwel(fcn,x0,H0,grad,crit,nit,method,varargin)
+function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel1(fcn,x0,H0,grad,crit,nit,method,epsilon,varargin)
+%[fhat,xhat,ghat,Hhat,itct,fcount,retcodehat] = csminwel1(fcn,x0,H0,grad,crit,nit,method,epsilon,varargin)
 % fcn:   string naming the objective function to be minimized
 % x0:    initial value of the parameter vector
 % H0:    initial value for the inverse Hessian.  Must be positive definite.
@@ -10,7 +10,7 @@ function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel(fcn,x0,H0,grad,crit,nit,me
 %        function value by more than crit.
 % nit:   Maximum number of iterations.
 % method: integer scalar, 2, 3 or 5 points formula.
-% penalty: scalar double, size of the penality.
+% epsilon: scalar double, numerical differentiation increment
 % varargin: A list of optional length of additional parameters that get handed off to fcn each
 %        time it is called.
 %        Note that if the program ends abnormally, it is possible to retrieve the current x,

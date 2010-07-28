@@ -209,10 +209,10 @@ if options.optimization_routine==1
     % Minimization of the objective function.
     if nargin==2
         [fval,param,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-            csminwel('smm_objective',xparam,H0,[],ct,it,2,options_.gradient_epsilon,sample_moments,weighting_matrix,options);    
+            csminwel1('smm_objective',xparam,H0,[],ct,it,2,options_.gradient_epsilon,sample_moments,weighting_matrix,options);    
     elseif nargin>2
         [fval,param,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-            csminwel('smm_objective',xparam,H0,[],ct,it,2,options_.gradient_epsilon,sample_moments,weighting_matrix,options,parallel);
+            csminwel1('smm_objective',xparam,H0,[],ct,it,2,options_.gradient_epsilon,sample_moments,weighting_matrix,options,parallel);
     end
 elseif options.optimization_routine==2
     optim_options = optimset('display','iter','MaxFunEvals',1000000,'MaxIter',6000,'TolFun',1e-4,'TolX',1e-4);
