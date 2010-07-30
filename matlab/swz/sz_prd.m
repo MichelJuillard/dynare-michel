@@ -492,7 +492,7 @@ if options_.ms.create_initialization_file == 1
             create_init_file=[c_path,'/sbvar_init_file ',matlab_filename,' ',markov_file,' ',options_.ms.output_file_tag];
             system(create_init_file); %Run operating system command and return result
         else
-            create_init_file=[c_path,'\sbvar_init.exe ',matlab_filename,' ',m_spec_path,'\',markov_file,' ',options_.ms.output_file_tag];
+            create_init_file=[c_path,'\sbvar_init.exe ',matlab_filename,' ',markov_file,' ',options_.ms.output_file_tag];
             dos(create_init_file)            
         end
     else           
