@@ -37,3 +37,4 @@ function swz_write_mhm_input(fname,options_ms)
     fprintf(fh,'3\n\n');
     fprintf(fh,'%f ',options_ms.dirichlet_scale);
     fprintf(fh,'\n');
+    fclose(fh);
