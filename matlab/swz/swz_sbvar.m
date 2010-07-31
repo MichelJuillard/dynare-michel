@@ -8,6 +8,8 @@ addpath([swz_root '/identification']);
 addpath([swz_root '/switching_specification']);
 addpath([swz_root '/mhm_specification']);
 
+clean_swz_files(M.fname);
+
 options.data = read_variables(options.datafile,options.varobs,[],options.xls_sheet,options.xls_range);
 
 if options.forecast == 0
