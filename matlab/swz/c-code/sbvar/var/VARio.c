@@ -701,6 +701,8 @@ void WriteAllParameters(FILE *f, char *filename, char *id, TStateModel *model)
 
   WriteTransitionMatrices(f_in,(char*)NULL,id,model);
   Write_VAR_Parameters(f_in,(char*)NULL,id,model);
+
+  if(!f) fclose(f_in);
 }
 
 /*******************************************************************************/

@@ -513,6 +513,7 @@ int main(int nargs, char **args)
       printf("Number inconsistent normalizations: %d\n",((T_VAR_Parameters*)mhm->model->theta)->WZ_inconsistancies);
       printf("Number singular inverse variances: %d\n\n",Get_VAR_Improper_Distribution_Counter());
 
+      fclose(mhm->f_out_regime_counts);
       fclose(mhm->f_out);
 
 /*        // After modified harmonic mean draws   ansi-c*/

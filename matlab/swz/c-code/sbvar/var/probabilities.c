@@ -130,6 +130,7 @@ int main(int nargs, char **args)
       fprintf(f_out,"\n");
     }
 
+  fclose(f_out);
   swzFree(spec);
   swzFree(out);
   swzFree(head);
