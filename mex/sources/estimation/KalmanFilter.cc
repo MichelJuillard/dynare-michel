@@ -24,6 +24,7 @@
 ///////////////////////////////////////////////////////////
 
 #include "KalmanFilter.hh"
+#include "LapackBindings.hh"
 
 KalmanFilter::~KalmanFilter()
 {
@@ -37,13 +38,14 @@ KalmanFilter::KalmanFilter(const std::string &dynamicDllFile, size_t n_endo, siz
                            double riccati_tol_arg, double lyapunov_tol_arg, int &info) :
   zeta_varobs_back_mixed(compute_zeta_varobs_back_mixed(zeta_back_arg, zeta_mixed_arg, varobs_arg)),
   Z(varobs_arg.size(), zeta_varobs_back_mixed.size()), T(zeta_varobs_back_mixed.size()), R(zeta_varobs_back_mixed.size(), n_exo),
-  Pstar(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()), Pinf(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()), RQRt(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()),
-  Ptmp(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()), F(varobs_arg.size(), varobs_arg.size()),
+  Pstar(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()), Pinf(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()), 
+  RQRt(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()), Ptmp(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()), F(varobs_arg.size(), varobs_arg.size()),
   Finv(varobs_arg.size(), varobs_arg.size()), K(zeta_varobs_back_mixed.size(), varobs_arg.size()), KFinv(zeta_varobs_back_mixed.size(), varobs_arg.size()),
-  oldKFinv(zeta_varobs_back_mixed.size(), varobs_arg.size()), Finverter(varobs_arg.size()), a_init(zeta_varobs_back_mixed.size(), 1),
+  oldKFinv(zeta_varobs_back_mixed.size(), varobs_arg.size()), a_init(zeta_varobs_back_mixed.size(), 1),
   a_new(zeta_varobs_back_mixed.size(), 1), vt(varobs_arg.size(), 1), vtFinv(1, varobs_arg.size()), vtFinvVt(1), riccati_tol(riccati_tol_arg),
   initKalmanFilter(dynamicDllFile, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg,
-                   zeta_static_arg, zeta_varobs_back_mixed, qz_criterium_arg, lyapunov_tol_arg, info)
+                   zeta_static_arg, zeta_varobs_back_mixed, qz_criterium_arg, lyapunov_tol_arg, info),
+  FUTP(varobs_arg.size()*(varobs_arg.size()+1)/2)
 {
   a_init.setAll(0.0);
   Z.setAll(0.0);
@@ -83,7 +85,12 @@ KalmanFilter::compute(const MatrixConstView &dataView, VectorView &steadyState,
     initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T, 
                               penalty, dataView, detrendedDataView, info);
 
-  return filter(detrendedDataView, H, vll, start, info);
+  double lik= filter(detrendedDataView, H, vll, start, info);
+
+  if (info != 0)
+    return penalty;
+  else 
+    return lik;
 
 };
 
@@ -110,13 +117,57 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
 
           // Finv=inv(F)
           mat::set_identity(Finv);
-          Finverter.invMult("N", F, Finv); // F now contains its LU decomposition!
+          // Pack F upper trinagle as vector
+          for (size_t i=1;i<=p;++i)
+            for(size_t j=i;j<=p;++j)
+              FUTP(i + (j-1)*j/2 -1) = F(i-1,j-1);
+
+          info=lapack::choleskySolver(FUTP, Finv, "U"); // F now contains its Chol decomposition!
+          if (info<0)
+            {
+              std::cout << "Info:" << info << std::endl;
+              std::cout << "t:" << t << std::endl;
+              return 0;
+            }
+          if (info>0)
+            {
+              //enforce Pstar symmetry with P=(P+P')/2=0.5P+0.5P'
+              mat::transpose(Ptmp, Pstar);
+              mat::add(Pstar,Ptmp);
+              for (size_t i=0;i<Pstar.getCols();++i)
+                for(size_t j=0;j<Pstar.getCols();++j)
+                  Pstar(i,j)*=0.5;
+
+              // K=PZ'
+              blas::gemm("N", "T", 1.0, Pstar, Z, 0.0, K);
+
+              //F=ZPZ' +H = ZK+H
+              F = H;
+              blas::gemm("N", "N", 1.0, Z, K, 1.0, F);
+
+              // Finv=inv(F)
+              mat::set_identity(Finv);
+              // Pack F upper trinagle as vector
+              for (size_t i=1;i<=p;++i)
+                for(size_t j=i;j<=p;++j)
+                  FUTP(i + (j-1)*j/2 -1) = F(i-1,j-1);
+
+              info=lapack::choleskySolver(FUTP, Finv, "U"); // F now contains its Chol decomposition!
+              if (info!=0)
+                {
+                  return 0;
+                }
+
+            }
           // KFinv gain matrix
           blas::gemm("N", "N", 1.0, K, Finv, 0.0, KFinv);
           // deteminant of F:
           Fdet = 1;
-          for (size_t d = 0; d < p; ++d)
-            Fdet *= (-F(d, d));
+          for (size_t d = 1; d <= p; ++d)
+            Fdet *= FUTP(d + (d-1)*d/2 -1);
+          Fdet *=Fdet;//*pow(-1.0,p);
+          //          for (size_t d = 0; d < p; ++d)
+          //            Fdet *= (-F(d, d));
 
           logFdet=log(fabs(Fdet));
 
@@ -129,11 +180,11 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
           blas::gemm("N", "N", 1.0, T, Pstar, 0.0, Ptmp);
           // 3) Pt+1= Ptmp*T' +RQR'
           Pstar = RQRt;
-          //blas::gemm("N", "T", 1.0, Ptmp, T, 1.0, Pstar);
+          blas::gemm("N", "T", 1.0, Ptmp, T, 1.0, Pstar);
           //enforce Pstar symmetry with P=(P+P')/2=0.5P+0.5P'
-          blas::gemm("N", "T", 0.5, Ptmp, T, 0.5, Pstar);
-          mat::transpose(Ptmp, Pstar);
-          mat::add(Pstar,Ptmp);
+          //blas::gemm("N", "T", 0.5, Ptmp, T, 0.5, Pstar);
+          //mat::transpose(Ptmp, Pstar);
+          //mat::add(Pstar,Ptmp);
 
           if (t>0)
             nonstationary = mat::isDiff(KFinv, oldKFinv, riccati_tol);

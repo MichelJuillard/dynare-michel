@@ -30,7 +30,7 @@ namespace lapack
   // calc Cholesky Decomposition (Mat A, char "U"pper/"L"ower)
   template<class Mat>
   inline int
-  choleskyDecomp(Mat A, const char *UL)
+  choleskyDecomp(Mat &A, const char *UL)
   {
     assert(A.getCols() == A.getRows());
     lapack_int lpinfo = 0;
@@ -42,12 +42,24 @@ namespace lapack
   }
 
 
- /**
- * "DSTEQR computes all eigenvalues and, optionally, eigenvectors	of a sym-
- * metric tridiagonal matrix using the implicit QL or QR	method.	 The eigen-
- * vectors of a full or band symmetric matrix can also be found if DSYTRD or
- * DSPTRD or DSBTRD has been used to reduce this	matrix to tridiagonal form."
- */
+  // calc Cholesky Decomposition based solution X to A*X=B
+  // for A pos. def. and symmetric supplied as uppper/lower triangle
+  // packed in a vector if UPLO = 'U', AP(i + (j-1)*j/2) = A(i,j) for 1<=i<=j;
+  // solutino X is returned in B and if B_in=I then B_out=X=inv(A)
+  // A_out contains uupper or lower Cholesky decomposition
+  template<class VecA, class MatB>
+  inline int
+  choleskySolver(VecA &A, MatB &B, const char *UL)
+  {
+    //assert(A.getCols() == A.getRows());
+    lapack_int lpinfo = 0;
+    lapack_int size = B.getRows();
+    lapack_int bcols = B.getCols();
+    lapack_int ldl = B.getLd();
+    dppsv(UL, &size, &bcols, A.getData(), B.getData(), &ldl, &lpinfo);
+    int info = (int) lpinfo;
+    return info;
+  }
 
 
 } // End of namespace
