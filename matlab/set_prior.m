@@ -90,7 +90,7 @@ if nvn
     bayestopt_.p3 = [ bayestopt_.p3; estim_params_.var_endo(:,8)];
     bayestopt_.p4 = [ bayestopt_.p4; estim_params_.var_endo(:,9)];
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.var_endo(:,10)];
-    bayestopt_.name = cellstr(strvcat(char(bayestopt_.name), M_.endo_names(estim_params_.var_endo(:,1),:)));
+    bayestopt_.name = cellstr(strvcat(char(bayestopt_.name), options_.varobs(estim_params_.var_endo(:,1),:)));
 end
 if ncx
     xparam1 = [xparam1; estim_params_.corrx(:,3)];

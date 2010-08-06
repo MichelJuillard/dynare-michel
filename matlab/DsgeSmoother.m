@@ -191,7 +191,7 @@ data1 = Y-trend;
 if any(any(H ~= 0))   % should be replaced by a flag
     if kalman_algo == 1
         [alphahat,epsilonhat,etahat,ahat,P,aK,PK,decomp] = ...
-            kalman_smoother(ST,Z,R1,Q,H,Pinf,Pstar,data1,nobs,np,smpl);
+            kalman_smoother(T,R,Q,H,Pstar,data1,start,mf,kalman_tol,riccati_tol);
         if all(alphahat(:)==0)
             kalman_algo = 2;
             if ~estim_params_.ncn
