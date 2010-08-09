@@ -45,23 +45,29 @@ function swz_write_markov_file(fname,M,options)
  
         fprintf(fh,['\n//== Free Dirichet dimensions for state_variable[%d]  ' ...
                     '==//\n'],i_chain);
-        fprintf(fh,'%d ',repmat(n_states,1,n_states));
+        %        fprintf(fh,'%d ',repmat(n_states,1,n_states));
+        fprintf(fh,'%d ',repmat(2,1,n_states));
         fprintf(fh,'\n\n');
 
         %//== The jth restriction matrix is n_states-by-free[j].  Each row of the restriction
         %//== matrix has exactly one non-zero entry and the sum of each column must be one.
         fprintf(fh,['//== Column restrictions for state_variable[%d] ' ...
                     '==//\n'],i_chain);
-        if n_states == 2
-            M = eye(2);
-            for i_state = 1:2
-                for j_state = 1:2
-                    fprintf(fh,'%d ',M(j_state,:));
-                    fprintf(fh,'\n');
-                end
+        for i_state = 1:n_states
+            if i_state == 1
+                M = eye(n_states,2);
+            elseif i_state == n_states
+                M = [zeros(n_states-2,2); eye(2)];
+            else
+                M = zeros(n_states,2);
+                M(i_state+[-1 1],1) = ones(2,1)/2;
+                M(i_state,2) = 1;
+            end
+            for j_state = 1:n_states
+                fprintf(fh,'%d ',M(j_state,:));
                 fprintf(fh,'\n');
             end
-        else
+            fprintf(fh,'\n');
         end
     end
 
