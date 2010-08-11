@@ -355,10 +355,12 @@ localVars.tit=tit;
 localVars.nn=nn;
 localVars.MAX_nirfs_dsgevar=MAX_nirfs_dsgevar;
 localVars.HPDIRF=HPDIRF;
-localVars.HPDIRFdsgevar=HPDIRFdsgevar;
-localVars.MeanIRFdsgevar = MeanIRFdsgevar;
 localVars.varlist=varlist;
 localVars.MaxNumberOfPlotPerFigure=MaxNumberOfPlotPerFigure;
+if options_.dsge_var
+    localVars.HPDIRFdsgevar=HPDIRFdsgevar;
+    localVars.MeanIRFdsgevar = MeanIRFdsgevar;
+end    
 
 %%% The files .TeX are genereted in sequential way always!
 
