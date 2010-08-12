@@ -70,12 +70,12 @@ private:
   Matrix RQRt, Ptmp;  //mm*mm variance-covariance matrix of variable disturbances
   Matrix F, Finv;  // nob*nob F=ZPZt +H an inv(F)
   Matrix K,  KFinv, oldKFinv; // mm*nobs K=PZt and K*Finv gain matrices
-  LUSolver Finverter; // matrix inversion algorithm
   Matrix a_init, a_new; // state vector
   Matrix vt; // current observation error vectors
   Matrix vtFinv, vtFinvVt; // intermeiate observation error *Finv vector
   double riccati_tol;
   InitializeKalmanFilter initKalmanFilter; //Initialise KF matrices
+  Vector FUTP; // F upper triangle packed as vector FUTP(i + (j-1)*j/2) = F(i,j) for 1<=i<=j;
 
   // Method
   double filter(const MatrixView &detrendedDataView,  const Matrix &H, VectorView &vll, size_t start, int &info);

@@ -132,6 +132,7 @@ logposterior(const VectorConstView &estParams, const MatrixConstView &data,
   double qz_criterium = *mxGetPr(mxGetField(options_, 0, "qz_criterium"));
   double lyapunov_tol = *mxGetPr(mxGetField(options_, 0, "lyapunov_complex_threshold"));
   double riccati_tol = *mxGetPr(mxGetField(options_, 0, "riccati_tol"));
+  size_t presample = (size_t) *mxGetPr(mxGetField(options_, 0, "presample"));
 
   std::vector<size_t> varobs;
   const mxArray *varobs_mx = mxGetField(options_, 0, "varobs_id");
@@ -175,16 +176,17 @@ logposterior(const VectorConstView &estParams, const MatrixConstView &data,
   Vector deepParams(n_param);
   deepParams = VectorConstView(mxGetPr(mxGetField(M_, 0, "params")), n_param, 1);
   Matrix Q(n_exo);
-  Q = MatrixConstView(mxGetPr(mxGetField(M_, 0, "Sigma_e")), n_exo, n_exo, 1);
+  Q = MatrixConstView(mxGetPr(mxGetField(M_, 0, "Sigma_e")), n_exo, n_exo, n_exo);
+  
   Matrix H(n_varobs);
   const mxArray *H_mx = mxGetField(M_, 0, "H");
   if (mxGetM(H_mx) == 1 && mxGetN(H_mx) == 1 && *mxGetPr(H_mx) == 0)
     H.setAll(0.0);
   else
-    H = MatrixConstView(mxGetPr(mxGetField(M_, 0, "H")), n_varobs, n_varobs, 1);
+    H = MatrixConstView(mxGetPr(mxGetField(M_, 0, "H")), n_varobs, n_varobs, n_varobs);
 
   // Compute the posterior
-  double logPD = lpd.compute(steadyState, estParams2, deepParams, data, Q, H, 0, info);
+  double logPD =lpd.compute(steadyState, estParams2, deepParams, data, Q, H, presample, info);
 
   // Cleanups
   for (std::vector<EstimatedParameter>::iterator it = estParamsInfo.begin();
