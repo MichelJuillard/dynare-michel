@@ -53,11 +53,11 @@ int lurgen(TSdmatrix *lu_dm, TSivector *pivot_dv, TSdmatrix *x_dm) {
    errflag2 = errflag;
    pivot_p = tzMalloc(mindim, lapack_int);
    if (!pivot_dv)
-      dgetrf_(&nrows2, &ncols2, LU, &nrows2, pivot_p, &errflag2);
+      dgetrf(&nrows2, &ncols2, LU, &nrows2, pivot_p, &errflag2);
    else {
       if ( pivot_dv->n != mindim) fn_DisplayError("Make sure the dimension of the input vector pivot_dv is the minimum number of row number and column number of the input matrix x_dm");
 
-      dgetrf_(&nrows2, &ncols2, LU, &nrows2, pivot_p, &errflag2);
+      dgetrf(&nrows2, &ncols2, LU, &nrows2, pivot_p, &errflag2);
       for(i=0; i<mindim; i++)
         pivot_dv->v[i] = pivot_p[i];
    }
@@ -112,7 +112,7 @@ int eigrsym(TSdvector *eval_dv, TSdmatrix *eVec_dm, const TSdmatrix *S_dm)
    n2 = n1;
    lwork2 = lwork;
    errflag2 = errflag;
-   dsyev_( (eVec_dm) ? "V" : "N", (S_dm->flag & M_SU) ? "U" : "L", &n2, tmpd0_m, &n2, eval_dv->v, work_p, &lwork2, &errflag2);
+   dsyev( (eVec_dm) ? "V" : "N", (S_dm->flag & M_SU) ? "U" : "L", &n2, tmpd0_m, &n2, eval_dv->v, work_p, &lwork2, &errflag2);
    errflag = errflag2;
    if (work_p[0]>lwork) printf("Warning for /mathlib.c/eigrsym(): needs at least %d workspace for good performance "
                                  "but lwork is allocated with only %d space!\n", (int)work_p[0], lwork);
@@ -216,7 +216,7 @@ int eigrgen(TSdzvector *vals_dzv, TSdzmatrix *rights_dzm, TSdzmatrix *lefts_dzm,
    n2 = n1;
    lwork2 = lwork;
    errflag2 = errflag;
-   dgeev_( (levecr_m) ? "V" : "N", (revecr_m) ? "V" : "N", &n2, tmpd0_m, &n2, evalr_v, evali_v,
+   dgeev( (levecr_m) ? "V" : "N", (revecr_m) ? "V" : "N", &n2, tmpd0_m, &n2, evalr_v, evali_v,
                                                           levecr_m, &n2, revecr_m, &n2, work_p, &lwork2, &errflag2);
    errflag = errflag2;
    vals_dzv->real->flag = V_DEF;
@@ -316,7 +316,7 @@ int chol(TSdmatrix *D_dm, TSdmatrix *S_dm, const char ul) {
             }
             _m2 = _m;
             errflag2 = errflag;
-            dpotrf_("U", &_m2, D, &_m2, &errflag2);
+            dpotrf("U", &_m2, D, &_m2, &errflag2);
             errflag = errflag2;
             break;
          case 'L': case 'l':
@@ -346,7 +346,7 @@ int chol(TSdmatrix *D_dm, TSdmatrix *S_dm, const char ul) {
 /*              //??????NOT tested yet.   ansi-c*/
             _m2 = _m;
             errflag2 = errflag;
-            dpotrf_("L", &_m2, D, &_m2, &errflag2);
+            dpotrf("L", &_m2, D, &_m2, &errflag2);
             errflag = errflag2;
             break;
          default:
@@ -357,7 +357,7 @@ int chol(TSdmatrix *D_dm, TSdmatrix *S_dm, const char ul) {
       if ( (ul=='U' || ul=='u') && (D_dm->flag & M_SU) ) {
         _m2 = _m;
         errflag2 = errflag;
-        dpotrf_("U", &_m2, D, &_m2, &errflag2);
+        dpotrf("U", &_m2, D, &_m2, &errflag2);
         errflag = errflag2;
          D_dm->flag = M_UT;
       }
@@ -365,7 +365,7 @@ int chol(TSdmatrix *D_dm, TSdmatrix *S_dm, const char ul) {
 /*           //Tested.  It works!   ansi-c*/
         _m2 = _m;
         errflag2 = errflag;
-        dpotrf_("L", &_m2, D, &_m2, &errflag2);
+        dpotrf("L", &_m2, D, &_m2, &errflag2);
         errflag = errflag2;
          D_dm->flag = M_LT;
       }
@@ -418,13 +418,13 @@ int invrtri(TSdmatrix *X_dm, TSdmatrix *A_dm, const char un)
    _n2 = _n;
    errflag2 = errflag;
    if (X==A) {
-      dtrtri_((A_dm->flag & M_UT) ? "U" : "L", (un=='U' || un=='u') ? "U" : "N", &_n2, X, &_n2, &errflag2);
+      dtrtri((A_dm->flag & M_UT) ? "U" : "L", (un=='U' || un=='u') ? "U" : "N", &_n2, X, &_n2, &errflag2);
       errflag = errflag2;
       if (errflag)  return (errflag);
    }
    else {
       memcpy(X, A, _n*_n*sizeof(double));
-      dtrtri_((A_dm->flag & M_UT) ? "U" : "L", (un=='U' || un=='u') ? "U" : "N", &_n2, X, &_n2, &errflag2);
+      dtrtri((A_dm->flag & M_UT) ? "U" : "L", (un=='U' || un=='u') ? "U" : "N", &_n2, X, &_n2, &errflag2);
       errflag = errflag2;
       if (errflag)  return (errflag);
       else  X_dm->flag = A_dm->flag;
@@ -473,11 +473,11 @@ int invspd(TSdmatrix *X_dm, TSdmatrix *A_dm, const char ul)
 /*        //=== Choleski decomposition.   ansi-c*/
       _n2 = _n;
       errflag2 = errflag;
-      dpotrf_(((ul=='U') || (ul=='u')) ? "U" : "L", &_n2, X, &_n2, &errflag2);
+      dpotrf(((ul=='U') || (ul=='u')) ? "U" : "L", &_n2, X, &_n2, &errflag2);
       errflag = errflag2;
       if (errflag)  return (errflag);
 /*        //=== Takes inverse.   ansi-c*/
-      dpotri_(((ul=='U') || (ul=='u')) ? "U" : "L", &_n2, X, &_n2, &errflag2);
+      dpotri(((ul=='U') || (ul=='u')) ? "U" : "L", &_n2, X, &_n2, &errflag2);
       errflag = errflag2;
       A_dm->flag = ((ul=='U') || (ul=='u')) ? M_SU : M_SL;
       return (errflag);
@@ -492,11 +492,11 @@ int invspd(TSdmatrix *X_dm, TSdmatrix *A_dm, const char ul)
 /*        //=== Choleski decomposition.   ansi-c*/
       _n2 = _n;
       errflag2 = errflag;
-      dpotrf_(((ul=='U') || (ul=='u')) ? "U" : "L", &_n2, X, &_n2, &errflag2);
+      dpotrf(((ul=='U') || (ul=='u')) ? "U" : "L", &_n2, X, &_n2, &errflag2);
       errflag = errflag2;
       if (errflag)  return (errflag);
 /*        //=== Takes inverse.   ansi-c*/
-      dpotri_(((ul=='U') || (ul=='u')) ? "U" : "L", &_n2, X, &_n2, &errflag2);
+      dpotri(((ul=='U') || (ul=='u')) ? "U" : "L", &_n2, X, &_n2, &errflag2);
       errflag = errflag2;
       X_dm->flag = ((ul=='U') || (ul=='u')) ? M_SU : M_SL;
       return (errflag);
@@ -545,7 +545,7 @@ int invrgen(TSdmatrix *X_dm, TSdmatrix *A_dm)
    if (X==A) {
      _n2 = _n;
      errflag2 = errflag;
-     dgetrf_(&_n2, &_n2, A, &_n2, ipivot, &errflag2);
+     dgetrf(&_n2, &_n2, A, &_n2, ipivot, &errflag2);
      errflag = errflag2;
       if (errflag) {
 /*  //         A_dm->flag = M_UNDEF;   ansi-c*/
@@ -554,7 +554,7 @@ int invrgen(TSdmatrix *X_dm, TSdmatrix *A_dm)
          return errflag;
       }
       lwork2 = lwork;
-      dgetri_(&_n2, A, &_n2, ipivot, work, &lwork2, &errflag2);
+      dgetri(&_n2, A, &_n2, ipivot, work, &lwork2, &errflag2);
       errflag = errflag2;
       if (work[0]>lwork) printf("Warning for /mathlib.c/invrgen(); when calling MKL dgetri_(), we need at least %d workspace for good performance "
                                     "but lwork is allocated with only %d space!\n", (int)work[0], lwork);
@@ -568,7 +568,7 @@ int invrgen(TSdmatrix *X_dm, TSdmatrix *A_dm)
       memcpy(X, A, _n*_n*sizeof(double));
       _n2 = _n;
       errflag2 = errflag;
-      dgetrf_(&_n2, &_n2, X, &_n2, ipivot, &errflag2);
+      dgetrf(&_n2, &_n2, X, &_n2, ipivot, &errflag2);
       errflag = errflag2;
       if (errflag) {
 /*  //         X_dm->flag = M_UNDEF;   ansi-c*/
@@ -577,7 +577,7 @@ int invrgen(TSdmatrix *X_dm, TSdmatrix *A_dm)
          return errflag;
       }
       lwork2 = lwork;
-      dgetri_(&_n2, X, &_n2, ipivot, work, &lwork2, &errflag2);
+      dgetri(&_n2, X, &_n2, ipivot, work, &lwork2, &errflag2);
       errflag = errflag2;
       if (work[0]>lwork) printf("Warning for /mathlib.c/invrgen(); when calling MKL dgetri_(), we need at least %d workspace for good performance "
                                     "but lwork is allocated with only %d space!\n", (int)work[0], lwork);
@@ -689,7 +689,7 @@ int BdivA_rrect(TSdmatrix *X_dm, const TSdmatrix *B_dm, const char lr, const TSd
    info2 = info;
    for(i=0; i<_n; i++)
      jpvt_p2[i] = jpvt_p[i];
-   dgeqp3_(&_m2,&_n2,qra_p,&_m2,jpvt_p2,tau_p,work_p,&lwork2,&info2);
+   dgeqp3(&_m2,&_n2,qra_p,&_m2,jpvt_p2,tau_p,work_p,&lwork2,&info2);
    info = info2;
    for(i=0; i<_n; i++)
      jpvt_p[i] = jpvt_p2[i];
@@ -705,7 +705,7 @@ int BdivA_rrect(TSdmatrix *X_dm, const TSdmatrix *B_dm, const char lr, const TSd
    _r2 = _r;
    lwork2 = lwork;
    info2 = info;
-   dormqr_("L","T",&_m2,&_r2,&_n2,qra_p,&_m2,tau_p,qrb_p,&_m2,work_p,&lwork2,&info2);
+   dormqr("L","T",&_m2,&_r2,&_n2,qra_p,&_m2,tau_p,qrb_p,&_m2,work_p,&lwork2,&info2);
    info = info2;
    if (work_p[0]>lwork) printf("Warning for /mathlib.c/BdivA_rrect(); when calling MKL dormqr_(), we need at least %d workspace for good performance "
                                  "but lwork is allocated with only %d space!\n", (int)work_p[0], lwork);
@@ -808,7 +808,7 @@ int BdivA_rgens(TSdmatrix *X_dm, const TSdmatrix *B_dm, const char lr, const TSd
       _mlap = _m;
       _rlap = _r;
       info2 = info;
-      dgesv_(&_mlap, &_rlap, Atran_p, &_mlap, ipiv_p, Btran_p, &_mlap, &info2);
+      dgesv(&_mlap, &_rlap, Atran_p, &_mlap, ipiv_p, Btran_p, &_mlap, &info2);
       info = info2;
       for (_i=0; _i<_r; _i++)  cblas_dcopy(_m, Btran_p+_i*_m, 1, X+_i, _r);   /*  Copying the transpose of Btran(_m-by-_r) to X (_r-by-_m);   ansi-c*/
       X_dm->flag = M_GE;
@@ -831,7 +831,7 @@ int BdivA_rgens(TSdmatrix *X_dm, const TSdmatrix *B_dm, const char lr, const TSd
       _mlap = _m;
       _rlap = _r;
       info2 = info;
-      dgesv_(&_mlap, &_rlap, W, &_mlap, ipiv_p, X, &_mlap, &info2);
+      dgesv(&_mlap, &_rlap, W, &_mlap, ipiv_p, X, &_mlap, &info2);
       info = info2;
       X_dm->flag = M_GE;
 
@@ -895,7 +895,7 @@ int bdivA_rgens(TSdvector *x_dv, const TSdvector *b_dv, const char lr, const TSd
       _mlap = _m;
       _rlap = _r;
       info2 = info;
-      dgesv_(&_mlap, &_rlap, Atran_p, &_mlap, ipiv_p, x, &_mlap, &info2);
+      dgesv(&_mlap, &_rlap, Atran_p, &_mlap, ipiv_p, x, &_mlap, &info2);
       info = info2;
       x_dv->flag = V_DEF;
 
@@ -916,7 +916,7 @@ int bdivA_rgens(TSdvector *x_dv, const TSdvector *b_dv, const char lr, const TSd
       _mlap = _m;
       _rlap = _r;
       info2 = info;
-      dgesv_(&_mlap, &_rlap, W, &_mlap, ipiv_p, x, &_mlap, &info2);
+      dgesv(&_mlap, &_rlap, W, &_mlap, ipiv_p, x, &_mlap, &info2);
       info = info2;
       x_dv->flag = V_DEF;
 
@@ -977,7 +977,7 @@ void Aldivb_spd(TSdvector *x_dv, TSdmatrix *A_dm, TSdvector *b_dv, char an) {
    if (A_dm->flag & M_SU) {
       nrows2 = nrows;
       errflag2 = errflag;
-      dpotrf_("U", &nrows2, W, &nrows2, &errflag2);   /*  Choleski.  U'*U = W where W will be replaced by upper triangular U.   ansi-c*/
+      dpotrf("U", &nrows2, W, &nrows2, &errflag2);   /*  Choleski.  U'*U = W where W will be replaced by upper triangular U.   ansi-c*/
       errflag = errflag2;
       if (errflag)  fn_DisplayError(".../mathlib.c/Aldivb_spd():  Error when calling Choleski dpotrf_().  Check if the L input matrix A_dm is positive definite or has legal values");
       if (x==b)  {
@@ -996,7 +996,7 @@ void Aldivb_spd(TSdvector *x_dv, TSdmatrix *A_dm, TSdvector *b_dv, char an) {
    else if (A_dm->flag & M_SL) {    /*  ?????????? Not tested yet.   ansi-c*/
       nrows2 = nrows;
       errflag2 = errflag;
-      dpotrf_("L", &nrows2, W, &nrows2, &errflag2);   /*  Choleski.  L*L' = W where W will be replaced by lower triangular L.   ansi-c*/
+      dpotrf("L", &nrows2, W, &nrows2, &errflag2);   /*  Choleski.  L*L' = W where W will be replaced by lower triangular L.   ansi-c*/
       errflag = errflag2;
       if (errflag)  fn_DisplayError(".../mathlib.c/Aldivb_spd():  Error when calling Choleski dpotrf_().  Check if the L input matrix A_dm is positive definite or has legal values");
       if (x==b)  {
@@ -1168,7 +1168,7 @@ int eigrsym_decomp(double *eval_v, double *evec_m, const double *s_m, const int 
    n2 = n1;
    lwork2 = lwork;
    errflag2 = errflag;
-   dsyev_( (evec_m) ? "V" : "N", ((ul=='u') || (ul=='U')) ? "U" : "L", &n2, tmpd0_m, &n2, eval_v, work_p, &lwork2, &errflag2);
+   dsyev( (evec_m) ? "V" : "N", ((ul=='u') || (ul=='U')) ? "U" : "L", &n2, tmpd0_m, &n2, eval_v, work_p, &lwork2, &errflag2);
    errflag = errflag2;
    if (evec_m) memcpy(evec_m, tmpd0_m, square(_n)*sizeof(double));
 
@@ -1220,7 +1220,7 @@ int eigrgen_decomp(double *evalr_v, double *evali_v, double *revecr_m, double *r
    n2 = n1;
    lwork2 = lwork;
    errflag2 = errflag;
-   dgeev_( (levecr_m) ? "V" : "N", (revecr_m) ? "V" : "N", &n2, tmpd0_m, &n2, evalr_v, evali_v,
+   dgeev( (levecr_m) ? "V" : "N", (revecr_m) ? "V" : "N", &n2, tmpd0_m, &n2, evalr_v, evali_v,
                                                           levecr_m, &n2, revecr_m, &n2, work_p, &lwork2, &errflag2);
    errflag = errflag2;
 
@@ -1309,7 +1309,7 @@ int chol_decomp(double *D, const double *s_m, const int _n, const char ul) {
 /*        //=== Choleski decomposition.   ansi-c*/
       _m2 = _m;
       errflag2 = errflag;
-      dpotrf_(((ul=='u') || (ul=='U')) ? "U" : "L", &_m2, D, &_m2, &errflag2);
+      dpotrf(((ul=='u') || (ul=='U')) ? "U" : "L", &_m2, D, &_m2, &errflag2);
       errflag = errflag2;
 /*        //---   ansi-c*/
 /*        // if (errflag<0) fn_DisplayError("Some element has an illegal value");   ansi-c*/
@@ -1377,11 +1377,11 @@ int inv_spd(double *D, const double *s_m, const int _n, const char ul) {
 /*     //=== Choleski decomposition.   ansi-c*/
    _m2 = _m;
    errflag2 = errflag;
-   dpotrf_(((ul=='u') || (ul=='U')) ? "U" : "L", &_m2, D, &_m2, &errflag2);
+   dpotrf(((ul=='u') || (ul=='U')) ? "U" : "L", &_m2, D, &_m2, &errflag2);
    errflag = errflag2;
    if (errflag) return (errflag);
 /*     //=== Takes inverse.   ansi-c*/
-   dpotri_(((ul=='u') || (ul=='U')) ? "U" : "L", &_m2, D, &_m2, &errflag2);
+   dpotri(((ul=='u') || (ul=='U')) ? "U" : "L", &_m2, D, &_m2, &errflag2);
    errflag = errflag2;
    return (errflag);
 /*     //---   ansi-c*/
