@@ -72,8 +72,8 @@ AC_LANG_POP([C++])
 AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])
 AC_SUBST([LIBADD_DLOPEN])
 # Check for GSL, needed by SWZ
-AX_PATH_GSL
-AM_CONDITIONAL([HAVE_GSL], [test "x$no_gsl" = "x"])
+AX_GSL
+AM_CONDITIONAL([HAVE_GSL], [test "x$has_gsl" = "xyes"])
 
 AM_CONDITIONAL([DO_SOMETHING], [test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes"])
 
@@ -87,7 +87,7 @@ else
   BUILD_MEX_MATLAB="no (missing MATLAB, or unknown version, or unknown architecture)"
 fi
 
-if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$no_gsl" = "x"; then
+if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$has_gsl" = "xyes"; then
    BUILD_SWZ_MEX_MATLAB="yes"
 else
    BUILD_SWZ_MEX_MATLAB="no (missing GSL)"

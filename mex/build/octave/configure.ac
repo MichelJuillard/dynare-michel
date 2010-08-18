@@ -53,8 +53,8 @@ AC_LANG_POP([C++])
 AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])
 AC_SUBST([LIBADD_DLOPEN])
 # Check for GSL, needed by SWZ
-AX_PATH_GSL
-AM_CONDITIONAL([HAVE_GSL], [test "x$no_gsl" = "x"])
+AX_GSL
+AM_CONDITIONAL([HAVE_GSL], [test "x$has_gsl" = "xyes"])
 
 AM_CONDITIONAL([DO_SOMETHING], [test "x$MKOCTFILE" != "x"])
 
@@ -68,7 +68,7 @@ else
   BUILD_MEX_OCTAVE="no (missing mkoctfile)"
 fi
 
-if test "x$MKOCTFILE" != "x" -a "x$no_gsl" = "x"; then
+if test "x$MKOCTFILE" != "x" -a "x$has_gsl" = "xyes"; then
    BUILD_SWZ_MEX_OCTAVE="yes"
 else
    BUILD_SWZ_MEX_OCTAVE="no (missing GSL)"
