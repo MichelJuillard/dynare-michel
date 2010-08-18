@@ -62,7 +62,8 @@ case ${MATLAB_ARCH} in
         ;;
     esac
     MATLAB_DEFS="$MATLAB_DEFS -DNDEBUG"
-    MATLAB_LDFLAGS="-static-libgcc -shared \$(top_srcdir)/mex.def"
+    # Note that static-libstdc++ is only supported since GCC 4.5 (but generates no error on older versions)
+    MATLAB_LDFLAGS="-static-libgcc -static-libstdc++ -shared \$(top_srcdir)/mex.def"
     MATLAB_LIBS="$LIBLOC/libmex.lib $LIBLOC/libmx.lib $LIBLOC/libmwlapack.lib"
     # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
     AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} $LIBLOC/libmwblas.lib"])
