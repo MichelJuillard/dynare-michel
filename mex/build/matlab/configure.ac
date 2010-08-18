@@ -42,11 +42,9 @@ fi
 
 case ${host_os} in
   *cygwin*)
-    # MATLAB can't use native Cygwin DLL, so using MinGW 3 shipped with Cygwin
-    CC=gcc-3
-    CXX=g++-3
-    CFLAGS="$CFLAGS -mno-cygwin"
-    CXXFLAGS="$CXXFLAGS -mno-cygwin"
+    AC_MSG_WARN([You are compiling for the Cygwin target. This means that the MEX files will])
+    AC_MSG_WARN([not run from MATLAB, because it cannot load the Cygwin DLL.])
+    AC_MSG_WARN([This is probably not what you want. Consider using a MinGW cross-compiler.])
     ;;
 esac
 
