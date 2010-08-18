@@ -66,20 +66,20 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
   minimal_solving_periods = minimal_solving_periods_arg;
   stack_solve_algo = stack_solve_algo_arg;
   solve_algo = solve_algo_arg;
+  mxArray *M_ = mexGetVariable("global", "M_");
+  nb_endo = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
+  endo_name_length = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
+  P_endo_names = (char*) mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
+  nb_exo = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_names")));
+  exo_name_length = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_names")));
+  P_exo_names = (char*) mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_names")));
+  nb_param = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "param_names")));
+  param_name_length = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "param_names")));
+  P_param_names = (char*) mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "param_names")));
 }
 
 string
-Interpreter::remove_white(string str)
-{
-  string temp;
-  for (unsigned int i = 0; i < str.length(); i++)
-    if (str[i] != ' ')
-      temp += str[i];
-  return(temp);
-}
-
-string
-Interpreter::add_underscore_to_fpe(string str)
+Interpreter::add_underscore_to_fpe(const string &str)
 {
   string temp;
   int pos1 = -1, pos2 = -1;
@@ -102,102 +102,122 @@ Interpreter::add_underscore_to_fpe(string str)
             }
         }
     }
-  return(temp + "\n " + tmp_n );
+  temp += "\n" + tmp_n ;
+  return temp;
 }
 
 
 string
-Interpreter::get_variable(SymbolType variable_type, unsigned int variable_num)
+Interpreter::get_variable(const SymbolType variable_type, const unsigned int variable_num)
 {
   ostringstream res;
-#ifndef DEBUG_EX
-  mxArray *M_;
-  char * P;
-  unsigned int R, C;
-  M_ = mexGetVariable("global", "M_");
   switch(variable_type)
     {
     case eEndogenous:
-      C = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
-      R = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
-      P = (char*) mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "endo_names")));
-      if (variable_num < R)
-        for (unsigned int i = 0; i < C; i++)
-          res << P[2*(variable_num+i*R)];
+      if (variable_num < nb_endo)
+        {
+          for (unsigned int i = 0; i < endo_name_length; i++)
+            if (P_endo_names[2*(variable_num+i*nb_endo)] != ' ')
+              res << P_endo_names[2*(variable_num+i*nb_endo)];
+        }
       else
-        mexPrintf("=> Unknown endogenous variable n° %d",EQN_dvar1);
+        mexPrintf("=> Unknown endogenous variable n° %d",variable_num);
       break;
     case eExogenous:
     case eExogenousDet:
-      C = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_names")));
-      R = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_names")));
-      P = (char*) mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_names")));
-      if (variable_num < R)
-        for (unsigned int i = 0; i < C; i++)
-          res << P[2*(variable_num+i*R)];
+      if (variable_num < nb_exo)
+        {
+          for (unsigned int i = 0; i < exo_name_length; i++)
+            if (P_exo_names[2*(variable_num+i*nb_exo)] != ' ')
+              res << P_exo_names[2*(variable_num+i*nb_exo)];
+        }
       else
-        mexPrintf("=> Unknown exogenous variable n° %d",EQN_dvar1);
+        mexPrintf("=> Unknown exogenous variable n° %d",variable_num);
       break;
     case eParameter:
-      C = mxGetN(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "param_names")));
-      R = mxGetM(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "param_names")));
-      P = (char*) mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "param_names")));
-      if (variable_num < R)
-        for (unsigned int i = 0; i < C; i++)
-          res << P[2*(variable_num+i*R)];
+      if (variable_num < nb_param)
+        {
+          for (unsigned int i = 0; i < param_name_length; i++)
+            if (P_param_names[2*(variable_num+i*nb_param)] != ' ')
+              res << P_param_names[2*(variable_num+i*nb_param)];
+        }
       else
-        mexPrintf("=> Unknown parameter n° %d",EQN_dvar1);
+        mexPrintf("=> Unknown parameter n° %d",variable_num);
       break;
     default:
       break;
     }
-#endif
-  return(remove_white(res.str()));
+  return(res.str());
 }
 
 
 string
-Interpreter::error_location(bool evaluate)
+Interpreter::error_location(bool evaluate, bool steady_state)
 {
-  string tmp;
   stringstream Error_loc("");
-  switch(EQN_type)
-    {
-      case TemporaryTerm:
-        if (EQN_block_number > 1)
-          Error_loc << "temporary term " << EQN_equation+1 << " in block " << EQN_block+1;
-        else
-          Error_loc << "temporary term " << EQN_equation+1;
-        break;
-      case ModelEquation:
-        if (EQN_block_number > 1)
-          Error_loc << "equation " << EQN_equation+1 << " in block " << EQN_block+1;
-        else
-          Error_loc << "equation " << EQN_equation+1;
-        break;
-      case FirstEndoDerivative:
-        if (EQN_block_number > 1)
-          Error_loc << "first order derivative of equation " << EQN_equation+1 << " in block " << EQN_block+1 << " with respect to endogenous variable ";
-        else
-          Error_loc << "first order derivative of equation " << EQN_equation+1 << " with respect to endogenous variable " << get_variable(eEndogenous, EQN_dvar1);
-        break;
-      default:
-        return("???");
-        break;
-    }
-  Error_loc << "\n " << add_underscore_to_fpe(print_expression(it_code_expr, evaluate));
+  if (!steady_state)
+    switch(EQN_type)
+      {
+        case TemporaryTerm:
+          if (EQN_block_number > 1)
+            Error_loc << "temporary term " << EQN_equation+1 << " in block " << EQN_block+1 << " at time " << it_;
+          else
+            Error_loc << "temporary term " << EQN_equation+1 << " at time " << it_;
+          break;
+        case ModelEquation:
+          if (EQN_block_number > 1)
+            Error_loc << "equation " << EQN_equation+1 << " in block " << EQN_block+1 << " at time " << it_;
+          else
+            Error_loc << "equation " << EQN_equation+1 << " at time " << it_;
+          break;
+        case FirstEndoDerivative:
+          if (EQN_block_number > 1)
+            Error_loc << "first order derivative of equation " << EQN_equation+1 << " in block " << EQN_block+1 << " with respect to endogenous variable " << get_variable(eEndogenous, EQN_dvar1) << " at time " << it_;
+          else
+            Error_loc << "first order derivative of equation " << EQN_equation+1 << " with respect to endogenous variable " << get_variable(eEndogenous, EQN_dvar1) << " at time " << it_;
+          break;
+        default:
+          return("???");
+          break;
+      }
+  else
+    switch(EQN_type)
+      {
+        case TemporaryTerm:
+          if (EQN_block_number > 1)
+            Error_loc << "temporary term " << EQN_equation+1 << " in block " << EQN_block+1;
+          else
+            Error_loc << "temporary term " << EQN_equation+1;
+          break;
+        case ModelEquation:
+          if (EQN_block_number > 1)
+            Error_loc << "equation " << EQN_equation+1 << " in block " << EQN_block+1;
+          else
+            Error_loc << "equation " << EQN_equation+1;
+          break;
+        case FirstEndoDerivative:
+          if (EQN_block_number > 1)
+            Error_loc << "first order derivative of equation " << EQN_equation+1 << " in block " << EQN_block+1 << " with respect to endogenous variable "  << get_variable(eEndogenous, EQN_dvar1);
+          else
+            Error_loc << "first order derivative of equation " << EQN_equation+1 << " with respect to endogenous variable " << get_variable(eEndogenous, EQN_dvar1);
+          break;
+        default:
+          return("???");
+          break;
+      }
+  Error_loc << endl << add_underscore_to_fpe(print_expression(it_code_expr, evaluate));
   return(Error_loc.str());
 }
 
 double
-Interpreter::pow1(double a, double b, bool evaluate)
+Interpreter::pow1(double a, double b, bool evaluate, bool steady_state)
 {
   double r = pow_(a, b);
   if (isnan(r))
     {
       if (error_not_printed)
         {
-          mexPrintf("--------------------------------------\nError: X^a with X=%5.15f\n in %s \n--------------------------------------\n", a,error_location(evaluate).c_str());
+          mexPrintf("--------------------------------------\nError: X^a with X=%5.15f\n in %s \n--------------------------------------\n", a, error_location(evaluate, steady_state).c_str());
           error_not_printed = false;
           r = 0.0000000000000000000000001;
         }
@@ -208,14 +228,14 @@ Interpreter::pow1(double a, double b, bool evaluate)
 }
 
 double
-Interpreter::log1(double a, bool evaluate)
+Interpreter::log1(double a, bool evaluate, bool steady_state)
 {
   double r = log(a);
   if (isnan(r))
     {
       if (error_not_printed)
         {
-          mexPrintf("--------------------------------------\nError: log(X) with X=%5.15f\n in %s \n--------------------------------------\n", a,error_location(evaluate).c_str());
+          mexPrintf("--------------------------------------\nError: log(X) with X=%5.15f\n in %s \n--------------------------------------\n", a, error_location(evaluate, steady_state).c_str());
           error_not_printed = false;
           r = 0.0000000000000000000000001;
         }
@@ -226,14 +246,14 @@ Interpreter::log1(double a, bool evaluate)
 }
 
 double
-Interpreter::log10_1(double a, bool evaluate)
+Interpreter::log10_1(double a, bool evaluate, bool steady_state)
 {
   double r = log(a);
   if (isnan(r))
     {
       if (error_not_printed)
         {
-          mexPrintf("--------------------------------------\nError: log10(X) with X=%5.15f\n in %s \n--------------------------------------\n", a,error_location(evaluate).c_str());
+          mexPrintf("--------------------------------------\nError: log10(X) with X=%5.15f\n in %s \n--------------------------------------\n", a, error_location(evaluate, steady_state).c_str());
           error_not_printed = false;
           r = 0.0000000000000000000000001;
         }
@@ -377,9 +397,7 @@ Interpreter::print_expression(it_code_type it_code, bool evaluate)
             {
             case eParameter:
               var = ((FLDV_ *) it_code->second)->get_pos();
-              tmp_out.str("");
-              tmp_out << get_variable(eParameter, var);
-              Stack.push(tmp_out.str());
+              Stack.push(get_variable(eParameter, var));
               Stackf.push(params[var]);
               break;
             case eEndogenous:
@@ -431,16 +449,12 @@ Interpreter::print_expression(it_code_type it_code, bool evaluate)
             {
             case eParameter:
               var = ((FLDSV_ *) it_code->second)->get_pos();
-              tmp_out.str("");
-              tmp_out << get_variable(eParameter, var);
-              Stack.push(tmp_out.str());
+              Stack.push(get_variable(eParameter, var));
               Stackf.push(params[var]);
               break;
             case eEndogenous:
               var = ((FLDSV_ *) it_code->second)->get_pos();
-              tmp_out.str("");
-              tmp_out << get_variable(eEndogenous, var);
-              Stack.push(tmp_out.str());
+              Stack.push(get_variable(eEndogenous, var));
               if (it_code->first == FLDSV)
                 {
                   if (evaluate)
@@ -453,16 +467,12 @@ Interpreter::print_expression(it_code_type it_code, bool evaluate)
               break;
             case eExogenous:
               var = ((FLDSV_ *) it_code->second)->get_pos();
-              tmp_out.str("");
-              tmp_out << get_variable(eExogenous, var);
-              Stack.push(tmp_out.str());
+              Stack.push(get_variable(eExogenous, var));
               break;
               Stackf.push(x[var]);
             case eExogenousDet:
               var = ((FLDSV_ *) it_code->second)->get_pos();
-              tmp_out.str("");
-              tmp_out << get_variable(eExogenousDet, var);
-              Stack.push(tmp_out.str());
+              Stack.push(get_variable(eExogenousDet, var));
               Stackf.push(x[var]);
               break;
             case eModelLocalVariable:
@@ -1114,6 +1124,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
   double rr;
   double *jacob = NULL, *jacob_other_endo = NULL, *jacob_exo = NULL, *jacob_exo_det = NULL;
   EQN_block = block_num;
+  stack<double> Stack;
 #ifdef DEBUG
   mexPrintf("compute_block_time\n");
 #endif
@@ -1748,7 +1759,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
                 {
                   if (error_not_printed)
                     {
-                      mexPrintf("--------------------------------------\n  Error: Divide by zero with %5.15f/%5.15f\n in %s \n--------------------------------------\n", v1, v2,error_location(evaluate).c_str());
+                      mexPrintf("--------------------------------------\n  Error: Divide by zero with %5.15f/%5.15f\n in %s \n--------------------------------------\n", v1, v2,error_location(evaluate, steady_state).c_str());
                       error_not_printed = false;
                       r = 1e70;
                     }
@@ -1797,7 +1808,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
 #endif
               break;
             case oPower:
-              r = pow1(v1, v2, evaluate);
+              r = pow1(v1, v2, evaluate, steady_state);
               if (isnan(res1))
                 go_on = false;
               Stack.push(r);
@@ -1844,7 +1855,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
 #endif
               break;
             case oLog:
-              Stack.push(log1(v1, evaluate));
+              Stack.push(log1(v1, evaluate, steady_state));
               if (isnan(res1))
                 go_on = false;
 #ifdef DEBUG
@@ -1852,7 +1863,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
 #endif
               break;
             case oLog10:
-              Stack.push(log10_1(v1, evaluate));
+              Stack.push(log10_1(v1, evaluate, steady_state));
               if (isnan(res1))
                 go_on = false;
 #ifdef DEBUG
@@ -1963,9 +1974,11 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
           switch (op)
             {
               case oNormcdf:
-#ifndef _MSC_VER                Stack.push(0.5*(1+erf((v1-v2)/v3/M_SQRT2)));# ifdef DEBUG
+#ifndef _MSC_VER
+                Stack.push(0.5*(1+erf((v1-v2)/v3/M_SQRT2)));
+# ifdef DEBUG
                 tmp_out << " |normcdf(" << v1 << ", " << v2 << ", " << v3 << ")|";
-# endif
+#endif
 #else
                 // erf() does not exist in Microsoft Visual C++
                 mexErrMsgTxt("bytecode: normcdf() not supported on your platform");
@@ -2272,7 +2285,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
             }
           if (!cvg)
             {
-              mexPrintf("Convergence not achieved in block %d, after %d iterations\n", Block_Count, iter);
+              mexPrintf("In Solve Forward simple, convergence not achieved in block %d, after %d iterations\n", Block_Count+1, iter);
               mexPrintf("r[0]= %f\n", r[0]);
               return false;
             }
@@ -2311,7 +2324,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 }
               if (!cvg)
                 {
-                  mexPrintf("Convergence not achieved in block %d, at time %d after %d iterations\n", Block_Count, it_, iter);
+                  mexPrintf("In Solve Forward simple, convergence not achieved in block %d, at time %d after %d iterations\n", Block_Count, it_, iter);
                   mexErrMsgTxt("End of bytecode");
                 }
             }
@@ -2354,7 +2367,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
             }
           if (!cvg)
             {
-              mexPrintf("Convergence not achieved in block %d, after %d iterations\n", Block_Count, iter);
+              mexPrintf("In Solve Backward simple, convergence not achieved in block %d, after %d iterations\n", Block_Count+1, iter);
               return false;
             }
         }
@@ -2392,7 +2405,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 }
               if (!cvg)
                 {
-                  mexPrintf("Convergence not achieved in block %d, at time %d after %d iterations\n", Block_Count, it_, iter);
+                  mexPrintf("In Solve Backward simple, convergence not achieved in block %d, at time %d after %d iterations\n", Block_Count+1, it_, iter);
                   mexErrMsgTxt("End of bytecode");
                 }
             }
@@ -2459,7 +2472,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 }
               if (!cvg || !result)
                 {
-                  mexPrintf("Convergence not achieved in block %d, after %d iterations\n", Block_Count, iter);
+                  mexPrintf("In Solve Forward complete, convergence not achieved in block %d, after %d iterations\n", Block_Count+1, iter);
                   return false;
                 }
             }
@@ -2478,7 +2491,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number, solve_algo);
               if (!result)
                 {
-                  mexPrintf("Convergence not achieved in block %d\n", Block_Count);
+                  mexPrintf("In Solve Forward complete, convergence not achieved in block %d\n", Block_Count+1);
                   return false;
                 }
             }
@@ -2538,7 +2551,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                     }
                   if (!cvg)
                     {
-                      mexPrintf("Convergence not achieved in block %d, at time %d after %d iterations\n", Block_Count, it_, iter);
+                      mexPrintf("In Solve Forward complete, convergence not achieved in block %d, at time %d after %d iterations\n", Block_Count+1, it_, iter);
                       mexErrMsgTxt("End of bytecode");
                     }
                 }
@@ -2625,7 +2638,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 }
               if (!cvg || !result)
                 {
-                  mexPrintf("Convergence not achieved in block %d, after %d iterations\n", Block_Count, iter);
+                  mexPrintf("In Solve Backward complete, convergence not achieved in block %d, after %d iterations\n", Block_Count+1, iter);
                   return false;
                 }
             }
@@ -2643,7 +2656,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number, solve_algo);
               if (!result)
                 {
-                  mexPrintf("Convergence not achieved in block %d\n", Block_Count);
+                  mexPrintf("In Solve Backward complete, convergence not achieved in block %d\n", Block_Count+1);
                   return false;
                 }
             }
@@ -2703,7 +2716,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                     }
                   if (!cvg)
                     {
-                      mexPrintf("Convergence not achieved in block %d, at time %d after %d iterations\n", Block_Count, it_, iter);
+                      mexPrintf("In Solve Backward complete, convergence not achieved in block %d, at time %d after %d iterations\n", Block_Count+1, it_, iter);
                       mexErrMsgTxt("End of bytecode");
                     }
                 }
@@ -2796,7 +2809,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 cvg = (max_res < solve_tolf);
               u_count = u_count_saved;
               int prev_iter = iter;
-              simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods, EQN_block_number, stack_solve_algo);
+              simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods, EQN_block_number, stack_solve_algo, endo_name_length, P_endo_names);
               iter++;
               if (iter > prev_iter)
                 {
@@ -2807,7 +2820,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
             }
           if (!cvg)
             {
-              mexPrintf("Convergence not achieved in block %d, after %d iterations\n", Block_Count, iter);
+              mexPrintf("In Solve two boundaries, convergence not achieved in block %d, after %d iterations\n", Block_Count+1, iter);
               mexErrMsgTxt("End of bytecode");
             }
         }
@@ -2836,7 +2849,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 }
             }
           cvg = false;
-          simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods, EQN_block_number, stack_solve_algo);
+          simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods, EQN_block_number, stack_solve_algo, endo_name_length, P_endo_names);
         }
       mxFree(r);
       mxFree(y_save);
@@ -2897,7 +2910,6 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
             it_code++;
             if (evaluate)
               {
-#ifndef DEBUG_EX
                 if (!steady_state)
                   {
                     jacobian_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_nb_col_jacob(),mxREAL));
@@ -2909,7 +2921,6 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
                     jacobian_other_endo_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_nb_col_other_endo_jacob(),mxREAL));
                     mexPrintf("at block = %d, mxCreateDoubleMatrix(%d, %d, mxREAL) jacobian_other_endo_block.size()=%d\n",Block_Count, fb->get_size(), fb->get_nb_col_other_endo_jacob(), sizeof(jacobian_other_endo_block[Block_Count]));
                   }
-#endif
                 evaluate_a_block(fb->get_size(), fb->get_type(), bin_basename, steady_state, Block_Count,
                                  fb->get_is_linear(), fb->get_endo_nbr(), fb->get_Max_Lag(), fb->get_Max_Lead(), fb->get_u_count_int());
               }

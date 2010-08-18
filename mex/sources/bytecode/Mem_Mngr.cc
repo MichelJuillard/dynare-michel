@@ -84,7 +84,10 @@ Mem_Mngr::mxMalloc_NZE()
           mexPrintf("Not enough memory available\n");
           mexEvalString("drawnow;");
         }
-      NZE_Mem_add = (NonZeroElem **) mxRealloc(NZE_Mem_add, CHUNK_SIZE*sizeof(NonZeroElem *));   /*We have to redefine the size of pointer on the memory*/
+      if (NZE_Mem_add)
+        NZE_Mem_add = (NonZeroElem **) mxRealloc(NZE_Mem_add, CHUNK_SIZE*sizeof(NonZeroElem *));   /*We have to redefine the size of pointer on the memory*/
+      else
+        NZE_Mem_add = (NonZeroElem **) mxMalloc(CHUNK_SIZE*sizeof(NonZeroElem *));   /*We have to define the size of pointer on the memory*/
       if (!NZE_Mem_add)
         {
           mexPrintf("Not enough memory available\n");
@@ -121,6 +124,7 @@ Mem_Mngr::Free_All()
       mxFree(NZE_Mem_Allocated.back());
       NZE_Mem_Allocated.pop_back();
     }
-  mxFree(NZE_Mem_add);
+  if (NZE_Mem_add)
+    mxFree(NZE_Mem_add);
   init_Mem();
 }

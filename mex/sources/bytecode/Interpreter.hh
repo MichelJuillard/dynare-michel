@@ -47,22 +47,23 @@ typedef code_liste_type::const_iterator it_code_type;
 class Interpreter : SparseMatrix
 {
 private:
-  #ifndef DEBUG_EX
   vector<mxArray*> jacobian_block, jacobian_other_endo_block, jacobian_exo_block, jacobian_det_exo_block;
-  #endif
   ExpressionType EQN_type;
+  char *P_endo_names, *P_exo_names, *P_param_names;
+  unsigned int nb_endo, nb_exo, nb_param;
+  unsigned int endo_name_length, exo_name_length, param_name_length;
   unsigned int EQN_equation, EQN_block, EQN_block_number;
   unsigned int EQN_dvar1, EQN_dvar2, EQN_dvar3;
   int EQN_lag1, EQN_lag2, EQN_lag3;
   it_code_type it_code_expr;
   protected:
-  double pow1(double a, double b, bool evaluate);
-  double log1(double a, bool evaluate);
-  double log10_1(double a, bool evaluate);
-  string remove_white(string str);
-  string add_underscore_to_fpe(string str);
-  string get_variable(SymbolType variable_type, unsigned int variable_num);
-  string error_location(bool evaluate);
+  double pow1(double a, double b, bool evaluate, bool steady_state);
+  double log1(double a, bool evaluate, bool steady_state);
+  double log10_1(double a, bool evaluate, bool steady_state);
+  /*string remove_white(string str);*/
+  string add_underscore_to_fpe(const string &str);
+  string get_variable(const SymbolType variable_type, const unsigned int variable_num);
+  string error_location(bool evaluate, bool steady_state);
   void compute_block_time(int Per_u_, bool evaluate, int block_num, int size, bool steady_state);
   string print_expression(it_code_type it_code, bool evaluate);
   void evaluate_a_block(const int size, const int type, string bin_basename, bool steady_state, int block_num,
@@ -73,7 +74,6 @@ private:
   vector<Block_contain_type> Block_Contain;
   code_liste_type code_liste;
   it_code_type it_code;
-  stack<double> Stack;
   int Block_Count, Per_u_, Per_y_;
   int it_, nb_row_x, nb_row_xd, maxit_, size_of_direction;
   double *g1, *r;
@@ -93,12 +93,10 @@ public:
               int nb_row_xd_arg, int periods_arg, int y_kmin_arg, int y_kmax_arg, int maxit_arg_, double solve_tolf_arg, int size_o_direction_arg,
               double slowc_arg, int y_decal_arg, double markowitz_c_arg, string &filename_arg, int minimal_solving_periods_arg, int stack_solve_algo_arg, int solve_algo_arg);
   bool compute_blocks(string file_name, string bin_basename, bool steady_state, bool evaluate, bool block, int &nb_blocks);
-  #ifndef DEBUG_EX
   inline mxArray* get_jacob(int block_num) {return jacobian_block[block_num];};
   inline mxArray* get_jacob_exo(int block_num) {return jacobian_exo_block[block_num];};
   inline mxArray* get_jacob_exo_det(int block_num) {return jacobian_det_exo_block[block_num];};
   inline mxArray* get_jacob_other_endo(int block_num) {return jacobian_other_endo_block[block_num];};
-  #endif
 };
 
 #endif

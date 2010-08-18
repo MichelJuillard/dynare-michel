@@ -478,9 +478,9 @@ SparseMatrix::Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>,
   map<pair<pair<int, int>, int>, int>::iterator it4;
   for (i = 0; i < y_size*(periods+y_kmin); i++)
     ya[i] = y[i];
-#if DEBUG
+//#if DEBUG
   unsigned int max_nze = mxGetNzmax(A_m);
-#endif
+//#endif
   unsigned int NZE = 0;
   int last_var = 0;
   for (i = 0; i < Size; i++)
@@ -499,9 +499,9 @@ SparseMatrix::Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>,
       eq = it4->first.second;
       int index = it4->second;
 #if DEBUG
-      if (index<0 || index >= u_count_alloc)
+      if (index<0 || index >= u_count_alloc || index > Size + Size*Size)
         {
-          mexPrintf("index (%d) out of range for u vector (0)\n",index);
+          mexPrintf("index (%d) out of range for u vector (0) max %d allocated %d\n",index, Size+Size*Size, u_count_alloc);
           mexErrMsgTxt("end of bytecode\n");
         }
       if (NZE >= max_nze)
@@ -514,24 +514,19 @@ SparseMatrix::Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>,
       Ai[NZE] = eq;
       NZE++;
 #if DEBUG
-      if ((index+lag*u_count_init) < 0 || (index+lag*u_count_init) >= u_count_alloc)
-        {
-          mexPrintf("index (%d) out of range for u vector (1)\n",index+lag*u_count_init);
-          mexErrMsgTxt("end of bytecode\n");
-        }
-      if (eq < 0 || eq >= (Size*periods))
+      if (eq < 0 || eq >= Size)
         {
           mexPrintf("index (%d) out of range for b vector (0)\n",eq);
           mexErrMsgTxt("end of bytecode\n");
          }
-      if (var+Size*(y_kmin+t+lag) < 0 || var+Size*(y_kmin+t+lag) >= Size*(periods+y_kmin+y_kmax))
+      if (var < 0 || var >= Size)
         {
-          mexPrintf("index (%d) out of range for index_vara vector (0)\n",var+Size*(y_kmin+t+lag));
+          mexPrintf("index (%d) out of range for index_vara vector (0)\n",var);
           mexErrMsgTxt("end of bytecode\n");
         }
-      if (index_vara[var+Size*(y_kmin+t+lag)] < 0 || index_vara[var+Size*(y_kmin+t+lag)] >= y_size*(periods+y_kmin+y_kmax))
+      if (index_vara[var] < 0 || index_vara[var] >= y_size)
         {
-          mexPrintf("index (%d) out of range for y vector max=%d (0)\n",index_vara[var+Size*(y_kmin+t+lag)], y_size*(periods+y_kmin+y_kmax));
+          mexPrintf("index (%d) out of range for y vector max=%d (0)\n",index_vara[var], y_size);
           mexErrMsgTxt("end of bytecode\n");
         }
 #endif
@@ -1358,7 +1353,7 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
           mexPrintf("Can't allocate b_m matrix in LU solver\n");
           mexErrMsgTxt("end of bytecode\n");
         }
-      A_m = mxCreateSparse(Size, Size, IM_i.size()*2, mxREAL);
+      A_m = mxCreateSparse(Size, Size, min(int(IM_i.size()*2), Size*Size), mxREAL);
       if (!A_m)
         {
           mexPrintf("Can't allocate A_m matrix in LU solver\n");
@@ -1612,11 +1607,11 @@ SparseMatrix::simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax,
       mxFree(bc);
     }
   else if (solve_algo == 1 || solve_algo == 4)
-    Solve_Matlab_LU_UMFPack(A_m, b_m, Size, slowc);
+    Solve_Matlab_LU_UMFPack(A_m, b_m, Size, slowc, false, it_);
   else if (solve_algo == 2)
-    Solve_Matlab_GMRES(A_m, b_m, Size, slowc, blck);
+    Solve_Matlab_GMRES(A_m, b_m, Size, slowc, blck, false, it_);
   else if (solve_algo == 3)
-    Solve_Matlab_BiCGStab(A_m, b_m, Size, slowc, blck);
+    Solve_Matlab_BiCGStab(A_m, b_m, Size, slowc, blck, false, it_);
   return true;
 }
 
@@ -1732,29 +1727,38 @@ SparseMatrix::Check_the_Solution(int periods, int y_kmin, int y_kmax, int Size, 
 }
 
 void
-SparseMatrix::Solve_Matlab_LU_UMFPack(mxArray* A_m, mxArray* b_m, int Size, double slowc_l)
+SparseMatrix::Solve_Matlab_LU_UMFPack(mxArray* A_m, mxArray* b_m, int Size, double slowc_l, bool is_two_boundaries, int  it_)
 {
   int n = mxGetM(A_m);
   mxArray *z;
   mxArray *rhs[2];
   rhs[0] = A_m;
   rhs[1] = b_m;
-  mexCallMATLAB(1,&z,2, rhs, "mldivide");
+  mexCallMATLAB(1, &z, 2, rhs, "mldivide");
   double *res = mxGetPr(z);
-  for (int i = 0; i < n; i++)
-    {
-      int eq = index_vara[i+Size*y_kmin];
-      double yy = - (res[i] + y[eq]);
-      direction[eq] = yy;
-      y[eq] += slowc_l * yy;
-    }
+  if (is_two_boundaries)
+    for (int i = 0; i < n; i++)
+      {
+        int eq = index_vara[i+Size*y_kmin];
+        double yy = - (res[i] + y[eq]);
+         direction[eq] = yy;
+        y[eq] += slowc_l * yy;
+      }
+  else
+    for (int i = 0; i < n; i++)
+      {
+        int eq = index_vara[i/*+Size*it_*/];
+        double yy = - (res[i] + y[eq+it_*y_size]);
+        direction[eq] = yy;
+        y[eq+it_*y_size] += slowc_l * yy;
+      }
   mxDestroyArray(A_m);
   mxDestroyArray(b_m);
   mxDestroyArray(z);
 }
 
 void
-SparseMatrix::Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double slowc, int block)
+SparseMatrix::Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double slowc, int block, bool is_two_boundaries, int it_)
 {
   int n = mxGetM(A_m);
   /*[L1, U1]=luinc(g1a,luinc_tol);*/
@@ -1809,13 +1813,22 @@ SparseMatrix::Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double sl
   else
     {
       double *res = mxGetPr(z);
-      for (int i = 0; i < n; i++)
-        {
-          int eq = index_vara[i+Size*y_kmin];
-          double yy = - (res[i] + y[eq]);
-          direction[eq] = yy;
-          y[eq] += slowc * yy;
-        }
+      if (is_two_boundaries)
+        for (int i = 0; i < n; i++)
+          {
+            int eq = index_vara[i+Size*y_kmin];
+            double yy = - (res[i] + y[eq]);
+            direction[eq] = yy;
+            y[eq] += slowc * yy;
+          }
+      else
+        for (int i = 0; i < n; i++)
+          {
+            int eq = index_vara[i];
+            double yy = - (res[i] + y[eq+it_*y_size]);
+             direction[eq] = yy;
+            y[eq] += slowc * yy;
+          }
     }
   mxDestroyArray(A_m);
   mxDestroyArray(b_m);
@@ -1825,7 +1838,7 @@ SparseMatrix::Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double sl
 
 
 void
-SparseMatrix::Solve_Matlab_BiCGStab(mxArray* A_m, mxArray* b_m, int Size, double slowc, int block)
+SparseMatrix::Solve_Matlab_BiCGStab(mxArray* A_m, mxArray* b_m, int Size, double slowc, int block, bool is_two_boundaries, int it_)
 {
   int n = mxGetM(A_m);
   /*[L1, U1]=luinc(g1a,luinc_tol);*/
@@ -1878,13 +1891,22 @@ SparseMatrix::Solve_Matlab_BiCGStab(mxArray* A_m, mxArray* b_m, int Size, double
   else
     {
       double *res = mxGetPr(z);
-      for (int i = 0; i < n; i++)
-        {
-          int eq = index_vara[i+Size*y_kmin];
-          double yy = - (res[i] + y[eq]);
-          direction[eq] = yy;
-          y[eq] += slowc * yy;
-        }
+      if (is_two_boundaries)
+        for (int i = 0; i < n; i++)
+          {
+            int eq = index_vara[i+Size*y_kmin];
+            double yy = - (res[i] + y[eq]);
+             direction[eq] = yy;
+            y[eq] += slowc * yy;
+          }
+      else
+        for (int i = 0; i < n; i++)
+          {
+            int eq = index_vara[i];
+            double yy = - (res[i] + y[eq+it_*y_size]);
+             direction[eq] = yy;
+            y[eq] += slowc * yy;
+          }
     }
   mxDestroyArray(A_m);
   mxDestroyArray(b_m);
@@ -1894,7 +1916,7 @@ SparseMatrix::Solve_Matlab_BiCGStab(mxArray* A_m, mxArray* b_m, int Size, double
 
 
 int
-SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, bool cvg, int &iter, int minimal_solving_periods, int Block_number, int stack_solve_algo)
+SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, bool cvg, int &iter, int minimal_solving_periods, int Block_number, int stack_solve_algo, int endo_name_length, char *P_endo_names)
 {
   /*Triangularisation at each period of a block using a simple gaussian Elimination*/
   t_save_op_s *save_op_s;
@@ -1925,8 +1947,12 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
     {
       if (iter == 0)
         {
-          for (j = 0; j < y_size; j++)
+           for (j = 0; j < y_size; j++)
             {
+              ostringstream res;
+              for (unsigned int i = 0; i < endo_name_length; i++)
+                if (P_endo_names[2*(j+i*nb_endo)] != ' ')
+                  res << P_endo_names[2*(j+i*nb_endo)];
               bool select = false;
               for (int i = 0; i < Size; i++)
                 if (j == index_vara[i])
@@ -1935,9 +1961,9 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                     break;
                   }
               if (select)
-                mexPrintf("-> variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
+                mexPrintf("-> variable %s (%d) at time %d = %f direction = %f\n", res.str().c_str(), j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
               else
-                mexPrintf("   variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
+                mexPrintf("   variable %s (%d) at time %d = %f direction = %f\n", res.str().c_str(), j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
             }
           mexPrintf("res1=%5.10f\n", res1);
           mexPrintf("The initial values of endogenous variables are too far from the solution.\n");
@@ -1950,6 +1976,10 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
         {
           for (j = 0; j < y_size; j++)
             {
+              ostringstream res;
+              for (unsigned int i = 0; i < endo_name_length; i++)
+                if (P_endo_names[2*(j+i*nb_endo)] != ' ')
+                  res << P_endo_names[2*(j+i*nb_endo)];
               bool select = false;
               for (int i = 0; i < Size; i++)
                 if (j == index_vara[i])
@@ -1958,16 +1988,16 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
                     break;
                   }
               if (select)
-                mexPrintf("-> variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
+                mexPrintf("-> variable %s (%d) at time %d = %f direction = %f\n", res.str().c_str(), j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
               else
-                mexPrintf("   variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
+                mexPrintf("   variable %s (%d) at time %d = %f direction = %f\n", res.str().c_str(), j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
             }
           mexPrintf("Dynare cannot improve the simulation in block %d at time %d (variable %d)\n", blck+1, it_+1, max_res_idx);
           mexEvalString("drawnow;");
           filename += " stopped";
           mexErrMsgTxt(filename.c_str());
         }
-      if(!(isnan(res1) || isinf(res1)) && !(isnan(g0) || isinf(g0)) && (stack_solve_algo == 1 || stack_solve_algo == 5))
+      if(!(isnan(res1) || isinf(res1)) && !(isnan(g0) || isinf(g0)) && (stack_solve_algo == 4 || stack_solve_algo == 5))
         {
           if (try_at_iteration == 0)
             {
@@ -2002,7 +2032,13 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
           slowc_save /= 1.1;
         }
       if (print_it)
-        mexPrintf("Error: Simulation diverging, trying to correct it using slowc=%f\n", slowc_save);
+        {
+          if (isnan(res1) || isinf(res1))
+            mexPrintf("Error: The model cannot be evaluated, trying to correct it using slowc=%f\n", slowc_save);
+          else
+            mexPrintf("Error: Simulation diverging, trying to correct it using slowc=%f\n", slowc_save);
+        }
+
       for (i = 0; i < y_size*(periods+y_kmin); i++)
         y[i] = ya[i]+slowc_save*direction[i];
       iter--;
@@ -2609,11 +2645,11 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
           End_GE(Size);
         }
       else if (stack_solve_algo == 1 || stack_solve_algo == 4)
-        Solve_Matlab_LU_UMFPack(A_m, b_m, Size, slowc);
+        Solve_Matlab_LU_UMFPack(A_m, b_m, Size, slowc, true, 0);
       else if (stack_solve_algo == 2)
-        Solve_Matlab_GMRES(A_m, b_m, Size, slowc, blck);
+        Solve_Matlab_GMRES(A_m, b_m, Size, slowc, blck, true, 0);
       else if (stack_solve_algo == 3)
-        Solve_Matlab_BiCGStab(A_m, b_m, Size, slowc, blck);
+        Solve_Matlab_BiCGStab(A_m, b_m, Size, slowc, blck, true, 0);
     }
   if (print_it)
     {
