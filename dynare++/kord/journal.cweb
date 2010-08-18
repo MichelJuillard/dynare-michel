@@ -300,7 +300,7 @@ Number of online processors is not implemented and returns -1, since
 Windows kernel32 |GetSystemInfo| call is too complicated.
 
 @<|sysconf| Win32 implementation@>=
-#include <Windows.h>
+#include <windows.h>
 
 #define _SC_PAGESIZE 1
 #define _SC_PHYS_PAGES 2
