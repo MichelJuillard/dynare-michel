@@ -61,6 +61,7 @@ case ${MATLAB_ARCH} in
         LIBLOC="$MATLAB/extern/lib/${MATLAB_ARCH}/microsoft"
         ;;
     esac
+    MATLAB_DEFS="$MATLAB_DEFS -DNDEBUG"
     MATLAB_LDFLAGS="-static-libgcc -shared \$(top_srcdir)/mex.def"
     MATLAB_LIBS="$LIBLOC/libmex.lib $LIBLOC/libmx.lib $LIBLOC/libmwlapack.lib"
     # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
