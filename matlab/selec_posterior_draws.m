@@ -51,9 +51,9 @@ switch nargin
   case 1
     info = 0;
   case 2
+    MAX_mega_bytes = 10;% Should be an option...
     if drsize>0
         info=2;
-        MAX_mega_bytes = 10;% Should be an option...
     else
         info=1;
     end
