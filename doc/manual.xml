@@ -3136,7 +3136,7 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>shock_decomposition</command>
-      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg><arg choice="plain">;</arg>
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg> <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -3147,11 +3147,13 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
       <listitem><para>...</para></listitem>
     </varlistentry>
     <varlistentry>
-      <term><option>shocks</option> = [ [<replaceable>VARIABLE_NAME</replaceable> ...] ; ...]</term>
+      <term><option>shocks</option> = (
+      <replaceable>VARIABLE_NAME</replaceable> [<replaceable>VARIABLE_NAME</replaceable> ...]
+      [ ; <replaceable>VARIABLE_NAME</replaceable> [<replaceable>VARIABLE_NAME</replaceable> ...] ...] )</term>
       <listitem><para>...</para></listitem>
     </varlistentry>
     <varlistentry>
-      <term><option>labels</option> = [<replaceable>VARIABLE_NAME</replaceable> ...]</term>
+      <term><option>labels</option> = ( <replaceable>VARIABLE_NAME</replaceable> [<replaceable>VARIABLE_NAME</replaceable> ...] )</term>
       <listitem><para>...</para></listitem>
     </varlistentry>
   </variablelist>
