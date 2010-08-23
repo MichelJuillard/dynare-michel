@@ -71,14 +71,14 @@ if order > 1
     ghxu=zeros(endo_nbr, npred*exo_nbr);
     ghuu=zeros(endo_nbr, exo_nbr^2);
     for i=1:size(g_2,2)
-        if s0 < npred & s1 < npred
+        if s0 < npred && s1 < npred
             ghxx(:,s0*npred+s1+1) = 2*g_2(:,i);
             if s1 > s0
                 ghxx(:,s1*npred+s0+1) = 2*g_2(:,i);
             end
-        elseif s0 < npred & s1 < npred+exo_nbr 
+        elseif s0 < npred && s1 < npred+exo_nbr 
             ghxu(:,(s0*exo_nbr+s1-npred+1)) = 2*g_2(:,i);
-        elseif s0 < npred+exo_nbr & s1 < npred+exo_nbr
+        elseif s0 < npred+exo_nbr && s1 < npred+exo_nbr
             ghuu(:,(s0-npred)*exo_nbr+s1-npred +1) = 2*g_2(:,i);
             if s1 > s0
                 ghuu(:,(s1-npred)*exo_nbr+s0-npred+1) = 2*g_2(:,i);
