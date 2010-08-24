@@ -2068,7 +2068,7 @@ steady;
     </varlistentry>
     <varlistentry>
       <term><option>hp_filter</option> = <replaceable>INTEGER</replaceable></term>
-      <listitem><para>Uses HP filter with &lambda; = <replaceable>INTEGER</replaceable> before computing moments. Note that this option is currently not available when computing empirical moments (see <option>periods</option> option). Default: no filter</para></listitem>
+      <listitem><para>Uses HP filter with &lambda; = <replaceable>INTEGER</replaceable> before computing moments. Default: no filter</para></listitem>
     </varlistentry>
     <varlistentry>
       <term><option>hp_ngrid</option> = <replaceable>INTEGER</replaceable></term>
@@ -2185,8 +2185,6 @@ steady;
 </para>
 <para>
   Currently, the IRFs are only plotted for 12 variables. Select the ones you want to see, if your model contains more than 12 endogenous variables.
-</para>
-<para>Currently, the HP filter is only available when computing theoretical moments, not for for moments of simulated variables.
 </para>
 <para>
   The covariance matrix of the shocks is specified either with the <xref linkend='shocks'/> command or with the <xref linkend='Sigma_e'/> command.
