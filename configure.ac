@@ -261,7 +261,7 @@ else
   TESTSUITE_OCTAVE="no"
 fi
 
-if test "$BUILD_DYNAREPLUSPLUS" = "yes"; then
+if test "x$ax_blas_ok" = "xyes" -a "x$ax_lapack_ok" = "xyes"; then
   TESTSUITE_DYNAREPLUSPLUS="yes"
 else
   TESTSUITE_DYNAREPLUSPLUS="no"
