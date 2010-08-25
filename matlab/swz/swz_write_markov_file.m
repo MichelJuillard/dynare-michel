@@ -94,7 +94,8 @@ function swz_write_markov_file(fname,M,options)
     
     for i_var = 1:nvars
         for i_chain = 1:n_chains
-            if ~isfield(options.ms.ms_chain(i_chain),'svar_coefficients')
+            if ~isfield(options.ms.ms_chain(i_chain),'svar_coefficients') ...
+                    || isempty(options.ms.ms_chain(i_chain).svar_coefficients)
                 i_equations = 0;
             else
                 i_equations = ...
@@ -114,8 +115,9 @@ function swz_write_markov_file(fname,M,options)
     fprintf(fh,'\n//== Controlling states variables for variance ==//\n');
     for i_var = 1:nvars
         for i_chain = 1:n_chains
-            if ~isfield(options.ms.ms_chain(i_chain),'svar_variances')
-                i_equations = 0;
+            if ~isfield(options.ms.ms_chain(i_chain),'svar_variances') ...
+                    || isempty(options.ms.ms_chain(i_chain).svar_variances)
+                    i_equations = 0;
             else
                 i_equations = ...
                     options.ms.ms_chain(i_chain).svar_variances.equations; 
