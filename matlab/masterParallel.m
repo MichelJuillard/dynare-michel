@@ -504,5 +504,11 @@ for j=1:totCPU,
 end
 
 % Cleanup.
-delete([fname,'_input.mat'])
+switch Strategy
+   case 0
+       delete([fname,'_input.mat'])
+   case 1
+       delete(['temp_input.mat'])
+end
+        
 delete ConcurrentCommand1.bat

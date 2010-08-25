@@ -47,15 +47,21 @@ dynareroot = dynare_config();
 
 % Load input data.
 load( ['slaveParallel_input',int2str(whoiam)])
+% keyboard;
 
 %Loads fGlobalVar Parallel.
 if exist('fGlobalVar'),
     globalVars = fieldnames(fGlobalVar);
     for j=1:length(globalVars),
         eval(['global ',globalVars{j},';'])
+        evalin('base',['global ',globalVars{j},';'])
     end
     struct2local(fGlobalVar);
     clear fGlobalVar
+    % create global variables in the base workspace as well
+    evalin('base',['load( [''slaveParallel_input',int2str(whoiam),'''],''fGlobalVar'')']) 
+    evalin('base','struct2local(fGlobalVar)');
+    evalin('base','clear fGlobalVar');
 end
 
 t0=clock;
@@ -102,12 +108,22 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
          end
                
         funcName=fname;  % Update global job name.
-        delete(['slaveJob',int2str(whoiam),'.mat']);
 
         if exist('fGlobalVar') && ~isempty (fGlobalVar)
             globalVars = fieldnames(fGlobalVar);
+            for j=1:length(globalVars),
+                info_whos = whos(globalVars{j});
+                if isempty(info_whos) || ~info_whos.global,
+                    eval(['global ',globalVars{j},';'])
+                    evalin('base',['global ',globalVars{j},';'])
+                end
+            end
             struct2local(fGlobalVar);
+            evalin('base',['load( [''slaveJob',int2str(whoiam),'''],''fGlobalVar'')']) 
+            evalin('base','struct2local(fGlobalVar)');
+            evalin('base','clear fGlobalVar');
         end
+        delete(['slaveJob',int2str(whoiam),'.mat']);
         fInputVar.Parallel = Parallel;
         
         % Launch the routine to be run in parallel.
