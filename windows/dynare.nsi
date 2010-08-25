@@ -2,8 +2,6 @@
 # Uses "NullSoft Scriptable Installer System", aka NSIS (see http://nsis.sourceforge.net)
 # NSIS can be run from both Windows and Linux (see "nsis" package in Debian)
 
-# NOTE: if you want to build from Debian, you'll need to replace /usr/share/nsis/Plugins/System.dll by the System.dll included in the windows distribution of NSIS (see http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=319999)
-
 # How to build the installer:
 # - build: the preprocessor, the MEX binaries (for MATLAB and for Octave), and the documentation (PDF files + HTML manual)
 # - run "makensis dynare.nsi" to create the installer
@@ -38,14 +36,6 @@ InstallDir "c:\dynare\${VERSION}"
 
 !define REGLOC "Software\Microsoft\Windows\CurrentVersion\Uninstall\Dynare ${VERSION}"
 !define SMLOC "$SMPROGRAMS\Dynare ${VERSION}"
-
-# Strip preprocessor, dynare++ and 32-bit DLL binaries
-# (64-bit DLL are compiled with MSVC and therefore are small)
-!system 'strip ../matlab/dynare_m.exe'
-!system 'strip ../dynare++/src/dynare++.exe'
-!system 'strip ../mex/octave/*.mex'
-!system 'strip ../mex/matlab/win32-6.5-7.4/*'
-!system 'strip ../mex/matlab/win32-7.5-7.10/*'
 
 !macro DETERMINE_CONTEXT
  # Determine if we are admin or not
@@ -126,8 +116,6 @@ SectionEnd
 Section "Dynare++ (standalone executable)"
  SetOutPath $INSTDIR\dynare++
  File ..\dynare++\src\dynare++.exe
- # The list of DLLs given here is used when building with Octave/MinGW build 3.2.4 (disabling POSIX threads)
- File ..\dynare++\src\atlas.dll ..\dynare++\src\blas.dll ..\dynare++\src\cblas.dll ..\dynare++\src\lapack.dll ..\dynare++\src\libgcc_s_dw2-1.dll ..\dynare++\src\libgfortran-3.dll
 SectionEnd
 
 Section "Documentation and examples (Dynare and Dynare++)"
