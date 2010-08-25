@@ -57,8 +57,12 @@ if exist('fGlobalVar') && ~isempty (fGlobalVar)
     globalVars = fieldnames(fGlobalVar);
     for j=1:length(globalVars),
         eval(['global ',globalVars{j},';'])
+        evalin('base',['global ',globalVars{j},';'])
     end
     struct2local(fGlobalVar);
+    % create global variables in the base workspace as well
+    evalin('base',['load( [''',fname,'_input''],''fGlobalVar'')']) 
+    evalin('base','struct2local(fGlobalVar)');
 end
 
 % On UNIX, mount the master working directory through SSH FS
@@ -80,6 +84,7 @@ end
 fInputVar.Parallel = Parallel;
 % Launch the routine to be run in parallel
 tic,
+% keyboard;
 fOutputVar = feval(fname, fInputVar ,fblck, nblck, whoiam, ThisMatlab);
 toc,
 if isfield(fOutputVar,'OutputFileName'),
