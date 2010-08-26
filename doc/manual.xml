@@ -140,8 +140,6 @@
 
   <para>The installer will also add an entry in your Start Menu with a shortcut to documentation files and to the uninstaller.</para>
 
-  <para>Users of MATLAB 64-bit also need to install <ulink url="http://www.microsoft.com/downloads/details.aspx?familyid=bd2a6171-e2d6-4230-b809-9a8d7548c1b6&amp;displaylang=en">Microsoft Visual C++ runtime libraries</ulink> in order to have functional MEX files.</para>
-
   <para>Note that you can have several versions of Dynare coexisting (for example in <filename>c:\dynare</filename>), as long as you correctly adjust your path settings (see <xref linkend="path_warning" />).</para>
 
   </sect2>
