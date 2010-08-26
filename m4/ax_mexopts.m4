@@ -50,23 +50,13 @@ case ${MATLAB_ARCH} in
   win32 | win64)
     MATLAB_CFLAGS="-fexceptions -g -O2"
     MATLAB_CXXFLAGS="-g -O2"
-    case $MATLAB_VERSION in
-      6.5*|7.0|7.0.0|7.0.4)
-        LIBLOC="$MATLAB/extern/lib/${MATLAB_ARCH}/microsoft/msvc60"
-        ;;
-      7.0.1)
-        AC_MSG_ERROR([MATLAB version 7.0.1 (R14SP1) is buggy (LAPACK library missing for MSVC), and can't be used for compiling MEX files])
-        ;;
-      *)
-        LIBLOC="$MATLAB/extern/lib/${MATLAB_ARCH}/microsoft"
-        ;;
-    esac
+    AX_COMPARE_VERSION([$MATLAB_VERSION], [eq], [7.0.1], [AC_MSG_ERROR([MATLAB version 7.0.1 (R14SP1) is buggy (LAPACK library missing for MSVC), and can't be used for compiling MEX files])])
     MATLAB_DEFS="$MATLAB_DEFS -DNDEBUG"
     # Note that static-libstdc++ is only supported since GCC 4.5 (but generates no error on older versions)
-    MATLAB_LDFLAGS="-static-libgcc -static-libstdc++ -shared \$(top_srcdir)/mex.def"
-    MATLAB_LIBS="$LIBLOC/libmex.lib $LIBLOC/libmx.lib $LIBLOC/libmwlapack.lib"
+    MATLAB_LDFLAGS="-static-libgcc -static-libstdc++ -shared \$(top_srcdir)/mex.def -L$MATLAB/bin/${MATLAB_ARCH}"
+    MATLAB_LIBS="-lmex -lmx -lmwlapack"
     # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
-    AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} $LIBLOC/libmwblas.lib"])
+    AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} -lmwblas"])
     ax_mexopts_ok="yes"
     ;;
   maci | maci64)
