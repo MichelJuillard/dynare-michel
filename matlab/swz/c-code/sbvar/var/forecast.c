@@ -345,7 +345,7 @@ int main(int nargs, char **args)
                      "  -fh : parameter header (Posterior mode: )\n"
                      "  -horizon : horizon for the forecast (12)\n"
 	      );
-      exit(1);
+      swzExit(1);
     }
 
   if (!parm)
@@ -392,7 +392,7 @@ int main(int nargs, char **args)
       if (!(posterior_file=fopen(post,"rt")))
 	{
 	  printf("Unable to open draws file: %s\n",post);
-	  exit(0);
+	  swzExit(0);
 	}
 
       // Get thinning factor from command line
@@ -436,13 +436,13 @@ int main(int nargs, char **args)
 	  {
 	    FreeVector(percentiles);
 	    printf("forecasting command line: Error parsing percentiles\n");
-	    exit(0);
+	    swzExit(0);
 	  }
       }
     else
       {
 	printf("forecasting command line(): Error parsing percentiles\n");
-	exit(0);
+	swzExit(0);
       }
 
   if (dw_FindArgument_String(nargs,args,"regimes") != -1)
