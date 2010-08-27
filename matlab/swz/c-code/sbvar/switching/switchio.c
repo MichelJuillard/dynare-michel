@@ -742,11 +742,11 @@ int ReadBaseTransitionMatricesFlat_SV(FILE *f_in, TMarkovStateVariable *sv)
 	      FreeMatrix(Q);
 	      return 0;
 	    }
-    
+
       // Scale the columns of Q - loose requirement on sumation to one
       for (j=sv->nbasestates-1; j >= 0; j--)
 	{
-	  for (sum=0.0, i=sv->nbasestates-1; i >= 0; i--) 
+	  for (sum=0.0, i=sv->nbasestates-1; i >= 0; i--)
 	    if (ElementM(Q,i,j) < 0.0)
 	      {
 		FreeMatrix(Q);
@@ -761,7 +761,7 @@ int ReadBaseTransitionMatricesFlat_SV(FILE *f_in, TMarkovStateVariable *sv)
 	      dw_UserError("Transition matrix columns must sum to one.");
 	      return 0;
 	    }
-	  for (sum=1.0/sum, i=sv->nbasestates-1; i >= 0; i--) 
+	  for (sum=1.0/sum, i=sv->nbasestates-1; i >= 0; i--)
 	    ElementM(Q,i,j)*=sum;
 	}
 

@@ -20,7 +20,7 @@
     model : point to valid TStateModel structure
 
    Results:
-    Computes and prints to the file f_out the requested percentiles for forecasts 
+    Computes and prints to the file f_out the requested percentiles for forecasts
     of the observables.
 
    Returns:
@@ -84,7 +84,7 @@ int forecast_percentile(FILE *f_out, TVector percentiles, int draws, FILE *poste
 	      {
 		// Draw time T regime
 		m=DrawDiscrete(init_prob);
-              
+
 		// Draw regimes from time T+1 through T+h inclusive
 		for (j=0; j < h; j++)
 		  {
@@ -138,7 +138,7 @@ ERROR_EXIT:
     model : point to valid TStateModel/T_MSStateSpace structure
 
    Results:
-    Computes and prints to the file f_out the requested percentiles for forecasts 
+    Computes and prints to the file f_out the requested percentiles for forecasts
     of the observables.
 
    Returns:
@@ -146,10 +146,10 @@ ERROR_EXIT:
 
    Notes:
     The regime at time T is drawn from the filtered probabilities at time t, and
-    is set to s there after. 
+    is set to s there after.
 
 */
-int forecast_percentile_regime(FILE *f_out, TVector percentiles, int draws, 
+int forecast_percentile_regime(FILE *f_out, TVector percentiles, int draws,
 			       FILE *posterior_file, int s, int T, int h, TStateModel *model)
 {
   T_VAR_Parameters *p;
@@ -238,54 +238,54 @@ ERROR_EXIT:
 
 
 /*
-   Attempt to set up model from command line.  Command line options are the 
+   Attempt to set up model from command line.  Command line options are the
    following
 
    -ft <filename tag>
       If this argument exists, then the following is attempted:
          specification file name = est_final_<tag>.dat
          output file name        = ir_<tag>_regime_<k>.dat
-         parameters file name    = est_final_<tag>.dat 
+         parameters file name    = est_final_<tag>.dat
          header                  = "Posterior mode: "
-   
+
    -fs <filename>
-      If this argument exists, then the specification file name is <filename>.  
+      If this argument exists, then the specification file name is <filename>.
       The argument -fs takes precedence over -ft.
 
    -fp <filename>
-      If this argument exists, then the parameters file name is <filename>.  The 
-      argument -fp takes precedence over -ft.  The default value is the filename 
+      If this argument exists, then the parameters file name is <filename>.  The
+      argument -fp takes precedence over -ft.  The default value is the filename
       associated with the argument -fs.
 
    -ph <header>
-      If this argument exists, then the header for the parameters file is 
+      If this argument exists, then the header for the parameters file is
       <header>.  The default value is "Posterior mode: ".
 
    -horizon <integer>
       If this argument exists, then the horizon of the impulse responses is given
       by the passed integer.  The default value is 12.
 
-   -error_bands 
+   -error_bands
       Output error bands.  (default = off - only median is computed)
 
    -percentiles n p_1 p_2 ... p_n
-      Percentiles to compute. The first parameter after percentiles must be the 
-      number of percentiles and the following values are the actual percentiles. 
+      Percentiles to compute. The first parameter after percentiles must be the
+      number of percentiles and the following values are the actual percentiles.
       default = 3  0.16  0.50  0.84   if error_bands flag is set
               = 1  0.50               otherwise
 
-   -parameter_uncertainty 
+   -parameter_uncertainty
       Apply parameter uncertainty when computing error bands.
 
-   -shocks_per_parameter <integer> 
-      Number of shocks and regime paths to draw for each parameter draw.  The 
+   -shocks_per_parameter <integer>
+      Number of shocks and regime paths to draw for each parameter draw.  The
       default value is 1 if parameter_uncertainty is set and 10,000 otherwise.
-     
-   -thin 
-      Thinning factor.  Only 1/thin of the draws in posterior draws file are 
+
+   -thin
+      Thinning factor.  Only 1/thin of the draws in posterior draws file are
       used. The default value is 1.
 
-   -regimes 
+   -regimes
       Produces forecasts as if each regime were permanent. (default = off)
 
    -regime <integer>
@@ -328,7 +328,7 @@ int main(int nargs, char **args)
       // parameter filename
       if (!parm)
 	sprintf(parm=(char*)malloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
-    } 
+    }
 
   // horizon
   horizon=dw_ParseInteger_String(nargs,args,"horizon",12);
@@ -344,7 +344,7 @@ int main(int nargs, char **args)
                      "  -horizon : horizon for the forecast (12)\n"
 	      );
       exit(1);
-    } 
+    }
 
   if (!parm)
     strcpy(parm=(char*)malloc(strlen(spec)+1),spec);
@@ -364,7 +364,7 @@ int main(int nargs, char **args)
   free(head);
   free(parm);
 
-  //============================= Compute forecasts ============================= 
+  //============================= Compute forecasts =============================
 
   // Mean forecast
   /* if (dw_FindArgument_String(nargs,args,"mean") != -1) */

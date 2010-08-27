@@ -2398,8 +2398,8 @@ void Update_lambda_psi_from_bplus(T_VAR_Parameters *p)
      forecast  : horizon x nvars matrix or null pointer
      horizon   : positive integer - forecast horizon
      initial   : initial value of predetermined variables.
-     shocks    : array of length horizon of shocks or null pointer.  If null 
-                 pointer, then the shocks are all zero. Each vector is of length 
+     shocks    : array of length horizon of shocks or null pointer.  If null
+                 pointer, then the shocks are all zero. Each vector is of length
                  nvar.
      S         : array of length horizon.  S[t] is the state at time T+1+t.
      model     : pointer to valid TStateModel structure.
@@ -2408,7 +2408,7 @@ void Update_lambda_psi_from_bplus(T_VAR_Parameters *p)
      Computes forecast
 
    Returns:
-     The matrix forecast upon success and null upon failure.  If forecast is 
+     The matrix forecast upon success and null upon failure.  If forecast is
      null, then it created.
 */
 TMatrix forecast_base(TMatrix forecast, int horizon, TVector initial, TVector *shocks, int *S, TStateModel *model)
@@ -2455,7 +2455,7 @@ TMatrix forecast_base(TMatrix forecast, int horizon, TVector initial, TVector *s
 }
 
 /*
-   For 1 <= k < h, y[k][i] is null if the ith coordinate of y(t0+1+k) is 
+   For 1 <= k < h, y[k][i] is null if the ith coordinate of y(t0+1+k) is
    unrestricted and is its value otherwise.  In general, t0 is the last index for
    which we have full information.  It must be the case that t0 <= nobs.
 */
@@ -2570,7 +2570,7 @@ TMatrix forecast_base(TMatrix forecast, int horizon, TVector initial, TVector *s
 /* } */
 
 /*
- 
+
 */
 /* TVector* dw_state_space_mean_unconditional_forecast(TVector *F, int h, int t0, TStateModel *model) */
 /* { */
@@ -3580,7 +3580,7 @@ TMatrix MakeA0(TMatrix A0, int s, T_VAR_Parameters *p)
 
 /*
    Assumes:
-     A0 : Matrix array of length n_states or null pointer.  A0[s] is either 
+     A0 : Matrix array of length n_states or null pointer.  A0[s] is either
           p->nvars x p->nvars matrix or null pointer
 */
 TMatrix* MakeA0_All(TMatrix *A0, T_VAR_Parameters *p)
@@ -3634,7 +3634,7 @@ TMatrix MakeAplus(TMatrix Aplus, int k, T_VAR_Parameters *p)
 
 /*
    Assumes:
-     Aplus : Matrix array of length n_states or null pointer.  Aplus[s] is either 
+     Aplus : Matrix array of length n_states or null pointer.  Aplus[s] is either
              p->npre x p->nvars matrix or null pointer
 */
 TMatrix* MakeAplus_All(TMatrix *Aplus, T_VAR_Parameters *p)
@@ -3684,7 +3684,7 @@ TMatrix MakeZeta(TMatrix Zeta, int k, T_VAR_Parameters *p)
 
 /*
    Assumes:
-     Zeta : Matrix array of length n_states or null pointer.  Zeta[s] is either 
+     Zeta : Matrix array of length n_states or null pointer.  Zeta[s] is either
              p->vars x p->nvars matrix or null pointer
 */
 TMatrix* MakeZeta_All(TMatrix *Zeta, T_VAR_Parameters *p)

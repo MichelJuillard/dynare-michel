@@ -12,7 +12,7 @@ static void AddObservationFixed(PRECISION x, int *low, int *h, int *high, PRECIS
 
 static PRECISION Cumulative(PRECISION level, int low, int *h, PRECISION min, PRECISION max, int intervals, int sample_size);
 static PRECISION Percentile(PRECISION percentile, int low, int *h, PRECISION min, PRECISION max, int intervals, int sample_size);
-static TMatrix MakeHistogram(int low, int *h, PRECISION min, PRECISION max,int intervals, int sample_size, 
+static TMatrix MakeHistogram(int low, int *h, PRECISION min, PRECISION max,int intervals, int sample_size,
 			     PRECISION min_out, PRECISION max_out, int bins);
 static TMatrix MakeHistogramAuto(int low, int *h, int high, PRECISION min, PRECISION max, int intervals, int sample_size, int bins);
 
@@ -53,7 +53,7 @@ TMatrixHistogram *CreateMatrixHistogram(int rows, int cols, int intervals, int t
 
  if (!(h->high=(int**)malloc(rows*sizeof(int*)))) dw_Error(MEM_ERR);
   for (i=rows-1; i >= 0; i--)
-   if (!(h->high[i]=(int*)malloc(cols*sizeof(int)))) dw_Error(MEM_ERR);  
+   if (!(h->high[i]=(int*)malloc(cols*sizeof(int)))) dw_Error(MEM_ERR);
 
  h->Min=CreateMatrix(rows,cols);
  h->Max=CreateMatrix(rows,cols);
@@ -476,8 +476,8 @@ static void Resize(PRECISION x, int *h, PRECISION *min, PRECISION *max, int inte
 }
 
 /*
-   Adds a observation to the histogram.  The type of the histogram must 
-   be HISTOGRAM_VARIABLE.   
+   Adds a observation to the histogram.  The type of the histogram must
+   be HISTOGRAM_VARIABLE.
 */
 static void AddObservationVariable(PRECISION x, int *h, PRECISION *min, PRECISION *max, int intervals)
 {
@@ -485,7 +485,7 @@ static void AddObservationVariable(PRECISION x, int *h, PRECISION *min, PRECISIO
 
  if ((x < *min) || (x > *max)) Resize(x,h,min,max,intervals);
 
- if (*max > *min)                     
+ if (*max > *min)
    {
     i=(int)(intervals*(x - *min)/(*max - *min));
     h[(i < intervals) ? i : intervals-1]++;
@@ -516,13 +516,13 @@ static void AddObservationFixed(PRECISION x, int *low, int *h, int *high, PRECIS
 
 /*
    Returns the level such that the probability of observing an observation
-   less than or equal to level is percentile.  If there is a point mass at 
+   less than or equal to level is percentile.  If there is a point mass at
    x, and P(y < x) <= percentile <= P(y <= x), then x is returned.
 
    Assumes
      Both intervals and sample_size are poitive and low and h[i] are
-     non-negative.  Also if 
-             
+     non-negative.  Also if
+
            high = sample_size - (low + h[0] + ... + h[intervals - 1]),
 
      then high is non-negative.
@@ -560,8 +560,8 @@ static PRECISION Percentile(PRECISION percentile, int low, int *h, PRECISION min
 
     Assumes
       Both intervals and sample_size are poitive and low and h[i] are
-      non-negative.  Also, if 
-               
+      non-negative.  Also, if
+
             high = sample_size - (low + h[0] + ... + h[intervals - 1]),
 
       then high is non-negative.
@@ -591,18 +591,18 @@ static PRECISION Cumulative(PRECISION level, int low, int *h, PRECISION min, PRE
  if (level >= max) return 1.0;
 
  for (count=low, i=0; i < intervals; count+=h[i++])
-  if ((min+=inc) >= level) 
+  if ((min+=inc) >= level)
    return ((PRECISION)count + (PRECISION)h[i]*(level - min + inc)/inc)/(PRECISION)sample_size;
  return 1.0;
 }
 
 /*
     Returns a histogram over the interval I=[min_out,max_out].  The matrix returned
-    has bins rows and 2 columns.  If inc=(max_out - min_out)/bins, then the first 
-    element of the ith row is 
+    has bins rows and 2 columns.  If inc=(max_out - min_out)/bins, then the first
+    element of the ith row is
 
-                                 min + (i + 0.5)*inc, 
-    
+                                 min + (i + 0.5)*inc,
+
     which is the mid-point of the ith interval.  The second element is
 
                         P(min + i*inc < x <= min + (i + 1)*inc)/inc,
@@ -611,11 +611,11 @@ static PRECISION Cumulative(PRECISION level, int low, int *h, PRECISION min, PRE
 
     Assumes
      Both intervals and sample_size are poitive and low and h[i] are
-     non-negative.  Also if 
-             
+     non-negative.  Also if
+
            high = sample_size - (low + h[0] + ... + h[intervals - 1]),
 
-     then high is non-negative. 
+     then high is non-negative.
 
      If min < max, let inc=(max - min)/intervals and define
 
@@ -742,7 +742,7 @@ static TMatrix MakeHistogramAuto(int low, int *h, int high, PRECISION min, PRECI
 	       }
        }
    }
-                                     
+
  return MakeHistogram(low,h,min,max,intervals,sample_size,min_out,max_out,bins);
 }
 
