@@ -6,6 +6,8 @@
 #include "dw_histogram.h"
 #include "dw_error.h"
 
+#include "modify_for_mex.h"
+
 static void Resize(PRECISION x, int *h, PRECISION *min, PRECISION *max, int intervals);
 static void AddObservationVariable(PRECISION x, int *h, PRECISION *min, PRECISION *max, int intervals);
 static void AddObservationFixed(PRECISION x, int *low, int *h, int *high, PRECISION min, PRECISION max, int intervals);
@@ -37,23 +39,23 @@ TMatrixHistogram *CreateMatrixHistogram(int rows, int cols, int intervals, int t
  int i, j;
  TMatrixHistogram *h;
 
- if (!(h=(TMatrixHistogram *)malloc(sizeof(TMatrixHistogram)))) dw_Error(MEM_ERR);
+ if (!(h=(TMatrixHistogram *)swzMalloc(sizeof(TMatrixHistogram)))) dw_Error(MEM_ERR);
 
- if (!(h->freq=(int***)malloc(rows*sizeof(int**)))) dw_Error(MEM_ERR);
+ if (!(h->freq=(int***)swzMalloc(rows*sizeof(int**)))) dw_Error(MEM_ERR);
  for (i=rows-1; i >= 0; i--)
   {
-   if (!(h->freq[i]=(int**)malloc(cols*sizeof(int*)))) dw_Error(MEM_ERR);
+   if (!(h->freq[i]=(int**)swzMalloc(cols*sizeof(int*)))) dw_Error(MEM_ERR);
    for (j=cols-1; j >= 0; j--)
-    if (!(h->freq[i][j]=(int*)malloc(intervals*sizeof(int)))) dw_Error(MEM_ERR);
+    if (!(h->freq[i][j]=(int*)swzMalloc(intervals*sizeof(int)))) dw_Error(MEM_ERR);
   }
 
- if (!(h->low=(int**)malloc(rows*sizeof(int*)))) dw_Error(MEM_ERR);
+ if (!(h->low=(int**)swzMalloc(rows*sizeof(int*)))) dw_Error(MEM_ERR);
   for (i=rows-1; i >= 0; i--)
-   if (!(h->low[i]=(int*)malloc(cols*sizeof(int)))) dw_Error(MEM_ERR);
+   if (!(h->low[i]=(int*)swzMalloc(cols*sizeof(int)))) dw_Error(MEM_ERR);
 
- if (!(h->high=(int**)malloc(rows*sizeof(int*)))) dw_Error(MEM_ERR);
+ if (!(h->high=(int**)swzMalloc(rows*sizeof(int*)))) dw_Error(MEM_ERR);
   for (i=rows-1; i >= 0; i--)
-   if (!(h->high[i]=(int*)malloc(cols*sizeof(int)))) dw_Error(MEM_ERR);
+   if (!(h->high[i]=(int*)swzMalloc(cols*sizeof(int)))) dw_Error(MEM_ERR);
 
  h->Min=CreateMatrix(rows,cols);
  h->Max=CreateMatrix(rows,cols);
@@ -193,15 +195,15 @@ TVectorHistogram *CreateVectorHistogram(int dim, int intervals, int type)
  int i;
  TVectorHistogram *h;
 
- if (!(h=(TVectorHistogram *)malloc(sizeof(TVectorHistogram))))
+ if (!(h=(TVectorHistogram *)swzMalloc(sizeof(TVectorHistogram))))
   dw_Error(MEM_ERR);
 
- if (!(h->freq=(int**)malloc(dim*sizeof(int*)))) dw_Error(MEM_ERR);
+ if (!(h->freq=(int**)swzMalloc(dim*sizeof(int*)))) dw_Error(MEM_ERR);
  for (i=dim-1; i >= 0; i--)
-  if (!(h->freq[i]=(int*)malloc(intervals*sizeof(int)))) dw_Error(MEM_ERR);
+  if (!(h->freq[i]=(int*)swzMalloc(intervals*sizeof(int)))) dw_Error(MEM_ERR);
 
- if (!(h->low=(int*)malloc(dim*sizeof(int)))) dw_Error(MEM_ERR);
- if (!(h->high=(int*)malloc(dim*sizeof(int)))) dw_Error(MEM_ERR);
+ if (!(h->low=(int*)swzMalloc(dim*sizeof(int)))) dw_Error(MEM_ERR);
+ if (!(h->high=(int*)swzMalloc(dim*sizeof(int)))) dw_Error(MEM_ERR);
 
  h->Min=CreateVector(dim);
  h->Max=CreateVector(dim);
@@ -333,9 +335,9 @@ TScalarHistogram *CreateScalarHistogram(int intervals, int type)
 {
  TScalarHistogram *h;
 
- if (!(h=(TScalarHistogram *)malloc(sizeof(TScalarHistogram)))) dw_Error(MEM_ERR);
+ if (!(h=(TScalarHistogram *)swzMalloc(sizeof(TScalarHistogram)))) dw_Error(MEM_ERR);
 
- if (!(h->freq=(int*)malloc(intervals*sizeof(int)))) dw_Error(MEM_ERR);
+ if (!(h->freq=(int*)swzMalloc(intervals*sizeof(int)))) dw_Error(MEM_ERR);
 
  h->intervals=intervals;
  h->sample_size=0;

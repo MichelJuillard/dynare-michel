@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "modify_for_mex.h"
+
 /*
    Assumes
     f_out : valid FILE pointer
@@ -43,7 +45,7 @@ int forecast_percentile(FILE *f_out, TVector percentiles, int draws, FILE *poste
   if (T > p->nobs) return 0;
 
   // allocate memory
-  S=(int*)malloc(h*sizeof(int));
+  S=(int*)swzMalloc(h*sizeof(int));
   forecast=CreateMatrix(h,p->nvars);
   histogram=CreateMatrixHistogram(h,p->nvars,100,HISTOGRAM_VARIABLE);
   initial=CreateVector(p->npre);
@@ -166,7 +168,7 @@ int forecast_percentile_regime(FILE *f_out, TVector percentiles, int draws,
   if (T > p->nobs) return 0;
 
   // allocate memory
-  S=(int*)malloc(h*sizeof(int));
+  S=(int*)swzMalloc(h*sizeof(int));
   for (i=0; i < h; i++) S[i]=s;
   forecast=CreateMatrix(h,p->nvars);
   histogram=CreateMatrixHistogram(h,p->nvars,100,HISTOGRAM_VARIABLE);
@@ -306,15 +308,15 @@ int main(int nargs, char **args)
 
   // specification filename
   if (buffer=dw_ParseString_String(nargs,args,"fs",(char*)NULL))
-    strcpy(spec=(char*)malloc(strlen(buffer)+1),buffer);
+    strcpy(spec=(char*)swzMalloc(strlen(buffer)+1),buffer);
 
   // parameter filename
   if (buffer=dw_ParseString_String(nargs,args,"fp",(char*)NULL))
-    strcpy(parm=(char*)malloc(strlen(buffer)+1),buffer);
+    strcpy(parm=(char*)swzMalloc(strlen(buffer)+1),buffer);
 
   // header
   if (buffer=dw_ParseString_String(nargs,args,"ph",(char*)NULL))
-    strcpy(head=(char*)malloc(strlen(buffer)+1),buffer);
+    strcpy(head=(char*)swzMalloc(strlen(buffer)+1),buffer);
 
   // file tag
   if (tag=dw_ParseString_String(nargs,args,"ft",(char*)NULL))
@@ -323,11 +325,11 @@ int main(int nargs, char **args)
 
       // specification filename
       if (!spec)
-	sprintf(spec=(char*)malloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
+	sprintf(spec=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
 
       // parameter filename
       if (!parm)
-	sprintf(parm=(char*)malloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
+	sprintf(parm=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
     }
 
   // horizon
@@ -347,12 +349,12 @@ int main(int nargs, char **args)
     }
 
   if (!parm)
-    strcpy(parm=(char*)malloc(strlen(spec)+1),spec);
+    strcpy(parm=(char*)swzMalloc(strlen(spec)+1),spec);
 
   if (!head)
     {
       buffer="Posterior mode: ";
-      strcpy(head=(char*)malloc(strlen(buffer)+1),buffer);
+      strcpy(head=(char*)swzMalloc(strlen(buffer)+1),buffer);
     }
 
   model=Read_VAR_Specification((FILE*)NULL,spec);
@@ -370,7 +372,7 @@ int main(int nargs, char **args)
   /* if (dw_FindArgument_String(nargs,args,"mean") != -1) */
   /*   { */
   /*     fmt="forecasts_mean_%s.prn"; */
-  /*     sprintf(out_filename=(char*)malloc(strlen(fmt) + strlen(tag) - 1),fmt,tag); */
+  /*     sprintf(out_filename=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 1),fmt,tag); */
   /*     f_out=fopen(out_filename,"wt"); */
   /*     free(out_filename); */
   /*     printf("Constructing mean forecast\n"); */
@@ -386,7 +388,7 @@ int main(int nargs, char **args)
     {
       // Open posterior draws file
       fmt="draws_%s.dat";
-      sprintf(post=(char*)malloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
+      sprintf(post=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
       if (!(posterior_file=fopen(post,"rt")))
 	{
 	  printf("Unable to open draws file: %s\n",post);
@@ -448,7 +450,7 @@ int main(int nargs, char **args)
       {
 	rewind(posterior_file);
 	fmt="forecasts_percentiles_regime_%d_%s.prn";
-	sprintf(out_filename=(char*)malloc(strlen(fmt) + strlen(tag) - 3),fmt,s,tag);
+	sprintf(out_filename=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 3),fmt,s,tag);
 	f_out=fopen(out_filename,"wt");
 	free(out_filename);
 	printf("Constructing percentiles for forecasts - regime %d\n",s);
@@ -459,7 +461,7 @@ int main(int nargs, char **args)
     if (((s=dw_ParseInteger_String(nargs,args,"regime",-1)) >= 0) && (s < p->nstates))
       {
 	fmt="forecasts_percentiles_regime_%d_%s.prn";
-	sprintf(out_filename=(char*)malloc(strlen(fmt) + strlen(tag) - 3),fmt,s,tag);
+	sprintf(out_filename=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 3),fmt,s,tag);
 	f_out=fopen(out_filename,"wt");
 	free(out_filename);
 	printf("Constructing percentiles for forecasts - regime %d\n",s);
@@ -469,7 +471,7 @@ int main(int nargs, char **args)
     else
       {
 	fmt="forecasts_percentiles_%s.prn";
-	sprintf(out_filename=(char*)malloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
+	sprintf(out_filename=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
 	f_out=fopen(out_filename,"wt");
 	free(out_filename);
 	printf("Constructing percentiles for forecasts - %d draws of shocks/regimes per posterior value\n",draws);
