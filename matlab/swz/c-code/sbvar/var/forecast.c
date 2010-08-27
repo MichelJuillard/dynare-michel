@@ -337,8 +337,8 @@ int main(int nargs, char **args)
 
   if (!spec)
     {
-      fprintf(stderr,"No specification filename given\n");
-      fprintf(stderr,"Command line syntax:\n"
+      swz_fprintf_err("No specification filename given\n");
+      swz_fprintf_err("Command line syntax:\n"
                      "  -ft : file tag\n"
 	             "  -fs : specification filename (est_final_<tag>.dat)\n"
 	             "  -fp : parameters filename (specification filename)\n"
