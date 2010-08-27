@@ -81,17 +81,17 @@ void FreeMatrixHistogram(TMatrixHistogram *h)
  int i, j;
  for (i=h->rows-1; i >= 0; i--)
   {
-   for (j=h->cols-1; j >= 0; j--) free(h->freq[i][j]);
-   free(h->freq[i]);
+   for (j=h->cols-1; j >= 0; j--) swzFree(h->freq[i][j]);
+   swzFree(h->freq[i]);
   }
- free(h->freq);
- for (i=h->rows-1; i >= 0; i--) free(h->low[i]);
- free(h->low);
- for (i=h->rows-1; i >= 0; i--) free(h->high[i]);
- free(h->high);
+ swzFree(h->freq);
+ for (i=h->rows-1; i >= 0; i--) swzFree(h->low[i]);
+ swzFree(h->low);
+ for (i=h->rows-1; i >= 0; i--) swzFree(h->high[i]);
+ swzFree(h->high);
  FreeMatrix(h->Min);
  FreeMatrix(h->Max);
- free(h);
+ swzFree(h);
 }
 
 void AddMatrixObservation(TMatrix X, TMatrixHistogram *h)
@@ -226,13 +226,13 @@ void SetMaxMinVectorHistogram(TVector Min, TVector Max, TVectorHistogram *h)
 void FreeVectorHistogram(TVectorHistogram *h)
 {
  int i;
- for (i=h->dim-1; i >= 0; i--) free(h->freq[i]);
- free(h->freq);
- free(h->low);
- free(h->high);
+ for (i=h->dim-1; i >= 0; i--) swzFree(h->freq[i]);
+ swzFree(h->freq);
+ swzFree(h->low);
+ swzFree(h->high);
  FreeVector(h->Min);
  FreeVector(h->Max);
- free(h);
+ swzFree(h);
 }
 
 void AddVectorObservation(TVector x, TVectorHistogram *h)
@@ -355,8 +355,8 @@ void SetMaxMinScalarHistogram(PRECISION Min, PRECISION Max, TScalarHistogram *h)
 
 void FreeScalarHistogram(TScalarHistogram *h)
 {
- free(h->freq);
- free(h);
+ swzFree(h->freq);
+ swzFree(h);
 }
 
 void AddScalarObservation(PRECISION x, TScalarHistogram *h)

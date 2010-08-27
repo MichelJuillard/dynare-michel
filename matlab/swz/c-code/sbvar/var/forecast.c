@@ -119,7 +119,7 @@ int forecast_percentile(FILE *f_out, TVector percentiles, int draws, FILE *poste
 ERROR_EXIT:
   FreeMatrixHistogram(histogram);
   FreeMatrix(forecast);
-  free(S);
+  swzFree(S);
   FreeVector(initial);
   FreeVector(prob);
   FreeVector(init_prob);
@@ -229,7 +229,7 @@ int forecast_percentile_regime(FILE *f_out, TVector percentiles, int draws,
 ERROR_EXIT:
   FreeMatrixHistogram(histogram);
   FreeMatrix(forecast);
-  free(S);
+  swzFree(S);
   FreeVector(initial);
   FreeVector(prob);
   FreeVector(init_prob);
@@ -362,9 +362,9 @@ int main(int nargs, char **args)
   Read_VAR_Parameters((FILE*)NULL,parm,head,model);
   p=(T_VAR_Parameters*)(model->theta);
 
-  free(spec);
-  free(head);
-  free(parm);
+  swzFree(spec);
+  swzFree(head);
+  swzFree(parm);
 
   //============================= Compute forecasts =============================
 
@@ -374,7 +374,7 @@ int main(int nargs, char **args)
   /*     fmt="forecasts_mean_%s.prn"; */
   /*     sprintf(out_filename=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 1),fmt,tag); */
   /*     f_out=fopen(out_filename,"wt"); */
-  /*     free(out_filename); */
+  /*     swzFree(out_filename); */
   /*     printf("Constructing mean forecast\n"); */
   /*     if (F=dw_state_space_mean_unconditional_forecast((TVector*)NULL,h,statespace->nobs,model)) */
   /* 	for (i=0; i < h; i++) */
@@ -452,7 +452,7 @@ int main(int nargs, char **args)
 	fmt="forecasts_percentiles_regime_%d_%s.prn";
 	sprintf(out_filename=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 3),fmt,s,tag);
 	f_out=fopen(out_filename,"wt");
-	free(out_filename);
+	swzFree(out_filename);
 	printf("Constructing percentiles for forecasts - regime %d\n",s);
 	forecast_percentile_regime(f_out,percentiles,draws,posterior_file,s,p->nobs,horizon,model);
 	fclose(f_out);
@@ -463,7 +463,7 @@ int main(int nargs, char **args)
 	fmt="forecasts_percentiles_regime_%d_%s.prn";
 	sprintf(out_filename=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 3),fmt,s,tag);
 	f_out=fopen(out_filename,"wt");
-	free(out_filename);
+	swzFree(out_filename);
 	printf("Constructing percentiles for forecasts - regime %d\n",s);
 	forecast_percentile_regime(f_out,percentiles,draws,posterior_file,s,p->nobs,horizon,model);
 	fclose(f_out);
@@ -473,7 +473,7 @@ int main(int nargs, char **args)
 	fmt="forecasts_percentiles_%s.prn";
 	sprintf(out_filename=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
 	f_out=fopen(out_filename,"wt");
-	free(out_filename);
+	swzFree(out_filename);
 	printf("Constructing percentiles for forecasts - %d draws of shocks/regimes per posterior value\n",draws);
 	forecast_percentile(f_out,percentiles,draws,posterior_file,p->nobs,horizon,model);
 	fclose(f_out);
