@@ -17,26 +17,21 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/******************************************************
- // k_order_perturbation.cpp : Defines the entry point for the k-order perturbation application DLL.
- //
- // called from Dynare dr1_k_order.m, (itself called form resol.m instead of regular dr1.m)
- //            if options_.order < 2 % 1st order only
- //                [ysteady, ghx_u]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
- //            else % 2nd order
- //                [ysteady, ghx_u, g_2]=k_order_perturbation(dr,task,M_,options_, oo_ , ['.' mexext]);
- // inputs:
- //			dr,		- Dynare structure
- //			task,  - check or not, not used
- //			M_		- Dynare structure
- //			options_ - Dynare structure
- //			oo_		- Dynare structure
- //			['.' mexext] Matlab dll extension
- // returns:
- //			 ysteady steady state
- //			ghx_u - first order rules packed in one matrix
- //			g_2 - 2nd order rules packed in one matrix
- **********************************************************/
+/*
+  Defines the entry point for the k-order perturbation application DLL.
+
+  Inputs:
+  1) dr
+  2) M_
+  3) options
+  4) oo_
+  5) string containing the MEX extension (with a dot at the beginning)
+
+ Outputs:
+ - if order == 1: only g_1
+ - if order == 2: g_0, g_1, g_2
+ - if order == 3: g_0, g_1, g_2, g_3
+*/
 
 #include "k_ord_dynare.hh"
 #include "dynamic_dll.hh"
@@ -69,28 +64,24 @@ DynareMxArrayToString(const mxArray *mxFldp, const int len, const int width, vec
 
 extern "C" {
 
-  // mexFunction: Matlab Inerface point and the main application driver
   void
   mexFunction(int nlhs, mxArray *plhs[],
               int nrhs, const mxArray *prhs[])
   {
     if (nrhs < 5)
-      mexErrMsgTxt("Must have at least 5 input parameters.");
-    if (nlhs == 0)
-      mexErrMsgTxt("Must have at least 1 output parameter.");
+      mexErrMsgTxt("Must have exactly 5 input parameters.");
 
     const mxArray *dr = prhs[0];
-    const int check_flag = (int) mxGetScalar(prhs[1]);
-    const mxArray *M_ = prhs[2];
-    const mxArray *options_ = prhs[3];
-    const mxArray *oo_ = prhs[4];
+    const mxArray *M_ = prhs[1];
+    const mxArray *options_ = prhs[2];
+    const mxArray *oo_ = prhs[3];
 
     mxArray *mFname = mxGetField(M_, 0, "fname");
     if (!mxIsChar(mFname))
       mexErrMsgTxt("Input must be of type char.");
     string fName = mxArrayToString(mFname);
-    const mxArray *mexExt = prhs[5];
-    string dfExt = mxArrayToString(mexExt); //Dynamic file extension, e.g.".dll" or .mexw32;
+    const mxArray *mexExt = prhs[4];
+    string dfExt = mxArrayToString(mexExt); // Dynamic file extension, e.g. ".dll" or ".mexw32"
 
     int kOrder;
     mxArray *mxFldp = mxGetField(options_, 0, "order");
@@ -102,24 +93,24 @@ extern "C" {
     if (kOrder == 1 && nlhs != 1)
       mexErrMsgTxt("k_order_perturbation at order 1 requires exactly 1 argument in output");
     else if (kOrder > 1 && nlhs != kOrder+1)
-      mexErrMsgTxt("k_order_perturbation at order > 1 requires exactly order + 1 argument in output");
+      mexErrMsgTxt("k_order_perturbation at order > 1 requires exactly order+1 arguments in output");
 
     double qz_criterium = 1+1e-6;
     mxFldp = mxGetField(options_, 0, "qz_criterium");
     if (mxIsNumeric(mxFldp))
       qz_criterium = (double) mxGetScalar(mxFldp);
 
-    mxFldp      = mxGetField(M_, 0, "params");
+    mxFldp = mxGetField(M_, 0, "params");
     double *dparams = (double *) mxGetData(mxFldp);
     int npar = (int) mxGetM(mxFldp);
     Vector modParams(dparams, npar);
 
-    mxFldp      = mxGetField(M_, 0, "Sigma_e");
+    mxFldp = mxGetField(M_, 0, "Sigma_e");
     dparams = (double *) mxGetData(mxFldp);
     npar = (int) mxGetN(mxFldp);
     TwoDMatrix vCov(npar, npar, dparams);
 
-    mxFldp      = mxGetField(dr, 0, "ys");  // and not in order of dr.order_var
+    mxFldp = mxGetField(dr, 0, "ys");  // and not in order of dr.order_var
     dparams = (double *) mxGetData(mxFldp);
     const int nSteady = (int) mxGetM(mxFldp);
     Vector ySteady(dparams, nSteady);
@@ -149,17 +140,17 @@ extern "C" {
 
     nPred -= nBoth; // correct nPred for nBoth.
 
-    mxFldp      = mxGetField(dr, 0, "order_var");
+    mxFldp = mxGetField(dr, 0, "order_var");
     dparams = (double *) mxGetData(mxFldp);
     npar = (int) mxGetM(mxFldp);
-    if (npar != nEndo)                           //(nPar != npar)
+    if (npar != nEndo)
       mexErrMsgTxt("Incorrect number of input var_order vars.");
     vector<int> var_order_vp(nEndo);
     for (int v = 0; v < nEndo; v++)
       var_order_vp[v] = (int)(*(dparams++));
 
     // the lag, current and lead blocks of the jacobian respectively
-    mxFldp      = mxGetField(M_, 0, "lead_lag_incidence");
+    mxFldp = mxGetField(M_, 0, "lead_lag_incidence");
     dparams = (double *) mxGetData(mxFldp);
     npar = (int) mxGetN(mxFldp);
     int nrows = (int) mxGetM(mxFldp);
@@ -182,7 +173,7 @@ extern "C" {
     vector<string> endoNames;
     DynareMxArrayToString(mxFldp, nendo, widthEndo, endoNames);
 
-    mxFldp      = mxGetField(M_, 0, "exo_names");
+    mxFldp = mxGetField(M_, 0, "exo_names");
     const int nexo = (int) mxGetM(mxFldp);
     const int widthExog = (int) mxGetN(mxFldp);
     vector<string> exoNames;
