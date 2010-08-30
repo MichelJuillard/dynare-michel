@@ -191,6 +191,7 @@ MATRIX_DIR = $(WORK_DIR)/utilities/DWCcode/matrix
 ERROR_DIR = $(WORK_DIR)/utilities/DWCcode/error
 ARRAY_DIR = $(WORK_DIR)/utilities/DWCcode/arrays
 ASCII_DIR = $(WORK_DIR)/utilities/DWCcode/ascii 
+HIST_DIR = $(WORK_DIR)/utilities/DWCcode/histogram
 STAT_DIR = $(WORK_DIR)/utilities/DWCcode/stat
 SPHERICAL_DIR = $(WORK_DIR)/utilities/DWCcode/spherical
 SORT_DIR = $(WORK_DIR)/utilities/DWCcode/sort
@@ -199,9 +200,9 @@ VAR_DIR = $(WORK_DIR)/sbvar/var
 #################################################################################
 
 # DW  FILES
-INCLUDE_DIR := -I$(MATRIX_DIR) -I$(ERROR_DIR) -I$(ARRAY_DIR) -I$(ASCII_DIR) -I$(STAT_DIR) -I$(SPHERICAL_DIR) -I$(SORT_DIR) -I$(SWITCH_DIR) -I$(VAR_DIR) $(INCLUDE_DIR) 
-VPATH := $(VPATH) $(MATRIX_DIR) $(ERROR_DIR) $(ARRAY_DIR) $(ASCII_DIR) $(STAT_DIR) $(SPHERICAL_DIR) $(SORT_DIR) $(SWITCH_DIR) $(VAR_DIR)
-OBJS := $(OBJS) bmatrix.o swzmatrix.o dw_error.o dw_rand.o dw_matrix_rand.o dw_array.o dw_matrix_array.o dw_matrix_sort.o dw_ascii.o dw_parse_cmd.o
+INCLUDE_DIR := -I$(MATRIX_DIR) -I$(ERROR_DIR) -I$(ARRAY_DIR) -I$(ASCII_DIR) -I$(HIST_DIR) -I$(STAT_DIR) -I$(SPHERICAL_DIR) -I$(SORT_DIR) -I$(SWITCH_DIR) -I$(VAR_DIR) $(INCLUDE_DIR) 
+VPATH := $(VPATH) $(MATRIX_DIR) $(ERROR_DIR) $(ARRAY_DIR) $(ASCII_DIR) $(HIST_DIR) $(STAT_DIR) $(SPHERICAL_DIR) $(SORT_DIR) $(SWITCH_DIR) $(VAR_DIR)
+OBJS := $(OBJS) bmatrix.o swzmatrix.o dw_error.o dw_rand.o dw_matrix_rand.o dw_array.o dw_matrix_array.o dw_matrix_sort.o dw_ascii.o dw_parse_cmd.o dw_histogram.o
 
 # MEX
 INCLUDE_DIR := -I$(WORK_DIR)/mex $(INCLUDE_DIR)
@@ -221,13 +222,13 @@ OBJS_INIT := $(OBJS) create_init_file.o switch.o switchio.o VARbase.o VARio.o VA
 OBJS_MHM_1 := $(OBJS)  mhm_VAR_main_1.o mhm_VAR.o VARbase.o VARio.o command_line_VAR.o switch.o switchio.o 
 OBJS_MHM_2 := $(OBJS) mhm_VAR_main_2.o spherical.o VARbase.o VARio.o switch.o switchio.o mhm_VAR.o
 OBJS_PROBA := $(OBJS) probabilities.o switch.o switchio.o VARbase.o VARio.o command_line_VAR.o
-
+OBJS_FORECAST := $(OBJS) forecast.o switch.o switchio.o VARbase.o VARio.o command_line_VAR.o
 
 
 #################################################################################
 # OUTPUT
 
-all: $(OUT_DIR)/sbvar_draws $(OUT_DIR)/sbvar_estimation $(OUT_DIR)/sbvar_init_file $(OUT_DIR)/sbvar_mhm_1 $(OUT_DIR)/sbvar_mhm_2 $(OUT_DIR)/sbvar_probabilities
+all: $(OUT_DIR)/sbvar_draws $(OUT_DIR)/sbvar_estimation $(OUT_DIR)/sbvar_init_file $(OUT_DIR)/sbvar_mhm_1 $(OUT_DIR)/sbvar_mhm_2 $(OUT_DIR)/sbvar_probabilities $(OUT_DIR)/sbvar_forecast
 
 
 $(OUT_DIR)/sbvar_draws: $(OBJS_DRAWS)
@@ -248,6 +249,8 @@ $(OUT_DIR)/sbvar_mhm_2: $(OBJS_MHM_2)
 $(OUT_DIR)/sbvar_probabilities: $(OBJS_PROBA)
 	$(CC) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_probabilities
 
+$(OUT_DIR)/sbvar_forecast: $(OBJS_FORECAST)
+	$(CC) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_forecast
 
 
 %.o : %.c
