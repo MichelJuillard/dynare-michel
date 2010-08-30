@@ -2418,17 +2418,17 @@ TMatrix forecast_base(TMatrix forecast, int horizon, TVector initial, TVector *s
   TVector x, y;
   int i, t;
 
-  // allocate forecast if necessary
+/*    // allocate forecast if necessary   ansi-c*/
   if (!forecast && !(forecast=CreateMatrix(horizon,p->nvars)))
     return (TMatrix)NULL;
 
-  // allocate memory
+/*    // allocate memory   ansi-c*/
   y=CreateVector(p->nvars);
   x=EquateVector((TVector)NULL,initial);
   A0=MakeA0_All((TMatrix*)NULL,p);
   Aplus=MakeAplus_All((TMatrix*)NULL,p);
 
-  // forecast
+/*    // forecast   ansi-c*/
   for (t=0; t < horizon; t++)
     {
       ProductVM(y,x,Aplus[S[t]]);
@@ -2445,7 +2445,7 @@ TMatrix forecast_base(TMatrix forecast, int horizon, TVector initial, TVector *s
       memcpy(pElementV(x),pElementV(y),p->nvars*sizeof(PRECISION));
     }
 
-  // free memory
+/*    // free memory   ansi-c*/
   dw_FreeArray(Aplus);
   dw_FreeArray(A0);
   FreeVector(x);

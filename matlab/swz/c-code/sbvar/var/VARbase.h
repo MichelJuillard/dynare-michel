@@ -201,8 +201,8 @@ void Draw_lambda(TStateModel *model);
 /* Forecasts */
 TMatrix forecast_base(TMatrix forecast, int horizon, TVector initial, TVector *shocks, int *S, TStateModel *model);
 
-//TVector* mean_conditional_forecast(TVector *F, PRECISION ***y, int h, int t0, TStateModel *model);
-//TVector* mean_unconditional_forecast(TVector *F, int h, int t0, TStateModel *model);
+/*  //TVector* mean_conditional_forecast(TVector *F, PRECISION ***y, int h, int t0, TStateModel *model);   ansi-c*/
+/*  //TVector* mean_unconditional_forecast(TVector *F, int h, int t0, TStateModel *model);   ansi-c*/
 
 /* Utilities */
 void ComputeDotProducts_All(T_VAR_Parameters *p);

@@ -733,7 +733,7 @@ int ReadBaseTransitionMatricesFlat_SV(FILE *f_in, TMarkovStateVariable *sv)
     }
   else
     {
-      // Read transition matrix
+/*        // Read transition matrix   ansi-c*/
       Q=CreateMatrix(sv->nbasestates,sv->nbasestates);
       for (j=0; j < ColM(Q); j++)
     for (i=0; i < RowM(Q); i++)
@@ -743,7 +743,7 @@ int ReadBaseTransitionMatricesFlat_SV(FILE *f_in, TMarkovStateVariable *sv)
           return 0;
         }
 
-      // Scale the columns of Q - loose requirement on sumation to one
+/*        // Scale the columns of Q - loose requirement on sumation to one   ansi-c*/
       for (j=sv->nbasestates-1; j >= 0; j--)
     {
       for (sum=0.0, i=sv->nbasestates-1; i >= 0; i--)
@@ -765,13 +765,13 @@ int ReadBaseTransitionMatricesFlat_SV(FILE *f_in, TMarkovStateVariable *sv)
         ElementM(Q,i,j)*=sum;
     }
 
-      // Convert base transition matrix to full transition matrix.
+/*        // Convert base transition matrix to full transition matrix.   ansi-c*/
       ConvertBaseTransitionMatrix(sv->Q,Q,sv->nlags_encoded);
 
-      // Free Q
+/*        // Free Q   ansi-c*/
       FreeMatrix(Q);
 
-      // Update
+/*        // Update   ansi-c*/
       if (!Update_B_from_Q_SV(sv))
     {
       dw_UserError("Transition matrices do not satisfy restrictions");

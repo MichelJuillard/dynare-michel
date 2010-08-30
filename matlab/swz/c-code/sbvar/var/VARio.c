@@ -570,12 +570,12 @@ int Read_VAR_ParametersFlat(FILE *f_in, TStateModel *model)
   int i, j, s, rtrn=0;
   T_VAR_Parameters *p=(T_VAR_Parameters*)(model->theta);
 
-  // Allocate memory
+/*    // Allocate memory   ansi-c*/
   A0=dw_CreateArray_matrix(p->nstates);
   Aplus=dw_CreateArray_matrix(p->nstates);
   Zeta=dw_CreateArray_vector(p->nstates);
 
-  // Read File
+/*    // Read File   ansi-c*/
   for (s=0; s < p->nstates; s++)
     {
       A0[s]=CreateMatrix(p->nvars,p->nvars);
@@ -599,7 +599,7 @@ int Read_VAR_ParametersFlat(FILE *f_in, TStateModel *model)
         goto ERROR;
     }
 
-  // Set A0, Aplus, and Zeta
+/*    // Set A0, Aplus, and Zeta   ansi-c*/
   for (j=0; j < p->nvars; j++)
     for (s=0; s < p->nstates; s++)
       {
@@ -612,18 +612,18 @@ int Read_VAR_ParametersFlat(FILE *f_in, TStateModel *model)
     p->Zeta[j][p->var_states[j][s]]=ElementV(Zeta[s],j);
       }
 
-  // Update b0, bplus, lambda, psi
+/*    // Update b0, bplus, lambda, psi   ansi-c*/
   Update_b0_bplus_from_A0_Aplus(p);
   if ((p->Specification & SPEC_SIMS_ZHA) == SPEC_SIMS_ZHA) Update_lambda_psi_from_bplus(p);
 
-  // Flags and notification that the VAR parameters have changed
+/*    // Flags and notification that the VAR parameters have changed   ansi-c*/
   p->valid_parameters=1;
   ThetaChanged(model);
   rtrn=1;
 
  ERROR:
 
-  // Free memory
+/*    // Free memory   ansi-c*/
   dw_FreeArray(A0);
   dw_FreeArray(Aplus);
   dw_FreeArray(Zeta);

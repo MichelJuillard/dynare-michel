@@ -37,14 +37,14 @@ int forecast_percentile(FILE *f_out, TVector percentiles, int draws, FILE *poste
   TMatrix forecast;
   TMatrixHistogram *histogram;
 
- // quick check of passed parameters
+/*   // quick check of passed parameters   ansi-c*/
   if (!f_out || !percentiles || (draws <= 0) || (T < 0) || (h < 0) || !model) return 0;
 
   p=(T_VAR_Parameters*)(model->theta);
 
   if (T > p->nobs) return 0;
 
-  // allocate memory
+/*    // allocate memory   ansi-c*/
   S=(int*)swzMalloc(h*sizeof(int));
   forecast=CreateMatrix(h,p->nvars);
   histogram=CreateMatrixHistogram(h,p->nvars,100,HISTOGRAM_VARIABLE);
@@ -54,13 +54,13 @@ int forecast_percentile(FILE *f_out, TVector percentiles, int draws, FILE *poste
   init_prob=CreateVector(p->nstates);
   prob=CreateVector(p->nstates);
 
-  // Initial value
+/*    // Initial value   ansi-c*/
   EquateVector(initial,p->X[T]);
 
   i=0;
   while (!done)
     {
-      // Read parameters and push them into model
+/*        // Read parameters and push them into model   ansi-c*/
       if (!posterior_file)
     done=1;
       else
@@ -78,30 +78,30 @@ int forecast_percentile(FILE *f_out, TVector percentiles, int draws, FILE *poste
 
     if (done != 2)
       {
-        // Get filtered probability at time T
+/*          // Get filtered probability at time T   ansi-c*/
         for (j=p->nstates-1; j >= 0; j--)
           ElementV(init_prob,j)=ProbabilityStateConditionalCurrent(j,T,model);
 
         for (k=draws; k > 0; k--)
           {
-        // Draw time T regime
+/*          // Draw time T regime   ansi-c*/
         m=DrawDiscrete(init_prob);
 
-        // Draw regimes from time T+1 through T+h inclusive
+/*          // Draw regimes from time T+1 through T+h inclusive   ansi-c*/
         for (j=0; j < h; j++)
           {
             ColumnVector(prob,model->sv->Q,m);
             S[j]=m=DrawDiscrete(prob);
           }
 
-        // Draw shocks
-        for (j=h-1; j >= 0; j--) dw_NormalVector(shocks[j]); // InitializeVector(shocks[i],0.0);
+/*          // Draw shocks   ansi-c*/
+        for (j=h-1; j >= 0; j--) dw_NormalVector(shocks[j]);  /*   InitializeVector(shocks[i],0.0);   ansi-c*/
 
-        // Compute forecast
+/*          // Compute forecast   ansi-c*/
         if (!forecast_base(forecast,h,initial,shocks,S,model))
           goto ERROR_EXIT;
 
-        // Accumulate impulse response
+/*          // Accumulate impulse response   ansi-c*/
         AddMatrixObservation(forecast,histogram);
           }
       }
@@ -160,14 +160,14 @@ int forecast_percentile_regime(FILE *f_out, TVector percentiles, int draws,
   TMatrix forecast;
   TMatrixHistogram *histogram;
 
- // quick check of passed parameters
+/*   // quick check of passed parameters   ansi-c*/
   if (!f_out || !percentiles || (draws <= 0) || (T < 0) || (h < 0) || !model) return 0;
 
   p=(T_VAR_Parameters*)(model->theta);
 
   if (T > p->nobs) return 0;
 
-  // allocate memory
+/*    // allocate memory   ansi-c*/
   S=(int*)swzMalloc(h*sizeof(int));
   for (i=0; i < h; i++) S[i]=s;
   forecast=CreateMatrix(h,p->nvars);
@@ -178,13 +178,13 @@ int forecast_percentile_regime(FILE *f_out, TVector percentiles, int draws,
   init_prob=CreateVector(p->nstates);
   prob=CreateVector(p->nstates);
 
-  // Initial value
+/*    // Initial value   ansi-c*/
   EquateVector(initial,p->X[T]);
 
   i=0;
   while (!done)
     {
-      // Read parameters and push them into model
+/*        // Read parameters and push them into model   ansi-c*/
       if (!posterior_file)
     done=1;
       else
@@ -204,14 +204,14 @@ int forecast_percentile_regime(FILE *f_out, TVector percentiles, int draws,
     {
       for (k=draws; k > 0; k--)
         {
-          // Draw shocks
-          for (j=h-1; j >= 0; j--) dw_NormalVector(shocks[j]); // InitializeVector(shocks[i],0.0);
+/*            // Draw shocks   ansi-c*/
+          for (j=h-1; j >= 0; j--) dw_NormalVector(shocks[j]);  /*   InitializeVector(shocks[i],0.0);   ansi-c*/
 
-          // Compute forecast
+/*            // Compute forecast   ansi-c*/
           if (!forecast_base(forecast,h,initial,shocks,S,model))
         goto ERROR_EXIT;
 
-          // Accumulate impulse response
+/*            // Accumulate impulse response   ansi-c*/
           AddMatrixObservation(forecast,histogram);
         }
     }
@@ -306,33 +306,33 @@ int main(int nargs, char **args)
   int s, horizon, thin, draws, i, j, n;
   FILE *f_out, *posterior_file;
 
-  // specification filename
+/*    // specification filename   ansi-c*/
   if (buffer=dw_ParseString_String(nargs,args,"fs",(char*)NULL))
     strcpy(spec=(char*)swzMalloc(strlen(buffer)+1),buffer);
 
-  // parameter filename
+/*    // parameter filename   ansi-c*/
   if (buffer=dw_ParseString_String(nargs,args,"fp",(char*)NULL))
     strcpy(parm=(char*)swzMalloc(strlen(buffer)+1),buffer);
 
-  // header
+/*    // header   ansi-c*/
   if (buffer=dw_ParseString_String(nargs,args,"ph",(char*)NULL))
     strcpy(head=(char*)swzMalloc(strlen(buffer)+1),buffer);
 
-  // file tag
+/*    // file tag   ansi-c*/
   if (tag=dw_ParseString_String(nargs,args,"ft",(char*)NULL))
     {
       fmt="est_final_%s.dat";
 
-      // specification filename
+/*        // specification filename   ansi-c*/
       if (!spec)
     sprintf(spec=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
 
-      // parameter filename
+/*        // parameter filename   ansi-c*/
       if (!parm)
     sprintf(parm=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
     }
 
-  // horizon
+/*    // horizon   ansi-c*/
   horizon=dw_ParseInteger_String(nargs,args,"horizon",12);
 
   if (!spec)
@@ -366,9 +366,9 @@ int main(int nargs, char **args)
   swzFree(head);
   swzFree(parm);
 
-  //============================= Compute forecasts =============================
+/*    //============================= Compute forecasts =============================   ansi-c*/
 
-  // Mean forecast
+/*    // Mean forecast   ansi-c*/
   /* if (dw_FindArgument_String(nargs,args,"mean") != -1) */
   /*   { */
   /*     fmt="forecasts_mean_%s.prn"; */
@@ -383,10 +383,10 @@ int main(int nargs, char **args)
   /*     return; */
   /*   } */
 
-  // Parameter uncertainty
+/*    // Parameter uncertainty   ansi-c*/
   if (dw_FindArgument_String(nargs,args,"parameter_uncertainity") != -1)
     {
-      // Open posterior draws file
+/*        // Open posterior draws file   ansi-c*/
       fmt="draws_%s.dat";
       sprintf(post=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
       if (!(posterior_file=fopen(post,"rt")))
@@ -395,25 +395,25 @@ int main(int nargs, char **args)
       swzExit(0);
     }
 
-      // Get thinning factor from command line
+/*        // Get thinning factor from command line   ansi-c*/
       thin=dw_ParseInteger_String(nargs,args,"thin",1);
 
-      // Get shocks_per_parameter from command line
+/*        // Get shocks_per_parameter from command line   ansi-c*/
       draws=dw_ParseInteger_String(nargs,args,"shocks_per_parameter",1);
     }
   else
     {
-      // Using posterior estimate
+/*        // Using posterior estimate   ansi-c*/
       posterior_file=(FILE*)NULL;
 
-      // thinning factor not used
+/*        // thinning factor not used   ansi-c*/
       thin=1;
 
-      // Get shocks_per_parameter from command line
+/*        // Get shocks_per_parameter from command line   ansi-c*/
       draws=dw_ParseInteger_String(nargs,args,"shocks_per_parameter",10000);
     }
 
-  // Setup percentiles
+/*    // Setup percentiles   ansi-c*/
   if ((i=dw_FindArgument_String(nargs,args,"percentiles")) == -1)
     if (dw_FindArgument_String(nargs,args,"error_bands") == -1)
       {
@@ -481,7 +481,7 @@ int main(int nargs, char **args)
 
   if (posterior_file) fclose(posterior_file);
   FreeVector(percentiles);
-  //=============================================================================
+/*    //=============================================================================   ansi-c*/
 
   return 0;
 }
