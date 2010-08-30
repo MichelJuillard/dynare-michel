@@ -1,6 +1,6 @@
 function osr1(i_params,i_var,weights)
 
-% Copyright (C) 2005-2009, 2010 Dynare Team
+% Copyright (C) 2005-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -31,11 +31,11 @@ if M_.exo_nbr == 0
 end
 
 if ~ M_.lead_lag_incidence(M_.maximum_lag+1,:) > 0
-    error ('OSR: Error in model specification: some variables don"t appear as current') ;
+    error ('OSR: Error in model specification: some variables don''t appear as current') ;
 end
 
 if M_.maximum_lead == 0
-    error ('Backward or static model: no point in using OLR') ;
+    error ('Backward or static model: no point in using OSR') ;
 end
 
 exe =zeros(M_.exo_nbr,1);
