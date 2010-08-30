@@ -221,23 +221,6 @@ extern "C" {
         // run stochastic steady
         app.walkStochSteady();
 
-        //ConstTwoDMatrix ss(app.getSS());
-        // open mat file
-        std::string matfile(fName); //(params.basename);
-        matfile += ".mat";
-        FILE *matfd = NULL;
-        if (NULL == (matfd = fopen(matfile.c_str(), "wb")))
-          mexErrMsgIdAndTxt("dynare:k_order_perturbation", "Couldn't open %s for writing.", matfile.c_str());
-
-        //std::string ss_matrix_name(fName);
-        //ss_matrix_name += "_steady_states";
-        //ss.writeMat4(matfd, ss_matrix_name.c_str());
-
-        // write the folded decision rule to the Mat-4 file
-        app.getFoldDecisionRule().writeMat4(matfd, fName.c_str()); //params.prefix);
-
-        fclose(matfd);
-
         /* Write derivative outputs into memory map */
         map<string, ConstTwoDMatrix> mm;
         app.getFoldDecisionRule().writeMMap(mm, string());
