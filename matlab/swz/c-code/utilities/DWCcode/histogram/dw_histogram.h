@@ -1,7 +1,7 @@
 #ifndef __HISTOGRAMS__
 #define __HISTOGRAMS__
 
-#include "matrix.h"
+#include "swzmatrix.h"
 
 #define HISTOGRAM_FIXED      1
 #define HISTOGRAM_VARIABLE   2
