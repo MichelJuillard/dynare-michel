@@ -562,7 +562,7 @@ int ReadBaseTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *he
           ConvertBaseTransitionMatrix(sv->Q,Q,sv->nlags_encoded);
 
           /* Free Q */
- 	  FreeMatrix(Q);
+       FreeMatrix(Q);
 
 /*        // Update   ansi-c*/
       if (!Update_B_from_Q_SV(sv))
@@ -728,42 +728,42 @@ int ReadBaseTransitionMatricesFlat_SV(FILE *f_in, TMarkovStateVariable *sv)
   if (sv->n_state_variables > 1)
     {
       for (i=0; i < sv->n_state_variables; i++)
-	if (!ReadBaseTransitionMatricesFlat_SV(f_in,sv->state_variable[i]))
-	  return 0;
+    if (!ReadBaseTransitionMatricesFlat_SV(f_in,sv->state_variable[i]))
+      return 0;
     }
   else
     {
       // Read transition matrix
       Q=CreateMatrix(sv->nbasestates,sv->nbasestates);
       for (j=0; j < ColM(Q); j++)
-	for (i=0; i < RowM(Q); i++)
-	  if (fscanf(f_in," %lf ",&ElementM(Q,i,j)) != 1)
-	    {
-	      FreeMatrix(Q);
-	      return 0;
-	    }
+    for (i=0; i < RowM(Q); i++)
+      if (fscanf(f_in," %lf ",&ElementM(Q,i,j)) != 1)
+        {
+          FreeMatrix(Q);
+          return 0;
+        }
 
       // Scale the columns of Q - loose requirement on sumation to one
       for (j=sv->nbasestates-1; j >= 0; j--)
-	{
-	  for (sum=0.0, i=sv->nbasestates-1; i >= 0; i--)
-	    if (ElementM(Q,i,j) < 0.0)
-	      {
-		FreeMatrix(Q);
-		dw_UserError("Transition matrix can not have negative elements.");
-		return 0;
-	      }
-	    else
-	      sum+=ElementM(Q,i,j);
-	  if (fabs(sum-1.0) > 1.0e-4)
-	    {
-	      FreeMatrix(Q);
-	      dw_UserError("Transition matrix columns must sum to one.");
-	      return 0;
-	    }
-	  for (sum=1.0/sum, i=sv->nbasestates-1; i >= 0; i--)
-	    ElementM(Q,i,j)*=sum;
-	}
+    {
+      for (sum=0.0, i=sv->nbasestates-1; i >= 0; i--)
+        if (ElementM(Q,i,j) < 0.0)
+          {
+        FreeMatrix(Q);
+        dw_UserError("Transition matrix can not have negative elements.");
+        return 0;
+          }
+        else
+          sum+=ElementM(Q,i,j);
+      if (fabs(sum-1.0) > 1.0e-4)
+        {
+          FreeMatrix(Q);
+          dw_UserError("Transition matrix columns must sum to one.");
+          return 0;
+        }
+      for (sum=1.0/sum, i=sv->nbasestates-1; i >= 0; i--)
+        ElementM(Q,i,j)*=sum;
+    }
 
       // Convert base transition matrix to full transition matrix.
       ConvertBaseTransitionMatrix(sv->Q,Q,sv->nlags_encoded);
@@ -773,10 +773,10 @@ int ReadBaseTransitionMatricesFlat_SV(FILE *f_in, TMarkovStateVariable *sv)
 
       // Update
       if (!Update_B_from_Q_SV(sv))
-	{
-	  dw_UserError("Transition matrices do not satisfy restrictions");
-	  return 0;
-	}
+    {
+      dw_UserError("Transition matrices do not satisfy restrictions");
+      return 0;
+    }
 
       return 1;
     }

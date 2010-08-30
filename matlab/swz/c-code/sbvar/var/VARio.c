@@ -580,36 +580,36 @@ int Read_VAR_ParametersFlat(FILE *f_in, TStateModel *model)
     {
       A0[s]=CreateMatrix(p->nvars,p->nvars);
       for (j=0; j < p->nvars; j++)
-	for (i=0; i < p->nvars; i++)
-	  if (fscanf(f_in," %lf ",&ElementM(A0[s],i,j)) != 1)
-	    goto ERROR;
+    for (i=0; i < p->nvars; i++)
+      if (fscanf(f_in," %lf ",&ElementM(A0[s],i,j)) != 1)
+        goto ERROR;
 
       Aplus[s]=CreateMatrix(p->npre,p->nvars);
       for (j=0; j < p->nvars; j++)
-	for (i=0; i < p->npre; i++)
-	  if (fscanf(f_in," %lf ",&ElementM(Aplus[s],i,j)) != 1)
-	    goto ERROR;
+    for (i=0; i < p->npre; i++)
+      if (fscanf(f_in," %lf ",&ElementM(Aplus[s],i,j)) != 1)
+        goto ERROR;
 
       Zeta[s]=CreateVector(p->nvars);
       for (j=0; j < p->nvars; j++)
-	if (fscanf(f_in," %lf ",&ElementV(Zeta[s],j)) != 1)
-	  goto ERROR;
-	else
-	  if (ElementV(Zeta[s],j) < 0.0)
-	    goto ERROR;
+    if (fscanf(f_in," %lf ",&ElementV(Zeta[s],j)) != 1)
+      goto ERROR;
+    else
+      if (ElementV(Zeta[s],j) < 0.0)
+        goto ERROR;
     }
 
   // Set A0, Aplus, and Zeta
   for (j=0; j < p->nvars; j++)
     for (s=0; s < p->nstates; s++)
       {
-	for (i=0; i < p->nvars; i++)
-	  ElementV(p->A0[j][p->coef_states[j][s]],i)=ElementM(A0[s],i,j);
+    for (i=0; i < p->nvars; i++)
+      ElementV(p->A0[j][p->coef_states[j][s]],i)=ElementM(A0[s],i,j);
 
-	for (i=0; i < p->npre; i++)
-	  ElementV(p->Aplus[j][p->coef_states[j][s]],i)=ElementM(Aplus[s],i,j);
+    for (i=0; i < p->npre; i++)
+      ElementV(p->Aplus[j][p->coef_states[j][s]],i)=ElementM(Aplus[s],i,j);
 
-	p->Zeta[j][p->var_states[j][s]]=ElementV(Zeta[s],j);
+    p->Zeta[j][p->var_states[j][s]]=ElementV(Zeta[s],j);
       }
 
   // Update b0, bplus, lambda, psi

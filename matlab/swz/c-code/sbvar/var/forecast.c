@@ -62,49 +62,49 @@ int forecast_percentile(FILE *f_out, TVector percentiles, int draws, FILE *poste
     {
       // Read parameters and push them into model
       if (!posterior_file)
-	done=1;
+    done=1;
       else
-	if (!ReadBaseTransitionMatricesFlat(posterior_file,model) || !Read_VAR_ParametersFlat(posterior_file,model))
-	  {
-	    done=2;
-	    printf("total posterior draws processed - %d\n",i);
-	  }
-	else
-	  if (i++ == n)
-	    {
-	      printf("%d posterior draws processed\n",i);
-	      n+=1000;
-	    }
+    if (!ReadBaseTransitionMatricesFlat(posterior_file,model) || !Read_VAR_ParametersFlat(posterior_file,model))
+      {
+        done=2;
+        printf("total posterior draws processed - %d\n",i);
+      }
+    else
+      if (i++ == n)
+        {
+          printf("%d posterior draws processed\n",i);
+          n+=1000;
+        }
 
-	if (done != 2)
-	  {
-	    // Get filtered probability at time T
-	    for (j=p->nstates-1; j >= 0; j--)
-	      ElementV(init_prob,j)=ProbabilityStateConditionalCurrent(j,T,model);
+    if (done != 2)
+      {
+        // Get filtered probability at time T
+        for (j=p->nstates-1; j >= 0; j--)
+          ElementV(init_prob,j)=ProbabilityStateConditionalCurrent(j,T,model);
 
-	    for (k=draws; k > 0; k--)
-	      {
-		// Draw time T regime
-		m=DrawDiscrete(init_prob);
+        for (k=draws; k > 0; k--)
+          {
+        // Draw time T regime
+        m=DrawDiscrete(init_prob);
 
-		// Draw regimes from time T+1 through T+h inclusive
-		for (j=0; j < h; j++)
-		  {
-		    ColumnVector(prob,model->sv->Q,m);
-		    S[j]=m=DrawDiscrete(prob);
-		  }
+        // Draw regimes from time T+1 through T+h inclusive
+        for (j=0; j < h; j++)
+          {
+            ColumnVector(prob,model->sv->Q,m);
+            S[j]=m=DrawDiscrete(prob);
+          }
 
-		// Draw shocks
-		for (j=h-1; j >= 0; j--) dw_NormalVector(shocks[j]); // InitializeVector(shocks[i],0.0);
+        // Draw shocks
+        for (j=h-1; j >= 0; j--) dw_NormalVector(shocks[j]); // InitializeVector(shocks[i],0.0);
 
-		// Compute forecast
-		if (!forecast_base(forecast,h,initial,shocks,S,model))
-		  goto ERROR_EXIT;
+        // Compute forecast
+        if (!forecast_base(forecast,h,initial,shocks,S,model))
+          goto ERROR_EXIT;
 
-		// Accumulate impulse response
-		AddMatrixObservation(forecast,histogram);
-	      }
-	  }
+        // Accumulate impulse response
+        AddMatrixObservation(forecast,histogram);
+          }
+      }
     }
 
   for (i=0; i < DimV(percentiles); i++)
@@ -152,7 +152,7 @@ ERROR_EXIT:
 
 */
 int forecast_percentile_regime(FILE *f_out, TVector percentiles, int draws,
-			       FILE *posterior_file, int s, int T, int h, TStateModel *model)
+                   FILE *posterior_file, int s, int T, int h, TStateModel *model)
 {
   T_VAR_Parameters *p;
   int done=0, rtrn=0, *S, i=0, j, k, m, n=1000;
@@ -186,35 +186,35 @@ int forecast_percentile_regime(FILE *f_out, TVector percentiles, int draws,
     {
       // Read parameters and push them into model
       if (!posterior_file)
-	done=1;
+    done=1;
       else
-	if (!ReadBaseTransitionMatricesFlat(posterior_file,model) || !Read_VAR_ParametersFlat(posterior_file,model))
-	  {
-	    done=2;
-	    printf("total posterior draws processed - %d\n",i);
-	  }
-	else
-	  if (i++ == n)
-	    {
-	      printf("%d posterior draws processed\n",i);
-	      n+=1000;
-	    }
+    if (!ReadBaseTransitionMatricesFlat(posterior_file,model) || !Read_VAR_ParametersFlat(posterior_file,model))
+      {
+        done=2;
+        printf("total posterior draws processed - %d\n",i);
+      }
+    else
+      if (i++ == n)
+        {
+          printf("%d posterior draws processed\n",i);
+          n+=1000;
+        }
 
       if (done != 2)
-	{
-	  for (k=draws; k > 0; k--)
-	    {
-	      // Draw shocks
-	      for (j=h-1; j >= 0; j--) dw_NormalVector(shocks[j]); // InitializeVector(shocks[i],0.0);
+    {
+      for (k=draws; k > 0; k--)
+        {
+          // Draw shocks
+          for (j=h-1; j >= 0; j--) dw_NormalVector(shocks[j]); // InitializeVector(shocks[i],0.0);
 
-	      // Compute forecast
-	      if (!forecast_base(forecast,h,initial,shocks,S,model))
-		goto ERROR_EXIT;
+          // Compute forecast
+          if (!forecast_base(forecast,h,initial,shocks,S,model))
+        goto ERROR_EXIT;
 
-	      // Accumulate impulse response
-	      AddMatrixObservation(forecast,histogram);
-	    }
-	}
+          // Accumulate impulse response
+          AddMatrixObservation(forecast,histogram);
+        }
+    }
     }
 
   for (i=0; i < DimV(percentiles); i++)
@@ -325,11 +325,11 @@ int main(int nargs, char **args)
 
       // specification filename
       if (!spec)
-	sprintf(spec=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
+    sprintf(spec=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
 
       // parameter filename
       if (!parm)
-	sprintf(parm=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
+    sprintf(parm=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
     }
 
   // horizon
@@ -340,11 +340,11 @@ int main(int nargs, char **args)
       swz_fprintf_err("No specification filename given\n");
       swz_fprintf_err("Command line syntax:\n"
                      "  -ft : file tag\n"
-	             "  -fs : specification filename (est_final_<tag>.dat)\n"
-	             "  -fp : parameters filename (specification filename)\n"
+                 "  -fs : specification filename (est_final_<tag>.dat)\n"
+                 "  -fp : parameters filename (specification filename)\n"
                      "  -fh : parameter header (Posterior mode: )\n"
                      "  -horizon : horizon for the forecast (12)\n"
-	      );
+          );
       swzExit(1);
     }
 
@@ -377,8 +377,8 @@ int main(int nargs, char **args)
   /*     swzFree(out_filename); */
   /*     printf("Constructing mean forecast\n"); */
   /*     if (F=dw_state_space_mean_unconditional_forecast((TVector*)NULL,h,statespace->nobs,model)) */
-  /* 	for (i=0; i < h; i++) */
-  /* 	  dw_PrintVector(f_out,F[i],"%le "); */
+  /*     for (i=0; i < h; i++) */
+  /*       dw_PrintVector(f_out,F[i],"%le "); */
   /*     fclose(f_out); */
   /*     return; */
   /*   } */
@@ -390,10 +390,10 @@ int main(int nargs, char **args)
       fmt="draws_%s.dat";
       sprintf(post=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
       if (!(posterior_file=fopen(post,"rt")))
-	{
-	  printf("Unable to open draws file: %s\n",post);
-	  swzExit(0);
-	}
+    {
+      printf("Unable to open draws file: %s\n",post);
+      swzExit(0);
+    }
 
       // Get thinning factor from command line
       thin=dw_ParseInteger_String(nargs,args,"thin",1);
@@ -417,66 +417,66 @@ int main(int nargs, char **args)
   if ((i=dw_FindArgument_String(nargs,args,"percentiles")) == -1)
     if (dw_FindArgument_String(nargs,args,"error_bands") == -1)
       {
-	percentiles=CreateVector(1);
-	ElementV(percentiles,0)=0.5;
+    percentiles=CreateVector(1);
+    ElementV(percentiles,0)=0.5;
       }
     else
       {
-	percentiles=CreateVector(3);
-	ElementV(percentiles,0)=0.16; ElementV(percentiles,1)=0.5; ElementV(percentiles,2)=0.84;
+    percentiles=CreateVector(3);
+    ElementV(percentiles,0)=0.16; ElementV(percentiles,1)=0.5; ElementV(percentiles,2)=0.84;
       }
   else
     if ((i+1 < nargs) && dw_IsInteger(args[i+1]) && ((n=atoi(args[i+1])) > 0) && (i+1+n < nargs))
       {
-	percentiles=CreateVector(n);
-	for (j=0; j < n; j++)
-	  if (!dw_IsFloat(args[i+2+j])|| ((ElementV(percentiles,j)=atof(args[i+2+j])) <= 0.0)
-	      || (ElementV(percentiles,j) >= 1.0)) break;
-	if (j < n)
-	  {
-	    FreeVector(percentiles);
-	    printf("forecasting command line: Error parsing percentiles\n");
-	    swzExit(0);
-	  }
+    percentiles=CreateVector(n);
+    for (j=0; j < n; j++)
+      if (!dw_IsFloat(args[i+2+j])|| ((ElementV(percentiles,j)=atof(args[i+2+j])) <= 0.0)
+          || (ElementV(percentiles,j) >= 1.0)) break;
+    if (j < n)
+      {
+        FreeVector(percentiles);
+        printf("forecasting command line: Error parsing percentiles\n");
+        swzExit(0);
+      }
       }
     else
       {
-	printf("forecasting command line(): Error parsing percentiles\n");
-	swzExit(0);
+    printf("forecasting command line(): Error parsing percentiles\n");
+    swzExit(0);
       }
 
   if (dw_FindArgument_String(nargs,args,"regimes") != -1)
     for (s=0; s < p->nstates; s++)
       {
-	rewind(posterior_file);
-	fmt="forecasts_percentiles_regime_%d_%s.prn";
-	sprintf(out_filename=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 3),fmt,s,tag);
-	f_out=fopen(out_filename,"wt");
-	swzFree(out_filename);
-	printf("Constructing percentiles for forecasts - regime %d\n",s);
-	forecast_percentile_regime(f_out,percentiles,draws,posterior_file,s,p->nobs,horizon,model);
-	fclose(f_out);
+    rewind(posterior_file);
+    fmt="forecasts_percentiles_regime_%d_%s.prn";
+    sprintf(out_filename=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 3),fmt,s,tag);
+    f_out=fopen(out_filename,"wt");
+    swzFree(out_filename);
+    printf("Constructing percentiles for forecasts - regime %d\n",s);
+    forecast_percentile_regime(f_out,percentiles,draws,posterior_file,s,p->nobs,horizon,model);
+    fclose(f_out);
       }
   else
     if (((s=dw_ParseInteger_String(nargs,args,"regime",-1)) >= 0) && (s < p->nstates))
       {
-	fmt="forecasts_percentiles_regime_%d_%s.prn";
-	sprintf(out_filename=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 3),fmt,s,tag);
-	f_out=fopen(out_filename,"wt");
-	swzFree(out_filename);
-	printf("Constructing percentiles for forecasts - regime %d\n",s);
-	forecast_percentile_regime(f_out,percentiles,draws,posterior_file,s,p->nobs,horizon,model);
-	fclose(f_out);
+    fmt="forecasts_percentiles_regime_%d_%s.prn";
+    sprintf(out_filename=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 3),fmt,s,tag);
+    f_out=fopen(out_filename,"wt");
+    swzFree(out_filename);
+    printf("Constructing percentiles for forecasts - regime %d\n",s);
+    forecast_percentile_regime(f_out,percentiles,draws,posterior_file,s,p->nobs,horizon,model);
+    fclose(f_out);
       }
     else
       {
-	fmt="forecasts_percentiles_%s.prn";
-	sprintf(out_filename=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
-	f_out=fopen(out_filename,"wt");
-	swzFree(out_filename);
-	printf("Constructing percentiles for forecasts - %d draws of shocks/regimes per posterior value\n",draws);
-	forecast_percentile(f_out,percentiles,draws,posterior_file,p->nobs,horizon,model);
-	fclose(f_out);
+    fmt="forecasts_percentiles_%s.prn";
+    sprintf(out_filename=(char*)swzMalloc(strlen(fmt) + strlen(tag) - 1),fmt,tag);
+    f_out=fopen(out_filename,"wt");
+    swzFree(out_filename);
+    printf("Constructing percentiles for forecasts - %d draws of shocks/regimes per posterior value\n",draws);
+    forecast_percentile(f_out,percentiles,draws,posterior_file,p->nobs,horizon,model);
+    fclose(f_out);
       }
 
   if (posterior_file) fclose(posterior_file);

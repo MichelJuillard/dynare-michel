@@ -15,7 +15,7 @@ static void AddObservationFixed(PRECISION x, int *low, int *h, int *high, PRECIS
 static PRECISION Cumulative(PRECISION level, int low, int *h, PRECISION min, PRECISION max, int intervals, int sample_size);
 static PRECISION Percentile(PRECISION percentile, int low, int *h, PRECISION min, PRECISION max, int intervals, int sample_size);
 static TMatrix MakeHistogram(int low, int *h, PRECISION min, PRECISION max,int intervals, int sample_size,
-			     PRECISION min_out, PRECISION max_out, int bins);
+                 PRECISION min_out, PRECISION max_out, int bins);
 static TMatrix MakeHistogramAuto(int low, int *h, int high, PRECISION min, PRECISION max, int intervals, int sample_size, int bins);
 
 
@@ -104,14 +104,14 @@ void AddMatrixObservation(TMatrix X, TMatrixHistogram *h)
    {
      for (i=h->rows-1; i >= 0; i--)
        for (j=h->cols-1; j >= 0; j--)
-	 {
-	   h->low[i][j]=h->high[i][j]=0;
-	   for (k=h->intervals-1; k >= 0; k--) h->freq[i][j][k]=0;
-	 }
+     {
+       h->low[i][j]=h->high[i][j]=0;
+       for (k=h->intervals-1; k >= 0; k--) h->freq[i][j][k]=0;
+     }
      if (h->type == HISTOGRAM_VARIABLE)
        for (i=h->rows-1; i >= 0; i--)
-	 for (j=h->cols-1; j >= 0; j--)
-	   ElementM(h->Min,i,j)=ElementM(h->Max,i,j)=ElementM(X,i,j);
+     for (j=h->cols-1; j >= 0; j--)
+       ElementM(h->Min,i,j)=ElementM(h->Max,i,j)=ElementM(X,i,j);
    }
 
  if (h->type == HISTOGRAM_FIXED)
@@ -245,12 +245,12 @@ void AddVectorObservation(TVector x, TVectorHistogram *h)
    {
      for (i=h->dim-1; i >= 0; i--)
        {
-	 h->low[i]=h->high[i]=0;
-	 for (k=h->intervals-1; k >= 0; k--) h->freq[i][k]=0;
+     h->low[i]=h->high[i]=0;
+     for (k=h->intervals-1; k >= 0; k--) h->freq[i][k]=0;
        }
      if (h->type == HISTOGRAM_VARIABLE)
        for (i=h->dim-1; i >= 0; i--)
-	 ElementV(h->Min,i)=ElementV(h->Max,i)=ElementV(x,i);
+     ElementV(h->Min,i)=ElementV(h->Max,i)=ElementV(x,i);
    }
 
  if (h->type == HISTOGRAM_FIXED)
@@ -691,57 +691,57 @@ static TMatrix MakeHistogramAuto(int low, int *h, int high, PRECISION min, PRECI
 
      if (lo == intervals)
        {
-	 min_out=max-1.0;
-	 max_out=max+1.0;
+     min_out=max-1.0;
+     max_out=max+1.0;
        }
      else
        {
-	 if (high > 0)
-	   hi=intervals;
-	 else
-	   for (hi=intervals-1; !h[hi]; hi--);
+     if (high > 0)
+       hi=intervals;
+     else
+       for (hi=intervals-1; !h[hi]; hi--);
 
-	 if (lo >= 0)
-	   if (hi < intervals)
-	     {
-	       min_out=min+lo*inc;
-	       max_out=min+(hi+1)*inc;
-	     }
-	   else
-	     {
-	       min_out=min+lo*inc;
-	       if (bins == 1)
-		 max_out=(1+SQRT_MACHINE_EPSILON)*max;
-	       else
-		 {
-		   inc=(1-SQRT_MACHINE_EPSILON)*(max - min_out)/(PRECISION)(bins-1);
-		   max_out=max + inc;
-		 }
-	     }
-	 else
-	   if (hi < intervals)
-	     {
-	       max_out=min+(hi+1)*inc;
-	       if (bins == 1)
-		 min_out=(1-SQRT_MACHINE_EPSILON)*min;
-	       else
-		 {
-		   inc=(1-SQRT_MACHINE_EPSILON)*(max_out - min)/(PRECISION)(bins-1);
-		   min_out=min - inc;
-		 }
-	     }
-	   else
-	     if (bins <= 2)
-	       {
-		 min_out=(1-SQRT_MACHINE_EPSILON)*min;
-		 max_out=(1+SQRT_MACHINE_EPSILON)*max;
-	       }
-	     else
-	       {
-		 inc=(1-SQRT_MACHINE_EPSILON)*(max_out - min)/(PRECISION)(bins-2);
-		 min_out=min - inc;
-		 max_out=max +inc;
-	       }
+     if (lo >= 0)
+       if (hi < intervals)
+         {
+           min_out=min+lo*inc;
+           max_out=min+(hi+1)*inc;
+         }
+       else
+         {
+           min_out=min+lo*inc;
+           if (bins == 1)
+         max_out=(1+SQRT_MACHINE_EPSILON)*max;
+           else
+         {
+           inc=(1-SQRT_MACHINE_EPSILON)*(max - min_out)/(PRECISION)(bins-1);
+           max_out=max + inc;
+         }
+         }
+     else
+       if (hi < intervals)
+         {
+           max_out=min+(hi+1)*inc;
+           if (bins == 1)
+         min_out=(1-SQRT_MACHINE_EPSILON)*min;
+           else
+         {
+           inc=(1-SQRT_MACHINE_EPSILON)*(max_out - min)/(PRECISION)(bins-1);
+           min_out=min - inc;
+         }
+         }
+       else
+         if (bins <= 2)
+           {
+         min_out=(1-SQRT_MACHINE_EPSILON)*min;
+         max_out=(1+SQRT_MACHINE_EPSILON)*max;
+           }
+         else
+           {
+         inc=(1-SQRT_MACHINE_EPSILON)*(max_out - min)/(PRECISION)(bins-2);
+         min_out=min - inc;
+         max_out=max +inc;
+           }
        }
    }
 

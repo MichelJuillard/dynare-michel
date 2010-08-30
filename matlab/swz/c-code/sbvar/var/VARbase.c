@@ -2433,13 +2433,13 @@ TMatrix forecast_base(TMatrix forecast, int horizon, TVector initial, TVector *s
     {
       ProductVM(y,x,Aplus[S[t]]);
       if (shocks)
-	{
-	  for (i=p->nvars-1; i >= 0; i--)
-	    ElementV(y,i)+=ElementV(shocks[t],i)/sqrt(p->Zeta[i][p->var_states[i][S[t]]]);
-	}
+    {
+      for (i=p->nvars-1; i >= 0; i--)
+        ElementV(y,i)+=ElementV(shocks[t],i)/sqrt(p->Zeta[i][p->var_states[i][S[t]]]);
+    }
       ProductInverseVM(y,y,A0[S[t]]);
       for (i=p->nvars-1; i >= 0; i--)
-	ElementM(forecast,t,i)=ElementV(y,i);
+    ElementM(forecast,t,i)=ElementV(y,i);
 
       memmove(pElementV(x)+p->nvars,pElementV(x),(p->nlags-1)*p->nvars*sizeof(PRECISION));
       memcpy(pElementV(x),pElementV(y),p->nvars*sizeof(PRECISION));
@@ -2487,23 +2487,23 @@ TMatrix forecast_base(TMatrix forecast, int horizon, TVector initial, TVector *s
 /*       Pxi1[k]=CreateVector(statespace->nstates); */
 /*       SPxi[k]=CreateVector(statespace->nstates); */
 /*       for (i=statespace->zeta_modulus-1; i >= 0; i--) */
-/* 	{ */
-/* 	  IEz[k][i]=CreateVector(statespace->nz); */
-/* 	  IEzz[k][i]=CreateMatrix(statespace->nz,statespace->nz); */
-/* 	  ISEz[k][i]=CreateVector(statespace->nz); */
-/* 	} */
+/*     { */
+/*       IEz[k][i]=CreateVector(statespace->nz); */
+/*       IEzz[k][i]=CreateMatrix(statespace->nz,statespace->nz); */
+/*       ISEz[k][i]=CreateVector(statespace->nz); */
+/*     } */
 /*       for (i=statespace->nstates-1; i >= 0; i--) */
-/* 	{ */
-/* 	  Ez1[k][i]=CreateVector(statespace->nz); */
-/* 	  Ezz1[k][i]=CreateMatrix(statespace->nz,statespace->nz); */
-/* 	  Ez[k][i]=CreateVector(statespace->nz); */
-/* 	  Ezz[k][i]=CreateMatrix(statespace->nz,statespace->nz); */
-/* 	  SEz[k][i]=CreateVector(statespace->nz); */
-/* 	} */
+/*     { */
+/*       Ez1[k][i]=CreateVector(statespace->nz); */
+/*       Ezz1[k][i]=CreateMatrix(statespace->nz,statespace->nz); */
+/*       Ez[k][i]=CreateVector(statespace->nz); */
+/*       Ezz[k][i]=CreateMatrix(statespace->nz,statespace->nz); */
+/*       SEz[k][i]=CreateVector(statespace->nz); */
+/*     } */
 /*     } */
 
 /*   ConditionalFilter(0,h-1,y,statespace->Ez[t0],statespace->Ezz[t0],model->V[t0],model->sv->Q, */
-/* 		    Pxi,Pxi1,IEz,IEzz,Ez1,Ezz1,Ez,Ezz,statespace); */
+/*             Pxi,Pxi1,IEz,IEzz,Ez1,Ezz1,Ez,Ezz,statespace); */
 
 /*   SmoothProbabilities_MSStateSpace(0,h-1,SPxi,Pxi,Pxi1,model->sv->Q); */
 
@@ -2519,34 +2519,34 @@ TMatrix forecast_base(TMatrix forecast, int horizon, TVector initial, TVector *s
 /*     { */
 /*       F=dw_CreateArray_vector(h); */
 /*       for (k=h-1; k >= 0; k--) */
-/* 	F[k]=CreateVector(statespace->ny); */
+/*     F[k]=CreateVector(statespace->ny); */
 /*     } */
 
 /*   for (k=h-1; k >= 0; k--) */
 /*     { */
 /*       InitializeVector(F[k],0.0); */
 /*       if (statespace->zeta_modulus > statespace->nbasestates) */
-/* 	{ */
-/* 	  IntegrateStatesSingle(SPzeta,SPxi[k],statespace->zeta_modulus,statespace->nbasestates,2); */
-/* 	  IntegrateStatesSingleV(z,SPzeta,ISEz[k],statespace->nbasestates,statespace->zeta_modulus/statespace->nbasestates,2); */
-/* 	  IntegrateStatesSingle(SPs,SPzeta,statespace->nbasestates,statespace->zeta_modulus/statespace->nbasestates,2); */
-/* 	  for (s=statespace->nbasestates-1; s >= 0; s--) */
-/* 	    { */
-/* 	      ProductMV(u,statespace->H[s],z[s]); */
-/* 	      AddVV(u,statespace->a[s],u); */
-/* 	      LinearCombinationV(F[k],1.0,F[k],ElementV(SPs,s),u); */
-/* 	    } */
-/* 	} */
+/*     { */
+/*       IntegrateStatesSingle(SPzeta,SPxi[k],statespace->zeta_modulus,statespace->nbasestates,2); */
+/*       IntegrateStatesSingleV(z,SPzeta,ISEz[k],statespace->nbasestates,statespace->zeta_modulus/statespace->nbasestates,2); */
+/*       IntegrateStatesSingle(SPs,SPzeta,statespace->nbasestates,statespace->zeta_modulus/statespace->nbasestates,2); */
+/*       for (s=statespace->nbasestates-1; s >= 0; s--) */
+/*         { */
+/*           ProductMV(u,statespace->H[s],z[s]); */
+/*           AddVV(u,statespace->a[s],u); */
+/*           LinearCombinationV(F[k],1.0,F[k],ElementV(SPs,s),u); */
+/*         } */
+/*     } */
 /*       else */
-/* 	{ */
-/* 	  IntegrateStatesSingle(SPs,SPxi[k],statespace->nbasestates,statespace->zeta_modulus,2); */
-/* 	  for (s=statespace->nbasestates-1; s >= 0; s--) */
-/* 	    { */
-/* 	      ProductMV(u,statespace->H[s],ISEz[k][s]); */
-/* 	      AddVV(u,statespace->a[s],u); */
-/* 	      LinearCombinationV(F[k],1.0,F[k],ElementV(SPs,s),u); */
-/* 	    } */
-/* 	} */
+/*     { */
+/*       IntegrateStatesSingle(SPs,SPxi[k],statespace->nbasestates,statespace->zeta_modulus,2); */
+/*       for (s=statespace->nbasestates-1; s >= 0; s--) */
+/*         { */
+/*           ProductMV(u,statespace->H[s],ISEz[k][s]); */
+/*           AddVV(u,statespace->a[s],u); */
+/*           LinearCombinationV(F[k],1.0,F[k],ElementV(SPs,s),u); */
+/*         } */
+/*     } */
 /*     } */
 
 /*   // Clean up */
@@ -3590,19 +3590,19 @@ TMatrix* MakeA0_All(TMatrix *A0, T_VAR_Parameters *p)
   if (!A0)
     {
       if (!(A0=dw_CreateArray_matrix(p->nstates)))
-	return (TMatrix*)NULL;
+    return (TMatrix*)NULL;
     }
   else
     if ((dw_DimA(A0) != p->nstates))
       {
-	dw_Error(SIZE_ERR);
-	return (TMatrix*)NULL;
+    dw_Error(SIZE_ERR);
+    return (TMatrix*)NULL;
       }
   for (s=p->nstates-1; s >= 0; s--)
     if (!(A0[s]=MakeA0(A0[s],s,p)))
       {
-	if (A0_in != A0) dw_FreeArray(A0);
-	return (TMatrix*)NULL;
+    if (A0_in != A0) dw_FreeArray(A0);
+    return (TMatrix*)NULL;
       }
   return A0;
 }
@@ -3644,19 +3644,19 @@ TMatrix* MakeAplus_All(TMatrix *Aplus, T_VAR_Parameters *p)
   if (!Aplus)
     {
       if (!(Aplus=dw_CreateArray_matrix(p->nstates)))
-	return (TMatrix*)NULL;
+    return (TMatrix*)NULL;
     }
   else
     if ((dw_DimA(Aplus) != p->nstates))
       {
-	dw_Error(SIZE_ERR);
-	return (TMatrix*)NULL;
+    dw_Error(SIZE_ERR);
+    return (TMatrix*)NULL;
       }
   for (s=p->nstates-1; s >= 0; s--)
     if (!(Aplus[s]=MakeAplus(Aplus[s],s,p)))
       {
-	if (Aplus_in != Aplus) dw_FreeArray(Aplus);
-	return (TMatrix*)NULL;
+    if (Aplus_in != Aplus) dw_FreeArray(Aplus);
+    return (TMatrix*)NULL;
       }
   return Aplus;
 }
@@ -3694,19 +3694,19 @@ TMatrix* MakeZeta_All(TMatrix *Zeta, T_VAR_Parameters *p)
   if (!Zeta)
     {
       if (!(Zeta=dw_CreateArray_matrix(p->nstates)))
-	return (TMatrix*)NULL;
+    return (TMatrix*)NULL;
     }
   else
     if ((dw_DimA(Zeta) != p->nstates))
       {
-	dw_Error(SIZE_ERR);
-	return (TMatrix*)NULL;
+    dw_Error(SIZE_ERR);
+    return (TMatrix*)NULL;
       }
   for (s=p->nstates-1; s >= 0; s--)
     if (!(Zeta[s]=MakeZeta(Zeta[s],s,p)))
       {
-	if (Zeta_in != Zeta) dw_FreeArray(Zeta);
-	return (TMatrix*)NULL;
+    if (Zeta_in != Zeta) dw_FreeArray(Zeta);
+    return (TMatrix*)NULL;
       }
   return Zeta;
 }
