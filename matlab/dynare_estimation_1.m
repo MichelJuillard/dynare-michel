@@ -1073,8 +1073,6 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
     bounds(:,2)=min(bounds(:,2),ub);
     bayestopt_.lb = bounds(:,1);
     bayestopt_.ub = bounds(:,2);
-    xparam1
-    bounds
     if any(xparam1 < bounds(:,1)) | any(xparam1 > bounds(:,2))
         find(xparam1 < bounds(:,1))
         find(xparam1 > bounds(:,2))
