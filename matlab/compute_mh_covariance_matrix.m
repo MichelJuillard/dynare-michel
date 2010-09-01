@@ -1,7 +1,7 @@
 function [posterior_mean,posterior_covariance,posterior_mode,posterior_kernel_at_the_mode] = compute_mh_covariance_matrix()
-
-% function [m0,s0] = compute_mh_covariance_matrix()
-% Estimation of the posterior covariance matrix and expectation. 
+% Estimation of the posterior covariance matrix, posterior mean, posterior mode and evaluation of the posterior kernel at the
+% estimated mode, using the draws from a metropolis-hastings. The estimated posterior mode and covariance matrix are saved in
+% a file <M_.fname>_mh_mode.mat. 
 % 
 % INPUTS 
 %   None.
@@ -10,12 +10,12 @@ function [posterior_mean,posterior_covariance,posterior_mode,posterior_kernel_at
 %   o  posterior_mean                [double]  (n*1) vector, posterior expectation of the parameters.
 %   o  posterior_covariance          [double]  (n*n) matrix, posterior covariance of the parameters (computed from previous metropolis hastings).
 %   o  posterior_mode                [double]  (n*1) vector, posterior mode of the parameters. 
-%   o  posterior_kernel_at_the_mode  [double]  scalar. 
+%   o  posterior_kernel_at_the_mode  [double]  scalar.
 %
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2006-2008 Dynare Team
+% Copyright (C) 2006-2008, 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
