@@ -198,14 +198,23 @@ void DrawAplus(TStateModel *model);
 void Draw_psi(TStateModel *model);
 void Draw_lambda(TStateModel *model);
 
+/* Forecasts */
+TMatrix forecast_base(TMatrix forecast, int horizon, TVector initial, TVector *shocks, int *S, TStateModel *model);
+
+//TVector* mean_conditional_forecast(TVector *F, PRECISION ***y, int h, int t0, TStateModel *model);
+//TVector* mean_unconditional_forecast(TVector *F, int h, int t0, TStateModel *model);
+
 /* Utilities */
 void ComputeDotProducts_All(T_VAR_Parameters *p);
 void ComputeLogAbsDetA0_All(T_VAR_Parameters *p);
 void ComputeLogAbsDetA0(int j, int k, T_VAR_Parameters *p);
 
 TMatrix MakeA0(TMatrix A0, int k, T_VAR_Parameters *p);
+TMatrix* MakeA0_All(TMatrix *A0, T_VAR_Parameters *p);
 TMatrix MakeAplus(TMatrix Aplus, int k, T_VAR_Parameters *p);
+TMatrix* MakeAplus_All(TMatrix *Aplus, T_VAR_Parameters *p);
 TMatrix MakeZeta(TMatrix Zeta, int k, T_VAR_Parameters *p);
+TMatrix* MakeZeta_All(TMatrix *Zeta, T_VAR_Parameters *p);
 TMatrix ConstructMatrixFromColumns(TMatrix X, TVector **, int k);
 
 void UpdateStateDependentFields(T_VAR_Parameters *p, int *S);

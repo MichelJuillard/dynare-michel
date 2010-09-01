@@ -563,6 +563,74 @@ int Write_VAR_ParametersFlat_Headers(FILE *f_out, TStateModel *model)
   return 1;
 }
 
+int Read_VAR_ParametersFlat(FILE *f_in, TStateModel *model)
+{
+  TMatrix *A0, *Aplus;
+  TVector *Zeta;
+  int i, j, s, rtrn=0;
+  T_VAR_Parameters *p=(T_VAR_Parameters*)(model->theta);
+
+  // Allocate memory
+  A0=dw_CreateArray_matrix(p->nstates);
+  Aplus=dw_CreateArray_matrix(p->nstates);
+  Zeta=dw_CreateArray_vector(p->nstates);
+
+  // Read File
+  for (s=0; s < p->nstates; s++)
+    {
+      A0[s]=CreateMatrix(p->nvars,p->nvars);
+      for (j=0; j < p->nvars; j++)
+	for (i=0; i < p->nvars; i++)
+	  if (fscanf(f_in," %lf ",&ElementM(A0[s],i,j)) != 1)
+	    goto ERROR;
+
+      Aplus[s]=CreateMatrix(p->npre,p->nvars);
+      for (j=0; j < p->nvars; j++)
+	for (i=0; i < p->npre; i++)
+	  if (fscanf(f_in," %lf ",&ElementM(Aplus[s],i,j)) != 1)
+	    goto ERROR;
+
+      Zeta[s]=CreateVector(p->nvars);
+      for (j=0; j < p->nvars; j++)
+	if (fscanf(f_in," %lf ",&ElementV(Zeta[s],j)) != 1)
+	  goto ERROR;
+	else
+	  if (ElementV(Zeta[s],j) < 0.0)
+	    goto ERROR;
+    }
+
+  // Set A0, Aplus, and Zeta
+  for (j=0; j < p->nvars; j++)
+    for (s=0; s < p->nstates; s++)
+      {
+	for (i=0; i < p->nvars; i++)
+	  ElementV(p->A0[j][p->coef_states[j][s]],i)=ElementM(A0[s],i,j);
+
+	for (i=0; i < p->npre; i++)
+	  ElementV(p->Aplus[j][p->coef_states[j][s]],i)=ElementM(Aplus[s],i,j);
+
+	p->Zeta[j][p->var_states[j][s]]=ElementV(Zeta[s],j);
+      }
+
+  // Update b0, bplus, lambda, psi
+  Update_b0_bplus_from_A0_Aplus(p);
+  if ((p->Specification & SPEC_SIMS_ZHA) == SPEC_SIMS_ZHA) Update_lambda_psi_from_bplus(p);
+
+  // Flags and notification that the VAR parameters have changed
+  p->valid_parameters=1;
+  ThetaChanged(model);
+  rtrn=1;
+
+ ERROR:
+
+  // Free memory
+  dw_FreeArray(A0);
+  dw_FreeArray(Aplus);
+  dw_FreeArray(Zeta);
+
+  return rtrn;
+}
+
 /*
    For each state the VAR parameters are printed as follows
     A0    (by columns)
