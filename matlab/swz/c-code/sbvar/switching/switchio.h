@@ -12,6 +12,7 @@ int WriteTransitionMatrices_SV(FILE *f_out, TMarkovStateVariable* sv, char *head
 int ReadBaseTransitionMatrices_SV(FILE *f_out, TMarkovStateVariable *sv, char *header, char *idstring);
 int WriteBaseTransitionMatrices_SV(FILE *f_out, TMarkovStateVariable *sv, char *header, char *idstring);
 
+int ReadBaseTransitionMatricesFlat_SV(FILE *f_out, TMarkovStateVariable *sv);
 int WriteBaseTransitionMatricesFlat_SV(FILE *f_out, TMarkovStateVariable *sv, char *fmt);
 void WriteBaseTransitionMatricesFlat_Headers_SV(FILE *f_out, TMarkovStateVariable* sv, char *idstring);
 
@@ -28,6 +29,7 @@ int WriteStates(FILE *f, char *filename, char *header, TStateModel *model);
 int ReadBaseTransitionMatrices(FILE *f, char *filename, char *header, TStateModel *model);
 int WriteBaseTransitionMatrices(FILE *f, char *filename, char *header, TStateModel *model);
 
+int ReadBaseTransitionMatricesFlat(FILE *f, TStateModel *model);
 int WriteBaseTransitionMatricesFlat(FILE *f, TStateModel *model, char *fmt);
 
 /*

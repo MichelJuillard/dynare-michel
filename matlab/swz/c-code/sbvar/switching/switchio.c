@@ -561,6 +561,9 @@ int ReadBaseTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *he
 /*        // Convert base transition matrix to full transition matrix.   ansi-c*/
           ConvertBaseTransitionMatrix(sv->Q,Q,sv->nlags_encoded);
 
+          /* Free Q */
+       FreeMatrix(Q);
+
 /*        // Update   ansi-c*/
       if (!Update_B_from_Q_SV(sv))
         {
@@ -570,6 +573,7 @@ int ReadBaseTransitionMatrices_SV(FILE *f_in, TMarkovStateVariable* sv, char *he
 
       return 1;
     }
+      FreeMatrix(Q);
       return 0;
     }
 }
@@ -710,6 +714,74 @@ void WriteBaseTransitionMatricesFlat_Headers_SV(FILE *f_out, TMarkovStateVariabl
     for (i=0; i < sv->nbasestates; i++)
       fprintf(f_out,"Q%s(%d,%d) ",idstring,i+1,j+1);
     }
+}
+
+/*
+   Returns 1 upon success and 0 upon failure.
+*/
+int ReadBaseTransitionMatricesFlat_SV(FILE *f_in, TMarkovStateVariable *sv)
+{
+  int i, j;
+  TMatrix Q;
+  PRECISION sum;
+
+  if (sv->n_state_variables > 1)
+    {
+      for (i=0; i < sv->n_state_variables; i++)
+    if (!ReadBaseTransitionMatricesFlat_SV(f_in,sv->state_variable[i]))
+      return 0;
+    }
+  else
+    {
+/*        // Read transition matrix   ansi-c*/
+      Q=CreateMatrix(sv->nbasestates,sv->nbasestates);
+      for (j=0; j < ColM(Q); j++)
+    for (i=0; i < RowM(Q); i++)
+      if (fscanf(f_in," %lf ",&ElementM(Q,i,j)) != 1)
+        {
+          FreeMatrix(Q);
+          return 0;
+        }
+
+/*        // Scale the columns of Q - loose requirement on sumation to one   ansi-c*/
+      for (j=sv->nbasestates-1; j >= 0; j--)
+    {
+      for (sum=0.0, i=sv->nbasestates-1; i >= 0; i--)
+        if (ElementM(Q,i,j) < 0.0)
+          {
+        FreeMatrix(Q);
+        dw_UserError("Transition matrix can not have negative elements.");
+        return 0;
+          }
+        else
+          sum+=ElementM(Q,i,j);
+      if (fabs(sum-1.0) > 1.0e-4)
+        {
+          FreeMatrix(Q);
+          dw_UserError("Transition matrix columns must sum to one.");
+          return 0;
+        }
+      for (sum=1.0/sum, i=sv->nbasestates-1; i >= 0; i--)
+        ElementM(Q,i,j)*=sum;
+    }
+
+/*        // Convert base transition matrix to full transition matrix.   ansi-c*/
+      ConvertBaseTransitionMatrix(sv->Q,Q,sv->nlags_encoded);
+
+/*        // Free Q   ansi-c*/
+      FreeMatrix(Q);
+
+/*        // Update   ansi-c*/
+      if (!Update_B_from_Q_SV(sv))
+    {
+      dw_UserError("Transition matrices do not satisfy restrictions");
+      return 0;
+    }
+
+      return 1;
+    }
+
+  return 1;
 }
 
 
@@ -892,6 +964,11 @@ int WriteBaseTransitionMatrices(FILE *f, char *filename, char *header, TStateMod
   int rtrn=(f_out) ? WriteBaseTransitionMatrices_SV(f_out,model->sv,header,"") : 0;
   if (!f && f_out) fclose(f_out);
   return rtrn;
+}
+
+int ReadBaseTransitionMatricesFlat(FILE *f, TStateModel *model)
+{
+  return f ? ReadBaseTransitionMatricesFlat_SV(f,model->sv) : 0;
 }
 
 int WriteBaseTransitionMatricesFlat(FILE *f, TStateModel *model, char *fmt)

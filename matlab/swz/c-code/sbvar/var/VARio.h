@@ -10,6 +10,7 @@ TStateModel* Read_VAR_Specification(FILE *f, char *filename);
 
 int Write_VAR_Parameters(FILE *f, char *filename, char *id, TStateModel *model);
 int Read_VAR_Parameters(FILE *f, char *filename, char *id, TStateModel *model);
+int Read_VAR_ParametersFlat(FILE *f_in, TStateModel *model);
 int Write_VAR_ParametersFlat(FILE *f, TStateModel *model, char *fmt);
 int Write_VAR_ParametersFlat_Headers(FILE *f_out, TStateModel *model);
 int Write_VAR_ParametersFlat_A0_Diagonal_One(FILE *f, TStateModel *model, char *fmt);
