@@ -249,7 +249,11 @@ for b = fblck:nblck,
     end% End of the simulations for one mh-block.
     record.AcceptationRates(b) = isux/j;
     if exist('OCTAVE_VERSION') || options_.console_mode
-        printf('\n');
+        if exist('OCTAVE_VERSION')
+            printf('\n');
+        else
+            fprintf('\n');
+        end
         diary on;
     elseif ~whoiam
         close(hh);
