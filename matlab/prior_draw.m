@@ -1,10 +1,10 @@
-function pdraw = prior_draw(init,  prior_structure)
+function pdraw = prior_draw(init,uniform)
 % This function generate one draw from the joint prior distribution.
 % 
 % INPUTS 
 %   o init             [integer]    scalar equal to 1 (first call) or 0.
-%   o prior_structure  [structure]  Describes the prior distribution [bayestopt_]
-%
+%   o uniform          [integer]    scalar equal to 1 (first call) or 0.
+%    
 % OUTPUTS 
 %   o pdraw            [double]     1*npar vector, draws from the joint prior density.
 %
@@ -38,43 +38,53 @@ persistent uniform_draws gaussian_draws gamma_draws beta_draws inverse_gamma_1_d
 
 
 if nargin>0 && init
-    p6 = prior_structure.p6;
-    p7 = prior_structure.p7;
-    p3 = prior_structure.p3;
-    p4 = prior_structure.p4;
-    lb = prior_structure.lb;
-    ub = prior_structure.ub;
-    prior_shape = prior_structure.pshape ;
+    p6 = evalin('base', 'bayestopt_.p6');
+    p7 = evalin('base', 'bayestopt_.p7');
+    p3 = evalin('base', 'bayestopt_.p3');
+    p4 = evalin('base', 'bayestopt_.p4');
+    lb = evalin('base', 'bayestopt_.lb');
+    ub = evalin('base', 'bayestopt_.ub');
     number_of_estimated_parameters = length(p6);
+    if nargin>1 && uniform
+        prior_shape = repmat(5,number_of_estimated_parameters,1);
+    else
+        prior_shape = evalin('base', 'bayestopt_.pshape');
+    end
     beta_index = find(prior_shape==1);
-    beta_draws = 1;
     if isempty(beta_index)
         beta_draws = 0;
+    else
+        beta_draws = 1;
     end
     gamma_index = find(prior_shape==2);
-    gamma_draws = 1;
     if isempty(gamma_index)
         gamma_draws = 0;
+    else
+        gamma_draws = 1;
     end
     gaussian_index = find(prior_shape==3);
-    gaussian_draws = 1;
     if isempty(gaussian_index)
         gaussian_draws = 0;
+    else
+        gaussian_draws = 1;
     end
     inverse_gamma_1_index = find(prior_shape==4);
-    inverse_gamma_1_draws = 1;
     if isempty(inverse_gamma_1_index)
         inverse_gamma_1_draws = 0;
+    else
+        inverse_gamma_1_draws = 1;
     end
     uniform_index = find(prior_shape==5);
-    uniform_draws = 1;
     if isempty(uniform_index)
         uniform_draws = 0;
+    else
+        uniform_draws = 1;
     end
     inverse_gamma_2_index = find(prior_shape==6);
-    inverse_gamma_2_draws = 1;
     if isempty(inverse_gamma_2_index)
         inverse_gamma_2_draws = 0;
+    else
+        inverse_gamma_2_draws = 1;
     end
     pdraw = zeros(number_of_estimated_parameters,1);
     return

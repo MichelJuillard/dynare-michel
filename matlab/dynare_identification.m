@@ -55,13 +55,12 @@ SampleSize = options_ident.prior_mc;
 
 % results = prior_sampler(0,M_,bayestopt_,options_,oo_);
 
-bbb=bayestopt_;
 if options_ident.prior_range
-    bbb.pshape = ones(size(bbb.pshape))*5;
-    bbb.p3=bbb.lb;
-    bbb.p4=bbb.ub;
+    prior_draw(1,1);
+else
+    prior_draw(1);
 end
-prior_draw(1,bbb);
+
 if ~(exist('sylvester3mr','file')==2),
 
     dynareroot = strrep(which('dynare'),'dynare.m','');

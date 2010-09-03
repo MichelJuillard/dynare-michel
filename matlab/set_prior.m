@@ -266,3 +266,6 @@ end
 % initialize persistent variables in priordens()
 priordens(xparam1,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7, ...
           bayestopt_.p3,bayestopt_.p4,1);
+
+% Put bayestopt_ in matlab's workspace
+assignin('base','bayestopt_',bayestopt_);
