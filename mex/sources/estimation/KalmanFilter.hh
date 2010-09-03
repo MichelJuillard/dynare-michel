@@ -61,7 +61,7 @@ public:
 private:
   const std::vector<size_t> zeta_varobs_back_mixed;
   static std::vector<size_t> compute_zeta_varobs_back_mixed(const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &varobs_arg);
-  Matrix Z;   //nob*mm matrix mapping endogeneous variables and observations
+  Matrix Z, Zt;   //nob*mm matrix mapping endogeneous variables and observations and its transpose
   Matrix T;   //mm*mm transition matrix of the state equation.
   Matrix R;   //mm*rr matrix, mapping structural innovations to state variables.
   Matrix Pstar; //mm*mm variance-covariance matrix of stationary variables
@@ -70,9 +70,9 @@ private:
   Matrix RQRt, Ptmp;  //mm*mm variance-covariance matrix of variable disturbances
   Matrix F, Finv;  // nob*nob F=ZPZt +H an inv(F)
   Matrix K,  KFinv, oldKFinv; // mm*nobs K=PZt and K*Finv gain matrices
-  Matrix a_init, a_new; // state vector
-  Matrix vt; // current observation error vectors
-  Matrix vtFinv, vtFinvVt; // intermeiate observation error *Finv vector
+  Vector a_init, a_new; // state vector
+  Vector vt; // current observation error vectors
+  Vector vtFinv;// intermediate observation error *Finv vector
   double riccati_tol;
   InitializeKalmanFilter initKalmanFilter; //Initialise KF matrices
   Vector FUTP; // F upper triangle packed as vector FUTP(i + (j-1)*j/2) = F(i,j) for 1<=i<=j;

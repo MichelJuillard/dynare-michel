@@ -41,7 +41,7 @@ LogPriorDensity::compute(const Vector &ep)
   for (size_t i = 0; i <  ep.getSize(); ++i)
     {
       logPriorDensity += log(((*(estParsDesc.estParams[i]).prior)).pdf(ep(i)));
-      if (std::isinf(abs(logPriorDensity)))
+      if (std::isinf(fabs(logPriorDensity)))
         return logPriorDensity;
     }
   return logPriorDensity;

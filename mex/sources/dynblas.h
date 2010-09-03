@@ -81,6 +81,11 @@ extern "C" {
              CONST_BLDOU a, CONST_BLINT lda, CONST_BLDOU x, CONST_BLINT incx,
              CONST_BLDOU beta, BLDOU y, CONST_BLINT incy);
 
+#define dsymv FORTRAN_WRAPPER(dsymv)
+  void dsymv(BLCHAR uplo, CONST_BLINT m, CONST_BLDOU alpha, CONST_BLDOU a, 
+             CONST_BLINT lda, CONST_BLDOU b, CONST_BLINT ldb, CONST_BLDOU beta,
+             BLDOU c, CONST_BLINT ldc);
+
 #define dtrsv FORTRAN_WRAPPER(dtrsv)
   void dtrsv(BLCHAR uplo, BLCHAR trans, BLCHAR diag, CONST_BLINT n,
              CONST_BLDOU a, CONST_BLINT lda, BLDOU x, CONST_BLINT incx);

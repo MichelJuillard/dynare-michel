@@ -27,6 +27,19 @@
 
 namespace blas
 {
+  /* Level 1 */
+
+  //! dot product of two vectors
+  template<class Vec1, class Vec2>
+  inline double
+  dot(const Vec1 &A, Vec2 &B)
+  {
+    assert(A.getSize() == B.getSize());
+    blas_int n = A.getSize();
+    blas_int lda = A.getStride(), ldb = B.getStride();
+    return ddot(&n, A.getData(), &lda, B.getData(), &ldb);
+  }
+
   /* Level 2 */
   
   //! Symmetric rank 1 operation: A = alpha*X*X' + A
@@ -39,6 +52,46 @@ namespace blas
     blas_int incx = X.getStride();
     blas_int lda = A.getLd();
     dsyr(uplo, &n, &alpha, X.getData(), &incx, A.getData(), &lda);
+  }
+
+  //! General matrix * vector multiplication
+  //  c = alpha*A*b + beta*c,   or   c := alpha*A'*b + beta*c,
+  // where alpha and beta are scalars, b and c are vectors and A is an
+  // m by n matrix.
+  template<class Mat1, class Vec2, class Vec3>
+  inline void
+  gemv(const char *transa, double alpha, const Mat1 &A,
+       const Vec2 &B, double beta, Vec3 &C)
+  {
+    blas_int m = A.getRows(), n = B.getSize(), k = A.getCols(), l = C.getSize();
+    if (*transa == 'T')
+      {
+        m = A.getCols();
+        k = A.getRows();
+      }
+    assert(m == l);
+    assert(k == n);
+    blas_int lda = A.getLd(), ldb = B.getStride(), ldc = C.getStride();
+    dgemv(transa,  &m, &n, &alpha, A.getData(), &lda,
+          B.getData(), &ldb, &beta, C.getData(), &ldc);
+  }
+
+  //! Symmetric matrix * vector multiplication
+  //  c = alpha*A*b + beta*c,
+  // where alpha and beta are scalars, b and c are vectors and A is a
+  // m by m symmetric matrix.
+  template<class Mat1, class Vec2, class Vec3>
+  inline void
+  symv(const char *uplo, double alpha, const Mat1 &A,
+       const Vec2 &B, double beta, Vec3 &C)
+  {
+    assert(A.getRows() == A.getCols());
+    blas_int n = A.getRows();
+    assert(A.getRows() == B.getSize());
+    assert(A.getRows() == C.getSize());
+    blas_int lda = A.getLd(), ldb = B.getStride(), ldc = C.getStride();
+    dsymv(uplo, &n,  &alpha, A.getData(), &lda,
+          B.getData(), &ldb, &beta, C.getData(), &ldc);
   }
 
   /* Level 3 */
@@ -90,7 +143,7 @@ namespace blas
           B.getData(), &ldb, &beta, C.getData(), &ldc);
   }
 
-  //! Symmetric matrix multiplication
+  //! Symmetric matrix A * (poss. rectangular) matrix B multiplication
   template<class Mat1, class Mat2, class Mat3>
   inline void
   symm(const char *side, const char *uplo,
@@ -98,14 +151,19 @@ namespace blas
        double beta, Mat3 &C)
   {
     assert(A.getRows() == A.getCols());
-    assert(A.getRows() == C.getRows());
-    assert(A.getCols() == B.getRows());
+    assert(B.getRows() == C.getRows());
     assert(B.getCols() == C.getCols());
-    blas_int m = A.getRows(), n = B.getCols();
+    if (*side == 'L' || *side == 'l')
+      assert(A.getCols() == B.getRows());
+    else if (*side == 'R' || *side == 'r')
+      assert(A.getRows() == B.getCols());
+
+    blas_int m = B.getRows(), n = B.getCols();
     blas_int lda = A.getLd(), ldb = B.getLd(), ldc = C.getLd();
     dsymm(side, uplo, &m, &n, &alpha, A.getData(), &lda,
           B.getData(), &ldb, &beta, C.getData(), &ldc);
   }
+  
 } // End of namespace
 
 #endif

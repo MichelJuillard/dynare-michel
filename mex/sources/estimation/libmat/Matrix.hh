@@ -207,14 +207,14 @@ namespace mat
   inline VectorConstView
   get_col(const Mat &M, size_t j)
   {
-    return VectorView(M.getData()+j*M.getLd(), M.getRows(), 1);
+    return VectorConstView(M.getData()+j*M.getLd(), M.getRows(), 1);
   }
 
   template<class Mat>
   inline VectorConstView
   get_row(const Mat &M, size_t i)
   {
-    return VectorView(M.getData()+i, M.getCols(), M.getLd());
+    return VectorConstView(M.getData()+i, M.getCols(), M.getLd());
   }
 
   template<class Mat1, class Mat2>
