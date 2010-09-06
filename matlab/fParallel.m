@@ -46,12 +46,14 @@ delete( [fname,'_',int2str(whoiam),'.log']);
 
 diary( [fname,'_',int2str(whoiam),'.log']);
 
-
-% configure dynare environment
-dynareroot = dynare_config();
-
 % Load input data
 load( [fname,'_input']) 
+
+% configure dynare environment
+if ~empty(Parallel(ThisMatlab).DynarePath)
+    addpath(Parallel(ThisMatlab).DynarePath)
+end
+dynareroot = dynare_config();
 
 if exist('fGlobalVar') && ~isempty (fGlobalVar)
     globalVars = fieldnames(fGlobalVar);
