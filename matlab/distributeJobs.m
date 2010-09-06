@@ -5,9 +5,9 @@ function [nCPU, totCPU, nBlockPerCPU] = distributeJobs(Parallel, fBlock, nBlock)
 %
 % INPUTS
 %  o Parallel [struct vector]   copy of options_.parallel
-%  o fBlock [int]               index number of the first thread
+%  o fBlock [int]               index number of the first job (e.g. MC iteration or MH block)
 %                               (between 1 and nBlock)
-%  o nBlock [int]               index number of the last thread.
+%  o nBlock [int]               index number of the last job.
 %
 % OUTPUT
 %  o nBlockPerCPU [int vector]  for each CPU used, indicates the number of
