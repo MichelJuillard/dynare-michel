@@ -41,14 +41,13 @@ delete( ['slaveParallel_',int2str(whoiam),'.log']);
 
 diary( ['slaveParallel_',int2str(whoiam),'.log']);
 
-% Load input data.
-load( ['slaveParallel_input',int2str(whoiam)])
 
 % configure dynare environment
-if ~empty(Parallel(ThisMatlab).DynarePath)
-    addpath(Parallel(ThisMatlab).DynarePath)
-end
 dynareroot = dynare_config();
+
+% Load input data.
+load( ['slaveParallel_input',int2str(whoiam)])
+% keyboard;
 
 %Loads fGlobalVar Parallel.
 if exist('fGlobalVar'),
