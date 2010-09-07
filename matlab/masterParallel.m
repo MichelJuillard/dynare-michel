@@ -202,9 +202,9 @@ for j=1:totCPU,
         if Parallel(indPC).Local == 1, %Run on the local machine (localhost).
             if isunix || (~matlab_ver_less_than('7.4') && ismac),
                 if exist('OCTAVE_VERSION')
-                    command1=['octave --eval "addpath(''',Parallel(indPC).DynarePath,'''), fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\)" &'];
+                    command1=['octave --eval "addpath(''',Parallel(indPC).DynarePath,'''), fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')" &'];
                 else
-                    command1=[Parallel(indPC).MatlabPath,' -nosplash -nodesktop -minimize -r "addpath(''',Parallel(indPC).DynarePath,'''), fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\)" &'];
+                    command1=[Parallel(indPC).MatlabPath,' -nosplash -nodesktop -minimize -r "addpath(''',Parallel(indPC).DynarePath,'''), fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')" &'];
                 end
             else
                 if exist('OCTAVE_VERSION')
@@ -267,9 +267,9 @@ for j=1:totCPU,
         
         if isunix || (~matlab_ver_less_than('7.4') && ismac),
             if exist('OCTAVE_VERSION'),
-                command1=['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "cd ',Parallel(indPC).RemoteFolder, '; octave --eval \"addpath(''',Parallel(indPC).DynarePath,'''), fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\);\" " &'];              
+                command1=['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "cd ',Parallel(indPC).RemoteFolder, '; octave --eval \"addpath(''',Parallel(indPC).DynarePath,'''), fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''');\" " &'];              
             else
-                command1=['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "cd ',Parallel(indPC).RemoteFolder, '; ',Parallel(indPC).MatlabPath,' -nosplash -nodesktop -minimize -r \"addpath(''',Parallel(indPC).DynarePath,'''), fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\);\" " &'];
+                command1=['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "cd ',Parallel(indPC).RemoteFolder, '; ',Parallel(indPC).MatlabPath,' -nosplash -nodesktop -minimize -r \"addpath(''',Parallel(indPC).DynarePath,'''), fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''');\" " &'];
             end
         else
             if ~strcmp(Parallel(indPC).PcName,MasterName), % Run on a remote machine!
@@ -298,10 +298,10 @@ for j=1:totCPU,
             if isunix || (~matlab_ver_less_than('7.4') && ismac),
                 if exist('OCTAVE_VERSION')
                    %command1=['octave --eval fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\) &'];
-                    command1=['octave --eval "addpath(''',Parallel(indPC).DynarePath,'''), slaveParallel\(',int2str(j),',',int2str(indPC),'\)" &'];
+                    command1=['octave --eval "addpath(''',Parallel(indPC).DynarePath,'''), slaveParallel(',int2str(j),',',int2str(indPC),')" &'];
                 else
                     %command1=[Parallel(indPC).MatlabPath,' -nosplash -nodesktop -minimize -r fParallel\(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',\''',fname,'\''\) &'];
-                    command1=[Parallel(indPC).MatlabPath,' -nosplash -nodesktop -minimize -r "addpath(''',Parallel(indPC).DynarePath,'''), slaveParallel\(',int2str(j),',',int2str(indPC),'\)" &'];
+                    command1=[Parallel(indPC).MatlabPath,' -nosplash -nodesktop -minimize -r "addpath(''',Parallel(indPC).DynarePath,'''), slaveParallel(',int2str(j),',',int2str(indPC),')" &'];
                 end
             else
                 if exist('OCTAVE_VERSION')
@@ -377,9 +377,9 @@ for j=1:totCPU,
         if newInstance,
             if isunix || (~matlab_ver_less_than('7.4') && ismac),
                 if exist('OCTAVE_VERSION'),
-                    command1=['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "cd ',Parallel(indPC).RemoteFolder, '; octave --eval \"addpath(''',Parallel(indPC).DynarePath,'''), slaveParallel\(',int2str(j),',',int2str(indPC),'\);\" " &'];
+                    command1=['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "cd ',Parallel(indPC).RemoteFolder, '; octave --eval \"addpath(''',Parallel(indPC).DynarePath,'''), slaveParallel(',int2str(j),',',int2str(indPC),');\" " &'];
                 else
-                    command1=['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "cd ',Parallel(indPC).RemoteFolder, '; ',Parallel(indPC).MatlabPath,' -nosplash -nodesktop -minimize -r \"addpath(''',Parallel(indPC).DynarePath,'''), slaveParallel\(',int2str(j),',',int2str(indPC),'\);\" " &'];
+                    command1=['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' "cd ',Parallel(indPC).RemoteFolder, '; ',Parallel(indPC).MatlabPath,' -nosplash -nodesktop -minimize -r \"addpath(''',Parallel(indPC).DynarePath,'''), slaveParallel(',int2str(j),',',int2str(indPC),');\" " &'];
                 end
             else
                 if ~strcmp(Parallel(indPC).PcName,MasterName), % Run on a remote machine.
