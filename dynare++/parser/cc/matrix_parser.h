@@ -5,6 +5,7 @@
 #ifndef OGP_MATRIX_PARSER
 #define OGP_MATRIX_PARSER
 
+#include <cstdlib> // For NULL
 #include <vector>
 
 namespace ogp {
