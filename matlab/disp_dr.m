@@ -228,6 +228,9 @@ for i = 1:length(M_.aux_vars)
             orig_name = deblank(M_.endo_names(M_.aux_vars(i).orig_index, :));
           case 3
             orig_name = deblank(M_.exo_names(M_.aux_vars(i).orig_index, :));
+          case 4
+            str = sprintf('EXPECTATION(%d)(...)', aux_lead_lag);
+            return
           otherwise
             error(sprintf('Invalid auxiliary type: %s', M_.endo_names(aux_index, :)))
         end
