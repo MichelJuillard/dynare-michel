@@ -33,7 +33,8 @@
 
 ;;; Changelog
 ;;  2010-09-07 by Yannick Kalantzis
-;;    Minor changes. Add `require'. Add builtin operators `;' and `='.
+;;    Minor changes. Add `require'. Add builtin operators `;' and `='. 
+;;    Highlight lags and leads. 
 ;;  2010-09-06 by Yannick Kalantzis 
 ;;    Created. 
 ;;    Reproduces Xah Lee's instructions. 
@@ -62,7 +63,7 @@ For detail, see `comment-dwim'."
   "dynare keywords.")
 
 (defvar dynare-functions
-  '("simul" "steady" "check" "rplot" "dynatype")
+  '("simul" "stoch_simul" "steady" "check" "rplot" "dynatype" "dynasave")
   "dynare functions.")
 
 ;; create the regex string for each class of keywords
@@ -80,6 +81,7 @@ For detail, see `comment-dwim'."
     (,dynare-functions-regexp . font-lock-function-name-face)
     (,dynare-keywords-regexp . font-lock-keyword-face)
     (";\\|=" . font-lock-builtin-face)
+    ("(\\(\\+\\|-\\)[1-9])" . font-lock-constant-face)
     ))
 
 ;; define the major mode
