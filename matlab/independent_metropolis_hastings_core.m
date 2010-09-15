@@ -87,7 +87,8 @@ end
 %%%%
 %%%% NOW i run the (nblck-fblck+1) metropolis-hastings chains
 %%%%
-jscale = diag(bayestopt_.jscale);
+
+proposal_covariance = d * diag(bayestopt_.jscale);
 
 jloop=0;
 
