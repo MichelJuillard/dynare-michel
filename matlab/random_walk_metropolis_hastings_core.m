@@ -118,7 +118,8 @@ end
 %%%%
 %%%% NOW i run the (nblck-fblck+1) metropolis-hastings chains
 %%%%
-jscale = diag(bayestopt_.jscale);
+
+proposal_covariance = d*diag(bayestopt_.jscale);
 
 jloop=0;
 
@@ -159,7 +160,7 @@ for b = fblck:nblck,
     irun = fline(b);
     j = 1;
     while j <= nruns(b)
-        par = feval(ProposalFun, ix2(b,:), d * jscale, n);
+        par = feval(ProposalFun, ix2(b,:), proposal_covariance, n);
         if all( par(:) > mh_bounds(:,1) ) & all( par(:) < mh_bounds(:,2) )
             try
                 logpost = - feval(TargetFun, par(:),varargin{:});               
