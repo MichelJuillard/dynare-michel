@@ -164,7 +164,7 @@ private:
   map<pair<int, int>, NonZeroElem *> Mapped_Array;
   int *NbNZRow, *NbNZCol;
   NonZeroElem **FNZE_R, **FNZE_C;
-  int nb_endo, u_count_init;
+  int u_count_init;
 
   int *pivot, *pivotk, *pivot_save;
   double *pivotv, *pivotva;

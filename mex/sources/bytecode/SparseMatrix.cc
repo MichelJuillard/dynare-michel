@@ -2240,8 +2240,8 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
             {
               ostringstream res;
               for (unsigned int i = 0; i < endo_name_length; i++)
-                if (P_endo_names[2*(j+i*nb_endo)] != ' ')
-                  res << P_endo_names[2*(j+i*nb_endo)];
+                if (P_endo_names[2*(j+i*y_size)] != ' ')
+                  res << P_endo_names[2*(j+i*y_size)];
               bool select = false;
               for (int i = 0; i < Size; i++)
                 if (j == index_vara[i])
@@ -2265,10 +2265,10 @@ SparseMatrix::simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax
         {
           for (j = 0; j < y_size; j++)
             {
-              ostringstream res;
+              ostringstream res("");
               for (unsigned int i = 0; i < endo_name_length; i++)
-                if (P_endo_names[2*(j+i*nb_endo)] != ' ')
-                  res << P_endo_names[2*(j+i*nb_endo)];
+                if (P_endo_names[2*(j+i*y_size)] != ' ')
+                  res << P_endo_names[2*(j+i*y_size)];
               bool select = false;
               for (int i = 0; i < Size; i++)
                 if (j == index_vara[i])
