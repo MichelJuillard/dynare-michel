@@ -35,7 +35,7 @@ mexFunction(int nlhs, mxArray *plhs[],
   int n = 0;
   int maxnargs = 0;
 
-  char *mainarg = "./a.out";
+  const char *mainarg = "./a.out";
   char *argument = NULL;
   char *beginarg = NULL;
   char **args = NULL;
@@ -43,11 +43,8 @@ mexFunction(int nlhs, mxArray *plhs[],
   /*
    * Check args
    */
-  if (nrhs != 1 || !mxIsChar(prhs[0]))
-    mexErrMsgTxt("This function takes only one string argument.");
-
-  if (nlhs != 0)
-    mexWarnMsgTxt("This function has no return arguments.\n");
+  if (nrhs != 1 || !mxIsChar(prhs[0]) || nlhs != 1)
+    DYN_MEX_FUNC_ERR_MSG_TXT("Error in swz_mex: this function takes 1 string input argument and returns 1 output argument.");
 
   /*
    * Allocate memory
@@ -56,23 +53,25 @@ mexFunction(int nlhs, mxArray *plhs[],
   argument = (char *)swzCalloc(mxGetN(prhs[0])+1, sizeof(char));
   args = (char **)swzCalloc(maxnargs, sizeof(char *));
   if (argument==NULL || args==NULL)
-    mexErrMsgTxt("In swz_mex: could not allocate memory. (1)");
+    DYN_MEX_FUNC_ERR_MSG_TXT("Error in swz_mex: could not allocate memory. (1)");
 
   /*
    * Create argument string from prhs and parse to create args / nargs
    */
   if (!(args[nargs] = (char *)swzCalloc(strlen(mainarg)+1, sizeof(char))))
-    mexErrMsgTxt("In swz_mex: could not allocate memory. (2)");
+    DYN_MEX_FUNC_ERR_MSG_TXT("Error in swz_mex: could not allocate memory. (2)");
+
   strncpy(args[nargs++], mainarg, strlen(mainarg));
 
   if (mxGetString(prhs[0], argument, mxGetN(prhs[0])+1))
-    mexErrMsgTxt("In swz_mex: error using mxGetString.\n");
+    DYN_MEX_FUNC_ERR_MSG_TXT("Error in swz_mex: error using mxGetString.\n");
 
   beginarg = &argument[0];
-  while(n=strcspn(beginarg, " "))
+  while((n=strcspn(beginarg, " ")))
     {
       if (!(args[nargs] = (char *)swzCalloc(n+1, sizeof(char))))
-        mexErrMsgTxt("In swz_mex: could not allocate memory. (3)");
+        DYN_MEX_FUNC_ERR_MSG_TXT("Error in swz_mex: could not allocate memory. (3)");
+
       strncpy(args[nargs++], beginarg, n);
       beginarg += (isspace(beginarg[n]) || isblank(beginarg[n]) ? ++n : n);
     }
@@ -81,7 +80,14 @@ mexFunction(int nlhs, mxArray *plhs[],
   /*
    * Call top_level function (formerly main)
    */
-  main(nargs, args);
+  try
+    {
+      main(nargs, args);
+    }
+  catch (const char *str)
+    {
+      DYN_MEX_FUNC_ERR_MSG_TXT(str);
+    }
 
   /*
    * free memory
@@ -89,4 +95,6 @@ mexFunction(int nlhs, mxArray *plhs[],
   for (n=0; n<nargs; n++)
     swzFree(args[n]);
   swzFree(args);
+
+  plhs[0] = mxCreateDoubleScalar(0);
 }

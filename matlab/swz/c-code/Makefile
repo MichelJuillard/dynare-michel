@@ -32,6 +32,7 @@ WORK_DIR =/home/kalagman/Documents/InternshipJob/Dynare/
 OUT_DIR = /home/kalagman/Documents/InternshipJob/Dynare/work/
 
 CC = /usr/bin/gcc-4.3.2
+CXX = g++
 FC = gfortran
 CFLAGS := $(CFLAGS) -static
 
@@ -53,6 +54,7 @@ endif
 ifdef USE_MICHEL_LAPTOP
 
 CC = gcc
+CXX = g++
 #CC = /opt/intel/Compiler/11.0/074/bin/intel64/icc -no-multibyte-chars
 FC = gfortran
 CFLAGS := $(CFLAGS) -static
@@ -73,6 +75,7 @@ endif
 
 ifdef STANDALONE_HB
 CC = gcc
+CXX = g++
 FC = gfortran
 
 GSL_INCLUDE_DIR = /usr/local64/include/gsl
@@ -89,7 +92,7 @@ endif
 
 #################################################################################
 VPATH = 
-INCLUDE_DIR = -I/Applications/MATLAB_R2009b.app/extern/include
+INCLUDE_DIR = -I/Applications/MATLAB_R2010b.app/extern/include
 LIBS_DIR = 
 LIBS = $(MAC_LIBS)
 OBJS =
@@ -232,29 +235,32 @@ all: $(OUT_DIR)/sbvar_draws $(OUT_DIR)/sbvar_estimation $(OUT_DIR)/sbvar_init_fi
 
 
 $(OUT_DIR)/sbvar_draws: $(OBJS_DRAWS)
-	$(CC) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_draws
+	$(CXX) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_draws
 
 $(OUT_DIR)/sbvar_estimation: $(OBJS_ESTIM)
-	$(CC) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_estimation
+	$(CXX) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_estimation
 
 $(OUT_DIR)/sbvar_init_file: $(OBJS_INIT)
-	$(CC) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_init_file
+	$(CXX) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_init_file
 
 $(OUT_DIR)/sbvar_mhm_1: $(OBJS_MHM_1)
-	$(CC) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_mhm_1
+	$(CXX) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_mhm_1
 
 $(OUT_DIR)/sbvar_mhm_2: $(OBJS_MHM_2)
-	$(CC) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_mhm_2
+	$(CXX) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_mhm_2
 
 $(OUT_DIR)/sbvar_probabilities: $(OBJS_PROBA)
-	$(CC) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_probabilities
+	$(CXX) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_probabilities
 
 $(OUT_DIR)/sbvar_forecast: $(OBJS_FORECAST)
-	$(CC) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_forecast
-
+	$(CXX) $(CFLAGS) $^ $(LIBS_DIR) $(LIBS) -o $(OUT_DIR)/sbvar_forecast
 
 %.o : %.c
-	$(CC) $(CFLAGS) $(INCLUDE_DIR) -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDE_DIR) -fexceptions -c $< -o $@
+
+%.o : %.cc
+	$(CXX) $(CFLAGS) $(INCLUDE_DIR) -fexceptions -c $< -o $@
+
 #
 #################################################################################
 clean:

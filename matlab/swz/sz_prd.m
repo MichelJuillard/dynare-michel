@@ -497,7 +497,8 @@ if options_.ms.create_initialization_file == 1
         end
     else           
         create_init_file=[matlab_filename,' ',markov_file,' ',options_.ms.output_file_tag];
-        mex_sbvar_init_file(create_init_file);
+        [err] = mex_sbvar_init_file(create_init_file);
+        mexErrCheck('mex_sbvar_init_file',err);
     end
 end
 
@@ -515,7 +516,8 @@ if options_.ms.estimate_msmodel == 1
         end
     else
         perform_estimation=['-cseed 5 -ft ',options_.ms.output_file_tag];
-        mex_sbvar_estimation(perform_estimation);
+        [err] = mex_sbvar_estimation(perform_estimation);
+        mexErrCheck('mex_sbvar_estimation',err);
     end
 end
 
@@ -540,9 +542,12 @@ if options_.ms.compute_mdd == 1
         end
     else
         compute_mdd1=['-cseed 5 -ft ',options_.ms.output_file_tag,' -fi ',mhm_file];
-        mex_sbvar_mhm_1(compute_mdd1);
+        [err] = mex_sbvar_mhm_1(compute_mdd1);
+        mexErrCheck('mex_sbvar_mhm_1',err);
         compute_mdd2=['-cseed 5 -ft ',options_.ms.output_file_tag,' -d ',int2str(options_.ms.proposal_draws),' -t 3'];
-        mex_sbvar_mhm_2(compute_mdd2);
+
+        [err] = mex_sbvar_mhm_2(compute_mdd2);
+        mexErrCheck('mex_sbvar_mhm_2',err);
     end
 end
 
@@ -561,7 +566,8 @@ if options_.ms.compute_probabilities == 1 %error registers here
         end
     else
         compute_prob=['-ft ',options_.ms.output_file_tag];
-        mex_sbvar_probabilities(compute_prob);
+        [err] = mex_sbvar_probabilities(compute_prob);
+        mexErrCheck('mex_sbvar_probabilities',err);
     end
 end
 
@@ -579,6 +585,7 @@ if options_.ms.print_draws == 1 %error here as well
         end
     else
         print_draws=['-cseed 5 -ft ',options_.ms.output_file_tag,' -i ',int2str(options_.ms.n_draws),' -t ',int2str(options_.ms.thinning_factor)];
-        mex_sbvar_draws(print_draws);
+        [err] = mex_sbvar_draws(print_draws);
+        mexErrCheck('mex_sbvar_draws',err);
     end
 end

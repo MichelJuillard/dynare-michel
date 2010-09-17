@@ -17,39 +17,51 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdarg.h>
 #include <string.h>
 
+
 #if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 #include <dynmex.h>
 #endif
 
-int constant_seed;
+  int constant_seed;
 
-void
-swz_fprintf_err(char *str, ...)
-{
-  va_list ap;
-  va_start(ap, str);
+  void
+  swz_fprintf_err(char *str, ...)
+  {
+    va_list ap;
+    va_start(ap, str);
 
 #if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
-  mexPrintf(str, ap);
+    mexPrintf(str, ap);
 #else
-  vfprintf(stderr, str, ap);
+    vfprintf(stderr, str, ap);
 #endif
 
-  va_end(ap);
-}
+    va_end(ap);
+  }
 
-void
-swzExit(int status)
-{
+
+
+  void
+  swzExit(int status)
+  {
 #if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
-  mexErrMsgTxt("Error in mexfile.\n");
+    throw "Error in SWZ mex file.\n";
 #else
-  exit(status);
+    exit(status);
 #endif
+  }
+
+#ifdef __cplusplus
 }
+#endif

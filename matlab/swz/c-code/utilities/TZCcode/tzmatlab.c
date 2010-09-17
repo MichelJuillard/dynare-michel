@@ -54,7 +54,10 @@ void fn_DisplayError(char *msg_s)
    #endif
 
    #ifdef WIN_MATLABAPI
-      mexErrMsgTxt(".");
+      /* Work around to remove mexErrMsgTxt */
+      /*      mexErrMsgTxt(".");*/
+      mexPrintf(".");
+      swzExit(1);
    #else
 /*        //getchar();   ansi-c*/
       swzExit( EXIT_FAILURE );                           /*   This exits the entire C program.   ansi-c*/

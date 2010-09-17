@@ -3,6 +3,7 @@ SWZ_SRC_BASEDIR = ../../../../matlab/swz/c-code
 SWZ_SRC_DIRS = $(SWZ_SRC_BASEDIR)/utilities/TZCcode $(SWZ_SRC_BASEDIR)/utilities/DWCcode/matrix $(SWZ_SRC_BASEDIR)/utilities/DWCcode/error $(SWZ_SRC_BASEDIR)/utilities/DWCcode/arrays $(SWZ_SRC_BASEDIR)/utilities/DWCcode/ascii $(SWZ_SRC_BASEDIR)/utilities/DWCcode/histogram $(SWZ_SRC_BASEDIR)/utilities/DWCcode/stat $(SWZ_SRC_BASEDIR)/utilities/DWCcode/spherical $(SWZ_SRC_BASEDIR)/utilities/DWCcode/sort $(SWZ_SRC_BASEDIR)/sbvar/switching $(SWZ_SRC_BASEDIR)/sbvar/var $(SWZ_SRC_BASEDIR)/mex
 
 vpath %.c $(SWZ_SRC_DIRS)
+vpath %.cc $(SWZ_SRC_BASEDIR)/mex
 
 CPPFLAGS += -DINTELCMATHLIBRARY $(GSL_CPPFLAGS) -I$(SWZ_SRC_BASEDIR)/utilities/TZCcode -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/matrix -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/error -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/arrays -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/ascii -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/histogram -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/stat -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/spherical -I$(SWZ_SRC_BASEDIR)/utilities/DWCcode/sort -I$(SWZ_SRC_BASEDIR)/sbvar/switching -I$(SWZ_SRC_BASEDIR)/sbvar/var -I$(SWZ_SRC_BASEDIR)/mex
 
@@ -11,7 +12,7 @@ LDFLAGS += $(GSL_LDFLAGS)
 
 noinst_PROGRAMS = mex_sbvar_init_file mex_sbvar_estimation mex_sbvar_mhm_1 mex_sbvar_mhm_2 mex_sbvar_probabilities mex_sbvar_draws mex_sbvar_forecast
 
-common_mex = mex_top_level.c modify_for_mex.c
+common_mex = mex_top_level.cc modify_for_mex.cc
 swz_common = bmatrix.c swzmatrix.c dw_error.c dw_rand.c dw_matrix_rand.c dw_array.c dw_matrix_array.c dw_matrix_sort.c dw_ascii.c dw_parse_cmd.c dw_histogram.c
 swz_tao    = tzmatlab.c mathlib.c cstz_dw.c
 
