@@ -184,7 +184,8 @@ protected:
   double *u, *y, *ya;
   vector<double*> jac;
   double *jcb;
-  double res1, res2, max_res, max_res_idx;
+  double res1, res2, max_res;
+  int max_res_idx;
   double slowc, slowc_save, prev_slowc_save, markowitz_c;
   int y_kmin, y_kmax, y_size, periods, y_decal;
   int  *index_vara, *index_equa;
