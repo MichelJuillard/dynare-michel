@@ -2770,6 +2770,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
           int u_count_saved = u_count;
           while (!(cvg || (iter > maxit_)))
             {
+
               res2 = 0;
               res1 = 0;
               max_res = 0;
@@ -2816,6 +2817,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   g0 = res2;
                   gp0 = -res2;
                   try_at_iteration = 0;
+                  slowc_save = slowc;
                 }
             }
           if (!cvg)

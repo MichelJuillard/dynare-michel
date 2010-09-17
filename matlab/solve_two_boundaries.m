@@ -209,10 +209,50 @@ while ~(cvg==1 | iter>maxit_),
         g1aa=g1a;
         ba=b;
         max_resa=max_res;
-        if(stack_solve_algo==1),
+        if(stack_solve_algo==0),
             dx = g1a\b- ya;
             ya = ya + lambda*dx;
             y(1+y_kmin:periods+y_kmin,y_index)=reshape(ya',length(y_index),periods)';
+        elseif(stack_solve_algo==1),
+            for t=1:periods;
+                first_elem = (t-1)*Blck_size+1;
+                last_elem = t*Blck_size;
+                next_elem = (t+1)*Blck_size;
+                Elem = first_elem:last_elem;
+                Elem_1 = last_elem+1:next_elem;
+                B1_inv = inv(g1a(Elem, Elem));
+                if (t < periods)
+                    S1 = B1_inv * g1a(Elem, Elem_1);
+                end;
+                g1a(Elem, Elem_1) = S1;
+                b(Elem) = B1_inv * b(Elem);
+                g1a(Elem, Elem) = ones(Blck_size, Blck_size);
+                if (t < periods)
+                    g1a(Elem_1, Elem_1) = g1a(Elem_1, Elem_1) - g1a(Elem_1, Elem) * S1;
+                    b(Elem_1) = b(Elem_1) - g1a(Elem_1, Elem) * b(Elem);
+                    g1a(Elem_1, Elem) = zeros(Blck_size, Blck_size);
+                end;
+            end;
+            za = b(Elem);
+            zaa = za;
+            y_Elem = (periods - 1) * Blck_size + 1:(periods) * Blck_size;
+            dx = ya;
+            dx(y_Elem) = za - ya(y_Elem);
+            ya(y_Elem) = ya(y_Elem) + lambda*dx(y_Elem);
+            for t=periods-1:-1:1;
+                first_elem = (t-1)*Blck_size+1;
+                last_elem = t*Blck_size;
+                next_elem = (t+1)*Blck_size;
+                Elem_1 = last_elem+1:next_elem;
+                Elem = first_elem:last_elem;
+                za = b(Elem) - g1a(Elem, Elem_1) * zaa;
+                zaa = za;
+                %y_Elem_1 = Blck_size * (t)+1:Blck_size * (t+1);
+                y_Elem = Blck_size * (t-1)+1:Blck_size * (t);
+                dx(y_Elem) = za - ya(y_Elem);
+                ya(y_Elem) = ya(y_Elem) + lambda*dx(y_Elem);
+                y(y_kmin + t, y_index) = ya(y_Elem);
+            end;
         elseif(stack_solve_algo==2),
             flag1=1;
             while(flag1>0)

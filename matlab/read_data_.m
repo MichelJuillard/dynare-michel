@@ -44,7 +44,7 @@ if size(oo_.endo_simul,2) < M_.maximum_lag+M_.maximum_lead+options_.periods
     end
     Values=fscanf(fid,'%f',inf);
     Values=reshape(Values,M_.orig_endo_nbr,size(Values,1)/M_.orig_endo_nbr);
-    oo_.endo_simul=Values(positions,:);
+    oo_.endo_simul=[Values(positions,:); kron(oo_.steady_state((M_.orig_endo_nbr+1) : M_.endo_nbr , 1) , ones(1 , size(Values, 2)))];
     fclose(fid);
 end
 
