@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2009 Dynare Team
+ * Copyright (C) 2008-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -168,8 +168,8 @@ main(int argc, char *argv[])
 #endif
   if ((nEndo != nendo) || (nExog != nexo))    //(nPar != npar)
     {
-      mexErrMsgTxt("Incorrect number of input parameters.\n");
-      //return;
+      mexPrintf("Incorrect number of input parameters.\n");
+      return;
     }
 
 #ifdef DEBUG

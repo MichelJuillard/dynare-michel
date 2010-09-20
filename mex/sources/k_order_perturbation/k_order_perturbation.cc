@@ -43,6 +43,8 @@
 
 #if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)  // exclude mexFunction for other applications
 
+#include "dynmex.h"
+
 //////////////////////////////////////////////////////
 // Convert MATLAB Dynare endo and exo names array to a vector<string> array of string pointers
 // Poblem is that Matlab mx function returns a long string concatenated by columns rather than rows
@@ -68,8 +70,8 @@ extern "C" {
   mexFunction(int nlhs, mxArray *plhs[],
               int nrhs, const mxArray *prhs[])
   {
-    if (nrhs < 5)
-      mexErrMsgTxt("Must have exactly 5 input parameters.");
+    if (nrhs < 5 || nlhs < 2)
+      DYN_MEX_FUNC_ERR_MSG_TXT("Must have exactly 5 input parameters and take at least 2 output parameters.");
 
     const mxArray *dr = prhs[0];
     const mxArray *M_ = prhs[1];
@@ -78,7 +80,8 @@ extern "C" {
 
     mxArray *mFname = mxGetField(M_, 0, "fname");
     if (!mxIsChar(mFname))
-      mexErrMsgTxt("Input must be of type char.");
+      DYN_MEX_FUNC_ERR_MSG_TXT("Input must be of type char.");
+
     string fName = mxArrayToString(mFname);
     const mxArray *mexExt = prhs[4];
     string dfExt = mxArrayToString(mexExt); // Dynamic file extension, e.g. ".dll" or ".mexw32"
@@ -90,10 +93,10 @@ extern "C" {
     else
       kOrder = 1;
 
-    if (kOrder == 1 && nlhs != 1)
-      mexErrMsgTxt("k_order_perturbation at order 1 requires exactly 1 argument in output");
-    else if (kOrder > 1 && nlhs != kOrder+1)
-      mexErrMsgTxt("k_order_perturbation at order > 1 requires exactly order+1 arguments in output");
+    if (kOrder == 1 && nlhs != 2)
+      DYN_MEX_FUNC_ERR_MSG_TXT("k_order_perturbation at order 1 requires exactly 2 arguments in output");
+    else if (kOrder > 1 && nlhs != kOrder+2)
+      DYN_MEX_FUNC_ERR_MSG_TXT("k_order_perturbation at order > 1 requires exactly order+2 arguments in output");
 
     double qz_criterium = 1+1e-6;
     mxFldp = mxGetField(options_, 0, "qz_criterium");
@@ -141,7 +144,8 @@ extern "C" {
     dparams = (double *) mxGetData(mxFldp);
     npar = (int) mxGetM(mxFldp);
     if (npar != nEndo)
-      mexErrMsgTxt("Incorrect number of input var_order vars.");
+      DYN_MEX_FUNC_ERR_MSG_TXT("Incorrect number of input var_order vars.");
+
     vector<int> var_order_vp(nEndo);
     for (int v = 0; v < nEndo; v++)
       var_order_vp[v] = (int)(*(dparams++));
@@ -154,14 +158,18 @@ extern "C" {
 
     TwoDMatrix llincidence(nrows, npar, dparams);
     if (npar != nEndo)
-      mexErrMsgIdAndTxt("dynare:k_order_perturbation", "Incorrect length of lead lag incidences: ncol=%d != nEndo=%d.", npar, nEndo);
-
+      {
+        ostringstream strstrm;
+        strstrm << "dynare:k_order_perturbation " << "Incorrect length of lead lag incidences: ncol=" << npar << " != nEndo=" << nEndo;
+        DYN_MEX_FUNC_ERR_MSG_TXT(strstrm.str().c_str());
+      }
     //get NNZH =NNZD(2) = the total number of non-zero Hessian elements
     mxFldp = mxGetField(M_, 0, "NNZDerivatives");
     dparams = (double *) mxGetData(mxFldp);
     Vector NNZD(dparams, (int) mxGetM(mxFldp));
     if (NNZD[kOrder-1] == -1)
-      mexErrMsgTxt("The derivatives were not computed for the required order. Make sure that you used the right order option inside the stoch_simul command");
+      DYN_MEX_FUNC_ERR_MSG_TXT("The derivatives were not computed for the required order. Make sure that you used the right order option inside the stoch_simul command");
+
     const int jcols = nExog+nEndo+nsPred+nsForw; // Num of Jacobian columns
 
     mxFldp = mxGetField(M_, 0, "var_order_endo_names");
@@ -177,7 +185,7 @@ extern "C" {
     DynareMxArrayToString(mxFldp, nexo, widthExog, exoNames);
 
     if ((nEndo != nendo) || (nExog != nexo))
-      mexErrMsgTxt("Incorrect number of input parameters.");
+      DYN_MEX_FUNC_ERR_MSG_TXT("Incorrect number of input parameters.");
 
     /* Fetch time index */
 
@@ -221,16 +229,16 @@ extern "C" {
             /* Set the output pointer to the output matrix ysteady. */
             map<string, ConstTwoDMatrix>::const_iterator cit = mm.begin();
             ++cit;
-            plhs[0] = mxCreateDoubleMatrix((*cit).second.numRows(), (*cit).second.numCols(), mxREAL);
+            plhs[1] = mxCreateDoubleMatrix((*cit).second.numRows(), (*cit).second.numCols(), mxREAL);
 
             // Copy Dynare++ matrix into MATLAB matrix
             const ConstVector &vec = (*cit).second.getData();
             assert(vec.skip() == 1);
-            memcpy(mxGetPr(plhs[0]), vec.base(), vec.length() * sizeof(double));
+            memcpy(mxGetPr(plhs[1]), vec.base(), vec.length() * sizeof(double));
           }
         if (kOrder >= 2)
           {
-            int ii = 0;
+            int ii = 1;
             for (map<string, ConstTwoDMatrix>::const_iterator cit = mm.begin();
                  ((cit != mm.end()) && (ii < nlhs)); ++cit)
               {
@@ -250,26 +258,33 @@ extern "C" {
     catch (const KordException &e)
       {
         e.print();
-        mexErrMsgIdAndTxt("dynare:k_order_perturbation", "Caught Kord exception: %s", e.get_message());
+        ostringstream strstrm;
+        strstrm << "dynare:k_order_perturbation: Caught Kord exception: " << e.get_message();
+        DYN_MEX_FUNC_ERR_MSG_TXT(strstrm.str().c_str());
       }
     catch (const TLException &e)
       {
         e.print();
-        mexErrMsgIdAndTxt("dynare:k_order_perturbation", "Caught TL exception");
+        DYN_MEX_FUNC_ERR_MSG_TXT("dynare:k_order_perturbation: Caught TL exception");
       }
     catch (SylvException &e)
       {
         e.printMessage();
-        mexErrMsgIdAndTxt("dynare:k_order_perturbation", "Caught Sylv exception");
+        DYN_MEX_FUNC_ERR_MSG_TXT("dynare:k_order_perturbation: Caught Sylv exception");
       }
     catch (const DynareException &e)
       {
-        mexErrMsgIdAndTxt("dynare:k_order_perturbation", "Caught KordDynare exception: %s", e.message());
+        ostringstream strstrm;
+        strstrm << "dynare:k_order_perturbation: Caught KordDynare exception: " << e.message();
+        DYN_MEX_FUNC_ERR_MSG_TXT(strstrm.str().c_str());
       }
     catch (const ogu::Exception &e)
       {
-        mexErrMsgIdAndTxt("dynare:k_order_perturbation", "Caught general exception: %s", e.message());
+        ostringstream strstrm;
+        strstrm << "dynare:k_order_perturbation: Caught general exception: " << e.message();
+        DYN_MEX_FUNC_ERR_MSG_TXT(strstrm.str().c_str());
       }
+    plhs[0] = mxCreateDoubleScalar(0);
   } // end of mexFunction()
 } // end of extern C
 
