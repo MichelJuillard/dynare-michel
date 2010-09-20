@@ -134,9 +134,6 @@ extern "C" {
     const int nEndo = (int) mxGetScalar(mxFldp);
     mxFldp = mxGetField(M_, 0, "param_nbr");
     const int nPar = (int) mxGetScalar(mxFldp);
-    // it_ should be set to M_.maximum_lag
-    mxFldp = mxGetField(M_, 0, "maximum_lag");
-    const int nMax_lag = (int) mxGetScalar(mxFldp);
 
     nPred -= nBoth; // correct nPred for nBoth.
 
@@ -195,7 +192,7 @@ extern "C" {
         std::string jName(fName); //params.basename);
         jName += ".jnl";
         Journal journal(jName.c_str());
-        DynamicModelDLL dynamicDLL(fName, nEndo, jcols, nMax_lag, nExog, ySteady, dfExt);
+        DynamicModelDLL dynamicDLL(fName, nExog, dfExt);
 
         // intiate tensor library
         tls.init(kOrder, nStat+2*nPred+3*nBoth+2*nForw+nExog);

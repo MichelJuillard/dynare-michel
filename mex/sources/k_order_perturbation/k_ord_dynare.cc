@@ -113,7 +113,7 @@ KordpDynare::calcDerivativesAtSteady() throw (DynareException)
   Vector llxSteady(nJcols-nExog);
   LLxSteady(ySteady, llxSteady);
 
-  dynamicDLL.eval(llxSteady, xx, &params, out, &g1, g2p, g3p);
+  dynamicDLL.eval(llxSteady, xx, params, ySteady, out, &g1, g2p, g3p);
 
   populateDerivativesContainer(g1, 1, JacobianIndices);
 

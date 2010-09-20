@@ -29,8 +29,8 @@
 #include "dynare_exception.h"
 
 // <model>_Dynamic DLL pointer
-typedef void  (*DynamicFn)
-(double *y, double *x, int nb_row_x, double *params, double *steady_state,
+typedef void (*DynamicFn)
+(const double *y, const double *x, int nb_row_x, const double *params, const double *steady_state,
  int it_, double *residual, double *g1, double *g2, double *g3);
 
 /**
@@ -40,13 +40,8 @@ typedef void  (*DynamicFn)
 class DynamicModelDLL
 {
 private:
-  DynamicFn  Dynamic; // pointer to the Dynamic function in DLL
-
-  const int length;  // tot num vars = Num of Jacobian rows
-  const int jcols;  // tot num var t-1, t and t+1 instances + exogs = Num of Jacobian columns
-  const int nMax_lag; // no of lags
+  DynamicFn Dynamic; // pointer to the Dynamic function in DLL
   const int nExog; // no of exogenous
-  const Vector &ySteady;
 #if defined(_WIN32) || defined(__CYGWIN32__)
   HINSTANCE dynamicHinstance;  // DLL instance pointer in Windows
 #else
@@ -55,17 +50,9 @@ private:
 
 public:
   // construct and load Dynamic model DLL
-  DynamicModelDLL(const string &fname, const int length, const int jcols,
-                  const int nMax_lag, const int nExog, const Vector &ySteady_arg, const string &sExt) throw (DynareException);
+  DynamicModelDLL(const string &fname, int nExog_arg, const string &sExt) throw (DynareException);
   virtual ~DynamicModelDLL();
 
-  // evaluate Dynamic model DLL
-  void eval(double *y, double *x, int nb_row_x, double *params,
-            int it_, double *residual, double *g1, double *g2, double *g3);
-  void eval(const Vector &y, const Vector &x,  const Vector *params,
-            Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException);
-  void eval(const Vector &y, const TwoDMatrix &x,  const Vector *params,
-            int it_, Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException);
-  void eval(const Vector &y, const TwoDMatrix &x,  const Vector *params,
+  void eval(const Vector &y, const Vector &x, const Vector &params, const Vector &ySteady,
             Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException);
 };

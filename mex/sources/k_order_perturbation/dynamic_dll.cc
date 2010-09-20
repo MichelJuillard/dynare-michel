@@ -22,13 +22,8 @@
 
 #include <sstream>
 
-/***********************************
- * Members of DynamicModelDLL for handling loading and calling
- * <model>_dynamic () function
- **************************************/
-DynamicModelDLL::DynamicModelDLL(const string &modName, const int y_length, const int j_cols,
-                                 const int n_max_lag, const int n_exog, const Vector &ySteady_arg, const string &sExt) throw (DynareException) :
-  length(y_length), jcols(j_cols), nMax_lag(n_max_lag), nExog(n_exog), ySteady(ySteady_arg)
+DynamicModelDLL::DynamicModelDLL(const string &modName, int nExog_arg, const string &sExt) throw (DynareException) :
+  nExog(nExog_arg)
 {
   string fName;
 #if !defined(__CYGWIN32__) && !defined(_WIN32)
@@ -94,59 +89,10 @@ DynamicModelDLL::~DynamicModelDLL()
 }
 
 void
-DynamicModelDLL::eval(double *y, double *x, int nb_row_x, double *params,
-                      int it_, double *residual, double *g1, double *g2, double *g3)
-{
-  double *steady_state = const_cast<double *>(ySteady.base());
-  Dynamic(y, x, nb_row_x, params, steady_state, it_, residual, g1, g2, g3);
-}
-
-void
-DynamicModelDLL::eval(const Vector &y, const TwoDMatrix &x, const  Vector *modParams,
-                      int it_, Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException)
-{
-  double  *dresidual, *dg1 = NULL, *dg2 = NULL, *dg3 = NULL;
-
-  if ((jcols-nExog) != y.length())
-    throw DynareException(__FILE__, __LINE__, "DLL Error: (jcols-nExog)!=ys.length()");
-
-  if (g1 != NULL)
-    {
-      if (g1->nrows() != length)
-        throw DynareException(__FILE__, __LINE__, "DLL Error: g1 has wrong size");
-      dg1 = const_cast<double *>(g1->base());
-    }
-  if (g2 != NULL)
-    dg2 = const_cast<double *>(g2->base());
-  dresidual = const_cast<double *>(residual.base());
-  if (g3 != NULL)
-    dg3 = const_cast<double *>(g3->base());
-  dresidual = const_cast<double *>(residual.base());
-  double *dy = const_cast<double *>(y.base());
-  double *dx = const_cast<double *>(x.base());
-  double *dbParams = const_cast<double *>(modParams->base());
-  double *steady_state = const_cast<double *>(ySteady.base());
-
-  Dynamic(dy, dx, nExog, dbParams, steady_state, it_, dresidual, dg1, dg2, dg3);
-}
-
-void
-DynamicModelDLL::eval(const Vector &y, const TwoDMatrix &x, const Vector *modParams,
+DynamicModelDLL::eval(const Vector &y, const Vector &x, const Vector &modParams, const Vector &ySteady,
                       Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException)
 {
-  eval(y, x, modParams, nMax_lag, residual, g1, g2, g3);
-}
-
-void
-DynamicModelDLL::eval(const Vector &y, const Vector &x, const Vector *modParams,
-                      Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException)
-{
-  /** ignore given exogens and create new 2D x matrix since
-   * when calling <model>_dynamic(z,x,params,it_) x must be equal to
-   * zeros(M_.maximum_lag+1,M_.exo_nbr)
-   **/
-  TwoDMatrix mx(nMax_lag+1, nExog);
-  mx.zeros(); // initialise shocks to 0s
-
-  eval(y, mx, modParams, nMax_lag, residual, g1, g2, g3);
+  Dynamic(y.base(), x.base(), nExog, modParams.base(), ySteady.base(), 0, residual.base(),
+          g1 == NULL ? NULL : g1->base(),
+          g2 == NULL ? NULL : g2->base(), g3 == NULL ? NULL : g3->base());
 }
