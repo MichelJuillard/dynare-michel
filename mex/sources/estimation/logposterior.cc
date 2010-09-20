@@ -26,7 +26,18 @@
 #include "Matrix.hh"
 #include "LogPosteriorDensity.hh"
 
+#include "dynmex.h"
 #include "mex.h"
+
+class LogposteriorMexErrMsgTxtException
+{
+public:
+  std::string errMsg;
+  LogposteriorMexErrMsgTxtException(const std::string &msg) : errMsg(msg)
+  {
+  }
+  inline const char *getErrMsg() { return errMsg.c_str(); }
+};
 
 void
 fillEstParamsInfo(const mxArray *estim_params_info, EstimatedParameter::pType type,
@@ -115,7 +126,7 @@ logposterior(const VectorConstView &estParams, const MatrixConstView &data,
   const mxArray *lli_mx = mxGetField(M_, 0, "lead_lag_incidence");
   MatrixConstView lli(mxGetPr(lli_mx), mxGetM(lli_mx), mxGetN(lli_mx), mxGetM(lli_mx));
   if (lli.getRows() != 3 || lli.getCols() != n_endo)
-    mexErrMsgTxt("Incorrect lead/lag incidence matrix");
+    throw LogposteriorMexErrMsgTxtException("Incorrect lead/lag incidence matrix");
 
   for (size_t i = 0; i < n_endo; i++)
     {
@@ -137,13 +148,14 @@ logposterior(const VectorConstView &estParams, const MatrixConstView &data,
   std::vector<size_t> varobs;
   const mxArray *varobs_mx = mxGetField(options_, 0, "varobs_id");
   if (mxGetM(varobs_mx) != 1)
-    mexErrMsgTxt("options_.varobs_id must be a row vector");
+    throw LogposteriorMexErrMsgTxtException("options_.varobs_id must be a row vector");
+
   size_t n_varobs = mxGetN(varobs_mx);
   std::transform(mxGetPr(varobs_mx), mxGetPr(varobs_mx) + n_varobs, back_inserter(varobs),
                  std::bind2nd(std::minus<size_t>(), 1));
 
   if (data.getRows() != n_varobs)
-    mexErrMsgTxt("Data has not as many rows as there are observed variables");
+    throw LogposteriorMexErrMsgTxtException("Data has not as many rows as there are observed variables");
 
   std::vector<EstimationSubsample> estSubsamples;
   estSubsamples.push_back(EstimationSubsample(0, data.getCols() - 1));
@@ -200,25 +212,23 @@ void
 mexFunction(int nlhs, mxArray *plhs[],
             int nrhs, const mxArray *prhs[])
 {
-  if (nrhs != 3)
-    mexErrMsgTxt("logposterior: exactly three arguments are required.");
-  if (nlhs != 1)
-    mexErrMsgTxt("logposterior: exactly one return argument is required.");
+  if (nrhs != 3 || nlhs !=2)
+    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: exactly three input arguments and two output arguments are required.");
 
   // Check and retrieve the arguments
 
   if (!mxIsDouble(prhs[0]) || mxGetN(prhs[0]) != 1)
-    mexErrMsgTxt("logposterior: First argument must be a column vector of double-precision numbers");
+    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: First argument must be a column vector of double-precision numbers");
 
   VectorConstView estParams(mxGetPr(prhs[0]), mxGetM(prhs[0]), 1);
 
   if (!mxIsDouble(prhs[1]))
-    mexErrMsgTxt("logposterior: Second argument must be a matrix of double-precision numbers");
+    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: Second argument must be a matrix of double-precision numbers");
 
   MatrixConstView data(mxGetPr(prhs[1]), mxGetM(prhs[1]), mxGetN(prhs[1]), mxGetM(prhs[1]));
 
   if (!mxIsChar(prhs[2]))
-    mexErrMsgTxt("logposterior: Third argument must be a character string");
+    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: Third argument must be a character string");
 
   char *mexext_mx = mxArrayToString(prhs[2]);
   std::string
@@ -226,8 +236,15 @@ mexFunction(int nlhs, mxArray *plhs[],
   mxFree(mexext_mx);
 
   // Compute and return the value
-  double lik = logposterior(estParams, data, mexext);
-
-  plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
-  *mxGetPr(plhs[0]) = lik;
+  try
+    {
+      double lik = logposterior(estParams, data, mexext);
+      plhs[1] = mxCreateDoubleMatrix(1, 1, mxREAL);
+      *mxGetPr(plhs[1]) = lik;
+    }
+  catch (LogposteriorMexErrMsgTxtException e)
+    {
+      DYN_MEX_FUNC_ERR_MSG_TXT(e.getErrMsg());
+    }
+  plhs[0] = mxCreateDoubleScalar(0);
 }
