@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2008 Dynare Team
+ * Copyright (C) 2006-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -84,14 +84,8 @@ mexFunction(int nlhs, mxArray *plhs[],
 
   /* Check for proper number of arguments */
 
-  if (nrhs < 2 || nrhs > 3)
-    {
-      mexErrMsgTxt("MJDGGES: two or three input arguments are required.");
-    }
-  else if (nlhs > 6)
-    {
-      mexErrMsgTxt("MJDGGES: too many output arguments.");
-    }
+  if (nrhs < 2 || nrhs > 3 || nlhs == 0 || nlhs > 7)
+    DYN_MEX_FUNC_ERR_MSG_TXT("MJDGGES: takes 2 or 3 input arguments and between 1 and 7 output arguments.");
 
   /* Check that A and B are real matrices of the same dimension.*/
 
@@ -102,26 +96,24 @@ mexFunction(int nlhs, mxArray *plhs[],
   if (!mxIsDouble(prhs[0]) || mxIsComplex(prhs[0])
       || !mxIsDouble(prhs[1]) || mxIsComplex(prhs[1])
       || (m1 != n1) || (m2 != n1) || (m2 != n2))
-    {
-      mexErrMsgTxt("MJDGGES requires two square real matrices of the same dimension.");
-    }
+    DYN_MEX_FUNC_ERR_MSG_TXT("MJDGGES requires two square real matrices of the same dimension.");
 
   /* Create a matrix for the return argument */
-  plhs[0] = mxCreateDoubleMatrix(n1, n1, mxREAL);
   plhs[1] = mxCreateDoubleMatrix(n1, n1, mxREAL);
   plhs[2] = mxCreateDoubleMatrix(n1, n1, mxREAL);
-  plhs[3] = mxCreateDoubleMatrix(1, 1, mxREAL);
-  plhs[4] = mxCreateDoubleMatrix(n1, 1, mxCOMPLEX);
-  plhs[5] = mxCreateDoubleMatrix(1, 1, mxREAL);
+  plhs[3] = mxCreateDoubleMatrix(n1, n1, mxREAL);
+  plhs[4] = mxCreateDoubleMatrix(1, 1, mxREAL);
+  plhs[5] = mxCreateDoubleMatrix(n1, 1, mxCOMPLEX);
+  plhs[6] = mxCreateDoubleMatrix(1, 1, mxREAL);
 
   /* Assign pointers to the various parameters */
-  s = mxGetPr(plhs[0]);
-  t = mxGetPr(plhs[1]);
-  z = mxGetPr(plhs[2]);
-  sdim = mxGetPr(plhs[3]);
-  eval_r = mxGetPr(plhs[4]);
-  eval_i = mxGetPi(plhs[4]);
-  info = mxGetPr(plhs[5]);
+  s = mxGetPr(plhs[1]);
+  t = mxGetPr(plhs[2]);
+  z = mxGetPr(plhs[3]);
+  sdim = mxGetPr(plhs[4]);
+  eval_r = mxGetPr(plhs[5]);
+  eval_i = mxGetPi(plhs[5]);
+  info = mxGetPr(plhs[6]);
 
   a = mxGetPr(prhs[0]);
   b = mxGetPr(prhs[1]);
@@ -145,8 +137,7 @@ mexFunction(int nlhs, mxArray *plhs[],
   /* Do the actual computations in a subroutine */
   mjdgges(s, t, z, &n, sdim, eval_r, eval_i, info);
 
-  return;
-
+  plhs[0] = mxCreateDoubleScalar(0);
 }
 
 /*

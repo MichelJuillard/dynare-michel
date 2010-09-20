@@ -1,7 +1,7 @@
 function [dr,info,M_,options_,oo_] = dr11_sparse(dr,task,M_,options_,oo_, jacobia_, hessian)
 %function [dr,info,M_,options_,oo_] = dr11_sparse(dr,task,M_,options_,oo_, jacobia_, hessian)
 
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -104,8 +104,8 @@ end
 %e
 %d
 
-[ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
-
+[err,ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
+mexErrCheck('mjdgges', err);
 
 if info1
     info(1) = 2;

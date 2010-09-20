@@ -32,7 +32,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 %   none.
 %  
 
-% Copyright (C) 1996-2009 Dynare Team
+% Copyright (C) 1996-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -338,7 +338,8 @@ else  % use original Dynare solver
     % 2) In  global_initialization.m, if mjdgges.m is visible exist(...)==2, 
     % this means that the DLL isn't avaiable and use_qzdiv is set to 1
     
-    [ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
+    [err,ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
+    mexErrCheck('mjdgges', err);
 
     if info1
         info(1) = 2;
