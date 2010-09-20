@@ -1,4 +1,4 @@
-// Tests the steady_state, in static and dynamic M-files
+// Tests the steady_state operator, in static and dynamic M-files with block decomposition
 
 var c k w;
 varexo x;
@@ -10,7 +10,7 @@ delt=0.02;
 bet=0.05;
 aa=0.5;
 
-model;
+model(block);
 c + k - aa*x*k(-1)^alph - (1-delt)*k(-1);
 c^(-gam) - (1+bet)^(-1)*(aa*alph*x(+1)*k^(alph-1) + 1 - delt)*c(+1)^(-gam);
 w = steady_state(k);
@@ -25,7 +25,7 @@ end;
 
 steady;
 
-check;
+//check;
 
 shocks;
 var x;

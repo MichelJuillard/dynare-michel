@@ -13,11 +13,14 @@ OCTAVE_MODS = \
 	optimal_policy/mult_elimination_test.mod \
 	ramst_initval_file.mod \
 	ramst_normcdf_and_friends.mod \
-	ramst_steady_state.mod \
 	example1_varexo_det.mod \
 	predetermined_variables.mod \
 	fs2000_ssfile.mod \
 	comments.mod \
+	steady_state_operator/standard.mod \
+	steady_state_operator/use_dll.mod \
+	steady_state_operator/block.mod \
+	steady_state_operator/bytecode_test.mod \
 	block_bytecode/fs2000_simk.mod \
 	block_bytecode/fs2000_lu.mod \
 	block_bytecode/fs2000_bicgstab.mod \
