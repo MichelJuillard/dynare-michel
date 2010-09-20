@@ -30,7 +30,7 @@
 
 // <model>_Dynamic DLL pointer
 typedef void  (*DynamicFn)
-(double *y, double *x, int nb_row_x, double *params,
+(double *y, double *x, int nb_row_x, double *params, double *steady_state,
  int it_, double *residual, double *g1, double *g2, double *g3);
 
 /**
@@ -46,6 +46,7 @@ private:
   const int jcols;  // tot num var t-1, t and t+1 instances + exogs = Num of Jacobian columns
   const int nMax_lag; // no of lags
   const int nExog; // no of exogenous
+  const Vector &ySteady;
 #if defined(_WIN32) || defined(__CYGWIN32__)
   HINSTANCE dynamicHinstance;  // DLL instance pointer in Windows
 #else
@@ -55,7 +56,7 @@ private:
 public:
   // construct and load Dynamic model DLL
   DynamicModelDLL(const string &fname, const int length, const int jcols,
-                  const int nMax_lag, const int nExog, const string &sExt) throw (DynareException);
+                  const int nMax_lag, const int nExog, const Vector &ySteady_arg, const string &sExt) throw (DynareException);
   virtual ~DynamicModelDLL();
 
   // evaluate Dynamic model DLL

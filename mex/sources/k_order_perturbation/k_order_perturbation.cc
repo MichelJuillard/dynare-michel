@@ -195,7 +195,7 @@ extern "C" {
         std::string jName(fName); //params.basename);
         jName += ".jnl";
         Journal journal(jName.c_str());
-        DynamicModelDLL dynamicDLL(fName, nEndo, jcols, nMax_lag, nExog, dfExt);
+        DynamicModelDLL dynamicDLL(fName, nEndo, jcols, nMax_lag, nExog, ySteady, dfExt);
 
         // intiate tensor library
         tls.init(kOrder, nStat+2*nPred+3*nBoth+2*nForw+nExog);

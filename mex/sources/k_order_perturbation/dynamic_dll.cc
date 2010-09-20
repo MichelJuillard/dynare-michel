@@ -27,8 +27,8 @@
  * <model>_dynamic () function
  **************************************/
 DynamicModelDLL::DynamicModelDLL(const string &modName, const int y_length, const int j_cols,
-                                 const int n_max_lag, const int n_exog, const string &sExt) throw (DynareException) :
-  length(y_length), jcols(j_cols), nMax_lag(n_max_lag), nExog(n_exog)
+                                 const int n_max_lag, const int n_exog, const Vector &ySteady_arg, const string &sExt) throw (DynareException) :
+  length(y_length), jcols(j_cols), nMax_lag(n_max_lag), nExog(n_exog), ySteady(ySteady_arg)
 {
   string fName;
 #if !defined(__CYGWIN32__) && !defined(_WIN32)
@@ -97,7 +97,8 @@ void
 DynamicModelDLL::eval(double *y, double *x, int nb_row_x, double *params,
                       int it_, double *residual, double *g1, double *g2, double *g3)
 {
-  Dynamic(y, x, nb_row_x, params, it_, residual, g1, g2, g3);
+  double *steady_state = const_cast<double *>(ySteady.base());
+  Dynamic(y, x, nb_row_x, params, steady_state, it_, residual, g1, g2, g3);
 }
 
 void
@@ -124,8 +125,9 @@ DynamicModelDLL::eval(const Vector &y, const TwoDMatrix &x, const  Vector *modPa
   double *dy = const_cast<double *>(y.base());
   double *dx = const_cast<double *>(x.base());
   double *dbParams = const_cast<double *>(modParams->base());
+  double *steady_state = const_cast<double *>(ySteady.base());
 
-  Dynamic(dy, dx, nExog, dbParams, it_, dresidual, dg1, dg2, dg3);
+  Dynamic(dy, dx, nExog, dbParams, steady_state, it_, dresidual, dg1, dg2, dg3);
 }
 
 void
