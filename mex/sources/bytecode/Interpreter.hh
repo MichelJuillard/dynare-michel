@@ -31,7 +31,7 @@
 # include "linbcg.hh"
 #endif
 #ifndef DEBUG_EX
-# include "mex.h"
+# include <dynmex.h>
 #else
 # include "mex_interface.hh"
 #endif
