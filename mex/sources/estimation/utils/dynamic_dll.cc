@@ -17,20 +17,14 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//#include "k_ord_dynare.hh"
 #include "dynamic_dll.hh"
 
 #include <sstream>
 
 using namespace std;
 
-/***********************************
-* Members of DynamicModelDLL for handling loading and calling
-* <model>_dynamic () function
-**************************************/
-DynamicModelDLL::DynamicModelDLL(const std::string &dynamicDllFile, const size_t y_length, const size_t j_cols,
-                                 const int n_max_lag, const size_t n_exog) throw (TSException) :
-length(y_length), jcols(j_cols), nMax_lag(n_max_lag), nExog(n_exog)
+DynamicModelDLL::DynamicModelDLL(const std::string &dynamicDllFile, size_t n_exog_arg) throw (TSException) :
+  n_exog(n_exog_arg)
 {
   std::string fName;
 #if !defined(__CYGWIN32__) && !defined(_WIN32)
@@ -97,57 +91,9 @@ DynamicModelDLL::~DynamicModelDLL()
 }
 
 void
-DynamicModelDLL::eval(double *y, double *x, int nb_row_x, double *params,
-                      int it_, double *residual, double *g1, double *g2, double *g3)
-{
-  Dynamic(y, x, nb_row_x, params, it_, residual, g1, g2, g3);
-}
-
-void
-DynamicModelDLL::eval(const Vector &y, const Matrix &x, const  Vector *modParams,
-                      int it_, Vector &residual, Matrix *g1, Matrix *g2, Matrix *g3) throw (TSException)
-{
-  double  *dresidual, *dg1 = NULL, *dg2 = NULL, *dg3 = NULL;
-
-  if ((jcols-nExog) != y.getSize())
-    throw TSException(__FILE__, __LINE__, "DLL Error: (jcols-nExog)!=ys.length()");
-
-  if (g1 != NULL)
-  {
-    if (g1->getRows() != length)  // dummy
-      throw TSException(__FILE__, __LINE__, "DLL Error: g1 has wrong size");
-    dg1 = const_cast<double *>(g1->getData());
-  }
-  if (g2 != NULL)
-    dg2 = const_cast<double *>(g2->getData());
-  //dresidual = const_cast<double *>(residual.getData());
-  if (g3 != NULL)
-    dg3 = const_cast<double *>(g3->getData());
-  dresidual = const_cast<double *>(residual.getData());
-  double *dy = const_cast<double *>(y.getData());
-  double *dx = const_cast<double *>(x.getData());
-  double *dbParams = const_cast<double *>(modParams->getData());
-
-  Dynamic(dy, dx, nExog, dbParams, it_, dresidual, dg1, dg2, dg3);
-}
-
-void
-DynamicModelDLL::eval(const Vector &y, const Matrix &x, const Vector *modParams,
+DynamicModelDLL::eval(const Vector &y, const Matrix &x, const Vector &modParams, VectorView &ySteady,
                       Vector &residual, Matrix *g1, Matrix *g2, Matrix *g3) throw (TSException)
 {
-  eval(y, x, modParams, nMax_lag, residual, g1, g2, g3);
-}
-
-void
-DynamicModelDLL::eval(const Vector &y, const Vector &x, const Vector *modParams,
-                      Vector &residual, Matrix *g1, Matrix *g2, Matrix *g3) throw (TSException)
-{
-  /** ignore given exogens and create new 2D x matrix since
-  * when calling <model>_dynamic(z,x,params,it_) x must be equal to
-  * zeros(M_.maximum_lag+1,M_.exo_nbr)
-  **/
-  Matrix mx(nMax_lag+1, nExog);
-  mx.setAll(0); // initialise shocks to 0s
-
-  eval(y, mx, modParams, nMax_lag, residual, g1, g2, g3);
+  Dynamic(y.getData(), x.getData(), n_exog, modParams.getData(), ySteady.getData(), 0, residual.getData(), 
+          g1 == NULL ? NULL : g1->getData(), g2 == NULL ? NULL : g2->getData(), g3 == NULL ? NULL : g3->getData());
 }

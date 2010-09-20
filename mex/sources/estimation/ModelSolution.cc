@@ -35,9 +35,9 @@ ModelSolution::ModelSolution(const std::string& dynamicDllFile,  size_t n_endo_a
                              const std::vector<size_t>& zeta_static_arg, double INqz_criterium)
                              : n_endo(n_endo_arg), n_exo(n_exo_arg),  // n_jcols = Num of Jacobian columns = nStat+2*nPred+3*nBoth+2*nForw+nExog
                              n_jcols (n_exo+n_endo+ zeta_back_arg.size() /*nsPred*/ + zeta_fwrd_arg.size() /*nsForw*/ +2*zeta_mixed_arg.size()), 
-                             jacobian (n_endo,n_jcols), residual(n_endo), Mx(2,n_exo),
+                             jacobian (n_endo,n_jcols), residual(n_endo), Mx(1,n_exo),
                                decisionRules ( n_endo_arg, n_exo_arg, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, INqz_criterium),
-                               dynamicDLLp(dynamicDllFile, n_endo,  n_jcols,  /* nMax_lag= */ 1,  n_exo),
+                               dynamicDLLp(dynamicDllFile, n_exo),
                                llXsteadyState(n_jcols-n_exo)
 {
   Mx.setAll(0.0);
@@ -78,7 +78,7 @@ ModelSolution::ComputeModelSolution(VectorView &steadyState, const Vector& deepP
     llXsteadyState(zeta_back_mixed.size() + n_endo + i) = steadyState(zeta_fwrd_mixed[i]);
 
     //get jacobian 
-    dynamicDLLp.eval(llXsteadyState, Mx, &deepParams,  1,  residual, &jacobian, NULL, NULL);
+  dynamicDLLp.eval(llXsteadyState, Mx, deepParams, steadyState, residual, &jacobian, NULL, NULL);
 
     //compute rules
     decisionRules.compute(jacobian,ghx, ghu);
