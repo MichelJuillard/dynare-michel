@@ -1043,7 +1043,8 @@ end;
     <itemizedlist>
       <listitem><para>the timing convention of <xref linkend="predetermined_variables"/> will have been changed to the default Dynare timing convention; in other words, variables declared as predetermined will be lagged on period back,</para></listitem>
       <listitem><para>the <link linkend="expectation_operator">expectation operators</link> will have been removed, replaced by auxiliary variables and new equations as explained in the documentation of the operator,</para></listitem>
-      <listitem><para>for stochastic models, variables with leads or lags greater or equal than two will have been removed, replaced by new auxiliary variables and equations.</para></listitem>
+      <listitem><para>endogenous variables with leads or lags greater or equal than two will have been removed, replaced by new auxiliary variables and equations,</para></listitem>
+      <listitem><para>for a stochastic model, exogenous variables with leads or lags will also have been replaced by new auxiliary variables and equations.</para></listitem>
     </itemizedlist>
   </para>
 
@@ -2194,7 +2195,7 @@ steady;
 
 <refsect1 id="aux_vars">
   <title>Auxiliary variables for leads and lags</title>
-  <para>For a stochastic model, Dynare will perform a transformation of the model so that there is only one lead and one lag on endogenous, and no lead/lag on exogenous.</para>
+  <para>Dynare will perform a transformation of the model so that there is only one lead and one lag on endogenous, and, in the case of a stochastic model, no lead/lag on exogenous.</para>
   <para>This transformation is achieved by the creation of auxiliary variables, and corresponding equations. For example, if <literal>x(+2)</literal> exists in the model, Dynare will create one auxiliary variable <literal>AUX_ENDO_LEAD = x(+1)</literal>, and replace <literal>x(+2)</literal> by <literal>AUX_ENDO_LEAD(+1)</literal>.</para>
   <para>A similar transformation is done for lags greater than 2 on endogenous (auxiliary variables will have a name beginning with <literal>AUX_ENDO_LAG</literal>), and for exogenous with leads and lags (auxiliary variables will have a name beginning with <literal>AUX_EXO_LEAG</literal> or <literal>AUX_EXO_LAG</literal> respectively).</para>
   <para>Once created, all auxiliary variables are included in the set of endogenous variables. The output of decision rules (see below) is such that auxiliary variable names are replaced by the original variables they refer to.</para>

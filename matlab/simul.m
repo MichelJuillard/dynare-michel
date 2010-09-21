@@ -1,9 +1,9 @@
-function simul(dr)
-% function simul(dr)
-% computes simulations
+function simul
+% function simul
+% Computes deterministic simulations
 %  
 % INPUTS
-%   dr: structure of decision rules for stochastic simulations
+%   None
 %  
 % OUTPUTS
 %   ...
@@ -12,7 +12,7 @@ function simul(dr)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 1996-2007 Dynare Team
+% Copyright (C) 1996-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -29,10 +29,10 @@ function simul(dr)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ oo_ ys0_
+global M_ options_ oo_
 
 if size(M_.lead_lag_incidence,2)-nnz(M_.lead_lag_incidence(M_.maximum_endo_lag+1,:)) > 0
-    mess = ['DYNARE: error in model specification : variable ' M_.endo_names(find(M_.lead_lag_incidence(M_.maximum_lag+1,:)==0),:)] ;
+    mess = ['SIMUL: error in model specification : variable ' M_.endo_names(find(M_.lead_lag_incidence(M_.maximum_lag+1,:)==0),:)] ;
     mess = [mess ' doesn''t appear as current variable.'] ; 
     error (mess) ;
 end
@@ -82,18 +82,15 @@ else
         oo_.endo_simul=bytecode('dynamic');
     else
         if M_.maximum_endo_lead == 0
-            error('simul doesn''t simulate purely backward models')
+            error('SIMUL: purely backward models are not supported')
+        elseif M_.maximum_endo_lag == 0
+            error('SIMUL: purely forward models are not supported')
         elseif M_.maximum_endo_lag == 1 && M_.maximum_endo_lead == 1
             sim1 ;
         else
-            simk ;
+            error('SIMUL: internal error of Dynare, contact the developpers')
         end;
     end;
 end;
 
 dyn2vec;
-
-% 6/18/01 MJ added dyn2vec if 40 variables or less
-% 01/16/03 MJ use dyn2vec whatever the number of variables
-% 02/18/03 MJ added oo_.steady_state for calling simult
-% 05/24/03 MJ added options_ and options_.periods
