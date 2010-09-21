@@ -10,11 +10,6 @@
 
 #include <cmath>
 
-#ifdef _MSC_VER
-// For finite()
-# include <cfloat>
-#endif
-
 @<|SparseTensor::insert| code@>;
 @<|SparseTensor::isFinite| code@>;
 @<|SparseTensor::getFoldIndexFillFactor| code@>;
@@ -39,13 +34,8 @@ void SparseTensor::insert(const IntSequence& key, int r, double c)
 				"Row number out of dimension of tensor in SparseTensor::insert");
 	TL_RAISE_IF(key.size() != dimen(),
 				"Wrong length of key in SparseTensor::insert");
-#ifndef _MSC_VER
 	TL_RAISE_IF(! std::isfinite(c),
 				"Insertion of non-finite value in SparseTensor::insert");
-#else
-	TL_RAISE_IF(! _finite(c),
-				"Insertion of non-finite value in SparseTensor::insert");
-#endif
 
 	iterator first_pos = m.lower_bound(key);
 	@<check that pair |key| and |r| is unique@>;
@@ -72,11 +62,7 @@ bool SparseTensor::isFinite() const
 	bool res = true;
 	const_iterator run = m.begin();
 	while (res && run != m.end()) {
-#ifndef _MSC_VER
 		if (! std::isfinite((*run).second.second))
-#else
-		if (! _finite((*run).second.second))
-#endif
 			res = false;
 		++run;
 	}

@@ -27,13 +27,7 @@ namespace ogu {
 				strncpy(file, f, file_length-1);
 				file[file_length-1] = '\0';
 				line = l;
-#ifndef _MSC_VER
 				strncpy(mes, m, std::min(mes_length-1,(int)strlen(m)));
-#else
-				/* MSVC doesn't define std::min() (should be in <algorithm>),
-				   but instead has a macro in <windows.h> */
-				strncpy(mes, m, min(mes_length-1,(int)strlen(m)));
-#endif
 				mes[mes_length-1] = '\0';
 			}
 		Exception(const char* f, int l, const std::string& m)
@@ -41,13 +35,7 @@ namespace ogu {
 				strncpy(file, f, file_length-1);
 				file[file_length-1] = '\0';
 				line = l;
-#ifndef _MSC_VER
 				strncpy(mes, m.c_str(), std::min(mes_length-1,(int)m.length()));
-#else
-				/* MSVC doesn't define std::min() (should be in <algorithm>),
-				   but instead has a macro in <windows.h> */
-				strncpy(mes, m.c_str(), min(mes_length-1,(int)m.length()));
-#endif
 				mes[mes_length-1] = '\0';
 			}
 		virtual ~Exception() {}

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2009 Dynare Team
+ * Copyright (C) 2007-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -24,11 +24,6 @@
 #include <ctime>
 #include <sstream>
 #include "SparseMatrix.hh"
-
-#ifdef _MSC_VER
-unsigned long _nan[2] = { 0xffffffff, 0x7fffffff };
-double NAN = *((double *) _nan);
-#endif
 
 SparseMatrix::SparseMatrix()
 {

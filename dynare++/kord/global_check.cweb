@@ -373,11 +373,7 @@ f^i(x_1,\ldots,x_i) &=
 		for (qmcpit run = beg; run != end; ++run, icol++) {
 			Vector ycol(ymat, icol);
 			Vector x(run.point());
-#ifndef _MSC_VER
 			x.mult(2*M_PI);
-#else
-			x.mult(2*3.14159265358979323846);
-#endif
 			ycol[0] = 1;
 			for (int i = 0; i < d; i++) {
 				Vector subsphere(ycol, 0, i+1);

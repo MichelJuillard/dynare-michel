@@ -456,11 +456,7 @@ bool ConstGeneralMatrix::isFinite() const
 {
 	for (int i = 0; i < numRows(); i++)
 		for (int j = 0; j < numCols(); j++)
-#ifndef _MSC_VER
 			if (! std::isfinite(get(i,j)))
-#else
-			if (! _finite(get(i,j)))
-#endif
 				return false;
 	return true;
 }

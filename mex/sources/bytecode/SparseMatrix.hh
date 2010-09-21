@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2009 Dynare Team
+ * Copyright (C) 2007-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -30,55 +30,6 @@
 #define MARKOVITZ
 
 using namespace std;
-
-#ifdef _MSC_VER
-# include <limits>
-#include <boost/math/special_functions/erf.hpp>
-#define M_SQRT2 1.4142135623730950488016887242097
-#define M_PI 3.1415926535897932384626433832795
-#define erf(x) boost::math::erf(x)
-extern unsigned long _nan[2];
-extern double NAN;
-
-inline bool
-isnan(double value)
-{
-  return _isnan(value);
-}
-
-inline bool
-isinf(double value)
-{
-  return (std::numeric_limits<double>::has_infinity
-          && value == std::numeric_limits<double>::infinity());
-}
-
-template<typename T>
-inline T
-asinh(T x)
-{
-  return log(x+sqrt(x*x+1));
-}
-
-template<typename T>
-inline T
-acosh(T x)
-{
-  if (!(x >= 1.0))
-    return sqrt(-1.0);
-  return log(x+sqrt(x*x-1.0));
-}
-
-template<typename T>
-inline T
-atanh(T x)
-{
-  if (!(x > -1.0 && x < 1.0))
-    return sqrt(-1.0);
-  return log((1.0+x)/(1.0-x))/2.0;
-}
-
-#endif
 
 struct t_save_op_s
 {

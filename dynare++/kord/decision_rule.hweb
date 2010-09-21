@@ -631,13 +631,7 @@ damp by one half.
 		if (fnorm <= flastnorm)
 			urelax_found = true;
 		else
-#ifndef _MSC_VER
 			urelax *= std::min(0.5, flastnorm/fnorm);
-#else
-	/* MSVC doesn't define std::min() (should be in <algorithm>),
-	   but instead has a macro in <windows.h> */
-			urelax *= min(0.5, flastnorm/fnorm);
-#endif
 	}
 
 
