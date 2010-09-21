@@ -392,7 +392,8 @@ else  % use original Dynare solver
     % derivatives with respect to dynamic state variables
     % forward variables
     w1 =w(1:n3,n2:nd);
-    if condest(w1) > 1e9;
+    if ~isfloat(w1) && (condest(w1) > 1e9)
+        % condest() fails on a scalar under Octave
         info(1) = 5;
         info(2) = condest(w1);
         return;
