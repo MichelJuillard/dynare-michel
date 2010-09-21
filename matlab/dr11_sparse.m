@@ -347,7 +347,9 @@ hu1 = [hu;zeros(np-npred,M_.exo_nbr)];
 [nrhx,nchx] = size(hx);
 [nrhu1,nchu1] = size(hu1);
 
-B1 = B*A_times_B_kronecker_C(dr.ghxx,hx,hu1);
+[err, abcOut] = A_times_B_kronecker_C(dr.ghxx,hx,hu1);
+mexErrCheck('A_times_B_kronecker_C', err);
+B1 = B*abcOut;
 rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B1;
 
 
@@ -362,7 +364,8 @@ kk = kk(1:npred,1:npred);
 rhs = sparse_hessian_times_B_kronecker_C(hessian,zu);
 
 
-B1 = A_times_B_kronecker_C(B*dr.ghxx,hu1);
+[err, B1] = A_times_B_kronecker_C(B*dr.ghxx,hu1);
+mexErrCheck('A_times_B_kronecker_C', err);
 rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B1;
 
 %lhs
@@ -420,8 +423,10 @@ for i=1:M_.maximum_endo_lead
     kk = find(kstate(:,2) == M_.maximum_endo_lag+i+1);
     gu = dr.ghx*Gu;
     [nrGu,ncGu] = size(Gu);
-    G1 = A_times_B_kronecker_C(dr.ghxx,Gu);
-    G2 = A_times_B_kronecker_C(hxx,Gu);
+    [err, G1] = A_times_B_kronecker_C(dr.ghxx,Gu);
+    mexErrCheck('A_times_B_kronecker_C', err);
+    [err, G2] = A_times_B_kronecker_C(hxx,Gu);
+    mexErrCheck('A_times_B_kronecker_C', err);
     guu = dr.ghx*Guu+G1;
     Gu = hx*Gu;
     Guu = hx*Guu;

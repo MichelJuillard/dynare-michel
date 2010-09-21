@@ -1,15 +1,16 @@
-function D = A_times_B_kronecker_C(A,B,C)
-%function D = A_times_B_kronecker_C(A,B,C)
+function [err, D] = A_times_B_kronecker_C(A,B,C)
+%function [err, D] = A_times_B_kronecker_C(A,B,C)
 % Computes A * kron(B,C). 
 %
 % INPUTS
-%   A  [double] mA*nA matrix.
-%   B  [double] mB*nB matrix.
-%   C  [double] mC*nC matrix.
-%  
+%   A   [double] mA*nA matrix.
+%   B   [double] mB*nB matrix.
+%   C   [double] mC*nC matrix.
+%
 % OUTPUTS
-%   D  [double] mA*(nC*nB) or mA*(nB*nB) matrix.
-%  
+%   err [double] scalar: 1 indicates failure, 0 indicates success
+%   D   [double] mA*(nC*nB) or mA*(nB*nB) matrix.
+%
 % ALGORITHM
 %   none.    
 %
@@ -34,11 +35,8 @@ function D = A_times_B_kronecker_C(A,B,C)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % Chek number of inputs and outputs.
-if nargin>3 || nargin<2
-    error('Two or Three input arguments required!')
-end
-if nargout>1
-    error('Too many output arguments!')
+if nargin>3 || nargin<2 || nargout~=2
+    error('A_times_B_kronecker_C takes 2 or 3 input arguments and provides exactly 2 output arguments.')
 end
 % Get & check dimensions. Initialization of the output matrix.
 [mA,nA] = size(A);
@@ -83,3 +81,4 @@ else
         D = A * kron(B,B);
     end
 end
+err = 0;

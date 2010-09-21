@@ -84,20 +84,32 @@ else
                 yhat1 = y__(dr.order_var(k2))-dr.ys(dr.order_var(k2));
                 yhat2 = y_(dr.order_var(k2),i-1)-dr.ys(dr.order_var(k2));
                 epsilon = ex_(i-1,:)';
+
+                [err, abcOut1] = A_times_B_kronecker_C(.5*dr.ghxx,yhat1);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                [err, abcOut2] = A_times_B_kronecker_C(.5*dr.ghuu,epsilon);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                [err, abcOut3] = A_times_B_kronecker_C(dr.ghxu,yhat1,epsilon);
+                mexErrCheck('A_times_B_kronecker_C', err);
+
                 y_(dr.order_var,i) = constant + dr.ghx*yhat2 + dr.ghu*epsilon ...
-                    + A_times_B_kronecker_C(.5*dr.ghxx,yhat1) ...
-                    + A_times_B_kronecker_C(.5*dr.ghuu,epsilon) ...
-                    + A_times_B_kronecker_C(dr.ghxu,yhat1,epsilon);
+                    + abcOut1 + abcOut2 + abcOut3;
                 y__(dr.order_var) = dr.ys(dr.order_var) + dr.ghx*yhat1 + dr.ghu*epsilon;
             end
         else
             for i = 2:iter+M_.maximum_lag
                 yhat = y_(dr.order_var(k2),i-1)-dr.ys(dr.order_var(k2));
                 epsilon = ex_(i-1,:)';
+
+                [err, abcOut1] = A_times_B_kronecker_C(.5*dr.ghxx,yhat);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                [err, abcOut2] = A_times_B_kronecker_C(.5*dr.ghuu,epsilon);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                [err, abcOut3] = A_times_B_kronecker_C(dr.ghxu,yhat,epsilon);
+                mexErrCheck('A_times_B_kronecker_C', err);
+
                 y_(dr.order_var,i) = constant + dr.ghx*yhat + dr.ghu*epsilon ...
-                    + A_times_B_kronecker_C(.5*dr.ghxx,yhat) ...
-                    + A_times_B_kronecker_C(.5*dr.ghuu,epsilon) ...
-                    + A_times_B_kronecker_C(dr.ghxu,yhat,epsilon);
+                    + abcOut1 + abcOut2 + abcOut3;
             end
         end
     end
