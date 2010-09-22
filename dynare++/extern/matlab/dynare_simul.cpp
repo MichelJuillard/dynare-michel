@@ -21,6 +21,7 @@
 // output:
 //      res      simulated results
 
+#include "dynmex.h"
 #include "mex.h"
 
 #include "decision_rule.h"
@@ -28,19 +29,15 @@
 #include "SylvException.h"
 
 extern "C" {
-	void mexFunction(int nhls, mxArray* plhs[],
+	void mexFunction(int nlhs, mxArray* plhs[],
 					 int nhrs, const mxArray* prhs[])
 	{
-		if (nhrs < 12)
-			mexErrMsgTxt("Must have at least 12 input parameters.\n");
-		if (nhls != 1)
-			mexErrMsgTxt("Must have exactly 1 output parameter.\n");
+		if (nhrs < 12 || nlhs != 2)
+                  DYN_MEX_FUNC_ERR_MSG_TXT("dynare_simul_ must have at least 12 input parameters and exactly 2 output arguments.\n");
 
 		int order = (int)mxGetScalar(prhs[0]);
-		if (nhrs != 12 + order) {
-			mexErrMsgTxt("Must have exactly 11+order input parameters.\n");
-			return;
-		}
+		if (nhrs != 12 + order)
+                  DYN_MEX_FUNC_ERR_MSG_TXT("dynare_simul_ must have exactly 11+order input parameters.\n");
 
 		int nstat = (int)mxGetScalar(prhs[1]);
 		int npred = (int)mxGetScalar(prhs[2]);
@@ -60,20 +57,20 @@ extern "C" {
 
 		int ny = nstat + npred + nboth + nforw;
 		if (ny != ystart_dim[0])
-			mexErrMsgTxt("ystart has wrong number of rows.\n");
+			DYN_MEX_FUNC_ERR_MSG_TXT("ystart has wrong number of rows.\n");
 		if (1 != ystart_dim[1])
-			mexErrMsgTxt("ystart has wrong number of cols.\n");
+			DYN_MEX_FUNC_ERR_MSG_TXT("ystart has wrong number of cols.\n");
 		int nper = shocks_dim[1];
 		if (nexog != shocks_dim[0])
-			mexErrMsgTxt("shocks has a wrong number of rows.\n");
+			DYN_MEX_FUNC_ERR_MSG_TXT("shocks has a wrong number of rows.\n");
 		if (nexog != vcov_dim[0])
-			mexErrMsgTxt("vcov has a wrong number of rows.\n");
+			DYN_MEX_FUNC_ERR_MSG_TXT("vcov has a wrong number of rows.\n");
 		if (nexog != vcov_dim[1])
-			mexErrMsgTxt("vcov has a wrong number of cols.\n");
+			DYN_MEX_FUNC_ERR_MSG_TXT("vcov has a wrong number of cols.\n");
 		if (ny != ysteady_dim[0])
-			mexErrMsgTxt("ysteady has wrong number of rows.\n");
+			DYN_MEX_FUNC_ERR_MSG_TXT("ysteady has wrong number of rows.\n");
 		if (1 != ysteady_dim[1])
-			mexErrMsgTxt("ysteady has wrong number of cols.\n");
+			DYN_MEX_FUNC_ERR_MSG_TXT("ysteady has wrong number of cols.\n");
 
 		mxArray* res = mxCreateDoubleMatrix(ny, nper, mxREAL);
 
@@ -91,13 +88,13 @@ extern "C" {
 					char buf[1000];
 					sprintf(buf, "Wrong number of columns for folded tensor: got %d but I want %d\n",
 							gk_dim[1], ft.ncols());
-					mexErrMsgTxt(buf);
+					DYN_MEX_FUNC_ERR_MSG_TXT(buf);
 				}
 				if (ft.nrows() != gk_dim[0]) {
 					char buf[1000];
 					sprintf(buf, "Wrong number of rows for folded tensor: got %d but I want %d\n",
 							gk_dim[0], ft.nrows());
-					mexErrMsgTxt(buf);
+					DYN_MEX_FUNC_ERR_MSG_TXT(buf);
 				}
 				ft.zeros();
 				ConstTwoDMatrix gk_mat(ft.nrows(), ft.ncols(), mxGetPr(gk));
@@ -121,13 +118,14 @@ extern "C" {
 			TwoDMatrix res_tmp_mat(ny, nper, mxGetPr(res));
 			res_tmp_mat = (const TwoDMatrix&)(*res_mat);
 			delete res_mat;
-			plhs[0] = res;
+			plhs[1] = res;
 		} catch (const KordException& e) {
-			mexErrMsgTxt("Caugth Kord exception.");
+			DYN_MEX_FUNC_ERR_MSG_TXT("Caugth Kord exception.");
 		} catch (const TLException& e) {
-			mexErrMsgTxt("Caugth TL exception.");
+			DYN_MEX_FUNC_ERR_MSG_TXT("Caugth TL exception.");
 		} catch (SylvException& e) {
-			mexErrMsgTxt("Caught Sylv exception.");
+			DYN_MEX_FUNC_ERR_MSG_TXT("Caught Sylv exception.");
 		}
+                plhs[0] = mxCreateDoubleScalar(0);
 	}
 };
