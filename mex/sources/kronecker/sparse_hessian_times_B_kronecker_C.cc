@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2009 Dynare Team
+ * Copyright (C) 2007-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -141,18 +141,12 @@ void
 mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   // Check input and output:
-  if ((nrhs > 3) || (nrhs < 2))
-    {
-      mexErrMsgTxt("Two or Three input arguments required.");
-    }
-  if (nlhs > 1)
-    {
-      mexErrMsgTxt("Too many output arguments.");
-    }
+  if ((nrhs > 3) || (nrhs < 2) || nlhs!=2)
+    DYN_MEX_FUNC_ERR_MSG_TXT("sparse_hessian_times_B_kronecker_C takes 2 or 3 input arguments and provides exactly 2 output arguments.");
+
   if (!mxIsSparse(prhs[0]))
-    {
-      mexErrMsgTxt("First input must be a sparse (dynare) hessian matrix.");
-    }
+    DYN_MEX_FUNC_ERR_MSG_TXT("sparse_hessian_times_B_kronecker_C: First input must be a sparse (dynare) hessian matrix.");
+
   // Get & Check dimensions (columns and rows):
   mwSize mA, nA, mB, nB, mC, nC;
   mA = mxGetM(prhs[0]);
@@ -164,16 +158,12 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       mC = mxGetM(prhs[2]);
       nC = mxGetN(prhs[2]);
       if (mB*mC != nA)
-        {
-          mexErrMsgTxt("Input dimension error!");
-        }
+        DYN_MEX_FUNC_ERR_MSG_TXT("Input dimension error!");
     }
   else // A*kron(B,B) is to be computed.
     {
       if (mB*mB != nA)
-        {
-          mexErrMsgTxt("Input dimension error!");
-        }
+        DYN_MEX_FUNC_ERR_MSG_TXT("Input dimension error!");
     }
   // Get input matrices:
   double *B, *C;
@@ -190,13 +180,13 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   double *D;
   if (nrhs == 3)
     {
-      plhs[0] = mxCreateDoubleMatrix(mA, nB*nC, mxREAL);
+      plhs[1] = mxCreateDoubleMatrix(mA, nB*nC, mxREAL);
     }
   else
     {
-      plhs[0] = mxCreateDoubleMatrix(mA, nB*nB, mxREAL);
+      plhs[1] = mxCreateDoubleMatrix(mA, nB*nB, mxREAL);
     }
-  D = mxGetPr(plhs[0]);
+  D = mxGetPr(plhs[1]);
   // Computational part:
   if (nrhs == 2)
     {
@@ -206,4 +196,5 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     {
       sparse_hessian_times_B_kronecker_C(isparseA, jsparseA, vsparseA, B, C, D, mA, nA, mB, nB, mC, nC);
     }
+  plhs[0] = mxCreateDoubleScalar(0);
 }

@@ -528,7 +528,9 @@ zx=[zx; zeros(M_.exo_nbr,np);zeros(M_.exo_det_nbr,np)];
 zu=[zu; eye(M_.exo_nbr);zeros(M_.exo_det_nbr,M_.exo_nbr)];
 [nrzx,nczx] = size(zx);
 
-rhs = -sparse_hessian_times_B_kronecker_C(hessian,zx);
+[err, rhs] = sparse_hessian_times_B_kronecker_C(hessian,zx);
+mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
+rhs = -rhs;
 
 %lhs
 n = M_.endo_nbr+sum(kstate(:,2) > M_.maximum_endo_lag+1 & kstate(:,2) < M_.maximum_endo_lag+M_.maximum_endo_lead+1);
@@ -585,7 +587,8 @@ hu = dr.ghu(nstatic+1:nstatic+npred,:);
 %kk = kk(1:npred,1:npred);
 %rhs = -hessian*kron(zx,zu)-f1*dr.ghxx(end-nyf+1:end,kk(:))*kron(hx(1:npred,:),hu(1:npred,:));
 
-rhs = sparse_hessian_times_B_kronecker_C(hessian,zx,zu);
+[err, rhs] = sparse_hessian_times_B_kronecker_C(hessian,zx,zu);
+mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
 
 nyf1 = sum(kstate(:,2) == M_.maximum_endo_lag+2);
 hu1 = [hu;zeros(np-npred,M_.exo_nbr)];
@@ -607,8 +610,8 @@ dr.ghxu = A\rhs;
 kk = reshape([1:np*np],np,np);
 kk = kk(1:npred,1:npred);
 
-rhs = sparse_hessian_times_B_kronecker_C(hessian,zu);
-
+[err, rhs] = sparse_hessian_times_B_kronecker_C(hessian,zu);
+mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
 
 [err, B1] = A_times_B_kronecker_C(B*dr.ghxx,hu1);
 mexErrCheck('A_times_B_kronecker_C', err);
@@ -655,7 +658,8 @@ for i=1:M_.maximum_endo_lead
         [junk,k3a,k3] = ...
             find(M_.lead_lag_incidenceordered(M_.maximum_endo_lag+j+1,:));
         nk3a = length(k3a);
-        B1 = sparse_hessian_times_B_kronecker_C(hessian(:,kh(k3,k3)),gu(k3a,:));
+        [err, B1] = sparse_hessian_times_B_kronecker_C(hessian(:,kh(k3,k3)),gu(k3a,:));
+        mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
         RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+B1;
     end
     % LHS
