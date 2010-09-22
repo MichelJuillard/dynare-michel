@@ -21,7 +21,7 @@ function [ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
 % SPECIAL REQUIREMENTS
 %   none.
 
-% Copyright (C) 1996-2009 Dynare Team
+% Copyright (C) 1996-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -39,7 +39,7 @@ function [ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % Chek number of inputs and outputs.
-if nargin>3 | nargin<2
+if nargin>3 || nargin<2
     error('Three or two input arguments required!')
 end
 if nargout>6
@@ -48,7 +48,7 @@ end
 % Check the first two inputs.
 [me,ne] = size(e);
 [md,nd] = size(d);
-if ( ~isreal(e) | ~isreal(d) | me~=ne | md~=nd | me~=nd)
+if ( ~isreal(e) || ~isreal(d) || me~=ne || md~=nd || me~=nd)
     % info should be negative in this case, see dgges.f.
     error('MJDGGES requires two square real matrices of the same dimension.')
 end

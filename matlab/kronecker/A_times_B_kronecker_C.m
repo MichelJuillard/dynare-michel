@@ -16,7 +16,7 @@ function D = A_times_B_kronecker_C(A,B,C)
 % SPECIAL REQUIREMENTS
 %   none.
 
-% Copyright (C) 1996-2008 Dynare Team
+% Copyright (C) 1996-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -34,7 +34,7 @@ function D = A_times_B_kronecker_C(A,B,C)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % Chek number of inputs and outputs.
-if nargin>3 | nargin<2
+if nargin>3 || nargin<2
     error('Two or Three input arguments required!')
 end
 if nargout>1
