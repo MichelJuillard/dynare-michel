@@ -332,7 +332,8 @@ C = hx;
 D = [rhs; zeros(n-M_.endo_nbr,size(rhs,2))];
 
 
-dr.ghxx = gensylv(2,A,B,C,D);
+[err, dr.ghxx] = gensylv(2,A,B,C,D);
+mexErrCheck('gensylv', err);
 
 %ghxu
 %rhs

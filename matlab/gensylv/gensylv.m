@@ -1,5 +1,5 @@
-function E = gensylv(fake,A,B,C,D)
-%function E = gensylv(fake,A,B,C,D)
+function [err, E] = gensylv(fake,A,B,C,D)
+%function [err, E] = gensylv(fake,A,B,C,D)
 % Solves a Sylvester equation.
 %
 % INPUTS
@@ -10,6 +10,7 @@ function E = gensylv(fake,A,B,C,D)
 %   D
 %    
 % OUTPUTS
+%   err      [double] scalar: 1 indicates failure, 0 indicates success
 %   E
 %    
 % ALGORITHM
@@ -18,7 +19,7 @@ function E = gensylv(fake,A,B,C,D)
 % SPECIAL REQUIREMENTS
 %   none.  
 
-% Copyright (C) 1996-2008 Dynare Team
+% Copyright (C) 1996-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -38,3 +39,4 @@ function E = gensylv(fake,A,B,C,D)
 C  = kron(C,C); 
 x0 = sylvester3(A,B,C,D);
 E  = sylvester3a(x0,A,B,C,D);
+err = 0;
