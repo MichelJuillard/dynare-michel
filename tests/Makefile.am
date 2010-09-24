@@ -31,7 +31,6 @@ OCTAVE_MODS = \
 	block_bytecode/ireland.mod \
 	block_bytecode/ls2003.mod \
 	block_bytecode/ramst_normcdf_and_friends.mod \
-	block_bytecode/ramst_steady_state.mod \
 	k_order_perturbation/fs2000k2a.mod \
 	k_order_perturbation/fs2000k2.mod \
 	k_order_perturbation/fs2000k_1.mod \
