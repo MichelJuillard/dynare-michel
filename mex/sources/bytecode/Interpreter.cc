@@ -199,60 +199,58 @@ Interpreter::error_location(bool evaluate, bool steady_state)
           return("???");
           break;
       }
-  Error_loc << endl << add_underscore_to_fpe(print_expression(it_code_expr, evaluate));
+  Error_loc << endl << add_underscore_to_fpe("      " + print_expression(it_code_expr, evaluate));
   return(Error_loc.str());
 }
 
 double
-Interpreter::pow1(double a, double b, bool evaluate, bool steady_state)
+Interpreter::pow1(double a, double b)
 {
   double r = pow_(a, b);
   if (isnan(r))
     {
-      if (error_not_printed)
-        {
-          mexPrintf("--------------------------------------\nError: X^a with X=%5.15f\n in %s \n--------------------------------------\n", a, error_location(evaluate, steady_state).c_str());
-          error_not_printed = false;
-          r = 0.0000000000000000000000001;
-        }
       res1 = NAN;
-      return r;
+      r = 0.0000000000000000000000001;
+      throw PowExceptionHandling(a, b);
     }
   return r;
 }
 
 double
-Interpreter::log1(double a, bool evaluate, bool steady_state)
+Interpreter::divide(double a, double b)
 {
-  double r = log(a);
-  if (isnan(r))
+  double r = a/ b;
+  if (isinf(r))
     {
-      if (error_not_printed)
-        {
-          mexPrintf("--------------------------------------\nError: log(X) with X=%5.15f\n in %s \n--------------------------------------\n", a, error_location(evaluate, steady_state).c_str());
-          error_not_printed = false;
-          r = 0.0000000000000000000000001;
-        }
       res1 = NAN;
-      return r;
+      r = 1e70;
+      throw PowExceptionHandling(a, b);
     }
   return r;
 }
 
 double
-Interpreter::log10_1(double a, bool evaluate, bool steady_state)
+Interpreter::log1(double a)
 {
   double r = log(a);
   if (isnan(r))
     {
-      if (error_not_printed)
-        {
-          mexPrintf("--------------------------------------\nError: log10(X) with X=%5.15f\n in %s \n--------------------------------------\n", a, error_location(evaluate, steady_state).c_str());
-          error_not_printed = false;
-          r = 0.0000000000000000000000001;
-        }
       res1 = NAN;
-      return r;
+      r = -1e70;
+      throw LogExceptionHandling(a);
+    }
+  return r;
+}
+
+double
+Interpreter::log10_1(double a)
+{
+  double r = log(a);
+  if (isnan(r))
+    {
+      res1 = NAN;
+      r = -1e70;
+      throw Log10ExceptionHandling(a);
     }
   return r;
 }
@@ -381,8 +379,9 @@ Interpreter::print_expression(it_code_type it_code, bool evaluate)
               dvar3 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
               break;
             default:
-              mexPrintf("Dérivatives %d not implemented yet\n", it_code->first);
-              mexErrMsgTxt("end of bytecode\n");
+              ostringstream tmp;
+              tmp << " in print_expression, derivatives " << it_code->first << " not implemented yet\n";
+              throw FatalExceptionHandling(tmp.str());
             }
           break;
         case FLDV:
@@ -1087,9 +1086,9 @@ Interpreter::print_expression(it_code_type it_code, bool evaluate)
           go_on = false;
           break;
         default:
-          mexPrintf("Unknown opcode %d!! FENDEQU=%d\n", it_code->first, FENDEQU);
-          mexErrMsgTxt("End of bytecode");
-          break;
+          ostringstream tmp;
+          tmp << " in print_expression, unknown opcode " << it_code->first << "!! FENDEQU=" << FENDEQU << "\n";
+          throw FatalExceptionHandling(tmp.str());
         }
       it_code++;
     }
@@ -1354,11 +1353,6 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
 #ifdef DEBUG
               mexPrintf("FLDSV y[var=%d]\n",var);
               tmp_out << " y[" << var << "](" << y[var] << ")";
-              if(var<0 || var>= y_size)
-                {
-                  mexPrintf("y[%d]=",var);
-                  mexErrMsgTxt("End of bytecode");
-                }
 #endif
               if (evaluate)
                 Stack.push(ya[var]);
@@ -1699,8 +1693,9 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
               jacob_exo_det[eq + size*pos_col] = rr;
               break;
             default:
-              mexPrintf("Variable %d not used yet\n", EQN_type);
-              mexErrMsgTxt("end of bytecode\n");
+              ostringstream tmp;
+              tmp << " in compute_block_time, variable " << EQN_type << " not used yet\n";
+              throw FatalExceptionHandling(tmp.str());
             }
 #ifdef DEBUG
           tmp_out << "=>";
@@ -1737,20 +1732,17 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
 #endif
               break;
             case oDivide:
-              double r;
-              r = v1 / v2;
-              if (isinf(r))
+              double tmp;
+              try
                 {
-                  if (error_not_printed)
-                    {
-                      mexPrintf("--------------------------------------\n  Error: Divide by zero with %5.15f/%5.15f\n in %s \n--------------------------------------\n", v1, v2,error_location(evaluate, steady_state).c_str());
-                      error_not_printed = false;
-                      r = 1e70;
-                    }
-                  res1 = NAN;
+                  tmp = divide(v1 , v2);
+                }
+              catch(FloatingPointExceptionHandling &fpeh)
+                {
+                  mexPrintf("%s      %s\n",fpeh.GetErrorMsg().c_str(),error_location(evaluate, steady_state).c_str());
                   go_on = false;
                 }
-              Stack.push(r);
+              Stack.push(tmp);
 #ifdef DEBUG
               tmp_out << " |" << v1 << "/" << v2 << "|";
 #endif
@@ -1792,10 +1784,16 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
 #endif
               break;
             case oPower:
-              r = pow1(v1, v2, evaluate, steady_state);
-              if (isnan(res1))
-                go_on = false;
-              Stack.push(r);
+              try
+                {
+                  tmp = pow1(v1, v2);
+                }
+              catch(FloatingPointExceptionHandling &fpeh)
+                {
+                  mexPrintf("%s      %s\n",fpeh.GetErrorMsg().c_str(),error_location(evaluate, steady_state).c_str());
+                  go_on = false;
+                }
+              Stack.push(tmp);
 
 #ifdef DEBUG
               tmp_out << " |" << v1 << "^" << v2 << "|";
@@ -1839,17 +1837,34 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
 #endif
               break;
             case oLog:
-              Stack.push(log1(v1, evaluate, steady_state));
-              if (isnan(res1))
-                go_on = false;
+              double tmp;
+              try
+                {
+                  tmp = log1(v1);
+                }
+              catch(FloatingPointExceptionHandling &fpeh)
+                {
+                  mexPrintf("%s      %s\n",fpeh.GetErrorMsg().c_str(),error_location(evaluate, steady_state).c_str());
+                  go_on = false;
+                }
+              Stack.push(tmp);
+              //if (isnan(res1))
+
 #ifdef DEBUG
               tmp_out << " |log(" << v1 << ")|";
 #endif
               break;
             case oLog10:
-              Stack.push(log10_1(v1, evaluate, steady_state));
-              if (isnan(res1))
-                go_on = false;
+              try
+                {
+                  tmp = log10_1(v1);
+                }
+              catch(FloatingPointExceptionHandling &fpeh)
+                {
+                  mexPrintf("%s      %s\n",fpeh.GetErrorMsg().c_str(),error_location(evaluate, steady_state).c_str());
+                  go_on = false;
+                }
+              Stack.push(tmp);
 #ifdef DEBUG
               tmp_out << " |log10(" << v1 << ")|";
 #endif
@@ -1936,7 +1951,8 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
               Stack.push(erf(v1));
 #ifdef DEBUG
               tmp_out << " |erf(" << v1 << ")|";
-#endif
+
+# endif
               break;
             default:
               ;
@@ -2004,14 +2020,15 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
           op = ((FOK_ *) it_code->second)->get_arg();
           if (Stack.size() > 0)
             {
-              mexPrintf("error: Stack not empty!\n");
-              mexErrMsgTxt("End of bytecode");
+              ostringstream tmp;
+              tmp << " in compute_block_time, stack not empty\n";
+              throw FatalExceptionHandling(tmp.str());
             }
           break;
         default:
-          mexPrintf("Unknown opcode %d!! FENDEQU=%d\n", it_code->first, FENDEQU);
-          mexErrMsgTxt("End of bytecode");
-          break;
+          ostringstream tmp;
+          tmp << " in compute_block_time, unknown opcode " << it_code->first << "\n";
+          throw FatalExceptionHandling(tmp.str());
         }
       it_code++;
     }
@@ -2174,7 +2191,7 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
     }
 }
 
-bool
+int
 Interpreter::simulate_a_block(const int size, const int type, string file_name, string bin_basename, bool Gaussian_Elimination, bool steady_state, int block_num,
                               const bool is_linear, const int symbol_table_endo_nbr, const int Block_List_Max_Lag, const int Block_List_Max_Lead, const int u_count_int)
 {
@@ -2245,23 +2262,23 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               cvg = (fabs(rr) < solve_tolf);
               if (cvg)
                 continue;
-              y[Block_Contain[0].Variable] += -r[0]/g1[0];
-              if (isinf(y[Block_Contain[0].Variable]))
+
+              try
                 {
-                  if (error_not_printed)
-                    {
-                      mexPrintf("--------------------------------------\n  Error: Divide by zero with %5.15f/%5.15f\nSingularity in block %d\n--------------------------------------\n", r[0], g1[0], block_num);
-                      error_not_printed = false;
-                    }
-                  res1 = NAN;
+                  y[Block_Contain[0].Variable] += - divide(r[0],g1[0]);
+                }
+              catch(FloatingPointExceptionHandling &fpeh)
+                {
+                  mexPrintf("%s      \n",fpeh.GetErrorMsg().c_str());
+                  mexPrintf("      Singularity in block %d", block_num+1);
                 }
               iter++;
             }
           if (!cvg)
             {
-              mexPrintf("In Solve Forward simple, convergence not achieved in block %d, after %d iterations\n", Block_Count+1, iter);
-              mexPrintf("r[0]= %f\n", r[0]);
-              return false;
+              ostringstream tmp;
+              tmp << " in Solve Forward simple, convergence not achieved in block " << Block_Count+1 << ", after " << iter << " iterations\n";
+              throw FatalExceptionHandling(tmp.str());
             }
         }
       else
@@ -2284,22 +2301,22 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   cvg = (fabs(rr) < solve_tolf);
                   if (cvg)
                     continue;
-                  y[Per_y_+Block_Contain[0].Variable] += -r[0]/g1[0];
-                  if (isinf(y[Per_y_+Block_Contain[0].Variable]))
+                  try
                     {
-                      if (error_not_printed)
-                        {
-                          mexPrintf("--------------------------------------\n  Error: Divide by zero with %5.15f/%5.15f\nSingularity in block %d\n--------------------------------------\n", r[0], g1[0], block_num);
-                          error_not_printed = false;
-                        }
-                      res1 = NAN;
+                      y[Per_y_+Block_Contain[0].Variable] += - divide(r[0], g1[0]);
+                    }
+                  catch(FloatingPointExceptionHandling &fpeh)
+                    {
+                      mexPrintf("%s      \n",fpeh.GetErrorMsg().c_str());
+                      mexPrintf("      Singularity in block %d", block_num+1);
                     }
                   iter++;
                 }
               if (!cvg)
                 {
-                  mexPrintf("In Solve Forward simple, convergence not achieved in block %d, at time %d after %d iterations\n", Block_Count, it_, iter);
-                  mexErrMsgTxt("End of bytecode");
+                  ostringstream tmp;
+                  tmp << " in Solve Forward simple, convergence not achieved in block " << Block_Count+1 << ", at time " << it_ << ", after " << iter << " iterations\n";
+                  throw FatalExceptionHandling(tmp.str());
                 }
             }
         }
@@ -2327,8 +2344,16 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               cvg = (fabs(rr) < solve_tolf);
               if (cvg)
                 continue;
-              y[Block_Contain[0].Variable] += -r[0]/g1[0];
-              if (isinf(y[Block_Contain[0].Variable]))
+              try
+                {
+                  y[Block_Contain[0].Variable] += - divide(r[0], g1[0]);
+                }
+              catch(FloatingPointExceptionHandling &fpeh)
+                {
+                  mexPrintf("%s      \n",fpeh.GetErrorMsg().c_str());
+                  mexPrintf("      Singularity in block %d", block_num+1);
+                }
+              /*if (isinf(y[Block_Contain[0].Variable]))
                 {
                   if (error_not_printed)
                     {
@@ -2336,13 +2361,14 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                       error_not_printed = false;
                     }
                   res1 = NAN;
-                }
+                }*/
               iter++;
             }
           if (!cvg)
             {
-              mexPrintf("In Solve Backward simple, convergence not achieved in block %d, after %d iterations\n", Block_Count+1, iter);
-              return false;
+              ostringstream tmp;
+              tmp << " in Solve Backward simple, convergence not achieved in block " << Block_Count+1 << ", after " << iter << " iterations\n";
+              throw FatalExceptionHandling(tmp.str());
             }
         }
       else
@@ -2365,8 +2391,17 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   cvg = (fabs(rr) < solve_tolf);
                   if (cvg)
                     continue;
-                  y[Per_y_+Block_Contain[0].Variable] += -r[0]/g1[0];
-                  if (isinf(y[Per_y_+Block_Contain[0].Variable]))
+                  try
+                    {
+                      y[Per_y_+Block_Contain[0].Variable] += - divide(r[0], g1[0]);
+                    }
+                  catch(FloatingPointExceptionHandling &fpeh)
+                    {
+                      mexPrintf("%s      \n",fpeh.GetErrorMsg().c_str());
+                      mexPrintf("      Singularity in block %d", block_num+1);
+                    }
+
+                  /*if (isinf(y[Per_y_+Block_Contain[0].Variable]))
                     {
                       if (error_not_printed)
                         {
@@ -2374,13 +2409,14 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                           error_not_printed = false;
                         }
                       res1 = NAN;
-                    }
+                    }*/
                   iter++;
                 }
               if (!cvg)
                 {
-                  mexPrintf("In Solve Backward simple, convergence not achieved in block %d, at time %d after %d iterations\n", Block_Count+1, it_, iter);
-                  mexErrMsgTxt("End of bytecode");
+                  ostringstream tmp;
+                  tmp << " in Solve Backward simple, convergence not achieved in block " << Block_Count+1 << ", at time " << it_ << ", after " << iter << " iterations\n";
+                  throw FatalExceptionHandling(tmp.str());
                 }
             }
         }
@@ -2435,7 +2471,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   if (cvg)
                     continue;
                   int prev_iter = iter;
-                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number, solve_algo);
+                  Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, solve_algo);
                   iter++;
                   if (iter > prev_iter)
                     {
@@ -2446,8 +2482,9 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 }
               if (!cvg || !result)
                 {
-                  mexPrintf("In Solve Forward complete, convergence not achieved in block %d, after %d iterations\n", Block_Count+1, iter);
-                  return false;
+                  ostringstream tmp;
+                  tmp << " in Solve Forward complete, convergence not achieved in block " << Block_Count+1 << ", after " << iter << " iterations\n";
+                  throw FatalExceptionHandling(tmp.str());
                 }
             }
           else
@@ -2462,11 +2499,11 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               error_not_printed = true;
               compute_block_time(0, false, block_num, size, steady_state);
               cvg = false;
-              result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number, solve_algo);
+              Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, solve_algo);
               if (!result)
                 {
-                  mexPrintf("In Solve Forward complete, convergence not achieved in block %d\n", Block_Count+1);
-                  return false;
+                  mexPrintf(" in Solve Forward complete, convergence not achieved in block %d\n", Block_Count+1);
+                  return ERROR_ON_EXIT;
                 }
             }
         }
@@ -2514,7 +2551,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                       if (cvg)
                         continue;
                       int prev_iter = iter;
-                      result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, EQN_block_number, solve_algo);
+                      Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, solve_algo);
                       iter++;
                       if (iter > prev_iter)
                         {
@@ -2525,8 +2562,9 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                     }
                   if (!cvg)
                     {
-                      mexPrintf("In Solve Forward complete, convergence not achieved in block %d, at time %d after %d iterations\n", Block_Count+1, it_, iter);
-                      mexErrMsgTxt("End of bytecode");
+                      ostringstream tmp;
+                      tmp << " in Solve Forward complete, convergence not achieved in block " << Block_Count+1 << ", at time " << it_ << ", after " << iter << " iterations\n";
+                      throw FatalExceptionHandling(tmp.str());
                     }
                 }
             }
@@ -2543,7 +2581,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   error_not_printed = true;
                   compute_block_time(0, false, block_num, size, steady_state);
                   cvg = false;
-                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, EQN_block_number, solve_algo);
+                  Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, solve_algo);
                 }
             }
         }
@@ -2601,7 +2639,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   if (cvg)
                     continue;
                   int prev_iter = iter;
-                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number, solve_algo);
+                  Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, solve_algo);
                   iter++;
                   if (iter > prev_iter)
                     {
@@ -2612,8 +2650,9 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 }
               if (!cvg || !result)
                 {
-                  mexPrintf("In Solve Backward complete, convergence not achieved in block %d, after %d iterations\n", Block_Count+1, iter);
-                  return false;
+                  ostringstream tmp;
+                  tmp << " in Solve Backward complete, convergence not achieved in block " << Block_Count+1 << ", after " << iter << " iterations\n";
+                  throw FatalExceptionHandling(tmp.str());
                 }
             }
           else
@@ -2627,11 +2666,11 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               error_not_printed = true;
               compute_block_time(0, false, block_num, size, steady_state);
               cvg = false;
-              result = simulate_NG(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, EQN_block_number, solve_algo);
+              Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, solve_algo);
               if (!result)
                 {
-                  mexPrintf("In Solve Backward complete, convergence not achieved in block %d\n", Block_Count+1);
-                  return false;
+                  mexPrintf(" in Solve Backward complete, convergence not achieved in block %d\n", Block_Count+1);
+                  return ERROR_ON_EXIT;
                 }
             }
         }
@@ -2679,7 +2718,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                       if (cvg)
                         continue;
                       int prev_iter = iter;
-                      result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, EQN_block_number, solve_algo);
+                      Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, solve_algo);
                       iter++;
                       if (iter > prev_iter)
                         {
@@ -2690,8 +2729,9 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                     }
                   if (!cvg)
                     {
-                      mexPrintf("In Solve Backward complete, convergence not achieved in block %d, at time %d after %d iterations\n", Block_Count+1, it_, iter);
-                      mexErrMsgTxt("End of bytecode");
+                      ostringstream tmp;
+                      tmp << " in Solve Backward complete, convergence not achieved in block " << Block_Count+1 << ", at time " << it_ << ", after " << iter << " iterations\n";
+                      throw FatalExceptionHandling(tmp.str());
                     }
                 }
             }
@@ -2704,7 +2744,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   error_not_printed = true;
                   compute_block_time(0, false, block_num, size, steady_state);
                   cvg = false;
-                  result = simulate_NG(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, EQN_block_number, solve_algo);
+                  Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, solve_algo);
                 }
             }
         }
@@ -2723,7 +2763,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
       if (steady_state)
         {
           mexPrintf("SOLVE_TWO_BOUNDARIES in a steady state model: impossible case\n");
-          return false;
+          return ERROR_ON_EXIT;
         }
       fixe_u(&u, u_count_int, u_count_int);
       Read_SparseMatrix(bin_basename, size, periods, y_kmin, y_kmax, steady_state, true, stack_solve_algo, solve_algo);
@@ -2731,9 +2771,6 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
       r = (double *) mxMalloc(size*sizeof(double));
       y_save = (double *) mxMalloc(y_size*sizeof(double)*(periods+y_kmax+y_kmin));
       begining = it_code;
-      if (!Gaussian_Elimination)
-        {
-        }
       giter = 0;
       iter = 0;
       if (!is_linear)
@@ -2784,7 +2821,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 cvg = (max_res < solve_tolf);
               u_count = u_count_saved;
               int prev_iter = iter;
-              simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods, EQN_block_number, stack_solve_algo, endo_name_length, P_endo_names);
+              Simulate_Newton_Two_Boundaries(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods, stack_solve_algo, endo_name_length, P_endo_names);
               iter++;
               if (iter > prev_iter)
                 {
@@ -2796,8 +2833,9 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
             }
           if (!cvg)
             {
-              mexPrintf("In Solve two boundaries, convergence not achieved in block %d, after %d iterations\n", Block_Count+1, iter);
-              mexErrMsgTxt("End of bytecode");
+              ostringstream tmp;
+              tmp << " in Solve two boundaries, convergence not achieved in block " << Block_Count+1 << ", after " << iter << " iterations\n";
+              throw FatalExceptionHandling(tmp.str());
             }
         }
       else
@@ -2825,7 +2863,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 }
             }
           cvg = false;
-          simulate_NG1(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods, EQN_block_number, stack_solve_algo, endo_name_length, P_endo_names);
+          Simulate_Newton_Two_Boundaries(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods, stack_solve_algo, endo_name_length, P_endo_names);
         }
       mxFree(r);
       mxFree(y_save);
@@ -2835,17 +2873,17 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
       memset(direction, 0, size_of_direction);
       break;
     default:
-      mexPrintf("Unknown type =%d\n", type);
-      mexEvalString("drawnow;");
-      mexErrMsgTxt("End of bytecode");
+      ostringstream tmp;
+      tmp << " in simulate_a_block, Unknown type = " << type << "\n";
+      throw FatalExceptionHandling(tmp.str());
+      return ERROR_ON_EXIT;
     }
-  return true;
+  return NO_ERROR_ON_EXIT;
 }
 
 bool
 Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_state, bool evaluate, bool block, int &nb_blocks)
 {
-
   bool result = true;
 
   int var;
@@ -2859,11 +2897,9 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
   EQN_block_number = code.get_block_number();
   if (!code_liste.size())
     {
-      mexPrintf("%s.cod Cannot be opened\n", file_name.c_str());
-      mexEvalString("drawnow;");
-      filename += " stopped";
-      mexEvalString("drawnow;");
-      mexErrMsgTxt(filename.c_str());
+      ostringstream tmp;
+      tmp << " in compute_blocks, " << file_name.c_str() << " cannot be opened\n";
+      throw FatalExceptionHandling(tmp.str());
     }
   //The big loop on intructions
   Block_Count = -1;
@@ -2901,11 +2937,15 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
                                  fb->get_is_linear(), fb->get_endo_nbr(), fb->get_Max_Lag(), fb->get_Max_Lead(), fb->get_u_count_int());
               }
             else
-              result = simulate_a_block(fb->get_size(), fb->get_type(), file_name, bin_basename, true, steady_state, Block_Count,
-                                        fb->get_is_linear(), fb->get_endo_nbr(), fb->get_Max_Lag(), fb->get_Max_Lead(), fb->get_u_count_int());
+              {
+                result = simulate_a_block(fb->get_size(), fb->get_type(), file_name, bin_basename, true, steady_state, Block_Count,
+                                          fb->get_is_linear(), fb->get_endo_nbr(), fb->get_Max_Lag(), fb->get_Max_Lead(), fb->get_u_count_int());
+                if (result == ERROR_ON_EXIT)
+                  return ERROR_ON_EXIT;
+              }
             delete fb;
           }
-          if (!result)
+          if (result == ERROR_ON_EXIT)
             go_on = false;
           break;
         case FEND:
@@ -2936,10 +2976,9 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
           it_code++;
           break;
         default:
-          mexPrintf("Unknown command %d\n",it_code->first);
-          mexEvalString("drawnow;");
-          mexErrMsgTxt("End of bytecode");
-          break;
+          ostringstream tmp;
+          tmp << " in compute_blocks, unknown command " << it_code->first << "\n";
+          throw FatalExceptionHandling(tmp.str());
         }
     }
   mxFree(Init_Code->second);

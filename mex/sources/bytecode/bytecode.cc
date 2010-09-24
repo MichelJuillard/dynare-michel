@@ -64,6 +64,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #else
   load_global((char*)prhs[1]);
 #endif
+  //ErrorHandlingException error_handling;
   int i, row_y = 0, col_y = 0, row_x = 0, col_x = 0, nb_row_xd = 0;
   int steady_row_y, steady_col_y, steady_row_x, steady_col_x, steady_nb_row_xd;
   int y_kmin = 0, y_kmax = 0, y_decal = 0, periods = 1;
@@ -121,40 +122,43 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         block = true;
       else
         {
-          mexPrintf("Unknown argument : ");
-          string f;
-          f = Get_Argument(prhs[i]);
-          f.append("\n");
-          mexErrMsgTxt(f.c_str());
+          ostringstream tmp;
+          tmp << " in main, unknown argument : " << Get_Argument(prhs[i]) << "\n";
+          throw FatalExceptionHandling(tmp.str());
         }
     }
   if (count_array_argument > 0 && count_array_argument < 4)
     {
-      mexPrintf("Missing arguments. All the following arguments have to be indicated y, x, params, it_\n");
-      mexErrMsgTxt("end of bytecode\n");
+      ostringstream tmp;
+      tmp << " in main, missing arguments. All the following arguments have to be indicated y, x, params, it_\n";
+      throw FatalExceptionHandling(tmp.str());
     }
 
   M_ = mexGetVariable("global", "M_");
   if (M_ == NULL)
     {
-      mexPrintf("Global variable not found : ");
-      mexErrMsgTxt("M_ \n");
+      ostringstream tmp;
+      tmp << " in main, global variable not found: M_\n";
+      throw FatalExceptionHandling(tmp.str());
     }
   /* Gets variables and parameters from global workspace of Matlab */
   oo_ = mexGetVariable("global", "oo_");
   if (oo_ == NULL)
     {
-      mexPrintf("Global variable not found : ");
-      mexErrMsgTxt("oo_ \n");
+      ostringstream tmp;
+      tmp << " in main, global variable not found: oo_\n";
+      throw FatalExceptionHandling(tmp.str());
     }
   options_ = mexGetVariable("global", "options_");
   if (options_ == NULL)
     {
-      mexPrintf("Global variable not found : ");
-      mexErrMsgTxt("options_ \n");
+      ostringstream tmp;
+      tmp << " in main, global variable not found: options_\n";
+      throw FatalExceptionHandling(tmp.str());
     }
   if (!count_array_argument)
     params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "params")));
+
   double *steady_yd = NULL, *steady_xd = NULL;
   if (!steady_state)
     {
@@ -246,30 +250,40 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   string f(fname);
   mxFree(fname);
   int nb_blocks = 0;
-  bool result = interprete.compute_blocks(f, f, steady_state, evaluate, block, nb_blocks);
+  double *pind;
+  bool result = true, no_error = true;
+
+  try
+    {
+      result = interprete.compute_blocks(f, f, steady_state, evaluate, block, nb_blocks);
+    }
+  catch (GeneralExceptionHandling &feh)
+    {
+      DYN_MEX_FUNC_ERR_MSG_TXT(feh.GetErrorMsg().c_str());
+    }
+
   clock_t t1 = clock();
-  if (!steady_state && !evaluate)
+  if (!steady_state && !evaluate && no_error)
     mexPrintf("Simulation Time=%f milliseconds\n", 1000.0*(double (t1)-double (t0))/double (CLOCKS_PER_SEC));
 #ifndef DEBUG_EX
-  double *pind;
   if (nlhs > 0)
     {
-      plhs[0] = mxCreateDoubleMatrix(row_y, col_y, mxREAL);
+      plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
       pind = mxGetPr(plhs[0]);
-      if (evaluate)
-        for (i = 0; i < row_y*col_y; i++)
-          pind[i] = y[i]-ya[i];
+      if (no_error)
+        pind[0] = 0;
       else
-        for (i = 0; i < row_y*col_y; i++)
-          pind[i] = y[i];
+        pind[0] = 1;
       if (nlhs > 1)
         {
-          plhs[1] = mxCreateDoubleMatrix(1, 1, mxREAL);
+          plhs[1] = mxCreateDoubleMatrix(row_y, col_y, mxREAL);
           pind = mxGetPr(plhs[1]);
-          if (result)
-            pind[0] = 0;
+          if (evaluate)
+            for (i = 0; i < row_y*col_y; i++)
+              pind[i] = y[i]-ya[i];
           else
-            pind[0] = 1;
+            for (i = 0; i < row_y*col_y; i++)
+              pind[i] = y[i];
           if (nlhs > 2)
             {
               int jacob_field_number = 0, jacob_exo_field_number = 0, jacob_exo_det_field_number = 0, jacob_other_endo_field_number = 0;
@@ -285,37 +299,22 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                   mexPrintf("the structure has been created\n");
                 }
               else if (!mxIsStruct(block_structur))
-                {
-                  mexPrintf("The third output argument must be a structure\n");
-                  mexErrMsgTxt("end of bytecode\n");
-                }
+                DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, the third output argument must be a structure\n");
               else
                 {
                   mexPrintf("Adding Fields\n");
                   jacob_field_number = mxAddField(block_structur, "jacob");
                   if (jacob_field_number == -1)
-                    {
-                      mexPrintf("Cannot add extra field to the structArray\n");
-                      mexErrMsgTxt("end of bytecode\n");
-                    }
+                    DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, cannot add extra field jacob to the structArray\n");
                   jacob_exo_field_number = mxAddField(block_structur, "jacob_exo");
                   if (jacob_exo_field_number == -1)
-                    {
-                      mexPrintf("Cannot add extra field to the structArray\n");
-                      mexErrMsgTxt("end of bytecode\n");
-                    }
+                    DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, cannot add extra field jacob_exo to the structArray\n");
                   jacob_exo_det_field_number = mxAddField(block_structur, "jacob_exo_det");
                   if (jacob_exo_det_field_number == -1)
-                    {
-                      mexPrintf("Cannot add extra field to the structArray\n");
-                      mexErrMsgTxt("end of bytecode\n");
-                    }
+                    DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, cannot add extra field jacob_exo_det to the structArray\n");
                   jacob_other_endo_field_number = mxAddField(block_structur, "jacob_other_endo");
                   if (jacob_other_endo_field_number == -1)
-                    {
-                      mexPrintf("Cannot add extra field to the structArray\n");
-                      mexErrMsgTxt("end of bytecode\n");
-                    }
+                    DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, cannot add extra field jacob_other_endo to the structArray\n");
                 }
               for (int i = 0; i < nb_blocks; i++)
                 {

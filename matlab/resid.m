@@ -70,7 +70,8 @@ if options_.block && ~options_.bytecode
       z(idx) = r;
     end
 elseif options_.block && options_.bytecode
-    [z,check] = bytecode('evaluate','static');
+    [check, z] = bytecode('evaluate','static');
+    mexErrCheck('bytecode', check);
 else
     z = feval([M_.fname '_static'],...
               oo_.steady_state,...

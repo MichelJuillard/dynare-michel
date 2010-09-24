@@ -73,13 +73,15 @@ end
 
 if(options_.block)
     if(options_.bytecode)
-        oo_.endo_simul=bytecode('dynamic');
+        [info, oo_.endo_simul] = bytecode('dynamic');
+        mexErrCheck('bytecode', info);
     else
         eval([M_.fname '_dynamic']);
     end;
 else
     if(options_.bytecode)
-        oo_.endo_simul=bytecode('dynamic');
+        [info, oo_.endo_simul]=bytecode('dynamic');
+        mexErrCheck('bytecode', info);
     else
         if M_.maximum_endo_lead == 0
             error('SIMUL: purely backward models are not supported')

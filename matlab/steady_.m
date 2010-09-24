@@ -76,9 +76,10 @@ if options_.steadystate_flag
                 check1 = 1;
             end
         elseif options_.block && options_.bytecode
-            [residuals, check1] = bytecode('evaluate','static',oo_.steady_state,...
+            [check1, residuals] = bytecode('evaluate','static',oo_.steady_state,...
                                    [oo_.exo_steady_state; ...
                                 oo_.exo_det_steady_state], M_.params, 1);
+            mexErrCheck('bytecode', check1);
         else
             check1 = 0;
             check1 = max(abs(feval([M_.fname '_static'],...
@@ -122,7 +123,8 @@ elseif options_.block && ~options_.bytecode
                             oo_.exo_det_steady_state], M_.params);
     end
 elseif options_.bytecode
-    [oo_.steady_state,check] = bytecode('static');
+    [check, oo_.steady_state] = bytecode('static');
+    mexErrCheck('bytecode', check);
 else
     [oo_.steady_state,check] = dynare_solve([M_.fname '_static'],...
                                             oo_.steady_state,...

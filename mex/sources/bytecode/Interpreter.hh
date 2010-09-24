@@ -57,9 +57,10 @@ private:
   int EQN_lag1, EQN_lag2, EQN_lag3;
   it_code_type it_code_expr;
   protected:
-  double pow1(double a, double b, bool evaluate, bool steady_state);
-  double log1(double a, bool evaluate, bool steady_state);
-  double log10_1(double a, bool evaluate, bool steady_state);
+  double pow1(double a, double b);
+  double divide(double a, double b);
+  double log1(double a);
+  double log10_1(double a);
   /*string remove_white(string str);*/
   string add_underscore_to_fpe(const string &str);
   string get_variable(const SymbolType variable_type, const unsigned int variable_num);
@@ -68,7 +69,7 @@ private:
   string print_expression(it_code_type it_code, bool evaluate);
   void evaluate_a_block(const int size, const int type, string bin_basename, bool steady_state, int block_num,
                         const bool is_linear = false, const int symbol_table_endo_nbr = 0, const int Block_List_Max_Lag = 0, const int Block_List_Max_Lead = 0, const int u_count_int = 0);
-  bool simulate_a_block(const int size, const int type, string file_name, string bin_basename, bool Gaussian_Elimination, bool steady_state, int block_num,
+  int simulate_a_block(const int size, const int type, string file_name, string bin_basename, bool Gaussian_Elimination, bool steady_state, int block_num,
                         const bool is_linear = false, const int symbol_table_endo_nbr = 0, const int Block_List_Max_Lag = 0, const int Block_List_Max_Lead = 0, const int u_count_int = 0);
   double *T;
   vector<Block_contain_type> Block_Contain;
