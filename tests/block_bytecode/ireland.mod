@@ -75,6 +75,6 @@ end;
 options_.maxit_=20;
 model_info;
 
-simul(periods=2000, stack_solve_algo = 1);
+simul(periods=2000, stack_solve_algo = 0);
 rplot y;
 rplot k;
