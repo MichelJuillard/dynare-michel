@@ -13,4 +13,6 @@ nodist_bytecode_SOURCES = \
 	SparseMatrix.cc \
 	Interpreter.hh \
 	Mem_Mngr.hh \
-	SparseMatrix.hh
+	SparseMatrix.hh \
+	ErrorHandling.hh
+
