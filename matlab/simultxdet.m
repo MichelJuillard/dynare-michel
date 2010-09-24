@@ -14,7 +14,7 @@ function [y_,int_width]=simultxdet(y0,ex,ex_det, iorder,var_list,M_,oo_,options_
 % The condition size(ex,1)+M_.maximum_lag=size(ex_det,1) must be verified
 %  for consistency.
 
-% Copyright (C) 2008-2009 Dynare Team
+% Copyright (C) 2008-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -140,15 +140,3 @@ int_width = zeros(iter,endo_nbr);
 for i=1:nvar
     int_width(:,i) = fact*sqrt(var_yf(:,i));
 end
-
-for i=1:nvar
-    my_subplot(i,nvar,2,3,'Forecasts');
-    
-    plot([-ykmin+1:0],y0(ivar(i),1:ykmin),'b-',...
-         [1:iter],y_(ivar(i),ykmin+1:end),'g-',...
-         [1:iter],y_(ivar(i),ykmin+1:end)'+int_width(:,ivar(i)),'g:',...
-         [1:iter],y_(ivar(i),ykmin+1:end)'-int_width(:,ivar(i)),'g:',...
-         [1 iter],repmat(dr.ys(ivar(i)),1,2),'r-');
-    title(M_.endo_names(ivar(i),:));
-end
-
