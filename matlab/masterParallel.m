@@ -82,9 +82,9 @@ for j=1:length(Parallel),
     end
 end
 if Strategy==0
-   display('User Strategy Now Is Open/Close (0)');
+   disp('User Strategy Now Is Open/Close (0)');
 else
-   display('User Strategy Now Is Always Open (1)');
+   disp('User Strategy Now Is Always Open (1)');
 end
    
 if Strategy==1
