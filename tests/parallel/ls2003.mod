@@ -62,8 +62,10 @@ stderr e_pies,inv_gamma_pdf,1.88,0.9827;
 end;
 
 // common syntax for win and unix, for local parallel runs (assuming quad-core):
-// all empty fields, except Local and NumCPU
-options_.parallel=struct('Local', 1, 'PcName','','NumCPU', [0:3], 'user','','passwd','','RemoteDrive', '', 'RemoteFolder','');
+// for Windows
+options_.parallel=struct('Local', 1, 'PcName','','NumCPU', [0:3], 'user','','passwd','','RemoteDrive', '', 'RemoteFolder','','MatlabPath',[matlabroot '/bin/matlab'],'DynarePath','../../matlab');
+// for Octave
+//options_.parallel=struct('Local', 1, 'PcName','','NumCPU', [0:3], 'user','','passwd','','RemoteDrive', '', 'RemoteFolder','','MatlabPath','/usr/bin/octave3.2','DynarePath','../../matlab');
 
 
 // windows syntax for remote runs (Local=0):
@@ -93,5 +95,8 @@ options_.parallel=struct('Local', 1, 'PcName','','NumCPU', [0:3], 'user','','pas
 //options_.parallel=struct('Local', 1, 'PcName','','NumCPU', [0:3], 'user','','passwd','','RemoteDrive', '', 'RemoteFolder','');
 //options_.parallel(2)=struct('Local', 0, 'PcName','uasalap29','NumCPU', [0:1], 'user','ISIS\rattoma','passwd','****', 'RemoteDrive', 'C', 'RemoteFolder','dynare_calcs\Remote');
 
-estimation(datafile=data_ca1,first_obs=8,nobs=79,mode_compute=0, mode_file=ls2003_mode, mh_nblocks=4,prefilter=1,mh_jscale=0.5,mh_replic=2000);//, load_mh_file);
+
+estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_replic=0);
+estimation(datafile=data_ca1,first_obs=8,nobs=79,mode_compute=0, mode_file=ls2003_mode, mh_nblocks=4,prefilter=1,mh_jscale=0.5,mh_replic=2000);
+estimation(datafile=data_ca1,first_obs=8,nobs=79,mode_compute=0, mode_file=ls2003_mode, mh_nblocks=4,prefilter=1,mh_jscale=0.5,mh_replic=2000,bayesian_irf,load_mh_file);
 
