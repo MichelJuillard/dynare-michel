@@ -12,7 +12,7 @@ function read_data_
 % SPECIAL REQUIREMENT
 %   none
 
-% Copyright (C) 2007-2008 Dynare Team
+% Copyright (C) 2007-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -39,7 +39,11 @@ if size(oo_.endo_simul,2) < M_.maximum_lag+M_.maximum_lead+options_.periods
     positions = ones(0);
     while (any(names_line))
         [chopped,names_line] = strtok(names_line);
-        allVariables = strvcat(allVariables, chopped);
+        if isempty(allVariables)
+            allVariables = chopped;
+        else
+            allVariables = char(allVariables, chopped);
+        end
         positions = [positions ; strmatch(chopped,M_.endo_names,'exact')];
     end
     Values=fscanf(fid,'%f',inf);
@@ -55,7 +59,11 @@ if size(oo_.exo_simul,1) < M_.maximum_lag+M_.maximum_lead+options_.periods
     positions = ones(0);
     while (any(names_line))
         [chopped,names_line] = strtok(names_line);
-        allVariables = strvcat(allVariables, chopped);
+        if isempty(allVariables)
+            allVariables = chopped;
+        else
+            allVariables = char(allVariables, chopped);
+        end
         positions = [positions ; strmatch(chopped,M_.exo_names,'exact')];
     end
     Values=fscanf(fid,'%f',inf);

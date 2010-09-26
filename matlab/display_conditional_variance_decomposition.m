@@ -65,7 +65,7 @@ for i=1:length(Steps)
     if options_.noprint == 0
         headers = M_.exo_names;
         headers(M_.exo_names_orig_ord,:) = headers;
-        headers = strvcat(' ',headers);
+        headers = char(' ',headers);
         lh = size(deblank(M_.endo_names(SubsetOfVariables,:)),2)+2;
         dyntable('',headers,...
                  deblank(M_.endo_names(SubsetOfVariables,:)),...

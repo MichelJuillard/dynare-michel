@@ -13,7 +13,7 @@ function [J,M_] = dyn_ramsey_dynamic_(ys,lbar,M_,options_,oo_,it_)
 % SPECIAL REQUIREMENTS
 %     none
 
-% Copyright (C) 2003-2009 Dynare Team
+% Copyright (C) 2003-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -84,10 +84,10 @@ max_leadlag1 = max_lead1;
 % adding new variables names
 endo_names1 = endo_names;
 % adding shocks to endogenous variables
-endo_names1 = strvcat(endo_names1, exo_names);
+endo_names1 = char(endo_names1, exo_names);
 % adding multipliers names
 for i=1:mult_nbr;
-    endo_names1 = strvcat(endo_names1,['mult_' int2str(i)]);
+    endo_names1 = char(endo_names1,['mult_' int2str(i)]);
 end
 
 % expanding matrix of lead/lag incidence

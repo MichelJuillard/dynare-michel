@@ -1,7 +1,7 @@
 function disp_th_moments(dr,var_list)
 % Display theoretical moments of variables
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -57,7 +57,7 @@ if ~options_.noprint %options_.nomoments == 0
     if options_.hp_filter
         title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];
     end
-    headers=strvcat('VARIABLE','MEAN','STD. DEV.','VARIANCE');
+    headers=char('VARIABLE','MEAN','STD. DEV.','VARIANCE');
     labels = deblank(M_.endo_names(ivar,:));
     lh = size(labels,2)+2;
     dyntable(title,headers,labels,z,lh,11,4);
@@ -70,7 +70,7 @@ if ~options_.noprint %options_.nomoments == 0
         end
         headers = M_.exo_names;
         headers(M_.exo_names_orig_ord,:) = headers;
-        headers = strvcat(' ',headers);
+        headers = char(' ',headers);
         lh = size(deblank(M_.endo_names(ivar(stationary_vars),:)),2)+2;
         dyntable(title,headers,deblank(M_.endo_names(ivar(stationary_vars), ...
                                                      :)),100*oo_.gamma_y{options_.ar+2}(stationary_vars,:),lh,8,2);
@@ -93,7 +93,7 @@ if options_.nocorr == 0
         title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];
     end
     labels = deblank(M_.endo_names(ivar(i1),:));
-    headers = strvcat('Variables',labels);
+    headers = char('Variables',labels);
     lh = size(labels,2)+2;
     dyntable(title,headers,labels,corr,lh,8,4);
     end
@@ -111,7 +111,7 @@ if options_.nocorr == 0
           title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];      
       end      
       labels = deblank(M_.endo_names(ivar(i1),:));      
-      headers = strvcat('Order ',int2str([1:options_.ar]'));      
+      headers = char('Order ',int2str([1:options_.ar]'));
       lh = size(labels,2)+2;
       dyntable(title,headers,labels,z,lh,8,4);
   end  

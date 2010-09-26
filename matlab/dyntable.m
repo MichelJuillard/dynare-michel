@@ -1,7 +1,7 @@
 function dyntable(title,headers,labels,values,label_width,val_width, ...
                   val_precis)
 
-% Copyright (C) 2002-2009 Dynare Team
+% Copyright (C) 2002-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -24,7 +24,7 @@ if options_.noprint
     return
 end
 
-label_width = max(size(deblank(strvcat(headers(1,:),labels)),2)+2, ...
+label_width = max(size(deblank(char(headers(1,:),labels)),2)+2, ...
                   label_width);
 val_width = max(size(deblank(headers(2:end,:)),2)+2,val_width);
 label_fmt = sprintf('%%-%ds',label_width);

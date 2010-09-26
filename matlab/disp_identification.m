@@ -1,6 +1,6 @@
 function disp_identification(pdraws, idemodel, idemoments, disp_pcorr)
 
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -89,8 +89,8 @@ for j=1:npar,
 end
 
 
-dyntable('Multi collinearity in the model:',strvcat('param','min','mean','max'), ...
-         strvcat(bayestopt_.name(kok)),[mmin, mmean, mmax],10,10,6);
+dyntable('Multi collinearity in the model:',char('param','min','mean','max'), ...
+         char(bayestopt_.name(kok)),[mmin, mmean, mmax],10,10,6);
 disp(' ')
 for j=1:npar,
     iweak = length(find(idemodel.Mco(j,:)'>(1-1.e-10)));
@@ -114,8 +114,8 @@ for j=1:npar,
 end
 disp(' ')
 
-dyntable('Multi collinearity for moments in J:',strvcat('param','min','mean','max'), ...
-         strvcat(bayestopt_.name(kokJ)),[mminJ, mmeanJ, mmaxJ],10,10,6);
+dyntable('Multi collinearity for moments in J:',char('param','min','mean','max'), ...
+         char(bayestopt_.name(kokJ)),[mminJ, mmeanJ, mmaxJ],10,10,6);
 disp(' ')
 for j=1:npar,
     iweak = length(find(idemoments.Mco(j,:)'>(1-1.e-10)));
@@ -141,12 +141,12 @@ disp(' ')
 
 if disp_pcorr,
     for j=1:length(kokP),
-        dyntable([bayestopt_.name{kokP(j)},' pairwise correlations in the model'],strvcat(' ','min','mean','max'), ...
-                 strvcat(bayestopt_.name{jpM{j}}),[pminM{j}' pmeanM{j}' pmaxM{j}'],10,10,3);  
+        dyntable([bayestopt_.name{kokP(j)},' pairwise correlations in the model'],char(' ','min','mean','max'), ...
+                 char(bayestopt_.name{jpM{j}}),[pminM{j}' pmeanM{j}' pmaxM{j}'],10,10,3);  
     end
 
     for j=1:length(kokPJ),
-        dyntable([bayestopt_.name{kokPJ(j)},' pairwise correlations in J moments'],strvcat(' ','min','mean','max'), ...
-                 strvcat(bayestopt_.name{jpJ{j}}),[pminJ{j}' pmeanJ{j}' pmaxJ{j}'],10,10,3);  
+        dyntable([bayestopt_.name{kokPJ(j)},' pairwise correlations in J moments'],char(' ','min','mean','max'), ...
+                 char(bayestopt_.name{jpJ{j}}),[pminJ{j}' pmeanJ{j}' pmaxJ{j}'],10,10,3);  
     end
 end

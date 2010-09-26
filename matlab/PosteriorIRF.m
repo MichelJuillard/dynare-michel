@@ -254,9 +254,12 @@ DistribIRF = zeros(options_.irf,9,nvar,M_.exo_nbr);
 HPDIRF = zeros(options_.irf,2,nvar,M_.exo_nbr);
 
 if options_.TeX
-  varlist_TeX = [];
   for i=1:nvar
-    varlist_TeX = strvcat(varlist_TeX,M_.endo_names_tex(IndxVariables(i),:));
+      if i==1
+          varlist_TeX = M_.endo_names_tex(IndxVariables(i),:);
+      else
+          varlist_TeX = char(varlist_TeX,M_.endo_names_tex(IndxVariables(i),:));
+      end
   end
 end
 
@@ -379,10 +382,15 @@ if options_.TeX
           if max(abs(MeanIRF(:,j,i))) > 10^(-6)  
             
             name = deblank(varlist(j,:));
-            NAMES = strvcat(NAMES,name);
-            
             texname = deblank(varlist_TeX(j,:));
-            TEXNAMES = strvcat(TEXNAMES,['$' texname '$']);
+
+            if j==1
+                NAMES = name;
+                TEXNAMES = ['$' texname '$'];
+            else
+                NAMES = char(NAMES,name);
+                TEXNAMES = char(TEXNAMES,['$' texname '$']);
+            end
           end
           
          end

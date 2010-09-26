@@ -17,7 +17,7 @@ function [ivar,vartan,options_] = set_stationary_variables_list(options_,M_)
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2007-2009 Dynare Team
+% Copyright (C) 2007-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -44,7 +44,11 @@ if ~isempty(options_.unit_root_vars)
     vartan = [];
     for i=1:nvar
         if isempty(strmatch(deblank(varlist(i,:)),options_.unit_root_vars,'exact'))       
-            vartan = strvcat(vartan,varlist(i,:));
+            if isempty(vartan)
+                vartan = varlist(i,:);
+            else
+                vartan = char(vartan,varlist(i,:));
+            end
         end
     end
 else

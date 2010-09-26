@@ -107,7 +107,7 @@ function dr=mult_elimination(varlist,M_, options_, oo_)
       headers = 'Variables';
       for i=1:length(varlist)
           k = strmatch(varlist{i},M_.endo_names(dr.order_var,:),'exact');
-          headers = strvcat(headers,varlist{i});
+          headers = char(headers,varlist{i});
           
           res_table(1:nspred,i) = M1(k,:)';
           res_table(nspred+(1:nspred),i) = M2(k,:)';
@@ -117,7 +117,7 @@ function dr=mult_elimination(varlist,M_, options_, oo_)
             
       my_title='ELIMINATION OF THE MULTIPLIERS';
       lab1 = M_.endo_names(dr.order_var(dr.nstatic+[ 1 2 5:8]),:);
-      labels = strvcat(lab1,lab1,M_.exo_names,M_.exo_names);
+      labels = char(lab1,lab1,M_.exo_names,M_.exo_names);
       lh = size(labels,2)+2;
       dyntable(my_title,headers,labels,res_table,lh,10,6);
       disp(' ')

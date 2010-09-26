@@ -74,8 +74,13 @@ for plt = 1:nbplt,
         kk = (plt-1)*nstar+k;
         [name,texname] = get_the_name(kk,TeX);
         if TeX
-            NAMES = strvcat(NAMES,name);
-            TeXNAMES = strvcat(TeXNAMES,texname);
+            if isempty(NAMES)
+                NAMES = name;
+                TeXNAMES = texname;
+            else
+                NAMES = char(NAMES,name);
+                TeXNAMES = char(TeXNAMES,texname);
+            end
         end
         xx = x;
         l1 = max(lb(kk),0.5*x(kk));

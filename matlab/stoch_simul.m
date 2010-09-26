@@ -79,7 +79,7 @@ if ~options_.noprint
     disp(['  Number of static variables:  ' int2str(oo_.dr.nstatic)])
     my_title='MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS';
     labels = deblank(M_.exo_names);
-    headers = strvcat('Variables',labels);
+    headers = char('Variables',labels);
     lh = size(labels,2)+2;
     dyntable(my_title,headers,labels,M_.Sigma_e,lh,10,6);
     if options_.partial_information
@@ -166,9 +166,17 @@ if options_.irf
                       deblank(M_.exo_names(i,:)) ' = y(i_var(j),:);']); 
                 if max(y(i_var(j),:)) - min(y(i_var(j),:)) > 1e-10
                     irfs  = cat(1,irfs,y(i_var(j),:));
-                    mylist = strvcat(mylist,deblank(var_list(j,:)));
+                    if isempty(mylist)
+                        mylist = deblank(var_list(j,:));
+                    else
+                        mylist = char(mylist,deblank(var_list(j,:)));
+                    end
                     if TeX
-                        mylistTeX = strvcat(mylistTeX,deblank(var_listTeX(j,:)));
+                        if isempty(mylistTeX)
+                            mylistTeX = deblank(var_listTeX(j,:));
+                        else
+                            mylistTeX = char(mylistTeX,deblank(var_listTeX(j,:)));
+                        end
                     end
                 end
             end

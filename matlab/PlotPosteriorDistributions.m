@@ -16,7 +16,7 @@ function oo_ = PlotPosteriorDistributions(estim_params_, M_, options_, bayestopt
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2008 Dynare Team
+% Copyright (C) 2005-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -69,16 +69,17 @@ for i=1:npar
             hfig = figure('Name',figurename);
         end
     end
-    if subplotnum == 1
-        if TeX
-            TeXNAMES = [];
-        end
-        NAMES = [];
-    end
     [nam,texnam] = get_the_name(i,TeX);
-    NAMES = strvcat(NAMES,nam);
-    if TeX
-        TeXNAMES = strvcat(TeXNAMES,texnam);
+    if subplotnum == 1
+        NAMES = nam;
+        if TeX
+            TeXNAMES = texnam;
+        end
+    else
+        NAMES = char(NAMES,nam);
+        if TeX
+            TeXNAMES = char(TeXNAMES,texnam);
+        end
     end
     [x2,f2,abscissa,dens,binf2,bsup2] = draw_prior_density(i,bayestopt_);
     top2 = max(f2); 

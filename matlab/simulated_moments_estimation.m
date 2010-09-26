@@ -54,15 +54,18 @@ options.estimated_parameters.list = [];
 xparam = [];
 if ~isempty(estim_params_.var_exo)
     options.estimated_variances.idx = estim_params_.var_exo(:,1);
-    options.estimated_parameters.list = strvcat(options.estimated_parameters.list,...
-                                                M_.exo_names(options.estimated_variances.idx,:));
+    options.estimated_parameters.list = char(M_.exo_names(options.estimated_variances.idx,:));
     options.estimated_parameters.nv = rows(estim_params_.var_exo);
     xparam = [xparam; estim_params_.var_exo(:,2)];
 end
 if ~isempty(estim_params_.param_vals)
     options.estimated_parameters.idx = estim_params_.param_vals(:,1);
-    options.estimated_parameters.list = strvcat(options.estimated_parameters.list,...
-                                                M_.param_names(options.estimated_parameters.idx,:));
+    if isempty(options.estimated_parameters.list)
+        options.estimated_parameters.list = char(M_.param_names(options.estimated_parameters.idx,:));
+    else
+        options.estimated_parameters.list = char(options.estimated_parameters.list,...
+            M_.param_names(options.estimated_parameters.idx,:));
+    end
     options.estimated_parameters.np = rows(estim_params_.param_vals);
     xparam = [xparam; estim_params_.param_vals(:,2)];
 end

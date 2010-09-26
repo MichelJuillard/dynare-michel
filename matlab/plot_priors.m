@@ -13,7 +13,7 @@ function plot_priors(bayestopt_,M_,options_)
 % SPECIAL REQUIREMENTS
 %    None
 
-% Copyright (C) 2004-2009 Dynare Team
+% Copyright (C) 2004-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -52,8 +52,13 @@ if nbplt == 1
         [x,f,abscissa,dens,binf,bsup] = draw_prior_density(i,bayestopt_);
         [nam,texnam] = get_the_name(i,TeX);
         if TeX
-            TeXNAMES = strvcat(TeXNAMES,texnam);
-            NAMES = strvcat(NAMES,nam);
+            if i==1
+                TeXNAMES = texnam;
+                NAMES = nam;
+            else
+                TeXNAMES = char(TeXNAMES,texnam);
+                NAMES = char(NAMES,nam);
+            end
         end    
         subplot(nr,nc,i)
         hh = plot(x,f,'-k','linewidth',2);
@@ -95,9 +100,14 @@ else
             [nam,texnam] = get_the_name(i,TeX);
             [x,f,abscissa,dens,binf,bsup] = draw_prior_density(i,bayestopt_);            
             if TeX
-                TeXNAMES = strvcat(TeXNAMES,texnam);
-                NAMES = strvcat(NAMES,nam);
-            end    
+                if index==1
+                    TeXNAMES = texnam;
+                    NAMES = nam;
+                else
+                    TeXNAMES = char(TeXNAMES,texnam);
+                    NAMES = char(NAMES,nam);
+                end
+            end
             subplot(nr,nc,index)
             hh = plot(x,f,'-k','linewidth',2);
             set(hh,'color',[0.7 0.7 0.7]);
@@ -134,8 +144,13 @@ else
         [x,f,abscissa,dens,binf,bsup] = draw_prior_density(i,bayestopt_);
         [nam,texnam] = get_the_name(i,TeX);
         if TeX
-            TeXNAMES = strvcat(TeXNAMES,texnam);
-            NAMES = strvcat(NAMES,nam);
+            if index==1
+                TeXNAMES = texnam;
+                NAMES = nam;
+            else
+                TeXNAMES = char(TeXNAMES,texnam);
+                NAMES = char(NAMES,nam);
+            end
         end    
         if lr
             subplot(lc,lr,index);

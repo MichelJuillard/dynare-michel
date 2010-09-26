@@ -1,7 +1,7 @@
 function info=stoch_simul_sparse(var_list)
 % This file is a modified version of stoch_simul.m: common parts should be factorized!
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -66,7 +66,7 @@ if ~options_.noprint
     disp(['  Number of static variables:  ' int2str(oo_dr_nstatic)])
     my_title='MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS';
     labels = deblank(M_.exo_names);
-    headers = strvcat('Variables',labels);
+    headers = char('Variables',labels);
     lh = size(labels,2)+2;
     dyntable(my_title,headers,labels,M_.Sigma_e,lh,10,6);
     disp(' ')
@@ -111,7 +111,11 @@ if options_.irf
         else
             ivar(i) = i_tmp;
             if TeX
-                var_listTeX = strvcat(var_listTeX,deblank(M_.endo_names_tex(i_tmp,:)));
+                if isempty(var_listTeX)
+                    var_listTeX = deblank(M_.endo_names_tex(i_tmp,:));
+                else
+                    var_listTeX = char(var_listTeX,deblank(M_.endo_names_tex(i_tmp,:)));
+                end
             end
         end
     end
@@ -148,9 +152,17 @@ if options_.irf
                       deblank(M_.exo_names(i,:)) ' = y(ivar(j),:);']); 
                 if max(y(ivar(j),:)) - min(y(ivar(j),:)) > 1e-10
                     irfs  = cat(1,irfs,y(ivar(j),:));
-                    mylist = strvcat(mylist,deblank(var_list(j,:)));
+                    if isempty(mylist)
+                        mylist = deblank(var_list(j,:));
+                    else
+                        mylist = char(mylist,deblank(var_list(j,:)));
+                    end
                     if TeX
-                        mylistTeX = strvcat(mylistTeX,deblank(var_listTeX(j,:)));
+                        if isempty(mylistTeX)
+                            mylistTeX = deblank(var_listTeX(j,:));
+                        else
+                            mylistTeX = char(mylistTeX,deblank(var_listTeX(j,:)));
+                        end
                     end
                 end
             end

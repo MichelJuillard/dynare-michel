@@ -1,7 +1,7 @@
 function disp_moments(y,var_list)
 % Displays moments of simulated variables
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -62,7 +62,7 @@ if options_.nomoments == 0
         title = [title ' (HP filter, lambda = ' ...
                  int2str(options_.hp_filter) ')'];
     end
-    headers=strvcat('VARIABLE','MEAN','STD. DEV.','VARIANCE','SKEWNESS', ...
+    headers=char('VARIABLE','MEAN','STD. DEV.','VARIANCE','SKEWNESS', ...
                     'KURTOSIS');
     dyntable(title,headers,labels,z,size(labels,2)+2,16,6);
 end
@@ -74,7 +74,7 @@ if options_.nocorr == 0
         title = [title ' (HP filter, lambda = ' ...
                  int2str(options_.hp_filter) ')'];
     end
-    headers = strvcat('VARIABLE',M_.endo_names(ivar,:));
+    headers = char('VARIABLE',M_.endo_names(ivar,:));
     dyntable(title,headers,labels,corr,size(labels,2)+2,8,4);
 end
 
@@ -92,7 +92,7 @@ if ar > 0
         title = [title ' (HP filter, lambda = ' ...
                  int2str(options_.hp_filter) ')'];
     end
-    headers = strvcat('VARIABLE',int2str([1:ar]'));
+    headers = char('VARIABLE',int2str([1:ar]'));
     dyntable(title,headers,labels,autocorr,size(labels,2)+2,8,4);
 end
 

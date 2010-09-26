@@ -12,7 +12,7 @@ function dynare_estimation_1(var_list_,dname)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2009, 2010 Dynare Team
+% Copyright (C) 2003-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -1171,14 +1171,22 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
             hold off
             xlim([1 gend])
             name    = deblank(M_.exo_names(i,:));
-            NAMES   = strvcat(NAMES,name);
+            if isempty(NAMES)
+                NAMES = name;
+            else
+                NAMES = char(NAMES,name);
+            end
             if ~isempty(options_.XTick)
                 set(gca,'XTick',options_.XTick)
                 set(gca,'XTickLabel',options_.XTickLabel)
             end
             if options_.TeX
                 texname = M_.exo_names_tex(i,1);
-                TeXNAMES   = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
+                if isempty(TeXNAMES)
+                    TeXNAMES = ['$ ' deblank(texname) ' $'];
+                else
+                    TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
+                end
             end
             title(name,'Interpreter','none')
             eval(['oo_.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
@@ -1217,7 +1225,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
                 plot(1:gend,innov(k,:),'-k','linewidth',1)
                 hold off
                 name = deblank(M_.exo_names(k,:));
-                NAMES = strvcat(NAMES,name);
+                if isempty(NAMES)
+                    NAMES = name;
+                else
+                    NAMES = char(NAMES,name);
+                end
                 if ~isempty(options_.XTick)
                     set(gca,'XTick',options_.XTick)
                     set(gca,'XTickLabel',options_.XTickLabel)
@@ -1225,7 +1237,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
                 xlim([1 gend])
                 if options_.TeX
                     texname = M_.exo_names_tex(k,:);
-                    TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
+                    if isempty(TeXNAMES)
+                        TeXNAMES = ['$ ' deblank(texname) ' $'];
+                    else
+                        TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
+                    end
                 end    
                 title(name,'Interpreter','none')
                 eval(['oo_.SmoothedShocks.' deblank(name) ' = innov(k,:)'';']);
@@ -1265,7 +1281,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
             plot(1:gend,innov(k,:),'-k','linewidth',1)
             hold off
             name     = deblank(M_.exo_names(k,:));
-            NAMES    = strvcat(NAMES,name);
+            if isempty(NAMES)
+                NAMES = name;
+            else
+                NAMES = char(NAMES,name);
+            end
             if ~isempty(options_.XTick)
                 set(gca,'XTick',options_.XTick)
                 set(gca,'XTickLabel',options_.XTickLabel)
@@ -1273,7 +1293,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
             xlim([1 gend])
             if options_.TeX
                 texname  = M_.exo_names_tex(k,:);
-                TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
+                if isempty(TeXNAMES)
+                    TeXNAMES = ['$ ' deblank(texname) ' $'];
+                else
+                    TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
+                end
             end
             title(name,'Interpreter','none')
             eval(['oo_.SmoothedShocks.' deblank(name) ' = innov(k,:)'';']);
@@ -1345,7 +1369,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
                 plot([1 gend],[0 0],'-r','linewidth',.5)
                 hold off
                 name    = deblank(options_.varobs(index(i),:));
-                NAMES   = strvcat(NAMES,name);
+                if isempty(NAMES)
+                    NAMES = name;
+                else
+                    NAMES = char(NAMES,name);
+                end
                 if ~isempty(options_.XTick)
                     set(gca,'XTick',options_.XTick)
                     set(gca,'XTickLabel',options_.XTickLabel)
@@ -1353,7 +1381,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
                 if options_.TeX
                     idx = strmatch(options_.varobs(indx(i),:),M_.endo_names,'exact');
                     texname = M_.endo_names_tex(idx,:);
-                    TeXNAMES   = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
+                    if isempty(TeXNAMES)
+                        TeXNAMES = ['$ ' deblank(texname) ' $'];
+                    else
+                        TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
+                    end
                 end
                 title(name,'Interpreter','none')
             end
@@ -1391,7 +1423,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
                     plot(1:gend,measurement_error(index(k),:),'-k','linewidth',1)
                     hold off
                     name = deblank(options_.varobs(index(k),:));
-                    NAMES = strvcat(NAMES,name);
+                    if isempty(NAMES)
+                        NAMES = name;
+                    else
+                        NAMES = char(NAMES,name);
+                    end
                     if ~isempty(options_.XTick)
                         set(gca,'XTick',options_.XTick)
                         set(gca,'XTickLabel',options_.XTickLabel)
@@ -1399,8 +1435,12 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
                     if options_.TeX
                         idx = strmatch(options_.varobs(k),M_.endo_names,'exact');
                         texname = M_.endo_names_tex(idx,:);
-                        TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
-                    end    
+                        if isempty(TeXNAMES)
+                            TeXNAMES = ['$ ' deblank(texname) ' $'];
+                        else
+                            TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
+                        end
+                    end
                     title(name,'Interpreter','none')
                 end
                 eval(['print -depsc2 ' M_.fname '_SmoothedObservationErrors' int2str(plt) '.eps']);
@@ -1438,7 +1478,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
                 plot(1:gend,measurement_error(index(k),:),'-k','linewidth',1)
                 hold off
                 name     = deblank(options_.varobs(index(k),:));
-                NAMES    = strvcat(NAMES,name);
+                if isempty(NAMES)
+                    NAMES = name;
+                else
+                    NAMES = char(NAMES,name);
+                end
                 if ~isempty(options_.XTick)
                     set(gca,'XTick',options_.XTick)
                     set(gca,'XTickLabel',options_.XTickLabel)
@@ -1446,7 +1490,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
                 if options_.TeX
                     idx = strmatch(options_.varobs(index(k)),M_.endo_names,'exact');
                     texname = M_.endo_names_tex(idx,:);
-                    TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
+                    if isempty(TeXNAMES)
+                        TeXNAMES = ['$ ' deblank(texname) ' $'];
+                    else
+                        TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
+                    end
                 end
                 title(name,'Interpreter','none');
             end
@@ -1493,7 +1541,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
             plot(1:gend,rawdata(:,i),'-k','linewidth',1)
             hold off
             name    = deblank(options_.varobs(i,:));
-            NAMES   = strvcat(NAMES,name);
+            if isempty(NAMES)
+                NAMES = name;
+            else
+                NAMES = char(NAMES,name);
+            end
             if ~isempty(options_.XTick)
                 set(gca,'XTick',options_.XTick)
                 set(gca,'XTickLabel',options_.XTickLabel)
@@ -1502,7 +1554,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
             if options_.TeX
                 idx = strmatch(options_.varobs(i),M_.endo_names,'exact');
                 texname = M_.endo_names_tex(idx,:);
-                TeXNAMES   = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
+                if isempty(TeXNAMES)
+                    TeXNAMES = ['$ ' deblank(texname) ' $'];
+                else
+                    TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
+                end
             end
             title(name,'Interpreter','none')
         end
@@ -1540,7 +1596,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
                 plot(1:gend,rawdata(:,k),'-k','linewidth',1)
                 hold off
                 name = deblank(options_.varobs(k,:));
-                NAMES = strvcat(NAMES,name);
+                if isempty(NAMES)
+                    NAMES = name;
+                else
+                    NAMES = char(NAMES,name);
+                end
                 if ~isempty(options_.XTick)
                     set(gca,'XTick',options_.XTick)
                     set(gca,'XTickLabel',options_.XTickLabel)
@@ -1549,7 +1609,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
                 if options_.TeX
                     idx = strmatch(options_.varobs(k),M_.endo_names,'exact');
                     texname = M_.endo_names_tex(idx,:);
-                    TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
+                    if isempty(TeXNAMES)
+                        TeXNAMES = ['$ ' deblank(texname) ' $'];
+                    else
+                        TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
+                    end
                 end    
                 title(name,'Interpreter','none')
             end
@@ -1588,7 +1652,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
             plot(1:gend,rawdata(:,k),'-k','linewidth',1)
             hold off
             name = deblank(options_.varobs(k,:));
-            NAMES    = strvcat(NAMES,name);
+            if isempty(NAMES)
+                NAMES = name;
+            else
+                NAMES = char(NAMES,name);
+            end
             if ~isempty(options_.XTick)
                 set(gca,'XTick',options_.XTick)
                 set(gca,'XTickLabel',options_.XTickLabel)
@@ -1597,7 +1665,11 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
             if options_.TeX
                 idx = strmatch(options_.varobs(i),M_.endo_names,'exact');
                 texname = M_.endo_names_tex(idx,:);
-                TeXNAMES = strvcat(TeXNAMES,['$ ' deblank(texname) ' $']);
+                if isempty(TeXNAMES)
+                    TeXNAMES = ['$ ' deblank(texname) ' $'];
+                else
+                    TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
+                end
             end
             title(name,'Interpreter','none');
         end

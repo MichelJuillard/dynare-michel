@@ -89,7 +89,6 @@ OutputFileName={};
 
 subplotnum = 0;
 for i=fpar:npar,
-  NAMES = [];
   figunumber = 0;
   
   for j=1:nvar
@@ -143,7 +142,6 @@ for i=fpar:npar,
           hold off
       end
       name = deblank(varlist(j,:));
-      NAMES = strvcat(NAMES,name);
       title(name,'Interpreter','none')
     end
     

@@ -43,7 +43,11 @@ if options_.TeX
     % needs to be fixed
     varlist_TeX = [];
     for i=1:nvar
-        varlist_TeX = strvcat(varlist_TeX,M_.endo_names_tex(SelecVariables(i),:));
+        if i==1
+            varlist_TeX = M_.endo_names_tex(SelecVariables(i),:);
+        else
+            varlist_TeX = char(varlist_TeX,M_.endo_names_tex(SelecVariables(i),:));
+        end
     end
 end
 Mean = zeros(n2,nvar);
@@ -107,9 +111,9 @@ if options_.TeX
         if max(abs(Mean(:,i))) > 10^(-6)
             subplotnum = subplotnum+1;
             name = deblank(varlist(i,:));
-            NAMES = strvcat(NAMES,name);
+            NAMES = name;
             texname = deblank(varlist_TeX(i,:));
-            TEXNAMES = strvcat(TEXNAMES,['$' texname '$']);
+            TEXNAMES = ['$' texname '$'];
         end
         if subplotnum == MaxNumberOfPlotsPerFigure | i == nvar
             fprintf(fidTeX,'\\begin{figure}[H]\n');

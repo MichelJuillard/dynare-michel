@@ -85,7 +85,6 @@ end
 OutputFileName = {};
 
 for i=fpar:nvar
-    NAMES = [];
     if max(abs(Mean(:,i))) > 10^(-6)
         subplotnum = subplotnum+1;
         set(0,'CurrentFigure',hh)
@@ -99,7 +98,6 @@ for i=fpar:nvar
         xlim([1 n2]);
         hold off
         name = deblank(varlist(i,:));
-        NAMES = strvcat(NAMES,name);
         title(name,'Interpreter','none')
     end
     

@@ -30,7 +30,7 @@ function [dr,info,M_,options_,oo_] = dr1_sparse(dr,task,M_,options_,oo_)
 %   none.
 %  
 
-% Copyright (C) 1996-2009 Dynare Team
+% Copyright (C) 1996-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -175,7 +175,7 @@ if options_.ramsey_policy
 % $$$             M_.maximum_lead = M_.maximum_lag;
 % $$$             M_.maximum_endo_lead = M_.maximum_lag;
 % $$$             
-% $$$             M_.endo_names = strvcat(M_.orig_model.endo_names, M_.endo_names(endo_nbr1+k,:));
+% $$$             M_.endo_names = char(M_.orig_model.endo_names, M_.endo_names(endo_nbr1+k,:));
 % $$$             M_.endo_nbr = endo_nbr1+length(k);  
 % $$$         end
 else
