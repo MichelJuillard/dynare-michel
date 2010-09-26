@@ -25,7 +25,7 @@ dispIndx = 0;   % 1: turn on all the diplays on the screen; 0: turn off (Added b
 
 [nx,no]=size(x0);
 nx=max(nx,no);
-NumGrad= ( ~isstr(grad) | length(grad)==0);
+NumGrad= ( ~ischar(grad) | length(grad)==0);
 done=0;
 itct=0;
 fcount=0;
