@@ -1,7 +1,6 @@
 SUBDIRS = estimation
 
 EXTRA_DIST = \
-	build_matlab.m \
 	build_matlab_multithread.m \
 	dynblas.h \
 	dynlapack.h \
