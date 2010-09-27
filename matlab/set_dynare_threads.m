@@ -1,7 +1,13 @@
-function i = isopmenmp()
-% This file is called only if the mex files are not compiled with the openmp flag (mutithreaded computations).  
+function set_dynare_threads(n)
+% This function sets the number of threads used by some MEX files when compiled
+% with OpenMP support, i.e with --enable-openmp is given to configure.
+% As of 2010-09-27, only A_times_B_kronecker_C and
+% sparse_hessian_times_B_kronecker_C support this.
+%
+% INPUTS 
+%  o n    [integer]   scalar specifying the number of threads to be used.    
 
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2009-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -17,4 +23,5 @@ function i = isopmenmp()
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-i = 0;
+
+setenv('DYNARE_NUM_THREADS',int2str(n));

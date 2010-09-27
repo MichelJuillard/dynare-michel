@@ -149,16 +149,6 @@ number_of_mex_files = size(mex_status,1);
 %% added dynare_v4/matlab with the subfolders. Matlab has to ignore these
 %% subfolders if valid mex files exist.
 matlab_path = path;
-test = strfind(matlab_path,[dynareroot 'threads/single']);
-if length(test)
-    rmpath([dynareroot 'threads/single']);
-    matlab_path = path;
-end
-test = strfind(matlab_path,[dynareroot 'threads/multi']);
-if length(test)
-    rmpath([dynareroot 'threads/multi']);
-    matlab_path = path;
-end
 for i=1:number_of_mex_files
     test = strfind(matlab_path,[dynareroot mex_status{i,2}]);
     action = length(test);
@@ -167,15 +157,8 @@ for i=1:number_of_mex_files
         matlab_path = path;
     end
 end
-%% Test if multithread mex files are available.
-if exist('isopenmp')==3
-    addpath([dynareroot '/threads/multi/'])
-    number_of_threads = set_dynare_threads();
-    multithread_flag  = number_of_threads-1;
-else
-    addpath([dynareroot '/threads/single/'])
-    multithread_flag = 0;
-end
+%% Initialize number of threads
+set_dynare_threads(1);
 %% Test if valid mex files are available, if a mex file is not available
 %% a matlab version of the routine is included in the path.
 disp(' ')
@@ -187,23 +170,14 @@ for i=1:number_of_mex_files
         addpath([dynareroot mex_status{i,2}]);
         message = '[m]   ';
     else
-        if multithread_flag && ( strcmpi(mex_status(i,1),'sparse_hessian_times_B_kronecker_C') || ...
-                                 strcmpi(mex_status(i,1),'A_times_B_kronecker_C') )
-            message = [ '[mex][multithread version, ' int2str(multithread_flag+1) ' threads are used] ' ]; 
-        else
-            message = '[mex] ';
-        end
+        message = '[mex] ';
     end
     disp([ message mex_status{i,3} '.' ])
 end
 
 % Test if bytecode DLL is present
 if exist('bytecode', 'file') == 3
-    if ~multithread_flag
-        message = '[mex] ';
-    else
-        message = [ '[mex][multithread version, ' int2str(multithread_flag+1) ' threads are used] ' ];
-    end
+    message = '[mex] ';
 else
     message = '[no]  ';
 end
