@@ -10,8 +10,7 @@ EXTRA_DIST = \
 	kronecker \
 	bytecode \
 	k_order_perturbation \
-	threads \
-	kalman
+	threads
 
 clean-local:
 	rm -rf `find mex/sources -name *.o`
