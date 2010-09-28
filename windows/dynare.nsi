@@ -52,7 +52,7 @@ Section "Dynare core (preprocessor and M-files)"
  SectionIn RO
 !insertmacro DETERMINE_CONTEXT
  SetOutPath $INSTDIR
- File README.txt mexopts.bat ..\license.txt ..\dynare.el
+ File README.txt mexopts-win32.bat mexopts-win64.bat ..\license.txt ..\dynare.el
 
  SetOutPath $INSTDIR\matlab
  File /r ..\matlab\*.m
@@ -144,7 +144,8 @@ Section "Uninstall"
  Delete $INSTDIR\uninstall.exe
  Delete $INSTDIR\README.txt
  Delete $INSTDIR\license.txt
- Delete $INSTDIR\mexopts.bat
+ Delete $INSTDIR\mexopts-win32.bat
+ Delete $INSTDIR\mexopts-win64.bat
  Delete $INSTDIR\dynare.el
  Rmdir /r $INSTDIR\matlab
  Rmdir /r $INSTDIR\mex
