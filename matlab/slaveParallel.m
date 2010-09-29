@@ -38,7 +38,6 @@ warning off;
 diary off;
 
 delete( ['slaveParallel_',int2str(whoiam),'.log']);
-
 diary( ['slaveParallel_',int2str(whoiam),'.log']);
 
 
@@ -96,7 +95,7 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
            else
                % Only for testing, will be remouved!
                
-               if isunx
+               if isunix
                  E1=fopen('/home/ivano/Works/Errore-slaveParallel.txt','w+');
                  fclose(E1);
                else            
@@ -181,5 +180,4 @@ else
 end
 disp(['slaveParallel on CPU ',int2str(whoiam),' completed.'])
 diary off;
-
 exit;
