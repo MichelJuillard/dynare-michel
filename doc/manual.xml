@@ -110,7 +110,7 @@
 
   <sect1 id="software-requirements"><title>Software requirements</title>
   <para>
-    Packaged versions of Dynare are available for <trademark class="registered">Windows</trademark> XP/Vista, <ulink url="http://www.debian.org">Debian GNU/Linux</ulink> and <ulink url="http://www.ubuntu.com/">Ubuntu</ulink>.
+    Packaged versions of Dynare are available for <trademark class="registered">Windows</trademark> XP/Vista, <ulink url="http://www.debian.org">Debian GNU/Linux</ulink>, <ulink url="http://www.ubuntu.com/">Ubuntu</ulink> and <trademark class="registered">Mac OS X</trademark> Leopard/Snow Leopard.
     Dynare should work on other systems, but some compilation steps are necessary in that case.
   </para>
   <para>In order to run Dynare, you need at least one of the following:
@@ -120,34 +120,44 @@
   </itemizedlist>
   </para>
 
-  <para>Some installation instructions for GNU Octave can be found on <ulink url="http://www.dynare.org/DynareWiki/DynareOctave">Dynare Wiki</ulink>.</para>
+  <para>Some installation instructions for GNU Octave can be found on the <ulink url="http://www.dynare.org/DynareWiki/DynareOctave">Dynare Wiki</ulink>.</para>
 
-  <para>If you plan to use options <xref linkend="use_dll"/> (in particular when computing third order approximations with <xref linkend="k_order_solver"/>), you will need to install the necessary requirements for compiling MEX files on your machine. If you are using MATLAB under Windows, install a C++ compiler on your machine, and configure it with MATLAB: see <ulink url="http://www.dynare.org/DynareWiki/ConfigureMatlabWindowsForMexCompilation">instructions on the Dynare wiki</ulink>. Users of Octave under Linux should install the package for MEX file compilation (under Debian or Ubuntu, it is called <filename>octave3.2-headers</filename> or <filename>octave3.0-headers</filename>). Users of MATLAB under Linux and MacOS, and users of Octave under Windows, normally need to do nothing, since a working compilation environment is available by default.</para>
+  <para>If you plan to use the <xref linkend="use_dll"/> option (in particular when computing third order approximations with <xref linkend="k_order_solver"/>), you will need to install the necessary requirements for compiling MEX files on your machine. If you are using MATLAB under Windows, install a C++ compiler on your machine and configure it with MATLAB: see <ulink url="http://www.dynare.org/DynareWiki/ConfigureMatlabWindowsForMexCompilation">instructions on the Dynare wiki</ulink>. Users of Octave under Linux should install the package for MEX file compilation (under Debian or Ubuntu, it is called <filename>octave3.2-headers</filename> or <filename>octave3.0-headers</filename>). If you are using Octave or MATLAB under Mac OS X, you should install the latest version of XCode: see <ulink url="http://www.dynare.org/DynareWiki/InstallOnMacOSX">instructions on the Dynare wiki</ulink>. Mac OS X Octave users will also need to install gnuplot if they want graphing capabilities. Users of MATLAB under Linux and Mac OS X, and users of Octave under Windows, normally need to do nothing, since a working compilation environment is available by default.</para>
 
   </sect1>
 
   <sect1><title>Installation of Dynare</title>
 
   <para>
-    After installation, Dynare can be used in any directory on your computer. It is best practive to keep your model files in directories different from the one containing the Dynare toolbox. That way you can upgrade Dynare and discard the previous version without having to worry about your own files.
+    After installation, Dynare can be used in any directory on your computer. It is best practice to keep your model files in directories different from the one containing the Dynare toolbox. That way you can upgrade Dynare and discard the previous version without having to worry about your own files.
   </para>
 
   <sect2><title>On <trademark class="registered">Windows</trademark></title>
 
   <para>Execute the automated installer called <filename>dynare-4.x.y-win.exe</filename> (where 4.x.y is the version number), and follow the instructions. The default installation directory is <filename>c:\dynare\4.x.y</filename>.</para>
 
-  <para>After installation, this directory will contain several sub-directories, among which <filename>matlab</filename>, <filename>mex</filename> and <filename>doc</filename>.</para>
+  <para>After installation, this directory will contain several sub-directories, among which are <filename>matlab</filename>, <filename>mex</filename> and <filename>doc</filename>.</para>
 
-  <para>The installer will also add an entry in your Start Menu with a shortcut to documentation files and to the uninstaller.</para>
+  <para>The installer will also add an entry in your Start Menu with a shortcut to the documentation files and uninstaller.</para>
 
   <para>Note that you can have several versions of Dynare coexisting (for example in <filename>c:\dynare</filename>), as long as you correctly adjust your path settings (see <xref linkend="path_warning" />).</para>
 
   </sect2>
 
   <sect2><title>On Debian GNU/Linux and Ubuntu</title>
-  <para>Please refer to <ulink url="http://www.dynare.org/DynareWiki/InstallOnDebianOrUbuntu">Dynare Wiki</ulink> for detailed instructions.</para>
+  <para>Please refer to the <ulink url="http://www.dynare.org/DynareWiki/InstallOnDebianOrUbuntu">Dynare Wiki</ulink> for detailed instructions.</para>
 
   <para>Dynare will be installed under <filename>/usr/share/dynare</filename> and <filename>/usr/lib/dynare</filename>. Documentation will be under <filename>/usr/share/doc/dynare</filename>.</para>
+  </sect2>
+
+  <sect2><title>On Mac OS X</title>
+  <para>Execute the automated installer called <filename>dynare-4.x.y-macosx-10.5+10.6.pkg</filename> (where 4.x.y is the version number), and follow the instructions. The default installation directory is <filename>/Applications/Dynare/4.x.y</filename>.</para>
+  <para>Please refer to the <ulink url="http://www.dynare.org/DynareWiki/InstallOnMacOSX">Dynare Wiki</ulink> for detailed instructions.</para>
+
+  <para>After installation, this directory will contain several sub-directories, among which are <filename>matlab</filename>, <filename>mex</filename> and <filename>doc</filename>.</para>
+
+  <para>Note that you can have several versions of Dynare coexisting (for example in <filename>c:\dynare</filename>), as long as you correctly adjust your path settings (see <xref linkend="path_warning" />).</para>
+
   </sect2>
 
   <sect2 id="install_other_systems"><title>For other systems</title>
@@ -167,7 +177,7 @@
 
     <listitem><para>Using the <command>addpath</command> command in the <trademark class="registered">MATLAB</trademark> command window:</para>
 
-    <para>Under <trademark class="registered">Windows</trademark>, assuming that you have installed Dynare at the standard location, and replacing "4.x.y" by correct version number, type:</para>
+    <para>Under <trademark class="registered">Windows</trademark>, assuming that you have installed Dynare in the standard location, and replacing "4.x.y" with the correct version number, type:</para>
     <programlisting>
 addpath c:\dynare\4.x.y\matlab
     </programlisting>
@@ -175,6 +185,11 @@ addpath c:\dynare\4.x.y\matlab
     <para>Under Debian GNU/Linux or Ubuntu, type:</para>
     <programlisting>
 addpath /usr/share/dynare/matlab
+    </programlisting>
+
+    <para>Under <trademark class="registered">Mac OS X</trademark>, assuming that you have installed Dynare in the standard location, and replacing "4.x.y" with the correct version number, type:</para>
+    <programlisting>
+addpath /Applications/Dynare/4.x.y/matlab/
     </programlisting>
 
     <para><trademark class="registered">MATLAB</trademark> will not remember this setting next time you run it, and you will have
@@ -194,12 +209,17 @@ addpath /usr/share/dynare/matlab
   <para>You need to add the <filename>matlab</filename> subdirectory of your Dynare
   installation to Octave path, using the <command>addpath</command> at the Octave command prompt.</para>
 
-  <para>Under <trademark class="registered">Windows</trademark>, assuming that you have installed Dynare at the standard location, and replacing "4.x.y" by correct version number, type:</para>
+  <para>Under <trademark class="registered">Windows</trademark>, assuming that you have installed Dynare in the standard location, and replacing "4.x.y" with the correct version number, type:</para>
   <programlisting>
 addpath c:\dynare\4.x.y\matlab
   </programlisting>
 
   <para>Under Debian GNU/Linux or Ubuntu, there is no need to use the <command>addpath</command> command; the packaging does it for you.</para>
+
+  <para>Under <trademark class="registered">Mac OS X</trademark>, assuming that you have installed Dynare in the standard location, and replacing "4.x.y" with the correct version number, type:</para>
+  <programlisting>
+addpath /Applications/Dynare/4.x.y/matlab
+  </programlisting>
 
   <para>If you are using an Octave version strictly older than 3.2.0, you will also want to tell to Octave to accept the short syntax (without parentheses and quotes) for the <command>dynare</command> command, by typing:</para>
   <programlisting>
@@ -211,7 +231,7 @@ mark_as_command dynare
 
   <sect2 id="path_warning"><title>Some words of warning</title>
 
-  <para>You should be very careful about the content of you <trademark class="registered">MATLAB</trademark> or Octave path. You can display its content by simply typing <command>path</command> in the command window.</para>
+  <para>You should be very careful about the content of your <trademark class="registered">MATLAB</trademark> or Octave path. You can display its content by simply typing <command>path</command> in the command window.</para>
 
   <para>The path should normally contain system directories of <trademark class="registered">MATLAB</trademark> or Octave, and some subdirectories of your Dynare installation. You have to manually add the <filename>matlab</filename> subdirectory, and Dynare will automatically add a few other subdirectories at runtime (depending on your configuration). You must verify that there is no directory coming from another version of Dynare than the one you are planning to use.</para>
 
