@@ -2,7 +2,7 @@ Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&
 Name: Dynare
 Maintainer: Dynare Team, whose members in 2010 are:
  Stéphane Adjemian <stephane.adjemian@ens.fr>
- Houtan Bastani <houtanb@gmail.com>
+ Houtan Bastani <houtan.bastani@ens.fr>
  Michel Juillard <michel.juillard@ens.fr>
  Ferhat Mihoubi <fmihoubi@univ-evry.fr>
  George Perendia <george@perendia.orangehome.co.uk>
