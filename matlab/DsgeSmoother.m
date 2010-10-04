@@ -203,7 +203,7 @@ if any(any(H ~= 0))   % should be replaced by a flag
                                                 nobs,np,smpl,mf);
             end
         end
-    elseif options_.kalman_algo == 2
+    elseif kalman_algo == 2
         if ~estim_params_.ncn
             [alphahat,epsilonhat,etahat,ahat,aK] = ...
                 DiffuseKalmanSmootherH3(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
@@ -289,7 +289,7 @@ else
                                                               data1,nobs,np,smpl);
         end
         if all(alphahat(:)==0)
-            options_.kalman_algo = 4;
+            kalman_algo = 4;
         end
     end
     if kalman_algo == 4
