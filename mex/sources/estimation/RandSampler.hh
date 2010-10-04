@@ -31,21 +31,17 @@
 class RandSampler {
 
 public:
-  RandSampler(){
-  };
   virtual ~RandSampler(){};
-  virtual double compute(Vector &mhLogPostDens, MatrixView &mhParams, Matrix &steadyState,
-                         Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H,
-                         size_t presampleStart, int &info, const size_t nMHruns = 0, const Matrix &Jscale,
-                         const Matrix &D, const LogPosteriorDensity &logPosteriorDensity, const Prior &drawDistribution) = 0;
-
+  virtual double compute(VectorView &mhLogPostDens, MatrixView &mhParams, Matrix &steadyState,
+                         Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H,
+                         const size_t presampleStart, int &info, const size_t nMHruns, const Matrix &Jscale,
+                         LogPosteriorDensity &logPosteriorDensity, Prior &drawDistribution,
+                         EstimatedParametersDescription &epd) = 0;
   /**
    * draw = Mean + randn(1,n) * Sigma_upper_chol;
    *
    */
   virtual void randMultiVar(Prior &distribution, Vector &draw, const Vector &mean, const Matrix &Scale, const size_t n);
-
-  virtual void saveDraws() = 0;
 
 };
 

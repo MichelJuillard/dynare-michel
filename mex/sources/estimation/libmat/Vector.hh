@@ -227,6 +227,27 @@ namespace vec
       }
     return nrm;
   }
+
+  // Computes the sum, min and max of a vector
+  // and returns double mean=sum/size
+  template<class Vec>
+  double
+  meanSumMinMax(double &sum, double &min, double &max, const Vec &v)
+  {
+    sum = 0;
+    min=max=v(0);
+    const double *p = v.getData();
+    while (p < v.getData() + v.getSize() * v.getStride())
+      {
+        if ((*p) > max)
+          max = (*p);
+        if ((*p) < min)
+          min = (*p);
+        sum+=*p;
+        p += v.getStride();
+      }
+    return sum/v.getSize();
+  }
 } // End of namespace
 
 #endif

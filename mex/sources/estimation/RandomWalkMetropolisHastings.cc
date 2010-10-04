@@ -20,29 +20,43 @@
 #include "RandomWalkMetropolisHastings.hh"
 
 double
-RandomWalkMetropolisHastings::compute(Vector &mhLogPostDens, MatrixView &mhParams, Matrix &steadyState,
-                                      Vector &estParams2, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H,
-                                      const size_t presampleStart, int &info, const size_t nMHruns, const Matrix &Jscale,
-                                      const Matrix &D, LogPosteriorDensity &lpd, Prior &drawDistribution)
+RandomWalkMetropolisHastings::compute(VectorView &mhLogPostDens, MatrixView &mhParams, Matrix &steadyState,
+                                      Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H,
+                                      const size_t presampleStart, int &info, const size_t nMHruns, const Matrix &Dscale,
+                                      LogPosteriorDensity &lpd, Prior &drawDistribution, EstimatedParametersDescription &epd)
 {
-  double logpost, newLogpost;
-  size_t accepted = 0;
-  parDraw = estParams2;
-  blas::gemm("N", "N", 1.0, D, Jscale, 1.0, Dscale);
+  bool overbound;
+  double newLogpost, logpost;
+  size_t count, accepted = 0;
+  parDraw = estParams;
+  logpost =  - lpd.compute(steadyState, estParams, deepParams, data, Q, H, presampleStart, info);
   for (size_t run = 0; run < nMHruns; ++run)
     {
+      overbound=false;
       randMultiVar(drawDistribution, newParDraw, parDraw, Dscale, parDraw.getSize());
-      try
+      for (count=0;count<parDraw.getSize();++count)
         {
-          newLogpost = lpd.compute(steadyState, newParDraw, deepParams, data, Q, H, presampleStart, info);
+          overbound=(newParDraw(count) <  epd.estParams[count].lower_bound || newParDraw(count) > epd.estParams[count].upper_bound );
+          if (overbound) 
+            {
+              newLogpost = -INFINITY;
+              break;
+            }
         }
-      catch(...)
+      if (!overbound)
         {
-          newLogpost = -INFINITY;
+          try
+            {
+              newLogpost = - lpd.compute(steadyState, newParDraw, deepParams, data, Q, H, presampleStart, info);
+            }
+          catch(...)
+            {
+              newLogpost = -INFINITY;
+            }
         }
       if ((newLogpost > -INFINITY) && log(uniform.drand()) < newLogpost-logpost)
         {
-          mat::get_col(mhParams, run) = newParDraw;
+          mat::get_row(mhParams, run) = newParDraw;
           parDraw = newParDraw;
           mhLogPostDens(run) = newLogpost;
           logpost = newLogpost;
@@ -50,16 +64,10 @@ RandomWalkMetropolisHastings::compute(Vector &mhLogPostDens, MatrixView &mhParam
         }
       else
         {
-          mat::get_col(mhParams, run) = parDraw;
+          mat::get_row(mhParams, run) = parDraw;
           mhLogPostDens(run) = logpost;
         }
     }
-  return accepted/nMHruns;
-}
-
-void
-RandomWalkMetropolisHastings::saveDraws(const std::string &modName, const std::string &suffix, const MatrixView &Draws, const size_t block)
-{
-
+  return (double) accepted/nMHruns;
 }
 

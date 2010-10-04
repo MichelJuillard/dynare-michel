@@ -176,9 +176,6 @@ LogLikelihoodSubSample::updateParams(const Vector &estParams, Vector &deepParams
               info = 1;
             } // end switch
         } // end found
-#ifdef DEBUG
-      mexPrintf("End of Setting of HQ params\n");
-#endif
     } //end for
 };
 

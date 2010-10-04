@@ -28,27 +28,25 @@
 
 #include "RandSampler.hh"
 
-class RandomWalkMetropolisHastings : public RandSampler {
+class RandomWalkMetropolisHastings : public RandSampler
+{
 
 private:
   UniformPrior uniform;
-  Matrix Dscale;
   Vector parDraw, newParDraw;
 
 public:
   RandomWalkMetropolisHastings(size_t size) :
     uniform(0.0, 0.0, 0.0, 1.0, 0.0, 1.0),
-    Dscale(size), parDraw(size), newParDraw(size)
+    parDraw(size), newParDraw(size)
   {
   };
   virtual ~RandomWalkMetropolisHastings(){};
-  double compute(Vector &mhLogPostDens, MatrixView &mhParams, Matrix &steadyState,
-                 Vector &estParams2, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H,
-                 const size_t presampleStart, int &info, const size_t nMHruns, const Matrix &Jscale,
-                 const Matrix &D, LogPosteriorDensity &logPosteriorDensity, Prior &drawDistribution);
-//	void randMultiVar(const Prior &distribution, Vector &draw, const Matrix &Scale, const Vector &mean, const size_t n = 0);
-  void saveDraws(const std::string &modName, const std::string &suffix, const MatrixView &Draws, const size_t block);
-
+  virtual double compute(VectorView &mhLogPostDens, MatrixView &mhParams, Matrix &steadyState,
+                         Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H,
+                         const size_t presampleStart, int &info, const size_t nMHruns, const Matrix &Jscale,
+                         LogPosteriorDensity &logPosteriorDensity, Prior &drawDistribution,
+                         EstimatedParametersDescription &epd);
 };
 
 #endif // !defined(A6BBC5E0_598E_4863_B7FF_E87320056B80__INCLUDED_)
