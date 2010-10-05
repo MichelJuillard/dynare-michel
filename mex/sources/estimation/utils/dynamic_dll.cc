@@ -94,6 +94,6 @@ void
 DynamicModelDLL::eval(const Vector &y, const Matrix &x, const Vector &modParams, VectorView &ySteady,
                       Vector &residual, Matrix *g1, Matrix *g2, Matrix *g3) throw (TSException)
 {
-  Dynamic(y.getData(), x.getData(), n_exog, modParams.getData(), ySteady.getData(), 0, residual.getData(), 
+  Dynamic(y.getData(), x.getData(), 1, modParams.getData(), ySteady.getData(), 0, residual.getData(),
           g1 == NULL ? NULL : g1->getData(), g2 == NULL ? NULL : g2->getData(), g3 == NULL ? NULL : g3->getData());
 }
