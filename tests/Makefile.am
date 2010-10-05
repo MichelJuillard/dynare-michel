@@ -52,8 +52,14 @@ OCTAVE_MODS = \
 	conditional_variance_decomposition/example1.mod \
 	dsge-var/simul_hybrid.mod \
 	dsge-var/dsgevar_forward_calibrated_lambda.mod \
-	dsge-var/dsgevar_forward_estimated_lambda.mod
- 
+	dsge-var/dsgevar_forward_estimated_lambda.mod \
+	external_function/example1_1st_and_2nd_deriv_functions_provided.mod \
+	external_function/example1_1st_and_2nd_deriv_functions_provided_dll.mod \
+	external_function/example1_1st_deriv_function_provided.mod \
+	external_function/example1_1st_deriv_function_provided_dll.mod \
+	external_function/example1_no_deriv_functions_provided.mod \
+	external_function/example1_no_deriv_functions_provided_dll.mod
+
 MODS = $(OCTAVE_MODS) \
 	arima/mod1b.mod \
 	arima/mod1c.mod \
