@@ -92,7 +92,7 @@ void
 DynamicModelDLL::eval(const Vector &y, const Vector &x, const Vector &modParams, const Vector &ySteady,
                       Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException)
 {
-  Dynamic(y.base(), x.base(), nExog, modParams.base(), ySteady.base(), 0, residual.base(),
+  Dynamic(y.base(), x.base(), 1, modParams.base(), ySteady.base(), 0, residual.base(),
           g1 == NULL ? NULL : g1->base(),
           g2 == NULL ? NULL : g2->base(), g3 == NULL ? NULL : g3->base());
 }
