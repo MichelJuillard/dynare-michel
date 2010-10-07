@@ -3,7 +3,7 @@ function d=hess_element(func,element1,element2,args)
 % returns an entry of the finite differences approximation to the hessian of func
 %
 % INPUTS
-%    func       [function handle]  associated with the function
+%    func       [function name]    string with name of the function
 %    element1   [int]              the indices showing the element within the hessian that should be returned
 %    element2   [int]
 %    args       [cell array]       arguments provided to func
@@ -30,6 +30,8 @@ function d=hess_element(func,element1,element2,args)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
+func = str2func(func);
 
 h=10e-6;
 p10 = args;
