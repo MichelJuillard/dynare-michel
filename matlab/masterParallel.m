@@ -129,6 +129,8 @@ end
 MasterName=deblank(MasterName);
 fInputVar.MasterName = MasterName;
 
+% keyboard;
+
 % Save input data for use by the slaves.
 switch Strategy
     case 0
@@ -510,9 +512,9 @@ for j=1:totCPU,
         dynareParallelGetFiles([fOutputVar.OutputFileName],PRCDir,Parallel(1:totSlaves));
     end
     if isfield(fOutputVar,'error'),
-        disp(['Job number ',int2str(j),'crashed with error:']);
+        disp(['Job number ',int2str(j),' crashed with error:']);
         iscrash=1;
-        keyboard;
+%         keyboard;
         disp([fOutputVar.error.message]);
     else
         fOutVar(j)=fOutputVar;
