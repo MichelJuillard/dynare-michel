@@ -298,7 +298,7 @@ for b=fpar:B
     if  whoiam,
         fprintf('Done! \n');
         waitbarString = [ 'Subdraw ' int2str(b) '/' int2str(B) ' done.'];
-        fMessageStatus((b-fpar+1)/(B-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo)
+        fMessageStatus((b-fpar+1)/(B-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);
     end
 end
 

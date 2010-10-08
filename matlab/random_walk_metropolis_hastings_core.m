@@ -193,7 +193,7 @@ for b = fblck:nblck,
             if mod(j,50)==0 & whoiam  
                 %             keyboard;
                 waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) '), ' sprintf('accept. %3.f%%%%', 100 * isux/j)];
-                fMessageStatus(prtfrc,whoiam,waitbarString, '', options_.parallel(ThisMatlab), MasterName, DyMo)
+                fMessageStatus(prtfrc,whoiam,waitbarString, '', options_.parallel(ThisMatlab), MasterName, DyMo);
             end
         else
             if mod(j, 3)==0 & ~whoiam
@@ -201,7 +201,7 @@ for b = fblck:nblck,
             elseif mod(j,50)==0 & whoiam,  
                 %             keyboard;
                 waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)];
-                fMessageStatus(prtfrc,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab), MasterName, DyMo)
+                fMessageStatus(prtfrc,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab), MasterName, DyMo);
             end
         end
         

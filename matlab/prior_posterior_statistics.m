@@ -297,6 +297,6 @@ end
 if ~isnumeric(options_.parallel),
     options_.parallel_info.leaveSlaveOpen = leaveSlaveOpen;
     if leaveSlaveOpen == 0,
-        closeSlave(options_.parallel),
+        closeSlave(options_.parallel,options_.parallel_info.RemoteTmpFolder),
     end
 end

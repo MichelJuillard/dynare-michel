@@ -201,7 +201,11 @@ else
     for j=1:totCPU-1,
         nfiles = ceil(nBlockPerCPU(j)/MAX_nirfs_dsge);
         NumberOfIRFfiles_dsge(j+1) =NumberOfIRFfiles_dsge(j)+nfiles;
-        nfiles = ceil(nBlockPerCPU(j)/MAX_nirfs_dsgevar);
+        if MAX_nirfs_dsgevar,
+            nfiles = ceil(nBlockPerCPU(j)/MAX_nirfs_dsgevar);
+        else
+            nfiles=0;
+        end
         NumberOfIRFfiles_dsgevar(j+1) =NumberOfIRFfiles_dsgevar(j)+nfiles;
         nfiles = ceil(nBlockPerCPU(j)/MAX_nruns);
         ifil2(j+1) =ifil2(j)+nfiles;
@@ -346,7 +350,7 @@ end
 % Save the local variables.
 localVars=[];
 
- Check=options_.TeX
+ Check=options_.TeX;
  if (Check)
    localVars.varlist_TeX=varlist_TeX;
  end

@@ -277,7 +277,7 @@ while fpar<npar % Parallel 'while'!!!
    if whoiam,
        fprintf('Done! \n');
        waitbarString = [ 'Subdraw ' int2str(fpar) '/' int2str(npar) ' done.'];
-       fMessageStatus((fpar-fpar0)/(npar-fpar0),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo)
+       fMessageStatus((fpar-fpar0)/(npar-fpar0),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);
    end
 end
 

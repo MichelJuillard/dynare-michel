@@ -43,7 +43,7 @@ end
 % Reshape 'myinputs' for local computation.
 % In order to avoid confusion in the name space, the instruction struct2local(myinputs) is replaced by:
 
-Check=options_.TeX
+Check=options_.TeX;
  if (Check)
    varlist_TeX=myinputs.varlist_TeX;
  end
@@ -164,7 +164,7 @@ for i=fpar:npar,
     if whoiam,
            fprintf('Done! \n');
            waitbarString = [ 'Exog. shocks ' int2str(i) '/' int2str(npar) ' done.'];
-           fMessageStatus((i-fpar+1)/(npar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo)
+           fMessageStatus((i-fpar+1)/(npar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);
     end
 end% loop over exo_var  
  

@@ -87,16 +87,16 @@ OutputFileName = {};
 for i=fpar:nvar
     if max(abs(Mean(:,i))) > 10^(-6)
         subplotnum = subplotnum+1;
-        set(0,'CurrentFigure',hh)
+        set(0,'CurrentFigure',hh);
         subplot(nn,nn,subplotnum);
         plot([1 n2],[0 0],'-r','linewidth',0.5);
         hold on
         for k = 1:9
-            plot(1:n2,squeeze(Distrib(k,:,i)),'-g','linewidth',0.5)
+            plot(1:n2,squeeze(Distrib(k,:,i)),'-g','linewidth',0.5);
         end
-        plot(1:n2,Mean(:,i),'-k','linewidth',1)
+        plot(1:n2,Mean(:,i),'-k','linewidth',1);
         xlim([1 n2]);
-        hold off
+        hold off;
         name = deblank(varlist(i,:));
         title(name,'Interpreter','none')
     end
@@ -126,7 +126,7 @@ for i=fpar:nvar
     
     if whoiam,
         waitbarString = [ 'Variable ' int2str(i) '/' int2str(nvar) ' done.'];
-        fMessageStatus((i-fpar+1)/(nvar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo)
+        fMessageStatus((i-fpar+1)/(nvar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);
     end
     
     
