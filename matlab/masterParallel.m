@@ -502,6 +502,7 @@ dynareParallelGetFiles([fname,'_output_*.mat'],PRCDir,Parallel(1:totSlaves));
 
 
 % Create return value.
+iscrash = 0;
 for j=1:totCPU,
     load([fname,'_output_',int2str(j),'.mat'],'fOutputVar');
     delete([fname,'_output_',int2str(j),'.mat']);
@@ -510,11 +511,17 @@ for j=1:totCPU,
     end
     if isfield(fOutputVar,'error'),
         disp(['Job number ',int2str(j),'crashed with error:']);
-        error([fOutputVar.error.message]);
+        iscrash=1;
+        keyboard;
+        disp([fOutputVar.error.message]);
+    else
+        fOutVar(j)=fOutputVar;
     end
-    fOutVar(j)=fOutputVar;
 end
-
+if iscrash,
+   error('Remote jobs crashed');
+end
+            
 pause(1), % wait for all remote diary off completed
 
 % Cleanup. (Only if the computing is executed remotly).
