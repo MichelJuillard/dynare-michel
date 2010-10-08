@@ -5,15 +5,15 @@ function fParallel(fblck,nblck,whoiam,ThisMatlab,fname)
 % computing task itself.
 %
 % INPUTS
-%  o fblck [int]          index number of the first thread to run in this
+%  o fblck [int]        index number of the first thread to run in this
 %                       MATLAB instance
-%  o nblck [int]          number of threads to run in this
+%  o nblck [int]        number of threads to run in this
 %                       MATLAB instance
-%  o whoiam [int]         index number of this CPU among all CPUs in the
+%  o whoiam [int]       index number of this CPU among all CPUs in the
 %                       cluster
-%  o ThisMatlab [int]     index number of this slave machine in the cluster
+%  o ThisMatlab [int]   index number of this slave machine in the cluster
 %                       (entry in options_.parallel)
-%  o fname [string]       function to be run, containing the computing task
+%  o fname [string]     function to be run, containing the computing task
 %
 % OUTPUTS 
 %   None 
@@ -46,11 +46,10 @@ delete( [fname,'_',int2str(whoiam),'.log']);
 
 diary( [fname,'_',int2str(whoiam),'.log']);
 
-
-% configure dynare environment
+% Configure dynare environment.
 dynareroot = dynare_config();
 
-% Load input data
+% Load input data.
 load( [fname,'_input']) 
 
 if exist('fGlobalVar') && ~isempty (fGlobalVar)
@@ -60,67 +59,52 @@ if exist('fGlobalVar') && ~isempty (fGlobalVar)
         evalin('base',['global ',globalVars{j},';'])
     end
     struct2local(fGlobalVar);
-    % create global variables in the base workspace as well
-    evalin('base',['load( [''',fname,'_input''],''fGlobalVar'')']) 
+    % Create global variables in the base workspace as well.
+    evalin('base',['load( [''',fname,'_input''],''fGlobalVar'')'])
     evalin('base','struct2local(fGlobalVar)');
 end
 
-% On UNIX, mount the master working directory through SSH FS
-% if (isunix | (~matlab_ver_less_than('7.4') & ismac) ) & Parallel(ThisMatlab).Local==0,
-%     system(['mkdir ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);
-%     system(['sshfs ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,':/',fInputVar.DyMo,' ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);
-% end
-
-% Special hack for MH directory: possibly no longer needed ?????? now all
-% files are managed locally and sent backwards later on in this routine!
-% if isfield(fInputVar,'MhDirectoryName') & Parallel(ThisMatlab).Local==0,
-%     if isunix | (~matlab_ver_less_than('7.4') & ismac),
-%         fInputVar.MhDirectoryName = ['~/MasterRemoteMirror_',fname,'_',int2str(whoiam),'/',fInputVar.MhDirectoryName];
-%     else
-%         fInputVar.MhDirectoryName = ['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\',fInputVar.MhDirectoryName];
-%     end
-% end
 
 fInputVar.Parallel = Parallel;
-% Launch the routine to be run in parallel
-tic,
-% keyboard;
-fOutputVar = feval(fname, fInputVar ,fblck, nblck, whoiam, ThisMatlab);
-toc,
-if isfield(fOutputVar,'OutputFileName'),
-    OutputFileName = fOutputVar.OutputFileName;
-else
-    OutputFileName = '';
-end
 
-if(whoiam)
-    
-    % Save the output result
-    save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
-    
-    % Inform the master that the job is finished, and transfer the output data
-    if Parallel(ThisMatlab).Local
-        delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
+
+% Launch the routine to be run in parallel.
+
+try,
+    tic,
+ 
+    fOutputVar = feval(fname, fInputVar ,fblck, nblck, whoiam, ThisMatlab);
+    toc,
+    if isfield(fOutputVar,'OutputFileName'),
+        OutputFileName = fOutputVar.OutputFileName;
     else
-        if isunix || (~matlab_ver_less_than('7.4') && ismac),            
-            for j=1:size(OutputFileName,1),
-                system(['scp ',OutputFileName{j,1},OutputFileName{j,2},' ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,':',fInputVar.DyMo,'/',OutputFileName{j,1}]);
-            end
-            system(['scp ',fname,'_output_',int2str(whoiam),'.mat ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,':',fInputVar.DyMo]);
-            system(['ssh ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,' rm -f ',fInputVar.DyMo,'/P_',fname,'_',int2str(whoiam),'End.txt']);
-%             system(['fusermount -u ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);
-%             system(['rm -r ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);      
-        else
-            for j=1:size(OutputFileName,1),
-                copyfile([OutputFileName{j,1},OutputFileName{j,2}],['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\',OutputFileName{j,1}])
-            end
-            copyfile([fname,'_output_',int2str(whoiam),'.mat'],['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end)]);
-            delete(['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\P_',fname,'_',int2str(whoiam),'End.txt']);
-        end
+        OutputFileName = '';
     end
+    if(whoiam)
+        
+        % Save the output result.
+        
+        save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
+       
+    end
+    
+    disp(['fParallel ',int2str(whoiam),' completed.'])
+catch ME
+    disp(['fParallel ',int2str(whoiam),' crashed.'])
+    fOutputVar.error = ME;
+    save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
+    waitbarString = fOutputVar.error.message;
+    %       waitbarTitle=['Metropolis-Hastings ',options_.parallel(ThisMatlab).PcName];
+    if Parallel(ThisMatlab).Local,
+        waitbarTitle='Local ';
+    else
+        waitbarTitle=[Parallel(ThisMatlab).PcName];
+    end
+    fMessageStatus(NaN,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
+    
 end
-
-disp(['fParallel ',int2str(whoiam),' completed.'])
 diary off;
+delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
+
 
 exit;

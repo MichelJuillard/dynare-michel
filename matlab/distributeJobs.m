@@ -1,4 +1,4 @@
-function [nCPU, totCPU, nBlockPerCPU] = distributeJobs(Parallel, fBlock, nBlock)
+function [nCPU, totCPU, nBlockPerCPU, totSLAVES] = distributeJobs(Parallel, fBlock, nBlock)
 % PARALLEL CONTEXT
 % In parallel context this function is used to determine the total number of available CPUs,
 % and the number of threads to run on each CPU.
@@ -46,7 +46,9 @@ if (nBlock-offset0)>totCPU,
     diff = mod((nBlock-offset0),totCPU);
     nBlockPerCPU(1:diff) = ceil((nBlock-offset0)/totCPU);
     nBlockPerCPU(diff+1:totCPU) = floor((nBlock-offset0)/totCPU);
+    totSLAVES=length(Parallel);
 else
     nBlockPerCPU(1:nBlock-offset0)=1;
     totCPU = nBlock-offset0;
+    totSLAVES = min(find(cumsum(nCPU)>=totCPU));
 end

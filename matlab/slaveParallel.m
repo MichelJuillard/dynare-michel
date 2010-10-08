@@ -126,6 +126,7 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
         fInputVar.Parallel = Parallel;
         
         % Launch the routine to be run in parallel.
+        try,
         tic,
         fOutputVar = feval(fname, fInputVar ,fblck, nblck, whoiam, ThisMatlab);
         toc,
@@ -141,43 +142,35 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
             save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
 
             % Inform the master that the job is finished, and transfer the output data
-            if Parallel(ThisMatlab).Local
-                delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
-            else
-                if isunix || (~matlab_ver_less_than('7.4') && ismac),
-                    for j=1:size(OutputFileName,1),
-                        system(['scp ',OutputFileName{j,1},OutputFileName{j,2},' ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,':',fInputVar.DyMo,'/',OutputFileName{j,1}]);
-                    end
-                    system(['scp ',fname,'_output_',int2str(whoiam),'.mat ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,':',fInputVar.DyMo]);
-                    system(['ssh ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,' rm -f ',fInputVar.DyMo,'/P_',fname,'_',int2str(whoiam),'End.txt']);
-                    %                 system(['fusermount -u ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);
-                    %                 system(['rm -r ~/MasterRemoteMirror_',fname,'_',int2str(whoiam)]);
-                else
-                    for j=1:size(OutputFileName,1),
-                        copyfile([OutputFileName{j,1},OutputFileName{j,2}],['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\',OutputFileName{j,1}])
-                    end
-                    copyfile([fname,'_output_',int2str(whoiam),'.mat'],['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end)]);
-                    delete(['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\P_',fname,'_',int2str(whoiam),'End.txt']);
-                end
-            end
+            delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
         end
 
         disp(['Job ',fname,' on CPU ',int2str(whoiam),' completed.'])
-        t0 =clock; % re-set waiting time of 20 mins
+        t0 =clock; % Re-set waiting time of 20 mins
+        catch ME
+            disp(['Job ',fname,' on CPU ',int2str(whoiam),' crashed.'])
+            fOutputVar.error = ME;
+            save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
+            waitbarString = fOutputVar.error.message;
+            if Parallel(ThisMatlab).Local,
+                waitbarTitle='Local ';
+            else
+                waitbarTitle=[Parallel(ThisMatlab).PcName];
+            end
+            fMessageStatus(NaN,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
+            delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
+            break
+            
+        end
     end
-    fslave = dir( ['slaveParallel_input',int2str(whoiam),'.mat']); % check if Master asks to exit
+    fslave = dir( ['slaveParallel_input',int2str(whoiam),'.mat']); % Check if Master asks to exit
 end
 
 
-if Parallel(ThisMatlab).Local
-    delete(['P_slave_',int2str(whoiam),'End.txt']);
-else
-    if isunix || (~matlab_ver_less_than('7.4') && ismac),
-        system(['ssh ',Parallel(ThisMatlab).user,'@',fInputVar.MasterName,' rm -f ',fInputVar.DyMo,'/P_slave_',int2str(whoiam),'End.txt']);
-    else
-        delete(['\\',fInputVar.MasterName,'\',fInputVar.DyMo(1),'$\',fInputVar.DyMo(4:end),'\P_slave_',int2str(whoiam),'End.txt']);
-    end
-end
 disp(['slaveParallel on CPU ',int2str(whoiam),' completed.'])
 diary off;
+
+delete(['P_slave_',int2str(whoiam),'End.txt']);
+
+
 exit;

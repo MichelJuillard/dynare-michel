@@ -39,11 +39,13 @@ if nargin<5,
     Parallel.Local=1;
 end
 
-save(['comp_status_',funcName,int2str(njob),'.mat'],'prtfrc','njob','waitbarString','waitbarTitle');
-if Parallel.Local==0,
-    if isunix || (~matlab_ver_less_than('7.4') && ismac),
-        system(['scp comp_status_',funcName,int2str(njob),'.mat ',Parallel.user,'@',MasterName,':',DyMo]);
-    else
-        copyfile(['comp_status_',funcName,int2str(njob),'.mat'],['\\',MasterName,'\',DyMo(1),'$\',DyMo(4:end),'\']);
-    end
+try
+    save(['comp_status_',funcName,int2str(njob),'.mat'],'prtfrc','njob','waitbarString','waitbarTitle');
+catch  
 end
+
+fslave = dir( ['slaveParallel_input',int2str(njob),'.mat']);
+if isempty(fslave),
+    error('Master asked to break the job')
+end
+
