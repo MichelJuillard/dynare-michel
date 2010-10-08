@@ -44,6 +44,7 @@ addpath([dynareroot '/kalman/smoother'])
 addpath([dynareroot '/AIM/'])
 addpath([dynareroot '/partial_information/'])
 addpath([dynareroot '/swz/'])
+addpath([dynareroot '/parallel/'])
 
 % For functions that exist only under some Octave versions
 % or some MATLAB versions, and for which we provide some replacement functions
