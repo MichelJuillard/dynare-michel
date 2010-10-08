@@ -102,7 +102,7 @@ for i=fpar:nvar
     end
     
     if isstruct(options_.parallel)
-        if options_.parallel.Local==0
+        if Parallel(ThisMatlab).Local==0
              DirectoryName = CheckPath('Output');
         end
     end
