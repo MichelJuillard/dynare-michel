@@ -101,7 +101,7 @@ for i=fpar:nvar
         title(name,'Interpreter','none')
     end
     
-    if isstruct(options_.parallel)
+    if whoiam,
         if Parallel(ThisMatlab).Local==0
              DirectoryName = CheckPath('Output');
         end
