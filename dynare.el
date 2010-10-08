@@ -1,6 +1,6 @@
 ;;; dynare.el --- major mode to edit .mod files for dynare
 ;; Created: 2010 Sep 10
-;; Version: 0.1
+;; Version: 0.2
 
 ;; Copyright (C) 2010 Yannick Kalantzis
 ;;
@@ -31,15 +31,28 @@
 ;;   (autoload 'dynare-mode "dynare" "Enter dynare mode." t)
 ;;   (setq auto-mode-alist (cons '("\\.mod\\'" . dynare-mode) auto-mode-alist))
 
+;;; Commentary:
+;;
+;;   Use C-c ; to comment/uncomment (or the default M-;).
+
 ;;; Changelog
-;;  2010-09-07 by Yannick Kalantzis
-;;    Minor changes. Add `require'. Add builtin operators `;' and `='. 
-;;    Highlight lags and leads. 
-;;  2010-09-06 by Yannick Kalantzis 
-;;    Created. 
-;;    Reproduces Xah Lee's instructions. 
-;;    See <http://xahlee.org/emacs/elisp_syntax_coloring.html>
-;;    Very basic syntax highlighting: comments, some keywords.
+;;
+;;  2010-10-08 by Yannick Kalantzis v0.2
+;;    Change syntax table: decimal numbers are words, mathematical
+;;    operators are punctuation. `@' and `#' are symbols.
+;;    Better font-lock for var, varexo, and parameters declaration,
+;;    and for macrocommands.
+;;    Add new keybinding for comment/uncomment: C-c ;
+;;
+;;  2010-09-07 by Yannick Kalantzis 
+;;    Minor changes. Add `require'. Add builtin operators `;' and `='.
+;;    Highlight lags and leads.
+;;
+;;  2010-09-06 by Yannick Kalantzis v0.1
+;;    Created.  
+;;    Reproduces Xah Lee's instructions.  See
+;;    <http://xahlee.org/emacs/elisp_syntax_coloring.html>. Very basic
+;;    syntax highlighting: comments, some keywords.
 
 ;;; TODO
 ;;    - indentation 
@@ -59,11 +72,19 @@ For detail, see `comment-dwim'."
 
 ;; define several class of keywords
 (defvar dynare-keywords
-  '("var" "varexo" "parameters" "model" "initval" "endval" "end" "shocks" "periods" "values" "resid" "for" "endfor" "define" "in") 
+  '("model" "initval" "endval" "end" "shocks" "periods" "values") 
   "dynare keywords.")
 
+(defvar dynare-constructs-regexp
+  "^[\s-]*\\(var\\|varexo\\|parameters\\)[a-zA-Z0-9,\s-@{}]*;"
+  "regexp for dynare constructs.")
+
+(defvar dynare-macrocommand-regexp
+  "\\(@#define\\|@#include\\|@#endfor\\|@#for\\s-+[a-zA-Z0-9]+\\s-+in\\s-+[a-zA-Z0-9]+\\|@{[a-zA-Z0-9]+}\\)"
+  "regexp for dynare macrocommand.")
+
 (defvar dynare-functions
-  '("simul" "stoch_simul" "steady" "check" "rplot" "dynatype" "dynasave")
+  '("simul" "stoch_simul" "steady" "check" "rplot" "dynatype" "dynasave" "resid")
   "dynare functions.")
 
 ;; create the regex string for each class of keywords
@@ -78,10 +99,12 @@ For detail, see `comment-dwim'."
 ;; each class of keyword is given a particular face
 (setq dynare-font-lock-keywords
   `(
+    (,dynare-macrocommand-regexp . font-lock-builtin-face)
     (,dynare-functions-regexp . font-lock-function-name-face)
     (,dynare-keywords-regexp . font-lock-keyword-face)
+    (,dynare-constructs-regexp . font-lock-keyword-face)
     (";\\|=" . font-lock-builtin-face)
-    ("(\\(\\+\\|-\\)[1-9])" . font-lock-constant-face)
+    ("(\\(+\\|-\\)[1-9])" . font-lock-constant-face)
     ))
 
 ;; define the major mode
@@ -92,6 +115,22 @@ For detail, see `comment-dwim'."
 
   ;; modify the keymap
   (define-key dynare-mode-map [remap comment-dwim] 'dynare-comment-dwim)
+  (define-key dynare-mode-map (kbd "C-c ;") 'dynare-comment-dwim)
+
+
+  ;; decimal numbers should be treated as words
+  (modify-syntax-entry ?\. "w" dynare-mode-syntax-table) 
+
+  ;; mathematical operators are treated as punctuation
+  (modify-syntax-entry ?+ "." dynare-mode-syntax-table)
+  (modify-syntax-entry ?- "." dynare-mode-syntax-table)
+  (modify-syntax-entry ?* "." dynare-mode-syntax-table)
+  (modify-syntax-entry ?/ "." dynare-mode-syntax-table)
+  (modify-syntax-entry ?^ "." dynare-mode-syntax-table)
+
+  ;; symbols for the macrolanguage
+  (modify-syntax-entry ?@ "_" dynare-mode-syntax-table)
+  (modify-syntax-entry ?# "_" dynare-mode-syntax-table)
 
   ;; define C++ style comment  “/* ... */” and “// ...” 
   (modify-syntax-entry ?\/ ". 124b" dynare-mode-syntax-table) 
