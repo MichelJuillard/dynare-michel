@@ -36,11 +36,15 @@ for indPC=1:length(Parallel),
     if Parallel(indPC).Local==0,
         if isunix || (~matlab_ver_less_than('7.4') && ismac),
             for jfil=1:size(NamFileInput,1),
-                system(['scp ',Parallel(indPC).user,'@',Parallel(indPC).PcName,':',Parallel(indPC).RemoteFolder,'/',PRCDir,'/',NamFileInput{jfil,1},NamFileInput{jfil,2},' ',NamFileInput{jfil,1}]);
+                if ~isempty(dynareParallelDir(NamFileInput{jfil,2},[PRCDir,filesep,NamFileInput{jfil,1}],Parallel(indPC))),
+                    system(['scp ',Parallel(indPC).user,'@',Parallel(indPC).PcName,':',Parallel(indPC).RemoteFolder,'/',PRCDir,'/',NamFileInput{jfil,1},NamFileInput{jfil,2},' ',NamFileInput{jfil,1}]);
+                end
             end
         else
-            for jfil=1:size(NamFileInput,1)
-                copyfile(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\',PRCDir,'\',NamFileInput{jfil,1},NamFileInput{jfil,2}],NamFileInput{jfil,1})
+            for jfil=1:size(NamFileInput,1),
+                if ~isempty(dynareParallelDir(NamFileInput{jfil,2},[PRCDir,filesep,NamFileInput{jfil,1}],Parallel(indPC))),
+                    copyfile(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\',PRCDir,'\',NamFileInput{jfil,1},NamFileInput{jfil,2}],NamFileInput{jfil,1})
+                end
             end
         end
     end
