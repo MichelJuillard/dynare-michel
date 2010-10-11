@@ -35,6 +35,8 @@ OCTAVE_MODS = \
 	k_order_perturbation/fs2000k2.mod \
 	k_order_perturbation/fs2000k_1.mod \
 	k_order_perturbation/fs2000k3.mod \
+	partial_information/PItest3aHc0PCLsimModPiYrVarobsAll.mod \
+	partial_information/PItest3aHc0PCLsimModPiYrVarobsCNR.mod \
 	arima/mod1.mod \
 	arima/mod1a.mod \
 	arima/mod2.mod \
