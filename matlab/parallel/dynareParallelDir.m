@@ -29,9 +29,16 @@ for indPC=1:length(Parallel),
     if isunix || (~matlab_ver_less_than('7.4') && ismac),
         if Parallel(indPC).Local==0,
             [check, ax]=system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' ls ',Parallel(indPC).RemoteFolder,'/',PRCDir,'/',filename]);
+            if check ~ 0
+                ax=[];
+            end
         else
-            ax=ls(filename);
-
+            try
+                ax=ls(filename);
+            catch
+                ax=[];
+            end
+            
         end
         dirlist = [dirlist, ax];
     else
@@ -40,6 +47,6 @@ for indPC=1:length(Parallel),
         else
             ax=ls(filename);
         end
-    dirlist = [dirlist; ax];
+        dirlist = [dirlist; ax];
     end
 end
