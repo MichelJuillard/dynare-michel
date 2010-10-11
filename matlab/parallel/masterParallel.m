@@ -512,7 +512,8 @@ for j=1:totCPU,
     load([fname,'_output_',int2str(j),'.mat'],'fOutputVar');
     delete([fname,'_output_',int2str(j),'.mat']);
     if isfield(fOutputVar,'OutputFileName'),
-        dynareParallelGetFiles([fOutputVar.OutputFileName],PRCDir,Parallel(1:totSlaves));
+        indPC=min(find(nCPU>=j));
+        dynareParallelGetFiles([fOutputVar.OutputFileName],PRCDir,Parallel(indPC));
     end
     if isfield(fOutputVar,'error'),
         disp(['Job number ',int2str(j),' crashed with error:']);
