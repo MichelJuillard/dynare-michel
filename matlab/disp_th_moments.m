@@ -37,9 +37,7 @@ end
 [oo_.gamma_y,stationary_vars] = th_autocovariances(dr,ivar,M_,options_);
 m = dr.ys(ivar);
 non_stationary_vars = setdiff(1:length(ivar),stationary_vars);
-ivar1 = intersect(non_stationary_vars,ivar);
-m(ivar1) = NaN;
-
+m(non_stationary_vars) = NaN;
 
 i1 = find(abs(diag(oo_.gamma_y{1})) > 1e-12);
 s2 = diag(oo_.gamma_y{1});

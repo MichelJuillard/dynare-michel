@@ -19,13 +19,12 @@ function [Gamma_y,stationary_vars] = th_autocovariances(dr,ivar,M_,options_,node
 %                                      Gamma_y{nar+2}   [double]  Variance decomposition.  
 %                                      Gamma_y{nar+3}   [double]  Expectation of the endogenous variables associated with a second 
 %                                                                 order approximation.    
-%   stationary_vars   [integer]      Vector of indices of stationary
-%                                           variables in declaration order
+%   stationary_vars   [integer]      Vector of indices of stationary variables (as a subset of 1:length(ivar))
 %
 % SPECIAL REQUIREMENTS
 %   
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
