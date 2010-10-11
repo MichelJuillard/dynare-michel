@@ -59,7 +59,7 @@ if ~options_.noprint %options_.nomoments == 0
     labels = deblank(M_.endo_names(ivar,:));
     lh = size(labels,2)+2;
     dyntable(title,headers,labels,z,lh,11,4);
-    if M_.exo_nbr > 1
+    if M_.exo_nbr > 1 && size(stationary_vars, 1) > 0
         disp(' ')
         title='VARIANCE DECOMPOSITION (in percent)';
         if options_.hp_filter
@@ -82,7 +82,7 @@ if ~options_.noprint %options_.nomoments == 0
     end
 end
 
-if options_.nocorr == 0
+if options_.nocorr == 0 && size(stationary_vars, 1) > 0
     corr = oo_.gamma_y{1}(i1,i1)./(sd(i1)*sd(i1)');
     if ~options_.noprint,
     disp(' ')
@@ -96,7 +96,7 @@ if options_.nocorr == 0
     dyntable(title,headers,labels,corr,lh,8,4);
     end
   end
-    if options_.ar > 0
+    if options_.ar > 0 && size(stationary_vars, 1) > 0
     z=[];
     for i=1:options_.ar
         oo_.autocorr{i} = oo_.gamma_y{i+1};

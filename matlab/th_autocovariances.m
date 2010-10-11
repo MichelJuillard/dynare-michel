@@ -136,7 +136,7 @@ if options_.hp_filter == 0
         end
     end
     % variance decomposition
-    if ~nodecomposition && M_.exo_nbr > 1
+    if ~nodecomposition && M_.exo_nbr > 1 && size(stationary_vars, 1) > 0
         Gamma_y{nar+2} = zeros(nvar,M_.exo_nbr);
         SS(exo_names_orig_ord,exo_names_orig_ord)=M_.Sigma_e+1e-14*eye(M_.exo_nbr);
         cs = chol(SS)';
