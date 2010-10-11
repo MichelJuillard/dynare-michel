@@ -134,6 +134,7 @@ private:
   long int nop_all, nop1, nop2;
   map<pair<pair<int, int>, int>, int> IM_i;
 protected:
+  vector<double> residual;
   int u_count_alloc, u_count_alloc_save;
   double *u, *y, *ya;
   vector<double*> jac;

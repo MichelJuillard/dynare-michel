@@ -30,8 +30,8 @@ function steady_()
 global M_ oo_ it_ options_
 
 if options_.bytecode && ...
-  (options_.solve_algo ~= 1 && options_.solve_algo ~= 2 && options_.solve_algo ~= 3 && options_.solve_algo ~= 4 && options_.solve_algo ~= 5)
-    error('STEADY: for the moment, you must use solve_algo=5 with bytecode option')
+  (options_.solve_algo < 0 || options_.solve_algo > 8)
+    error('STEADY: for the moment, you must use solve_algo=1, 2, 3, 4, 5, 6, 7, 8 with bytecode option')
 end
 if ~options_.bytecode && options_.solve_algo == 5
     error('STEADY: you can''t yet use solve_algo=5 without bytecode option')
@@ -123,8 +123,28 @@ elseif options_.block && ~options_.bytecode
                             oo_.exo_det_steady_state], M_.params);
     end
 elseif options_.bytecode
-    [check, oo_.steady_state] = bytecode('static');
-    mexErrCheck('bytecode', check);
+    if options_.solve_algo > 4
+        [check, oo_.steady_state] = bytecode('static');
+        mexErrCheck('bytecode', check);
+    else
+        for b = 1:size(M_.blocksMFS,1)
+            n = size(M_.blocksMFS{b}, 1);
+            ss = oo_.steady_state;
+            if n ~= 0
+                [y, check] = dynare_solve('block_bytecode_mfs_steadystate', ...
+                                       ss(M_.blocksMFS{b}), ...
+                                      options_.jacobian_flag, b);
+                if check ~= 0
+                    error(['STEADY: convergence problems in block ' int2str(b)])
+                end
+                oo_.steady_state(M_.blocksMFS{b}) = y;
+            else
+              [check, r, g1, oo_.steady_state] = feval('bytecode', oo_.steady_state, ...
+                                                [oo_.exo_steady_state; ...
+                                  oo_.exo_det_steady_state], M_.params, 1, options_.solve_algo, 'static', 'evaluate', ['block = ' int2str(b)]);
+            end;
+        end
+    end
 else
     [oo_.steady_state,check] = dynare_solve([M_.fname '_static'],...
                                             oo_.steady_state,...
