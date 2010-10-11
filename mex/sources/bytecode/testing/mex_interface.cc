@@ -321,7 +321,9 @@ mxDuplicateArray(const mxArray *array)
       memcpy(Array->data , array->data, Size);
       break;
     default:
-      mexErrMsgTxt("Array type not handle");
+      ostringstream tmp;
+      tmp << "Array type not handle: " << array->type << "\n";
+      mexErrMsgTxt(tmp.str());
     }
   return(Array);
 }
@@ -421,7 +423,9 @@ read_Array(FILE *fid)
       Array = read_char_array(fid);
       break;
     default:
-      mexErrMsgTxt("Array type not handle in read_Array\n");
+      ostringstream tmp;
+      tmp << "Array type not handle in read_Array: " << array_type << "\n";
+      mexErrMsgTxt(tmp.str());
     }
   return(Array);
 }
