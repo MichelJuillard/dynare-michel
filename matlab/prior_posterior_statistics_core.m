@@ -94,6 +94,11 @@ end
 DirectoryName = CheckPath('metropolis');
 
 RemoteFlag = 0;
+for j=1:length(Parallel),
+    if Parallel(j).Local==0,
+        RemoteFlag = 1;
+    end
+end
 if whoiam
     ifil=ifil(:,whoiam);
     waitbarString = ['Please wait... Bayesian (posterior) subdraws (' int2str(fpar) 'of' int2str(B) ')...'];
@@ -101,7 +106,6 @@ if whoiam
         waitbarTitle=['Local '];
     else
         waitbarTitle=[Parallel(ThisMatlab).PcName];
-        RemoteFlag = 1;
     end
     fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);
 else
