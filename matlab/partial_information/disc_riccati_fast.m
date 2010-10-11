@@ -28,7 +28,7 @@
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if nargin == 4 | isempty( ch ) == 1 
+if nargin == 4 || isempty( ch ) == 1 
     flag_ch = 0; 
 else 
     flag_ch = 1; 

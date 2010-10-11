@@ -11,7 +11,7 @@
 % Joe Pearlman and Alejandro Justiniano 
 % 3/5/2005 
 % =================================================================
-if nargin == 2 | isempty( ch ) == 1 
+if nargin == 2 || isempty( ch ) == 1 
     flag_ch = 0; 
 else 
     flag_ch = 1; 
