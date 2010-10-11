@@ -1,4 +1,4 @@
-function  AutoCOR_YRk=PCL_Part_info_irmoments( H, varobs, dr,ivar)
+function  AutoCOR_YRk=PCL_Part_info_moments( H, varobs, dr,ivar)
 % sets up parameters and calls part-info kalman filter
 % developed by G Perendia, July 2006 for implementation from notes by Prof. Joe Pearlman to 
 % suit partial information RE solution in accordance with, and based on, the 
@@ -31,7 +31,10 @@ function  AutoCOR_YRk=PCL_Part_info_irmoments( H, varobs, dr,ivar)
     warning_old_state = warning;
     warning off
 
-    [junk,OBS] = ismember(varobs,M_.endo_names,'rows');
+    OBS = [];
+    for i=1:rows(varobs)
+        OBS = [OBS find(strcmp(deblank(varobs(i,:)), cellstr(M_.endo_names))) ];
+    end
     NOBS = length(OBS);
     
     G1=dr.PI_ghx;

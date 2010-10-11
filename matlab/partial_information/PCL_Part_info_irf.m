@@ -29,7 +29,10 @@ function  y=PCL_Part_info_irf( H, varobs, ivar, M_, dr, irfpers,ii)
 % The jump variables have dimension NETA
         
         
-    [junk,OBS] = ismember(varobs,M_.endo_names,'rows');
+    OBS = [];
+    for i=1:rows(varobs)
+        OBS = [OBS find(strcmp(deblank(varobs(i,:)), cellstr(M_.endo_names))) ];
+    end
     NOBS = length(OBS);
     
         G1=dr.PI_ghx;
