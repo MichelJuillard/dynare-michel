@@ -236,17 +236,6 @@ end
 ifil = fout(end).ifil;
 
 
-
-if exist('OCTAVE_VERSION')
-    printf('\n');
-    diary on;
-else
-    if exist('h')
-        close(h)
-    end
-    
-end
-
 stock_gend=gend;
 stock_data=Y;
 save([DirectoryName '/' M_.fname '_data.mat'],'stock_gend','stock_data');

@@ -94,12 +94,12 @@ end
 DirectoryName = CheckPath('metropolis');
 
 RemoteFlag = 0;
-for j=1:length(Parallel),
-    if Parallel(j).Local==0,
-        RemoteFlag = 1;
-    end
-end
 if whoiam
+    for j=1:length(Parallel),
+        if Parallel(j).Local==0,
+            RemoteFlag = 1;
+        end
+    end
     ifil=ifil(:,whoiam);
     waitbarString = ['Please wait... Bayesian (posterior) subdraws (' int2str(fpar) 'of' int2str(B) ')...'];
     if Parallel(ThisMatlab).Local,
@@ -317,4 +317,14 @@ OutputFileName_param;
 OutputFileName_forc_mean;
 OutputFileName_forc_point];
 % OutputFileName_moments];
+end
+
+if exist('OCTAVE_VERSION')
+    printf('\n');
+    diary on;
+else
+    if exist('h')
+        close(h)
+    end
+    
 end
