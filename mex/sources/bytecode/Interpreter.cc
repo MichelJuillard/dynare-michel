@@ -146,7 +146,7 @@ Interpreter::get_variable(const SymbolType variable_type, const unsigned int var
 
 
 string
-Interpreter::error_location(bool evaluate, bool steady_state)
+Interpreter::error_location(bool evaluate, bool steady_state, int size, int block_num)
 {
   stringstream Error_loc("");
   if (!steady_state)
@@ -199,7 +199,7 @@ Interpreter::error_location(bool evaluate, bool steady_state)
           return("???");
           break;
       }
-  Error_loc << endl << add_underscore_to_fpe("      " + print_expression(it_code_expr, evaluate));
+  Error_loc << endl << add_underscore_to_fpe("      " + print_expression(it_code_expr, evaluate, size, block_num, steady_state));
   return(Error_loc.str());
 }
 
@@ -219,12 +219,12 @@ Interpreter::pow1(double a, double b)
 double
 Interpreter::divide(double a, double b)
 {
-  double r = a/ b;
+  double r = a / b;
   if (isinf(r))
     {
       res1 = NAN;
       r = 1e70;
-      throw PowExceptionHandling(a, b);
+      throw DivideExceptionHandling(a, b);
     }
   return r;
 }
@@ -257,9 +257,9 @@ Interpreter::log10_1(double a)
 
 
 string
-Interpreter::print_expression(it_code_type it_code, bool evaluate)
+Interpreter::print_expression(it_code_type it_code, bool evaluate, int size, int block_num, bool steady_state)
 {
-  int var, lag = 0, op;
+  int var, lag = 0, op, eq;
   stack<string> Stack;
   stack<double> Stackf;
   ostringstream tmp_out, tmp_out2;
@@ -272,6 +272,17 @@ Interpreter::print_expression(it_code_type it_code, bool evaluate)
   unsigned int dvar1, dvar2, dvar3;
   int lag1, lag2, lag3;
   size_t found;
+  double *jacob = NULL, *jacob_other_endo = NULL, *jacob_exo = NULL, *jacob_exo_det = NULL;
+  if (evaluate)
+    {
+      jacob = mxGetPr(jacobian_block[block_num]);
+      if (!steady_state)
+        {
+          jacob_other_endo = mxGetPr(jacobian_other_endo_block[block_num]);
+          jacob_exo = mxGetPr(jacobian_exo_block[block_num]);
+          jacob_exo_det = mxGetPr(jacobian_det_exo_block[block_num]);
+        }
+    }
 
   while (go_on)
     {
@@ -694,6 +705,18 @@ Interpreter::print_expression(it_code_type it_code, bool evaluate)
           g1[var] = Stackf.top();
           Stackf.pop();
           break;
+        case FSTPG2:
+          go_on = false;
+          //store in derivative (g) variable from the processor
+          eq = ((FSTPG2_ *) it_code->second)->get_row();
+          var = ((FSTPG2_ *) it_code->second)->get_col();
+          tmp_out.str("");
+          tmp_out << "jacob[" << eq+size*var+1 << "] = " << Stack.top();
+          Stack.pop();
+          jacob[eq + size*var] = Stackf.top();
+          Stackf.pop();
+
+          break;
         case FBINARY:
           op = ((FBINARY_ *) it_code->second)->get_op_type();
           v2 = Stack.top();
@@ -1111,21 +1134,19 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
 #ifdef DEBUG
   mexPrintf("compute_block_time\n");
 #endif
-  #ifndef DEBUG_EX
-  if (evaluate && !steady_state)
+  if (evaluate /*&& !steady_state*/)
     {
       jacob = mxGetPr(jacobian_block[block_num]);
-      mexPrintf("jacobian_block[%d]=%x\n",block_num, jacobian_block[block_num]);
-      jacob_other_endo = mxGetPr(jacobian_other_endo_block[block_num]);
-      jacob_exo = mxGetPr(jacobian_exo_block[block_num]);
-      jacob_exo_det = mxGetPr(jacobian_det_exo_block[block_num]);
+      if (!steady_state)
+        {
+          jacob_other_endo = mxGetPr(jacobian_other_endo_block[block_num]);
+          jacob_exo = mxGetPr(jacobian_exo_block[block_num]);
+          jacob_exo_det = mxGetPr(jacobian_det_exo_block[block_num]);
+        }
     }
-  #endif
 
-  //feclearexcept (FE_ALL_EXCEPT);
   while (go_on)
     {
-      //tmp_it_code = it_code;
       switch (it_code->first)
         {
         case FNUMEXPR:
@@ -1343,7 +1364,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
             case eParameter:
               var = ((FLDSV_ *) it_code->second)->get_pos();
 #ifdef DEBUG
-              mexPrintf("FLDSV Param[var=%d]\n",var);
+              mexPrintf("FLDSV Param[var=%d]=%f\n",var, params[var]);
               tmp_out << " params[" << var << "](" << params[var] << ")";
 #endif
               Stack.push(params[var]);
@@ -1351,7 +1372,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
             case eEndogenous:
               var = ((FLDSV_ *) it_code->second)->get_pos();
 #ifdef DEBUG
-              mexPrintf("FLDSV y[var=%d]\n",var);
+              mexPrintf("FLDSV y[var=%d]=%f\n",var, ya[var]);
               tmp_out << " y[" << var << "](" << y[var] << ")";
 #endif
               if (evaluate)
@@ -1439,10 +1460,13 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
           //load a temporary variable in the processor
           var = ((FLDST_ *) it_code->second)->get_pos();
 #ifdef DEBUG
-          mexPrintf("FLDST T[%d]\n",var);
-          tmp_out << " T[" << var << "](" << T[var] << ")";
+          mexPrintf("FLDST T[%d]",var);
 #endif
           Stack.push(T[var]);
+#ifdef DEBUG
+          mexPrintf("=%f\n", T[var]);
+          tmp_out << " T[" << var << "](" << T[var] << ")";
+#endif
           break;
         case FLDU:
           //load u variable in the processor
@@ -1577,6 +1601,9 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
           break;
         case FSTPT:
           //store in a temporary variable from the processor
+#ifdef DEBUG
+          mexPrintf("FSTPT\n");
+#endif
           var = ((FSTPT_ *) it_code->second)->get_pos();
           T[var*(periods+y_kmin+y_kmax)+it_] = Stack.top();
 #ifdef DEBUG
@@ -1584,15 +1611,22 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
           mexPrintf(" T[%d, %d](%f)=%s\n", it_, var, T[var*(periods+y_kmin+y_kmax)+it_], tmp_out.str().c_str());
           tmp_out.str("");
 #endif
+
           Stack.pop();
           break;
         case FSTPST:
           //store in a temporary variable from the processor
+#ifdef DEBUG
+          mexPrintf("FSTPST\n");
+#endif
           var = ((FSTPST_ *) it_code->second)->get_pos();
+#ifdef DEBUG
+          mexPrintf("var=%d\n",var);
+#endif
           T[var] = Stack.top();
 #ifdef DEBUG
           tmp_out << "=>";
-          mexPrintf(" T[%d](%f)=%s\n", var, T[var], tmp_out.str().c_str());
+          mexPrintf(" T[%d](%f)=%s T[2]=%f\n", var, T[var], tmp_out.str().c_str(), T[2]);
           tmp_out.str("");
 #endif
           Stack.pop();
@@ -1601,9 +1635,12 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
           //store in u variable from the processor
           var = ((FSTPU_ *) it_code->second)->get_pos();
           var += Per_u_;
-          u[var] = Stack.top();
 #ifdef DEBUG
           mexPrintf("FSTPU\n");
+          mexPrintf("var=%d\n",var);
+#endif
+          u[var] = Stack.top();
+#ifdef DEBUG
           tmp_out << "=>";
           mexPrintf(" u[%d](%f)=%s\n", var, u[var], tmp_out.str().c_str());
           tmp_out.str("");
@@ -1628,16 +1665,25 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
         case FSTPR:
           //store in residual variable from the processor
           var = ((FSTPR_ *) it_code->second)->get_pos();
+#ifdef DEBUG
+          tmp_out << "=>";
+          mexPrintf(" r[%d]", var);
+          tmp_out.str("");
+#endif
           r[var] = Stack.top();
 #ifdef DEBUG
           tmp_out << "=>";
-          mexPrintf(" r[%d](%f)=%s\n", var, r[var], tmp_out.str().c_str());
+          mexPrintf("(%f)=%s\n", r[var], tmp_out.str().c_str());
           tmp_out.str("");
 #endif
           Stack.pop();
           break;
         case FSTPG:
           //store in derivative (g) variable from the processor
+#ifdef DEBUG
+          mexPrintf("FSTPG\n");
+          mexEvalString("drawnow;");
+#endif
           var = ((FSTPG_ *) it_code->second)->get_pos();
           g1[var] = Stack.top();
 #ifdef DEBUG
@@ -1648,6 +1694,23 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
           Stack.pop();
           break;
 
+        case FSTPG2:
+            //store in the jacobian matrix
+          rr = Stack.top();
+          if (EQN_type != FirstEndoDerivative)
+            {
+              ostringstream tmp;
+              tmp << " in compute_block_time, impossible case " << EQN_type << " not implement in static jacobian\n";
+              throw FatalExceptionHandling(tmp.str());
+            }
+          eq = ((FSTPG2_ *) it_code->second)->get_row();
+          var = ((FSTPG2_ *) it_code->second)->get_col();
+#ifdef DEBUG
+          mexPrintf("FSTPG2 eq=%d, var=%d\n", eq, var);
+          mexEvalString("drawnow;");
+#endif
+          jacob[eq + size*var] = rr;
+          break;
         case FSTPG3:
           //store in derivative (g) variable from the processor
 #ifdef DEBUG
@@ -1662,7 +1725,6 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
               var = ((FSTPG3_ *) it_code->second)->get_col();
               lag = ((FSTPG3_ *) it_code->second)->get_lag();
               pos_col = ((FSTPG3_ *) it_code->second)->get_col_pos();
-              mexPrintf("jacob[%d(size=%d*pos_col=%d + eq=%d )]=%f\n",eq + size*pos_col, size, pos_col, eq, rr);
               jacob[eq + size*pos_col] = rr;
               break;
             case FirstOtherEndoDerivative:
@@ -1711,6 +1773,9 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
           Stack.pop();
           v1 = Stack.top();
           Stack.pop();
+#ifdef DEBUG
+          mexPrintf("FBINARY, op=%d\n", op);
+#endif
           switch (op)
             {
             case oPlus:
@@ -1733,13 +1798,16 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
               break;
             case oDivide:
               double tmp;
+#ifdef DEBUG
+              mexPrintf("v1=%f / v2=%f\n", v1, v2);
+#endif
               try
                 {
                   tmp = divide(v1 , v2);
                 }
               catch(FloatingPointExceptionHandling &fpeh)
                 {
-                  mexPrintf("%s      %s\n",fpeh.GetErrorMsg().c_str(),error_location(evaluate, steady_state).c_str());
+                  mexPrintf("%s      %s\n",fpeh.GetErrorMsg().c_str(),error_location(evaluate, steady_state, size, block_num).c_str());
                   go_on = false;
                 }
               Stack.push(tmp);
@@ -1784,13 +1852,16 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
 #endif
               break;
             case oPower:
+#ifdef DEBUG
+              mexPrintf("pow\n");
+#endif
               try
                 {
                   tmp = pow1(v1, v2);
                 }
               catch(FloatingPointExceptionHandling &fpeh)
                 {
-                  mexPrintf("%s      %s\n",fpeh.GetErrorMsg().c_str(),error_location(evaluate, steady_state).c_str());
+                  mexPrintf("%s      %s\n",fpeh.GetErrorMsg().c_str(),error_location(evaluate, steady_state, size, block_num).c_str());
                   go_on = false;
                 }
               Stack.push(tmp);
@@ -1821,6 +1892,9 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
           op = ((FUNARY_ *) it_code->second)->get_op_type();
           v1 = Stack.top();
           Stack.pop();
+#ifdef DEBUG
+          mexPrintf("FUNARY, op=%d\n", op);
+#endif
           switch (op)
             {
             case oUminus:
@@ -1844,7 +1918,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
                 }
               catch(FloatingPointExceptionHandling &fpeh)
                 {
-                  mexPrintf("%s      %s\n",fpeh.GetErrorMsg().c_str(),error_location(evaluate, steady_state).c_str());
+                  mexPrintf("%s      %s\n",fpeh.GetErrorMsg().c_str(),error_location(evaluate, steady_state, size, block_num).c_str());
                   go_on = false;
                 }
               Stack.push(tmp);
@@ -1861,7 +1935,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
                 }
               catch(FloatingPointExceptionHandling &fpeh)
                 {
-                  mexPrintf("%s      %s\n",fpeh.GetErrorMsg().c_str(),error_location(evaluate, steady_state).c_str());
+                  mexPrintf("%s      %s\n",fpeh.GetErrorMsg().c_str(),error_location(evaluate, steady_state, size, block_num).c_str());
                   go_on = false;
                 }
               Stack.push(tmp);
@@ -2041,14 +2115,23 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
 void
 Interpreter::evaluate_a_block(const int size, const int type, string bin_basename, bool steady_state, int block_num,
                               const bool is_linear, const int symbol_table_endo_nbr, const int Block_List_Max_Lag,
-                              const int Block_List_Max_Lead, const int u_count_int)
+                              const int Block_List_Max_Lead, const int u_count_int, int block)
 {
   it_code_type begining;
+  if (steady_state)
+    residual = vector<double>(size);
+  else
+    residual = vector<double>(size*(periods+y_kmin));
   switch (type)
     {
     case EVALUATE_FORWARD:
       if (steady_state)
-        compute_block_time(0, true, block_num, size, steady_state);
+        {
+          compute_block_time(0, true, block_num, size, steady_state);
+          if (block >= 0)
+            for (int j = 0; j < size; j++)
+              residual[j] = y[Block_Contain[j].Variable] - ya[Block_Contain[j].Variable];
+        }
       else
         {
           begining = it_code;
@@ -2057,6 +2140,9 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
               it_code = begining;
               Per_y_ = it_*y_size;
               compute_block_time(0, true, block_num, size, steady_state);
+              if (block >= 0)
+                for (int j = 0; j < size; j++)
+                  residual[it_*size+j] = y[it_*y_size+Block_Contain[j].Variable] - ya[it_*y_size+Block_Contain[j].Variable];
             }
         }
       break;
@@ -2066,8 +2152,16 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
       if (steady_state)
         {
           compute_block_time(0, true, block_num, size, steady_state);
-          for (int j = 0; j < size; j++)
-            y[Block_Contain[j].Variable] += r[j];
+          if (block < 0)
+            {
+              for (int j = 0; j < size; j++)
+                y[Block_Contain[j].Variable] += r[j];
+            }
+          else
+            {
+              for (int j = 0; j < size; j++)
+                residual[j] = r[j];
+            }
         }
       else
         {
@@ -2077,8 +2171,16 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
               it_code = begining;
               Per_y_ = it_*y_size;
               compute_block_time(0, true, block_num, size, steady_state);
-              for (int j = 0; j < size; j++)
-                y[it_*y_size+Block_Contain[j].Variable] += r[j];
+              if (block < 0)
+                {
+                  for (int j = 0; j < size; j++)
+                    y[it_*y_size+Block_Contain[j].Variable] += r[j];
+                }
+              else
+                {
+                  for (int j = 0; j < size; j++)
+                     residual[it_*size+j] = r[j];
+                }
             }
         }
       mxFree(g1);
@@ -2091,8 +2193,12 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
       if (steady_state)
         {
           compute_block_time(0, true, block_num, size, steady_state);
-          for (int j = 0; j < size; j++)
-            y[Block_Contain[j].Variable] += r[j];
+          if (block < 0)
+            for (int j = 0; j < size; j++)
+              y[Block_Contain[j].Variable] += r[j];
+          else
+            for (int j = 0; j < size; j++)
+              residual[j] = r[j];
         }
       else
         {
@@ -2102,8 +2208,12 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
               it_code = begining;
               Per_y_ = it_*y_size;
               compute_block_time(0, true, block_num, size, steady_state);
-              for (int j = 0; j < size; j++)
-                y[it_*y_size+Block_Contain[j].Variable] += r[j];
+              if (block < 0)
+                for (int j = 0; j < size; j++)
+                  y[it_*y_size+Block_Contain[j].Variable] += r[j];
+              else
+                for (int j = 0; j < size; j++)
+                  residual[it_*size+j] = r[j];
             }
         }
       mxFree(r);
@@ -2111,6 +2221,9 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
     case EVALUATE_BACKWARD:
       if (steady_state)
         compute_block_time(0, true, block_num, size, steady_state);
+        if (block >= 0)
+            for (int j = 0; j < size; j++)
+              residual[j] = y[Block_Contain[j].Variable] - ya[Block_Contain[j].Variable];
       else
         {
           begining = it_code;
@@ -2119,6 +2232,9 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
               it_code = begining;
               Per_y_ = it_*y_size;
               compute_block_time(0, true, block_num, size, steady_state);
+              if (block >= 0)
+                for (int j = 0; j < size; j++)
+                  residual[it_*size+j] = y[it_*y_size+Block_Contain[j].Variable] - ya[it_*y_size+Block_Contain[j].Variable];
             }
         }
       break;
@@ -2128,8 +2244,16 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
       if (steady_state)
         {
           compute_block_time(0, true, block_num, size, steady_state);
-          for (int j = 0; j < size; j++)
-            y[Block_Contain[j].Variable] += r[j];
+          if (block < 0)
+            {
+              for (int j = 0; j < size; j++)
+                y[Block_Contain[j].Variable] += r[j];
+            }
+          else
+            {
+              for (int j = 0; j < size; j++)
+                residual[j] = r[j];
+            }
         }
       else
         {
@@ -2139,8 +2263,16 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
               it_code = begining;
               Per_y_ = it_*y_size;
               compute_block_time(0, true, block_num, size, steady_state);
-              for (int j = 0; j < size; j++)
-                y[it_*y_size+Block_Contain[j].Variable] += r[j];
+              if (block < 0)
+                {
+                  for (int j = 0; j < size; j++)
+                    y[it_*y_size+Block_Contain[j].Variable] += r[j];
+                }
+              else
+                {
+                  for (int j = 0; j < size; j++)
+                     residual[it_*size+j] = r[j];
+                }
             }
         }
       mxFree(g1);
@@ -2153,8 +2285,12 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
       if (steady_state)
         {
           compute_block_time(0, true, block_num, size, steady_state);
-          for (int j = 0; j < size; j++)
-            y[Block_Contain[j].Variable] += r[j];
+          if (block < 0)
+            for (int j = 0; j < size; j++)
+              y[Block_Contain[j].Variable] += r[j];
+          else
+            for (int j = 0; j < size; j++)
+              residual[j] = r[j];
         }
       else
         {
@@ -2164,8 +2300,12 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
               it_code = begining;
               Per_y_ = it_*y_size;
               compute_block_time(0, true, block_num, size, steady_state);
-              for (int j = 0; j < size; j++)
-                y[it_*y_size+Block_Contain[j].Variable] += r[j];
+              if (block < 0)
+                for (int j = 0; j < size; j++)
+                  y[it_*y_size+Block_Contain[j].Variable] += r[j];
+              else
+                for (int j = 0; j < size; j++)
+                  residual[it_*size+j] = r[j];
             }
         }
       mxFree(r);
@@ -2183,8 +2323,12 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
           Per_y_ = it_*y_size;
           it_code = begining;
           compute_block_time(Per_u_, true, block_num, size, steady_state);
-          for (int j = 0; j < size; j++)
-            y[it_*y_size+Block_Contain[j].Variable] += r[j];
+          if (block < 0)
+            for (int j = 0; j < size; j++)
+              y[it_*y_size+Block_Contain[j].Variable] += r[j];
+          else
+            for (int j = 0; j < size; j++)
+              residual[it_*size+j] = r[j];
         }
       mxFree(r);
       break;
@@ -2353,15 +2497,6 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   mexPrintf("%s      \n",fpeh.GetErrorMsg().c_str());
                   mexPrintf("      Singularity in block %d", block_num+1);
                 }
-              /*if (isinf(y[Block_Contain[0].Variable]))
-                {
-                  if (error_not_printed)
-                    {
-                      mexPrintf("--------------------------------------\n  Error: Divide by zero with %5.15f/%5.15f\nSingularity in block %d\n--------------------------------------\n", r[0], g1[0], block_num);
-                      error_not_printed = false;
-                    }
-                  res1 = NAN;
-                }*/
               iter++;
             }
           if (!cvg)
@@ -2401,15 +2536,6 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                       mexPrintf("      Singularity in block %d", block_num+1);
                     }
 
-                  /*if (isinf(y[Per_y_+Block_Contain[0].Variable]))
-                    {
-                      if (error_not_printed)
-                        {
-                          mexPrintf("--------------------------------------\n  Error: Divide by zero with %5.15f/%5.15f\nSingularity in block %d\n--------------------------------------\n", r[0], g1[0], block_num);
-                          error_not_printed = false;
-                        }
-                      res1 = NAN;
-                    }*/
                   iter++;
                 }
               if (!cvg)
@@ -2882,7 +3008,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
 }
 
 bool
-Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_state, bool evaluate, bool block, int &nb_blocks)
+Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_state, bool evaluate, int block, int &nb_blocks)
 {
   bool result = true;
 
@@ -2901,9 +3027,16 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
       tmp << " in compute_blocks, " << file_name.c_str() << " cannot be opened\n";
       throw FatalExceptionHandling(tmp.str());
     }
+  if (block >= (int)code.get_block_number())
+    {
+      ostringstream tmp;
+      tmp << " in compute_blocks, input argument block = " << block+1 << " is greater than the number of blocks in the model (" << code.get_block_number() << " see M_.blocksMFS)\n";
+      throw FatalExceptionHandling(tmp.str());
+    }
   //The big loop on intructions
   Block_Count = -1;
   bool go_on = true;
+
   it_code = code_liste.begin();
   it_code_type Init_Code = it_code;
   while (go_on)
@@ -2913,7 +3046,11 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
         case FBEGINBLOCK:
           Block_Count++;
 #ifdef DEBUG
-          mexPrintf("FBEGINBLOCK %d\n", Block_Count+1);
+          mexPrintf("---------------------------------------------------------\n");
+          if (block < 0)
+            mexPrintf("FBEGINBLOCK %d\n", Block_Count+1);
+          else
+            mexPrintf("FBEGINBLOCK %d\n", block+1);
 #endif
           //it's a new block
           {
@@ -2922,19 +3059,15 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
             it_code++;
             if (evaluate)
               {
+                jacobian_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_nb_col_jacob(),mxREAL));
                 if (!steady_state)
                   {
-                    jacobian_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_nb_col_jacob(),mxREAL));
-                    mexPrintf("at block = %d, mxCreateDoubleMatrix(%d, %d, mxREAL) jacobian_block.size()=%d\n",Block_Count, fb->get_size(), fb->get_nb_col_jacob(), sizeof(jacobian_block[Block_Count]));
                     jacobian_exo_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_exo_size(),mxREAL));
-                    mexPrintf("at block = %d, mxCreateDoubleMatrix(%d, %d, mxREAL) jacobian_exo_block.size()=%d fb->get_exo_size()=%d\n",Block_Count, fb->get_size(), fb->get_exo_size(), sizeof(jacobian_exo_block[Block_Count]), fb->get_exo_size());
                     jacobian_det_exo_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_det_exo_size(),mxREAL));
-                    mexPrintf("at block = %d, mxCreateDoubleMatrix(%d, %d, mxREAL) jacobian_det_exo_block.size()=%d\n",Block_Count, fb->get_size(), fb->get_det_exo_size(), sizeof(jacobian_det_exo_block[Block_Count]));
                     jacobian_other_endo_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_nb_col_other_endo_jacob(),mxREAL));
-                    mexPrintf("at block = %d, mxCreateDoubleMatrix(%d, %d, mxREAL) jacobian_other_endo_block.size()=%d\n",Block_Count, fb->get_size(), fb->get_nb_col_other_endo_jacob(), sizeof(jacobian_other_endo_block[Block_Count]));
                   }
                 evaluate_a_block(fb->get_size(), fb->get_type(), bin_basename, steady_state, Block_Count,
-                                 fb->get_is_linear(), fb->get_endo_nbr(), fb->get_Max_Lag(), fb->get_Max_Lead(), fb->get_u_count_int());
+                                 fb->get_is_linear(), fb->get_endo_nbr(), fb->get_Max_Lag(), fb->get_Max_Lead(), fb->get_u_count_int(), block);
               }
             else
               {
@@ -2945,7 +3078,7 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
               }
             delete fb;
           }
-          if (result == ERROR_ON_EXIT)
+          if (block >= 0)
             go_on = false;
           break;
         case FEND:
@@ -2963,19 +3096,28 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
           if (T)
             mxFree(T);
           T = (double *) mxMalloc(var*(periods+y_kmin+y_kmax)*sizeof(double));
-          it_code++;
+          if (block >= 0)
+            {
+              it_code = code_liste.begin() + code.get_begin_block(block);
+            }
+          else
+            it_code++;
           break;
         case FDIMST:
 #ifdef DEBUG
-          mexPrintf("FDIMST\n");
+          mexPrintf("FDIMST size=%d\n",((FDIMST_ *) it_code->second)->get_size());
 #endif
           var = ((FDIMST_ *) it_code->second)->get_size();
           if (T)
             mxFree(T);
           T = (double *) mxMalloc(var*sizeof(double));
-          it_code++;
+          if (block >= 0)
+            it_code = code_liste.begin() + code.get_begin_block(block);
+          else
+            it_code++;
           break;
         default:
+          mexPrintf("Error\n");
           ostringstream tmp;
           tmp << " in compute_blocks, unknown command " << it_code->first << "\n";
           throw FatalExceptionHandling(tmp.str());

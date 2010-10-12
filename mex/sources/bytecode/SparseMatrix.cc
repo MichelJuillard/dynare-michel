@@ -313,7 +313,7 @@ SparseMatrix::Read_SparseMatrix(string file_name, const int Size, int periods, i
           for (j = 0; j < Size; j++)
             IM_i[make_pair(make_pair(j, Size*(periods+y_kmax)), 0)] = j;
         }
-      else if (stack_solve_algo >= 1 || stack_solve_algo <= 4)
+      else if (stack_solve_algo >= 0 || stack_solve_algo <= 4)
         {
           for (i = 0; i < u_count_init-Size; i++)
             {
@@ -330,7 +330,7 @@ SparseMatrix::Read_SparseMatrix(string file_name, const int Size, int periods, i
     }
   else
     {
-      if ((stack_solve_algo == 5 && !steady_state) || (solve_algo == 5 && steady_state))
+      if ((stack_solve_algo == 5 && !steady_state) || (solve_algo == 8 && steady_state))
         {
           for (i = 0; i < u_count_init; i++)
             {
@@ -341,7 +341,7 @@ SparseMatrix::Read_SparseMatrix(string file_name, const int Size, int periods, i
               IM_i[make_pair(make_pair(eq, var), lag)] = j;
             }
         }
-      else if ( ((stack_solve_algo >= 1 || stack_solve_algo <= 4) && !steady_state) || ((solve_algo >= 1 || solve_algo <= 4) && steady_state) )
+      else if ( ((stack_solve_algo >= 0 || stack_solve_algo <= 4) && !steady_state) || ((solve_algo >= 5 || solve_algo <= 7) && steady_state) )
         {
           for (i = 0; i < u_count_init; i++)
             {
@@ -2643,7 +2643,7 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
       mexPrintf("-----------------------------------\n");
     }
 
-  if (solve_algo == 5)
+  if (solve_algo == 8)
     Simple_Init(it_, y_kmin, y_kmax, Size, IM_i);
   else
     {
@@ -2664,13 +2664,13 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
       Init_Matlab_Sparse_Simple(Size, IM_i, A_m, b_m);
     }
 
-  if (solve_algo == 1 || solve_algo == 4 || solve_algo == 0)
+  if (solve_algo == 5)
     Solve_Matlab_LU_UMFPack(A_m, b_m, Size, slowc, false, it_);
-  else if (solve_algo == 2)
+  else if (solve_algo == 6)
     Solve_Matlab_GMRES(A_m, b_m, Size, slowc, blck, false, it_);
-  else if (solve_algo == 3)
+  else if (solve_algo == 7)
     Solve_Matlab_BiCGStab(A_m, b_m, Size, slowc, blck, false, it_);
-  else if (solve_algo == 5)
+  else if (solve_algo == 8)
     Solve_ByteCode_Sparse_GaussianElimination(Size, blck, steady_state, it_);
   return;
 }

@@ -29,6 +29,12 @@
 #include <algorithm>
 using namespace std;
 
+#if !defined(DYN_MEX_FUNC_ERR_MSG_TXT)
+#define DYN_MEX_FUNC_ERR_MSG_TXT(str)           \
+  do {                                          \
+    mexPrintf("%s\n", str);                     \
+  } while(0)
+#endif
 
 typedef unsigned int mwIndex;
 typedef unsigned int mwSize;

@@ -48,7 +48,7 @@ public:
 class FloatingPointExceptionHandling : public GeneralExceptionHandling
 {
 public:
-  FloatingPointExceptionHandling(string value) : GeneralExceptionHandling(string("Floating point error in bytrecode: " + value))
+  FloatingPointExceptionHandling(string value) : GeneralExceptionHandling(string("Floating point error in bytecode: " + value))
    {};
 };
 
@@ -82,6 +82,7 @@ public:
 class DivideExceptionHandling : public FloatingPointExceptionHandling
 {
   double value1, value2;
+public:
   DivideExceptionHandling(double value1_arg, double value2_arg) : FloatingPointExceptionHandling("a/X"),
                                    value1(value1_arg),
                                    value2(value2_arg)
@@ -111,7 +112,7 @@ public:
 class FatalExceptionHandling : public GeneralExceptionHandling
 {
 public:
-  FatalExceptionHandling(string ErrorMsg_arg) : GeneralExceptionHandling("Fatal error in bytrecode:")
+  FatalExceptionHandling(string ErrorMsg_arg) : GeneralExceptionHandling("Fatal error in bytecode:")
     {
       completeErrorMsg(ErrorMsg_arg);
     };

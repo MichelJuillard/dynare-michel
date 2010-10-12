@@ -32,8 +32,6 @@ Get_Argument(const char *argv)
   return f;
 }
 
-int
-main(int nrhs, const char *prhs[])
 
 #else
 
@@ -51,34 +49,29 @@ Get_Argument(const mxArray *prhs)
   mxFree(first_argument);
   return f;
 }
+#endif
 
-
-/* The gateway routine */
 void
-mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
-#endif
-{
-  mxArray *M_, *oo_, *options_;
+Get_Arguments_and_global_variables(int nrhs,
 #ifndef DEBUG_EX
-  mxArray *block_structur = NULL;
+                                   const mxArray *prhs[],
 #else
-  load_global((char*)prhs[1]);
+                                   const char *prhs[],
 #endif
-  //ErrorHandlingException error_handling;
-  int i, row_y = 0, col_y = 0, row_x = 0, col_x = 0, nb_row_xd = 0;
-  int steady_row_y, steady_col_y, steady_row_x, steady_col_x, steady_nb_row_xd;
-  int y_kmin = 0, y_kmax = 0, y_decal = 0, periods = 1;
-  double *direction;
-  bool steady_state = false;
-  bool evaluate = false;
-  bool block = false;
-  double *params = NULL;
-  double *yd = NULL, *xd = NULL;
-  int count_array_argument = 0;
+                                   int &count_array_argument,
+                                   double *yd[], unsigned int &row_y, unsigned int &col_y,
+                                   double *xd[], unsigned int &row_x, unsigned int &col_x,
+                                   double *params[], unsigned int &periods,
+#ifndef DEBUG_EX
+                                   mxArray *block_structur[],
+#endif
+                                   bool &steady_state, bool &evaluate, int &block,
+                                   mxArray *M_[], mxArray *oo_[], mxArray *options_[])
+{
 #ifdef DEBUG_EX
-  for (i = 2; i < nrhs; i++)
+  for (int i = 2; i < nrhs; i++)
 #else
-  for (i = 0; i < nrhs; i++)
+  for (int i = 0; i < nrhs; i++)
 #endif
     {
 #ifndef DEBUG_EX
@@ -87,26 +80,27 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           switch (count_array_argument)
             {
             case 0:
-              yd = mxGetPr(prhs[i]);
+              *yd = mxGetPr(prhs[i]);
               row_y = mxGetM(prhs[i]);
               col_y = mxGetN(prhs[i]);
               break;
             case 1:
-              xd =  mxGetPr(prhs[i]);
+              *xd =  mxGetPr(prhs[i]);
               row_x = mxGetM(prhs[i]);
               col_x = mxGetN(prhs[i]);
               break;
             case 2:
-              params = mxGetPr(prhs[i]);
+              *params = mxGetPr(prhs[i]);
               break;
             case 3:
               periods = mxGetScalar(prhs[i]);
               break;
             case 4:
-              block_structur = mxDuplicateArray(prhs[i]);
+              *block_structur = mxDuplicateArray(prhs[i]);
               break;
             default:
-              mexPrintf("Unknown argument\n");
+              //mexPrintf("Unknown argument count_array_argument=%d\n",count_array_argument);
+              break;
             }
           count_array_argument++;
         }
@@ -118,23 +112,38 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         steady_state = false;
       else if (Get_Argument(prhs[i]) == "evaluate")
         evaluate = true;
-      else if (Get_Argument(prhs[i]) == "block")
-        block = true;
       else
         {
-          ostringstream tmp;
-          tmp << " in main, unknown argument : " << Get_Argument(prhs[i]) << "\n";
-          throw FatalExceptionHandling(tmp.str());
+          int pos = Get_Argument(prhs[i]).find("block");
+          if (pos != (int)string::npos)
+            {
+              int pos1 = Get_Argument(prhs[i]).find("=", pos+5);
+              if (pos1 != (int)string::npos)
+                pos = pos1 + 1;
+              else
+                pos += 5;
+              block =  atoi(Get_Argument(prhs[i]).substr(pos, string::npos).c_str())-1;
+            }
+          else
+            {
+              ostringstream tmp;
+              tmp << " in main, unknown argument : " << Get_Argument(prhs[i]) << "\n";
+              throw FatalExceptionHandling(tmp.str());
+            }
         }
     }
   if (count_array_argument > 0 && count_array_argument < 4)
     {
-      ostringstream tmp;
-      tmp << " in main, missing arguments. All the following arguments have to be indicated y, x, params, it_\n";
-      throw FatalExceptionHandling(tmp.str());
+      if (count_array_argument == 3 && steady_state)
+        periods = 1;
+      else
+        {
+          ostringstream tmp;
+          tmp << " in main, missing arguments. All the following arguments have to be indicated y, x, params, it_\n";
+          throw FatalExceptionHandling(tmp.str());
+        }
     }
-
-  M_ = mexGetVariable("global", "M_");
+  *M_ = mexGetVariable("global", "M_");
   if (M_ == NULL)
     {
       ostringstream tmp;
@@ -142,20 +151,70 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       throw FatalExceptionHandling(tmp.str());
     }
   /* Gets variables and parameters from global workspace of Matlab */
-  oo_ = mexGetVariable("global", "oo_");
+  *oo_ = mexGetVariable("global", "oo_");
   if (oo_ == NULL)
     {
       ostringstream tmp;
       tmp << " in main, global variable not found: oo_\n";
       throw FatalExceptionHandling(tmp.str());
     }
-  options_ = mexGetVariable("global", "options_");
+  *options_ = mexGetVariable("global", "options_");
   if (options_ == NULL)
     {
       ostringstream tmp;
       tmp << " in main, global variable not found: options_\n";
       throw FatalExceptionHandling(tmp.str());
     }
+}
+
+#ifdef DEBUG_EX
+int
+main(int nrhs, const char *prhs[])
+#else
+/* The gateway routine */
+void
+mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+#endif
+{
+  mxArray *M_, *oo_, *options_;
+#ifndef DEBUG_EX
+  mxArray *block_structur = NULL;
+#else
+  int nlhs = 0;
+  char *plhs[1];
+  load_global((char*)prhs[1]);
+#endif
+  //ErrorHandlingException error_handling;
+  unsigned int i, row_y = 0, col_y = 0, row_x = 0, col_x = 0, nb_row_xd = 0;
+  int steady_row_y, steady_col_y, steady_row_x, steady_col_x, steady_nb_row_xd;
+  int y_kmin = 0, y_kmax = 0, y_decal = 0;
+  unsigned int periods = 1;
+  double *direction;
+  bool steady_state = false;
+  bool evaluate = false;
+  int block = -1;
+  double *params = NULL;
+  double *yd = NULL, *xd = NULL;
+  int count_array_argument = 0;
+
+  try
+    {
+      Get_Arguments_and_global_variables(nrhs, prhs, count_array_argument,
+                                   &yd, row_y, col_y,
+                                   &xd, row_x, col_x,
+                                   &params, periods,
+#ifndef DEBUG_EX
+                                   &block_structur,
+#endif
+                                   steady_state, evaluate, block,
+                                   &M_, &oo_, &options_);
+    }
+  catch (GeneralExceptionHandling &feh)
+    {
+      DYN_MEX_FUNC_ERR_MSG_TXT(feh.GetErrorMsg().c_str());
+    }
+
+
   if (!count_array_argument)
     params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "params")));
 
@@ -246,7 +305,9 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   int y_size = row_y;
   int nb_row_x = row_x;
   clock_t t0 = clock();
+
   Interpreter interprete(params, y, ya, x, steady_yd, steady_xd, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal, markowitz_c, file_name, minimal_solving_periods, stack_solve_algo, solve_algo);
+
   string f(fname);
   mxFree(fname);
   int nb_blocks = 0;
@@ -266,6 +327,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   if (!steady_state && !evaluate && no_error)
     mexPrintf("Simulation Time=%f milliseconds\n", 1000.0*(double (t1)-double (t0))/double (CLOCKS_PER_SEC));
 #ifndef DEBUG_EX
+  bool dont_store_a_structure = false;
   if (nlhs > 0)
     {
       plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
@@ -276,14 +338,35 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         pind[0] = 1;
       if (nlhs > 1)
         {
-          plhs[1] = mxCreateDoubleMatrix(row_y, col_y, mxREAL);
-          pind = mxGetPr(plhs[1]);
-          if (evaluate)
-            for (i = 0; i < row_y*col_y; i++)
-              pind[i] = y[i]-ya[i];
+          if (block >= 0)
+            {
+              if (evaluate)
+                {
+                  vector<double> residual = interprete.get_residual();
+                  plhs[1] = mxCreateDoubleMatrix(residual.size()/col_y, col_y, mxREAL);
+                  pind = mxGetPr(plhs[1]);
+                  for (i = 0; i < residual.size(); i++)
+                    pind[i] = residual[i];
+                }
+              else
+                {
+                  plhs[1] = mxCreateDoubleMatrix(row_y, col_y, mxREAL);
+                  pind = mxGetPr(plhs[1]);
+                  for (i = 0; i < row_y*col_y; i++)
+                    pind[i] = y[i];
+                }
+            }
           else
-            for (i = 0; i < row_y*col_y; i++)
-              pind[i] = y[i];
+            {
+              plhs[1] = mxCreateDoubleMatrix(row_y, col_y, mxREAL);
+              pind = mxGetPr(plhs[1]);
+              if (evaluate)
+                for (i = 0; i < row_y*col_y; i++)
+                  pind[i] = y[i]-ya[i];
+              else
+                for (i = 0; i < row_y*col_y; i++)
+                   pind[i] = y[i];
+            }
           if (nlhs > 2)
             {
               int jacob_field_number = 0, jacob_exo_field_number = 0, jacob_exo_det_field_number = 0, jacob_other_endo_field_number = 0;
@@ -295,14 +378,20 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                   jacob_exo_det_field_number=2;
                   jacob_other_endo_field_number=2;
                   mwSize dims[1] = {nb_blocks };
-                  plhs[2] = mxCreateStructArray(1, dims, 4, field_names);
-                  mexPrintf("the structure has been created\n");
+                  block_structur = plhs[2] = mxCreateStructArray(1, dims, 4, field_names);
                 }
               else if (!mxIsStruct(block_structur))
-                DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, the third output argument must be a structure\n");
+                if (block >=0 )
+                  {
+
+                    block_structur = plhs[2] = mxDuplicateArray(interprete.get_jacob(0));
+                    //mexCallMATLAB(0,NULL, 1, &block_structur, "disp");
+                    dont_store_a_structure = true;
+                  }
+                else
+                  DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, the third output argument must be a structure\n");
               else
                 {
-                  mexPrintf("Adding Fields\n");
                   jacob_field_number = mxAddField(block_structur, "jacob");
                   if (jacob_field_number == -1)
                     DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, cannot add extra field jacob to the structArray\n");
@@ -316,14 +405,26 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                   if (jacob_other_endo_field_number == -1)
                     DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, cannot add extra field jacob_other_endo to the structArray\n");
                 }
-              for (int i = 0; i < nb_blocks; i++)
+              if (!dont_store_a_structure)
                 {
-                  mxSetFieldByNumber(block_structur,i,jacob_field_number,interprete.get_jacob(i));
-                  mxSetFieldByNumber(block_structur,i,jacob_exo_field_number,interprete.get_jacob_exo(i));
-                  mxSetFieldByNumber(block_structur,i,jacob_exo_det_field_number,interprete.get_jacob_exo_det(i));
-                  mxSetFieldByNumber(block_structur,i,jacob_other_endo_field_number,interprete.get_jacob_other_endo(i));
+                  for (int i = 0; i < nb_blocks; i++)
+                   {
+                      mxSetFieldByNumber(block_structur,i,jacob_field_number,interprete.get_jacob(i));
+                      if (!evaluate)
+                        {
+                          mxSetFieldByNumber(block_structur,i,jacob_exo_field_number,interprete.get_jacob_exo(i));
+                          mxSetFieldByNumber(block_structur,i,jacob_exo_det_field_number,interprete.get_jacob_exo_det(i));
+                          mxSetFieldByNumber(block_structur,i,jacob_other_endo_field_number,interprete.get_jacob_other_endo(i));
+                        }
+                    }
                 }
-              plhs[2] = block_structur;
+              if (nlhs > 3)
+                {
+                  plhs[3] = mxCreateDoubleMatrix(row_y, col_y, mxREAL);
+                  pind = mxGetPr(plhs[3]);
+                  for (i = 0; i < row_y*col_y; i++)
+                    pind[i] = y[i];
+                }
             }
         }
     }
