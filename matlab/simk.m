@@ -3,6 +3,8 @@ function simk
 % performs deterministic simulations with lead or lag on more than one
 % period
 %
+% Currently used only for purely forward models.
+%
 % INPUTS
 %   ...
 % OUTPUTS
@@ -17,7 +19,7 @@ function simk
 %   None.
 %  
 
-% Copyright (C) 1996-2009 Dynare Team
+% Copyright (C) 1996-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -35,9 +37,7 @@ function simk
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global M_ options_ oo_
-global it_ iyr0 broyden_
 
-%func_name = [M_.fname '_static'];
 nk = M_.maximum_endo_lag + M_.maximum_endo_lead + 1 ;
 ny = size(M_.lead_lag_incidence,2) ;
 icc1 = M_.lead_lag_incidence(nk,:) > 0;
@@ -139,14 +139,8 @@ for iter = 1:options_.maxit_
     i = M_.maximum_endo_lag+1 ;
     while (i>1) & (it_<=options_.periods+M_.maximum_endo_lag)
         h3 = clock ;
-        if broyden_ & iter > 1
-            %d1_ = -feval(fh,oo_.endo_simul(iyr));
-            d1 = -feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),z,oo_.exo_simul, M_.params, it_);
-        else
-            %jacob(func_name,oo_.endo_simul(iyr)) ;
-            [d1,jacobian] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul, M_.params, it_);
-            d1 = -d1 ;
-        end
+        [d1,jacobian] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul, M_.params, it_);
+        d1 = -d1 ;
         err_f = max(err_f,max(abs(d1)));
         if lky(i) ~= 0
             j1i = ky(1:lky(i),i) ;
@@ -232,14 +226,8 @@ for iter = 1:options_.maxit_
     end
     icr0 = (it_-M_.maximum_lag-M_.maximum_endo_lag -1)*ny ;
     while it_ <= options_.periods+M_.maximum_lag
-        if broyden_
-            %d1_ = -feval(fh,oo_.endo_simul(iyr));
-            d1 = -feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),z,oo_.exo_simul, M_.params, it_);
-        else
-            %jacob(func_name,oo_.endo_simul(iyr)) ;
-            [d1,jacobian] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul, M_.params, it_);
-            d1 = -d1 ;
-        end
+        [d1,jacobian] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul, M_.params, it_);
+        d1 = -d1 ;
         err_f = max(err_f,max(abs(d1)));
         w0 = jacobian(:,1:isc(1)) ;
         w = jacobian(:,isc(1)+1:isc(1+M_.maximum_endo_lead)) ;
@@ -344,12 +332,3 @@ end
 disp(['WARNING : the maximum number of iterations is reached.']) ;
 fprintf ('\n') ;
 disp (['-----------------------------------------------------']) ;
-return ;
-
-% 2/11/99 MJ took out reshapel
-
-
-
-
-
-
