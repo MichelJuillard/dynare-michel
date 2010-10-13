@@ -1,5 +1,5 @@
-function d = bksup1(ny,jcf)
-% function d = bksup1(ny,jcf)
+function d = bksup1(c,ny,jcf,iyf,periods)
+% function d = bksup1(c,ny,jcf,iyf,periods)
 % Solves deterministic models recursively by backsubstitution for one lead/lag
 %
 % INPUTS
@@ -12,7 +12,7 @@ function d = bksup1(ny,jcf)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2007 Dynare Team
+% Copyright (C) 2003-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -29,19 +29,15 @@ function d = bksup1(ny,jcf)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global options_ iyf c 
-
-ir = [(options_.periods-2)*ny+1:ny+(options_.periods-2)*ny] ;
-irf = iyf+(options_.periods-1)*ny ;
+ir = [(periods-2)*ny+1:ny+(periods-2)*ny] ;
+irf = iyf+(periods-1)*ny ;
 icf = [1:size(iyf,2)] ;
 
-for i = 2:options_.periods
+for i = 2:periods
     c(ir,jcf) = c(ir,jcf)-c(ir,icf)*c(irf,jcf) ;
     ir = ir-ny ;
     irf = irf-ny ;
 end
 
 d = c(:,jcf) ;
-
-return ;
 

@@ -15,7 +15,7 @@ function sim1
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 1996-2009 Dynare Team
+% Copyright (C) 1996-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -33,7 +33,6 @@ function sim1
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global M_ options_ oo_
-global  iyp iyf M_ it_ c
 
 lead_lag_incidence = M_.lead_lag_incidence;
 
@@ -89,11 +88,11 @@ for iter = 1:options_.maxit_
         s(:,isf) = s(:,isf)+c(ic,1:nyf) ;
         ic = ic + ny ;
         c(ic,nrc) = s\c(ic,nrc) ;
-        c = bksup1(ny,nrc) ;
+        c = bksup1(c,ny,nrc,iyf,options_.periods) ;
         c = reshape(c,ny,options_.periods+1) ;
         oo_.endo_simul(:,it_init+(0:options_.periods)) = oo_.endo_simul(:,it_init+(0:options_.periods))+options_.slowc*c ;
     else
-        c = bksup1(ny,nrc) ;
+        c = bksup1(c,ny,nrc,iyf,options_.periods) ;
         c = reshape(c,ny,options_.periods) ;
         oo_.endo_simul(:,it_init+(0:options_.periods-1)) = oo_.endo_simul(:,it_init+(0:options_.periods-1))+options_.slowc*c ;
     end
@@ -128,6 +127,4 @@ if ~stop
     oo_.deterministic_simulation.iterations = options_.maxit_;
 end
 disp (['-----------------------------------------------------']) ;
-return ;
 
-% 08/24/01 MJ added start_simul
