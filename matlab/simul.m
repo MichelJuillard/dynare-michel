@@ -85,12 +85,10 @@ else
     else
         if M_.maximum_endo_lead == 0
             error('SIMUL: purely backward models are not supported')
-        elseif M_.maximum_endo_lag == 0
-            error('SIMUL: purely forward models are not supported')
         elseif M_.maximum_endo_lag == 1 && M_.maximum_endo_lead == 1
             sim1 ;
-        else
-            error('SIMUL: internal error of Dynare, contact the developpers')
+        else % For purely forward models
+            simk;
         end;
     end;
 end;
