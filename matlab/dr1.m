@@ -254,6 +254,10 @@ if M_.maximum_endo_lead == 0
     return
 end
 
+if M_.maximum_endo_lag == 0 && options_.order > 1
+    error(['2nd and 3rd order approximation not implemented for purely forward models'])
+end
+
 %forward--looking models
 if nstatic > 0
     [Q,R] = qr(b(:,1:nstatic));
