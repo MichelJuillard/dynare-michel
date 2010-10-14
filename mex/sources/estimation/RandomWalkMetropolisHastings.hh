@@ -44,7 +44,7 @@ public:
   virtual ~RandomWalkMetropolisHastings(){};
   virtual double compute(VectorView &mhLogPostDens, MatrixView &mhParams, Matrix &steadyState,
                          Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H,
-                         const size_t presampleStart, int &info, const size_t nMHruns, const Matrix &Jscale,
+                         const size_t presampleStart, int &info, const size_t startDraw, size_t nMHruns, const Matrix &Jscale,
                          LogPosteriorDensity &logPosteriorDensity, Prior &drawDistribution,
                          EstimatedParametersDescription &epd);
 };

@@ -22,7 +22,7 @@
 double
 RandomWalkMetropolisHastings::compute(VectorView &mhLogPostDens, MatrixView &mhParams, Matrix &steadyState,
                                       Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H,
-                                      const size_t presampleStart, int &info, const size_t nMHruns, const Matrix &Dscale,
+                                      const size_t presampleStart, int &info, const size_t startDraw, size_t nMHruns, const Matrix &Dscale,
                                       LogPosteriorDensity &lpd, Prior &drawDistribution, EstimatedParametersDescription &epd)
 {
   bool overbound;
@@ -30,7 +30,7 @@ RandomWalkMetropolisHastings::compute(VectorView &mhLogPostDens, MatrixView &mhP
   size_t count, accepted = 0;
   parDraw = estParams;
   logpost =  - lpd.compute(steadyState, estParams, deepParams, data, Q, H, presampleStart, info);
-  for (size_t run = 0; run < nMHruns; ++run)
+  for (size_t run = startDraw - 1; run < nMHruns; ++run)
     {
       overbound=false;
       randMultiVar(drawDistribution, newParDraw, parDraw, Dscale, parDraw.getSize());
@@ -68,6 +68,6 @@ RandomWalkMetropolisHastings::compute(VectorView &mhLogPostDens, MatrixView &mhP
           mhLogPostDens(run) = logpost;
         }
     }
-  return (double) accepted/nMHruns;
+  return (double) accepted/(nMHruns-startDraw+1);
 }
 

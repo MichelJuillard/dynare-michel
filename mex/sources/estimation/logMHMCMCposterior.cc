@@ -102,27 +102,27 @@ size_t
 sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
            Matrix &steadyState, Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H,
            const size_t presampleStart, int &info, const VectorConstView &nruns, const size_t fblock, const size_t nBlocks,
-           const Matrix &Jscale, Prior &drawDistribution, EstimatedParametersDescription &epd, 
-           const std::string &resultsFileStem, const size_t console_mode)
+           const Matrix &Jscale, Prior &drawDistribution, EstimatedParametersDescription &epd,
+           const std::string &resultsFileStem, size_t console_mode, size_t load_mh_file)
 {
-  enum{iMin,iMax};
-  std::vector<size_t> OpenOldFile(nBlocks, 1);
+  enum {iMin, iMax};
+  std::vector<size_t> OpenOldFile(nBlocks, 0);
   size_t jloop = 0, irun, j; // counters
-  double dsum, dmax, dmin, sux = 0, jsux=0;
+  double dsum, dmax, dmin, sux = 0, jsux = 0;
   std::string mhFName;
   std::stringstream ssFName;
   MATFile *drawmat; // MCMC draws output file pointer
   FILE *fidlog;  // log file
   int matfStatus;
   size_t npar = estParams.getSize();
-  Matrix MinMax(npar,2);
+  Matrix MinMax(npar, 2);
   const mxArray *myinputs = mexGetVariablePtr("caller", "myinputs");
   const mxArray *InitSizeArrayPtr = mxGetField(myinputs, 0, "InitSizeArray");
   const VectorConstView InitSizeArrayVw(mxGetPr(InitSizeArrayPtr), nBlocks, 1);
   Vector InitSizeArray(InitSizeArrayVw.getSize());
   InitSizeArray = InitSizeArrayVw;
   const mxArray *flinePtr = mxGetField(myinputs, 0, "fline");
-  const VectorConstView fline(mxGetPr(flinePtr), nBlocks, 1);
+  VectorView fline(mxGetPr(flinePtr), nBlocks, 1);
 
   const mxArray *NewFileArrayPtr = mxGetField(myinputs, 0, "NewFile");
   VectorView NewFileVw(mxGetPr(NewFileArrayPtr), nBlocks, 1);
@@ -132,12 +132,22 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
   const mxArray *MAX_nrunsPtr = mxGetField(myinputs, 0, "MAX_nruns");
   const size_t MAX_nruns = (size_t) mxGetScalar(MAX_nrunsPtr);
 
+  //ix2=myinputs.ix2;
+  const mxArray *blockStartParamsPtr = mxGetField(myinputs, 0, "ix2");
+  MatrixView blockStartParamsMxVw(mxGetPr(blockStartParamsPtr), nBlocks, npar, nBlocks);
+  Vector startParams(npar);
+
+  //ilogpo2=myinputs.ilogpo2;
+  mxArray *mxFirstLogLikPtr = mxGetField(myinputs, 0, "ilogpo2");
+  VectorView FirstLogLiK(mxGetPr(mxFirstLogLikPtr), nBlocks, 1);
+
   const mxArray *record = mxGetField(myinputs, 0, "record");
   const mxArray *AcceptationRatesPtr = mxGetField(record, 0, "AcceptationRates");
   VectorView AcceptationRates(mxGetPr(AcceptationRatesPtr), nBlocks, 1);
 
-  mxArray *mxLastParametersPtr= mxGetField(record, 0, "LastParameters");
+  mxArray *mxLastParametersPtr = mxGetField(record, 0, "LastParameters");
   MatrixView LastParameters(mxGetPr(mxLastParametersPtr), nBlocks, npar, nBlocks);
+  LastParameters = blockStartParamsMxVw;
 
   mxArray *mxLastLogLikPtr = mxGetField(record, 0, "LastLogLiK");
   VectorView LastLogLiK(mxGetPr(mxLastLogLikPtr), nBlocks, 1);
@@ -146,139 +156,213 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
   mxArray *mxMhParamDrawsPtr = 0;
   size_t currInitSizeArray = 0;
 
-  mexPrintf("\n Starting MH Block Loop\n\n");
+  // Waitbar
+  mxArray *waitBarRhs[3], *waitBarLhs[1];
+  waitBarRhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
+  std::string barTitle;
+  std::stringstream ssbarTitle;
+
+  ssbarTitle.clear();
+  ssbarTitle.str("");
+  ssbarTitle << "Please wait... Metropolis-Hastings  " << fblock << "/" << nBlocks << "  ...";
+  barTitle = ssbarTitle.str();
+  waitBarRhs[1] = mxCreateString(barTitle.c_str());
+  //strcpy( *mxGetPr(waitBarRhs[1]), mhFName.c_str());
+  *mxGetPr(waitBarRhs[0]) = (double) 0.0;
+  mexCallMATLAB(1, waitBarLhs, 2, waitBarRhs, "waitbar");
+  if (waitBarRhs[1])
+    mxDestroyArray(waitBarRhs[1]);
+//  *mxGetPr(waitBarRhs[1])=*mxGetPr(waitBarLhs[0]);
+  waitBarRhs[1] = waitBarLhs[0];
 
   for (size_t b = fblock; b <= nBlocks; ++b)
     {
       jloop = jloop+1;
 
+      if ((load_mh_file != 0)  && (fline(b) > 1) && OpenOldFile[b])
+        {
+          //  load(['./' MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'])
+          ssFName.clear();
+          ssFName.str("");
+          ssFName << resultsFileStem << DIRECTORY_SEPARATOR << "metropolis" << DIRECTORY_SEPARATOR << resultsFileStem << "_mh" << (size_t) NewFile(b-1) << "_blck" << b << ".mat";
+          mhFName = ssFName.str();
+          drawmat = matOpen(mhFName.c_str(), "r");
+          mexPrintf("MH: Open mhFName.c_str %s \n", mhFName.c_str());
+          if (drawmat == 0)
+            {
+              fline(b) = 1;
+              mexPrintf("Error in MH: Can not open old draws Mat file for reading:  %s \n  \
+                  Starting a new file instead! \n", mhFName.c_str());
+            }
+          else
+            {
+              currInitSizeArray = (size_t) InitSizeArray(b-1);
+              mxMhParamDrawsPtr = matGetVariable(drawmat, "x2");
+              mxMhLogPostDensPtr = matGetVariable(drawmat, "logpo2");
+              matClose(drawmat);
+              OpenOldFile[b] = 1;
+            }
+        } // end if
+      ssbarTitle.clear();
+      ssbarTitle.str("");
+      ssbarTitle << "Please wait... Metropolis-Hastings  " << b << "/" << nBlocks << "  ...";
+      barTitle = ssbarTitle.str();
+      waitBarRhs[2] = mxCreateString(barTitle.c_str());
+      //strcpy( *mxGetPr(waitBarRhs[1]), mhFName.c_str());
+      *mxGetPr(waitBarRhs[0]) = (double) 0.0;
+      mexCallMATLAB(0, NULL, 3, waitBarRhs, "waitbar");
+      mxDestroyArray(waitBarRhs[2]);
+
+      VectorView LastParametersRow = mat::get_row(LastParameters, b-1);
+
       sux = 0.0;
       jsux = 0;
       irun = (size_t) fline(b-1);
-      j = 0;//1;
+      j = 0; //1;
       while (j < nruns(b-1))
         {
-        if (currInitSizeArray != (size_t) InitSizeArray(b-1))
-          {
-            // new or different size result arrays/matrices
-            currInitSizeArray = (size_t) InitSizeArray(b-1);
-            if (mxMhLogPostDensPtr) 
-              mxDestroyArray(mxMhLogPostDensPtr);  // log post density array
-            mxMhLogPostDensPtr = mxCreateDoubleMatrix(currInitSizeArray, 1, mxREAL);
-            if (mxMhParamDrawsPtr) 
-              mxDestroyArray(mxMhParamDrawsPtr);  // accepted MCMC MH draws
-            mxMhParamDrawsPtr =  mxCreateDoubleMatrix( currInitSizeArray, npar,  mxREAL);
-          }
-        VectorView mhLogPostDens(mxGetPr(mxMhLogPostDensPtr), currInitSizeArray, (size_t) 1);
-        MatrixView mhParamDraws(mxGetPr(mxMhParamDrawsPtr), currInitSizeArray, npar, currInitSizeArray);
-        jsux= rwmh.compute(mhLogPostDens, mhParamDraws, steadyState, estParams, deepParams, data, Q, H,
-                   presampleStart, info, currInitSizeArray, Jscale, lpd, drawDistribution, epd);
-        sux+=jsux*currInitSizeArray;
-        j += currInitSizeArray; //j=j+1;
-        irun += currInitSizeArray;
-        
-        if(console_mode)
-             mexPrintf("   MH: Computing Metropolis-Hastings (chain %d/%d): %3.f \b%% done, acceptance rate: %3.f \b%%\r", b, nBlocks, 100 * j/nruns(b-1), 100 * sux / j);
-        // % Now I save the simulations
-        // save draw  2 mat file ([MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'],'x2','logpo2');
-        ssFName.clear();
-        ssFName.str("");
-        ssFName << resultsFileStem << DIRECTORY_SEPARATOR << "metropolis" << DIRECTORY_SEPARATOR << resultsFileStem << "_mh" << (size_t) NewFile(b-1) << "_blck" << b << ".mat" ;
-        mhFName = ssFName.str();
-        drawmat = matOpen(mhFName.c_str(), "w");
-        if (drawmat==0)
-          {
-            mexPrintf("Error in MH: Can not open draws Mat file for writing:  %s \n", mhFName.c_str());
-            exit(1);
-          }
-        matfStatus = matPutVariable(drawmat, "x2", mxMhParamDrawsPtr);
-        if (matfStatus)
-          {
-            mexPrintf("Error in MH: Can not use draws Mat file for writing:  %s \n", mhFName.c_str());
-            exit(1);
-          }
-        matfStatus = matPutVariable(drawmat, "logpo2", mxMhLogPostDensPtr);
-        if (matfStatus)
-          {
-            mexPrintf("Error in MH: Can not usee draws Mat file for writing:  %s \n", mhFName.c_str());
-            exit(1);
-          }
-        matClose(drawmat);
+          if ((currInitSizeArray != (size_t) InitSizeArray(b-1)) &&   OpenOldFile[b] != 1)
+            {
+              mexPrintf(" Init 2 Arrays\n");
+              // new or different size result arrays/matrices
+              currInitSizeArray = (size_t) InitSizeArray(b-1);
+              if (mxMhLogPostDensPtr)
+                mxDestroyArray(mxMhLogPostDensPtr);                                                     // log post density array
+              mxMhLogPostDensPtr = mxCreateDoubleMatrix(currInitSizeArray, 1, mxREAL);
+              if (mxMhParamDrawsPtr)
+                mxDestroyArray(mxMhParamDrawsPtr);                                                    // accepted MCMC MH draws
+              mxMhParamDrawsPtr =  mxCreateDoubleMatrix(currInitSizeArray, npar,  mxREAL);
+            }
+          startParams = LastParametersRow;
+          VectorView mhLogPostDens(mxGetPr(mxMhLogPostDensPtr), currInitSizeArray, (size_t) 1);
+          MatrixView mhParamDraws(mxGetPr(mxMhParamDrawsPtr), currInitSizeArray, npar, currInitSizeArray);
+          jsux = rwmh.compute(mhLogPostDens, mhParamDraws, steadyState, startParams, deepParams, data, Q, H,
+                              presampleStart, info, irun, currInitSizeArray, Jscale, lpd, drawDistribution, epd);
+          irun = currInitSizeArray;
+          sux += jsux*currInitSizeArray;
+          j += currInitSizeArray; //j=j+1;
 
-        // save log to fidlog = fopen([MhDirectoryName '/metropolis.log'],'a');
-        ssFName.str("");
-        ssFName << resultsFileStem << DIRECTORY_SEPARATOR << "metropolis" << DIRECTORY_SEPARATOR << "metropolis.log" ;
-        mhFName = ssFName.str();
-        fidlog = fopen(mhFName.c_str(), "a");
-        fprintf(fidlog,"\n");
-        fprintf(fidlog,"%% Mh%dBlck%d ( %s %s )\n", (int) NewFile(b-1),b , __DATE__ , __TIME__  );
-        fprintf(fidlog," \n");
-        fprintf(fidlog,"  Number of simulations.: %d \n", currInitSizeArray);// (length(logpo2)) ');
-        fprintf(fidlog,"  Acceptation rate......: %f \n", jsux/currInitSizeArray);
-        fprintf(fidlog,"  Posterior mean........:\n");
-        for (size_t i=0; i<npar; ++i)
-          {
-            VectorView mhpdColVw=mat::get_col(mhParamDraws,i); 
-            fprintf(fidlog,"    params: %d : %f \n", i, vec::meanSumMinMax(dsum, dmin, dmax, mhpdColVw));
-            MinMax(i,iMin)=dmin;
-            MinMax(i,iMax)=dmax;
-          } // end
-        fprintf(fidlog,"    log2po: %f \n", vec::meanSumMinMax(dsum, dmin, dmax, mhLogPostDens));
-        fprintf(fidlog,"  Minimum value.........:\n");;
-        for (size_t i=0; i<npar; ++i)
-          fprintf(fidlog,"    params: %d : %f \n", i, MinMax(i,iMin));
-        fprintf(fidlog,"    log2po: %f \n", dmin);
-        fprintf(fidlog,"  Maximum value.........:\n");
-        for (size_t i=0; i<npar; ++i)
-          fprintf(fidlog,"    params: %d : %f \n", i, MinMax(i,iMax));
-        fprintf(fidlog,"    log2po: %f \n", dmax);
-        fprintf(fidlog," \n");
-        fclose(fidlog);
+          //   if exist('OCTAVE_VERSION') ||
+          if (console_mode)
+            mexPrintf("   MH: Computing Metropolis-Hastings (chain %d/%d): %3.f \b%% done, acceptance rate: %3.f \b%%\r", b, nBlocks, 100 * j/nruns(b-1), 100 * sux / j);
+          else
+            {
+              // Waitbar
+              ssbarTitle.clear();
+              ssbarTitle.str("");
+              ssbarTitle << "Metropolis-Hastings : " << b << "/" << nBlocks << " Acceptance: " << 100 * sux/j << "%";
+              barTitle = ssbarTitle.str();
+              waitBarRhs[2] = mxCreateString(barTitle.c_str());
+              *mxGetPr(waitBarRhs[0]) = j / nruns(b-1);
+              mexCallMATLAB(0, NULL, 3, waitBarRhs, "waitbar");
+              mxDestroyArray(waitBarRhs[2]);
 
-        jsux = 0;
-  //            if (j == nruns(b-1)) // % I record the last draw...
-  //                record.LastParameters(b,:) = x2(end,:);
-  //                record.LastLogLiK(b) = logpo2(end);
-  //            } // end
-        if (j == nruns(b-1)) // % I record the last draw...
-          {
-            VectorView LastParametersRow= mat::get_row(LastParameters,b-1); 
-            LastParametersRow= mat::get_row(mhParamDraws, currInitSizeArray-1);//x2(end,:);
-            LastLogLiK(b-1) = mhLogPostDens(currInitSizeArray-1); //logpo2(end);
-          } // end
-        // size of next file in chain b
-        InitSizeArray(b-1) = std::min((size_t) nruns(b-1)-j, MAX_nruns);
-        // initialization of next file if necessary
-        if (InitSizeArray(b-1))
-          {
-            NewFile(b-1) = NewFile(b-1) + 1;
-            irun = 0;
-          } // end
+            }
+          // % Now I save the simulations
+          // save draw  2 mat file ([MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'],'x2','logpo2');
+          ssFName.clear();
+          ssFName.str("");
+          ssFName << resultsFileStem << DIRECTORY_SEPARATOR << "metropolis" << DIRECTORY_SEPARATOR << resultsFileStem << "_mh" << (size_t) NewFile(b-1) << "_blck" << b << ".mat";
+          mhFName = ssFName.str();
+          drawmat = matOpen(mhFName.c_str(), "w");
+          if (drawmat == 0)
+            {
+              mexPrintf("Error in MH: Can not open draws Mat file for writing:  %s \n", mhFName.c_str());
+              exit(1);
+            }
+          matfStatus = matPutVariable(drawmat, "x2", mxMhParamDrawsPtr);
+          if (matfStatus)
+            {
+              mexPrintf("Error in MH: Can not use draws Mat file for writing:  %s \n", mhFName.c_str());
+              exit(1);
+            }
+          matfStatus = matPutVariable(drawmat, "logpo2", mxMhLogPostDensPtr);
+          if (matfStatus)
+            {
+              mexPrintf("Error in MH: Can not usee draws Mat file for writing:  %s \n", mhFName.c_str());
+              exit(1);
+            }
+          matClose(drawmat);
 
+          // save log to fidlog = fopen([MhDirectoryName '/metropolis.log'],'a');
+          ssFName.str("");
+          ssFName << resultsFileStem << DIRECTORY_SEPARATOR << "metropolis" << DIRECTORY_SEPARATOR << "metropolis.log";
+          mhFName = ssFName.str();
+          fidlog = fopen(mhFName.c_str(), "a");
+          fprintf(fidlog, "\n");
+          fprintf(fidlog, "%% Mh%dBlck%d ( %s %s )\n", (int) NewFile(b-1), b, __DATE__, __TIME__);
+          fprintf(fidlog, " \n");
+          fprintf(fidlog, "  Number of simulations.: %d \n", currInitSizeArray); // (length(logpo2)) ');
+          fprintf(fidlog, "  Acceptation rate......: %f \n", jsux);
+          fprintf(fidlog, "  Posterior mean........:\n");
+          for (size_t i = 0; i < npar; ++i)
+            {
+              VectorView mhpdColVw = mat::get_col(mhParamDraws, i);
+              fprintf(fidlog, "    params: %d : %f \n", i+1, vec::meanSumMinMax(dsum, dmin, dmax, mhpdColVw));
+              MinMax(i, iMin) = dmin;
+              MinMax(i, iMax) = dmax;
+            } // end
+          fprintf(fidlog, "    log2po: %f \n", vec::meanSumMinMax(dsum, dmin, dmax, mhLogPostDens));
+          fprintf(fidlog, "  Minimum value.........:\n");;
+          for (size_t i = 0; i < npar; ++i)
+            fprintf(fidlog, "    params: %d : %f \n", i+1, MinMax(i, iMin));
+          fprintf(fidlog, "    log2po: %f \n", dmin);
+          fprintf(fidlog, "  Maximum value.........:\n");
+          for (size_t i = 0; i < npar; ++i)
+            fprintf(fidlog, "    params: %d : %f \n", i+1, MinMax(i, iMax));
+          fprintf(fidlog, "    log2po: %f \n", dmax);
+          fprintf(fidlog, " \n");
+          fclose(fidlog);
+
+          jsux = 0;
+          LastParametersRow = mat::get_row(mhParamDraws, currInitSizeArray-1); //x2(end,:);
+          LastLogLiK(b-1) = mhLogPostDens(currInitSizeArray-1); //logpo2(end);
+          InitSizeArray(b-1) = std::min((size_t) nruns(b-1)-j, MAX_nruns);
+          // initialization of next file if necessary
+          if (InitSizeArray(b-1))
+            {
+              NewFile(b-1) = NewFile(b-1) + 1;
+              irun = 0;
+            } // end
+          irun++;
         } // end  while % End of the simulations for one mh-block.
-      //set record.
+      //record.
       AcceptationRates(b-1) = sux/j;
+      OpenOldFile[b] = 0;
     } // end % End of the loop over the mh-blocks.
-    if( mexPutVariable("caller", "record.AcceptationRates", AcceptationRatesPtr))
-      mexPrintf("MH Warning: due to error record.AcceptationRates is NOT set !! \n") ;
+  mexPrintf(" put Var record.AcceptationRates  \n");
+  if (mexPutVariable("caller", "record.AcceptationRates", AcceptationRatesPtr))
+    mexPrintf("MH Warning: due to error record.AcceptationRates is NOT set !! \n");
+  //else mexPrintf(" record.AcceptationRates is now set !! \n");
 
-    if( mexPutVariable("caller", "record.LastParameters", mxLastParametersPtr))
-      mexPrintf("MH Warning: due to error record.MhParamDraw is NOT set !! \n") ;
+  if (mexPutVariable("caller", "record.LastParameters", mxLastParametersPtr))
+    mexPrintf("MH Warning: due to error record.MhParamDraw is NOT set !! \n");
 
-    if( mexPutVariable("caller", "record.LastLogLiK", mxLastLogLikPtr))
-      mexPrintf("MH Warning: due to error record.LastLogLiK is NOT set !! \n") ;
+  if (mexPutVariable("caller", "record.LastLogLiK", mxLastLogLikPtr))
+    mexPrintf("MH Warning: due to error record.LastLogLiK is NOT set !! \n");
 
-    NewFileVw=NewFile;
-    if( mexPutVariable("caller", "NewFile", NewFileArrayPtr))
-      mexPrintf("MH Warning: due to error NewFile is NOT set !! \n") ;
+  if (mexPutVariable("caller", "record.LastLogLiK2", mxLastLogLikPtr))
+    mexPrintf("MH Warning: due to error record.LastLogLiK is NOT set !! \n");
+  if (mexPutVariable("caller", "LastLogLiK3", mxLastLogLikPtr))
+    mexPrintf("MH Warning: due to error record.LastLogLiK is NOT set !! \n");
 
-    if (mxMhLogPostDensPtr) 
-      mxDestroyArray(mxMhLogPostDensPtr);  // delete log post density array
-    if (mxMhParamDrawsPtr) 
-      mxDestroyArray(mxMhParamDrawsPtr);  // delete accepted MCMC MH draws
+  NewFileVw = NewFile;
+  if (mexPutVariable("caller", "NewFile", NewFileArrayPtr))
+    mexPrintf("MH Warning: due to error NewFile is NOT set !! \n");
 
-    // return last line run in the last MH block sub-array 
-    return currInitSizeArray;
+  // Cleanup
+  if (mxMhLogPostDensPtr)
+    mxDestroyArray(mxMhLogPostDensPtr);                                             // delete log post density array
+  if (mxMhParamDrawsPtr)
+    mxDestroyArray(mxMhParamDrawsPtr);                                            // delete accepted MCMC MH draws
+
+// Close Bar  
+  mexCallMATLAB(0, NULL, 1, waitBarLhs, "close");
+  mxDestroyArray(waitBarLhs[0]);
+  mxDestroyArray(waitBarRhs[1]);
+
+  // return last line run in the last MH block sub-array
+  return irun;
 
 }
 
@@ -326,6 +410,7 @@ logMCMCposterior(const VectorConstView &estParams, const MatrixConstView &data, 
   double riccati_tol = *mxGetPr(mxGetField(options_, 0, "riccati_tol"));
   size_t presample = (size_t) *mxGetPr(mxGetField(options_, 0, "presample"));
   size_t console_mode = (size_t) *mxGetPr(mxGetField(options_, 0, "console_mode"));
+  size_t load_mh_file = (size_t) *mxGetPr(mxGetField(options_, 0, "load_mh_file"));
 
   std::vector<size_t> varobs;
   const mxArray *varobs_mx = mxGetField(options_, 0, "varobs_id");
@@ -392,12 +477,9 @@ logMCMCposterior(const VectorConstView &estParams, const MatrixConstView &data, 
     Jscale(i, i) = vJscale(i);
   blas::gemm("N", "N", 1.0, D, Jscale, 0.0, Dscale);
 
-//  Matrix mh_bounds(n_estParams,2);
-
-  // Compute the MHMCMC loop draws
-  // and get get last line run in the last MH block sub-array 
+  //sample MHMCMC draws and get get last line run in the last MH block sub-array
   size_t lastMHblockArrayLine = sampleMHMC(lpd, rwmh, steadyState, estParams2, deepParams, data, Q, H, presample, info,
-             nMHruns, fblock, nBlocks, Dscale, drawGaussDist01, epd, resultsFileStem, console_mode); 
+                                           nMHruns, fblock, nBlocks, Dscale, drawGaussDist01, epd, resultsFileStem, console_mode, load_mh_file);
 
   // Cleanups
   for (std::vector<EstimatedParameter>::iterator it = estParamsInfo.begin();
@@ -405,7 +487,6 @@ logMCMCposterior(const VectorConstView &estParams, const MatrixConstView &data, 
     delete it->prior;
 
   return lastMHblockArrayLine;
-  
 }
 
 void
@@ -443,8 +524,7 @@ mexFunction(int nlhs, mxArray *plhs[],
   assert(nMHruns.getSize() == nBlocks);
 
   MatrixConstView D(mxGetPr(prhs[6]), mxGetM(prhs[6]), mxGetN(prhs[6]), mxGetM(prhs[6]));
-
-  // Compute MCMC MH Draws and get last line run in the last MH block sub-array 
+  //calculate MHMCMC draws and get get last line run in the last MH block sub-array
   size_t lastMHblockArrayLine = logMCMCposterior(estParams, data, mexext, fblock, nBlocks, nMHruns, D);
 
   *mxGetPr(plhs[0]) = (double) lastMHblockArrayLine;
