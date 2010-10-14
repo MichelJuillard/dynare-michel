@@ -51,6 +51,10 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 
 info = 0;
 
+if M_.maximum_endo_lag == 0 && options_.order > 1
+    error(['2nd and 3rd order approximation not implemented for purely forward models'])
+end
+
 if options_.k_order_solver;
     dr = set_state_space(dr,M_);
     [dr,info] = k_order_pert(dr,M_,options_,oo_);
@@ -252,10 +256,6 @@ if M_.maximum_endo_lead == 0
         dr.ghu = repmat(1./dr.ys,1,size(dr.ghu,2)).*dr.ghu;
     end
     return
-end
-
-if M_.maximum_endo_lag == 0 && options_.order > 1
-    error(['2nd and 3rd order approximation not implemented for purely forward models'])
 end
 
 %forward--looking models
