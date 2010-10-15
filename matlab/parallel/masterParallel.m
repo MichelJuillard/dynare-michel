@@ -192,7 +192,7 @@ for j=1:totCPU,
     
         
     % Creo un file che mi serve per sapere se la computazione di un
-    % blocco parallelo (una core) è terminata oppure no!
+    % blocco parallelo (una core) Ã¨ terminata oppure no!
     
     fid1=fopen(['P_',fname,'_',int2str(j),'End.txt'],'w+');
     fclose(fid1);
@@ -230,7 +230,7 @@ for j=1:totCPU,
         end
     else
         
-        % Se la computazione è remota, lo creo in locale, lo copio directory remota (creata
+        % Se la computazione Ã¨ remota, lo creo in locale, lo copio directory remota (creata
         % sopra) e lo cancello in locale. Lo stesso vale per gli altri
         % dati.
         save( ['slaveParallel_input',int2str(j)],'Parallel');
@@ -320,13 +320,13 @@ for j=1:totCPU,
                     end
                 end
             elseif Parallel(indPC).Local==0, % Run using network on remote machine or also on local machine.
+                if j==nCPU0+1,
+                    dynareParallelSendFiles(NamFileInput,PRCDir,Parallel(indPC));
+                end
                 dynareParallelSendFiles(['P_',fname,'_',int2str(j),'End.txt'],PRCDir,Parallel(indPC));
                 delete(['P_',fname,'_',int2str(j),'End.txt']);
                 dynareParallelSendFiles(['slaveJob',int2str(j),'.mat'],PRCDir,Parallel(indPC));
                 delete(['slaveJob',int2str(j),'.mat']);
-                if j==nCPU0+1,
-                    dynareParallelSendFiles(NamFileInput,PRCDir,Parallel(indPC));
-                end
                 if newInstance,
                     dynareParallelSendFiles(['slaveParallel_input',int2str(j),'.mat'],PRCDir,Parallel(indPC))
                     if isunix || (~matlab_ver_less_than('7.4') && ismac),
@@ -502,17 +502,17 @@ while (ForEver)
       
 end
 
-
-dynareParallelGetFiles([fname,'_output_*.mat'],PRCDir,Parallel(1:totSlaves));
+% keyboard;
 
 
 % Create return value.
 iscrash = 0;
 for j=1:totCPU,
+    indPC=min(find(nCPU>=j));
+    dynareParallelGetFiles([fname,'_output_',int2str(j),'.mat'],PRCDir,Parallel(indPC));
     load([fname,'_output_',int2str(j),'.mat'],'fOutputVar');
     delete([fname,'_output_',int2str(j),'.mat']);
     if isfield(fOutputVar,'OutputFileName'),
-        indPC=min(find(nCPU>=j));
         dynareParallelGetFiles([fOutputVar.OutputFileName],PRCDir,Parallel(indPC));
     end
     if isfield(fOutputVar,'error'),
@@ -520,6 +520,9 @@ for j=1:totCPU,
         iscrash=1;
 %         keyboard;
         disp([fOutputVar.error.message]);
+        for jstack=1:length(fOutputVar.error.stack)
+            fOutputVar.error.stack(jstack),
+        end
     else
         fOutVar(j)=fOutputVar;
     end
@@ -571,6 +574,7 @@ switch Strategy
             delete ConcurrentCommand1.bat
         end
 end
+
 
 
 

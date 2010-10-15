@@ -84,6 +84,8 @@ elseif strcmpi(type,'gsa')
 else
     MhDirectoryName = CheckPath('prior');
 end
+delete([MhDirectoryName filesep M_.fname '_IRF_DSGEs*.mat']);
+delete([MhDirectoryName filesep M_.fname '_IRF_BVARDSGEs*.mat']);
 if strcmpi(type,'posterior')
     load([ MhDirectoryName filesep  M_.fname '_mh_history.mat'])
     TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
