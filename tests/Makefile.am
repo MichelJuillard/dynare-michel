@@ -42,6 +42,7 @@ OCTAVE_MODS = \
 	arima/mod2.mod \
 	arima/mod2c.mod \
 	fs2000/fs2000.mod \
+	fs2000/fs2000c.mod \
 	homotopy/homotopy1_test.mod \
 	homotopy/homotopy2_test.mod \
 	homotopy/homotopy3_test.mod \

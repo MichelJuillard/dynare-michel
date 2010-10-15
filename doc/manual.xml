@@ -417,6 +417,7 @@ dynare ramst.mod savemacro
   <listitem><para><xref linkend='parameters'/></para></listitem>
   <listitem><para><xref linkend='change_type'/></para></listitem>
   <listitem><para><xref linkend='predetermined_variables'/></para></listitem>
+  <listitem><para><xref linkend='trend_var'/></para></listitem>
 </itemizedlist>
 
 <refentry id="var">
@@ -432,6 +433,11 @@ dynare ramst.mod savemacro
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>var</command>
+      <arg>
+        <arg choice="plain">(</arg>
+        <arg choice="req"><option>deflator</option> = <replaceable>MODEL_EXPRESSION</replaceable></arg>
+        <arg choice="plain">)</arg>
+      </arg>
       <arg choice="plain">
 	      <replaceable>VARIABLE_NAME</replaceable>
 	      <arg>$<replaceable>LATEX_NAME</replaceable>$</arg>
@@ -446,15 +452,26 @@ dynare ramst.mod savemacro
 
   <refsect1><title>Description</title>
   <para>
-    This required command declares the endogenous variables in the model. See <xref linkend="conventions"/> for the syntax of <replaceable>VARIABLE_NAME</replaceable>. Optionally it is possible to give a LaTeX name to the variable.
+    This required command declares the endogenous variables in the model. See <xref linkend="conventions"/> for the syntax of <replaceable>VARIABLE_NAME</replaceable> and <replaceable>MODEL_EXPRESSION</replaceable>. Optionally it is possible to give a LaTeX name to the variable or, if it nonstationary, provide information regarding its deflator.
   </para>
   <para><command>var</command> commands can appear several times in the file and Dynare will concatenate them.</para>
+  </refsect1>
+
+  <refsect1><title>Options</title>
+  <para>If the model is nonstationary and is to be written as such in the <command>model</command> block, Dynare will need the trend deflator for the appropriate endogenous variables in order to stationarize the model. The trend deflator must be provided alongside the variables that follow this trend.</para>
+  <variablelist>
+    <varlistentry>
+      <term><option>deflator = <replaceable>MODEL_EXPRESSION</replaceable></option></term>
+      <listitem><para>The expression used to detrend an endogenous variable. All trend variables, endogenous variables and parameters referenced in <replaceable>MODEL_EXPRESSION</replaceable> must already have been declared by the <command>trend_var</command>, <command>var</command> and <command>parameters</command> commands.</para></listitem>
+    </varlistentry>
+  </variablelist>
   </refsect1>
 
   <refsect1><title>Example</title>
   <informalexample>
     <programlisting>
 var c gnp q1 q2;
+var(deflator=A) i b;
     </programlisting>
   </informalexample>
   </refsect1>
@@ -720,6 +737,61 @@ end;
       </programlisting>
     </para>
     </formalpara>
+  </informalexample>
+  </refsect1>
+</refentry>
+
+<refentry id="trend_var">
+  <refmeta>
+    <refentrytitle>trend_var</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>trend_var</refname>
+    <refpurpose>declares trend variables</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>trend_var</command>
+      <arg choice="plain">
+        <arg choice="plain">(</arg>
+        <arg choice="req"><option>growth_factor</option> = <replaceable>MODEL_EXPRESSION</replaceable></arg>
+        <arg choice="plain">)</arg>
+      </arg>
+      <arg choice="plain">
+        <replaceable>VARIABLE_NAME</replaceable>
+        <arg>$<replaceable>LATEX_NAME</replaceable>$</arg>
+      </arg>
+      <arg rep="repeat"><arg>,</arg>
+      <replaceable>VARIABLE_NAME</replaceable>
+      <arg>$<replaceable>LATEX_NAME</replaceable>$</arg>
+      </arg>
+      <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1><title>Description</title>
+  <para>This optional command declares the trend variables in the model. See <xref linkend="conventions"/> for the syntax of <replaceable>MODEL_EXPRESSION</replaceable> and <replaceable>VARIABLE_NAME</replaceable>. Optionally it is possible to give a LaTeX name to the variable.</para>
+  <para>Trend variables are required if the user wants to be able to write a nonstationary model in the <command>model</command> block. The <command>trend_var</command> command must appear before the <command>var</command> command that references the trend variable.</para>
+  <para><command>trend_var</command> commands can appear several times in the file and Dynare will concatenate them.</para>
+  </refsect1>
+
+  <refsect1><title>Options</title>
+  <para>If the model is nonstationary and is to be written as such in the <command>model</command> block, Dynare will need the growth factor of every trend variable in order to stationarize the model. The growth factor must be provided within the declaration of the trend variable.</para>
+  <variablelist>
+    <varlistentry>
+      <term><option>growth_factor = <replaceable>MODEL_EXPRESSION</replaceable></option></term>
+      <listitem><para>The growth factor of the trend variable. All endogenous variables and parameters referenced in <replaceable>MODEL_EXPRESSION</replaceable> must already have been declared by the <command>var</command> and <command>parameters</command> commands.</para></listitem>
+    </varlistentry>
+  </variablelist>
+  </refsect1>
+
+  <refsect1><title>Example</title>
+  <informalexample>
+    <programlisting>
+trend_var (growth_factor=gA) A;
+    </programlisting>
   </informalexample>
   </refsect1>
 </refentry>
@@ -1380,7 +1452,6 @@ end;
 </refentry>
 
 </sect1>
-
 <sect1 id="sec_shocks"><title>Shocks on exogenous variables</title>
 <para>
   In a deterministic context, when one wants to study the transition of one equilibrium position to another, it is equivalent to analyze the consequences of a permanent shock and this in done in Dynare through the proper use of <xref linkend='initval'/> and <xref linkend='endval'/>.
