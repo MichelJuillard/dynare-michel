@@ -389,6 +389,12 @@ if options_.mode_compute == 0 && length(options_.mode_file) == 0 && options_.mh_
     return;
 end
 
+if options_.mode_compute>0 || options_.mode_compute==6
+    % Erase previously computed optimal mh scale parameter.
+    delete([M_.fname '_optimal_mh_scale_parameter.mat'])
+end
+
+
 %% Estimation of the posterior mode or likelihood mode
 if options_.mode_compute > 0 && ~options_.mh_posterior_mode_estimation
     if ~options_.dsge_var
@@ -550,6 +556,7 @@ if options_.mode_compute > 0 && ~options_.mh_posterior_mode_estimation
             end
             hh = inv(PostVar);
             save([M_.fname '_mode.mat'],'xparam1','hh');
+            save([M_.fname '_optimal_mh_scale_parameter.mat'],'Scale');
             bayestopt_.jscale = ones(length(xparam1),1)*Scale;%??!
         end    
       case 7
