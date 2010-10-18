@@ -93,6 +93,7 @@ void mexEvalString(const string str);
 double* mxGetPr(const mxArray *b_m);
 inline mwIndex* mxGetIr(const mxArray *A_m) {return (mwIndex*)A_m->Ir;};
 inline mwIndex* mxGetJc(const mxArray *A_m) {return (mwIndex*)A_m->Jc;};
+mxArray* mxSetNzmax(mxArray* A_m, mwSize nz_max);
 inline int mxGetNzmax(const mxArray *A_m) {return A_m->Nzmax;};
 inline int mxGetM(const mxArray *A_m) {return A_m->size_1;};
 inline int mxGetN(const mxArray *A_m) {return A_m->size_2;};

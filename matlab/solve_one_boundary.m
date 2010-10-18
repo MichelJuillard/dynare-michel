@@ -1,4 +1,4 @@
-function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo, forward_backward, is_dynamic, verbose)
+function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo, forward_backward, is_dynamic, verbose, indirect_call)
 % Computes the deterministic simulation of a block of equation containing
 % lead or lag variables 
 %
@@ -38,9 +38,13 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
 %                                           field remains unchanged
 %   verbose            [integer]        (0) iterations are not printed
 %                                       (1) iterations are printed
-%
-% OUTPUTS
+%   indirect_call      [integer]        (0) direct call to the fname
+%                                       (1) indirect call via the
+%                                       local_fname wrapper
+% OUTPUTS                                    
 %   y                  [matrix]         All endogenous variables of the model      
+%   info               [integer]        >=0 no error
+%                                       <0 error
 %  
 % ALGORITHM
 %   Newton with LU or GMRES or BicGstab for dynamic block
@@ -84,7 +88,7 @@ else
     start = periods+y_kmin;
     finish = y_kmin+1;
 end
-lambda=1;
+%lambda=1;
 for it_=start:incr:finish
     cvg=0;
     iter=0;
@@ -260,7 +264,7 @@ for it_=start:incr:finish
                 [yn,info] = csolve(@local_fname, y(y_index_eq),@local_fname,1e-6,500, x, params, y, y_index_eq, fname, 1);
                 dx = ya - yn;
                 y(y_index_eq) = yn;
-            elseif((stack_solve_algo==1 & is_dynamic) | (~is_dynamic & options_.solve_algo==1)),
+            elseif((stack_solve_algo==1 & is_dynamic) | (stack_solve_algo==0 & is_dynamic) | (~is_dynamic & options_.solve_algo==1)),
                 dx =  g1\r;
                 ya = ya - lambda*dx;
                 if(is_dynamic)

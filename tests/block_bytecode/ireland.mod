@@ -23,7 +23,7 @@ scy = 0.0040;
 shy = 0.0015;
 shc = 0.0010;
 
-model(block,cutoff=0);
+model(bytecode, block,cutoff=0);
 exp(y) = exp(a)*exp(k(-1))^theta*exp(h)^(1-theta);
 a = (1-rho)*aa+rho*a(-1)+e;
 exp(y) = exp(c) + exp(i);

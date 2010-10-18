@@ -42,7 +42,6 @@ SparseMatrix::SparseMatrix()
   restart = 0;
   IM_i.clear();
   lu_inc_tol = 1e-10;
-  reduced = true;
 }
 
 int
@@ -366,7 +365,7 @@ SparseMatrix::Read_SparseMatrix(string file_name, const int Size, int periods, i
 }
 
 void
-SparseMatrix::Simple_Init(int it_, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM)
+SparseMatrix::Simple_Init(int it_, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM, bool &zero_solution)
 {
   int i, eq, var, lag;
   map<pair<pair<int, int>, int>, int>::iterator it4;
@@ -435,15 +434,24 @@ SparseMatrix::Simple_Init(int it_, int y_kmin, int y_kmax, int Size, map<pair<pa
       it4++;
     }
   //#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
+  double cum_abs_sum = 0;
   for (i = 0; i < Size; i++)
-    b[i] = i;
+    {
+      b[i] = i;
+      cum_abs_sum += fabs(u[i]);
+    }
+  if (cum_abs_sum < 1e-20)
+    zero_solution = true;
+  else
+    zero_solution = false;
+
   mxFree(temp_NZE_R);
   mxFree(temp_NZE_C);
   u_count = u_count1;
 }
 
 void
-SparseMatrix::Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>, int> &IM, mxArray *A_m, mxArray *b_m)
+SparseMatrix::Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>, int> &IM, mxArray *A_m, mxArray *b_m, bool &zero_solution)
 {
   int i, eq, var;
   double *b = mxGetPr(b_m);
@@ -482,10 +490,19 @@ SparseMatrix::Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>,
 #endif
   unsigned int NZE = 0;
   int last_var = 0;
+  double cum_abs_sum = 0;
   for (i = 0; i < Size; i++)
-    b[i] = u[i];
+    {
+      b[i] = u[i];
+      cum_abs_sum += fabs(b[i]);
+    }
+  if (cum_abs_sum < 1e-20)
+    zero_solution = true;
+  else
+    zero_solution = false;
+
   Aj[0] = 0;
-  last_var = 0;
+  last_var = -1;
   it4 = IM.begin();
   while (it4 != IM.end())
     {
@@ -1321,10 +1338,307 @@ SparseMatrix::Check_the_Solution(int periods, int y_kmin, int y_kmax, int Size, 
     }
 }
 
+mxArray*
+SparseMatrix::substract_A_B(mxArray* A_m, mxArray* B_m)
+{
+  unsigned int n_A = mxGetN(A_m);
+  unsigned int m_A = mxGetM(A_m);
+  double* A_d = mxGetPr(A_m);
+  unsigned int n_B = mxGetN(B_m);
+  double* B_d = mxGetPr(B_m);
+  mxArray* C_m = mxCreateDoubleMatrix(m_A, n_B, mxREAL);
+  double* C_d = mxGetPr(C_m);
+  for (unsigned int j = 0; j < n_A; j++)
+    for (unsigned int i = 0; i < m_A; i++)
+      {
+        unsigned int index = j*m_A+i;
+        C_d[index] = A_d[index] - B_d[index];
+    }
+  return C_m;
+}
+
+
+
+mxArray*
+SparseMatrix::Sparse_substract_A_SB(mxArray* A_m, mxArray* B_m)
+{
+  unsigned int n_B = mxGetN(B_m);
+  unsigned int m_B = mxGetM(B_m);
+  mwIndex* B_i = mxGetIr(B_m);
+  mwIndex* B_j = mxGetJc(B_m);
+  unsigned int total_nze_B = B_j[n_B];
+  double* B_d = mxGetPr(B_m);
+  mxArray* C_m = mxDuplicateArray(A_m);
+  double* C_d = mxGetPr(C_m);
+  unsigned int nze_B = 0;
+  unsigned int B_col = 0;
+  while (nze_B < total_nze_B)
+    {
+      while (nze_B >= (unsigned int)B_j[B_col+1] && (nze_B < total_nze_B))
+        B_col++;
+      C_d[B_col*m_B+B_i[nze_B]] -= B_d[nze_B];
+      nze_B++;
+    }
+  return C_m;
+}
+
+
+
+mxArray*
+SparseMatrix::Sparse_substract_SA_SB(mxArray* A_m, mxArray* B_m)
+{
+  unsigned int n_A = mxGetN(A_m);
+  unsigned int m_A = mxGetM(A_m);
+  mwIndex* A_i = mxGetIr(A_m);
+  mwIndex* A_j = mxGetJc(A_m);
+  unsigned int total_nze_A = A_j[n_A];
+  double* A_d = mxGetPr(A_m);
+  unsigned int n_B = mxGetN(B_m);
+  mwIndex* B_i = mxGetIr(B_m);
+  mwIndex* B_j = mxGetJc(B_m);
+  unsigned int total_nze_B = B_j[n_B];
+  double* B_d = mxGetPr(B_m);
+  mxArray* C_m = mxCreateSparse(m_A, n_B, m_A*n_B, mxREAL);
+  mwIndex* C_i = mxGetIr(C_m);
+  mwIndex* C_j = mxGetJc(C_m);
+  double* C_d = mxGetPr(C_m);
+  unsigned int nze_B = 0, nze_C = 0, nze_A = 0;
+  unsigned int A_col = 0, B_col = 0, C_col = 0;
+  C_j[C_col] = 0;
+  while (nze_A < total_nze_A || nze_B < total_nze_B)
+    {
+      while (nze_A >= (unsigned int)A_j[A_col+1] && (nze_A < total_nze_A))
+        A_col++;
+      int A_row = A_i[nze_A];
+      while (nze_B >= (unsigned int)B_j[B_col+1] && (nze_B < total_nze_B))
+        B_col++;
+      int B_row = B_i[nze_B];
+      if (A_col == B_col)
+        {
+          if (A_row == B_row && (nze_B < total_nze_B && nze_A < total_nze_A))
+            {
+              C_d[nze_C] = A_d[nze_A++] - B_d[nze_B++];
+              C_i[nze_C] = A_row;
+              while (C_col < A_col)
+                C_j[++C_col] = nze_C;
+              C_j[A_col+1] = nze_C++;
+              C_col = A_col;
+            }
+          else if (A_row < B_row || (nze_B >= total_nze_B && nze_A < total_nze_A))
+            {
+              C_d[nze_C] = A_d[nze_A++];
+              C_i[nze_C] = A_row;
+              while (C_col < A_col)
+                C_j[++C_col] = nze_C;
+              C_j[A_col+1] = nze_C++;
+              C_col = A_col;
+            }
+          else
+            {
+              C_d[nze_C] = - B_d[nze_B++];
+              C_i[nze_C] = B_row;
+              while (C_col < B_col)
+                C_j[++C_col] = nze_C;
+              C_j[B_col+1] = nze_C++;
+              C_col = B_col;
+            }
+        }
+      else if (A_col < B_col || (nze_B >= total_nze_B && nze_A < total_nze_A))
+        {
+          C_d[nze_C] = A_d[nze_A++];
+          C_i[nze_C] = A_row;
+          while (C_col < A_col)
+            C_j[++C_col] = nze_C;
+          C_j[A_col+1] = nze_C++;
+          C_col = A_col;
+        }
+      else
+        {
+          C_d[nze_C] = - B_d[nze_B++];
+          C_i[nze_C] = B_row;
+          while (C_col < B_col)
+             C_j[++C_col] = nze_C;
+          C_j[B_col+1] = nze_C++;
+          C_col = B_col;
+        }
+    }
+  while (C_col < n_B)
+    C_j[++C_col] = nze_C;
+  mxSetNzmax(C_m, nze_C);
+  return C_m;
+}
+
+
+mxArray*
+SparseMatrix::mult_SAT_B(mxArray* A_m, mxArray* B_m)
+{
+  unsigned int n_A = mxGetN(A_m);
+  unsigned int m_A = mxGetM(A_m);
+  mwIndex* A_i = mxGetIr(A_m);
+  mwIndex* A_j = mxGetJc(A_m);
+  double* A_d = mxGetPr(A_m);
+  unsigned int n_B = mxGetN(B_m);
+  double* B_d = mxGetPr(B_m);
+  mxArray* C_m = mxCreateDoubleMatrix(m_A, n_B, mxREAL);
+  double* C_d = mxGetPr(C_m);
+  unsigned int nze_A = 0;
+  for (unsigned int j = 0; j < n_B; j++)
+    {
+      for (unsigned int i = 0; i < n_A; i++)
+          {
+          double sum = 0;
+          nze_A = A_j[i];
+          while ( nze_A < (unsigned int)A_j[i+1] )
+            {
+              unsigned int i_A = A_i[nze_A];
+              sum += A_d[nze_A++] * B_d[i_A];
+            }
+          C_d[j*n_A+i] = sum;
+        }
+    }
+  return C_m;
+}
+
+
+mxArray*
+SparseMatrix::Sparse_mult_SAT_B(mxArray* A_m, mxArray* B_m)
+{
+  unsigned int n_A = mxGetN(A_m);
+  unsigned int m_A = mxGetM(A_m);
+  mwIndex* A_i = mxGetIr(A_m);
+  mwIndex* A_j = mxGetJc(A_m);
+  double* A_d = mxGetPr(A_m);
+  unsigned int n_B = mxGetN(B_m);
+  unsigned int m_B = mxGetM(B_m);
+  double* B_d = mxGetPr(B_m);
+  mxArray* C_m = mxCreateSparse(m_A, n_B, m_A*n_B, mxREAL);
+  mwIndex* C_i = mxGetIr(C_m);
+  mwIndex* C_j = mxGetJc(C_m);
+  double* C_d = mxGetPr(C_m);
+  unsigned int nze_C = 0, nze_A = 0;
+  unsigned int C_col = 0;
+  C_j[C_col] = 0;
+  for (unsigned int j = 0; j < n_B; j++)
+    {
+      for (unsigned int i = 0; i < n_A; i++)
+          {
+          double sum = 0;
+          nze_A = A_j[i];
+          while ( nze_A < (unsigned int)A_j[i+1] )
+            {
+              unsigned int i_A = A_i[nze_A];
+              sum += A_d[nze_A++] * B_d[i_A];
+            }
+          if (fabs(sum) > 1e-10)
+            {
+              C_d[nze_C] = sum;
+              C_i[nze_C] = i;
+              while (C_col < j)
+                C_j[++C_col] = nze_C;
+              nze_C++;
+            }
+        }
+    }
+  while (C_col < m_B)
+    C_j[++C_col] = nze_C;
+  mxSetNzmax(C_m, nze_C);
+  return C_m;
+}
+
+
+mxArray*
+SparseMatrix::Sparse_mult_SAT_SB(mxArray* A_m, mxArray* B_m)
+{
+  unsigned int n_A = mxGetN(A_m);
+  unsigned int m_A = mxGetM(A_m);
+  mwIndex* A_i = mxGetIr(A_m);
+  mwIndex* A_j = mxGetJc(A_m);
+  double* A_d = mxGetPr(A_m);
+  unsigned int n_B = mxGetN(B_m);
+  mwIndex* B_i = mxGetIr(B_m);
+  mwIndex* B_j = mxGetJc(B_m);
+  double* B_d = mxGetPr(B_m);
+  mxArray* C_m = mxCreateSparse(m_A, n_B, m_A*n_B, mxREAL);
+  mwIndex* C_i = mxGetIr(C_m);
+  mwIndex* C_j = mxGetJc(C_m);
+  double* C_d = mxGetPr(C_m);
+  unsigned int nze_B = 0, nze_C = 0, nze_A = 0;
+  unsigned int C_col = 0;
+  C_j[C_col] = 0;
+  for (unsigned int j = 0; j < n_B; j++)
+    {
+      for (unsigned int i = 0; i < n_A; i++)
+          {
+          double sum = 0;
+          nze_B = B_j[j];
+          nze_A = A_j[i];
+          while ( nze_A < (unsigned int)A_j[i+1] && nze_B < (unsigned int)B_j[j+1])
+            {
+              unsigned int i_A = A_i[nze_A];
+              unsigned int i_B = B_i[nze_B];
+              if ( i_A == i_B)
+                sum += A_d[nze_A++] * B_d[nze_B++];
+              else if (i_A < i_B)
+                nze_A++;
+              else
+                nze_B++;
+            }
+          if (fabs(sum) > 1e-10)
+            {
+              C_d[nze_C] = sum;
+              C_i[nze_C] = i;
+              while (C_col < j)
+                C_j[++C_col] = nze_C;
+              nze_C++;
+            }
+        }
+    }
+  while (C_col < n_B)
+    C_j[++C_col] = nze_C;
+  mxSetNzmax(C_m, nze_C);
+  return C_m;
+}
+
+mxArray*
+SparseMatrix::Sparse_transpose(mxArray* A_m)
+{
+  unsigned int n_A = mxGetN(A_m);
+  unsigned int m_A = mxGetM(A_m);
+  mwIndex* A_i = mxGetIr(A_m);
+  mwIndex* A_j = mxGetJc(A_m);
+  unsigned int total_nze_A = A_j[n_A];
+  double* A_d = mxGetPr(A_m);
+  mxArray* C_m = mxCreateSparse(n_A, m_A, total_nze_A, mxREAL);
+  mwIndex* C_i = mxGetIr(C_m);
+  mwIndex* C_j = mxGetJc(C_m);
+  double* C_d = mxGetPr(C_m);
+  unsigned int nze_C = 0, nze_A = 0;
+  memset(C_j, 0, m_A);
+  map<pair<unsigned int, unsigned int>, double> B2;
+  for (unsigned int i = 0; i < n_A; i++)
+    {
+      while ( nze_A < (unsigned int)A_j[i+1])
+        {
+          C_j[A_i[nze_A]+1]++;
+          B2[make_pair(A_i[nze_A], i)] = A_d[nze_A];
+          nze_A++;
+        }
+    }
+  for (unsigned int i = 0; i < m_A; i++)
+    C_j[i+1] += C_j[i];
+  for (map<pair<unsigned int, unsigned int>, double>::const_iterator it = B2.begin(); it != B2.end(); it++)
+    {
+      C_d[nze_C] = it->second;
+      C_i[nze_C++] = it->first.second;
+    }
+  return C_m;
+}
+
+
+
 void
 SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int Size, double slowc_l, bool is_two_boundaries, int  it_)
 {
-  mexPrintf("Solve_Matlab_Relaxation Size=%d\n", Size);
   mxArray *B1, *C1, *A2, *B2, *A3, *b1, *b2;
   double* b_m_d = mxGetPr(b_m);
   if (!b_m_d)
@@ -1407,7 +1721,7 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int S
        A3*/
   while (var < 2*Size && nze < max_nze)
     {
-      if (A_m_j[var+1] <= nze)
+      if ((unsigned int)A_m_j[var+1] <= nze)
         {
           if (var < Size)
             b1_d[var] = b_m_d[var];
@@ -1474,20 +1788,19 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int S
     B2_j[++B2_var] = B2_nze;
   while(A3_var < Size)
     A3_j[++A3_var] = A3_nze;
-
   mxArray *d1;
-  mxArray *val[2];
   vector<pair<mxArray*, mxArray*> > triangular_form;
-  //mxArray* C_B1_inv;
   int last_t = 0;
   double sumc=0, C_sumc = 1000;
-  mxArray *B1_inv;
+  mxArray *B1_inv = NULL;
+  mxArray *B1_inv_t = NULL;
   for (int t = 1; t <= periods; t++)
     {
       if (abs(sumc / C_sumc -1) > 1e-10*res1)
         {
           C_sumc = sumc;
-          mxDestroyArray(B1_inv);
+          if (B1_inv)
+            mxDestroyArray(B1_inv);
           mexCallMATLAB(1, &B1_inv, 1, &B1, "inv");
           mwIndex *B_inv_j = mxGetJc(B1_inv);
           unsigned int B_inv_nze = B_inv_j[Size];
@@ -1497,42 +1810,31 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int S
             sumc += fabs(B_inv_d[i]);
           last_t = t;
         }
+      B1_inv_t = Sparse_transpose(B1_inv);
+      mxArray *S1 = Sparse_mult_SAT_SB(B1_inv_t, C1);
 
-      mxArray *S1;
-      val[0] = B1_inv;
-      val[1] = C1;
-      mexCallMATLAB(1, &S1, 2, val, "*");
-
-      val[1] = b1;
-      mexCallMATLAB(1, &d1, 2, val, "*");
-
-
+      d1 = mult_SAT_B(B1_inv_t, b1);
       if (t < periods)
       //Computation for the next lines
         {
-          val[0] = A2;
-          val[1] = S1;
+          mxDestroyArray(B1_inv_t);
+          mxArray *A2_t = Sparse_transpose(A2);
+          mxDestroyArray(A2);
+
+          mxArray *tmp = Sparse_mult_SAT_SB(A2_t, S1);
           mxDestroyArray(B1);
-          mxArray *tmp;
-          mexCallMATLAB(1, &tmp, 2, val, "*");
-          val[0] = B2;
-          val[1] = tmp;
-          mexCallMATLAB(1, &B1, 2, val, "-");
+          B1 = Sparse_substract_SA_SB(B2, tmp);
           mxDestroyArray(tmp);
 
-          val[0] = A2;
-          val[1] = d1;
-          mxDestroyArray(b1);
-          mexCallMATLAB(1, &tmp, 2, val, "*");
-          val[0] = b2;
-          val[1] = tmp;
-          mexCallMATLAB(1, &b1, 2, val, "-");
+          tmp = mult_SAT_B(A2_t, d1);
+          b1 = substract_A_B(b2, tmp);
           mxDestroyArray(tmp);
+
           triangular_form.push_back(make_pair(S1, d1));
-
+          mxDestroyArray(A2_t);
         }
-      mxDestroyArray(A2);
       A2 = mxDuplicateArray(A3);
+
       //I  S1
       //0  B1 C1  =>B1 =
       //   A2 B2  => A2 = A3
@@ -1544,7 +1846,7 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int S
         nze--;
       while (var < (t+2)*Size && nze < max_nze)
         {
-          if (A_m_j[var+1] <= nze)
+          if ((unsigned int)A_m_j[var+1] <= nze)
             {
               b2_d[var - (t+1) * Size] = b_m_d[var];
               var++;
@@ -1568,7 +1870,6 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int S
           nze++;
         }
     }
-  //mexPrintf("last_t=%d\n", last_t);
   double *d1_d = mxGetPr(d1);
   for(unsigned i=0; i<Size; i++)
     {
@@ -1579,18 +1880,15 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int S
     }
 
   pair<mxArray*, mxArray*> tf;
-
   for (int t = periods-2; t >= 0; t--)
     {
       mxArray* tmp;
       tf = triangular_form.back();
       triangular_form.pop_back();
-      val[0] = tf.first;
-      val[1] = d1;
-      mexCallMATLAB(1, &tmp, 2, val, "*");
-      val[0] = tf.second;
-      val[1] = tmp;
-      mexCallMATLAB(1, &d1, 2, val, "-");
+      mxArray* tf_first_t = Sparse_transpose(tf.first);
+      mxDestroyArray(tf.first);
+      tmp = mult_SAT_B(tf_first_t, d1);
+      d1 = substract_A_B(tf.second, tmp);
       d1_d = mxGetPr(d1);
       mxDestroyArray(tmp);
       for(unsigned i=0; i<Size; i++)
@@ -1600,7 +1898,7 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int S
           direction[eq] = yy;
           y[eq] += slowc_l * yy;
         }
-      mxDestroyArray(tf.first);
+      mxDestroyArray(tf_first_t);
       mxDestroyArray(tf.second);
     }
   mxDestroyArray(B1);
@@ -1646,10 +1944,17 @@ SparseMatrix::Solve_Matlab_LU_UMFPack(mxArray* A_m, mxArray* b_m, int Size, doub
 }
 
 void
-SparseMatrix::Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double slowc, int block, bool is_two_boundaries, int it_)
+SparseMatrix::Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double slowc, int block, bool is_two_boundaries, int it_, bool steady_state)
 {
+#ifdef OCTAVE_MEX_FILE
+  ostringstream tmp;
+  if (steady_state)
+    tmp << " GMRES method is not implemented in Octave. You cannot use solve_algo=6, change solve_algo.\n";
+  else
+    tmp << " GMRES method is not implemented in Octave. You cannot use stack_solve_algo=2, change stack_solve_algo.\n";
+  throw FatalExceptionHandling(tmp.str());
+#endif
   int n = mxGetM(A_m);
-  /*[L1, U1]=luinc(g1a,luinc_tol);*/
   mxArray *lhs0[2];
   mxArray *rhs0[2];
   rhs0[0] = A_m;
@@ -1677,26 +1982,25 @@ SparseMatrix::Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double sl
   mxDestroyArray(rhs[4]);
   mxDestroyArray(rhs[5]);
   mxDestroyArray(rhs[6]);
-  if (*flag1 > 0 || reduced)
+  if (*flag1 > 0)
     {
       ostringstream tmp;
       if (*flag1 == 1)
         {
-          tmp << "Error in simul: No convergence inside GMRES, in block " << block;
+          tmp << "Error in bytecode: No convergence inside GMRES, in block " << block+1;
           mexWarnMsgTxt(tmp.str().c_str());
         }
       else if (*flag1 == 2)
         {
-          tmp << "Error in simul: Preconditioner is ill-conditioned, in block " << block;
+          tmp << "Error in bytecode: Preconditioner is ill-conditioned, in block " << block+1;
           mexWarnMsgTxt(tmp.str().c_str());
         }
       else if (*flag1 == 3)
         {
-          tmp << "Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block " << block;
+          tmp << "Error in bytecode: GMRES stagnated (Two consecutive iterates were the same.), in block " << block+1;
           mexWarnMsgTxt(tmp.str().c_str());
         }
       lu_inc_tol /= 10;
-      reduced = false;
     }
   else
     {
@@ -1714,8 +2018,8 @@ SparseMatrix::Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double sl
           {
             int eq = index_vara[i];
             double yy = - (res[i] + y[eq+it_*y_size]);
-             direction[eq] = yy;
-            y[eq] += slowc * yy;
+            direction[eq] = yy;
+            y[eq+it_*y_size] += slowc * yy;
           }
     }
   mxDestroyArray(A_m);
@@ -1755,26 +2059,25 @@ SparseMatrix::Solve_Matlab_BiCGStab(mxArray* A_m, mxArray* b_m, int Size, double
   mxDestroyArray(rhs[3]);
   mxDestroyArray(rhs[4]);
   mxDestroyArray(rhs[5]);
-  if (*flag1 > 0 || reduced)
+  if (*flag1 > 0)
     {
       ostringstream tmp;
       if (*flag1 == 1)
         {
-          tmp << "Error in simul: No convergence inside BiCGStab, in block " << block;
+          tmp << "Error in bytecode: No convergence inside BiCGStab, in block " << block+1;
           mexWarnMsgTxt(tmp.str().c_str());
         }
       else if (*flag1 == 2)
         {
-          tmp << "Error in simul: Preconditioner is ill-conditioned, in block " << block;
+          tmp << "Error in bytecode: Preconditioner is ill-conditioned, in block " << block+1;
           mexWarnMsgTxt(tmp.str().c_str());
         }
       else if (*flag1 == 3)
         {
-          tmp << "Error in simul: BiCGStab stagnated (Two consecutive iterates were the same.), in block " << block;
+          tmp << "Error in bytecode: BiCGStab stagnated (Two consecutive iterates were the same.), in block " << block+1;
           mexWarnMsgTxt(tmp.str().c_str());
         }
       lu_inc_tol /= 10;
-      reduced = false;
     }
   else
     {
@@ -1793,7 +2096,7 @@ SparseMatrix::Solve_Matlab_BiCGStab(mxArray* A_m, mxArray* b_m, int Size, double
             int eq = index_vara[i];
             double yy = - (res[i] + y[eq+it_*y_size]);
              direction[eq] = yy;
-            y[eq] += slowc * yy;
+            y[eq+it_*y_size] += slowc * yy;
           }
     }
   mxDestroyArray(A_m);
@@ -2553,7 +2856,7 @@ SparseMatrix::Solve_ByteCode_Symbolic_Sparse_GaussianElimination(int Size, bool 
 
 
 void
-SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter, bool steady_state, int solve_algo)
+SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter, bool steady_state, int stack_solve_algo, int solve_algo)
 {
   int i, j;
   mxArray *b_m = NULL, *A_m = NULL;
@@ -2634,7 +2937,41 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
     }
   if (print_it )
     {
-      mexPrintf("solwc=%f g0=%f res2=%f glambda2=%f\n",slowc_save,g0, res2, glambda2);
+      //mexPrintf("solwc=%f g0=%f res2=%f glambda2=%f\n",slowc_save,g0, res2, glambda2);
+      if (steady_state)
+        {
+          switch (solve_algo)
+            {
+              case 0:
+                mexPrintf("MODEL STEADY STATE: MATLAB fsolve\n");
+                break;
+              case 1:
+                mexPrintf("MODEL STEADY STATE: MATLAB solve1\n");
+                break;
+              case 2:
+              case 4:
+                mexPrintf("MODEL STEADY STATE: block decomposition + MATLAB solve1\n");
+                break;
+              case 3:
+                mexPrintf("MODEL STEADY STATE: MATLAB csolve\n");
+                break;
+              case 5:
+                mexPrintf("MODEL STEADY STATE: Sparse LU\n");
+                break;
+              case 6:
+                mexPrintf("MODEL SIMULATION: (method=GMRES)\n");
+                break;
+              case 7:
+                mexPrintf("MODEL SIMULATION: (method=BiCGStab)\n");
+                break;
+              case 8:
+                mexPrintf("MODEL SIMULATION: (method=ByteCode own solver)\n");
+                break;
+              default:
+                mexPrintf("MODEL SIMULATION: (method=Unknown - %d - )\n", stack_solve_algo);
+            }
+        }
+
       mexPrintf("-----------------------------------\n");
       mexPrintf("      Simulate iteration no %d     \n", iter+1);
       mexPrintf("      max. error=%.10e       \n", double (max_res));
@@ -2642,9 +2979,9 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
       mexPrintf("      abs. error=%.10e       \n", double (res1));
       mexPrintf("-----------------------------------\n");
     }
-
-  if (solve_algo == 8)
-    Simple_Init(it_, y_kmin, y_kmax, Size, IM_i);
+  bool zero_solution;
+  if ((solve_algo == 8 && steady_state) || (stack_solve_algo == 5 && !steady_state))
+    Simple_Init(it_, y_kmin, y_kmax, Size, IM_i, zero_solution);
   else
     {
       b_m = mxCreateDoubleMatrix(Size,1,mxREAL);
@@ -2661,17 +2998,29 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
           tmp << " in Simulate_Newton_One_Boundary, can't allocate A_m matrix\n";
           throw FatalExceptionHandling(tmp.str());
         }
-      Init_Matlab_Sparse_Simple(Size, IM_i, A_m, b_m);
+      Init_Matlab_Sparse_Simple(Size, IM_i, A_m, b_m, zero_solution);
     }
-
-  if (solve_algo == 5)
-    Solve_Matlab_LU_UMFPack(A_m, b_m, Size, slowc, false, it_);
-  else if (solve_algo == 6)
-    Solve_Matlab_GMRES(A_m, b_m, Size, slowc, blck, false, it_);
-  else if (solve_algo == 7)
-    Solve_Matlab_BiCGStab(A_m, b_m, Size, slowc, blck, false, it_);
-  else if (solve_algo == 8)
-    Solve_ByteCode_Sparse_GaussianElimination(Size, blck, steady_state, it_);
+  if (zero_solution)
+    {
+      for (int i = 0; i < Size; i++)
+        {
+          int eq = index_vara[i];
+          double yy = - (y[eq+it_*y_size]);
+          direction[eq] = yy;
+          y[eq+it_*y_size] += slowc * yy;
+        }
+    }
+  else
+    {
+      if ((solve_algo == 8 && steady_state) || (stack_solve_algo == 5 && !steady_state))
+        Solve_ByteCode_Sparse_GaussianElimination(Size, blck, steady_state, it_);
+      else if ((solve_algo == 6 && steady_state) || (stack_solve_algo == 2 && !steady_state))
+        Solve_Matlab_GMRES(A_m, b_m, Size, slowc, blck, false, it_, steady_state);
+      else if ((solve_algo == 7 && steady_state) || (stack_solve_algo == 3 && !steady_state))
+        Solve_Matlab_BiCGStab(A_m, b_m, Size, slowc, blck, false, it_);
+      else if ((solve_algo == 5 && steady_state) || ((stack_solve_algo == 0 || stack_solve_algo == 1) && !steady_state))
+        Solve_Matlab_LU_UMFPack(A_m, b_m, Size, slowc, false, it_);
+    }
   return;
 }
 
@@ -2701,8 +3050,8 @@ SparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int it_, int 
             {
               ostringstream res;
               for (unsigned int i = 0; i < endo_name_length; i++)
-                if (P_endo_names[2*(j+i*y_size)] != ' ')
-                  res << P_endo_names[2*(j+i*y_size)];
+                if (P_endo_names[CHAR_LENGTH*(j+i*y_size)] != ' ')
+                  res << P_endo_names[CHAR_LENGTH*(j+i*y_size)];
               bool select = false;
               for (int i = 0; i < Size; i++)
                 if (j == index_vara[i])
@@ -2875,7 +3224,7 @@ SparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int it_, int 
       else if (stack_solve_algo == 1)
         Solve_Matlab_Relaxation(A_m, b_m, Size, slowc, true, 0);
       else if (stack_solve_algo == 2)
-        Solve_Matlab_GMRES(A_m, b_m, Size, slowc, blck, true, 0);
+        Solve_Matlab_GMRES(A_m, b_m, Size, slowc, blck, true, 0, false);
       else if (stack_solve_algo == 3)
         Solve_Matlab_BiCGStab(A_m, b_m, Size, slowc, blck, true, 0);
       else if (stack_solve_algo == 5)

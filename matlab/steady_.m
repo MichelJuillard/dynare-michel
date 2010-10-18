@@ -33,8 +33,8 @@ if options_.bytecode && ...
   (options_.solve_algo < 0 || options_.solve_algo > 8)
     error('STEADY: for the moment, you must use solve_algo=1, 2, 3, 4, 5, 6, 7, 8 with bytecode option')
 end
-if ~options_.bytecode && options_.solve_algo == 5
-    error('STEADY: you can''t yet use solve_algo=5 without bytecode option')
+if ~options_.bytecode && options_.solve_algo == 8
+    error('STEADY: you can''t yet use solve_algo=8 without bytecode option')
 end
 
 if options_.steadystate_flag
@@ -126,7 +126,7 @@ elseif options_.bytecode
     if options_.solve_algo > 4
         [check, oo_.steady_state] = bytecode('static');
         mexErrCheck('bytecode', check);
-    else
+    elseif options_.block
         for b = 1:size(M_.blocksMFS,1)
             n = size(M_.blocksMFS{b}, 1);
             ss = oo_.steady_state;
@@ -144,6 +144,14 @@ elseif options_.bytecode
                                   oo_.exo_det_steady_state], M_.params, 1, options_.solve_algo, 'static', 'evaluate', ['block = ' int2str(b)]);
             end;
         end
+    else
+        [y, check] = dynare_solve('bytecode_steadystate', ...
+                               oo_.steady_state, ...
+                               options_.jacobian_flag);
+        if check ~= 0
+            error('STEADY: convergence problems')
+        end
+        oo_.steady_state = y;
     end
 else
     [oo_.steady_state,check] = dynare_solve([M_.fname '_static'],...

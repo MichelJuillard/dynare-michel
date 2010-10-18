@@ -131,7 +131,7 @@ mxCreateSparse(unsigned int rows, unsigned int cols, unsigned int nz_max, mxData
   Array->Nzmax = nz_max;
   Array->data = (double*)mxMalloc(nz_max*sizeof(double));
   Array->Ir = (mwIndex*)mxMalloc(nz_max*sizeof(mwIndex));
-  Array->Jc = (mwIndex*)mxMalloc(cols*sizeof(mwIndex));
+  Array->Jc = (mwIndex*)mxMalloc((cols+1)*sizeof(mwIndex));
   return(Array);
 }
 
@@ -174,6 +174,15 @@ mxDestroyArray(mxArray* A_m)
   if (A_m->Jc)
     mxFree(A_m->Jc);
   mxFree(A_m);
+}
+
+mxArray*
+mxSetNzmax(mxArray* A_m, mwSize nz_max)
+{
+  A_m->Nzmax = nz_max;
+  A_m->data = (double*)mxRealloc(A_m->data, nz_max*sizeof(double));
+  A_m->Ir = (mwIndex*)mxRealloc(A_m->Ir, nz_max*sizeof(mwIndex));
+  return(A_m);
 }
 
 void

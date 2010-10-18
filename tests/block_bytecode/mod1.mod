@@ -18,7 +18,7 @@ var e_x; stderr 0.01;
 var e_y; stderr 0.01;
 end;
 steady;
-check;
+//check;
 model_info;
 simul(periods=50);
 /*stoch_simul(order=1,periods=1000,irf=0,nomoments);

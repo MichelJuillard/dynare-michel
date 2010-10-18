@@ -247,7 +247,6 @@ while ~(cvg==1 | iter>maxit_),
                 Elem = first_elem:last_elem;
                 za = b(Elem) - g1a(Elem, Elem_1) * zaa;
                 zaa = za;
-                %y_Elem_1 = Blck_size * (t)+1:Blck_size * (t+1);
                 y_Elem = Blck_size * (t-1)+1:Blck_size * (t);
                 dx(y_Elem) = za - ya(y_Elem);
                 ya(y_Elem) = ya(y_Elem) + lambda*dx(y_Elem);
@@ -309,7 +308,7 @@ while ~(cvg==1 | iter>maxit_),
         end
     end
     iter=iter+1;
-    disp(['iteration: ' num2str(iter,'%d') ' error: ' num2str(max_res,'%e') ' stack_solve_algo=' num2str(stack_solve_algo)]);
+    disp(['iteration: ' num2str(iter,'%d') ' error: ' num2str(max_res,'%e')]);
 end;
 if (iter>maxit_)
     disp(['No convergence after ' num2str(iter,'%4d') ' iterations in Block ' num2str(Block_Num,'%d')]);
