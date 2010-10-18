@@ -1822,7 +1822,7 @@ periods 100;
     For complicated models, finding good numerical initial values for the endogenous variables is the trickiest part of finding the equilibrium of that model. Often, it is better to start with a smaller model and add new variables one by one.
   </para>
 
-  <para>If you know how to compute the steady state for your model, you can provide a <trademark class="registered">MATLAB</trademark> function doing the computation instead of using <command>steady</command>. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
+  <para>If you know how to compute the steady state for your model, you can provide a <trademark class="registered">MATLAB</trademark>/Octave function doing the computation instead of using <command>steady</command>. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000_steadystate.m</filename> in <filename>examples</filename> directory for an example.
   </para>
 
   </refsect1>
@@ -2261,7 +2261,7 @@ steady;
   <command>stoch_simul</command> computes a Taylor approximation of the decision and transition functions for the model, impulse response functions and various descriptive statistics (moments, variance decomposition, correlation and autocorrelation coefficients). For correlated shocks, the variance decomposition is computed as in the VAR literature through a Cholesky decomposition of the covariance matrix of the exogenous variables. When the shocks are correlated, the variance decomposition depends upon the order of the variables in the <xref linkend='varexo'/> command.
 </para>
 
-<para>The Taylor approximation is computed around the steady state. If you know how to compute the steady state for your model, you can provide a <trademark class="registered">MATLAB</trademark>/Octave function doing the computation instead of using the nonlinear solver. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
+<para>The Taylor approximation is computed around the steady state. If you know how to compute the steady state for your model, you can provide a <trademark class="registered">MATLAB</trademark>/Octave function doing the computation instead of using the nonlinear solver. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000_steadystate.m</filename> in <filename>examples</filename> directory for an example.
 </para>
 
 <para>The IRFs are computed as the difference between the trajectory of a variable following a shock at the beginning of period 1 and its steady state value.
@@ -3460,7 +3460,7 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 </refsect1>
 
 <refsect1><title>Note on steady state computation</title>
-<para>If you know how to compute the steady state for your model, you can provide a <trademark class="registered">MATLAB</trademark> function doing the computation instead of using <command>steady</command>. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
+<para>If you know how to compute the steady state for your model, you can provide a <trademark class="registered">MATLAB</trademark>/Octave function doing the computation instead of using <command>steady</command>. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000_steadystate.m</filename> in <filename>examples</filename> directory for an example.
 </para>
 </refsect1>
 </refentry>
@@ -3565,7 +3565,7 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
   <para>When <command>unit_root_vars</command> is used the <xref linkend="lik_init"/> option of <xref linkend="estimation"/> has no effect.
   </para>
 
-  <para>When there are nonstationary variables in a model, there is no unique deterministic steady state. The user must supply a <trademark class="registered">MATLAB</trademark> function that computes the steady state values of the stationary variables in the model and returns dummy values for the nonstationary ones. The function should be called with the name of the <filename>.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000a_steadystate.m</filename> in <filename>examples/fs2000</filename> directory.
+  <para>When there are nonstationary variables in a model, there is no unique deterministic steady state. The user must supply a <trademark class="registered">MATLAB</trademark>/Octave function that computes the steady state values of the stationary variables in the model and returns dummy values for the nonstationary ones. The function should be called with the name of the <filename>.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000_steadystate.m</filename> in <filename>examples</filename> directory for an example.
   </para>
 
   <para>Note that the nonstationary variables in the model must be integrated processes(their first difference or k-difference must be stationary).</para>
