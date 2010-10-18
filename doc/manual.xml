@@ -4409,6 +4409,10 @@ plot_conditional_forecast(periods = 10) e u;
       <listitem><para>A cash in advance model, estimated by <xref linkend="schorfheide_2000"/>.</para></listitem>
     </varlistentry>
     <varlistentry>
+      <term><filename>fs2000_nonstationary.mod</filename></term>
+      <listitem><para>The same model than <filename>fs2000.mod</filename>, but written in non-stationary form. Detrending of the equations is done by Dynare.</para></listitem>
+    </varlistentry>
+    <varlistentry>
       <term><filename>bkk.mod</filename></term>
       <listitem><para>Multi-country RBC model with time to build, presented in <xref linkend="backus-kehoe-kydland_1992"/>.</para></listitem>
     </varlistentry>
