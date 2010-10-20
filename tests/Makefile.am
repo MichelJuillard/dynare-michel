@@ -17,6 +17,8 @@ OCTAVE_MODS = \
 	predetermined_variables.mod \
 	fs2000_ssfile.mod \
 	comments.mod \
+	histval_sto.mod \
+	histval_det.mod \
 	steady_state_operator/standard.mod \
 	steady_state_operator/use_dll.mod \
 	steady_state_operator/block.mod \
