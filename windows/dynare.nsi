@@ -110,7 +110,7 @@ SectionGroupEnd
 
 Section "MEX files for Octave 3.2.4 (MinGW build)"
  SetOutPath $INSTDIR\mex\octave
- File ..\mex\octave\*.mex
+ File ..\mex\octave\*.mex ..\mex\octave\*.oct
 SectionEnd
 
 Section "Dynare++ (standalone executable)"

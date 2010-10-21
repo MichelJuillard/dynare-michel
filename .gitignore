@@ -84,6 +84,7 @@ ylwrap
 # DLL rules
 *.mex
 *.dll
+*.oct
 *.mexglx
 *.mexa64
 *.mexw32

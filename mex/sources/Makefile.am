@@ -7,6 +7,7 @@ EXTRA_DIST = \
 	mjdgges \
 	kronecker \
 	bytecode \
+	qzcomplex \
 	k_order_perturbation
 
 clean-local:

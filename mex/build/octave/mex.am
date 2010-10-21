@@ -1,5 +1,3 @@
-EXEEXT = .mex
-
 CPPFLAGS += $(shell $(MKOCTFILE) -p CPPFLAGS)
 CPPFLAGS += $(shell $(MKOCTFILE) -p INCFLAGS)
 CPPFLAGS += -I$(top_srcdir)/../../sources
