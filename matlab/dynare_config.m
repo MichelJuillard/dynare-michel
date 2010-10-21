@@ -71,12 +71,6 @@ if exist('OCTAVE_VERSION') && octave_ver_less_than('3.2.0')
     addpath([dynareroot '/missing/bicgstab'])
 end
 
-% orschur() is missing in Octave; we don't have a real replacement;
-% the one we provide just exits with an error message
-if exist('OCTAVE_VERSION')
-    addpath([dynareroot '/missing/ordschur'])
-end
-
 % bsxfun is missing in old versions of matlab (octave?)
 if ~exist('OCTAVE_VERSION') && matlab_ver_less_than('7.4')
     addpath([dynareroot '/missing/bsxfun'])

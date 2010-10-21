@@ -1,6 +1,6 @@
 DYNARE_ROOT = $(abs_top_srcdir)/matlab
 
-# Under Octave we only test a subset of MOD files, because of missing features (models with unit roots, reading Excel files)
+# Under Octave we only test a subset of MOD files, because of missing features
 OCTAVE_MODS = \
 	ramst.mod \
 	ramst_a.mod \
@@ -41,9 +41,14 @@ OCTAVE_MODS = \
 	partial_information/PItest3aHc0PCLsimModPiYrVarobsCNR.mod \
 	arima/mod1.mod \
 	arima/mod1a.mod \
+	arima/mod1b.mod \
+	arima/mod1c.mod \
 	arima/mod2.mod \
+	arima/mod2a.mod \
+	arima/mod2b.mod \
 	arima/mod2c.mod \
 	fs2000/fs2000.mod \
+	fs2000/fs2000a.mod \
 	fs2000/fs2000c.mod \
 	homotopy/homotopy1_test.mod \
 	homotopy/homotopy2_test.mod \
@@ -54,6 +59,12 @@ OCTAVE_MODS = \
 	AIM/fs2000x10L9_L_AIM.mod \
 	AIM/fs2000x10_L9_L.mod \
 	AIM/fs2000x10_L9_L_AIM.mod \
+	AIM/fs2000_b1L1L.mod \
+	AIM/fs2000_b1L1L_AIM.mod \
+	AIM/ls2003_2L0L.mod \
+	AIM/ls2003_2L0L_AIM.mod \
+	AIM/ls2003_2L2L.mod \
+	AIM/ls2003_2L2L_AIM.mod \
 	conditional_variance_decomposition/example1.mod \
 	dsge-var/simul_hybrid.mod \
 	dsge-var/dsgevar_forward_calibrated_lambda.mod \
@@ -66,17 +77,6 @@ OCTAVE_MODS = \
 	external_function/example1_no_deriv_functions_provided_dll.mod
 
 MODS = $(OCTAVE_MODS) \
-	arima/mod1b.mod \
-	arima/mod1c.mod \
-	arima/mod2a.mod \
-	arima/mod2b.mod \
-	fs2000/fs2000a.mod \
-	AIM/fs2000_b1L1L.mod \
-	AIM/fs2000_b1L1L_AIM.mod \
-	AIM/ls2003_2L0L.mod \
-	AIM/ls2003_2L0L_AIM.mod \
-	AIM/ls2003_2L2L.mod \
-	AIM/ls2003_2L2L_AIM.mod \
 	block_bytecode/fs2000_gmres.mod \
 	block_bytecode/ramst_a.mod
 

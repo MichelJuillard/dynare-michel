@@ -102,6 +102,7 @@ AC_CONFIG_FILES([Makefile
                  dynare_simul_/Makefile
                  swz/Makefile
                  logposterior/Makefile
-                 qzcomplex/Makefile])
+                 qzcomplex/Makefile
+                 ordschur/Makefile])
 
 AC_OUTPUT

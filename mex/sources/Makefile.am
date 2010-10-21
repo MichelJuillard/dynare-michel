@@ -8,7 +8,8 @@ EXTRA_DIST = \
 	kronecker \
 	bytecode \
 	qzcomplex \
-	k_order_perturbation
+	k_order_perturbation \
+	ordschur
 
 clean-local:
 	rm -rf `find mex/sources -name *.o`
