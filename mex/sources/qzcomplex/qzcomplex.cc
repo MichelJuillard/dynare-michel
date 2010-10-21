@@ -51,14 +51,9 @@ Computes the complex QZ decomposition of @math{(A, B)}, satisfying:\n\
   int nargin = args.length();
   octave_value_list retval;
 
-  if (nargin != 2)
+  if (nargin != 2 || nargout != 4)
     {
-      error("qzcomplex: needs two input arguments");
-      return retval;
-    }
-  if (nargout != 4)
-    {
-      error("qzcomplex: needs four output arguments");
+      print_usage();
       return retval;
     }
 
@@ -102,3 +97,14 @@ Computes the complex QZ decomposition of @math{(A, B)}, satisfying:\n\
   retval(3) = octave_value(vsr);
   return retval;
 }
+
+/*
+
+%!test
+%! A = [ 1 2 3+1i; 4 5-1i 0; -1 -5 3];
+%! B = [ -2 -8i 4; 1 5+3i 5; 7 -10 -2];
+%! [AA,BB,Q,Z] = qzcomplex(A,B);
+%! assert(Q'*A*Z, AA, sqrt(eps))
+%! assert(Q'*B*Z, BB, sqrt(eps))
+
+*/

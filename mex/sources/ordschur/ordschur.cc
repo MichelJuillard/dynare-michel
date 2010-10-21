@@ -97,7 +97,7 @@ eigenvalues as they appear along @math{T}'s diagonal.\n\
 
   if (info != 0)
     {
-      error("qzcomplex: zgges failed");
+      error("ordschur: dtrsen failed");
       return retval;
     }
 
@@ -105,3 +105,13 @@ eigenvalues as they appear along @math{T}'s diagonal.\n\
   retval(1) = octave_value(T);
   return retval;
 }
+
+/*
+
+%!test
+%! A = [1 2 3 -2; 4 5 6 -5 ; 7 8 9 -5; 10 11 12 4 ];
+%! [U, T] = schur(A);
+%! [US, TS] = ordschur(U, T, [ 0 0 1 1 ]);
+%! assert(US*TS*US', A, sqrt(eps))
+
+*/
