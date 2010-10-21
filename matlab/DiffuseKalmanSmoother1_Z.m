@@ -34,7 +34,7 @@ function [alphahat,etahat,atilde,P,aK,PK,d,decomp] = DiffuseKalmanSmoother1_Z(T,
 %   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
 %   Analysis, vol. 24(1), pp. 85-98). 
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -133,7 +133,7 @@ while rank(Pinf(:,:,t+1),kalman_tol) && (t<smpl)
         Linf(:,:,t)         = T - Kinf(:,:,t)*Z;
         Fstar(:,:,t)        = Z*Pstar(:,:,t)*Z';
         Kstar(:,:,t)        = (T*Pstar(:,:,t)*Z'-Kinf(:,:,t)*Fstar(:,:,t))*iFinf(:,:,t);
-        Pstar(:,:,t+1)      = T*Pstar(:,:,t)*T'-T*Pstar(:,:,t)*Z'*Kinf(:,:,t)'-Kinf(:,:,t)*F*Kstar(:,:,t)' + QQ;
+        Pstar(:,:,t+1)      = T*Pstar(:,:,t)*T'-T*Pstar(:,:,t)*Z'*Kinf(:,:,t)'-Kinf(:,:,t)*Fstar(:,:,t)*Kstar(:,:,t)' + QQ;
         Pinf(:,:,t+1)       = T*Pinf(:,:,t)*T'-T*Pinf(:,:,t)*Z'*Kinf(:,:,t)';
     end
 
