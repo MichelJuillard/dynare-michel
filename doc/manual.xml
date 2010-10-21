@@ -2253,6 +2253,10 @@ steady;
       <term><option>pruning</option></term>
       <listitem><para>Discard higher order terms when iteratively computing simulations of the solution, as in <xref linkend="kim-kim-schaumburg-sims_2008"/>.</para></listitem>
     </varlistentry>
+    <varlistentry id="partial_information">
+      <term><option>partial_information</option></term>
+      <listitem><para>Computes the solution of the model under partial information, along the lines of <xref linkend="pearlman-currie-levine_1986"/>. Agents are supposed to observe only some variables of the economy. The set of observed variables is declared using the <xref linkend="varobs"/> statement. Note that if <xref linkend="varobs"/> is not present or contains all endogenous variables, then this is the full information case and this option has no effect.</para></listitem>
+    </varlistentry>
   </variablelist>
 
 </refsect1>
@@ -2718,6 +2722,9 @@ stoch_simul(linear,irf=60) y k;
   <refsect1><title>Description</title>
   <para>
     <command>varobs</command> lists the name of observed endogenous variables for the estimation procedure. These variables must be available in the data file (see <xref linkend='estimation'/>).
+  </para>
+  <para>
+    Alternatively, this command is also used in conjunction with the <xref linkend="partial_information"/> option of <xref linkend="stoch_simul"/>, for declaring the set of observed variables when solving the model under partial information.
   </para>
   <para>
     Only one instance of <command>varobs</command> is allowed in a model file. If one needs to declare observed variables in a loop, the macroprocessor can be used as shown in the second example below.
@@ -4833,6 +4840,33 @@ plot_conditional_forecast(periods = 10) e u;
       <pagenums>3397-3414</pagenums>
     </biblioset>
 
+  </biblioentry>
+
+  <biblioentry id="pearlman-currie-levine_1986" xreflabel="Pearlman, Currie and Levine (1986)">
+    <biblioset relation="article">
+      <authorgroup>
+        <author>
+          <surname>Pearlman</surname>
+          <firstname>Joseph</firstname>
+        </author>
+        <author>
+          <surname>Currie</surname>
+          <firstname>David</firstname>
+        </author>
+        <author>
+          <surname>Levine</surname>
+          <firstname>Paul</firstname>
+        </author>
+      </authorgroup>
+      <pubdate>1986</pubdate>
+      <title>Rational expectations models with partial information</title>
+    </biblioset>
+    <biblioset relation="journal">
+      <title>Economic Modelling</title>
+      <volumenum>3</volumenum>
+      <issuenum>2</issuenum>
+      <pagenums>90-105</pagenums>
+    </biblioset>
   </biblioentry>
 
 </bibliography>
