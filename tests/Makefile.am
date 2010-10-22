@@ -1,7 +1,6 @@
 DYNARE_ROOT = $(abs_top_srcdir)/matlab
 
-# Under Octave we only test a subset of MOD files, because of missing features
-OCTAVE_MODS = \
+MODS = \
 	ramst.mod \
 	ramst_a.mod \
 	example1.mod \
@@ -23,15 +22,7 @@ OCTAVE_MODS = \
 	steady_state_operator/use_dll.mod \
 	steady_state_operator/block.mod \
 	steady_state_operator/bytecode_test.mod \
-	block_bytecode/fs2000_simk.mod \
-	block_bytecode/fs2000_lu.mod \
-	block_bytecode/fs2000_bicgstab.mod \
-	block_bytecode/fs2000_optpath.mod \
-	block_bytecode/fs2000_bytecode.mod \
-	block_bytecode/fs2000_block_bytecode.mod \
-	block_bytecode/ramst.mod \
 	block_bytecode/ireland.mod \
-	block_bytecode/ls2003.mod \
 	block_bytecode/ramst_normcdf_and_friends.mod \
 	k_order_perturbation/fs2000k2a.mod \
 	k_order_perturbation/fs2000k2.mod \
@@ -76,18 +67,16 @@ OCTAVE_MODS = \
 	external_function/example1_no_deriv_functions_provided.mod \
 	external_function/example1_no_deriv_functions_provided_dll.mod
 
-MODS = $(OCTAVE_MODS) \
-	block_bytecode/fs2000_gmres.mod \
-	block_bytecode/ramst_a.mod
-
 EXTRA_DIST = $(MODS) \
 	run_test_octave.m \
+	block_bytecode/run_block_bytecode_tests.m \
+	block_bytecode/run_ls2003.m \
+	block_bytecode/ls2003.mod \
 	fs2000/fsdat_simul.m \
 	test.m \
 	objectives \
 	ramst_initval_file_data.m \
 	homotopy/common.mod \
-	block_bytecode/fs2000_common.mod \
 	bvar_a_la_sims/bvar_sample.m
 
 TARGETS = check-matlab
@@ -98,12 +87,16 @@ endif
 
 check-local: $(TARGETS)
 
-check-octave: $(OCTAVE_MODS)
+check-octave: $(MODS)
 	@set -e; \
-		for modfile in $(OCTAVE_MODS); do \
+		for modfile in $(MODS); do \
 			$(OCTAVE) --norc --silent --no-history run_test_octave.m $$modfile $(DYNARE_ROOT) $(PACKAGE_VERSION); \
 		done
 .PHONY: check-octave
+
+check-block-bytecode:
+	cd block_bytecode && $(OCTAVE) --norc --silent --no-history run_block_bytecode_tests.m $(DYNARE_ROOT) $(PACKAGE_VERSION)
+.PHONY: check-block-bytecode
 
 check-matlab: $(MODS)
 # MATLAB stuff to be added here
@@ -137,8 +130,7 @@ clean-local:
 
 	rm -f arima/data1.m arima/data2.m \
 		k_order_perturbation/*.jnl \
-		k_order_perturbation/*.mat \
-		block_bytecode/fs2000_simk.swp
+		k_order_perturbation/*.mat
 
 	rm -rf ramsey_objective
 
@@ -149,3 +141,5 @@ clean-local:
 	rm -f dsge-var/datarabanal_hybrid.mat
 
 	rm -rf partial_information/PItest3aHc0PCLsimModPiYrVarobsAll_PCL* partial_information/PItest3aHc0PCLsimModPiYrVarobsCNR_PCL*
+
+	rm -rf block_bytecode/ws block_bytecode/ls2003_tmp*

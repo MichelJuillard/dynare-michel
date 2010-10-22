@@ -16,8 +16,19 @@ rho_A = 0.2;
 rho_ys = 0.9;
 rho_pies = 0.7;
 
-
+@#if !block && !bytecode
+model;
+@#else
+@# if block && !bytecode
+model(block, cutoff=0);
+@# else
+@#  if !block && bytecode
+model(bytecode);
+@#  else
 model(block, bytecode, cutoff=0);
+@#  endif
+@# endif
+@#endif
 y = y(+1) - (tau +alpha*(2-alpha)*(1-tau))*(R-pie(+1))-alpha*(tau +alpha*(2-alpha)*(1-tau))*dq(+1) + alpha*(2-alpha)*((1-tau)/tau)*(y_s-y_s(+1))-A(+1);
 pie = exp(-rr/400)*pie(+1)+alpha*exp(-rr/400)*dq(+1)-alpha*dq+(k/(tau+alpha*(2-alpha)*(1-tau)))*y+alpha*(2-alpha)*(1-tau)/(tau*(tau+alpha*(2-alpha)*(1-tau)))*y_s;
 pie = de+(1-alpha)*dq+pie_s;
@@ -53,10 +64,15 @@ var e_pies = 1.89;
 end;
 
 options_.maxit_=100;
-steady(solve_algo = 5);
+steady(solve_algo = @{solve_algo});
 
+@#if block
 model_info;
-//check;
+@#endif
+
+@#if !block && !bytecode
+check;
+@#endif
 
 shocks;
 var e_q;
@@ -64,10 +80,11 @@ periods 1;
 values 0.5;
 end;
 
-simul(periods=20, markowitz=0, stack_solve_algo = 5);
+simul(periods=20, markowitz=0, stack_solve_algo = @{stack_solve_algo});
+/*
 rplot vv;
 rplot ww;
 rplot A;
 rplot pie;
-
+*/
 
