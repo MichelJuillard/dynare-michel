@@ -11,7 +11,7 @@ function steady_()
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -27,14 +27,19 @@ function steady_()
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-global M_ oo_ it_ options_
 
-if options_.bytecode && ...
-  (options_.solve_algo < 0 || options_.solve_algo > 8)
-    error('STEADY: for the moment, you must use solve_algo=1, 2, 3, 4, 5, 6, 7, 8 with bytecode option')
+global M_ oo_ options_
+
+if options_.solve_algo < 0 || options_.solve_algo > 8
+    error('STEADY: solve_algo must be between 0 and 8')
 end
-if ~options_.bytecode && options_.solve_algo == 8
-    error('STEADY: you can''t yet use solve_algo=8 without bytecode option')
+
+if ~options_.bytecode && ~options_.block && options_.solve_algo > 4
+    error('STEADY: you can''t use solve_algo > 4 without block nor bytecode options')
+end
+
+if ~options_.bytecode && options_.block && options_.solve_algo == 5
+    error('STEADY: you can''t use solve_algo = 5 without bytecode option')
 end
 
 if options_.steadystate_flag

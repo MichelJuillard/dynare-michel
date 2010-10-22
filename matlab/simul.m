@@ -31,6 +31,22 @@ function simul
 
 global M_ options_ oo_
 
+if options_.stack_solve_algo < 0 || options_.stack_solve_algo > 5
+    error('SIMUL: stack_solve_algo must be between 0 and 5')
+end
+
+if ~options_.block && ~options_.bytecode && options_.stack_solve_algo ~= 0
+    error('SIMUL: you must use stack_solve_algo=0 when not using block nor bytecode option')
+end
+
+if options_.block && ~options_.bytecode && options_.stack_solve_algo == 5
+    error('SIMUL: you can''t use stack_solve_algo = 5 without bytecode option')
+end
+
+if exist('OCTAVE_VERSION') && options_.stack_solve_algo == 2
+    error('SIMUL: you can''t use stack_solve_algo = 2 under Octave')
+end
+
 if size(M_.lead_lag_incidence,2)-nnz(M_.lead_lag_incidence(M_.maximum_endo_lag+1,:)) > 0
     mess = ['SIMUL: error in model specification : variable ' M_.endo_names(find(M_.lead_lag_incidence(M_.maximum_lag+1,:)==0),:)] ;
     mess = [mess ' doesn''t appear as current variable.'] ; 
@@ -56,20 +72,6 @@ if isempty(options_.scalv) | options_.scalv == 0
 end
 
 options_.scalv= 1 ;
-
-if ~options_.block && ~options_.bytecode && options_.stack_solve_algo ~= 0
-    error('SIMUL: for the moment, you must use stack_solve_algo=0 when not using block nor bytecode option')
-end
-if options_.block && ~options_.bytecode && (options_.stack_solve_algo == 5)
-    error('SIMUL: for the moment, you must use stack_solve_algo={1,2,3,4} when using block without bytecode option')
-end
-if options_.bytecode && (options_.stack_solve_algo ~= 0 && options_.stack_solve_algo ~= 1 && options_.stack_solve_algo ~= 2 && options_.stack_solve_algo ~= 3 && options_.stack_solve_algo ~= 4 && options_.stack_solve_algo ~= 5)
-    error('SIMUL: for the moment, you must use stack_solve_algo= 1, 2, 3, 4 or 5 with bytecode option')
-end
-
-if exist('OCTAVE_VERSION') && options_.stack_solve_algo == 2
-    error('SIMUL: stack_solve_algo=2 is not available for Octave. Choose another value.')
-end
 
 if(options_.block)
     if(options_.bytecode)
