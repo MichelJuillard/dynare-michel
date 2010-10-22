@@ -1783,12 +1783,15 @@ periods 100;
       <term><option>solve_algo</option> = <replaceable>INTEGER</replaceable></term>
       <listitem><para>Determines the non-linear solver to use. Possible values for the option are:
       <itemizedlist>
-        <listitem><para><literal>0</literal>: uses <trademark class="registered">MATLAB</trademark> Optimization Toolbox FSOLVE</para></listitem>
+        <listitem><para><literal>0</literal>: uses <trademark class="registered">MATLAB</trademark> Optimization Toolbox FSOLVE (not available under Octave)</para></listitem>
         <listitem><para><literal>1</literal>: uses Dynare's own nonlinear equation solver</para></listitem>
         <listitem><para><literal>2</literal>: splits the model into recursive blocks and solves each block in turn</para></listitem>
         <listitem><para><literal>3</literal>: Chris Sims' solver</para></listitem>
         <listitem><para><literal>4</literal>: similar to value <literal>2</literal>, except that it deals differently with nearly singular Jacobian</para></listitem>
-        <listitem><para><literal>5</literal>: Newton algorithm with a sparse Gaussian elimination (SPE)</para></listitem>
+        <listitem><para><literal>5</literal>: Newton algorithm with a sparse Gaussian elimination (SPE) (requires <xref linkend="bytecode"/> option)</para></listitem>
+        <listitem><para><literal>6</literal>: Newton algorithm with a sparse LU solver at each iteration (requires <xref linkend="bytecode"/> and/or <xref linkend="block"/> option)</para></listitem>
+        <listitem><para><literal>7</literal>: Newton algorithm with a Generalized Minimal Residual (GMRES) solver at each iteration (requires <xref linkend="bytecode"/> and/or <xref linkend="block"/> option; not available under Octave))</para></listitem>
+        <listitem><para><literal>8</literal>: Newton algorithm with a Stabilized Bi-Conjugate Gradient (BICGSTAB) solver at each iteration (requires <xref linkend="bytecode"/> and/or <xref linkend="block"/> option)</para></listitem>
       </itemizedlist>
       Default value is <literal>2</literal>.
       </para></listitem>
@@ -2096,12 +2099,12 @@ steady;
       <term><option>stack_solve_algo</option> = <replaceable>INTEGER</replaceable></term>
       <listitem><para>Algorithm used for computing the solution. Possible values are:
       <itemizedlist>
-        <listitem><para><literal>0</literal>: Newton method to solve simultaneously all the equations for every period, see <xref linkend="juillard_1996"/>. (Default)</para></listitem>
-        <listitem><para><literal>1</literal>: use a Newton algorithm with a sparse LU solver at each iteration.</para></listitem>
-        <listitem><para><literal>2</literal>: use a Newton algorithm with a Generalized Minimal Residual (GMRES) solver at each iteration. This option is not available under Octave.</para></listitem>
-        <listitem><para><literal>3</literal>: use a Newton algorithm with a Stabilized Bi-Conjugate Gradient (BICGSTAB) solver at each iteration.</para></listitem>
-        <listitem><para><literal>4</literal>: use a Newton algorithm with a optimal path length at each iteration.</para></listitem>
-        <listitem><para><literal>5</literal>: use a Newton algorithm with a sparse Gaussian elimination (SPE) solver at each iteration.</para></listitem>
+        <listitem><para><literal>0</literal>: Newton method to solve simultaneously all the equations for every period, see <xref linkend="juillard_1996"/> (Default)</para></listitem>
+        <listitem><para><literal>1</literal>: use a Newton algorithm with a sparse LU solver at each iteration (requires <xref linkend="bytecode"/> and/or <xref linkend="block"/> option)</para></listitem>
+        <listitem><para><literal>2</literal>: use a Newton algorithm with a Generalized Minimal Residual (GMRES) solver at each iteration (requires <xref linkend="bytecode"/> and/or <xref linkend="block"/> option; not available under Octave)</para></listitem>
+        <listitem><para><literal>3</literal>: use a Newton algorithm with a Stabilized Bi-Conjugate Gradient (BICGSTAB) solver at each iteration (requires <xref linkend="bytecode"/> and/or <xref linkend="block"/> option) </para></listitem>
+        <listitem><para><literal>4</literal>: use a Newton algorithm with a optimal path length at each iteration (requires <xref linkend="bytecode"/> and/or <xref linkend="block"/> option)</para></listitem>
+        <listitem><para><literal>5</literal>: use a Newton algorithm with a sparse Gaussian elimination (SPE) solver at each iteration (requires <xref linkend="bytecode"/> option)</para></listitem>
       </itemizedlist>
       </para></listitem>
     </varlistentry>
