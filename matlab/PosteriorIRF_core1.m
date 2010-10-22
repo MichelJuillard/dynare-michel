@@ -49,7 +49,6 @@ end
 % Reshape 'myinputs' for local computation.
 % In order to avoid confusion in the name space, the instruction struct2local(myinputs) is replaced by:
 
-% Da CONTROLLARE con MARCO!
 IRUN = myinputs.IRUN;
 irun =myinputs.irun;
 irun2=myinputs.irun2;
@@ -77,12 +76,9 @@ MAX_nruns=myinputs.MAX_nruns;
 NumberOfIRFfiles_dsge=myinputs.NumberOfIRFfiles_dsge;
 NumberOfIRFfiles_dsgevar=myinputs.NumberOfIRFfiles_dsgevar;
 ifil2=myinputs.ifil2;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 if whoiam
     Parallel=myinputs.Parallel;
-    MasterName=myinputs.MasterName;
-    DyMo=myinputs.DyMo;
 end
 
 
@@ -95,10 +91,10 @@ if whoiam
     if Parallel(ThisMatlab).Local,
         waitbarTitle=['Local '];
     else
-        waitbarTitle=[Parallel(ThisMatlab).PcName];
+        waitbarTitle=[Parallel(ThisMatlab).ComputerName];
         RemoteFlag =1;
     end
-    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);
+    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
 else
     if exist('OCTAVE_VERSION')
         diary off;
@@ -130,7 +126,9 @@ if whoiam
    NumberOfIRFfiles_dsgevar=NumberOfIRFfiles_dsgevar(whoiam);
 end
 
-while fpar<npar % Parallel 'while'!!!
+% Parallel 'while' very good!!!
+
+while fpar<npar 
     fpar = fpar + 1;
     irun = irun+1;
     irun2 = irun2+1;
@@ -273,11 +271,10 @@ while fpar<npar % Parallel 'while'!!!
     elseif ~whoiam 
         waitbar(fpar/npar,h);  
     end
-   % if mod(fpar,10)==0 & whoiam,
    if whoiam,
        fprintf('Done! \n');
        waitbarString = [ 'Subdraw ' int2str(fpar) '/' int2str(npar) ' done.'];
-       fMessageStatus((fpar-fpar0)/(npar-fpar0),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);
+       fMessageStatus((fpar-fpar0)/(npar-fpar0),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
    end
 end
 

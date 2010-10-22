@@ -63,6 +63,19 @@ InitSizeArray = min([repmat(MAX_nruns,nblck,1) fline+nruns-1],[],2);
 
 load([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
 
+
+% Only for test parallel results!!!
+
+% To check the equivalence between parallel and seria computation!
+% First run in serial mode, and then comment the follow line.
+%   save('recordSerial.mat','-struct', 'record');
+
+% For parllel runs after serial runs with the abobe line active.
+%   TempRecord=load('recordSerial.mat');
+%   record.Seeds=TempRecord.Seeds;
+
+
+   
 % Snapshot of the current state of computing. It necessary for the parallel
 % execution (i.e. to execute in a corretct way portion of code remotely or
 % on many core). The mandatory variables for local/remote parallel

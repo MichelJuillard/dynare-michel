@@ -194,9 +194,9 @@ end
 b=0;
 
 % Like sequential execution!
-if isnumeric(options_.parallel),% | isunix, % For the moment exclude unix platform from parallel implementation!
+if isnumeric(options_.parallel),
     [fout] = prior_posterior_statistics_core(localVars,1,B,0);
-% Parallel execution!
+    % Parallel execution!
 else
     [nCPU, totCPU, nBlockPerCPU] = distributeJobs(options_.parallel, 1, B);
     for j=1:totCPU-1,
@@ -214,8 +214,8 @@ else
         ifil(6,j+1) =ifil(6,j)+nfiles;
         nfiles = ceil(nBlockPerCPU(j)/MAX_nforc2);
         ifil(7,j+1) =ifil(7,j)+nfiles;
-%       nfiles = ceil(nBlockPerCPU(j)/MAX_momentsno);
-%       ifil(8,j+1) =ifil(8,j)+nfiles;
+        %       nfiles = ceil(nBlockPerCPU(j)/MAX_momentsno);
+        %       ifil(8,j+1) =ifil(8,j)+nfiles;
     end
     localVars.ifil = ifil;
     globalVars = struct('M_',M_, ...
@@ -243,8 +243,8 @@ save([DirectoryName '/' M_.fname '_data.mat'],'stock_gend','stock_data');
 if ~isnumeric(options_.parallel),
     leaveSlaveOpen = options_.parallel_info.leaveSlaveOpen;
     if options_.parallel_info.leaveSlaveOpen == 0,
-     % Commenting for testing!
-     % options_.parallel_info.leaveSlaveOpen = 1; % Force locally to leave open remote matlab sessions (repeated pm3 calls)
+        % Commenting for testing!!!
+        % options_.parallel_info.leaveSlaveOpen = 1; % Force locally to leave open remote matlab sessions (repeated pm3 calls)
     end
 end
 

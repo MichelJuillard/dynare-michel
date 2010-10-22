@@ -1,10 +1,16 @@
 function storeGlobalVars(fname,append)
-% Stores all global vars in structure fGlobalVar and saves it in the file fname.mat
+% PARALLEL CONTEXT
+% In a parallel context, this function stores all global vars in structure 
+% fGlobalVar and saves it in the file fname.mat
 %
 % INPUTS
-%  fname [str]         name of the file 
-
-% Copyright (C) 2009 Dynare Team
+% fname [str]         name of the file 
+%
+% OUTPUTS
+% None
+%
+%
+% Copyright (C) 2009-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -21,8 +27,9 @@ function storeGlobalVars(fname,append)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+
 GlobalNames = who('global');
-varlist = '';
+% varlist = '';
 for j=1:length(GlobalNames);
     eval(['global ',GlobalNames{j},';']);
     eval(['fGlobalVar.',GlobalNames{j},'=',GlobalNames{j},';']);

@@ -48,7 +48,6 @@ global options_ oo_ M_ bayestopt_ estim_params_
 % Reshape 'myinputs' for local computation.
 % In order to avoid confusion in the name space, the instruction struct2local(myinputs) is replaced by:
 
-% Da CONTROLLARE con MARCO!
 type=myinputs.type;
 run_smoother=myinputs.run_smoother;
 gend=myinputs.gend;
@@ -87,8 +86,6 @@ if ~strcmpi(type,'prior'),
 end
 if whoiam
     Parallel=myinputs.Parallel;
-    MasterName=myinputs.MasterName;
-    DyMo=myinputs.DyMo;
 end
 
 DirectoryName = CheckPath('metropolis');
@@ -105,9 +102,9 @@ if whoiam
     if Parallel(ThisMatlab).Local,
         waitbarTitle=['Local '];
     else
-        waitbarTitle=[Parallel(ThisMatlab).PcName];
+        waitbarTitle=[Parallel(ThisMatlab).ComputerName];
     end
-    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);
+    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
 else
     if exist('OCTAVE_VERSION')
         diary off;
@@ -298,11 +295,11 @@ for b=fpar:B
     elseif ~whoiam,
         waitbar(b/B,h);
     end
-    % if mod(b,10)==0 & whoiam,
+    
     if  whoiam,
         fprintf('Done! \n');
         waitbarString = [ 'Subdraw ' int2str(b) '/' int2str(B) ' done.'];
-        fMessageStatus((b-fpar+1)/(B-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);
+        fMessageStatus((b-fpar+1)/(B-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
     end
 end
 

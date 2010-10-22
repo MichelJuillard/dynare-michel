@@ -1,5 +1,6 @@
 function [ErrorCode] = AnalyseComputationalEnviroment(DataInput)
 
+
 % PARALLEL CONTEXT
 % In a parallel context, this function is used to check the user computational request.
 % If no error happen the function return 0.
@@ -9,19 +10,21 @@ function [ErrorCode] = AnalyseComputationalEnviroment(DataInput)
 % DataInput is the strcture option_.parallel, with the follow fields:
 %
 %           Local         Define the computation place: 1 is on local machine, 0 remote
-%           PcName        Intuitive: contain the computer name.
-%           NumCPU        Intuitive: contain the CPU number.
-%             user        Intuitive: contain the use name for the PcName.
-%           passwd        Intuitive: contain the password for the user name in PcName.
+%     ComputerName        Intuitive: contain the computer name.
+%           CPUnbr        Intuitive: contain the CPU number.
+%         UserName        Intuitive: contain the use name for the ComputerName.
+%           passwd        Intuitive: contain the password for the user name in ComputerName.
 %      RemoteDrive        Drive used for Local/Remote computation (data exchange, etc) must be contain 'RemoteFolder'.
-%     RemoteFolder        Folder in RemoteDrive used for Local/Remote computation.
+%     RemoteDirectory     Folder in RemoteDrive used for Local/Remote computation.
+%     MatlabOctavePath    []
+%         DynarePath      []
 %
 %   This information is typed by the user using the *.mod file, 
 %   the goal of this function is to check if it correct.
 %
 %
 % The variable ErrorCode is initialized at 0. If there are non problems with 
-% Local, PcName connections,... in general with parallel software execution, 
+% Local, ComputerName connections,... in general with parallel software execution, 
 % the ErrorCode is unchanged, in the others cases 1, 2 , ... The values
 % table is below.
 %
@@ -34,7 +37,7 @@ function [ErrorCode] = AnalyseComputationalEnviroment(DataInput)
 %
 %   Value 1:    The variable 'Local' has a bad value!
 %
-%   Value 2:    The variable 'NumCPU' has a bad value. Parallel Dynare
+%   Value 2:    The variable 'CPUnbr' has a bad value. Parallel Dynare
 %               require an input data like [s:d] with s<=d, in this case we
 %               have s>d!
 %         2.1   The user asks to use more CPU of those available.
@@ -91,14 +94,14 @@ end
 
 %%%%%%%%%%  Local Machine   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% In this case we need to check only the variable 'NumCPU'. 
+% In this case we need to check only the variable 'CPUnbr'. 
 
 % We run the parallel code on local computer, so the others fields are automatically 
 % fixed by Dynare. Then the user can also fill them with wrong values.
 
 if (DataInput.Local == 1)
     
-    yn=isempty(DataInput.NumCPU);
+    yn=isempty(DataInput.CPUnbr);
     
     if yn==1
         ErrorCode=2;
@@ -112,23 +115,23 @@ if (DataInput.Local == 1)
     
     [si0 de0]=system(['psinfo \\']);
     
-    RealNumCPU=-1;
-    RealNumCPU=GiveCPUnumber(de0);
+    RealCPUnbr=-1;
+    RealCPUnbr=GiveCPUnumber(de0);
     
     % Trasforming the input data provided in a form [n1:n2] in a single numerical
     % value.   
     
-    DataInput.NumCPU=length(DataInput.NumCPU);
+    DataInput.CPUnbr=length(DataInput.CPUnbr);
     
-    if DataInput.NumCPU  == RealNumCPU
+    if DataInput.CPUnbr  == RealCPUnbr
         % It is Ok!
     end
     
-    if DataInput.NumCPU > RealNumCPU
+    if DataInput.CPUnbr > RealCPUnbr
         ErrorCode=2.1;
         
     end
-    if DataInput.NumCPU < RealNumCPU
+    if DataInput.CPUnbr < RealCPUnbr
         ErrorCode=2.2;
     end    
 end   
@@ -143,7 +146,7 @@ if (DataInput.Local == 0)
    si1=[];
    de1=[]; 
     
-  [si1 de1]=system(['ping ', DataInput.PcName]);
+  [si1 de1]=system(['ping ', DataInput.ComputerName]);
     
     if si1==1 
         % It is impossiblie to be connected to the
@@ -160,7 +163,7 @@ if (DataInput.Local == 0)
     % possible to exchange data with them.
    
      
-    if (isempty(DataInput.user)) || (isempty(DataInput.passwd))
+    if (isempty(DataInput.UserName)) || (isempty(DataInput.Password))
       
       % The fields user name and/or password are/is empty!
       
@@ -170,13 +173,21 @@ if (DataInput.Local == 0)
     end
     
    
-    % Now we very if RemoteDrive and/or RemoteFolder exist on remote
+    % Now we very if RemoteDrive and/or RemoteDirectory exist on remote
     % computer
     
     StartPwd=pwd;
     
+    if (isempty(DataInput.RemoteDirectory))
+        disp 'Remote Drive and/or Remote Folder not exist!';
+        
+        ErrorCode=5;
+        return
+    end
+    
+    
     try
-        cd(['\\',DataInput.PcName,'\',DataInput.RemoteDrive,'$\',DataInput.RemoteFolder]);
+        cd(['\\',DataInput.ComputerName,'\',DataInput.RemoteDrive,'$\',DataInput.RemoteDirectory]);
     catch
        
         cd ([StartPwd]);
@@ -187,18 +198,28 @@ if (DataInput.Local == 0)
     
     end
 
+ 
+    
    cd ([StartPwd]);
     
  
    % Now we verify if it possible to exchange data with the remote
    % computer:
     
+    fT = fopen('WriteTest.txt', 'w+');
+    fclose(fT);
+   
+    Status=copyfile('WriteTest.txt', ['\\',DataInput.ComputerName,'\',DataInput.RemoteDrive,'$\',DataInput.RemoteDirectory]);
     
-    Status=copyfile('Tracing.m', ['\\',DataInput.PcName,'\',DataInput.RemoteDrive,'$\',DataInput.RemoteFolder]);
     
     if Status==1   
+        
         % Remote Drive/Folder exist on Remote computer and
         % it is possible to exchange data with him.
+        
+        %Delete Traces (local and remotely)
+        delete ('WriteTest.txt')
+        delete(['\\',DataInput.ComputerName,'\',DataInput.RemoteDrive,'$\',DataInput.RemoteDirectory,'\WriteTest.txt']);
     else
         
         ErrorCode=6;
@@ -207,12 +228,12 @@ if (DataInput.Local == 0)
    
     
    % Now we verify if it is possible execute a matlab section on remote
-   % machine when the user is .user with password .passwd
+   % machine when the user is .UserName with password .Password
    
     si2=[];
     de2=[];
    
-    [si2 de2]=system(['start /B /WAIT psexec \\',DataInput.PcName,' -e -u ',DataInput.user,' -p ',DataInput.passwd,' -W ',DataInput.RemoteDrive,':\',DataInput.RemoteFolder, ' -low  matlab -nosplash -nodesktop -minimize -r Tracing']);
+    [si2 de2]=system(['start /B /WAIT psexec \\',DataInput.ComputerName,' -e -u ',DataInput.UserName,' -p ',DataInput.Password,' -W ',DataInput.RemoteDrive,':\',DataInput.RemoteDirectory, ' -low  matlab -nosplash -nodesktop -minimize -r Tracing']);
      
     NoError='error code 0';
     
@@ -228,34 +249,34 @@ if (DataInput.Local == 0)
     else 
         
         % No error it is possible execute a matlab section on remote
-        % machine when the user is .user with password .passwd
+        % machine when the user is .UserName with password .Password
     end
     
    
     % At this point we can to analyze the remote computer hardware.
     
-    RealNumCPU=-1;
+    RealCPUnbr=-1;
     
     
     [si0 de0]=system(['psinfo \\']);
-    RealNumCPU=GiveCPUnumber(de0);
+    RealCPUnbr=GiveCPUnumber(de0);
     
     
     % Trasforming the input data provided in a form [n1:n2] in a single numerical
     % value.
     
     
-    DataInput.NumCPU=length(DataInput.NumCPU);
+    DataInput.CPUnbr=length(DataInput.CPUnbr);
     
-    if DataInput.NumCPU  == RealNumCPU
+    if DataInput.CPUnbr  == RealCPUnbr
         % It is Ok!
     end
     
-    if DataInput.NumCPU > RealNumCPU
+    if DataInput.CPUnbr > RealCPUnbr
         ErrorCode=2.1;
         
     end
-    if DataInput.NumCPU < RealNumCPU
+    if DataInput.CPUnbr < RealCPUnbr
         ErrorCode=2.2;
     end
     

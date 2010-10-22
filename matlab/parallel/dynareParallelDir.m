@@ -1,11 +1,14 @@
 function dirlist = dynareParallelDir(filename,PRCDir,Parallel)
 % PARALLEL CONTEXT
-% In a parallel context, this is ...
+% In a parallel context, this is a specialized version of dir() function.
 %
+% INPUTS
+%  o filename   []   ...
+%  o PRCDir     []   ... 
+%  o Parallel   []   ...  
 %
-% INPUT/OUTPUT description:
-%
-%
+%  OUTPUTS
+%  o dirlist    []   ...  
 %
 % Copyright (C) 2009-2010 Dynare Team
 %
@@ -28,7 +31,7 @@ dirlist=[];
 for indPC=1:length(Parallel),
     if isunix || (~matlab_ver_less_than('7.4') && ismac),
         if Parallel(indPC).Local==0,
-            [check, ax]=system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' ls ',Parallel(indPC).RemoteFolder,'/',PRCDir,'/',filename]);
+            [check, ax]=system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' ls ',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',filename]);
             if check ~ 0
                 ax=[];
             end
@@ -43,7 +46,7 @@ for indPC=1:length(Parallel),
         dirlist = [dirlist, ax];
     else
         if Parallel(indPC).Local==0,
-            ax=ls(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\',PRCDir,'\',filename]);
+            ax=ls(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\',filename]);
         else
             ax=ls(filename);
         end

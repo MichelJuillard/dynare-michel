@@ -8,9 +8,9 @@ function slaveParallel(whoiam,ThisMatlab)
 %
 %
 % INPUTS
-%  o whoiam [int]         index number of this CPU among all CPUs in the
+%  o whoiam [int]       index number of this CPU among all CPUs in the
 %                       cluster.
-%  o ThisMatlab [int]     index number of this slave machine in the cluster.
+%  o ThisMatlab [int]   index number of this slave machine in the cluster.
 %
 % OUTPUTS 
 %   None  
@@ -41,12 +41,11 @@ delete( ['slaveParallel_',int2str(whoiam),'.log']);
 diary( ['slaveParallel_',int2str(whoiam),'.log']);
 
 
-% configure dynare environment
+% Configure dynare environment
 dynareroot = dynare_config();
 
 % Load input data.
 load( ['slaveParallel_input',int2str(whoiam)])
-% keyboard;
 
 %Loads fGlobalVar Parallel.
 if exist('fGlobalVar'),
@@ -73,10 +72,7 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
     end
     % I wait for 20 min or while mater asks to exit (i.e. it cancels fslave file)
     pause(1);
-    
-    % -> Da Sistemare!!!!!!!!!!!!!!!!
-    % Con testing su reti vere e con core reali!!!!
-    
+ 
     fjob = dir(['slaveJob',int2str(whoiam),'.mat']);
     
     if ~isempty(fjob),
@@ -95,13 +91,13 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
            else
                % Only for testing, will be remouved!
                
-               if isunix
-                 E1=fopen('/home/ivano/Works/Errore-slaveParallel.txt','w+');
-                 fclose(E1);
-               else            
-                 E1=fopen('c:\dynare_calcs\Errore-slaveParallel.txt','w+');
-                 fclose(E1);
-               end
+%                if isunix
+%                  E1=fopen('/home/ivano/Works/Errore-slaveParallel.txt','w+');
+%                  fclose(E1);
+%                else            
+%                  E1=fopen('c:\dynare_calcs\Errore-slaveParallel.txt','w+');
+%                  fclose(E1);
+%                end
                        
            end
          end
@@ -155,7 +151,7 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
             if Parallel(ThisMatlab).Local,
                 waitbarTitle='Local ';
             else
-                waitbarTitle=[Parallel(ThisMatlab).PcName];
+                waitbarTitle=[Parallel(ThisMatlab).ComputerName];
             end
             fMessageStatus(NaN,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
             delete(['P_',fname,'_',int2str(whoiam),'End.txt']);

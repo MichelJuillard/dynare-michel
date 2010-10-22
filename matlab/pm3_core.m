@@ -4,7 +4,7 @@ function myoutput=pm3_core(myinputs,fpar,nvar,whoiam, ThisMatlab)
 % Core functionality for pm3.m function, which can be parallelized.
  
 % INPUTS 
-%   See See the comment in random_walk_metropolis_hastings_core.m funtion.
+% See the comment in random_walk_metropolis_hastings_core.m funtion.
 
 % OUTPUTS
 % o myoutput  [struc]
@@ -52,8 +52,6 @@ Mean=myinputs.Mean;
 
 if whoiam
     Parallel=myinputs.Parallel;
-    MasterName=myinputs.MasterName;
-    DyMo=myinputs.DyMo;
 end
 
 
@@ -65,9 +63,9 @@ if whoiam
       if Parallel(ThisMatlab).Local,
         waitbarTitle=['Local '];
       else
-        waitbarTitle=[Parallel(ThisMatlab).PcName];
+        waitbarTitle=[Parallel(ThisMatlab).ComputerName];
       end        
-        fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);   
+        fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));   
  end
 
 
@@ -126,7 +124,7 @@ for i=fpar:nvar
     
     if whoiam,
         waitbarString = [ 'Variable ' int2str(i) '/' int2str(nvar) ' done.'];
-        fMessageStatus((i-fpar+1)/(nvar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);
+        fMessageStatus((i-fpar+1)/(nvar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
     end
     
     

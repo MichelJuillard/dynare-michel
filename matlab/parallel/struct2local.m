@@ -1,10 +1,16 @@
-function struct2local(S),
-% The argument is a structure possibly containing several fields.
-% This function will create, in the workspace of the calling function,
+function struct2local(S)
+% PARALLEL CONTEXT
+% In a parallel context, this function will create, in the workspace of the calling function,
 % as many variables as there are fields in the structure, assigning
 % them the value of the fields.
-
-% Copyright (C) 2009 Dynare Team
+%
+% INPUTS
+%  o S [struc]   This structure possibly containing several fields ...
+%  
+%  OUTPUTS
+%  None
+%
+% Copyright (C) 2009-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -20,6 +26,7 @@ function struct2local(S),
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
 
 vnam = fieldnames(S);
 

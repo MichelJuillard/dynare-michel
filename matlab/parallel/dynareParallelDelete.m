@@ -2,10 +2,13 @@ function dynareParallelDelete(fname,pname,Parallel)
 % PARALLEL CONTEXT
 % In a parallel context, this is a specialized version of delete() function.
 %
+% INPUTS
+%  o fname      []   ...
+%  o pname      []   ... 
+%  o Parallel   []   ...  
 %
-% INPUT/OUTPUT description:
-%
-%
+%  OUTPUTS
+%  None
 %
 %
 % Copyright (C) 2009-2010 Dynare Team
@@ -38,9 +41,9 @@ end
 
 for indPC=1:length(Parallel),
     if isunix
-        system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' rm -f ',Parallel(indPC).RemoteFolder,'/',pname,fname]);
+        system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' rm -f ',Parallel(indPC).RemoteDirectory,'/',pname,fname]);
     else
-        delete(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\',pname,fname]);
+        delete(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',pname,fname]);
     end
     
 end

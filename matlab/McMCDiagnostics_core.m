@@ -54,8 +54,6 @@ M_=myinputs.M_;
 
 if whoiam
     Parallel=myinputs.Parallel;
-    MasterName=myinputs.MasterName;
-    DyMo=myinputs.DyMo;
 end
 if ~exist('MhDirectoryName'),
     MhDirectoryName = CheckPath('metropolis');
@@ -70,9 +68,9 @@ if whoiam
     if Parallel(ThisMatlab).Local,
         waitbarTitle=['Local '];
     else
-        waitbarTitle=[Parallel(ThisMatlab).PcName];
+        waitbarTitle=[Parallel(ThisMatlab).ComputerName];
     end        
-    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);    
+    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));    
 end
 for j=fpar:npar,
     fprintf('    Parameter %d...  ',j);
@@ -121,7 +119,7 @@ for j=fpar:npar,
     fprintf('Done! \n');
     if whoiam,  
         waitbarString = [ 'Parameter ' int2str(j) '/' int2str(npar) ' done.'];
-        fMessageStatus((j-fpar+1)/(npar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo)
+        fMessageStatus((j-fpar+1)/(npar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab))
     end
 end
 
