@@ -369,7 +369,6 @@ for j=1:totCPU,
     
 end
 
-fclose(fid);
 % In This way we are sure that the file 'ConcurrentCommand1.bat' is
 % closed and then it can be deleted!
 while (1)
