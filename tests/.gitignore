@@ -10,6 +10,9 @@
 *.dat
 *_simul
 
+/partial_information/PItest3aHc0PCLsimModPiYrVarobsAll_PCL*
+/partial_information/PItest3aHc0PCLsimModPiYrVarobsCNR_PCL*
+
 !/AIM/data_ca1.m
 !/AIM/fs2000_b1L1L_AIM_steadystate.m
 !/AIM/fs2000_b1L1L_steadystate.m

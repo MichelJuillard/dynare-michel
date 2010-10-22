@@ -147,3 +147,5 @@ clean-local:
 	rm -f $(shell find -name '*~')
 
 	rm -f dsge-var/datarabanal_hybrid.mat
+
+	rm -rf partial_information/PItest3aHc0PCLsimModPiYrVarobsAll_PCL* partial_information/PItest3aHc0PCLsimModPiYrVarobsCNR_PCL*
