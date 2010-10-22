@@ -97,7 +97,7 @@ for it_=start:incr:finish
         if(is_dynamic)
             [r, y, g1, g2, g3] = feval(fname, y, x, params, it_, 0);
         else
-            [r, y, g1, g2, g3] = feval(fname, y, x, params, 0);
+            [r, y, g1] = feval(fname, y, x, params);
         end;
         if(~isreal(r))
             max_res=(-(max(max(abs(r))))^2)^0.5;
@@ -219,6 +219,9 @@ for it_=start:incr:finish
             ya_save=ya;
             g1a=g1;
             if(~is_dynamic & options_.solve_algo == 0)
+			    if (verbose == 1)
+				  disp("steady: fsolve");
+				end
                 if exist('OCTAVE_VERSION') || isempty(ver('optim'))
                     % Note that fsolve() exists under Octave, but has a different syntax
                     % So we fail for the moment under Octave, until we add the corresponding code
@@ -238,6 +241,9 @@ for it_=start:incr:finish
                     info = -Block_Num*10;
                 end
             elseif((~is_dynamic & options_.solve_algo==2) || (is_dynamic & stack_solve_algo==4))
+			    if (verbose == 1 & ~is_dynamic)
+				  disp("steady: LU + lnsrch1");
+				end
                 lambda=1;
                 stpmx = 100 ;
                 if (is_dynamic)
@@ -261,10 +267,16 @@ for it_=start:incr:finish
                     y = ya';
                 end;
             elseif(~is_dynamic & options_.solve_algo==3)
+			    if (verbose == 1)
+				  disp("steady: csolve");
+				end
                 [yn,info] = csolve(@local_fname, y(y_index_eq),@local_fname,1e-6,500, x, params, y, y_index_eq, fname, 1);
                 dx = ya - yn;
                 y(y_index_eq) = yn;
-            elseif((stack_solve_algo==1 & is_dynamic) | (stack_solve_algo==0 & is_dynamic) | (~is_dynamic & options_.solve_algo==1)),
+            elseif((stack_solve_algo==1 & is_dynamic) | (stack_solve_algo==0 & is_dynamic) | (~is_dynamic & (options_.solve_algo==1 | options_.solve_algo==6))),
+			    if (verbose == 1 & ~is_dynamic)
+				  disp("steady: Sparse LU ");
+				end
                 dx =  g1\r;
                 ya = ya - lambda*dx;
                 if(is_dynamic)
@@ -272,8 +284,14 @@ for it_=start:incr:finish
                 else
                     y(y_index_eq) = ya;
                 end;
-            elseif(stack_solve_algo==2 & is_dynamic),
+            elseif((stack_solve_algo==2 & is_dynamic) | (options_.solve_algo==7 & ~is_dynamic)),
                 flag1=1;
+				if exist('OCTAVE_VERSION')
+                    error('SOLVE_ONE_BOUNDARY: you can''t use solve_algo=7 since GMRES is not implemented in Octave')
+                end
+				if (verbose == 1 & ~is_dynamic)
+				  disp("steady: GMRES ");
+				end
                 while(flag1>0)
                     [L1, U1]=luinc(g1,luinc_tol);
                     [dx,flag1] = gmres(g1,-r,Blck_size,1e-6,Blck_size,L1,U1);
@@ -296,8 +314,11 @@ for it_=start:incr:finish
                         end;
                     end;
                 end;
-            elseif(stack_solve_algo==3 & is_dynamic),
+            elseif((stack_solve_algo==3 & is_dynamic) | (options_.solve_algo==8 & ~is_dynamic)),
                 flag1=1;
+				if (verbose == 1 & ~is_dynamic)
+				  disp("steady: BiCGStab");
+				end
                 while(flag1>0)
                     [L1, U1]=luinc(g1,luinc_tol);
                     [dx,flag1] = bicgstab(g1,-r,1e-7,Blck_size,L1,U1);
@@ -352,14 +373,16 @@ for it_=start:incr:finish
         return;
     end
 end
-info = 1;
 if(is_dynamic)
+    info = 1;
     oo_.deterministic_simulation.status = 1;
     oo_.deterministic_simulation.error = max_res;
     oo_.deterministic_simulation.iterations = iter;
     oo_.deterministic_simulation.block(Block_Num).status = 1;
     oo_.deterministic_simulation.block(Block_Num).error = max_res;
     oo_.deterministic_simulation.block(Block_Num).iterations = iter;
+else
+  info = 0;
 end;
 return;
 

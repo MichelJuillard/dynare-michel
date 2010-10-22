@@ -329,7 +329,7 @@ SparseMatrix::Read_SparseMatrix(string file_name, const int Size, int periods, i
     }
   else
     {
-      if ((stack_solve_algo == 5 && !steady_state) || (solve_algo == 8 && steady_state))
+      if ((stack_solve_algo == 5 && !steady_state) || (solve_algo == 5 && steady_state))
         {
           for (i = 0; i < u_count_init; i++)
             {
@@ -340,7 +340,7 @@ SparseMatrix::Read_SparseMatrix(string file_name, const int Size, int periods, i
               IM_i[make_pair(make_pair(eq, var), lag)] = j;
             }
         }
-      else if ( ((stack_solve_algo >= 0 || stack_solve_algo <= 4) && !steady_state) || ((solve_algo >= 5 || solve_algo <= 7) && steady_state) )
+      else if ( ((stack_solve_algo >= 0 || stack_solve_algo <= 4) && !steady_state) || ((solve_algo >= 6 || solve_algo <= 8) && steady_state) )
         {
           for (i = 0; i < u_count_init; i++)
             {
@@ -1949,7 +1949,7 @@ SparseMatrix::Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double sl
 #ifdef OCTAVE_MEX_FILE
   ostringstream tmp;
   if (steady_state)
-    tmp << " GMRES method is not implemented in Octave. You cannot use solve_algo=6, change solve_algo.\n";
+    tmp << " GMRES method is not implemented in Octave. You cannot use solve_algo=7, change solve_algo.\n";
   else
     tmp << " GMRES method is not implemented in Octave. You cannot use stack_solve_algo=2, change stack_solve_algo.\n";
   throw FatalExceptionHandling(tmp.str());
@@ -2956,19 +2956,19 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
                 mexPrintf("MODEL STEADY STATE: MATLAB csolve\n");
                 break;
               case 5:
-                mexPrintf("MODEL STEADY STATE: Sparse LU\n");
+                mexPrintf("MODEL STEADY STATE: (method=ByteCode own solver)\n");
                 break;
               case 6:
-                mexPrintf("MODEL SIMULATION: (method=GMRES)\n");
+                mexPrintf("MODEL STEADY STATE: Sparse LU\n");
                 break;
               case 7:
-                mexPrintf("MODEL SIMULATION: (method=BiCGStab)\n");
+                mexPrintf("MODEL STEADY STATE: (method=GMRES)\n");
                 break;
               case 8:
-                mexPrintf("MODEL SIMULATION: (method=ByteCode own solver)\n");
+                mexPrintf("MODEL STEADY STATE: (method=BiCGStab)\n");
                 break;
               default:
-                mexPrintf("MODEL SIMULATION: (method=Unknown - %d - )\n", stack_solve_algo);
+                mexPrintf("MODEL STEADY STATE: (method=Unknown - %d - )\n", stack_solve_algo);
             }
         }
 
@@ -2980,7 +2980,7 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
       mexPrintf("-----------------------------------\n");
     }
   bool zero_solution;
-  if ((solve_algo == 8 && steady_state) || (stack_solve_algo == 5 && !steady_state))
+  if ((solve_algo == 5 && steady_state) || (stack_solve_algo == 5 && !steady_state))
     Simple_Init(it_, y_kmin, y_kmax, Size, IM_i, zero_solution);
   else
     {
@@ -3012,13 +3012,13 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
     }
   else
     {
-      if ((solve_algo == 8 && steady_state) || (stack_solve_algo == 5 && !steady_state))
+      if ((solve_algo == 5 && steady_state) || (stack_solve_algo == 5 && !steady_state))
         Solve_ByteCode_Sparse_GaussianElimination(Size, blck, steady_state, it_);
-      else if ((solve_algo == 6 && steady_state) || (stack_solve_algo == 2 && !steady_state))
+      else if ((solve_algo == 7 && steady_state) || (stack_solve_algo == 2 && !steady_state))
         Solve_Matlab_GMRES(A_m, b_m, Size, slowc, blck, false, it_, steady_state);
-      else if ((solve_algo == 7 && steady_state) || (stack_solve_algo == 3 && !steady_state))
+      else if ((solve_algo == 8 && steady_state) || (stack_solve_algo == 3 && !steady_state))
         Solve_Matlab_BiCGStab(A_m, b_m, Size, slowc, blck, false, it_);
-      else if ((solve_algo == 5 && steady_state) || ((stack_solve_algo == 0 || stack_solve_algo == 1) && !steady_state))
+      else if ((solve_algo == 6 && steady_state) || ((stack_solve_algo == 0 || stack_solve_algo == 1) && !steady_state))
         Solve_Matlab_LU_UMFPack(A_m, b_m, Size, slowc, false, it_);
     }
   return;
