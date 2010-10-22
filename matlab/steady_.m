@@ -42,6 +42,10 @@ if ~options_.bytecode && options_.block && options_.solve_algo == 5
     error('STEADY: you can''t use solve_algo = 5 without bytecode option')
 end
 
+if exist('OCTAVE_VERSION') && options_.solve_algo == 7
+    error('SIMUL: you can''t use solve_algo = 7 under Octave')
+end
+
 if options_.steadystate_flag
     [ys,check] = feval([M_.fname '_steadystate'],...
                        oo_.steady_state,...
