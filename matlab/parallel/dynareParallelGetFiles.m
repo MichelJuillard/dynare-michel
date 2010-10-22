@@ -1,9 +1,16 @@
 function dynareParallelGetFiles(NamFileInput,PRCDir,Parallel)
 % PARALLEL CONTEXT
-% In a parallel context, this is ...
+% In a parallel context, this is a specialized mono-directional (Remote to Local) version of copy()
+% function.
 %
 %
-% INPUT/OUTPUT description:
+% INPUTS
+%  o NamFileInput   []   ...
+%  o PRCDir         []   ... 
+%  o Parallel       []   ...  
+%
+%  OUTPUTS
+%  None
 %
 %
 %
@@ -37,13 +44,13 @@ for indPC=1:length(Parallel),
         if isunix || (~matlab_ver_less_than('7.4') && ismac),
             for jfil=1:size(NamFileInput,1),
 %                 if ~isempty(dynareParallelDir(NamFileInput{jfil,2},[PRCDir,filesep,NamFileInput{jfil,1}],Parallel(indPC))),
-                    system(['scp ',Parallel(indPC).user,'@',Parallel(indPC).PcName,':',Parallel(indPC).RemoteFolder,'/',PRCDir,'/',NamFileInput{jfil,1},NamFileInput{jfil,2},' ',NamFileInput{jfil,1}]);
+                    system(['scp ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,':',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',NamFileInput{jfil,1},NamFileInput{jfil,2},' ',NamFileInput{jfil,1}]);
 %                 end
             end
         else
             for jfil=1:size(NamFileInput,1),
                 if ~isempty(dynareParallelDir(NamFileInput{jfil,2},[PRCDir,filesep,NamFileInput{jfil,1}],Parallel(indPC))),
-                    copyfile(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\',PRCDir,'\',NamFileInput{jfil,1},NamFileInput{jfil,2}],NamFileInput{jfil,1})
+                    copyfile(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\',NamFileInput{jfil,1},NamFileInput{jfil,2}],NamFileInput{jfil,1})
                 end
             end
         end

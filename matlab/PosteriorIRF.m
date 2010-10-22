@@ -195,7 +195,7 @@ localVars.NumberOfIRFfiles_dsgevar=NumberOfIRFfiles_dsgevar;
 localVars.ifil2=ifil2;
 
 % Like sequential execution!
-if isnumeric(options_.parallel),% | isunix, % For the moment exclude unix platform from parallel implementation.
+if isnumeric(options_.parallel),
     [fout] = PosteriorIRF_core1(localVars,1,B,0);
 else
    % Parallel execution!
@@ -424,9 +424,9 @@ end
 % The others file format are generated in parallel by PosteriorIRF_core2!
 
 
-                                % Comment for testing!
+                                     % Comment for testing!
 if ~exist('OCTAVE_VERSION')
-    if isnumeric(options_.parallel) % || (M_.exo_nbr*ceil(size(varlist,1)/MaxNumberOfPlotPerFigure))<8,% | isunix, % for the moment exclude unix platform from parallel implementation
+    if isnumeric(options_.parallel)  || (M_.exo_nbr*ceil(size(varlist,1)/MaxNumberOfPlotPerFigure))<8,
         [fout] = PosteriorIRF_core2(localVars,1,M_.exo_nbr,0);
     else
         globalVars = struct('M_',M_, ...

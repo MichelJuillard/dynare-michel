@@ -1,11 +1,12 @@
 function [TiSt] = CreateTimeString()
 % PARALLEL CONTEXT
-% In a parallel context, this is ...
+% In a parallel context, this is a specialized version of clock() function.
 %
+% INPUTS
+% None
 %
-% INPUT/OUTPUT description:
-%
-%
+%  OUTPUTS
+%  o TiSt    []   ...  
 %
 % Copyright (C) 2009-2010 Dynare Team
 %

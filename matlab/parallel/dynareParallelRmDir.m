@@ -2,16 +2,15 @@ function dynareParallelRmDir(PRCDir,Parallel)
 % PARALLEL CONTEXT
 % In a parallel context, this is a specialized version of rmdir() function.
 %
+% INPUTS
+%  o PRCDir         []   ... 
+%  o Parallel       []   ...  
 %
-% INPUT/OUTPUT description:
+%  OUTPUTS
+%  None
 %
 %
 %
-%
-%
-% Then at the point call of this function it is possible react in a best way, in accord
-% with the ErrorCode.
-
 % Copyright (C) 2009-2010 Dynare Team
 %
 % This file is part of Dynare.
@@ -38,12 +37,11 @@ end
 
 for indPC=1:length(Parallel),
     while (1)
-        %         keyboard;
         if isunix
-            stat = system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' rm -fr ',Parallel(indPC).RemoteFolder,'/',PRCDir]);
+            stat = system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' rm -fr ',Parallel(indPC).RemoteDirectory,'/',PRCDir]);
             break;
         else
-            [stat, mess, id] = rmdir(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\',PRCDir],'s');
+            [stat, mess, id] = rmdir(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir],'s');
             if stat==1,
                 break,
             else

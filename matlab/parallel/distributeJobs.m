@@ -14,8 +14,8 @@ function [nCPU, totCPU, nBlockPerCPU, totSLAVES] = distributeJobs(Parallel, fBlo
 %                               threads run on that CPU
 %  o totCPU [int]               total number of CPU used (can be lower than
 %                               the number of CPU declared in "Parallel", if
-%                               the number of required threads is lower)
-%  o nCPU                       he number of CPU in user format.
+%                               the number of required threads is lower!)
+%  o nCPU                       the number of CPU in user format.
 
 % Copyright (C) 2010 Dynare Team
 %
@@ -36,7 +36,7 @@ function [nCPU, totCPU, nBlockPerCPU, totSLAVES] = distributeJobs(Parallel, fBlo
 
 totCPU=0;
 for j=1:length(Parallel),
-    nCPU(j)=length(Parallel(j).NumCPU);
+    nCPU(j)=length(Parallel(j).CPUnbr);
     totCPU=totCPU+nCPU(j);
 end
 

@@ -2,16 +2,14 @@ function dynareParallelMkDir(PRCDir,Parallel)
 % PARALLEL CONTEXT
 % In a parallel context, this is a specialized version of rmdir() function.
 %
+% INPUTS
+%  o PRCDir         []   ... 
+%  o Parallel       []   ...  
 %
-% INPUT/OUTPUT description:
+%  OUTPUTS
+%  None
 %
 %
-%
-%
-%
-% Then at the point call of this function it is possible react in a best way, in accord
-% with the ErrorCode.
-
 % Copyright (C) 2009-2010 Dynare Team
 %
 % This file is part of Dynare.
@@ -39,9 +37,9 @@ end
 for indPC=1:length(Parallel)
     if Parallel(indPC).Local==0,
         if isunix || (~matlab_ver_less_than('7.4') && ismac),
-            system(['ssh ',Parallel(indPC).user,'@',Parallel(indPC).PcName,' mkdir -p ',Parallel(indPC).RemoteFolder,'/',PRCDir])
+            system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' mkdir -p ',Parallel(indPC).RemoteDirectory,'/',PRCDir])
         else
-            [NonServeS NonServeD]=mkdir(['\\',Parallel(indPC).PcName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteFolder,'\',PRCDir]);
+            [NonServeS NonServeD]=mkdir(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir]);
         end
     end
 end

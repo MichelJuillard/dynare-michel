@@ -15,8 +15,8 @@ function fParallel(fblck,nblck,whoiam,ThisMatlab,fname)
 %                       (entry in options_.parallel)
 %  o fname [string]     function to be run, containing the computing task
 %
-% OUTPUTS 
-%   None 
+% OUTPUTS
+%   None
 %
 % Copyright (C) 2006-2008,2010 Dynare Team
 %
@@ -43,14 +43,13 @@ warning off;
 diary off;
 
 delete( [fname,'_',int2str(whoiam),'.log']);
-
 diary( [fname,'_',int2str(whoiam),'.log']);
 
 % Configure dynare environment.
 dynareroot = dynare_config();
 
 % Load input data.
-load( [fname,'_input']) 
+load( [fname,'_input'])
 
 if exist('fGlobalVar') && ~isempty (fGlobalVar)
     globalVars = fieldnames(fGlobalVar);
@@ -64,15 +63,13 @@ if exist('fGlobalVar') && ~isempty (fGlobalVar)
     evalin('base','struct2local(fGlobalVar)');
 end
 
-
 fInputVar.Parallel = Parallel;
 
 
 % Launch the routine to be run in parallel.
-
 try,
     tic,
- 
+    
     fOutputVar = feval(fname, fInputVar ,fblck, nblck, whoiam, ThisMatlab);
     toc,
     if isfield(fOutputVar,'OutputFileName'),
@@ -81,11 +78,8 @@ try,
         OutputFileName = '';
     end
     if(whoiam)
-        
         % Save the output result.
-        
         save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
-       
     end
     
     disp(['fParallel ',int2str(whoiam),' completed.'])
@@ -94,11 +88,11 @@ catch ME
     fOutputVar.error = ME;
     save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
     waitbarString = fOutputVar.error.message;
-    %       waitbarTitle=['Metropolis-Hastings ',options_.parallel(ThisMatlab).PcName];
+    %       waitbarTitle=['Metropolis-Hastings ',options_.parallel(ThisMatlab).ComputerName];
     if Parallel(ThisMatlab).Local,
         waitbarTitle='Local ';
     else
-        waitbarTitle=[Parallel(ThisMatlab).PcName];
+        waitbarTitle=[Parallel(ThisMatlab).ComputerName];
     end
     fMessageStatus(NaN,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
     

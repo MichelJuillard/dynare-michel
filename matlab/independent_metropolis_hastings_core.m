@@ -57,14 +57,12 @@ nruns=myinputs.nruns;
 NewFile=myinputs.NewFile;
 MAX_nruns=myinputs.MAX_nruns;
 d=myinputs.d;
-InitSizeArray=myinputs.InitSizeArray;                    
+InitSizeArray=myinputs.InitSizeArray;
 record=myinputs.record;
 varargin=myinputs.varargin;
 
 if whoiam
     Parallel=myinputs.Parallel;
-    MasterName=myinputs.MasterName;
-    DyMo=myinputs.DyMo;
     % initialize persistent variables in priordens()
     priordens(xparam1,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7, ...
         bayestopt_.p3,bayestopt_.p4,1);
@@ -121,13 +119,13 @@ for b = fblck:nblck,
     elseif whoiam
         %       keyboard;
         waitbarString = ['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...'];
-        %       waitbarTitle=['Metropolis-Hastings ',options_.parallel(ThisMatlab).PcName];
+        %       waitbarTitle=['Metropolis-Hastings ',options_.parallel(ThisMatlab).ComputerName];
         if options_.parallel(ThisMatlab).Local,
             waitbarTitle=['Local '];
         else
-            waitbarTitle=[options_.parallel(ThisMatlab).PcName];
+            waitbarTitle=[options_.parallel(ThisMatlab).ComputerName];
         end        
-        fMessageStatus(0,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab), MasterName, DyMo);
+        fMessageStatus(0,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab));
     else,
         hh = waitbar(0,['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...']);
         set(hh,'Name','Metropolis-Hastings');
@@ -138,7 +136,7 @@ for b = fblck:nblck,
     irun = fline(b);
     j = 1;
     while j <= nruns(b)
-        par = feval(ProposalFun, xparam1, d * jscale, n); 
+        par = feval(ProposalFun, xparam1, proposal_covariance, n); 
         if all( par(:) > mh_bounds(:,1) ) & all( par(:) < mh_bounds(:,2) )
             try
                 logpost = - feval(TargetFun, par(:),varargin{:});               
@@ -149,8 +147,8 @@ for b = fblck:nblck,
             logpost = -inf;
         end
         r = logpost - ilogpo2(b) + ...
-            log(feval(ProposalDensity, ix2(b,:), xparam1, d * jscale, n)) - ...
-            log(feval(ProposalDensity, par, xparam1, d * jscale, n));
+            log(feval(ProposalDensity, ix2(b,:), xparam1, proposal_covariance, n)) - ...
+            log(feval(ProposalDensity, par, xparam1, proposal_covariance, n));
         if (logpost > -inf) && (log(rand) < r)
             x2(irun,:) = par;
             ix2(b,:) = par;
@@ -174,7 +172,7 @@ for b = fblck:nblck,
             if mod(j,50)==0 & whoiam,  
                 %             keyboard;
                 waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) '), ' sprintf('accept. %3.f%%%%', 100 * isux/j)];
-                fMessageStatus(prtfrc,whoiam,waitbarString, '', options_.parallel(ThisMatlab), MasterName, DyMo)
+                fMessageStatus(prtfrc,whoiam,waitbarString, '', options_.parallel(ThisMatlab))
             end
         else
             if mod(j, 3)==0 & ~whoiam
@@ -182,7 +180,7 @@ for b = fblck:nblck,
             elseif mod(j,50)==0 & whoiam,  
                 %             keyboard;
                 waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)];
-                fMessageStatus(prtfrc,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab), MasterName, DyMo)
+                fMessageStatus(prtfrc,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab))
             end
         end
         

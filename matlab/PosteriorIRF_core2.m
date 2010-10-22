@@ -65,8 +65,6 @@ MaxNumberOfPlotPerFigure=myinputs.MaxNumberOfPlotPerFigure;
 % Necessary only for remote computing!
 if whoiam
  Parallel=myinputs.Parallel;
- MasterName=myinputs.MasterName;
- DyMo=myinputs.DyMo;
 end
 
 % To save the figures where the function is computed!
@@ -79,10 +77,10 @@ if whoiam,
     if Parallel(ThisMatlab).Local,
         waitbarTitle=['Local '];
     else
-        waitbarTitle=[Parallel(ThisMatlab).PcName];
+        waitbarTitle=[Parallel(ThisMatlab).ComputerName];
         RemoteFlag = 1;
     end
-    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);
+    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
 end
 
 OutputFileName={};
@@ -164,11 +162,11 @@ for i=fpar:npar,
     if whoiam,
            fprintf('Done! \n');
            waitbarString = [ 'Exog. shocks ' int2str(i) '/' int2str(npar) ' done.'];
-           fMessageStatus((i-fpar+1)/(npar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);
+           fMessageStatus((i-fpar+1)/(npar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
     end
 end% loop over exo_var  
  
 
- 
+
 myoutput.OutputFileName = OutputFileName;
 
