@@ -21,6 +21,8 @@
 !/AIM/fsdat.m
 !/block_bytecode/MARK3_endo.dat
 !/block_bytecode/MARK3_exo.dat
+!/block_bytecode/run_block_bytecode_tests.m
+!/block_bytecode/run_ls2003.m
 !/bvar_a_la_sims/bvar_sample.m
 !/external_function/extFunDeriv.m
 !/external_function/extFunNoDerivs.m
