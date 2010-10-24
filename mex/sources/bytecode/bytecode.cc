@@ -410,12 +410,9 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                   for (int i = 0; i < nb_blocks; i++)
                    {
                       mxSetFieldByNumber(block_structur,i,jacob_field_number,interprete.get_jacob(i));
-                      if (!evaluate)
-                        {
-                          mxSetFieldByNumber(block_structur,i,jacob_exo_field_number,interprete.get_jacob_exo(i));
-                          mxSetFieldByNumber(block_structur,i,jacob_exo_det_field_number,interprete.get_jacob_exo_det(i));
-                          mxSetFieldByNumber(block_structur,i,jacob_other_endo_field_number,interprete.get_jacob_other_endo(i));
-                        }
+                      mxSetFieldByNumber(block_structur,i,jacob_exo_field_number,interprete.get_jacob_exo(i));
+                      mxSetFieldByNumber(block_structur,i,jacob_exo_det_field_number,interprete.get_jacob_exo_det(i));
+                      mxSetFieldByNumber(block_structur,i,jacob_other_endo_field_number,interprete.get_jacob_other_endo(i));
                     }
                   plhs[2] = block_structur;
                 }
