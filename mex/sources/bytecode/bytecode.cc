@@ -417,6 +417,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                           mxSetFieldByNumber(block_structur,i,jacob_other_endo_field_number,interprete.get_jacob_other_endo(i));
                         }
                     }
+                  plhs[2] = block_structur;
                 }
               if (nlhs > 3)
                 {
