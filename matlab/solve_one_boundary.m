@@ -220,7 +220,7 @@ for it_=start:incr:finish
             g1a=g1;
             if(~is_dynamic & options_.solve_algo == 0)
 			    if (verbose == 1)
-				  disp("steady: fsolve");
+				  disp('steady: fsolve');
 				end
                 if exist('OCTAVE_VERSION') || isempty(ver('optim'))
                     % Note that fsolve() exists under Octave, but has a different syntax
@@ -242,7 +242,7 @@ for it_=start:incr:finish
                 end
             elseif((~is_dynamic & options_.solve_algo==2) || (is_dynamic & stack_solve_algo==4))
 			    if (verbose == 1 & ~is_dynamic)
-				  disp("steady: LU + lnsrch1");
+				  disp('steady: LU + lnsrch1');
 				end
                 lambda=1;
                 stpmx = 100 ;
@@ -268,14 +268,14 @@ for it_=start:incr:finish
                 end;
             elseif(~is_dynamic & options_.solve_algo==3)
 			    if (verbose == 1)
-				  disp("steady: csolve");
+				  disp('steady: csolve');
 				end
                 [yn,info] = csolve(@local_fname, y(y_index_eq),@local_fname,1e-6,500, x, params, y, y_index_eq, fname, 1);
                 dx = ya - yn;
                 y(y_index_eq) = yn;
             elseif((stack_solve_algo==1 & is_dynamic) | (stack_solve_algo==0 & is_dynamic) | (~is_dynamic & (options_.solve_algo==1 | options_.solve_algo==6))),
 			    if (verbose == 1 & ~is_dynamic)
-				  disp("steady: Sparse LU ");
+				  disp('steady: Sparse LU ');
 				end
                 dx =  g1\r;
                 ya = ya - lambda*dx;
@@ -290,7 +290,7 @@ for it_=start:incr:finish
                     error('SOLVE_ONE_BOUNDARY: you can''t use solve_algo=7 since GMRES is not implemented in Octave')
                 end
 				if (verbose == 1 & ~is_dynamic)
-				  disp("steady: GMRES ");
+				  disp('steady: GMRES ');
 				end
                 while(flag1>0)
                     [L1, U1]=luinc(g1,luinc_tol);
@@ -317,7 +317,7 @@ for it_=start:incr:finish
             elseif((stack_solve_algo==3 & is_dynamic) | (options_.solve_algo==8 & ~is_dynamic)),
                 flag1=1;
 				if (verbose == 1 & ~is_dynamic)
-				  disp("steady: BiCGStab");
+				  disp('steady: BiCGStab');
 				end
                 while(flag1>0)
                     [L1, U1]=luinc(g1,luinc_tol);
