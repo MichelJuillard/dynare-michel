@@ -1,4 +1,4 @@
-function InitializeComputationalEnviroment(DataInput)
+function InitializeComputationalEnviroment()
 
 % PARALLEL CONTEXT
 % In a parallel context, this function is used to Initialize the computational enviroment according with
@@ -28,6 +28,26 @@ function InitializeComputationalEnviroment(DataInput)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 
+% This is simple and check!
+% The default value for the new field MatlabOctavePath now is 'matlab' or
+% 'octave'. Then if the field is empty it is necessary to fill it with the
+% default value.
+
+global options_
+
+for j=1:length(options_.parallel),
+    if isempty(options_.parallel(j).MatlabOctavePath),
+        if exist('OCTAVE_VERSION')
+            options_.parallel(j).MatlabOctavePath = 'octave';
+        else
+           options_.parallel(j).MatlabOctavePath = 'matlab';
+        end
+    end
+end
+ 
+
+
+
 % Invoke masterParallel with 8 arguments and the last equal to 1. With this shape
 % for input data, masterParallel only create a new directory for remote
 % computation. The name of this directory is time depending. For local
@@ -35,6 +55,6 @@ function InitializeComputationalEnviroment(DataInput)
 % previous computations.
 
 delete(['P_slave_*End.txt'])
-masterParallel(DataInput.parallel,[],[],[],[],[],[],DataInput.parallel_info,1);
+masterParallel(options_.parallel,[],[],[],[],[],[],options_.parallel_info,1);
 
 return
