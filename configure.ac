@@ -68,6 +68,9 @@ AX_BOOST_BASE([1.34])
 CPPFLAGS_SAVED="$CPPFLAGS"
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
 AC_CHECK_HEADERS([boost/graph/adjacency_list.hpp], [], [AC_MSG_ERROR([Can't find Boost Graph Library])])
+AC_CHECK_HEADERS([boost/algorithm/string/trim.hpp], [], [AC_MSG_ERROR([Can't find Boost String Library])])
+AC_CHECK_HEADERS([boost/algorithm/string/split.hpp], [], [AC_MSG_ERROR([Can't find Boost String Library])])
+AC_CHECK_HEADERS([boost/lexical_cast.hpp], [], [AC_MSG_ERROR([Can't find Boost Lexical Cast Header])])
 CPPFLAGS="$CPPFLAGS_SAVED"
 
 # Don't use deprecated hash structures
