@@ -161,19 +161,19 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
   waitBarRhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
   std::string barTitle;
   std::stringstream ssbarTitle;
-
-  ssbarTitle.clear();
-  ssbarTitle.str("");
-  ssbarTitle << "Please wait... Metropolis-Hastings  " << fblock << "/" << nBlocks << "  ...";
-  barTitle = ssbarTitle.str();
-  waitBarRhs[1] = mxCreateString(barTitle.c_str());
-  //strcpy( *mxGetPr(waitBarRhs[1]), mhFName.c_str());
-  *mxGetPr(waitBarRhs[0]) = (double) 0.0;
-  mexCallMATLAB(1, waitBarLhs, 2, waitBarRhs, "waitbar");
-  if (waitBarRhs[1])
-    mxDestroyArray(waitBarRhs[1]);
-//  *mxGetPr(waitBarRhs[1])=*mxGetPr(waitBarLhs[0]);
-  waitBarRhs[1] = waitBarLhs[0];
+  if (console_mode==0)
+    {
+      ssbarTitle.clear();
+      ssbarTitle.str("");
+      ssbarTitle << "Please wait... Metropolis-Hastings  " << fblock << "/" << nBlocks << "  ...";
+      barTitle = ssbarTitle.str();
+      waitBarRhs[1] = mxCreateString(barTitle.c_str());
+      *mxGetPr(waitBarRhs[0]) = (double) 0.0;
+      mexCallMATLAB(1, waitBarLhs, 2, waitBarRhs, "waitbar");
+      if (waitBarRhs[1])
+        mxDestroyArray(waitBarRhs[1]);
+      waitBarRhs[1] = waitBarLhs[0];
+    }
 
   for (size_t b = fblock; b <= nBlocks; ++b)
     {
@@ -352,14 +352,21 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
 
   // Cleanup
   if (mxMhLogPostDensPtr)
-    mxDestroyArray(mxMhLogPostDensPtr);                                             // delete log post density array
+    mxDestroyArray(mxMhLogPostDensPtr);   // delete log post density array
   if (mxMhParamDrawsPtr)
-    mxDestroyArray(mxMhParamDrawsPtr);                                            // delete accepted MCMC MH draws
+    mxDestroyArray(mxMhParamDrawsPtr);    // delete accepted MCMC MH draws
 
-// Close Bar  
-  mexCallMATLAB(0, NULL, 1, waitBarLhs, "close");
-  mxDestroyArray(waitBarLhs[0]);
-  mxDestroyArray(waitBarRhs[1]);
+  // Waitbar  
+  if (console_mode==0)
+    {
+      // Bellow call to close waitbar seems to cause crashes and it is for 
+      // now left commented out and the waitbar neeeds to be closed manually
+      // alternativelly, call with options_.console_mode=1;  
+      //mexCallMATLAB(0, NULL, 1, waitBarLhs, "close");
+      mxDestroyArray(waitBarLhs[0]);
+      mxDestroyArray(waitBarRhs[1]);
+      mxDestroyArray(waitBarRhs[0]);
+    }
 
   // return last line run in the last MH block sub-array
   return irun;
