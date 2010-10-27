@@ -1,5 +1,5 @@
 function [x,info] = dynare_solve_block_or_bytecode(y, exo, params)
-% Copyright (C) 1996-2010 Dynare Team
+% Copyright (C) 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -15,6 +15,7 @@ function [x,info] = dynare_solve_block_or_bytecode(y, exo, params)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
 global options_ M_
 info = 0;
 x = y;
