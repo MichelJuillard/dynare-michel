@@ -70,9 +70,7 @@ steady(solve_algo = @{solve_algo});
 model_info;
 @#endif
 
-@#if !block && !bytecode
 check;
-@#endif
 
 shocks;
 var e_q;
