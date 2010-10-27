@@ -1,4 +1,4 @@
-function InitializeComputationalEnviroment()
+function InitializeComputationalEnvironment()
 
 % PARALLEL CONTEXT
 % In a parallel context, this function is used to Initialize the computational enviroment according with

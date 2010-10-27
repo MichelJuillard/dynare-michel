@@ -1,4 +1,4 @@
-function [ErrorCode] = AnalyseComputationalEnviroment(DataInput)
+function [ErrorCode] = AnalyseComputationalEnvironment(DataInput, parallel_info)
 
 
 % PARALLEL CONTEXT
