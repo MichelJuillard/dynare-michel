@@ -114,65 +114,14 @@ if options_.steadystate_flag
                                                 options_.jacobian_flag, ...         
                                                 [oo_.exo_steady_state;oo_.exo_det_steady_state],indv);
     end
-elseif options_.block && ~options_.bytecode
-    for b = 1:size(M_.blocksMFS,1)
-        n = size(M_.blocksMFS{b}, 1);
-        ss = oo_.steady_state;
-        if n ~= 0
-            if options_.solve_algo <= 4
-                [y, check] = dynare_solve('block_mfs_steadystate', ...
-                                          ss(M_.blocksMFS{b}), ...
-                                          options_.jacobian_flag, b);
-                if check ~= 0
-                    error(['STEADY: convergence problems in block ' int2str(b)])
-                end
-                ss(M_.blocksMFS{b}) = y;
-            else
-                [ss, check] = solve_one_boundary([M_.fname '_static_' int2str(b)], ss, [oo_.exo_steady_state; ...
-                            oo_.exo_det_steady_state], M_.params, M_.blocksMFS{b}, n, 1, 0, b, 0, options_.maxit_, ...
-                            options_.solve_tolf, options_.slowc, 0, options_.solve_algo, 1, 0, 0);
-              
-            end
-        end
-        [r, g1, oo_.steady_state] = feval([M_.fname '_static'], b, ss, ...
-                                          [oo_.exo_steady_state; ...
-                            oo_.exo_det_steady_state], M_.params);
-    end
-elseif options_.bytecode
-    if options_.solve_algo > 4
-        [check, oo_.steady_state] = bytecode('static');
-        mexErrCheck('bytecode', check);
-    elseif options_.block
-        for b = 1:size(M_.blocksMFS,1)
-            n = size(M_.blocksMFS{b}, 1);
-            ss = oo_.steady_state;
-            if n ~= 0
-                [y, check] = dynare_solve('block_bytecode_mfs_steadystate', ...
-                                       ss(M_.blocksMFS{b}), ...
-                                      options_.jacobian_flag, b);
-                if check ~= 0
-                    error(['STEADY: convergence problems in block ' int2str(b)])
-                end
-                oo_.steady_state(M_.blocksMFS{b}) = y;
-            else
-              [check, r, g1, oo_.steady_state] = feval('bytecode', oo_.steady_state, ...
-                                                [oo_.exo_steady_state; ...
-                                  oo_.exo_det_steady_state], M_.params, 1, options_.solve_algo, 'static', 'evaluate', ['block = ' int2str(b)]);
-            end;
-        end
-    else
-        [y, check] = dynare_solve('bytecode_steadystate', ...
-                               oo_.steady_state, ...
-                               options_.jacobian_flag);
-        if check ~= 0
-            error('STEADY: convergence problems')
-        end
-        oo_.steady_state = y;
-    end
-else
+elseif (options_.bytecode == 0 && options_.block == 0)
     [oo_.steady_state,check] = dynare_solve([M_.fname '_static'],...
                                             oo_.steady_state,...
                                             options_.jacobian_flag, ...     
+                                            [oo_.exo_steady_state; ...
+                        oo_.exo_det_steady_state], M_.params);
+else
+    [oo_.steady_state,check] = dynare_solve_block_or_bytecode(oo_.steady_state,...
                                             [oo_.exo_steady_state; ...
                         oo_.exo_det_steady_state], M_.params);
 end

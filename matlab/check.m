@@ -30,9 +30,6 @@ function [result,info] = check
 
 global M_ options_ oo_
 
-if options_.block || options_.bytecode
-    error('CHECK: incompatibility with "block" or "bytecode" option')
-end
 
 temp_options = options_;
 tempex = oo_.exo_simul;
@@ -53,7 +50,11 @@ end
 oo_.exo_simul = tempex;
 
 eigenvalues_ = dr.eigval;
-nyf = nnz(dr.kstate(:,2)>M_.maximum_endo_lag+1);
+if (options_.block)
+    nyf = dr.nfwrd;
+else
+    nyf = nnz(dr.kstate(:,2)>M_.maximum_endo_lag+1);
+end;
 [m_lambda,i]=sort(abs(eigenvalues_));
 n_explod = nnz(abs(eigenvalues_) > options_.qz_criterium);
 

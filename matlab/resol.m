@@ -66,7 +66,10 @@ end
 dr.ys = ys;
 check1 = 0;
 % testing for steadystate file
-fh = str2func([M_.fname '_static']);
+if (~options_.bytecode)
+    fh = str2func([M_.fname '_static']);
+end;
+
 if options_.steadystate_flag
     [dr.ys,check1] = feval([M_.fname '_steadystate'],dr.ys,...
                            [oo_.exo_steady_state; ...
@@ -88,12 +91,18 @@ else
     if  options_.ramsey_policy == 0
         if options_.linear == 0
             % nonlinear models
-            if max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; ...
-                                    oo_.exo_det_steady_state], M_.params))) > options_.dynatol
-                [dr.ys,check1] = dynare_solve(fh,dr.ys,options_.jacobian_flag,...
-                                              [oo_.exo_steady_state; ...
-                                    oo_.exo_det_steady_state], M_.params);
-            end
+            if (options_.block == 0 && options_.bytecode == 0)
+                if max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; ...
+                                        oo_.exo_det_steady_state], M_.params))) > options_.dynatol
+                    [dr.ys,check1] = dynare_solve(fh,dr.ys,options_.jacobian_flag,...
+                                                  [oo_.exo_steady_state; ...
+                                        oo_.exo_det_steady_state], M_.params);
+                end
+            else
+                [dr.ys,check1] = dynare_solve_block_or_bytecode(dr.ys,...
+                                                  [oo_.exo_steady_state; ...
+                                        oo_.exo_det_steady_state], M_.params);
+            end;
         else
             % linear models
             [fvec,jacob] = feval(fh,dr.ys,[oo_.exo_steady_state;...
@@ -125,7 +134,11 @@ if ~isreal(dr.ys)
 end
 
 dr.fbias = zeros(M_.endo_nbr,1);
-[dr,info,M_,options_,oo_] = dr1(dr,check_flag,M_,options_,oo_);
+if options_.block
+  [dr,info,M_,options_,oo_] = dr_block(dr,check_flag,M_,options_,oo_);
+else
+  [dr,info,M_,options_,oo_] = dr1(dr,check_flag,M_,options_,oo_);
+end
 if info(1)
     return
 end

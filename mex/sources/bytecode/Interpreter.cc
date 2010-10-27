@@ -1733,7 +1733,6 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
               var = ((FSTPG3_ *) it_code->second)->get_col();
               lag = ((FSTPG3_ *) it_code->second)->get_lag();
               pos_col = ((FSTPG3_ *) it_code->second)->get_col_pos();
-              mexPrintf("jacob_other_endo[%d(size=%d*pos_col=%d + eq=%d)]=%f\n",size*pos_col + eq, size, pos_col, eq, rr);
               jacob_other_endo[eq + size*pos_col] = rr;
               break;
             case FirstExoDerivative:
@@ -1742,7 +1741,6 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
               var = ((FSTPG3_ *) it_code->second)->get_col();
               lag = ((FSTPG3_ *) it_code->second)->get_lag();
               pos_col = ((FSTPG3_ *) it_code->second)->get_col_pos();
-              mexPrintf("jacob_exo[%d(size=%d*pos_col=%dr + eq=%d)]=%f\n",size*pos_col+eq, size, pos_col, eq, rr);
               jacob_exo[eq + size*pos_col] = rr;
               break;
             case FirstExodetDerivative:
@@ -1751,7 +1749,6 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
               var = ((FSTPG3_ *) it_code->second)->get_col();
               lag = ((FSTPG3_ *) it_code->second)->get_lag();
               pos_col = ((FSTPG3_ *) it_code->second)->get_col_pos();
-              mexPrintf("jacob_exo_det[%d(size=%d*pos_col=%dr + eq=%d)]=%f\n",size*pos_col+eq, size, pos_col, eq, rr);
               jacob_exo_det[eq + size*pos_col] = rr;
               break;
             default:

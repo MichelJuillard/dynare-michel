@@ -1,4 +1,4 @@
-function [r, g1] = block_bytecode_mfs_steadystate(y, b)
+function [r, g1] = block_bytecode_mfs_steadystate(y, b, y_all)
 % Wrapper around the *_static.m file, for use with dynare_solve,
 % when block_mfs option is given to steady.
 
@@ -20,8 +20,7 @@ function [r, g1] = block_bytecode_mfs_steadystate(y, b)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global M_ oo_
-ss = oo_.steady_state;
 indx = M_.blocksMFS{b};
-ss(indx) = y;
+y_all(indx) = y;
 x = [oo_.exo_steady_state; oo_.exo_det_steady_state];
-eval(['[chk, r, g1] = bytecode( ss, x, M_.params, 1, ss, ''evaluate'', ''static'', ''block = ' int2str(b) ''');']);
+eval(['[chk, r, g1] = bytecode( y_all, x, M_.params, 1, y_all, ''evaluate'', ''static'', ''block = ' int2str(b) ''');']);

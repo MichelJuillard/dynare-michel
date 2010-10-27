@@ -161,10 +161,18 @@ else
     
     it_ = M_.maximum_lag + 1;
     z = repmat(dr.ys,1,klen);
-    z = z(iyr0) ;
+    if ~options_.bytecode
+        z = z(iyr0) ;
+    end;
     if options_.order == 1
-        [junk,jacobia_] = feval([M_.fname '_dynamic'],z,[oo_.exo_simul ...
-                            oo_.exo_det_simul], M_.params, it_);
+        if (options_.bytecode)
+            jacobia_ = [];
+            [chck, junk, jacobia_] = bytecode('dynamic','evaluate', z,[oo_.exo_simul ...
+                                oo_.exo_det_simul], M_.params, 1, jacobia_);
+        else
+            [junk,jacobia_] = feval([M_.fname '_dynamic'],z,[oo_.exo_simul ...
+                                oo_.exo_det_simul], M_.params, it_);
+        end;
     elseif options_.order == 2
         [junk,jacobia_,hessian1] = feval([M_.fname '_dynamic'],z,...
                                          [oo_.exo_simul ...
