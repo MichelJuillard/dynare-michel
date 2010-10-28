@@ -1788,7 +1788,7 @@ periods 100;
       <term><option>solve_algo</option> = <replaceable>INTEGER</replaceable></term>
       <listitem><para>Determines the non-linear solver to use. Possible values for the option are:
       <itemizedlist>
-        <listitem><para><literal>0</literal>: uses <trademark class="registered">MATLAB</trademark> Optimization Toolbox FSOLVE (not available under Octave)</para></listitem>
+        <listitem><para><literal>0</literal>: uses <literal>fsolve</literal> (under <trademark class="registered">MATLAB</trademark>, only available if you have the Optimization Toolbox; always available under Octave)</para></listitem>
         <listitem><para><literal>1</literal>: uses Dynare's own nonlinear equation solver</para></listitem>
         <listitem><para><literal>2</literal>: splits the model into recursive blocks and solves each block in turn</para></listitem>
         <listitem><para><literal>3</literal>: Chris Sims' solver</para></listitem>

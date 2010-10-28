@@ -28,18 +28,18 @@ putenv("GNUTERM", "dumb")
 
 for block = 0:1
   for bytecode = 0:1
-    ## Recall that solve_algo={0,7} and stack_solve_algo=2 are not supported
+    ## Recall that solve_algo=7 and stack_solve_algo=2 are not supported
     ## under Octave
     default_solve_algo = 2;
     default_stack_solve_algo = 0;
     if !block && !bytecode
-      solve_algos = 1:4;
+      solve_algos = 0:4;
       stack_solve_algos = 0;
     elseif block && !bytecode
-      solve_algos = [1:4 6 8];
+      solve_algos = [0:4 6 8];
       stack_solve_algos = [0 1 3 4];
     else
-      solve_algos = [1:6 8];
+      solve_algos = [0:6 8];
       stack_solve_algos = [0 1 3:5];
     endif
 

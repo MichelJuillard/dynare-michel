@@ -38,10 +38,8 @@ global options_
 options_ = set_default_option(options_,'solve_algo',2);
 info = 0;
 if options_.solve_algo == 0
-    if exist('OCTAVE_VERSION') || isempty(ver('optim'))
-        % Note that fsolve() exists under Octave, but has a different syntax
-        % So we fail for the moment under Octave, until we add the corresponding code
-        error('DYNARE_SOLVE: you can''t use solve_algo=0 since you don''t have Matlab''s Optimization Toolbox')
+    if ~exist('OCTAVE_VERSION') && isempty(ver('optim'))
+        error('You can''t use solve_algo=0 since you don''t have MATLAB''s Optimization Toolbox')
     end
     options=optimset('fsolve');
     options.MaxFunEvals = 50000;
@@ -53,7 +51,15 @@ if options_.solve_algo == 0
     else
         options.Jacobian = 'off';
     end
-    [x,fval,exitval,output] = fsolve(func,x,options,varargin{:});
+    if ~exist('OCTAVE_VERSION')
+        [x,fval,exitval,output] = fsolve(func,x,options,varargin{:});
+    else
+        % Under Octave, use a wrapper, since fsolve() does not have a 4th arg
+        func2 = str2func(func);
+        func = @(x) func2(x, varargin{:});
+        [x,fval,exitval,output] = fsolve(func,x,options);
+    end
+        
     if exitval > 0
         info = 0;
     else
