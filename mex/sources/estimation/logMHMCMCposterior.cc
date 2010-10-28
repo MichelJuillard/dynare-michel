@@ -128,7 +128,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
   const mxArray *flinePtr = mxGetField(myinputs, 0, "fline");
   VectorView fline(mxGetPr(flinePtr), nBlocks, 1);
 
-  const mxArray *NewFileArrayPtr = mxGetField(myinputs, 0, "NewFile");
+  mxArray *NewFileArrayPtr = mxGetField(myinputs, 0, "NewFile");
   VectorView NewFileVw(mxGetPr(NewFileArrayPtr), nBlocks, 1);
   Vector NewFile(NewFileVw.getSize());
   NewFile = NewFileVw;
@@ -146,7 +146,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
   VectorView FirstLogLiK(mxGetPr(mxFirstLogLikPtr), nBlocks, 1);
 
   const mxArray *record = mxGetField(myinputs, 0, "record");
-  const mxArray *AcceptationRatesPtr = mxGetField(record, 0, "AcceptationRates");
+  mxArray *AcceptationRatesPtr = mxGetField(record, 0, "AcceptationRates");
   VectorView AcceptationRates(mxGetPr(AcceptationRatesPtr), nBlocks, 1);
 
   mxArray *mxLastParametersPtr = mxGetField(record, 0, "LastParameters");
