@@ -280,6 +280,7 @@ mark_as_command dynare
       <arg><option>onlymacro</option></arg>
       <arg><option>nolinemacro</option></arg>
       <arg><option>warn_uninit</option></arg>
+      <arg><option>console</option></arg>
       <arg><option>cygwin</option></arg>
       <arg><option>msvc</option></arg>
     </cmdsynopsis>
@@ -346,6 +347,10 @@ mark_as_command dynare
     <varlistentry>
       <term><option>warn_uninit</option></term>
       <listitem><para>Display a warning for each variable or parameter which is not initialized. Initialization should be done through <xref linkend="param_init"/> or <xref linkend="load_params_and_steady_state"/> for parameters, or through <xref linkend="initval"/>, <xref linkend="endval"/> or <xref linkend="load_params_and_steady_state"/> for endogenous and exogenous.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>console</option></term>
+      <listitem><para>Activate console mode: Dynare will not use graphical waitbars for long computations. Note that this option is only useful under <trademark class="registered">MATLAB</trademark>, since Octave does not provide graphical waitbar capabilities.</para></listitem>
     </varlistentry>
     <varlistentry>
       <term><option>cygwin</option></term>
