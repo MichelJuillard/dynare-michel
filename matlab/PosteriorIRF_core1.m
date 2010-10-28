@@ -238,7 +238,7 @@ while fpar<npar
             if MAX_nirfs_dsgevar & (fpar == npar | IRUN == npar)
                 stock_irf_bvardsge = stock_irf_bvardsge(:,:,:,1:IRUN);
                 instr = [MhDirectoryName '/' M_.fname '_irf_bvardsge' ...
-                         int2str(NumberOfIRFfiles_dsgevar) ' stock_irf_bvardsge;'];,
+                         int2str(NumberOfIRFfiles_dsgevar) '.mat stock_irf_bvardsge;'];,
                 eval(['save ' instr]);
                 NumberOfIRFfiles_dsgevar = NumberOfIRFfiles_dsgevar+1;
                 if RemoteFlag==1,
