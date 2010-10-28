@@ -28,7 +28,9 @@
 #include "RandomWalkMetropolisHastings.hh"
 
 #include "mex.h"
-#include "mat.h"
+#ifdef MATLAB_MEX_FILE
+# include "mat.h"
+#endif
 
 #if defined(_WIN32) || defined(__CYGWIN32__) || defined(WINDOWS)
 # define DIRECTORY_SEPARATOR "\\"
@@ -111,9 +113,11 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
   double dsum, dmax, dmin, sux = 0, jsux = 0;
   std::string mhFName;
   std::stringstream ssFName;
+#ifdef MATLAB_MEX_FILE
   MATFile *drawmat; // MCMC draws output file pointer
-  FILE *fidlog;  // log file
   int matfStatus;
+#endif
+  FILE *fidlog;  // log file
   size_t npar = estParams.getSize();
   Matrix MinMax(npar, 2);
   const mxArray *myinputs = mexGetVariablePtr("caller", "myinputs");
@@ -179,6 +183,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
     {
       jloop = jloop+1;
 
+#ifdef MATLAB_MEX_FILE
       if ((load_mh_file != 0)  && (fline(b) > 1) && OpenOldFile[b])
         {
           //  load(['./' MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'])
@@ -203,6 +208,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
               OpenOldFile[b] = 1;
             }
         } // end if
+#endif
       ssbarTitle.clear();
       ssbarTitle.str("");
       ssbarTitle << "Please wait... Metropolis-Hastings  " << b << "/" << nBlocks << "  ...";
@@ -258,6 +264,8 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
               mxDestroyArray(waitBarRhs[2]);
 
             }
+
+#ifdef MATLAB_MEX_FILE
           // % Now I save the simulations
           // save draw  2 mat file ([MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'],'x2','logpo2');
           ssFName.clear();
@@ -283,6 +291,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
               exit(1);
             }
           matClose(drawmat);
+#endif
 
           // save log to fidlog = fopen([MhDirectoryName '/metropolis.log'],'a');
           ssFName.str("");
