@@ -118,6 +118,7 @@ AC_CONFIG_FILES([Makefile
                  k_order_perturbation/Makefile
                  dynare_simul_/Makefile
                  swz/Makefile
-                 logposterior/Makefile])
+                 logposterior/Makefile
+                 logMHMCMCposterior/Makefile])
 
 AC_OUTPUT

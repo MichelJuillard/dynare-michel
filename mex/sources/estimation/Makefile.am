@@ -25,6 +25,7 @@ EXTRA_DIST = \
 	LogLikelihoodMain.cc \
 	LogLikelihoodSubSample.cc \
 	LogLikelihoodSubSample.hh \
+	logMHMCMCposterior.cc \
 	logposterior.cc \
 	LogPosteriorDensity.cc \
 	LogPosteriorDensity.hh \
@@ -34,6 +35,10 @@ EXTRA_DIST = \
 	ModelSolution.hh \
 	Prior.cc \
 	Prior.hh \
+	RandomWalkMetropolisHastings.cc \
+	RandomWalkMetropolisHastings.hh \
+	RandSampler.cc \
+	RandSampler.hh \
 	utils/dynamic_dll.cc \
 	utils/dynamic_dll.hh \
 	utils/ts_exception.h

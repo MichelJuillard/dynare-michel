@@ -102,6 +102,7 @@ AC_CONFIG_FILES([Makefile
                  dynare_simul_/Makefile
                  swz/Makefile
                  logposterior/Makefile
+                 logMHMCMCposterior/Makefile
                  qzcomplex/Makefile
                  ordschur/Makefile])
 
