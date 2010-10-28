@@ -82,7 +82,7 @@ EXTRA_DIST = $(MODS) \
 TARGETS = check-matlab
 
 if HAVE_OCTAVE
-TARGETS += check-octave
+TARGETS += check-octave check-block-bytecode
 endif
 
 check-local: $(TARGETS)
