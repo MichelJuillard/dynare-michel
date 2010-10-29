@@ -58,6 +58,12 @@ ylwrap
 !/doc/userguide/P_SchorfMod.pdf
 !/doc/userguide/P_ModStruct2.pdf
 !/doc/userguide/P_ShockModel2.pdf
+!/doc/parallel/AvenueParadigm.pdf
+!/doc/parallel/iVaNo_*.pdf
+!/doc/parallel/netbook_*.pdf
+!/doc/parallel/quest_*.pdf
+!/doc/parallel/RWMH_quest1_*.pdf
+!/doc/parallel/waitbars*.pdf
 
 # Preprocessor
 /preprocessor/dynare_m

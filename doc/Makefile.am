@@ -1,4 +1,4 @@
-SUBDIRS = preprocessor macroprocessor userguide
+SUBDIRS = preprocessor macroprocessor userguide parallel
 
 PDF_TARGETS =
 
