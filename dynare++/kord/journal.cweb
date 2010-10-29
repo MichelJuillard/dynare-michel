@@ -254,6 +254,7 @@ Number of online processors is not implemented and returns -1, since
 Windows kernel32 |GetSystemInfo| call is too complicated.
 
 @<|sysconf| Win32 implementation@>=
+#define NOMINMAX // Do not define "min" and "max" macros
 #include <windows.h>
 
 #define _SC_PAGESIZE 1
