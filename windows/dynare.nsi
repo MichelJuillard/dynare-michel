@@ -120,7 +120,7 @@ SectionEnd
 
 Section "Documentation and examples (Dynare and Dynare++)"
  SetOutPath $INSTDIR\doc
- File ..\doc\manual.pdf ..\doc\guide.pdf ..\doc\userguide\UserGuide.pdf ..\doc\bvar-a-la-sims.pdf ..\doc\dr.pdf ..\doc\macroprocessor\macroprocessor.pdf ..\doc\preprocessor\preprocessor.pdf
+ File ..\doc\manual.pdf ..\doc\guide.pdf ..\doc\userguide\UserGuide.pdf ..\doc\bvar-a-la-sims.pdf ..\doc\dr.pdf ..\doc\macroprocessor\macroprocessor.pdf ..\doc\preprocessor\preprocessor.pdf ..\doc\parallel\parallel.pdf
 
  SetOutPath $INSTDIR\doc\manual-html
  File ..\doc\manual-html\*.html
