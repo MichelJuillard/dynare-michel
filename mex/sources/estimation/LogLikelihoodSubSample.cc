@@ -36,7 +36,7 @@ LogLikelihoodSubSample::LogLikelihoodSubSample(const std::string &dynamicDllFile
                                                const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg,
                                                const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg, const double qz_criterium,
                                                const std::vector<size_t> &varobs, double riccati_tol, double lyapunov_tol, int &INinfo) :
-  estiParDesc(INestiParDesc),
+  startPenalty(-1e8),estiParDesc(INestiParDesc),
   kalmanFilter(dynamicDllFile, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium,
                varobs, riccati_tol, lyapunov_tol, INinfo), eigQ(n_exo), eigH(varobs.size()), info(INinfo)
 {
@@ -46,6 +46,8 @@ double
 LogLikelihoodSubSample::compute(VectorView &steadyState, const MatrixConstView &dataView, const Vector &estParams, Vector &deepParams,
                                 Matrix &Q, Matrix &H, VectorView &vll, MatrixView &detrendedDataView, int &info, size_t start, size_t period)
 {
+  penalty=startPenalty;
+  logLikelihood=startPenalty;
 
   updateParams(estParams, deepParams, Q, H, period);
   if (info == 0)
@@ -84,17 +86,11 @@ LogLikelihoodSubSample::updateParams(const Vector &estParams, Vector &deepParams
               break;
 
             case EstimatedParameter::measureErr_SD:
-#ifdef DEBUG
-              mexPrintf("Setting of H var_endo\n");
-#endif
               k = estiParDesc.estParams[i].ID1;
               H(k, k) = estParams(i)*estParams(i);
               break;
 
             case EstimatedParameter::shock_Corr:
-#ifdef DEBUG
-              mexPrintf("Setting of Q corrx\n");
-#endif
               k1 = estiParDesc.estParams[i].ID1;
               k2 = estiParDesc.estParams[i].ID2;
               Q(k1, k2) = estParams(i)*sqrt(Q(k1, k1)*Q(k2, k2));
@@ -128,9 +124,6 @@ LogLikelihoodSubSample::updateParams(const Vector &estParams, Vector &deepParams
               break;
 
             case EstimatedParameter::measureErr_Corr:
-#ifdef DEBUG
-              mexPrintf("Setting of H corrn\n");
-#endif
               k1 = estiParDesc.estParams[i].ID1;
               k2 = estiParDesc.estParams[i].ID2;
               //      H(k1,k2) = xparam1(i)*sqrt(H(k1,k1)*H(k2,k2));

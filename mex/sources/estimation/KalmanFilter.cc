@@ -80,15 +80,24 @@ KalmanFilter::compute(const MatrixConstView &dataView, VectorView &steadyState,
                       VectorView &vll, MatrixView &detrendedDataView,
                       size_t start, size_t period, double &penalty, int &info)
 {
-  if(period==0) // initialise all KF matrices
-    initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T, Pstar, Pinf,
-                              penalty, dataView, detrendedDataView, info);
-  else  // initialise parameter dependent KF matrices only but not Ps
-    initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T, 
-                              penalty, dataView, detrendedDataView, info);
+  double lik=INFINITY;
+  try
+    {
+      if(period==0) // initialise all KF matrices
+        initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T, Pstar, Pinf,
+                                  penalty, dataView, detrendedDataView, info);
+      else  // initialise parameter dependent KF matrices only but not Ps
+        initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T, 
+                                  penalty, dataView, detrendedDataView, info);
 
-  double lik= filter(detrendedDataView, H, vll, start, info);
-
+      lik= filter(detrendedDataView, H, vll, start, info);
+    }
+  catch (const DecisionRules::BlanchardKahnException &bke)
+    {
+      info =22;
+      return penalty;
+    }
+ 
   if (info != 0)
     return penalty;
   else 
@@ -97,7 +106,7 @@ KalmanFilter::compute(const MatrixConstView &dataView, VectorView &steadyState,
 };
 
 /**
- * 30:*
+ * Multi-variate standard Kalman Filter
  */
 double
 KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, VectorView &vll, size_t start, int &info)
@@ -110,6 +119,7 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
       if (nonstationary)
         {
           // K=PZ'
+          //blas::gemm("N", "T", 1.0, Pstar, Z, 0.0, K);
           blas::symm("L", "U", 1.0, Pstar, Zt, 0.0, K);
 
           //F=ZPZ' +H = ZK+H
@@ -141,6 +151,7 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
                   Pstar(i,j)*=0.5;
 
               // K=PZ'
+              //blas::gemm("N", "T", 1.0, Pstar, Z, 0.0, K);
               blas::symm("L", "U", 1.0, Pstar, Zt, 0.0, K);
 
               //F=ZPZ' +H = ZK+H
@@ -167,7 +178,8 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
           Fdet = 1;
           for (size_t d = 1; d <= p; ++d)
             Fdet *= FUTP(d + (d-1)*d/2 -1);
-          Fdet *=Fdet;
+          Fdet *=Fdet;//*pow(-1.0,p);
+
           logFdet=log(fabs(Fdet));
 
           Ptmp = Pstar;
@@ -181,10 +193,6 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
           // 3) Pt+1= Ptmp*T' +RQR'
           Pstar = RQRt;
           blas::gemm("N", "T", 1.0, Ptmp, T, 1.0, Pstar);
-          //enforce Pstar symmetry with P=(P+P')/2=0.5P+0.5P'
-          //blas::gemm("N", "T", 0.5, Ptmp, T, 0.5, Pstar);
-          //mat::transpose(Ptmp, Pstar);
-          //mat::add(Pstar,Ptmp);
 
           if (t>0)
             nonstationary = mat::isDiff(KFinv, oldKFinv, riccati_tol);

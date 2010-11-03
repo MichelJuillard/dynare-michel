@@ -19,17 +19,27 @@
 
 #include "RandomWalkMetropolisHastings.hh"
 
+#include <iostream>
+#include <fstream>
+
 double
 RandomWalkMetropolisHastings::compute(VectorView &mhLogPostDens, MatrixView &mhParams, Matrix &steadyState,
                                       Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H,
                                       const size_t presampleStart, int &info, const size_t startDraw, size_t nMHruns, const Matrix &Dscale,
                                       LogPosteriorDensity &lpd, Prior &drawDistribution, EstimatedParametersDescription &epd)
 {
+  //streambuf *likbuf, *drawbuf *backup;
+  std::ofstream urandfilestr, drawfilestr;
+  urandfilestr.open ("urand.csv");
+  drawfilestr.open ("paramdraws.csv");
+
   bool overbound;
-  double newLogpost, logpost;
+  double newLogpost, logpost, urand;
   size_t count, accepted = 0;
   parDraw = estParams;
+
   logpost =  - lpd.compute(steadyState, estParams, deepParams, data, Q, H, presampleStart, info);
+
   for (size_t run = startDraw - 1; run < nMHruns; ++run)
     {
       overbound=false;
@@ -49,25 +59,36 @@ RandomWalkMetropolisHastings::compute(VectorView &mhLogPostDens, MatrixView &mhP
             {
               newLogpost = - lpd.compute(steadyState, newParDraw, deepParams, data, Q, H, presampleStart, info);
             }
-          catch(...)
+          catch(const std::exception &e)
+            {
+              throw; // for now handle the system and other errors higher-up
+            }
+          catch (...)
             {
               newLogpost = -INFINITY;
             }
         }
-      if ((newLogpost > -INFINITY) && log(uniform.drand()) < newLogpost-logpost)
+      urand=uniform.drand();
+      if ((newLogpost > -INFINITY) && log(urand) < newLogpost-logpost)
         {
-          mat::get_row(mhParams, run) = newParDraw;
           parDraw = newParDraw;
-          mhLogPostDens(run) = newLogpost;
           logpost = newLogpost;
           accepted++;
         }
-      else
-        {
-          mat::get_row(mhParams, run) = parDraw;
-          mhLogPostDens(run) = logpost;
-        }
+      mat::get_row(mhParams, run) = parDraw;
+      mhLogPostDens(run) = logpost;
+
+      //urandfilestr.write(urand);
+      urandfilestr << urand << "\n"; //","
+      for (size_t c=0;c<newParDraw.getSize()-1;++c)
+        drawfilestr << newParDraw(c) << ",";
+//        drawfilestr.write(newParDraw(i));
+      drawfilestr <<  newParDraw(newParDraw.getSize()-1) << "\n";
     }
+
+  urandfilestr.close();
+  drawfilestr.close();
+
   return (double) accepted/(nMHruns-startDraw+1);
 }
 

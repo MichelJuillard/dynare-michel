@@ -43,13 +43,14 @@ public:
   virtual ~LogLikelihoodSubSample();
 
 private:
-  double penalty;
+  double startPenalty, penalty;
   double logLikelihood;
   EstimatedParametersDescription &estiParDesc;
   KalmanFilter kalmanFilter;
   VDVEigDecomposition eigQ;
   VDVEigDecomposition eigH;
   int &info;
+
   // methods
   void updateParams(const Vector &estParams, Vector &deepParams,
                     Matrix &Q, Matrix &H, size_t period);
