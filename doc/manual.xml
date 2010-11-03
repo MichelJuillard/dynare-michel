@@ -283,6 +283,10 @@ mark_as_command dynare
       <arg><option>console</option></arg>
       <arg><option>cygwin</option></arg>
       <arg><option>msvc</option></arg>
+      <arg><option>parallel</option><arg>=<replaceable>CLUSTER_NAME</replaceable></arg></arg>
+      <arg><option>conffile</option>=<replaceable>FILENAME</replaceable></arg>
+      <arg><option>parallel_slave_open_mode</option></arg>
+      <arg><option>parallel_test</option></arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -359,6 +363,22 @@ mark_as_command dynare
     <varlistentry>
       <term><option>msvc</option></term>
       <listitem><para>Tells Dynare that your <trademark class="registered">MATLAB</trademark> is configured for compiling MEX files with Microsoft Visual C++ (see <xref linkend="software-requirements"/>). This option is only available under Windows, and is used in conjunction with <xref linkend="use_dll"/>.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>parallel</option>[=<replaceable>CLUSTER_NAME</replaceable>]</term>
+      <listitem><para>Tells Dynare to perform computations in parallel. If <replaceable>CLUSTER_NAME</replaceable> is passed, Dynare will use the specified cluster to perform parallel computations. Otherwise, Dynare will use the first cluster specified in the configuration file. See <xref linkend="conffile"/> for more information about the configuration file.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>conffile=<replaceable>FILENAME</replaceable></option></term>
+      <listitem><para>Specifies the location of the configuration file if it differs from the default. See <xref linkend="conffile"/> for more information about the configuration file and its default location.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>parallel_slave_open_mode</option></term>
+      <listitem><para>Instructs Dynare to leave the connection to the slave node open after computation is complete, closing this connection only when Dynare finishes processing.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>parallel_test</option></term>
+      <listitem><para>Tests the parallel setup specified in the configuration file without executing the .mod file. See <xref linkend="conffile"/> for more information about the configuration file.</para></listitem>
     </varlistentry>
   </variablelist>
 
@@ -4401,6 +4421,207 @@ plot_conditional_forecast(periods = 10) e u;
 
 </refentry>
 
+</sect1>
+
+</chapter>
+
+<chapter id="conffile"><title>The Configuration File</title>
+  <para>The configuration file is used to provide Dynare with information not related to the model (and hence not placed in the model file). At the moment, it is only used when using Dynare to run parallel computations.</para>
+
+  <para>On Linux and Mac OS X, the default location of the configuration file is <filename>$HOME/.dynare</filename>, while on Windows it is <filename>%APPDATA%/dynare.ini</filename>.</para>
+
+  <para>The parsing of the configuration file is case-sensitive and it should take the following form, with each option/choice pair placed on a newline:</para>
+
+  <informalexample>
+    <programlisting>
+[command0]
+option0 = choice0
+option1 = choice1
+
+[command1]
+option0 = choice0
+option1 = choice1
+    </programlisting>
+  </informalexample>
+
+<para>The configuration file follows a few conventions (self-explanatory conventions such as <replaceable>USER_NAME</replaceable> have been excluded for concision):
+  <itemizedlist>
+    <listitem><para><replaceable>COMPUTER_NAME</replaceable> indicates the valid name of a server (e.g. localhost, cepremap.org) or an IP address.</para></listitem>
+    <listitem><para><replaceable>DRIVE_NAME</replaceable> indicates a valid drive name in Windows (e.g. <literal>C</literal>).</para></listitem>
+    <listitem><para><replaceable>PATH</replaceable> indicates a valid path in the underlying operating system (e.g. <literal>/home/user/dynare/matlab/</literal>).</para></listitem>
+    <listitem><para><replaceable>PATH_AND_FILE</replaceable> indicates a valid path to a file in the underlying operating system (e.g. <literal>/usr/local/MATLAB/R2010b/bin/matlab</literal>).</para></listitem>
+    <listitem><para><replaceable>BOOLEAN</replaceable> <literal>true</literal> or <literal>false</literal>.</para></listitem>
+  </itemizedlist>
+</para>
+
+<sect1><title>Parallel Configuration</title>
+
+<refentry id="cluster">
+  <refmeta>
+    <refentrytitle>[cluster]</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>[cluster]</refname>
+    <refpurpose>spceficies a computing cluster</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>[cluster]</command><sbr></sbr>
+      <arg choice="plain"><option>Name</option> = <replaceable>CLUSTER_NAME</replaceable></arg><sbr></sbr>
+      <arg choice="plain"><option>Members</option> = <replaceable>NODE_NAME</replaceable>
+      <arg choice="opt" rep="repeat"><replaceable>NODE_NAME</replaceable></arg></arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1><title>Description</title>
+    <para>When working in parallel, <command>[cluster]</command> is required to specify the group of computers that will be used. It is required even if you are only invoking multiple processes on one computer.</para>
+  </refsect1>
+
+  <refsect1><title>Options</title>
+  <variablelist>
+    <varlistentry>
+      <term><option>Name</option> = <replaceable>CLUSTER_NAME</replaceable></term>
+      <listitem><para>The reference name of this cluster.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>Members</option> = <replaceable>NODE_NAME</replaceable> <replaceable>NODE_NAME</replaceable> ...</term>
+      <listitem><para>A list of nodes that comprise the cluster. Each node is separated by at least one space.</para><important><para>At the current time, all nodes specified by <option>Members</option> must run the same type of operating system (i.e. all Windows or all Linux/Mac OS X). The platform versions don't matter (i.e. you can mix Windows XP and 7).</para></important></listitem>
+    </varlistentry>
+  </variablelist>
+  </refsect1>
+
+ <refsect1><title>Example</title>
+  <informalexample>
+    <programlisting>
+[cluster]
+Name = c1
+Members = n1 n2 n3
+    </programlisting>
+  </informalexample>
+  </refsect1>
+</refentry>
+
+<refentry id="node">
+  <refmeta>
+    <refentrytitle>[node]</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>[node]</refname>
+    <refpurpose>spceficies a computing node</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>[node]</command><sbr></sbr>
+      <arg choice="plain"><option>Name</option> = <replaceable>NODE_NAME</replaceable></arg>
+      <sbr></sbr>
+      <arg choice="plain"><option>CPUnbr</option> =
+         <group choice="plain">
+	    <replaceable>INTEGER</replaceable>
+	    <arg>[<replaceable>INTEGER</replaceable>:<replaceable>INTEGER</replaceable>]</arg>
+	 </group>
+      </arg>
+      <sbr></sbr>
+      <arg choice="plain"><option>ComputerName</option> = <replaceable>COMPUTER_NAME</replaceable></arg>
+      <sbr></sbr>
+      <arg choice="opt"><option>UserName</option> = <replaceable>USER_NAME</replaceable></arg>
+      <sbr></sbr>
+      <arg choice="opt"><option>Password</option> = <replaceable>PASSWORD</replaceable></arg>
+      <sbr></sbr>
+      <arg choice="opt"><option>RemoteDrive</option> = <replaceable>DRIVE_NAME</replaceable></arg>
+      <sbr></sbr>
+      <arg choice="opt"><option>RemoteDirectory</option> = <replaceable>PATH</replaceable></arg>
+      <sbr></sbr>
+      <arg choice="opt"><option>DynarePath</option> = <replaceable>PATH</replaceable></arg>
+      <sbr></sbr>
+      <arg choice="opt"><option>MatlabOctavePath</option> = <replaceable>PATH_AND_FILE</replaceable></arg>
+      <sbr></sbr>
+      <arg choice="opt"><option>SingleCompThread</option> = <replaceable>BOOLEAN</replaceable></arg>
+      <sbr></sbr>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1><title>Description</title>
+    <para>When working in parallel, <command>[node]</command> is required for every computer that will be used. The options that are required differ, depending on the underlying operating system and whether you are working locally or remotely.</para>
+  </refsect1>
+
+  <refsect1><title>Options</title>
+  <variablelist>
+    <varlistentry>
+      <term><option>Name</option> = <replaceable>NODE_NAME</replaceable></term>
+      <listitem><para>The reference name of this node.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>CPUnbr</option> = <replaceable>INTEGER</replaceable> | [<replaceable>INTEGER</replaceable>:<replaceable>INTEGER</replaceable>]</term>
+      <listitem><para>If just one integer is passed, the number of processors to use. If a range of integers is passed, the specific processors to use (processor counting is defined to begin at one as opposed to zero). Note that using specific processors is only possible under Windows; under Linux and Mac OS X, if a range is passed the same number of processors will be used but the range will be adjusted to begin at one.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>ComputerName</option> = <replaceable>COMPUTER_NAME</replaceable></term>
+      <listitem><para>The name or IP address of the node. If you want to run locally, use <literal>localhost</literal> (case-sensitive).</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>UserName</option> = <replaceable>USER_NAME</replaceable></term>
+      <listitem><para>The username used to log into a remote system. Required for remote runs on all platforms.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>Password</option> = <replaceable>PASSWORD</replaceable></term>
+      <listitem><para>The password used to log into the remote system. Required for remote runs originating from Windows.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>RemoteDrive</option> = <replaceable>DRIVE_NAME</replaceable></term>
+      <listitem><para>The drive to be used for remote computation. Required for remote runs originating from Windows.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>RemoteDirectory</option> = <replaceable>PATH</replaceable></term>
+      <listitem><para>The directory to be used for remote computation. Required for remote runs on all platforms.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>DynarePath</option> = <replaceable>PATH</replaceable></term>
+      <listitem><para>The path to the matlab subdirectory within the Dynare installation directory. The default is the empty string.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>MatlabOctavePath</option> = <replaceable>PATH_AND_FILE</replaceable></term>
+      <listitem><para>The path to the Matlab or Octave executable. The default value is <literal>matlab</literal>.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>SingleCompThread</option> = <replaceable>BOOLEAN</replaceable></term>
+      <listitem><para>Whether or not to disable Matlab's native multithreading. The default value is <literal>true</literal>.</para></listitem>
+    </varlistentry>
+  </variablelist>
+  </refsect1>
+
+<refsect1><title>Example</title>
+  <informalexample>
+    <programlisting>
+[node]
+Name = n1
+ComputerName = localhost
+CPUnbr = 1
+
+[node]
+Name = n2
+ComputerName = dynserv.cepremap.org
+CPUnbr = 5
+UserName = usern
+RemoteDirectory = /home/usern/Remote
+DynarePath = /home/usern/dynare/matlab
+MatlabOctavePath = matlab
+
+[node]
+Name = n3
+ComputerName = dynserv.dynare.org
+CPUnbr = [2:4]
+UserName = usern
+RemoteDirectory = /home/usern/Remote
+DynarePath = /home/usern/dynare/matlab
+MatlabOctavePath = matlab
+    </programlisting>
+  </informalexample>
+  </refsect1>
+</refentry>
 </sect1>
 
 </chapter>
