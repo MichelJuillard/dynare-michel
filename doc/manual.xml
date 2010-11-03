@@ -4428,7 +4428,7 @@ plot_conditional_forecast(periods = 10) e u;
 <chapter id="conffile"><title>The Configuration File</title>
   <para>The configuration file is used to provide Dynare with information not related to the model (and hence not placed in the model file). At the moment, it is only used when using Dynare to run parallel computations.</para>
 
-  <para>On Linux and Mac OS X, the default location of the configuration file is <filename>$HOME/.dynare</filename>, while on Windows it is <filename>%APPDATA%/dynare.ini</filename>.</para>
+  <para>On Linux and Mac OS X, the default location of the configuration file is <filename>$HOME/.dynare</filename>, while on Windows it is <filename>%APPDATA%\dynare.ini</filename> (typically <filename>C:\Documents and Settings\<replaceable>USERNAME</replaceable>\Application Data\dynare.ini</filename> under Windows XP, or <filename>C:\Users\<replaceable>USERNAME</replaceable>\AppData\dynare.ini</filename> under Windows Vista or Windows 7).</para>
 
   <para>The parsing of the configuration file is case-sensitive and it should take the following form, with each option/choice pair placed on a newline:</para>
 
@@ -4446,11 +4446,11 @@ option1 = choice1
 
 <para>The configuration file follows a few conventions (self-explanatory conventions such as <replaceable>USER_NAME</replaceable> have been excluded for concision):
   <itemizedlist>
-    <listitem><para><replaceable>COMPUTER_NAME</replaceable> indicates the valid name of a server (e.g. localhost, cepremap.org) or an IP address.</para></listitem>
-    <listitem><para><replaceable>DRIVE_NAME</replaceable> indicates a valid drive name in Windows (e.g. <literal>C</literal>).</para></listitem>
-    <listitem><para><replaceable>PATH</replaceable> indicates a valid path in the underlying operating system (e.g. <literal>/home/user/dynare/matlab/</literal>).</para></listitem>
-    <listitem><para><replaceable>PATH_AND_FILE</replaceable> indicates a valid path to a file in the underlying operating system (e.g. <literal>/usr/local/MATLAB/R2010b/bin/matlab</literal>).</para></listitem>
-    <listitem><para><replaceable>BOOLEAN</replaceable> <literal>true</literal> or <literal>false</literal>.</para></listitem>
+    <listitem><para><replaceable>COMPUTER_NAME</replaceable> indicates the valid name of a server (<foreignphrase>e.g.</foreignphrase> <literal>localhost</literal>, <literal>server.cepremap.org</literal>) or an IP address.</para></listitem>
+    <listitem><para><replaceable>DRIVE_NAME</replaceable> indicates a valid drive name in Windows, without the trailing colon (<foreignphrase>e.g.</foreignphrase> <literal>C</literal>).</para></listitem>
+    <listitem><para><replaceable>PATH</replaceable> indicates a valid path in the underlying operating system (<foreignphrase>e.g.</foreignphrase> <literal>/home/user/dynare/matlab/</literal>).</para></listitem>
+    <listitem><para><replaceable>PATH_AND_FILE</replaceable> indicates a valid path to a file in the underlying operating system (<foreignphrase>e.g.</foreignphrase> <literal>/usr/local/MATLAB/R2010b/bin/matlab</literal>).</para></listitem>
+    <listitem><para><replaceable>BOOLEAN</replaceable> is <literal>true</literal> or <literal>false</literal>.</para></listitem>
   </itemizedlist>
 </para>
 
@@ -4463,7 +4463,7 @@ option1 = choice1
 
   <refnamediv>
     <refname>[cluster]</refname>
-    <refpurpose>spceficies a computing cluster</refpurpose>
+    <refpurpose>specifies a computing cluster</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
@@ -4487,7 +4487,7 @@ option1 = choice1
     </varlistentry>
     <varlistentry>
       <term><option>Members</option> = <replaceable>NODE_NAME</replaceable> <replaceable>NODE_NAME</replaceable> ...</term>
-      <listitem><para>A list of nodes that comprise the cluster. Each node is separated by at least one space.</para><important><para>At the current time, all nodes specified by <option>Members</option> must run the same type of operating system (i.e. all Windows or all Linux/Mac OS X). The platform versions don't matter (i.e. you can mix Windows XP and 7).</para></important></listitem>
+      <listitem><para>A list of nodes that comprise the cluster. Each node is separated by at least one space.</para><important><para>At the current time, all nodes specified by <option>Members</option> must run the same type of operating system (<foreignphrase>i.e.</foreignphrase> all Windows or all Linux/Mac OS X). The platform versions don't matter (<foreignphrase>i.e.</foreignphrase> you can mix Windows XP and 7).</para></important></listitem>
     </varlistentry>
   </variablelist>
   </refsect1>
@@ -4510,7 +4510,7 @@ Members = n1 n2 n3
 
   <refnamediv>
     <refname>[node]</refname>
-    <refpurpose>spceficies a computing node</refpurpose>
+    <refpurpose>specifies a computing node</refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
@@ -4580,15 +4580,15 @@ Members = n1 n2 n3
     </varlistentry>
     <varlistentry>
       <term><option>DynarePath</option> = <replaceable>PATH</replaceable></term>
-      <listitem><para>The path to the matlab subdirectory within the Dynare installation directory. The default is the empty string.</para></listitem>
+      <listitem><para>The path to the <filename>matlab</filename> subdirectory within the Dynare installation directory. The default is the empty string.</para></listitem>
     </varlistentry>
     <varlistentry>
       <term><option>MatlabOctavePath</option> = <replaceable>PATH_AND_FILE</replaceable></term>
-      <listitem><para>The path to the Matlab or Octave executable. The default value is <literal>matlab</literal>.</para></listitem>
+      <listitem><para>The path to the <trademark class="registered">MATLAB</trademark> or Octave executable. The default value is <literal>matlab</literal>.</para></listitem>
     </varlistentry>
     <varlistentry>
       <term><option>SingleCompThread</option> = <replaceable>BOOLEAN</replaceable></term>
-      <listitem><para>Whether or not to disable Matlab's native multithreading. The default value is <literal>true</literal>.</para></listitem>
+      <listitem><para>Whether or not to disable <trademark class="registered">MATLAB</trademark>'s native multithreading. The default value is <literal>true</literal>.</para></listitem>
     </varlistentry>
   </variablelist>
   </refsect1>
