@@ -85,7 +85,7 @@ if nargout == 0
         disp(' ')
     end
     
-    for i=1:length(z)
+    for i=1:M_.orig_endo_nbr
         if abs(z(i)) < options_.dynatol/100
             tmp = 0;
         else
