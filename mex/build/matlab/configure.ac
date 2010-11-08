@@ -99,6 +99,16 @@ AC_ARG_ENABLE([openmp], AS_HELP_STRING([--enable-openmp], [use OpenMP for parall
   fi
 ])
 
+AC_ARG_WITH([m2html], AS_HELP_STRING([--with-m2html=DIR], [specify installation directory of M2HTML]), [
+M2HTML=$withval
+BUILD_M2HTML=yes
+], [
+M2HTML=
+BUILD_M2HTML=no
+])
+AC_SUBST([M2HTML])
+AM_CONDITIONAL([HAVE_M2HTML], [test "x$M2HTML" != "x"])
+
 AC_MSG_NOTICE([
 
 Dynare is now configured for building the following components...
@@ -106,6 +116,7 @@ Dynare is now configured for building the following components...
 Binaries (with "make"):
  MEX files for MATLAB (except SWZ):     $BUILD_MEX_MATLAB
  SWZ MEX files for MATLAB:              $BUILD_SWZ_MEX_MATLAB
+ M2HTML documentation:                  $BUILD_M2HTML
 
 ])
 

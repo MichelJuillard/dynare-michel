@@ -64,6 +64,8 @@ ylwrap
 !/doc/parallel/quest_*.pdf
 !/doc/parallel/RWMH_quest1_*.pdf
 !/doc/parallel/waitbars*.pdf
+doc/m2html
+mex/build/matlab/run_m2html.m
 
 # Preprocessor
 /preprocessor/dynare_m
