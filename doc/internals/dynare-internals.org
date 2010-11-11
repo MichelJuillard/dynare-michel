@@ -134,19 +134,27 @@ $\Sigma_y$.
 
 The autocovariance matrix of $y_t$ and $y_{t-1}$ is defined as
 \begin{align*}
-\mbox{cov}\left(y_t,y_{t-1}\right) &=E\left\{\hat y_t\hat
-y_{t-1}'\right\}\\
+\mbox{cov}\left(y_t,y_{t-1}\right) &=E\left\{y_t y_{t-1}'\right\}\\
  &= E\left\{\left(g_y \hat
 y_{t-1}+g_u u_t\right)\hat y_{t-1}'\right\}\\
 &= g_y\Sigma_y
 \end{align*}
-by recursion we have that $\mbox{corr}\left(y_t,y_{t-k}\right)=E_\left{y_ty_{t-k}'\right\}=g_y^k\Sigma_y$.
+by recursion we have
+\begin{align*}
+\mbox{cov}\left(y_t,y_{t-k}\right) &=E\left\{y_t y_{t-k}'\right\} \\
+&=g_y^k\Sigma_y
+\end{align*}
 
 The autocorrelation matrix is then
-\[
+\begin{equation*}
 \mbox{corr}\left(y_t,y_{t-k}\right) =
-\mbox{diag}(\sigma_y)^{-1}E_\left{y_ty_{t-k}'\right\}\mbox{diag}(\sigma_y)^{-1}
-\]
+\mbox{diag}\left(\sigma_y\right)^{-1}E\left\{y_ty_{t-k}'\right\}\mbox{diag}\left(\sigma_y\right)^{-1}
+\end{equation*}
+where $\mbox{diag}\left(\sigma_y\right)$ is a diagonal matrix with the standard deviations on the main diagonal.
+
+*** Function <<lyapunov\_symm.m>>
+  - [[m2html:lyapunov_symm.html>>][M2HTML link]]
+  - TO BE DONE
 * Estimation
 ** estimation
    Dynare command *estimation* calls function [[dynare\_estimation.m]]
