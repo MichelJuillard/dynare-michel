@@ -1,0 +1,254 @@
+#+LINK: m2html http://www.dynare.org/dynare-matlab-m2html/matlab/ 
+#+OPTIONS: Latex:t
+#+LATEX_HEADER: \usepackage{amsmath}
+
+#+TITLE: Dynare internal documentation
+#+BEGIN_CENTER
+Stéphane Adjemian,
+Houtan Bastani,
+Michel Juillard,
+Ferhat Mihoubi,
+George Perendia,
+Marco Ratto,
+Sébastien Villemot
+#+END_CENTER
+
+* Introduction
+This file is an attempt to document the algorithms, the *M* functions
+and the DLL's used in Dynare. *This is work in progress and will be
+completed little by little overtime*.  The organization is the same as
+in the Dynare Reference Manual (http://www.dynare.org/manual or 
+http://www.dynare.org/documentation-and-support/manual/manual.pdf). Being
+familar with the Reference Manual is of course a pre-requisite to
+understand the internal documentation.
+Thereis one entry point for each of the main Dynare commands.
+** Other available documentation
+   See http://www.dynare.org/documentation-and-support
+** M2HTML documentation
+   M2html is a tool that documents automatically Matlab
+   functions. In particular, it gives easy access to the other
+   functions that call a particular functions and to the functions
+   called by a particular
+   function. http://www.dynare.org/dynare-matlab-m2html
+   In this document, M2HTML links provide direct access to the M2HTML
+   documentation for a particular function.
+* Starting Dynare processing
+  Function *dynare.m* ([[m2html:dynare.html][M2HTML]])
+  executes Dynare preprocessor *dynare\_m* that creates *<fname>.m* and,
+  in turn, executes it.
+  In addition Dynare preprocessor creates:
+  - a representation of the dynamic model as a *M* function: *<fname>\_dynamic.m* (by default) or
+    a *<fname>\_dynamic* DLL or in the form of bytecode, depending on the
+    options used in the *model* command. 
+  - a representation for the static model *<fname>\_static.m* (by default), a DLL or as bytecode,
+    depending on the options used in the *model* command
+  - a function returning the steady state of the model
+    *<fname>\_steadystate.m*, if *steady\_state\_model* command is used.
+  - a function representing the period objective,
+    of an optimizing agent when optimal policy commands are used:
+    *<fname>\_objective\_static.m* 
+* Model internal representation
+  TO BE DONE
+* Symbol declaration
+  TO BE DONE
+* Parameter and variable initialization
+  TO BE DONE
+* Solving and simulating
+**  steady
+***    Function steady.m
+    - [[m2html:steady.html][M2HTML link]]
+    - TO BE DONE
+**  homotopy\_setup
+    - TO BE DONE
+**  check
+***    Function check.m
+    - [[m2html:check.html][M2HTML link]]
+    - TO BE DONE
+**  model\_info
+    - TO BE DONE
+**  simul
+***    Function simul.m
+    - [[m2hmtl:simul.html][M2HTML link]]
+    - TO BE DONE
+**  stoch\_simul
+***    Function stoch\_simul.m
+    - [[m2html:stoch_simul.html][M2HTML link]]
+    - The main steps are
+          - compute the approximated solution of the model, done in
+            [[resol.m]] or by [[PCL\_resol.m]], in a partial information
+            context
+          - print the approximated decision functions (except for
+            order==3)
+          - if a Monte-Carlo simulation is requested by the user
+            with the option *periods*, perform the simulation by
+            calling [[simult.m]]
+	  - compute and display moments. In absence of Monte-Carlo
+            simulation, Dynare computes and reports theoretical
+            moments with [[disp\_th\_moments.m]]. Otherwise, Dynare computes
+            and reports empirical moments for the simulated variables
+            with [[disp\_moments.m]]
+	  - compute and display IRFs according to option *irf*
+	  - compute univariate spectral density for each variable
+            according to option *SpectralDensity* with
+            [[UnivariateSpectralDensity.m]]
+*** Function <<disp\_th\_moments.m>>
+    - [[m2html:disp_th_moments.html][M2HTML link]]
+    - This function displays theoretical moments as returned by [[th\_autocovariances.m]]
+*** Function <<th\_autocovariances.m>>
+    - [[m2html:th_autocovariances.html][M2HTML link]]
+    - This function computes the following moments of the (selected)
+      endogenous variables and returns them in cell array *Gamma\_y*:
+      - matrix of covariance: *Gamma\_y{1}*
+      - matrices of auto-correlation:
+        *Gamma\_y{2}...Gamma\_y{nar+1}*. The number of autocovariances
+        matrices that are computed is controlled by $options\_.nar$.
+      - matrix of variance-decomposition: *Gamma\_y{nar+2}* (if there
+        is more than one shock in the model).
+      - second order approximation of unconditional expectation: *Gamma\_y{nar+3}* (only for second order
+        approximation of the model)
+    - with option *hpfilter*, Dynare returns the theoretical moments
+      of endogenous variables filtered with Hodrick Prescott formula
+      (see Uhlig, 1999).  
+
+*Algorithm*
+
+At 1st order, the approximated solution of the model takes the form:
+\[
+y_t = \bar y + g_y (s_{t-1}-\bar s)+g_u u_t
+\]
+$\Sigma_y$, the covariance matrix of $y_t$ must satisfy
+\[
+\Sigma_y = g_y\Sigma_y g_y' + g_u \Sigma_u g_u'
+\]
+where $\Sigma_u$ is the covariance matrix of $u_t$. This requires that
+the eigenvalues of $g_y$ are smaller than 1 in modulus.
+
+The above equation is a Sylvester equation that is best solved by a
+specialized algorithm. Dynare, currently, uses [[lyapunov\_symm.m]]. In
+the actual implementation, we distinguish between state variables and non
+state variables. 
+
+The vector of standard deviations $\sigma_y$ is
+obtained by taking the square root of the diagonal elements of
+$\Sigma_y$.
+
+The autocovariance matrix of $y_t$ and $y_{t-1}$ is defined as
+\begin{align*}
+\mbox{cov}\left(y_t,y_{t-1}\right) &=E\left\{\hat y_t\hat
+y_{t-1}'\right\}\\
+ &= E\left\{\left(g_y \hat
+y_{t-1}+g_u u_t\right)\hat y_{t-1}'\right\}\\
+&= g_y\Sigma_y
+\end{align*}
+by recursion we have that $\mbox{corr}\left(y_t,y_{t-k}\right)=E_\left{y_ty_{t-k}'\right\}=g_y^k\Sigma_y$.
+
+The autocorrelation matrix is then
+\[
+\mbox{corr}\left(y_t,y_{t-k}\right) =
+\mbox{diag}(\sigma_y)^{-1}E_\left{y_ty_{t-k}'\right\}\mbox{diag}(\sigma_y)^{-1}
+\]
+* Estimation
+** estimation
+   Dynare command *estimation* calls function [[dynare\_estimation.m]]
+*** Function <<dynare\_estimation.m>>
+   - [[m2html:dynare_estimation.html][M2HTML link]]
+   - This function handles recursive estimation over several samples, when option *nobs* contains several values.
+   - For each given sample, estimation is done by function [[dynare_estimation_1.m][dynare\_estimation\_1.m]]
+*** Function <<dynare\_estimation\_1.m>>
+    - [[m2html:dynare_estimation_1.html][M2HTML link]]
+    - The big parts of this function are as follows:
+          - initialization and data preparation
+          - computation of maximum likelihood or posterior mode (starts around line 347)
+          - runs MCMC (starts around line 1003)
+          - computes the posterior distributions of various statistics (starts around line 1038)
+          - computes smooth values at the last point estimate of the
+            parameters (maximum likelihood, posterior mode or
+            posterior mean) (starts around line 1052) 
+    - Computation of the log posterior density (or log likelihood) is done by [[DsgeLikelihood.m]]
+    - Computation of the smooth values is done by [[DsgeSmoother.m]]
+*** Function <<DsgeLikelihood.m>>
+    - [[m2html:DsgeLiklihood.html][M2HTML link]]
+    - This function computes the likelihood of the model and if necessary evaluates the priors in order to compute the posterior. The likelihood is computed with the Kalman filter, but the implementation called here keeps only those elements necessary to the computation of the likelihood, for efficiency reasons. A fuller version of the Kalman filter is called by DsgeSmoother.m.
+    - The main steps are:
+      - initialization of the structural parameters
+      - computation of the solution of the linear rational expectation model by [[dynare\_resolve.m]]
+      - initialization of the Kalman filter
+      - call the appropriate Kalman filter routine:
+          - stationary initialization
+                - multivariate filter
+                    - missing observations: [[missing\_observations\_kalman\_filter.m]]
+                    - no missing observations: [[kalman\_filter.m]] 
+                - univariate filter
+                    - correlated shocks: [[univariate\_kalman\_filter\_corr.m]]
+                    - non-correlated shocks: [[univariate\_kalman\_filter.m]]
+                    - The above two functions handle both missing and no missing observations cases. 
+          - diffuse initialization for models with unit roots
+                - multivariate filter
+                  - missing observations: [[missing\_observations\_diffuse\_kalman\_filter.m]]
+                  - no missing observations: [[diffuse\_kalman\_filter.m]] 
+                - univariate filter
+                  - correlated shock: [[univariate\_diffuse\_kalman\_filter\_corr.m]]
+                  - non-correlated shocks: [[univariate\_diffuse\_kalman\_filter.m]] 
+    - Evaluation of priors if necessary: [[priordens.m]] 
+    - When the multivariate filter encounters a singularity, Dynare switches automatically to the univariate filter.
+*** Function <<DsgeSmoother.m>>
+    - [[m2html:DsgeSmoother.html][M2HTML link]]
+    - This functions computes the smoother of the model. The smoother is computed by first running the Kalman filter (forward in time), then the smoother (backward in time).
+    - The main steps are:
+      - initialization of the structural parameters
+      - computation of the solution of the linear rational expectation model by dynare_resolve.m
+      - initialization of the Kalman filter
+      - call the appropriate Kalman filter/smoother function (The structure of the smoother routines is different from the filter ones, because we are in the middle of the repackaging this code):
+          - no measurement error
+                - stationary initialization
+                      - multivariate filter
+                            - missing observations: [[missing\_DiffuseKalmanSmoother1.m]]
+                            - no missing observations : [[DiffuseKalmanSmoother1.m]] 
+                      - univariate filter/smoother
+                            - missing observations: [[missing\_DiffuseKalmanSmoother3.m]]
+                            - no missing observations: [[DiffuseKalmanSmoother3.m]] 
+                - diffuse initialization
+                      - multivariate filter
+                            - missing observations: [[missing\_DiffuseKalmanSmoother1\_Z.m]]
+                            - no missing observations: [[DiffuseKalmanSmoother1_Z.m]] 
+                      - univariate filter
+                            - missing observations: [[missing\_DiffuseKalmanSmoother3\_Z.m]]
+                            - no missing observations: [[DiffuseKalmanSmoother3\_Z.m]] 
+          - measurement error
+                - stationary initialization
+                      - multivariate filter
+                            - missing observations : N/A
+                            - no missing observations: [[DiffuseKalmanSmootherH1corr.m]] 
+                      - univariate filter
+                            - missing observations : N/A
+                            - no missing observations
+                                  - correlated shocks: [[DiffuseKalmanSmootherH3corr.m]]
+                                  - no correlated shocks: [[DiffuseKalmanSmootherH3.m]] 
+                - diffuse initialization
+                      - multivariate filter
+                            - missing observations : N/A
+                            - no missing observations: [[DiffuseKalmanSmootherH1\_Z.m]] 
+                      - univariate filter
+                            - missing observations : N/A
+                            - no missing observations
+                                  - correlated shocks: N/A
+                                  - no correlated shocks: [[DiffuseKalmanSmootherH3\_Z.m]]
+** model\_comparison
+    TO BE DONE
+** shock\_decomposition
+    TO BE DONE
+* Forecasting
+  TO BE DONE
+* Optimal policy
+  TO BE DONE
+* Sensitivity and identification analysis
+  TO BE DONE
+* Displaying and saving results
+  TO BE DONE
+* Misc commands
+  TO BE DONE
+
+* REFERENCES
+
+ - H. Uhlig (1999) "A toolkit for analysing nonlinear dynamic models easily" in R. Marimón and A. Scott /Computational Methods for the
+Study of Dynamic Economies/. Oxford University Press.  
