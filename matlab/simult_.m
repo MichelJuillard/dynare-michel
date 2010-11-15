@@ -86,11 +86,11 @@ else
                 yhat2 = y_(dr.order_var(k2),i-1)-dr.ys(dr.order_var(k2));
                 epsilon = ex_(i-1,:)';
 
-                [err, abcOut1] = A_times_B_kronecker_C(.5*dr.ghxx,yhat1);
+                [err, abcOut1] = A_times_B_kronecker_C(.5*dr.ghxx,yhat1,options_.threads.kronecker.A_times_B_kronecker_C);
                 mexErrCheck('A_times_B_kronecker_C', err);
-                [err, abcOut2] = A_times_B_kronecker_C(.5*dr.ghuu,epsilon);
+                [err, abcOut2] = A_times_B_kronecker_C(.5*dr.ghuu,epsilon,options_.threads.kronecker.A_times_B_kronecker_C);
                 mexErrCheck('A_times_B_kronecker_C', err);
-                [err, abcOut3] = A_times_B_kronecker_C(dr.ghxu,yhat1,epsilon);
+                [err, abcOut3] = A_times_B_kronecker_C(dr.ghxu,yhat1,epsilon,options_.threads.kronecker.A_times_B_kronecker_C);
                 mexErrCheck('A_times_B_kronecker_C', err);
 
                 y_(dr.order_var,i) = constant + dr.ghx*yhat2 + dr.ghu*epsilon ...
@@ -102,11 +102,11 @@ else
                 yhat = y_(dr.order_var(k2),i-1)-dr.ys(dr.order_var(k2));
                 epsilon = ex_(i-1,:)';
 
-                [err, abcOut1] = A_times_B_kronecker_C(.5*dr.ghxx,yhat);
+                [err, abcOut1] = A_times_B_kronecker_C(.5*dr.ghxx,yhat,options_.threads.kronecker.A_times_B_kronecker_C);
                 mexErrCheck('A_times_B_kronecker_C', err);
-                [err, abcOut2] = A_times_B_kronecker_C(.5*dr.ghuu,epsilon);
+                [err, abcOut2] = A_times_B_kronecker_C(.5*dr.ghuu,epsilon,options_.threads.kronecker.A_times_B_kronecker_C);
                 mexErrCheck('A_times_B_kronecker_C', err);
-                [err, abcOut3] = A_times_B_kronecker_C(dr.ghxu,yhat,epsilon);
+                [err, abcOut3] = A_times_B_kronecker_C(dr.ghxu,yhat,epsilon,options_.threads.kronecker.A_times_B_kronecker_C);
                 mexErrCheck('A_times_B_kronecker_C', err);
 
                 y_(dr.order_var,i) = constant + dr.ghx*yhat + dr.ghu*epsilon ...

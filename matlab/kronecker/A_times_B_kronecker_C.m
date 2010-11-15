@@ -1,4 +1,4 @@
-function [err, D] = A_times_B_kronecker_C(A,B,C)
+function [err, D] = A_times_B_kronecker_C(A,B,C,fake)
 %function [err, D] = A_times_B_kronecker_C(A,B,C)
 % Computes A * kron(B,C). 
 %
@@ -36,12 +36,12 @@ function [err, D] = A_times_B_kronecker_C(A,B,C)
 
 % Chek number of inputs and outputs.
 if nargin>3 || nargin<2 || nargout~=2
-    error('A_times_B_kronecker_C takes 2 or 3 input arguments and provides exactly 2 output arguments.')
+    error('A_times_B_kronecker_C takes 3 or 4 input arguments and provides exactly 2 output arguments.')
 end
 % Get & check dimensions. Initialization of the output matrix.
 [mA,nA] = size(A);
 [mB,nB] = size(B);
-if nargin == 3
+if nargin == 4
     [mC,nC] = size(C);
     if mB*mC ~= nA
         error('Input dimension error!')
@@ -57,7 +57,7 @@ else
 end
 % Computational part.
 if loop
-    if nargin == 3
+    if nargin == 4
         k1 = 1; 
         for i1=1:nB
             for i2=1:nC
@@ -75,7 +75,7 @@ if loop
         end
     end
 else
-    if nargin == 3
+    if nargin == 4
         D = A * kron(B,C);
     else
         D = A * kron(B,B);

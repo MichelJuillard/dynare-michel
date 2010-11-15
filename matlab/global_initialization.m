@@ -53,6 +53,10 @@ options_.solve_tolx = eps^(2/3);
 options_.solve_maxit = 500;
 options_.deterministic_simulation_initialization = 0;
 
+% Default number of threads for parallelized mex files.  
+options_.threads.kronecker.A_times_B_kronecker_C = 1;
+options_.threads.kronecker.sparse_hessian_times_B_kronecker_C = 1;
+
 % steady state file
 if exist([M_.fname '_steadystate.m'],'file')
     options_.steadystate_flag = 1;

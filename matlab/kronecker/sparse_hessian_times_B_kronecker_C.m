@@ -1,4 +1,4 @@
-function [err, D] = sparse_hessian_times_B_kronecker_C(A,B,C)
+function [err, D] = sparse_hessian_times_B_kronecker_C(A,B,C,fake)
 %function [err, D] = sparse_hessian_times_B_kronecker_C(A,B,C)
 % Computes A * kron(B,C) where A is a sparse matrix.
 %
@@ -39,10 +39,10 @@ if nargout~=2
 end
 
 switch nargin
+  case 4
+    D = A_times_B_kronecker_C(A,B,C,fake);
   case 3
-    D = A_times_B_kronecker_C(A,B,C);
-  case 2
-    D = A_times_B_kronecker_C(A,B,B);
+    D = A_times_B_kronecker_C(A,B,B,fake);
   otherwise
     error('Two or Three input arguments required!')
 end

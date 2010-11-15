@@ -31,12 +31,14 @@
 # include <omp.h>
 #endif
 
+#define DEBUG_OMP 0
+
 void
 full_A_times_kronecker_B_C(double *A, double *B, double *C, double *D,
-                           blas_int mA, blas_int nA, blas_int mB, blas_int nB, blas_int mC, blas_int nC)
+                           blas_int mA, blas_int nA, blas_int mB, blas_int nB, blas_int mC, blas_int nC, int number_of_threads)
 {
 #if USE_OMP
-# pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
+# pragma omp parallel for num_threads(number_of_threads)
   for (long int colD = 0; colD < nB*nC; colD++)
     {
 # if DEBUG_OMP
@@ -77,10 +79,10 @@ full_A_times_kronecker_B_C(double *A, double *B, double *C, double *D,
 }
 
 void
-full_A_times_kronecker_B_B(double *A, double *B, double *D, blas_int mA, blas_int nA, blas_int mB, blas_int nB)
+full_A_times_kronecker_B_B(double *A, double *B, double *D, blas_int mA, blas_int nA, blas_int mB, blas_int nB, int number_of_threads)
 {
 #if USE_OMP
-# pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
+# pragma omp parallel for num_threads(number_of_threads)
   for (long int colD = 0; colD < nB*nB; colD++)
     {
 # if DEBUG_OMP
@@ -124,8 +126,8 @@ void
 mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   // Check input and output:
-  if (nrhs > 3 || nrhs < 2 || nlhs != 2)
-    DYN_MEX_FUNC_ERR_MSG_TXT("A_times_B_kronecker_C takes 2 or 3 input arguments and provides exactly 2 output arguments.");
+  if (nrhs > 4 || nrhs < 3 || nlhs != 2)
+    DYN_MEX_FUNC_ERR_MSG_TXT("A_times_B_kronecker_C takes 3 or 4 input arguments and provides exactly 2 output arguments.");
 
   // Get & Check dimensions (columns and rows):
   mwSize mA, nA, mB, nB, mC, nC;
@@ -133,7 +135,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   nA = mxGetN(prhs[0]);
   mB = mxGetM(prhs[1]);
   nB = mxGetN(prhs[1]);
-  if (nrhs == 3) // A*kron(B,C) is to be computed.
+  if (nrhs == 4) // A*kron(B,C) is to be computed.
     {
       mC = mxGetM(prhs[2]);
       nC = mxGetN(prhs[2]);
@@ -147,15 +149,18 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
   // Get input matrices:
   double *B, *C, *A;
+  int numthreads;
   A = mxGetPr(prhs[0]);
   B = mxGetPr(prhs[1]);
-  if (nrhs == 3)
+  numthreads = (int) mxGetScalar(prhs[2]);
+  if (nrhs == 4)
     {
       C = mxGetPr(prhs[2]);
+      numthreads = (int) mxGetScalar(prhs[3]);
     }
   // Initialization of the ouput:
   double *D;
-  if (nrhs == 3)
+  if (nrhs == 4)
     {
       plhs[1] = mxCreateDoubleMatrix(mA, nB*nC, mxREAL);
     }
@@ -165,13 +170,13 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
   D = mxGetPr(plhs[1]);
   // Computational part:
-  if (nrhs == 2)
+  if (nrhs == 3)
     {
-      full_A_times_kronecker_B_B(A, B, &D[0], (int) mA, (int) nA, (int) mB, (int) nB);
+      full_A_times_kronecker_B_B(A, B, &D[0], (int) mA, (int) nA, (int) mB, (int) nB, numthreads);
     }
   else
     {
-      full_A_times_kronecker_B_C(A, B, C, &D[0], (int) mA, (int) nA, (int) mB, (int) nB, (int) mC, (int) nC);
+      full_A_times_kronecker_B_C(A, B, C, &D[0], (int) mA, (int) nA, (int) mB, (int) nB, (int) mC, (int) nC, numthreads);
     }
   plhs[0] = mxCreateDoubleScalar(0);
 }

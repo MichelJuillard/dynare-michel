@@ -152,8 +152,6 @@ for i=1:number_of_mex_files
         matlab_path = path;
     end
 end
-%% Initialize number of threads
-set_dynare_threads(1);
 %% Test if valid mex files are available, if a mex file is not available
 %% a matlab version of the routine is included in the path.
 disp(' ')

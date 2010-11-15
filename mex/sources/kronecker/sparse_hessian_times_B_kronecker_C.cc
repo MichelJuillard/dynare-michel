@@ -31,9 +31,11 @@
 # include <omp.h>
 #endif
 
+#define DEBUG_OMP 0
+
 void
 sparse_hessian_times_B_kronecker_B(mwIndex *isparseA, mwIndex *jsparseA, double *vsparseA,
-                                   double *B, double *D, mwSize mA, mwSize nA, mwSize mB, mwSize nB)
+                                   double *B, double *D, mwSize mA, mwSize nA, mwSize mB, mwSize nB, int number_of_threads)
 {
   /*
   **   Loop over the columns of kron(B,B) (or of the result matrix D).
@@ -41,7 +43,7 @@ sparse_hessian_times_B_kronecker_B(mwIndex *isparseA, mwIndex *jsparseA, double 
   **   symmetric pattern of the hessian matrix.
   */
 #if USE_OMP
-# pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
+# pragma omp parallel for num_threads(number_of_threads)
 #endif
   for (int j1B = 0; j1B < nB; j1B++)
     {
@@ -90,13 +92,13 @@ sparse_hessian_times_B_kronecker_B(mwIndex *isparseA, mwIndex *jsparseA, double 
 void
 sparse_hessian_times_B_kronecker_C(mwIndex *isparseA, mwIndex *jsparseA, double *vsparseA,
                                    double *B, double *C, double *D,
-                                   mwSize mA, mwSize nA, mwSize mB, mwSize nB, mwSize mC, mwSize nC)
+                                   mwSize mA, mwSize nA, mwSize mB, mwSize nB, mwSize mC, mwSize nC, int number_of_threads)
 {
   /*
   **   Loop over the columns of kron(B,B) (or of the result matrix D).
   */
 #if USE_OMP
-# pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
+# pragma omp parallel for num_threads(number_of_threads)
 #endif
   for (long int jj = 0; jj < nB*nC; jj++) // column of kron(B,C) index.
     {
@@ -141,8 +143,8 @@ void
 mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   // Check input and output:
-  if ((nrhs > 3) || (nrhs < 2) || nlhs!=2)
-    DYN_MEX_FUNC_ERR_MSG_TXT("sparse_hessian_times_B_kronecker_C takes 2 or 3 input arguments and provides exactly 2 output arguments.");
+  if ((nrhs > 4) || (nrhs < 3) || nlhs!=2)
+    DYN_MEX_FUNC_ERR_MSG_TXT("sparse_hessian_times_B_kronecker_C takes 3 or 4 input arguments and provides exactly 2 output argument.");
 
   if (!mxIsSparse(prhs[0]))
     DYN_MEX_FUNC_ERR_MSG_TXT("sparse_hessian_times_B_kronecker_C: First input must be a sparse (dynare) hessian matrix.");
@@ -153,7 +155,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   nA = mxGetN(prhs[0]);
   mB = mxGetM(prhs[1]);
   nB = mxGetN(prhs[1]);
-  if (nrhs == 3) // A*kron(B,C) is to be computed.
+  if (nrhs == 4) // A*kron(B,C) is to be computed.
     {
       mC = mxGetM(prhs[2]);
       nC = mxGetN(prhs[2]);
@@ -167,10 +169,13 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
   // Get input matrices:
   double *B, *C;
+  int numthreads;
   B = mxGetPr(prhs[1]);
-  if (nrhs == 3)
+  numthreads = (int) mxGetScalar(prhs[2]);
+  if (nrhs == 4)
     {
       C = mxGetPr(prhs[2]);
+      numthreads = (int) mxGetScalar(prhs[3]);
     }
   // Sparse (dynare) hessian matrix.
   mwIndex *isparseA = (mwIndex *) mxGetIr(prhs[0]);
@@ -178,7 +183,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   double  *vsparseA = mxGetPr(prhs[0]);
   // Initialization of the ouput:
   double *D;
-  if (nrhs == 3)
+  if (nrhs == 4)
     {
       plhs[1] = mxCreateDoubleMatrix(mA, nB*nC, mxREAL);
     }
@@ -188,13 +193,13 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
   D = mxGetPr(plhs[1]);
   // Computational part:
-  if (nrhs == 2)
+  if (nrhs == 3)
     {
-      sparse_hessian_times_B_kronecker_B(isparseA, jsparseA, vsparseA, B, D, mA, nA, mB, nB);
+      sparse_hessian_times_B_kronecker_B(isparseA, jsparseA, vsparseA, B, D, mA, nA, mB, nB,numthreads);
     }
   else
     {
-      sparse_hessian_times_B_kronecker_C(isparseA, jsparseA, vsparseA, B, C, D, mA, nA, mB, nB, mC, nC);
+      sparse_hessian_times_B_kronecker_C(isparseA, jsparseA, vsparseA, B, C, D, mA, nA, mB, nB, mC, nC, numthreads);
     }
   plhs[0] = mxCreateDoubleScalar(0);
 }
