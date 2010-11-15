@@ -65,6 +65,8 @@ ylwrap
 !/doc/parallel/RWMH_quest1_*.pdf
 !/doc/parallel/waitbars*.pdf
 doc/m2html
+doc/internals/*.html
+doc/internals/ltxpng
 mex/build/matlab/run_m2html.m
 
 # Preprocessor

@@ -204,6 +204,11 @@ if test "x$enable_octave" = "xyes"; then
 fi
 AM_CONDITIONAL([ENABLE_OCTAVE], [test "x$enable_octave" = "xyes"])
 
+# Enable exporting of Org files
+# The clean way would be to test for Emacs, Org-mode, latex, dvipng...
+AC_ARG_ENABLE([org-export], AS_HELP_STRING([--enable-org-export], [enable exporting of Org files (requires Emacs, org-mode and other external programs)]))
+AM_CONDITIONAL([ENABLE_ORG_EXPORT], [test "x$enable_org_export" != "x"])
+
 # Construct final output message
 
 BUILD_PREPROCESSOR="yes"
@@ -260,6 +265,12 @@ else
   BUILD_DYNARE_PREPROC_DOC="no (missing doxygen)"
 fi
 
+if test "x$enable_org_export" != "x"; then
+  BUILD_DYNARE_INTERNAL_DOC="yes"
+else
+  BUILD_DYNARE_INTERNAL_DOC="no (Org export not enabled)"
+fi
+
 if test "x$OCTAVE" != "x"; then
   TESTSUITE_OCTAVE="yes"
 else
@@ -290,6 +301,7 @@ PDF documentation (with "make pdf"):
 HTML documentation (with "make html"):
  Dynare reference manual:               $BUILD_DYNARE_HTML_MANUAL
  Dynare preprocessor developer doc:     $BUILD_DYNARE_PREPROC_DOC
+ Dynare internal doc:                   $BUILD_DYNARE_INTERNAL_DOC
 
 Testsuites (run with "make check"):
  Dynare for Octave:                     $TESTSUITE_OCTAVE
