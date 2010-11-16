@@ -3507,9 +3507,14 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 
 </refsect1>
 
-<refsect1><title>Note on steady state computation</title>
+<refsect1><title>Notes</title>
+<refsect2><title>Steady state computation</title>
 <para>If you know how to compute the steady state for your model, you can provide a <trademark class="registered">MATLAB</trademark>/Octave function doing the computation instead of using <command>steady</command>. The function should be called with the name of the <filename class="extension">.mod</filename> file followed by <filename>_steadystate</filename>. See <filename>fs2000_steadystate.m</filename> in <filename>examples</filename> directory for an example.
 </para>
+</refsect2>
+<refsect2><title>Running the smoother with calibrated parameters</title>
+It is possible to compute smoothed value of the endogenous variables and the shocks with calibrated parameters, without estimation proper. For this usage, there should be no <command>estimated_params</command> block. Observed variables must be declared. A dataset must be specified in the <command>estimation</command> instruction. In addition, use the following options: <command>mode_compute=0,mh_replic=0,smoother</command>. Currently, there is no specific output for this usage of the <command>estimation</command> command. The results are made available in fields of <command>oo_</command> structure. An example is available in <filename>./tests/smoother/calibrated_model.mod</filename>.
+</refsect2>
 </refsect1>
 </refentry>
 
