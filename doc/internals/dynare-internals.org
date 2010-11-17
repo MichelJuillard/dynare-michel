@@ -1,5 +1,5 @@
 #+LINK: m2html http://www.dynare.org/dynare-matlab-m2html/matlab/ 
-#+OPTIONS: Latex:t
+#+OPTIONS: Latex:t, ^:nil
 #+LATEX_HEADER: \usepackage{amsmath}
 
 #+TITLE: Dynare internal documentation
@@ -155,6 +155,8 @@ where $\mbox{diag}\left(\sigma_y\right)$ is a diagonal matrix with the standard 
 *** Function <<lyapunov\_symm.m>>
   - [[m2html:lyapunov_symm.html>>][M2HTML link]]
   - TO BE DONE
+*** Function <<dr1.m>>
+    
 * Estimation
 ** estimation
    Dynare command *estimation* calls function [[dynare\_estimation.m]]
