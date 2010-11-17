@@ -1,14 +1,14 @@
 function simul
-% function simul
 % Computes deterministic simulations
 %  
 % INPUTS
 %   None
 %  
 % OUTPUTS
-%   ...
+%   none
+%    
 % ALGORITHM
-%   ...
+%   
 % SPECIAL REQUIREMENTS
 %   none
 
@@ -30,6 +30,8 @@ function simul
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global M_ options_ oo_
+
+test_for_deep_parameters_calibration(M_);
 
 if options_.stack_solve_algo < 0 || options_.stack_solve_algo > 5
     error('SIMUL: stack_solve_algo must be between 0 and 5')

@@ -19,6 +19,8 @@ function info=stoch_simul(var_list)
 
 global M_ options_ oo_ it_
 
+test_for_deep_parameters_calibration(M_);
+
 options_old = options_;
 if options_.linear
     options_.order = 1;
@@ -64,7 +66,7 @@ if info(1)
     options_ = options_old;
     print_info(info, options_.noprint);
     return
-end  
+end
 
 if ~options_.noprint
     disp(' ')

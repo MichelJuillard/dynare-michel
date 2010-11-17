@@ -30,6 +30,8 @@ function steady()
 
 global M_ oo_ options_ ys0_ 
 
+test_for_deep_parameters_calibration(M_);
+
 options_ = set_default_option(options_,'jacobian_flag',1);
 options_ = set_default_option(options_,'steadystate_flag',0);
 if exist([M_.fname '_steadystate.m'])
