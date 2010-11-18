@@ -5,7 +5,7 @@ CPPFLAGS += -I$(top_srcdir)/../../sources
 DEFS += -DOCTAVE_MEX_FILE
 
 CFLAGS += $(shell $(MKOCTFILE) -p CPICFLAG)
-
+FFLAGS += $(shell $(MKOCTFILE) -p FPICFLAG)
 CXXFLAGS += $(shell $(MKOCTFILE) -p CXXPICFLAG)
 
 LDFLAGS += $(shell $(MKOCTFILE) -p DL_LDFLAGS)
