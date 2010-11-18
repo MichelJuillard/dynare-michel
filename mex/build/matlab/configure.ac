@@ -38,6 +38,7 @@ if test "x$ax_enable_matlab" = "xyes"; then
 
   CFLAGS="$MATLAB_CFLAGS"
   CXXFLAGS="$MATLAB_CXXFLAGS"
+  FFLAGS="$MATLAB_FFLAGS"
 fi
 
 case ${host_os} in
@@ -49,8 +50,10 @@ case ${host_os} in
 esac
 
 CFLAGS="$CFLAGS -Wall"
+FFLAGS="$FFLAGS -Wall"
 CXXFLAGS="$CXXFLAGS -Wall"
 
+AC_PROG_F77
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
@@ -130,6 +133,7 @@ AC_CONFIG_FILES([Makefile
                  dynare_simul_/Makefile
                  swz/Makefile
                  logposterior/Makefile
-                 logMHMCMCposterior/Makefile])
+                 logMHMCMCposterior/Makefile
+		 libslicot/Makefile])
 
 AC_OUTPUT

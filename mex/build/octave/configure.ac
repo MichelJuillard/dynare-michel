@@ -28,12 +28,15 @@ if test "x$MKOCTFILE" != "x"; then
   CC=`$MKOCTFILE -p CC`
   CXX=`$MKOCTFILE -p CXX`
   CFLAGS=`$MKOCTFILE -p CFLAGS`
+  FFLAGS=`$MKOCTFILE -p FFLAGS`
   CXXFLAGS=`$MKOCTFILE -p CXXFLAGS`
 fi
 
 CFLAGS="$CFLAGS -Wall"
+FFLAGS="$FFLAGS -Wall"
 CXXFLAGS="$CXXFLAGS -Wall"
 
+AC_PROG_F77
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
@@ -104,6 +107,7 @@ AC_CONFIG_FILES([Makefile
                  logposterior/Makefile
                  logMHMCMCposterior/Makefile
                  qzcomplex/Makefile
-                 ordschur/Makefile])
+                 ordschur/Makefile
+		 libslicot/Makefile])
 
 AC_OUTPUT
