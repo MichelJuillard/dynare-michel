@@ -108,6 +108,7 @@ AC_CONFIG_FILES([Makefile
                  logMHMCMCposterior/Makefile
                  qzcomplex/Makefile
                  ordschur/Makefile
-		 libslicot/Makefile])
+		 libslicot/Makefile
+		 kalman_steady_state/Makefile])
 
 AC_OUTPUT

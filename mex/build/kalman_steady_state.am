@@ -1,0 +1,8 @@
+vpath %.cc $(top_srcdir)/../../sources/kalman_steady_state
+
+noinst_PROGRAMS = kalman_steady_state
+
+kalman_steady_state_LDADD = ../libslicot/libslicot.a 
+kalman_steady_state_LDADD +=../libslicot/libauxslicot.a
+
+nodist_kalman_steady_state_SOURCES = kalman_steady_state.cc

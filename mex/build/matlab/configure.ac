@@ -134,6 +134,7 @@ AC_CONFIG_FILES([Makefile
                  swz/Makefile
                  logposterior/Makefile
                  logMHMCMCposterior/Makefile
-		 libslicot/Makefile])
+		 libslicot/Makefile
+		 kalman_steady_state/Makefile])
 
 AC_OUTPUT
