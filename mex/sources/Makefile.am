@@ -9,7 +9,8 @@ EXTRA_DIST = \
 	bytecode \
 	qzcomplex \
 	k_order_perturbation \
-	ordschur
+	ordschur \
+	libslicot
 
 clean-local:
 	rm -rf `find mex/sources -name *.o`
