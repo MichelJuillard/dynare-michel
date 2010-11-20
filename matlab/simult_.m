@@ -41,7 +41,7 @@ y_(:,1) = y0;
 
 if ~options_.k_order_solver
     if iorder==1
-        y_(:,1) = y_(:,1) - dr.ys;
+        y_(:,1) = y_(:,1)-dr.ys;
     end
 end
 
@@ -71,13 +71,15 @@ else
     k2 = k2(:,1)+(M_.maximum_lag+1-k2(:,2))*M_.endo_nbr;
     switch iorder
       case 1
-        if isempty(dr.ghu)
+        if isempty(dr.ghu)% For (linearized) deterministic models.
             for i = 2:iter+M_.maximum_lag
                 yhat = y_(dr.order_var(k2),i-1);
                 y_(dr.order_var,i) = dr.ghx*yhat;
             end
+        elseif isempty(dr.ghx)% For (linearized) purely forward variables (no state variables).
+            y_(dr.order_var,:) = dr.ghu*transpose(ex_);
         else
-            epsilon = dr.ghu*transpose(ex_); clear('ex_');
+            epsilon = dr.ghu*transpose(ex_);
             for i = 2:iter+M_.maximum_lag
                 yhat = y_(dr.order_var(k2),i-1);
                 y_(dr.order_var,i) = dr.ghx*yhat + epsilon(:,i-1);
