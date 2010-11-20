@@ -67,32 +67,39 @@ if options_.k_order_solver% Call dynare++ routines.
     mexErrCheck('dynare_simul_', err);
     y_(dr.order_var,:) = y_;
 else
-    k2 = dr.kstate(find(dr.kstate(:,2) <= 1+M_.maximum_lag),[1 2]);
-    k2 = k2(:,1)+(M_.maximum_lag+1-k2(:,2))*M_.endo_nbr;
+    if options_.block
+        k2 = dr.nstatic +1 : dr.nstatic + dr.npred+dr.nboth;
+        order_var = M_.block_structure.variable_reordered;        
+    else
+        k2 = dr.kstate(find(dr.kstate(:,2) <= M_.maximum_lag+1),[1 2]);
+        k2 = k2(:,1)+(M_.maximum_lag+1-k2(:,2))*M_.endo_nbr;
+        order_var = dr.order_var;
+    end;
+    
     switch iorder
       case 1
         if isempty(dr.ghu)% For (linearized) deterministic models.
             for i = 2:iter+M_.maximum_lag
-                yhat = y_(dr.order_var(k2),i-1);
-                y_(dr.order_var,i) = dr.ghx*yhat;
+                yhat = y_(order_var(k2),i-1);
+                y_(order_var,i) = dr.ghx*yhat;
             end
         elseif isempty(dr.ghx)% For (linearized) purely forward variables (no state variables).
             y_(dr.order_var,:) = dr.ghu*transpose(ex_);
         else
             epsilon = dr.ghu*transpose(ex_);
             for i = 2:iter+M_.maximum_lag
-                yhat = y_(dr.order_var(k2),i-1);
-                y_(dr.order_var,i) = dr.ghx*yhat + epsilon(:,i-1);
+                yhat = y_(order_var(k2),i-1);
+                y_(order_var,i) = dr.ghx*yhat + epsilon(:,i-1);
             end
         end
         y_ = bsxfun(@plus,y_,dr.ys);
       case 2
-        constant = dr.ys(dr.order_var)+.5*dr.ghs2;
+        constant = dr.ys(order_var)+.5*dr.ghs2;
         if options_.pruning
             y__ = y0;
             for i = 2:iter+M_.maximum_lag
-                yhat1 = y__(dr.order_var(k2))-dr.ys(dr.order_var(k2));
-                yhat2 = y_(dr.order_var(k2),i-1)-dr.ys(dr.order_var(k2));
+                yhat1 = y__(order_var(k2))-dr.ys(order_var(k2));
+                yhat2 = y_(order_var(k2),i-1)-dr.ys(order_var(k2));
                 epsilon = ex_(i-1,:)';
                 [err, abcOut1] = A_times_B_kronecker_C(.5*dr.ghxx,yhat1,options_.threads.kronecker.A_times_B_kronecker_C);
                 mexErrCheck('A_times_B_kronecker_C', err);
@@ -100,13 +107,13 @@ else
                 mexErrCheck('A_times_B_kronecker_C', err);
                 [err, abcOut3] = A_times_B_kronecker_C(dr.ghxu,yhat1,epsilon,options_.threads.kronecker.A_times_B_kronecker_C);
                 mexErrCheck('A_times_B_kronecker_C', err);
-                y_(dr.order_var,i) = constant + dr.ghx*yhat2 + dr.ghu*epsilon ...
+                y_(order_var,i) = constant + dr.ghx*yhat2 + dr.ghu*epsilon ...
                     + abcOut1 + abcOut2 + abcOut3;
-                y__(dr.order_var) = dr.ys(dr.order_var) + dr.ghx*yhat1 + dr.ghu*epsilon;
+                y__(order_var) = dr.ys(order_var) + dr.ghx*yhat1 + dr.ghu*epsilon;
             end
         else
             for i = 2:iter+M_.maximum_lag
-                yhat = y_(dr.order_var(k2),i-1)-dr.ys(dr.order_var(k2));
+                yhat = y_(order_var(k2),i-1)-dr.ys(order_var(k2));
                 epsilon = ex_(i-1,:)';
                 [err, abcOut1] = A_times_B_kronecker_C(.5*dr.ghxx,yhat,options_.threads.kronecker.A_times_B_kronecker_C);
                 mexErrCheck('A_times_B_kronecker_C', err);
