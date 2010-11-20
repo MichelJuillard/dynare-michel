@@ -44,7 +44,7 @@ if options_.block && ~options_.bytecode
     end
 elseif options_.bytecode
     if options_.solve_algo > 4
-        [check, x] = bytecode('static', y, exo, params);
+        [check, x] = bytecode('static', x, exo, params);
         mexErrCheck('bytecode', check);
         info = check;
     elseif options_.block
