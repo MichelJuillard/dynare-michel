@@ -57,7 +57,8 @@ if options_.steadystate_flag
                                                         M_.fname,...
                                                         oo_.exo_steady_state,...
                                                         oo_.exo_det_steady_state,...
-                                                        M_.params);
+                                                        M_.params,...
+                                                        options_.bytecode);
         else
             error([M_.fname '_steadystate.m doesn''t match the model']);
         end
@@ -84,11 +85,12 @@ if options_.steadystate_flag
             if ~isempty(idx)
                 check1 = 1;
             end
-        elseif options_.block && options_.bytecode
+        elseif options_.bytecode
             [check1, residuals] = bytecode('evaluate','static',oo_.steady_state,...
                                    [oo_.exo_steady_state; ...
                                 oo_.exo_det_steady_state], M_.params, 1);
             mexErrCheck('bytecode', check1);
+            check1 = max(abs(residuals)) > options_.dynatol ;
         else
             check1 = 0;
             check1 = max(abs(feval([M_.fname '_static'],...
