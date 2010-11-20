@@ -59,7 +59,7 @@ const double very_big = 1e24;
 const int alt_symbolic_count_max = 1;
 const double mem_increasing_factor = 1.1;
 
-class SparseMatrix
+class SparseMatrix : public ErrorMsg
 {
 public:
   SparseMatrix();
@@ -153,13 +153,12 @@ private:
 protected:
   vector<double> residual;
   int u_count_alloc, u_count_alloc_save;
-  double *u, *y, *ya;
   vector<double*> jac;
   double *jcb;
   double res1, res2, max_res;
   int max_res_idx;
   double slowc, slowc_save, prev_slowc_save, markowitz_c;
-  int y_kmin, y_kmax, y_size, periods, y_decal;
+  int y_decal;
   int  *index_vara, *index_equa;
   int u_count, tbreak_g;
   int iter;

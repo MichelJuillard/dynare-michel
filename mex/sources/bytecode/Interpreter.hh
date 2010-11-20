@@ -41,47 +41,30 @@
 using namespace std;
 
 #define pow_ pow
-typedef vector<pair<Tags, void * > > code_liste_type;
-typedef code_liste_type::const_iterator it_code_type;
 
-class Interpreter : SparseMatrix
+class Interpreter : public SparseMatrix
 {
 private:
-  vector<mxArray*> jacobian_block, jacobian_other_endo_block, jacobian_exo_block, jacobian_det_exo_block;
-  ExpressionType EQN_type;
-  char *P_endo_names, *P_exo_names, *P_param_names;
-  unsigned int nb_endo, nb_exo, nb_param;
-  unsigned int endo_name_length, exo_name_length, param_name_length;
-  unsigned int EQN_equation, EQN_block, EQN_block_number;
   unsigned int EQN_dvar1, EQN_dvar2, EQN_dvar3;
   int EQN_lag1, EQN_lag2, EQN_lag3;
-  it_code_type it_code_expr;
   protected:
   double pow1(double a, double b);
   double divide(double a, double b);
   double log1(double a);
   double log10_1(double a);
-  /*string remove_white(string str);*/
-  string add_underscore_to_fpe(const string &str);
-  string get_variable(const SymbolType variable_type, const unsigned int variable_num);
-  string error_location(bool evaluate, bool steady_state, int size, int block_num);
   void compute_block_time(int Per_u_, bool evaluate, int block_num, int size, bool steady_state);
   string print_expression(it_code_type it_code, bool evaluate, int size, int block_num, bool steady_state);
   void evaluate_a_block(const int size, const int type, string bin_basename, bool steady_state, int block_num,
                         const bool is_linear = false, const int symbol_table_endo_nbr = 0, const int Block_List_Max_Lag = 0, const int Block_List_Max_Lead = 0, const int u_count_int = 0, int block = -1);
   int simulate_a_block(const int size, const int type, string file_name, string bin_basename, bool Gaussian_Elimination, bool steady_state, int block_num,
                         const bool is_linear = false, const int symbol_table_endo_nbr = 0, const int Block_List_Max_Lag = 0, const int Block_List_Max_Lead = 0, const int u_count_int = 0);
-  double *T;
   vector<Block_contain_type> Block_Contain;
   code_liste_type code_liste;
   it_code_type it_code;
   int Block_Count, Per_u_, Per_y_;
-  int it_, nb_row_x, nb_row_xd, maxit_, size_of_direction;
-  double *g2, *g1, *r;
+  int it_, maxit_, size_of_direction;
   double solve_tolf;
   bool GaussSeidel;
-  double *x, *params;
-  double *steady_y, *steady_x;
   map<pair<pair<int, int>, int>, int> IM_i;
   int equation, derivative_equation, derivative_variable;
   string filename;

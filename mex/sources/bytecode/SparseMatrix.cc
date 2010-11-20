@@ -2877,9 +2877,9 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
                     break;
                   }
               if (select)
-                mexPrintf("-> variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
+                mexPrintf("-> variable %s (%d) at time %d = %f direction = %f\n", get_variable(eEndogenous, j).c_str(), j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
               else
-                mexPrintf("   variable %d at time %d = %f direction = %f\n", j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
+                mexPrintf("   variable %s (%d) at time %d = %f direction = %f\n", get_variable(eEndogenous, j).c_str(), j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
             }
           if (steady_state)
             {
@@ -3248,7 +3248,13 @@ SparseMatrix::fixe_u(double **u, int u_count_int, int max_lag_plus_max_lead_plus
 {
   u_count = u_count_int * periods;
   u_count_alloc = 2*u_count;
+#if DEBUG
+  mexPrintf("fixe_u : alloc(%d double)\n",u_count_alloc);
+#endif
   (*u) = (double *) mxMalloc(u_count_alloc*sizeof(double));
+#if DEBUG
+  mexPrintf("*u=%d\n",*u);
+#endif
   memset((*u), 0, u_count_alloc*sizeof(double));
   u_count_init = max_lag_plus_max_lead_plus_1;
 }
