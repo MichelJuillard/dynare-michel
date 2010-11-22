@@ -58,11 +58,6 @@
 #include <dynmex.h>
 //#include "../matlab_versions_compatibility.h"
 
-#ifdef MWTYPES_NOT_DEFINED
-  typedef int mwIndex;
-  typedef int mwSize;
-#endif
-
 #if !defined(MATLAB_MEX_FILE) || !defined(_WIN32)
 # define sb02od sb02od_
 #endif
@@ -269,7 +264,7 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
             mexPrintf("a singular matrix was encountered during the computation of the solution matrix P");
             break;
           }      
-        otherwise:
+        default:
           {
             mexPrintf("Unknown problem!");
           }
