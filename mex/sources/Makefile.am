@@ -10,7 +10,8 @@ EXTRA_DIST = \
 	qzcomplex \
 	k_order_perturbation \
 	ordschur \
-	libslicot
+	libslicot \
+	kalman_steady_state
 
 clean-local:
 	rm -rf `find mex/sources -name *.o`
