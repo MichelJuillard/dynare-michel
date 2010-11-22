@@ -63,8 +63,8 @@
   typedef int mwSize;
 #endif
 
-#if defined(__linux__) || defined(OCTAVE)
-    #define sb02od sb02od_
+#if !defined(MATLAB_MEX_FILE) || !defined(_WIN32)
+# define sb02od sb02od_
 #endif
 
 extern "C"

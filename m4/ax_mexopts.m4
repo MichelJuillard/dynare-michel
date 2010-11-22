@@ -51,7 +51,7 @@ case ${MATLAB_ARCH} in
   win32 | win64)
     MATLAB_CFLAGS="-fexceptions -g -O2"
     MATLAB_CXXFLAGS="-g -O2"
-    MATLAB_FFLAGS="-fexceptions -g -O2"
+    MATLAB_FFLAGS="-fexceptions -g -O2 -fno-underscoring"
     AX_COMPARE_VERSION([$MATLAB_VERSION], [eq], [7.0.1], [AC_MSG_ERROR([MATLAB version 7.0.1 (R14SP1) is buggy (LAPACK library missing for MSVC), and can't be used for compiling MEX files])])
     MATLAB_DEFS="$MATLAB_DEFS -DNDEBUG"
     # Note that static-libstdc++ is only supported since GCC 4.5 (but generates no error on older versions)
