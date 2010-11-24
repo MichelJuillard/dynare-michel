@@ -152,12 +152,14 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   int numthreads;
   A = mxGetPr(prhs[0]);
   B = mxGetPr(prhs[1]);
-  numthreads = (int) mxGetScalar(prhs[2]);
   if (nrhs == 4)
     {
       C = mxGetPr(prhs[2]);
       numthreads = (int) mxGetScalar(prhs[3]);
     }
+  else
+    numthreads = (int) mxGetScalar(prhs[2]);
+
   // Initialization of the ouput:
   double *D;
   if (nrhs == 4)
