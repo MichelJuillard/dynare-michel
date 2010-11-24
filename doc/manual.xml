@@ -1524,7 +1524,7 @@ end;
         <synopfragment id="det_shock">
           <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable>;</arg>
           <arg choice="plain">periods <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg><arg rep="repeat"><arg>,</arg> <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg></arg>;</arg>
-          <arg choice="plain">values <replaceable>EXPRESSION</replaceable> <arg rep="repeat"><arg>,</arg> <replaceable>EXPRESSION</replaceable></arg>;</arg>
+          <arg choice="plain">values <group choice="plain"><arg choice="plain"><replaceable>DOUBLE</replaceable></arg><arg choice="plain">(<replaceable>EXPRESSION</replaceable>)</arg></group> <arg rep="repeat"><arg>,</arg> <group choice="plain"><arg choice="plain"><replaceable>DOUBLE</replaceable></arg><arg choice="plain">(<replaceable>EXPRESSION</replaceable>)</arg></group></arg>;</arg>
         </synopfragment>
 
         <synopfragment id="sto_shock">
@@ -1554,6 +1554,12 @@ end;
     will have a constant value over the range.
   </para>
 
+  <para>
+    Note that shock values are not restricted to numerical constants: arbitrary
+    expressions are also allowed, but you have to enclose them inside
+    parentheses.
+  </para>
+
   <refsect3><title>Example</title> 
   <informalexample>
     <programlisting>
@@ -1567,6 +1573,9 @@ values 0;
 var v;
 periods 4:5 6 7:9;
 values 1 1.1 0.9;
+var w;
+periods 1 2;
+values (1+p) (exp(z));
 end;
     </programlisting>
   </informalexample>
