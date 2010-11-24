@@ -62,6 +62,7 @@ end
 
 initial_endo_simul = oo_.endo_simul;
 
+warning_old_state = warning;
 warning off all
 
 if nargin<1
@@ -185,4 +186,4 @@ if ~stop
     oo_.endo_simul = initial_endo_simul;
 end
 
-warning on all
+warning(warning_old_state);
