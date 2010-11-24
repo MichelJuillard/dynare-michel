@@ -1544,7 +1544,14 @@ end;
     For deterministic simulations, the <command>shocks</command> block specifies temporary changes in the value of an exogenous variables. For permanent shocks, use an <xref linkend='endval'/> block.
   </para>
 
-  <para>When specifying shocks on several periods, the <command>values</command> <replaceable>EXPRESSION</replaceable> must return either a scalar value common to all periods with a shock or a column vector with as many elements as there are periods in the <command>periods</command> statement just before it.
+  <para>
+    It is possible to specify shocks which last several periods and which can
+    vary over time. The <command>periods</command> keyword accepts a list of
+    several dates or date ranges, which must be matched by as many shock values
+    in the <command>values</command> keyword. Note that a range in the
+    <command>periods</command> keyword must be matched by only one value in the
+    <command>values</command> keyword: this syntax means that the exogenous
+    will have a constant value over the range.
   </para>
 
   <refsect3><title>Example</title> 
@@ -1558,11 +1565,8 @@ var u;
 periods 4:5;
 values 0;
 var v;
-periods 4 5 6;
-values 0;
-var u;
-periods 4  5   6;
-values  1 1.1 0.9;
+periods 4:5 6 7:9;
+values 1 1.1 0.9;
 end;
     </programlisting>
   </informalexample>
