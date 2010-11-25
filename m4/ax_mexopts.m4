@@ -45,7 +45,6 @@ case ${MATLAB_ARCH} in
     else # glnxa64
       MATLAB_CFLAGS="$MATLAB_CFLAGS -fno-omit-frame-pointer"
       MATLAB_CXXFLAGS="$MATLAB_CXXFLAGS -fno-omit-frame-pointer"
-      MATLAB_FFLAGS="$MATLAB_FFLAGS -fdefault-integer-8"
     fi
     ax_mexopts_ok="yes"
     ;;
@@ -84,6 +83,11 @@ case ${MATLAB_ARCH} in
     ax_mexopts_ok="no"
     ;;
 esac
+
+# Starting from MATLAB 7.8, on 64-bit platforms, BLAS and LAPACK expect 64-bit integers, so make it the default for integers in Fortran code
+if test "${MATLAB_ARCH}" = "glnxa64" -o "${MATLAB_ARCH}" = "win64" -o "${MATLAB_ARCH}" = "maci64"; then
+  AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.8], [MATLAB_FFLAGS="$MATLAB_FFLAGS -fdefault-integer-8"])
+fi
 
 # Converts the MATLAB version number into comparable integers with only major and minor version numbers
 # For example, 7.4.2 will become 0704
