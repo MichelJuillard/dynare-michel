@@ -31,6 +31,20 @@ function z = resid(junk)
 
 global M_ options_ oo_
 
+tagname = 'name';
+if nargin && ischar(junk)
+    tagname = junk;
+end
+
+
+tags  = M_.equations_tags;
+istag = 0;
+if length(tags)
+    istag = 1;
+end
+
+
+
 steady_state_old = oo_.steady_state;
 
 % If using a steady state file, initialize oo_.steady_state with that file
@@ -80,19 +94,31 @@ else
                oo_.exo_det_steady_state], M_.params);
 end
 
+
 % Display the non-zero residuals if no return value
 if nargout == 0
     for i = 1:4
         disp(' ')
     end
-    
+    disp('Residuals of the static equations:')
+    disp(' ')
     for i=1:M_.orig_endo_nbr
         if abs(z(i)) < options_.dynatol/100
             tmp = 0;
         else
             tmp = z(i);
         end
-        disp(['Residual for equation number ' int2str(i) ' is equal to ' num2str(tmp)])
+        if istag
+            tg = tags(cell2mat(tags(:,1)) == i,2:3); % all tags for equation i
+            ind = strmatch( tagname, cellstr( tg(:,1) ) );
+        end
+        if length(ind) == 0 || ~istag
+            disp(['Equation number ' int2str(i) ' : ' num2str(tmp)])
+        else
+            t1 = tg( ind , 2 );
+            s = cell2mat(t1);
+            disp( ['Equation number ', int2str(i) ,' : ', num2str(tmp) ,' : ' s])
+        end
     end
     for i = 1:2
         disp(' ')
