@@ -45,6 +45,7 @@ case ${MATLAB_ARCH} in
     else # glnxa64
       MATLAB_CFLAGS="$MATLAB_CFLAGS -fno-omit-frame-pointer"
       MATLAB_CXXFLAGS="$MATLAB_CXXFLAGS -fno-omit-frame-pointer"
+      MATLAB_FFLAGS="$MATLAB_FFLAGS -fdefault-integer-8"
     fi
     ax_mexopts_ok="yes"
     ;;

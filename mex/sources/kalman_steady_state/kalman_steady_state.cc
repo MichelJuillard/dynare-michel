@@ -49,22 +49,18 @@
 ++    [1] T = transpose(dynare transition matrix) and Z = transpose(dynare selection matrix).    
 */ 
 
-
-//#include <iostream>
 #include <string.h>
-//#include "matrix.h"
 #include <stdlib.h>
-//#include "mex.h"
 #include <dynmex.h>
-//#include "../matlab_versions_compatibility.h"
+#include <dynlapack.h>
 
 #if !defined(MATLAB_MEX_FILE) || !defined(_WIN32)
-# define sb02od sb02od_
+#define sb02od sb02od_
 #endif
 
 extern "C"
 {
-  int sb02od(char*, char*, char*, char*, char*, char*, mwSize*, mwSize*, mwSize*, double*, mwSize*, double*, mwSize*, double*, mwSize*, double*, mwSize*, double*, mwSize*, double*, double*, mwSize*, double*, double*, double*, double*, mwSize*, double*, mwSize*, double*, mwSize*, double*, int*, double*, mwSize*, int*, int*);
+  int sb02od(char*, char*, char*, char*, char*, char*, mwSize*, mwSize*, mwSize*, double*, mwSize*, double*, mwSize*, double*, mwSize*, double*, mwSize*, double*, mwSize*, double*, double*, mwSize*, double*, double*, double*, double*, mwSize*, double*, mwSize*, double*, mwSize*, double*, lapack_int*, double*, mwSize*, lapack_int*, lapack_int*);
 }
 
 template <typename T> T max(T x, T y)
@@ -185,7 +181,7 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
   mwSize LDWORK = max( (mwSize)7*((mwSize)2*n + (mwSize)1) + (mwSize)16, (mwSize)16*n );
   LDWORK = max( LDWORK, (mwSize)2*n + p, (mwSize)3*p);
   double tolerance = -1.0;
-  int INFO;
+  lapack_int INFO;
   // Outputs of subroutine sb02OD
   double rcond;
   double *WR, *WI, *BETA, *S, *TT, *UU;
@@ -196,12 +192,12 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[] )
   TT = (double *) mxCalloc(LDT*nn, sizeof(double));
   UU = (double *) mxCalloc(LDU*nn, sizeof(double));
   // Working arrays
-  int *IWORK;
-  IWORK = (int *) mxCalloc(LIWORK, sizeof(int));
+  lapack_int *IWORK;
+  IWORK = (lapack_int *) mxCalloc(LIWORK, sizeof(lapack_int));
   double *DWORK;
   DWORK = (double *) mxCalloc(LDWORK, sizeof(double));
-  int *BWORK;
-  BWORK = (int *) mxCalloc(nn, sizeof(int));
+  lapack_int *BWORK;
+  BWORK = (lapack_int *) mxCalloc(nn, sizeof(lapack_int));
   // Initialize the output of the mex file
   double *P;
   plhs[0] = mxCreateDoubleMatrix(n,n,mxREAL);
