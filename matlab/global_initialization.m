@@ -89,7 +89,6 @@ options_.XTickLabel = [];
 options_.irf = 40;
 options_.relative_irf = 0;
 options_.ar = 5;
-options_.simul_seed = [];
 options_.hp_filter = 0;
 options_.hp_ngrid = 512;
 options_.nomoments = 0;

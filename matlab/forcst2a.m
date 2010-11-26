@@ -25,7 +25,6 @@ exo_nbr = M_.exo_nbr;
 ykmin_ = M_.maximum_endo_lag;
 
 horizon = size(e,1);
-options_ = set_default_option(options_,'simul_seed',0);
 order = options_.order;
 
 k1 = [ykmin_:-1:1];

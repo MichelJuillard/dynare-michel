@@ -58,7 +58,6 @@ else
     ex2 = ex1;
     chol_S = chol(M_.Sigma_e(i_exo_var,i_exo_var));
     for j = 1: replic
-        randn('seed',j);
         ex1(:,i_exo_var) = randn(long+drop,nxs)*chol_S;
         ex2 = ex1;
         ex2(drop+1,:) = ex2(drop+1,:)+e1';   

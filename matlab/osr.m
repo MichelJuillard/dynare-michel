@@ -27,7 +27,6 @@ options_ = set_default_option(options_,'drop',100);
 options_ = set_default_option(options_,'replic',1);
 options_ = set_default_option(options_,'nomoments',0);
 options_ = set_default_option(options_,'nocorr',0);
-options_ = set_default_option(options_,'simul_seed',[]);
 options_ = set_default_option(options_,'hp_filter',0);
 options_ = set_default_option(options_,'hp_ngrid',512);
 options_ = set_default_option(options_,'simul',0);
