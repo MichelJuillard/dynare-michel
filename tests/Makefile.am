@@ -6,6 +6,7 @@ MODS = \
 	example1.mod \
 	example2.mod \
 	example1_use_dll.mod \
+	example1_with_tags.mod\
 	t_sgu_ex1.mod \
 	osr_example.mod \
 	optimal_policy/ramsey.mod \
