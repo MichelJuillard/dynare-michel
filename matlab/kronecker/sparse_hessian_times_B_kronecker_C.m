@@ -1,5 +1,5 @@
-function [err, D] = sparse_hessian_times_B_kronecker_C(A,B,C,fake)
-%function [err, D] = sparse_hessian_times_B_kronecker_C(A,B,C)
+function [err, D] = sparse_hessian_times_B_kronecker_C(varargin)
+%function [err, D] = sparse_hessian_times_B_kronecker_C(A,B,C, fake)
 % Computes A * kron(B,C) where A is a sparse matrix.
 %
 % INPUTS
@@ -33,16 +33,19 @@ function [err, D] = sparse_hessian_times_B_kronecker_C(A,B,C,fake)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
+A = varargin{1};
+B = varargin{2};
+C = varargin{3};
+fake = varargin{nargin};
 if nargout~=2
     error('sparse_hessian_times_B_kronecker_C provides exactly 2 output arguments.')
 end
 
 switch nargin
   case 4
-    D = A_times_B_kronecker_C(A,B,C,fake);
+    [fake,D] = A_times_B_kronecker_C(A,B,C,fake);
   case 3
-    D = A_times_B_kronecker_C(A,B,B,fake);
+    [fake,D] = A_times_B_kronecker_C(A,B,C);
   otherwise
     error('Two or Three input arguments required!')
 end

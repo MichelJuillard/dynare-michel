@@ -35,9 +35,11 @@ function [err, D] = A_times_B_kronecker_C(A,B,C,fake)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % Chek number of inputs and outputs.
-if nargin>3 || nargin<2 || nargout~=2
+if nargin>4 || nargin<3 || nargout~=2
     error('A_times_B_kronecker_C takes 3 or 4 input arguments and provides exactly 2 output arguments.')
 end
+
+
 % Get & check dimensions. Initialization of the output matrix.
 [mA,nA] = size(A);
 [mB,nB] = size(B);
