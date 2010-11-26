@@ -66,7 +66,8 @@ MODS = \
 	external_function/example1_1st_deriv_function_provided.mod \
 	external_function/example1_1st_deriv_function_provided_dll.mod \
 	external_function/example1_no_deriv_functions_provided.mod \
-	external_function/example1_no_deriv_functions_provided_dll.mod
+	external_function/example1_no_deriv_functions_provided_dll.mod \
+	seeds.mod
 
 EXTRA_DIST = $(MODS) \
 	run_test_octave.m \
