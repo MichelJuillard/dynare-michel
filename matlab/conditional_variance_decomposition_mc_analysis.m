@@ -1,4 +1,5 @@
-function oo_ = conditional_variance_decomposition_mc_analysis(NumberOfSimulations, type, dname, fname, Steps, exonames, exo, vartan, var, mh_conf_sig, oo_)
+function oo_ = ...
+    conditional_variance_decomposition_mc_analysis(NumberOfSimulations, type, dname, fname, Steps, exonames, exo, var_list, endogenous_variable_index, mh_conf_sig, oo_)
 % This function analyses the (posterior or prior) distribution of the
 % endogenous conditional variance decomposition.
 
@@ -27,19 +28,19 @@ else
     PATH = [dname '/prior/moments/'];
 end
 
-indx = check_name(vartan,var);
-if isempty(indx)
-    disp([ type '_analysis:: ' var ' is not a stationary endogenous variable!'])
-    return
-end
-endogenous_variable_index = sum(1:indx);
+% $$$ indx = check_name(vartan,var);
+% $$$ if isempty(indx)
+% $$$     disp([ type '_analysis:: ' var ' is not a stationary endogenous variable!'])
+% $$$     return
+% $$$ end
+% $$$ endogenous_variable_index = sum(1:indx);
 exogenous_variable_index = check_name(exonames,exo);
 if isempty(exogenous_variable_index)
     disp([ type '_analysis:: ' exo ' is not a declared exogenous variable!'])
     return
 end
 
-name = [ var '.' exo ];
+name = [ var_list(endogenous_variable_index,:) '.' exo ];
 if isfield(oo_, [ TYPE 'TheoreticalMoments' ])
     eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments;'])
     if isfield(temporary_structure,'dsge')
@@ -75,17 +76,15 @@ p_density = NaN(2^9,2,length(Steps));
 p_hpdinf = NaN(1,length(Steps));
 p_hpdsup = NaN(1,length(Steps));
 for i=1:length(Steps)
-    if ~isconst(tmp(:,i))
-        [pp_mean, pp_median, pp_var, hpd_interval, pp_deciles, pp_density] = ...
-            posterior_moments(tmp(:,i),1,mh_conf_sig);
-        p_mean(2,i) = pp_mean;
-        p_median(i) = pp_median;
-        p_variance(i) = pp_var;
-        p_deciles(:,i) = pp_deciles;
-        p_hpdinf(i) = hpd_interval(1);
-        p_hpdinf(i) = hpd_interval(2);
-        p_density(:,:,i) = pp_density;
-    end
+    [pp_mean, pp_median, pp_var, hpd_interval, pp_deciles, pp_density] = ...
+        posterior_moments(tmp(:,i),1,mh_conf_sig);
+    p_mean(2,i) = pp_mean;
+    p_median(i) = pp_median;
+    p_variance(i) = pp_var;
+    p_deciles(:,i) = pp_deciles;
+    p_hpdinf(i) = hpd_interval(1);
+    p_hpdsup(i) = hpd_interval(2);
+    p_density(:,:,i) = pp_density;
 end
 eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.mean.' name ' = p_mean;']);
 eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.median.' name ' = p_median;']);

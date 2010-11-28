@@ -67,14 +67,14 @@ nar = options_.ar;
 options_.ar = 0;
 
 NumberOfDrawsFiles = rows(DrawsFiles);
-NumberOfSavedElementsPerSimulation = nvar*(nvar+1)/2*M_.exo_nbr*length(Steps);
+NumberOfSavedElementsPerSimulation = nvar*M_.exo_nbr*length(Steps);
 MaXNumberOfConditionalDecompLines = ceil(options_.MaxNumberOfBytes/NumberOfSavedElementsPerSimulation/8);
 
 if SampleSize<=MaXNumberOfConditionalDecompLines
-    Conditional_decomposition_array = zeros(nvar*(nvar+1)/2,length(Steps),M_.exo_nbr,SampleSize);
+    Conditional_decomposition_array = zeros(nvar,length(Steps),M_.exo_nbr,SampleSize);
     NumberOfConditionalDecompFiles = 1;
 else
-    Conditional_decomposition_array = zeros(nvar*(nvar+1)/2,length(Steps),M_.exo_nbr,MaXNumberOfConditionalDecompLines);
+    Conditional_decomposition_array = zeros(nvar,length(Steps),M_.exo_nbr,MaXNumberOfConditionalDecompLines);
     NumberOfLinesInTheLastConditionalDecompFile = mod(SampleSize,MaXNumberOfConditionalDecompLines);
     NumberOfConditionalDecompFiles = ceil(SampleSize/MaXNumberOfConditionalDecompLines);
 end
@@ -118,6 +118,7 @@ for file = 1:NumberOfDrawsFiles
             StateSpaceModel.number_of_state_equations = M_.endo_nbr+rows(aux);
             StateSpaceModel.number_of_state_innovations = M_.exo_nbr;
             StateSpaceModel.sigma_e_is_diagonal = M_.sigma_e_is_diagonal;
+            StateSpaceModel.order_var = dr.order_var;
             first_call = 0;
             clear('endo_nbr','nstatic','npred','k');
         end
@@ -136,10 +137,10 @@ for file = 1:NumberOfDrawsFiles
                      'Conditional_decomposition_array');
             end
             if (ConditionalDecompFileNumber==NumberOfConditionalDecompFiles-1)% Prepare last round.
-                Conditional_decomposition_array = zeros(nvar*(nvar+1)/2, length(Steps),M_.exo_nbr,NumberOfLinesInTheLastConditionalDecompFile) ;
+                Conditional_decomposition_array = zeros(nvar, length(Steps),M_.exo_nbr,NumberOfLinesInTheLastConditionalDecompFile) ;
                 NumberOfConditionalDecompLines = NumberOfLinesInTheLastConditionalDecompFile;
             elseif ConditionalDecompFileNumber<NumberOfConditionalDecompFiles-1
-                Conditional_decomposition_array = zeros(nvar*(nvar+1)/2,length(Steps),M_.exo_nbr,MaXNumberOfConditionalDecompLines);
+                Conditional_decomposition_array = zeros(nvar,length(Steps),M_.exo_nbr,MaXNumberOfConditionalDecompLines);
             else
                 clear('Conditional_decomposition_array');
             end

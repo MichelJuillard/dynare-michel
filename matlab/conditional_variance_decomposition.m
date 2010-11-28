@@ -1,4 +1,4 @@
-function PackedConditionalVarianceDecomposition = conditional_variance_decomposition(StateSpaceModel, Steps, SubsetOfVariables,sigma_e_is_diagonal)
+function ConditionalVarianceDecomposition = conditional_variance_decomposition(StateSpaceModel, Steps, SubsetOfVariables,sigma_e_is_diagonal)
 % This function computes the conditional variance decomposition of a given state space model
 % for a subset of endogenous variables.
 % 
@@ -8,9 +8,10 @@ function PackedConditionalVarianceDecomposition = conditional_variance_decomposi
 %   SubsetOfVariables   [integer]     1*q vector of indices.
 %    
 % OUTPUTS 
-%   PackedConditionalVarianceDecomposition  [double] n(n+1)/2*p matrix, where p is the number of state innovations and
-%                                                    n is equal to length(SubsetOfVariables).    
-%
+%   ConditionalVarianceDecomposition  [double] [n h p] array, where 
+%                                                    n is equal to length(SubsetOfVariables)
+%                                                    h is the number of Steps
+%                                                    p is the number of state innovations and
 % SPECIAL REQUIREMENTS
 %
 % [1] In this version, absence of measurement errors is assumed...
@@ -37,11 +38,10 @@ number_of_state_innovations = ...
 transition_matrix = StateSpaceModel.transition_matrix;
 number_of_state_equations = ...
     StateSpaceModel.number_of_state_equations;
+order_var = StateSpaceModel.order_var;
 nSteps = length(Steps);
 
-ConditionalVariance = zeros(number_of_state_equations,number_of_state_equations);
-ConditionalVariance = repmat(ConditionalVariance,[1 1 nSteps ...
-                    number_of_state_innovations]);
+ConditionalVariance = zeros(number_of_state_equations,nSteps,number_of_state_innovations);
 
 if StateSpaceModel.sigma_e_is_diagonal
     B = StateSpaceModel.impulse_matrix.* ...
@@ -58,17 +58,23 @@ for i=1:number_of_state_innovations
     for h = 1:max(Steps)
         V = transition_matrix*V*transition_matrix'+BB;
         if h == Steps(m)
-            ConditionalVariance(:,:,m,i) = V;
+            ConditionalVariance(order_var,m,i) = diag(V);
             m = m+1;
         end
     end
 end
 
-ConditionalVariance = ConditionalVariance(SubsetOfVariables,SubsetOfVariables,:,:);
+ConditionalVariance = ConditionalVariance(SubsetOfVariables,:,:);
+
 NumberOfVariables = length(SubsetOfVariables);
-PackedConditionalVarianceDecomposition = zeros(NumberOfVariables*(NumberOfVariables+1)/2,length(Steps),StateSpaceModel.number_of_state_innovations); 
+SumOfVariances = zeros(NumberOfVariables,nSteps);
+for h = 1:length(Steps)
+    SumOfVariances(:,h) = sum(ConditionalVariance(:,h,:),3);
+end
+
+ConditionalVarianceDecomposition = zeros(NumberOfVariables,length(Steps),number_of_state_innovations); 
 for i=1:number_of_state_innovations
     for h = 1:length(Steps)
-        PackedConditionalVarianceDecomposition(:,h,i) = dyn_vech(ConditionalVariance(:,:,h,i));
+        ConditionalVarianceDecomposition(:,h,i) = squeeze(ConditionalVariance(:,h,i))./SumOfVariances(:,h);
     end
 end

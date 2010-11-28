@@ -113,7 +113,7 @@ if M_.exo_nbr > 1
         if posterior
             for i=1:NumberOfEndogenousVariables
                 for j=1:NumberOfExogenousVariables
-                    oo_ = posterior_analysis('conditional decomposition',var_list_(i,:),M_.exo_names(j,:),Steps,options_,M_,oo_);
+                    oo_ = posterior_analysis('conditional decomposition',i,M_.exo_names(j,:),Steps,options_,M_,oo_);
                 end
             end
         else

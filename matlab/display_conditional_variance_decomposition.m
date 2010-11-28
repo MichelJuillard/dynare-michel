@@ -44,8 +44,9 @@ ic = dr.nstatic+(1:dr.npred)';
 
 [StateSpaceModel.transition_matrix,StateSpaceModel.impulse_matrix] = kalman_transition_matrix(dr,iv,ic,[],exo_nbr);
 StateSpaceModel.state_innovations_covariance_matrix = M_.Sigma_e;
+StateSpaceModel.order_var = dr.order_var;
 
-conditional_decomposition_array = conditional_variance_decomposition(StateSpaceModel,Steps,dr.inv_order_var(SubsetOfVariables ));
+conditional_decomposition_array = conditional_variance_decomposition(StateSpaceModel,Steps,SubsetOfVariables );
 
 if options_.noprint == 0
     disp(' ')
@@ -58,10 +59,9 @@ for i=1:length(Steps)
     disp(['Period ' int2str(Steps(i)) ':'])
     
     for j=1:exo_nbr
-        vardec_i(:,j) = dyn_diag_vech(conditional_decomposition_array(:, ...
-                                                          i,j));
+        vardec_i(:,j) = 100*conditional_decomposition_array(:, ...
+                                                          i,j);
     end
-    vardec_i = 100*vardec_i./repmat(sum(vardec_i,2),1,exo_nbr);
     if options_.noprint == 0
         headers = M_.exo_names;
         headers(M_.exo_names_orig_ord,:) = headers;
