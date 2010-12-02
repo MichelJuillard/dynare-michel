@@ -3513,7 +3513,7 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 </para>
 </refsect2>
 <refsect2><title>Running the smoother with calibrated parameters</title>
-It is possible to compute smoothed value of the endogenous variables and the shocks with calibrated parameters, without estimation proper. For this usage, there should be no <command>estimated_params</command> block. Observed variables must be declared. A dataset must be specified in the <command>estimation</command> instruction. In addition, use the following options: <command>mode_compute=0,mh_replic=0,smoother</command>. Currently, there is no specific output for this usage of the <command>estimation</command> command. The results are made available in fields of <command>oo_</command> structure. An example is available in <filename>./tests/smoother/calibrated_model.mod</filename>.
+<para>It is possible to compute smoothed value of the endogenous variables and the shocks with calibrated parameters, without estimation proper. For this usage, there should be no <command>estimated_params</command> block. Observed variables must be declared. A dataset must be specified in the <command>estimation</command> instruction. In addition, use the following options: <command>mode_compute=0,mh_replic=0,smoother</command>. Currently, there is no specific output for this usage of the <command>estimation</command> command. The results are made available in fields of <command>oo_</command> structure. An example is available in <filename>./tests/smoother/calibrated_model.mod</filename>.</para>
 </refsect2>
 </refsect1>
 </refentry>
