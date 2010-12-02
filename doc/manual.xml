@@ -3247,13 +3247,13 @@ end;
       <listitem><para>Specifies the optimizer for the mode computation:
       <itemizedlist>
         <listitem><para><literal>0</literal>: the mode isn't computed. <option>mode_file</option> option must be specified</para></listitem>
-        <listitem><para><literal>1</literal>: uses <trademark class="registered">MATLAB</trademark>'s <command>fmincon</command></para></listitem>
+        <listitem><para><literal>1</literal>: uses <command>fmincon</command> optimization routine (not available under Octave)</para></listitem>
         <listitem><para><literal>2</literal>: value no longer used</para></listitem>
-        <listitem><para><literal>3</literal>: uses <trademark class="registered">MATLAB</trademark>'s <command>fminunc</command></para></listitem>
+        <listitem><para><literal>3</literal>: uses <command>fminunc</command> optimization routine</para></listitem>
         <listitem><para><literal>4</literal>: uses Chris Sims's <command>csminwel</command></para></listitem>
         <listitem><para><literal>5</literal>: uses Marco Ratto's <command>newrat</command></para></listitem> 
         <listitem><para><literal>6</literal>: uses a Monte-Carlo based optimization routine (see <ulink url="http://www.dynare.org/DynareWiki/MonteCarloOptimization">Dynare wiki</ulink> for more details)</para></listitem>
-        <listitem><para><literal>7</literal>: uses <trademark class="registered">MATLAB</trademark>'s <command>fminsearch</command> (a simplex based routine)</para></listitem>
+        <listitem><para><literal>7</literal>: uses <command>fminsearch</command>, a simplex based optimization routine (available under Octave if the <ulink url="http://octave.sourceforge.net/optim/">optim</ulink> package from Octave-Forge is installed)</para></listitem>
         <listitem><para>It is also possible to give a <replaceable>FUNCTION_NAME</replaceable> to this option, instead of an <replaceable>INTEGER</replaceable>. In that case, Dynare takes the return value of that function as the posterior mode.</para>
         </listitem>
       </itemizedlist>
