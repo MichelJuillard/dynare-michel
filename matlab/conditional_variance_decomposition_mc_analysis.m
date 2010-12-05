@@ -67,8 +67,7 @@ for file = 1:length(ListOfFiles)
     i1 = i2+1;
 end
 
-p_mean = NaN(2,length(Steps));
-p_mean(1,:) = Steps;
+p_mean = NaN(1,length(Steps));
 p_median = NaN(1,length(Steps));
 p_variance = NaN(1,length(Steps));
 p_deciles = NaN(9,length(Steps));
@@ -78,7 +77,7 @@ p_hpdsup = NaN(1,length(Steps));
 for i=1:length(Steps)
     [pp_mean, pp_median, pp_var, hpd_interval, pp_deciles, pp_density] = ...
         posterior_moments(tmp(:,i),1,mh_conf_sig);
-    p_mean(2,i) = pp_mean;
+    p_mean(i) = pp_mean;
     p_median(i) = pp_median;
     p_variance(i) = pp_var;
     p_deciles(:,i) = pp_deciles;
@@ -86,6 +85,7 @@ for i=1:length(Steps)
     p_hpdsup(i) = hpd_interval(2);
     p_density(:,:,i) = pp_density;
 end
+eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.steps = Steps;']);
 eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.mean.' name ' = p_mean;']);
 eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.median.' name ' = p_median;']);
 eval(['oo_.' TYPE 'TheoreticalMoments.dsge.ConditionalVarianceDecomposition.variance.' name ' = p_variance;']);
