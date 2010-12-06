@@ -112,7 +112,7 @@ if nargout == 0
             tg = tags(cell2mat(tags(:,1)) == i,2:3); % all tags for equation i
             ind = strmatch( tagname, cellstr( tg(:,1) ) );
         end
-        if length(ind) == 0 || ~istag
+        if ~istag || length(ind) == 0
             disp(['Equation number ' int2str(i) ' : ' num2str(tmp)])
         else
             t1 = tg( ind , 2 );
