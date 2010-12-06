@@ -211,27 +211,9 @@ KordpDynare::populateDerivativesContainer(const TwoDMatrix &g, int ord, const ve
             s[2] = revOrder[s2];
           else
             s[2] = s2;
-	  // reordering symmetry indices in increasing order
-	  if (s[0] > s[1])
-	    {
-	      int temp = s[0];
-	      s[0] = s[1];
-	      s[1] = temp;
-	    }
-	  if (s[1] > s[2])
-	    {
-	      int temp = s[1];
-	      s[1] = s[2];
-	      s[2] = temp;
-	    }
-	  if (s[0] > s[1])
-	    {
-	      int temp = s[0];
-	      s[0] = s[1];
-	      s[1] = temp;
-	    }
-	  double x = g.get(i, 2);
-	  mdTi->insert(s, j, x);
+          double x = g.get(i, 2);
+          if (s.isSorted())
+            mdTi->insert(s, j, x);
         }
     }
 
