@@ -167,8 +167,8 @@ KordpDynare::populateDerivativesContainer(const TwoDMatrix &g, int ord, const ve
         {
           int j = (int) g.get(i, 0)-1; // hessian indices start with 1
           int i1 = (int) g.get(i, 1) -1;
-          int s0 = (int) floor(((double) i1)/((double) nJcols));
-          int s1 = i1- (nJcols*s0);
+          int s0 = i1 / nJcols;
+          int s1 = i1 % nJcols;
           if (s0 < nJcols1)
             s[0] = revOrder[s0];
           else
@@ -195,10 +195,10 @@ KordpDynare::populateDerivativesContainer(const TwoDMatrix &g, int ord, const ve
         {
           int j = (int) g.get(i, 0)-1;
           int i1 = (int) g.get(i, 1) -1;
-          int s0 = (int) floor(((double) i1)/((double) nJcols2));
-          int i2 = i1 - nJcols2*s0;
-          int s1 = (int) floor(((double) i2)/((double) nJcols));
-          int s2 = i2 - nJcols*s1;
+          int s0 = i1 / nJcols2;
+          int i2 = i1 % nJcols2;
+          int s1 = i2 / nJcols;
+          int s2 = i2 % nJcols;
           if (s0 < nJcols1)
             s[0] = revOrder[s0];
           else
