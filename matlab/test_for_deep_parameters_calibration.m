@@ -40,8 +40,8 @@ if ~isempty(plist)
         end
     end
     tmp = dbstack;
-    message = [message, ' when using ' tmp(2).name '.\n'];
-    message = [message, 'If these parameters are not initialized in a steadystate file, Dynare may not be able to solve the model...\n\n'];
+    message = [message, ' when using ' tmp(2).name '. '];
+    message = [message, 'If these parameters are not initialized in a steadystate file, Dynare may not be able to solve the model...'];
     message_id  = 'Dynare:ParameterCalibration:NaNValues';
     warning(message_id,message);
 end
