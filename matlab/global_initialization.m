@@ -307,8 +307,12 @@ options_.ms.draws_nbr_modified_harmonic_mean = 1000000;
 options_.ms.thinning_factor = 1;
 options_.ms.dirichlet_scale = [1.0 1.5 2.0];
 
+% Shock decomposition
+options_.parameter_set = [];
+
 % initialize persistent variables in priordens()
 priordens([],[],[],[],[],[],1);
 
 % Set dynare random generator and seed.
 set_dynare_seed('default');
+
