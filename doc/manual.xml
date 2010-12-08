@@ -3565,8 +3565,9 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
   <refsect1><title>Options</title>
   <variablelist>
     <varlistentry>
-      <term><option>parameters</option> = <replaceable>PARAMETER_NAME</replaceable></term>
-      <listitem><para>...</para></listitem>
+      <term><option>parameter_set</option> = <option>prior_mode</option> | <option>prior_mean</option> | <option>posterior_mode</option> | 
+      <option>posterior_mean</option> | <option>posterior_median</option></term>
+      <listitem><para>Specify the parameter set to use for running the smoother. Default value: <option>posterior_mean</option> if Metropolis has been run, else <option>posterior_mode</option>.</para></listitem>
     </varlistentry>
     <varlistentry>
       <term><option>shocks</option> = (
