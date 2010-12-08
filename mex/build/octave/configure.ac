@@ -59,6 +59,12 @@ AC_SUBST([LIBADD_DLOPEN])
 AX_GSL
 AM_CONDITIONAL([HAVE_GSL], [test "x$has_gsl" = "xyes"])
 
+# Check for libmatio, needed by estimation DLL (only under Octave, as an alternative to MATLAB's libmat)
+AC_CHECK_HEADER([matio.h])
+AC_CHECK_LIB([matio], [Mat_Open], [LIBADD_MATIO="-lmatio"])
+AC_SUBST([LIBADD_MATIO])
+AM_CONDITIONAL([HAVE_MATIO], [test "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"])
+
 AM_CONDITIONAL([DO_SOMETHING], [test "x$MKOCTFILE" != "x"])
 
 if test "x$MKOCTFILE" != "x"; then
@@ -77,6 +83,12 @@ else
    BUILD_SWZ_MEX_OCTAVE="no (missing GSL)"
 fi
 
+if test "x$MKOCTFILE" != "x" -a "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"; then
+  BUILD_ESTIMATION_MEX_OCTAVE="yes"
+else
+  BUILD_ESTIMATION_MEX_OCTAVE="no (missing MatIO library)"
+fi
+
 AC_ARG_ENABLE([openmp], AS_HELP_STRING([--enable-openmp], [use OpenMP for parallelization of some MEX files]), [
   if test "x$enable_openmp" = "xyes"; then
     CPPFLAGS="$CPPFLAGS -DUSE_OMP"
@@ -92,6 +104,7 @@ Dynare is now configured for building the following components...
 Binaries (with "make"):
  MEX files for Octave (except SWZ):     $BUILD_MEX_OCTAVE
  SWZ MEX files for Octave:              $BUILD_SWZ_MEX_OCTAVE
+ Estimation MEX for Octave:             $BUILD_ESTIMATION_MEX_OCTAVE
 
 ])
 
