@@ -130,7 +130,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
   Matrix MinMax(npar, 2);
 
   const mxArray *InitSizeArrayPtr = mexGetVariablePtr("caller", "InitSizeArray");
-  if (InitSizeArrayPtr==NULL || InitSizeArrayPtr==0 || (long)InitSizeArrayPtr==-1)
+  if (InitSizeArrayPtr==NULL)
     {
       mexPrintf("Metropolis-Hastings myinputs field InitSizeArrayPtr Initialisation failed!\n");
       return(-1);
@@ -140,7 +140,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
   InitSizeArray = InitSizeArrayVw;
   //const mxArray *flinePtr = mxGetField(myinputs, 0, "fline");
   const mxArray *flinePtr = mexGetVariable("caller",  "fline");
-  if (flinePtr==NULL || flinePtr==0 || (long)flinePtr==-1)
+  if (flinePtr==NULL)
     {
       mexPrintf("Metropolis-Hastings myinputs field fline Initialisation failed!\n");
       return(-1);
@@ -148,7 +148,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
   VectorView fline(mxGetPr(flinePtr), nBlocks, 1);
 
   mxArray *NewFileArrayPtr = mexGetVariable("caller", "NewFile");
-  if (NewFileArrayPtr==NULL || NewFileArrayPtr==0 || (long)NewFileArrayPtr==-1)
+  if (NewFileArrayPtr==NULL)
     {
       mexPrintf("Metropolis-Hastings myinputs fields NewFileArrayPtr Initialisation failed!\n");
       return(-1);
@@ -169,13 +169,13 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
 
   const mxArray *record = mexGetVariable("caller", "record");
   //const mxArray *record = mxGetField(myinputs, 0, "record");
-  if (record==NULL || record==0 || (long)record==-1)
+  if (record==NULL)
     {
       mexPrintf("Metropolis-Hastings record Initialisation failed!\n");
       return(-1);
     }
   mxArray *AcceptationRatesPtr = mxGetField(record, 0, "AcceptationRates");
-  if (AcceptationRatesPtr==NULL || AcceptationRatesPtr==0 || (long)AcceptationRatesPtr==-1)
+  if (AcceptationRatesPtr==NULL)
     {
       mexPrintf("Metropolis-Hastings record AcceptationRatesPtr Initialisation failed!\n");
       return(-1);
