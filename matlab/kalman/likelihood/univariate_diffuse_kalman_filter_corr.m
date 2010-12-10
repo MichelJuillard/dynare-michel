@@ -18,7 +18,7 @@ function [LIK, lik] = univariate_diffuse_kalman_filter_corr(T,R,Q,H,Pinf,Pstar,Y
 %    no_more_missing_observations [integer]   scalar.
 %
 % OUTPUTS
-%    LIK        [double]    scalar, likelihood
+%    LIK        [double]    scalar, MINUS loglikelihood
 %    lik        [double]    vector, density of observations in each period.
 %
 % REFERENCES

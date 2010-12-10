@@ -19,7 +19,7 @@ function [LIK, lik] = missing_observations_diffuse_kalman_filter(T,R,Q,H,Pinf,Ps
 %    no_more_missing_observations [integer]   scalar.
 %             
 % OUTPUTS
-%    LIK:    likelihood
+%    LIK:    MINUS loglikelihood
 %    lik:    density vector in each period
 %        
 % REFERENCES

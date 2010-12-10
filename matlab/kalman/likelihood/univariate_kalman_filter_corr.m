@@ -19,7 +19,7 @@ function [LIK, lik] = ...
 %    no_more_missing_observations [integer]   scalar.
 %
 % OUTPUTS
-%    LIK        [double]    scalar, likelihood
+%    LIK        [double]    scalar, MINUS loglikelihood
 %    lik        [double]    vector, density of observations in each period.
 %
 % REFERENCES

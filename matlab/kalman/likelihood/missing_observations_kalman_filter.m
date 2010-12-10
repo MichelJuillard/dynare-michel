@@ -18,7 +18,7 @@ function  [LIK, lik] = missing_observations_kalman_filter(T,R,Q,H,P,Y,start,mf,k
 %    no_more_missing_observations [integer]   scalar.    
 %    
 % OUTPUTS
-%    LIK        [double]    scalar, likelihood
+%    LIK        [double]    scalar, MINUS loglikelihood
 %    lik        [double]    vector, density of observations in each period.
 %        
 % REFERENCES

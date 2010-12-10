@@ -14,7 +14,7 @@ function [LIK, lik] = kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol)
 %    riccati_tol            [double]    scalar, tolerance parameter (riccati iteration).
 %
 % OUTPUTS
-%    LIK        [double]    scalar, likelihood
+%    LIK        [double]    scalar, MINUS loglikelihood
 %    lik        [double]    vector, density of observations in each period.
 %
 % REFERENCES

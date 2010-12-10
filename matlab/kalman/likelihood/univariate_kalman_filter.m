@@ -17,7 +17,7 @@ function [LIK, lik] = univariate_kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,r
 %    no_more_missing_observations [integer]   scalar.
 %
 % OUTPUTS
-%    LIK        [double]    scalar, likelihood
+%    LIK        [double]    scalar, MINUS loglikelihood
 %    lik        [double]    vector, density of observations in each period.
 %
 % REFERENCES

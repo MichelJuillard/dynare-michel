@@ -15,7 +15,7 @@ function [LIK, lik] = diffuse_kalman_filter(T,R,Q,H,Pinf,Pstar,Y,start,Z,kalman_
 %    riccati_tol [double]      scalar, tolerance parameter (riccati iteration).
 %             
 % OUTPUTS
-%    LIK:    likelihood
+%    LIK:    MINUS loglikelihood
 %    lik:    density vector in each period
 %        
 % REFERENCES
