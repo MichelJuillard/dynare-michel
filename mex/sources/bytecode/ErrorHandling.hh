@@ -139,6 +139,9 @@ double *u, *y, *ya;
 double *steady_y, *steady_x;
 double *g2, *g1, *r;
 vector<mxArray*> jacobian_block, jacobian_other_endo_block, jacobian_exo_block, jacobian_det_exo_block;
+map<unsigned int,double> TEF;
+map<pair<unsigned int, unsigned int>, double > TEFD;
+map<pair<unsigned int, pair<unsigned int, unsigned int> >, double > TEFDD;
 
 ExpressionType EQN_type;
 it_code_type it_code_expr;

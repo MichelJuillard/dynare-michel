@@ -160,6 +160,9 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
 #endif
               EQN_type = TemporaryTerm;
               EQN_equation = ((FNUMEXPR_ *) it_code->second)->get_equation();
+#ifdef DEBUG
+              mexPrintf("EQN_equation=%d\n",EQN_equation);mexEvalString("drawnow;");
+#endif
               break;
             case ModelEquation:
 #ifdef DEBUG
@@ -1058,6 +1061,339 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
             }
           break;
 
+        case FPUSH:
+          break;
+
+        case FCALL:
+          {
+#ifdef DEBUG
+            mexPrintf("------------------------------\n");
+            mexPrintf("CALL ");mexEvalString("drawnow;");
+#endif
+            FCALL_ *fc = (FCALL_ *) it_code->second;
+            string function_name = fc->get_function_name();
+#ifdef DEBUG
+            mexPrintf("function_name=%s ", function_name.c_str());mexEvalString("drawnow;");
+#endif
+            unsigned int nb_input_arguments = fc->get_nb_input_arguments();
+#ifdef DEBUG
+            mexPrintf("nb_input_arguments=%d ", nb_input_arguments);mexEvalString("drawnow;");
+#endif
+            unsigned int nb_output_arguments = fc->get_nb_output_arguments();
+#ifdef DEBUG
+            mexPrintf("nb_output_arguments=%d\n", nb_output_arguments);mexEvalString("drawnow;");
+#endif
+
+
+            mxArray *output_arguments[3];
+            string arg_func_name = fc->get_arg_func_name();
+#ifdef DEBUG
+            mexPrintf("arg_func_name.length() = %d\n",arg_func_name.length());
+            mexPrintf("arg_func_name.c_str() = %s\n",arg_func_name.c_str());
+#endif
+            unsigned int nb_add_input_arguments = fc->get_nb_add_input_arguments();
+            external_function_type function_type = fc->get_function_type();
+#ifdef DEBUG
+            mexPrintf("function_type=%d ExternalFunctionWithoutDerivative=%d\n",function_type, ExternalFunctionWithoutDerivative);
+            mexEvalString("drawnow;");
+#endif
+            mxArray **input_arguments;
+            switch (function_type)
+              {
+              case ExternalFunctionWithoutDerivative:
+              case ExternalFunctionWithFirstDerivative:
+              case ExternalFunctionWithFirstandSecondDerivative:
+                {
+                  input_arguments = (mxArray**)mxMalloc(nb_input_arguments * sizeof(mxArray*));
+#ifdef DEBUG
+                  mexPrintf("Stack.size()=%d\n",Stack.size());
+                  mexEvalString("drawnow;");
+#endif
+                  for (unsigned int i = 0; i < nb_input_arguments ; i++)
+                    {
+                      mxArray *vv = mxCreateDoubleScalar(Stack.top());
+                      input_arguments[nb_input_arguments - i - 1] = vv;
+                      Stack.pop();
+                    }
+                  mexCallMATLAB(nb_output_arguments, output_arguments, nb_input_arguments, input_arguments, function_name.c_str());
+                  double *rr = mxGetPr(output_arguments[0]);
+                  Stack.push(*rr);
+                  if (function_type == ExternalFunctionWithFirstDerivative || function_type == ExternalFunctionWithFirstandSecondDerivative)
+                    {
+                      unsigned int indx = fc->get_indx();
+                      double *FD1 = mxGetPr(output_arguments[1]);
+                      unsigned int rows = mxGetN(output_arguments[1]);
+                      for(unsigned int i = 0; i < rows; i++)
+                        TEFD[make_pair(indx, i)] = FD1[i];
+                    }
+                  if (function_type == ExternalFunctionWithFirstandSecondDerivative)
+                    {
+                      unsigned int indx = fc->get_indx();
+                      double *FD2 = mxGetPr(output_arguments[2]);
+                      unsigned int rows = mxGetM(output_arguments[2]);
+                      unsigned int cols = mxGetN(output_arguments[2]);
+                      unsigned int k = 0;
+                      for (unsigned int j = 0; j < cols; j++)
+                        for (unsigned int i = 0; i < rows; i++)
+                          TEFDD[make_pair(indx, make_pair(i, j))] = FD2[k++];
+                    }
+                }
+                break;
+              case ExternalFunctionNumericalFirstDerivative:
+                {
+                  input_arguments = (mxArray**)mxMalloc((nb_input_arguments+1+nb_add_input_arguments) * sizeof(mxArray*));
+                  mxArray *vv = mxCreateString(arg_func_name.c_str());
+                  input_arguments[0] = vv;
+                  vv = mxCreateDoubleScalar(fc->get_row());
+                  input_arguments[1] = vv;
+                  vv = mxCreateCellMatrix(1, nb_add_input_arguments);
+                  for (unsigned int i = 0; i < nb_add_input_arguments; i++)
+                    {
+                      double rr = Stack.top();
+#ifdef DEBUG
+                      mexPrintf("i=%d rr = %f Stack.size()=%d\n",i, rr, Stack.size());
+#endif
+                      mxSetCell(vv, nb_add_input_arguments - (i+1), mxCreateDoubleScalar(rr));
+                      Stack.pop();
+                    }
+                  input_arguments[nb_input_arguments+nb_add_input_arguments] = vv;
+#ifdef DEBUG
+                  mexCallMATLAB(0, NULL, 1, & input_arguments[0], "disp");
+                  mexCallMATLAB(0, NULL, 1, & input_arguments[1], "disp");
+                  mexCallMATLAB(0, NULL, 1, & input_arguments[2], "celldisp");
+                  mexPrintf("OK\n");
+                  mexEvalString("drawnow;");
+#endif
+                  nb_input_arguments = 3;
+                  mexCallMATLAB(nb_output_arguments, output_arguments, nb_input_arguments, input_arguments, function_name.c_str());
+                  double *rr = mxGetPr(output_arguments[0]);
+#ifdef DEBUG
+                  mexPrintf("*rr=%f\n",*rr);
+#endif
+                  Stack.push(*rr);
+                }
+                break;
+              case ExternalFunctionFirstDerivative:
+                {
+                  input_arguments = (mxArray**)mxMalloc(nb_input_arguments * sizeof(mxArray*));
+                  for (unsigned int i = 0; i < nb_input_arguments; i++)
+                    {
+                      mxArray *vv = mxCreateDoubleScalar(Stack.top());
+                      input_arguments[(nb_input_arguments - 1) - i] = vv;
+                      Stack.pop();
+                    }
+                  mexCallMATLAB(nb_output_arguments, output_arguments, nb_input_arguments, input_arguments, function_name.c_str());
+                  unsigned int indx = fc->get_indx();
+                  double *FD1 = mxGetPr(output_arguments[0]);
+                  //mexPrint
+                  unsigned int rows = mxGetN(output_arguments[0]);
+                  for (unsigned int i = 0; i < rows; i++)
+                    TEFD[make_pair(indx, i)] = FD1[i];
+                }
+                break;
+              case ExternalFunctionNumericalSecondDerivative:
+                {
+                  input_arguments = (mxArray**)mxMalloc((nb_input_arguments+1+nb_add_input_arguments) * sizeof(mxArray*));
+                  mxArray *vv = mxCreateString(arg_func_name.c_str());
+                  input_arguments[0] = vv;
+                  vv = mxCreateDoubleScalar(fc->get_row());
+                  input_arguments[1] = vv;
+                  vv = mxCreateDoubleScalar(fc->get_col());
+                  input_arguments[2] = vv;
+                  vv = mxCreateCellMatrix(1, nb_add_input_arguments);
+                  for (unsigned int i = 0; i < nb_add_input_arguments; i++)
+                    {
+                      double rr = Stack.top();
+                      mexPrintf("i=%d rr = %f\n",i, rr);
+                      mxSetCell(vv, (nb_add_input_arguments - 1) - i, mxCreateDoubleScalar(rr));
+                      Stack.pop();
+                    }
+                  input_arguments[nb_input_arguments+nb_add_input_arguments] = vv;
+                  mexCallMATLAB(0, NULL, 1, & input_arguments[0], "disp");
+                  mexCallMATLAB(0, NULL, 1, & input_arguments[1], "disp");
+                  mexCallMATLAB(0, NULL, 1, & input_arguments[2], "celldisp");
+                  mexPrintf("OK\n");
+                  mexEvalString("drawnow;");
+                  nb_input_arguments = 3;
+                  mexCallMATLAB(nb_output_arguments, output_arguments, nb_input_arguments, input_arguments, function_name.c_str());
+                  double *rr = mxGetPr(output_arguments[0]);
+                  Stack.push(*rr);
+                }
+                break;
+              case ExternalFunctionSecondDerivative:
+                {
+                  input_arguments = (mxArray**)mxMalloc(nb_input_arguments * sizeof(mxArray*));
+                  for (unsigned int i = 0; i < nb_input_arguments ; i++)
+                    {
+                      mxArray *vv = mxCreateDoubleScalar(Stack.top());
+                      input_arguments[i] = vv;
+                      Stack.pop();
+                    }
+                  mexCallMATLAB(nb_output_arguments, output_arguments, nb_input_arguments, input_arguments, function_name.c_str());
+                  unsigned int indx = fc->get_indx();
+                  double *FD2 = mxGetPr(output_arguments[2]);
+                  unsigned int rows = mxGetM(output_arguments[0]);
+                  unsigned int cols = mxGetN(output_arguments[0]);
+                  unsigned int k = 0;
+                  for (unsigned int j = 0; j < cols; j++)
+                    for (unsigned int i = 0; i < rows; i++)
+                      TEFDD[make_pair(indx, make_pair(i, j))] = FD2[k++];
+                }
+                break;
+              }
+            /*if (f)
+              {
+                input_arguments = (mxArray**)mxMalloc((nb_input_arguments+1+nb_add_input_arguments) * sizeof(mxArray*));
+                //the called function is jacob_element or hess_element
+                mxArray *vv = mxCreateString(arg_func_name.c_str());
+                input_arguments[0] = vv;
+                vv = mxCreateDoubleScalar(fc->get_indx());
+                input_arguments[1] = vv;
+                start_input_arg += 2;
+              }
+            else
+               input_arguments = (mxArray**)mxMalloc(nb_input_arguments * sizeof(mxArray*));
+            for (unsigned int i = start_input_arg; i < nb_input_arguments + start_input_arg; i++)
+              {
+                mxArray *vv = mxCreateDoubleScalar(Stack.top());
+                input_arguments[i] = vv;
+                Stack.pop();
+              }
+            mexPrintf("nb_add_input_arguments=%d Stack.size()=%d\n",nb_add_input_arguments, Stack.size());mexEvalString("drawnow;");
+            if (arg_func_name.length() > 0)
+              {
+                mxArray *vv = mxCreateCellArray(1, &nb_add_input_arguments);
+                for (unsigned int i = 0; i < nb_add_input_arguments; i++)
+                  {
+                    double rr = Stack.top();
+                    mexPrintf("i=%d rr = %f\n",i, rr);
+                    mxSetCell(vv, i, mxCreateDoubleScalar(rr));
+                    Stack.pop();
+                  }
+                input_arguments[nb_input_arguments+nb_add_input_arguments] = vv;
+                mexCallMATLAB(0, NULL, 1, & input_arguments[0], "disp");
+                mexCallMATLAB(0, NULL, 1, & input_arguments[1], "disp");
+                mexCallMATLAB(0, NULL, 1, & input_arguments[2], "celldisp");
+                mexPrintf("OK\n");
+                mexEvalString("drawnow;");
+                nb_input_arguments = 3;
+              }
+
+            mexCallMATLAB(nb_output_arguments, output_arguments, nb_input_arguments, input_arguments, function_name.c_str());
+            double *rr = mxGetPr(output_arguments[0]);
+            Stack.push(*rr);
+            if (nb_output_arguments >= 2)  //its the return of a TEF
+              {
+                unsigned int indx = fc->get_indx();
+                double *FD1 = mxGetPr(output_arguments[1]);
+                unsigned int rows = mxGetM(output_arguments[1]);
+                for(unsigned int i = 0; i < rows; i++)
+                  TEFD[make_pair(indx, i)] = FD1[i];
+                if (nb_output_arguments == 3)
+                  {
+                    double *FD2 = mxGetPr(output_arguments[2]);
+                    unsigned int rows = mxGetM(output_arguments[2]);
+                    unsigned int cols = mxGetN(output_arguments[2]);
+                    unsigned int k = 0;
+                    for (unsigned int j = 0; j < cols; j++)
+                      for (unsigned int i = 0; i < rows; i++)
+                        TEFDD[make_pair(indx, make_pair(i, j))] = FD2[k++];
+                  }
+              }
+            else*/
+/*
+#ifdef DEBUG
+            mexPrintf("Stack.size()=%d, *rr=%f\n",Stack.size(), *rr);
+            mexPrintf("done\n");
+            mexEvalString("drawnow;");
+#endif*/
+          }
+          break;
+        case FSTPTEF:
+          var = ((FSTPTEF_ *) it_code->second)->get_number();
+#ifdef DEBUG
+          mexPrintf("FSTPTEF\n");
+          mexPrintf("var=%d Stack.size()=%d\n",var, Stack.size());
+#endif
+          TEF[var-1] = Stack.top();
+#ifdef DEBUG
+          mexPrintf("FSTP TEF[var-1]=%f done\n",TEF[var-1]);
+          mexEvalString("drawnow;");
+#endif
+          Stack.pop();
+          break;
+        case FLDTEF:
+          var = ((FLDTEF_ *) it_code->second)->get_number();
+#ifdef DEBUG
+          mexPrintf("FLDTEF\n");
+          mexPrintf("var=%d Stack.size()=%d\n",var, Stack.size());
+          mexPrintf("FLD TEF[var-1]=%f done\n",TEF[var-1]);
+          mexEvalString("drawnow;");
+#endif
+          Stack.push(TEF[var-1]);
+          break;
+        case FSTPTEFD:
+          {
+            unsigned int indx = ((FSTPTEFD_ *) it_code->second)->get_indx();
+            unsigned int row = ((FSTPTEFD_ *) it_code->second)->get_row();
+#ifdef DEBUG
+            mexPrintf("FSTPTEFD\n");
+            mexPrintf("indx=%d Stack.size()=%d\n",indx, Stack.size());
+#endif
+            TEFD[make_pair(indx, row-1)] = Stack.top();
+#ifdef DEBUG
+            mexPrintf("FSTP TEFD[make_pair(indx, row)]=%f done\n",TEFD[make_pair(indx, row-1)]);
+            mexEvalString("drawnow;");
+#endif
+            Stack.pop();
+          }
+
+          break;
+        case FLDTEFD:
+          {
+            unsigned int indx = ((FLDTEFD_ *) it_code->second)->get_indx();
+            unsigned int row = ((FLDTEFD_ *) it_code->second)->get_row();
+#ifdef DEBUG
+            mexPrintf("FLDTEFD\n");
+            mexPrintf("indx=%d row=%d Stack.size()=%d\n",indx, row, Stack.size());
+            mexPrintf("FLD TEFD[make_pair(indx, row)]=%f done\n",TEFD[make_pair(indx, row-1)]);
+            mexEvalString("drawnow;");
+#endif
+            Stack.push(TEFD[make_pair(indx, row-1)]);
+          }
+          break;
+        case FSTPTEFDD:
+          {
+            unsigned int indx = ((FSTPTEFDD_ *) it_code->second)->get_indx();
+            unsigned int row = ((FSTPTEFDD_ *) it_code->second)->get_row();
+            unsigned int col = ((FSTPTEFDD_ *) it_code->second)->get_col();
+#ifdef DEBUG
+            mexPrintf("FSTPTEFD\n");
+            mexPrintf("indx=%d Stack.size()=%d\n",indx, Stack.size());
+#endif
+            TEFDD[make_pair(indx, make_pair(row-1, col-1))] = Stack.top();
+#ifdef DEBUG
+            mexPrintf("FSTP TEFDD[make_pair(indx, make_pair(row, col))]=%f done\n",TEFDD[make_pair(indx, make_pair(row, col))]);
+            mexEvalString("drawnow;");
+#endif
+            Stack.pop();
+          }
+
+          break;
+        case FLDTEFDD:
+          {
+            unsigned int indx = ((FLDTEFDD_ *) it_code->second)->get_indx();
+            unsigned int row = ((FLDTEFDD_ *) it_code->second)->get_row();
+            unsigned int col = ((FSTPTEFDD_ *) it_code->second)->get_col();
+#ifdef DEBUG
+            mexPrintf("FLDTEFD\n");
+            mexPrintf("indx=%d Stack.size()=%d\n",indx, Stack.size());
+            mexPrintf("FLD TEFD[make_pair(indx, make_pair(row, col))]=%f done\n",TEFDD[make_pair(indx, make_pair(row, col))]);
+            mexEvalString("drawnow;");
+#endif
+            Stack.push(TEFDD[make_pair(indx, make_pair(row-1, col-1))]);
+          }
+          break;
         case FCUML:
           v1 = Stack.top();
           Stack.pop();
