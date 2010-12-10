@@ -10,7 +10,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
 %   number_of_observations         [integer]
 %   no_more_missing_observations   [integer] 
 % OUTPUTS 
-%   fval        :     value of the posterior kernel at xparam1.
+%   fval        :     MINUS value of the log posterior kernel at xparam1.
 %   cost_flag   :     zero if the function returns a penalty, one otherwise.
 %   ys          :     steady state of original endogenous variables
 %   trend_coeff :
