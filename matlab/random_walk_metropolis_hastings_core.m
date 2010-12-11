@@ -121,12 +121,12 @@ end
 if any(isnan(bayestopt_.jscale))
     if exist([ModelName '_optimal_mh_scale_parameter.mat'])% This file is created by mode_compute=6.
         load([ModelName '_optimal_mh_scale_parameter'])
-        proposal_covariance = d*Scale;
+        proposal_covariance_Choleksy_decomposition = d*Scale;
     else
         error('mh:: Something is wrong. I can''t figure out the value of the scale parameter.')
     end
 else
-    proposal_covariance = d*diag(bayestopt_.jscale);
+    proposal_covariance_Cholesky_decomposition = d*diag(bayestopt_.jscale);
 end
 
 
@@ -169,7 +169,7 @@ for b = fblck:nblck,
     irun = fline(b);
     j = 1;
     while j <= nruns(b)
-        par = feval(ProposalFun, ix2(b,:), proposal_covariance, n);
+        par = feval(ProposalFun, ix2(b,:), proposal_covariance_Cholesky_decomposition, n);
         if all( par(:) > mh_bounds(:,1) ) & all( par(:) < mh_bounds(:,2) )
             try
                 logpost = - feval(TargetFun, par(:),varargin{:});               
