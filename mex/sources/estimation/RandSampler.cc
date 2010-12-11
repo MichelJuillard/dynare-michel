@@ -24,6 +24,7 @@
 ///////////////////////////////////////////////////////////
 
 #include "RandSampler.hh"
+#include "BlasBindings.hh"
 
 /**
  * draw = Mean + randn(1,n) * Sigma_upper_chol;
@@ -32,12 +33,14 @@ void
 RandSampler::randMultiVar(Prior &distribution, Vector &draw, const Vector &mean, const Matrix &Scale, const size_t n)
 {
   assert(n == draw.getSize());
-  assert(n == mean.getSize() || 1 == mean.getSize());
-  assert(n == Scale.getRows() || 1 == Scale.getRows());
-  assert(n == Scale.getCols() || 1 == Scale.getCols());
+  assert(n == mean.getSize() );
+  assert(n == Scale.getRows());
+  assert(n == Scale.getCols());
+
+  draw=mean;
+  Vector drawTmp(n);
   for (size_t i = 0; i < n; ++i)
-    draw(i) = mean(1 == mean.getSize() ? 0 : i)
-              + distribution.drand()
-              *Scale((1 == Scale.getRows() ? 0 : i), (1 == Scale.getCols() ? 0 : i));
+    drawTmp(i) =  distribution.drand();
+  blas::gemv("T", 1.0, Scale, drawTmp, 1.0, draw);
 }
 
