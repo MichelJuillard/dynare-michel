@@ -84,14 +84,6 @@ DecisionRules::DecisionRules(size_t n_arg, size_t p_arg,
       pi_fwrd.push_back(i);
     else
       beta_fwrd.push_back(i);
-
-  // Construct the fixed part of D and E
-  D.setAll(0.0);
-  for (size_t i = 0; i < n_mixed; i++)
-    D(n - n_static + i, beta_back[i]) = 1.0;
-  E.setAll(0.0);
-  for (size_t i = 0; i < n_mixed; i++)
-    E(n - n_static + i, n_back_mixed + beta_fwrd[i]) = 1.0;
 }
 
 void
@@ -110,12 +102,18 @@ DecisionRules::compute(const Matrix &jacobian, Matrix &g_y, Matrix &g_u) throw (
   QR.computeAndLeftMultByQ(S, "T", A);
 
   // Construct matrix D
+  D.setAll(0.0);
+  for (size_t i = 0; i < n_mixed; i++)
+    D(n - n_static + i, beta_back[i]) = 1.0;
   for (size_t j = 0; j < n_back_mixed; j++)
     mat::col_copy(A, n_back_mixed + zeta_back_mixed[j], n_static, n - n_static,
                   D, j, 0);
   MatrixView(D, 0, n_back_mixed, n - n_static, n_fwrd_mixed) = MatrixView(A, n_static, n_back_mixed + n, n - n_static, n_fwrd_mixed);
 
   // Construct matrix E
+  E.setAll(0.0);
+  for (size_t i = 0; i < n_mixed; i++)
+    E(n - n_static + i, n_back_mixed + beta_fwrd[i]) = 1.0;
   MatrixView(E, 0, 0, n - n_static, n_back_mixed) = MatrixView(A, n_static, 0, n - n_static, n_back_mixed);
   for (size_t j = 0; j < n_fwrd; j++)
     mat::col_copy(A, n_back_mixed + zeta_fwrd_mixed[pi_fwrd[j]], n_static, n - n_static,
