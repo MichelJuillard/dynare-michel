@@ -3,7 +3,12 @@ ACLOCAL_AMFLAGS = -I ../../../m4
 # libdynare++ must come before gensylv, k_order_perturbation, dynare_simul_
 # libslicot must come before kalman_steady_state
 if DO_SOMETHING
-SUBDIRS = mjdgges kronecker bytecode libdynare++ gensylv k_order_perturbation dynare_simul_ logposterior logMHMCMCposterior libslicot kalman_steady_state
+SUBDIRS = mjdgges kronecker bytecode libdynare++ gensylv k_order_perturbation dynare_simul_ logposterior logMHMCMCposterior kalman_steady_state
+
+if HAVE_FORT
+SUBDIRS += libslicot
+endif
+
 if HAVE_GSL
 SUBDIRS += swz
 endif

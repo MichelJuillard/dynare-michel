@@ -54,6 +54,7 @@ FFLAGS="$FFLAGS -Wall"
 CXXFLAGS="$CXXFLAGS -Wall"
 
 AC_PROG_F77
+AM_CONDITIONAL([HAVE_FORT], [test "x$F77" != "x"])
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
@@ -94,6 +95,12 @@ else
    BUILD_SWZ_MEX_MATLAB="no (missing GSL)"
 fi
 
+if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$F77" != "x"; then
+   BUILD_LIBSLICOT_MATLAB="yes"
+else
+   BUILD_LIBSLICOT_MATLAB="no (missing Fortran Compiler)"
+fi
+
 AC_ARG_ENABLE([openmp], AS_HELP_STRING([--enable-openmp], [use OpenMP for parallelization of some MEX files]), [
   if test "x$enable_openmp" = "xyes"; then
     CPPFLAGS="$CPPFLAGS -DUSE_OMP"
@@ -118,6 +125,7 @@ Dynare is now configured for building the following components...
 
 Binaries (with "make"):
  MEX files for MATLAB (except SWZ):     $BUILD_MEX_MATLAB
+ Libslicot library:                     $BUILD_LIBSLICOT_MATLAB
  SWZ MEX files for MATLAB:              $BUILD_SWZ_MEX_MATLAB
  M2HTML documentation:                  $BUILD_M2HTML
 
