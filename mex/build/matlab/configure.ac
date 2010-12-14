@@ -96,9 +96,9 @@ else
 fi
 
 if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$F77" != "x"; then
-   BUILD_LIBSLICOT_MATLAB="yes"
+   BUILD_KALMAN_STEADY_STATE_MATLAB="yes"
 else
-   BUILD_LIBSLICOT_MATLAB="no (missing Fortran Compiler)"
+   BUILD_KALMAN_STEADY_STATE_MATLAB="no (missing Fortran Compiler for compilation of libslicot)"
 fi
 
 AC_ARG_ENABLE([openmp], AS_HELP_STRING([--enable-openmp], [use OpenMP for parallelization of some MEX files]), [
@@ -124,10 +124,10 @@ AC_MSG_NOTICE([
 Dynare is now configured for building the following components...
 
 Binaries (with "make"):
- MEX files for MATLAB (except SWZ):     $BUILD_MEX_MATLAB
- Libslicot library:                     $BUILD_LIBSLICOT_MATLAB
- SWZ MEX files for MATLAB:              $BUILD_SWZ_MEX_MATLAB
- M2HTML documentation:                  $BUILD_M2HTML
+ MEX files for MATLAB (except SWZ and Kalman Steady State):     $BUILD_MEX_MATLAB
+ SWZ MEX files for MATLAB:                                      $BUILD_SWZ_MEX_MATLAB
+ Kalman Steady State MEX file for MATLAB:                       $BUILD_KALMAN_STEADY_STATE_MATLAB
+ M2HTML documentation:                                          $BUILD_M2HTML
 
 ])
 

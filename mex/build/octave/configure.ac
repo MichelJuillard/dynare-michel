@@ -91,9 +91,9 @@ else
 fi
 
 if  test "x$MKOCTFILE" != "x" -a "x$F77" != "x"; then
-   BUILD_LIBSLICOT_OCTAVE="yes"
+   BUILD_KALMAN_STEADY_STATE_OCTAVE="yes"
 else
-   BUILD_LIBSLICOT_OCTAVE="no (missing Fortran Compiler)"
+   BUILD_KALMAN_STEADY_STATE_OCTAVE="no (missing Fortran Compiler for compilation of libslicot)"
 fi
 
 AC_ARG_ENABLE([openmp], AS_HELP_STRING([--enable-openmp], [use OpenMP for parallelization of some MEX files]), [
@@ -109,10 +109,10 @@ AC_MSG_NOTICE([
 Dynare is now configured for building the following components...
 
 Binaries (with "make"):
- MEX files for Octave (except SWZ):     $BUILD_MEX_OCTAVE
- Libslicot library:                     $BUILD_LIBSLICOT_OCTAVE
- SWZ MEX files for Octave:              $BUILD_SWZ_MEX_OCTAVE
- Estimation MEX for Octave:             $BUILD_ESTIMATION_MEX_OCTAVE
+ MEX files for Octave (except SWZ and Kalman Steady State):     $BUILD_MEX_OCTAVE
+ SWZ MEX files for Octave:                                      $BUILD_SWZ_MEX_OCTAVE
+ Kalman Steady State MEX file for Octave:                       $BUILD_KALMAN_STEADY_STATE_OCTAVE
+ Estimation MEX for Octave:                                     $BUILD_ESTIMATION_MEX_OCTAVE
 
 ])
 
