@@ -70,20 +70,19 @@ extern "C" {
   mexFunction(int nlhs, mxArray *plhs[],
               int nrhs, const mxArray *prhs[])
   {
-    if (nrhs < 5 || nlhs < 2)
-      DYN_MEX_FUNC_ERR_MSG_TXT("Must have exactly 5 input parameters and take at least 2 output parameters.");
+    if (nrhs != 4 || nlhs < 2)
+      DYN_MEX_FUNC_ERR_MSG_TXT("Must have exactly 4 input parameters and take at least 2 output parameters.");
 
     const mxArray *dr = prhs[0];
     const mxArray *M_ = prhs[1];
     const mxArray *options_ = prhs[2];
-    const mxArray *oo_ = prhs[3];
 
     mxArray *mFname = mxGetField(M_, 0, "fname");
     if (!mxIsChar(mFname))
       DYN_MEX_FUNC_ERR_MSG_TXT("Input must be of type char.");
 
     string fName = mxArrayToString(mFname);
-    const mxArray *mexExt = prhs[4];
+    const mxArray *mexExt = prhs[3];
     string dfExt = mxArrayToString(mexExt); // Dynamic file extension, e.g. ".dll" or ".mexw32"
 
     int kOrder;

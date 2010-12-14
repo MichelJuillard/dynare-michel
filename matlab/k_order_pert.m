@@ -26,19 +26,19 @@ order = options.order;
 
 switch(order)
   case 1
-    [err, g_1] = k_order_perturbation(dr,M,options, oo , ['.' ...
+    [err, g_1] = k_order_perturbation(dr,M,options, ['.' ...
                         mexext]);
     mexErrCheck('k_order_perturbation', err);
     dr.g_1 = g_1;
   case 2
-    [err, g_0, g_1, g_2] = k_order_perturbation(dr,M,options, oo , ['.' ...
+    [err, g_0, g_1, g_2] = k_order_perturbation(dr,M,options, ['.' ...
                         mexext]);
     mexErrCheck('k_order_perturbation', err);
     dr.g_0 = g_0;
     dr.g_1 = g_1;
     dr.g_2 = g_2;
   case 3
-    [err, g_0, g_1, g_2, g_3] = k_order_perturbation(dr,M,options, oo , ['.' ...
+    [err, g_0, g_1, g_2, g_3] = k_order_perturbation(dr,M,options, ['.' ...
                         mexext]);
     mexErrCheck('k_order_perturbation', err);
     dr.g_0 = g_0;
