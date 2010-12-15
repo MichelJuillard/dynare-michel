@@ -22,8 +22,7 @@
 
 #include <sstream>
 
-DynamicModelDLL::DynamicModelDLL(const string &modName, int nExog_arg, const string &sExt) throw (DynareException) :
-  nExog(nExog_arg)
+DynamicModelDLL::DynamicModelDLL(const string &modName, const string &sExt) throw (DynareException)
 {
   string fName;
 #if !defined(__CYGWIN32__) && !defined(_WIN32)

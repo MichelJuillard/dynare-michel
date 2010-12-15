@@ -42,7 +42,6 @@ class DynamicModelDLL
 {
 private:
   DynamicFn Dynamic; // pointer to the Dynamic function in DLL
-  const int nExog; // no of exogenous
 #if defined(_WIN32) || defined(__CYGWIN32__)
   HINSTANCE dynamicHinstance;  // DLL instance pointer in Windows
 #else
@@ -51,7 +50,7 @@ private:
 
 public:
   // construct and load Dynamic model DLL
-  DynamicModelDLL(const string &fname, int nExog_arg, const string &sExt) throw (DynareException);
+  DynamicModelDLL(const string &fname, const string &sExt) throw (DynareException);
   virtual ~DynamicModelDLL();
 
   void eval(const Vector &y, const Vector &x, const Vector &params, const Vector &ySteady,
