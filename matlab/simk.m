@@ -76,7 +76,7 @@ if isempty(jwc)
     temp = icc1 ;
 else
     ljwc = size(jwc,1) ;          % length of each row in jwc
-    temp = union(jwc,icc1) ;      % prepares next iteration
+    temp = union(jwc,icc1,'rows') ;      % prepares next iteration
 end
 
 j1 = ky(1:lky(1),1) ;
@@ -90,7 +90,7 @@ for i = 2:M_.maximum_endo_lag
             if ljwc(i) == 0
                 temp = icc1;
             else
-                temp = union(jwc(1:ljwc(i),i),icc1) ;
+                temp = union(jwc(1:ljwc(i),i),icc1,'rows') ;
             end
         else
             [jwc,ljwc] = ffill(jwc,ljwc,[]) ;
@@ -103,7 +103,7 @@ for i = 2:M_.maximum_endo_lag
         else
             [jwc,ljwc] = ffill(jwc,ljwc,temp) ;
         end
-        temp = union(jwc(1:ljwc(i),i),icc1) ;
+        temp = union(jwc(1:ljwc(i),i),icc1,'rows') ;
     end
 end
 
@@ -112,7 +112,7 @@ ltemp = zeros(M_.maximum_endo_lag,1) ;
 jwc1 = zeros(ncc1,M_.maximum_endo_lag) ;
 
 for i = 1:M_.maximum_endo_lag
-    temp = union(jwc(1:ljwc(i),i),icc1) ;
+    temp = union(jwc(1:ljwc(i),i),icc1,'rows') ;
     ltemp(i) = size(temp,1) ;
     if ljwc(i) > 0
         jwc(1:ljwc(i),i) = indnv(jwc(1:ljwc(i),i),temp) ;
@@ -165,7 +165,7 @@ for iter = 1:options_.maxit_
                     w = -w0*c(j1i,1:ncc1) ;
                     jwci = icc1 ;
                 else
-                    iz = union(jwci,icc1) ;
+                    iz = union(jwci,icc1,'rows') ;
                     ix = indnv(jwci,iz) ;
                     iy__ = indnv(icc1,iz) ;
                     temp = zeros(size(w,1),size(iz,1)) ;
