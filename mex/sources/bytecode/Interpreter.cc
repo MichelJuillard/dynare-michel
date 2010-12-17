@@ -916,9 +916,15 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
 #endif
               break;
             case oEqual:
+              // Nothing to do
+              break;
             default:
-              /*throw EvalException();*/
-              ;
+              {
+                mexPrintf("Error\n");
+                ostringstream tmp;
+                tmp << " in compute_block_time, unknown binary operator " << op << "\n";
+                throw FatalExceptionHandling(tmp.str());
+              }
             }
           break;
         case FUNARY:
@@ -1062,7 +1068,12 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
 # endif
               break;
             default:
-              ;
+              {
+                mexPrintf("Error\n");
+                ostringstream tmp;
+                tmp << " in compute_block_time, unknown unary operator " << op << "\n";
+                throw FatalExceptionHandling(tmp.str());
+              }
             }
           break;
         case FTRINARY:
@@ -1087,6 +1098,13 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
                 tmp_out << " |normpdf(" << v1 << ", " << v2 << ", " << v3 << ")|";
 #endif
                 break;
+              default:
+                {
+                  mexPrintf("Error\n");
+                  ostringstream tmp;
+                  tmp << " in compute_block_time, unknown trinary operator " << op << "\n";
+                  throw FatalExceptionHandling(tmp.str());
+                }
             }
           break;
 
