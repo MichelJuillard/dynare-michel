@@ -149,20 +149,27 @@ for b = fblck:nblck,
     if exist('OCTAVE_VERSION') || options_.console_mode
         diary off
         disp(' ')
-    elseif whoiam
-        %       keyboard;
-        waitbarString = ['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...'];
-        %       waitbarTitle=['Metropolis-Hastings ',options_.parallel(ThisMatlab).ComputerName];
+        newString='';
+        if whoiam
+            waitbarString = ['Wait... MH (' int2str(b) '/' int2str(options_.mh_nblck) ')...'];
+        end
+    else,
+        if whoiam
+            waitbarString = ['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...'];
+        else
+            hh = waitbar(0,['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...']);
+            set(hh,'Name','Metropolis-Hastings');
+        end
+        
+    end
+    if whoiam
         if options_.parallel(ThisMatlab).Local,
             waitbarTitle=['Local '];
         else
             waitbarTitle=[options_.parallel(ThisMatlab).ComputerName];
         end        
-        fMessageStatus(0,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab));
-    else,
-        hh = waitbar(0,['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...']);
-        set(hh,'Name','Metropolis-Hastings');
-        
+        prc0=(b-fblck)/(nblck-fblck+1)*(exist('OCTAVE_VERSION') || options_.console_mode);
+        fMessageStatus(prc0,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab));
     end
     isux = 0;
     jsux = 0;
@@ -196,13 +203,15 @@ for b = fblck:nblck,
                 if exist('OCTAVE_VERSION')
                     printf('MH: Computing Metropolis-Hastings (chain %d/%d): %3.f%% done, acception rate: %3.f%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
                 else
-                    fprintf('   MH: Computing Metropolis-Hastings (chain %d/%d): %3.f \b%% done, acceptance rate: %3.f \b%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
+                    s0=repmat('\b',1,length(newString));
+                    newString=sprintf('MH: Computing Metropolis-Hastings (chain %d/%d): %3.f%% done, acceptance rate: %3.f%%', b, nblck, 100 * prtfrc, 100 * isux / j);
+                    fprintf([s0,'%s'],newString);
                 end
             end
             if mod(j,50)==0 & whoiam  
                 %             keyboard;
-                waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) '), ' sprintf('accept. %3.f%%%%', 100 * isux/j)];
-                fMessageStatus(prtfrc,whoiam,waitbarString, '', options_.parallel(ThisMatlab));
+                waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) '), ' sprintf('accept. %3.f%%', 100 * isux/j)];
+                fMessageStatus((b-fblck)/(nblck-fblck+1)+prtfrc/(nblck-fblck+1),whoiam,waitbarString, '', options_.parallel(ThisMatlab));
             end
         else
             if mod(j, 3)==0 & ~whoiam
@@ -258,14 +267,14 @@ for b = fblck:nblck,
         irun = irun + 1;
     end% End of the simulations for one mh-block.
     record.AcceptationRates(b) = isux/j;
-    if exist('OCTAVE_VERSION') || options_.console_mode
+    if exist('OCTAVE_VERSION') || options_.console_mode || whoiam
         if exist('OCTAVE_VERSION')
             printf('\n');
         else
             fprintf('\n');
         end
         diary on;
-    elseif ~whoiam
+    else %if ~whoiam
         close(hh);
     end
     record.Seeds(b).Normal = randn('state');
