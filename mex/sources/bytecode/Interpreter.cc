@@ -874,6 +874,35 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
               tmp_out << " |" << v1 << "^" << v2 << "|";
 #endif
               break;
+            case oPowerDeriv:
+              {
+                int derivOrder = nearbyint(Stack.top());
+                Stack.pop();
+                try
+                  {
+                    if (fabs(v1) < NEAR_ZERO && v2 > 0 &&
+                        derivOrder >= v2 &&
+                        fabs(v2-nearbyint(v2)) < NEAR_ZERO)
+                      Stack.push(0.0);
+                    else
+                      {
+                        double dxp = pow1(v1, v2-derivOrder);
+                        for (int i=0; i<derivOrder; i++)
+                          dxp *= v2--;
+                        Stack.push(dxp);
+                      }
+                  }
+                catch(FloatingPointExceptionHandling &fpeh)
+                  {
+                    mexPrintf("%s      %s\n",fpeh.GetErrorMsg().c_str(),error_location(evaluate, steady_state, size, block_num, it_, Per_u_).c_str());
+                    go_on = false;
+                  }
+              }
+
+#ifdef DEBUG
+               tmp_out << " |PowerDeriv(" << v1 << ", " << v2 << ")|";
+#endif
+                break;
             case oMax:
               Stack.push(max(v1, v2));
 #ifdef DEBUG
@@ -2429,7 +2458,11 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
             delete fb;
           }
           if (block >= 0)
-            go_on = false;
+            {
+
+              go_on = false;
+            }
+
           break;
         case FEND:
 #ifdef DEBUG

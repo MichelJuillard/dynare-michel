@@ -24,6 +24,10 @@
 #include <iostream>
 #include <sstream>
 #include "CodeInterpreter.hh"
+#ifdef DEBUG_EX
+#  include <math>
+#  include "mex_interface.hh"
+#endif
 
 using namespace std;
 
@@ -1078,6 +1082,33 @@ print_expression(it_code_type it_code, bool evaluate, int size, int block_num, b
               Stack.push(tmp_out.str());
 #ifdef DEBUG
               mexPrintf("ok\n");
+#endif
+              break;
+            case oPowerDeriv:
+              {
+                int derivOrder = nearbyint(Stackf.top());
+                Stackf.pop();
+                if (fabs(v1f) < NEAR_ZERO && v2f > 0 &&
+                    derivOrder >= v2f &&
+                    fabs(v2f-nearbyint(v2f)) < NEAR_ZERO)
+                  Stackf.push(0.0);
+                else
+                  {
+                    double dxp = pow(v1f, v2f-derivOrder);
+                    for (int i=0; i<derivOrder; i++)
+                      dxp *= v2f--;
+                    Stackf.push(dxp);
+                  }
+                tmp_out.str("");
+                if(isnan(r))
+                  tmp_out << "$ PowerDeriv £";
+                else
+                  tmp_out << "PowerDeriv";
+                tmp_out << "(" << v1 << ", " << v2 << ", " << derivOrder << ")";
+                Stack.push(tmp_out.str());
+              }
+#ifdef DEBUG
+               tmp_out << " |PowerDeriv(" << v1 << ", " << v2 << ")|";
 #endif
               break;
             case oMax:
