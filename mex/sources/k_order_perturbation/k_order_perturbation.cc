@@ -24,8 +24,7 @@
   1) dr
   2) M_
   3) options
-  4) oo_
-  5) string containing the MEX extension (with a dot at the beginning)
+  4) string containing the MEX extension (with a dot at the beginning)
 
  Outputs:
  - if order == 1: only g_1
@@ -33,7 +32,7 @@
  - if order == 3: g_0, g_1, g_2, g_3
 */
 
-#include "k_ord_dynare.hh"
+#include "dynamic_m.hh"
 #include "dynamic_dll.hh"
 
 #include <cmath>
@@ -76,6 +75,7 @@ extern "C" {
     const mxArray *dr = prhs[0];
     const mxArray *M_ = prhs[1];
     const mxArray *options_ = prhs[2];
+    int use_dll = (int)mxGetScalar(mxGetField(options_, 0, "use_dll"));
 
     mxArray *mFname = mxGetField(M_, 0, "fname");
     if (!mxIsChar(mFname))
@@ -199,7 +199,12 @@ extern "C" {
         std::string jName(fName); //params.basename);
         jName += ".jnl";
         Journal journal(jName.c_str());
-        DynamicModelDLL dynamicDLL(fName, dfExt);
+
+        DynamicModelAC *dynamicModelFile;
+        if (use_dll == 1)
+          dynamicModelFile = new DynamicModelDLL(fName, dfExt);
+        else
+          dynamicModelFile = new DynamicModelMFile(fName);
 
         // intiate tensor library
         tls.init(kOrder, nStat+2*nPred+3*nBoth+2*nForw+nExog);
@@ -207,7 +212,7 @@ extern "C" {
         // make KordpDynare object
         KordpDynare dynare(endoNames, nEndo, exoNames, nExog, nPar,
                            ySteady, vCov, modParams, nStat, nPred, nForw, nBoth,
-                           jcols, NNZD, nSteps, kOrder, journal, dynamicDLL,
+                           jcols, NNZD, nSteps, kOrder, journal, dynamicModelFile,
                            sstol, var_order_vp, llincidence, qz_criterium);
 
         // construct main K-order approximation class

@@ -15,4 +15,8 @@ nodist_k_order_perturbation_SOURCES = \
 	k_ord_dynare.cc \
 	k_ord_dynare.hh \
 	dynamic_dll.cc \
-	dynamic_dll.hh
+	dynamic_dll.hh \
+	dynamic_abstract_class.cc \
+	dynamic_abstract_class.hh \
+	dynamic_m.cc \
+	dynamic_m.hh

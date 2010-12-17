@@ -17,7 +17,6 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "k_ord_dynare.hh"
 #include "dynamic_dll.hh"
 
 #include <sstream>
@@ -36,7 +35,7 @@ DynamicModelDLL::DynamicModelDLL(const string &modName, const string &sExt) thro
       dynamicHinstance = LoadLibrary(fName.c_str());
       if (dynamicHinstance == NULL)
         throw 1;
-      Dynamic = (DynamicFn) GetProcAddress(dynamicHinstance, "Dynamic");
+      Dynamic = (DynamicDLLFn) GetProcAddress(dynamicHinstance, "Dynamic");
       if (Dynamic == NULL)
         {
           FreeLibrary(dynamicHinstance); // Free the library
@@ -49,7 +48,7 @@ DynamicModelDLL::DynamicModelDLL(const string &modName, const string &sExt) thro
           cerr << dlerror() << endl;
           throw 1;
         }
-      Dynamic = (DynamicFn) dlsym(dynamicHinstance, "Dynamic");
+      Dynamic = (DynamicDLLFn) dlsym(dynamicHinstance, "Dynamic");
       if ((Dynamic  == NULL) || dlerror())
         {
           dlclose(dynamicHinstance); // Free the library

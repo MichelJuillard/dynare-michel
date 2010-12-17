@@ -27,9 +27,12 @@ MODS = \
 	block_bytecode/ireland.mod \
 	block_bytecode/ramst_normcdf_and_friends.mod \
 	k_order_perturbation/fs2000k2a.mod \
-	k_order_perturbation/fs2000k2.mod \
-	k_order_perturbation/fs2000k_1.mod \
-	k_order_perturbation/fs2000k3.mod \
+	k_order_perturbation/fs2000k2_use_dll.mod \
+	k_order_perturbation/fs2000k_1_use_dll.mod \
+	k_order_perturbation/fs2000k3_use_dll.mod \
+	k_order_perturbation/fs2000k2_m.mod \
+	k_order_perturbation/fs2000k_1_m.mod \
+	k_order_perturbation/fs2000k3_m.mod \
 	partial_information/PItest3aHc0PCLsimModPiYrVarobsAll.mod \
 	partial_information/PItest3aHc0PCLsimModPiYrVarobsCNR.mod \
 	arima/mod1.mod \

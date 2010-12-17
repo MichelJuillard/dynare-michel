@@ -21,13 +21,16 @@
 
 #include <vector>
 #include "first_order.h"
-#include "k_ord_dynare.hh"
-#include "dynamic_dll.hh"
+#include "dynamic_abstract_class.hh"
 
 #include <cmath>
 #include <sstream>
 
 #include "memory_file.h"
+
+
+#include <iostream>
+#include <fstream>
 
 /**************************************************************************************/
 /*       Dynare DynamicModel class                                                                 */
@@ -38,13 +41,13 @@ KordpDynare::KordpDynare(const vector<string> &endo, int num_endo,
                          Vector &ysteady, TwoDMatrix &vcov, Vector &inParams, int nstat,
                          int npred, int nforw, int nboth, const int jcols, const Vector &nnzd,
                          const int nsteps, int norder,
-                         Journal &jr, DynamicModelDLL &dynamicDLL, double sstol,
+                         Journal &jr, DynamicModelAC *dynamicModelFile_arg, double sstol,
                          const vector<int> &var_order, const TwoDMatrix &llincidence, double criterium) throw (TLException) :
   nStat(nstat), nBoth(nboth), nPred(npred), nForw(nforw), nExog(nexog), nPar(npar),
   nYs(npred + nboth), nYss(nboth + nforw), nY(num_endo), nJcols(jcols), NNZD(nnzd), nSteps(nsteps),
   nOrder(norder), journal(jr), ySteady(ysteady), params(inParams), vCov(vcov),
   md(1), dnl(*this, endo), denl(*this, exo), dsnl(*this, dnl, denl), ss_tol(sstol), varOrder(var_order),
-  ll_Incidence(llincidence), qz_criterium(criterium), dynamicDLL(dynamicDLL)
+  ll_Incidence(llincidence), qz_criterium(criterium), dynamicModelFile(dynamicModelFile_arg)
 {
   ReorderDynareJacobianIndices();
 
@@ -113,7 +116,7 @@ KordpDynare::calcDerivativesAtSteady() throw (DynareException)
   Vector llxSteady(nJcols-nExog);
   LLxSteady(ySteady, llxSteady);
 
-  dynamicDLL.eval(llxSteady, xx, params, ySteady, out, &g1, g2p, g3p);
+  dynamicModelFile->eval(llxSteady, xx, params, ySteady, out, &g1, g2p, g3p);
 
   populateDerivativesContainer(g1, 1, JacobianIndices);
 

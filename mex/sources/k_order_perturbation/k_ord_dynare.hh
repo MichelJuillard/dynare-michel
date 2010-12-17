@@ -80,13 +80,16 @@ public:
 /*********************************************/
 // The following only implements DynamicModel with help of ogdyn::DynareModel
 // instantiation of pure abstract DynamicModel decl. in dynamic_model.h
+class DynamicModelAC;
 class DynamicModelDLL;
+class DynamicModelMFile;
 
 class KordpDynare : public DynamicModel
 {
   friend class DynareNameList;
   friend class DynareStateNameList;
   friend class DynamicModelDLL;
+  friend class DynamicModelMFile;
 
   const int nStat;
   const int nBoth;
@@ -120,7 +123,7 @@ public:
               Vector &ySteady, TwoDMatrix &vCov, Vector &params, int nstat, int nPred,
               int nforw, int nboth, const int nJcols, const Vector &NNZD,
               const int nSteps, const int ord,
-              Journal &jr, DynamicModelDLL &dynamicDLL, double sstol,
+              Journal &jr, DynamicModelAC *dynamicModelFile_arg, double sstol,
               const vector<int> &varOrder, const TwoDMatrix &ll_Incidence,
               double qz_criterium) throw (TLException);
 
@@ -222,7 +225,7 @@ public:
   void evaluateSystem(Vector &out, const Vector &yym, const Vector &yy,
                       const Vector &yyp, const Vector &xx) throw (DynareException);
   void calcDerivativesAtSteady() throw (DynareException);
-  DynamicModelDLL &dynamicDLL;
+  DynamicModelAC *dynamicModelFile;
   DynamicModel *
   clone() const
   {

@@ -17,6 +17,9 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef _DYNAMIC_DLL_HH
+#define _DYNAMIC_DLL_HH
+
 #if defined(_WIN32) || defined(__CYGWIN32__)
 # define NOMINMAX // Do not define "min" and "max" macros
 # include <windows.h>
@@ -25,12 +28,12 @@
 #endif
 
 #include <string>
-#include <dynmex.h>
 
+#include "dynamic_abstract_class.hh"
 #include "dynare_exception.h"
 
 // <model>_Dynamic DLL pointer
-typedef void (*DynamicFn)
+typedef void (*DynamicDLLFn)
 (const double *y, const double *x, int nb_row_x, const double *params, const double *steady_state,
  int it_, double *residual, double *g1, double *g2, double *g3);
 
@@ -38,10 +41,10 @@ typedef void (*DynamicFn)
  * creates pointer to Dynamic function inside <model>_dynamic.dll
  * and handles calls to it.
  **/
-class DynamicModelDLL
+class DynamicModelDLL : public DynamicModelAC
 {
 private:
-  DynamicFn Dynamic; // pointer to the Dynamic function in DLL
+  DynamicDLLFn Dynamic; // pointer to the Dynamic function in DLL
 #if defined(_WIN32) || defined(__CYGWIN32__)
   HINSTANCE dynamicHinstance;  // DLL instance pointer in Windows
 #else
@@ -56,3 +59,4 @@ public:
   void eval(const Vector &y, const Vector &x, const Vector &params, const Vector &ySteady,
             Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException);
 };
+#endif
