@@ -66,7 +66,7 @@ load([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
 
 % Only for test parallel results!!!
 
-% To check the equivalence between parallel and seria computation!
+% To check the equivalence between parallel and serial computation!
 % First run in serial mode, and then comment the follow line.
 %   save('recordSerial.mat','-struct', 'record');
 
