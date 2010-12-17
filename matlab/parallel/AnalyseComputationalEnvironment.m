@@ -1,10 +1,9 @@
 function [ErrorCode] = AnalyseComputationalEnvironment(DataInput, DataInputAdd)
 % PARALLEL CONTEXT
-% In a parallel context, this function is used to check the user computational request.
-% If no error happen the function return 0. The function is able to do it
-% for Windows, Linux enviroment for Matlab and Octave software.
-% This is a recoursive function. The recursion is on the numbers of
-% computer machine in the cluster.
+% In a parallel context, this function is used to check the cluster defined by the user.
+% If no error happen the function returns 0. The function complies with
+% Windows/Linux operating systems and Matlab/Octave software.
+%
 %
 % INPUT/OUTPUT description:
 %
@@ -12,27 +11,29 @@ function [ErrorCode] = AnalyseComputationalEnvironment(DataInput, DataInputAdd)
 % DataInput
 %   is the strcture option_.parallel, with the follow fields:
 %
-%           Local         Define the computation place: 1 is on local machine, 0 remote
-%     ComputerName        Intuitive: contain the computer name.
-%           CPUnbr        Intuitive: contain the CPU number.
-%         UserName        Intuitive: contain the user name for the ComputerName.
-%           Password      Intuitive: contain the password for the user name in ComputerName.
-%      RemoteDrive        Drive used for Local/Remote computation (data exchange, etc) must be contain 'RemoteFolder'.
-%     RemoteDirectory     Folder in RemoteDrive used for Local/Remote computation.
-%     MatlabOctavePath    []
-%         DynarePath      []
+%             Local         1 is on local machine, 0 remote
+%      ComputerName         the computer name.
+%            CPUnbr         the CPU's
+%          UserName         the user name for the ComputerName.
+%          Password         the password for the user name in ComputerName.
+%       RemoteDrive         Drive used for Remote computation (data exchange, etc): must be contain 'RemoteFolder'.
+%   RemoteDirectory         Folder in RemoteDrive used for Remote computation.
+%  MatlabOctavePath         Path to MATLAB or Octave executable.
+%        DynarePath         Path to matlab directory within the Dynare installation directory.
 %
-%   This information is typed by the user using the *.mod file,
-%   the goal of this function is to check if it correct.
+%   This information is typed by the user in the DYNARE configuration file and is parsed by the preprocessor,
+%   the goal of this function is to check if configuration is correct and if dynare
+%   can be executed successfully in parallel mode.
 %
 %
 % DataInputAdd
-%   is the structure options_.parallel_info. We use only the string in hte
-%   field RemoteTmpFolder (the volatile directory created/destroyed on remote
-%   computer). Then for semplicity we derive a string from the struct:
+%   it is the structure options_.parallel_info. Currently , only the string in the
+%   field RemoteTmpFolder (the temporary directory created/destroyed on remote
+%   computer) is used.
+
 
 RemoteTmpFolder=DataInputAdd.RemoteTmpFolder;
-% DataInputAdd=[];
+dynareParallelMkDir(RemoteTmpFolder,DataInput);
 
 
 % The variable ErrorCode is initialized at 0. If there are non problems with
@@ -43,40 +44,39 @@ RemoteTmpFolder=DataInputAdd.RemoteTmpFolder;
 %
 %   Table for ErrorCode Values.
 %
-%   ErrorCode -> 0  Initial Value -> No Error Detected!!!
-%   ErrorCode -> > 1  When an error happens. The value 1, 2, 3... are
-%   used to specify the kind of error.
+%   ErrorCode -> 0      Initial Value -> No Error Detected!!!
+%   ErrorCode -> 1 ...  When an error is detected, the values 1, 2, 3... are
+%   used to specify the type of error or warning.
 %
 %   Value 1:    The variable 'Local' has a bad value!
 %
-%   Value 2:    The variable 'CPUnbr' has a bad value. Parallel Dynare
-%               require an input data like [s:d] with s<=d, in this case we
-%               have s>d! Or simply the field have no correct length (also
-%               empty)!
-%         2.1   The user asks to use more CPU of those available.
-%         2.2   There are CPU not used!
+%   Value 2:    The variable 'CPUnbr' has a bad value. For more information
+%               see http://www.dynare.org/DynareWiki/ParallelDynare.
+%         2.1   [warning] The user asks to use more CPU's than those available.
+%         2.2   [warning] There are unused CPU's!
+%
 %
 %   Value 3:    The remote computer is unreachable!!!
 %
 %   Value 4:    The fields user name and/or password are/is empty!
 %
-%   Value 5:    Remote Drive and/or Remote Folder not exist!
+%   Value 5:    Remote Drive and/or Remote Folder do not exist!
 %
-%   Value 6:    It is impossible write/read file on remote computer.
+%   Value 6:    It is impossible write/read files on the remote computer.
 %
-%   Value 7:    The values user and/or passwd are incorrets or the user have
-%               no permissions to execute a Matlab section. Or symply
-%               Matlab software is non installed!
+%   Value 7:    The values user and/or passwd are incorrect or the user has
+%               no permissions to execute a Matlab session. Or simply
+%               Matlab path (MatlabOctavePath) is incorrect!
 %
-%   Value 8:    iIt is possible delete remote computational traces!
+%   Value 8:    Dynare path (DynarePath) is incorrect!
 %
-%
-%
-%
+%   Value 9:    It is impossible delete remote computational temporary files!
 %
 %
-% Then at the point call of this function it is possible react in a best way, in accord
-% with the ErrorCode.
+%
+%
+% Currently when errors are detected execution simply stops and users can
+% fix configuration errors according to the error type.
 
 % Copyright (C) 2009-2010 Dynare Team
 %
@@ -98,418 +98,310 @@ RemoteTmpFolder=DataInputAdd.RemoteTmpFolder;
 
 ErrorCode=0;
 
-Enviroment=-1;
-
-% Determine a specific operating system or software version when necessary
-% for different command (sintax, name, ...).
-Enviroment=isunix || (~matlab_ver_less_than('7.4') && ismac);
-
-% Recoursive call:
-% ...
+% Determine the operating system or software version when necessary
+% for different command types
+Environment=isunix || (~matlab_ver_less_than('7.4') && ismac);
 
 
-disp(' ');
-disp(' ');
-
-% The function is composed by two main blocks, determined by the 'Local'
-% variable.
-
-% This check can be removed ... in accord with the dynare parser
-% strategy.
-
-if ((DataInput.Local == 0) |(DataInput.Local == 1))
-    % Continue it is Ok!
-    disp('Check on Local Variable ..... Ok!');
+for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
+    % and use AnalyseComputationalEnvironment with differents input!
+    
+    disp(' ');
+    disp(' ');
+    disp(['Testing computer -> ',DataInput(Node).ComputerName,' <- ...']);
     disp(' ');
     disp(' ');
     
-else
-    disp('The variable "Local" has a bad value!');
-    disp(' ');
-    disp('ErrorCode 1.');
-    disp(' ');
-    disp(' ');
-    ErrorCode=1;
-    return
+    % The function is composed by two main blocks, determined by the 'Local'
+    % variable.
     
-end
-
-%         %%%%%%%%%%  Local (No Network) Computing   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         Here only the multi-core, or multi-processor avaiable on local
-%         machine are involved in parallel computing. No network
-%         comunications are required!
-
-
-% In this case we need to check only the variable 'CPUnbr'.
-
-% We run the parallel code on local computer, so the others fields are automatically
-% fixed by Dynare parser. Then the user can also fill them with wrong values.
-
-
-if (DataInput.Local == 1)
-    
-    % This check can be removed ... in accord with the dynare parser
+    % This check can be removed ... according to the dynare parser
     % strategy.
     
-    yn=isempty(DataInput.CPUnbr);
-    
-    if yn==1
-        % The field is empty!
-        disp('The field "CPUnbr" is empty!');
-        disp(' ');
-        disp('ErrorCode 2.');
+    if ((DataInput(Node).Local == 0) |(DataInput(Node).Local == 1))
+        % Continue it is Ok!
+        disp('Check on Local Variable ..... Ok!');
         disp(' ');
         disp(' ');
-        ErrorCode=2;
-        return
-    end
-    
-    % This check can be removed ... in accord with the dynare parser
-    % strategy.
-    
-    L=length(DataInput.CPUnbr);
-    
-    if L~=2
-        % The field have no correct length!
-        disp('The field "CPUnbr" have no length 2!');
-        disp(' ');
-        disp('ErrorCode 2.');
-        disp(' ');
-        disp(' ');
-        ErrorCode=2;
-        return
-    end
-    
-    % This check can be removed ... in accord with the dynare parser
-    % strategy.
-    
-    s=DataInput.CPUnbr(1);
-    d=DataInput.CPUnbr(2);
-    
-    if s>d
-        % Bad value s>d!
-        disp('In the field "CPUnbr" left side number > right side number!');
-        disp(' ');
-        disp('ErrorCode 2.');
-        disp(' ');
-        disp(' ');
-        ErrorCode=2;
-        return
-    end
-    
-    
-    % We look for the information on local computer hardware.
-    
-    si0=[];
-    de0=[];
-    
-    if Enviroment
-        [si0 de0]=system('grep processor /proc/cpuinfo');
+        
     else
-        [si0 de0]=system(['psinfo \\']);
+        disp('The variable "Local" has a bad value!');
+        disp(' ');
+        disp('ErrorCode 1.');
+        disp(' ');
+        disp(' ');
+        ErrorCode=1;
+        return
+        
     end
     
+    %         %%%%%%%%%%  Local (No Network) Computing   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %         Here only the multi-core, or multi-processor avaiable on local
+    %         machine are involved in parallel computing. No network
+    %         comunications are required!
     
-    RealCPUnbr=-1;
-    RealCPUnbr=GiveCPUnumber(de0);
     
-    % Questo controllo penso che si possa MIGLIORARE!!!!!
+    % In this case we need to check only the variable 'CPUnbr'.
     
-    if  isempty (RealCPUnbr)
-        % An error occurred when we try to know the Cpu/Cores
-        % numbers.
-        disp('It is impossible determine the number of Cpu/Processor avaiable on this machine!');
-        disp(' ');
-        disp('ErrorCode 2.');
-        disp(' ');
-        if Enviroment
-            disp('Check the command "$less /proc/cpuinfo" ... !');
+    % We run the parallel code on local computer, so the others fields are automatically
+    % fixed by Dynare parser. Then the user can also fill them with wrong values.
+    
+        
+    %         %%%%%%%%%%  Cluster Computing   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %         Here we can have many computer with multi-core, or multi-processor avaiable on the
+    %         network and involved in parallel computing.
+    %         So in this case we need more sophisticated check.
+    
+    
+    if (DataInput(Node).Local == 0)
+        
+        % Now we verify if it is possibile to be connected with the
+        % remote computer.
+        
+        si1=[];
+        de1=[];
+        
+        if Environment
+            [si1 de1]=system(['ping ', DataInput(Node).ComputerName, ' -c 4']);
         else
-            disp('Check if the pstools are installed and are in machine path! And check the command "psinfo \\"');
+            [si1 de1]=system(['ping ', DataInput(Node).ComputerName]);
         end
-        disp(' ');
-        ErrorCode=2;
-        return
-    end
-    
-    
-    % Trasforming the input data provided in a form [n1:n2] in a single numerical
-    % value.
-    
-    
-    CPUnbrUser=DataInput.CPUnbr(2)-DataInput.CPUnbr(1)+1;
-    
-    if  CPUnbrUser==RealCPUnbr
-        % It is Ok!
-        disp('Check on CPUnbr Variable ..... Ok!');
-        disp(' ');
-        disp(['Hardware have ', num2str(RealCPUnbr),' Cpu/Cores!']);
-        disp(['User require ',num2str(CPUnbrUser),' Cpu/Cores!']);
-        disp(' ');
-        disp(' ');
         
-    end
-    
-    if CPUnbrUser > RealCPUnbr
-        disp('Check on CPUnbr Variable ..... Ok!');
-        disp(' ');
-        disp(['Hardware have ', num2str(RealCPUnbr),' Cpu/Cores!']);
-        disp(['User require ',num2str(CPUnbrUser),' Cpu/Cores!']);
-        disp(' ');
-        disp('Warning! The user asks to use more CPU than those available.');
-        disp(' ');
-        disp(' ');
-        ErrorCode=2.1;
-        % return
-        
-    end
-    if CPUnbrUser < RealCPUnbr
-        disp('Check on CPUnbr Variable ..... Ok!');
-        disp(' ');
-        disp(['Hardware have ', num2str(RealCPUnbr),' Cpu/Cores!']);
-        disp(['User require ',num2str(CPUnbrUser),' Cpu/Cores!']);
-        disp(' ');
-        disp('Warning! There are CPU not used!');
-        disp(' ');
-        disp(' ');
-        ErrorCode=2.2;
-        % return
-    end
-    disp('Test for "Local" parallel computation ..... Passed!');
-    disp(' ');
-    disp(' ');
-end
-
-
-
-%         %%%%%%%%%%  Cluster Computing   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%         Here we can have many computer with multi-core, or multi-processor avaiable on the
-%         network and involved in parallel computing.
-%         So in this case we need more sophisticated check.
-
-
-if (DataInput.Local == 0)
-    
-    % Now we verify if it is possibile to be connected with the
-    % remote computer.
-    
-    si1=[];
-    de1=[];
-    
-    if Enviroment
-        [si1 de1]=system(['ping ', DataInput.ComputerName, ' -c 4']);
-    else
-        [si1 de1]=system(['ping ', DataInput.ComputerName]);
-    end
-    
-    if (si1)       
-        disp(['It is impossibile to be connected to the computer with name "',DataInput.ComputerName,'" using the network!']);
-        disp(' ');
-        disp('ErrorCode 3.');
-        ErrorCode=3;
-        disp(' ');
-        disp(' ');
-        return;
-    else
-        disp('Check on ComputerName Variable ..... Ok!');
-        disp(' ');
-        disp(' ');
-    end
-    
-    
-    % Now we verify if user name and password are correct and if remote
-    % drive and remote folder exist on the remote computer and it is
-    % possible to exchange data with them.
-    
-    if Enviroment
-        % This check can be removed ... in accord with the dynare parser
-        % strategy.
-        
-        if (isempty(DataInput.UserName))
-            disp('The fields UserName is empty!');
+        if (si1)
+            disp(['It is impossibile to be connected to the computer with name "',DataInput(Node).ComputerName,'" using the network!']);
             disp(' ');
-            disp('ErrorCode 4.');
+            disp('ErrorCode 3.');
+            ErrorCode=3;
             disp(' ');
             disp(' ');
-            ErrorCode=4;
+            return;
+        else
+            disp('Check on ComputerName Variable ..... Ok!');
+            disp(' ');
+            disp(' ');
+        end
+        
+        
+        % Now we verify if user name and password are correct and if remote
+        % drive and remote folder exist on the remote computer and it is
+        % possible to exchange data with them.
+        
+        if Environment
+            % This check can be removed ... according to the dynare parser
+            % strategy.
+            
+            if (isempty(DataInput(Node).UserName))
+                disp('The fields UserName is empty!');
+                disp(' ');
+                disp('ErrorCode 4.');
+                disp(' ');
+                disp(' ');
+                ErrorCode=4;
+                return
+            end
+            disp('Check on UserName Variable ..... Ok!');
+            disp(' ');
+            disp(' ');
+            
+            % This check can be removed ... according to the dynare parser
+            % strategy.
+            
+            if (~isempty(DataInput(Node).Password))
+                disp('[WARNING] The field Password should be empty under unix or mac!');
+                disp(' ');
+                disp(['Remove the string ',DataInput(Node).Password,' from this field!']);
+                disp(' ');
+                disp('ErrorCode 4.');
+                disp(' ');
+                disp(' ');
+                ErrorCode=4;
+%                 return
+            else
+                disp('Check on Password Variable ..... Ok!');
+                disp(' ');
+                disp(' ');
+            end
+            
+        else
+            
+            % This check can be removed ... according to the dynare parser
+            % strategy.
+            
+            if (isempty(DataInput(Node).UserName)) || (isempty(DataInput(Node).Password))
+                disp('The fields UserName and/or Password are/is empty!');
+                disp(' ');
+                disp('ErrorCode 4.');
+                disp(' ');
+                disp(' ');
+                ErrorCode=4;
+                return
+            end
+            disp('Check on UserName Variable ..... Ok!');
+            disp(' ');
+            disp(' ');
+            disp('Check on Password Variable ..... Ok!');
+            disp(' ');
+            disp(' ');
+            
+        end
+        
+        % Now we very if RemoteDrive and/or RemoteDirectory exist on remote
+        % computer!
+        
+        if Environment
+            
+            % This check can be removed ... according to the dynare parser
+            % strategy.
+            
+            if  isempty(DataInput(Node).RemoteDirectory)
+                disp('The field RemoteDirectory is empty!');
+                disp(' ');
+                disp('ErrorCode 5.');
+                disp(' ');
+                disp(' ');
+                ErrorCode=5;
+                return
+            end
+            
+            % This check can be removed ... according to the dynare parser
+            % strategy.
+            
+            if (~isempty(DataInput(Node).RemoteDrive))
+                disp('[WARNING] The fields RemoteDrive should be empty under unix or max!');
+                disp(' ');
+                disp(['remove the string ',DataInput(Node).RemoteDrive,' from this field!']);
+                disp(' ');
+                disp('ErrorCode 5.');
+                disp(' ');
+                disp(' ');
+                ErrorCode=5;
+%                 return
+            end
+            
+            si2=[];
+            de2=[];
+            
+            [si2 de2]=system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' ls ',DataInput(Node).RemoteDirectory,'/',RemoteTmpFolder,'/']);
+            
+            if (si2)
+                disp ('Remote Directory does not exist or is not reachable!');
+                disp(' ');
+                disp('ErrorCode 5.');
+                disp(' ');
+                disp(' ');
+                ErrorCode=5;
+                return
+            end
+            
+            disp('Check on RemoteDirectory Variable ..... Ok!');
+            disp(' ');
+            disp(' ');
+            disp('Check on RemoteDrive Variable ..... Ok!');
+            disp(' ');
+            disp(' ');
+            
+        else
+            % This check can be removed ... according to the dynare parser
+            % strategy.
+            
+            if (isempty(DataInput(Node).RemoteDrive)||isempty(DataInput(Node).RemoteDirectory))
+                disp('Remote RemoteDrive and/or RemoteDirectory is/are empty!');
+                disp(' ');
+                disp('ErrorCode 5.');
+                disp(' ');
+                disp(' ');
+                ErrorCode=5;
+                return
+            end
+            
+            
+            si2=[];
+            de2=[];
+            [s12 de2]=system(['dir \\',DataInput(Node).ComputerName,'\',DataInput(Node).RemoteDrive,'$\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder]);
+            
+            if (si2)
+                disp ('Remote Directory does not exist or it is not reachable!');
+                disp(' ');
+                disp('ErrorCode 5.');
+                disp(' ');
+                disp(' ');
+                ErrorCode=5;
+                return
+            end
+            
+            disp('Check on RemoteDirectory Variable ..... Ok!');
+            disp(' ');
+            disp(' ');
+            disp('Check on RemoteDrive Variable ..... Ok!');
+            disp(' ');
+            disp(' ');
+            
+        end
+        
+        
+        % Now we verify if it possible to exchange data with the remote
+        % computer:
+        
+        
+        % Build a command file to test the matlab execution and dynare path ...
+        
+        fid = fopen('Tracing.m', 'w+');
+        s1=(['fT = fopen(''MatlabOctaveIsOk.txt'',''w+'');\n']);
+        s2='fclose(fT);\n';
+        SBS=strfind(DataInput(Node).DynarePath,'\');
+        DPStr=DataInput(Node).DynarePath;
+        if isempty(SBS),
+            DPStrNew=DPStr;
+        else
+            DPStrNew=[DPStr(1:SBS(1)),'\'];
+            for j=2:length(SBS),
+                DPStrNew=[DPStrNew,DPStr(SBS(j-1)+1:SBS(j)),'\'];
+            end
+            DPStrNew=[DPStrNew,DPStr(SBS(end)+1:end)];
+        end
+        s3=['addpath(''',DPStrNew,'''),\n'];
+        s4=['try,\n  dynareroot = dynare_config();\n'];
+        s41=(['  fT = fopen(''DynareIsOk.txt'',''w+'');\n']);
+        s42='  fclose(fT);\n';
+        s5=['catch,end,\n'];
+        s51=(['  fT = fopen(''DynareFailed.txt'',''w+'');\n']);
+        s52='  fclose(fT);\n';
+        send='exit';
+        StrCommand=([s1,s2,s3,s4,s41,s42,s5,s51,s52,send]);
+        % Mettere controllo su NbW ...
+        NbW = fprintf(fid,StrCommand, '%s');
+        fclose(fid);
+        
+        dynareParallelSendFiles('Tracing.m', RemoteTmpFolder,DataInput(Node));
+        FindTracing = dynareParallelDir('Tracing.m', RemoteTmpFolder,DataInput(Node));
+        
+        delete ('Tracing.m');
+        
+        if (isempty(FindTracing))
+            disp ('It is impossible to exchange data with Remote Drive and/or Remote Directory! ErrorCode 6.');
+            disp(' ');
+            disp('ErrorCode 6.');
+            disp(' ');
+            disp(' ');
+            ErrorCode=6;
             return
-        end
-        
-        % This check can be removed ... in accord with the dynare parser
-        % strategy.
-        
-        if (~isempty(DataInput.Password))
-            disp('The fields Password must be empty!');
-            disp(' ');
-            disp(['Remouve the string ',DataInput.Password,' from this field!']);
-            disp(' ');
-            disp('ErrorCode 4.');
+        else
+            disp('Check on Exchange File with Remote Computer ..... Ok!');
             disp(' ');
             disp(' ');
-            ErrorCode=4;
-            return
-        end
-        disp('Check on UserName Variable ..... Ok!');
-        disp(' ');
-        disp(' ');
-        disp('Check on Password Variable ..... Ok!');
-        disp(' ');
-        disp(' ');
-        
-    else
-        
-        % This check can be removed ... in accord with the dynare parser
-        % strategy.
-        
-        if (isempty(DataInput.UserName)) || (isempty(DataInput.Password))
-            disp('The fields UserName and/or Password are/is empty!');
-            disp(' ');
-            disp('ErrorCode 4.');
-            disp(' ');
-            disp(' ');
-            ErrorCode=4;
-            return
-        end
-        disp('Check on UserName Variable ..... Ok!');
-        disp(' ');
-        disp(' ');
-        disp('Check on Password Variable ..... Ok!');
-        disp(' ');
-        disp(' ');
-        
-    end
-    
-    % Now we very if RemoteDrive and/or RemoteDirectory exist on remote
-    % computer!
-    
-    if Enviroment
-        
-        % This check can be removed ... in accord with the dynare parser
-        % strategy.
-        
-        if  isempty(DataInput.RemoteDirectory)
-            disp('The fields RemoteDirectory is empty!');
-            disp(' ');
-            disp('ErrorCode 5.');
-            disp(' ');
-            disp(' ');
-            ErrorCode=5;
-            return
-        end
-        
-        % This check can be removed ... in accord with the dynare parser
-        % strategy.
-        
-        if (~isempty(DataInput.RemoteDrive))
-            disp('The fields RemoteDrive must be empty!');
-            disp(' ');
-            disp(['Remouve the string ',DataInput.RemoteDrive,' from this field!']);
-            disp(' ');
-            disp('ErrorCode 5.');
-            disp(' ');
-            disp(' ');
-            ErrorCode=5;
-            return
-        end
-        
-        si2=[];
-        de2=[];
-        
-        % Da verificare ... in Linux ...
-          [si2 de2]=system(['ssh ',DataInput.UserName,'@',DataInput.ComputerName,' ls ',DataInput.RemoteDirectory,'/',RemoteTmpFolder,'/']);
-        
-        if (si2)
-            disp ('Remote Directory not exist or is not reachables!');
-            disp(' ');
-            disp('ErrorCode 5.');
-            disp(' ');
-            disp(' ');
-            ErrorCode=5;
-            return
-        end
-        
-        disp('Check on RemoteDirectory Variable ..... Ok!');
-        disp(' ');
-        disp(' ');
-        disp('Check on RemoteDrive Variable ..... Ok!');
-        disp(' ');
-        disp(' ');
-        
-    else
-        % This check can be removed ... in accord with the dynare parser
-        % strategy.
-        
-        if (isempty(DataInput.RemoteDrive)||isempty(DataInput.RemoteDirectory))
-            disp('Remote RemoteDrive and/or RemoteDirectory is/are empty!');
-            disp(' ');
-            disp('ErrorCode 5.');
-            disp(' ');
-            disp(' ');
-            ErrorCode=5;
-            return
         end
         
         
-        si2=[];
-        de2=[];
-        [s12 de2]=system(['dir \\',DataInput.ComputerName,'\',DataInput.RemoteDrive,'$\',DataInput.RemoteDirectory,'\',RemoteTmpFolder]);
+        % Now we verify if it is possible execute a matlab/octave section on remote
+        % machine when the user is .UserName with password .Password and
+        % the path is MatlabOctavePath.
         
-        if (si2)
-            disp ('Remote Directory not exist or is not reachables!');
-            disp(' ');
-            disp('ErrorCode 5.');
-            disp(' ');
-            disp(' ');
-            ErrorCode=5;
-            return
-        end
-        
-        disp('Check on RemoteDirectory Variable ..... Ok!');
-        disp(' ');
-        disp(' ');
-        disp('Check on RemoteDrive Variable ..... Ok!');
-        disp(' ');
-        disp(' ');
-        
-    end
-    
-    
-    % Now we verify if it possible to exchange data with the remote
-    % computer:
-    
-    % Mettere il percorso in cui si trova 'Tracing.m'!!!
-    
-    dynareParallelSendFiles('Tracing.m', RemoteTmpFolder,DataInput);
-    FindTracing = dynareParallelDir('Tracing.m', RemoteTmpFolder,DataInput);
-    
-    if (isempty(FindTracing))
-        disp ('It is impossible to exchange data with Remote Drive and/or Remote Directory! ErrorCode 6.');
-        disp(' ');
-        disp('ErrorCode 6.');
-        disp(' ');
-        disp(' ');
-        ErrorCode=6;
-        return
-    else
-        disp('Check on exchange file with remote computer ..... Ok!');
-        disp(' ');
-        disp(' ');
-    end
-    
-    
-    % Now we verify if it is possible execute a matlab/octave section on remote
-    % machine when the user is .UserName with password .Password
-    
-    if exist('OCTAVE_VERSION')
-        % OCTAVE!
-    else
-        % Matlab!
-        
-        if Enviroment
+        if Environment
             % Controllare ... in Linux!
-              system(['ssh ',DataInput.UserName,'@',DataInput.ComputerName,' "cd ',DataInput.RemoteDirectory,'/',RemoteTmpFolder,  '; matlab -nosplash -nodesktop -minimize -r Tracing;" &']);
+            system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' "cd ',DataInput(Node).RemoteDirectory,'/',RemoteTmpFolder,  '; ', DataInput(Node).MatlabOctavePath, ' -nosplash -nodesktop -minimize -r Tracing;" &'])
+            
         else
-            [NonServeS NenServeD]=system(['start /B /WAIT psexec \\',DataInput.ComputerName,' -e -u ',DataInput.UserName,' -p ',DataInput.Password,' -W ',DataInput.RemoteDrive,':\',DataInput.RemoteDirectory,'\',RemoteTmpFolder ' -low  matlab -nosplash -nodesktop -minimize -r Tracing']);
+            [NonServeS NenServeD]=system(['start /B psexec \\',DataInput(Node).ComputerName,' -e -u ',DataInput(Node).UserName,' -p ',DataInput(Node).Password,' -W ',DataInput(Node).RemoteDrive,':\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder ' -low   ',DataInput(Node).MatlabOctavePath,' -nosplash -nodesktop -minimize -r Tracing']);
         end
         
         % Timer da fissare, nei valori di attesa!
@@ -521,12 +413,20 @@ if (DataInput.Local == 0)
         else t2=t1(5)+1;
         end
         
+        Flag=0;
+        
         while (1);
-            
+            if Flag==0
+                disp('Try to run matlab on remote machine ... ');
+                disp(' ');
+                disp('please wait ... ');
+                disp(' ');
+                Flag=1;
+            end
             nt=fix(clock);
             nt(5)-t2;
             
-            if (~isempty (dynareParallelDir('ItIsOk.txt',RemoteTmpFolder,DataInput))) || ((nt(5)-t2)>0)
+            if (~isempty (dynareParallelDir('MatlabOctaveIsOk.txt',RemoteTmpFolder,DataInput(Node)))) || ((nt(5)-t2)>0)
                 if ((nt(5)-t2)>0)
                     ErrorCode=7;
                 end
@@ -537,59 +437,88 @@ if (DataInput.Local == 0)
         
         if  (ErrorCode==7)
             
-            disp ('It is possible execute a matlab section on remote machine!');
+            disp ('It is not possible execute a matlab session on remote machine!');
             disp(' ');
             disp('ErrorCode 7.');
             disp(' ');
             disp(' ');
             ErrorCode=7;
+            dynareParallelRmDir(RemoteTmpFolder,DataInput(Node));
             return
             
         else
-            disp('Check on Matlab execution on remote machine ..... Ok!');
+            disp('Check on MatlabOctave Path and MatlabOctave Program Execution on remote machine ..... Ok!');
             disp(' ');
             disp(' ');
+            
+            % Now we verify if the DynarePath is correct ...
+            disp('Check the Dynare path on remote machine ... ');
+            disp(' ');
+            disp('please wait ... ');
+            disp(' ');
+            pause(1)
+            
+            if isempty(dynareParallelDir('DynareIsOk.txt',RemoteTmpFolder,DataInput(Node)))
+                ErrorCode=8;
+            end
+            
+            if  (ErrorCode==8)
+                
+                disp ('The DynarePath is incorrect!');
+                disp(' ');
+                disp('ErrorCode 8.');
+                disp(' ');
+                disp(' ');
+                ErrorCode=8;
+                dynareParallelRmDir(RemoteTmpFolder,DataInput(Node));
+                return
+                
+            else
+                disp('Check on Dynare Path remote machine ..... Ok!');
+                disp(' ');
+                disp(' ');
+            end
         end
         
-    end
-    
-    % Now we verify if it is possible delete remote computational traces!
-    
-    dynareParallelRmDir(RemoteTmpFolder,DataInput);
-    
-    si3=[];
-    de3=[];
-    
-    if Enviroment
         
-        % Da verificare ... in Linux ...
-        % [si3 de3]=system(['ssh ',DataInput.UserName,'@',DataInput.ComputerName,' ls ',DataInput.RemoteDirectory,'/']);
-    else
+        % Now we verify if it is possible delete remote computational traces!
         
-        [s13 de3]=system(['dir \\',DataInput.ComputerName,'\',DataInput.RemoteDrive,'$\',DataInput.RemoteDirectory,'\',RemoteTmpFolder]);
+        dynareParallelRmDir(RemoteTmpFolder,DataInput(Node));
+        
+        si3=[];
+        de3=[];
+        
+        if Environment
+            [si3 de3]=system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' ls ',DataInput(Node).RemoteDirectory,'/',RemoteTmpFolder]);
+        else
+            
+            [si3 de3]=system(['dir \\',DataInput(Node).ComputerName,'\',DataInput(Node).RemoteDrive,'$\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder]);
+        end
+        
+        if (si3)
+            disp ('Check on Delete Remote Computational Traces ..... Ok!');
+            disp(' ');
+            disp(' ');
+        else
+            disp ('It is impossible to delete temporary files on remote machine!');
+            disp(' ');
+            disp('ErrorCode 9.');
+            disp(' ');
+            disp(' ');
+            ErrorCode=9;
+            return
+        end
+        
+        
+        
+        
     end
+    % Now we check the variable 'CPUnbr'.
     
-    if isempty(si3)
-        disp ('Check on delete remote computational traces ..... Ok!');
-        disp(' ');
-        disp(' ');
-    else
-        disp ('It is impossible delete computational traces on remote machine!');
-        disp(' ');
-        disp('ErrorCode 8.');
-        disp(' ');
-        disp(' ');
-        ErrorCode=8;
-        return
-    end
-    
-    
-   % Now we check the variable 'CPUnbr'. 
-    
-    % This check can be removed ... in accord with the dynare parser
+    % This check can be removed ... according to the dynare parser
     % strategy.
     
-    yn=isempty(DataInput.CPUnbr);
+    yn=isempty(DataInput(Node).CPUnbr);
     
     if yn==1
         % The field is empty!
@@ -602,38 +531,9 @@ if (DataInput.Local == 0)
         return
     end
     
-    % This check can be removed ... in accord with the dynare parser
+    % This check can be removed ... according to the dynare parser
     % strategy.
     
-    L=length(DataInput.CPUnbr);
-    
-    if L~=2
-        % The field have no correct length!
-        disp('The field "CPUnbr" have no length 2!');
-        disp(' ');
-        disp('ErrorCode 2.');
-        disp(' ');
-        disp(' ');
-        ErrorCode=2;
-        return
-    end
-    
-    % This check can be removed ... in accord with the dynare parser
-    % strategy.
-    
-    s=DataInput.CPUnbr(1);
-    d=DataInput.CPUnbr(2);
-    
-    if s>d
-        % Bad value s>d!
-        disp('In the field "CPUnbr" left side number > right side number!');
-        disp(' ');
-        disp('ErrorCode 2.');
-        disp(' ');
-        disp(' ');
-        ErrorCode=2;
-        return
-    end
     
     
     % We look for the information on local computer hardware.
@@ -641,14 +541,22 @@ if (DataInput.Local == 0)
     si0=[];
     de0=[];
     
-    if Enviroment
-        [si0 de0]=system('grep processor /proc/cpuinfo');
+    if (DataInput(Node).Local == 1)
+        if Environment,
+            [si0 de0]=system('grep processor /proc/cpuinfo');
+        else
+            [si0 de0]=system(['psinfo \\']);
+        end
     else
-        [si0 de0]=system(['psinfo \\']);
+        if Environment,
+            [si0 de0]=system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' grep processor /proc/cpuinfo']);
+        else
+            [si0 de0]=system(['psinfo \\',DataInput(Node).ComputerName,' -u ',DataInput(Node).UserName,' -p ',DataInput(Node).Password]);
+        end
     end
     
     
-    RealCPUnbr=-1;
+    RealCPUnbr='';
     RealCPUnbr=GiveCPUnumber(de0);
     
     % Questo controllo penso che si possa MIGLIORARE!!!!!
@@ -660,7 +568,7 @@ if (DataInput.Local == 0)
         disp(' ');
         disp('ErrorCode 2.');
         disp(' ');
-        if Enviroment
+        if Environment
             disp('Check the command "$less /proc/cpuinfo" ... !');
         else
             disp('Check if the pstools are installed and are in machine path! And check the command "psinfo \\"');
@@ -675,26 +583,22 @@ if (DataInput.Local == 0)
     % value.
     
     
-    CPUnbrUser=DataInput.CPUnbr(2)-DataInput.CPUnbr(1)+1;
+    CPUnbrUser=length(DataInput(Node).CPUnbr);
+    maxCPUnbrUser=max(DataInput(Node).CPUnbr)+1;
     
-    if  CPUnbrUser==RealCPUnbr
+    disp(['Hardware has ', num2str(RealCPUnbr),' Cpu/Cores!']);
+    disp(['User requires ',num2str(CPUnbrUser),' Cpu/Cores!']);
+    if  CPUnbrUser==RealCPUnbr,
         % It is Ok!
         disp('Check on CPUnbr Variable ..... Ok!');
         disp(' ');
-        disp(['Hardware have ', num2str(RealCPUnbr),' Cpu/Cores!']);
-        disp(['User require ',num2str(CPUnbrUser),' Cpu/Cores!']);
         disp(' ');
         disp(' ');
         
     end
     
     if CPUnbrUser > RealCPUnbr
-        disp('Check on CPUnbr Variable ..... Ok!');
-        disp(' ');
-        disp(['Hardware have ', num2str(RealCPUnbr),' Cpu/Cores!']);
-        disp(['User require ',num2str(CPUnbrUser),' Cpu/Cores!']);
-        disp(' ');
-        disp('Warning! The user asks to use more CPU than those available.');
+        disp('Warning! The user asks to use more CPU''s than those available.');
         disp(' ');
         disp(' ');
         ErrorCode=2.1;
@@ -702,24 +606,18 @@ if (DataInput.Local == 0)
         
     end
     if CPUnbrUser < RealCPUnbr
-        disp('Check on CPUnbr Variable ..... Ok!');
-        disp(' ');
-        disp(['Hardware have ', num2str(RealCPUnbr),' Cpu/Cores!']);
-        disp(['User require ',num2str(CPUnbrUser),' Cpu/Cores!']);
-        disp(' ');
-        disp('Warning! There are CPU not used!');
+        disp('Warning! There are unused CPU''s!');
         disp(' ');
         disp(' ');
         ErrorCode=2.2;
         % return
     end
-    disp('Test for Cluster computation ..... Passed!');
+    
+    disp(['Test for Cluster computation, computer ',DataInput(Node).ComputerName, ' ..... Passed!']);
     disp(' ');
     disp(' ');
     
     
-    return
 end
 
-
-
+return
