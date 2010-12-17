@@ -4,7 +4,6 @@ function [fOutVar,nBlockPerCPU, totCPU] = masterParallel(Parallel,fBlock,nBlock,
 % computing.
 % It is the top-level function called on the master computer when parallelizing a task.
 
-
 % This function have two main computational startegy for manage the matlab worker (slave process).
 % 0 Simple Close/Open Stategy:
 % In this case the new matlab istances (slave process) are open when
@@ -93,7 +92,7 @@ if nargin>8 && initialize==1
         evalin('base','options_.parallel_info.RemoteTmpFolder=PRCDirTmp;')
         evalin('base','clear PRCDirTmp,')
     else
-        % Delete the traces (if exists) of last local section computations.
+        % Delete the traces (if existing) of last local session of computations.
         if Strategy==1,
             mydelete(['slaveParallel_input*.mat']);
         end
@@ -101,19 +100,8 @@ if nargin>8 && initialize==1
     return
 end
 
-% The default value for the new field MatlabOctavePath now is 'matlab' or
-% 'octave'.
 
-for j=1:length(Parallel),
-    if isempty(Parallel(j).MatlabOctavePath),
-        Parallel(j).MatlabOctavePath = 'matlab';
-    end
-end
 
-% Only for testing!
-
-% To test AnalyseComputationalEnviroment.m function
-% save('Parallel.mat','-struct', 'Parallel');
 % Only for testing!
 
 % if Strategy==0
@@ -130,14 +118,12 @@ end
 % Determine my hostname and my working directory.
 
 DyMo=pwd;
-fInputVar.DyMo=DyMo;
-if isunix || (~matlab_ver_less_than('7.4') && ismac) ,
-    [tempo, MasterName]=system('hostname --fqdn');
-else
+% fInputVar.DyMo=DyMo;
+if ~(isunix || (~matlab_ver_less_than('7.4') && ismac)) ,
     [tempo, MasterName]=system('hostname');
+    MasterName=deblank(MasterName);
 end
-MasterName=deblank(MasterName);
-fInputVar.MasterName = MasterName;
+% fInputVar.MasterName = MasterName;
 
 
 % Save input data for use by the slaves.
@@ -168,8 +154,8 @@ offset0 = fBlock-1;
 
 
 % Clean up remnants of previous runs.
-mydelete(['comp_status_',fname,'*.mat'])
-mydelete(['P_',fname,'*End.txt'])
+mydelete(['comp_status_',fname,'*.mat']);
+mydelete(['P_',fname,'*End.txt']);
 
 
 % Create a shell script containing the commands to launch the required
@@ -184,6 +170,7 @@ else
     dynareParallelMkDir(PRCDir,Parallel(1:totSlaves));
 end
 
+
 for j=1:totCPU,
     
     
@@ -192,6 +179,19 @@ for j=1:totCPU,
     end
     
     indPC=min(find(nCPU>=j));
+    
+    % According to the information contained in configuration file, compThread can limit MATLAB
+    % to a single computational thread. By default, MATLAB makes use of the multithreading
+    % capabilities of the computer on which it is running. Nevertheless
+    % exsperimental results show as matlab native
+    % multithreading limit the performaces when the parallel computing is active.
+    
+    
+    if strcmp('true',Parallel(indPC).SingleCompThread),
+        compThread = '-singleCompThread';
+    else
+        compThread = '';
+    end
     
     if indPC>1
         nCPU0 = nCPU(indPC-1);
@@ -267,13 +267,13 @@ for j=1:totCPU,
                     if exist('OCTAVE_VERSION')
                         command1=['octave --eval "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')" &'];
                     else
-                        command1=[Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')" &'];
+                        command1=[Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')" &'];
                     end
                 else
                     if exist('OCTAVE_VERSION')
                         command1=['start /B psexec -W ',DyMo, ' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  octave --eval "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                     else
-                        command1=['start /B psexec -W ',DyMo, ' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
+                        command1=['start /B psexec -W ',DyMo, ' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                     end
                 end
             else                                                            % 0.2 Parallel(indPC).Local==0: Run using network on remote machine or also on local machine.
@@ -286,7 +286,7 @@ for j=1:totCPU,
                     if exist('OCTAVE_VERSION'),
                         command1=['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' "cd ',Parallel(indPC).RemoteDirectory,'/',PRCDir, '; octave --eval \"addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''');\" " &'];
                     else
-                        command1=['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' "cd ',Parallel(indPC).RemoteDirectory,'/',PRCDir, '; ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize -r \"addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''');\" " &'];
+                        command1=['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' "cd ',Parallel(indPC).RemoteDirectory,'/',PRCDir, '; ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r \"addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''');\" " &'];
                     end
                 else
                     if ~strcmp(Parallel(indPC).ComputerName,MasterName),  % 0.3 Run on a remote machine!
@@ -295,7 +295,7 @@ for j=1:totCPU,
                                 ' -low  octave --eval "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                         else
                             command1=['start /B psexec \\',Parallel(indPC).ComputerName,' -e -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
-                                ' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
+                                ' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                         end
                     else                                                  % 0.4 Run on the local machine via the network
                         if exist('OCTAVE_VERSION'),
@@ -303,7 +303,7 @@ for j=1:totCPU,
                                 ' -low  octave --eval "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                         else
                             command1=['start /B psexec \\',Parallel(indPC).ComputerName,' -e -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
-                                ' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
+                                ' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                         end
                     end
                 end
@@ -316,13 +316,13 @@ for j=1:totCPU,
                     if exist('OCTAVE_VERSION')
                         command1=['octave --eval "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),')" &'];
                     else
-                        command1=[Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),')" &'];
+                        command1=[Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),')" &'];
                     end
                 else
                     if exist('OCTAVE_VERSION')
                         command1=['start /B psexec -W ',DyMo, ' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  octave --eval "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),')"'];
                     else
-                        command1=['start /B psexec -W ',DyMo, ' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),')"'];
+                        command1=['start /B psexec -W ',DyMo, ' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),')"'];
                     end
                 end
             elseif Parallel(indPC).Local==0,                                % 1.2 Run using network on remote machine or also on local machine.
@@ -339,7 +339,7 @@ for j=1:totCPU,
                         if exist('OCTAVE_VERSION'),
                             command1=['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' "cd ',Parallel(indPC).RemoteDirectory,'/',PRCDir '; octave --eval \"addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),');\" " &'];
                         else
-                            command1=['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' "cd ',Parallel(indPC).RemoteDirectory,'/',PRCDir '; ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize -r \"addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),');\" " &'];
+                            command1=['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' "cd ',Parallel(indPC).RemoteDirectory,'/',PRCDir '; ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r \"addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),');\" " &'];
                         end
                     else
                         if ~strcmp(Parallel(indPC).ComputerName,MasterName), % 1.3 Run on a remote machine.
@@ -348,7 +348,7 @@ for j=1:totCPU,
                                     ' -low  octave --eval "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),')"'];
                             else
                                 command1=['start /B psexec \\',Parallel(indPC).ComputerName,' -e -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
-                                    ' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),')"'];
+                                    ' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),')"'];
                             end
                         else                                                % 1.4 Run on the local machine via the network.
                             if exist('OCTAVE_VERSION'),
@@ -356,7 +356,7 @@ for j=1:totCPU,
                                     ' -low  octave --eval "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),')"'];
                             else
                                 command1=['start /B psexec \\',Parallel(indPC).ComputerName,' -e -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
-                                    ' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),')"'];
+                                    ' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),')"'];
                             end
                         end
                     end
@@ -387,11 +387,22 @@ else
 end
 
 
+% For matlab enviroment with options_.console_mode = 0:
+% create a parallel (local/remote) specialized computational status bars!
+
+global options_
+
+
+
 % Create a parallel (local/remote) specialized computational status bars!
 
-if exist('OCTAVE_VERSION'),
+if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
     diary off;
-    printf('\n');
+    if exist('OCTAVE_VERSION')
+        printf('\n');
+    else
+        fprintf('\n');
+    end
 else
     hfigstatus = figure('name',['Parallel ',fname],...
         'DockControls','off', ...
@@ -436,12 +447,44 @@ delete(['comp_status_',fname,'*.mat']);
 % Wait for the slaves to finish their job, and display some progress
 % information meanwhile.
 
+% Caption for console mode computing ...
+
+if (options_.console_mode == 1)
+    fnameTemp=fname;
+    
+    L=length(fnameTemp);
+    
+    PoCo=strfind(fnameTemp,'_core');
+    
+    for i=PoCo:L
+        if i==PoCo
+            fnameTemp(i)=' ';
+        else
+            fnameTemp(i)='.';
+        end
+    end
+     
+    for i=1:L
+        if  fnameTemp(i)=='_';
+            fnameTemp(i)=' ';
+        end
+    end
+    
+     fnameTemp(L)='';
+    
+    Information=['Parallel ' fnameTemp ' Computing ...'];
+    fprintf([Information,'\n\n']);
+    
+end
+
 
 ForEver=1;
+statusString = '';
 
 while (ForEver)
     
     waitbarString = '';
+    statusString0 = repmat('\b',1,length(sprintf(statusString, 100 .* pcerdone)));
     statusString = '';
     
     pause(1)
@@ -460,7 +503,7 @@ while (ForEver)
             end
             pcerdone(j) = prtfrc;
             idCPU(j) = njob;
-            if exist('OCTAVE_VERSION'),
+            if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
                 statusString = [statusString, int2str(j), ' %3.f%% done! '];
             else
                 status_String{j} = waitbarString;
@@ -468,10 +511,20 @@ while (ForEver)
             end
         catch % ME
             % To define!
+            if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
+                statusString = [statusString, int2str(j), ' %3.f%% done! '];
+            end
         end
     end
-    if exist('OCTAVE_VERSION'),
-        printf([statusString,'\r'], 100 .* pcerdone);
+    if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
+        if exist('OCTAVE_VERSION')
+            printf([statusString,'\r'], 100 .* pcerdone);
+        else
+            if ~isempty(statusString)
+                fprintf([statusString0,statusString], 100 .* pcerdone); 
+            end
+        end
+        
     else
         for j=1:totCPU,
             try
@@ -490,14 +543,19 @@ while (ForEver)
                 HoTuttiGliOutput=HoTuttiGliOutput+1;
             end
         end
+        
         if HoTuttiGliOutput==totCPU,
-            
-            mydelete(['comp_status_',fname,'*.mat'])
-            if ~exist('OCTAVE_VERSION'),
-                close(hfigstatus),
-            else
-                printf('\n');
+            mydelete(['comp_status_',fname,'*.mat']);
+            if exist('OCTAVE_VERSION')|| (options_.console_mode == 1),
+                if exist('OCTAVE_VERSION')
+                    printf('\n');
+                else
+                    fprintf('\n');
+                    fprintf(['End Parallel Session ....','\n\n']);
+                end
                 diary on;
+            else
+                close(hfigstatus),
             end
             
             break
@@ -521,7 +579,6 @@ for j=1:totCPU,
     if isfield(fOutputVar,'error'),
         disp(['Job number ',int2str(j),' crashed with error:']);
         iscrash=1;
-%         keyboard;
         disp([fOutputVar.error.message]);
         for jstack=1:length(fOutputVar.error.stack)
             fOutputVar.error.stack(jstack),
