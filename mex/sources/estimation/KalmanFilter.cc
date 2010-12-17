@@ -47,16 +47,15 @@ KalmanFilter::KalmanFilter(const std::string &dynamicDllFile, size_t n_endo, siz
                    zeta_static_arg, zeta_varobs_back_mixed, qz_criterium_arg, lyapunov_tol_arg, info),
   FUTP(varobs_arg.size()*(varobs_arg.size()+1)/2)
 {
-  a_init.setAll(0.0);
   Z.setAll(0.0);
+  Zt.setAll(0.0);
   for (size_t i = 0; i < varobs_arg.size(); ++i)
     {
       size_t j = find(zeta_varobs_back_mixed.begin(), zeta_varobs_back_mixed.end(),
                       varobs_arg[i]) - zeta_varobs_back_mixed.begin();
       Z(i, j) = 1.0;
+      Zt(j, i) = 1.0;      
     }
-  mat::transpose(Zt,Z);
-
 }
 
 std::vector<size_t>
@@ -114,6 +113,7 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
   double loglik=0.0, ll, logFdet, Fdet, dvtFinvVt;
   size_t p = Finv.getRows();
   bool nonstationary = true;
+  a_init.setAll(0.0);
   for (size_t t = 0; t < detrendedDataView.getCols(); ++t)
     {
       if (nonstationary)
@@ -170,7 +170,6 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
                 {
                   return 0;
                 }
-
             }
           // KFinv gain matrix
           blas::symm("R", "U", 1.0, Finv, K, 0.0, KFinv);
@@ -178,7 +177,7 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
           Fdet = 1;
           for (size_t d = 1; d <= p; ++d)
             Fdet *= FUTP(d + (d-1)*d/2 -1);
-          Fdet *=Fdet;//*pow(-1.0,p);
+          Fdet *=Fdet;
 
           logFdet=log(fabs(Fdet));
 
@@ -202,8 +201,8 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
       // err= Yt - Za
       VectorConstView yt=mat::get_col(detrendedDataView, t);
       vt = yt;
-   
       blas::gemv("N", -1.0, Z, a_init, 1.0, vt);
+
       // at+1= T(at+ KFinv *err)
       blas::gemv("N", 1.0, KFinv, vt, 1.0, a_init);
       blas::gemv("N", 1.0, T, a_init, 0.0, a_new);
