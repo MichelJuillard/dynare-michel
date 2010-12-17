@@ -33,8 +33,6 @@ private:
   const size_t cols2;
   lapack_int lwork, lwork2;
   double *work, *work2, *tau;
-  Matrix H, Q2;
-  Vector v;
 public:
   /*!
     \todo Replace heuristic choice for workspace size by a query to determine the optimal size
