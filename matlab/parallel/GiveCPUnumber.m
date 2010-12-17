@@ -11,7 +11,7 @@ function [nCPU]= GiveCPUnumber (ComputerInformations)
 % The CPUs or Cores numbers of computer.
 %
 % SPECIAL REQUIREMENTS
-%    none
+% none
 
 % Copyright (C) 2010 Dynare Team
 %
@@ -41,6 +41,7 @@ Enviroment=-1;
 
 switch Enviroment
     case 0          %WINDOWS OPERATING SYSTEM
+        
         OffSet=27;
 
         SringPosition=strfind(ComputerInformations, 'Processors:');
@@ -62,7 +63,7 @@ switch Enviroment
         nCPU=str2num(nCPU);
 
         return
-    case 1       %LIKE UNIX OPERATING SYSTEM
+    case 1            %LIKE UNIX OPERATING SYSTEM
         
         % Da generalizzare a un numero di CPu maggiore di 9!!!
 
