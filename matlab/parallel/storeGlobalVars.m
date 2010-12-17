@@ -4,7 +4,9 @@ function storeGlobalVars(fname,append)
 % fGlobalVar and saves it in the file fname.mat
 %
 % INPUTS
-% fname [str]         name of the file 
+% fname  [str]         name of the file
+%
+% append []			   flag to append globals to the storage file
 %
 % OUTPUTS
 % None
