@@ -61,50 +61,9 @@ stderr e_ys,inv_gamma_pdf,1.2533,0.6551;
 stderr e_pies,inv_gamma_pdf,1.88,0.9827;
 end;
 
-// common syntax for win and unix, for local parallel runs (assuming quad-core):
-// for Matlab
-options_.parallel=struct('Local', 1, 'PcName','','NumCPU', [0:3], 'user','','passwd','','RemoteDrive', '', 'RemoteFolder','','MatlabPath',[matlabroot '/bin/matlab'],'DynarePath','../../matlab');
-// for Octave
-//options_.parallel=struct('Local', 1, 'PcName','','NumCPU', [0:3], 'user','','passwd','','RemoteDrive', '', 'RemoteFolder','','MatlabPath','/usr/bin/octave3.2','DynarePath','../../matlab');
-
-
-// windows syntax for remote runs (Local=0):
-// win passwd has to be typed explicitly!
-// RemoteDrive has to be yped explicitly!
-// for user, ALSO the group has to be specified, like WINGROUP\jsmith, i.e. user jsmith in group WINGROUP
-// PcName is the name of the computed in the windows network, i.e. the output of hostname, or the full IP adress
-//options_.parallel=struct('Local', 0, 'PcName','hal9000','NumCPU', [4:6], 'user','WINGROUP\jsmith','passwd','****', 'RemoteDrive', 'C', 'RemoteFolder','dynare_calcs\Remote','MatlabPath',[matlabroot '/bin/matlab'],'DynarePath','../../matlab');
-
-// example to use several remote PC's to build a grid on windows:
-//options_.parallel=struct('Local', 0, 'PcName','hal9000','NumCPU', [0:3], 'user','WINGROUP\azziniv','passwd','****', 'RemoteDrive', 'C', 'RemoteFolder','dynare_calcs\Remote','MatlabPath',[matlabroot '/bin/matlab'],'DynarePath','../../matlab');
-//options_.parallel(2)=struct('Local', 0, 'PcName','donald','NumCPU', [0:3], 'user','WINGROUP\azziniv','passwd','****', 'RemoteDrive', 'D', 'RemoteFolder','dynare_calcs\Remote','MatlabPath',[matlabroot '/bin/matlab'],'DynarePath','../../matlab');
-//options_.parallel(3)=struct('Local', 0, 'PcName','desktop01','NumCPU', [0:3], 'user','','passwd','','RemoteDrive', ppp(1), 'RemoteFolder',ppp(4:end),'MatlabPath',[matlabroot '/bin/matlab'],'DynarePath','../../matlab');
-//options_.parallel(4)=struct('Local', 0, 'PcName','laptop01','NumCPU', [0:1], 'user','WINGROUP\jsmith','passwd','****', 'RemoteDrive', 'C', 'RemoteFolder','dynare_calcs\Remote','MatlabPath',[matlabroot '/bin/matlab'],'DynarePath','../../matlab');
-//options_.parallel(5)=struct('Local', 0, 'PcName','amelia','NumCPU', [0:3], 'user','WINGROUP\azziniv','passwd','****', 'RemoteDrive', 'C', 'RemoteFolder','dynare_calcs\Remote','MatlabPath',[matlabroot '/bin/matlab'],'DynarePath','../../matlab');
-
-// unix syntax for remote runs (Local=0):
-// no passwd and RemoteDrive needed!
-// PcName: full IP address or address
-//options_.parallel=struct('Local', 0, 'PcName','donald.duck.org','NumCPU', [0:3], 'user','jsmith','passwd','', 'RemoteDrive', '', 'RemoteFolder','/home/jsmith/Remote','MatlabPath',[matlabroot '/bin/matlab'],'DynarePath','../../matlab');
-
-// example to combine local and remote runs (on unix):
-//options_.parallel=struct('Local', 1, 'PcName','','NumCPU', [0:3], 'user','','passwd','','RemoteDrive', '', 'RemoteFolder','','MatlabPath',[matlabroot '/bin/matlab'],'DynarePath','../../matlab');
-//options_.parallel(2)=struct('Local', 0, 'PcName','donald.duck.org','NumCPU', [0:3], 'user','jsmith','passwd','', 'RemoteDrive', '', 'RemoteFolder','/home/jsmith/Remote','MatlabPath',[matlabroot '/bin/matlab'],'DynarePath','../../matlab');
-
-// example to combine local and remote runs (on win):
-//options_.parallel=struct('Local', 1, 'PcName','','NumCPU', [0:3], 'user','','passwd','','RemoteDrive', '', 'RemoteFolder','','MatlabPath',[matlabroot '/bin/matlab'],'DynarePath','../../matlab');
-//options_.parallel(2)=struct('Local', 0, 'PcName','laptop01','NumCPU', [0:1], 'user','WINGROUP\jsmith','passwd','****', 'RemoteDrive', 'C', 'RemoteFolder','dynare_calcs\Remote','MatlabPath',[matlabroot '/bin/matlab'],'DynarePath','../../matlab');
-
-options_.parallel_info.leaveSlaveOpen = 1;
-
-// POINT OF TEST FOR INITIALIZE AND ANALYZE COMPUTATIONAL ENVIROMENT
-InitializeComputationalEnviroment(options_);
 
 estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_replic=0);
-estimation(datafile=data_ca1,first_obs=8,nobs=79,mode_compute=0, mode_file=ls2003_mode, mh_nblocks=4,prefilter=1,mh_jscale=0.5,mh_replic=2000);
-estimation(datafile=data_ca1,first_obs=8,nobs=79,mode_compute=0, mode_file=ls2003_mode, mh_nblocks=4,prefilter=1,mh_jscale=0.5,mh_replic=2000,bayesian_irf,load_mh_file);
+estimation(datafile=data_ca1,first_obs=8,nobs=79,mode_compute=0, mode_file=ls2003_mode, mh_nblocks=4, prefilter=1, mh_jscale=0.5, mh_replic=2000);
+estimation(datafile=data_ca1,first_obs=8,nobs=79,mode_compute=0, mode_file=ls2003_mode, mh_nblocks=4,prefilter=1,mh_jscale=0.5,mh_replic=2000,bayesian_irf,load_mh_file,smoother,forecast=12, filtered_vars, filter_step_ahead=[1 2 3 4]);
 
-if options_.parallel_info.leaveSlaveOpen == 1,
-    closeSlave(options_.parallel,options_.parallel_info.RemoteTmpFolder),
-end
 
