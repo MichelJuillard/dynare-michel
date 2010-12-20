@@ -32,7 +32,7 @@ for indPC=1:length(Parallel),
     if isunix || (~matlab_ver_less_than('7.4') && ismac),
         if Parallel(indPC).Local==0,
             [check, ax]=system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' ls ',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',filename]);
-            if check ~ 0
+            if check ~ 0;
                 ax=[];
             end
         else
