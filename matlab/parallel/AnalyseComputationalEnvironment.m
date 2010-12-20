@@ -369,7 +369,11 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
         send='exit';
         StrCommand=([s1,s2,s3,s4,s41,s42,s5,s51,s52,send]);
         % Mettere controllo su NbW ...
-        NbW = fprintf(fid,StrCommand, '%s');
+        if exist('OCTAVE_VERSION')
+            NbW = printf(fid,StrCommand, '%s');
+        else
+            NbW = fprintf(fid,StrCommand, '%s');
+        end
         fclose(fid);
         
         dynareParallelSendFiles('Tracing.m', RemoteTmpFolder,DataInput(Node));
@@ -398,7 +402,7 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
         
         if Environment
             % Controllare ... in Linux!
-            system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' "cd ',DataInput(Node).RemoteDirectory,'/',RemoteTmpFolder,  '; ', DataInput(Node).MatlabOctavePath, ' -nosplash -nodesktop -minimize -r Tracing;" &'])
+            system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' "cd ',DataInput(Node).RemoteDirectory,'/',RemoteTmpFolder,  '; ', DataInput(Node).MatlabOctavePath, ' -nosplash -nodesktop -minimize -r Tracing;" &']);
             
         else
             [NonServeS NenServeD]=system(['start /B psexec \\',DataInput(Node).ComputerName,' -e -u ',DataInput(Node).UserName,' -p ',DataInput(Node).Password,' -W ',DataInput(Node).RemoteDrive,':\',DataInput(Node).RemoteDirectory,'\',RemoteTmpFolder ' -low   ',DataInput(Node).MatlabOctavePath,' -nosplash -nodesktop -minimize -r Tracing']);
