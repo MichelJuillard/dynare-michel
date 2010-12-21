@@ -170,7 +170,15 @@ if options_.lik_init == 1               % Kalman filter
     if kalman_algo ~= 2
         kalman_algo = 1;
     end
-    Pstar = lyapunov_symm(T,R*Q*R',options_.qz_criterium,options_.lyapunov_complex_threshold);
+    [Pstar,junk,unit_roots] = lyapunov_symm(T,R*Q*R',options_.qz_criterium,...
+                                            options_.lyapunov_complex_threshold);
+    if ~isempty(unit_roots)
+        % if unit roots the penalty equals the sum of distance to 2-qz_criterium
+        fval = bayestopt_.penalty + sum(unit_roots-2+ ...
+                                        options_.qz_criterium);
+        cost_flag = 0;
+        return
+    end
     Pinf        = [];
 elseif options_.lik_init == 2   % Old Diffuse Kalman filter
     if kalman_algo ~= 2
