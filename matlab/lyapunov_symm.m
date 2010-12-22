@@ -1,4 +1,4 @@
-function [x,u,unit_roots] = lyapunov_symm(a,b,qz_criterium,lyapunov_complex_threshold,method)
+function [x,u] = lyapunov_symm(a,b,qz_criterium,lyapunov_complex_threshold,method)
 % Solves the Lyapunov equation x-a*x*a' = b, for b and x symmetric matrices.
 % If a has some unit roots, the function computes only the solution of the stable subsystem.
 %  
@@ -15,7 +15,6 @@ function [x,u,unit_roots] = lyapunov_symm(a,b,qz_criterium,lyapunov_complex_thre
 % OUTPUTS
 %   x:      [double]    m*m solution matrix of the lyapunov equation, where m is the dimension of the stable subsystem.
 %   u:      [double]    Schur vectors associated with unit roots  
-%   unit_roots [double] vector containing roots too close to 1
 %
 % ALGORITHM
 %   Uses reordered Schur decomposition
@@ -58,13 +57,10 @@ if size(a,1) == 1
     return
 end
 
-unit_roots = [];
 if method<2
     [U,T] = schur(a);
-    roots = abs(ordeig(T));
-    e1 = roots > 2-qz_criterium;
-    k = sum(e1);       % Number of unit roots.
-    unit_roots = roots(1:k);
+    e1 = abs(ordeig(T)) > 2-qz_criterium;
+    k = sum(e1);       % Number of unit roots. 
     n = length(e1)-k;  % Number of stationary variables.
     if k > 0
         % Selects stable roots
