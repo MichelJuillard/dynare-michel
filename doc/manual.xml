@@ -2255,7 +2255,7 @@ steady;
     </varlistentry>
     <varlistentry>
       <term><option>qz_criterium</option> = <replaceable>DOUBLE</replaceable></term>
-      <listitem><para>Value used to split stable from unstable eigenvalues in reordering the Generalized Schur decomposition used for solving 1<superscript>st</superscript> order problems. Default: <literal>1.000001</literal></para></listitem>
+      <listitem><para>Value used to split stable from unstable eigenvalues in reordering the Generalized Schur decomposition used for solving 1<superscript>st</superscript> order problems. Default: <literal>1.000001</literal> (except when estimating with <xref linkend="lik_init"/> equal to <literal>1</literal>: the default is <literal>0.999999</literal> in that case)</para></listitem>
     </varlistentry>
     <varlistentry>
       <term><option>replic</option> = <replaceable>INTEGER</replaceable></term>
