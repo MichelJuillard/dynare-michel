@@ -55,10 +55,6 @@ var e_a; stderr 0.014;
 var e_m; stderr 0.005;
 end;
 
-unit_root_vars P_obs Y_obs;
-
-steady;
-
 check;
 
 estimated_params;
@@ -81,7 +77,7 @@ Y_obs (gam);
 end;
 
 estimation(order=1,datafile=fsdat_simul,nobs=192,loglinear,mh_replic=2000,
-           mode_compute=4,mh_nblocks=2,mh_drop=0.45,mh_jscale=0.65);
+           mode_compute=4,mh_nblocks=2,mh_drop=0.45,mh_jscale=0.65,diffuse_filter);
 
 //stoch_simul(order=1, periods=200);
 //datatomfile('fsdat_simul2', char('gy_obs', 'gp_obs', 'Y_obs', 'P_obs'));
