@@ -54,6 +54,22 @@ if (options_.diffuse_filter==1) && (options_.lik_init==1)
     options_.lik_init = 3;
 end
 
+%% If options_.lik_init == 1
+%%  set by default options_.qz_criterium to 1-1e-6 
+%%  and check options_.qz_criterium < 1-eps if options_.lik_init == 1
+%% Else set by default options_.qz_criterium to 1+1e-6
+if options_.lik_init == 1
+    if isempty(options_.qz_criterium)
+        options_.qz_criterium = 1-1e-6;
+    elseif options_.qz_criterium > 1-eps
+        error(['estimation: option qz_criterium is too large for estimating ' ...
+               'a stationary model. If your model contains unit roots, use ' ...
+               'option diffuse_filter'])
+    end
+elseif isempty(options_.qz_criterium)
+    options_.qz_criterium = 1+1e-6;
+end
+
 %% If the data are prefiltered then there must not be constants in the
 %% measurement equation of the DSGE model or in the DSGE-VAR model.
 if options_.prefilter == 1
@@ -587,7 +603,7 @@ if options_.mode_compute > 0 && ~options_.mh_posterior_mode_estimation
         neps=10;
         %  Set input parameters. 
         maxy=0;
-        eps=1.0e-9;
+        epsilon=1.0e-9;
         rt_=.10;
         t=15.0;
         ns=10;
@@ -602,7 +618,7 @@ if options_.mode_compute > 0 && ~options_.mh_posterior_mode_estimation
         
         vm=1*ones(npar,1);
         disp(['number of parameters= ' num2str(npar) 'max= '  num2str(maxy) 't=  ' num2str(t)]);
-        disp(['rt_=  '  num2str(rt_) 'eps=  '  num2str(eps) 'ns=  '  num2str(ns)]);
+        disp(['rt_=  '  num2str(rt_) 'eps=  '  num2str(epsilon) 'ns=  '  num2str(ns)]);
         disp(['nt=  '  num2str(nt) 'neps= '   num2str(neps) 'maxevl=  '  num2str(maxevl)]);
         %      disp(['iprint=   '   num2str(iprint) 'seed=   '   num2str(seed)]);
         disp '  ';
@@ -615,10 +631,10 @@ if options_.mode_compute > 0 && ~options_.mh_posterior_mode_estimation
         
         %  keyboard 
         if ~options_.dsge_var
-            [xparam1, fval, nacc, nfcnev, nobds, ier, t, vm] = sa(fh,xparam1,maxy,rt_,eps,ns,nt ...
+            [xparam1, fval, nacc, nfcnev, nobds, ier, t, vm] = sa(fh,xparam1,maxy,rt_,epsilon,ns,nt ...
                                                               ,neps,maxevl,LB,UB,c,idisp ,t,vm,gend,data,data_index,number_of_observations,no_more_missing_observations);
         else
-            [xparam1, fval, nacc, nfcnev, nobds, ier, t, vm] = sa(fh,xparam1,maxy,rt_,eps,ns,nt ...
+            [xparam1, fval, nacc, nfcnev, nobds, ier, t, vm] = sa(fh,xparam1,maxy,rt_,epsilon,ns,nt ...
                                                               ,neps,maxevl,LB,UB,c,idisp ,t,vm,gend);
         end
       otherwise

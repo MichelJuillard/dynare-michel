@@ -39,6 +39,10 @@ end
 
 options_.order = 1;
 
+if isempty(options_.qz_criterium)
+    options_.qz_criterium = 1+1e-6;
+end
+
 [dr, info] = resol(oo_.steady_state,1);
 
 oo_.dr = dr;

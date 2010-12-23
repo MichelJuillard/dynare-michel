@@ -32,6 +32,10 @@ options_ = set_default_option(options_,'hp_ngrid',512);
 options_ = set_default_option(options_,'simul',0);
 options_ = set_default_option(options_,'periods',1);
 
+if isempty(options_.qz_criterium)
+    options_.qz_criterium = 1+1e-6;
+end
+
 make_ex_;
 
 np = size(params,1);

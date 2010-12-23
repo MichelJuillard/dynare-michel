@@ -31,6 +31,10 @@ elseif options_.order == 3
     options_.k_order_solver = 1;
 end
 
+if isempty(options_.qz_criterium)
+    options_.qz_criterium = 1+1e-6;
+end
+
 if options_.partial_information == 1 || options_.ACES_solver == 1
     PI_PCL_solver = 1;
     if options_.order ~= 1
