@@ -3198,6 +3198,7 @@ end;
       <itemizedlist>
         <listitem><para><literal>1</literal>: for stationary models, the initial matrix of variance of the error of forecast is set equal to the unconditional variance of the state variables</para></listitem>
         <listitem><para><literal>2</literal>: for nonstationary models: a wide prior is used with an initial matrix of variance of the error of forecast diagonal with 10 on the diagonal</para></listitem>
+        <listitem><para><literal>3</literal>: for nonstationary models: ...</para></listitem>
       </itemizedlist>
       Default value is <literal>1</literal>.
       </para></listitem>
