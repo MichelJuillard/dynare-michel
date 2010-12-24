@@ -104,9 +104,9 @@ fillEstParamsInfo(const mxArray *estim_params_info, EstimatedParameter::pType ty
 
 int
 sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
-           Matrix &steadyState, Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H,
-           size_t presampleStart, int &info, const VectorConstView &nruns, size_t fblock, size_t nBlocks,
-           const Matrix &Jscale, Prior &drawDistribution, EstimatedParametersDescription &epd,
+           Matrix &steadyState, Vector &estParams, Vector &deepParams, const MatrixConstView &data,
+           Matrix &Q, Matrix &H, size_t presampleStart, int &info, const VectorConstView &nruns, 
+           size_t fblock, size_t nBlocks, Proposal pdd, EstimatedParametersDescription &epd,
            const std::string &resultsFileStem, size_t console_mode, size_t load_mh_file)
 {
   enum {iMin, iMax};
@@ -382,7 +382,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
           try
             {
               jsux = rwmh.compute(mhLogPostDens, mhParamDraws, steadyState, startParams, deepParams, data, Q, H,
-                              presampleStart, info, irun, currInitSizeArray, Jscale, lpd, drawDistribution, epd);
+                              presampleStart, info, irun, currInitSizeArray, lpd, pdd, epd);
               irun = currInitSizeArray;
               sux += jsux*currInitSizeArray;
               j += currInitSizeArray; //j=j+1;
@@ -715,18 +715,13 @@ logMCMCposterior(const VectorConstView &estParams, const MatrixConstView &data, 
   GaussianPrior drawGaussDist01(0.0, 1.0, -INFINITY, INFINITY, 0.0, 1.0);
   // get Jscale = diag(bayestopt_.jscale);
   const mxArray *bayestopt_ = mexGetVariablePtr("global", "bayestopt_");
-  Matrix Jscale(n_estParams);
-  Matrix Dscale(n_estParams);
-  //Vector vJscale(n_estParams);
-  Jscale.setAll(0.0);
-  VectorConstView vJscale(mxGetPr(mxGetField(bayestopt_, 0, "jscale")), n_estParams, 1);
-  for (size_t i = 0; i < n_estParams; i++)
-    Jscale(i, i) = vJscale(i);
-  blas::gemm("N", "N", 1.0, D, Jscale, 0.0, Dscale);
+  const Matrix Jscale(n_estParams);
+  const VectorConstView vJscale(mxGetPr(mxGetField(bayestopt_, 0, "jscale")), n_estParams, 1);
+  Proposal pdd(vJscale,D);
 
   //sample MHMCMC draws and get get last line run in the last MH block sub-array
   int lastMHblockArrayLine = sampleMHMC(lpd, rwmh, steadyState, estParams2, deepParams, data, Q, H, presample, info,
-                                           nMHruns, fblock, nBlocks, Dscale, drawGaussDist01, epd, resultsFileStem, console_mode, load_mh_file);
+                                           nMHruns, fblock, nBlocks, pdd, epd, resultsFileStem, console_mode, load_mh_file);
 
   // Cleanups
   for (std::vector<EstimatedParameter>::iterator it = estParamsInfo.begin();

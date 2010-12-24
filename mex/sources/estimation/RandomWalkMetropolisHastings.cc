@@ -25,8 +25,8 @@
 double
 RandomWalkMetropolisHastings::compute(VectorView &mhLogPostDens, MatrixView &mhParams, Matrix &steadyState,
                                       Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H,
-                                      const size_t presampleStart, int &info, const size_t startDraw, size_t nMHruns, const Matrix &Dscale,
-                                      LogPosteriorDensity &lpd, Prior &drawDistribution, EstimatedParametersDescription &epd)
+                                      const size_t presampleStart, int &info, const size_t startDraw, size_t nMHruns, 
+                                      LogPosteriorDensity &lpd, Proposal &pDD, EstimatedParametersDescription &epd)
 {
   //streambuf *likbuf, *drawbuf *backup;
   std::ofstream urandfilestr, drawfilestr;
@@ -43,7 +43,7 @@ RandomWalkMetropolisHastings::compute(VectorView &mhLogPostDens, MatrixView &mhP
   for (size_t run = startDraw - 1; run < nMHruns; ++run)
     {
       overbound=false;
-      randMultiVar(drawDistribution, newParDraw, parDraw, Dscale, parDraw.getSize());
+      pDD.draw(parDraw, newParDraw);
       for (count=0;count<parDraw.getSize();++count)
         {
           overbound=(newParDraw(count) <  epd.estParams[count].lower_bound || newParDraw(count) > epd.estParams[count].upper_bound );
@@ -68,7 +68,7 @@ RandomWalkMetropolisHastings::compute(VectorView &mhLogPostDens, MatrixView &mhP
               newLogpost = -INFINITY;
             }
         }
-      urand=uniform.drand();
+      urand=pDD.selectionTestDraw();
       if ((newLogpost > -INFINITY) && log(urand) < newLogpost-logpost)
         {
           parDraw = newParDraw;

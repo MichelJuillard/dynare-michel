@@ -136,7 +136,7 @@ oldoptions_console_mode=options_.console_mode;
     record.Seeds(b).Unifor = rand('state');
   end
   % calculate draws and get last line run in the last MH block sub-array
-  irun = logMHMCMCposterior( xparam1, varargin{2}, mexext, fblck, nblck, nruns, d)
+  irun = logMHMCMCposterior( xparam1, varargin{2}, mexext, fblck, nblck, nruns, vv)
   if irun<0
     error('Error in logMHMCMCposterior');
   end

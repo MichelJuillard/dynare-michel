@@ -26,26 +26,25 @@
 #if !defined(A6BBC5E0_598E_4863_B7FF_E87320056B80__INCLUDED_)
 #define A6BBC5E0_598E_4863_B7FF_E87320056B80__INCLUDED_
 
-#include "RandSampler.hh"
+#include "LogPosteriorDensity.hh"
+#include "Proposal.hh"
 
-class RandomWalkMetropolisHastings : public RandSampler
+class RandomWalkMetropolisHastings
 {
 
 private:
-  UniformPrior uniform;
   Vector parDraw, newParDraw;
 
 public:
   RandomWalkMetropolisHastings(size_t size) :
-    uniform(0.0, 0.0, 0.0, 1.0, 0.0, 1.0),
     parDraw(size), newParDraw(size)
   {
   };
   virtual ~RandomWalkMetropolisHastings(){};
   virtual double compute(VectorView &mhLogPostDens, MatrixView &mhParams, Matrix &steadyState,
                          Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H,
-                         const size_t presampleStart, int &info, const size_t startDraw, size_t nMHruns, const Matrix &Jscale,
-                         LogPosteriorDensity &logPosteriorDensity, Prior &drawDistribution,
+                         const size_t presampleStart, int &info, const size_t startDraw, size_t nMHruns, 
+                         LogPosteriorDensity &logPosteriorDensity, Proposal &proposalDrawDistribution,
                          EstimatedParametersDescription &epd);
 };
 
