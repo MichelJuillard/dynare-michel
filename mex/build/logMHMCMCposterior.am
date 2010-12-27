@@ -53,10 +53,10 @@ nodist_logMHMCMCposterior_SOURCES = \
 	ModelSolution.hh \
 	Prior.cc \
 	Prior.hh \
+	Proposal.cc \
+	Proposal.hh \
 	RandomWalkMetropolisHastings.cc \
 	RandomWalkMetropolisHastings.hh \
-	RandSampler.cc \
-	RandSampler.hh \
 	dynamic_dll.cc \
 	dynamic_dll.hh \
 	logMHMCMCposterior.cc
