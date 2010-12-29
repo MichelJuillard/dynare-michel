@@ -116,17 +116,25 @@ At 1st order, the approximated solution of the model takes the form:
 \[
 y_t = \bar y + g_y (s_{t-1}-\bar s)+g_u u_t
 \]
-$\Sigma_y$, the covariance matrix of $y_t$ must satisfy
+where $s_t$ is the subset of variables that enter the state of the system.
 \[
-\Sigma_y = g_y\Sigma_y g_y' + g_u \Sigma_u g_u'
+s_t = \bar s + g_y^{(s)} (s_{t-1}-\bar s)+g_u^{(s)} u_t
+\]
+
+$\Sigma_s$, the covariance matrix of $s_t$ must satisfy
+\[
+\Sigma_s = g_y^{(s)}\Sigma_s g_y_{(s)}' + g_u^{(s)} \Sigma_u g_u^{(s)}'
 \]
 where $\Sigma_u$ is the covariance matrix of $u_t$. This requires that
-the eigenvalues of $g_y$ are smaller than 1 in modulus.
+the eigenvalues of $g_y^{(s)}$ are smaller than 1 in modulus.
+
+The full covariance matrix for $y_t$, $\Sigma_y$, or any subpart of it, can then be obtained as
+\[
+\Sigma_ = g_y^{(s)}\Sigma_s g_y_{(s)}' + g_u^{(s)} \Sigma_u g_u^{(s)}'
+\]
 
 The above equation is a Sylvester equation that is best solved by a
-specialized algorithm. Dynare, currently, uses [[lyapunov\_symm.m]]. In
-the actual implementation, we distinguish between state variables and non
-state variables. 
+specialized algorithm. Dynare, currently, uses [[lyapunov\_symm.m]]. 
 
 The vector of standard deviations $\sigma_y$ is
 obtained by taking the square root of the diagonal elements of
