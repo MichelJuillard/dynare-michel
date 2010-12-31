@@ -1,4 +1,4 @@
-function [x,info] = dynare_solve_block_or_bytecode(y, exo, params)
+function [x,info] = dynare_solve_block_or_bytecode(y, exo, params, temporary_terms)
 % Copyright (C) 2010 Dynare Team
 %
 % This file is part of Dynare.
@@ -48,12 +48,13 @@ elseif options_.bytecode
         mexErrCheck('bytecode', check);
         info = check;
     elseif options_.block
+        temporary_terms = [];
         for b = 1:size(M_.blocksMFS,1)
             n = size(M_.blocksMFS{b}, 1);
             if n ~= 0
                 [y, check] = dynare_solve('block_bytecode_mfs_steadystate', ...
                                        x(M_.blocksMFS{b}), ...
-                                      options_.jacobian_flag, b, x);
+                                      options_.jacobian_flag, b, x, temporary_terms);
                 if check ~= 0
                     error(['STEADY: convergence problems in block ' int2str(b)])
                 end
