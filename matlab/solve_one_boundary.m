@@ -256,11 +256,13 @@ for it_=start:incr:finish
                 f = 0.5*r'*r;
                 p = -g1\r ;
                 if (is_dynamic)
-                    [ya,f,r,check]=lnsrch1(y(it_,:),f,g,p,stpmax,'lnsrch1_wrapper_one_boundary',nn,  y_index_eq, y_index_eq, fname, y, x, params, it_);
+                    [ya,f,r,check]=lnsrch1(y(it_,:)',f,g,p,stpmax,'lnsrch1_wrapper_one_boundary',nn,  y_index_eq, y_index_eq, fname, y, x, params, it_);
+                    dx = ya' - y(it_, :);
                 else
                     [ya,f,r,check]=lnsrch1(y,f,g,p,stpmax,fname,nn,y_index_eq,x, params, 0);
+                    dx = ya - y(y_index_eq);
                 end;
-                dx = ya - y(y_index_eq);
+                
                 if(is_dynamic)
                     y(it_,:) = ya';
                 else
