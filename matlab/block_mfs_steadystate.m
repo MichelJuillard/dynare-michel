@@ -27,3 +27,4 @@ y_all(indx) = y;
 x = [oo_.exo_steady_state; oo_.exo_det_steady_state];
 
 eval(['[r,g1] = ' M_.fname '_static(b, y_all, x, M_.params);']);
+g1 = full(g1);
