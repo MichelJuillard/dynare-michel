@@ -35,7 +35,8 @@ func = str2func(func);
 h=10e-6;
 pargs=args;
 margs=args;
-for i=1:size(args,2)
+% length(args) is used instead of size(args, 2) to avoid to transpose column vectors
+for i=1:length(args)
     if i==element
         pargs{i} = pargs{i} + h;
         margs{i} = margs{i} - h;
