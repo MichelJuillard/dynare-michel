@@ -32,7 +32,8 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
                          double *direction_arg, int y_size_arg,
                          int nb_row_x_arg, int nb_row_xd_arg, int periods_arg, int y_kmin_arg, int y_kmax_arg,
                          int maxit_arg_, double solve_tolf_arg, int size_of_direction_arg, double slowc_arg, int y_decal_arg, double markowitz_c_arg,
-                         string &filename_arg, int minimal_solving_periods_arg, int stack_solve_algo_arg, int solve_algo_arg)
+                         string &filename_arg, int minimal_solving_periods_arg, int stack_solve_algo_arg, int solve_algo_arg,
+                         bool global_temporary_terms_arg, bool print_arg)
 {
   params = params_arg;
   y = y_arg;
@@ -60,6 +61,8 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
   minimal_solving_periods = minimal_solving_periods_arg;
   stack_solve_algo = stack_solve_algo_arg;
   solve_algo = solve_algo_arg;
+  global_temporary_terms = global_temporary_terms_arg;
+  print = print_arg;
 }
 
 double
@@ -129,6 +132,8 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
   double *jacob = NULL, *jacob_other_endo = NULL, *jacob_exo = NULL, *jacob_exo_det = NULL;
   EQN_block = block_num;
   stack<double> Stack;
+  external_function_type function_type;
+
 #ifdef DEBUG
   mexPrintf("compute_block_time\n");
 #endif
@@ -1139,7 +1144,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
             mexPrintf("arg_func_name.c_str() = %s\n",arg_func_name.c_str());
 #endif
             unsigned int nb_add_input_arguments = fc->get_nb_add_input_arguments();
-            external_function_type function_type = fc->get_function_type();
+            function_type = fc->get_function_type();
 #ifdef DEBUG
             mexPrintf("function_type=%d ExternalFunctionWithoutDerivative=%d\n",function_type, ExternalFunctionWithoutDerivative);
             mexEvalString("drawnow;");
@@ -1251,16 +1256,20 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
                   for (unsigned int i = 0; i < nb_add_input_arguments; i++)
                     {
                       double rr = Stack.top();
+#ifdef DEBUG
                       mexPrintf("i=%d rr = %f\n",i, rr);
+#endif
                       mxSetCell(vv, (nb_add_input_arguments - 1) - i, mxCreateDoubleScalar(rr));
                       Stack.pop();
                     }
                   input_arguments[nb_input_arguments+nb_add_input_arguments] = vv;
+#ifdef DEBUG
                   mexCallMATLAB(0, NULL, 1, & input_arguments[0], "disp");
                   mexCallMATLAB(0, NULL, 1, & input_arguments[1], "disp");
                   mexCallMATLAB(0, NULL, 1, & input_arguments[2], "celldisp");
                   mexPrintf("OK\n");
                   mexEvalString("drawnow;");
+#endif
                   nb_input_arguments = 3;
                   mexCallMATLAB(nb_output_arguments, output_arguments, nb_input_arguments, input_arguments, function_name.c_str());
                   double *rr = mxGetPr(output_arguments[0]);
@@ -1288,72 +1297,6 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
                 }
                 break;
               }
-            /*if (f)
-              {
-                input_arguments = (mxArray**)mxMalloc((nb_input_arguments+1+nb_add_input_arguments) * sizeof(mxArray*));
-                //the called function is jacob_element or hess_element
-                mxArray *vv = mxCreateString(arg_func_name.c_str());
-                input_arguments[0] = vv;
-                vv = mxCreateDoubleScalar(fc->get_indx());
-                input_arguments[1] = vv;
-                start_input_arg += 2;
-              }
-            else
-               input_arguments = (mxArray**)mxMalloc(nb_input_arguments * sizeof(mxArray*));
-            for (unsigned int i = start_input_arg; i < nb_input_arguments + start_input_arg; i++)
-              {
-                mxArray *vv = mxCreateDoubleScalar(Stack.top());
-                input_arguments[i] = vv;
-                Stack.pop();
-              }
-            mexPrintf("nb_add_input_arguments=%d Stack.size()=%d\n",nb_add_input_arguments, Stack.size());mexEvalString("drawnow;");
-            if (arg_func_name.length() > 0)
-              {
-                mxArray *vv = mxCreateCellArray(1, &nb_add_input_arguments);
-                for (unsigned int i = 0; i < nb_add_input_arguments; i++)
-                  {
-                    double rr = Stack.top();
-                    mexPrintf("i=%d rr = %f\n",i, rr);
-                    mxSetCell(vv, i, mxCreateDoubleScalar(rr));
-                    Stack.pop();
-                  }
-                input_arguments[nb_input_arguments+nb_add_input_arguments] = vv;
-                mexCallMATLAB(0, NULL, 1, & input_arguments[0], "disp");
-                mexCallMATLAB(0, NULL, 1, & input_arguments[1], "disp");
-                mexCallMATLAB(0, NULL, 1, & input_arguments[2], "celldisp");
-                mexPrintf("OK\n");
-                mexEvalString("drawnow;");
-                nb_input_arguments = 3;
-              }
-
-            mexCallMATLAB(nb_output_arguments, output_arguments, nb_input_arguments, input_arguments, function_name.c_str());
-            double *rr = mxGetPr(output_arguments[0]);
-            Stack.push(*rr);
-            if (nb_output_arguments >= 2)  //its the return of a TEF
-              {
-                unsigned int indx = fc->get_indx();
-                double *FD1 = mxGetPr(output_arguments[1]);
-                unsigned int rows = mxGetM(output_arguments[1]);
-                for(unsigned int i = 0; i < rows; i++)
-                  TEFD[make_pair(indx, i)] = FD1[i];
-                if (nb_output_arguments == 3)
-                  {
-                    double *FD2 = mxGetPr(output_arguments[2]);
-                    unsigned int rows = mxGetM(output_arguments[2]);
-                    unsigned int cols = mxGetN(output_arguments[2]);
-                    unsigned int k = 0;
-                    for (unsigned int j = 0; j < cols; j++)
-                      for (unsigned int i = 0; i < rows; i++)
-                        TEFDD[make_pair(indx, make_pair(i, j))] = FD2[k++];
-                  }
-              }
-            else*/
-/*
-#ifdef DEBUG
-            mexPrintf("Stack.size()=%d, *rr=%f\n",Stack.size(), *rr);
-            mexPrintf("done\n");
-            mexEvalString("drawnow;");
-#endif*/
           }
           break;
         case FSTPTEF:
@@ -1387,12 +1330,15 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
             mexPrintf("FSTPTEFD\n");
             mexPrintf("indx=%d Stack.size()=%d\n",indx, Stack.size());
 #endif
-            TEFD[make_pair(indx, row-1)] = Stack.top();
+            if (function_type == ExternalFunctionNumericalFirstDerivative)
+              {
+                TEFD[make_pair(indx, row-1)] = Stack.top();
 #ifdef DEBUG
-            mexPrintf("FSTP TEFD[make_pair(indx, row)]=%f done\n",TEFD[make_pair(indx, row-1)]);
-            mexEvalString("drawnow;");
+                mexPrintf("FSTP TEFD[make_pair(indx, row)]=%f done\n",TEFD[make_pair(indx, row-1)]);
+                mexEvalString("drawnow;");
 #endif
-            Stack.pop();
+                Stack.pop();
+              }
           }
 
           break;
@@ -1418,12 +1364,15 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
             mexPrintf("FSTPTEFD\n");
             mexPrintf("indx=%d Stack.size()=%d\n",indx, Stack.size());
 #endif
-            TEFDD[make_pair(indx, make_pair(row-1, col-1))] = Stack.top();
+            if (function_type == ExternalFunctionNumericalSecondDerivative)
+              {
+                TEFDD[make_pair(indx, make_pair(row-1, col-1))] = Stack.top();
 #ifdef DEBUG
-            mexPrintf("FSTP TEFDD[make_pair(indx, make_pair(row, col))]=%f done\n",TEFDD[make_pair(indx, make_pair(row, col))]);
-            mexEvalString("drawnow;");
+                mexPrintf("FSTP TEFDD[make_pair(indx, make_pair(row, col))]=%f done\n",TEFDD[make_pair(indx, make_pair(row, col))]);
+                mexEvalString("drawnow;");
 #endif
-            Stack.pop();
+                Stack.pop();
+              }
           }
 
           break;
@@ -2394,6 +2343,47 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
   return NO_ERROR_ON_EXIT;
 }
 
+void
+Interpreter::print_a_block(const int size, const int type, string bin_basename, bool steady_state, int block_num,
+                              const bool is_linear, const int symbol_table_endo_nbr, const int Block_List_Max_Lag,
+                              const int Block_List_Max_Lead, const int u_count_int, int block)
+{
+  it_code_type begining;
+  mexPrintf("\nBlock %d\n",block_num+1);
+  mexPrintf("----------\n");
+  if (steady_state)
+    residual = vector<double>(size);
+  else
+    residual = vector<double>(size*(periods+y_kmin));
+  bool go_on = true;
+  bool space = false;
+  while (go_on)
+    {
+      if (it_code->first == FENDBLOCK)
+        {
+          go_on = false;
+          it_code++;
+        }
+      else
+        {
+          string s = print_expression(it_code, false, size, block_num, steady_state, Per_u_, it_, it_code, false);
+          if (s == "if (evaluate)" || s == "else")
+            space = false;
+          if (s.length()>0)
+            {
+              if (space)
+                mexPrintf("  %s\n",s.c_str());
+              else
+                mexPrintf("%s\n",s.c_str());
+              mexEvalString("drawnow;");
+            }
+          if (s == "if (evaluate)" || s == "else")
+            space = true;
+        }
+    }
+}
+
+
 bool
 Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_state, bool evaluate, int block, int &nb_blocks)
 {
@@ -2444,7 +2434,10 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
             FBEGINBLOCK_ *fb = (FBEGINBLOCK_ *) it_code->second;
             Block_Contain = fb->get_Block_Contain();
             it_code++;
-            if (evaluate)
+            if (print)
+              print_a_block(fb->get_size(), fb->get_type(), bin_basename, steady_state, Block_Count,
+                            fb->get_is_linear(), fb->get_endo_nbr(), fb->get_Max_Lag(), fb->get_Max_Lead(), fb->get_u_count_int(), block);
+            else if (evaluate)
               {
 #ifdef DEBUG
                 mexPrintf("jacobian_block=mxCreateDoubleMatrix(%d, %d, mxREAL)\n",fb->get_size(),fb->get_nb_col_jacob());
@@ -2511,7 +2504,19 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
           var = ((FDIMST_ *) it_code->second)->get_size();
           if (T)
             mxFree(T);
-          T = (double *) mxMalloc(var*sizeof(double));
+          if (global_temporary_terms)
+            {
+              GlobalTemporaryTerms = mexGetVariable("caller", "temporary_terms");
+              if (GlobalTemporaryTerms == NULL)
+                {
+                  mexPrintf("GlobalTemporaryTerms is NULL\n");mexEvalString("drawnow;");
+                }
+              if (var != (int)mxGetNumberOfElements(GlobalTemporaryTerms))
+                GlobalTemporaryTerms = mxCreateDoubleMatrix(var, 1, mxREAL);
+              T = mxGetPr(GlobalTemporaryTerms);
+            }
+          else
+            T = (double *) mxMalloc(var*sizeof(double));
           if (block >= 0)
             it_code = code_liste.begin() + code.get_begin_block(block);
           else
@@ -2524,6 +2529,9 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
           throw FatalExceptionHandling(tmp.str());
         }
     }
+  if (global_temporary_terms)
+    mexPutVariable("caller", "temporary_terms", GlobalTemporaryTerms);
+
   mxFree(Init_Code->second);
   nb_blocks = Block_Count+1;
   if (T)
