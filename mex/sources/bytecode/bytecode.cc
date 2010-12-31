@@ -66,7 +66,8 @@ Get_Arguments_and_global_variables(int nrhs,
                                    mxArray *block_structur[],
 #endif
                                    bool &steady_state, bool &evaluate, int &block,
-                                   mxArray *M_[], mxArray *oo_[], mxArray *options_[])
+                                   mxArray *M_[], mxArray *oo_[], mxArray *options_[], bool &global_temporary_terms,
+                                   bool &print)
 {
 #ifdef DEBUG_EX
   for (int i = 2; i < nrhs; i++)
@@ -112,6 +113,10 @@ Get_Arguments_and_global_variables(int nrhs,
         steady_state = false;
       else if (Get_Argument(prhs[i]) == "evaluate")
         evaluate = true;
+      else if (Get_Argument(prhs[i]) == "global_temporary_terms")
+        global_temporary_terms = true;
+      else if (Get_Argument(prhs[i]) == "print")
+        print = true;
       else
         {
           int pos = Get_Argument(prhs[i]).find("block");
@@ -196,6 +201,8 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   double *params = NULL;
   double *yd = NULL, *xd = NULL;
   int count_array_argument = 0;
+  bool global_temporary_terms = false;
+  bool print = false;
 
   try
     {
@@ -207,7 +214,8 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                                    &block_structur,
 #endif
                                    steady_state, evaluate, block,
-                                   &M_, &oo_, &options_);
+                                   &M_, &oo_, &options_, global_temporary_terms,
+                                   print);
     }
   catch (GeneralExceptionHandling &feh)
     {
@@ -294,6 +302,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   double *ya = (double *) mxMalloc(size_of_direction);
   direction = (double *) mxMalloc(size_of_direction);
   memset(direction, 0, size_of_direction);
+
   double *x = (double *) mxMalloc(col_x*row_x*sizeof(double));
   for (i = 0; i < row_x*col_x; i++)
     x[i] = double (xd[i]);
@@ -306,7 +315,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   int nb_row_x = row_x;
   clock_t t0 = clock();
 
-  Interpreter interprete(params, y, ya, x, steady_yd, steady_xd, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal, markowitz_c, file_name, minimal_solving_periods, stack_solve_algo, solve_algo);
+  Interpreter interprete(params, y, ya, x, steady_yd, steady_xd, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal, markowitz_c, file_name, minimal_solving_periods, stack_solve_algo, solve_algo, global_temporary_terms, print);
 
   string f(fname);
   mxFree(fname);
