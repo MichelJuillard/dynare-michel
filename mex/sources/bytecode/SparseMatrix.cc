@@ -485,7 +485,7 @@ SparseMatrix::Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>,
   map<pair<pair<int, int>, int>, int>::iterator it4;
   for (i = 0; i < y_size*(periods+y_kmin); i++)
     ya[i] = y[i];
-#if DEBUG
+#ifdef DEBUG
   unsigned int max_nze = mxGetNzmax(A_m);
 #endif
   unsigned int NZE = 0;
@@ -514,7 +514,7 @@ SparseMatrix::Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>,
         }
       eq = it4->first.second;
       int index = it4->second;
-#if DEBUG
+#ifdef DEBUG
       if (index<0 || index >= u_count_alloc || index > Size + Size*Size)
         {
           ostringstream tmp;
@@ -531,7 +531,7 @@ SparseMatrix::Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>,
       A[NZE] = u[index];
       Ai[NZE] = eq;
       NZE++;
-#if DEBUG
+#ifdef DEBUG
       if (eq < 0 || eq >= Size)
         {
           ostringstream tmp;
@@ -593,7 +593,7 @@ SparseMatrix::Init_Matlab_Sparse(int periods, int y_kmin, int y_kmax, int Size, 
   map<pair<pair<int, int>, int>, int>::iterator it4;
   for (i = 0; i < y_size*(periods+y_kmin); i++)
     ya[i] = y[i];
-#if DEBUG
+#ifdef DEBUG
   unsigned int max_nze = mxGetNzmax(A_m);
 #endif
   unsigned int NZE = 0;
@@ -624,7 +624,7 @@ SparseMatrix::Init_Matlab_Sparse(int periods, int y_kmin, int y_kmax, int Size, 
               int ti_new_y_kmin = -min(periods-(t+1), y_kmin);
               if (lag <= ti_new_y_kmax && lag >= ti_new_y_kmin)   /*Build the index for sparse matrix containing the jacobian : u*/
                 {
-#if DEBUG
+#ifdef DEBUG
                   if (index<0 || index >= u_count_alloc || index > Size + Size*Size)
                    {
                      ostringstream tmp;
@@ -644,7 +644,7 @@ SparseMatrix::Init_Matlab_Sparse(int periods, int y_kmin, int y_kmax, int Size, 
                 }
               if (lag > ti_y_kmax || lag < ti_y_kmin)
                 {
-#if DEBUG
+#ifdef DEBUG
                   if (eq < 0 || eq >= Size * periods)
                     {
                       ostringstream tmp;
@@ -669,7 +669,7 @@ SparseMatrix::Init_Matlab_Sparse(int periods, int y_kmin, int y_kmax, int Size, 
             }
           else           /* ...and store it in the u vector*/
             {
-#if DEBUG
+#ifdef DEBUG
               if (index < 0 || index >= u_count_alloc)
                 {
                   ostringstream tmp;
@@ -3248,11 +3248,11 @@ SparseMatrix::fixe_u(double **u, int u_count_int, int max_lag_plus_max_lead_plus
 {
   u_count = u_count_int * periods;
   u_count_alloc = 2*u_count;
-#if DEBUG
+#ifdef DEBUG
   mexPrintf("fixe_u : alloc(%d double)\n",u_count_alloc);
 #endif
   (*u) = (double *) mxMalloc(u_count_alloc*sizeof(double));
-#if DEBUG
+#ifdef DEBUG
   mexPrintf("*u=%d\n",*u);
 #endif
   memset((*u), 0, u_count_alloc*sizeof(double));
