@@ -38,7 +38,7 @@ for i=1:nvar
     end
 end
 
-y = y(ivar,options_.drop+M_.maximum_lag+1:end)';
+y = y(ivar,options_.drop+1:end)';
 
 m = mean(y);
 

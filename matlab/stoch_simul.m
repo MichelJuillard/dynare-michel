@@ -117,13 +117,13 @@ if ~options_.noprint
 end
 
 if options_.periods > 0 && ~PI_PCL_solver
-    if options_.periods < options_.drop
+    if options_.periods <= options_.drop
         disp(['STOCH_SIMUL error: The horizon of simulation is shorter' ...
               ' than the number of observations to be DROPed'])
         options_ =options_old;
         return
     end
-    oo_.endo_simul = simult(repmat(oo_.dr.ys,1,M_.maximum_lag),oo_.dr);
+    oo_.endo_simul = simult(oo_.dr.ys,oo_.dr);
     dyn2vec;
 end
 
