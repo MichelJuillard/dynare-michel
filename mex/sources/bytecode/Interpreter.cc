@@ -1960,7 +1960,24 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               max_res_idx = 0;
               error_not_printed = true;
               compute_block_time(0, false, block_num, size, steady_state);
-              cvg = false;
+              if (!(isnan(res1) || isinf(res1)))
+                {
+                  for (i = 0; i < size; i++)
+                    {
+                      double rr;
+                      rr = r[i];
+                      if (max_res < fabs(rr))
+                        {
+                          max_res = fabs(rr);
+                          max_res_idx = i;
+                        }
+                      res2 += rr*rr;
+                      res1 += fabs(rr);
+                    }
+                  cvg = (max_res < solve_tolf);
+                }
+              else
+                cvg = false;
               Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, stack_solve_algo, solve_algo);
               if (!result)
                 {
@@ -2042,7 +2059,24 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   max_res = 0; max_res_idx = 0;
                   error_not_printed = true;
                   compute_block_time(0, false, block_num, size, steady_state);
-                  cvg = false;
+                  if (!(isnan(res1) || isinf(res1)))
+                    {
+                      for (i = 0; i < size; i++)
+                        {
+                          double rr;
+                          rr = r[i];
+                          if (max_res < fabs(rr))
+                            {
+                              max_res = fabs(rr);
+                              max_res_idx = i;
+                            }
+                          res2 += rr*rr;
+                          res1 += fabs(rr);
+                        }
+                      cvg = (max_res < solve_tolf);
+                    }
+                  else
+                    cvg = false;
                   Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, stack_solve_algo, solve_algo);
                 }
             }
@@ -2127,7 +2161,24 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
               max_res = 0; max_res_idx = 0;
               error_not_printed = true;
               compute_block_time(0, false, block_num, size, steady_state);
-              cvg = false;
+              if (!(isnan(res1) || isinf(res1)))
+                {
+                  for (i = 0; i < size; i++)
+                    {
+                      double rr;
+                      rr = r[i];
+                      if (max_res < fabs(rr))
+                        {
+                          max_res = fabs(rr);
+                          max_res_idx = i;
+                        }
+                      res2 += rr*rr;
+                      res1 += fabs(rr);
+                    }
+                  cvg = (max_res < solve_tolf);
+                }
+              else
+                cvg = false;
               Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, stack_solve_algo, solve_algo);
               if (!result)
                 {
@@ -2205,7 +2256,24 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   Per_y_ = it_*y_size;
                   error_not_printed = true;
                   compute_block_time(0, false, block_num, size, steady_state);
-                  cvg = false;
+                  if (!(isnan(res1) || isinf(res1)))
+                    {
+                      for (i = 0; i < size; i++)
+                        {
+                          double rr;
+                          rr = r[i];
+                          if (max_res < fabs(rr))
+                            {
+                              max_res = fabs(rr);
+                              max_res_idx = i;
+                            }
+                          res2 += rr*rr;
+                          res1 += fabs(rr);
+                        }
+                      cvg = (max_res < solve_tolf);
+                    }
+                  else
+                    cvg = false;
                   Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, stack_solve_algo, solve_algo);
                 }
             }
