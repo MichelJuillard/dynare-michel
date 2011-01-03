@@ -84,7 +84,7 @@ if options_.block && ~options_.bytecode
       end
       z(idx) = r;
     end
-elseif options_.block && options_.bytecode
+elseif options_.bytecode
     [check, z] = bytecode('evaluate','static');
     mexErrCheck('bytecode', check);
 else
@@ -100,6 +100,7 @@ if nargout == 0
     for i = 1:4
         disp(' ')
     end
+    ind = [];
     disp('Residuals of the static equations:')
     disp(' ')
     for i=1:M_.orig_endo_nbr
