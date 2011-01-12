@@ -1,7 +1,7 @@
 function disp_moments(y,var_list)
 % Displays moments of simulated variables
 
-% Copyright (C) 2001-2010 Dynare Team
+% Copyright (C) 2001-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -84,7 +84,7 @@ ar = options_.ar;
 if ar > 0
     autocorr = [];
     for i=1:ar
-        oo_.autocorr{i} = y(ar+1:end,:)'*y(ar+1-i:end-i,:)./((size(y,1)-ar)*s'*s);
+        oo_.autocorr{i} = y(ar+1:end,:)'*y(ar+1-i:end-i,:)./((size(y,1)-ar)*std(y(ar+1:end,:))'*std(y(ar+1-i:end-i,:)));
         autocorr = [ autocorr diag(oo_.autocorr{i}) ];
     end
     title = 'AUTOCORRELATION OF SIMULATED VARIABLES';
