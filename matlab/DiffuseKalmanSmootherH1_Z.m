@@ -97,25 +97,48 @@ t = 0;
 while rank(Pinf(:,:,t+1),crit1) & t<smpl
     t = t+1;
     v(:,t)= Y(:,t) - Z*a(:,t);
-    F = Z*Pinf(:,:,t)*Z';
-    if rcond(F) < crit
-        return          
+    Finf = Z*Pinf(:,:,t)*Z';
+    if rcond(Finf) < kalman_tol
+        if ~all(abs(Finf(:)) < kalman_tol)
+            % The univariate diffuse kalman filter should be used.
+            return
+        else
+            Fstar(:,:,t)  = Z*Pstar(:,:,t)*Z' + H;
+            if rcond(Fstar(:,:,t)) < kalman_tol
+                if ~all(abs(Fstar(:,:,t))<kalman_tol)
+                    % The univariate diffuse kalman filter should be used.
+                    return
+                else
+                    a(:,:,t+1) = T*a(:,:,t);
+                    Pstar(:,:,t+1) = T*Pstar(:,:,t)*transpose(T)+QQ;
+                    Pinf(:,:,t+1)  = T*Pinf(:,:,t)*transpose(T);
+                end
+            else
+                iFstar = inv(Fstar(:,:,t));
+                Kstar(:,:,t)  = Pstar(:,:,t)*Z'*iFstar(:,:,t);
+                Pinf(:,:,t+1)   = T*Pinf(:,:,t)*transpose(T);
+                Pstar(:,:,t+1)  = T*(Pstar(:,:,t)-Pstar(:,:,t)*Z'*Kstar(:,:,t)')*T'+QQ;
+                a(:,:,t+1)        = T*(a(:,:,t)+Kstar(:,:,t)*v(:,t));
+            end
+        end
+    else
+
+        iFinf(:,:,t)        = inv(F);
+        PZI                 = Pinf(:,:,t)*Z'*iFinf(:,:,t);
+        atilde(:,t)         = a(:,t) + PZI*v(:,t);
+        Kinf(:,:,t)         = T*PZI;
+        a(:,t+1)            = T*atilde(:,t);
+        aK(1,:,t+1)         = a(:,t+1);
+        % isn't a meaningless as long as we are in the diffuse part? MJ
+        for jnk=2:nk
+            aK(jnk,:,t+jnk) = T*dynare_squeeze(aK(jnk-1,:,t+jnk-1));
+        end
+        Linf(:,:,t)         = T - Kinf(:,:,t)*Z;
+        Fstar(:,:,t)        = Z*Pstar(:,:,t)*Z' + H;
+        Kstar(:,:,t)        = (T*Pstar(:,:,t)*Z'-Kinf(:,:,t)*Fstar(:,:,t))*iFinf(:,:,t);
+        Pstar(:,:,t+1)      = T*Pstar(:,:,t)*T'-T*Pstar(:,:,t)*Z'*Kinf(:,:,t)'-T*Pinf(:,:,t)*Z'*Kstar(:,:,t)' + QQ;
+        Pinf(:,:,t+1)       = T*Pinf(:,:,t)*T'-T*Pinf(:,:,t)*Z'*Kinf(:,:,t)';
     end
-    iFinf(:,:,t)        = inv(F);
-    PZI                 = Pinf(:,:,t)*Z'*iFinf(:,:,t);
-    atilde(:,t)         = a(:,t) + PZI*v(:,t);
-    Kinf(:,:,t)         = T*PZI;
-    a(:,t+1)            = T*atilde(:,t);
-    aK(1,:,t+1)         = a(:,t+1);
-    % isn't a meaningless as long as we are in the diffuse part? MJ
-    for jnk=2:nk
-        aK(jnk,:,t+jnk) = T*dynare_squeeze(aK(jnk-1,:,t+jnk-1));
-    end
-    Linf(:,:,t)         = T - Kinf(:,:,t)*Z;
-    Fstar(:,:,t)        = Z*Pstar(:,:,t)*Z' + H;
-    Kstar(:,:,t)        = (T*Pstar(:,:,t)*Z'-Kinf(:,:,t)*Fstar(:,:,t))*iFinf(:,:,t);
-    Pstar(:,:,t+1)      = T*Pstar(:,:,t)*T'-T*Pstar(:,:,t)*Z'*Kinf(:,:,t)'-Kinf(:,:,t)*F*Kstar(:,:,t)' + QQ;
-    Pinf(:,:,t+1)       = T*Pinf(:,:,t)*T'-T*Pinf(:,:,t)*Z'*Kinf(:,:,t)';
 end
 d = t;
 P(:,:,d+1) = Pstar(:,:,d+1);

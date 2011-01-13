@@ -101,7 +101,7 @@ while rank(Pinf(:,:,t+1),kalman_tol) && (t<smpl)
             % The univariate diffuse kalman filter should be used.
             return
         else
-            Fstar(:,:,t)  = Z*Pstar(:,:,t)*Z' + H;
+            Fstar(:,:,t)  = Z*Pstar(:,:,t)*Z';
             if rcond(Fstar(:,:,t)) < kalman_tol
                 if ~all(abs(Fstar(:,:,t))<kalman_tol)
                     % The univariate diffuse kalman filter should be used.
@@ -133,7 +133,8 @@ while rank(Pinf(:,:,t+1),kalman_tol) && (t<smpl)
         Linf(:,:,t)         = T - Kinf(:,:,t)*Z;
         Fstar(:,:,t)        = Z*Pstar(:,:,t)*Z';
         Kstar(:,:,t)        = (T*Pstar(:,:,t)*Z'-Kinf(:,:,t)*Fstar(:,:,t))*iFinf(:,:,t);
-        Pstar(:,:,t+1)      = T*Pstar(:,:,t)*T'-T*Pstar(:,:,t)*Z'*Kinf(:,:,t)'-Kinf(:,:,t)*Fstar(:,:,t)*Kstar(:,:,t)' + QQ;
+        %        Pstar(:,:,t+1)      = T*Pstar(:,:,t)*T'-T*Pstar(:,:,t)*Z'*Kinf(:,:,t)'-Kinf(:,:,t)*Fstar(:,:,t)*Kstar(:,:,t)' + QQ;
+        Pstar(:,:,t+1)      = T*Pstar(:,:,t)*T'-T*Pstar(:,:,t)*Z'*Kinf(:,:,t)'-T*Pinf(:,:,t)*Z'*Kstar(:,:,t)' + QQ;
         Pinf(:,:,t+1)       = T*Pinf(:,:,t)*T'-T*Pinf(:,:,t)*Z'*Kinf(:,:,t)';
     end
 

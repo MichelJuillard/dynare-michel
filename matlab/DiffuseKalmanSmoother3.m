@@ -68,25 +68,18 @@ a               = zeros(mm,smpl);
 a1              = zeros(mm,smpl+1);
 aK              = zeros(nk,mm,smpl+nk);
 PK              = zeros(nk,mm,mm,smpl+nk);
-
-if isempty(options_.diffuse_d),
-    smpl_diff = 1;
-else
-    smpl_diff=rank(Pinf1);
-end
-
-Fstar           = zeros(pp,smpl_diff);
-Finf            = zeros(pp,smpl_diff);
-Fi              = zeros(pp,smpl_diff);
+Fstar           = zeros(pp,smpl);
+Finf            = zeros(pp,smpl);
+Fi              = zeros(pp,smpl);
 Ki              = zeros(mm,pp,smpl);
 Li              = zeros(mm,mm,pp,smpl);
-Linf            = zeros(mm,mm,pp,smpl_diff);
-L0              = zeros(mm,mm,pp,smpl_diff);
-Kstar           = zeros(mm,pp,smpl_diff);
+Linf            = zeros(mm,mm,pp,smpl);
+L0              = zeros(mm,mm,pp,smpl);
+Kstar           = zeros(mm,pp,smpl);
 P               = zeros(mm,mm,smpl+1);
 P1                      = P;
-Pstar           = zeros(spstar(1),spstar(2),smpl_diff+1); Pstar(:,:,1) = Pstar1;
-Pinf            = zeros(spinf(1),spinf(2),smpl_diff+1); Pinf(:,:,1) = Pinf1;
+Pstar           = zeros(spstar(1),spstar(2),smpl+1); Pstar(:,:,1) = Pstar1;
+Pinf            = zeros(spinf(1),spinf(2),smpl+1); Pinf(:,:,1) = Pinf1;
 Pstar1          = Pstar;
 Pinf1           = Pinf;
 crit            = options_.kalman_tol;
@@ -132,29 +125,7 @@ while newRank & t < smpl
             Pinf(:,:,t) = Pinf(:,:,t) - Kinf(:,i,t)*transpose(Kinf(:,i,t))/Finf(i,t);
             Pstar(:,:,t)=tril(Pstar(:,:,t))+transpose(tril(Pstar(:,:,t),-1));
             Pinf(:,:,t)=tril(Pinf(:,:,t))+transpose(tril(Pinf(:,:,t),-1));
-            % new terminiation criteria by M. Ratto
             P0=Pinf(:,:,t);
-            %             newRank = any(diag(P0(mf,mf))>crit);
-            %             if newRank==0, id = i; end,
-            if ~isempty(options_.diffuse_d),  
-                newRank = (icc<options_.diffuse_d);  
-                %if newRank & any(diag(P0(mf,mf))>crit)==0; 
-                if newRank & (any(diag(P0(mf,mf))>crit)==0 & rank(P0,crit1)==0); 
-                    disp('WARNING!! Change in OPTIONS_.DIFFUSE_D in univariate DKF')
-                    options_.diffuse_d = icc;
-                    newRank=0;
-                end
-            else
-                %newRank = any(diag(P0(mf,mf))>crit);                 
-                newRank = (any(diag(P0(mf,mf))>crit) | rank(P0,crit1));                 
-                if newRank==0, 
-                    options_.diffuse_d = icc;
-                end                    
-            end,
-            %             if newRank==0, 
-            %                 options_.diffuse_d=i;   %this is buggy
-            %             end                    
-            % end new terminiation criteria by M. Ratto
         elseif Fstar(i,t) > crit 
             %% Note that : (1) rank(Pinf)=0 implies that Finf = 0, (2) outside this loop (when for some i and t the condition
             %% rank(Pinf)=0 is satisfied we have P = Pstar and F = Fstar and (3) Finf = 0 does not imply that
@@ -170,12 +141,19 @@ while newRank & t < smpl
     for jnk=2:nk
         aK(jnk,:,t+jnk) = T*dynare_squeeze(aK(jnk-1,:,t+jnk-1));
     end
+    if newRank
+        oldRank = rank(P0,crit);
+    else
+        oldRank = 0;
+    end
     Pstar(:,:,t+1)      = T*Pstar(:,:,t)*transpose(T)+ QQ;
     Pinf(:,:,t+1)       = T*Pinf(:,:,t)*transpose(T);
     P0 = Pinf(:,:,t+1);
-    if newRank,
-        %newRank = any(diag(P0(mf,mf))>crit);
+    if newRank
         newRank   = rank(P0,crit1);
+    end
+    if oldRank ~= newRank
+        disp('univariate_diffuse_kalman_filter:: T does influence the rank of Pinf!')   
     end
 end
 
