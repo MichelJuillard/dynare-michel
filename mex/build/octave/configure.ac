@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Copyright (C) 2009-2010 Dynare Team
+dnl Copyright (C) 2009-2011 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -32,9 +32,9 @@ if test "x$MKOCTFILE" != "x"; then
   CXXFLAGS=`$MKOCTFILE -p CXXFLAGS`
 fi
 
-CFLAGS="$CFLAGS -Wall"
+CFLAGS="$CFLAGS -Wall -Wno-parentheses"
 FFLAGS="$FFLAGS -Wall"
-CXXFLAGS="$CXXFLAGS -Wall"
+CXXFLAGS="$CXXFLAGS -Wall -Wno-parentheses"
 
 AC_PROG_F77
 AM_CONDITIONAL([HAVE_FORT], [test "x$F77" != "x"])

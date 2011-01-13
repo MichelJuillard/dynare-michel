@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Copyright (C) 2009-2010 Dynare Team
+dnl Copyright (C) 2009-2011 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -47,7 +47,7 @@ esac
 # Use C++ for testing headers
 AC_LANG([C++])
 
-CXXFLAGS="$CXXFLAGS -Wall"
+CXXFLAGS="$CXXFLAGS -Wall -Wno-parentheses"
 
 AC_PROG_RANLIB
 
