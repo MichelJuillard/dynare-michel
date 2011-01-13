@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2010 Dynare Team
+ * Copyright (C) 2007-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -39,36 +39,36 @@ full_A_times_kronecker_B_C(double *A, double *B, double *C, double *D,
 {
 #if USE_OMP
 # pragma omp parallel for num_threads(number_of_threads)
-  for (long int colD = 0; colD < nB*nC; colD++)
+  for (blas_int colD = 0; colD < nB*nC; colD++)
     {
 # if DEBUG_OMP
       mexPrintf("%d thread number is %d (%d).\n", colD, omp_get_thread_num(), omp_get_num_threads());
 # endif
-      unsigned int colB = colD/nC;
-      unsigned int colC = colD%nC;
-      for (int  colA = 0; colA < nA; colA++)
+      blas_int colB = colD/nC;
+      blas_int colC = colD%nC;
+      for (blas_int colA = 0; colA < nA; colA++)
         {
-          unsigned int rowB = colA/mC;
-          unsigned int rowC = colA%mC;
-          unsigned int idxA = colA*mA;
-          unsigned int idxD = colD*mA;
+          blas_int rowB = colA/mC;
+          blas_int rowC = colA%mC;
+          blas_int idxA = colA*mA;
+          blas_int idxD = colD*mA;
           double BC = B[colB*mB+rowB]*C[colC*mC+rowC];
-          for (int rowD = 0; rowD < mA; rowD++)
+          for (blas_int rowD = 0; rowD < mA; rowD++)
             {
               D[idxD+rowD] += A[idxA+rowD]*BC;
             }
         }
     }
 #else
-  const unsigned long shiftA = mA*mC;
-  const unsigned long shiftD = mA*nC;
-  unsigned long int kd = 0, ka = 0;
+  const blas_int shiftA = mA*mC;
+  const blas_int shiftD = mA*nC;
+  blas_int kd = 0, ka = 0;
   char transpose[2] = "N";
   double one = 1.0;
-  for (unsigned long int col = 0; col < nB; col++)
+  for (blas_int col = 0; col < nB; col++)
     {
       ka = 0;
-      for (unsigned long int row = 0; row < mB; row++)
+      for (blas_int row = 0; row < mB; row++)
         {
           dgemm(transpose, transpose, &mA, &nC, &mC, &B[mB*col+row], &A[ka], &mA, &C[0], &mC, &one, &D[kd], &mA);
           ka += shiftA;
@@ -83,36 +83,36 @@ full_A_times_kronecker_B_B(double *A, double *B, double *D, blas_int mA, blas_in
 {
 #if USE_OMP
 # pragma omp parallel for num_threads(number_of_threads)
-  for (long int colD = 0; colD < nB*nB; colD++)
+  for (blas_int colD = 0; colD < nB*nB; colD++)
     {
 # if DEBUG_OMP
       mexPrintf("%d thread number is %d (%d).\n", colD, omp_get_thread_num(), omp_get_num_threads());
 # endif
-      unsigned int j1B = colD/nB;
-      unsigned int j2B = colD%nB;
-      for (int  colA = 0; colA < nA; colA++)
+      blas_int j1B = colD/nB;
+      blas_int j2B = colD%nB;
+      for (blas_int colA = 0; colA < nA; colA++)
         {
-          unsigned int i1B = colA/mB;
-          unsigned int i2B = colA%mB;
-          unsigned int idxA = colA*mA;
-          unsigned int idxD = colD*mA;
+          blas_int i1B = colA/mB;
+          blas_int i2B = colA%mB;
+          blas_int idxA = colA*mA;
+          blas_int idxD = colD*mA;
           double BB = B[j1B*mB+i1B]*B[j2B*mB+i2B];
-          for (int rowD = 0; rowD < mA; rowD++)
+          for (blas_int rowD = 0; rowD < mA; rowD++)
             {
               D[idxD+rowD] += A[idxA+rowD]*BB;
             }
         }
     }
 #else
-  const unsigned long int shiftA = mA*mB;
-  const unsigned long int shiftD = mA*nB;
-  unsigned long int kd = 0, ka = 0;
+  const blas_int shiftA = mA*mB;
+  const blas_int shiftD = mA*nB;
+  blas_int kd = 0, ka = 0;
   char transpose[2] = "N";
   double one = 1.0;
-  for (unsigned long int col = 0; col < nB; col++)
+  for (blas_int col = 0; col < nB; col++)
     {
       ka = 0;
-      for (unsigned long int row = 0; row < mB; row++)
+      for (blas_int row = 0; row < mB; row++)
         {
           dgemm(transpose, transpose, &mA, &nB, &mB, &B[mB*col+row], &A[ka], &mA, &B[0], &mB, &one, &D[kd], &mA);
           ka += shiftA;
@@ -174,11 +174,11 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   // Computational part:
   if (nrhs == 3)
     {
-      full_A_times_kronecker_B_B(A, B, &D[0], (int) mA, (int) nA, (int) mB, (int) nB, numthreads);
+      full_A_times_kronecker_B_B(A, B, &D[0], mA, nA, mB, nB, numthreads);
     }
   else
     {
-      full_A_times_kronecker_B_C(A, B, C, &D[0], (int) mA, (int) nA, (int) mB, (int) nB, (int) mC, (int) nC, numthreads);
+      full_A_times_kronecker_B_C(A, B, C, &D[0], mA, nA, mB, nB, mC, nC, numthreads);
     }
   plhs[0] = mxCreateDoubleScalar(0);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2010 Dynare Team
+ * Copyright (C) 2007-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -45,37 +45,37 @@ sparse_hessian_times_B_kronecker_B(mwIndex *isparseA, mwIndex *jsparseA, double 
 #if USE_OMP
 # pragma omp parallel for num_threads(number_of_threads)
 #endif
-  for (int j1B = 0; j1B < nB; j1B++)
+  for (mwIndex j1B = 0; j1B < nB; j1B++)
     {
 #if DEBUG_OMP
       mexPrintf("%d thread number is %d (%d).\n", j1B, omp_get_thread_num(), omp_get_num_threads());
 #endif
-      for (unsigned int j2B = j1B; j2B < nB; j2B++)
+      for (mwIndex j2B = j1B; j2B < nB; j2B++)
         {
-          unsigned long int jj = j1B*nB+j2B; // column of kron(B,B) index.
-          unsigned long int iv = 0;
-          unsigned int nz_in_column_ii_of_A = 0;
-          unsigned int k1 = 0;
-          unsigned int k2 = 0;
+          mwIndex jj = j1B*nB+j2B; // column of kron(B,B) index.
+          mwIndex iv = 0;
+          int nz_in_column_ii_of_A = 0;
+          mwIndex k1 = 0;
+          mwIndex k2 = 0;
           /*
           ** Loop over the rows of kron(B,B) (column jj).
           */
-          for (unsigned long int ii = 0; ii < nA; ii++)
+          for (mwIndex ii = 0; ii < nA; ii++)
             {
               k1 = jsparseA[ii];
               k2 = jsparseA[ii+1];
               if (k1 < k2) // otherwise column ii of A does not have non zero elements (and there is nothing to compute).
                 {
                   ++nz_in_column_ii_of_A;
-                  unsigned int i1B = (ii/mB);
-                  unsigned int i2B = (ii%mB);
+                  mwIndex i1B = (ii/mB);
+                  mwIndex i2B = (ii%mB);
                   double bb  = B[j1B*mB+i1B]*B[j2B*mB+i2B];
                   /*
                   ** Loop over the non zero entries of A(:,ii).
                   */
-                  for (unsigned int k = k1; k < k2; k++)
+                  for (mwIndex k = k1; k < k2; k++)
                     {
-                      unsigned int kk = isparseA[k];
+                      mwIndex kk = isparseA[k];
                       D[jj*mA+kk] = D[jj*mA+kk] + bb*vsparseA[iv];
                       iv++;
                     }
@@ -100,37 +100,37 @@ sparse_hessian_times_B_kronecker_C(mwIndex *isparseA, mwIndex *jsparseA, double 
 #if USE_OMP
 # pragma omp parallel for num_threads(number_of_threads)
 #endif
-  for (long int jj = 0; jj < nB*nC; jj++) // column of kron(B,C) index.
+  for (mwIndex jj = 0; jj < nB*nC; jj++) // column of kron(B,C) index.
     {
       // Uncomment the following line to check if all processors are used.
 #if DEBUG_OMP
       mexPrintf("%d thread number is %d (%d).\n", jj, omp_get_thread_num(), omp_get_num_threads());
 #endif
-      unsigned int jB = jj/nC;
-      unsigned int jC = jj%nC;
-      unsigned int k1 = 0;
-      unsigned int k2 = 0;
-      unsigned long int iv = 0;
-      unsigned int nz_in_column_ii_of_A = 0;
+      mwIndex jB = jj/nC;
+      mwIndex jC = jj%nC;
+      mwIndex k1 = 0;
+      mwIndex k2 = 0;
+      mwIndex iv = 0;
+      int nz_in_column_ii_of_A = 0;
       /*
       ** Loop over the rows of kron(B,C) (column jj).
       */
-      for (unsigned long int ii = 0; ii < nA; ii++)
+      for (mwIndex ii = 0; ii < nA; ii++)
         {
           k1 = jsparseA[ii];
           k2 = jsparseA[ii+1];
           if (k1 < k2) // otherwise column ii of A does not have non zero elements (and there is nothing to compute).
             {
               ++nz_in_column_ii_of_A;
-              unsigned int iC = (ii%mB);
-              unsigned int iB = (ii/mB);
+              mwIndex iC = (ii%mB);
+              mwIndex iB = (ii/mB);
               double cb = C[jC*mC+iC]*B[jB*mB+iB];
               /*
               ** Loop over the non zero entries of A(:,ii).
               */
-              for (unsigned int k = k1; k < k2; k++)
+              for (mwIndex k = k1; k < k2; k++)
                 {
-                  unsigned int kk = isparseA[k];
+                  mwIndex kk = isparseA[k];
                   D[jj*mA+kk] = D[jj*mA+kk] + cb*vsparseA[iv];
                   iv++;
                 }
