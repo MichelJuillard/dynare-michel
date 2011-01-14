@@ -323,7 +323,14 @@ for it_=start:incr:finish
 				end
                 while(flag1>0)
                     [L1, U1]=luinc(g1,luinc_tol);
-                    [dx,flag1] = bicgstab(g1,-r,1e-7,Blck_size,L1,U1);
+					phat = ya + U1 \ (L1 \ r);
+					res = g1 * phat;
+					if max(abs(res)) >= options_.solve_tolf
+                        [dx,flag1] = bicgstab(g1,-r,1e-7,Blck_size,L1,U1);
+					else
+					    flag1 = 0;
+						dx = phat - ya;
+					end;
                     if (flag1>0 | reduced)
                         if(flag1==1)
                             disp(['Error in simul: No convergence inside BICGSTAB after ' num2str(iter,'%6d') ' iterations, in block' num2str(Block_Num,'%3d')]);
