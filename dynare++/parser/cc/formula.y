@@ -13,8 +13,8 @@
 	extern ogp::FormulaParser* fparser;
 	extern YYLTYPE fmla_lloc;
 
-	static void print_token_value (FILE *, int, YYSTYPE);
-#define YYPRINT(file, type, value) print_token_value (file, type, value)
+  //  static void print_token_value (FILE *, int, YYSTYPE);
+  //  #define YYPRINT(file, type, value) print_token_value (file, type, value)
 
 %}
 
@@ -80,8 +80,10 @@ void fmla_error(const char* s)
 	fparser->error(s);
 }
 
+/*
 static void print_token_value(FILE* file, int type, YYSTYPE value)
 {
 	if (type == NAME)
 		fprintf(file, "%s", value.string);
 }
+*/

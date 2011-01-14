@@ -13,8 +13,8 @@
 	extern ogdyn::DynareParser* dynare_parser;
 	int symblist_flag;
 
-	static void print_token_value1 (FILE *, int, YYSTYPE);
-#define YYPRINT(file, type, value) print_token_value1 (file, type, value)
+  //	static void print_token_value1 (FILE *, int, YYSTYPE);
+  //#define YYPRINT(file, type, value) print_token_value1 (file, type, value)
 
 %}
 
@@ -112,6 +112,7 @@ void dynglob_error(const char* mes)
 	dynare_parser->error(mes);
 }
 
+/*
 static void print_token_value1(FILE* file, int type, YYSTYPE value)
 {
 	if (type == NAME)
@@ -119,3 +120,4 @@ static void print_token_value1(FILE* file, int type, YYSTYPE value)
 	if (type == CHARACTER)
 		fprintf(file, "%c", value.character);
 }
+*/
