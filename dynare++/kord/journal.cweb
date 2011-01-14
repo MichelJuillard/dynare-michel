@@ -1,5 +1,4 @@
-@q $Id: journal.cweb 413 2005-08-16 14:39:55Z kamenik $ @>
-@q Copyright 2004, Ondra Kamenik @>
+@q Copyright (C) 2004-2011, Ondra Kamenik @>
 
 @ Start of {\tt journal.cpp} file.
 
@@ -254,7 +253,9 @@ Number of online processors is not implemented and returns -1, since
 Windows kernel32 |GetSystemInfo| call is too complicated.
 
 @<|sysconf| Win32 implementation@>=
-#define NOMINMAX // Do not define "min" and "max" macros
+#ifndef NOMINMAX
+# define NOMINMAX // Do not define "min" and "max" macros
+#endif
 #include <windows.h>
 
 #define _SC_PAGESIZE 1
