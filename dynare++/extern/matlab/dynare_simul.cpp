@@ -54,18 +54,18 @@ extern "C" {
 		const mwSize* const ysteady_dim = mxGetDimensions(ysteady);
 
 		int ny = nstat + npred + nboth + nforw;
-		if (ny != ystart_dim[0])
+		if (ny != (int) ystart_dim[0])
 			DYN_MEX_FUNC_ERR_MSG_TXT("ystart has wrong number of rows.\n");
 		if (1 != ystart_dim[1])
 			DYN_MEX_FUNC_ERR_MSG_TXT("ystart has wrong number of cols.\n");
 		int nper = shocks_dim[1];
-		if (nexog != shocks_dim[0])
+		if (nexog != (int) shocks_dim[0])
 			DYN_MEX_FUNC_ERR_MSG_TXT("shocks has a wrong number of rows.\n");
-		if (nexog != vcov_dim[0])
+		if (nexog != (int) vcov_dim[0])
 			DYN_MEX_FUNC_ERR_MSG_TXT("vcov has a wrong number of rows.\n");
-		if (nexog != vcov_dim[1])
+		if (nexog != (int) vcov_dim[1])
 			DYN_MEX_FUNC_ERR_MSG_TXT("vcov has a wrong number of cols.\n");
-		if (ny != ysteady_dim[0])
+		if (ny != (int) ysteady_dim[0])
 			DYN_MEX_FUNC_ERR_MSG_TXT("ysteady has wrong number of rows.\n");
 		if (1 != ysteady_dim[1])
 			DYN_MEX_FUNC_ERR_MSG_TXT("ysteady has wrong number of cols.\n");
@@ -82,13 +82,13 @@ extern "C" {
 				const mxArray* gk = prhs[11+dim];
 				const mwSize* const gk_dim = mxGetDimensions(gk);
 				FFSTensor ft(ny, npred+nboth+nexog, dim);
-				if (ft.ncols() != gk_dim[1]) {
+				if (ft.ncols() != (int) gk_dim[1]) {
 					char buf[1000];
 					sprintf(buf, "Wrong number of columns for folded tensor: got %d but I want %d\n",
 						(int) gk_dim[1], ft.ncols());
 					DYN_MEX_FUNC_ERR_MSG_TXT(buf);
 				}
-				if (ft.nrows() != gk_dim[0]) {
+				if (ft.nrows() != (int) gk_dim[0]) {
 					char buf[1000];
 					sprintf(buf, "Wrong number of rows for folded tensor: got %d but I want %d\n",
 						(int) gk_dim[0], ft.nrows());
