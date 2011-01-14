@@ -1806,7 +1806,7 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int S
     B2_j[++B2_var] = B2_nze;
   while(A3_var < Size)
     A3_j[++A3_var] = A3_nze;
-  mxArray *d1;
+  mxArray *d1 = NULL;
   vector<pair<mxArray*, mxArray*> > triangular_form;
   int last_t = 0;
   double sumc=0, C_sumc = 1000;
@@ -2051,7 +2051,7 @@ SparseMatrix::Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double sl
 void
 SparseMatrix::Solve_Matlab_BiCGStab(mxArray* A_m, mxArray* b_m, int Size, double slowc, int block, bool is_two_boundaries, int it_, mxArray* x0_m, bool steady_state)
 {
-  int n = mxGetM(A_m);
+  unsigned int n = mxGetM(A_m);
   /*[L1, U1]=luinc(g1a,luinc_tol);*/
   mxArray *lhs0[2];
   mxArray *rhs0[2];
@@ -2151,7 +2151,7 @@ SparseMatrix::Solve_Matlab_BiCGStab(mxArray* A_m, mxArray* b_m, int Size, double
     {
       double *res = mxGetPr(z);
       if (is_two_boundaries)
-        for (int i = 0; i < n; i++)
+        for (unsigned int i = 0; i < n; i++)
           {
             int eq = index_vara[i+Size*y_kmin];
             double yy = - (res[i] + y[eq]);
@@ -2159,7 +2159,7 @@ SparseMatrix::Solve_Matlab_BiCGStab(mxArray* A_m, mxArray* b_m, int Size, double
             y[eq] += slowc * yy;
           }
       else
-        for (int i = 0; i < n; i++)
+        for (unsigned int i = 0; i < n; i++)
           {
             int eq = index_vara[i];
             double yy = - (res[i] + y[eq+it_*y_size]);

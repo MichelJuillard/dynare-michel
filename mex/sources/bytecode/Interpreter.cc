@@ -33,7 +33,7 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
                          int nb_row_x_arg, int nb_row_xd_arg, int periods_arg, int y_kmin_arg, int y_kmax_arg,
                          int maxit_arg_, double solve_tolf_arg, int size_of_direction_arg, double slowc_arg, int y_decal_arg, double markowitz_c_arg,
                          string &filename_arg, int minimal_solving_periods_arg, int stack_solve_algo_arg, int solve_algo_arg,
-                         bool global_temporary_terms_arg, bool print_arg)
+                         bool global_temporary_terms_arg, bool print_arg, mxArray* GlobalTemporaryTerms_arg)
 {
   params = params_arg;
   y = y_arg;
@@ -63,6 +63,7 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
   solve_algo = solve_algo_arg;
   global_temporary_terms = global_temporary_terms_arg;
   print = print_arg;
+  GlobalTemporaryTerms = GlobalTemporaryTerms_arg;
 }
 
 double
@@ -132,7 +133,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
   double *jacob = NULL, *jacob_other_endo = NULL, *jacob_exo = NULL, *jacob_exo_det = NULL;
   EQN_block = block_num;
   stack<double> Stack;
-  external_function_type function_type;
+  external_function_type function_type = ExternalFunctionWithoutDerivative;
 
 #ifdef DEBUG
   mexPrintf("compute_block_time\n");
@@ -2574,7 +2575,6 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
             mxFree(T);
           if (global_temporary_terms)
             {
-              GlobalTemporaryTerms = mexGetVariable("caller", "temporary_terms");
               if (GlobalTemporaryTerms == NULL)
                 {
                   mexPrintf("GlobalTemporaryTerms is NULL\n");mexEvalString("drawnow;");
@@ -2585,6 +2585,7 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
             }
           else
             T = (double *) mxMalloc(var*sizeof(double));
+
           if (block >= 0)
             it_code = code_liste.begin() + code.get_begin_block(block);
           else
@@ -2597,12 +2598,10 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
           throw FatalExceptionHandling(tmp.str());
         }
     }
-  if (global_temporary_terms)
-    mexPutVariable("caller", "temporary_terms", GlobalTemporaryTerms);
 
   mxFree(Init_Code->second);
   nb_blocks = Block_Count+1;
-  if (T)
+  if (T and !global_temporary_terms)
     mxFree(T);
   return result;
 }

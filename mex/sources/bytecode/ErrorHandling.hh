@@ -361,13 +361,13 @@ print_expression(it_code_type it_code, bool evaluate, int size, int block_num, b
   double v1f, v2f, v3f =0.0;
   bool go_on = true;
   double ll;
-  ExpressionType equation_type ;
+  ExpressionType equation_type = TemporaryTerm;
   unsigned int equation_num;
   unsigned int dvar1, dvar2, dvar3;
   int lag1, lag2, lag3;
   size_t found;
   double *jacob = NULL, *jacob_other_endo = NULL, *jacob_exo = NULL, *jacob_exo_det = NULL;
-  external_function_type function_type ;
+  external_function_type function_type = ExternalFunctionWithoutDerivative;
 
   if (evaluate)
     {

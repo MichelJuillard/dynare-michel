@@ -48,13 +48,12 @@ elseif options_.bytecode
         mexErrCheck('bytecode', check);
         info = check;
     elseif options_.block
-        temporary_terms = [];
         for b = 1:size(M_.blocksMFS,1)
             n = size(M_.blocksMFS{b}, 1);
             if n ~= 0
                 [y, check] = dynare_solve('block_bytecode_mfs_steadystate', ...
                                        x(M_.blocksMFS{b}), ...
-                                      options_.jacobian_flag, b, x, temporary_terms);
+                                      options_.jacobian_flag, b, x);
                 if check ~= 0
                     error(['STEADY: convergence problems in block ' int2str(b)])
                 end

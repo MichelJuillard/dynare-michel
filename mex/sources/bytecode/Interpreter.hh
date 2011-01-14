@@ -81,13 +81,14 @@ public:
               double *direction_arg, int y_size_arg, int nb_row_x_arg,
               int nb_row_xd_arg, int periods_arg, int y_kmin_arg, int y_kmax_arg, int maxit_arg_, double solve_tolf_arg, int size_o_direction_arg,
               double slowc_arg, int y_decal_arg, double markowitz_c_arg, string &filename_arg, int minimal_solving_periods_arg, int stack_solve_algo_arg, int solve_algo_arg,
-              bool global_temporary_terms_arg, bool print_arg);
+              bool global_temporary_terms_arg, bool print_arg, mxArray* GlobalTemporaryTerms_arg);
   bool compute_blocks(string file_name, string bin_basename, bool steady_state, bool evaluate, int block, int &nb_blocks);
   inline mxArray* get_jacob(int block_num) {return jacobian_block[block_num];};
   inline mxArray* get_jacob_exo(int block_num) {return jacobian_exo_block[block_num];};
   inline mxArray* get_jacob_exo_det(int block_num) {return jacobian_det_exo_block[block_num];};
   inline mxArray* get_jacob_other_endo(int block_num) {return jacobian_other_endo_block[block_num];};
   inline vector<double> get_residual() {return residual;};
+  inline mxArray* get_Temporary_Terms() {return GlobalTemporaryTerms;};
 };
 
 #endif
