@@ -1,11 +1,13 @@
 %{
+// Copyright (C) 2006-2011, Ondra Kamenik
+
 #include "parser/cc/location.h"
 #include "dynare_model.h"
 #include "dynglob_tab.hh"
 
 #include <stdio.h>
 
-	int dynglob_error(char*);
+	void dynglob_error(const char*);
 	int dynglob_lex(void);
 	extern int dynglob_lineno;
 	extern ogdyn::DynareParser* dynare_parser;
@@ -105,7 +107,7 @@ planner_discount : PLANNERDISCOUNT NAME SEMICOLON {
 
 %%
 
-int dynglob_error(char* mes)
+void dynglob_error(const char* mes)
 {
 	dynare_parser->error(mes);
 }

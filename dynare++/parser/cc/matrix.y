@@ -1,9 +1,11 @@
+// Copyright (C) 2006-2011, Ondra Kamenik
+
 %{
 #include "location.h"
 #include "matrix_parser.h" 
 #include "matrix_tab.hh"
 
-	void matrix_error(char*);
+	void matrix_error(const char*);
 	int matrix_lex(void);
 	extern int matrix_lineno;
 	extern ogp::MatrixParser* mparser;
@@ -58,7 +60,7 @@ one_row : NEW_ROW {mparser->start_row();} lod;
 
 %%
 
-void matrix_error(char* s)
+void matrix_error(const char* s)
 {
 	mparser->error(s);
 }

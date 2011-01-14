@@ -1,5 +1,4 @@
-@q $Id: twod_matrix.hweb 376 2005-07-21 15:48:05Z kamenik $ @>
-@q Copyright 2004, Ondra Kamenik @>
+@q Copyright (C) 2004-2011, Ondra Kamenik @>
 
 @*2 Matrix interface. Start of {\tt twod\_matrix.h} file.
 
@@ -78,7 +77,7 @@ public:@/
 		: GeneralMatrix(d, r, c)@+ {}@;
 	TwoDMatrix(const GeneralMatrix& m)
 		: GeneralMatrix(m)@+ {}@;
-	TwoDMatrix(const GeneralMatrix& m, char* dummy)
+	TwoDMatrix(const GeneralMatrix& m, const char* dummy)
 		: GeneralMatrix(m, dummy)@+ {}@;
 	TwoDMatrix(const TwoDMatrix& m, int first_col, int num)
 		: GeneralMatrix(m, 0, first_col, m.numRows(), num)@+ {}@;
