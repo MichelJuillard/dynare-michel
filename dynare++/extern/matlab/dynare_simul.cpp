@@ -1,6 +1,4 @@
-// $Id: dynare_simul.cpp 1488 2007-12-19 14:16:30Z kamenik $
-
-// Copyright 2005, Ondra Kamenik
+// Copyright (C) 2005-2011, Ondra Kamenik
 
 // This is the mexFunction providing interface to
 // DecisionRule<>::simulate(). It takes the following input
@@ -87,13 +85,13 @@ extern "C" {
 				if (ft.ncols() != gk_dim[1]) {
 					char buf[1000];
 					sprintf(buf, "Wrong number of columns for folded tensor: got %d but I want %d\n",
-							gk_dim[1], ft.ncols());
+						(int) gk_dim[1], ft.ncols());
 					DYN_MEX_FUNC_ERR_MSG_TXT(buf);
 				}
 				if (ft.nrows() != gk_dim[0]) {
 					char buf[1000];
 					sprintf(buf, "Wrong number of rows for folded tensor: got %d but I want %d\n",
-							gk_dim[0], ft.nrows());
+						(int) gk_dim[0], ft.nrows());
 					DYN_MEX_FUNC_ERR_MSG_TXT(buf);
 				}
 				ft.zeros();

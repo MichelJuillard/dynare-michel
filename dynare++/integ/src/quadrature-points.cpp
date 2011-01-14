@@ -1,4 +1,4 @@
-
+// Copyright (C) 2008-2011, Ondra Kamenik
 
 #include "parser/cc/matrix_parser.h"
 #include "utils/cc/memory_file.h"
@@ -141,7 +141,7 @@ int main(int argc, char** argv)
 			delete *it;
 		points.erase(new_end, points.end());
 
-		printf("Duplicit nodes removed:   %d\n", sq.numEvals(level)-points.size());
+		printf("Duplicit nodes removed:   %zd\n", sq.numEvals(level)-points.size());
 
 		// calculate weights and mass
 		double mass = 0.0;

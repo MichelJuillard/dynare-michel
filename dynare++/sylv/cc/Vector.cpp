@@ -1,7 +1,4 @@
-/* $Header: /var/lib/cvs/dynare_cpp/sylv/cc/Vector.cpp,v 1.1.1.1 2004/06/04 13:01:13 kamenik Exp $ */
-
-/* Tag $Name:  $ */
-
+// Copyright (C) 2004-2011, Ondra Kamenik
 
 #include "Vector.h"
 #include "GeneralMatrix.h"
@@ -44,7 +41,7 @@ const Vector& Vector::operator=(const Vector& v)
 		(data <= v.data && v.data < data+len*s ||
 		 v.data <= data && data < v.data+v.len*v.s) &&
 		(data-v.data) % s == 0) {
-		printf("this destroy=%d, v destroy=%d, data-v.data=%d, len=%d\n", destroy, v.destroy, data-v.data, len);
+		printf("this destroy=%d, v destroy=%d, data-v.data=%zd, len=%d\n", destroy, v.destroy, data-v.data, len);
 		throw SYLV_MES_EXCEPTION("Attempt to assign overlapping vectors.");
 	}
 	copy(v.base(), v.skip());
