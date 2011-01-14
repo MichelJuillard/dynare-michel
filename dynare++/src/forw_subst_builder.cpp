@@ -1,6 +1,4 @@
-// Copyright (C) 2006, Ondra Kamenik
-
-// $Id$
+// Copyright (C) 2006-2011, Ondra Kamenik
 
 #include "forw_subst_builder.h"
 
@@ -21,10 +19,10 @@ ForwSubstBuilder::ForwSubstBuilder(DynareModel& m)
 		if (mlead > 1) {
 			info.num_affected_equations++;
 			// break it to non-linear terms
-			hash_set<int> nlt = model.get_nonlinear_subterms(ft);
+			unordered_set<int> nlt = model.get_nonlinear_subterms(ft);
 			int j = 0; // indexes subterms
 			// and make substitutions for all these non-linear subterms
-			for (hash_set<int>::const_iterator it = nlt.begin();
+			for (unordered_set<int>::const_iterator it = nlt.begin();
 				 it != nlt.end(); ++it, ++j)
 				substitute_for_term(*it, i, j);
 		}

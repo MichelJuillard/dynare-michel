@@ -1,6 +1,4 @@
-// Copyright (C) 2006, Ondra Kamenik
-
-// $Id$
+// Copyright (C) 2006-2011, Ondra Kamenik
 
 #ifndef PLANNER_BUILDER_H
 #define PLANNER_BUILDER_H
@@ -9,7 +7,7 @@
 
 namespace ogdyn {
 
-	using __gnu_cxx::hash_set;
+	using boost::unordered_set;
 	using std::map;
 	using std::vector;
 
@@ -108,7 +106,7 @@ namespace ogdyn {
 		friend class MultInitSS;
 	public:
 		/** Type for a set of variable names. */
-		typedef hash_set<const char*> Tvarset;
+		typedef unordered_set<const char*> Tvarset;
 		/** Type for a set of equations. An equation is identified by
 		 * an index to an equation in the equation vector given by
 		 * DynareModel::eqs. The tree index of the i-th formula is

@@ -1,6 +1,4 @@
-// Copyright (C) 2005, Ondra Kamenik
-
-// $Id: tree.h 1762 2008-03-31 14:28:54Z kamenik $
+// Copyright (C) 2005-2011, Ondra Kamenik
 
 #ifndef OGP_TREE_H
 #define OGP_TREE_H
@@ -8,14 +6,14 @@
 #include <vector>
 #include <set>
 #include <map>
-#include <ext/hash_map>
-#include <ext/hash_set>
+#include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
+#include <cstdio>
 
 namespace ogp {
 
-	using __gnu_cxx::hash_set;
-	using __gnu_cxx::hash_map;
-	using __gnu_cxx::hash;
+	using boost::unordered_set;
+	using boost::unordered_map;
 	using std::vector;
 	using std::set;
 	using std::map;
@@ -128,7 +126,7 @@ namespace ogp {
 	 * the caller, since at this level of Operation abstraction, one
 	 * cannot discriminate between different nulary operations
 	 * (constants, variables). The uniqueness is enforced by the
-	 * hash_map whose keys are operations and values are integers
+	 * unordered_map whose keys are operations and values are integers
 	 * (indices of the terms).
 
 	 * This class can also make derivatives of a given term with
@@ -136,7 +134,7 @@ namespace ogp {
 	 * recognize zero derivativates, we maintain a list of nulary
 	 * terms contained in the term. A possible zero derivative is then quickly
 	 * recognized by looking at the list. The list is implemented as a
-	 * hash_set of integers.
+	 * unordered_set of integers.
 	 *
 	 * In addition, many term can be differentiated multiple times wrt
 	 * one variable since they can be referenced multiple times. To
@@ -155,7 +153,7 @@ namespace ogp {
 
 		/** This defines a type for a map mapping the unary and binary
 		 * operations to their indices. */
-		typedef hash_map<Operation, int, ophash> _Topmap;
+		typedef unordered_map<Operation, int, ophash> _Topmap;
 		typedef _Topmap::value_type _Topval;
 
 		/** This is the map mapping the unary and binary operations to
@@ -163,14 +161,14 @@ namespace ogp {
 		_Topmap opmap;
 
 		/** This is a type for a set of integers. */
-		typedef hash_set<int> _Tintset;
+		typedef unordered_set<int> _Tintset;
 		/** This is a vector of integer sets corresponding to the
 		 * nulary terms contained in the term. */
 		vector<_Tintset> nul_incidence;
 
 		/** This is a type of the map from variables (nulary terms) to
 		 * the terms. */
-		typedef hash_map<int, int> _Tderivmap;
+		typedef unordered_map<int, int> _Tderivmap;
 		/** This is a vector of derivative mappings. For each term, it
 		 * maps variables to the derivatives of the term with respect
 		 * to the variables. */
@@ -258,7 +256,7 @@ namespace ogp {
 		void nularify(int t);
 
 		/** Return the set of nulary terms of the given term. */
-		const hash_set<int>& nulary_of_term(int t) const
+		const unordered_set<int>& nulary_of_term(int t) const
 			{return nul_incidence[t];}
 
 		/** Select subterms of the given term according a given
@@ -267,7 +265,7 @@ namespace ogp {
 		 * a compound function of the returned subterms and the
 		 * function consists only from operations which yield false in
 		 * the selector. */
-		hash_set<int> select_terms(int t, const opselector& sel) const;
+		unordered_set<int> select_terms(int t, const opselector& sel) const;
 
 		/** Select subterms of the given term according a given
 		 * operation selector and return the set of terms that
@@ -275,7 +273,7 @@ namespace ogp {
 		 * a compound function of the returned subterms and the
 		 * subterms are maximal subterms consisting from operations
 		 * yielding true in the selector. */
-		hash_set<int> select_terms_inv(int t, const opselector& sel) const;
+		unordered_set<int> select_terms_inv(int t, const opselector& sel) const;
 
 		/** This forgets all the derivative mappings. It is used after
 		 * a term has been nularified, and then the derivative
@@ -316,12 +314,12 @@ namespace ogp {
 		/** This does the same job as select_terms with the only
 		 * difference, that it adds the terms to the given set and
 		 * hence can be used recursivelly. */
-		void select_terms(int t, const opselector& sel, hash_set<int>& subterms) const; 
+		void select_terms(int t, const opselector& sel, unordered_set<int>& subterms) const; 
 		/** This does the same job as select_terms_inv with the only
 		 * difference, that it adds the terms to the given set and
 		 * hence can be used recursivelly and returns true if the term
 		 * was selected. */
-		bool select_terms_inv(int t, const opselector& sel, hash_set<int>& subterms) const; 
+		bool select_terms_inv(int t, const opselector& sel, unordered_set<int>& subterms) const; 
 		/** This updates nul_incidence information after the term t
 		 * was turned to a nulary term in all terms. It goes through
 		 * the tree from simplest terms to teh more complex ones and

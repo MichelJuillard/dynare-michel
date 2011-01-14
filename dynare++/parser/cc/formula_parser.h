@@ -1,6 +1,4 @@
-// Copyright (C) 2005, Ondra Kamenik
-
-// $Id: formula_parser.h 1760 2008-03-31 14:26:35Z kamenik $
+// Copyright (C) 2005-2011, Ondra Kamenik
 
 #ifndef OGP_FORMULA_PARSER_H
 #define OGP_FORMULA_PARSER_H
@@ -193,7 +191,7 @@ namespace ogp {
 			{otree.nularify(t);}
 		/** Returns a set of nulary terms of the given term. Just
 		 * calls OperationTree::nulary_of_term. */
-		const hash_set<int>& nulary_of_term(int t) const
+		const unordered_set<int>& nulary_of_term(int t) const
 			{return otree.nulary_of_term(t);}
 
 		/** Parse a given string containing one or more formulas. The
