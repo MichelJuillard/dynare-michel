@@ -57,7 +57,13 @@ if options_.solve_algo == 0
         % Under Octave, use a wrapper, since fsolve() does not have a 4th arg
         func2 = str2func(func);
         func = @(x) func2(x, varargin{:});
-        [x,fval,exitval,output] = fsolve(func,x,options);
+		% Octave do not converge when it starts from the solution
+		[fvec,fjac] = feval(func,x,varargin{:});
+		if max(abs(fvec)) >= options_.solve_tolf
+            [x,fval,exitval,output] = fsolve(func,x,options);
+        else
+            exitval = 3;
+		end;
     end
         
     if exitval > 0
