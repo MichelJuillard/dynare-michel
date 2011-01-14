@@ -130,7 +130,7 @@ License: GFDL-1.3+
 Files: dynare++/*.cweb, dynare++/*.hweb, dynare++/*.cpp, dynare++/*.h,
  dynare++/*.tex, dynare++/*.mod, dynare++/*.m, dynare++/*.web, dynare++/*.lex,
  dynare++/*.y
-Copyright: 2005-2008, Ondra Kamenik
+Copyright: 2004-2011, Ondra Kamenik
 License: GPL-3+
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -147,7 +147,7 @@ License: GPL-3+
 
 Files: dynare++/utils/*.cpp, dynare++/utils/*.h, dynare++/parser/*.cpp,
  dynare++/parser/*.h, dynare++/parser/*.lex, dynare++/parser/*.y
-Copyright: 2005-2008, Ondra Kamenik
+Copyright: 2004-2011, Ondra Kamenik
 License: LGPL-3+
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by

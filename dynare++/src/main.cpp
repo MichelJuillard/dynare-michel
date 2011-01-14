@@ -1,3 +1,5 @@
+// Copyright (C) 2004-2011, Ondra Kamenik
+
 #include "dynare3.h"
 #include "dynare_exception.h"
 #include "dynare_params.h"
@@ -17,7 +19,7 @@ int main(int argc, char** argv)
 		return 0;
 	}
 	if (params.version) {
-		printf("Dynare++ v. %s. Copyright (C) 2004,2005,2006 Ondra Kamenik\n",
+		printf("Dynare++ v. %s. Copyright (C) 2004-2011, Ondra Kamenik\n",
 			   DYNVERSION);
 		printf("Dynare++ comes with ABSOLUTELY NO WARRANTY and is distributed under\n");
 		printf("GPL: modules integ, tl, kord, sylv, src, extern and documentation\n");

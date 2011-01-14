@@ -208,10 +208,13 @@ JournalRecord& endrec(JournalRecord& rec)
 @<|Journal::printHeader| code@>=
 void Journal::printHeader()
 {
-	(*this)<< "This is Dynare++, Copyright (C) 2004,2005 Michel Juillard, Ondra Kamenik\n";
-	(*this)<< "Dynare++ comes with ABSOLUTELY NO WARRANTY and is distributed under\n";
-	(*this)<< "General Public License, see http://www.gnu.org/license/gpl.html\n";
-	(*this)<< "\n\n";
+	(*this)<< "This is Dynare++, Copyright (C) 2004-2011, Ondra Kamenik\n"
+	       << "Dynare++ comes with ABSOLUTELY NO WARRANTY and is distributed under\n"
+		     << "GPL: modules integ, tl, kord, sylv, src, extern and documentation\n"
+	       << "LGPL: modules parser, utils\n"
+	       << " for GPL  see http://www.gnu.org/licenses/gpl.html\n"
+	       << " for LGPL see http://www.gnu.org/licenses/lgpl.html\n"
+	       << "\n\n";
 
 #if !defined(__MINGW32__)
 	utsname info;
