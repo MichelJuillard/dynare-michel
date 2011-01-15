@@ -141,7 +141,7 @@ int main(int argc, char** argv)
 			delete *it;
 		points.erase(new_end, points.end());
 
-		printf("Duplicit nodes removed:   %zd\n", sq.numEvals(level)-points.size());
+		printf("Duplicit nodes removed:   %lu\n", (unsigned long) (sq.numEvals(level)-points.size()));
 
 		// calculate weights and mass
 		double mass = 0.0;

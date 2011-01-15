@@ -41,7 +41,7 @@ const Vector& Vector::operator=(const Vector& v)
 		(data <= v.data && v.data < data+len*s ||
 		 v.data <= data && data < v.data+v.len*v.s) &&
 		(data-v.data) % s == 0) {
-		printf("this destroy=%d, v destroy=%d, data-v.data=%zd, len=%d\n", destroy, v.destroy, data-v.data, len);
+		printf("this destroy=%d, v destroy=%d, data-v.data=%lu, len=%d\n", destroy, v.destroy, (unsigned long) (data-v.data), len);
 		throw SYLV_MES_EXCEPTION("Attempt to assign overlapping vectors.");
 	}
 	copy(v.base(), v.skip());

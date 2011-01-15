@@ -145,7 +145,7 @@ InducedSymmetries::InducedSymmetries(const Equivalence& e, const Permutation& p,
 @<|InducedSymmetries::print| code@>=
 void InducedSymmetries::print() const
 {
-	printf("Induced symmetries: %zd\n",size());
+	printf("Induced symmetries: %lu\n", (unsigned long) size());
 	for (unsigned int i = 0; i < size(); i++)
 		operator[](i).print();
 }
