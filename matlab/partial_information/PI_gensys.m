@@ -34,7 +34,7 @@ function [G1pi,C,impact,nmat,TT1,TT2,gev,eu, DD, E2, E5, GAMMA, FL_RANK ]=PI_gen
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 
-lastwarn('');
+lastwarn('','');
 global lq_instruments;
 eu=[0;0];C=c;
 realsmall=1e-6;
@@ -67,17 +67,23 @@ F2=Sinv*U01'*a1*V02;
 F3=Sinv*U01'*a2*V01;
 F4=Sinv*U01'*a2*V02;
 F5=Sinv*U01'*PSI;
-%if isempty(V02) & isempty(U02) % no only backward looking variables model
+singular=0;
 warning('', '');
 try
-  warning('off','MATLAB:nearlySingularMatrix');
-  warning('off','MATLAB:singularMatrix');
-  UAVinv=inv(C2); % i.e. inv(U02'*a1*V02)
-  [LastWarningTxt LastWarningID]=lastwarn;
-  if (strcmp('MATLAB:nearlySingularMatrix',LastWarningID) | ...
-      strcmp('MATLAB:illConditionedMatrix',LastWarningID) | ...
-      strcmp('MATLAB:singularMatrix',LastWarningID) | isinf(UAVinv))
-    %display(LastWarningTxt);
+  if rcond(C2) < 1e-8
+        singular=1;
+  else
+    warning('off','MATLAB:nearlySingularMatrix');
+    warning('off','MATLAB:singularMatrix');
+    UAVinv=inv(C2); % i.e. inv(U02'*a1*V02)
+    [LastWarningTxt LastWarningID]=lastwarn;
+    if any(any(isinf(UAVinv)))==1
+      singular=1;
+    end
+  end
+  if singular == 1 || strcmp('MATLAB:nearlySingularMatrix',LastWarningID) == 1 || ...
+      strcmp('MATLAB:illConditionedMatrix',LastWarningID)==1 || ...
+      strcmp('MATLAB:singularMatrix',LastWarningID)==1 
     [C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, M1, M2, UAVinv, FL_RANK] = PI_gensys_singularC(C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, 0);
     V02=[V02 V01*M2];
     V01=V01*M1;
@@ -95,11 +101,10 @@ try
       return;
     end
   end
-%
 catch
   [errmsg, errcode]=lasterror;
   warning(['error callig PI_gensys_singularC: ' errmsg ],'errcode');
-  warning('','');
+  error('errcode',['error callig PI_gensys_singularC: ' errmsg ]);
 end
 %
 % Define TT1, TT2

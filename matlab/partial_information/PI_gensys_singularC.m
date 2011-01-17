@@ -24,7 +24,7 @@ function [C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, M1, M2, UAVinv, FL_RANK]=PI_gensy
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-level=level+1;
+level=level+1
 if level>100
   error( ' PI_gensys_singularC recurssion exceeeded its maximum of 100 iterations! ');
 end
@@ -61,18 +61,27 @@ F3 = M*F3*M1;
 F2 =[M*F2  M*F1*M2];
 F1 = M*F1*M1;
 warning('', '');
+singular=0;
 try
-  UAVinv=inv(C2);
-  [LastWarningTxt LastWarningID]=lastwarn;
-  if strcmp('MATLAB:nearlySingularMatrix',LastWarningID) | ...
-      strcmp('MATLAB:illConditionedMatrix',LastWarningID) | ...
-      strcmp('MATLAB:singularMatrix',LastWarningID) | isinf(UAVinv)
+  if rcond(C2) < 1e-8
+        singular=1;
+  else
+    UAVinv=inv(C2);
+    [LastWarningTxt LastWarningID]=lastwarn;
+    if any(any(isinf(UAVinv)))==1
+      singular=1;
+    end
+  end
+  % line test is for Octave strncmp('warning: inverse: matrix singular',LastWarningTxt, 33)==1 || ...
+  if  singular==1 || strcmp('MATLAB:nearlySingularMatrix',LastWarningID)==1 || ...
+      strcmp('MATLAB:illConditionedMatrix',LastWarningID)==1 || ...
+      strcmp('MATLAB:singularMatrix',LastWarningID)==1
     [C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, M1, M2, UAVinv, FL_RANK] = PI_gensys_singularC(C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, level);
   end
 catch
-  [errmsg, errcode]=lasterror;
+  [errmsg, errcode]=lasterr;
   warning(['error callig PI_gensys_singularC: ' errmsg ],'errcode');
-  warning('','');
+  error('errcode',['error callig PI_gensys_singularC: ' errmsg ]);
 end
 
 return;

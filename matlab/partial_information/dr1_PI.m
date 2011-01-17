@@ -109,7 +109,7 @@ function [dr,info,M_,options_,oo_] = dr1_PI(dr,task,M_,options_,oo_)
         end
         
 
-	if options_.ACES_solver == 1
+        if options_.ACES_solver == 1
           sim_ruleids=[];
           tct_ruleids=[];
           if  size(M_.equations_tags,1)>0  % there are tagged equations, check if they are aceslq rules
@@ -124,37 +124,37 @@ function [dr,info,M_,options_,oo_] = dr1_PI(dr,task,M_,options_,oo_)
           end
           lq_instruments.sim_ruleids=sim_ruleids;
           lq_instruments.tct_ruleids=tct_ruleids;
-            %if isfield(lq_instruments,'xsopt_SS') %% changed by BY
+          %if isfield(lq_instruments,'xsopt_SS') %% changed by BY
           [junk, lq_instruments.xsopt_SS,lq_instruments.lmopt_SS,s2,check] = opt_steady_get;%% changed by BY
           [qc, DYN_Q] = QPsolve(lq_instruments, s2, check); %% added by BY
           z = repmat(lq_instruments.xsopt_SS,1,klen);
-        else 
+        else
           z = repmat(dr.ys,1,klen);
         end
         z = z(iyr0) ;
         [junk,jacobia_] = feval([M_.fname '_dynamic'],z,[oo_.exo_simul ...
-              oo_.exo_det_simul], M_.params, it_);
-        
-            if options_.ACES_solver==1 & (length(sim_ruleids)>0 || length(tct_ruleids)>0 )
-              if length(sim_ruleids)>0
-                sim_rule=jacobia_(sim_ruleids,:);
-                % uses the subdirectory - BY
-                save ([ACES_DirectoryName,'/',M_.fname '_ACESLQ_sim_rule.txt'], 'sim_rule', '-ascii', '-double', '-tabs');
-              end
-              if length(tct_ruleids)>0
-                tct_rule=jacobia_(tct_ruleids,:);
-                % uses the subdirectory - BY
-                save ([ACES_DirectoryName,'/',M_.fname '_ACESLQ_tct_rule.txt'], 'tct_rule', '-ascii', '-double', '-tabs');
-              end
-              aces_ruleids=union(tct_ruleids,sim_ruleids);
-              j_size=size(jacobia_,1);
-              j_rows=1:j_size;
-              j_rows = setxor(j_rows,aces_ruleids);
-              jacobia_=jacobia_(j_rows ,:);
-            end
-          
+          oo_.exo_det_simul], M_.params, it_);
+
+        if options_.ACES_solver==1 && (length(sim_ruleids)>0 || length(tct_ruleids)>0 )
+          if length(sim_ruleids)>0
+            sim_rule=jacobia_(sim_ruleids,:);
+            % uses the subdirectory - BY
+            save ([ACES_DirectoryName,'/',M_.fname '_ACESLQ_sim_rule.txt'], 'sim_rule', '-ascii', '-double', '-tabs');
+          end
+          if length(tct_ruleids)>0
+            tct_rule=jacobia_(tct_ruleids,:);
+            % uses the subdirectory - BY
+            save ([ACES_DirectoryName,'/',M_.fname '_ACESLQ_tct_rule.txt'], 'tct_rule', '-ascii', '-double', '-tabs');
+          end
+          aces_ruleids=union(tct_ruleids,sim_ruleids);
+          j_size=size(jacobia_,1);
+          j_rows=1:j_size;
+          j_rows = setxor(j_rows,aces_ruleids);
+          jacobia_=jacobia_(j_rows ,:);
+        end
+
     end
-    
+
     if options_.debug
         save([M_.fname '_debug.mat'],'jacobia_')
     end
