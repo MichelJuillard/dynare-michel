@@ -67,7 +67,8 @@ Get_Arguments_and_global_variables(int nrhs,
 #endif
                                    bool &steady_state, bool &evaluate, int &block,
                                    mxArray *M_[], mxArray *oo_[], mxArray *options_[], bool &global_temporary_terms,
-                                   bool &print)
+                                   bool &print,
+                                   mxArray* GlobalTemporaryTerms[])
 {
 #ifdef DEBUG_EX
   for (int i = 2; i < nrhs; i++)
@@ -98,6 +99,10 @@ Get_Arguments_and_global_variables(int nrhs,
               break;
             case 4:
               *block_structur = mxDuplicateArray(prhs[i]);
+              break;
+            case 5:
+              global_temporary_terms = true;
+              *GlobalTemporaryTerms = mxDuplicateArray(prhs[i]);
               break;
             default:
               //mexPrintf("Unknown argument count_array_argument=%d\n",count_array_argument);
@@ -182,6 +187,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
 {
   mxArray *M_, *oo_, *options_;
+  mxArray* GlobalTemporaryTerms;
 #ifndef DEBUG_EX
   mxArray *block_structur = NULL;
 #else
@@ -215,7 +221,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
                                    steady_state, evaluate, block,
                                    &M_, &oo_, &options_, global_temporary_terms,
-                                   print);
+                                   print, &GlobalTemporaryTerms);
     }
   catch (GeneralExceptionHandling &feh)
     {
@@ -315,7 +321,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   int nb_row_x = row_x;
   clock_t t0 = clock();
 
-  Interpreter interprete(params, y, ya, x, steady_yd, steady_xd, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal, markowitz_c, file_name, minimal_solving_periods, stack_solve_algo, solve_algo, global_temporary_terms, print);
+  Interpreter interprete(params, y, ya, x, steady_yd, steady_xd, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal, markowitz_c, file_name, minimal_solving_periods, stack_solve_algo, solve_algo, global_temporary_terms, print, GlobalTemporaryTerms);
 
   string f(fname);
   mxFree(fname);
@@ -427,7 +433,18 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                   pind = mxGetPr(plhs[3]);
                   for (i = 0; i < row_y*col_y; i++)
                     pind[i] = y[i];
+                  if (nlhs > 4)
+                    {
+                      mxArray* GlobalTemporaryTerms = interprete.get_Temporary_Terms();
+                      unsigned int nb_temp_terms = mxGetM(GlobalTemporaryTerms);
+                      plhs[4] = mxCreateDoubleMatrix(nb_temp_terms, 1, mxREAL);
+                      pind = mxGetPr(plhs[4]);
+                      double *tt = mxGetPr(GlobalTemporaryTerms);
+                      for (i = 0; i < nb_temp_terms; i++)
+                        pind[i] = tt[i];
+                    }
                 }
+
             }
         }
     }
