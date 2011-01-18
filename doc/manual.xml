@@ -3362,6 +3362,10 @@ end;
       <listitem><para>Only run the smoother on the variables listed just after the <command>estimation</command> command. Default: run the smoother on all the declared endogenous variables.</para></listitem>
     </varlistentry>
     <varlistentry>
+      <term><option>cova_compute</option> = <replaceable>INTEGER</replaceable></term>
+      <listitem><para>When 0, the covariance matrix of estimated parameters is not computed after the computation of posterior mode (or maximum likelihood). This increases speed of computation in large models during development, when this information is not always necessary. Of course, it will break all successive computations that would require this covariance matrix. Default is 1.</para></listitem>
+    </varlistentry>
+    <varlistentry>
       <term><option>solve_algo</option> = <replaceable>INTEGER</replaceable></term>
       <listitem><para>See <link linkend="solve_algo">there</link></para></listitem>
     </varlistentry>
