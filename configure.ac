@@ -63,7 +63,8 @@ if test "x$YACC" = "x"; then
   AM_MISSING_PROG([YACC], [bison])
 fi
 
-AX_BOOST_BASE([1.34])
+# We need 1.36 because of unordered_{set,hash} used by Dynare++
+AX_BOOST_BASE([1.36])
 
 CPPFLAGS_SAVED="$CPPFLAGS"
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
