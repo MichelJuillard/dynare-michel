@@ -141,7 +141,7 @@ while newRank & t < smpl
         end
     end
     if newRank
-        oldRank = rank(Pinf(:,:,t),crit);
+        oldRank = rank(Pinf(:,:,t),crit1);
     else
         oldRank = 0;
     end
