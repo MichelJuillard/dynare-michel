@@ -392,7 +392,7 @@ if options_.mode_compute == 0 && length(options_.mode_file) == 0 && options_.mh_
                     decomp(options_.filter_step_ahead,i_endo,:,:);
             end
         end
-        for i=bayestopt_.smoother_saved_var_list
+        for i=bayestopt_.smoother_saved_var_list'
             i1 = dr.order_var(bayestopt_.smoother_var_list(i));
             eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(i1,:)) ' = atT(i,:)'';']);
             eval(['oo_.FilteredVariables.' deblank(M_.endo_names(i1,:)) ' = squeeze(aK(1,i,:));']);
