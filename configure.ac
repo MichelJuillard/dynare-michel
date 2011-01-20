@@ -49,6 +49,9 @@ AC_LANG([C++])
 
 CXXFLAGS="$CXXFLAGS -Wall -Wno-parentheses"
 
+# If default 'ar' is not available, try to find one with a host prefix (see ticket #145)
+AC_CHECK_PROGS([AR], [ar ${host_alias}-ar])
+
 AC_PROG_RANLIB
 
 AX_PROG_LN_S
