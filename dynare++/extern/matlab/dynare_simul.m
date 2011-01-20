@@ -1,10 +1,10 @@
 %
 % SYNOPSIS
 % 
-% [err, r] = dynare_simul(name, shocks)
-% [err, r] = dynare_simul(name, prefix, shocks)
-% [err, r] = dynare_simul(name, shocks, start)
-% [err, r] = dynare_simul(name, prefix, shocks, start)
+% r = dynare_simul(name, shocks)
+% r = dynare_simul(name, prefix, shocks)
+% r = dynare_simul(name, shocks, start)
+% r = dynare_simul(name, prefix, shocks, start)
 %
 %     name     name of MAT-file produced by dynare++
 %     prefix   prefix of variables in the MAT-file
@@ -43,30 +43,28 @@
 %
 %       shocks = zeros(4,100); % 4 exogenous variables in the model
 %       shocks(dyn_i_EPS3,:) = -0.1; % the permanent shock to EPS3
-%       [err, r] = dynare_simul('your_model.mat',shocks);
+%       r = dynare_simul('your_model.mat',shocks);
 %
 % 2. one stochastic simulation for 100 periods
 %
 %       shocks = zeros(4,100)./0; % put NaNs everywhere
-%       [err, r] = dynare_simul('your_model.mat',shocks);
+%       r = dynare_simul('your_model.mat',shocks);
 %
 % 3. one stochastic simulation starting at 75% undercapitalized economy
 %
 %       shocks = zeros(4,100)./0; % put NaNs everywhere
 %       ystart = dyn_ss; % get copy of DR fix point
 %       ystart(dyn_i_K) = 0.75*dyn_ss(dyn_i_K); % scale down the capital
-%       [err, r] = dynare_simul('your_model.mat',shocks,ystart);
+%       r = dynare_simul('your_model.mat',shocks,ystart);
 %
 % 
 % SEE ALSO
 %
 %   "DSGE Models with Dynare++. A Tutorial.", Ondra Kamenik, 2005
 
-function [err, r] = dynare_simul(varargin)
+% Copyright (C) 2005-2011, Ondra Kamenik
 
-if nargout ~= 2 || nargin < 12
-    error('dynare_simul_ must have at least 12 input parameters and exactly 2 output arguments.');
-end
+function r = dynare_simul(varargin)
 
 % get the file name and load data
 fname = varargin{1};
@@ -159,7 +157,10 @@ end
 seed = ceil(10000*rand(1,1));
 
 % call dynare_simul_
-command = ['r=dynare_simul_(' num2str(order-1) ',nstat,npred,nboth,nforw,' ...
+command = ['[err,r]=dynare_simul_(' num2str(order-1) ',nstat,npred,nboth,nforw,' ...
            'nexog,ystart,shocks,vcov_exo,seed,ss' derstr ');'];
 eval(command);
-err = 0;
+
+if err
+    error('Simulation failed')
+end
