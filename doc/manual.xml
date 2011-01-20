@@ -3189,6 +3189,16 @@ end;
       <listitem><para>Computes a log--linear approximation of the model instead of a linear approximation. The data must correspond to the definition of the variables used in the model. Default: computes a linear approximation</para></listitem>
     </varlistentry>
     <varlistentry>
+      <term><option>plot_priors</option> = <replaceable>INTEGER</replaceable></term>
+      <listitem><para>Control the plotting of priors:
+      <itemizedlist>
+        <listitem><para><literal>0</literal>: no prior plot</para></listitem>
+        <listitem><para><literal>1</literal>: prior density for each estimated parameter is plotted. It is important to check that the actual shape of prior densities matches what you have in mind. Ill choosen values for the prior standard density can result in absurd prior densities.</para></listitem>
+      </itemizedlist>
+      Default value is <literal>1</literal>.
+      </para></listitem>
+    </varlistentry>
+    <varlistentry>
       <term><option>nograph</option></term>
       <listitem><para>No graphs should be plotted</para></listitem>
     </varlistentry>
