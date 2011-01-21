@@ -37,7 +37,7 @@ Enviroment=-1;
 
 % Determine a specific operating system or software version when necessary
 % for different command (sintax, name, ...).
-  Enviroment=isunix || (~matlab_ver_less_than('7.4') && ismac);
+  Enviroment=~ispc; %isunix || (~matlab_ver_less_than('7.4') && ismac);
 
 switch Enviroment
     case 0          %WINDOWS OPERATING SYSTEM

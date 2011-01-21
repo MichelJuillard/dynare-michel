@@ -100,7 +100,7 @@ ErrorCode=0;
 
 % Determine the operating system or software version when necessary
 % for different command types
-Environment=isunix || (~matlab_ver_less_than('7.4') && ismac);
+Environment=~ispc; %isunix || (~matlab_ver_less_than('7.4') && ismac);
 
 
 for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
