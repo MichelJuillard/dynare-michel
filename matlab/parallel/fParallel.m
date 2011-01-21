@@ -83,9 +83,9 @@ try,
     end
     
     disp(['fParallel ',int2str(whoiam),' completed.'])
-catch ME
+catch,
     disp(['fParallel ',int2str(whoiam),' crashed.'])
-    fOutputVar.error = ME;
+    fOutputVar.error = lasterror;
     save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
     waitbarString = fOutputVar.error.message;
     %       waitbarTitle=['Metropolis-Hastings ',options_.parallel(ThisMatlab).ComputerName];
