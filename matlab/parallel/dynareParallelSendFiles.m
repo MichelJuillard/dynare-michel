@@ -46,7 +46,7 @@ for indPC=1:length(Parallel),
                 if ~isempty(NamFileInput{jfil,1})
                     system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' mkdir -p ',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',NamFileInput{jfil,1}])
                 end
-                system(['scp ',NamFileInput{jfil,1},NamFileInput{jfil,2},' ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,':',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',NamFileInput{jfil,1}]);
+                [NonServeL NonServeR]=system(['scp ',NamFileInput{jfil,1},NamFileInput{jfil,2},' ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,':',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',NamFileInput{jfil,1}]);
             end
         else
             for jfil=1:size(NamFileInput,1)
