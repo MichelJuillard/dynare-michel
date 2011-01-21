@@ -504,7 +504,11 @@ while (ForEver)
             pcerdone(j) = prtfrc;
             idCPU(j) = njob;
             if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
-                statusString = [statusString, int2str(j), ' %3.f%% done! '];
+                if (~ispc)
+                    statusString = ['\n',statusString, int2str(j), ' %3.f%% done! '];
+                 else
+                     statusString = [statusString, int2str(j), ' %3.f%% done! '];
+                end
             else
                 status_String{j} = waitbarString;
                 status_Title{j} = waitbarTitle;
@@ -512,7 +516,11 @@ while (ForEver)
         catch % ME
             % To define!
             if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
-                statusString = [statusString, int2str(j), ' %3.f%% done! '];
+                 if (~ispc)
+                     statusString = ['\n',statusString, int2str(j), ' %3.f%% done! '];
+                 else
+                     statusString = [statusString, int2str(j), ' %3.f%% done! '];
+                end
             end
         end
     end
