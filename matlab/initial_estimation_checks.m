@@ -45,14 +45,6 @@ if nv > M_.exo_nbr+estim_params_.nvn
     error(['Estimation can''t take place because there are less shocks than' ...
            'observed variables'])
 end
-if (number_of_observations==gend*nv)% No missing observations...
-    k = find(all(~isnan(data),2));
-    r = rank(data(unique(k),:));
-    if r < nv
-        error(['Estimation can''t take place because the data are perfectly' ...
-               ' correlated']);
-    end
-end
 
 if options_.dsge_var
     [fval,cost_flag,info] = DsgeVarLikelihood(xparam1,gend);
