@@ -29,7 +29,7 @@ function dirlist = dynareParallelDir(filename,PRCDir,Parallel)
 
 dirlist=[];
 for indPC=1:length(Parallel),
-    if isunix || (~matlab_ver_less_than('7.4') && ismac),
+    if ~ispc, %isunix || (~matlab_ver_less_than('7.4') && ismac),
         if Parallel(indPC).Local==0,
             [check, ax]=system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' ls ',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',filename]);
             if check ~ 0;
@@ -45,10 +45,27 @@ for indPC=1:length(Parallel),
         end
         dirlist = [dirlist, ax];
     else
-        if Parallel(indPC).Local==0,
-            ax=ls(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\',filename]);
+        if exist('OCTAVE_VERSION'), % patch for peculiar behaviour of ls under Windows 
+            if Parallel(indPC).Local==0,
+                ax0=dir(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\',filename]);
+            else
+                ax0=dir(filename);
+            end
+            if isempty(ax0),
+                ax='';
+            else
+                for jax=1:length(ax0);
+                    ax{jax}=ax0(jax).name;
+                end
+                ax=char(ax{:});
+            end
+            
         else
-            ax=ls(filename);
+            if Parallel(indPC).Local==0,
+                ax=ls(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\',filename]);
+            else
+                ax=ls(filename);
+            end
         end
         dirlist = [dirlist; ax];
     end
