@@ -144,10 +144,10 @@ while i<n,
         end
         xh1=x;
     end
-    save gstep
+    save gstep.mat
 end
 
-save gstep
+save gstep.mat
 
 
 

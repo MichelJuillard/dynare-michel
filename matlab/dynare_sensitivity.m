@@ -375,19 +375,19 @@ if options_gsa.glue,
         %     Info.order_var=dr_.order_var;
         %     Out=Out1;
         Info.TypeofSample='post';
-        save([OutputDirectoryName,'/',fname_,'_glue_post'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info', 'Exo')
+        save([OutputDirectoryName,'/',fname_,'_glue_post.mat'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info', 'Exo')
         %save([fname_,'_post_glue_smooth'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info')
         
     else
         if options_gsa.pprior
             Info.TypeofSample='prior';
-            save([OutputDirectoryName,'/',fname_,'_glue_prior'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info', 'Exo')
+            save([OutputDirectoryName,'/',fname_,'_glue_prior.mat'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info', 'Exo')
             %       save([OutputDirectoryName,'/',fname_,'_prior_glue'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
             %       Out=Out1;
             %       save([OutputDirectoryName,'/',fname_,'_prior_glue_smooth'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
         else
             Info.TypeofSample='mc';
-            save([OutputDirectoryName,'/',fname_,'_glue_mc'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info', 'Exo')
+            save([OutputDirectoryName,'/',fname_,'_glue_mc.mat'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem','Info', 'Exo')
             %       save([OutputDirectoryName,'/',fname_,'_mc_glue'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')
             %       Out=Out1;
             %       save([OutputDirectoryName,'/',fname_,'_mc_glue_smooth'], 'Out', 'Sam', 'Lik', 'Obs', 'Rem')

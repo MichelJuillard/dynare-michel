@@ -89,7 +89,7 @@ disp(['Maximum Hessian eigenvalue ',num2str(max(ee))])
 g=gg;
 check=0;
 if max(eig(hh))<0, disp('Negative definite Hessian! Local maximum!'), pause, end,
-save m1 x hh g hhg igg fval0
+save m1.mat x hh g hhg igg fval0
 
 igrad=1;
 igibbs=1;
@@ -202,9 +202,9 @@ while norm(gg)>gtol & check==0 & jit<nit,
         
         if norm(x(:,icount)-xparam1)>1.e-12,
             try 
-                save m1 x fval0 nig -append
+                save m1.mat x fval0 nig -append
             catch
-                save m1 x fval0 nig 
+                save m1.mat x fval0 nig 
             end
             [dum, gg, htol0, igg, hhg]=mr_hessian(0,xparam1,func_hh,flagit,htol,varargin{:});
             if htol0>htol, %ftol,
@@ -237,11 +237,11 @@ while norm(gg)>gtol & check==0 & jit<nit,
         disp(['Elapsed time for iteration ',num2str(t),' s.'])
         
         g(:,icount+1)=gg;
-        save m1 x hh g hhg igg fval0 nig
+        save m1.mat x hh g hhg igg fval0 nig
     end
 end
 
-save m1 x hh g hhg igg fval0 nig
+save m1.mat x hh g hhg igg fval0 nig
 if ftol>ftol0,
     disp(' ')
     disp('Numerical noise in the likelihood')

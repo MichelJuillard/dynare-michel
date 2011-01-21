@@ -202,7 +202,7 @@ while i<n,
         h1(i)=h10;
         i=0;
     end
-    save hess
+    save hess.mat
 end
 
 h_1=h1;
@@ -261,7 +261,7 @@ if hflag==2,
             xh_1(i)=x(i);
             xh_1(j)=x(j);
             j=j+1;
-            save hess
+            save hess.mat
         end
         i=i+1;
     end
@@ -323,7 +323,7 @@ if any(isnan(hessian_mat)),
 end
 hh1=h1;
 htol1=htol;
-save hess
+save hess.mat
 % 11/25/03 SA Created from Hessian_sparse (removed sparse)
 
 
