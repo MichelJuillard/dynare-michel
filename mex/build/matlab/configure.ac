@@ -63,7 +63,7 @@ AC_PROG_MKDIR_P
 AX_PTHREAD
 # Check for boost libraries used in estimation DLL
 AC_LANG_PUSH([C++])
-AX_BOOST_BASE([1.34])
+AX_BOOST_BASE([1.36])
 CPPFLAGS_SAVED="$CPPFLAGS"
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
 AC_CHECK_HEADER([boost/random/linear_congruential.hpp], [], [AC_MSG_ERROR([Can't find Boost Random Library])])
