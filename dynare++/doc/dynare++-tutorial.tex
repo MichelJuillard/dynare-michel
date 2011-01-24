@@ -10,7 +10,7 @@
 
 \author{Ondra Kamen\'\i k}
 
-\date{Jan 2009 (describes v. 1.3.7)}
+\date{January 2011}
 \maketitle
 
 \tableofcontents
@@ -18,13 +18,16 @@
 \section{Setup}
 
 The Dynare++ setup procedure is pretty straightforward as Dynare++ is included in the Dynare installation 
-packages which can be downloaded from http://www.dynare.org. Take the following steps:
+packages which can be downloaded from \url{http://www.dynare.org}. Take the following steps:
 \begin{enumerate}
 \item Add the {\tt dynare++} subdirectory of the root Dynare installation directory to the your
 operating system path. This ensures that your OS will find the {\tt dynare++} executable.
-\item If you have Matlab and want to run custom simulations (see
-  \ref{custom}), then set the Matlab path to the path from the
-  previous step.
+\item If you have MATLAB and want to run custom simulations (see \ref{custom}),
+  then you need to add to your MATLAB path the {\tt dynare++} subdirectory of
+  the root Dynare installation directory, and also directory containing the
+  \texttt{dynare\_simul\_} MEX file (note the trailing underscore). The easiest
+  way to add the latter is to run Dynare once in your MATLAB session (even
+  without giving it any MOD file).
 \end{enumerate}
 
 \section{Sample Session}
