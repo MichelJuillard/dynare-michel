@@ -14,7 +14,7 @@ function [data,rawdata]=dynare_estimation_init(var_list_, igsa)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2007 Dynare Team
+% Copyright (C) 2003-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -160,7 +160,7 @@ for i=1:n_varobs
     k1 = [k1 strmatch(deblank(options_.varobs(i,:)),M_.endo_names, 'exact')];
 end
 % union of observed and state variables
-k2 = union(k',[dr.nstatic+1:dr.nstatic+dr.npred]');
+k2 = union(k',[dr.nstatic+1:dr.nstatic+dr.npred]', 'rows');
 
 % set restrict_state to postion of observed + state variables
 % in expanded state vector
