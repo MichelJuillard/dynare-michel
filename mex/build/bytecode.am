@@ -1,18 +1,16 @@
-vpath %.cc $(top_srcdir)/../../sources/bytecode
-vpath %.hh $(top_srcdir)/../../sources/bytecode
-
 noinst_PROGRAMS = bytecode
 
-# bytecode_CPPFLAGS interacts badly with VPATH
-CPPFLAGS += -I$(top_srcdir)/../../sources/bytecode -I$(top_srcdir)/../../../preprocessor
+bytecode_CPPFLAGS = -I$(top_srcdir)/../../sources/bytecode -I$(top_srcdir)/../../../preprocessor
+
+TOPDIR = $(top_srcdir)/../../sources/bytecode
 
 nodist_bytecode_SOURCES = \
-	bytecode.cc \
-	Interpreter.cc \
-	Mem_Mngr.cc \
-	SparseMatrix.cc \
-	Interpreter.hh \
-	Mem_Mngr.hh \
-	SparseMatrix.hh \
-	ErrorHandling.hh
+	$(TOPDIR)/bytecode.cc \
+	$(TOPDIR)/Interpreter.cc \
+	$(TOPDIR)/Mem_Mngr.cc \
+	$(TOPDIR)/SparseMatrix.cc \
+	$(TOPDIR)/Interpreter.hh \
+	$(TOPDIR)/Mem_Mngr.hh \
+	$(TOPDIR)/SparseMatrix.hh \
+	$(TOPDIR)/ErrorHandling.hh
 

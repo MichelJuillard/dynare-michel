@@ -134,15 +134,14 @@ Binaries (with "make"):
 AC_CONFIG_FILES([Makefile
                  mjdgges/Makefile
                  kronecker/Makefile
-                 gensylv/Makefile
-                 libdynare++/Makefile
                  bytecode/Makefile
+                 libdynare++/Makefile
+                 gensylv/Makefile
                  k_order_perturbation/Makefile
                  dynare_simul_/Makefile
                  swz/Makefile
-                 logposterior/Makefile
-                 logMHMCMCposterior/Makefile
-		 libslicot/Makefile
-		 kalman_steady_state/Makefile])
+                 estimation/Makefile
+                 libslicot/Makefile
+                 kalman_steady_state/Makefile])
 
 AC_OUTPUT

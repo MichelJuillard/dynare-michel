@@ -1,8 +1,6 @@
 EXEEXT = .oct
 include ../mex.am
 
-vpath %.cc $(top_srcdir)/../../sources/ordschur
-
 noinst_PROGRAMS = ordschur
 
-nodist_ordschur_SOURCES = ordschur.cc
+nodist_ordschur_SOURCES = $(top_srcdir)/../../sources/ordschur/ordschur.cc

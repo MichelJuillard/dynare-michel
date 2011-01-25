@@ -1,22 +1,21 @@
-vpath %.cc $(top_srcdir)/../../sources/k_order_perturbation
-
 noinst_PROGRAMS = k_order_perturbation
 
-# Can't use k_order_perturbation_CPPFLAGS, because it interacts badly with VPATH
-CPPFLAGS += -I$(top_srcdir)/../../../dynare++/src -I$(top_srcdir)/../../../dynare++/kord -I$(top_srcdir)/../../../dynare++/tl/cc -I$(top_srcdir)/../../../dynare++/utils/cc -I$(top_srcdir)/../../../dynare++/sylv/cc -I$(top_srcdir)/../../../dynare++/integ/cc -I$(top_srcdir)/../../sources
+k_order_perturbation_CPPFLAGS = -I$(top_srcdir)/../../../dynare++/src -I$(top_srcdir)/../../../dynare++/kord -I$(top_srcdir)/../../../dynare++/tl/cc -I$(top_srcdir)/../../../dynare++/utils/cc -I$(top_srcdir)/../../../dynare++/sylv/cc -I$(top_srcdir)/../../../dynare++/integ/cc -I$(top_srcdir)/../../sources
 
-CXXFLAGS += $(PTHREAD_CFLAGS)
+k_order_perturbation_CXXFLAGS = $(PTHREAD_CFLAGS)
 
 # libdynare++ must come before pthread
 k_order_perturbation_LDADD = ../libdynare++/libdynare++.a $(PTHREAD_LIBS) $(LIBADD_DLOPEN)
 
+TOPDIR = $(top_srcdir)/../../sources/k_order_perturbation
+
 nodist_k_order_perturbation_SOURCES = \
-	k_order_perturbation.cc \
-	k_ord_dynare.cc \
-	k_ord_dynare.hh \
-	dynamic_dll.cc \
-	dynamic_dll.hh \
-	dynamic_abstract_class.cc \
-	dynamic_abstract_class.hh \
-	dynamic_m.cc \
-	dynamic_m.hh
+	$(TOPDIR)/k_order_perturbation.cc \
+	$(TOPDIR)/k_ord_dynare.cc \
+	$(TOPDIR)/k_ord_dynare.hh \
+	$(TOPDIR)/dynamic_dll.cc \
+	$(TOPDIR)/dynamic_dll.hh \
+	$(TOPDIR)/dynamic_abstract_class.cc \
+	$(TOPDIR)/dynamic_abstract_class.hh \
+	$(TOPDIR)/dynamic_m.cc \
+	$(TOPDIR)/dynamic_m.hh

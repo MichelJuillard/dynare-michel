@@ -1,78 +1,77 @@
-vpath %.cpp $(top_srcdir)/../../../dynare++/sylv/cc $(top_srcdir)/../../../dynare++/tl/cc $(top_srcdir)/../../../dynare++/kord $(top_srcdir)/../../../dynare++/integ/cc $(top_srcdir)/../../../dynare++/src
-
 noinst_LIBRARIES = libdynare++.a
 
-# Can't use k_order_perturbation_CPPFLAGS, because it interacts badly with VPATH
-CPPFLAGS += -I$(top_srcdir)/../../../dynare++/src -I$(top_srcdir)/../../../dynare++/kord -I$(top_srcdir)/../../../dynare++/tl/cc -I$(top_srcdir)/../../../dynare++/utils/cc -I$(top_srcdir)/../../../dynare++/sylv/cc -I$(top_srcdir)/../../../dynare++/integ/cc -I$(top_srcdir)/../../sources
+libdynare___a_CPPFLAGS = -I$(top_srcdir)/../../../dynare++/src -I$(top_srcdir)/../../../dynare++/kord -I$(top_srcdir)/../../../dynare++/tl/cc -I$(top_srcdir)/../../../dynare++/utils/cc -I$(top_srcdir)/../../../dynare++/sylv/cc -I$(top_srcdir)/../../../dynare++/integ/cc -I$(top_srcdir)/../../sources
 
-CXXFLAGS += $(PTHREAD_CFLAGS)
+libdynare___a_CXXFLAGS = $(PTHREAD_CFLAGS)
+
+TOPDIR = $(top_srcdir)/../../../dynare++
 
 KORD_SRCS = \
-	faa_di_bruno.cpp \
-	korder_stoch.cpp \
-	journal.cpp \
-	decision_rule.cpp \
-	dynamic_model.cpp \
-	random.cpp \
-	first_order.cpp \
-	normal_conjugate.cpp \
-	approximation.cpp \
-	global_check.cpp \
-	korder.cpp
+	$(TOPDIR)/kord/faa_di_bruno.cpp \
+	$(TOPDIR)/kord/korder_stoch.cpp \
+	$(TOPDIR)/kord/journal.cpp \
+	$(TOPDIR)/kord/decision_rule.cpp \
+	$(TOPDIR)/kord/dynamic_model.cpp \
+	$(TOPDIR)/kord/random.cpp \
+	$(TOPDIR)/kord/first_order.cpp \
+	$(TOPDIR)/kord/normal_conjugate.cpp \
+	$(TOPDIR)/kord/approximation.cpp \
+	$(TOPDIR)/kord/global_check.cpp \
+	$(TOPDIR)/kord/korder.cpp
 
 SYLV_SRCS = \
-	IterativeSylvester.cpp \
-	QuasiTriangular.cpp \
-	QuasiTriangularZero.cpp \
-	GeneralMatrix.cpp \
-	GeneralSylvester.cpp \
-	SimilarityDecomp.cpp \
-	SylvException.cpp \
-	SchurDecompEig.cpp \
-	Vector.cpp \
-	TriangularSylvester.cpp \
-	SylvParams.cpp \
-	BlockDiagonal.cpp \
-	KronVector.cpp \
-	SylvMemory.cpp \
-	SymSchurDecomp.cpp \
-	SylvMatrix.cpp \
-	SchurDecomp.cpp \
-	KronUtils.cpp
+	$(TOPDIR)/sylv/cc/IterativeSylvester.cpp \
+	$(TOPDIR)/sylv/cc/QuasiTriangular.cpp \
+	$(TOPDIR)/sylv/cc/QuasiTriangularZero.cpp \
+	$(TOPDIR)/sylv/cc/GeneralMatrix.cpp \
+	$(TOPDIR)/sylv/cc/GeneralSylvester.cpp \
+	$(TOPDIR)/sylv/cc/SimilarityDecomp.cpp \
+	$(TOPDIR)/sylv/cc/SylvException.cpp \
+	$(TOPDIR)/sylv/cc/SchurDecompEig.cpp \
+	$(TOPDIR)/sylv/cc/Vector.cpp \
+	$(TOPDIR)/sylv/cc/TriangularSylvester.cpp \
+	$(TOPDIR)/sylv/cc/SylvParams.cpp \
+	$(TOPDIR)/sylv/cc/BlockDiagonal.cpp \
+	$(TOPDIR)/sylv/cc/KronVector.cpp \
+	$(TOPDIR)/sylv/cc/SylvMemory.cpp \
+	$(TOPDIR)/sylv/cc/SymSchurDecomp.cpp \
+	$(TOPDIR)/sylv/cc/SylvMatrix.cpp \
+	$(TOPDIR)/sylv/cc/SchurDecomp.cpp \
+	$(TOPDIR)/sylv/cc/KronUtils.cpp
 
 TL_SRCS = \
-	normal_moments.cpp \
-	int_sequence.cpp \
-	tensor.cpp \
-	ps_tensor.cpp \
-	pyramid_prod2.cpp \
-	equivalence.cpp \
-	fine_container.cpp \
-	kron_prod.cpp \
-	t_polynomial.cpp \
-	symmetry.cpp \
-	stack_container.cpp \
-	twod_matrix.cpp \
-	sparse_tensor.cpp \
-	sthread.cpp \
-	gs_tensor.cpp \
-	pyramid_prod.cpp \
-	fs_tensor.cpp \
-	permutation.cpp \
-	rfs_tensor.cpp \
-	t_container.cpp \
-	tl_static.cpp
+	$(TOPDIR)/tl/cc/normal_moments.cpp \
+	$(TOPDIR)/tl/cc/int_sequence.cpp \
+	$(TOPDIR)/tl/cc/tensor.cpp \
+	$(TOPDIR)/tl/cc/ps_tensor.cpp \
+	$(TOPDIR)/tl/cc/pyramid_prod2.cpp \
+	$(TOPDIR)/tl/cc/equivalence.cpp \
+	$(TOPDIR)/tl/cc/fine_container.cpp \
+	$(TOPDIR)/tl/cc/kron_prod.cpp \
+	$(TOPDIR)/tl/cc/t_polynomial.cpp \
+	$(TOPDIR)/tl/cc/symmetry.cpp \
+	$(TOPDIR)/tl/cc/stack_container.cpp \
+	$(TOPDIR)/tl/cc/twod_matrix.cpp \
+	$(TOPDIR)/tl/cc/sparse_tensor.cpp \
+	$(TOPDIR)/tl/cc/sthread.cpp \
+	$(TOPDIR)/tl/cc/gs_tensor.cpp \
+	$(TOPDIR)/tl/cc/pyramid_prod.cpp \
+	$(TOPDIR)/tl/cc/fs_tensor.cpp \
+	$(TOPDIR)/tl/cc/permutation.cpp \
+	$(TOPDIR)/tl/cc/rfs_tensor.cpp \
+	$(TOPDIR)/tl/cc/t_container.cpp \
+	$(TOPDIR)/tl/cc/tl_static.cpp
 
 INTEG_SRCS = \
-	product.cpp \
-	quadrature.cpp \
-	quasi_mcarlo.cpp \
-	smolyak.cpp \
-	vector_function.cpp
+	$(TOPDIR)/integ/cc/product.cpp \
+	$(TOPDIR)/integ/cc/quadrature.cpp \
+	$(TOPDIR)/integ/cc/quasi_mcarlo.cpp \
+	$(TOPDIR)/integ/cc/smolyak.cpp \
+	$(TOPDIR)/integ/cc/vector_function.cpp
 
 nodist_libdynare___a_SOURCES = \
 	$(KORD_SRCS) \
 	$(TL_SRCS) \
 	$(SYLV_SRCS) \
 	$(INTEG_SRCS) \
-	nlsolve.cpp
+	$(TOPDIR)/src/nlsolve.cpp

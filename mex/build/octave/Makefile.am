@@ -14,6 +14,6 @@ SUBDIRS += libslicot kalman_steady_state
 endif
 
 if HAVE_MATIO
-SUBDIRS += logposterior logMHMCMCposterior
+SUBDIRS += estimation
 endif
 endif

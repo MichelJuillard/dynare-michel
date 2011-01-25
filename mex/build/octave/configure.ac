@@ -125,11 +125,10 @@ AC_CONFIG_FILES([Makefile
                  k_order_perturbation/Makefile
                  dynare_simul_/Makefile
                  swz/Makefile
-                 logposterior/Makefile
-                 logMHMCMCposterior/Makefile
+                 estimation/Makefile
                  qzcomplex/Makefile
                  ordschur/Makefile
-		 libslicot/Makefile
-		 kalman_steady_state/Makefile])
+                 libslicot/Makefile
+                 kalman_steady_state/Makefile])
 
 AC_OUTPUT
