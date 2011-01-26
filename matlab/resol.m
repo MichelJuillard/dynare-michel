@@ -47,6 +47,10 @@ global it_
 
 jacobian_flag = 0; 
 
+if isfield(oo_,'dr');
+    dr = oo_.dr;
+end
+
 options_ = set_default_option(options_,'jacobian_flag',1);
 info = 0;
 

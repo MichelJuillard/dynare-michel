@@ -1,4 +1,4 @@
-function [J,M_] = dyn_ramsey_dynamic_(ys,lbar,M_,options_,oo_,it_)
+function [J,M_,dr] = dyn_ramsey_dynamic_(ys,lbar,M_,options_,dr,it_)
 % function J = dyn_ramsey_dynamic_(ys,lbar)
 % dyn_ramsey_dynamic_ sets up the Jacobian of the expanded model for optimal
 % policies. It modifies several fields of M_
@@ -29,6 +29,8 @@ function [J,M_] = dyn_ramsey_dynamic_(ys,lbar,M_,options_,oo_,it_)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
+persistent old_lead_lag
 
 % retrieving model parameters
 endo_nbr = M_.endo_nbr;
@@ -71,7 +73,7 @@ Uy = Uy';
 Uyy = reshape(Uyy,endo_nbr,endo_nbr);
 
 % retrieving derivatives of original model
-[f,fJ,fH] = feval([fname '_dynamic'],y(k),[oo_.exo_simul oo_.exo_det_simul], M_.params, it_);
+[f,fJ,fH] = feval([fname '_dynamic'],y(k),zeros(2,exo_nbr), M_.params, it_);
 instr_nbr = endo_nbr - size(f,1);
 mult_nbr = endo_nbr-instr_nbr;
 
@@ -248,3 +250,31 @@ M_.maximum_endo_lead = max_lead1;
 M_.maximum_lag = max_lag1;
 M_.maximum_endo_lag = max_lag1;
 M_.orig_model = orig_model;
+
+if isfield(options_,'varobs') && (any(size(i_leadlag1,2) ~= size(old_lead_lag,2)) || any(any(i_leadlag1 ~= old_lead_lag)))
+    global bayestopt_
+    dr = set_state_space(dr,M_);
+    nstatic = dr.nstatic;          % Number of static variables. 
+    npred = dr.npred;              % Number of predetermined variables.
+
+    var_obs_index = [];
+    k1 = [];
+    for i=1:size(options_.varobs,1);
+        var_obs_index = [var_obs_index strmatch(deblank(options_.varobs(i,:)),M_.endo_names(dr.order_var,:),'exact')];
+        k1 = [k1 strmatch(deblank(options_.varobs(i,:)),M_.endo_names, 'exact')];
+    end
+    % Define union of observed and state variables
+    k2 = union(var_obs_index',[nstatic+1:nstatic+npred]');
+    % Set restrict_state to postion of observed + state variables in expanded state vector.
+    dr.restrict_var_list = k2;
+    [junk,ic] = intersect(k2,nstatic+(1:npred)');
+    dr.restrict_columns = ic;
+    % set mf0 to positions of state variables in restricted state vector for likelihood computation.
+    [junk,bayestopt_.mf0] = ismember([dr.nstatic+1:dr.nstatic+dr.npred]',k2);
+    % Set mf1 to positions of observed variables in restricted state vector for likelihood computation.
+    [junk,bayestopt_.mf1] = ismember(var_obs_index,k2); 
+    % Set mf2 to positions of observed variables in expanded state vector for filtering and smoothing.
+    bayestopt_.mf2  = var_obs_index;
+    bayestopt_.mfys = k1;
+    old_lead_lag = i_leadlag1;
+end

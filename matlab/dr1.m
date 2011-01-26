@@ -136,21 +136,10 @@ if options_.ramsey_policy
         return
     end
     
-    [jacobia_,M_] = dyn_ramsey_dynamic_(oo_.steady_state,multbar,M_,options_,oo_,it_);
+    [jacobia_,M_,dr] = dyn_ramsey_dynamic_(oo_.steady_state,multbar,M_,options_,dr,it_);
     klen = M_.maximum_lag + M_.maximum_lead + 1;
     dr.ys = [oo_.steady_state;zeros(M_.exo_nbr,1);multbar];
     oo_.steady_state = dr.ys;
-    
-    if options_.noprint == 0
-        disp_steady_state(M_,oo_)
-        for i=M_.orig_endo_nbr:M_.endo_nbr
-            if strmatch('mult_',M_.endo_names(i,:))
-                disp(sprintf('%s \t\t %g',M_.endo_names(i,:), ...
-                             dr.ys(i)));
-            end
-        end
-    end
-
 else
     klen = M_.maximum_lag + M_.maximum_lead + 1;
     iyv = M_.lead_lag_incidence';

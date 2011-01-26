@@ -198,7 +198,7 @@ end
 % Define union of observed and state variables
 k2 = union(var_obs_index',[dr.nstatic+1:dr.nstatic+dr.npred]', 'rows');
 % Set restrict_state to postion of observed + state variables in expanded state vector.
-bayestopt_.restrict_var_list = k2;
+oo_.dr.restrict_var_list = k2;
 % set mf0 to positions of state variables in restricted state vector for likelihood computation.
 [junk,bayestopt_.mf0] = ismember([dr.nstatic+1:dr.nstatic+dr.npred]',k2);
 % Set mf1 to positions of observed variables in restricted state vector for likelihood computation.
@@ -208,12 +208,7 @@ bayestopt_.mf2  = var_obs_index;
 bayestopt_.mfys = k1;
 
 [junk,ic] = intersect(k2,nstatic+(1:npred)');
-bayestopt_.restrict_columns = [ic; length(k2)+(1:nspred-npred)'];
-aux = dr.transition_auxiliary_variables;
-aux(:,2) = aux(:,2) + sum(k2 <= nstatic);
-k = find(aux(:,2) > npred);
-aux(k,2) = aux(k,2) + sum(k2 > nstatic+npred);
-bayestopt_.restrict_aux = aux;
+oo_.dr.restrict_columns = [ic; length(k2)+(1:nspred-npred)'];
 
 k3 = [];
 if options_.selected_variables_only
