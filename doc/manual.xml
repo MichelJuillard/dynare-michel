@@ -1961,7 +1961,10 @@ steady(homotopy_mode = 1, homotopy_steps = 50);
       <arg choice="plain">;</arg>
       <sbr/>
       <arg choice="plain" rep="repeat">
-        <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable> ;
+        <group>
+          <arg choice="plain"><replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable> ;</arg>
+          <arg choice="plain">[ <replaceable>VARIABLE_NAME</replaceable>, <arg choice="plain" rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg> ] = <replaceable>EXPRESSION</replaceable> ;</arg>
+        </group>
       </arg>
       <sbr/>
       <command>end</command><arg choice="plain">;</arg>
@@ -2011,8 +2014,9 @@ steady_state_model;
   d  = l - mst + 1;
   y  = k^alp*n^(1-alp)*gst^alp;
   R  = mst/bet;
-  W  = l/n;
-  e = 1;
+
+  // You can use MATLAB functions which return several arguments
+  [W, e] = my_function(l, n);
   
   gp_obs = m/dA;
   gy_obs = dA;

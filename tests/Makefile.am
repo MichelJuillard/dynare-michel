@@ -84,7 +84,8 @@ EXTRA_DIST = $(MODS) \
 	objectives \
 	ramst_initval_file_data.m \
 	homotopy/common.mod \
-	bvar_a_la_sims/bvar_sample.m
+	bvar_a_la_sims/bvar_sample.m \
+	fs2000_ssfile_aux.m
 
 TARGETS = check-matlab
 
