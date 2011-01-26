@@ -92,7 +92,7 @@ b = ghu1*M_.Sigma_e*ghu1';
 
 ipred = nstatic+(1:npred)';
 % state space representation for state variables only
-[A,B] = kalman_transition_matrix(dr,ipred,1:nx,dr.transition_auxiliary_variables,M_.exo_nbr);
+[A,B] = kalman_transition_matrix(dr,ipred,1:nx,M_.exo_nbr);
 % Compute stationary variables (before HP filtering),
 % and compute 2nd order mean correction on stationary variables (in case of
 % HP filtering, this mean correction is computed *before* filtering)

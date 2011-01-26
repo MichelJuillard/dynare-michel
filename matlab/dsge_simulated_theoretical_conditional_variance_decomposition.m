@@ -111,10 +111,6 @@ for file = 1:NumberOfDrawsFiles
             npred = dr.npred;
             iv = (1:endo_nbr)';
             ic = [ nstatic+(1:npred) endo_nbr+(1:size(dr.ghx,2)-npred) ]';
-            aux = dr.transition_auxiliary_variables;
-            k = find(aux(:,2) > npred);
-            aux(:,2) = aux(:,2) + nstatic;
-            aux(k,2) = aux(k,2) + dr.nfwrd;
             StateSpaceModel.number_of_state_equations = M_.endo_nbr+rows(aux);
             StateSpaceModel.number_of_state_innovations = M_.exo_nbr;
             StateSpaceModel.sigma_e_is_diagonal = M_.sigma_e_is_diagonal;
@@ -122,7 +118,7 @@ for file = 1:NumberOfDrawsFiles
             first_call = 0;
             clear('endo_nbr','nstatic','npred','k');
         end
-        [StateSpaceModel.transition_matrix,StateSpaceModel.impulse_matrix] = kalman_transition_matrix(dr,iv,ic,aux,M_.exo_nbr);
+        [StateSpaceModel.transition_matrix,StateSpaceModel.impulse_matrix] = kalman_transition_matrix(dr,iv,ic,M_.exo_nbr);
         StateSpaceModel.state_innovations_covariance_matrix = M_.Sigma_e;
         clear('dr');
         Conditional_decomposition_array(:,:,:,linea) = conditional_variance_decomposition(StateSpaceModel, Steps, ivar);

@@ -42,7 +42,7 @@ StateSpaceModel.sigma_e_is_diagonal = M_.sigma_e_is_diagonal;
 iv = (1:endo_nbr)';
 ic = dr.nstatic+(1:dr.npred)';
 
-[StateSpaceModel.transition_matrix,StateSpaceModel.impulse_matrix] = kalman_transition_matrix(dr,iv,ic,[],exo_nbr);
+[StateSpaceModel.transition_matrix,StateSpaceModel.impulse_matrix] = kalman_transition_matrix(dr,iv,ic,exo_nbr);
 StateSpaceModel.state_innovations_covariance_matrix = M_.Sigma_e;
 StateSpaceModel.order_var = dr.order_var;
 
