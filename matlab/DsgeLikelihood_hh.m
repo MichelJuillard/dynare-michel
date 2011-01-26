@@ -125,9 +125,7 @@ function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend
   %------------------------------------------------------------------------------
   % 2. call model setup & reduction program
   %------------------------------------------------------------------------------
-  [T,R,SteadyState,info] = dynare_resolve(bayestopt_.restrict_var_list,...
-					  bayestopt_.restrict_columns,...
-					  bayestopt_.restrict_aux);
+  [T,R,SteadyState,info] = dynare_resolve('restrict');
   if info(1) == 1 || info(1) == 2 || info(1) == 5
       fval = bayestopt_.penalty+1;
       cost_flag = 0;

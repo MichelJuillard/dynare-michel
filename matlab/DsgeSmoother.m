@@ -67,8 +67,10 @@ set_all_parameters(xparam1);
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program
 %------------------------------------------------------------------------------
-[T,R,SteadyState] = dynare_resolve(bayestopt_.smoother_var_list,...
-                                        bayestopt_.smoother_restrict_columns,[]);
+oo_.dr.restrict_var_list = bayestopt_.smoother_var_list;
+oo_.dr.restrict_columns = bayestopt_.smoother_restrict_columns;
+[T,R,SteadyState] = dynare_resolve('restrict');
+
 bayestopt_.mf = bayestopt_.smoother_mf;
 if options_.noconstant
     constant = zeros(nobs,1);

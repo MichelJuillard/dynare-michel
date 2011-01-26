@@ -1,12 +1,10 @@
-function [A,B,ys,info] = dynare_resolve(iv,ic,aux)
-% function [A,B,ys,info] = dynare_resolve(iv,ic,aux)
+function [A,B,ys,info] = dynare_resolve(mode)
+% function [A,B,ys,info] = dynare_resolve(mode)
 % Computes the linear approximation and the matrices A and B of the
 % transition equation
 %
 % INPUTS
-%    iv:             selected variables (observed and state variables)
-%    ic:             state variables position in the transition matrix columns
-%    aux:            indices for auxiliary equations
+%    mode:           string 'restrict' returns restricted transition matrices
 %
 % OUTPUTS
 %    A:              matrix of predetermined variables effects in linear solution (ghx)
@@ -61,16 +59,15 @@ if nargin == 0
     npred = oo_.dr.npred;
     iv = (1:endo_nbr)';
     ic = [ nstatic+(1:npred) endo_nbr+(1:size(oo_.dr.ghx,2)-npred) ]';
-    aux = oo_.dr.transition_auxiliary_variables;
-    k = find(aux(:,2) > npred);
-    aux(:,2) = aux(:,2) + nstatic;
-    aux(k,2) = aux(k,2) + oo_.dr.nfwrd;
+else
+    iv = oo_.dr.restrict_var_list;
+    ic = oo_.dr.restrict_columns;
 end
 
 if nargout==1
-    A = kalman_transition_matrix(oo_.dr,iv,ic,aux,M_.exo_nbr);
+    A = kalman_transition_matrix(oo_.dr,iv,ic,M_.exo_nbr);
     return
 end
 
-[A,B] = kalman_transition_matrix(oo_.dr,iv,ic,aux,M_.exo_nbr);
+[A,B] = kalman_transition_matrix(oo_.dr,iv,ic,M_.exo_nbr);
 ys = oo_.dr.ys;
