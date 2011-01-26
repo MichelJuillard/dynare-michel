@@ -60,7 +60,7 @@ V0 = oo_.var(k4,k4);
 Atest = [dr2.M1(k3,:) dr2.M2(k3,:) dr2.M4(k3,:); eye(6) zeros(6,10);zeros(4,16)];
 Btest = [dr2.M3(k3,:); zeros(6,4); eye(4)];
 
-V1=lyapunov_symm(Atest,Btest*M_.Sigma_e*Btest',options_.qz_criterium,options_.lyapunov_complex_threshold);
+V1=lyapunov_symm(Atest,Btest*M_.Sigma_e*Btest',1+1e-6,options_.lyapunov_complex_threshold);
 
 if max(max(abs(V1(1:6,1:6)-V0)))
    disp('Test OK')
