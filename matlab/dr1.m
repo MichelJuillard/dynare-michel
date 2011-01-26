@@ -86,6 +86,7 @@ if options_.ramsey_policy
         M_.maximum_endo_lead = orig_model.maximum_endo_lead;
         M_.maximum_lag = orig_model.maximum_lag;
         M_.maximum_endo_lag = orig_model.maximum_endo_lag;
+        oo_.steady_state = oo_.steady_state(1:M_.endo_nbr);
     end
 
     if options_.steadystate_flag
