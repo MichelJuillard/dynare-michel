@@ -181,65 +181,7 @@ elseif options_.lik_init == 3 % Diffuse Kalman filter
     if kalman_algo ~= 4
         kalman_algo = 3;
     end
-    [QT,ST] = schur(T);
-    e1 = abs(ordeig(ST)) > 2-options_.qz_criterium;
-    [QT,ST] = ordschur(QT,ST,e1);
-    k = find(abs(ordeig(ST)) > 2-options_.qz_criterium);
-    nk = length(k);
-    nk1 = nk+1;
-    Pinf = zeros(np,np);
-    Pinf(1:nk,1:nk) = eye(nk);
-    Pstar = zeros(np,np);
-    B = QT'*R*Q*R'*QT;
-    for i=np:-1:nk+2
-        if ST(i,i-1) == 0
-            if i == np
-                c = zeros(np-nk,1);
-            else
-                c = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i,i+1:end)')+...
-                    ST(i,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i);
-            end
-            q = eye(i-nk)-ST(nk1:i,nk1:i)*ST(i,i);
-            Pstar(nk1:i,i) = q\(B(nk1:i,i)+c);
-            Pstar(i,nk1:i-1) = Pstar(nk1:i-1,i)';
-        else
-            if i == np
-                c = zeros(np-nk,1);
-                c1 = zeros(np-nk,1);
-            else
-                c = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i,i+1:end)')+...
-                    ST(i,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i)+...
-                    ST(i,i-1)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i-1);
-                c1 = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i-1,i+1:end)')+...
-                     ST(i-1,i-1)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i-1)+...
-                     ST(i-1,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i);
-            end
-            q = [eye(i-nk)-ST(nk1:i,nk1:i)*ST(i,i) -ST(nk1:i,nk1:i)*ST(i,i-1);...
-                 -ST(nk1:i,nk1:i)*ST(i-1,i) eye(i-nk)-ST(nk1:i,nk1:i)*ST(i-1,i-1)];
-            z =  q\[B(nk1:i,i)+c;B(nk1:i,i-1)+c1];
-            Pstar(nk1:i,i) = z(1:(i-nk));
-            Pstar(nk1:i,i-1) = z(i-nk+1:end);
-            Pstar(i,nk1:i-1) = Pstar(nk1:i-1,i)';
-            Pstar(i-1,nk1:i-2) = Pstar(nk1:i-2,i-1)';
-            i = i - 1;
-        end
-    end
-    if i == nk+2
-        c = ST(nk+1,:)*(Pstar(:,nk+2:end)*ST(nk1,nk+2:end)')+ST(nk1,nk1)*ST(nk1,nk+2:end)*Pstar(nk+2:end,nk1);
-        Pstar(nk1,nk1)=(B(nk1,nk1)+c)/(1-ST(nk1,nk1)*ST(nk1,nk1));
-    end
-    Z = QT(mf,:);
-    R1 = QT'*R;
-    [QQ,RR,EE] = qr(Z*ST(:,1:nk),0);
-    k = find(abs(diag([RR; zeros(nk-size(Z,1),size(RR,2))])) < 1e-8);
-    if length(k) > 0
-        k1 = EE(:,k);
-        dd =ones(nk,1);
-        dd(k1) = zeros(length(k1),1);
-        Pinf(1:nk,1:nk) = diag(dd);
-    end
-end
-if kalman_algo == 2
+    [Z,ST,R1,QT,Pstar,Pinf] = schur_statespace_transformation(mf,T,R,Q,options_.qz_criterium);
 end
 kalman_tol = options_.kalman_tol;
 riccati_tol = options_.riccati_tol;
@@ -262,7 +204,7 @@ if (kalman_algo==1)% Multivariate Kalman Filter
 end
 if (kalman_algo==2)% Univariate Kalman Filter
     no_correlation_flag = 1;
-    if length(H)==1 & H == 0
+    if isequal(H,0)
         H = zeros(nobs,1);
     else
         if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
@@ -293,7 +235,7 @@ if (kalman_algo==3)% Multivariate Diffuse Kalman Filter
 end
 if (kalman_algo==4)% Univariate Diffuse Kalman Filter
     no_correlation_flag = 1;
-    if length(H)==1 & H == 0
+    if isequal(H,0)
         H = zeros(nobs,1);
     else
         if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...

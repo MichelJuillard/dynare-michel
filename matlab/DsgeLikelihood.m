@@ -206,7 +206,7 @@ if (kalman_algo==1)% Multivariate Kalman Filter
 end
 if (kalman_algo==2)% Univariate Kalman Filter
     no_correlation_flag = 1;
-    if length(H)==1 & H == 0
+    if isequal(H,0)
         H = zeros(nobs,1);
     else
         if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
@@ -237,7 +237,7 @@ if (kalman_algo==3)% Multivariate Diffuse Kalman Filter
 end
 if (kalman_algo==4)% Univariate Diffuse Kalman Filter
     no_correlation_flag = 1;
-    if length(H)==1 & H == 0
+    if isequal(H,0)
         H = zeros(nobs,1);
     else
         if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...

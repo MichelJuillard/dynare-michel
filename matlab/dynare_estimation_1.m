@@ -220,7 +220,7 @@ else
     k3 = (1:M_.endo_nbr)';
 end
 bayestopt_.smoother_var_list = union(k2,k3);
-[junk,bayestopt_.smoother_saved_var_list] = intersect(k3,bayestopt_.smoother_var_list);
+[junk,bayestopt_.smoother_saved_var_list] = intersect(k3,bayestopt_.smoother_var_list(:));
 [junk,ic] = intersect(bayestopt_.smoother_var_list,nstatic+(1:npred)');
 bayestopt_.smoother_restrict_columns = ic;
 [junk,bayestopt_.smoother_mf] = ismember(var_obs_index, ...
@@ -306,7 +306,7 @@ options_ = set_default_option(options_,'mh_nblck',2);
 options_ = set_default_option(options_,'nodiagnostic',0);
 
 % load mode file is necessary
-if length(options_.mode_file) > 0 && ~options_.mh_posterior_mode_estimation
+if ~isempty(options_.mode_file) && ~options_.mh_posterior_mode_estimation
     load(options_.mode_file);
 end
 
@@ -366,7 +366,7 @@ missing_value = ~(number_of_observations == gend*n_varobs);
 
 initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
 
-if isnumeric(options_.mode_compute) && options_.mode_compute == 0 && length(options_.mode_file) == 0 && options_.mh_posterior_mode_estimation==0
+if isequal(options_.mode_compute,0) && isempty(options_.mode_file) && options_.mh_posterior_mode_estimation==0
     if options_.smoother == 1
         [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp] = DsgeSmoother(xparam1,gend,data,data_index,missing_value);
         oo_.Smoother.SteadyState = ys;
@@ -401,14 +401,14 @@ if isnumeric(options_.mode_compute) && options_.mode_compute == 0 && length(opti
     return;
 end
 
-if options_.mode_compute==6
+if isequal(options_.mode_compute,6)
     % Erase previously computed optimal mh scale parameter.
     delete([M_.fname '_optimal_mh_scale_parameter.mat'])
 end
 
 
 %% Estimation of the posterior mode or likelihood mode
-if any(options_.mode_compute ~= 0) && ~options_.mh_posterior_mode_estimation
+if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
     if ~options_.dsge_var
         fh=str2func('DsgeLikelihood');
     else
@@ -645,8 +645,7 @@ if any(options_.mode_compute ~= 0) && ~options_.mh_posterior_mode_estimation
                    ' option is unknown!'])
         end
     end
-    %     if options_.mode_compute ~= 5
-    if options_.mode_compute ~= 6
+    if ~isequal(options_.mode_compute,6)
         if options_.cova_compute == 1
             if ~options_.dsge_var
                 hh = reshape(hessian('DsgeLikelihood',xparam1, ...
@@ -665,7 +664,6 @@ if any(options_.mode_compute ~= 0) && ~options_.mh_posterior_mode_estimation
     else
         save([M_.fname '_mode.mat'],'xparam1','parameter_names');
     end
-    %     end
 end
 
 if options_.cova_compute == 0

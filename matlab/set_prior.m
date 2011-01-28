@@ -74,7 +74,7 @@ if nvx
     bayestopt_.name = cellstr(M_.exo_names(estim_params_.var_exo(:,1),:));
 end
 if nvn
-    if M_.H == 0
+    if isequal(M_.H,0)
         nvarobs = size(options_.varobs,1);
         M_.H = zeros(nvarobs,nvarobs);
     end
@@ -115,7 +115,7 @@ if ncx
     end
 end
 if ncn
-    if M_.H == 0
+    if isequal(M_.H,0)
         nvarobs = size(options_.varobs,1);
         M_.H = zeros(nvarobs,nvarobs);
     end

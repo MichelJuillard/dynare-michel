@@ -133,7 +133,7 @@ data1 = Y-trend;
 % -----------------------------------------------------------------------------
 %  4. Kalman smoother
 % -----------------------------------------------------------------------------
-if size(H,1) == 1 && H == 0
+if isequal(H,0)
     H = zeros(nobs,nobs);
 end
 
@@ -156,7 +156,7 @@ if kalman_algo == 1 || kalman_algo == 3
     [alphahat,epsilonhat,etahat,ahat,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmootherH1_Z(ST, ...
                                                       Z,R1,Q,H,Pinf,Pstar, ...
                                                       data1,nobs,np,smpl,kalman_tol,riccati_tol,data_index);
-    if all(alphahat(:)==0)
+    if isequal(alphahat,0)
         if kalman_algo == 1
             kalman_algo = 2;
         elseif kalman_algo == 3
@@ -214,147 +214,7 @@ if estim_params_.ncn && (kalman_algo == 2 || kalman_algo == 4)
     if ~isempty(decomp)
         decomp = decomp(:,k,:,:);
     end
-    if ~isempte(P)
+    if ~isempty(P)
         P = P(k,k,:);
     end
 end
-
-% $$$ if any(any(H ~= 0))   % should be replaced by a flag
-% $$$     if kalman_algo == 1
-% $$$         [alphahat,epsilonhat,etahat,ahat,P,aK,PK,decomp] = ...
-% $$$             kalman_smoother(T,R,Q,H,Pstar,data1,start,mf,kalman_tol,riccati_tol);
-% $$$         if all(alphahat(:)==0)
-% $$$             kalman_algo = 2;
-% $$$             if ~estim_params_.ncn
-% $$$                 [alphahat,epsilonhat,etahat,ahat,aK] = ...
-% $$$                     DiffuseKalmanSmootherH3(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
-% $$$             else
-% $$$                 [alphahat,epsilonhat,etahat,ahat,aK] = ...
-% $$$                     DiffuseKalmanSmootherH3corr(T,R,Q,H,Pinf,Pstar,Y,trend, ...
-% $$$                                                 nobs,np,smpl,mf);
-% $$$             end
-% $$$         end
-% $$$     elseif kalman_algo == 2
-% $$$         if ~estim_params_.ncn
-% $$$             [alphahat,epsilonhat,etahat,ahat,aK] = ...
-% $$$                 DiffuseKalmanSmootherH3(T,R,Q,H,Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
-% $$$         else
-% $$$             [alphahat,epsilonhat,etahat,ahat,aK] = ...
-% $$$                 DiffuseKalmanSmootherH3corr(T,R,Q,H,Pinf,Pstar,Y,trend, ...
-% $$$                                             nobs,np,smpl,mf);
-% $$$         end
-% $$$     elseif kalman_algo == 3 | kalman_algo == 4
-% $$$         data1 = Y - trend;
-% $$$         if kalman_algo == 3
-% $$$             [alphahat,epsilonhat,etahat,ahat,P,aK,PK,d,decomp] = ...
-% $$$                 DiffuseKalmanSmootherH1_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,nobs,np,smpl);
-% $$$             if all(alphahat(:)==0)
-% $$$                 kalman_algo = 4;
-% $$$                 if ~estim_params_.ncn
-% $$$                     [alphahat,epsilonhat,etahat,ahat,P,aK,PK,d,decomp] = ...
-% $$$                         DiffuseKalmanSmootherH3_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1,nobs,np,smpl);
-% $$$                 else
-% $$$                     [alphahat,epsilonhat,etahat,ahat,P,aK,PK,d,decomp] = ...
-% $$$                         DiffuseKalmanSmootherH3corr_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1, ...
-% $$$                                                       nobs,np,smpl);
-% $$$                 end
-% $$$             end
-% $$$         else
-% $$$             if ~estim_params_.ncn
-% $$$                 [alphahat,epsilonhat,etahat,ahat,P,aK,PK,d,decomp] = ...
-% $$$                     DiffuseKalmanSmootherH3_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1, ...
-% $$$                                               nobs,np,smpl);
-% $$$             else
-% $$$                 [alphahat,epsilonhat,etahat,ahat,P,aK,PK,d,decomp] = ...
-% $$$                     DiffuseKalmanSmootherH3corr_Z(ST,Z,R1,Q,H,Pinf,Pstar,data1, ...
-% $$$                                                   nobs,np,smpl);
-% $$$             end
-% $$$         end
-% $$$         alphahat = QT*alphahat;
-% $$$         ahat = QT*ahat;
-% $$$         nk = options_.nk;
-% $$$         for jnk=1:nk
-% $$$             aK(jnk,:,:) = QT*squeeze(aK(jnk,:,:));
-% $$$             for i=1:size(PK,4)
-% $$$                 PK(jnk,:,:,i) = QT*squeeze(PK(jnk,:,:,i))*QT';
-% $$$             end
-% $$$             for i=1:size(decomp,4)
-% $$$                 decomp(jnk,:,:,i) = QT*squeeze(decomp(jnk,:,:,i));
-% $$$             end
-% $$$         end
-% $$$         for i=1:size(P,4)
-% $$$             P(:,:,i) = QT*squeeze(P(:,:,i))*QT';
-% $$$         end
-% $$$     end
-% $$$ else
-% $$$     H = 0;
-% $$$     if kalman_algo == 1
-% $$$         if missing_value
-% $$$             [alphahat,etahat,ahat,aK] = missing_DiffuseKalmanSmoother1(T,R,Q, ...
-% $$$                                                               Pinf,Pstar,Y,trend,nobs,np,smpl,mf,data_index);
-% $$$         else
-% $$$             [alphahat,epsilonhat,etahat,ahat,P,aK,PK,decomp] = ...
-% $$$                 kalman_smoother(T,R,Q,H,Pstar,data1,start,mf,kalman_tol,riccati_tol);
-% $$$         end
-% $$$         if all(alphahat(:)==0)
-% $$$             kalman_algo = 2;
-% $$$         end
-% $$$     end
-% $$$     if kalman_algo == 2
-% $$$         if missing_value
-% $$$             [alphahat,etahat,ahat,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmoother3(T,R,Q, ...
-% $$$                                                               Pinf,Pstar,Y,trend,nobs,np,smpl,mf,data_index);
-% $$$         else
-% $$$             [alphahat,etahat,ahat,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3(T,R,Q, ...
-% $$$                                                               Pinf,Pstar,Y,trend,nobs,np,smpl,mf);
-% $$$         end
-% $$$     end
-% $$$     if kalman_algo == 3
-% $$$         data1 = Y - trend;
-% $$$         if missing_value
-% $$$             [alphahat,etahat,ahat,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmoother1_Z(ST, ...
-% $$$                                                               Z,R1,Q,Pinf,Pstar,data1,nobs,np,smpl,data_index);
-% $$$         else
-% $$$             [alphahat,etahat,ahat,P,aK,PK,d,decomp] = DiffuseKalmanSmoother1_Z(ST, ...
-% $$$                                                               Z,R1,Q,Pinf,Pstar, ...
-% $$$                                                               data1,nobs,np,smpl);
-% $$$         end
-% $$$         if all(alphahat(:)==0)
-% $$$             kalman_algo = 4;
-% $$$         end
-% $$$     end
-% $$$     if kalman_algo == 4
-% $$$         data1 = Y - trend;
-% $$$         if missing_value
-% $$$             [alphahat,etahat,ahat,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmoother3_Z(ST, ...
-% $$$                                                               Z,R1,Q,Pinf,Pstar,data1,nobs,np,smpl,data_index);
-% $$$         else
-% $$$             [alphahat,etahat,ahat,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3_Z(ST, ...
-% $$$                                                               Z,R1,Q,Pinf,Pstar, ...
-% $$$                                                               data1,nobs,np,smpl);
-% $$$         end
-% $$$     end
-% $$$     if kalman_algo == 3 | kalman_algo == 4
-% $$$         alphahat = QT*alphahat;
-% $$$         ahat = QT*ahat;
-% $$$         nk = options_.nk;
-% $$$ % $$$           if M_.exo_nbr<2 % Fix the crash of Dynare when the estimated model has only one structural shock (problem with 
-% $$$ % $$$                           % the squeeze function, that does not affect 2D arrays).
-% $$$ % $$$               size_decomp = 0;
-% $$$ % $$$           else
-% $$$ % $$$               size_decomp = size(decomp,4);
-% $$$ % $$$           end
-% $$$         for jnk=1:nk
-% $$$             aK(jnk,:,:) = QT*squeeze(aK(jnk,:,:));
-% $$$             for i=1:size(PK,4)
-% $$$                 PK(jnk,:,:,i) = QT*dynare_squeeze(PK(jnk,:,:,i))*QT';
-% $$$             end
-% $$$             for i=1:size(decomp,4)
-% $$$                 decomp(jnk,:,:,i) = QT*dynare_squeeze(decomp(jnk,:,:,i));
-% $$$             end
-% $$$         end
-% $$$         for i=1:size(P,4)
-% $$$             P(:,:,i) = QT*dynare_squeeze(P(:,:,i))*QT';
-% $$$         end
-% $$$     end
-% $$$ end
