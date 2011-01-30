@@ -1794,6 +1794,7 @@ periods 100;
   <listitem><para><xref linkend='steady_state_model'/></para></listitem>
   <listitem><para><xref linkend='check'/></para></listitem>
   <listitem><para><xref linkend='model_info'/></para></listitem>
+  <listitem><para><xref linkend='print_bytecode_static_model_and_print_bytecode_dynamic_model'/></para></listitem>
   <listitem><para><xref linkend='simul'/></para></listitem>
   <listitem><para><xref linkend='stoch_simul'/></para></listitem>
 </itemizedlist>
@@ -2104,6 +2105,31 @@ steady;
     <listitem><para>SOLVE TWO BOUNDARIES <replaceable>x</replaceable>: the block contains equations depending on both forward and backward variables. g<subscript>j</subscript>(y<subscript>j,t</subscript>, y<subscript>t</subscript>, y<subscript>t-1</subscript>, ..., y<subscript>t-k</subscript> ,y<subscript>t</subscript>, y<subscript>t+1</subscript>, ..., y<subscript>t+k</subscript>) =0. <replaceable>x</replaceable> is equal to SIMPLE if the block has only one equation. If several equation appears in the block, <replaceable>x</replaceable> is equal to COMPLETE.</para></listitem>
   </itemizedlist>
   </para>
+  </refsect1>
+</refentry>
+
+<refentry id="print_bytecode_static_model_and_print_bytecode_dynamic_model">
+  <refmeta>
+    <refentrytitle>print_bytecode_static_model and print_bytecode_dynamic_model</refentrytitle>
+  </refmeta>
+  
+  <refnamediv>
+    <refname>print_bytecode_static_model and print_bytecode_dynamic_model</refname>
+    <refpurpose>Display the static and the dynamic model stored in te bytecode binary format file.</refpurpose>
+  </refnamediv>
+  
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>print_bytecode_static_model</command>
+      <arg choice="plain">;</arg><arg choice="plain"> and </arg>
+      <command>print_bytecode_dynamic_model</command>
+      <arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+  
+  <refsect1><title>Description</title>
+    <para>The <command>print_bytecode_static_model</command> command print the equations and the Jacobian matrix of the static model stored in the bytecode binary format file. The <command>print_bytecode_dynamic_model</command> command do the same for a dnamic model.
+    </para>
   </refsect1>
 </refentry>
 
