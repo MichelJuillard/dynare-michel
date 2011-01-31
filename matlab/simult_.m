@@ -67,8 +67,8 @@ if options_.k_order_solver% Call dynare++ routines.
     y_(dr.order_var,:) = y_;
 else
     if options_.block
-        k2 = dr.nstatic +1 : dr.nstatic + dr.npred+dr.nboth;
-        order_var = M_.block_structure.variable_reordered;        
+        k2 = [dr.glb_pred dr.glb_both];
+        order_var = 1:M_.endo_nbr;
     else
         k2 = dr.kstate(find(dr.kstate(:,2) <= M_.maximum_lag+1),[1 2]);
         k2 = k2(:,1)+(M_.maximum_lag+1-k2(:,2))*M_.endo_nbr;
