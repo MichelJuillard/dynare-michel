@@ -1452,10 +1452,7 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
                               const int Block_List_Max_Lead, const int u_count_int, int block)
 {
   it_code_type begining;
-  if (steady_state)
-    residual = vector<double>(size);
-  else
-    residual = vector<double>(size*(periods+y_kmin));
+  
   switch (type)
     {
     case EVALUATE_FORWARD:
@@ -1465,7 +1462,13 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
           if (block >= 0)
             for (int j = 0; j < size; j++)
               residual[j] = y[Block_Contain[j].Variable] - ya[Block_Contain[j].Variable];
-        }
+          else
+            for (int j = 0; j < size; j++)
+              {
+                //mexPrintf("=>residual[Block_Contain[%d].Equation = %d]=%g (y = %g, ya = %g)\n", j, Block_Contain[j].Equation, y[Block_Contain[j].Variable] - ya[Block_Contain[j].Variable], y[Block_Contain[j].Variable], ya[Block_Contain[j].Variable]);
+                residual[Block_Contain[j].Equation] = y[Block_Contain[j].Variable] - ya[Block_Contain[j].Variable];
+              }
+         }
       else
         {
           begining = it_code;
@@ -1477,6 +1480,9 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
               if (block >= 0)
                 for (int j = 0; j < size; j++)
                   residual[it_*size+j] = y[it_*y_size+Block_Contain[j].Variable] - ya[it_*y_size+Block_Contain[j].Variable];
+              else
+                for (int j = 0; j < size; j++)
+                  residual[it_*size+Block_Contain[j].Equation] = y[it_*y_size+Block_Contain[j].Variable] - ya[it_*y_size+Block_Contain[j].Variable];
             }
         }
       break;
@@ -1489,7 +1495,10 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
           if (block < 0)
             {
               for (int j = 0; j < size; j++)
-                y[Block_Contain[j].Variable] += r[j];
+                {
+                  //mexPrintf("residual[Block_Contain[%d].Equation = %d]=%g\n", j, Block_Contain[j].Equation, r[j]);
+                  residual[Block_Contain[j].Equation] = r[j];
+                }
             }
           else
             {
@@ -1508,7 +1517,10 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
               if (block < 0)
                 {
                   for (int j = 0; j < size; j++)
-                    y[it_*y_size+Block_Contain[j].Variable] += r[j];
+                    {
+                      //mexPrintf("residual[Per_y + Block_Contain[%d].Equation = %d]=%g\n", j, Per_y_ + Block_Contain[j].Equation, r[j]);
+                      residual[Per_y_+Block_Contain[j].Equation] = r[j];
+                    }
                 }
               else
                 {
@@ -1532,7 +1544,10 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
           compute_block_time(0, true, block_num, size, steady_state);
           if (block < 0)
             for (int j = 0; j < size; j++)
-              y[Block_Contain[j].Variable] += r[j];
+              {
+                //mexPrintf("residual[Block_Contain[%d].Equation = %d]=%g\n", j, Block_Contain[j].Equation, r[j]);
+                residual[Block_Contain[j].Equation] = r[j];
+              }
           else
             for (int j = 0; j < size; j++)
               residual[j] = r[j];
@@ -1547,7 +1562,10 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
               compute_block_time(0, true, block_num, size, steady_state);
               if (block < 0)
                 for (int j = 0; j < size; j++)
-                  y[it_*y_size+Block_Contain[j].Variable] += r[j];
+                  {
+                    //mexPrintf("residual[it_*y_size+Block_Contain[%d].Equation = %d]=%g\n", j, it_*y_size+Block_Contain[j].Equation, r[j]);
+                    residual[it_*y_size+Block_Contain[j].Equation] = r[j];
+                  }
               else
                 for (int j = 0; j < size; j++)
                   residual[it_*size+j] = r[j];
@@ -1557,10 +1575,18 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
       break;
     case EVALUATE_BACKWARD:
       if (steady_state)
-        compute_block_time(0, true, block_num, size, steady_state);
-        if (block >= 0)
+        {
+          compute_block_time(0, true, block_num, size, steady_state);
+          if (block >= 0)
             for (int j = 0; j < size; j++)
               residual[j] = y[Block_Contain[j].Variable] - ya[Block_Contain[j].Variable];
+          else
+            for (int j = 0; j < size; j++)
+              {
+                //mexPrintf("residual[Block_Contain[%d].Equation = %d]=%g\n", j, Block_Contain[j].Equation, y[Block_Contain[j].Variable] - ya[Block_Contain[j].Variable]);
+                residual[Block_Contain[j].Equation] = y[Block_Contain[j].Variable] - ya[Block_Contain[j].Variable];
+              }
+         }
       else
         {
           begining = it_code;
@@ -1572,6 +1598,9 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
               if (block >= 0)
                 for (int j = 0; j < size; j++)
                   residual[it_*size+j] = y[it_*y_size+Block_Contain[j].Variable] - ya[it_*y_size+Block_Contain[j].Variable];
+              else
+                for (int j = 0; j < size; j++)
+                  residual[it_*size+Block_Contain[j].Equation] = y[it_*y_size+Block_Contain[j].Variable] - ya[it_*y_size+Block_Contain[j].Variable];
             }
         }
       break;
@@ -1584,7 +1613,10 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
           if (block < 0)
             {
               for (int j = 0; j < size; j++)
-                y[Block_Contain[j].Variable] += r[j];
+                {
+                  //mexPrintf("residual[Block_Contain[%d].Equation = %d]=%g\n", j, Block_Contain[j].Equation, r[j]);
+                  residual[Block_Contain[j].Equation] = r[j];
+                }
             }
           else
             {
@@ -1603,7 +1635,10 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
               if (block < 0)
                 {
                   for (int j = 0; j < size; j++)
-                    y[it_*y_size+Block_Contain[j].Variable] += r[j];
+                    {
+                      //mexPrintf("residual[Per_y_+Block_Contain[%d].Equation = %d]=%g\n", j, Per_y_+Block_Contain[j].Equation, r[j]);
+                      residual[Per_y_+Block_Contain[j].Equation] = r[j];
+                    }
                 }
               else
                 {
@@ -1624,7 +1659,10 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
           compute_block_time(0, true, block_num, size, steady_state);
           if (block < 0)
             for (int j = 0; j < size; j++)
-              y[Block_Contain[j].Variable] += r[j];
+              {
+                //mexPrintf("residual[Block_Contain[%d].Equation = %d]=%g\n", j, Block_Contain[j].Equation, r[j]);
+                residual[Block_Contain[j].Equation] = r[j];
+              }
           else
             for (int j = 0; j < size; j++)
               residual[j] = r[j];
@@ -1639,7 +1677,10 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
               compute_block_time(0, true, block_num, size, steady_state);
               if (block < 0)
                 for (int j = 0; j < size; j++)
-                  y[it_*y_size+Block_Contain[j].Variable] += r[j];
+                  {
+                    //mexPrintf("residual[Per_y_+Block_Contain[%d].Equation = %d]=%g\n", j, Per_y_+Block_Contain[j].Equation, r[j]);
+                    residual[Per_y_+Block_Contain[j].Equation] = r[j];
+                  }
               else
                 for (int j = 0; j < size; j++)
                   residual[it_*size+j] = r[j];
@@ -1662,7 +1703,10 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
           compute_block_time(Per_u_, true, block_num, size, steady_state);
           if (block < 0)
             for (int j = 0; j < size; j++)
-              y[it_*y_size+Block_Contain[j].Variable] += r[j];
+              {
+                //mexPrintf("residual[it_*y_size+Block_Contain[%d].Equation = %d]=%g\n", j, it_*y_size+Block_Contain[j].Equation, r[j]);
+                residual[it_*y_size+Block_Contain[j].Equation] = r[j];
+              }
           else
             for (int j = 0; j < size; j++)
               residual[it_*size+j] = r[j];
@@ -2485,6 +2529,14 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
 
   it_code = code_liste.begin();
   it_code_type Init_Code = it_code;
+  if (block < 0)
+    {
+      if (steady_state)
+        residual = vector<double>(y_size);
+      else
+        residual = vector<double>(y_size*(periods+y_kmin));
+    }
+  
   while (go_on)
     {
       switch (it_code->first)
@@ -2520,6 +2572,13 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
                     jacobian_exo_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_exo_size(),mxREAL));
                     jacobian_det_exo_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_det_exo_size(),mxREAL));
                     jacobian_other_endo_block.push_back(mxCreateDoubleMatrix(fb->get_size(), fb->get_nb_col_other_endo_jacob(),mxREAL));
+                  }
+                if (block >= 0)
+                  {
+                    if (steady_state)
+                      residual = vector<double>(fb->get_size());
+                    else
+                      residual = vector<double>(fb->get_size()*(periods+y_kmin));
                   }
                 evaluate_a_block(fb->get_size(), fb->get_type(), bin_basename, steady_state, Block_Count,
                                  fb->get_is_linear(), fb->get_endo_nbr(), fb->get_Max_Lag(), fb->get_Max_Lead(), fb->get_u_count_int(), block);

@@ -376,8 +376,11 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
               plhs[1] = mxCreateDoubleMatrix(row_y, col_y, mxREAL);
               pind = mxGetPr(plhs[1]);
               if (evaluate)
-                for (i = 0; i < row_y*col_y; i++)
-                  pind[i] = y[i]-ya[i];
+                {
+                  vector<double> residual = interprete.get_residual();
+                  for (i = 0; i < residual.size(); i++)
+                    pind[i] = residual[i];
+                }
               else
                 for (i = 0; i < row_y*col_y; i++)
                    pind[i] = y[i];
