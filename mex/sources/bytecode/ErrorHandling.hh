@@ -2117,7 +2117,7 @@ print_expression(it_code_type it_code, bool evaluate, int size, int block_num, b
           break;
         case FJMPIFEVAL:
           tmp_out.str("");
-          tmp_out << "if (evaluate)";
+          tmp_out << "if (~evaluate)";
           go_on = false;
           break;
         case FJMP:
