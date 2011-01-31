@@ -1,4 +1,4 @@
-function [x,info] = dynare_solve_block_or_bytecode(y, exo, params, temporary_terms)
+function [x,info] = dynare_solve_block_or_bytecode(y, exo, params)
 % Copyright (C) 2010 Dynare Team
 %
 % This file is part of Dynare.
