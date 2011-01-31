@@ -103,7 +103,7 @@ end
 for k=1:nx
     flag = 0;
     if options_.block
-        str1 = subst_auxvar(k1(dr.nstatic+k),-1);
+        str1 = subst_auxvar(dr.state_var(k),-1);
     else
         str1 = subst_auxvar(k1(klag(k,1)),klag(k,2)-M_.maximum_lag-2);
     end;
