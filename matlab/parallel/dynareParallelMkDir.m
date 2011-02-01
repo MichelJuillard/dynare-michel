@@ -37,7 +37,7 @@ end
 for indPC=1:length(Parallel)
     if Parallel(indPC).Local==0,
         if ~ispc, %isunix || (~matlab_ver_less_than('7.4') && ismac),
-            system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' mkdir -p ',Parallel(indPC).RemoteDirectory,'/',PRCDir]);
+            [NonServeS NonServeD]=system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' mkdir -p ',Parallel(indPC).RemoteDirectory,'/',PRCDir]);
         else
             [NonServeS NonServeD]=mkdir(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir]);
         end
