@@ -37,11 +37,21 @@ end
 
 for indPC=1:length(Parallel),
     while (1)
-        if isunix
+        if ~isdos
             stat = system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' rm -fr ',Parallel(indPC).RemoteDirectory,'/',PRCDir]);
             break;
         else
+            if exist('OCTAVE_VERSION'), % Patch for peculiar behaviour of rmdir under Windows.
+            % It is necessary because the command rmdir always ask at the user to confirm your decision before
+            % deleting a directory: this stops the computation! The Octave native function 'confirm_recursive_rmdir'
+            % disable this mechanism.
+               val = confirm_recursive_rmdir (false);
+               [stat, mess, id] = rmdir(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir],'s');
+            
+            else
             [stat, mess, id] = rmdir(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir],'s');
+            end
+            
             if stat==1,
                 break,
             else
