@@ -45,19 +45,19 @@ diary( ['slaveParallel_',int2str(whoiam),'.log']);
 dynareroot = dynare_config();
 
 % Load input data.
-load( ['slaveParallel_input',int2str(whoiam)])
+load( ['slaveParallel_input',int2str(whoiam)]);
 
 %Loads fGlobalVar Parallel.
 if exist('fGlobalVar'),
     globalVars = fieldnames(fGlobalVar);
     for j=1:length(globalVars),
-        eval(['global ',globalVars{j},';'])
-        evalin('base',['global ',globalVars{j},';'])
+        eval(['global ',globalVars{j},';']);
+        evalin('base',['global ',globalVars{j},';']);
     end
     struct2local(fGlobalVar);
     clear fGlobalVar
     % create global variables in the base workspace as well
-    evalin('base',['load( [''slaveParallel_input',int2str(whoiam),'''],''fGlobalVar'')']) 
+    evalin('base',['load( [''slaveParallel_input',int2str(whoiam),'''],''fGlobalVar'')']) ;
     evalin('base','struct2local(fGlobalVar)');
     evalin('base','clear fGlobalVar');
 end
@@ -109,12 +109,12 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
             for j=1:length(globalVars),
                 info_whos = whos(globalVars{j});
                 if isempty(info_whos) || ~info_whos.global,
-                    eval(['global ',globalVars{j},';'])
-                    evalin('base',['global ',globalVars{j},';'])
+                    eval(['global ',globalVars{j},';']);
+                    evalin('base',['global ',globalVars{j},';']);
                 end
             end
             struct2local(fGlobalVar);
-            evalin('base',['load( [''slaveJob',int2str(whoiam),'''],''fGlobalVar'')']) 
+            evalin('base',['load( [''slaveJob',int2str(whoiam),'''],''fGlobalVar'')']);
             evalin('base','struct2local(fGlobalVar)');
             evalin('base','clear fGlobalVar');
         end
@@ -135,18 +135,18 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
         if(whoiam)
 
             % Save the output result.
-            save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
+            save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' );
 
             % Inform the master that the job is finished, and transfer the output data
             delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
         end
 
-        disp(['Job ',fname,' on CPU ',int2str(whoiam),' completed.'])
+        disp(['Job ',fname,' on CPU ',int2str(whoiam),' completed.']);
         t0 =clock; % Re-set waiting time of 20 mins
         catch ME
-            disp(['Job ',fname,' on CPU ',int2str(whoiam),' crashed.'])
+            disp(['Job ',fname,' on CPU ',int2str(whoiam),' crashed.']);
             fOutputVar.error = ME;
-            save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' )
+            save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' );
             waitbarString = fOutputVar.error.message;
             if Parallel(ThisMatlab).Local,
                 waitbarTitle='Local ';
@@ -163,7 +163,7 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
 end
 
 
-disp(['slaveParallel on CPU ',int2str(whoiam),' completed.'])
+disp(['slaveParallel on CPU ',int2str(whoiam),' completed.']);
 diary off;
 
 delete(['P_slave_',int2str(whoiam),'End.txt']);
