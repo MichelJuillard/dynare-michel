@@ -2546,9 +2546,9 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
 #ifdef DEBUG
           mexPrintf("---------------------------------------------------------\n");
           if (block < 0)
-            mexPrintf("FBEGINBLOCK %d\n", Block_Count+1);
+            mexPrintf("FBEGINBLOCK Block_Count=%d\n", Block_Count+1);
           else
-            mexPrintf("FBEGINBLOCK %d\n", block+1);
+            mexPrintf("FBEGINBLOCK block=%d\n", block+1);
 #endif
           //it's a new block
           {

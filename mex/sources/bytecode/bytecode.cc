@@ -387,48 +387,57 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             }
           if (nlhs > 2)
             {
-              int jacob_field_number = 0, jacob_exo_field_number = 0, jacob_exo_det_field_number = 0, jacob_other_endo_field_number = 0;
-              if (!block_structur)
+              if (evaluate)
                 {
-                  const char *field_names[] = {"g1","g1_x","g1_xd","g1_o"};
-                  jacob_field_number=0;
-                  jacob_exo_field_number=1;
-                  jacob_exo_det_field_number=2;
-                  jacob_other_endo_field_number=2;
-                  mwSize dims[1] = {nb_blocks };
-                  plhs[2] = mxCreateStructArray(1, dims, 4, field_names);
-                }
-              else if (!mxIsStruct(block_structur))
-                {
-                  plhs[2] = interprete.get_jacob(0);
-                  //mexCallMATLAB(0,NULL, 1, &plhs[2], "disp");
-                  dont_store_a_structure = true;
-                }
-              else
-                {
-                  plhs[2] = block_structur;
-                  jacob_field_number = mxAddField(plhs[2], "g1");
-                  if (jacob_field_number == -1)
-                    DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, cannot add extra field jacob to the structArray\n");
-                  jacob_exo_field_number = mxAddField(plhs[2], "g1_x");
-                  if (jacob_exo_field_number == -1)
-                    DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, cannot add extra field jacob_exo to the structArray\n");
-                  jacob_exo_det_field_number = mxAddField(plhs[2], "g1_xd");
-                  if (jacob_exo_det_field_number == -1)
-                    DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, cannot add extra field jacob_exo_det to the structArray\n");
-                  jacob_other_endo_field_number = mxAddField(plhs[2], "g1_o");
-                  if (jacob_other_endo_field_number == -1)
-                    DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, cannot add extra field jacob_other_endo to the structArray\n");
-                }
-              if (!dont_store_a_structure)
-                {
-                  for (int i = 0; i < nb_blocks; i++)
-                   {
-                      mxSetFieldByNumber(plhs[2],i,jacob_field_number,interprete.get_jacob(i));
-                      mxSetFieldByNumber(plhs[2],i,jacob_exo_field_number,interprete.get_jacob_exo(i));
-                      mxSetFieldByNumber(plhs[2],i,jacob_exo_det_field_number,interprete.get_jacob_exo_det(i));
-                      mxSetFieldByNumber(plhs[2],i,jacob_other_endo_field_number,interprete.get_jacob_other_endo(i));
+                  int jacob_field_number = 0, jacob_exo_field_number = 0, jacob_exo_det_field_number = 0, jacob_other_endo_field_number = 0;
+                  if (!block_structur)
+                    {
+                      const char *field_names[] = {"g1","g1_x","g1_xd","g1_o"};
+                      jacob_field_number=0;
+                      jacob_exo_field_number=1;
+                      jacob_exo_det_field_number=2;
+                      jacob_other_endo_field_number=2;
+                      mwSize dims[1] = {nb_blocks };
+                      plhs[2] = mxCreateStructArray(1, dims, 4, field_names);
                     }
+                  else if (!mxIsStruct(block_structur))
+                    {
+                      plhs[2] = interprete.get_jacob(0);
+                      //mexCallMATLAB(0,NULL, 1, &plhs[2], "disp");
+                      dont_store_a_structure = true;
+                    }
+                  else
+                    {
+                      plhs[2] = block_structur;
+                      jacob_field_number = mxAddField(plhs[2], "g1");
+                      if (jacob_field_number == -1)
+                        DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, cannot add extra field jacob to the structArray\n");
+                      jacob_exo_field_number = mxAddField(plhs[2], "g1_x");
+                      if (jacob_exo_field_number == -1)
+                        DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, cannot add extra field jacob_exo to the structArray\n");
+                      jacob_exo_det_field_number = mxAddField(plhs[2], "g1_xd");
+                      if (jacob_exo_det_field_number == -1)
+                        DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, cannot add extra field jacob_exo_det to the structArray\n");
+                      jacob_other_endo_field_number = mxAddField(plhs[2], "g1_o");
+                      if (jacob_other_endo_field_number == -1)
+                        DYN_MEX_FUNC_ERR_MSG_TXT("Fatal error in bytecode: in main, cannot add extra field jacob_other_endo to the structArray\n");
+                    }
+                  if (!dont_store_a_structure)
+                    {
+                      for (int i = 0; i < nb_blocks; i++)
+                       {
+                          mxSetFieldByNumber(plhs[2],i,jacob_field_number,interprete.get_jacob(i));
+                          mxSetFieldByNumber(plhs[2],i,jacob_exo_field_number,interprete.get_jacob_exo(i));
+                          mxSetFieldByNumber(plhs[2],i,jacob_exo_det_field_number,interprete.get_jacob_exo_det(i));
+                          mxSetFieldByNumber(plhs[2],i,jacob_other_endo_field_number,interprete.get_jacob_other_endo(i));
+                        }
+                    }
+                }
+              else 
+                {
+                  plhs[2] = mxCreateDoubleMatrix(1, 1, mxREAL);
+                  pind = mxGetPr(plhs[0]);
+                  pind[0] = NAN;
                 }
               if (nlhs > 3)
                 {

@@ -59,7 +59,7 @@ elseif options_.bytecode
                 end
                 x(M_.blocksMFS{b}) = y;
             else
-                [check, x] = feval('bytecode', x, exo, params, 'static', ['block = ' int2str(b)]);
+                [chk, nulldev, nulldev1, x] = bytecode( x, exo, params, 1, x, 'evaluate', 'static', ['block = ' int2str(b)]);
             end;
         end
     else
