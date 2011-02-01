@@ -4,11 +4,11 @@ function dirlist = dynareParallelDir(filename,PRCDir,Parallel)
 %
 % INPUTS
 %  o filename   []   ...
-%  o PRCDir     []   ... 
-%  o Parallel   []   ...  
+%  o PRCDir     []   ...
+%  o Parallel   []   ...
 %
 %  OUTPUTS
-%  o dirlist    []   ...  
+%  o dirlist    []   ...
 %
 % Copyright (C) 2009-2010 Dynare Team
 %
@@ -31,21 +31,40 @@ dirlist=[];
 for indPC=1:length(Parallel),
     if ~ispc, %isunix || (~matlab_ver_less_than('7.4') && ismac),
         if Parallel(indPC).Local==0,
-            [check, ax]=system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' ls ',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',filename]);
+            if exist('OCTAVE_VERSION') % Patch for peculiar behaviour of ssh-ls under Linux.
+                % It is necessary to capture the ls warning message.
+                % To do it under the ssh protocol it is necessary to redirect the ls message in a text file.
+                % The file is 'OctaveStandardOutputMessage.txt' and it is
+                % saved in the Model directory.
+                [check, ax]=system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' ls ',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',filename, ' 2> OctaveStandardOutputMessage.txt']);
+            else
+                [check, ax]=system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' ls ',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',filename]);
+            end
             if check ~ 0;
                 ax=[];
             end
         else
-            try
-                ax=ls(filename);
-            catch
-                ax=[];
+
+            if exist('OCTAVE_VERSION') % Patch for peculiar behaviour of ls under Linux.
+                
+                % It is necessary to capture the ls warning message and properly manage the jolly char '*'!
+                [check ax]=system(['ls ' ,filename, ' 2> OctaveStandardOutputMessage.txt']);
+                
+                if check ~ 0;
+                    ax=[];
+                end
+            else
+                try
+                    ax=ls(filename);
+                catch
+                    ax=[];
+                end
             end
-            
+
         end
         dirlist = [dirlist, ax];
     else
-        if exist('OCTAVE_VERSION'), % patch for peculiar behaviour of ls under Windows 
+        if exist('OCTAVE_VERSION'), % Patch for peculiar behaviour of ls under Windows.
             if Parallel(indPC).Local==0,
                 ax0=dir(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\',filename]);
             else
@@ -59,7 +78,7 @@ for indPC=1:length(Parallel),
                 end
                 ax=char(ax{:});
             end
-            
+
         else
             if Parallel(indPC).Local==0,
                 ax=ls(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\',filename]);
