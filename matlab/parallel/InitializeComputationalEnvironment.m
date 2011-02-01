@@ -33,6 +33,16 @@ function InitializeComputationalEnvironment()
 % 'octave'. Then if the field is empty it is necessary to fill it with the
 % default value.
 
+% Deactivate some 'Parallel/Warning' message in Octave!
+% Comment the line 'warning('off');' in order to view the warning message
+% in Octave!
+
+if exist('OCTAVE_VERSION'), 
+    warning('off');
+end
+
+
+
 global options_
 
 for j=1:length(options_.parallel),
@@ -58,7 +68,7 @@ end
 % parallel computations with Strategy == 1 delete the traces (if exists) of
 % previous computations.
 
-delete(['P_slave_*End.txt'])
+delete(['P_slave_*End.txt']);
 masterParallel(options_.parallel,[],[],[],[],[],[],options_.parallel_info,1);
 
 return
