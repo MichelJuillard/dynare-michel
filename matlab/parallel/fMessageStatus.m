@@ -44,6 +44,6 @@ end
 
 fslave = dir( ['slaveParallel_input',int2str(njob),'.mat']);
 if isempty(fslave),
-    error('Master asked to break the job')
+    error('Master asked to break the job');
 end
 
