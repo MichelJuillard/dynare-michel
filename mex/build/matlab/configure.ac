@@ -86,12 +86,6 @@ else
   BUILD_MEX_MATLAB="no (missing MATLAB, or unknown version, or unknown architecture)"
 fi
 
-if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$has_gsl" = "xyes"; then
-   BUILD_SWZ_MEX_MATLAB="yes"
-else
-   BUILD_SWZ_MEX_MATLAB="no (missing GSL)"
-fi
-
 if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$F77" != "x"; then
    BUILD_KALMAN_STEADY_STATE_MATLAB="yes"
 else
@@ -121,10 +115,9 @@ AC_MSG_NOTICE([
 Dynare is now configured for building the following components...
 
 Binaries (with "make"):
- MEX files for MATLAB (except SWZ and Kalman Steady State):     $BUILD_MEX_MATLAB
- SWZ MEX files for MATLAB:                                      $BUILD_SWZ_MEX_MATLAB
- Kalman Steady State MEX file for MATLAB:                       $BUILD_KALMAN_STEADY_STATE_MATLAB
- M2HTML documentation:                                          $BUILD_M2HTML
+ MEX files for MATLAB (except Kalman Steady State):     $BUILD_MEX_MATLAB
+ Kalman Steady State MEX file for MATLAB:               $BUILD_KALMAN_STEADY_STATE_MATLAB
+ M2HTML documentation:                                  $BUILD_M2HTML
 
 ])
 
@@ -136,7 +129,6 @@ AC_CONFIG_FILES([Makefile
                  gensylv/Makefile
                  k_order_perturbation/Makefile
                  dynare_simul_/Makefile
-                 swz/Makefile
                  estimation/Makefile
                  libslicot/Makefile
                  kalman_steady_state/Makefile])

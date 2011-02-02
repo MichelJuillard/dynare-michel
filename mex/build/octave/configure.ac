@@ -75,12 +75,6 @@ else
   BUILD_MEX_OCTAVE="no (missing mkoctfile)"
 fi
 
-if test "x$MKOCTFILE" != "x" -a "x$has_gsl" = "xyes"; then
-   BUILD_SWZ_MEX_OCTAVE="yes"
-else
-   BUILD_SWZ_MEX_OCTAVE="no (missing GSL)"
-fi
-
 if test "x$MKOCTFILE" != "x" -a "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"; then
   BUILD_ESTIMATION_MEX_OCTAVE="yes"
 else
@@ -106,10 +100,9 @@ AC_MSG_NOTICE([
 Dynare is now configured for building the following components...
 
 Binaries (with "make"):
- MEX files for Octave (except SWZ and Kalman Steady State):     $BUILD_MEX_OCTAVE
- SWZ MEX files for Octave:                                      $BUILD_SWZ_MEX_OCTAVE
- Kalman Steady State MEX file for Octave:                       $BUILD_KALMAN_STEADY_STATE_OCTAVE
- Estimation MEX for Octave:                                     $BUILD_ESTIMATION_MEX_OCTAVE
+ MEX files for Octave (except Kalman Steady State):     $BUILD_MEX_OCTAVE
+ Kalman Steady State MEX file for Octave:               $BUILD_KALMAN_STEADY_STATE_OCTAVE
+ Estimation MEX for Octave:                             $BUILD_ESTIMATION_MEX_OCTAVE
 
 ])
 
@@ -121,7 +114,6 @@ AC_CONFIG_FILES([Makefile
                  gensylv/Makefile
                  k_order_perturbation/Makefile
                  dynare_simul_/Makefile
-                 swz/Makefile
                  estimation/Makefile
                  qzcomplex/Makefile
                  ordschur/Makefile
