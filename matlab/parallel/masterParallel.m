@@ -102,6 +102,16 @@ end
 
 
 
+% Deactivate some 'Parallel/Warning' message in Octave!
+% Comment the line 'warning('off');' in order to view the warning message
+% in Octave!
+
+if exist('OCTAVE_VERSION'),
+    warning('off');
+end
+
+
+
 % Only for testing!
 
 % if Strategy==0
@@ -109,6 +119,7 @@ end
 % else
 %     disp('User Strategy Now Is Always Open (1)');
 % end
+
 
 if Strategy==1
     totCPU=0;
@@ -211,7 +222,7 @@ for j=1:totCPU,
         fblck = offset+1;
         nblck = sum(nBlockPerCPU(1:j));
         save temp_input.mat fblck nblck fname -append;
-        copyfile('temp_input.mat',['slaveJob',int2str(j),'.mat'])
+        copyfile('temp_input.mat',['slaveJob',int2str(j),'.mat']);
         if Parallel(indPC).Local ==0,
             fid1=fopen(['stayalive',int2str(j),'.txt'],'w+');
             fclose(fid1);
@@ -383,7 +394,14 @@ if ~ispc, %isunix || (~matlab_ver_less_than('7.4') && ismac),
     system('sh ConcurrentCommand1.bat &');
     pause(1)
 else
-    system('ConcurrentCommand1.bat');
+    
+    if exist('OCTAVE_VERSION')
+        % Redirect the standard output to the file 'OctaveStandardOutputMessage.txt'!
+        % This file is saved in the Model directory.
+        system('ConcurrentCommand1.bat > OctaveStandardOutputMessage.txt');
+    else
+        system('ConcurrentCommand1.bat');
+    end
 end
 
 
@@ -449,7 +467,7 @@ delete(['comp_status_',fname,'*.mat']);
 
 % Caption for console mode computing ...
 
-if (options_.console_mode == 1)
+if (options_.console_mode == 1) ||  exist('OCTAVE_VERSION')
     fnameTemp=fname;
     
     L=length(fnameTemp);
@@ -463,19 +481,30 @@ if (options_.console_mode == 1)
             fnameTemp(i)='.';
         end
     end
-     
+    
     for i=1:L
         if  fnameTemp(i)=='_';
             fnameTemp(i)=' ';
         end
     end
     
-     fnameTemp(L)='';
+    fnameTemp(L)='';
     
     Information=['Parallel ' fnameTemp ' Computing ...'];
-    fprintf([Information,'\n\n']);
+    if exist('OCTAVE_VERSION')
+       if (~ispc) && (Strategy==0)
+           printf('\n');
+           pause(2);
+       end
+       
+        printf([Information,'\n\n']);
+    else
+        fprintf([Information,'\n\n']);
+    end
     
 end
+
+
 
 
 ForEver=1;
@@ -505,9 +534,9 @@ while (ForEver)
             idCPU(j) = njob;
             if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
                 if (~ispc)
-                    statusString = ['\n',statusString, int2str(j), ' %3.f%% done! '];
-                 else
-                     statusString = [statusString, int2str(j), ' %3.f%% done! '];
+                  statusString = [statusString, int2str(j), ' %3.f%% done! '];
+                else
+                    statusString = [statusString, int2str(j), ' %3.f%% done! '];
                 end
             else
                 status_String{j} = waitbarString;
@@ -516,10 +545,10 @@ while (ForEver)
         catch % ME
             % To define!
             if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
-                 if (~ispc)
-                     statusString = ['\n',statusString, int2str(j), ' %3.f%% done! '];
-                 else
-                     statusString = [statusString, int2str(j), ' %3.f%% done! '];
+                if (~ispc)
+                   statusString = [statusString, int2str(j), ' %3.f%% done! '];
+                else
+                    statusString = [statusString, int2str(j), ' %3.f%% done! '];
                 end
             end
         end
@@ -529,7 +558,7 @@ while (ForEver)
             printf([statusString,'\r'], 100 .* pcerdone);
         else
             if ~isempty(statusString)
-                fprintf([statusString0,statusString], 100 .* pcerdone); 
+                fprintf([statusString0,statusString], 100 .* pcerdone);
             end
         end
         
@@ -543,7 +572,7 @@ while (ForEver)
             end
         end
     end
-    
+       
     if isempty(dynareParallelDir(['P_',fname,'_*End.txt'],PRCDir,Parallel(1:totSlaves)));
         HoTuttiGliOutput=0;
         for j=1:totCPU,
