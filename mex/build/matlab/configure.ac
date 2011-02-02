@@ -73,9 +73,6 @@ AC_LANG_POP([C++])
 # Check for dlopen(), needed by k_order_perturbation DLL
 AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])
 AC_SUBST([LIBADD_DLOPEN])
-# Check for GSL, needed by SWZ
-AX_GSL
-AM_CONDITIONAL([HAVE_GSL], [test "x$has_gsl" = "xyes"])
 
 AM_CONDITIONAL([DO_SOMETHING], [test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes"])
 
