@@ -2,17 +2,17 @@ function myoutput = McMCDiagnostics_core(myinputs,fpar,npar,whoiam, ThisMatlab)
 % PARALLEL CONTEXT
 % Core functionality for MCMC Diagnostics, which can be parallelized.
 % See also the comment in random_walk_metropolis_hastings_core.m funtion.
- 
 
-% INPUTS 
+
+% INPUTS
 %   See See the comment in random_walk_metropolis_hastings_core.m funtion.
 
 % OUTPUTS
 % o myoutput  [struc]
 %  Contained UDIAG.
 %
-% ALGORITHM 
-%   Portion of McMCDiagnostics.m function.       
+% ALGORITHM
+%   Portion of McMCDiagnostics.m function.
 %
 % SPECIAL REQUIREMENTS.
 %   None.
@@ -59,7 +59,7 @@ if ~exist('MhDirectoryName'),
     MhDirectoryName = CheckPath('metropolis');
 end
 
-ALPHA = 0.2;                                % increase too much with the number of simulations. 
+ALPHA = 0.2;                                % increase too much with the number of simulations.
 tmp = zeros(NumberOfDraws*nblck,3);
 UDIAG = zeros(NumberOfLines,6,npar-fpar+1);
 
@@ -69,30 +69,36 @@ if whoiam
         waitbarTitle=['Local '];
     else
         waitbarTitle=[Parallel(ThisMatlab).ComputerName];
-    end        
-    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));    
+    end
+    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
 end
 for j=fpar:npar,
-    fprintf('    Parameter %d...  ',j);
+    if exist('OCTAVE_VERSION'),
+        if (whoiam==0),
+            printf('    Parameter %d...  ',j);
+        end
+    else
+        fprintf('    Parameter %d...  ',j);
+    end
     for b = 1:nblck
         startline = 0;
         for n = 1:NumberOfMcFilesPerBlock
             %load([MhDirectoryName '/' mcfiles(n,1,b).name],'x2');
             load([MhDirectoryName '/' M_.fname '_mh',int2str(n),'_blck' int2str(b) ...
-                  '.mat'],'x2');
+                '.mat'],'x2');
             nx2 = size(x2,1);
             tmp((b-1)*NumberOfDraws+startline+(1:nx2),1) = x2(:,j);
             %      clear x2;
             startline = startline + nx2;
         end
-% $$$     %load([MhDirectoryName '/' mcfiles(NumberOfMcFilesPerBlock,1,b).name],'x2');
-% $$$     load([MhDirectoryName '/' M_.fname '_mh',int2str(NumberOfMcFilesPerBlock),'_blck' int2str(b) '.mat'],'x2');
-% $$$     tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+MAX_nruns*(LastFileNumber-1)+LastLineNumber,1) = x2(:,j);
-% $$$     clear x2;
-% $$$     startline = startline + LastLineNumber;
+        % $$$     %load([MhDirectoryName '/' mcfiles(NumberOfMcFilesPerBlock,1,b).name],'x2');
+        % $$$     load([MhDirectoryName '/' M_.fname '_mh',int2str(NumberOfMcFilesPerBlock),'_blck' int2str(b) '.mat'],'x2');
+        % $$$     tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+MAX_nruns*(LastFileNumber-1)+LastLineNumber,1) = x2(:,j);
+        % $$$     clear x2;
+        % $$$     startline = startline + LastLineNumber;
     end
     tmp(:,2) = kron(transpose(1:nblck),ones(NumberOfDraws,1));
-    tmp(:,3) = kron(ones(nblck,1),time'); 
+    tmp(:,3) = kron(ones(nblck,1),time');
     tmp = sortrows(tmp,1);
     ligne   = 0;
     for iter  = Origin:StepSize:NumberOfDraws
@@ -111,13 +117,19 @@ for j=fpar:npar,
         for i=1:nblck
             pmet = temp(find(temp(:,2)==i));
             UDIAG(ligne,2,j-fpar+1) = UDIAG(ligne,2,j-fpar+1) + pmet(csup,1)-pmet(cinf,1);
-            moyenne = mean(pmet,1); %% Within mean. 
+            moyenne = mean(pmet,1); %% Within mean.
             UDIAG(ligne,4,j-fpar+1) = UDIAG(ligne,4,j-fpar+1) + sum((pmet(:,1)-moyenne).^2)/(n-1);
             UDIAG(ligne,6,j-fpar+1) = UDIAG(ligne,6,j-fpar+1) + sum(abs(pmet(:,1)-moyenne).^3)/(n-1);
         end
     end
-    fprintf('Done! \n');
-    if whoiam,  
+    if exist('OCTAVE_VERSION'),
+        if (whoiam==0),
+            printf('Done! \n');
+        end
+    else
+        fprintf('Done! \n');
+    end
+    if whoiam,
         waitbarString = [ 'Parameter ' int2str(j) '/' int2str(npar) ' done.'];
         fMessageStatus((j-fpar+1)/(npar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab))
     end

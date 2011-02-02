@@ -3,22 +3,22 @@ function myoutput=prior_posterior_statistics_core(myinputs,fpar,B,whoiam, ThisMa
 % Core functionality for prior_posterior.m function, which can be parallelized.
 % See also the comment in random_walk_metropolis_hastings_core.m funtion.
 %
-% INPUTS 
+% INPUTS
 %   See See the comment in random_walk_metropolis_hastings_core.m funtion.
 
 % OUTPUTS
 % o myoutput  [struc]
-%  Contained OutputFileName_smooth; 
-%                          _update; 
-%                          _inno; 
-%                          _error; 
-%                          _filter_step_ahead; 
+%  Contained OutputFileName_smooth;
+%                          _update;
+%                          _inno;
+%                          _error;
+%                          _filter_step_ahead;
 %                          _param;
 %                          _forc_mean;
 %                          _forc_point
 %
-% ALGORITHM 
-%   Portion of prior_posterior.m function.       
+% ALGORITHM
+%   Portion of prior_posterior.m function.
 % This file is part of Dynare.
 %
 % SPECIAL REQUIREMENTS.
@@ -111,37 +111,37 @@ else
     else
         h = waitbar(0,'Taking subdraws...');
     end
-    
+
 end
 
 if RemoteFlag==1,
-OutputFileName_smooth = {};
-OutputFileName_update = {};
-OutputFileName_inno = {};
-OutputFileName_error = {};
-OutputFileName_filter_step_ahead = {};
-OutputFileName_param = {};
-OutputFileName_forc_mean = {};
-OutputFileName_forc_point = {};
-% OutputFileName_moments = {};
+    OutputFileName_smooth = {};
+    OutputFileName_update = {};
+    OutputFileName_inno = {};
+    OutputFileName_error = {};
+    OutputFileName_filter_step_ahead = {};
+    OutputFileName_param = {};
+    OutputFileName_forc_mean = {};
+    OutputFileName_forc_point = {};
+    % OutputFileName_moments = {};
 end
 
 for b=fpar:B
-    
+
     %    [deep, logpo] = GetOneDraw(type);
     %    set_all_parameters(deep);
     %    dr = resol(oo_.steady_state,0);
     if strcmpi(type,'prior')
-        
+
         [deep, logpo] = GetOneDraw(type);
-        
+
     else
         deep = x(b,:);
         logpo = logpost(b);
     end
     set_all_parameters(deep);
     [dr,info] = resol(oo_.steady_state,0);
-    
+
     if run_smoother
         [alphahat,etahat,epsilonhat,alphatilde,SteadyState,trend_coeff,aK] = ...
             DsgeSmoother(deep,gend,Y,data_index,missing_value);
@@ -164,7 +164,7 @@ for b=fpar:B
         if naK
             stock_filter_step_ahead(:,dr.order_var,:,irun(4)) = aK(options_.filter_step_ahead,1:endo_nbr,:);
         end
-        
+
         if horizon
             yyyy = alphahat(iendo,i_last_obs);
             yf = forcst2a(yyyy,dr,zeros(horizon,exo_nbr));
@@ -190,19 +190,19 @@ for b=fpar:B
             else
                 yf1 = yf1 + repmat(SteadyState',[horizon+maxlag,1,1]);
             end
-            
+
             stock_forcst_mean(:,:,irun(6)) = yf';
             stock_forcst_point(:,:,irun(7)) = yf1';
         end
-        
+
     end
     stock_param(irun(5),:) = deep;
     stock_logpo(irun(5),1) = logpo;
     stock_ys(irun(5),:) = SteadyState';
-    
+
     irun = irun +  ones(7,1);
-    
-    
+
+
     if irun(1) > MAX_nsmoo || b == B
         stock = stock_smooth(:,:,1:irun(1)-1);
         ifil(1) = ifil(1) + 1;
@@ -211,72 +211,72 @@ for b=fpar:B
         stock = stock_update(:,:,1:irun(1)-1);
         save([DirectoryName '/' M_.fname '_update' int2str(ifil(1)) '.mat'],'stock');
         if RemoteFlag==1,
-        OutputFileName_smooth = [OutputFileName_smooth; {[DirectoryName filesep], [M_.fname '_smooth' int2str(ifil(1)) '.mat']}];
-        OutputFileName_update = [OutputFileName_update; {[DirectoryName filesep], [M_.fname '_update' int2str(ifil(1)) '.mat']}];
+            OutputFileName_smooth = [OutputFileName_smooth; {[DirectoryName filesep], [M_.fname '_smooth' int2str(ifil(1)) '.mat']}];
+            OutputFileName_update = [OutputFileName_update; {[DirectoryName filesep], [M_.fname '_update' int2str(ifil(1)) '.mat']}];
         end
         irun(1) = 1;
     end
-    
+
     if irun(2) > MAX_ninno || b == B
         stock = stock_innov(:,:,1:irun(2)-1);
         ifil(2) = ifil(2) + 1;
         save([DirectoryName '/' M_.fname '_inno' int2str(ifil(2)) '.mat'],'stock');
         if RemoteFlag==1,
-        OutputFileName_inno = [OutputFileName_inno; {[DirectoryName filesep], [M_.fname '_inno' int2str(ifil(2)) '.mat']}];
+            OutputFileName_inno = [OutputFileName_inno; {[DirectoryName filesep], [M_.fname '_inno' int2str(ifil(2)) '.mat']}];
         end
         irun(2) = 1;
     end
-    
+
     if nvn && (irun(3) > MAX_nerro || b == B)
         stock = stock_error(:,:,1:irun(3)-1);
         ifil(3) = ifil(3) + 1;
         save([DirectoryName '/' M_.fname '_error' int2str(ifil(3)) '.mat'],'stock');
         if RemoteFlag==1,
-        OutputFileName_error = [OutputFileName_error; {[DirectoryName filesep], [M_.fname '_error' int2str(ifil(3)) '.mat']}];
+            OutputFileName_error = [OutputFileName_error; {[DirectoryName filesep], [M_.fname '_error' int2str(ifil(3)) '.mat']}];
         end
         irun(3) = 1;
     end
-    
+
     if naK && (irun(4) > MAX_naK || b == B)
         stock = stock_filter_step_ahead(:,:,:,1:irun(4)-1);
         ifil(4) = ifil(4) + 1;
         save([DirectoryName '/' M_.fname '_filter_step_ahead' int2str(ifil(4)) '.mat'],'stock');
         if RemoteFlag==1,
-        OutputFileName_filter_step_ahead = [OutputFileName_filter_step_ahead; {[DirectoryName filesep], [M_.fname '_filter_step_ahead' int2str(ifil(4)) '.mat']}];
+            OutputFileName_filter_step_ahead = [OutputFileName_filter_step_ahead; {[DirectoryName filesep], [M_.fname '_filter_step_ahead' int2str(ifil(4)) '.mat']}];
         end
         irun(4) = 1;
     end
-    
+
     if irun(5) > MAX_nruns || b == B
         stock = stock_param(1:irun(5)-1,:);
         ifil(5) = ifil(5) + 1;
         save([DirectoryName '/' M_.fname '_param' int2str(ifil(5)) '.mat'],'stock','stock_logpo','stock_ys');
         if RemoteFlag==1,
-        OutputFileName_param = [OutputFileName_param; {[DirectoryName filesep], [M_.fname '_param' int2str(ifil(5)) '.mat']}];
+            OutputFileName_param = [OutputFileName_param; {[DirectoryName filesep], [M_.fname '_param' int2str(ifil(5)) '.mat']}];
         end
         irun(5) = 1;
     end
-    
+
     if horizon && (irun(6) > MAX_nforc1 || b == B)
         stock = stock_forcst_mean(:,:,1:irun(6)-1);
         ifil(6) = ifil(6) + 1;
         save([DirectoryName '/' M_.fname '_forc_mean' int2str(ifil(6)) '.mat'],'stock');
         if RemoteFlag==1,
-        OutputFileName_forc_mean = [OutputFileName_forc_mean; {[DirectoryName filesep], [M_.fname '_forc_mean' int2str(ifil(6)) '.mat']}];
+            OutputFileName_forc_mean = [OutputFileName_forc_mean; {[DirectoryName filesep], [M_.fname '_forc_mean' int2str(ifil(6)) '.mat']}];
         end
         irun(6) = 1;
     end
-    
+
     if horizon && (irun(7) > MAX_nforc2 ||  b == B)
         stock = stock_forcst_point(:,:,1:irun(7)-1);
         ifil(7) = ifil(7) + 1;
         save([DirectoryName '/' M_.fname '_forc_point' int2str(ifil(7)) '.mat'],'stock');
         if RemoteFlag==1,
-        OutputFileName_forc_point = [OutputFileName_forc_point; {[DirectoryName filesep], [M_.fname '_forc_point' int2str(ifil(7)) '.mat']}];
+            OutputFileName_forc_point = [OutputFileName_forc_point; {[DirectoryName filesep], [M_.fname '_forc_point' int2str(ifil(7)) '.mat']}];
         end
         irun(7) = 1;
     end
-    
+
     % if moments_varendo && (irun(8) > MAX_momentsno || b == B)
     %    stock = stock_moments(1:irun(8)-1);
     %    ifil(8) = ifil(8) + 1;
@@ -286,18 +286,22 @@ for b=fpar:B
     %    end
     %    irun(8) = 1;
     % end
-    
-%   DirectoryName=TempPath;
-    
-    
-    if exist('OCTAVE_VERSION')
-        printf('Taking subdraws: %3.f%% done\r', b/B*100);
+
+    %   DirectoryName=TempPath;
+
+
+    if exist('OCTAVE_VERSION'),
+        if (whoiam==0),
+            printf('Taking subdraws: %3.f%% done\r', b/B*100);
+        end
     elseif ~whoiam,
         waitbar(b/B,h);
     end
-    
+
     if  whoiam,
-        fprintf('Done! \n');
+        if ~exist('OCTAVE_VERSION')
+            fprintf('Done! \n');
+        end
         waitbarString = [ 'Subdraw ' int2str(b) '/' int2str(B) ' done.'];
         fMessageStatus((b-fpar+1)/(B-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
     end
@@ -305,15 +309,15 @@ end
 
 myoutput.ifil=ifil;
 if RemoteFlag==1,
-myoutput.OutputFileName = [OutputFileName_smooth; 
-OutputFileName_update; 
-OutputFileName_inno; 
-OutputFileName_error; 
-OutputFileName_filter_step_ahead; 
-OutputFileName_param;
-OutputFileName_forc_mean;
-OutputFileName_forc_point];
-% OutputFileName_moments];
+    myoutput.OutputFileName = [OutputFileName_smooth;
+        OutputFileName_update;
+        OutputFileName_inno;
+        OutputFileName_error;
+        OutputFileName_filter_step_ahead;
+        OutputFileName_param;
+        OutputFileName_forc_mean;
+        OutputFileName_forc_point];
+    % OutputFileName_moments];
 end
 
 if exist('OCTAVE_VERSION')
@@ -323,5 +327,5 @@ else
     if exist('h')
         close(h)
     end
-    
+
 end
