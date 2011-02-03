@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Dynare Team
+ * Copyright (C) 2010-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -19,34 +19,43 @@
 
 #ifndef _MEXMOD
 #define _MEXMOD
+
 void swz_exit(int status);
 void swz_fprintf_err(const char * str, ...);
 extern int constant_seed;
-#endif
 
+#endif
 
 
 #if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 
-
 #include <dynmex.h>
 #include <dynblas.h>
 #include <dynlapack.h>
+#include <mat.h>
 
 #define swzMalloc mxMalloc
 #define swzCalloc mxCalloc
 #define swzRealloc mxRealloc
 #define swzFree mxFree
 
+mxArray *globalMatlabStruct;
+
+#ifndef _MEXWRITE
+#define _MEXWRITE
+
+void mex_write_to_matlab_matfile(double *, int, int, const char *, const char *);
+void mex_write_to_matlab_global_struct(double *, int, int, const char *);
+mxArray *getMxArray(double *, int, int);
+
+#endif
 
 #else
-
 
 #define swz_fprintf_stdout printf
 #define swzMalloc malloc
 #define swzCalloc calloc
 #define swzRealloc realloc
 #define swzFree free
-
 
 #endif
