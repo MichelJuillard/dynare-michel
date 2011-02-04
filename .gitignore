@@ -159,14 +159,5 @@ mex/build/matlab/run_m2html.m
 /mex/sources/estimation/libmat/tests/test-repmat
 /mex/sources/estimation/libmat/tests/test-repmat.exe
 
-# Misc
-!/matlab/swz/c-code/Makefile
-!/mex/sources/kalman/cc/Makefile
-!/mex/sources/kalman/matlab/Makefile
-!/mex/sources/kalman/qt/f90/Makefile
-!/mex/sources/kalman/qt/test/Makefile
-!/mex/sources/kalman/sylv/cc/Makefile
-!/mex/sources/kalman/testing/Makefile
-
 # MacOS stuff
 .DS_Store
