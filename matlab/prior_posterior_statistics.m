@@ -22,7 +22,7 @@ function prior_posterior_statistics(type,Y,gend,data_index,missing_value)
 % See the comments random_walk_metropolis_hastings.m funtion.
 
 
-% Copyright (C) 2005-2010 Dynare Team
+% Copyright (C) 2005-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

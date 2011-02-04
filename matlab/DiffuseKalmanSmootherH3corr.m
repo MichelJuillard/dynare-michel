@@ -29,7 +29,7 @@ function [alphahat,epsilonhat,etahat,a,aK] = DiffuseKalmanSmootherH3corr(T,R,Q,H
 %   Models", S.J. Koopman and J. Durbin (2000, in Journal of Time Series 
 %   Analysis, vol. 21(3), pp. 281-296).  
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

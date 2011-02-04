@@ -36,7 +36,7 @@ function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,d,decomp] = DiffuseKalmanSmo
 %   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
 %   Analysis, vol. 24(1), pp. 85-98). 
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

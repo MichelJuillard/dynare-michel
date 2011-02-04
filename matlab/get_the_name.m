@@ -15,7 +15,7 @@ function [nam,texnam] = get_the_name(k,TeX)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

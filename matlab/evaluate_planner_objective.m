@@ -15,7 +15,7 @@ function oo1 = evaluate_planner_objective(dr,M,oo,options)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2007-2010 Dynare Team
+% Copyright (C) 2007-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

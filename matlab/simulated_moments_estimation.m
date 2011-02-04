@@ -14,7 +14,7 @@ function [param,sigma] = simulated_moments_estimation(dataset,options,parallel)
 % SPECIAL REQUIREMENTS
 %  The user has to provide a file where the moment conditions are defined.
 
-% Copyright (C) 2010 Dynare Team
+% Copyright (C) 2010-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

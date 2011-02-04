@@ -18,7 +18,7 @@ function mode_check(x,fval,hessian,gend,data,lb,ub,data_index,number_of_observat
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2009, 2010 Dynare Team
+% Copyright (C) 2003-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

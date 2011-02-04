@@ -19,7 +19,7 @@ function [errorcode, varargout] = common_size (varargin)
 
 % Copyright (C) 1995, 1996, 1999, 2000, 2002, 2004, 2005, 2007
 %               Kurt Hornik
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

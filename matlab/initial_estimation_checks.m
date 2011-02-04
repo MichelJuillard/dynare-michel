@@ -13,7 +13,7 @@ function initial_estimation_checks(xparam1,gend,data,data_index,number_of_observ
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2009 Dynare Team
+% Copyright (C) 2003-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

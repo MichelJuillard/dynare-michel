@@ -17,7 +17,7 @@ function myoutput=PosteriorIRF_core2(myinputs,fpar,npar,whoiam, ThisMatlab)
 % SPECIAL REQUIREMENTS.
 %   None.
 %
-% Copyright (C) 2006-2008,2010 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -15,7 +15,7 @@ function forcst_unc(y0,var_list)
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2006-2009 Dynare Team
+% Copyright (C) 2006-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

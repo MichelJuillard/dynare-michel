@@ -12,7 +12,7 @@ function PosteriorOddsTable = model_comparison(ModelNames,ModelPriors,oo,options
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2007-2010 Dynare Team
+% Copyright (C) 2007-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -3,7 +3,7 @@ function [f0, x, ig] = mr_gstep(init,x,func0,htol0,varargin)
 % 
 % Gibbs type step in optimisation
 
-% Copyright (C) 2006 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -1,4 +1,4 @@
-dnl Copyright (C) 2009 Dynare Team
+dnl Copyright (C) 2009-2010 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl

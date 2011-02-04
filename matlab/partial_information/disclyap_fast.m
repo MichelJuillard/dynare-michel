@@ -11,7 +11,7 @@ function X=disclyap_fast(G,V,ch)
 % Joe Pearlman and Alejandro Justiniano 
 % 3/5/2005 
 
-% Copyright (C) 2010 Dynare Team
+% Copyright (C) 2010-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

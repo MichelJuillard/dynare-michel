@@ -18,7 +18,7 @@ function r = matlab_ver_less_than(verstr)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

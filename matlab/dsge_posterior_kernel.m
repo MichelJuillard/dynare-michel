@@ -21,7 +21,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = dsge_posterior_kernel(xparam1,ge
 % SPECIAL REQUIREMENTS
 %
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

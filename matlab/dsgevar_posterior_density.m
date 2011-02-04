@@ -16,7 +16,7 @@ function bvar = dsgevar_posterior_density(deep)
 %   none
 %  
 
-% Copyright (C) 1996-2007 Dynare Team
+% Copyright (C) 1996-2008 Dynare Team
 %
 % This file is part of Dynare.
 %

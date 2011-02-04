@@ -1,6 +1,6 @@
 function [data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,nvarobs)
 
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

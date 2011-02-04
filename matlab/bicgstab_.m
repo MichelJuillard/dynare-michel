@@ -1,6 +1,6 @@
 function [x,status]=bicgstab_(func,b,x,tole,kmax,varargin)
 
-% Copyright (C) 2007 Dynare Team
+% Copyright (C) 2007-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

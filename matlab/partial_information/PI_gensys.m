@@ -16,7 +16,7 @@ function [G1pi,C,impact,nmat,TT1,TT2,gev,eu, DD, E2, E5, GAMMA, FL_RANK ]=PI_gen
 % Corrected 10/28/96 by CAS
 
 % Copyright (C) 1996-2009 Christopher Sims
-% Copyright (C) 2010 Dynare Team
+% Copyright (C) 2010-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

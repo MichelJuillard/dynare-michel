@@ -7,7 +7,7 @@ function H = bfgsi(H0,dg,dx)
 % Original file downloaded from:
 % http://sims.princeton.edu/yftp/optimize/mfiles/bfgsi.m
 
-% Copyright (C) 1993-2007 Christopher Sims
+% Copyright (C) 1993-2009 Christopher Sims
 %
 % This file is part of Dynare.
 %

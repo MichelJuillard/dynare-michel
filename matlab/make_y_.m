@@ -12,7 +12,7 @@ function make_y_
 %   none
 %  
 
-% Copyright (C) 1996-2007 Dynare Team
+% Copyright (C) 1996-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

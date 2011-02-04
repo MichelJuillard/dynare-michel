@@ -6,7 +6,7 @@ function gcompare(s1,s2)
 %               saved by the instruction DYNASAVE. The simulation in file1
 %               is refered to as the base simulation.
 
-% Copyright (C) 2001 Dynare Team
+% Copyright (C) 2001-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -13,7 +13,7 @@ function list = list_of_parameters_calibrated_as_NaN(M_)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2010 Dynare Team
+% Copyright (C) 2010-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

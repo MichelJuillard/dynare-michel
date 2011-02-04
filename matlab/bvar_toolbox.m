@@ -42,7 +42,7 @@ function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
 %    - bvar_prior_{tau,decay,lambda,mu,omega,flat,train}
 
 % Copyright (C) 2003-2007 Christopher Sims
-% Copyright (C) 2007-2008 Dynare Team
+% Copyright (C) 2007-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

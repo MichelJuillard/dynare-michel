@@ -1,6 +1,6 @@
 function yf=forcst2(y0,horizon,dr,n)
 
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

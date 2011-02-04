@@ -32,7 +32,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 %   none.
 %  
 
-% Copyright (C) 1996-2010 Dynare Team
+% Copyright (C) 1996-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

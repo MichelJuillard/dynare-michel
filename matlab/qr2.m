@@ -17,7 +17,7 @@ function [Q,R] = qr2(X)
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2006-2008 Dynare Team
+% Copyright (C) 2006-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

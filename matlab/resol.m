@@ -25,7 +25,7 @@ function [dr,info]=resol(ys,check_flag)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

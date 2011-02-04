@@ -1,6 +1,6 @@
 function jndx = subset();
 
-% Copyright (C) 2006 Dynare Team
+% Copyright (C) 2006-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

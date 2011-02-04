@@ -15,7 +15,7 @@ function oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bay
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2006-2009 Dynare Team
+% Copyright (C) 2006-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

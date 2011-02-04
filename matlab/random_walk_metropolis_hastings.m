@@ -18,7 +18,7 @@ function random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bou
 %
 % SPECIAL REQUIREMENTS
 %   None.
-
+%
 % PARALLEL CONTEXT
 % The most computationally intensive part of this function may be executed
 % in parallel. The code sutable to be executed in
@@ -34,8 +34,7 @@ function random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bou
 % Then the comments write here can be used for all the other pairs of
 % parallel functions and also for management funtions.
 
-
-% Copyright (C) 2006-2008,2010 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

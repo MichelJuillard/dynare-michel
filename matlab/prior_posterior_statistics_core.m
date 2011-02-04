@@ -5,7 +5,7 @@ function myoutput=prior_posterior_statistics_core(myinputs,fpar,B,whoiam, ThisMa
 %
 % INPUTS
 %   See See the comment in random_walk_metropolis_hastings_core.m funtion.
-
+%
 % OUTPUTS
 % o myoutput  [struc]
 %  Contained OutputFileName_smooth;
@@ -23,6 +23,11 @@ function myoutput=prior_posterior_statistics_core(myinputs,fpar,B,whoiam, ThisMa
 %
 % SPECIAL REQUIREMENTS.
 %   None.
+
+% Copyright (C) 2005-2011 Dynare Team
+%
+% This file is part of Dynare.
+%
 % Dynare is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or

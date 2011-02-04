@@ -1,6 +1,6 @@
 function yf=forcst2a(y0,dr,e)
 
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

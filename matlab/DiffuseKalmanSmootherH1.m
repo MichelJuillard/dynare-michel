@@ -28,7 +28,7 @@ function [alphahat,epsilonhat,etahat,atilde, aK] = DiffuseKalmanSmootherH1(T,R,Q
 %   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
 %   Analysis, vol. 24(1), pp. 85-98). 
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

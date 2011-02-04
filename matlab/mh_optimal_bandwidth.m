@@ -24,7 +24,7 @@ function optimal_bandwidth = mh_optimal_bandwidth(data,number_of_draws,bandwidth
 %   [1] M. Skold and G.O. Roberts [2003], "Density estimation for the Metropolis-Hastings algorithm". 
 %   [2] Silverman [1986], "Density estimation for statistics and data analysis". 
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

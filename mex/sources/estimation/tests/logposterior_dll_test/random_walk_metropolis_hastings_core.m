@@ -47,7 +47,7 @@ function myoutput = random_walk_metropolis_hastings_core(myinputs,fblck,nblck,wh
 % parallel functions and also for management funtions.
 
 
-% Copyright (C) 2006-2008,2010 Dynare Team
+% Copyright (C) 2006-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

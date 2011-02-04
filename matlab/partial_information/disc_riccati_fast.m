@@ -11,7 +11,7 @@ function Z=disc_riccati_fast(F,D,R,H,ch)
 % V.2 22/10/06
 % =================================================================
 
-% Copyright (C) 2006-2010 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

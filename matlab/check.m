@@ -11,7 +11,7 @@ function [result,info] = check
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2008, 2010 Dynare Team
+% Copyright (C) 2001-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -15,7 +15,7 @@ function [A,B] = kalman_transition_matrix(dr,iv,ic,exo_nbr)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

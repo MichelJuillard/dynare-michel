@@ -13,7 +13,7 @@ function initvalf(fname_)
 %    All variables local to this function have an underscore appended to
 %    their name, to minimize clashes with model variables loaded by this function.
 
-% Copyright (C) 2003-2009 Dynare Team
+% Copyright (C) 2003-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

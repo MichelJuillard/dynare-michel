@@ -1,6 +1,6 @@
 function MakeAllFigures(NumberOfPlots,Caption,FigureProperties,Info)
 
-% Copyright (C) 2005 Dynare Team
+% Copyright (C) 2005-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

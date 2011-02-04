@@ -4,7 +4,7 @@ function sout = myboxplot (data,notched,symbol,vertical,maxwhisker)
 %  sout = myboxplot (data,notched,symbol,vertical,maxwhisker)
 
 %
-% Copyright (C) 2010 Dynare Team
+% Copyright (C) 2010-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

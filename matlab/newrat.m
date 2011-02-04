@@ -25,7 +25,7 @@ function [xparam1, hh, gg, fval, igg] = newrat(func0, x, hh, gg, igg, ftol0, nit
 %
 %  varargin = list of parameters for func0 
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

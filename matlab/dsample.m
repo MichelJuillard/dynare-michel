@@ -15,7 +15,7 @@ function dsample(s1,s2)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2008 Dynare Team
+% Copyright (C) 2001-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

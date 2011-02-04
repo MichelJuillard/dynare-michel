@@ -20,7 +20,7 @@ function [fhat,xhat,fcount,retcode] = csminit(fcn,x0,f0,g0,badg,H0,varargin)
 % http://sims.princeton.edu/yftp/optimize/mfiles/csminit.m
 
 % Copyright (C) 1993-2007 Christopher Sims
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

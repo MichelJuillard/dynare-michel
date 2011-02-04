@@ -15,7 +15,7 @@ function density = multivariate_normal_pdf(X,Mean,Sigma_upper_chol,n);
 %        
 % SPECIAL REQUIREMENTS
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

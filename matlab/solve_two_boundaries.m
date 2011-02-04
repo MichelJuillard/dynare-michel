@@ -42,7 +42,7 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
 %   none.
 %  
 
-% Copyright (C) 1996-2009 Dynare Team
+% Copyright (C) 1996-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

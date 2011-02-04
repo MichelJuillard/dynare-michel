@@ -14,7 +14,7 @@ function [y_,int_width]=simultxdet(y0,ex,ex_det, iorder,var_list,M_,oo_,options_
 % The condition size(ex,1)+M_.maximum_lag=size(ex_det,1) must be verified
 %  for consistency.
 
-% Copyright (C) 2008-2010 Dynare Team
+% Copyright (C) 2008-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

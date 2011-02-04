@@ -16,7 +16,7 @@ function AA = generalized_cholesky2(A)
 % Factorization," SIAM Journal of Scientific Statistical Computating,
 % 11, 6: 1136-58.
 
-% Copyright (C) 2003 Dynare Team
+% Copyright (C) 2003-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

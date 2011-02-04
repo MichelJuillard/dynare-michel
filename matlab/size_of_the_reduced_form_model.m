@@ -1,7 +1,7 @@
 function mega = size_of_the_reduced_form_model(dr)
 % Computes the size of dr.
 
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

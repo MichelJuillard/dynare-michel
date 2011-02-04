@@ -30,7 +30,7 @@ function [LIK, lik] = ...
 % NOTES
 %   The vector "lik" is used to evaluate the jacobian of the likelihood.
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

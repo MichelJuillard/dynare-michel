@@ -17,7 +17,7 @@ function my_subplot(i,imax,irow,icol,fig_title)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

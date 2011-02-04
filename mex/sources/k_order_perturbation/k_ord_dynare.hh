@@ -1,5 +1,4 @@
 /*
- * Copyright (C) 2005 Ondra Kamenik
  * Copyright (C) 2008-2010 Dynare Team
  *
  * This file is part of Dynare.
@@ -17,9 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-// based on: $Id: dynare3.h 1764 2008-03-31 14:30:55Z kamenik $
-// by 2005, Ondra Kamenik
 
 #ifndef K_ORD_DYNARE3_H
 #define K_ORD_DYNARE3_H

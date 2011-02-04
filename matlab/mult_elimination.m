@@ -12,7 +12,7 @@ function dr=mult_elimination(varlist,M_, options_, oo_)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2010 Dynare Team
+% Copyright (C) 2003-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

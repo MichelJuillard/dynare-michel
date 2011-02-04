@@ -13,7 +13,7 @@ function [J,M_,dr] = dyn_ramsey_dynamic_(ys,lbar,M_,options_,dr,it_)
 % SPECIAL REQUIREMENTS
 %     none
 
-% Copyright (C) 2003-2010 Dynare Team
+% Copyright (C) 2003-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

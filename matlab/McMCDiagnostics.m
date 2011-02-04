@@ -12,12 +12,11 @@ function McMCDiagnostics(options_, estim_params_, M_)
 %
 % SPECIAL REQUIREMENTS
 %   none
-
+%
 % PARALLEL CONTEXT
 % See the comment in random_walk_metropolis_hastings.m funtion.
 
-
-% Copyright (C) 2005-2008,2010 Dynare Team
+% Copyright (C) 2005-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

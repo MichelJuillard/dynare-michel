@@ -15,7 +15,7 @@ function pdraw = prior_draw(init,uniform)
 % NOTE 1. Input arguments 1 an 2 are only needed for initialization.
 % NOTE 2. A given draw from the joint prior distribution does not satisfy BK conditions a priori.
 
-% Copyright (C) 2006-2009 Dynare Team
+% Copyright (C) 2006-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

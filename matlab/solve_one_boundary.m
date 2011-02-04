@@ -53,7 +53,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
 %   none.
 %  
 
-% Copyright (C) 1996-2009 Dynare Team
+% Copyright (C) 1996-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

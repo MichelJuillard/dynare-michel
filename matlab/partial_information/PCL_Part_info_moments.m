@@ -5,7 +5,7 @@ function  AutoCOR_YRk=PCL_Part_info_moments( H, varobs, dr,ivar)
 % Pearlman, Currie and Levine 1986 solution.
 % 22/10/06 - Version 2 for new Riccati with 4 params instead 5 
 
-% Copyright (C) 2006-2010 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

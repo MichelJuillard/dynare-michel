@@ -1,6 +1,6 @@
 function [McoH, McoJ, McoGP, PcoH, PcoJ, PcoGP, condH, condJ, condGP, eH, eJ, eGP, ind01, ind02, indnoH, indnoJ, ixnoH, ixnoJ] = identification_checks(H,JJ, gp, bayestopt_)
 
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

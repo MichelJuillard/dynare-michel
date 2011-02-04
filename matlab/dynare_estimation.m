@@ -11,7 +11,7 @@ function dynare_estimation(var_list,varargin)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

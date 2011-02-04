@@ -1,6 +1,6 @@
 function forcs = mcforecast3(cL,H,mcValue,shocks,forcs,T,R,mv,mu)
 
-% Copyright (C) 2006 Dynare Team
+% Copyright (C) 2006-2008 Dynare Team
 %
 % This file is part of Dynare.
 %

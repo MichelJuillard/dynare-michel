@@ -13,7 +13,7 @@ function y_=simult(ys, dr)
 %    none
 %  
 
-% Copyright (C) 2001-2007 Dynare Team
+% Copyright (C) 2001-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -1,7 +1,7 @@
 function x=sylvester3a(x0,a,b,c,d)
 % solves iteratively ax+bxc=d
 
-% Copyright (C) 2005-2008 Dynare Team
+% Copyright (C) 2005-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

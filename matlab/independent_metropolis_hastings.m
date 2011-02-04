@@ -18,12 +18,11 @@ function independent_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bou
 %
 % SPECIAL REQUIREMENTS
 %   None.
-
+%
 % PARALLEL CONTEXT
 % See the comment in random_walk_metropolis_hastings.m funtion.
 
-
-% Copyright (C) 2006-2008,2010 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

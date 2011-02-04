@@ -2,7 +2,7 @@ function [pdraws, TAU, GAM, LRE, gp, H, JJ] = dynare_identification(options_iden
 
 % main 
 %
-% Copyright (C) 2010 Dynare Team
+% Copyright (C) 2010-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

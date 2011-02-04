@@ -17,7 +17,7 @@ function [fval,cost_flag,info,PHI,SIGMAu,iXX,prior] = DsgeVarLikelihood(xparam1,
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2006-2008 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

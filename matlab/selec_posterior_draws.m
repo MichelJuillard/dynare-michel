@@ -20,7 +20,7 @@ function SampleAddress = selec_posterior_draws(SampleSize,drsize)
 %   None.
 % 
 
-% Copyright (C) 2006-2008 Dynare Team
+% Copyright (C) 2006-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

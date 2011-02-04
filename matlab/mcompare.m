@@ -10,7 +10,7 @@ function mcompare(s1,s2)
 %               value of the base simulation, the absolute difference is ploted
 %               instead of the relative one.
 
-% Copyright (C) 2001 Dynare Team
+% Copyright (C) 2001-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

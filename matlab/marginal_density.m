@@ -15,7 +15,7 @@ function [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2007 Dynare Team
+% Copyright (C) 2005-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
