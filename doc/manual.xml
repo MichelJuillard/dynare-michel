@@ -238,7 +238,7 @@ mark_as_command dynare
   <para>You have to be aware that adding other directories to your path can potentially create problems, if some of your M-files have the same names than Dynare files. Your files would then override Dynare files, and make Dynare unusable.</para>
   </sect2>
 
-  </sect1>
+</sect1>
 </chapter>
 
 <chapter><title>Dynare invocation</title>
@@ -321,77 +321,79 @@ mark_as_command dynare
   <para><command>dynare</command> will then run the computing tasks by executing <replaceable>FILENAME</replaceable><filename>.m</filename>.</para>
   </refsect1>
 
-  <refsect1><title>Options</title>
+  <refsect1>
+    <title>Options</title>
 
-  <variablelist>
-    <varlistentry>
-      <term><option>noclearall</option></term>
-      <listitem><para>By default, <command>dynare</command> will issue a <command>clear all</command> command to <trademark class="registered">MATLAB</trademark> or Octave, thereby deleting all workspace variables; this options instructs <command>dynare</command> not to clear the workspace</para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>debug</option></term>
-      <listitem><para>Instructs the preprocessor to write some debugging information about the scanning and parsing of the <filename class="extension">.mod</filename> file</para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>notmpterms</option></term>
-      <listitem><para>Instructs the preprocessor to omit temporary terms in the static and dynamic files; this generally decreases performance, but is used for debugging purposes since it makes the static and dynamic files more readable</para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>savemacro</option>[=<replaceable>FILENAME</replaceable>]</term>
-      <listitem><para>Instructs <command>dynare</command> to save the intermediary file which is obtained after macro-processing (see <xref linkend="macrolanguage"/>); the saved output will go in the file specified, or if no file is specified in <replaceable>FILENAME</replaceable><filename>-macroexp.mod</filename></para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>onlymacro</option></term>
-      <listitem><para>Instructs the preprocessor to only perform the macro-processing step, and stop just after. Mainly useful for debugging purposes or for using the macro-processor independently of the rest of Dynare toolbox.</para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>nolinemacro</option></term>
-      <listitem><para>Instructs the macro-preprocessor to omit line numbering information in the intermediary <filename class="extension">.mod</filename> file created after the maco-processing step. Useful in conjunction with <option>savemacro</option> when one wants that to reuse the intermediary <filename class="extension">.mod</filename> file, without having it cluttered by line numbering directives.</para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>warn_uninit</option></term>
-      <listitem><para>Display a warning for each variable or parameter which is not initialized. Initialization should be done through <xref linkend="param_init"/> or <xref linkend="load_params_and_steady_state"/> for parameters, or through <xref linkend="initval"/>, <xref linkend="endval"/> or <xref linkend="load_params_and_steady_state"/> for endogenous and exogenous.</para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>console</option></term>
-      <listitem><para>Activate console mode: Dynare will not use graphical waitbars for long computations. Note that this option is only useful under <trademark class="registered">MATLAB</trademark>, since Octave does not provide graphical waitbar capabilities.</para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>cygwin</option></term>
-      <listitem><para>Tells Dynare that your <trademark class="registered">MATLAB</trademark> is configured for compiling MEX files with Cygwin (see <xref linkend="software-requirements"/>). This option is only available under Windows, and is used in conjunction with <xref linkend="use_dll"/>.</para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>msvc</option></term>
-      <listitem><para>Tells Dynare that your <trademark class="registered">MATLAB</trademark> is configured for compiling MEX files with Microsoft Visual C++ (see <xref linkend="software-requirements"/>). This option is only available under Windows, and is used in conjunction with <xref linkend="use_dll"/>.</para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>parallel</option>[=<replaceable>CLUSTER_NAME</replaceable>]</term>
-      <listitem><para>Tells Dynare to perform computations in parallel. If <replaceable>CLUSTER_NAME</replaceable> is passed, Dynare will use the specified cluster to perform parallel computations. Otherwise, Dynare will use the first cluster specified in the configuration file. See <xref linkend="conffile"/> for more information about the configuration file.</para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>conffile=<replaceable>FILENAME</replaceable></option></term>
-      <listitem><para>Specifies the location of the configuration file if it differs from the default. See <xref linkend="conffile"/> for more information about the configuration file and its default location.</para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>parallel_slave_open_mode</option></term>
-      <listitem><para>Instructs Dynare to leave the connection to the slave node open after computation is complete, closing this connection only when Dynare finishes processing.</para></listitem>
-    </varlistentry>
-    <varlistentry>
-      <term><option>parallel_test</option></term>
-      <listitem><para>Tests the parallel setup specified in the configuration file without executing the .mod file. See <xref linkend="conffile"/> for more information about the configuration file.</para></listitem>
-    </varlistentry>
-  </variablelist>
+    <variablelist>
+      <varlistentry>
+        <term><option>noclearall</option></term>
+        <listitem><para>By default, <command>dynare</command> will issue a <command>clear all</command> command to <trademark class="registered">MATLAB</trademark> or Octave, thereby deleting all workspace variables; this options instructs <command>dynare</command> not to clear the workspace</para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>debug</option></term>
+        <listitem><para>Instructs the preprocessor to write some debugging information about the scanning and parsing of the <filename class="extension">.mod</filename> file</para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>notmpterms</option></term>
+        <listitem><para>Instructs the preprocessor to omit temporary terms in the static and dynamic files; this generally decreases performance, but is used for debugging purposes since it makes the static and dynamic files more readable</para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>savemacro</option>[=<replaceable>FILENAME</replaceable>]</term>
+        <listitem><para>Instructs <command>dynare</command> to save the intermediary file which is obtained after macro-processing (see <xref linkend="macrolanguage"/>); the saved output will go in the file specified, or if no file is specified in <replaceable>FILENAME</replaceable><filename>-macroexp.mod</filename></para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>onlymacro</option></term>
+        <listitem><para>Instructs the preprocessor to only perform the macro-processing step, and stop just after. Mainly useful for debugging purposes or for using the macro-processor independently of the rest of Dynare toolbox.</para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>nolinemacro</option></term>
+        <listitem><para>Instructs the macro-preprocessor to omit line numbering information in the intermediary <filename class="extension">.mod</filename> file created after the maco-processing step. Useful in conjunction with <option>savemacro</option> when one wants that to reuse the intermediary <filename class="extension">.mod</filename> file, without having it cluttered by line numbering directives.</para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>warn_uninit</option></term>
+        <listitem><para>Display a warning for each variable or parameter which is not initialized. Initialization should be done through <xref linkend="param_init"/> or <xref linkend="load_params_and_steady_state"/> for parameters, or through <xref linkend="initval"/>, <xref linkend="endval"/> or <xref linkend="load_params_and_steady_state"/> for endogenous and exogenous.</para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>console</option></term>
+        <listitem><para>Activate console mode: Dynare will not use graphical waitbars for long computations. Note that this option is only useful under <trademark class="registered">MATLAB</trademark>, since Octave does not provide graphical waitbar capabilities.</para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>cygwin</option></term>
+        <listitem><para>Tells Dynare that your <trademark class="registered">MATLAB</trademark> is configured for compiling MEX files with Cygwin (see <xref linkend="software-requirements"/>). This option is only available under Windows, and is used in conjunction with <xref linkend="use_dll"/>.</para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>msvc</option></term>
+        <listitem><para>Tells Dynare that your <trademark class="registered">MATLAB</trademark> is configured for compiling MEX files with Microsoft Visual C++ (see <xref linkend="software-requirements"/>). This option is only available under Windows, and is used in conjunction with <xref linkend="use_dll"/>.</para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>parallel</option>[=<replaceable>CLUSTER_NAME</replaceable>]</term>
+        <listitem><para>Tells Dynare to perform computations in parallel. If <replaceable>CLUSTER_NAME</replaceable> is passed, Dynare will use the specified cluster to perform parallel computations. Otherwise, Dynare will use the first cluster specified in the configuration file. See <xref linkend="conffile"/> for more information about the configuration file.</para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>conffile=<replaceable>FILENAME</replaceable></option></term>
+        <listitem><para>Specifies the location of the configuration file if it differs from the default. See <xref linkend="conffile"/> for more information about the configuration file and its default location.</para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>parallel_slave_open_mode</option></term>
+        <listitem><para>Instructs Dynare to leave the connection to the slave node open after computation is complete, closing this connection only when Dynare finishes processing.</para></listitem>
+      </varlistentry>
+      <varlistentry>
+        <term><option>parallel_test</option></term>
+        <listitem><para>Tests the parallel setup specified in the configuration file without executing the .mod file. See <xref linkend="conffile"/> for more information about the configuration file.</para></listitem>
+      </varlistentry>
+    </variablelist>
 
   </refsect1>
 
-  <refsect1><title>Output</title>
-  <para>
-    Depending on the computing tasks requested in the <filename class="extension">.mod</filename> file, executing command <command>dynare</command> will leave in the workspace variables containing results available for further processing. More details are given under the relevant computing tasks.
-  </para>
+  <refsect1>
+    <title>Output</title>
+    <para>
+      Depending on the computing tasks requested in the <filename class="extension">.mod</filename> file, executing command <command>dynare</command> will leave in the workspace variables containing results available for further processing. More details are given under the relevant computing tasks.
+    </para>
 
-  <para>
-    The <varname>M_</varname>, <varname>oo_</varname> and <varname>options_</varname> structures are also saved in a file called <replaceable>FILENAME</replaceable><filename>_results.mat</filename>.
-  </para>
+    <para>
+      The <varname>M_</varname>, <varname>oo_</varname> and <varname>options_</varname> structures are also saved in a file called <replaceable>FILENAME</replaceable><filename>_results.mat</filename>.
+    </para>
   </refsect1>
 
   <refsect1><title>Examples</title>
@@ -969,7 +971,7 @@ trend_var (growth_factor=gA) A;
 <formalpara><title>Syntax</title>
 <para>
   <programlisting>
-<replaceable>PARAMETER_NAME</replaceable> = <replaceable>EXPRESSION</replaceable> ;
+    <replaceable>PARAMETER_NAME</replaceable> = <replaceable>EXPRESSION</replaceable> ;
   </programlisting>
 </para>
 </formalpara>
@@ -2128,8 +2130,8 @@ steady;
   </refsynopsisdiv>
   
   <refsect1><title>Description</title>
-    <para>The <command>print_bytecode_static_model</command> command print the equations and the Jacobian matrix of the static model stored in the bytecode binary format file. The <command>print_bytecode_dynamic_model</command> command do the same for a dnamic model.
-    </para>
+  <para>The <command>print_bytecode_static_model</command> command print the equations and the Jacobian matrix of the static model stored in the bytecode binary format file. The <command>print_bytecode_dynamic_model</command> command do the same for a dnamic model.
+  </para>
   </refsect1>
 </refentry>
 
@@ -2697,7 +2699,8 @@ steady;
         global workspace with the same name as the endogenous variables. They
         are also available in the <varname>oo_.endo_simul</varname> matrix. The
         series are arranged by row, in declaration order of the variable
-        names</para>
+        names.
+      </para>
     </listitem>
     <listitem>
       <para>
@@ -2803,24 +2806,24 @@ stoch_simul(linear,irf=60) y k;
   </refsect1>
 
   <refsect1><title>Examples</title>
-    <refsect2><title>Simple example</title>
-      <informalexample>
-        <programlisting>
+  <refsect2><title>Simple example</title>
+  <informalexample>
+    <programlisting>
 varobs C y rr;
-        </programlisting>
-      </informalexample>
-    </refsect2>
-    <refsect2><title>In a loop</title>
-      <informalexample>
-        <programlisting>
+    </programlisting>
+  </informalexample>
+  </refsect2>
+  <refsect2><title>In a loop</title>
+  <informalexample>
+    <programlisting>
 varobs
 @#for co in countries
   GDP_@{co}
 @#endfor
 ;
-        </programlisting>
-      </informalexample>
-    </refsect2>
+    </programlisting>
+  </informalexample>
+  </refsect2>
   </refsect1>
 
 </refentry>
@@ -3334,7 +3337,7 @@ end;
       NB:           The          previous           method          of
       declaring  <varname>dsge_prior_weight</varname>  as a  parameter
       and then placing it in 
-<command>estimated_params</command> is now deprecated and will be removed in a future release of Dynare.</para></listitem>
+      <command>estimated_params</command> is now deprecated and will be removed in a future release of Dynare.</para></listitem>
     </varlistentry>
     <varlistentry>
       <term><option>dsge_var</option> = <replaceable>DOUBLE</replaceable></term>
@@ -4490,14 +4493,14 @@ plot_conditional_forecast(periods = 10) e u;
 </chapter>
 
 <chapter id="conffile"><title>The Configuration File</title>
-  <para>The configuration file is used to provide Dynare with information not related to the model (and hence not placed in the model file). At the moment, it is only used when using Dynare to run parallel computations.</para>
+<para>The configuration file is used to provide Dynare with information not related to the model (and hence not placed in the model file). At the moment, it is only used when using Dynare to run parallel computations.</para>
 
-  <para>On Linux and Mac OS X, the default location of the configuration file is <filename>$HOME/.dynare</filename>, while on Windows it is <filename>%APPDATA%\dynare.ini</filename> (typically <filename>C:\Documents and Settings\<replaceable>USERNAME</replaceable>\Application Data\dynare.ini</filename> under Windows XP, or <filename>C:\Users\<replaceable>USERNAME</replaceable>\AppData\dynare.ini</filename> under Windows Vista or Windows 7).</para>
+<para>On Linux and Mac OS X, the default location of the configuration file is <filename>$HOME/.dynare</filename>, while on Windows it is <filename>%APPDATA%\dynare.ini</filename> (typically <filename>C:\Documents and Settings\<replaceable>USERNAME</replaceable>\Application Data\dynare.ini</filename> under Windows XP, or <filename>C:\Users\<replaceable>USERNAME</replaceable>\AppData\dynare.ini</filename> under Windows Vista or Windows 7).</para>
 
-  <para>The parsing of the configuration file is case-sensitive and it should take the following form, with each option/choice pair placed on a newline:</para>
+<para>The parsing of the configuration file is case-sensitive and it should take the following form, with each option/choice pair placed on a newline:</para>
 
-  <informalexample>
-    <programlisting>
+<informalexample>
+  <programlisting>
 [command0]
 option0 = choice0
 option1 = choice1
@@ -4505,17 +4508,17 @@ option1 = choice1
 [command1]
 option0 = choice0
 option1 = choice1
-    </programlisting>
-  </informalexample>
+  </programlisting>
+</informalexample>
 
 <para>The configuration file follows a few conventions (self-explanatory conventions such as <replaceable>USER_NAME</replaceable> have been excluded for concision):
-  <itemizedlist>
-    <listitem><para><replaceable>COMPUTER_NAME</replaceable> indicates the valid name of a server (<foreignphrase>e.g.</foreignphrase> <literal>localhost</literal>, <literal>server.cepremap.org</literal>) or an IP address.</para></listitem>
-    <listitem><para><replaceable>DRIVE_NAME</replaceable> indicates a valid drive name in Windows, without the trailing colon (<foreignphrase>e.g.</foreignphrase> <literal>C</literal>).</para></listitem>
-    <listitem><para><replaceable>PATH</replaceable> indicates a valid path in the underlying operating system (<foreignphrase>e.g.</foreignphrase> <literal>/home/user/dynare/matlab/</literal>).</para></listitem>
-    <listitem><para><replaceable>PATH_AND_FILE</replaceable> indicates a valid path to a file in the underlying operating system (<foreignphrase>e.g.</foreignphrase> <literal>/usr/local/MATLAB/R2010b/bin/matlab</literal>).</para></listitem>
-    <listitem><para><replaceable>BOOLEAN</replaceable> is <literal>true</literal> or <literal>false</literal>.</para></listitem>
-  </itemizedlist>
+<itemizedlist>
+  <listitem><para><replaceable>COMPUTER_NAME</replaceable> indicates the valid name of a server (<foreignphrase>e.g.</foreignphrase> <literal>localhost</literal>, <literal>server.cepremap.org</literal>) or an IP address.</para></listitem>
+  <listitem><para><replaceable>DRIVE_NAME</replaceable> indicates a valid drive name in Windows, without the trailing colon (<foreignphrase>e.g.</foreignphrase> <literal>C</literal>).</para></listitem>
+  <listitem><para><replaceable>PATH</replaceable> indicates a valid path in the underlying operating system (<foreignphrase>e.g.</foreignphrase> <literal>/home/user/dynare/matlab/</literal>).</para></listitem>
+  <listitem><para><replaceable>PATH_AND_FILE</replaceable> indicates a valid path to a file in the underlying operating system (<foreignphrase>e.g.</foreignphrase> <literal>/usr/local/MATLAB/R2010b/bin/matlab</literal>).</para></listitem>
+  <listitem><para><replaceable>BOOLEAN</replaceable> is <literal>true</literal> or <literal>false</literal>.</para></listitem>
+</itemizedlist>
 </para>
 
 <sect1><title>Parallel Configuration</title>
@@ -4540,7 +4543,7 @@ option1 = choice1
   </refsynopsisdiv>
 
   <refsect1><title>Description</title>
-    <para>When working in parallel, <command>[cluster]</command> is required to specify the group of computers that will be used. It is required even if you are only invoking multiple processes on one computer.</para>
+  <para>When working in parallel, <command>[cluster]</command> is required to specify the group of computers that will be used. It is required even if you are only invoking multiple processes on one computer.</para>
   </refsect1>
 
   <refsect1><title>Options</title>
@@ -4556,7 +4559,7 @@ option1 = choice1
   </variablelist>
   </refsect1>
 
- <refsect1><title>Example</title>
+  <refsect1><title>Example</title>
   <informalexample>
     <programlisting>
 [cluster]
@@ -4583,10 +4586,10 @@ Members = n1 n2 n3
       <arg choice="plain"><option>Name</option> = <replaceable>NODE_NAME</replaceable></arg>
       <sbr></sbr>
       <arg choice="plain"><option>CPUnbr</option> =
-         <group choice="plain">
-	    <replaceable>INTEGER</replaceable>
-	    <arg>[<replaceable>INTEGER</replaceable>:<replaceable>INTEGER</replaceable>]</arg>
-	 </group>
+      <group choice="plain">
+        <replaceable>INTEGER</replaceable>
+        <arg>[<replaceable>INTEGER</replaceable>:<replaceable>INTEGER</replaceable>]</arg>
+      </group>
       </arg>
       <sbr></sbr>
       <arg choice="plain"><option>ComputerName</option> = <replaceable>COMPUTER_NAME</replaceable></arg>
@@ -4609,7 +4612,7 @@ Members = n1 n2 n3
   </refsynopsisdiv>
 
   <refsect1><title>Description</title>
-    <para>When working in parallel, <command>[node]</command> is required for every computer that will be used. The options that are required differ, depending on the underlying operating system and whether you are working locally or remotely.</para>
+  <para>When working in parallel, <command>[node]</command> is required for every computer that will be used. The options that are required differ, depending on the underlying operating system and whether you are working locally or remotely.</para>
   </refsect1>
 
   <refsect1><title>Options</title>
@@ -4657,7 +4660,7 @@ Members = n1 n2 n3
   </variablelist>
   </refsect1>
 
-<refsect1><title>Example</title>
+  <refsect1><title>Example</title>
   <informalexample>
     <programlisting>
 [node]
