@@ -35,24 +35,24 @@ function [info] = convertAimCodeToInfo(aimCode)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 switch aimCode
-    case 1
-        info = 0; % no problem encountered
-    case 2
-        info = 102;
-    case 3
-        info = 103;
-    case 35
-        info = 135;
-    case 4
-        info = 104;
-    case 45
-        info = 145;
-    case 5
-        info = 105;
-    case 61
-        info = 161;
-    case 62
-        info = 162;
-    otherwise
-        info = 1;
+  case 1
+    info = 0; % no problem encountered
+  case 2
+    info = 102;
+  case 3
+    info = 103;
+  case 35
+    info = 135;
+  case 4
+    info = 104;
+  case 45
+    info = 145;
+  case 5
+    info = 105;
+  case 61
+    info = 161;
+  case 62
+    info = 162;
+  otherwise
+    info = 1;
 end

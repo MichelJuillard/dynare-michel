@@ -41,6 +41,6 @@ gradient_method = 2;
 
 [lpd,xparams,grad,hessian,itct,fcount,retcodehat] = ...
     csminwel1('minus_logged_prior_density',iparams,H0,[],crit,nit,gradient_method, options_.gradient_epsilon, ... 
-             prior_shape, prior_hyperparameter_1, prior_hyperparameter_2, prior_inf_bound, prior_sup_bound);
+              prior_shape, prior_hyperparameter_1, prior_hyperparameter_2, prior_inf_bound, prior_sup_bound);
 
 lpd = -lpd;

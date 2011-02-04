@@ -108,10 +108,10 @@ if ncx
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.corrx(:,11)];
     if isempty(bayestopt_.name)
         bayestopt_.name = cellstr(char(char(strcat(cellstr(M_.exo_names(estim_params_.corrx(:,1),:)), ...
-            ',' , cellstr(M_.exo_names(estim_params_.corrx(:,2),:))))));
+                                                   ',' , cellstr(M_.exo_names(estim_params_.corrx(:,2),:))))));
     else
         bayestopt_.name = cellstr(char(char(bayestopt_.name), char(strcat(cellstr(M_.exo_names(estim_params_.corrx(:,1),:)), ...
-            ',' , cellstr(M_.exo_names(estim_params_.corrx(:,2),:))))));
+                                                          ',' , cellstr(M_.exo_names(estim_params_.corrx(:,2),:))))));
     end
 end
 if ncn
@@ -130,10 +130,10 @@ if ncn
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.corrn(:,11)];
     if isempty(bayestopt_.name)
         bayestopt_.name = cellstr(char(char(strcat(cellstr(M_.endo_names(estim_params_.corrn(:,1),:)),...
-            ',' ,  cellstr(M_.endo_names(estim_params_.corrn(:,2),:))))));
+                                                   ',' ,  cellstr(M_.endo_names(estim_params_.corrn(:,2),:))))));
     else
         bayestopt_.name = cellstr(char(char(bayestopt_.name), char(strcat(cellstr(M_.endo_names(estim_params_.corrn(:,1),:)),...
-            ',' ,  cellstr(M_.endo_names(estim_params_.corrn(:,2),:))))));
+                                                          ',' ,  cellstr(M_.endo_names(estim_params_.corrn(:,2),:))))));
     end
 end
 if np

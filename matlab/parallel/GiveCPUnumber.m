@@ -37,36 +37,36 @@ Enviroment=-1;
 
 % Determine a specific operating system or software version when necessary
 % for different command (sintax, name, ...).
-  Enviroment=~ispc; %isunix || (~matlab_ver_less_than('7.4') && ismac);
+Enviroment=~ispc; %isunix || (~matlab_ver_less_than('7.4') && ismac);
 
 switch Enviroment
-    case 0          %WINDOWS OPERATING SYSTEM
-        
-        OffSet=27;
+  case 0          %WINDOWS OPERATING SYSTEM
+    
+    OffSet=27;
 
-        SringPosition=strfind(ComputerInformations, 'Processors:');
-        nCPU=ComputerInformations(SringPosition+OffSet);
+    SringPosition=strfind(ComputerInformations, 'Processors:');
+    nCPU=ComputerInformations(SringPosition+OffSet);
 
-        % We check if there are Processors/Cores more than 9.
+    % We check if there are Processors/Cores more than 9.
 
 
-        t0=ComputerInformations(SringPosition+OffSet+1);
-        t1=str2num(t0);
-        t1=isempty(t1);
+    t0=ComputerInformations(SringPosition+OffSet+1);
+    t1=str2num(t0);
+    t1=isempty(t1);
 
-        % if t1 is 0 the machine have more than 9 CPU.
+    % if t1 is 0 the machine have more than 9 CPU.
 
-        if t1==0
-            nCPU=strcat(nCPU,t0);
-        end
+    if t1==0
+        nCPU=strcat(nCPU,t0);
+    end
 
-        nCPU=str2num(nCPU);
+    nCPU=str2num(nCPU);
 
-        return
-    case 1            %LIKE UNIX OPERATING SYSTEM
-        
-        % Da generalizzare a un numero di CPu maggiore di 9!!!
+    return
+  case 1            %LIKE UNIX OPERATING SYSTEM
+    
+    % Da generalizzare a un numero di CPu maggiore di 9!!!
 
-        nCPU=str2num(ComputerInformations(length(ComputerInformations)-1))+1;
+    nCPU=str2num(ComputerInformations(length(ComputerInformations)-1))+1;
 
 end

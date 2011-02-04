@@ -92,7 +92,7 @@ for ii = 1:size(JJ1,2);
     McoJ(ind2(ii),:) = [cosn([JJ1(:,ii),JJ1(:,find([1:1:size(JJ1,2)]~=ii))])];
 end
 for ii = 1:size(gp1,2);
-  McoGP(ind3(ii),:) = [cosn([gp1(:,ii),gp1(:,find([1:1:size(gp1,2)]~=ii))])];
+    McoGP(ind3(ii),:) = [cosn([gp1(:,ii),gp1(:,find([1:1:size(gp1,2)]~=ii))])];
 end
 
 % format long  % some are nearly 1
@@ -106,7 +106,7 @@ if rankH<npar | rankHH<npar | min(1-McoH)<1.e-10
     %   disp(' ')
     if length(ind1)<npar,
         ixno = ixno + 1;
-%         indnoH(ixno) = {find(~ismember([1:npar],ind1))};
+        %         indnoH(ixno) = {find(~ismember([1:npar],ind1))};
         indnoH(ixno,:) = (~ismember([1:npar],ind1));
         %     disp('Not identified params')
         %     disp(bayestopt_.name(indnoH{1}))
@@ -115,12 +115,12 @@ if rankH<npar | rankHH<npar | min(1-McoH)<1.e-10
     e0 = [rankHH+1:length(ind1)];
     for j=1:length(e0),
         ixno = ixno + 1;
-%         indnoH(ixno) = {ind1(find(abs(e1(:,e0(j)))) > 1.e-6 )};
+        %         indnoH(ixno) = {ind1(find(abs(e1(:,e0(j)))) > 1.e-6 )};
         indnoH(ixno,:) = (abs(e1(:,e0(j))) > 1.e-6 )';
         %     disp('Perfectly collinear parameters')
         %     disp(bayestopt_.name(indnoH{ixno}))
         %     disp(' ')
-%         ind01(indnoH{ixno})=0;
+        %         ind01(indnoH{ixno})=0;
     end
 else % rank(H)==length(theta), go to 2
      % 2. check rank of J
@@ -136,7 +136,7 @@ if rankJ<npar | rankJJ<npar | min(1-McoJ)<1.e-10
     %   disp(' ')
     if length(ind2)<npar,
         ixno = ixno + 1;
-%         indnoJ(ixno) = {find(~ismember([1:npar],ind2))};
+        %         indnoJ(ixno) = {find(~ismember([1:npar],ind2))};
         indnoJ(ixno,:) = (~ismember([1:npar],ind2));
     end
     ee0 = [rankJJ+1:length(ind2)];
@@ -145,15 +145,15 @@ if rankJ<npar | rankJJ<npar | min(1-McoJ)<1.e-10
     end
     for j=1:length(ee0),
         ixno = ixno + 1;
-%         indnoJ(ixno) = {ind2( find(abs(ee1(:,ee0(j))) > 1.e-6) )};
+        %         indnoJ(ixno) = {ind2( find(abs(ee1(:,ee0(j))) > 1.e-6) )};
         indnoJ(ixno,:) = (abs(ee1(:,ee0(j))) > 1.e-6)';
         %     disp('Perfectly collinear parameters in moments J')
         %     disp(bayestopt_.name(indnoJ{ixno}))
         %     disp(' ')
-%         ind02(indnoJ{ixno})=0;
+        %         ind02(indnoJ{ixno})=0;
     end
 else  %rank(J)==length(theta) =>
-%         disp('All parameters are identified at theta by the moments included in J')
+      %         disp('All parameters are identified at theta by the moments included in J')
 end
 ixnoJ=ixno;
 

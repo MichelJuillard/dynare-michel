@@ -76,7 +76,7 @@ localVars.varargin=varargin;
 if isnumeric(options_.parallel),
     fout = independent_metropolis_hastings_core(localVars, fblck, nblck, 0);
     record = fout.record;
-% Parallel execution.    
+    % Parallel execution.    
 else
     % global variables for parallel routines
     globalVars = struct('M_',M_, ...

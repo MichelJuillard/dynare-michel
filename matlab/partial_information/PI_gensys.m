@@ -70,41 +70,41 @@ F5=Sinv*U01'*PSI;
 singular=0;
 warning('', '');
 try
-  if rcond(C2) < 1e-8
+    if rcond(C2) < 1e-8
         singular=1;
-  else
-    warning('off','MATLAB:nearlySingularMatrix');
-    warning('off','MATLAB:singularMatrix');
-    UAVinv=inv(C2); % i.e. inv(U02'*a1*V02)
-    [LastWarningTxt LastWarningID]=lastwarn;
-    if any(any(isinf(UAVinv)))==1
-      singular=1;
-    end
-  end
-  if singular == 1 || strcmp('MATLAB:nearlySingularMatrix',LastWarningID) == 1 || ...
-      strcmp('MATLAB:illConditionedMatrix',LastWarningID)==1 || ...
-      strcmp('MATLAB:singularMatrix',LastWarningID)==1 
-    [C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, M1, M2, UAVinv, FL_RANK] = PI_gensys_singularC(C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, 0);
-    V02=[V02 V01*M2];
-    V01=V01*M1;
-  end
-  warning('on','MATLAB:singularMatrix');
-  warning('on','MATLAB:nearlySingularMatrix');
-  if (isinf(UAVinv) | isnan(UAVinv)) 
-    if(options_.useACES==1)
-      disp('ERROR! saving PI_gensys_data_dump');
-      save PI_gensys_data_dump
-      error('PI_gensys: Inversion of poss. zero matrix UAVinv=inv(U02''*a1*V02)!');
     else
-      warning('PI_gensys: Evading inversion of zero matrix UAVinv=inv(U02''*a1*V02)!');
-      eu=[0,0];
-      return;
+        warning('off','MATLAB:nearlySingularMatrix');
+        warning('off','MATLAB:singularMatrix');
+        UAVinv=inv(C2); % i.e. inv(U02'*a1*V02)
+        [LastWarningTxt LastWarningID]=lastwarn;
+        if any(any(isinf(UAVinv)))==1
+            singular=1;
+        end
     end
-  end
+    if singular == 1 || strcmp('MATLAB:nearlySingularMatrix',LastWarningID) == 1 || ...
+                 strcmp('MATLAB:illConditionedMatrix',LastWarningID)==1 || ...
+                 strcmp('MATLAB:singularMatrix',LastWarningID)==1 
+        [C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, M1, M2, UAVinv, FL_RANK] = PI_gensys_singularC(C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, 0);
+        V02=[V02 V01*M2];
+        V01=V01*M1;
+    end
+    warning('on','MATLAB:singularMatrix');
+    warning('on','MATLAB:nearlySingularMatrix');
+    if (isinf(UAVinv) | isnan(UAVinv)) 
+        if(options_.useACES==1)
+            disp('ERROR! saving PI_gensys_data_dump');
+            save PI_gensys_data_dump
+            error('PI_gensys: Inversion of poss. zero matrix UAVinv=inv(U02''*a1*V02)!');
+        else
+            warning('PI_gensys: Evading inversion of zero matrix UAVinv=inv(U02''*a1*V02)!');
+            eu=[0,0];
+            return;
+        end
+    end
 catch
-  [errmsg, errcode]=lasterror;
-  warning(['error callig PI_gensys_singularC: ' errmsg ],'errcode');
-  error('errcode',['error callig PI_gensys_singularC: ' errmsg ]);
+    [errmsg, errcode]=lasterror;
+    warning(['error callig PI_gensys_singularC: ' errmsg ],'errcode');
+    error('errcode',['error callig PI_gensys_singularC: ' errmsg ]);
 end
 %
 % Define TT1, TT2
@@ -149,45 +149,45 @@ G1pi=[Ze11 Ze12 Ze134 Ze134; P1 G11 G12 G13; Ze31 G21 G22 G23; P3 G31 G32 G33];
 impact=[eye(NX,NX); zeros(n+FL_RANK,NX)];
 
 if(options_.ACES_solver==1)
-  if isfield(lq_instruments,'names')
-    num_inst=size(lq_instruments.names,1);
-    if num_inst>0 
-      i_var=lq_instruments.inst_var_indices;
-      N1=UAVinv*U02'*lq_instruments.B1;
-      N3=-FF*N1+Sinv*U01'*lq_instruments.B1;
+    if isfield(lq_instruments,'names')
+        num_inst=size(lq_instruments.names,1);
+        if num_inst>0 
+            i_var=lq_instruments.inst_var_indices;
+            N1=UAVinv*U02'*lq_instruments.B1;
+            N3=-FF*N1+Sinv*U01'*lq_instruments.B1;
+        else
+            error('WARNING: There are no instrumnets for ACES!');
+        end
+        lq_instruments.N1=N1;
+        lq_instruments.N3=N3;
     else
         error('WARNING: There are no instrumnets for ACES!');
     end
-    lq_instruments.N1=N1;
-    lq_instruments.N3=N3;
-  else
-    error('WARNING: There are no instrumnets for ACES!');
-  end
-  E3=V02*[P1 G11 G12 G13];
-  E3= E3+ [zeros(size(V01,1),size(E3,2)-size(V01,2)) V01];
-  E2=-E3;
-  E5=-V02*N1;
-  DD=[zeros(NX,size(N1,2));N1; zeros(FL_RANK,size(N1,2));N3];
-  II=eye(num_inst);
-  GAMMA=[ E3 -E5 %zeros(size(E3,1),num_inst);
-    zeros(num_inst,size(E3,2)), II;
-    ];
-  eu =[1; 1], nmat=[], gev=[];
-  return; % do not check B&K compliancy
+    E3=V02*[P1 G11 G12 G13];
+    E3= E3+ [zeros(size(V01,1),size(E3,2)-size(V01,2)) V01];
+    E2=-E3;
+    E5=-V02*N1;
+    DD=[zeros(NX,size(N1,2));N1; zeros(FL_RANK,size(N1,2));N3];
+    II=eye(num_inst);
+    GAMMA=[ E3 -E5 %zeros(size(E3,1),num_inst);
+            zeros(num_inst,size(E3,2)), II;
+          ];
+    eu =[1; 1], nmat=[], gev=[];
+    return; % do not check B&K compliancy
 end
 
 G0pi=eye(n+FL_RANK+NX);
 try
-  % In Matlab: [aa bb q z v w] = qz(a,b) s.t. qaz = aa, qbz = bb % 
-  % In Octave: [aa bb q z v w] = qz(a,b) s.t. q'az = aa, q'bz=bb %
-  % and qzcomplex() extension based on lapack zgges produces same 
-  % qz output for Octave as Matlab qz() does for Matlab thus:
-  if exist('OCTAVE_VERSION')
-    [a b q z]=qzcomplex(G0pi,G1pi);
-    q=q';
-  else
-    [a b q z]=qz(G0pi,G1pi);
-  end
+    % In Matlab: [aa bb q z v w] = qz(a,b) s.t. qaz = aa, qbz = bb % 
+    % In Octave: [aa bb q z v w] = qz(a,b) s.t. q'az = aa, q'bz=bb %
+    % and qzcomplex() extension based on lapack zgges produces same 
+    % qz output for Octave as Matlab qz() does for Matlab thus:
+    if exist('OCTAVE_VERSION')
+        [a b q z]=qzcomplex(G0pi,G1pi);
+        q=q';
+    else
+        [a b q z]=qz(G0pi,G1pi);
+    end
 catch
     try
         lerror=lasterror;
@@ -196,10 +196,10 @@ catch
             disp '** Unexpected Error PI_Gensys:qz: ** :';
             button=questdlg('Continue Y/N?','Unexpected Error in qz','No','Yes','Yes'); 
             switch button 
-            case 'No' 
+              case 'No' 
                 error ('Terminated')
-            %case 'Yes'
-                    
+                %case 'Yes'
+                
             end
         end
         G1pi=[];impact=[];nmat=[]; gev=[];
@@ -210,9 +210,9 @@ catch
         disp lerror.message;
         button=questdlg('Continue Y/N?','Unexpected Error in qz','No','Yes','Yes'); 
         switch button 
-        case 'No' 
+          case 'No' 
             error ('Terminated') 
-        case 'Yes' 
+          case 'Yes' 
             G1pi=[];impact=[];nmat=[]; gev=[];
             eu=[-2;-2];
             return
@@ -225,44 +225,44 @@ nunstab=0;
 zxz=0;
 nn=size(a,1);
 for i=1:nn
-% ------------------div calc------------
-   if ~fixdiv
-      if abs(a(i,i)) > 0
-         divhat=abs(b(i,i))/abs(a(i,i));
-	 % bug detected by Vasco Curdia and Daria Finocchiaro, 2/25/2004  A root of
-	 % exactly 1.01 and no root between 1 and 1.02, led to div being stuck at 1.01
-	 % and the 1.01 root being misclassified as stable.  Changing < to <= below fixes this.
-         if 1+realsmall<divhat & divhat<=div
-            div=.5*(1+divhat);
-         end
-      end
-   end
-% ----------------------------------------
-   nunstab=nunstab+(abs(b(i,i))>div*abs(a(i,i)));
-   if abs(a(i,i))<realsmall & abs(b(i,i))<realsmall
-      zxz=1;
-   end
+    % ------------------div calc------------
+    if ~fixdiv
+        if abs(a(i,i)) > 0
+            divhat=abs(b(i,i))/abs(a(i,i));
+            % bug detected by Vasco Curdia and Daria Finocchiaro, 2/25/2004  A root of
+            % exactly 1.01 and no root between 1 and 1.02, led to div being stuck at 1.01
+            % and the 1.01 root being misclassified as stable.  Changing < to <= below fixes this.
+            if 1+realsmall<divhat & divhat<=div
+                div=.5*(1+divhat);
+            end
+        end
+    end
+    % ----------------------------------------
+    nunstab=nunstab+(abs(b(i,i))>div*abs(a(i,i)));
+    if abs(a(i,i))<realsmall & abs(b(i,i))<realsmall
+        zxz=1;
+    end
 end
 div ;
 if ~zxz
-   [a b q z]=qzdiv(div,a,b,q,z);
+    [a b q z]=qzdiv(div,a,b,q,z);
 end
 
 gev=[diag(a) diag(b)];
 if zxz
-   disp('Coincident zeros.  Indeterminacy and/or nonexistence.')
-   eu=[-2;-2];
-   % correction added 7/29/2003.  Otherwise the failure to set output
-   % arguments leads to an error message and no output (including eu).
-   nmat=[]; %;gev=[]
-   return
+    disp('Coincident zeros.  Indeterminacy and/or nonexistence.')
+    eu=[-2;-2];
+    % correction added 7/29/2003.  Otherwise the failure to set output
+    % arguments leads to an error message and no output (including eu).
+    nmat=[]; %;gev=[]
+    return
 end
 if (FL_RANK ~= nunstab & options_.ACES_solver~=1)
-   disp(['Number of unstable variables ' num2str(nunstab)]);
-   disp( ['does not match number of expectational equations ' num2str(FL_RANK)]); 
-   nmat=[];% gev=[];
-   eu=[-2;-2];
-   return
+    disp(['Number of unstable variables ' num2str(nunstab)]);
+    disp( ['does not match number of expectational equations ' num2str(FL_RANK)]); 
+    nmat=[];% gev=[];
+    eu=[-2;-2];
+    return
 end
 
 % New Definitions

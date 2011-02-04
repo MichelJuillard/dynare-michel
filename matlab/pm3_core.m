@@ -2,7 +2,7 @@ function myoutput=pm3_core(myinputs,fpar,nvar,whoiam, ThisMatlab)
 
 % PARALLEL CONTEXT
 % Core functionality for pm3.m function, which can be parallelized.
- 
+
 % INPUTS 
 % See the comment in random_walk_metropolis_hastings_core.m funtion.
 
@@ -59,14 +59,14 @@ global options_ M_ oo_
 
 
 if whoiam
-      waitbarString = ['Parallel plots pm3 ...'];
-      if Parallel(ThisMatlab).Local,
+    waitbarString = ['Parallel plots pm3 ...'];
+    if Parallel(ThisMatlab).Local,
         waitbarTitle=['Local '];
-      else
+    else
         waitbarTitle=[Parallel(ThisMatlab).ComputerName];
-      end        
-        fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));   
- end
+    end        
+    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));   
+end
 
 
 
@@ -101,10 +101,10 @@ for i=fpar:nvar
     
     if whoiam,
         if Parallel(ThisMatlab).Local==0
-             DirectoryName = CheckPath('Output');
+            DirectoryName = CheckPath('Output');
         end
     end
- 
+    
     if subplotnum == MaxNumberOfPlotsPerFigure | i == nvar
         eval(['print -depsc2 ' M_.dname '/Output/'  M_.fname '_' name3 '_' deblank(tit3(i,:)) '.eps' ]);
         if ~exist('OCTAVE_VERSION')

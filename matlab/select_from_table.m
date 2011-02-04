@@ -15,10 +15,10 @@ function [indices] = select_from_table(table,key,value)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    candidates = table(strmatch(key,table(:,2),'exact'),:);
-    if nargin == 2
-      indices = cell2mat( candidates(:,1) );
-      return;
-    end
-    indices = candidates(strmatch(value, candidates(:,3), 'exact'),1);
-    indices = cell2mat(indices);
+candidates = table(strmatch(key,table(:,2),'exact'),:);
+if nargin == 2
+    indices = cell2mat( candidates(:,1) );
+    return;
+end
+indices = candidates(strmatch(value, candidates(:,3), 'exact'),1);
+indices = cell2mat(indices);

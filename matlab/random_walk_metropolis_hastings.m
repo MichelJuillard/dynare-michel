@@ -75,7 +75,7 @@ load([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
 %   record.Seeds=TempRecord.Seeds;
 
 
-   
+
 % Snapshot of the current state of computing. It necessary for the parallel
 % execution (i.e. to execute in a corretct way portion of code remotely or
 % on many core). The mandatory variables for local/remote parallel
@@ -108,7 +108,7 @@ if isnumeric(options_.parallel) || (nblck-fblck)==0,
     fout = random_walk_metropolis_hastings_core(localVars, fblck, nblck, 0);
     record = fout.record;
 
-% Parallel in Local or remote machine.   
+    % Parallel in Local or remote machine.   
 else 
     % Global variables for parallel routines.
     globalVars = struct('M_',M_, ...

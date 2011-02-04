@@ -72,17 +72,17 @@ end
 if options_.block && ~options_.bytecode
     z = zeros(M_.endo_nbr,1);
     for i = 1:length(M_.blocksMFS)
-      [r, g, yy, var_indx] = feval([M_.fname '_static'],...
-              i,...
-              oo_.steady_state,...
-              [oo_.exo_steady_state; ...
-               oo_.exo_det_steady_state], M_.params);
-      if isempty(M_.blocksMFS{i})
-          idx = var_indx;
-      else
-          idx = M_.blocksMFS{i};
-      end
-      z(idx) = r;
+        [r, g, yy, var_indx] = feval([M_.fname '_static'],...
+                                     i,...
+                                     oo_.steady_state,...
+                                     [oo_.exo_steady_state; ...
+                            oo_.exo_det_steady_state], M_.params);
+        if isempty(M_.blocksMFS{i})
+            idx = var_indx;
+        else
+            idx = M_.blocksMFS{i};
+        end
+        z(idx) = r;
     end
 elseif options_.bytecode
     [check, z] = bytecode('evaluate','static');

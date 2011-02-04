@@ -85,17 +85,17 @@ for j=fpar:npar,
         for n = 1:NumberOfMcFilesPerBlock
             %load([MhDirectoryName '/' mcfiles(n,1,b).name],'x2');
             load([MhDirectoryName '/' M_.fname '_mh',int2str(n),'_blck' int2str(b) ...
-                '.mat'],'x2');
+                  '.mat'],'x2');
             nx2 = size(x2,1);
             tmp((b-1)*NumberOfDraws+startline+(1:nx2),1) = x2(:,j);
             %      clear x2;
             startline = startline + nx2;
         end
-        % $$$     %load([MhDirectoryName '/' mcfiles(NumberOfMcFilesPerBlock,1,b).name],'x2');
-        % $$$     load([MhDirectoryName '/' M_.fname '_mh',int2str(NumberOfMcFilesPerBlock),'_blck' int2str(b) '.mat'],'x2');
-        % $$$     tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+MAX_nruns*(LastFileNumber-1)+LastLineNumber,1) = x2(:,j);
-        % $$$     clear x2;
-        % $$$     startline = startline + LastLineNumber;
+% $$$     %load([MhDirectoryName '/' mcfiles(NumberOfMcFilesPerBlock,1,b).name],'x2');
+% $$$     load([MhDirectoryName '/' M_.fname '_mh',int2str(NumberOfMcFilesPerBlock),'_blck' int2str(b) '.mat'],'x2');
+% $$$     tmp((b-1)*NumberOfDraws+startline+1:(b-1)*NumberOfDraws+MAX_nruns*(LastFileNumber-1)+LastLineNumber,1) = x2(:,j);
+% $$$     clear x2;
+% $$$     startline = startline + LastLineNumber;
     end
     tmp(:,2) = kron(transpose(1:nblck),ones(NumberOfDraws,1));
     tmp(:,3) = kron(ones(nblck,1),time');

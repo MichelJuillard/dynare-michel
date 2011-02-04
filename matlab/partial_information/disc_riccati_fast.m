@@ -1,4 +1,4 @@
-  function Z=disc_riccati_fast(F,D,R,H,ch)
+function Z=disc_riccati_fast(F,D,R,H,ch)
 % function Z=disc_riccati_fast(F,D,R,H,ch)
 % 
 % Solves discrete Riccati Equation: 
@@ -58,12 +58,12 @@ while matd > tol && count < 100
     Y1=X0'*Y0*INVPY*X0+ Y0; 
     X1=X0*INVPY*X0; 
     matd=sum( sum(abs( P1 - P0 ))); 
-%    P0=(P1+P1')/2
+    %    P0=(P1+P1')/2
     P0=P1; 
     X0=X1;
     Y0=Y1;
     count=count+1;
-%    matd;
+    %    matd;
 end 
 
 Z=(P0+P0')/2;
@@ -72,8 +72,8 @@ Z=(P0+P0')/2;
 if count==100
     matd
     error('Riccati not converged fast enough!');
-%    error.identifier='Riccati not converged!'
-%    error
+    %    error.identifier='Riccati not converged!'
+    %    error
 end
 %if count >5 
 %    disp('Riccati count= ');

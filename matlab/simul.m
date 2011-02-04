@@ -90,7 +90,7 @@ else
         if M_.maximum_endo_lead == 0
             error('SIMUL: purely backward models are not supported')
         elseif M_.maximum_endo_lag == 1 && M_.maximum_endo_lead == 1
-            sim1 ;
+        sim1 ;
         else % For purely forward models
             simk;
         end;

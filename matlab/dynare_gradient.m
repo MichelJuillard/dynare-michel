@@ -57,10 +57,10 @@ for i=1:m
         G(:,i) = (Fh-F)/epsilon;
     else
         [Fh,flag] = feval(fcn, x-transpose(h), varargin{:});
-	if flag
+        if flag
             G(:,i) = (F-Fh)/epsilon;
-	else
+        else
             error('-- Bad gradient --')
-	end
+        end
     end
 end

@@ -97,7 +97,7 @@ if whoiam
     Parallel=myinputs.Parallel;
     % initialize persistent variables in priordens()
     priordens(xparam1,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7, ...
-        bayestopt_.p3,bayestopt_.p4,1);
+              bayestopt_.p3,bayestopt_.p4,1);
 end
 
 % (re)Set the penalty
@@ -138,7 +138,7 @@ for b = fblck:nblck,
     rand('state',record.Seeds(b).Unifor);
     if (options_.load_mh_file~=0)  & (fline(b)>1) & OpenOldFile(b)
         load(['./' MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) ...
-            '_blck' int2str(b) '.mat'])
+              '_blck' int2str(b) '.mat'])
         x2 = [x2;zeros(InitSizeArray(b)-fline(b)+1,npar)];
         logpo2 = [logpo2;zeros(InitSizeArray(b)-fline(b)+1,1)];
         OpenOldFile(b) = 0;

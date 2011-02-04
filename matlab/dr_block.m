@@ -83,9 +83,9 @@ for i = 1:Size;
     ghx = [];
     indexi_0 = 0;
     if (verbose)
-      disp(['Block ' int2str(i)]);
-      disp('-----------');
-      data(i)
+        disp(['Block ' int2str(i)]);
+        disp('-----------');
+        data(i)
     end;
     n_pred = data(i).n_backward;
     n_fwrd = data(i).n_forward;
@@ -116,318 +116,318 @@ for i = 1:Size;
     
 
     switch M_.block_structure.block(i).Simulation_Type
-        case 1
-            %Evaluate Forward
-            if maximum_lag > 0 && n_pred > 0
+      case 1
+        %Evaluate Forward
+        if maximum_lag > 0 && n_pred > 0
+            indx_r = find(M_.block_structure.block(i).lead_lag_incidence(1,:));
+            indx_c = M_.block_structure.block(i).lead_lag_incidence(1,indx_r);
+            data(i).eigval = diag(jacob(indx_r, indx_c));
+            data(i).rank = sum(abs(data(i).eigval) > 0);
+        else
+            data(i).eigval = [];
+            data(i).rank = 0;
+        end
+        dr.eigval = [dr.eigval ; data(i).eigval];
+        %First order approximation
+        if task ~= 1
+            if (maximum_lag > 0)
+                indexi_0 = min(lead_lag_incidence(2,:));
                 indx_r = find(M_.block_structure.block(i).lead_lag_incidence(1,:));
                 indx_c = M_.block_structure.block(i).lead_lag_incidence(1,indx_r);
-                data(i).eigval = diag(jacob(indx_r, indx_c));
-                data(i).rank = sum(abs(data(i).eigval) > 0);
-            else
-                data(i).eigval = [];
-                data(i).rank = 0;
-            end
-            dr.eigval = [dr.eigval ; data(i).eigval];
-            %First order approximation
-            if task ~= 1
-                if (maximum_lag > 0)
-                    indexi_0 = min(lead_lag_incidence(2,:));
-                    indx_r = find(M_.block_structure.block(i).lead_lag_incidence(1,:));
-                    indx_c = M_.block_structure.block(i).lead_lag_incidence(1,indx_r);
-                    ghx = jacob(indx_r, indx_c);
-                end;
-                ghu = data(i).g1_x;
-            end
-        case 2
-            %Evaluate Backward
-            if maximum_lead > 0 && n_fwrd > 0
-                indx_r = find(M_.block_structure.block(i).lead_lag_incidence(2,:));
-                indx_c = M_.block_structure.block(i).lead_lag_incidence(2,indx_r);
-                data(i).eigval = 1./ diag(jacob(indx_r, indx_c));
-                data(i).rank = sum(abs(data(i).eigval) > 0);
-            else
-                data(i).eigval = [];
-                data(i).rank = 0;
-            end
-            dr.rank = dr.rank + data(i).rank;
-            dr.eigval = [dr.eigval ; data(i).eigval];
-        case 3
-            %Solve Forward simple
-            if maximum_lag > 0 && n_pred > 0
-              data(i).eigval = - jacob(1 , 1 : n_pred) / jacob(1 , n_pred + n_static + 1 : n_pred + n_static + n_pred + n_both);
-              data(i).rank = sum(abs(data(i).eigval) > 0);
-            else
-              data(i).eigval = [];
-              data(i).rank = 0;
+                ghx = jacob(indx_r, indx_c);
             end;
-            dr.eigval = [dr.eigval ; data(i).eigval];
-            %First order approximation
-            if task ~= 1
-                if (maximum_lag > 0)
-                    indexi_0 = min(lead_lag_incidence(2,:));
-                    ghx = - jacob(1 , 1 : n_pred) / jacob(1 , n_pred + n_static + 1 : n_pred + n_static + n_pred + n_both);
-                end;
-                ghu = data(i).g1_x;
-            end
-        case 4
-            %Solve Backward simple
-            if maximum_lead > 0 && n_fwrd > 0
-              data(i).eigval = - jacob(1 , n_pred + n - n_fwrd + 1 : n_pred + n) / jacob(1 , n_pred + n + 1 : n_pred + n + n_fwrd) ;
-              data(i).rank = sum(abs(data(i).eigval) > 0);
-            else
-              data(i).eigval = [];
-              data(i).rank = 0;
+            ghu = data(i).g1_x;
+        end
+      case 2
+        %Evaluate Backward
+        if maximum_lead > 0 && n_fwrd > 0
+            indx_r = find(M_.block_structure.block(i).lead_lag_incidence(2,:));
+            indx_c = M_.block_structure.block(i).lead_lag_incidence(2,indx_r);
+            data(i).eigval = 1./ diag(jacob(indx_r, indx_c));
+            data(i).rank = sum(abs(data(i).eigval) > 0);
+        else
+            data(i).eigval = [];
+            data(i).rank = 0;
+        end
+        dr.rank = dr.rank + data(i).rank;
+        dr.eigval = [dr.eigval ; data(i).eigval];
+      case 3
+        %Solve Forward simple
+        if maximum_lag > 0 && n_pred > 0
+            data(i).eigval = - jacob(1 , 1 : n_pred) / jacob(1 , n_pred + n_static + 1 : n_pred + n_static + n_pred + n_both);
+            data(i).rank = sum(abs(data(i).eigval) > 0);
+        else
+            data(i).eigval = [];
+            data(i).rank = 0;
+        end;
+        dr.eigval = [dr.eigval ; data(i).eigval];
+        %First order approximation
+        if task ~= 1
+            if (maximum_lag > 0)
+                indexi_0 = min(lead_lag_incidence(2,:));
+                ghx = - jacob(1 , 1 : n_pred) / jacob(1 , n_pred + n_static + 1 : n_pred + n_static + n_pred + n_both);
             end;
-            dr.rank = dr.rank + data(i).rank;
-            dr.eigval = [dr.eigval ; data(i).eigval];
-        case 5
-            %Solve Forward complete
-            if maximum_lag > 0 && n_pred > 0
-              data(i).eigval = eig(- jacob(: , 1 : n_pred) / ...
-                                     jacob(: , (n_pred + n_static + 1 : n_pred + n_static + n_pred )));
-              data(i).rank = sum(abs(data(i).eigval) > 0);
-            else
-              data(i).eigval = [];
-              data(i).rank = 0;
-            end;
-            dr.eigval = [dr.eigval ; data(i).eigval];
-        case 6
-            %Solve Backward complete
-            if maximum_lead > 0 && n_fwrd > 0
-              data(i).eigval = eig(- jacob(: , n_pred + n - n_fwrd + 1: n_pred + n))/ ...
-                                     jacob(: , n_pred + n + 1 : n_pred + n + n_fwrd);
-              data(i).rank = sum(abs(data(i).eigval) > 0);
-            else
-              data(i).eigval = [];
-              data(i).rank = 0;
-            end;
-            dr.rank = dr.rank + data(i).rank;
-            dr.eigval = [dr.eigval ; data(i).eigval];
-        case 8
-            %The lead_lag_incidence contains columns in the following order :
-            %  static variables, backward variable, mixed variables and forward variables
-            %  
-            %Procedes to a QR decomposition on the jacobian matrix to reduce the problem size
-            index_c = lead_lag_incidence(2,:);             % Index of all endogenous variables present at time=t
-            index_s = lead_lag_incidence(2,1:n_static);    % Index of all static endogenous variables present at time=t
-            if n_static > 0
-                [Q, R] = qr(jacob(:,index_s));
-                aa = Q'*jacob;
-            else
-                aa = jacob;
-            end;
-            indexi_0 = min(lead_lag_incidence(2,:));
-            index_0m = (n_static+1:n_static+n_pred) + indexi_0 - 1;
-            index_0p = (n_static+n_pred+1:n) + indexi_0 - 1;
-            index_m = 1:(n_pred+n_both);
-            indexi_p = max(lead_lag_incidence(2,:))+1;
-            index_p = indexi_p:size(jacob, 2);
-            nyf = n_fwrd + n_both;
+            ghu = data(i).g1_x;
+        end
+      case 4
+        %Solve Backward simple
+        if maximum_lead > 0 && n_fwrd > 0
+            data(i).eigval = - jacob(1 , n_pred + n - n_fwrd + 1 : n_pred + n) / jacob(1 , n_pred + n + 1 : n_pred + n + n_fwrd) ;
+            data(i).rank = sum(abs(data(i).eigval) > 0);
+        else
+            data(i).eigval = [];
+            data(i).rank = 0;
+        end;
+        dr.rank = dr.rank + data(i).rank;
+        dr.eigval = [dr.eigval ; data(i).eigval];
+      case 5
+        %Solve Forward complete
+        if maximum_lag > 0 && n_pred > 0
+            data(i).eigval = eig(- jacob(: , 1 : n_pred) / ...
+                                 jacob(: , (n_pred + n_static + 1 : n_pred + n_static + n_pred )));
+            data(i).rank = sum(abs(data(i).eigval) > 0);
+        else
+            data(i).eigval = [];
+            data(i).rank = 0;
+        end;
+        dr.eigval = [dr.eigval ; data(i).eigval];
+      case 6
+        %Solve Backward complete
+        if maximum_lead > 0 && n_fwrd > 0
+            data(i).eigval = eig(- jacob(: , n_pred + n - n_fwrd + 1: n_pred + n))/ ...
+                jacob(: , n_pred + n + 1 : n_pred + n + n_fwrd);
+            data(i).rank = sum(abs(data(i).eigval) > 0);
+        else
+            data(i).eigval = [];
+            data(i).rank = 0;
+        end;
+        dr.rank = dr.rank + data(i).rank;
+        dr.eigval = [dr.eigval ; data(i).eigval];
+      case 8
+        %The lead_lag_incidence contains columns in the following order :
+        %  static variables, backward variable, mixed variables and forward variables
+        %  
+        %Procedes to a QR decomposition on the jacobian matrix to reduce the problem size
+        index_c = lead_lag_incidence(2,:);             % Index of all endogenous variables present at time=t
+        index_s = lead_lag_incidence(2,1:n_static);    % Index of all static endogenous variables present at time=t
+        if n_static > 0
+            [Q, R] = qr(jacob(:,index_s));
+            aa = Q'*jacob;
+        else
+            aa = jacob;
+        end;
+        indexi_0 = min(lead_lag_incidence(2,:));
+        index_0m = (n_static+1:n_static+n_pred) + indexi_0 - 1;
+        index_0p = (n_static+n_pred+1:n) + indexi_0 - 1;
+        index_m = 1:(n_pred+n_both);
+        indexi_p = max(lead_lag_incidence(2,:))+1;
+        index_p = indexi_p:size(jacob, 2);
+        nyf = n_fwrd + n_both;
 
-            A = aa(:,index_m);  % Jacobain matrix for lagged endogeneous variables
-            B = aa(:,index_c);  % Jacobian matrix for contemporaneous endogeneous variables
-            C = aa(:,index_p);  % Jacobain matrix for led endogeneous variables
+        A = aa(:,index_m);  % Jacobain matrix for lagged endogeneous variables
+        B = aa(:,index_c);  % Jacobian matrix for contemporaneous endogeneous variables
+        C = aa(:,index_p);  % Jacobain matrix for led endogeneous variables
 
-            row_indx = n_static+1:n;
-            
-            D = [[aa(row_indx,index_0m) zeros(n_dynamic,n_both) aa(row_indx,index_p)] ; [zeros(n_both, n_pred) eye(n_both) zeros(n_both, n_both + n_fwrd)]];
-            E = [-aa(row_indx,[index_m index_0p])  ; [zeros(n_both, n_both + n_pred) eye(n_both, n_both + n_fwrd) ] ];
+        row_indx = n_static+1:n;
+        
+        D = [[aa(row_indx,index_0m) zeros(n_dynamic,n_both) aa(row_indx,index_p)] ; [zeros(n_both, n_pred) eye(n_both) zeros(n_both, n_both + n_fwrd)]];
+        E = [-aa(row_indx,[index_m index_0p])  ; [zeros(n_both, n_both + n_pred) eye(n_both, n_both + n_fwrd) ] ];
 
-            [err, ss, tt, w, sdim, data(i).eigval, info1] = mjdgges(E,D,options_.qz_criterium);
-            if (verbose)
-              disp('eigval');
-              disp(data(i).eigval);
-            end;
-            if info1
-              info(1) = 2;
-              info(2) = info1;
-              return
+        [err, ss, tt, w, sdim, data(i).eigval, info1] = mjdgges(E,D,options_.qz_criterium);
+        if (verbose)
+            disp('eigval');
+            disp(data(i).eigval);
+        end;
+        if info1
+            info(1) = 2;
+            info(2) = info1;
+            return
+        end
+        %sdim
+        nba = nd-sdim;
+        if task == 1
+            data(i).rank = rank(w(nd-nyf+1:end,nd-nyf+1:end));
+            dr.rank = dr.rank + data(i).rank;
+            if ~exist('OCTAVE_VERSION','builtin')
+                data(i).eigval = eig(E,D);
             end
-            %sdim
-            nba = nd-sdim;
-            if task == 1
-              data(i).rank = rank(w(nd-nyf+1:end,nd-nyf+1:end));
-              dr.rank = dr.rank + data(i).rank;
-              if ~exist('OCTAVE_VERSION','builtin')
-                  data(i).eigval = eig(E,D);
-              end
-			  dr.eigval = [dr.eigval ; data(i).eigval];
-            end
-            if (verbose)
-                disp(['sum eigval > 1 = ' int2str(sum(abs(data(i).eigval) > 1.)) ' nyf=' int2str(nyf) ' and dr.rank=' int2str(data(i).rank)]);
-                disp(['data(' int2str(i) ').eigval']);
-                disp(data(i).eigval);
-            end;
-            
-            %First order approximation
-            if task ~= 1
-                if nba ~= nyf
-                    sorted_roots = sort(abs(dr.eigval));
-                    if isfield(options_,'indeterminacy_continuity')
-                        if options_.indeterminacy_msv == 1
-                            [ss,tt,w,q] = qz(e',d');
-                            [ss,tt,w,q] = reorder(ss,tt,w,q);
-                            ss = ss';
-                            tt = tt';
-                            w  = w';
-                            nba = nyf;
-                        end
-                    else
-                        if nba > nyf
-                            temp = sorted_roots(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
-                            info(1) = 3;
-                        elseif nba < nyf;
-                            temp = sorted_roots(nd-nyf+1:nd-nba)-1-options_.qz_criterium;
-                            info(1) = 4;
-                        end
-                        info(2) = temp'*temp;
-                        return
+            dr.eigval = [dr.eigval ; data(i).eigval];
+        end
+        if (verbose)
+            disp(['sum eigval > 1 = ' int2str(sum(abs(data(i).eigval) > 1.)) ' nyf=' int2str(nyf) ' and dr.rank=' int2str(data(i).rank)]);
+            disp(['data(' int2str(i) ').eigval']);
+            disp(data(i).eigval);
+        end;
+        
+        %First order approximation
+        if task ~= 1
+            if nba ~= nyf
+                sorted_roots = sort(abs(dr.eigval));
+                if isfield(options_,'indeterminacy_continuity')
+                    if options_.indeterminacy_msv == 1
+                        [ss,tt,w,q] = qz(e',d');
+                        [ss,tt,w,q] = reorder(ss,tt,w,q);
+                        ss = ss';
+                        tt = tt';
+                        w  = w';
+                        nba = nyf;
                     end
-                end
-                indx_stable_root = 1: (nd - nyf);    %=> index of stable roots
-                indx_explosive_root = n_pred + 1:nd;  %=> index of explosive roots
-
-                % derivatives with respect to dynamic state variables
-                % forward variables
-                Z = w';
-                Z11t = Z(indx_stable_root,    indx_stable_root)';
-                Z21  = Z(indx_explosive_root, indx_stable_root);
-                Z22  = Z(indx_explosive_root, indx_explosive_root);
-                
-                if ~isfloat(Z21) && (condest(Z21) > 1e9)
-                    % condest() fails on a scalar under Octave
-                    info(1) = 5;
-                    info(2) = condest(Z21);
-                    return;
                 else
-                    gx = -inv(Z22) * Z21;
+                    if nba > nyf
+                        temp = sorted_roots(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
+                        info(1) = 3;
+                    elseif nba < nyf;
+                        temp = sorted_roots(nd-nyf+1:nd-nba)-1-options_.qz_criterium;
+                        info(1) = 4;
+                    end
+                    info(2) = temp'*temp;
+                    return
                 end
-                % predetermined variables
-                hx =  Z11t * inv(tt(indx_stable_root, indx_stable_root)) * ss(indx_stable_root, indx_stable_root) * inv(Z11t);
-                
-                k1 = 1:(n_pred+n_both);
-                k2 = 1:(n_fwrd+n_both);
+            end
+            indx_stable_root = 1: (nd - nyf);    %=> index of stable roots
+            indx_explosive_root = n_pred + 1:nd;  %=> index of explosive roots
 
-                ghx = [hx(k1,:); gx(k2(n_both+1:end),:)];
+            % derivatives with respect to dynamic state variables
+            % forward variables
+            Z = w';
+            Z11t = Z(indx_stable_root,    indx_stable_root)';
+            Z21  = Z(indx_explosive_root, indx_stable_root);
+            Z22  = Z(indx_explosive_root, indx_explosive_root);
+            
+            if ~isfloat(Z21) && (condest(Z21) > 1e9)
+                % condest() fails on a scalar under Octave
+                info(1) = 5;
+                info(2) = condest(Z21);
+                return;
+            else
+                gx = -inv(Z22) * Z21;
+            end
+            % predetermined variables
+            hx =  Z11t * inv(tt(indx_stable_root, indx_stable_root)) * ss(indx_stable_root, indx_stable_root) * inv(Z11t);
+            
+            k1 = 1:(n_pred+n_both);
+            k2 = 1:(n_fwrd+n_both);
+
+            ghx = [hx(k1,:); gx(k2(n_both+1:end),:)];
+            
+            if (verbose)
+                disp('ghx');
+                disp(ghx);
+            end;
+            
+            %lead variables actually present in the model
+            
+            j4 = n_static+n_pred+1:n_static+n_pred+n_both+n_fwrd;
+            j3 = nonzeros(lead_lag_incidence(2,j4)) - n_static - 2 * n_pred - n_both;
+            j4 = find(lead_lag_incidence(2,j4));
+            if (verbose)
+                disp('j3');
+                disp(j3);
+                disp('j4');
+                disp(j4);
+            end;
+
+            % derivatives with respect to exogenous variables
+            if exo_nbr
+                if n_static > 0
+                    fu = Q' * data(i).g1_x;
+                else
+                    fu = data(i).g1_x;
+                end;
                 
+                B_static = [];
+                if n_static > 0
+                    B_static = B(:,1:n_static);  % submatrix containing the derivatives w.r. to static variables
+                end
+                B_pred = B(:,n_static+1:n_static+n_pred);
+                B_fyd = B(:,n_static+n_pred+1:end);
+
+                ghu = -[B_static C(:,j3)*gx(j4,1:n_pred)+B_pred B_fyd]\fu;
+                if (verbose)
+                    disp('ghu');
+                    disp(ghu);
+                end;
+            else
+                ghu = [];
+            end
+
+            % static variables
+            if n_static > 0
+                temp = - C(1:n_static,j3)*gx(j4,:)*hx;
+                if (verbose)
+                    disp('temp');
+                    disp(temp);
+                end;
+                j5 = index_m;
+                if (verbose)
+                    disp('j5');
+                    disp(j5);
+                end;
+                b = aa(:,index_c);
+                b10 = b(1:n_static, 1:n_static);
+                b11 = b(1:n_static, n_static+1:n);
+                if (verbose)
+                    disp('b10');
+                    disp(b10);
+                    disp('b11');
+                    disp(b11);
+                end;
+                temp(:,j5) = temp(:,j5)-A(1:n_static,:);
+                if (verbose)
+                    disp('temp');
+                    disp(temp);
+                end;
+                disp(temp-b11*ghx);
+                temp = b10\(temp-b11*ghx);
+                if (verbose)
+                    disp('temp');
+                    disp(temp);
+                end;
+                ghx = [temp; ghx];
+                temp = [];
                 if (verbose)
                     disp('ghx');
                     disp(ghx);
                 end;
-                
-                %lead variables actually present in the model
-                
-                j4 = n_static+n_pred+1:n_static+n_pred+n_both+n_fwrd;
-                j3 = nonzeros(lead_lag_incidence(2,j4)) - n_static - 2 * n_pred - n_both;
-                j4 = find(lead_lag_incidence(2,j4));
-                if (verbose)
-                    disp('j3');
-                    disp(j3);
-                    disp('j4');
-                    disp(j4);
-                end;
-
-                % derivatives with respect to exogenous variables
-                if exo_nbr
-                    if n_static > 0
-                        fu = Q' * data(i).g1_x;
-                    else
-                        fu = data(i).g1_x;
-                    end;
-                    
-                    B_static = [];
-                    if n_static > 0
-                        B_static = B(:,1:n_static);  % submatrix containing the derivatives w.r. to static variables
-                    end
-                    B_pred = B(:,n_static+1:n_static+n_pred);
-                    B_fyd = B(:,n_static+n_pred+1:end);
-
-                    ghu = -[B_static C(:,j3)*gx(j4,1:n_pred)+B_pred B_fyd]\fu;
-                    if (verbose)
-                        disp('ghu');
-                        disp(ghu);
-                    end;
-                else
-                    ghu = [];
-                end
-
-                % static variables
-                if n_static > 0
-                    temp = - C(1:n_static,j3)*gx(j4,:)*hx;
-                    if (verbose)
-                        disp('temp');
-                        disp(temp);
-                    end;
-                    j5 = index_m;
-                    if (verbose)
-                        disp('j5');
-                        disp(j5);
-                    end;
-                    b = aa(:,index_c);
-                    b10 = b(1:n_static, 1:n_static);
-                    b11 = b(1:n_static, n_static+1:n);
-                    if (verbose)
-                        disp('b10');
-                        disp(b10);
-                        disp('b11');
-                        disp(b11);
-                    end;
-                    temp(:,j5) = temp(:,j5)-A(1:n_static,:);
-                    if (verbose)
-                        disp('temp');
-                        disp(temp);
-                    end;
-                    disp(temp-b11*ghx);
-                    temp = b10\(temp-b11*ghx);
-                    if (verbose)
-                        disp('temp');
-                        disp(temp);
-                    end;
-                    ghx = [temp; ghx];
-                    temp = [];
-                    if (verbose)
-                        disp('ghx');
-                        disp(ghx);
-                    end;
-                end
-            
-                if options_.loglinear == 1
-                    k = find(dr.kstate(:,2) <= M_.maximum_endo_lag+1);
-                    klag = dr.kstate(k,[1 2]);
-                    k1 = dr.order_var;
-                
-                    ghx = repmat(1./dr.ys(k1),1,size(ghx,2)).*ghx.* ...
-                             repmat(dr.ys(k1(klag(:,1)))',size(ghx,1),1);
-                    ghu = repmat(1./dr.ys(k1),1,size(ghu,2)).*ghu;
-                end
-
-                if options_.aim_solver ~= 1 && options_.use_qzdiv
-                    % Necessary when using Sims' routines for QZ
-                    gx = real(gx);
-                    hx = real(hx);
-                    ghx = real(ghx);
-                    ghu = real(ghu);
-                end
-                ghx
-                %exogenous deterministic variables
-                if exo_det_nbr > 0
-                    f1 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+2:end,order_var))));
-                    f0 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+1,order_var))));
-                    fudet = data(i).g1_xd;
-                    M1 = inv(f0+[zeros(n,n_static) f1*gx zeros(n,nyf-n_both)]);
-                    M2 = M1*f1;
-                    dr.ghud = cell(M_.exo_det_length,1);
-                    dr.ghud{1} = -M1*fudet;
-                    for i = 2:M_.exo_det_length
-                        dr.ghud{i} = -M2*dr.ghud{i-1}(end-nyf+1:end,:);
-                    end
-                end
-                
-                 
-                %Endogeneous variables of the previous blocks
-                
-                
             end
+            
+            if options_.loglinear == 1
+                k = find(dr.kstate(:,2) <= M_.maximum_endo_lag+1);
+                klag = dr.kstate(k,[1 2]);
+                k1 = dr.order_var;
+                
+                ghx = repmat(1./dr.ys(k1),1,size(ghx,2)).*ghx.* ...
+                      repmat(dr.ys(k1(klag(:,1)))',size(ghx,1),1);
+                ghu = repmat(1./dr.ys(k1),1,size(ghu,2)).*ghu;
+            end
+
+            if options_.aim_solver ~= 1 && options_.use_qzdiv
+                % Necessary when using Sims' routines for QZ
+                gx = real(gx);
+                hx = real(hx);
+                ghx = real(ghx);
+                ghu = real(ghu);
+            end
+            ghx
+            %exogenous deterministic variables
+            if exo_det_nbr > 0
+                f1 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+2:end,order_var))));
+                f0 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+1,order_var))));
+                fudet = data(i).g1_xd;
+                M1 = inv(f0+[zeros(n,n_static) f1*gx zeros(n,nyf-n_both)]);
+                M2 = M1*f1;
+                dr.ghud = cell(M_.exo_det_length,1);
+                dr.ghud{1} = -M1*fudet;
+                for i = 2:M_.exo_det_length
+                    dr.ghud{i} = -M2*dr.ghud{i-1}(end-nyf+1:end,:);
+                end
+            end
+            
+            
+            %Endogeneous variables of the previous blocks
+            
+            
+        end
     end;
     if task ~=1
         if (maximum_lag > 0)
@@ -462,5 +462,5 @@ if (verbose)
     dr.ghu
 end;
 if (task == 1)
-	return;
+    return;
 end;

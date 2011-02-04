@@ -1,4 +1,4 @@
-  function X=disclyap_fast(G,V,ch)
+function X=disclyap_fast(G,V,ch)
 % function X=disclyap_fast(G,V,ch)
 % 
 % Solve the discrete Lyapunov Equation 

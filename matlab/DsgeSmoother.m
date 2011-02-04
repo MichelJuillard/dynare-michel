@@ -166,7 +166,7 @@ if kalman_algo == 1 || kalman_algo == 3
         end
     end
 end
-        
+
 if kalman_algo == 2 || kalman_algo == 4
     if estim_params_.ncn
         ST = [ zeros(nobs,nobs) Z; zeros(np,nobs) T];
@@ -180,7 +180,7 @@ if kalman_algo == 2 || kalman_algo == 4
         
     end
     [alphahat,epsilonhat,etahat,ahat,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmootherH3_Z(ST, ...
-                                                          Z,R1,Q,diag(H),Pinf,Pstar,data1,nobs,np,smpl,data_index);
+                                                      Z,R1,Q,diag(H),Pinf,Pstar,data1,nobs,np,smpl,data_index);
 end
 
 if kalman_algo == 3 || kalman_algo == 4
@@ -218,7 +218,7 @@ if estim_params_.ncn && (kalman_algo == 2 || kalman_algo == 4)
         P = P(k,k,:);
     end
 end
-    
+
 % $$$ if any(any(H ~= 0))   % should be replaced by a flag
 % $$$     if kalman_algo == 1
 % $$$         [alphahat,epsilonhat,etahat,ahat,P,aK,PK,decomp] = ...

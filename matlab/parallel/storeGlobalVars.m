@@ -6,7 +6,7 @@ function storeGlobalVars(fname,append)
 % INPUTS
 % fname  [str]         name of the file
 %
-% append []			   flag to append globals to the storage file
+% append []                        flag to append globals to the storage file
 %
 % OUTPUTS
 % None

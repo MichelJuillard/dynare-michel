@@ -43,4 +43,4 @@ for i=1:length(args)
     end
 end
 d=(func(pargs{:})...
-  -func(margs{:}))/(2*h);
+   -func(margs{:}))/(2*h);

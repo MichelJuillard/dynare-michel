@@ -184,10 +184,10 @@ while fpar<npar
         while explosive_var
             % draw from the marginal posterior of SIGMA
             SIGMAu_draw = rand_inverse_wishart(nvobs, DSGE_PRIOR_WEIGHT-NumberOfParametersPerEquation, ...
-                SIGMA_inv_upper_chol);
+                                               SIGMA_inv_upper_chol);
             % draw from the conditional posterior of PHI
             PHI_draw = rand_matrix_normal(NumberOfParametersPerEquation,nvobs, PHI, ...
-                chol(SIGMAu_draw)', chol(iXX)');
+                                          chol(SIGMAu_draw)', chol(iXX)');
             Companion_matrix(1:nvobs,:) = transpose(PHI_draw(1:NumberOfLagsTimesNvobs,:));
             % Check for stationarity
             explosive_var = any(abs(eig(Companion_matrix))>1.000000001);
@@ -222,7 +222,7 @@ while fpar<npar
         else
             stock_irf_bvardsge(:,:,:,IRUN) = reshape(tmp_dsgevar,options_.irf,nvobs,M_.exo_nbr);
             instr = [MhDirectoryName '/' M_.fname '_irf_bvardsge' ...
-                int2str(NumberOfIRFfiles_dsgevar) '.mat stock_irf_bvardsge;'];,
+                     int2str(NumberOfIRFfiles_dsgevar) '.mat stock_irf_bvardsge;'];,
             eval(['save ' instr]);
             if RemoteFlag==1,
                 OutputFileName_bvardsge = [OutputFileName_bvardsge; {[MhDirectoryName filesep], [M_.fname '_irf_bvardsge' int2str(NumberOfIRFfiles_dsgevar) '.mat']}];
@@ -238,7 +238,7 @@ while fpar<npar
             if MAX_nirfs_dsgevar & (fpar == npar | IRUN == npar)
                 stock_irf_bvardsge = stock_irf_bvardsge(:,:,:,1:IRUN);
                 instr = [MhDirectoryName '/' M_.fname '_irf_bvardsge' ...
-                    int2str(NumberOfIRFfiles_dsgevar) '.mat stock_irf_bvardsge;'];,
+                         int2str(NumberOfIRFfiles_dsgevar) '.mat stock_irf_bvardsge;'];,
                 eval(['save ' instr]);
                 NumberOfIRFfiles_dsgevar = NumberOfIRFfiles_dsgevar+1;
                 if RemoteFlag==1,
@@ -299,8 +299,8 @@ end
 % directory on call machine that contain the model).
 
 myoutput.OutputFileName = [OutputFileName_dsge;
-    OutputFileName_param;
-    OutputFileName_bvardsge];
+                    OutputFileName_param;
+                    OutputFileName_bvardsge];
 
 
 

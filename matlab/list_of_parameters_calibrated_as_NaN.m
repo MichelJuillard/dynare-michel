@@ -29,9 +29,9 @@ function list = list_of_parameters_calibrated_as_NaN(M_)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    idx  = find(isnan(M_.params));
-    nnn  = length(idx);
-    list = [];
-    if nnn
-        list = M_.param_names(idx,:);
-    end
+idx  = find(isnan(M_.params));
+nnn  = length(idx);
+list = [];
+if nnn
+    list = M_.param_names(idx,:);
+end

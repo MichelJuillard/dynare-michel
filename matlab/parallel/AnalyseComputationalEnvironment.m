@@ -104,7 +104,7 @@ Environment=~ispc; %isunix || (~matlab_ver_less_than('7.4') && ismac);
 
 
 for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
-    % and use AnalyseComputationalEnvironment with differents input!
+                             % and use AnalyseComputationalEnvironment with differents input!
     
     disp(' ');
     disp(' ');
@@ -146,7 +146,7 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
     % We run the parallel code on local computer, so the others fields are automatically
     % fixed by Dynare parser. Then the user can also fill them with wrong values.
     
-        
+    
     %         %%%%%%%%%%  Cluster Computing   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     %         Here we can have many computer with multi-core, or multi-processor avaiable on the
     %         network and involved in parallel computing.
@@ -215,7 +215,7 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
                 disp(' ');
                 disp(' ');
                 ErrorCode=4;
-%                 return
+                %                 return
             else
                 disp('Check on Password Variable ..... Ok!');
                 disp(' ');
@@ -275,7 +275,7 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
                 disp(' ');
                 disp(' ');
                 ErrorCode=5;
-%                 return
+                %                 return
             end
             
             si2=[];

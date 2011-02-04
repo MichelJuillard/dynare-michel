@@ -97,12 +97,12 @@ title = 'Model Comparison';
 headers = char('Model',ShortModelNames{:});
 if prior_flag
     labels = char('Priors','Log Marginal Density','Bayes Ratio', ...
-                     'Posterior Model Probability');
+                  'Posterior Model Probability');
     values = [ModelPriors';MarginalLogDensity';exp(lmpd-lmpd(1))'; ...
               elmpd'/sum(elmpd)];
 else
     labels = char('Priors','Log Marginal Density','Bayes Ratio','Posterior Odds Ratio', ...
-                     'Posterior Model Probability');
+                  'Posterior Model Probability');
     values = [ModelPriors';MarginalLogDensity'; exp(MarginalLogDensity-MarginalLogDensity(1))'; ...
               exp(lmpd-lmpd(1))'; elmpd'/sum(elmpd)];
 end

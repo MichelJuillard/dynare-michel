@@ -85,18 +85,18 @@ end
 if options_.nocorr == 0 && size(stationary_vars, 1) > 0
     corr = oo_.gamma_y{1}(i1,i1)./(sd(i1)*sd(i1)');
     if ~options_.noprint,
-    disp(' ')
-    title='MATRIX OF CORRELATIONS';
-    if options_.hp_filter
-        title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];
+        disp(' ')
+        title='MATRIX OF CORRELATIONS';
+        if options_.hp_filter
+            title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];
+        end
+        labels = deblank(M_.endo_names(ivar(i1),:));
+        headers = char('Variables',labels);
+        lh = size(labels,2)+2;
+        dyntable(title,headers,labels,corr,lh,8,4);
     end
-    labels = deblank(M_.endo_names(ivar(i1),:));
-    headers = char('Variables',labels);
-    lh = size(labels,2)+2;
-    dyntable(title,headers,labels,corr,lh,8,4);
-    end
-  end
-    if options_.ar > 0 && size(stationary_vars, 1) > 0
+end
+if options_.ar > 0 && size(stationary_vars, 1) > 0
     z=[];
     for i=1:options_.ar
         oo_.autocorr{i} = oo_.gamma_y{i+1};
@@ -104,13 +104,13 @@ if options_.nocorr == 0 && size(stationary_vars, 1) > 0
     end
     if ~options_.noprint,      
         disp(' ')    
-      title='COEFFICIENTS OF AUTOCORRELATION';      
-      if options_.hp_filter        
-          title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];      
-      end      
-      labels = deblank(M_.endo_names(ivar(i1),:));      
-      headers = char('Order ',int2str([1:options_.ar]'));
-      lh = size(labels,2)+2;
-      dyntable(title,headers,labels,z,lh,8,4);
-  end  
+        title='COEFFICIENTS OF AUTOCORRELATION';      
+        if options_.hp_filter        
+            title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];      
+        end      
+        labels = deblank(M_.endo_names(ivar(i1),:));      
+        headers = char('Order ',int2str([1:options_.ar]'));
+        lh = size(labels,2)+2;
+        dyntable(title,headers,labels,z,lh,8,4);
+    end  
 end

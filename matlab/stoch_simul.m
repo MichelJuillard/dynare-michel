@@ -99,15 +99,15 @@ if ~options_.noprint
         disp(' ')
 
         if isfield(options_,'varobs')&& ~isempty(options_.varobs)
-          PCL_varobs=options_.varobs;
-          disp('OBSERVED VARIABLES')
+            PCL_varobs=options_.varobs;
+            disp('OBSERVED VARIABLES')
         else
-          PCL_varobs=M_.endo_names;
-          disp(' VAROBS LIST NOT SPECIFIED')
-          disp(' ASSUMED OBSERVED VARIABLES')
+            PCL_varobs=M_.endo_names;
+            disp(' VAROBS LIST NOT SPECIFIED')
+            disp(' ASSUMED OBSERVED VARIABLES')
         end
         for i=1:size(PCL_varobs,1)
-          disp(['    ' PCL_varobs(i,:)])
+            disp(['    ' PCL_varobs(i,:)])
         end
     end
     disp(' ')

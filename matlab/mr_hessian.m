@@ -48,8 +48,8 @@ n=size(x,1);
 if init,
     gstep_=options_.gstep;
     htol = 1.e-4; 
-%h1=max(abs(x),gstep_*ones(n,1))*eps^(1/3);
-%h1=max(abs(x),sqrt(gstep_)*ones(n,1))*eps^(1/6);
+    %h1=max(abs(x),gstep_*ones(n,1))*eps^(1/3);
+    %h1=max(abs(x),sqrt(gstep_)*ones(n,1))*eps^(1/6);
     h1=max(abs(x),sqrt(gstep_)*ones(n,1))*eps^(1/4);
     return,
 end

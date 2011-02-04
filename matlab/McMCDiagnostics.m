@@ -110,7 +110,7 @@ if isnumeric(options_.parallel),
     fout = McMCDiagnostics_core(localVars,1,npar,0);
     UDIAG = fout.UDIAG;
     clear fout
-% Parallel execution!
+    % Parallel execution!
 else
     ModelName = M_.fname;
     if ~isempty(M_.bvar)

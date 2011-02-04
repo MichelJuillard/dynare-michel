@@ -69,7 +69,7 @@ if ~noprint
       case 52 %DsgeVarLikelihood
         error('');
 
-      % Aim Code Conversions by convertAimCodeToInfo.m
+        % Aim Code Conversions by convertAimCodeToInfo.m
       case 102
         error('Aim: roots not correctly computed by real_schur.');
       case 103

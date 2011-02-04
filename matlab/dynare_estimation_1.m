@@ -44,7 +44,7 @@ if options_.order > 1
     if ~exist('particle','dir')
         disp('This version of Dynare cannot estimate non linearized models!')
         disp('Set "order" equal to 1.')
-       disp(' ')
+        disp(' ')
         options_.order = 1;
     end
 end
@@ -645,27 +645,27 @@ if any(options_.mode_compute ~= 0) && ~options_.mh_posterior_mode_estimation
                    ' option is unknown!'])
         end
     end
-%     if options_.mode_compute ~= 5
-        if options_.mode_compute ~= 6
-            if options_.cova_compute == 1
-                if ~options_.dsge_var
-                    hh = reshape(hessian('DsgeLikelihood',xparam1, ...
-                                         options_.gstep,gend,data,data_index,number_of_observations,...
-                                         no_more_missing_observations),nx,nx);
-                else
-                    hh = reshape(hessian('DsgeVarLikelihood',xparam1,options_.gstep,gend),nx,nx);
-                end
+    %     if options_.mode_compute ~= 5
+    if options_.mode_compute ~= 6
+        if options_.cova_compute == 1
+            if ~options_.dsge_var
+                hh = reshape(hessian('DsgeLikelihood',xparam1, ...
+                                     options_.gstep,gend,data,data_index,number_of_observations,...
+                                     no_more_missing_observations),nx,nx);
             else
-                nn = repmat(NaN,length(xparam1),length(xparam1))
+                hh = reshape(hessian('DsgeVarLikelihood',xparam1,options_.gstep,gend),nx,nx);
             end
-        end
-        parameter_names = bayestopt_.name;
-        if options_.cova_compute
-            save([M_.fname '_mode.mat'],'xparam1','hh','parameter_names');
         else
-            save([M_.fname '_mode.mat'],'xparam1','parameter_names');
+            nn = repmat(NaN,length(xparam1),length(xparam1))
         end
-%     end
+    end
+    parameter_names = bayestopt_.name;
+    if options_.cova_compute
+        save([M_.fname '_mode.mat'],'xparam1','hh','parameter_names');
+    else
+        save([M_.fname '_mode.mat'],'xparam1','parameter_names');
+    end
+    %     end
 end
 
 if options_.cova_compute == 0

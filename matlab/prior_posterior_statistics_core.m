@@ -170,7 +170,7 @@ for b=fpar:B
             yf = forcst2a(yyyy,dr,zeros(horizon,exo_nbr));
             if options_.prefilter == 1
                 yf(:,IdObs) = yf(:,IdObs)+repmat(bayestopt_.mean_varobs', ...
-                    horizon+maxlag,1);
+                                                 horizon+maxlag,1);
             end
             yf(:,IdObs) = yf(:,IdObs)+(gend+[1-maxlag:horizon]')*trend_coeff';
             if options_.loglinear == 1
@@ -184,7 +184,7 @@ for b=fpar:B
                     repmat(bayestopt_.mean_varobs',[horizon+maxlag,1,1]);
             end
             yf1(:,IdObs,:) = yf1(:,IdObs,:)+repmat((gend+[1-maxlag:horizon]')* ...
-                trend_coeff',[1,1,1]);
+                                                   trend_coeff',[1,1,1]);
             if options_.loglinear == 1
                 yf1 = yf1 + repmat(log(SteadyState'),[horizon+maxlag,1,1]);
             else
@@ -310,13 +310,13 @@ end
 myoutput.ifil=ifil;
 if RemoteFlag==1,
     myoutput.OutputFileName = [OutputFileName_smooth;
-        OutputFileName_update;
-        OutputFileName_inno;
-        OutputFileName_error;
-        OutputFileName_filter_step_ahead;
-        OutputFileName_param;
-        OutputFileName_forc_mean;
-        OutputFileName_forc_point];
+                        OutputFileName_update;
+                        OutputFileName_inno;
+                        OutputFileName_error;
+                        OutputFileName_filter_step_ahead;
+                        OutputFileName_param;
+                        OutputFileName_forc_mean;
+                        OutputFileName_forc_point];
     % OutputFileName_moments];
 end
 

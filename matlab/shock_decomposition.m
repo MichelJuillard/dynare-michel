@@ -56,7 +56,7 @@ if isempty(parameter_set)
                'and posterior mode is not available'])
     end
 end
-   
+
 oo = evaluate_smoother(parameter_set);
 
 % reduced form

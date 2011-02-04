@@ -89,12 +89,12 @@ MAX_ninno = min(B,ceil(MaxNumberOfBytes/(exo_nbr*gend)/8));
 MAX_nerro = min(B,ceil(MaxNumberOfBytes/(size(options_.varobs,1)*gend)/8));
 if naK
     MAX_naK   = min(B,ceil(MaxNumberOfBytes/(size(options_.varobs,1)* ...
-        length(options_.filter_step_ahead)*gend)/8));
+                                             length(options_.filter_step_ahead)*gend)/8));
 end
 if horizon
     MAX_nforc1 = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*(horizon+maxlag))/8));
     MAX_nforc2 = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*(horizon+maxlag))/ ...
-        8));
+                            8));
     IdObs    = bayestopt_.mfys;
     
 end
@@ -130,7 +130,7 @@ end
 
 if options_.filter_step_ahead
     stock_filter_step_ahead = zeros(naK,endo_nbr,gend+ ...
-        options_.filter_step_ahead(end),MAX_naK);
+                                    options_.filter_step_ahead(end),MAX_naK);
     run_smoother = 1;
 end
 if options_.forecast
@@ -219,10 +219,10 @@ else
     end
     localVars.ifil = ifil;
     globalVars = struct('M_',M_, ...
-        'options_', options_, ...
-        'bayestopt_', bayestopt_, ...
-        'estim_params_', estim_params_, ...
-        'oo_', oo_);
+                        'options_', options_, ...
+                        'bayestopt_', bayestopt_, ...
+                        'estim_params_', estim_params_, ...
+                        'oo_', oo_);
     
     % which files have to be copied to run remotely
     NamFileInput(1,:) = {'',[M_.fname '_static.m']};

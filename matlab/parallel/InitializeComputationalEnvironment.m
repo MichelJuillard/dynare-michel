@@ -50,7 +50,7 @@ for j=1:length(options_.parallel),
         if exist('OCTAVE_VERSION')
             options_.parallel(j).MatlabOctavePath = 'octave';
         else
-           options_.parallel(j).MatlabOctavePath = 'matlab';
+            options_.parallel(j).MatlabOctavePath = 'matlab';
         end
     end
     if options_.parallel(j).Local && isempty(options_.parallel(j).DynarePath),
@@ -58,7 +58,7 @@ for j=1:length(options_.parallel),
         options_.parallel(j).DynarePath=dynareroot;
     end
 end
- 
+
 
 
 

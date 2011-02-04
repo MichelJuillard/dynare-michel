@@ -37,12 +37,12 @@ for indPC=1:length(Parallel),
     if (Parallel(indPC).Local==0),
         dynareParallelDelete( 'slaveParallel_input*.mat',TmpFolder,Parallel(indPC));
     end
-	%else
-        delete( 'slaveParallel_input*.mat');
-        pause(1)
-        delete(['slaveParallel_*.log']);
+    %else
+    delete( 'slaveParallel_input*.mat');
+    pause(1)
+    delete(['slaveParallel_*.log']);
     %end
-        delete ConcurrentCommand1.bat;
+    delete ConcurrentCommand1.bat;
 end
 
 while(1)
@@ -58,4 +58,3 @@ while(1)
     end
 end
 
-        

@@ -105,8 +105,8 @@ else
                 end
             else
                 [dr.ys,check1] = dynare_solve_block_or_bytecode(dr.ys,...
-                                                  [oo_.exo_steady_state; ...
-                                        oo_.exo_det_steady_state], M_.params);
+                                                                [oo_.exo_steady_state; ...
+                                    oo_.exo_det_steady_state], M_.params);
             end;
         else
             % linear models
@@ -140,9 +140,9 @@ end
 
 dr.fbias = zeros(M_.endo_nbr,1);
 if options_.block
-  [dr,info,M_,options_,oo_] = dr_block(dr,check_flag,M_,options_,oo_);
+    [dr,info,M_,options_,oo_] = dr_block(dr,check_flag,M_,options_,oo_);
 else
-  [dr,info,M_,options_,oo_] = dr1(dr,check_flag,M_,options_,oo_);
+    [dr,info,M_,options_,oo_] = dr1(dr,check_flag,M_,options_,oo_);
 end
 if info(1)
     return

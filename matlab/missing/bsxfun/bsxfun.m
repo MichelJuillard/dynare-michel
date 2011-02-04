@@ -1,6 +1,6 @@
 function C = bsxfun(fun,A,B)
 % (Imperfect) Clone of matlab's bsxfun built-in function.
-    
+
 % Copyright (C) 2010 Dynare Team
 %
 % This file is part of Dynare.

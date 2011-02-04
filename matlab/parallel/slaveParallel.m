@@ -72,36 +72,36 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
     end
     % I wait for 20 min or while mater asks to exit (i.e. it cancels fslave file)
     pause(1);
- 
+    
     fjob = dir(['slaveJob',int2str(whoiam),'.mat']);
     
     if ~isempty(fjob),
         clear fGlobalVar fInputVar fblck nblck fname
         
         while(1)
-           Go=0;
-           
-           Go=fopen(['slaveJob',int2str(whoiam),'.mat']);
-          
-           if Go>0    
-               fclose(Go);
-               pause(1);
-               load(['slaveJob',int2str(whoiam),'.mat']);
-               break
-           else
-               % Only for testing, will be remouved!
-               
-%                if isunix
-%                  E1=fopen('/home/ivano/Works/Errore-slaveParallel.txt','w+');
-%                  fclose(E1);
-%                else            
-%                  E1=fopen('c:\dynare_calcs\Errore-slaveParallel.txt','w+');
-%                  fclose(E1);
-%                end
-                       
-           end
-         end
-               
+            Go=0;
+            
+            Go=fopen(['slaveJob',int2str(whoiam),'.mat']);
+            
+            if Go>0    
+                fclose(Go);
+                pause(1);
+                load(['slaveJob',int2str(whoiam),'.mat']);
+                break
+            else
+                % Only for testing, will be remouved!
+                
+                %                if isunix
+                %                  E1=fopen('/home/ivano/Works/Errore-slaveParallel.txt','w+');
+                %                  fclose(E1);
+                %                else            
+                %                  E1=fopen('c:\dynare_calcs\Errore-slaveParallel.txt','w+');
+                %                  fclose(E1);
+                %                end
+                
+            end
+        end
+        
         funcName=fname;  % Update global job name.
 
         if exist('fGlobalVar') && ~isempty (fGlobalVar)
@@ -123,26 +123,26 @@ while (etime(clock,t0)<1200 && ~isempty(fslave)) || ~isempty(dir(['stayalive',in
         
         % Launch the routine to be run in parallel.
         try,
-        tic,
-        fOutputVar = feval(fname, fInputVar ,fblck, nblck, whoiam, ThisMatlab);
-        toc,
-        if isfield(fOutputVar,'OutputFileName'),
-            OutputFileName = fOutputVar.OutputFileName;
-        else
-            OutputFileName = '';
-        end
+            tic,
+            fOutputVar = feval(fname, fInputVar ,fblck, nblck, whoiam, ThisMatlab);
+            toc,
+            if isfield(fOutputVar,'OutputFileName'),
+                OutputFileName = fOutputVar.OutputFileName;
+            else
+                OutputFileName = '';
+            end
 
-        if(whoiam)
+            if(whoiam)
 
-            % Save the output result.
-            save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' );
+                % Save the output result.
+                save([ fname,'_output_',int2str(whoiam),'.mat'],'fOutputVar' );
 
-            % Inform the master that the job is finished, and transfer the output data
-            delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
-        end
+                % Inform the master that the job is finished, and transfer the output data
+                delete(['P_',fname,'_',int2str(whoiam),'End.txt']);
+            end
 
-        disp(['Job ',fname,' on CPU ',int2str(whoiam),' completed.']);
-        t0 =clock; % Re-set waiting time of 20 mins
+            disp(['Job ',fname,' on CPU ',int2str(whoiam),' completed.']);
+            t0 =clock; % Re-set waiting time of 20 mins
         catch ME
             disp(['Job ',fname,' on CPU ',int2str(whoiam),' crashed.']);
             fOutputVar.error = ME;

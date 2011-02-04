@@ -63,7 +63,7 @@ if options_.nomoments == 0
                  int2str(options_.hp_filter) ')'];
     end
     headers=char('VARIABLE','MEAN','STD. DEV.','VARIANCE','SKEWNESS', ...
-                    'KURTOSIS');
+                 'KURTOSIS');
     dyntable(title,headers,labels,z,size(labels,2)+2,16,6);
 end
 

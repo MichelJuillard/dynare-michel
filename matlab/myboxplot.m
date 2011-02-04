@@ -34,10 +34,10 @@ a=1-notched;
 
 % ## figure out how many data sets we have
 if iscell(data), 
-  nc = length(data);
+    nc = length(data);
 else
-%   if isvector(data), data = data(:); end
-  nc = size(data,2);
+    %   if isvector(data), data = data(:); end
+    nc = size(data,2);
 end
 
 % ## compute statistics
@@ -61,60 +61,60 @@ for i=1:nc
     else
         col = data(:,i);
     end
-%   ## Skip missing data
-% % % % % % %   col(isnan(col) | isna (col)) = [];
-  col(isnan(col)) = [];
+    %   ## Skip missing data
+    % % % % % % %   col(isnan(col) | isna (col)) = [];
+    col(isnan(col)) = [];
 
-  %   ## Remember the data length
-  nd = length(col);
-  box(i) = nd;
-  if (nd > 1)
-%     ## min,max and quartiles
-%     s(1:5,i) = statistics(col)(1:5);
-s(1,i)=min(col);
-s(5,i)=max(col);
-s(2,i)=myprctilecol(col,25);
-s(3,i)=myprctilecol(col,50);
-s(4,i)=myprctilecol(col,75);
-
-
+    %   ## Remember the data length
+    nd = length(col);
+    box(i) = nd;
+    if (nd > 1)
+        %     ## min,max and quartiles
+        %     s(1:5,i) = statistics(col)(1:5);
+        s(1,i)=min(col);
+        s(5,i)=max(col);
+        s(2,i)=myprctilecol(col,25);
+        s(3,i)=myprctilecol(col,50);
+        s(4,i)=myprctilecol(col,75);
 
 
 
 
 
 
-%     ## confidence interval for the median
-    est = 1.57*(s(4,i)-s(2,i))/sqrt(nd);
-    s(6,i) = max([s(3,i)-est, s(2,i)]);
-    s(7,i) = min([s(3,i)+est, s(4,i)]);
-%     ## whiskers out to the last point within the desired inter-quartile range
-    IQR = maxwhisker*(s(4,i)-s(2,i));
-    whisker_y(:,i) = [min(col(col >= s(2,i)-IQR)); s(2,i)];
-    whisker_y(:,nc+i) = [max(col(col <= s(4,i)+IQR)); s(4,i)];
-%     ## outliers beyond 1 and 2 inter-quartile ranges
-    outliers = col((col < s(2,i)-IQR & col >= s(2,i)-2*IQR) | (col > s(4,i)+IQR & col <= s(4,i)+2*IQR));
-    outliers2 = col(col < s(2,i)-2*IQR | col > s(4,i)+2*IQR);
-    outliers_x = [outliers_x; i*ones(size(outliers))];
-    outliers_y = [outliers_y; outliers];
-    outliers2_x = [outliers2_x; i*ones(size(outliers2))];
-    outliers2_y = [outliers2_y; outliers2];
-  elseif (nd == 1)
-%     ## all statistics collapse to the value of the point
-    s(:,i) = col;
-%     ## single point data sets are plotted as outliers.
-    outliers_x = [outliers_x; i];
-    outliers_y = [outliers_y; col];
-  else
-%     ## no statistics if no points
-    s(:,i) = NaN;
-  end
+
+
+        %     ## confidence interval for the median
+        est = 1.57*(s(4,i)-s(2,i))/sqrt(nd);
+        s(6,i) = max([s(3,i)-est, s(2,i)]);
+        s(7,i) = min([s(3,i)+est, s(4,i)]);
+        %     ## whiskers out to the last point within the desired inter-quartile range
+        IQR = maxwhisker*(s(4,i)-s(2,i));
+        whisker_y(:,i) = [min(col(col >= s(2,i)-IQR)); s(2,i)];
+        whisker_y(:,nc+i) = [max(col(col <= s(4,i)+IQR)); s(4,i)];
+        %     ## outliers beyond 1 and 2 inter-quartile ranges
+        outliers = col((col < s(2,i)-IQR & col >= s(2,i)-2*IQR) | (col > s(4,i)+IQR & col <= s(4,i)+2*IQR));
+        outliers2 = col(col < s(2,i)-2*IQR | col > s(4,i)+2*IQR);
+        outliers_x = [outliers_x; i*ones(size(outliers))];
+        outliers_y = [outliers_y; outliers];
+        outliers2_x = [outliers2_x; i*ones(size(outliers2))];
+        outliers2_y = [outliers2_y; outliers2];
+    elseif (nd == 1)
+        %     ## all statistics collapse to the value of the point
+        s(:,i) = col;
+        %     ## single point data sets are plotted as outliers.
+        outliers_x = [outliers_x; i];
+        outliers_y = [outliers_y; col];
+    else
+        %     ## no statistics if no points
+        s(:,i) = NaN;
+    end
 end
 % % % % if isempty(outliers2_y)
 % % % %     outliers2_y=
 % ## Note which boxes don't have enough stats
 chop = find(box <= 1);
-    
+
 % ## Draw a box around the quartiles, with width proportional to the number of
 % ## items in the box. Draw notches if desired.
 box = box*0.23/max(box);
@@ -153,25 +153,25 @@ if isnan(mm), mm=0; MM=0; end,
 
 if vertical
     plot (quartile_x, quartile_y, 'b',  ...
-        whisker_x, whisker_y, 'b--',   ...
-        cap_x, cap_y, 'k',   ...
-        median_x, median_y, 'r',  ...
-        outliers_x, outliers_y, [symbol(1),'r'],   ...
-        outliers2_x, outliers2_y, [symbol(2),'r']);
-        set(gca,'XTick',1:nc);
-        set(gca, 'XLim', [0.5, nc+0.5]);
-        set(gca, 'YLim', [mm-(MM-mm)*0.05-eps, MM+(MM-mm)*0.05+eps]);
+          whisker_x, whisker_y, 'b--',   ...
+          cap_x, cap_y, 'k',   ...
+          median_x, median_y, 'r',  ...
+          outliers_x, outliers_y, [symbol(1),'r'],   ...
+          outliers2_x, outliers2_y, [symbol(2),'r']);
+    set(gca,'XTick',1:nc);
+    set(gca, 'XLim', [0.5, nc+0.5]);
+    set(gca, 'YLim', [mm-(MM-mm)*0.05-eps, MM+(MM-mm)*0.05+eps]);
 
 else
-% % % % %     plot (quartile_y, quartile_x, "b;;",
-% % % % %     whisker_y, whisker_x, "b;;",
-% % % % %     cap_y, cap_x, "b;;",
-% % % % %     median_y, median_x, "r;;",
-% % % % %     outliers_y, outliers_x, [symbol(1),"r;;"],
-% % % % %     outliers2_y, outliers2_x, [symbol(2),"r;;"]);
+    % % % % %     plot (quartile_y, quartile_x, "b;;",
+    % % % % %     whisker_y, whisker_x, "b;;",
+    % % % % %     cap_y, cap_x, "b;;",
+    % % % % %     median_y, median_x, "r;;",
+    % % % % %     outliers_y, outliers_x, [symbol(1),"r;;"],
+    % % % % %     outliers2_y, outliers2_x, [symbol(2),"r;;"]);
 end
 
 if nargout,
-  sout=s;
+    sout=s;
 end
 % % % endfunction
