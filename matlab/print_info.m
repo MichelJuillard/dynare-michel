@@ -56,10 +56,36 @@ if ~noprint
         error('The steady state is complex.')
       case 30 
         error('Variance can''t be computed')
+      case 41
+        error('one (many) parameter(s) do(es) not satisfy the lower bound');
+      case 42
+        error('one (many) parameter(s) do(es) not satisfy the upper bound');
       case 43
         error('Covariance matrix of shocks is not positive definite')
+      case 44 %DsgeLikelihood_hh / DsgeLikelihood
+        error('');
       case 51
         error('You are estimating a DSGE-VAR model, but the value of the dsge prior weight is too low!')
+      case 52 %DsgeVarLikelihood
+        error('');
+
+      % Aim Code Conversions by convertAimCodeToInfo.m
+      case 102
+        error('Aim: roots not correctly computed by real_schur.');
+      case 103
+        error('Aim: too many big roots.');
+      case 135
+        error('Aim: too many big roots, and q(:,right) is singular.');
+      case 104
+        error('Aim: too few big roots.');
+      case 145
+        error('Aim: too few big roots, and q(:,right) is singular.');
+      case 105
+        error('Aim: q(:,right) is singular.');
+      case 161
+        error('Aim: too many exact shiftrights.');
+      case 162
+        error('Aim: too many numeric shiftrights.');
       otherwise
         error('This case shouldn''t happen. Contact the authors of Dynare')
     end

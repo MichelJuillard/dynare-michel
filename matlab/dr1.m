@@ -230,7 +230,7 @@ if M_.maximum_endo_lead == 0
         try
             [dr,aimcode]=dynAIMsolver1(jacobia_,M_,dr);
             if aimcode ~=1
-                info(1) = aimcode;
+                info(1) = convertAimCodeToInfo(aimcode);
                 info(2) = 1.0e+8;
                 return
             end
@@ -283,7 +283,7 @@ if (options_.aim_solver == 1) && (task == 0)
         % reuse some of the bypassed code and tests that may be needed 
         
         if aimcode ~=1
-            info(1) = aimcode;
+            info(1) = convertAimCodeToInfo(aimcode);
             info(2) = 1.0e+8;
             return
         end
