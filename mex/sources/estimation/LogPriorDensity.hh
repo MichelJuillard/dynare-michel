@@ -11,10 +11,11 @@
 #include "Vector.hh"
 #include "EstimatedParametersDescription.hh"
 
-class LogPriorDensity {
+class LogPriorDensity
+{
 
 public:
-  LogPriorDensity(EstimatedParametersDescription& estParsDesc);
+  LogPriorDensity(EstimatedParametersDescription &estParsDesc);
   virtual ~LogPriorDensity();
 
   double compute(const Vector &estParams);

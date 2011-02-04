@@ -18,12 +18,12 @@
  */
 
 // Test  for ModelSolution
-// Uses fs2000k2.mod and its ..._dynamic.mexw32 
+// Uses fs2000k2.mod and its ..._dynamic.mexw32
 
 #include "ModelSolution.hh"
 
 int
-main (int argc, char** argv)
+main(int argc, char **argv)
 {
   if (argc < 2)
     {
@@ -33,12 +33,12 @@ main (int argc, char** argv)
 
   std::string modName = argv[1];
   const int npar = 7;
-  const size_t n_endo=15, n_exo=2; 
-  std::vector<size_t> zeta_fwrd_arg; 
-  std::vector<size_t> zeta_back_arg; 
+  const size_t n_endo = 15, n_exo = 2;
+  std::vector<size_t> zeta_fwrd_arg;
+  std::vector<size_t> zeta_back_arg;
   std::vector<size_t> zeta_mixed_arg;
   std::vector<size_t> zeta_static_arg;
-  double qz_criterium=1.0+1.0e-9;  
+  double qz_criterium = 1.0+1.0e-9;
   Vector deepParams(npar);
 
   double dYSparams [] = {
@@ -52,45 +52,45 @@ main (int argc, char** argv)
     0.0, 0.0250e-3
   };
   int nVCVpar = 2;
-  MatrixView vCovVW(vcov,nVCVpar,nVCVpar,nVCVpar);
-  Matrix vCov (nVCVpar, nVCVpar);
+  MatrixView vCovVW(vcov, nVCVpar, nVCVpar, nVCVpar);
+  Matrix vCov(nVCVpar, nVCVpar);
   vCov = vCovVW;
 
   double dparams[] = { 0.3300,
-    0.9900,
-    0.0030,
-    1.0110,
-    0.7000,
-    0.7870,
-    0.0200};
+                       0.9900,
+                       0.0030,
+                       1.0110,
+                       0.7000,
+                       0.7870,
+                       0.0200};
 
-  VectorView modParamsVW (dparams, npar,1);
-  deepParams=modParamsVW;
-  VectorView steadyState(dYSparams,n_endo,1);
+  VectorView modParamsVW(dparams, npar, 1);
+  deepParams = modParamsVW;
+  VectorView steadyState(dYSparams, n_endo, 1);
   std::cout << "Vector deepParams: " << std::endl << deepParams << std::endl;
   std::cout << "Matrix vCov: " << std::endl << vCov << std::endl;
   std::cout << "Vector steadyState: " << std::endl << steadyState << std::endl;
 
   // Set zeta vectors [0:(n-1)] from Matlab indices [1:n]
   //order_var = [ stat_var(:); pred_var(:); both_var(:); fwrd_var(:)];
-  size_t statc[]={ 4, 5, 6, 8, 9, 10, 11, 12, 14};
-  size_t back[]={1,7,13};
-  size_t both[]={2};
-  size_t fwd[]={ 3,15};
-  for (int i=0;i<9;++i)
+  size_t statc[] = { 4, 5, 6, 8, 9, 10, 11, 12, 14};
+  size_t back[] = {1, 7, 13};
+  size_t both[] = {2};
+  size_t fwd[] = { 3, 15};
+  for (int i = 0; i < 9; ++i)
     zeta_static_arg.push_back(statc[i]-1);
-  for (int i=0;i<3;++i)
+  for (int i = 0; i < 3; ++i)
     zeta_back_arg.push_back(back[i]-1);
-  for (int i=0;i<1;++i)
+  for (int i = 0; i < 1; ++i)
     zeta_mixed_arg.push_back(both[i]-1);
-  for (int i=0;i<2;++i)
+  for (int i = 0; i < 2; ++i)
     zeta_fwrd_arg.push_back(fwd[i]-1);
 
   Matrix ghx(n_endo, zeta_back_arg.size() + zeta_mixed_arg.size());
-  Matrix ghu(n_endo,n_exo);
+  Matrix ghu(n_endo, n_exo);
 
-  ModelSolution modelSolution( modName, n_endo, n_exo
-    , zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium);
+  ModelSolution modelSolution(modName, n_endo, n_exo,
+                              zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium);
 
   modelSolution.compute(steadyState, deepParams, ghx,  ghu);
 

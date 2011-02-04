@@ -187,7 +187,7 @@ public:
 };
 
 // If x~InvGamma(a,b) , then  1/x ~Gamma(a,1/b) distribution
-// i.e. Dynare lpdfig2(x*x,n,s) = lpdfgam(1/(x*x),s/2,2/n) - 2*log(x*x) 
+// i.e. Dynare lpdfig2(x*x,n,s) = lpdfgam(1/(x*x),s/2,2/n) - 2*log(x*x)
 struct InvGamma2_Prior : public Prior
 {
 public:

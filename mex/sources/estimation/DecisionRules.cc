@@ -70,7 +70,7 @@ DecisionRules::DecisionRules(size_t n_arg, size_t p_arg,
             back_inserter(zeta_dynamic));
 
   // Compute beta_back and pi_back
-  for(size_t i = 0; i < n_back_mixed; i++)
+  for (size_t i = 0; i < n_back_mixed; i++)
     if (find(zeta_mixed.begin(), zeta_mixed.end(), zeta_back_mixed[i])
         == zeta_mixed.end())
       pi_back.push_back(i);
@@ -78,7 +78,7 @@ DecisionRules::DecisionRules(size_t n_arg, size_t p_arg,
       beta_back.push_back(i);
 
   // Compute beta_fwrd and pi_fwrd
-  for(size_t i = 0; i < n_fwrd_mixed; i++)
+  for (size_t i = 0; i < n_fwrd_mixed; i++)
     if (find(zeta_mixed.begin(), zeta_mixed.end(), zeta_fwrd_mixed[i])
         == zeta_mixed.end())
       pi_fwrd.push_back(i);
@@ -95,7 +95,7 @@ DecisionRules::compute(const Matrix &jacobian, Matrix &g_y, Matrix &g_u) throw (
   assert(g_u.getRows() == n && g_u.getCols() == p);
 
   // Construct S, perform QR decomposition and get A = Q*jacobian
-  for(size_t i = 0; i < n_static; i++)
+  for (size_t i = 0; i < n_static; i++)
     mat::col_copy(jacobian, n_back_mixed+zeta_static[i], S, i);
 
   A = MatrixConstView(jacobian, 0, 0, n, n_back_mixed + n + n_fwrd_mixed);

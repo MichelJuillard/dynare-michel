@@ -36,7 +36,7 @@ LogLikelihoodSubSample::LogLikelihoodSubSample(const std::string &dynamicDllFile
                                                const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg,
                                                const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg, const double qz_criterium,
                                                const std::vector<size_t> &varobs, double riccati_tol, double lyapunov_tol, int &INinfo) :
-  startPenalty(-1e8),estiParDesc(INestiParDesc),
+  startPenalty(-1e8), estiParDesc(INestiParDesc),
   kalmanFilter(dynamicDllFile, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium,
                varobs, riccati_tol, lyapunov_tol, INinfo), eigQ(n_exo), eigH(varobs.size()), info(INinfo)
 {
@@ -46,8 +46,8 @@ double
 LogLikelihoodSubSample::compute(VectorView &steadyState, const MatrixConstView &dataView, const Vector &estParams, Vector &deepParams,
                                 Matrix &Q, Matrix &H, VectorView &vll, MatrixView &detrendedDataView, int &info, size_t start, size_t period)
 {
-  penalty=startPenalty;
-  logLikelihood=startPenalty;
+  penalty = startPenalty;
+  logLikelihood = startPenalty;
 
   updateParams(estParams, deepParams, Q, H, period);
   if (info == 0)
@@ -159,7 +159,7 @@ LogLikelihoodSubSample::updateParams(const Vector &estParams, Vector &deepParams
                 } //   end if
               break;
 
-            //if estim_params_.np > 0  // i.e. num of deep parameters >0
+              //if estim_params_.np > 0  // i.e. num of deep parameters >0
             case EstimatedParameter::deepPar:
               k = estiParDesc.estParams[i].ID1;
               deepParams(k) = estParams(i);

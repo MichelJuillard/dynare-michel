@@ -62,9 +62,9 @@ mjdgges(double *a, double *b, double *z, double *n, double *sdim, double *eval_r
     {
       *per = *par / *pb;
       if (*pai == 0.0 && *pb == 0.0)
-	*pei = 0.0;
+        *pei = 0.0;
       else
-	*pei = *pai / *pb;
+        *pei = *pai / *pb;
       ++par;
       ++pai;
       ++pb;

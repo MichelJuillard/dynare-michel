@@ -41,7 +41,7 @@ namespace blas
   }
 
   /* Level 2 */
-  
+
   //! Symmetric rank 1 operation: A = alpha*X*X' + A
   template<class Mat, class Vec>
   inline void
@@ -163,7 +163,7 @@ namespace blas
     dsymm(side, uplo, &m, &n, &alpha, A.getData(), &lda,
           B.getData(), &ldb, &beta, C.getData(), &ldc);
   }
-  
+
 } // End of namespace
 
 #endif

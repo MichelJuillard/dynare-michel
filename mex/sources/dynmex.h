@@ -36,14 +36,14 @@ typedef int mwSize;
  * Fix for trac ticket Ticket #137
  */
 #if !defined(DYN_MEX_FUNC_ERR_MSG_TXT)
-#define DYN_MEX_FUNC_ERR_MSG_TXT(str)           \
+# define DYN_MEX_FUNC_ERR_MSG_TXT(str)          \
   do {                                          \
     mexPrintf("%s\n", str);                     \
     int i;                                      \
     for (i = 0; i < nlhs; i++)                  \
       plhs[i] = mxCreateDoubleScalar(1);        \
     return;                                     \
-  } while(0)
+  } while (0)
 #endif
 
 #endif

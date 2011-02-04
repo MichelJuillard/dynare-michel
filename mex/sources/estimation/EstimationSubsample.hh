@@ -55,7 +55,8 @@
  *
  * Time indices follow C convention: first period has index 0.
  */
-class EstimationSubsample {
+class EstimationSubsample
+{
 public:
   EstimationSubsample(size_t startPeriod, size_t endPeriod);
   virtual ~EstimationSubsample();

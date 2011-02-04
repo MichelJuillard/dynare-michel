@@ -28,7 +28,6 @@
 
 #include "memory_file.h"
 
-
 #include <iostream>
 #include <fstream>
 

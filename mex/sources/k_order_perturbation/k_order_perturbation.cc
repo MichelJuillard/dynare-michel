@@ -26,10 +26,10 @@
   3) options
   4) string containing the MEX extension (with a dot at the beginning)
 
- Outputs:
- - if order == 1: only g_1
- - if order == 2: g_0, g_1, g_2
- - if order == 3: g_0, g_1, g_2, g_3
+  Outputs:
+  - if order == 1: only g_1
+  - if order == 2: g_0, g_1, g_2
+  - if order == 3: g_0, g_1, g_2, g_3
 */
 
 #include "dynamic_m.hh"
@@ -42,7 +42,7 @@
 
 #if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)  // exclude mexFunction for other applications
 
-#include "dynmex.h"
+# include "dynmex.h"
 
 //////////////////////////////////////////////////////
 // Convert MATLAB Dynare endo and exo names array to a vector<string> array of string pointers
@@ -75,7 +75,7 @@ extern "C" {
     const mxArray *dr = prhs[0];
     const mxArray *M_ = prhs[1];
     const mxArray *options_ = prhs[2];
-    int use_dll = (int)mxGetScalar(mxGetField(options_, 0, "use_dll"));
+    int use_dll = (int) mxGetScalar(mxGetField(options_, 0, "use_dll"));
 
     mxArray *mFname = mxGetField(M_, 0, "fname");
     if (!mxIsChar(mFname))
@@ -147,7 +147,7 @@ extern "C" {
 
     vector<int> var_order_vp(nEndo);
     for (int v = 0; v < nEndo; v++)
-      var_order_vp[v] = (int)(*(dparams++));
+      var_order_vp[v] = (int) (*(dparams++));
 
     // the lag, current and lead blocks of the jacobian respectively
     mxFldp = mxGetField(M_, 0, "lead_lag_incidence");

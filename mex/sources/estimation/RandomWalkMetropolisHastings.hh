@@ -40,10 +40,10 @@ public:
     parDraw(size), newParDraw(size)
   {
   };
-  virtual ~RandomWalkMetropolisHastings(){};
+  virtual ~RandomWalkMetropolisHastings() {};
   virtual double compute(VectorView &mhLogPostDens, MatrixView &mhParams, Matrix &steadyState,
                          Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H,
-                         const size_t presampleStart, int &info, const size_t startDraw, size_t nMHruns, 
+                         const size_t presampleStart, int &info, const size_t startDraw, size_t nMHruns,
                          LogPosteriorDensity &logPosteriorDensity, Proposal &proposalDrawDistribution,
                          EstimatedParametersDescription &epd);
 };

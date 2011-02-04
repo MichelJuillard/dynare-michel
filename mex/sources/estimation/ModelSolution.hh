@@ -29,20 +29,20 @@
 #include "DecisionRules.hh"
 #include "dynamic_dll.hh"
 
-
 /**
-* compute the steady state (2nd stage), and
-* computes first order approximation
-* 
-*/
-class ModelSolution{
+ * compute the steady state (2nd stage), and
+ * computes first order approximation
+ *
+ */
+class ModelSolution
+{
 
 public:
-  ModelSolution(const std::string& dynamicDllFile,  size_t n_endo, size_t n_exo, const std::vector<size_t>& zeta_fwrd_arg, 
-    const std::vector<size_t>& zeta_back_arg, const std::vector<size_t>& zeta_mixed_arg, 
-    const std::vector<size_t>& zeta_static_arg, double qz_criterium);
-  virtual ~ModelSolution(){};
-  void compute( VectorView& steadyState, const Vector& deepParams, 	Matrix& ghx, Matrix& ghu ) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException);
+  ModelSolution(const std::string &dynamicDllFile,  size_t n_endo, size_t n_exo, const std::vector<size_t> &zeta_fwrd_arg,
+                const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
+                const std::vector<size_t> &zeta_static_arg, double qz_criterium);
+  virtual ~ModelSolution() {};
+  void compute(VectorView &steadyState, const Vector &deepParams,      Matrix &ghx, Matrix &ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException);
 
 private:
   const size_t n_endo;
@@ -56,12 +56,9 @@ private:
   DynamicModelDLL dynamicDLLp;
   Vector llXsteadyState;
   //Matrix jacobian;
-  void ComputeModelSolution( VectorView& steadyState, const Vector& deepParams, 	Matrix& ghx, Matrix& ghu ) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException);
-  void ComputeSteadyState( VectorView& steadyState, const Vector& deepParams);
+  void ComputeModelSolution(VectorView &steadyState, const Vector &deepParams,         Matrix &ghx, Matrix &ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException);
+  void ComputeSteadyState(VectorView &steadyState, const Vector &deepParams);
 
 };
-
-
-
 
 #endif // !defined(5ADFF920_9C74_46f5_9FE9_88AD4D4BBF19__INCLUDED_)

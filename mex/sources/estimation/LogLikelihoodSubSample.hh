@@ -30,7 +30,8 @@
 #include "KalmanFilter.hh"
 #include "VDVEigDecomposition.hh"
 
-class LogLikelihoodSubSample {
+class LogLikelihoodSubSample
+{
 
 public:
   LogLikelihoodSubSample(const std::string &dynamicDllFile, EstimatedParametersDescription &estiParDesc, size_t n_endo, size_t n_exo,

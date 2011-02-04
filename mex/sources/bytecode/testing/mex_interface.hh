@@ -30,10 +30,10 @@
 using namespace std;
 
 #if !defined(DYN_MEX_FUNC_ERR_MSG_TXT)
-#define DYN_MEX_FUNC_ERR_MSG_TXT(str)           \
+# define DYN_MEX_FUNC_ERR_MSG_TXT(str)          \
   do {                                          \
     mexPrintf("%s\n", str);                     \
-  } while(0)
+  } while (0)
 #endif
 
 typedef unsigned int mwIndex;
@@ -64,66 +64,111 @@ enum mxArray_type
     mxUINT64_CLASS = 14
   };
 
-class mxArray_tag {
-  public:
+class mxArray_tag
+{
+public:
   unsigned int size_1, size_2;
   mwIndex *Ir, *Jc;
   int Nzmax;
   double *data;
   mxArray_type type;
   vector<string> field_name;
-  vector<vector<mxArray_tag*> > field_array;
+  vector<vector<mxArray_tag *> > field_array;
   mxArray_tag();
 };
 
-
-
 typedef mxArray_tag mxArray;
 
-void load_global(char* file_name);
+void load_global(char *file_name);
 /*Matlab clone function*/
 int mexPrintf(const char *str, ...);
 void mexErrMsgTxt(const string str);
 void mexWarnMsgTxt(const string str);
-void* mxMalloc(unsigned int amount);
-void* mxRealloc(void *to_extend, unsigned int amount);
-void* mxCalloc(unsigned int nb_elements, unsigned int amount_per_element);
+void *mxMalloc(unsigned int amount);
+void *mxRealloc(void *to_extend, unsigned int amount);
+void *mxCalloc(unsigned int nb_elements, unsigned int amount_per_element);
 void mxFree(void *to_release);
 void mexEvalString(const string str);
-double* mxGetPr(const mxArray *b_m);
-inline mwIndex* mxGetIr(const mxArray *A_m) {return (mwIndex*)A_m->Ir;};
-inline mwIndex* mxGetJc(const mxArray *A_m) {return (mwIndex*)A_m->Jc;};
-mxArray* mxSetNzmax(mxArray* A_m, mwSize nz_max);
-inline int mxGetNzmax(const mxArray *A_m) {return A_m->Nzmax;};
-inline int mxGetM(const mxArray *A_m) {return A_m->size_1;};
-inline int mxGetN(const mxArray *A_m) {return A_m->size_2;};
-inline bool mxIsChar(const mxArray *A) {return A->type == mxCHAR_CLASS;};
-inline bool mxIsFloat(const mxArray *A) {return A->type == mxDOUBLE_CLASS || A->type == mxSINGLE_CLASS;};
-inline bool mxIsStruct(const mxArray *A) {return A->type == mxSTRUCT_CLASS;};
-mxArray* mxCreateDoubleMatrix(unsigned int rows,unsigned int cols, mxData_type mx_type);
-mxArray* mxCreateSparse(unsigned int rows, unsigned int cols, unsigned int nz_max, mxData_type mx_type);
-mxArray* mxCreateCharArray(unsigned int rows, unsigned int cols, mxData_type mx_type);
-mxArray* mxCreateDoubleScalar(double value);
-mxArray* mxCreateStructMatrix(unsigned int rows, unsigned int cols, unsigned int nfields, const string &fieldnames);
-inline mxArray* mxCreateStructArray(unsigned int rows, mwSize* cols, int nfields, const string &fieldnames) {return mxCreateStructMatrix(rows, *cols, nfields, fieldnames);};
-mxArray* mxCreatNULLMatrix();
-void mexCallMATLAB(unsigned int n_lhs, mxArray* lhs[], unsigned int n_rhs, mxArray* rhs[], const char* function);
-void mxDestroyArray(mxArray* A_m);
-mxArray* read_struct(FILE *fid);
-mxArray* read_Array(FILE *fid);
-mxArray* read_double_array(FILE *fid);
-mxArray* mexGetVariable(const char* space_name, const char* matrix_name);
-int mxGetFieldNumber(const mxArray* Struct, const char* field_name);
-mxArray* mxGetFieldByNumber(mxArray* Struct, unsigned int pos, unsigned int field_number);
+double *mxGetPr(const mxArray *b_m);
+inline mwIndex *
+mxGetIr(const mxArray *A_m)
+{
+  return (mwIndex *) A_m->Ir;
+};
+inline mwIndex *
+mxGetJc(const mxArray *A_m)
+{
+  return (mwIndex *) A_m->Jc;
+};
+mxArray *mxSetNzmax(mxArray *A_m, mwSize nz_max);
+inline int
+mxGetNzmax(const mxArray *A_m)
+{
+  return A_m->Nzmax;
+};
+inline int
+mxGetM(const mxArray *A_m)
+{
+  return A_m->size_1;
+};
+inline int
+mxGetN(const mxArray *A_m)
+{
+  return A_m->size_2;
+};
+inline bool
+mxIsChar(const mxArray *A)
+{
+  return A->type == mxCHAR_CLASS;
+};
+inline bool
+mxIsFloat(const mxArray *A)
+{
+  return A->type == mxDOUBLE_CLASS || A->type == mxSINGLE_CLASS;
+};
+inline bool
+mxIsStruct(const mxArray *A)
+{
+  return A->type == mxSTRUCT_CLASS;
+};
+mxArray *mxCreateDoubleMatrix(unsigned int rows, unsigned int cols, mxData_type mx_type);
+mxArray *mxCreateSparse(unsigned int rows, unsigned int cols, unsigned int nz_max, mxData_type mx_type);
+mxArray *mxCreateCharArray(unsigned int rows, unsigned int cols, mxData_type mx_type);
+mxArray *mxCreateDoubleScalar(double value);
+mxArray *mxCreateStructMatrix(unsigned int rows, unsigned int cols, unsigned int nfields, const string &fieldnames);
+inline mxArray *
+mxCreateStructArray(unsigned int rows, mwSize *cols, int nfields, const string &fieldnames)
+{
+  return mxCreateStructMatrix(rows, *cols, nfields, fieldnames);
+};
+mxArray *mxCreatNULLMatrix();
+void mexCallMATLAB(unsigned int n_lhs, mxArray* lhs[], unsigned int n_rhs, mxArray* rhs[], const char *function);
+void mxDestroyArray(mxArray *A_m);
+mxArray *read_struct(FILE *fid);
+mxArray *read_Array(FILE *fid);
+mxArray *read_double_array(FILE *fid);
+mxArray *mexGetVariable(const char *space_name, const char *matrix_name);
+int mxGetFieldNumber(const mxArray *Struct, const char *field_name);
+mxArray *mxGetFieldByNumber(mxArray *Struct, unsigned int pos, unsigned int field_number);
 void mxSetFieldByNumber(mxArray *Struct, mwIndex index, unsigned int field_number, mxArray *pvalue);
-int mxAddField(mxArray* Struct, const char* field_name);
+int mxAddField(mxArray *Struct, const char *field_name);
 void mxSetFieldByNumber(mxArray *Struct, mwIndex index, unsigned int fieldnumber, mxArray *pvalue);
-inline unsigned int mxGetNumberOfElements(const mxArray* A) {return A->size_1 * A->size_2;};
+inline unsigned int
+mxGetNumberOfElements(const mxArray *A)
+{
+  return A->size_1 * A->size_2;
+};
 int mxGetString(const mxArray *array, char *buf, unsigned int buflen);
-inline double mxGetScalar(const mxArray *array) {if (!mxIsFloat(array)) mexErrMsgTxt("not a float array\n");return array->data[0];};
-mxArray* mxDuplicateArray(const mxArray *array);
-void Free_simple_array(mxArray* array);
-void Free_struct_array(mxArray* array);
-void Free_Array(mxArray* array);
+inline double
+mxGetScalar(const mxArray *array)
+{
+  if (!mxIsFloat(array))
+    mexErrMsgTxt("not a float array\n");
+  return array->data[0];
+};
+mxArray *mxDuplicateArray(const mxArray *array);
+void Free_simple_array(mxArray *array);
+void Free_struct_array(mxArray *array);
+void Free_Array(mxArray *array);
 void Free_global();
 #endif

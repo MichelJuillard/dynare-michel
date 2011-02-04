@@ -140,12 +140,12 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       mC = mxGetM(prhs[2]);
       nC = mxGetN(prhs[2]);
       if (mB*mC != nA)
-        DYN_MEX_FUNC_ERR_MSG_TXT( "Input dimension error!");
+        DYN_MEX_FUNC_ERR_MSG_TXT("Input dimension error!");
     }
   else // A*kron(B,B) is to be computed.
     {
       if (mB*mB != nA)
-        DYN_MEX_FUNC_ERR_MSG_TXT( "Input dimension error!");
+        DYN_MEX_FUNC_ERR_MSG_TXT("Input dimension error!");
     }
   // Get input matrices:
   double *B, *C, *A;

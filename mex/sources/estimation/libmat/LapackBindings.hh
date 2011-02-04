@@ -41,7 +41,6 @@ namespace lapack
     return info;
   }
 
-
   // calc Cholesky Decomposition based solution X to A*X=B
   // for A pos. def. and symmetric supplied as uppper/lower triangle
   // packed in a vector if UPLO = 'U', AP(i + (j-1)*j/2) = A(i,j) for 1<=i<=j;
@@ -60,7 +59,6 @@ namespace lapack
     int info = (int) lpinfo;
     return info;
   }
-
 
 } // End of namespace
 

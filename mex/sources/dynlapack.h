@@ -106,7 +106,7 @@ extern "C" {
 
 #define dppsv FORTRAN_WRAPPER(dppsv)
   void dppsv(LACHAR uplo, CONST_LAINT n, CONST_LAINT m, LADOU a, LADOU b, CONST_LAINT ldb,
-              LAINT info);
+             LAINT info);
 
 #define dpotri FORTRAN_WRAPPER(dpotri)
   void dpotri(LACHAR uplo, CONST_LAINT n, LADOU a, CONST_LAINT lda,

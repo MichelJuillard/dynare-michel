@@ -131,7 +131,8 @@ SparseMatrix::At_Col(int c, int lag, NonZeroElem **first)
               firsta = firsta->NZE_C_N;
               i++;
             }
-          if (firsta->lag_index == lag) i++;
+          if (firsta->lag_index == lag)
+            i++;
         }
     }
   return i;
@@ -340,7 +341,7 @@ SparseMatrix::Read_SparseMatrix(string file_name, const int Size, int periods, i
               IM_i[make_pair(make_pair(eq, var), lag)] = j;
             }
         }
-      else if ( ((stack_solve_algo >= 0 || stack_solve_algo <= 4) && !steady_state) || ((solve_algo >= 6 || solve_algo <= 8) && steady_state) )
+      else if (((stack_solve_algo >= 0 || stack_solve_algo <= 4) && !steady_state) || ((solve_algo >= 6 || solve_algo <= 8) && steady_state))
         {
           for (i = 0; i < u_count_init; i++)
             {
@@ -523,7 +524,7 @@ SparseMatrix::Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>,
       eq = it4->first.second;
       int index = it4->second;
 #ifdef DEBUG
-      if (index<0 || index >= u_count_alloc || index > Size + Size*Size)
+      if (index < 0 || index >= u_count_alloc || index > Size + Size*Size)
         {
           ostringstream tmp;
           tmp << " in Init_Matlab_Sparse_Simple, index (" << index << ") out of range for u vector max = " << Size+Size*Size << " allocated = " << u_count_alloc << "\n";
@@ -545,7 +546,7 @@ SparseMatrix::Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>,
           ostringstream tmp;
           tmp << " in Init_Matlab_Sparse_Simple, index (" << eq << ") out of range for b vector\n";
           throw FatalExceptionHandling(tmp.str());
-         }
+        }
       if (var < 0 || var >= Size)
         {
           ostringstream tmp;
@@ -560,11 +561,9 @@ SparseMatrix::Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>,
         }
 #endif
       it4++;
-   }
+    }
   Aj[Size] = NZE;
 }
-
-
 
 void
 SparseMatrix::Init_Matlab_Sparse(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM, mxArray *A_m, mxArray *b_m, mxArray *x0_m)
@@ -637,24 +636,24 @@ SparseMatrix::Init_Matlab_Sparse(int periods, int y_kmin, int y_kmax, int Size, 
           if (var < (periods+y_kmax)*Size)
             {
               ti_y_kmin = -min(t, y_kmin);
-              ti_y_kmax = min(periods-(t +1 ), y_kmax);
+              ti_y_kmax = min(periods-(t +1), y_kmax);
               int ti_new_y_kmax = min(t, y_kmax);
               int ti_new_y_kmin = -min(periods-(t+1), y_kmin);
               if (lag <= ti_new_y_kmax && lag >= ti_new_y_kmin)   /*Build the index for sparse matrix containing the jacobian : u*/
                 {
 #ifdef DEBUG
-                  if (index<0 || index >= u_count_alloc || index > Size + Size*Size)
-                   {
-                     ostringstream tmp;
-                     tmp << " in Init_Matlab_Sparse, index (" << index << ") out of range for u vector max = " << Size+Size*Size << " allocated = " << u_count_alloc << "\n";
-                     throw FatalExceptionHandling(tmp.str());
-                   }
-                 if (NZE >= max_nze)
-                   {
-                     ostringstream tmp;
-                     tmp << " in Init_Matlab_Sparse, exceeds the capacity of A_m sparse matrix\n";
-                     throw FatalExceptionHandling(tmp.str());
-                   }
+                  if (index < 0 || index >= u_count_alloc || index > Size + Size*Size)
+                    {
+                      ostringstream tmp;
+                      tmp << " in Init_Matlab_Sparse, index (" << index << ") out of range for u vector max = " << Size+Size*Size << " allocated = " << u_count_alloc << "\n";
+                      throw FatalExceptionHandling(tmp.str());
+                    }
+                  if (NZE >= max_nze)
+                    {
+                      ostringstream tmp;
+                      tmp << " in Init_Matlab_Sparse, exceeds the capacity of A_m sparse matrix\n";
+                      throw FatalExceptionHandling(tmp.str());
+                    }
 #endif
                   A[NZE] = u[index];
                   Ai[NZE] = eq - lag * Size;
@@ -668,7 +667,7 @@ SparseMatrix::Init_Matlab_Sparse(int periods, int y_kmin, int y_kmax, int Size, 
                       ostringstream tmp;
                       tmp << " in Init_Matlab_Sparse, index (" << eq << ") out of range for b vector\n";
                       throw FatalExceptionHandling(tmp.str());
-                     }
+                    }
                   if (var+Size*(y_kmin+t+lag) < 0 || var+Size*(y_kmin+t+lag) >= Size*(periods+y_kmin+y_kmax))
                     {
                       ostringstream tmp;
@@ -708,7 +707,6 @@ SparseMatrix::Init_Matlab_Sparse(int periods, int y_kmin, int y_kmax, int Size, 
     }
   Aj[Size*periods] = NZE;
 }
-
 
 void
 SparseMatrix::Init_GE(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM)
@@ -966,7 +964,7 @@ SparseMatrix::compare(int *save_op, int *save_opa, int *save_opaa, int beg_t, in
           i = j = 0;
           while (i < nop4)
             {
-              save_op_s = (t_save_op_s *)(&(save_op[i]));
+              save_op_s = (t_save_op_s *) (&(save_op[i]));
               up = &u[save_op_s->first+t*diff1[j]];
               switch (save_op_s->operat)
                 {
@@ -997,7 +995,7 @@ SparseMatrix::compare(int *save_op, int *save_opa, int *save_opaa, int beg_t, in
           i = j = 0;
           while (i < nop4)
             {
-              save_op_s = (t_save_op_s *)(&(save_op[i]));
+              save_op_s = (t_save_op_s *) (&(save_op[i]));
               if (save_op_s->lag < (periods_beg_t-t))
                 {
                   up = &u[save_op_s->first+t*diff1[j]];
@@ -1356,43 +1354,41 @@ SparseMatrix::Check_the_Solution(int periods, int y_kmin, int y_kmax, int Size, 
     }
 }
 
-mxArray*
-SparseMatrix::substract_A_B(mxArray* A_m, mxArray* B_m)
+mxArray *
+SparseMatrix::substract_A_B(mxArray *A_m, mxArray *B_m)
 {
   unsigned int n_A = mxGetN(A_m);
   unsigned int m_A = mxGetM(A_m);
-  double* A_d = mxGetPr(A_m);
+  double *A_d = mxGetPr(A_m);
   unsigned int n_B = mxGetN(B_m);
-  double* B_d = mxGetPr(B_m);
-  mxArray* C_m = mxCreateDoubleMatrix(m_A, n_B, mxREAL);
-  double* C_d = mxGetPr(C_m);
+  double *B_d = mxGetPr(B_m);
+  mxArray *C_m = mxCreateDoubleMatrix(m_A, n_B, mxREAL);
+  double *C_d = mxGetPr(C_m);
   for (unsigned int j = 0; j < n_A; j++)
     for (unsigned int i = 0; i < m_A; i++)
       {
         unsigned int index = j*m_A+i;
         C_d[index] = A_d[index] - B_d[index];
-    }
+      }
   return C_m;
 }
 
-
-
-mxArray*
-SparseMatrix::Sparse_substract_A_SB(mxArray* A_m, mxArray* B_m)
+mxArray *
+SparseMatrix::Sparse_substract_A_SB(mxArray *A_m, mxArray *B_m)
 {
   unsigned int n_B = mxGetN(B_m);
   unsigned int m_B = mxGetM(B_m);
-  mwIndex* B_i = mxGetIr(B_m);
-  mwIndex* B_j = mxGetJc(B_m);
+  mwIndex *B_i = mxGetIr(B_m);
+  mwIndex *B_j = mxGetJc(B_m);
   unsigned int total_nze_B = B_j[n_B];
-  double* B_d = mxGetPr(B_m);
-  mxArray* C_m = mxDuplicateArray(A_m);
-  double* C_d = mxGetPr(C_m);
+  double *B_d = mxGetPr(B_m);
+  mxArray *C_m = mxDuplicateArray(A_m);
+  double *C_d = mxGetPr(C_m);
   unsigned int nze_B = 0;
   unsigned int B_col = 0;
   while (nze_B < total_nze_B)
     {
-      while (nze_B >= (unsigned int)B_j[B_col+1] && (nze_B < total_nze_B))
+      while (nze_B >= (unsigned int) B_j[B_col+1] && (nze_B < total_nze_B))
         B_col++;
       C_d[B_col*m_B+B_i[nze_B]] -= B_d[nze_B];
       nze_B++;
@@ -1400,35 +1396,33 @@ SparseMatrix::Sparse_substract_A_SB(mxArray* A_m, mxArray* B_m)
   return C_m;
 }
 
-
-
-mxArray*
-SparseMatrix::Sparse_substract_SA_SB(mxArray* A_m, mxArray* B_m)
+mxArray *
+SparseMatrix::Sparse_substract_SA_SB(mxArray *A_m, mxArray *B_m)
 {
   unsigned int n_A = mxGetN(A_m);
   unsigned int m_A = mxGetM(A_m);
-  mwIndex* A_i = mxGetIr(A_m);
-  mwIndex* A_j = mxGetJc(A_m);
+  mwIndex *A_i = mxGetIr(A_m);
+  mwIndex *A_j = mxGetJc(A_m);
   unsigned int total_nze_A = A_j[n_A];
-  double* A_d = mxGetPr(A_m);
+  double *A_d = mxGetPr(A_m);
   unsigned int n_B = mxGetN(B_m);
-  mwIndex* B_i = mxGetIr(B_m);
-  mwIndex* B_j = mxGetJc(B_m);
+  mwIndex *B_i = mxGetIr(B_m);
+  mwIndex *B_j = mxGetJc(B_m);
   unsigned int total_nze_B = B_j[n_B];
-  double* B_d = mxGetPr(B_m);
-  mxArray* C_m = mxCreateSparse(m_A, n_B, m_A*n_B, mxREAL);
-  mwIndex* C_i = mxGetIr(C_m);
-  mwIndex* C_j = mxGetJc(C_m);
-  double* C_d = mxGetPr(C_m);
+  double *B_d = mxGetPr(B_m);
+  mxArray *C_m = mxCreateSparse(m_A, n_B, m_A*n_B, mxREAL);
+  mwIndex *C_i = mxGetIr(C_m);
+  mwIndex *C_j = mxGetJc(C_m);
+  double *C_d = mxGetPr(C_m);
   unsigned int nze_B = 0, nze_C = 0, nze_A = 0;
   unsigned int A_col = 0, B_col = 0, C_col = 0;
   C_j[C_col] = 0;
   while (nze_A < total_nze_A || nze_B < total_nze_B)
     {
-      while (nze_A >= (unsigned int)A_j[A_col+1] && (nze_A < total_nze_A))
+      while (nze_A >= (unsigned int) A_j[A_col+1] && (nze_A < total_nze_A))
         A_col++;
       int A_row = A_i[nze_A];
-      while (nze_B >= (unsigned int)B_j[B_col+1] && (nze_B < total_nze_B))
+      while (nze_B >= (unsigned int) B_j[B_col+1] && (nze_B < total_nze_B))
         B_col++;
       int B_row = B_i[nze_B];
       if (A_col == B_col)
@@ -1453,7 +1447,7 @@ SparseMatrix::Sparse_substract_SA_SB(mxArray* A_m, mxArray* B_m)
             }
           else
             {
-              C_d[nze_C] = - B_d[nze_B++];
+              C_d[nze_C] = -B_d[nze_B++];
               C_i[nze_C] = B_row;
               while (C_col < B_col)
                 C_j[++C_col] = nze_C;
@@ -1472,10 +1466,10 @@ SparseMatrix::Sparse_substract_SA_SB(mxArray* A_m, mxArray* B_m)
         }
       else
         {
-          C_d[nze_C] = - B_d[nze_B++];
+          C_d[nze_C] = -B_d[nze_B++];
           C_i[nze_C] = B_row;
           while (C_col < B_col)
-             C_j[++C_col] = nze_C;
+            C_j[++C_col] = nze_C;
           C_j[B_col+1] = nze_C++;
           C_col = B_col;
         }
@@ -1486,27 +1480,26 @@ SparseMatrix::Sparse_substract_SA_SB(mxArray* A_m, mxArray* B_m)
   return C_m;
 }
 
-
-mxArray*
-SparseMatrix::mult_SAT_B(mxArray* A_m, mxArray* B_m)
+mxArray *
+SparseMatrix::mult_SAT_B(mxArray *A_m, mxArray *B_m)
 {
   unsigned int n_A = mxGetN(A_m);
   unsigned int m_A = mxGetM(A_m);
-  mwIndex* A_i = mxGetIr(A_m);
-  mwIndex* A_j = mxGetJc(A_m);
-  double* A_d = mxGetPr(A_m);
+  mwIndex *A_i = mxGetIr(A_m);
+  mwIndex *A_j = mxGetJc(A_m);
+  double *A_d = mxGetPr(A_m);
   unsigned int n_B = mxGetN(B_m);
-  double* B_d = mxGetPr(B_m);
-  mxArray* C_m = mxCreateDoubleMatrix(m_A, n_B, mxREAL);
-  double* C_d = mxGetPr(C_m);
+  double *B_d = mxGetPr(B_m);
+  mxArray *C_m = mxCreateDoubleMatrix(m_A, n_B, mxREAL);
+  double *C_d = mxGetPr(C_m);
   unsigned int nze_A = 0;
   for (unsigned int j = 0; j < n_B; j++)
     {
       for (unsigned int i = 0; i < n_A; i++)
-          {
+        {
           double sum = 0;
           nze_A = A_j[i];
-          while ( nze_A < (unsigned int)A_j[i+1] )
+          while (nze_A < (unsigned int) A_j[i+1])
             {
               unsigned int i_A = A_i[nze_A];
               sum += A_d[nze_A++] * B_d[i_A];
@@ -1517,32 +1510,31 @@ SparseMatrix::mult_SAT_B(mxArray* A_m, mxArray* B_m)
   return C_m;
 }
 
-
-mxArray*
-SparseMatrix::Sparse_mult_SAT_B(mxArray* A_m, mxArray* B_m)
+mxArray *
+SparseMatrix::Sparse_mult_SAT_B(mxArray *A_m, mxArray *B_m)
 {
   unsigned int n_A = mxGetN(A_m);
   unsigned int m_A = mxGetM(A_m);
-  mwIndex* A_i = mxGetIr(A_m);
-  mwIndex* A_j = mxGetJc(A_m);
-  double* A_d = mxGetPr(A_m);
+  mwIndex *A_i = mxGetIr(A_m);
+  mwIndex *A_j = mxGetJc(A_m);
+  double *A_d = mxGetPr(A_m);
   unsigned int n_B = mxGetN(B_m);
   unsigned int m_B = mxGetM(B_m);
-  double* B_d = mxGetPr(B_m);
-  mxArray* C_m = mxCreateSparse(m_A, n_B, m_A*n_B, mxREAL);
-  mwIndex* C_i = mxGetIr(C_m);
-  mwIndex* C_j = mxGetJc(C_m);
-  double* C_d = mxGetPr(C_m);
+  double *B_d = mxGetPr(B_m);
+  mxArray *C_m = mxCreateSparse(m_A, n_B, m_A*n_B, mxREAL);
+  mwIndex *C_i = mxGetIr(C_m);
+  mwIndex *C_j = mxGetJc(C_m);
+  double *C_d = mxGetPr(C_m);
   unsigned int nze_C = 0, nze_A = 0;
   unsigned int C_col = 0;
   C_j[C_col] = 0;
   for (unsigned int j = 0; j < n_B; j++)
     {
       for (unsigned int i = 0; i < n_A; i++)
-          {
+        {
           double sum = 0;
           nze_A = A_j[i];
-          while ( nze_A < (unsigned int)A_j[i+1] )
+          while (nze_A < (unsigned int) A_j[i+1])
             {
               unsigned int i_A = A_i[nze_A];
               sum += A_d[nze_A++] * B_d[i_A];
@@ -1563,38 +1555,37 @@ SparseMatrix::Sparse_mult_SAT_B(mxArray* A_m, mxArray* B_m)
   return C_m;
 }
 
-
-mxArray*
-SparseMatrix::Sparse_mult_SAT_SB(mxArray* A_m, mxArray* B_m)
+mxArray *
+SparseMatrix::Sparse_mult_SAT_SB(mxArray *A_m, mxArray *B_m)
 {
   unsigned int n_A = mxGetN(A_m);
   unsigned int m_A = mxGetM(A_m);
-  mwIndex* A_i = mxGetIr(A_m);
-  mwIndex* A_j = mxGetJc(A_m);
-  double* A_d = mxGetPr(A_m);
+  mwIndex *A_i = mxGetIr(A_m);
+  mwIndex *A_j = mxGetJc(A_m);
+  double *A_d = mxGetPr(A_m);
   unsigned int n_B = mxGetN(B_m);
-  mwIndex* B_i = mxGetIr(B_m);
-  mwIndex* B_j = mxGetJc(B_m);
-  double* B_d = mxGetPr(B_m);
-  mxArray* C_m = mxCreateSparse(m_A, n_B, m_A*n_B, mxREAL);
-  mwIndex* C_i = mxGetIr(C_m);
-  mwIndex* C_j = mxGetJc(C_m);
-  double* C_d = mxGetPr(C_m);
+  mwIndex *B_i = mxGetIr(B_m);
+  mwIndex *B_j = mxGetJc(B_m);
+  double *B_d = mxGetPr(B_m);
+  mxArray *C_m = mxCreateSparse(m_A, n_B, m_A*n_B, mxREAL);
+  mwIndex *C_i = mxGetIr(C_m);
+  mwIndex *C_j = mxGetJc(C_m);
+  double *C_d = mxGetPr(C_m);
   unsigned int nze_B = 0, nze_C = 0, nze_A = 0;
   unsigned int C_col = 0;
   C_j[C_col] = 0;
   for (unsigned int j = 0; j < n_B; j++)
     {
       for (unsigned int i = 0; i < n_A; i++)
-          {
+        {
           double sum = 0;
           nze_B = B_j[j];
           nze_A = A_j[i];
-          while ( nze_A < (unsigned int)A_j[i+1] && nze_B < (unsigned int)B_j[j+1])
+          while (nze_A < (unsigned int) A_j[i+1] && nze_B < (unsigned int) B_j[j+1])
             {
               unsigned int i_A = A_i[nze_A];
               unsigned int i_B = B_i[nze_B];
-              if ( i_A == i_B)
+              if (i_A == i_B)
                 sum += A_d[nze_A++] * B_d[nze_B++];
               else if (i_A < i_B)
                 nze_A++;
@@ -1617,25 +1608,25 @@ SparseMatrix::Sparse_mult_SAT_SB(mxArray* A_m, mxArray* B_m)
   return C_m;
 }
 
-mxArray*
-SparseMatrix::Sparse_transpose(mxArray* A_m)
+mxArray *
+SparseMatrix::Sparse_transpose(mxArray *A_m)
 {
   unsigned int n_A = mxGetN(A_m);
   unsigned int m_A = mxGetM(A_m);
-  mwIndex* A_i = mxGetIr(A_m);
-  mwIndex* A_j = mxGetJc(A_m);
+  mwIndex *A_i = mxGetIr(A_m);
+  mwIndex *A_j = mxGetJc(A_m);
   unsigned int total_nze_A = A_j[n_A];
-  double* A_d = mxGetPr(A_m);
-  mxArray* C_m = mxCreateSparse(n_A, m_A, total_nze_A, mxREAL);
-  mwIndex* C_i = mxGetIr(C_m);
-  mwIndex* C_j = mxGetJc(C_m);
-  double* C_d = mxGetPr(C_m);
+  double *A_d = mxGetPr(A_m);
+  mxArray *C_m = mxCreateSparse(n_A, m_A, total_nze_A, mxREAL);
+  mwIndex *C_i = mxGetIr(C_m);
+  mwIndex *C_j = mxGetJc(C_m);
+  double *C_d = mxGetPr(C_m);
   unsigned int nze_C = 0, nze_A = 0;
   memset(C_j, 0, m_A);
   map<pair<unsigned int, unsigned int>, double> B2;
   for (unsigned int i = 0; i < n_A; i++)
     {
-      while ( nze_A < (unsigned int)A_j[i+1])
+      while (nze_A < (unsigned int) A_j[i+1])
         {
           C_j[A_i[nze_A]+1]++;
           B2[make_pair(A_i[nze_A], i)] = A_d[nze_A];
@@ -1652,13 +1643,11 @@ SparseMatrix::Sparse_transpose(mxArray* A_m)
   return C_m;
 }
 
-
-
 void
-SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int Size, double slowc_l, bool is_two_boundaries, int  it_)
+SparseMatrix::Solve_Matlab_Relaxation(mxArray *A_m, mxArray *b_m, unsigned int Size, double slowc_l, bool is_two_boundaries, int  it_)
 {
   mxArray *B1, *C1, *A2, *B2, *A3, *b1, *b2;
-  double* b_m_d = mxGetPr(b_m);
+  double *b_m_d = mxGetPr(b_m);
   if (!b_m_d)
     {
       ostringstream tmp;
@@ -1690,56 +1679,56 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int S
   unsigned int nze = 0;
   unsigned int var = A_m_j[nze];
   B1 = mxCreateSparse(Size, Size, Size*Size, mxREAL);
-  mwIndex* B1_i = mxGetIr(B1);
-  mwIndex* B1_j = mxGetJc(B1);
-  double* B1_d = mxGetPr(B1);
+  mwIndex *B1_i = mxGetIr(B1);
+  mwIndex *B1_j = mxGetJc(B1);
+  double *B1_d = mxGetPr(B1);
   unsigned int B1_nze = 0;
   unsigned int B1_var = 0;
   B1_i[B1_nze] = 0;
   B1_j[B1_var] = 0;
   C1 = mxCreateSparse(Size, Size, Size*Size, mxREAL);
-  mwIndex* C1_i = mxGetIr(C1);
-  mwIndex* C1_j = mxGetJc(C1);
-  double* C1_d = mxGetPr(C1);
+  mwIndex *C1_i = mxGetIr(C1);
+  mwIndex *C1_j = mxGetJc(C1);
+  double *C1_d = mxGetPr(C1);
   unsigned int C1_nze = 0;
   unsigned int C1_var = 0;
   C1_i[C1_nze] = 0;
   C1_j[C1_var] = 0;
   A2 = mxCreateSparse(Size, Size, Size*Size, mxREAL);
-  mwIndex* A2_i = mxGetIr(A2);
-  mwIndex* A2_j = mxGetJc(A2);
-  double* A2_d = mxGetPr(A2);
+  mwIndex *A2_i = mxGetIr(A2);
+  mwIndex *A2_j = mxGetJc(A2);
+  double *A2_d = mxGetPr(A2);
   unsigned int A2_nze = 0;
   unsigned int A2_var = 0;
   A2_i[A2_nze] = 0;
   A2_j[A2_var] = 0;
   B2 = mxCreateSparse(Size, Size, Size*Size, mxREAL);
-  mwIndex* B2_i = mxGetIr(B2);
-  mwIndex* B2_j = mxGetJc(B2);
-  double* B2_d = mxGetPr(B2);
+  mwIndex *B2_i = mxGetIr(B2);
+  mwIndex *B2_j = mxGetJc(B2);
+  double *B2_d = mxGetPr(B2);
   unsigned int B2_nze = 0;
   unsigned int B2_var = 0;
   B2_i[B2_nze] = 0;
   B2_j[B2_var] = 0;
   A3 = mxCreateSparse(Size, Size, Size*Size, mxREAL);
-  mwIndex* A3_i = mxGetIr(A3);
-  mwIndex* A3_j = mxGetJc(A3);
-  double* A3_d = mxGetPr(A3);
+  mwIndex *A3_i = mxGetIr(A3);
+  mwIndex *A3_j = mxGetJc(A3);
+  double *A3_d = mxGetPr(A3);
   unsigned int A3_nze = 0;
   unsigned int A3_var = 0;
   A3_i[A3_nze] = 0;
   A3_j[A3_var] = 0;
   b1 = mxCreateDoubleMatrix(Size, 1, mxREAL);
-  double* b1_d = mxGetPr(b1);
+  double *b1_d = mxGetPr(b1);
   b2 = mxCreateDoubleMatrix(Size, 1, mxREAL);
-  double* b2_d = mxGetPr(b2);
+  double *b2_d = mxGetPr(b2);
   unsigned int eq = 0;
   /*B1 C1
     A2 B2
-       A3*/
+    A3*/
   while (var < 2*Size && nze < max_nze)
     {
-      if ((unsigned int)A_m_j[var+1] <= nze)
+      if ((unsigned int) A_m_j[var+1] <= nze)
         {
           if (var < Size)
             b1_d[var] = b_m_d[var];
@@ -1767,7 +1756,7 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int S
               A2_nze++;
             }
         }
-      else if(var < 2*Size)
+      else if (var < 2*Size)
         {
           if (eq < Size)
             {
@@ -1804,12 +1793,12 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int S
     A2_j[++A2_var] = A2_nze;
   while (B2_var < Size)
     B2_j[++B2_var] = B2_nze;
-  while(A3_var < Size)
+  while (A3_var < Size)
     A3_j[++A3_var] = A3_nze;
   mxArray *d1 = NULL;
-  vector<pair<mxArray*, mxArray*> > triangular_form;
+  vector<pair<mxArray *, mxArray *> > triangular_form;
   int last_t = 0;
-  double sumc=0, C_sumc = 1000;
+  double sumc = 0, C_sumc = 1000;
   mxArray *B1_inv = NULL;
   mxArray *B1_inv_t = NULL;
   for (int t = 1; t <= periods; t++)
@@ -1822,9 +1811,9 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int S
           mexCallMATLAB(1, &B1_inv, 1, &B1, "inv");
           mwIndex *B_inv_j = mxGetJc(B1_inv);
           unsigned int B_inv_nze = B_inv_j[Size];
-          double* B_inv_d = mxGetPr(B1_inv);
+          double *B_inv_d = mxGetPr(B1_inv);
           sumc = 0;
-          for (unsigned int i = 0; i <B_inv_nze; i++ )
+          for (unsigned int i = 0; i < B_inv_nze; i++)
             sumc += fabs(B_inv_d[i]);
           last_t = t;
         }
@@ -1833,7 +1822,7 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int S
 
       d1 = mult_SAT_B(B1_inv_t, b1);
       if (t < periods)
-      //Computation for the next lines
+        //Computation for the next lines
         {
           mxDestroyArray(B1_inv_t);
           mxArray *A2_t = Sparse_transpose(A2);
@@ -1864,7 +1853,7 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int S
         nze--;
       while (var < (t+2)*Size && nze < max_nze)
         {
-          if ((unsigned int)A_m_j[var+1] <= nze)
+          if ((unsigned int) A_m_j[var+1] <= nze)
             {
               b2_d[var - (t+1) * Size] = b_m_d[var];
               var++;
@@ -1889,30 +1878,30 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int S
         }
     }
   double *d1_d = mxGetPr(d1);
-  for(unsigned i=0; i<Size; i++)
+  for (unsigned i = 0; i < Size; i++)
     {
       int eq = index_vara[i+Size*(y_kmin+periods-1)];
-      double yy = - (d1_d[i] + y[eq]);
+      double yy = -(d1_d[i] + y[eq]);
       direction[eq] = yy;
       y[eq] += slowc_l * yy;
     }
 
-  pair<mxArray*, mxArray*> tf;
+  pair<mxArray *, mxArray *> tf;
   for (int t = periods-2; t >= 0; t--)
     {
-      mxArray* tmp;
+      mxArray *tmp;
       tf = triangular_form.back();
       triangular_form.pop_back();
-      mxArray* tf_first_t = Sparse_transpose(tf.first);
+      mxArray *tf_first_t = Sparse_transpose(tf.first);
       mxDestroyArray(tf.first);
       tmp = mult_SAT_B(tf_first_t, d1);
       d1 = substract_A_B(tf.second, tmp);
       d1_d = mxGetPr(d1);
       mxDestroyArray(tmp);
-      for(unsigned i=0; i<Size; i++)
+      for (unsigned i = 0; i < Size; i++)
         {
           int eq = index_vara[i+Size*(y_kmin+t)];
-          double yy = - (d1_d[i] + y[eq]);
+          double yy = -(d1_d[i] + y[eq]);
           direction[eq] = yy;
           y[eq] += slowc_l * yy;
         }
@@ -1931,7 +1920,7 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int S
 }
 
 void
-SparseMatrix::Solve_Matlab_LU_UMFPack(mxArray* A_m, mxArray* b_m, int Size, double slowc_l, bool is_two_boundaries, int  it_)
+SparseMatrix::Solve_Matlab_LU_UMFPack(mxArray *A_m, mxArray *b_m, int Size, double slowc_l, bool is_two_boundaries, int  it_)
 {
   int n = mxGetM(A_m);
   mxArray *z;
@@ -1944,15 +1933,15 @@ SparseMatrix::Solve_Matlab_LU_UMFPack(mxArray* A_m, mxArray* b_m, int Size, doub
     for (int i = 0; i < n; i++)
       {
         int eq = index_vara[i+Size*y_kmin];
-        double yy = - (res[i] + y[eq]);
-         direction[eq] = yy;
+        double yy = -(res[i] + y[eq]);
+        direction[eq] = yy;
         y[eq] += slowc_l * yy;
       }
   else
     for (int i = 0; i < n; i++)
       {
         int eq = index_vara[i];
-        double yy = - (res[i] + y[eq+it_*y_size]);
+        double yy = -(res[i] + y[eq+it_*y_size]);
         direction[eq] = yy;
         y[eq+it_*y_size] += slowc_l * yy;
       }
@@ -1962,7 +1951,7 @@ SparseMatrix::Solve_Matlab_LU_UMFPack(mxArray* A_m, mxArray* b_m, int Size, doub
 }
 
 void
-SparseMatrix::Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double slowc, int block, bool is_two_boundaries, int it_, bool steady_state, mxArray* x0_m)
+SparseMatrix::Solve_Matlab_GMRES(mxArray *A_m, mxArray *b_m, int Size, double slowc, int block, bool is_two_boundaries, int it_, bool steady_state, mxArray *x0_m)
 {
 #ifdef OCTAVE_MEX_FILE
   ostringstream tmp;
@@ -1991,7 +1980,7 @@ SparseMatrix::Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double sl
   rhs[6] = U1;
   rhs[7] = x0_m;
   mxArray *lhs[2];
-  mexCallMATLAB(2,lhs, 8, rhs, "gmres");
+  mexCallMATLAB(2, lhs, 8, rhs, "gmres");
   mxArray *z = lhs[0];
   mxArray *flag = lhs[1];
   double *flag1 = mxGetPr(flag);
@@ -2028,7 +2017,7 @@ SparseMatrix::Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double sl
         for (int i = 0; i < n; i++)
           {
             int eq = index_vara[i+Size*y_kmin];
-            double yy = - (res[i] + y[eq]);
+            double yy = -(res[i] + y[eq]);
             direction[eq] = yy;
             y[eq] += slowc * yy;
           }
@@ -2036,7 +2025,7 @@ SparseMatrix::Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double sl
         for (int i = 0; i < n; i++)
           {
             int eq = index_vara[i];
-            double yy = - (res[i] + y[eq+it_*y_size]);
+            double yy = -(res[i] + y[eq+it_*y_size]);
             direction[eq] = yy;
             y[eq+it_*y_size] += slowc * yy;
           }
@@ -2047,9 +2036,8 @@ SparseMatrix::Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double sl
   mxDestroyArray(flag);
 }
 
-
 void
-SparseMatrix::Solve_Matlab_BiCGStab(mxArray* A_m, mxArray* b_m, int Size, double slowc, int block, bool is_two_boundaries, int it_, mxArray* x0_m, bool steady_state)
+SparseMatrix::Solve_Matlab_BiCGStab(mxArray *A_m, mxArray *b_m, int Size, double slowc, int block, bool is_two_boundaries, int it_, mxArray *x0_m, bool steady_state)
 {
   unsigned int n = mxGetM(A_m);
   /*[L1, U1]=luinc(g1a,luinc_tol);*/
@@ -2064,7 +2052,7 @@ SparseMatrix::Solve_Matlab_BiCGStab(mxArray* A_m, mxArray* b_m, int Size, double
   mxArray *z;
   if (steady_state)  /*Octave BicStab algorihtm involves a 0 division in case of a preconditionner equal to the LU decomposition of A matrix*/
     {
-      mxArray* res = mult_SAT_B(Sparse_transpose(A_m), x0_m);
+      mxArray *res = mult_SAT_B(Sparse_transpose(A_m), x0_m);
       double *resid = mxGetPr(res);
       double *b = mxGetPr(b_m);
       for (unsigned int i = 0; i < n; i++)
@@ -2112,7 +2100,7 @@ SparseMatrix::Solve_Matlab_BiCGStab(mxArray* A_m, mxArray* b_m, int Size, double
       rhs[5] = U1;
       rhs[6] = x0_m;
       mxArray *lhs[2];
-      mexCallMATLAB(2,lhs, 7, rhs, "bicgstab");
+      mexCallMATLAB(2, lhs, 7, rhs, "bicgstab");
       z = lhs[0];
       mxArray *flag = lhs[1];
       double *flag1 = mxGetPr(flag);
@@ -2124,7 +2112,7 @@ SparseMatrix::Solve_Matlab_BiCGStab(mxArray* A_m, mxArray* b_m, int Size, double
       mxDestroyArray(rhs[5]);
     }
   /*mexPrintf("z");
-  mexCallMATLAB(0, NULL, 1, &z, "disp");*/
+    mexCallMATLAB(0, NULL, 1, &z, "disp");*/
   mxDestroyArray(rhs0[1]);
 
   if (flags > 0)
@@ -2154,16 +2142,16 @@ SparseMatrix::Solve_Matlab_BiCGStab(mxArray* A_m, mxArray* b_m, int Size, double
         for (unsigned int i = 0; i < n; i++)
           {
             int eq = index_vara[i+Size*y_kmin];
-            double yy = - (res[i] + y[eq]);
-             direction[eq] = yy;
+            double yy = -(res[i] + y[eq]);
+            direction[eq] = yy;
             y[eq] += slowc * yy;
           }
       else
         for (unsigned int i = 0; i < n; i++)
           {
             int eq = index_vara[i];
-            double yy = - (res[i] + y[eq+it_*y_size]);
-             direction[eq] = yy;
+            double yy = -(res[i] + y[eq+it_*y_size]);
+            direction[eq] = yy;
             y[eq+it_*y_size] += slowc * yy;
           }
     }
@@ -2580,9 +2568,9 @@ SparseMatrix::Solve_ByteCode_Symbolic_Sparse_GaussianElimination(int Size, bool 
                     }
                 }
               if (fabs(piv) < eps)
-                mexPrintf("==> Error NR_max=%d, N_max=%d and piv=%f, piv_abs=%f, markovitz_max=%f\n",NR_max, N_max, piv, piv_abs, markovitz_max);
+                mexPrintf("==> Error NR_max=%d, N_max=%d and piv=%f, piv_abs=%f, markovitz_max=%f\n", NR_max, N_max, piv, piv_abs, markovitz_max);
               if (NR_max == 0)
-                mexPrintf("==> Error NR_max=0 and piv=%f, markovitz_max=%f\n",piv, markovitz_max);
+                mexPrintf("==> Error NR_max=0 and piv=%f, markovitz_max=%f\n", piv, markovitz_max);
               pivot[i] = pivj;
               pivot_save[i] = pivj;
               pivotk[i] = pivk;
@@ -2604,10 +2592,10 @@ SparseMatrix::Solve_ByteCode_Symbolic_Sparse_GaussianElimination(int Size, bool 
                 {
                   if (nop+1 >= nopa)
                     {
-                      nopa = long (mem_increasing_factor*(double)nopa);
+                      nopa = long (mem_increasing_factor*(double) nopa);
                       save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
                     }
-                  save_op_s = (t_save_op_s *)(&(save_op[nop]));
+                  save_op_s = (t_save_op_s *) (&(save_op[nop]));
                   save_op_s->operat = IFLD;
                   save_op_s->first = pivk;
                   save_op_s->lag = 0;
@@ -2617,10 +2605,10 @@ SparseMatrix::Solve_ByteCode_Symbolic_Sparse_GaussianElimination(int Size, bool 
           if (piv_abs < eps)
             {
               ostringstream tmp;
-              if (Block_number>1)
+              if (Block_number > 1)
                 tmp << " in Solve_ByteCode_Symbolic_Sparse_GaussianElimination, singular system in block " << Block_number+1 << "\n";
               else
-                 tmp << " in Solve_ByteCode_Symbolic_Sparse_GaussianElimination, singular system\n";
+                tmp << " in Solve_ByteCode_Symbolic_Sparse_GaussianElimination, singular system\n";
               throw FatalExceptionHandling(tmp.str());
             }
           /*divide all the non zeros elements of the line pivj by the max_pivot*/
@@ -2643,10 +2631,10 @@ SparseMatrix::Solve_ByteCode_Symbolic_Sparse_GaussianElimination(int Size, bool 
                     {
                       if (nop+j*2+1 >= nopa)
                         {
-                          nopa = long (mem_increasing_factor*(double)nopa);
+                          nopa = long (mem_increasing_factor*(double) nopa);
                           save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
                         }
-                      save_op_s = (t_save_op_s *)(&(save_op[nop+j*2]));
+                      save_op_s = (t_save_op_s *) (&(save_op[nop+j*2]));
                       save_op_s->operat = IFDIV;
                       save_op_s->first = first->u_index;
                       save_op_s->lag = first->lag_index;
@@ -2662,10 +2650,10 @@ SparseMatrix::Solve_ByteCode_Symbolic_Sparse_GaussianElimination(int Size, bool 
                 {
                   if (nop+1 >= nopa)
                     {
-                      nopa = long (mem_increasing_factor*(double)nopa);
+                      nopa = long (mem_increasing_factor*(double) nopa);
                       save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
                     }
-                  save_op_s = (t_save_op_s *)(&(save_op[nop]));
+                  save_op_s = (t_save_op_s *) (&(save_op[nop]));
                   save_op_s->operat = IFDIV;
                   save_op_s->first = b[pivj];
                   save_op_s->lag = 0;
@@ -2699,10 +2687,10 @@ SparseMatrix::Solve_ByteCode_Symbolic_Sparse_GaussianElimination(int Size, bool 
                     {
                       if (nop+1 >= nopa)
                         {
-                          nopa = long (mem_increasing_factor*(double)nopa);
+                          nopa = long (mem_increasing_factor*(double) nopa);
                           save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
                         }
-                      save_op_s_l = (t_save_op_s *)(&(save_op[nop]));
+                      save_op_s_l = (t_save_op_s *) (&(save_op[nop]));
                       save_op_s_l->operat = IFLD;
                       save_op_s_l->first = first->u_index;
                       save_op_s_l->lag = abs(first->lag_index);
@@ -2747,10 +2735,10 @@ SparseMatrix::Solve_ByteCode_Symbolic_Sparse_GaussianElimination(int Size, bool 
                             {
                               if (nop+2 >= nopa)
                                 {
-                                  nopa = long (mem_increasing_factor*(double)nopa);
+                                  nopa = long (mem_increasing_factor*(double) nopa);
                                   save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
                                 }
-                              save_op_s_l = (t_save_op_s *)(&(save_op[nop]));
+                              save_op_s_l = (t_save_op_s *) (&(save_op[nop]));
                               save_op_s_l->operat = IFLESS;
                               save_op_s_l->first = tmp_u_count;
                               save_op_s_l->second = first_piv->u_index;
@@ -2795,10 +2783,10 @@ SparseMatrix::Solve_ByteCode_Symbolic_Sparse_GaussianElimination(int Size, bool 
                                 {
                                   if (nop+3 >= nopa)
                                     {
-                                      nopa = long (mem_increasing_factor*(double)nopa);
+                                      nopa = long (mem_increasing_factor*(double) nopa);
                                       save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
                                     }
-                                  save_op_s_l = (t_save_op_s *)(&(save_op[nop]));
+                                  save_op_s_l = (t_save_op_s *) (&(save_op[nop]));
                                   save_op_s_l->operat = IFSUB;
                                   save_op_s_l->first = first_sub->u_index;
                                   save_op_s_l->second = first_piv->u_index;
@@ -2829,10 +2817,10 @@ SparseMatrix::Solve_ByteCode_Symbolic_Sparse_GaussianElimination(int Size, bool 
                     {
                       if (nop+3 >= nopa)
                         {
-                          nopa = long (mem_increasing_factor*(double)nopa);
+                          nopa = long (mem_increasing_factor*(double) nopa);
                           save_op = (int *) mxRealloc(save_op, nopa*sizeof(int));
                         }
-                      save_op_s_l = (t_save_op_s *)(&(save_op[nop]));
+                      save_op_s_l = (t_save_op_s *) (&(save_op[nop]));
                       save_op_s_l->operat = IFSUB;
                       save_op_s_l->first = b[row];
                       save_op_s_l->second = b[pivj];
@@ -2921,7 +2909,6 @@ SparseMatrix::Solve_ByteCode_Symbolic_Sparse_GaussianElimination(int Size, bool 
   End_GE(Size);
 }
 
-
 void
 SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter, bool steady_state, int stack_solve_algo, int solve_algo)
 {
@@ -2930,7 +2917,7 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
   Clear_u();
   error_not_printed = true;
   u_count_alloc_save = u_count_alloc;
-  if (isnan(res1) || isinf(res1) || (res2 > 12*g0 && iter>0))
+  if (isnan(res1) || isinf(res1) || (res2 > 12*g0 && iter > 0))
     {
       if (iter == 0 || fabs(slowc_save) < 1e-8)
         {
@@ -2967,12 +2954,12 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
               throw FatalExceptionHandling(tmp.str());
             }
         }
-      if(!(isnan(res1) || isinf(res1)) && !(isnan(g0) || isinf(g0)))
+      if (!(isnan(res1) || isinf(res1)) && !(isnan(g0) || isinf(g0)))
         {
           if (try_at_iteration == 0)
             {
               prev_slowc_save = slowc_save;
-              slowc_save = max( - gp0 / (2 * (res2 - g0 - gp0)) , 0.1);
+              slowc_save = max(-gp0 / (2 * (res2 - g0 - gp0)), 0.1);
             }
           else
             {
@@ -2981,10 +2968,10 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
               double a = (1/(slowc_save * slowc_save) * t1 - 1/(prev_slowc_save * prev_slowc_save) * t2) / (slowc_save - prev_slowc_save);
               double b = (-prev_slowc_save/(slowc_save * slowc_save) * t1 + slowc_save/(prev_slowc_save * prev_slowc_save) * t2) / (slowc_save - prev_slowc_save);
               prev_slowc_save = slowc_save;
-              slowc_save = max(min( -b + sqrt(b*b - 3 * a * gp0) / (3 * a), 0.5 * slowc_save), 0.1 * slowc_save);
+              slowc_save = max(min(-b + sqrt(b*b - 3 * a * gp0) / (3 * a), 0.5 * slowc_save), 0.1 * slowc_save);
             }
           glambda2 = res2;
-          try_at_iteration ++;
+          try_at_iteration++;
         }
       else
         {
@@ -3002,40 +2989,40 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
     {
       return;
     }
-  if (print_it )
+  if (print_it)
     {
       //mexPrintf("solwc=%f g0=%f res2=%f glambda2=%f\n",slowc_save,g0, res2, glambda2);
       if (steady_state)
         {
           switch (solve_algo)
             {
-              case 0:
-                mexPrintf("MODEL STEADY STATE: MATLAB fsolve\n");
-                break;
-              case 1:
-                mexPrintf("MODEL STEADY STATE: MATLAB solve1\n");
-                break;
-              case 2:
-              case 4:
-                mexPrintf("MODEL STEADY STATE: block decomposition + MATLAB solve1\n");
-                break;
-              case 3:
-                mexPrintf("MODEL STEADY STATE: MATLAB csolve\n");
-                break;
-              case 5:
-                mexPrintf("MODEL STEADY STATE: (method=ByteCode own solver)\n");
-                break;
-              case 6:
-                mexPrintf("MODEL STEADY STATE: Sparse LU\n");
-                break;
-              case 7:
-                mexPrintf("MODEL STEADY STATE: (method=GMRES)\n");
-                break;
-              case 8:
-                mexPrintf("MODEL STEADY STATE: (method=BiCGStab)\n");
-                break;
-              default:
-                mexPrintf("MODEL STEADY STATE: (method=Unknown - %d - )\n", stack_solve_algo);
+            case 0:
+              mexPrintf("MODEL STEADY STATE: MATLAB fsolve\n");
+              break;
+            case 1:
+              mexPrintf("MODEL STEADY STATE: MATLAB solve1\n");
+              break;
+            case 2:
+            case 4:
+              mexPrintf("MODEL STEADY STATE: block decomposition + MATLAB solve1\n");
+              break;
+            case 3:
+              mexPrintf("MODEL STEADY STATE: MATLAB csolve\n");
+              break;
+            case 5:
+              mexPrintf("MODEL STEADY STATE: (method=ByteCode own solver)\n");
+              break;
+            case 6:
+              mexPrintf("MODEL STEADY STATE: Sparse LU\n");
+              break;
+            case 7:
+              mexPrintf("MODEL STEADY STATE: (method=GMRES)\n");
+              break;
+            case 8:
+              mexPrintf("MODEL STEADY STATE: (method=BiCGStab)\n");
+              break;
+            default:
+              mexPrintf("MODEL STEADY STATE: (method=Unknown - %d - )\n", stack_solve_algo);
             }
         }
 
@@ -3051,21 +3038,21 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
     Simple_Init(it_, y_kmin, y_kmax, Size, IM_i, zero_solution);
   else
     {
-      b_m = mxCreateDoubleMatrix(Size,1,mxREAL);
+      b_m = mxCreateDoubleMatrix(Size, 1, mxREAL);
       if (!b_m)
         {
           ostringstream tmp;
           tmp << " in Simulate_Newton_One_Boundary, can't allocate b_m vector\n";
           throw FatalExceptionHandling(tmp.str());
         }
-      A_m = mxCreateSparse(Size, Size, min(int(IM_i.size()*2), Size*Size), mxREAL);
+      A_m = mxCreateSparse(Size, Size, min(int (IM_i.size()*2), Size*Size), mxREAL);
       if (!A_m)
         {
           ostringstream tmp;
           tmp << " in Simulate_Newton_One_Boundary, can't allocate A_m matrix\n";
           throw FatalExceptionHandling(tmp.str());
         }
-      x0_m = mxCreateDoubleMatrix(Size,1,mxREAL);
+      x0_m = mxCreateDoubleMatrix(Size, 1, mxREAL);
       if (!x0_m)
         {
           ostringstream tmp;
@@ -3079,7 +3066,7 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
       for (int i = 0; i < Size; i++)
         {
           int eq = index_vara[i];
-          double yy = - (y[eq+it_*y_size]);
+          double yy = -(y[eq+it_*y_size]);
           direction[eq] = yy;
           y[eq+it_*y_size] += slowc * yy;
         }
@@ -3098,8 +3085,6 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
   return;
 }
 
-
-
 void
 SparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, bool cvg, int &iter, int minimal_solving_periods, int stack_solve_algo, unsigned int endo_name_length, char *P_endo_names)
 {
@@ -3116,11 +3101,11 @@ SparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int it_, int 
       mexEvalString("drawnow;");
       time00 = clock();
     }
-  if (isnan(res1) || isinf(res1) || (res2 > 12*g0 && iter>0))
+  if (isnan(res1) || isinf(res1) || (res2 > 12*g0 && iter > 0))
     {
       if (iter == 0 || fabs(slowc_save) < 1e-8)
         {
-           for (int j = 0; j < y_size; j++)
+          for (int j = 0; j < y_size; j++)
             {
               ostringstream res;
               for (unsigned int i = 0; i < endo_name_length; i++)
@@ -3139,19 +3124,19 @@ SparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int it_, int 
                 mexPrintf("   variable %s (%d) at time %d = %f direction = %f\n", res.str().c_str(), j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
             }
           ostringstream Error;
-          if (iter == 0 )
+          if (iter == 0)
             Error << " in Simulate_Newton_Two_Boundaries, the initial values of endogenous variables are too far from the solution.\nChange them!\n";
           else
             Error << " in Simulate_Newton_Two_Boundaries, dynare cannot improve the simulation in block " << blck+1 << " at time " << it_+1 << " (variable " << index_vara[max_res_idx]+1 << ")\n";
           //Error << filename << " stopped";
           throw FatalExceptionHandling(Error.str());
         }
-      if(!(isnan(res1) || isinf(res1)) && !(isnan(g0) || isinf(g0)) && (stack_solve_algo == 4 || stack_solve_algo == 5))
+      if (!(isnan(res1) || isinf(res1)) && !(isnan(g0) || isinf(g0)) && (stack_solve_algo == 4 || stack_solve_algo == 5))
         {
           if (try_at_iteration == 0)
             {
               prev_slowc_save = slowc_save;
-              slowc_save = max( - gp0 / (2 * (res2 - g0 - gp0)) , 0.1);
+              slowc_save = max(-gp0 / (2 * (res2 - g0 - gp0)), 0.1);
             }
           else
             {
@@ -3160,11 +3145,11 @@ SparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int it_, int 
               double a = (1/(slowc_save * slowc_save) * t1 - 1/(prev_slowc_save * prev_slowc_save) * t2) / (slowc_save - prev_slowc_save);
               double b = (-prev_slowc_save/(slowc_save * slowc_save) * t1 + slowc_save/(prev_slowc_save * prev_slowc_save) * t2) / (slowc_save - prev_slowc_save);
               prev_slowc_save = slowc_save;
-              slowc_save = max(min( -b + sqrt(b*b - 3 * a * gp0) / (3 * a), 0.5 * slowc_save), 0.1 * slowc_save);
+              slowc_save = max(min(-b + sqrt(b*b - 3 * a * gp0) / (3 * a), 0.5 * slowc_save), 0.1 * slowc_save);
             }
           glambda2 = res2;
-          try_at_iteration ++;
-          if (slowc_save<=0.1)
+          try_at_iteration++;
+          if (slowc_save <= 0.1)
             {
               for (int i = 0; i < y_size*(periods+y_kmin); i++)
                 y[i] = ya[i]+direction[i];
@@ -3234,28 +3219,28 @@ SparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int it_, int 
     {
       if (iter == 0)
         {
-          switch(stack_solve_algo)
+          switch (stack_solve_algo)
             {
-              case 0:
-                mexPrintf("MODEL SIMULATION: (method=Sparse LU)\n");
-                break;
-              case 1:
-                mexPrintf("MODEL SIMULATION: (method=Relaxation)\n");
-                break;
-              case 2:
-                mexPrintf("MODEL SIMULATION: (method=GMRES)\n");
-                break;
-              case 3:
-                mexPrintf("MODEL SIMULATION: (method=BiCGStab)\n");
-                break;
-              case 4:
-                mexPrintf("MODEL SIMULATION: (method=Sparse LU & optimal path length)\n");
-                break;
-              case 5:
-                mexPrintf("MODEL SIMULATION: (method=ByteCode own solver)\n");
-                break;
-              default:
-                mexPrintf("MODEL SIMULATION: (method=Unknown - %d - )\n", stack_solve_algo);
+            case 0:
+              mexPrintf("MODEL SIMULATION: (method=Sparse LU)\n");
+              break;
+            case 1:
+              mexPrintf("MODEL SIMULATION: (method=Relaxation)\n");
+              break;
+            case 2:
+              mexPrintf("MODEL SIMULATION: (method=GMRES)\n");
+              break;
+            case 3:
+              mexPrintf("MODEL SIMULATION: (method=BiCGStab)\n");
+              break;
+            case 4:
+              mexPrintf("MODEL SIMULATION: (method=Sparse LU & optimal path length)\n");
+              break;
+            case 5:
+              mexPrintf("MODEL SIMULATION: (method=ByteCode own solver)\n");
+              break;
+            default:
+              mexPrintf("MODEL SIMULATION: (method=Unknown - %d - )\n", stack_solve_algo);
             }
         }
       mexPrintf("-----------------------------------\n");
@@ -3276,14 +3261,14 @@ SparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int it_, int 
         Init_GE(periods, y_kmin, y_kmax, Size, IM_i);
       else
         {
-          b_m = mxCreateDoubleMatrix(periods*Size,1,mxREAL);
+          b_m = mxCreateDoubleMatrix(periods*Size, 1, mxREAL);
           if (!b_m)
             {
               ostringstream tmp;
               tmp << " in Simulate_Newton_Two_Boundaries, can't allocate b_m vector\n";
               throw FatalExceptionHandling(tmp.str());
             }
-          x0_m = mxCreateDoubleMatrix(periods*Size,1,mxREAL);
+          x0_m = mxCreateDoubleMatrix(periods*Size, 1, mxREAL);
           if (!x0_m)
             {
               ostringstream tmp;
@@ -3330,11 +3315,11 @@ SparseMatrix::fixe_u(double **u, int u_count_int, int max_lag_plus_max_lead_plus
   u_count = u_count_int * periods;
   u_count_alloc = 2*u_count;
 #ifdef DEBUG
-  mexPrintf("fixe_u : alloc(%d double)\n",u_count_alloc);
+  mexPrintf("fixe_u : alloc(%d double)\n", u_count_alloc);
 #endif
   (*u) = (double *) mxMalloc(u_count_alloc*sizeof(double));
 #ifdef DEBUG
-  mexPrintf("*u=%d\n",*u);
+  mexPrintf("*u=%d\n", *u);
 #endif
   memset((*u), 0, u_count_alloc*sizeof(double));
   u_count_init = max_lag_plus_max_lead_plus_1;

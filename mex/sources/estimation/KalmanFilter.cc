@@ -37,8 +37,8 @@ KalmanFilter::KalmanFilter(const std::string &dynamicDllFile, size_t n_endo, siz
                            double qz_criterium_arg, const std::vector<size_t> &varobs_arg,
                            double riccati_tol_arg, double lyapunov_tol_arg, int &info) :
   zeta_varobs_back_mixed(compute_zeta_varobs_back_mixed(zeta_back_arg, zeta_mixed_arg, varobs_arg)),
-  Z(varobs_arg.size(), zeta_varobs_back_mixed.size()), Zt(Z.getCols(),Z.getRows()), T(zeta_varobs_back_mixed.size()), R(zeta_varobs_back_mixed.size(), n_exo),
-  Pstar(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()), Pinf(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()), 
+  Z(varobs_arg.size(), zeta_varobs_back_mixed.size()), Zt(Z.getCols(), Z.getRows()), T(zeta_varobs_back_mixed.size()), R(zeta_varobs_back_mixed.size(), n_exo),
+  Pstar(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()), Pinf(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()),
   RQRt(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()), Ptmp(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()), F(varobs_arg.size(), varobs_arg.size()),
   Finv(varobs_arg.size(), varobs_arg.size()), K(zeta_varobs_back_mixed.size(), varobs_arg.size()), KFinv(zeta_varobs_back_mixed.size(), varobs_arg.size()),
   oldKFinv(zeta_varobs_back_mixed.size(), varobs_arg.size()), a_init(zeta_varobs_back_mixed.size()),
@@ -54,7 +54,7 @@ KalmanFilter::KalmanFilter(const std::string &dynamicDllFile, size_t n_endo, siz
       size_t j = find(zeta_varobs_back_mixed.begin(), zeta_varobs_back_mixed.end(),
                       varobs_arg[i]) - zeta_varobs_back_mixed.begin();
       Z(i, j) = 1.0;
-      Zt(j, i) = 1.0;      
+      Zt(j, i) = 1.0;
     }
 }
 
@@ -79,27 +79,27 @@ KalmanFilter::compute(const MatrixConstView &dataView, VectorView &steadyState,
                       VectorView &vll, MatrixView &detrendedDataView,
                       size_t start, size_t period, double &penalty, int &info)
 {
-  double lik=INFINITY;
+  double lik = INFINITY;
   try
     {
-      if(period==0) // initialise all KF matrices
+      if (period == 0) // initialise all KF matrices
         initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T, Pstar, Pinf,
-                                  penalty, dataView, detrendedDataView, info);
-      else  // initialise parameter dependent KF matrices only but not Ps
-        initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T, 
-                                  penalty, dataView, detrendedDataView, info);
+                                    penalty, dataView, detrendedDataView, info);
+      else             // initialise parameter dependent KF matrices only but not Ps
+        initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T,
+                                    penalty, dataView, detrendedDataView, info);
 
-      lik= filter(detrendedDataView, H, vll, start, info);
+      lik = filter(detrendedDataView, H, vll, start, info);
     }
   catch (const DecisionRules::BlanchardKahnException &bke)
     {
-      info =22;
+      info = 22;
       return penalty;
     }
- 
+
   if (info != 0)
     return penalty;
-  else 
+  else
     return lik;
 
 };
@@ -110,7 +110,7 @@ KalmanFilter::compute(const MatrixConstView &dataView, VectorView &steadyState,
 double
 KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, VectorView &vll, size_t start, int &info)
 {
-  double loglik=0.0, ll, logFdet, Fdet, dvtFinvVt;
+  double loglik = 0.0, ll, logFdet, Fdet, dvtFinvVt;
   size_t p = Finv.getRows();
   bool nonstationary = true;
   a_init.setAll(0.0);
@@ -130,25 +130,25 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
           // Finv=inv(F)
           mat::set_identity(Finv);
           // Pack F upper trinagle as vector
-          for (size_t i=1;i<=p;++i)
-            for(size_t j=i;j<=p;++j)
-              FUTP(i + (j-1)*j/2 -1) = F(i-1,j-1);
+          for (size_t i = 1; i <= p; ++i)
+            for (size_t j = i; j <= p; ++j)
+              FUTP(i + (j-1)*j/2 -1) = F(i-1, j-1);
 
-          info=lapack::choleskySolver(FUTP, Finv, "U"); // F now contains its Chol decomposition!
-          if (info<0)
+          info = lapack::choleskySolver(FUTP, Finv, "U"); // F now contains its Chol decomposition!
+          if (info < 0)
             {
               std::cout << "Info:" << info << std::endl;
               std::cout << "t:" << t << std::endl;
               return 0;
             }
-          if (info>0)
+          if (info > 0)
             {
               //enforce Pstar symmetry with P=(P+P')/2=0.5P+0.5P'
               mat::transpose(Ptmp, Pstar);
-              mat::add(Pstar,Ptmp);
-              for (size_t i=0;i<Pstar.getCols();++i)
-                for(size_t j=0;j<Pstar.getCols();++j)
-                  Pstar(i,j)*=0.5;
+              mat::add(Pstar, Ptmp);
+              for (size_t i = 0; i < Pstar.getCols(); ++i)
+                for (size_t j = 0; j < Pstar.getCols(); ++j)
+                  Pstar(i, j) *= 0.5;
 
               // K=PZ'
               //blas::gemm("N", "T", 1.0, Pstar, Z, 0.0, K);
@@ -161,12 +161,12 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
               // Finv=inv(F)
               mat::set_identity(Finv);
               // Pack F upper trinagle as vector
-              for (size_t i=1;i<=p;++i)
-                for(size_t j=i;j<=p;++j)
-                  FUTP(i + (j-1)*j/2 -1) = F(i-1,j-1);
+              for (size_t i = 1; i <= p; ++i)
+                for (size_t j = i; j <= p; ++j)
+                  FUTP(i + (j-1)*j/2 -1) = F(i-1, j-1);
 
-              info=lapack::choleskySolver(FUTP, Finv, "U"); // F now contains its Chol decomposition!
-              if (info!=0)
+              info = lapack::choleskySolver(FUTP, Finv, "U"); // F now contains its Chol decomposition!
+              if (info != 0)
                 {
                   return 0;
                 }
@@ -177,9 +177,9 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
           Fdet = 1;
           for (size_t d = 1; d <= p; ++d)
             Fdet *= FUTP(d + (d-1)*d/2 -1);
-          Fdet *=Fdet;
+          Fdet *= Fdet;
 
-          logFdet=log(fabs(Fdet));
+          logFdet = log(fabs(Fdet));
 
           Ptmp = Pstar;
           // Pt+1= T(Pt - KFinvK')T' +RQR'
@@ -193,13 +193,13 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
           Pstar = RQRt;
           blas::gemm("N", "T", 1.0, Ptmp, T, 1.0, Pstar);
 
-          if (t>0)
+          if (t > 0)
             nonstationary = mat::isDiff(KFinv, oldKFinv, riccati_tol);
-          oldKFinv=KFinv;
+          oldKFinv = KFinv;
         }
 
       // err= Yt - Za
-      VectorConstView yt=mat::get_col(detrendedDataView, t);
+      VectorConstView yt = mat::get_col(detrendedDataView, t);
       vt = yt;
       blas::gemv("N", -1.0, Z, a_init, 1.0, vt);
 
@@ -212,12 +212,13 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
          Here we calc likelihood and store results.
       *****************/
       blas::symv("U", 1.0, Finv, vt, 0.0, vtFinv);
-      dvtFinvVt=blas::dot(vtFinv, vt );
+      dvtFinvVt = blas::dot(vtFinv, vt);
 
       ll = -0.5*(p*log(2*M_PI)+logFdet+dvtFinvVt);
 
       vll(t) = ll;
-      if (t >= start) loglik += ll;
+      if (t >= start)
+        loglik += ll;
 
     }
 

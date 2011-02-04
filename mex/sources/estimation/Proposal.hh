@@ -63,7 +63,7 @@ public:
 
 public:
   Proposal(const VectorConstView &vJscale, const MatrixConstView &covariance);
-  virtual ~Proposal(){};
+  virtual ~Proposal() {};
   virtual void draw(Vector &mean, Vector &draw);
   virtual Matrix&getVar();
   virtual int seed();

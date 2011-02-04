@@ -34,7 +34,8 @@
  * Class that calculates Log Posterior Density using kalman, based on Dynare
  * DsgeLikelihood.m
  */
-class LogPosteriorDensity {
+class LogPosteriorDensity
+{
 
 private:
   LogPriorDensity logPriorDensity;

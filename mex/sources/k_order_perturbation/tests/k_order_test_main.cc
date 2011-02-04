@@ -271,7 +271,7 @@ main(int argc, char *argv[])
 
       // get latest ysteady
       double *dYsteady = (dynare.getSteady().base());
-      ySteady = (Vector *)(&dynare.getSteady());
+      ySteady = (Vector *) (&dynare.getSteady());
     }
   catch (const KordException &e)
     {

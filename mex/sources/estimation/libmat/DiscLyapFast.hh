@@ -50,7 +50,8 @@ public:
     const int info;
     std::string message;
     DLPException(int info_arg, std::string message_arg) :
-      info(info_arg), message(message_arg) {
+      info(info_arg), message(message_arg)
+    {
     };
   };
 
@@ -59,15 +60,15 @@ public:
   {
     mat::set_identity(I);
   };
-  virtual ~DiscLyapFast(){};
+  virtual ~DiscLyapFast() {};
   template <class MatG, class MatV, class MatX >
-  void solve_lyap(const MatG &G, const MatV &V, MatX &X, double tol, size_t flag_ch) throw(DLPException);
+  void solve_lyap(const MatG &G, const MatV &V, MatX &X, double tol, size_t flag_ch) throw (DLPException);
 
 };
 
 template <class MatG, class MatV, class MatX >
 void
-DiscLyapFast::solve_lyap(const MatG &G, const MatV &V, MatX &X, double tol = 1e-16, size_t flag_ch = 0) throw(DLPException)
+DiscLyapFast::solve_lyap(const MatG &G, const MatV &V, MatX &X, double tol = 1e-16, size_t flag_ch = 0) throw (DLPException)
 {
   P0 = V;
   P1 = V;

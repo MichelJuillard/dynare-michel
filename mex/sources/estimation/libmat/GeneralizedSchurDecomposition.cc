@@ -24,8 +24,8 @@
 
 double GeneralizedSchurDecomposition::criterium_static;
 
-GeneralizedSchurDecomposition::GeneralizedSchurDecomposition(size_t n_arg, double criterium_arg)
-  : n(n_arg), criterium(criterium_arg)
+GeneralizedSchurDecomposition::GeneralizedSchurDecomposition(size_t n_arg, double criterium_arg) :
+  n(n_arg), criterium(criterium_arg)
 {
   alphar = new double[n];
   alphai = new double[n];
@@ -51,7 +51,7 @@ GeneralizedSchurDecomposition::~GeneralizedSchurDecomposition()
 lapack_int
 GeneralizedSchurDecomposition::selctg(const double *alphar, const double *alphai, const double *beta)
 {
-  return((*alphar * *alphar + *alphai * *alphai) < criterium_static * *beta * *beta);
+  return ((*alphar * *alphar + *alphai * *alphai) < criterium_static * *beta * *beta);
 }
 
 std::ostream &

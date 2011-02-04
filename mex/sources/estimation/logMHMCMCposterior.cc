@@ -31,7 +31,7 @@
 #if defined MATLAB_MEX_FILE
 # include "mat.h"
 #else   //  OCTAVE_MEX_FILE e.t.c.
-#include "matio.h"
+# include "matio.h"
 #endif
 
 #if defined(_WIN32) || defined(__CYGWIN32__) || defined(WINDOWS)
@@ -105,12 +105,12 @@ fillEstParamsInfo(const mxArray *estim_params_info, EstimatedParameter::pType ty
 int
 sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
            Matrix &steadyState, Vector &estParams, Vector &deepParams, const MatrixConstView &data,
-           Matrix &Q, Matrix &H, size_t presampleStart, int &info, const VectorConstView &nruns, 
+           Matrix &Q, Matrix &H, size_t presampleStart, int &info, const VectorConstView &nruns,
            size_t fblock, size_t nBlocks, Proposal pdd, EstimatedParametersDescription &epd,
            const std::string &resultsFileStem, size_t console_mode, size_t load_mh_file)
 {
   enum {iMin, iMax};
-  int iret=0; // return value
+  int iret = 0; // return value
   std::vector<size_t> OpenOldFile(nBlocks, 0);
   size_t jloop = 0, irun, j; // counters
   double dsum, dmax, dmin, sux = 0, jsux = 0;
@@ -130,28 +130,28 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
   Matrix MinMax(npar, 2);
 
   const mxArray *InitSizeArrayPtr = mexGetVariablePtr("caller", "InitSizeArray");
-  if (InitSizeArrayPtr==NULL)
+  if (InitSizeArrayPtr == NULL)
     {
       mexPrintf("Metropolis-Hastings myinputs field InitSizeArrayPtr Initialisation failed!\n");
-      return(-1);
+      return (-1);
     }
   const VectorConstView InitSizeArrayVw(mxGetPr(InitSizeArrayPtr), nBlocks, 1);
   Vector InitSizeArray(InitSizeArrayVw.getSize());
   InitSizeArray = InitSizeArrayVw;
   //const mxArray *flinePtr = mxGetField(myinputs, 0, "fline");
   const mxArray *flinePtr = mexGetVariable("caller",  "fline");
-  if (flinePtr==NULL)
+  if (flinePtr == NULL)
     {
       mexPrintf("Metropolis-Hastings myinputs field fline Initialisation failed!\n");
-      return(-1);
+      return (-1);
     }
   VectorView fline(mxGetPr(flinePtr), nBlocks, 1);
 
   mxArray *NewFileArrayPtr = mexGetVariable("caller", "NewFile");
-  if (NewFileArrayPtr==NULL)
+  if (NewFileArrayPtr == NULL)
     {
       mexPrintf("Metropolis-Hastings myinputs fields NewFileArrayPtr Initialisation failed!\n");
-      return(-1);
+      return (-1);
     }
   VectorView NewFileVw(mxGetPr(NewFileArrayPtr), nBlocks, 1);
   //Vector NewFile(NewFileVw.getSize());
@@ -169,16 +169,16 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
 
   const mxArray *record = mexGetVariable("caller", "record");
   //const mxArray *record = mxGetField(myinputs, 0, "record");
-  if (record==NULL)
+  if (record == NULL)
     {
       mexPrintf("Metropolis-Hastings record Initialisation failed!\n");
-      return(-1);
+      return (-1);
     }
   mxArray *AcceptationRatesPtr = mxGetField(record, 0, "AcceptationRates");
-  if (AcceptationRatesPtr==NULL)
+  if (AcceptationRatesPtr == NULL)
     {
       mexPrintf("Metropolis-Hastings record AcceptationRatesPtr Initialisation failed!\n");
-      return(-1);
+      return (-1);
     }
   VectorView AcceptationRates(mxGetPr(AcceptationRatesPtr), nBlocks, 1);
 
@@ -199,7 +199,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
   waitBarRhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
   std::string barTitle;
   std::stringstream ssbarTitle;
-  if (console_mode==0)
+  if (console_mode == 0)
     {
       ssbarTitle.clear();
       ssbarTitle.str("");
@@ -243,7 +243,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
               OpenOldFile[b] = 1;
             }
         } // end if
-      if (console_mode==0)
+      if (console_mode == 0)
         {
           ssbarTitle.clear();
           ssbarTitle.str("");
@@ -264,20 +264,20 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
               // new or different size result arrays/matrices
               currInitSizeArray = (size_t) InitSizeArray(b-1);
               if (mxMhLogPostDensPtr)
-                mxDestroyArray(mxMhLogPostDensPtr);                                                     // log post density array
+                mxDestroyArray(mxMhLogPostDensPtr);                                                                                                          // log post density array
               mxMhLogPostDensPtr = mxCreateDoubleMatrix(currInitSizeArray, 1, mxREAL);
-              if( mxMhLogPostDensPtr == NULL)
+              if (mxMhLogPostDensPtr == NULL)
                 {
                   mexPrintf("Metropolis-Hastings mxMhLogPostDensPtr Initialisation failed!\n");
-                  return(-1);
+                  return (-1);
                 }
               if (mxMhParamDrawsPtr)
-                mxDestroyArray(mxMhParamDrawsPtr);                                                    // accepted MCMC MH draws
+                mxDestroyArray(mxMhParamDrawsPtr);                                                                                                        // accepted MCMC MH draws
               mxMhParamDrawsPtr =  mxCreateDoubleMatrix(currInitSizeArray, npar,  mxREAL);
-              if( mxMhParamDrawsPtr == NULL)
+              if (mxMhParamDrawsPtr == NULL)
                 {
                   mexPrintf("Metropolis-Hastings mxMhParamDrawsPtr Initialisation failed!\n");
-                  return(-1);
+                  return (-1);
                 }
             }
 
@@ -294,10 +294,10 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
             }
           else
             {
-              int start[2]={0,0},edge[2]={2,2},stride[2]={1,1}, err=0;
+              int start[2] = {0, 0}, edge[2] = {2, 2}, stride[2] = {1, 1}, err = 0;
               mexPrintf("MHMCMC: Using interim partial draws file %s \n", mhFName.c_str());
-//              matvar = Mat_VarReadInfo(drawmat, "x2");
-              matvar = Mat_VarReadInfo(drawmat, (char *)"x2");
+              //              matvar = Mat_VarReadInfo(drawmat, "x2");
+              matvar = Mat_VarReadInfo(drawmat, (char *) "x2");
               if (matvar == NULL)
                 {
                   fline(b) = 1;
@@ -309,7 +309,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
                   // GetVariable(drawmat, "x2");
                   dims[0] = matvar->dims[0]-1;
                   dims[1] = matvar->dims[1]-1;
-                  err=Mat_VarReadData(drawmat,matvar,mxGetPr(mxMhParamDrawsPtr),start,stride,matvar->dims);
+                  err = Mat_VarReadData(drawmat, matvar, mxGetPr(mxMhParamDrawsPtr), start, stride, matvar->dims);
                   if (err)
                     {
                       fline(b) = 1;
@@ -319,7 +319,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
                   Mat_VarFree(matvar);
                 }
               //mxMhLogPostDensPtr = Mat_GetVariable(drawmat, "logpo2");
-              matvar = Mat_VarReadInfo(drawmat, (char*)"logpo2");
+              matvar = Mat_VarReadInfo(drawmat, (char *) "logpo2");
               if (matvar == NULL)
                 {
                   fline(b) = 1;
@@ -331,7 +331,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
                   // GetVariable(drawmat, "x2");
                   dims[0] = matvar->dims[0]-1;
                   dims[1] = matvar->dims[1]-1;
-                  err=Mat_VarReadData(drawmat,matvar,mxGetPr(mxMhLogPostDensPtr),start,stride,matvar->dims);
+                  err = Mat_VarReadData(drawmat, matvar, mxGetPr(mxMhLogPostDensPtr), start, stride, matvar->dims);
                   if (err)
                     {
                       fline(b) = 1;
@@ -360,20 +360,20 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
               // new or different size result arrays/matrices
               currInitSizeArray = (size_t) InitSizeArray(b-1);
               if (mxMhLogPostDensPtr)
-                mxDestroyArray(mxMhLogPostDensPtr);                                                     // log post density array
+                mxDestroyArray(mxMhLogPostDensPtr);                                                                                                          // log post density array
               mxMhLogPostDensPtr = mxCreateDoubleMatrix(currInitSizeArray, 1, mxREAL);
-              if( mxMhLogPostDensPtr == NULL)
+              if (mxMhLogPostDensPtr == NULL)
                 {
                   mexPrintf("Metropolis-Hastings mxMhLogPostDensPtr Initialisation failed!\n");
-                  return(-1);
+                  return (-1);
                 }
               if (mxMhParamDrawsPtr)
-                mxDestroyArray(mxMhParamDrawsPtr);                                                    // accepted MCMC MH draws
+                mxDestroyArray(mxMhParamDrawsPtr);                                                                                                        // accepted MCMC MH draws
               mxMhParamDrawsPtr =  mxCreateDoubleMatrix(currInitSizeArray, npar,  mxREAL);
-              if( mxMhParamDrawsPtr == NULL)
+              if (mxMhParamDrawsPtr == NULL)
                 {
                   mexPrintf("Metropolis-Hastings mxMhParamDrawsPtr Initialisation failed!\n");
-                  return(-1);
+                  return (-1);
                 }
             }
           startParams = LastParametersRow;
@@ -382,62 +382,62 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
           try
             {
               jsux = rwmh.compute(mhLogPostDens, mhParamDraws, steadyState, startParams, deepParams, data, Q, H,
-                              presampleStart, info, irun, currInitSizeArray, lpd, pdd, epd);
+                                  presampleStart, info, irun, currInitSizeArray, lpd, pdd, epd);
               irun = currInitSizeArray;
               sux += jsux*currInitSizeArray;
               j += currInitSizeArray; //j=j+1;
             }
           catch (const TSException &tse)
             {
-              iret=-100;
+              iret = -100;
               mexPrintf(" TSException Exception in RandomWalkMH dynamic_dll: %s \n", (tse.getMessage()).c_str());
               goto cleanup;
             }
           catch (const DecisionRules::BlanchardKahnException &bke)
             {
-              iret=-90;
+              iret = -90;
               mexPrintf(" Too many Blanchard-Kahn Exceptions in RandomWalkMH : n_fwrd_vars %d n_explosive_eigenvals %d \n", bke.n_fwrd_vars, bke.n_explosive_eigenvals);
               goto cleanup;
-            } 
+            }
           catch (const GeneralizedSchurDecomposition::GSDException &gsde)
             {
-              iret=-80;
+              iret = -80;
               mexPrintf(" GeneralizedSchurDecomposition Exception in RandomWalkMH: info %d, n %d  \n", gsde.info, gsde.n);
               goto cleanup;
             }
           catch (const LUSolver::LUException &lue)
             {
-              iret=-70;
+              iret = -70;
               mexPrintf(" LU Exception in RandomWalkMH : info %d \n", lue.info);
               goto cleanup;
             }
           catch (const VDVEigDecomposition::VDVEigException &vdve)
             {
-              iret=-60;
+              iret = -60;
               mexPrintf(" VDV Eig Exception in RandomWalkMH : %s ,  info: %d\n", vdve.message.c_str(), vdve.info);
               goto cleanup;
             }
           catch (const DiscLyapFast::DLPException &dlpe)
             {
-              iret=-50;
+              iret = -50;
               mexPrintf(" Lyapunov solver Exception in RandomWalkMH : %s ,  info: %d\n", dlpe.message.c_str(), dlpe.info);
               goto cleanup;
             }
           catch (const std::runtime_error &re)
             {
-              iret=-3;
+              iret = -3;
               mexPrintf(" Runtime Error Exception in RandomWalkMH: %s \n", re.what());
               goto cleanup;
             }
           catch (const std::exception &e)
             {
-              iret=-2;
+              iret = -2;
               mexPrintf(" Standard System Exception in RandomWalkMH: %s \n", e.what());
               goto cleanup;
             }
           catch (...)
             {
-              iret=-1000;
+              iret = -1000;
               mexPrintf(" Unknown unhandled Exception in RandomWalkMH! %s \n");
               goto cleanup;
             }
@@ -500,21 +500,21 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
               mexPrintf("Error in MH: Can not open draws Mat file for writing:  %s \n", mhFName.c_str());
               exit(1);
             }
-          dims[0]= currInitSizeArray;
-          dims[1]= npar;
-          matvar = Mat_VarCreate("x2",MAT_C_DOUBLE,MAT_T_DOUBLE,2,dims,mxGetPr(mxMhParamDrawsPtr),0);
-          matfStatus=Mat_VarWrite( drawmat, matvar, 0);
-          Mat_VarFree(matvar);          
+          dims[0] = currInitSizeArray;
+          dims[1] = npar;
+          matvar = Mat_VarCreate("x2", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, mxGetPr(mxMhParamDrawsPtr), 0);
+          matfStatus = Mat_VarWrite(drawmat, matvar, 0);
+          Mat_VarFree(matvar);
           if (matfStatus)
             {
               mexPrintf("Error in MH: Can not use draws Mat file for writing:  %s \n", mhFName.c_str());
               exit(1);
             }
           //matfStatus = matPutVariable(drawmat, "logpo2", mxMhLogPostDensPtr);
-          dims[1]= 1;
-          matvar = Mat_VarCreate("logpo2",MAT_C_DOUBLE,MAT_T_DOUBLE,2,dims,mxGetPr(mxMhLogPostDensPtr),0);
-          matfStatus=Mat_VarWrite( drawmat, matvar, 0);
-          Mat_VarFree(matvar);          
+          dims[1] = 1;
+          matvar = Mat_VarCreate("logpo2", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, mxGetPr(mxMhLogPostDensPtr), 0);
+          matfStatus = Mat_VarWrite(drawmat, matvar, 0);
+          Mat_VarFree(matvar);
           if (matfStatus)
             {
               mexPrintf("Error in MH: Can not usee draws Mat file for writing:  %s \n", mhFName.c_str());
@@ -556,11 +556,11 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
           jsux = 0;
           LastParametersRow = mat::get_row(mhParamDraws, currInitSizeArray-1); //x2(end,:);
           LastLogLiK(b-1) = mhLogPostDens(currInitSizeArray-1); //logpo2(end);
-          InitSizeArray(b-1) = std::min( (size_t) nruns(b-1)-j, MAX_nruns);
+          InitSizeArray(b-1) = std::min((size_t) nruns(b-1)-j, MAX_nruns);
           // initialization of next file if necessary
           if (InitSizeArray(b-1))
             {
-              NewFileVw(b-1)++;// = NewFile(b-1) + 1;
+              NewFileVw(b-1)++; // = NewFile(b-1) + 1;
               irun = 1;
             } // end
           //irun++;
@@ -584,21 +584,21 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
     mexPrintf("MH Warning: due to error NewFile is NOT set !! \n");
 
   // Cleanup
-mexPrintf("MH Cleanup !! \n");
+  mexPrintf("MH Cleanup !! \n");
 
-cleanup:
+ cleanup:
   if (mxMhLogPostDensPtr)
-    mxDestroyArray(mxMhLogPostDensPtr);   // delete log post density array
+    mxDestroyArray(mxMhLogPostDensPtr);                                            // delete log post density array
   if (mxMhParamDrawsPtr)
-    mxDestroyArray(mxMhParamDrawsPtr);    // delete accepted MCMC MH draws
+    mxDestroyArray(mxMhParamDrawsPtr);                                            // delete accepted MCMC MH draws
 
 #ifdef MATLAB_MEX_FILE
-  // Waitbar  
-  if (console_mode==0)
+  // Waitbar
+  if (console_mode == 0)
     {
-      // Bellow call to close waitbar seems to cause crashes and it is for 
+      // Bellow call to close waitbar seems to cause crashes and it is for
       // now left commented out and the waitbar neeeds to be closed manually
-      // alternativelly, call with options_.console_mode=1;  
+      // alternativelly, call with options_.console_mode=1;
       //mexCallMATLAB(0, NULL, 1, waitBarLhs, "close");
       //mxDestroyArray(waitBarLhs[0]);
       mxDestroyArray(waitBarRhs[1]);
@@ -607,8 +607,8 @@ cleanup:
 #endif
 
   // return error code or last line run in the last MH block sub-array
-  if (iret==0)
-    iret=(int)irun;
+  if (iret == 0)
+    iret = (int) irun;
   return iret;
 
 }
@@ -717,11 +717,11 @@ logMCMCposterior(const VectorConstView &estParams, const MatrixConstView &data, 
   const mxArray *bayestopt_ = mexGetVariablePtr("global", "bayestopt_");
   const Matrix Jscale(n_estParams);
   const VectorConstView vJscale(mxGetPr(mxGetField(bayestopt_, 0, "jscale")), n_estParams, 1);
-  Proposal pdd(vJscale,D);
+  Proposal pdd(vJscale, D);
 
   //sample MHMCMC draws and get get last line run in the last MH block sub-array
   int lastMHblockArrayLine = sampleMHMC(lpd, rwmh, steadyState, estParams2, deepParams, data, Q, H, presample, info,
-                                           nMHruns, fblock, nBlocks, pdd, epd, resultsFileStem, console_mode, load_mh_file);
+                                        nMHruns, fblock, nBlocks, pdd, epd, resultsFileStem, console_mode, load_mh_file);
 
   // Cleanups
   for (std::vector<EstimatedParameter>::iterator it = estParamsInfo.begin();
@@ -741,7 +741,7 @@ mexFunction(int nlhs, mxArray *plhs[],
     mexErrMsgTxt("logposterior: exactly one return argument is required.");
 
   plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
-// Check and retrieve the arguments
+  // Check and retrieve the arguments
 
   if (!mxIsDouble(prhs[0]) || mxGetN(prhs[0]) != 1)
     mexErrMsgTxt("logposterior: First argument must be a column vector of double-precision numbers");

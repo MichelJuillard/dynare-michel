@@ -44,7 +44,7 @@ InitializeKalmanFilter::InitializeKalmanFilter(const std::string &dynamicDllFile
   g_x(n_endo_arg, zeta_back_arg.size() + zeta_mixed_arg.size()),
   g_u(n_endo_arg, n_exo_arg),
   Rt(n_exo_arg, zeta_varobs_back_mixed.size()),
-  RQ(zeta_varobs_back_mixed.size(), n_exo_arg) 
+  RQ(zeta_varobs_back_mixed.size(), n_exo_arg)
 {
   std::vector<size_t> zeta_back_mixed;
   set_union(zeta_back_arg.begin(), zeta_back_arg.end(),
@@ -53,12 +53,12 @@ InitializeKalmanFilter::InitializeKalmanFilter(const std::string &dynamicDllFile
   for (size_t i = 0; i < zeta_back_mixed.size(); i++)
     pi_bm_vbm.push_back(find(zeta_varobs_back_mixed.begin(), zeta_varobs_back_mixed.end(),
                              zeta_back_mixed[i]) - zeta_varobs_back_mixed.begin());
-                                                    
+
 }
 // initialise parameter dependent KF matrices only but not Ps
 void
 InitializeKalmanFilter::initialize(VectorView &steadyState, const Vector &deepParams, Matrix &R,
-                                   const Matrix &Q, Matrix &RQRt, Matrix &T, 
+                                   const Matrix &Q, Matrix &RQRt, Matrix &T,
                                    double &penalty, const MatrixConstView &dataView,
                                    MatrixView &detrendedDataView, int &info)
 {
@@ -79,7 +79,6 @@ InitializeKalmanFilter::initialize(VectorView &steadyState, const Vector &deepPa
   initialize(steadyState, deepParams, R, Q, RQRt, T, penalty, dataView, detrendedDataView, info);
   setPstar(Pstar, Pinf, T, RQRt, info);
 }
-
 
 void
 InitializeKalmanFilter::setT(Matrix &T, int &info)
@@ -104,27 +103,27 @@ InitializeKalmanFilter::setPstar(Matrix &Pstar, Matrix &Pinf, const Matrix &T, c
 {
 
   try
-  {
-    // disclyap_fast(T, RQR, Pstar, lyapunov_tol, 0 or 1 to check chol)
-    discLyapFast.solve_lyap(T, RQRt, Pstar, lyapunov_tol, 0); 
+    {
+      // disclyap_fast(T, RQR, Pstar, lyapunov_tol, 0 or 1 to check chol)
+      discLyapFast.solve_lyap(T, RQRt, Pstar, lyapunov_tol, 0);
 
-    Pinf.setAll(0.0);
-  }
-  catch(const DiscLyapFast::DLPException &e)
-  {
-    if (e.info > 0) // The matrix is not positive definite in NormCholesky calculator
-      {
-        printf(e.message.c_str());
-        info = -1; //likelihood = penalty;
-        return;
-      }
-    else if (e.info < 0)
-      {
-        printf("Caugth unhandled TS exception with Pstar matrix: ");
-        printf(e.message.c_str());
-        info = -1; //likelihood = penalty;
-        throw;
-      }
-  }
+      Pinf.setAll(0.0);
+    }
+  catch (const DiscLyapFast::DLPException &e)
+    {
+      if (e.info > 0) // The matrix is not positive definite in NormCholesky calculator
+        {
+          printf(e.message.c_str());
+          info = -1; //likelihood = penalty;
+          return;
+        }
+      else if (e.info < 0)
+        {
+          printf("Caugth unhandled TS exception with Pstar matrix: ");
+          printf(e.message.c_str());
+          info = -1; //likelihood = penalty;
+          throw;
+        }
+    }
 }
 

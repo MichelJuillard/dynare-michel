@@ -31,14 +31,14 @@ extern "C"
 {
   F77_RET_T
   F77_FUNC(zgges, ZGGES) (F77_CONST_CHAR_ARG_DECL, F77_CONST_CHAR_ARG_DECL, F77_CONST_CHAR_ARG_DECL,
-                          octave_idx_type (*) (Complex *, Complex *), const octave_idx_type &,
+                          octave_idx_type (*)(Complex *, Complex *), const octave_idx_type &,
                           Complex *, const octave_idx_type &, Complex *, const octave_idx_type &,
                           octave_idx_type &, Complex *, Complex *, Complex *, const octave_idx_type &,
                           Complex *, const octave_idx_type &, Complex *, const octave_idx_type &,
                           double *, octave_idx_type *, octave_idx_type &);
 }
 
-DEFUN_DLD (qzcomplex, args, nargout, "-*- texinfo -*-\n\
+DEFUN_DLD(qzcomplex, args, nargout, "-*- texinfo -*-\n\
 @deftypefn {Loadable Function} [ @var{aa}, @var{bb}, @var{q}, @var{z} ] = qzcomplex (@var{a}, @var{b})\n\
 \n\
 Computes the complex QZ decomposition of @math{(A, B)}, satisfying:\n\
@@ -76,14 +76,14 @@ Computes the complex QZ decomposition of @math{(A, B)}, satisfying:\n\
   OCTAVE_LOCAL_BUFFER(Complex, beta, n);
   OCTAVE_LOCAL_BUFFER(Complex, work, lwork);
   OCTAVE_LOCAL_BUFFER(double, rwork, 8*n);
-  ComplexMatrix vsl(n, n), vsr(n,n);
+  ComplexMatrix vsl(n, n), vsr(n, n);
   octave_idx_type sdim, info;
-  
-  F77_XFCN (zgges, ZGGES, (F77_CONST_CHAR_ARG("V"), F77_CONST_CHAR_ARG("V"),
-                           F77_CONST_CHAR_ARG("N"), NULL,
-                           n, A.fortran_vec(), n, B.fortran_vec(), n, sdim,
-                           alpha, beta, vsl.fortran_vec(), n, vsr.fortran_vec(), n,
-                           work, lwork, rwork, NULL, info));
+
+  F77_XFCN(zgges, ZGGES, (F77_CONST_CHAR_ARG("V"), F77_CONST_CHAR_ARG("V"),
+                          F77_CONST_CHAR_ARG("N"), NULL,
+                          n, A.fortran_vec(), n, B.fortran_vec(), n, sdim,
+                          alpha, beta, vsl.fortran_vec(), n, vsr.fortran_vec(), n,
+                          work, lwork, rwork, NULL, info));
 
   if (info != 0)
     {
@@ -100,11 +100,11 @@ Computes the complex QZ decomposition of @math{(A, B)}, satisfying:\n\
 
 /*
 
-%!test
-%! A = [ 1 2 3+1i; 4 5-1i 0; -1 -5 3];
-%! B = [ -2 -8i 4; 1 5+3i 5; 7 -10 -2];
-%! [AA,BB,Q,Z] = qzcomplex(A,B);
-%! assert(Q'*A*Z, AA, sqrt(eps))
-%! assert(Q'*B*Z, BB, sqrt(eps))
+  %!test
+  %! A = [ 1 2 3+1i; 4 5-1i 0; -1 -5 3];
+  %! B = [ -2 -8i 4; 1 5+3i 5; 7 -10 -2];
+  %! [AA,BB,Q,Z] = qzcomplex(A,B);
+  %! assert(Q'*A*Z, AA, sqrt(eps))
+  %! assert(Q'*B*Z, BB, sqrt(eps))
 
 */

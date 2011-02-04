@@ -35,9 +35,9 @@ typedef void (*DynamicFn)
  int it_, double *residual, double *g1, double *g2, double *g3);
 
 /**
-* creates pointer to Dynamic function inside <model>_dynamic.dll
-* and handles calls to it.
-**/
+ * creates pointer to Dynamic function inside <model>_dynamic.dll
+ * and handles calls to it.
+ **/
 class DynamicModelDLL
 {
 private:

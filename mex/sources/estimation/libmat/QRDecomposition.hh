@@ -39,7 +39,7 @@ public:
     \param[in] rows_arg Number of rows of the matrix to decompose
     \param[in] cols_arg Number of columns of the matrix to decompose
     \param[in] cols2_arg Number of columns of the matrix to be multiplied by Q
-   */
+  */
   QRDecomposition(size_t rows_arg, size_t cols_arg, size_t cols2_arg);
   virtual ~QRDecomposition();
   //! Performs the QR decomposition of a matrix, and left-multiplies another matrix by Q

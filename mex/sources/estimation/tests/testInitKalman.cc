@@ -40,8 +40,7 @@ main(int argc, char **argv)
   std::vector<size_t> zeta_static_arg;
   //std::vector<size_t>
   double qz_criterium = 1.000001; //1.0+1.0e-9;
-  Vector
-  steadyState(n_endo), deepParams(npar);
+  Vector steadyState(n_endo), deepParams(npar);
 
   double dYSparams [] = {
     1.000199998312523,
@@ -62,8 +61,8 @@ main(int argc, char **argv)
   };
 
   double vcov[] = {
-    0.001256631601,	0.0,
-    0.0,	0.000078535044
+    0.001256631601,     0.0,
+    0.0,        0.000078535044
   };
 
   double dparams[] = {
@@ -76,11 +75,9 @@ main(int argc, char **argv)
     0.0100
   };
 
-  VectorView
-  modParamsVW(dparams, npar, 1);
+  VectorView modParamsVW(dparams, npar, 1);
   deepParams = modParamsVW;
-  VectorView
-  steadyStateVW(dYSparams, n_endo, 1);
+  VectorView steadyStateVW(dYSparams, n_endo, 1);
   steadyState = steadyStateVW;
   std::cout << "Vector deepParams: " << std::endl << deepParams << std::endl;
   std::cout << "Vector steadyState: " << std::endl << steadyState << std::endl;
@@ -117,35 +114,29 @@ main(int argc, char **argv)
 
   size_t n_vbm = zeta_varobs_back_mixed.size();
 
-  Matrix
-  T(n_vbm, n_vbm), R(n_vbm, n_exo), 
-  RQRt(n_vbm, n_vbm), Pstar(n_vbm, n_vbm),
-  Pinf(n_vbm, n_vbm), Q(n_exo);
+  Matrix T(n_vbm, n_vbm), R(n_vbm, n_exo),
+    RQRt(n_vbm, n_vbm), Pstar(n_vbm, n_vbm),
+    Pinf(n_vbm, n_vbm), Q(n_exo);
 
-  MatrixView
-  vCovVW(vcov, n_exo, n_exo, n_exo);
+  MatrixView vCovVW(vcov, n_exo, n_exo, n_exo);
   Q = vCovVW;
 
   double lyapunov_tol = 1e-16;
   int info = 0;
   size_t nobs = 2;
-  Matrix yView(nobs,192); // dummy
+  Matrix yView(nobs, 192); // dummy
   yView.setAll(0.2);
-  const MatrixConstView dataView(yView, 0,  0, nobs, yView.getCols() ); // dummy
-  Matrix yDetrendView(nobs,yView.getCols()); // dummy
-  MatrixView dataDetrendView(yDetrendView, 0,  0, nobs, yDetrendView.getCols() ); // dummy
+  const MatrixConstView dataView(yView, 0,  0, nobs, yView.getCols()); // dummy
+  Matrix yDetrendView(nobs, yView.getCols()); // dummy
+  MatrixView dataDetrendView(yDetrendView, 0,  0, nobs, yDetrendView.getCols()); // dummy
 
-
-
-  const Vector
-  xparams1(0); // dummy
+  const Vector xparams1(0); // dummy
   double penalty = 1e8;
 
-  InitializeKalmanFilter
-  initializeKalmanFilter(modName, n_endo, n_exo,
-                         zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg,
-                         zeta_varobs_back_mixed, qz_criterium,
-                         lyapunov_tol, info);
+  InitializeKalmanFilter initializeKalmanFilter(modName, n_endo, n_exo,
+                                                zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg,
+                                                zeta_varobs_back_mixed, qz_criterium,
+                                                lyapunov_tol, info);
 
   std::cout << "Initialize KF with Q: " << std::endl << Q << std::endl;
 

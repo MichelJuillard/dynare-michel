@@ -40,8 +40,7 @@ main(int argc, char **argv)
   std::vector<size_t> zeta_static_arg;
   //std::vector<size_t>
   double qz_criterium = 1.000001; //1.0+1.0e-9;
-  Vector
-  steadyState(n_endo), deepParams(npar);
+  Vector steadyState(n_endo), deepParams(npar);
 
   double dYSparams [] = {
     1.000199998312523,
@@ -62,8 +61,8 @@ main(int argc, char **argv)
   };
 
   double vcov[] = {
-    0.001256631601,	0.0,
-    0.0,	0.000078535044
+    0.001256631601,     0.0,
+    0.0,        0.000078535044
   };
 
   double dparams[] = {
@@ -76,11 +75,9 @@ main(int argc, char **argv)
     0.0100
   };
 
-  VectorView
-  modParamsVW(dparams, npar, 1);
+  VectorView modParamsVW(dparams, npar, 1);
   deepParams = modParamsVW;
-  VectorView
-  steadyStateVW(dYSparams, n_endo, 1);
+  VectorView steadyStateVW(dYSparams, n_endo, 1);
   steadyState = steadyStateVW;
   std::cout << "Vector deepParams: " << std::endl << deepParams << std::endl;
   std::cout << "Vector steadyState: " << std::endl << steadyState << std::endl;
@@ -109,31 +106,30 @@ main(int argc, char **argv)
   Matrix Q(n_exo), H(nobs);
   H.setAll(0.0);
 
-  MatrixView
-  vCovVW(vcov, n_exo, n_exo, n_exo);
+  MatrixView vCovVW(vcov, n_exo, n_exo, n_exo);
   Q = vCovVW;
   std::cout << "Matrix Q: " << std::endl << Q << std::endl;
 
   double lyapunov_tol = 1e-16;
   double riccati_tol = 1e-16;
   int info = 0;
-  Matrix yView(nobs,192); // dummy
+  Matrix yView(nobs, 192); // dummy
   yView.setAll(0.2);
-  const MatrixConstView dataView(yView, 0,  0, nobs, yView.getCols() ); // dummy
-  Matrix yDetrendView(nobs,yView.getCols()); // dummy
-  MatrixView dataDetrendView(yDetrendView, 0,  0, nobs, yDetrendView.getCols() ); // dummy
+  const MatrixConstView dataView(yView, 0,  0, nobs, yView.getCols()); // dummy
+  Matrix yDetrendView(nobs, yView.getCols()); // dummy
+  MatrixView dataDetrendView(yDetrendView, 0,  0, nobs, yDetrendView.getCols()); // dummy
   Vector vll(yView.getCols());
-  VectorView vwll(vll,0,vll.getSize());
- 
+  VectorView vwll(vll, 0, vll.getSize());
+
   double penalty = 1e8;
 
   KalmanFilter kalman(modName, n_endo, n_exo,
-                         zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium,
-                         varobs_arg, riccati_tol, lyapunov_tol, info);
+                      zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, qz_criterium,
+                      varobs_arg, riccati_tol, lyapunov_tol, info);
 
-  size_t start=0, period=0;
-  double ll=kalman.compute(dataView, steadyStateVW,  Q, H, deepParams,
-                                   vwll, dataDetrendView, start, period, penalty, info);
+  size_t start = 0, period = 0;
+  double ll = kalman.compute(dataView, steadyStateVW,  Q, H, deepParams,
+                             vwll, dataDetrendView, start, period, penalty, info);
 
   std::cout << "ll: " << std::endl << ll << std::endl;
 }

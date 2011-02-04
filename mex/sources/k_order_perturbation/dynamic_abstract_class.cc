@@ -23,9 +23,9 @@ void
 DynamicModelAC::copyDoubleIntoTwoDMatData(double *dm, TwoDMatrix *tdm, int rows, int cols)
 {
   int dmIdx = 0;
-  for (int j=0; j<cols; j++)
-    for (int i=0; i<rows; i++)
-      tdm->get(i,j) = dm[dmIdx++];
+  for (int j = 0; j < cols; j++)
+    for (int i = 0; i < rows; i++)
+      tdm->get(i, j) = dm[dmIdx++];
 }
 
 double *
@@ -37,15 +37,15 @@ DynamicModelAC::unpackSparseMatrix(mxArray *sparseMat)
   mwIndex *colIdxVector = mxGetJc(sparseMat);
 
   double *ptr = mxGetPr(sparseMat);
-  double *newMat = (double *)malloc(sizeRowIdxVector*3*sizeof(double));
+  double *newMat = (double *) malloc(sizeRowIdxVector*3*sizeof(double));
 
   int rind = 0;
   int retvalind0 = 0;
   int retvalind1 = sizeRowIdxVector;
   int retvalind2 = sizeRowIdxVector*2;
 
-  for (int i=0; i<totalCols; i++)
-    for (int j=0;j<(int)(colIdxVector[i+1]-colIdxVector[i]); j++, rind++)
+  for (int i = 0; i < totalCols; i++)
+    for (int j = 0; j < (int) (colIdxVector[i+1]-colIdxVector[i]); j++, rind++)
       {
         newMat[retvalind0++] = rowIdxVector[rind] + 1;
         newMat[retvalind1++] = i + 1;

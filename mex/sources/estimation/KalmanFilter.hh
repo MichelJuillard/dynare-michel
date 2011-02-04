@@ -44,7 +44,8 @@
  *   Analysis, vol. 24(1), pp. 85-98).
  */
 
-class KalmanFilter {
+class KalmanFilter
+{
 
 public:
   virtual ~KalmanFilter();
@@ -72,7 +73,7 @@ private:
   Matrix K,  KFinv, oldKFinv; // mm*nobs K=PZt and K*Finv gain matrices
   Vector a_init, a_new; // state vector
   Vector vt; // current observation error vectors
-  Vector vtFinv;// intermediate observation error *Finv vector
+  Vector vtFinv; // intermediate observation error *Finv vector
   double riccati_tol;
   InitializeKalmanFilter initKalmanFilter; //Initialise KF matrices
   Vector FUTP; // F upper triangle packed as vector FUTP(i + (j-1)*j/2) = F(i,j) for 1<=i<=j;

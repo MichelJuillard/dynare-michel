@@ -24,18 +24,15 @@
 int
 main(int argc, char **argv)
 {
-//BetaPrior bp( Prior::Beta, 0.1, 0.1, 0.1, 0.0, 1.0, 5.0, 1.0);
   BetaPrior bp(0.1, 0.1, 0.0, 1.0, 5.0, 1.0);
   double pdf = bp.pdf(0.5);
   std::cout << "beta pdf of 5,1, 0.5: "  << std::setw(13) << pdf << std::endl;
-  BetaPrior *bpp = new BetaPrior( //Prior::Beta,
-    0.1, 0.1, 0.0, 1.0, 1.0, 5.0);
+  BetaPrior *bpp = new BetaPrior(0.1, 0.1, 0.0, 1.0, 1.0, 5.0);
   Prior *pp = bpp;
   pdf = (*pp).pdf(0.1);
   std::cout << "Parent (Beta) pdf of 1,5, 0.1: "  << std::setw(13) << pdf << std::endl;
 
-  GammaPrior *gpp = new GammaPrior( //Prior::Beta,
-    0.1, 0.1, 0.0, 1.0, 1.0, 5.0);
+  GammaPrior *gpp = new GammaPrior(0.1, 0.1, 0.0, 1.0, 1.0, 5.0);
   pp = gpp;
   pdf = (*pp).pdf(0.1);
   std::cout << "Parent (Gamma) pdf of 1,5, 0.1: "  << std::setw(13) << pdf << std::endl;

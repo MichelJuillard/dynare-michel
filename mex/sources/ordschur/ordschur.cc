@@ -40,7 +40,7 @@ extern "C"
                             const octave_idx_type &, octave_idx_type &);
 }
 
-DEFUN_DLD (ordschur, args, nargout, "-*- texinfo -*-\n\
+DEFUN_DLD(ordschur, args, nargout, "-*- texinfo -*-\n\
 @deftypefn {Loadable Function} [ @var{us}, @var{ts} ] = ordschur (@var{u}, @var{t}, @var{select})\n\
 \n\
 Reorders the real Schur factorization @math{X = U*T*U'} so that selected\n\
@@ -89,11 +89,11 @@ eigenvalues as they appear along @math{T}'s diagonal.\n\
   OCTAVE_LOCAL_BUFFER(octave_idx_type, S2, n);
   for (int i = 0; i < n; i++)
     S2[i] = S(i);
-  
-  F77_XFCN (dtrsen, dtrsen, (F77_CONST_CHAR_ARG("N"), F77_CONST_CHAR_ARG("V"),
-                             S2, n, T.fortran_vec(), n, U.fortran_vec(), n,
-                             wr, wi, m, cond1, cond2, work, lwork, 
-                             iwork, liwork, info));
+
+  F77_XFCN(dtrsen, dtrsen, (F77_CONST_CHAR_ARG("N"), F77_CONST_CHAR_ARG("V"),
+                            S2, n, T.fortran_vec(), n, U.fortran_vec(), n,
+                            wr, wi, m, cond1, cond2, work, lwork,
+                            iwork, liwork, info));
 
   if (info != 0)
     {
@@ -108,10 +108,10 @@ eigenvalues as they appear along @math{T}'s diagonal.\n\
 
 /*
 
-%!test
-%! A = [1 2 3 -2; 4 5 6 -5 ; 7 8 9 -5; 10 11 12 4 ];
-%! [U, T] = schur(A);
-%! [US, TS] = ordschur(U, T, [ 0 0 1 1 ]);
-%! assert(US*TS*US', A, sqrt(eps))
+  %!test
+  %! A = [1 2 3 -2; 4 5 6 -5 ; 7 8 9 -5; 10 11 12 4 ];
+  %! [U, T] = schur(A);
+  %! [US, TS] = ordschur(U, T, [ 0 0 1 1 ]);
+  %! assert(US*TS*US', A, sqrt(eps))
 
 */

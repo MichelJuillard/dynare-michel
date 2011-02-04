@@ -143,7 +143,7 @@ void
 mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   // Check input and output:
-  if ((nrhs > 4) || (nrhs < 3) || nlhs!=2)
+  if ((nrhs > 4) || (nrhs < 3) || nlhs != 2)
     DYN_MEX_FUNC_ERR_MSG_TXT("sparse_hessian_times_B_kronecker_C takes 3 or 4 input arguments and provides exactly 2 output argument.");
 
   if (!mxIsSparse(prhs[0]))
@@ -195,7 +195,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   // Computational part:
   if (nrhs == 3)
     {
-      sparse_hessian_times_B_kronecker_B(isparseA, jsparseA, vsparseA, B, D, mA, nA, mB, nB,numthreads);
+      sparse_hessian_times_B_kronecker_B(isparseA, jsparseA, vsparseA, B, D, mA, nA, mB, nB, numthreads);
     }
   else
     {

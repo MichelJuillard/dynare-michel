@@ -19,7 +19,6 @@
 #include <cstring>
 #include "Interpreter.hh"
 
-
 #ifdef DEBUG_EX
 
 using namespace std;
@@ -31,7 +30,6 @@ Get_Argument(const char *argv)
   string f(argv);
   return f;
 }
-
 
 #else
 
@@ -68,80 +66,80 @@ Get_Arguments_and_global_variables(int nrhs,
                                    bool &steady_state, bool &evaluate, int &block,
                                    mxArray *M_[], mxArray *oo_[], mxArray *options_[], bool &global_temporary_terms,
                                    bool &print,
-                                   mxArray* GlobalTemporaryTerms[])
+                                   mxArray *GlobalTemporaryTerms[])
 {
 #ifdef DEBUG_EX
   for (int i = 2; i < nrhs; i++)
 #else
-  for (int i = 0; i < nrhs; i++)
+    for (int i = 0; i < nrhs; i++)
 #endif
-    {
+      {
 #ifndef DEBUG_EX
-      if (!mxIsChar(prhs[i]))
-        {
-          switch (count_array_argument)
-            {
-            case 0:
-              *yd = mxGetPr(prhs[i]);
-              row_y = mxGetM(prhs[i]);
-              col_y = mxGetN(prhs[i]);
-              break;
-            case 1:
-              *xd =  mxGetPr(prhs[i]);
-              row_x = mxGetM(prhs[i]);
-              col_x = mxGetN(prhs[i]);
-              break;
-            case 2:
-              *params = mxGetPr(prhs[i]);
-              break;
-            case 3:
-              periods = mxGetScalar(prhs[i]);
-              break;
-            case 4:
-              *block_structur = mxDuplicateArray(prhs[i]);
-              break;
-            case 5:
-              global_temporary_terms = true;
-              *GlobalTemporaryTerms = mxDuplicateArray(prhs[i]);
-              break;
-            default:
-              //mexPrintf("Unknown argument count_array_argument=%d\n",count_array_argument);
-              break;
-            }
-          count_array_argument++;
-        }
-      else
+        if (!mxIsChar(prhs[i]))
+          {
+            switch (count_array_argument)
+              {
+              case 0:
+                *yd = mxGetPr(prhs[i]);
+                row_y = mxGetM(prhs[i]);
+                col_y = mxGetN(prhs[i]);
+                break;
+              case 1:
+                *xd =  mxGetPr(prhs[i]);
+                row_x = mxGetM(prhs[i]);
+                col_x = mxGetN(prhs[i]);
+                break;
+              case 2:
+                *params = mxGetPr(prhs[i]);
+                break;
+              case 3:
+                periods = mxGetScalar(prhs[i]);
+                break;
+              case 4:
+                *block_structur = mxDuplicateArray(prhs[i]);
+                break;
+              case 5:
+                global_temporary_terms = true;
+                *GlobalTemporaryTerms = mxDuplicateArray(prhs[i]);
+                break;
+              default:
+                //mexPrintf("Unknown argument count_array_argument=%d\n",count_array_argument);
+                break;
+              }
+            count_array_argument++;
+          }
+        else
 #endif
-      if (Get_Argument(prhs[i]) == "static")
-        steady_state = true;
-      else if (Get_Argument(prhs[i]) == "dynamic")
-        steady_state = false;
-      else if (Get_Argument(prhs[i]) == "evaluate")
-        evaluate = true;
-      else if (Get_Argument(prhs[i]) == "global_temporary_terms")
-        global_temporary_terms = true;
-      else if (Get_Argument(prhs[i]) == "print")
-        print = true;
-      else
-        {
-          int pos = Get_Argument(prhs[i]).find("block");
-          if (pos != (int)string::npos)
-            {
-              int pos1 = Get_Argument(prhs[i]).find("=", pos+5);
-              if (pos1 != (int)string::npos)
-                pos = pos1 + 1;
-              else
-                pos += 5;
-              block =  atoi(Get_Argument(prhs[i]).substr(pos, string::npos).c_str())-1;
-            }
+          if (Get_Argument(prhs[i]) == "static")
+            steady_state = true;
+          else if (Get_Argument(prhs[i]) == "dynamic")
+            steady_state = false;
+          else if (Get_Argument(prhs[i]) == "evaluate")
+            evaluate = true;
+          else if (Get_Argument(prhs[i]) == "global_temporary_terms")
+            global_temporary_terms = true;
+          else if (Get_Argument(prhs[i]) == "print")
+            print = true;
           else
             {
-              ostringstream tmp;
-              tmp << " in main, unknown argument : " << Get_Argument(prhs[i]) << "\n";
-              throw FatalExceptionHandling(tmp.str());
+              int pos = Get_Argument(prhs[i]).find("block");
+              if (pos != (int) string::npos)
+                {
+                  int pos1 = Get_Argument(prhs[i]).find("=", pos+5);
+                  if (pos1 != (int) string::npos)
+                    pos = pos1 + 1;
+                  else
+                    pos += 5;
+                  block =  atoi(Get_Argument(prhs[i]).substr(pos, string::npos).c_str())-1;
+                }
+              else
+                {
+                  ostringstream tmp;
+                  tmp << " in main, unknown argument : " << Get_Argument(prhs[i]) << "\n";
+                  throw FatalExceptionHandling(tmp.str());
+                }
             }
-        }
-    }
+      }
   if (count_array_argument > 0 && count_array_argument < 4)
     {
       if (count_array_argument == 3 && steady_state)
@@ -182,18 +180,18 @@ int
 main(int nrhs, const char *prhs[])
 #else
 /* The gateway routine */
-void
-mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
+  void
+  mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
 {
   mxArray *M_, *oo_, *options_;
-  mxArray* GlobalTemporaryTerms;
+  mxArray *GlobalTemporaryTerms;
 #ifndef DEBUG_EX
   mxArray *block_structur = NULL;
 #else
   int nlhs = 0;
   char *plhs[1];
-  load_global((char*)prhs[1]);
+  load_global((char *) prhs[1]);
 #endif
   //ErrorHandlingException error_handling;
   unsigned int i, row_y = 0, col_y = 0, row_x = 0, col_x = 0, nb_row_xd = 0;
@@ -213,21 +211,20 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   try
     {
       Get_Arguments_and_global_variables(nrhs, prhs, count_array_argument,
-                                   &yd, row_y, col_y,
-                                   &xd, row_x, col_x,
-                                   &params, periods,
+                                         &yd, row_y, col_y,
+                                         &xd, row_x, col_x,
+                                         &params, periods,
 #ifndef DEBUG_EX
-                                   &block_structur,
+                                         &block_structur,
 #endif
-                                   steady_state, evaluate, block,
-                                   &M_, &oo_, &options_, global_temporary_terms,
-                                   print, &GlobalTemporaryTerms);
+                                         steady_state, evaluate, block,
+                                         &M_, &oo_, &options_, global_temporary_terms,
+                                         print, &GlobalTemporaryTerms);
     }
   catch (GeneralExceptionHandling &feh)
     {
       DYN_MEX_FUNC_ERR_MSG_TXT(feh.GetErrorMsg().c_str());
     }
-
 
   if (!count_array_argument)
     params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "params")));
@@ -282,10 +279,10 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   int solve_algo;
   double solve_tolf;
   if (steady_state)
-     {
-       solve_algo = int (*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "solve_algo")))));
-       solve_tolf = *(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "solve_tolf"))));
-     }
+    {
+      solve_algo = int (*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "solve_algo")))));
+      solve_tolf = *(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "solve_tolf"))));
+    }
 
   else
     {
@@ -383,7 +380,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 }
               else
                 for (i = 0; i < row_y*col_y; i++)
-                   pind[i] = y[i];
+                  pind[i] = y[i];
             }
           if (nlhs > 2)
             {
@@ -392,11 +389,11 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                   int jacob_field_number = 0, jacob_exo_field_number = 0, jacob_exo_det_field_number = 0, jacob_other_endo_field_number = 0;
                   if (!block_structur)
                     {
-                      const char *field_names[] = {"g1","g1_x","g1_xd","g1_o"};
-                      jacob_field_number=0;
-                      jacob_exo_field_number=1;
-                      jacob_exo_det_field_number=2;
-                      jacob_other_endo_field_number=2;
+                      const char *field_names[] = {"g1", "g1_x", "g1_xd", "g1_o"};
+                      jacob_field_number = 0;
+                      jacob_exo_field_number = 1;
+                      jacob_exo_det_field_number = 2;
+                      jacob_other_endo_field_number = 2;
                       mwSize dims[1] = {nb_blocks };
                       plhs[2] = mxCreateStructArray(1, dims, 4, field_names);
                     }
@@ -425,15 +422,15 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                   if (!dont_store_a_structure)
                     {
                       for (int i = 0; i < nb_blocks; i++)
-                       {
-                          mxSetFieldByNumber(plhs[2],i,jacob_field_number,interprete.get_jacob(i));
-                          mxSetFieldByNumber(plhs[2],i,jacob_exo_field_number,interprete.get_jacob_exo(i));
-                          mxSetFieldByNumber(plhs[2],i,jacob_exo_det_field_number,interprete.get_jacob_exo_det(i));
-                          mxSetFieldByNumber(plhs[2],i,jacob_other_endo_field_number,interprete.get_jacob_other_endo(i));
+                        {
+                          mxSetFieldByNumber(plhs[2], i, jacob_field_number, interprete.get_jacob(i));
+                          mxSetFieldByNumber(plhs[2], i, jacob_exo_field_number, interprete.get_jacob_exo(i));
+                          mxSetFieldByNumber(plhs[2], i, jacob_exo_det_field_number, interprete.get_jacob_exo_det(i));
+                          mxSetFieldByNumber(plhs[2], i, jacob_other_endo_field_number, interprete.get_jacob_other_endo(i));
                         }
                     }
                 }
-              else 
+              else
                 {
                   plhs[2] = mxCreateDoubleMatrix(1, 1, mxREAL);
                   pind = mxGetPr(plhs[0]);
@@ -447,7 +444,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                     pind[i] = y[i];
                   if (nlhs > 4)
                     {
-                      mxArray* GlobalTemporaryTerms = interprete.get_Temporary_Terms();
+                      mxArray *GlobalTemporaryTerms = interprete.get_Temporary_Terms();
                       unsigned int nb_temp_terms = mxGetM(GlobalTemporaryTerms);
                       plhs[4] = mxCreateDoubleMatrix(nb_temp_terms, 1, mxREAL);
                       pind = mxGetPr(plhs[4]);

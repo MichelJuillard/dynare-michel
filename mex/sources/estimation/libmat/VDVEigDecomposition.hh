@@ -47,28 +47,29 @@ public:
     const lapack_int info;
     std::string message;
     VDVEigException(lapack_int info_arg, std::string message_arg) :
-      info(info_arg), message(message_arg) {
+      info(info_arg), message(message_arg)
+    {
     };
   };
 
-/**
- *  This constructor only creates optimal workspace using
- *  input matrix m
- */
-  VDVEigDecomposition(const Matrix &m) throw(VDVEigException);
+  /**
+   *  This constructor only creates optimal workspace using
+   *  input matrix m
+   */
+  VDVEigDecomposition(const Matrix &m) throw (VDVEigException);
 
-/**
- *  This constructoro only crates workspace using the size of
- *  the input matrix m
- */
-  VDVEigDecomposition(size_t n) throw(VDVEigException);
+  /**
+   *  This constructoro only crates workspace using the size of
+   *  the input matrix m
+   */
+  VDVEigDecomposition(size_t n) throw (VDVEigException);
 
   virtual ~VDVEigDecomposition()
   {
     delete[] work;
   };
   template <class Mat>
-  void calculate(const Mat &H) throw(VDVEigException);
+  void calculate(const Mat &H) throw (VDVEigException);
   // get eigenvalues
   Vector &
   getD()
@@ -91,14 +92,14 @@ public:
 
 template <class Mat>
 void
-VDVEigDecomposition::calculate(const Mat &m) throw(VDVEigException)
+VDVEigDecomposition::calculate(const Mat &m) throw (VDVEigException)
 {
   info = 0;
   if (m.getRows() != m.getCols())
-    throw(VDVEigException(info, "Matrix is not square in VDVEigDecomposition calculate"));
+    throw (VDVEigException(info, "Matrix is not square in VDVEigDecomposition calculate"));
 
   if (m.getCols() != (size_t) n  || m.getLd() != (size_t) lda)
-    throw(VDVEigException(info, "Matrix not matching VDVEigDecomposition class"));
+    throw (VDVEigException(info, "Matrix not matching VDVEigDecomposition class"));
 
   double tmpwork;
   lapack_int tmplwork = -1;
@@ -113,7 +114,7 @@ VDVEigDecomposition::calculate(const Mat &m) throw(VDVEigException)
   dsyev("V", "U", &n, V.getData(), &lda, D.getData(), work, &lwork, &info);
 
   if (info < 0)
-    throw(VDVEigException(info, "Internal error in VDVEigDecomposition calculation"));
+    throw (VDVEigException(info, "Internal error in VDVEigDecomposition calculation"));
   converged = true;
   if (info)
     converged = false;

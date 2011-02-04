@@ -22,44 +22,50 @@
 #ifndef TS_EXCEPTION_H
 #define TS_EXCEPTION_H
 
-#include <stdio.h> 
-#include <string> 
+#include <stdio.h>
+#include <string>
 
-#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE) 	
-#include "mex.h"
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
+# include "mex.h"
 #endif
 
-#define TS_RAISE(mes) \
+#define TS_RAISE(mes)                           \
   throw TSException(__FILE__, __LINE__, mes);
 
-#define TS_RAISE_IF(expr, mes) \
+#define TS_RAISE_IF(expr, mes)                          \
   if (expr) throw TSException(__FILE__, __LINE__, mes);
-
 
 class TSException
 {
   std::string fname; //char fname[50];
   int lnum;
-  std::string message;// char message[500];
+  std::string message; // char message[500];
 public:
-  TSException(const char*f,int l,const std::string &mes)
+  TSException(const char *f, int l, const std::string &mes)
   {
-    fname =std::string(f); // strncpy(fname,f,50);fname[49]= '\0';
-    message=mes;//strncpy(message,mes,500);message[499]= '\0';
-    lnum= l;
+    fname = std::string(f); // strncpy(fname,f,50);fname[49]= '\0';
+    message = mes; //strncpy(message,mes,500);message[499]= '\0';
+    lnum = l;
   }
-  virtual ~TSException(){};
-
-  virtual void print()const
+  virtual
+  ~TSException()
   {
-    printf("At %s:%d:%s\n",fname.c_str(),lnum,message.c_str());
-#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE) 
-    mexPrintf("At %s:%d:%s\n",fname.c_str(),lnum,message.c_str());
+  };
+
+  virtual void
+  print() const
+  {
+    printf("At %s:%d:%s\n", fname.c_str(), lnum, message.c_str());
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
+    mexPrintf("At %s:%d:%s\n", fname.c_str(), lnum, message.c_str());
 #endif
   }
 
-  virtual const std::string getMessage()const
-  {return message;}
+  virtual const std::string
+  getMessage() const
+  {
+    return message;
+  }
 };
 
 ;

@@ -27,11 +27,10 @@
 #include <ctime>
 
 #ifdef OCTAVE_MEX_FILE
-  #define CHAR_LENGTH 1
+# define CHAR_LENGTH 1
 #else
-  #define CHAR_LENGTH 2
+# define CHAR_LENGTH 2
 #endif
-
 
 #include "Mem_Mngr.hh"
 #include "ErrorHandling.hh"
@@ -73,16 +72,16 @@ public:
 
 private:
   void Init_GE(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM);
-  void Init_Matlab_Sparse(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM, mxArray *A_m, mxArray *b_m, mxArray* x0_m);
-  void Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>, int> &IM, mxArray *A_m, mxArray *b_m, bool &zero_solution, mxArray* x0_m);
+  void Init_Matlab_Sparse(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM, mxArray *A_m, mxArray *b_m, mxArray *x0_m);
+  void Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>, int> &IM, mxArray *A_m, mxArray *b_m, bool &zero_solution, mxArray *x0_m);
   void Simple_Init(int it_, int y_kmin, int y_kmax, int Size, std::map<std::pair<std::pair<int, int>, int>, int> &IM, bool &zero_solution);
   void End_GE(int Size);
   void Solve_ByteCode_Symbolic_Sparse_GaussianElimination(int Size, bool symbolic, int Block_number);
   void Solve_ByteCode_Sparse_GaussianElimination(int Size, int blck, bool steady_state, int it_);
-  void Solve_Matlab_Relaxation(mxArray* A_m, mxArray* b_m, unsigned int Size, double slowc_l, bool is_two_boundaries, int  it_);
-  void Solve_Matlab_LU_UMFPack(mxArray* A_m, mxArray* b_m, int Size, double slowc_l, bool is_two_boundaries, int it_);
-  void Solve_Matlab_GMRES(mxArray* A_m, mxArray* b_m, int Size, double slowc, int block, bool is_two_boundaries, int it_, bool steady_state, mxArray* x0_m);
-  void Solve_Matlab_BiCGStab(mxArray* A_m, mxArray* b_m, int Size, double slowc, int block, bool is_two_boundaries, int it_, mxArray* x0_m, bool steady_state);
+  void Solve_Matlab_Relaxation(mxArray *A_m, mxArray *b_m, unsigned int Size, double slowc_l, bool is_two_boundaries, int  it_);
+  void Solve_Matlab_LU_UMFPack(mxArray *A_m, mxArray *b_m, int Size, double slowc_l, bool is_two_boundaries, int it_);
+  void Solve_Matlab_GMRES(mxArray *A_m, mxArray *b_m, int Size, double slowc, int block, bool is_two_boundaries, int it_, bool steady_state, mxArray *x0_m);
+  void Solve_Matlab_BiCGStab(mxArray *A_m, mxArray *b_m, int Size, double slowc, int block, bool is_two_boundaries, int it_, mxArray *x0_m, bool steady_state);
   bool compare(int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, long int nop4,  int Size
 #ifdef PROFILER
                , long int *ndiv, long int *nsub
@@ -111,14 +110,13 @@ private:
 #endif
                );
   double simple_bksub(int it_, int Size, double slowc_l);
-  mxArray* Sparse_transpose(mxArray* A_m);
-  mxArray* Sparse_mult_SAT_SB(mxArray* A_m, mxArray* B_m);
-  mxArray* Sparse_mult_SAT_B(mxArray* A_m, mxArray* B_m);
-  mxArray* mult_SAT_B(mxArray* A_m, mxArray* B_m);
-  mxArray* Sparse_substract_SA_SB(mxArray* A_m, mxArray* B_m);
-  mxArray* Sparse_substract_A_SB(mxArray* A_m, mxArray* B_m);
-  mxArray* substract_A_B(mxArray* A_m, mxArray* B_m);
-
+  mxArray *Sparse_transpose(mxArray *A_m);
+  mxArray *Sparse_mult_SAT_SB(mxArray *A_m, mxArray *B_m);
+  mxArray *Sparse_mult_SAT_B(mxArray *A_m, mxArray *B_m);
+  mxArray *mult_SAT_B(mxArray *A_m, mxArray *B_m);
+  mxArray *Sparse_substract_SA_SB(mxArray *A_m, mxArray *B_m);
+  mxArray *Sparse_substract_A_SB(mxArray *A_m, mxArray *B_m);
+  mxArray *substract_A_B(mxArray *A_m, mxArray *B_m);
 
   stack<double> Stack;
   int nb_prologue_table_u, nb_first_table_u, nb_middle_table_u, nb_last_table_u;
@@ -153,7 +151,7 @@ private:
 protected:
   vector<double> residual;
   int u_count_alloc, u_count_alloc_save;
-  vector<double*> jac;
+  vector<double *> jac;
   double *jcb;
   double res1, res2, max_res;
   int max_res_idx;

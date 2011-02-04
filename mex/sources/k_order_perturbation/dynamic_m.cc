@@ -30,7 +30,7 @@ DynamicModelMFile::~DynamicModelMFile()
 
 void
 DynamicModelMFile::eval(const Vector &y, const Vector &x, const Vector &modParams, const Vector &ySteady,
-                      Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException)
+                        Vector &residual, TwoDMatrix *g1, TwoDMatrix *g2, TwoDMatrix *g3) throw (DynareException)
 {
   mxArray *prhs[nrhs_dynamic], *plhs[nlhs_dynamic];
 
@@ -39,23 +39,23 @@ DynamicModelMFile::eval(const Vector &y, const Vector &x, const Vector &modParam
   prhs[2] = mxCreateDoubleMatrix(modParams.length(), 1, mxREAL);
   prhs[3] = mxCreateDoubleScalar(1.0);
 
-  memcpy((void *)(mxGetPr(prhs[0])), (void *)y.base(), y.length()*sizeof(double));
-  memcpy((void *)(mxGetPr(prhs[1])), (void *)x.base(), x.length()*sizeof(double));
-  memcpy((void *)(mxGetPr(prhs[2])), (void *)modParams.base(), modParams.length()*sizeof(double));
+  memcpy((void *) (mxGetPr(prhs[0])), (void *) y.base(), y.length()*sizeof(double));
+  memcpy((void *) (mxGetPr(prhs[1])), (void *) x.base(), x.length()*sizeof(double));
+  memcpy((void *) (mxGetPr(prhs[2])), (void *) modParams.base(), modParams.length()*sizeof(double));
 
   int retVal = mexCallMATLAB(nlhs_dynamic, plhs, nrhs_dynamic, prhs, DynamicMFilename.c_str());
   if (retVal != 0)
     throw DynareException(__FILE__, __LINE__, "Trouble calling " + DynamicMFilename);
 
-  residual = Vector(mxGetPr(plhs[0]), residual.skip(), (int)mxGetM(plhs[0]));
-  copyDoubleIntoTwoDMatData(mxGetPr(plhs[1]), g1, (int)mxGetM(plhs[1]), (int)mxGetN(plhs[1]));
+  residual = Vector(mxGetPr(plhs[0]), residual.skip(), (int) mxGetM(plhs[0]));
+  copyDoubleIntoTwoDMatData(mxGetPr(plhs[1]), g1, (int) mxGetM(plhs[1]), (int) mxGetN(plhs[1]));
   if (g2 != NULL)
-    copyDoubleIntoTwoDMatData(unpackSparseMatrix(plhs[2]), g2, (int)mxGetNzmax(plhs[2]), 3);
+    copyDoubleIntoTwoDMatData(unpackSparseMatrix(plhs[2]), g2, (int) mxGetNzmax(plhs[2]), 3);
   if (g3 != NULL)
-    copyDoubleIntoTwoDMatData(unpackSparseMatrix(plhs[3]), g3, (int)mxGetNzmax(plhs[3]), 3);
+    copyDoubleIntoTwoDMatData(unpackSparseMatrix(plhs[3]), g3, (int) mxGetNzmax(plhs[3]), 3);
 
-  for (int i=0; i<nrhs_dynamic; i++)
-      mxDestroyArray(prhs[i]);
-  for (int i=0; i<nlhs_dynamic; i++)
-      mxDestroyArray(plhs[i]);
+  for (int i = 0; i < nrhs_dynamic; i++)
+    mxDestroyArray(prhs[i]);
+  for (int i = 0; i < nlhs_dynamic; i++)
+    mxDestroyArray(plhs[i]);
 }

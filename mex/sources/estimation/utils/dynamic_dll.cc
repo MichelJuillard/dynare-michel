@@ -34,49 +34,49 @@ DynamicModelDLL::DynamicModelDLL(const std::string &dynamicDllFile, size_t n_exo
   fName += dynamicDllFile;
 
   try
-  {
+    {
 #if defined(__CYGWIN32__) || defined(_WIN32)
-    dynamicHinstance = LoadLibrary(fName.c_str());
-    if (dynamicHinstance == NULL)
-      throw 1;
-    Dynamic = (DynamicFn) GetProcAddress(dynamicHinstance, "Dynamic");
-    if (Dynamic == NULL)
-    {
-      FreeLibrary(dynamicHinstance); // Free the library
-      throw 2;
-    }
+      dynamicHinstance = LoadLibrary(fName.c_str());
+      if (dynamicHinstance == NULL)
+        throw 1;
+      Dynamic = (DynamicFn) GetProcAddress(dynamicHinstance, "Dynamic");
+      if (Dynamic == NULL)
+        {
+          FreeLibrary(dynamicHinstance); // Free the library
+          throw 2;
+        }
 #else // Linux or Mac
-    dynamicHinstance = dlopen(fName.c_str(), RTLD_NOW);
-    if ((dynamicHinstance == NULL) || dlerror())
-    {
-      cerr << dlerror() << endl;
-      throw 1;
-    }
-    Dynamic = (DynamicFn) dlsym(dynamicHinstance, "Dynamic");
-    if ((Dynamic  == NULL) || dlerror())
-    {
-      dlclose(dynamicHinstance); // Free the library
-      cerr << dlerror() << endl;
-      throw 2;
-    }
+      dynamicHinstance = dlopen(fName.c_str(), RTLD_NOW);
+      if ((dynamicHinstance == NULL) || dlerror())
+        {
+          cerr << dlerror() << endl;
+          throw 1;
+        }
+      Dynamic = (DynamicFn) dlsym(dynamicHinstance, "Dynamic");
+      if ((Dynamic  == NULL) || dlerror())
+        {
+          dlclose(dynamicHinstance); // Free the library
+          cerr << dlerror() << endl;
+          throw 2;
+        }
 #endif
 
-  }
+    }
   catch (int i)
-  {
-    std::ostringstream msg;
-    msg << "Error when loading " << fName << " (";
-    if (i == 1)
-      msg << "can't dynamically load the file";
-    if (i == 2)
-      msg << "can't locate the 'Dynamic' symbol";
-    msg << ")";
-    throw TSException(__FILE__, __LINE__, msg.str());
-  }
+    {
+      std::ostringstream msg;
+      msg << "Error when loading " << fName << " (";
+      if (i == 1)
+        msg << "can't dynamically load the file";
+      if (i == 2)
+        msg << "can't locate the 'Dynamic' symbol";
+      msg << ")";
+      throw TSException(__FILE__, __LINE__, msg.str());
+    }
   catch (...)
-  {
-    throw TSException(__FILE__, __LINE__, std::string("Can't find Dynamic function in ") + fName);
-  }
+    {
+      throw TSException(__FILE__, __LINE__, std::string("Can't find Dynamic function in ") + fName);
+    }
 }
 
 DynamicModelDLL::~DynamicModelDLL()

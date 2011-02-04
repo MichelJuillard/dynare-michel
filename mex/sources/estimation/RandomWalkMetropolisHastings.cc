@@ -25,29 +25,29 @@
 double
 RandomWalkMetropolisHastings::compute(VectorView &mhLogPostDens, MatrixView &mhParams, Matrix &steadyState,
                                       Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H,
-                                      const size_t presampleStart, int &info, const size_t startDraw, size_t nMHruns, 
+                                      const size_t presampleStart, int &info, const size_t startDraw, size_t nMHruns,
                                       LogPosteriorDensity &lpd, Proposal &pDD, EstimatedParametersDescription &epd)
 {
   //streambuf *likbuf, *drawbuf *backup;
   std::ofstream urandfilestr, drawfilestr;
-  urandfilestr.open ("urand.csv");
-  drawfilestr.open ("paramdraws.csv");
+  urandfilestr.open("urand.csv");
+  drawfilestr.open("paramdraws.csv");
 
   bool overbound;
   double newLogpost, logpost, urand;
   size_t count, accepted = 0;
   parDraw = estParams;
 
-  logpost =  - lpd.compute(steadyState, estParams, deepParams, data, Q, H, presampleStart, info);
+  logpost = -lpd.compute(steadyState, estParams, deepParams, data, Q, H, presampleStart, info);
 
   for (size_t run = startDraw - 1; run < nMHruns; ++run)
     {
-      overbound=false;
+      overbound = false;
       pDD.draw(parDraw, newParDraw);
-      for (count=0;count<parDraw.getSize();++count)
+      for (count = 0; count < parDraw.getSize(); ++count)
         {
-          overbound=(newParDraw(count) <  epd.estParams[count].lower_bound || newParDraw(count) > epd.estParams[count].upper_bound );
-          if (overbound) 
+          overbound = (newParDraw(count) < epd.estParams[count].lower_bound || newParDraw(count) > epd.estParams[count].upper_bound);
+          if (overbound)
             {
               newLogpost = -INFINITY;
               break;
@@ -57,9 +57,9 @@ RandomWalkMetropolisHastings::compute(VectorView &mhLogPostDens, MatrixView &mhP
         {
           try
             {
-              newLogpost = - lpd.compute(steadyState, newParDraw, deepParams, data, Q, H, presampleStart, info);
+              newLogpost = -lpd.compute(steadyState, newParDraw, deepParams, data, Q, H, presampleStart, info);
             }
-          catch(const std::exception &e)
+          catch (const std::exception &e)
             {
               throw; // for now handle the system and other errors higher-up
             }
@@ -68,7 +68,7 @@ RandomWalkMetropolisHastings::compute(VectorView &mhLogPostDens, MatrixView &mhP
               newLogpost = -INFINITY;
             }
         }
-      urand=pDD.selectionTestDraw();
+      urand = pDD.selectionTestDraw();
       if ((newLogpost > -INFINITY) && log(urand) < newLogpost-logpost)
         {
           parDraw = newParDraw;
@@ -78,11 +78,9 @@ RandomWalkMetropolisHastings::compute(VectorView &mhLogPostDens, MatrixView &mhP
       mat::get_row(mhParams, run) = parDraw;
       mhLogPostDens(run) = logpost;
 
-      //urandfilestr.write(urand);
       urandfilestr << urand << "\n"; //","
-      for (size_t c=0;c<newParDraw.getSize()-1;++c)
+      for (size_t c = 0; c < newParDraw.getSize()-1; ++c)
         drawfilestr << newParDraw(c) << ",";
-//        drawfilestr.write(newParDraw(i));
       drawfilestr <<  newParDraw(newParDraw.getSize()-1) << "\n";
     }
 

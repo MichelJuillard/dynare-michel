@@ -27,7 +27,8 @@
 
 #include "LogLikelihoodSubSample.hh"
 
-class LogLikelihoodMain {
+class LogLikelihoodMain
+{
 private:
   std::vector<EstimationSubsample> &estSubsamples; // reference to member of EstimatedParametersDescription
   LogLikelihoodSubSample logLikelihoodSubSample;
@@ -36,11 +37,10 @@ private:
 
 public:
   virtual ~LogLikelihoodMain();
-  LogLikelihoodMain( //const Matrix &data, Vector &deepParams_arg, //GeneralParams& estimOptions,
-    const std::string &dynamicDllFile, EstimatedParametersDescription &estiParDesc, size_t n_endo, size_t n_exo,
-    const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
-    const std::vector<size_t> &zeta_static_arg, const double qz_criterium_arg, const std::vector<size_t> &varobs_arg,
-    double riccati_tol_arg, double lyapunov_tol_arg, int &info);
+  LogLikelihoodMain(const std::string &dynamicDllFile, EstimatedParametersDescription &estiParDesc, size_t n_endo, size_t n_exo,
+                    const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
+                    const std::vector<size_t> &zeta_static_arg, const double qz_criterium_arg, const std::vector<size_t> &varobs_arg,
+                    double riccati_tol_arg, double lyapunov_tol_arg, int &info);
 
   /**
    * Compute method Inputs:
@@ -50,8 +50,8 @@ public:
    * Q and H KF matrices of shock and measurement error varinaces and covariances
    * KF logLikelihood calculation start period.
    */
-  double compute(Matrix &steadyState, const Vector &estParams, Vector &deepParams, const MatrixConstView &data, 
-    Matrix &Q, Matrix &H, size_t presampleStart, int &info); // for calls from estimation and to set Steady State
+  double compute(Matrix &steadyState, const Vector &estParams, Vector &deepParams, const MatrixConstView &data,
+                 Matrix &Q, Matrix &H, size_t presampleStart, int &info); // for calls from estimation and to set Steady State
 
   Vector &
   getVll()

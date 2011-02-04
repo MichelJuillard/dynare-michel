@@ -28,17 +28,17 @@
 #include "ModelSolution.hh"
 
 /**
-* compute the steady state (2nd stage), and computes first order approximation
-*/
-ModelSolution::ModelSolution(const std::string& dynamicDllFile,  size_t n_endo_arg, size_t n_exo_arg, const std::vector<size_t>& zeta_fwrd_arg, 
-                             const std::vector<size_t>& zeta_back_arg, const std::vector<size_t>& zeta_mixed_arg, 
-                             const std::vector<size_t>& zeta_static_arg, double INqz_criterium)
-                             : n_endo(n_endo_arg), n_exo(n_exo_arg),  // n_jcols = Num of Jacobian columns = nStat+2*nPred+3*nBoth+2*nForw+nExog
-                             n_jcols (n_exo+n_endo+ zeta_back_arg.size() /*nsPred*/ + zeta_fwrd_arg.size() /*nsForw*/ +2*zeta_mixed_arg.size()), 
-                             jacobian (n_endo,n_jcols), residual(n_endo), Mx(1,n_exo),
-                               decisionRules ( n_endo_arg, n_exo_arg, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, INqz_criterium),
-                               dynamicDLLp(dynamicDllFile, n_exo),
-                               llXsteadyState(n_jcols-n_exo)
+ * compute the steady state (2nd stage), and computes first order approximation
+ */
+ModelSolution::ModelSolution(const std::string &dynamicDllFile,  size_t n_endo_arg, size_t n_exo_arg, const std::vector<size_t> &zeta_fwrd_arg,
+                             const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
+                             const std::vector<size_t> &zeta_static_arg, double INqz_criterium) :
+  n_endo(n_endo_arg), n_exo(n_exo_arg),  // n_jcols = Num of Jacobian columns = nStat+2*nPred+3*nBoth+2*nForw+nExog
+  n_jcols(n_exo+n_endo+ zeta_back_arg.size() /*nsPred*/ + zeta_fwrd_arg.size() /*nsForw*/ +2*zeta_mixed_arg.size()),
+  jacobian(n_endo, n_jcols), residual(n_endo), Mx(1, n_exo),
+  decisionRules(n_endo_arg, n_exo_arg, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, INqz_criterium),
+  dynamicDLLp(dynamicDllFile, n_exo),
+  llXsteadyState(n_jcols-n_exo)
 {
   Mx.setAll(0.0);
   jacobian.setAll(0.0);
@@ -51,20 +51,20 @@ ModelSolution::ModelSolution(const std::string& dynamicDllFile,  size_t n_endo_a
             back_inserter(zeta_back_mixed));
 }
 
-void 
-ModelSolution::compute(VectorView& steadyState, const Vector& deepParams, Matrix& ghx, Matrix& ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
+void
+ModelSolution::compute(VectorView &steadyState, const Vector &deepParams, Matrix &ghx, Matrix &ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
 {
   // compute Steady State
   ComputeSteadyState(steadyState, deepParams);
 
-  // then get jacobian and 
+  // then get jacobian and
 
-  ComputeModelSolution( steadyState,  deepParams, ghx, ghu);
+  ComputeModelSolution(steadyState, deepParams, ghx, ghu);
 
 }
 
-void 
-ModelSolution::ComputeModelSolution(VectorView &steadyState, const Vector& deepParams, Matrix& ghx, Matrix& ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
+void
+ModelSolution::ComputeModelSolution(VectorView &steadyState, const Vector &deepParams, Matrix &ghx, Matrix &ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
 {
   // set extended Steady State
 
@@ -77,14 +77,14 @@ ModelSolution::ComputeModelSolution(VectorView &steadyState, const Vector& deepP
   for (size_t i = 0; i < zeta_fwrd_mixed.size(); i++)
     llXsteadyState(zeta_back_mixed.size() + n_endo + i) = steadyState(zeta_fwrd_mixed[i]);
 
-    //get jacobian 
+  //get jacobian
   dynamicDLLp.eval(llXsteadyState, Mx, deepParams, steadyState, residual, &jacobian, NULL, NULL);
 
-    //compute rules
-    decisionRules.compute(jacobian,ghx, ghu);
+  //compute rules
+  decisionRules.compute(jacobian, ghx, ghu);
 }
-void 
-ModelSolution::ComputeSteadyState(VectorView& steadyState, const Vector& deepParams)
+void
+ModelSolution::ComputeSteadyState(VectorView &steadyState, const Vector &deepParams)
 {
   // does nothig for time being.
 }

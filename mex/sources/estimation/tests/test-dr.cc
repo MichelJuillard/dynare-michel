@@ -141,11 +141,11 @@ main(int argc, char **argv)
     {
       dr.compute(jacobian, g_y, g_u);
     }
-  catch(GeneralizedSchurDecomposition::GSDException &e)
+  catch (GeneralizedSchurDecomposition::GSDException &e)
     {
       std::cerr << e << std::endl;
     }
-  catch(DecisionRules::BlanchardKahnException &e)
+  catch (DecisionRules::BlanchardKahnException &e)
     {
       std::cerr << e << std::endl;
     }

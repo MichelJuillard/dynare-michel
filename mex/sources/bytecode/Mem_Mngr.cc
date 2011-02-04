@@ -85,9 +85,9 @@ Mem_Mngr::mxMalloc_NZE()
           mexEvalString("drawnow;");
         }
       if (NZE_Mem_add)
-        NZE_Mem_add = (NonZeroElem **) mxRealloc(NZE_Mem_add, CHUNK_SIZE*sizeof(NonZeroElem *));   /*We have to redefine the size of pointer on the memory*/
+        NZE_Mem_add = (NonZeroElem **) mxRealloc(NZE_Mem_add, CHUNK_SIZE*sizeof(NonZeroElem *));                                                                                                     /*We have to redefine the size of pointer on the memory*/
       else
-        NZE_Mem_add = (NonZeroElem **) mxMalloc(CHUNK_SIZE*sizeof(NonZeroElem *));   /*We have to define the size of pointer on the memory*/
+        NZE_Mem_add = (NonZeroElem **) mxMalloc(CHUNK_SIZE*sizeof(NonZeroElem *));                                                                                       /*We have to define the size of pointer on the memory*/
       if (!NZE_Mem_add)
         {
           mexPrintf("Not enough memory available\n");
@@ -95,7 +95,7 @@ Mem_Mngr::mxMalloc_NZE()
         }
       for (i = CHUNK_heap_pos; i < CHUNK_SIZE; i++)
         {
-          NZE_Mem_add[i] = (NonZeroElem *)(NZE_Mem+(i-CHUNK_heap_pos));
+          NZE_Mem_add[i] = (NonZeroElem *) (NZE_Mem+(i-CHUNK_heap_pos));
         }
       i = CHUNK_heap_pos++;
       return (NZE_Mem_add[i]);
@@ -109,7 +109,7 @@ Mem_Mngr::mxFree_NZE(void *pos)
   size_t gap;
   for (i = 0; i < Nb_CHUNK; i++)
     {
-      gap = ((size_t)(pos)-(size_t)(NZE_Mem_add[i*CHUNK_BLCK_SIZE]))/sizeof(NonZeroElem);
+      gap = ((size_t) (pos)-(size_t) (NZE_Mem_add[i*CHUNK_BLCK_SIZE]))/sizeof(NonZeroElem);
       if ((gap < CHUNK_BLCK_SIZE) && (gap >= 0))
         break;
     }

@@ -44,7 +44,7 @@ Matrix::~Matrix()
 }
 
 Matrix &
-Matrix::operator= (const Matrix &arg)
+Matrix::operator=(const Matrix &arg)
 {
   assert(rows == arg.rows && cols == arg.cols);
   memcpy(data, arg.data, rows*cols*sizeof(double));
@@ -58,8 +58,8 @@ operator<<(std::ostream &out, const Matrix &M)
   return out;
 }
 
-MatrixView::MatrixView(double *data_arg, size_t rows_arg, size_t cols_arg, size_t ld_arg)
-  : data(data_arg), rows(rows_arg), cols(cols_arg), ld(ld_arg)
+MatrixView::MatrixView(double *data_arg, size_t rows_arg, size_t cols_arg, size_t ld_arg) :
+  data(data_arg), rows(rows_arg), cols(cols_arg), ld(ld_arg)
 {
 }
 
@@ -71,7 +71,7 @@ operator<<(std::ostream &out, const MatrixView &M)
 }
 
 MatrixView &
-MatrixView::operator= (const MatrixView &arg)
+MatrixView::operator=(const MatrixView &arg)
 {
   assert(rows == arg.getRows() && cols == arg.getCols());
   for (size_t j = 0; j < cols; j++)
@@ -79,8 +79,8 @@ MatrixView::operator= (const MatrixView &arg)
   return *this;
 }
 
-MatrixConstView::MatrixConstView(const double *data_arg, size_t rows_arg, size_t cols_arg, size_t ld_arg)
-  : data(data_arg), rows(rows_arg), cols(cols_arg), ld(ld_arg)
+MatrixConstView::MatrixConstView(const double *data_arg, size_t rows_arg, size_t cols_arg, size_t ld_arg) :
+  data(data_arg), rows(rows_arg), cols(cols_arg), ld(ld_arg)
 {
 }
 

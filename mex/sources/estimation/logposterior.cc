@@ -177,7 +177,7 @@ logposterior(const VectorConstView &estParams, const MatrixConstView &data,
   // Allocate LogPosteriorDensity object
   int info;
   LogPosteriorDensity lpd(dynamicDllFile, epd, n_endo, n_exo, zeta_fwrd, zeta_back, zeta_mixed, zeta_static,
-      qz_criterium, varobs, riccati_tol, lyapunov_tol, info);
+                          qz_criterium, varobs, riccati_tol, lyapunov_tol, info);
 
   // Construct arguments of compute() method
   Matrix steadyState(n_endo, 1);
@@ -189,7 +189,7 @@ logposterior(const VectorConstView &estParams, const MatrixConstView &data,
   deepParams = VectorConstView(mxGetPr(mxGetField(M_, 0, "params")), n_param, 1);
   Matrix Q(n_exo);
   Q = MatrixConstView(mxGetPr(mxGetField(M_, 0, "Sigma_e")), n_exo, n_exo, n_exo);
-  
+
   Matrix H(n_varobs);
   const mxArray *H_mx = mxGetField(M_, 0, "H");
   if (mxGetM(H_mx) == 1 && mxGetN(H_mx) == 1 && *mxGetPr(H_mx) == 0)
@@ -198,7 +198,7 @@ logposterior(const VectorConstView &estParams, const MatrixConstView &data,
     H = MatrixConstView(mxGetPr(mxGetField(M_, 0, "H")), n_varobs, n_varobs, n_varobs);
 
   // Compute the posterior
-  double logPD =lpd.compute(steadyState, estParams2, deepParams, data, Q, H, presample, info);
+  double logPD = lpd.compute(steadyState, estParams2, deepParams, data, Q, H, presample, info);
 
   // Cleanups
   for (std::vector<EstimatedParameter>::iterator it = estParamsInfo.begin();
@@ -212,7 +212,7 @@ void
 mexFunction(int nlhs, mxArray *plhs[],
             int nrhs, const mxArray *prhs[])
 {
-  if (nrhs != 3 || nlhs !=2)
+  if (nrhs != 3 || nlhs != 2)
     DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: exactly three input arguments and two output arguments are required.");
 
   // Check and retrieve the arguments
@@ -232,7 +232,7 @@ mexFunction(int nlhs, mxArray *plhs[],
 
   char *mexext_mx = mxArrayToString(prhs[2]);
   std::string
-  mexext(mexext_mx);
+    mexext(mexext_mx);
   mxFree(mexext_mx);
 
   // Compute and return the value

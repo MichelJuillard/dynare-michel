@@ -19,22 +19,22 @@
 
 #include "VDVEigDecomposition.hh"
 
-VDVEigDecomposition::VDVEigDecomposition(const Matrix &m) throw(VDVEigException) :
+VDVEigDecomposition::VDVEigDecomposition(const Matrix &m) throw (VDVEigException) :
   lda(m.getLd()), n(m.getCols()), lwork(-1),
   info(0),   converged(false), V(m), D(n)
 {
   if (m.getRows() != m.getCols())
-    throw(VDVEigException(info, "Matrix is not square in VDVEigDecomposition constructor"));
+    throw (VDVEigException(info, "Matrix is not square in VDVEigDecomposition constructor"));
 
   double tmpwork;
   dsyev("V", "U", &n, V.getData(), &lda, D.getData(), &tmpwork, &lwork, &info);
   lwork = (lapack_int) tmpwork;
   work = new double[lwork];
   if (info < 0)
-    throw(VDVEigException(info, "Internal error in VDVEigDecomposition constructor"));
+    throw (VDVEigException(info, "Internal error in VDVEigDecomposition constructor"));
 }
 
-VDVEigDecomposition::VDVEigDecomposition(size_t inn) throw(VDVEigException) :
+VDVEigDecomposition::VDVEigDecomposition(size_t inn) throw (VDVEigException) :
   lda(inn), n(inn), lwork(3*inn-1),
   info(0),   converged(false), V(inn), D(inn)
 {
