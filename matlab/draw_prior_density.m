@@ -14,7 +14,7 @@ function [x,f,abscissa,dens,binf,bsup] = draw_prior_density(indx,bayestopt_);
 %    bsup:         [double]     Scalar, last element of x
 
 
-% Copyright (C) 2004-2009 Dynare Team
+% Copyright (C) 2004-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -50,8 +50,17 @@ switch pshape(indx)
     dens = density(abscissa,p6(indx),p7(indx),p3(indx),p4(indx));
   case 2% Generalized Gamma prior
     density = @(x,a,b,c) gampdf(x-c,a,b);
-    infbound = gaminv(truncprior,p6(indx),p7(indx))+p3(indx);
-    supbound = gaminv(1-truncprior,p6(indx),p7(indx))+p3(indx);
+    try
+        infbound = gaminv(truncprior,p6(indx),p7(indx))+p3(indx);
+        supbound = gaminv(1-truncprior,p6(indx),p7(indx))+p3(indx);
+    catch
+        % Workaround for ticket #161
+        if exist('OCTAVE_VERSION')
+            error(['Due to a bug in Octave, you must choose other values for mean and/or variance of your prior on ' bayestopt_.name{indx} ', or use another shape'])
+        else
+            rethrow(lasterror)
+        end
+    end
     stepsize = (supbound-infbound)/steps;
     abscissa = infbound:stepsize:supbound;
     dens = density(abscissa,p6(indx),p7(indx),p3(indx));
@@ -62,8 +71,17 @@ switch pshape(indx)
     abscissa = infbound:stepsize:supbound;
     dens = normpdf(abscissa,p6(indx),p7(indx));  
   case 4% Inverse-gamma of type 1 prior
-    infbound = 1/sqrt(gaminv(1-10*truncprior, p7(indx)/2, 2/p6(indx)))+p3(indx);
-    supbound = 1/sqrt(gaminv(10*truncprior, p7(indx)/2, 2/p6(indx)))+p3(indx);
+    try
+        infbound = 1/sqrt(gaminv(1-10*truncprior, p7(indx)/2, 2/p6(indx)))+p3(indx);
+        supbound = 1/sqrt(gaminv(10*truncprior, p7(indx)/2, 2/p6(indx)))+p3(indx);
+    catch
+        % Workaround for ticket #161
+        if exist('OCTAVE_VERSION')
+            error(['Due to a bug in Octave, you must choose other values for mean and/or variance of your prior on ' bayestopt_.name{indx} ', or use another shape'])
+        else
+            rethrow(lasterror)
+        end
+    end
     stepsize = (supbound-infbound)/steps;
     abscissa = infbound:stepsize:supbound;
     dens = exp(lpdfig1(abscissa-p3(indx),p6(indx),p7(indx)));  
@@ -74,8 +92,17 @@ switch pshape(indx)
     abscissa = infbound:stepsize:supbound;
     dens = ones(1, steps) / (supbound-infbound);
   case 6% Inverse-gamma of type 2 prior
-    infbound = 1/(gaminv(1-10*truncprior, p7(indx)/2, 2/p6(indx)))+p3(indx);
-    supbound = 1/(gaminv(10*truncprior, p7(indx)/2, 2/p6(indx)))+p3(indx);
+    try
+        infbound = 1/(gaminv(1-10*truncprior, p7(indx)/2, 2/p6(indx)))+p3(indx);
+        supbound = 1/(gaminv(10*truncprior, p7(indx)/2, 2/p6(indx)))+p3(indx);
+    catch
+        % Workaround for ticket #161
+        if exist('OCTAVE_VERSION')
+            error(['Due to a bug in Octave, you must choose other values for mean and/or variance of your prior on ' bayestopt_.name{indx} ', or use another shape'])
+        else
+            rethrow(lasterror)
+        end
+    end
     stepsize = (supbound-infbound)/steps ;
     abscissa = infbound:stepsize:supbound;
     dens = exp(lpdfig2(abscissa-p3(indx),p6(indx),p7(indx)));

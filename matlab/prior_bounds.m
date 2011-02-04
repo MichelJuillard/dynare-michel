@@ -11,7 +11,7 @@ function bounds = prior_bounds(bayestopt)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2009 Dynare Team
+% Copyright (C) 2003-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -55,8 +55,17 @@ for i=1:length(p6)
             bounds(i,1) = p3(i);
             bounds(i,2) = Inf;
         else
-            bounds(i,1) = gaminv(prior_trunc,p6(i),p7(i))+p3(i);
-            bounds(i,2) = gaminv(1-prior_trunc,p6(i),p7(i))+p3(i);
+            try
+                bounds(i,1) = gaminv(prior_trunc,p6(i),p7(i))+p3(i);
+                bounds(i,2) = gaminv(1-prior_trunc,p6(i),p7(i))+p3(i);
+            catch
+                % Workaround for ticket #161
+                if exist('OCTAVE_VERSION')
+                    error(['Due to a bug in Octave, you must choose other values for mean and/or variance of your prior on ' bayestopt.name{i} ', or use another shape'])
+                else
+                    rethrow(lasterror)
+                end
+            end
         end
       case 3
         if prior_trunc == 0
@@ -71,9 +80,18 @@ for i=1:length(p6)
             bounds(i,1) = p3(i);
             bounds(i,2) = Inf;
         else
-            bounds(i,1) = 1/sqrt(gaminv(1-prior_trunc, p7(i)/2, 2/p6(i)))+p3(i);
-            bounds(i,2) = 1/sqrt(gaminv(prior_trunc, p7(i)/2, ...
-                                        2/p6(i)))+p3(i);
+            try
+                bounds(i,1) = 1/sqrt(gaminv(1-prior_trunc, p7(i)/2, 2/p6(i)))+p3(i);
+                bounds(i,2) = 1/sqrt(gaminv(prior_trunc, p7(i)/2, ...
+                                            2/p6(i)))+p3(i);
+            catch
+                % Workaround for ticket #161
+                if exist('OCTAVE_VERSION')
+                    error(['Due to a bug in Octave, you must choose other values for mean and/or variance of your prior on ' bayestopt.name{i} ', or use another shape'])
+                else
+                    rethrow(lasterror)
+                end
+            end
         end
       case 5
         if prior_trunc == 0
@@ -88,8 +106,17 @@ for i=1:length(p6)
             bounds(i,1) = p3(i);
             bounds(i,2) = Inf;
         else
-            bounds(i,1) = 1/gaminv(1-prior_trunc, p7(i)/2, 2/p6(i))+p3(i);
-            bounds(i,2) = 1/gaminv(prior_trunc, p7(i)/2, 2/p6(i))+ p3(i);
+            try
+                bounds(i,1) = 1/gaminv(1-prior_trunc, p7(i)/2, 2/p6(i))+p3(i);
+                bounds(i,2) = 1/gaminv(prior_trunc, p7(i)/2, 2/p6(i))+ p3(i);
+            catch
+                % Workaround for ticket #161
+                if exist('OCTAVE_VERSION')
+                    error(['Due to a bug in Octave, you must choose other values for mean and/or variance of your prior on ' bayestopt.name{i} ', or use another shape'])
+                else
+                    rethrow(lasterror)
+                end
+            end
         end
       otherwise
         error(sprintf('prior_bounds: unknown distribution shape (index %d, type %d)', i, pshape(i)));
