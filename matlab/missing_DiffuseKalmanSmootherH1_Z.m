@@ -1,4 +1,4 @@
-function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmoother1_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,kalman_tol,riccati_tol,data_index)
+function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmootherH1_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,kalman_tol,riccati_tol,data_index)
 
 % function [alphahat,epsilonhat,etahat,a, aK] = DiffuseKalmanSmoother1(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl)
 % Computes the diffuse kalman smoother without measurement error, in the case of a non-singular var-cov matrix 
@@ -39,7 +39,7 @@ function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,d,decomp] = missing_DiffuseK
 %   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
 %   Analysis, vol. 24(1), pp. 85-98). 
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
