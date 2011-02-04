@@ -15,7 +15,7 @@ function dynareroot = dynare_config(path_to_dynare)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -43,7 +43,7 @@ addpath([dynareroot '/kalman/likelihood'])
 addpath([dynareroot '/kalman/smoother'])
 addpath([dynareroot '/AIM/'])
 addpath([dynareroot '/partial_information/'])
-addpath([dynareroot '/swz/'])
+addpath([dynareroot '/ms-sbvar/'])
 addpath([dynareroot '/parallel/'])
 
 % For functions that exist only under some Octave versions
