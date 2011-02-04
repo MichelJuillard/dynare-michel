@@ -1,6 +1,4 @@
-/* $Header: /var/lib/cvs/dynare_cpp/sylv/matlab/gensylv.cpp,v 1.1.1.1 2004/06/04 13:01:13 kamenik Exp $ */
-
-/* Tag $Name:  $ */
+// Copyright (C) 2005-2011, Ondra Kamenik
 
 #include "dynmex.h"
 #include "mex.h"
@@ -55,7 +53,7 @@ extern "C" {
                   DYN_MEX_FUNC_ERR_MSG_TXT("Matrix C must be square.");
                 if (Bdims[0] < Bdims[1])
                   DYN_MEX_FUNC_ERR_MSG_TXT("Matrix B must not have more columns than rows.");
-                if (Ddims[1] != power(Cdims[0], order))
+                if (Ddims[1] != (mwSize) power(Cdims[0], order))
                   DYN_MEX_FUNC_ERR_MSG_TXT("Matrix D has wrong number of columns.");
 
 		int n = Adims[0];
