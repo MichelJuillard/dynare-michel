@@ -81,7 +81,6 @@ EXTRA_DIST = $(MODS) \
 	block_bytecode/ls2003.mod \
 	fs2000/fsdat_simul.m \
 	fs2000/fs2000a_steadystate.m \
-	fs2000/fs2000c_steadystate.m \
 	identification/kim/kim2_steadystate.m \
 	identification/as2007/as2007_steadystate.m \
 	AIM/fs2000_b1L1L_steadystate.m \
