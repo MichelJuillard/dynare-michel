@@ -85,7 +85,7 @@ for i = 1:nvar
     eval(['oo_.' name3 '.HPDsup.' name ' = HPD(2,:,i);']);
 end
 %%
-%%      Finally I build the plots.
+%% 	Finally I build the plots.
 %%
 
 % Block of code executed in parallel, with the exception of file
@@ -147,16 +147,24 @@ localVars.tit3=tit3;
 localVars.Mean=Mean;
 % Like sequential execution!
 
+
+if ~exist('OCTAVE_VERSION')
 % Commenting for testing!
 if isnumeric(options_.parallel) || ceil(size(varlist,1)/MaxNumberOfPlotsPerFigure)<4,
-    fout = pm3_core(localVars,1,nvar,0);
-    
-    % Parallel execution!
-else
+      fout = pm3_core(localVars,1,nvar,0);
+ 
+ % Parallel execution!
+ else
     globalVars = struct('M_',M_, ...
-                        'options_', options_, ...
-                        'oo_', oo_);
-    [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, 1, nvar, [],'pm3_core', localVars,globalVars, options_.parallel_info);
+      'options_', options_, ...
+      'oo_', oo_);
+     [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, 1, nvar, [],'pm3_core', localVars,globalVars, options_.parallel_info);
+ end
+else
+    % For the time being in Octave enviroment the pm3.m is executed only in
+    % serial modality, to avoid problem with the plots.
+    
+    fout = pm3_core(localVars,1,nvar,0);
 end
 
 
