@@ -6,8 +6,8 @@ function dynareParallelGetFiles(NamFileInput,PRCDir,Parallel)
 %
 % INPUTS
 %  o NamFileInput   []   ...
-%  o PRCDir         []   ... 
-%  o Parallel       []   ...  
+%  o PRCDir         []   ...
+%  o Parallel       []   ...
 %
 %  OUTPUTS
 %  None
@@ -43,9 +43,46 @@ for indPC=1:length(Parallel),
     if Parallel(indPC).Local==0,
         if ~ispc, %isunix || (~matlab_ver_less_than('7.4') && ismac),
             for jfil=1:size(NamFileInput,1),
-                %                 if ~isempty(dynareParallelDir(NamFileInput{jfil,2},[PRCDir,filesep,NamFileInput{jfil,1}],Parallel(indPC))),
-                [NonServeL NonServeR]= system(['scp ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,':',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',NamFileInput{jfil,1},NamFileInput{jfil,2},' ',NamFileInput{jfil,1}]);
-                %                 end
+                % if ~isempty(dynareParallelDir(NamFileInput{jfil,2},[PRCDir,filesep,NamFileInput{jfil,1}],Parallel(indPC))),
+
+                if exist('OCTAVE_VERSION') % Patch for peculiar behaviour of ls under Linux.
+                    % It is necessary to manage the jolly char '*'!
+
+                    FindAst=strfind(NamFileInput{jfil,2},'comp_status_random_walk_metropolis_hastings_core*');
+                    
+                    if isempty (FindAst)
+
+                        [NonServeL NonServeR]= system(['scp ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,':',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',NamFileInput{jfil,1},NamFileInput{jfil,2},' ',NamFileInput{jfil,1}]);
+
+                    else
+
+                        filenameTemp=NamFileInput{jfil,2};
+                        
+                        [NotUsed FlI]=system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' ls ',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',filenameTemp, ' 2> OctaveStandardOutputMessage.txt']);
+                        
+                        if isempty (FlI)
+                            return
+                        end
+
+                        AstPos=strfind(filenameTemp,'.mat')-1;
+                        FiMat=findstr(FlI, '.mat');
+                        NumFileToCopy=length(FiMat);
+
+
+                        for i=1: NumFileToCopy
+                            Ni=num2str(i);
+                            filenameTemp(1,AstPos)=Ni;
+                            [NonServeL NonServeR]= system(['scp ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,':',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',NamFileInput{jfil,1},filenameTemp,' ',NamFileInput{jfil,1}]);
+                        end
+                    end
+
+                else
+
+                    [NonServeL NonServeR]= system(['scp ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,':',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',NamFileInput{jfil,1},NamFileInput{jfil,2},' ',NamFileInput{jfil,1}]);
+                end
+
+
+                % end
             end
         else
             for jfil=1:size(NamFileInput,1),

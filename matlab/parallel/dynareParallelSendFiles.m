@@ -6,8 +6,8 @@ function dynareParallelSendFiles(NamFileInput,PRCDir,Parallel)
 %
 % INPUTS
 %  o NamFileInput   []   ...
-%  o PRCDir         []   ... 
-%  o Parallel       []   ...  
+%  o PRCDir         []   ...
+%  o Parallel       []   ...
 %
 %  OUTPUTS
 %  None
@@ -44,7 +44,7 @@ for indPC=1:length(Parallel),
         if ~ispc, %isunix || (~matlab_ver_less_than('7.4') && ismac),
             for jfil=1:size(NamFileInput,1),
                 if ~isempty(NamFileInput{jfil,1})
-                    system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' mkdir -p ',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',NamFileInput{jfil,1}])
+                    [NonServeL NonServeR]=system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' mkdir -p ',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',NamFileInput{jfil,1}]);
                 end
                 [NonServeL NonServeR]=system(['scp ',NamFileInput{jfil,1},NamFileInput{jfil,2},' ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,':',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',NamFileInput{jfil,1}]);
             end
@@ -52,10 +52,56 @@ for indPC=1:length(Parallel),
             for jfil=1:size(NamFileInput,1)
                 if ~isempty(NamFileInput{jfil,1})
                     if isempty(dynareParallelDir(NamFileInput{jfil,1},PRCDir,Parallel(indPC)))
-                        mkdir(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\',NamFileInput{jfil,1}]);
+                        
+                        if exist('OCTAVE_VERSION') % Patch for peculiar behaviour of mkdir under Windows.
+                            
+                            % It is Necessary because Octave is not able to
+                            % create two nested directory at the same time.
+                            
+                           % Remove (if present) the '/' chars. Can be easily transformed
+                           % in a function.
+                           
+                            NamFileInputTemp=NamFileInput{jfil,1};
+                            while(1)
+                                Bs=strfind(NamFileInputTemp,'/');
+                                if isempty(Bs),
+                                    break;
+                                else
+                                    NamFileInputTemp(1,Bs)='\';
+                                end
+                            end
+                            
+                            [NonServeL NonServeR]=system(['mkdir \\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\',NamFileInputTemp]);
+
+                        else
+                            mkdir(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\',NamFileInput{jfil,1}]);
+                        end
                     end
                 end
-                copyfile([NamFileInput{jfil,1},NamFileInput{jfil,2}],['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\',NamFileInput{jfil,1}])
+                
+                if exist('OCTAVE_VERSION') % Patch for peculiar behaviour copyfile ls under Windows.
+                    
+                    % It is Necessary because Octave is not able to
+                    % use the jolly char '*' with copyfile.
+                    
+                      % Remove (if present) the '/' chars. Can be easily transformed
+                      % in a function.
+                    
+                    NamFileInputTemp=NamFileInput{jfil,1};
+                    while(1)
+                        Bs=strfind(NamFileInputTemp,'/');
+                        if isempty(Bs),
+                            break;
+                        else
+                            NamFileInputTemp(1,Bs)='\';
+                        end
+                    end
+                    
+                    [NonServeS NonServeD]=system(['copy ',NamFileInputTemp, NamFileInput{jfil,2},' \\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\',NamFileInputTemp]);
+                    
+                else
+                    copyfile([NamFileInput{jfil,1},NamFileInput{jfil,2}],['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\',NamFileInput{jfil,1}]);
+                end
             end
         end
     end
