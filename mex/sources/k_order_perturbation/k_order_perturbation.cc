@@ -106,16 +106,22 @@ extern "C" {
     double *dparams = (double *) mxGetData(mxFldp);
     int npar = (int) mxGetM(mxFldp);
     Vector modParams(dparams, npar);
+    if (!modParams.isFinite())
+      DYN_MEX_FUNC_ERR_MSG_TXT("The parameters vector contains NaN or Inf");
 
     mxFldp = mxGetField(M_, 0, "Sigma_e");
     dparams = (double *) mxGetData(mxFldp);
     npar = (int) mxGetN(mxFldp);
     TwoDMatrix vCov(npar, npar, dparams);
+    if (!vCov.isFinite())
+      DYN_MEX_FUNC_ERR_MSG_TXT("The covariance matrix of shocks contains NaN or Inf");
 
     mxFldp = mxGetField(dr, 0, "ys");  // and not in order of dr.order_var
     dparams = (double *) mxGetData(mxFldp);
     const int nSteady = (int) mxGetM(mxFldp);
     Vector ySteady(dparams, nSteady);
+    if (!ySteady.isFinite())
+      DYN_MEX_FUNC_ERR_MSG_TXT("The steady state vector contains NaN or Inf");
 
     mxFldp = mxGetField(dr, 0, "nstatic");
     const int nStat = (int) mxGetScalar(mxFldp);
