@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 Dynare Team
+ * Copyright (C) 2008-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -21,7 +21,9 @@
 #define _DYNAMIC_DLL_HH
 
 #if defined(_WIN32) || defined(__CYGWIN32__)
-# define NOMINMAX // Do not define "min" and "max" macros
+# ifndef NOMINMAX
+#  define NOMINMAX // Do not define "min" and "max" macros
+# endif
 # include <windows.h>
 #else
 # include <dlfcn.h> // unix/linux DLL (.so) handling routines
