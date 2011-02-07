@@ -3884,7 +3884,7 @@ plot_conditional_forecast(periods = 10) e u;
   <refsynopsisdiv>
     <cmdsynopsis>
       <command>plot_conditional_forecast</command>
-      <arg>(<option>periods</option> = <replaceable>INTEGER</replaceable>)</arg><arg choice="plain">;</arg>
+      <arg>(<option>periods</option> = <replaceable>INTEGER</replaceable>)</arg> <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg><arg choice="plain">;</arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
