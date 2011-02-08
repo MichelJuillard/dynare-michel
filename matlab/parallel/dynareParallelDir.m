@@ -32,10 +32,10 @@ for indPC=1:length(Parallel),
     if ~ispc, %isunix || (~matlab_ver_less_than('7.4') && ismac),
         if Parallel(indPC).Local==0,
             if exist('OCTAVE_VERSION') % Patch for peculiar behaviour of ssh-ls under Linux.
-                                       % It is necessary to capture the ls warning message.
-                                       % To do it under the ssh protocol it is necessary to redirect the ls message in a text file.
-                                       % The file is 'OctaveStandardOutputMessage.txt' and it is
-                                       % saved in the Model directory.
+                % It is necessary to capture the ls warning message.
+                % To do it under the ssh protocol it is necessary to redirect the ls message in a text file.
+                % The file is 'OctaveStandardOutputMessage.txt' and it is
+                % saved in the Model directory.
                 [check, ax]=system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' ls ',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',filename, ' 2> OctaveStandardOutputMessage.txt']);
             else
                 [check, ax]=system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' ls ',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',filename]);
@@ -64,7 +64,7 @@ for indPC=1:length(Parallel),
         end
         dirlist = [dirlist, ax];
     else
-        if exist('OCTAVE_VERSION'), % Patch for peculiar behaviour of ls under Windows.
+        if exist('OCTAVE_VERSION'),     % Patch for peculiar behaviour of ls under Windows.
             if Parallel(indPC).Local==0,
                 ax0=dir(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\',filename]);
             else
@@ -73,10 +73,11 @@ for indPC=1:length(Parallel),
             if isempty(ax0),
                 ax='';
             else
+                clear ax1;
                 for jax=1:length(ax0);
-                    ax{jax}=ax0(jax).name;
+                    ax1{jax}=ax0(jax).name;
                 end
-                ax=char(ax{:});
+                ax=char(ax1{:});
             end
 
         else
