@@ -470,7 +470,7 @@ if any(options_.mode_compute ~= 0) && ~options_.mh_posterior_mode_estimation
         if isfield(options_,'ftol')
             crit = options_.ftol;
         else
-            crit = 1.e-7;
+            crit = 1.e-5;
         end
         if isfield(options_,'nit')
             nit = options_.nit;
