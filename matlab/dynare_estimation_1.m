@@ -911,7 +911,7 @@ if any(bayestopt_.pshape > 0) & options_.TeX %% Bayesian estimation (posterior m
         fprintf(fidTeX,['%% ' datestr(now,0)]);
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,' \n');
-        fprintf(fidTeX,'{\\tiny \n')
+        fprintf(fidTeX,'{\\tiny \n');
         fprintf(fidTeX,'\\begin{table}\n');
         fprintf(fidTeX,'\\centering\n');
         fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
@@ -934,7 +934,7 @@ if any(bayestopt_.pshape > 0) & options_.TeX %% Bayesian estimation (posterior m
         fprintf(fidTeX,'\\caption{Results from posterior parameters (parameters)}\n ');
         fprintf(fidTeX,'\\label{Table:Posterior:1}\n');
         fprintf(fidTeX,'\\end{table}\n');
-        fprintf(fidTeX,'} \n')
+        fprintf(fidTeX,'} \n');
         fprintf(fidTeX,'%% End of TeX file.\n');
         fclose(fidTeX);
     end
@@ -951,7 +951,7 @@ if any(bayestopt_.pshape > 0) & options_.TeX %% Bayesian estimation (posterior m
         fprintf(fidTeX,'\\centering\n');
         fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
-        fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n')
+        fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
         fprintf(fidTeX,'\\hline \\\\ \n');
         ip = 1;
         for i=1:nvx
@@ -970,7 +970,7 @@ if any(bayestopt_.pshape > 0) & options_.TeX %% Bayesian estimation (posterior m
         fprintf(fidTeX,'\\caption{Results from posterior parameters (standard deviation of structural shocks)}\n ');
         fprintf(fidTeX,'\\label{Table:Posterior:2}\n');
         fprintf(fidTeX,'\\end{table}\n');
-        fprintf(fidTeX,'} \n')
+        fprintf(fidTeX,'} \n');
         fprintf(fidTeX,'%% End of TeX file.\n');
         fclose(fidTeX);
     end
