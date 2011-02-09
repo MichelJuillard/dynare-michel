@@ -313,11 +313,11 @@ if options_.irf
             end
         end
         iter_ = olditer;
-        if TeX
-            fprintf(fidTeX,' \n');
-            fprintf(fidTeX,'%% End Of TeX file. \n');
-            fclose(fidTeX);
-        end
+    end
+    if TeX
+        fprintf(fidTeX,' \n');
+        fprintf(fidTeX,'%% End Of TeX file. \n');
+        fclose(fidTeX);
     end
 end
 
