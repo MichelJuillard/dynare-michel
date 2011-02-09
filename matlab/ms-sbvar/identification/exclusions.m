@@ -6,6 +6,11 @@ nlags = options_ms.nlags;
 Qi = options_ms.Qi;
 Ri1 = options_ms.Ri;
 
+Ui = cell(nvar,1);
+Vi = cell(nvar,1);
+n0 = zeros(nvar,1);
+np = zeros(nvar,1);
+
 k = nlags*nvar+1;
 
 Ri = zeros(k,k,nvar);
