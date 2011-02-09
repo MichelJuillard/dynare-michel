@@ -308,6 +308,7 @@ options_.ms.draws_nbr_mean_var_estimate = 200000;
 options_.ms.draws_nbr_modified_harmonic_mean = 1000000;
 options_.ms.thinning_factor = 1;
 options_.ms.dirichlet_scale = [1.0 1.5 2.0];
+options_.ms.vlistlog = [];
 
 % Shock decomposition
 options_.parameter_set = [];

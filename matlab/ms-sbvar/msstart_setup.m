@@ -37,14 +37,14 @@ end
 %2    FFR/100.
 options_.ms.vlist = [1:size(options_.varobs,1)];    % 1: U; 4: PCE inflation.
 options_.ms.varlist=cellstr(options_.varobs);
-%options_.ms.log_var = [ ];   % subset of "options_.ms.vlist.  Variables in log level so that differences are in **monthly** growth, unlike R and U which are in annual percent (divided by 100 already).
-options_.ms.percent_var = [1:size(options_.varobs,1)];           % subset of "options_.ms.vlist"
+options_.ms.log_var = sort(varlist_indices(options_.ms.vlistlog,options_.varobs));   % subset of "options_.ms.vlist.  Variables in log level so that differences are in **monthly** growth, unlike R and U which are in annual percent (divided by 100 already).
+options_.ms.percent_var =setdiff(options_.ms.vlist,options_.ms.log_var);
 %options_.ms.restriction_fname='ftd_upperchol3v';   %Only used by msstart2.m.
 ylab = options_.ms.varlist;
 xlab = options_.ms.varlist;
 
 %----------------
-nvar = length(options_.ms.vlist);   % number of endogenous variables
+nvar = size(options_.varobs,1);   % number of endogenous variables
 nlogeno = length(options_.ms.log_var)  % number of endogenous variables in options_.ms.log_var
 npereno = length(options_.ms.percent_var)  % number of endogenous variables in options_.ms.percent_var
 if (nvar~=(nlogeno+npereno))
