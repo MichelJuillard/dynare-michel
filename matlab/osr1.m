@@ -62,7 +62,7 @@ else
     % testing if ys isn't a steady state or if we aren't computing Ramsey policy
     fh = str2func([M_.fname '_static']);
     if max(abs(feval(fh,oo_.steady_state,[oo_.exo_steady_state; oo_.exo_det_steady_state], M_.params))) ...
-            > options_.dynatol & options_.ramsey_policy == 0
+            > options_.dynatol && options_.ramsey_policy == 0
         if options_.linear == 0
             % nonlinear models
             [dr.ys,check1] = dynare_solve(fh,dr.ys,options_.jacobian_flag,...

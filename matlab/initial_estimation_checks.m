@@ -75,7 +75,7 @@ if options_.steadystate_flag
     % Check if the steady state obtained from the _steadystate file is a 
     % steady state.
     check1 = 0;
-    if isfield(options_,'unit_root_vars') & options_.diffuse_filter == 0
+    if isfield(options_,'unit_root_vars') && options_.diffuse_filter == 0
         if isempty(options_.unit_root_vars)
             if ~options_.bytecode
                 check1 = max(abs(feval([M_.fname '_static'],...
@@ -101,7 +101,7 @@ if info(1) > 0
     print_info(info, options_.noprint)
 end
 
-if any(abs(oo_.steady_state(bayestopt_.mfys))>1e-9) & (options_.prefilter==1) 
+if any(abs(oo_.steady_state(bayestopt_.mfys))>1e-9) && (options_.prefilter==1) 
     disp(['You are trying to estimate a model with a non zero steady state for the observed endogenous'])
     disp(['variables using demeaned data!'])
     error('You should change something in your mod file...')

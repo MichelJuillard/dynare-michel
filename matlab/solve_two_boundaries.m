@@ -42,7 +42,7 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
 %   none.
 %  
 
-% Copyright (C) 1996-2010 Dynare Team
+% Copyright (C) 1996-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -72,7 +72,7 @@ max_resa=1e100;
 Jacobian_Size=Blck_size*(y_kmin+y_kmax_l +periods);
 g1=spalloc( Blck_size*periods, Jacobian_Size, nze*periods);
 reduced = 0;
-while ~(cvg==1 | iter>maxit_),
+while ~(cvg==1 || iter>maxit_),
     [r, y, g1, g2, g3, b]=feval(fname, y, x, params, periods, 0, y_kmin, Blck_size);
     %     fjac = zeros(Blck_size, Blck_size*(y_kmin_l+1+y_kmax_l));
     %     disp(['Blck_size=' int2str(Blck_size) ' size(y_index)=' int2str(size(y_index,2))]);
@@ -146,16 +146,16 @@ while ~(cvg==1 | iter>maxit_),
     %     else
     %       max_res=max(max(abs(r)));
     %     end;
-    if(~isreal(max_res) | isnan(max_res))
+    if(~isreal(max_res) || isnan(max_res))
         cvg = 0;
-    elseif(is_linear & iter>0)
+    elseif(is_linear && iter>0)
         cvg = 1;
     else
         cvg=(max_res<solve_tolf);
     end;
     if(~cvg)
         if(iter>0)
-            if(~isreal(max_res) | isnan(max_res) | (max_resa<max_res && iter>1))
+            if(~isreal(max_res) || isnan(max_res) || (max_resa<max_res && iter>1))
                 if(~isreal(max_res))
                     disp(['Variable ' M_.endo_names(max_indx,:) ' (' int2str(max_indx) ') returns an undefined value']);
                 end;
@@ -257,7 +257,7 @@ while ~(cvg==1 | iter>maxit_),
             while(flag1>0)
                 [L1, U1]=luinc(g1a,luinc_tol);
                 [za,flag1] = gmres(g1a,b,Blck_size,1e-6,Blck_size*periods,L1,U1);
-                if (flag1>0 | reduced)
+                if (flag1>0 || reduced)
                     if(flag1==1)
                         disp(['Error in simul: No convergence inside GMRES after ' num2str(periods*10,'%6d') ' iterations, in block' num2str(Block_Size,'%3d')]);
                     elseif(flag1==2)
@@ -278,7 +278,7 @@ while ~(cvg==1 | iter>maxit_),
             while(flag1>0)
                 [L1, U1]=luinc(g1a,luinc_tol);
                 [za,flag1] = bicgstab(g1a,b,1e-7,Blck_size*periods,L1,U1);
-                if (flag1>0 | reduced)
+                if (flag1>0 || reduced)
                     if(flag1==1)
                         disp(['Error in simul: No convergence inside BICGSTAB after ' num2str(periods*10,'%6d') ' iterations, in block' num2str(Block_Size,'%3d')]);
                     elseif(flag1==2)

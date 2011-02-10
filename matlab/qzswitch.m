@@ -14,6 +14,7 @@ function [A,B,Q,Z] = qzswitch(i,A,B,Q,Z)
 % http://sims.princeton.edu/yftp/gensys/mfiles/qzswitch.m
 
 % Copyright (C) 1993-2007 Christopher Sims
+% Copyright (C) 2008-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -36,7 +37,7 @@ a = A(i,i); d = B(i,i); b = A(i,i+1); e = B(i,i+1);
 c = A(i+1,i+1); f = B(i+1,i+1);
 % A(i:i+1,i:i+1)=[a b; 0 c];
 % B(i:i+1,i:i+1)=[d e; 0 f];
-if (abs(c)<realsmall & abs(f)<realsmall)
+if (abs(c)<realsmall && abs(f)<realsmall)
     if abs(a)<realsmall
         % l.r. coincident 0's with u.l. of A=0; do nothing
         return
@@ -47,7 +48,7 @@ if (abs(c)<realsmall & abs(f)<realsmall)
         wz=[wz [wz(2)';-wz(1)'] ];
         xy=eye(2);
     end
-elseif (abs(a)<realsmall & abs(d)<realsmall)
+elseif (abs(a)<realsmall && abs(d)<realsmall)
     if abs(c)<realsmall
         % u.l. coincident zeros with l.r. of A=0; do nothing
         return

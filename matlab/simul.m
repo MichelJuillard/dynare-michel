@@ -69,7 +69,7 @@ if ~ options_.initval_file
     end
 end
 
-if isempty(options_.scalv) | options_.scalv == 0
+if isempty(options_.scalv) || options_.scalv == 0
     options_.scalv = oo_.steady_state ;
 end
 
