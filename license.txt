@@ -30,7 +30,7 @@ Files: matlab/AIM/SP*
 Copyright: Public domain
 License: Public domain
 
-Files: matlab/bfgsi.m, matlab/qzswitch.m, matlab/qzdiv.m
+Files: matlab/bfgsi.m
 Copyright: 1993-2009, Christopher Sims
 License: GPL-3+
  Dynare is free software: you can redistribute it and/or modify
@@ -48,7 +48,8 @@ License: GPL-3+
 
 Files: matlab/csolve.m, matlab/csminit.m, matlab/numgrad.m, matlab/numgrad3.m,
  matlab/numgrad5.m, matlab/csminwel.m, matlab/bvar_density.m,
- matlab/bvar_toolbox.m, matlab/partial_information/PI_gensys.m
+ matlab/bvar_toolbox.m, matlab/partial_information/PI_gensys.m,
+ matlab/qzswitch.m, matlab/qzdiv.m
 Copyright: 1993-2009, Christopher Sims
            2006-2011, Dynare Team
 License: GPL-3+
