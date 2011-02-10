@@ -136,7 +136,7 @@ for b = fblck:nblck,
     jloop=jloop+1;
     randn('state',record.Seeds(b).Normal);
     rand('state',record.Seeds(b).Unifor);
-    if (options_.load_mh_file~=0)  & (fline(b)>1) & OpenOldFile(b)
+    if (options_.load_mh_file~=0) && (fline(b)>1) && OpenOldFile(b)
         load(['./' MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) ...
               '_blck' int2str(b) '.mat'])
         x2 = [x2;zeros(InitSizeArray(b)-fline(b)+1,npar)];
@@ -177,7 +177,7 @@ for b = fblck:nblck,
     j = 1;
     while j <= nruns(b)
         par = feval(ProposalFun, ix2(b,:), proposal_covariance_Cholesky_decomposition, n);
-        if all( par(:) > mh_bounds(:,1) ) & all( par(:) < mh_bounds(:,2) )
+        if all( par(:) > mh_bounds(:,1) ) && all( par(:) < mh_bounds(:,2) )
             try
                 logpost = - feval(TargetFun, par(:),varargin{:});
             catch
@@ -210,22 +210,22 @@ for b = fblck:nblck,
                     fprintf([s0,'%s'],newString);
                 end
             end
-            if mod(j,50)==0 & whoiam
+            if mod(j,50)==0 && whoiam
                 %             keyboard;
                 waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) '), ' sprintf('accept. %3.f%%', 100 * isux/j)];
                 fMessageStatus((b-fblck)/(nblck-fblck+1)+prtfrc/(nblck-fblck+1),whoiam,waitbarString, '', options_.parallel(ThisMatlab));
             end
         else
-            if mod(j, 3)==0 & ~whoiam
+            if mod(j, 3)==0 && ~whoiam
                 waitbar(prtfrc,hh,[ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)]);
-            elseif mod(j,50)==0 & whoiam,
+            elseif mod(j,50)==0 && whoiam,
                 %             keyboard;
                 waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)];
                 fMessageStatus(prtfrc,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab));
             end
         end
 
-        if (irun == InitSizeArray(b)) | (j == nruns(b)) % Now I save the simulations
+        if (irun == InitSizeArray(b)) || (j == nruns(b)) % Now I save the simulations
             save([MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'],'x2','logpo2');
             fidlog = fopen([MhDirectoryName '/metropolis.log'],'a');
             fprintf(fidlog,['\n']);
@@ -238,7 +238,7 @@ for b = fblck:nblck,
                 fprintf(fidlog,['    params:' int2str(i) ': ' num2str(mean(x2(:,i))) '\n']);
             end
             fprintf(fidlog,['    log2po:' num2str(mean(logpo2)) '\n']);
-            fprintf(fidlog,['  Minimum value.........:\n']);;
+            fprintf(fidlog,['  Minimum value.........:\n']);
             for i=1:length(x2(1,:))
                 fprintf(fidlog,['    params:' int2str(i) ': ' num2str(min(x2(:,i))) '\n']);
             end

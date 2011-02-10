@@ -113,7 +113,7 @@ r               = zeros(mm,smpl);
 t = 0;
 icc=0;
 newRank   = rank(Pinf(:,:,1),crit1);
-while newRank & t < smpl
+while newRank && t < smpl
     t = t+1;
     a(:,t) = a1(:,t);
     Pstar1(:,:,t) = Pstar(:,:,t);
@@ -125,7 +125,7 @@ while newRank & t < smpl
         Fstar(i,t)  = Zi*Pstar(:,:,t)*Zi' +H(i);
         Finf(i,t)   = Zi*Pinf(:,:,t)*Zi';
         Kstar(:,i,t) = Pstar(:,:,t)*Zi';
-        if Finf(i,t) > crit & newRank
+        if Finf(i,t) > crit && newRank
             icc=icc+1;
             Kinf(:,i,t)       = Pinf(:,:,t)*Zi';
             Kinf_Finf         = Kinf(:,i,t)/Finf(i,t);
@@ -172,7 +172,7 @@ Pinf  = Pinf(:,:,1:d);
 Pstar1 = Pstar1(:,:,1:d);
 Pinf1  = Pinf1(:,:,1:d);
 notsteady = 1;
-while notsteady & t<smpl
+while notsteady && t<smpl
     t = t+1;
     a(:,t) = a1(:,t);
     P1(:,:,t) = P(:,:,t);
@@ -254,7 +254,7 @@ if d
     for t = d:-1:1
         di = flipud(data_index{t})';
         for i = di
-            %      if Finf(i,t) > crit & ~(t==d & i>options_.diffuse_d),  % use of options_.diffuse_d to be sure of DKF termination
+            %      if Finf(i,t) > crit && ~(t==d && i>options_.diffuse_d),  % use of options_.diffuse_d to be sure of DKF termination
             if Finf(i,t) > crit 
                 r1(:,t) = Z(i,:)'*v(i,t)/Finf(i,t) + ...
                           (Kinf(:,i,t)'*Fstar(i,t)/Finf(i,t)-Kstar(:,i,t)')*r0(:,t)/Finf(i,t)*Z(i,:)' + ...

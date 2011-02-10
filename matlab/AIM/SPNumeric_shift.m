@@ -35,7 +35,7 @@ right    = qcols+1:qcols+neq;
 [Q,R,E]  = qr( h(:,right) );
 zerorows = find( abs(diag(R)) <= condn );
 
-while( any(zerorows) & iq <= qrows )
+while( any(zerorows) && iq <= qrows )
    h=sparse(h);
    Q=sparse(Q);
    h = Q'*h;

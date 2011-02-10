@@ -10,6 +10,7 @@ function [A,B,Q,Z] = qzdiv(stake,A,B,Q,Z)
 % http://sims.princeton.edu/yftp/gensys/mfiles/qzdiv.m
 
 % Copyright (C) 1993-2007 Christopher Sims
+% Copyright (C) 2008-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -33,7 +34,7 @@ root(:,2) = root(:,2)./root(:,1);
 for i = n:-1:1
     m=0;
     for j=i:-1:1
-        if (root(j,2) > stake | root(j,2) < -.1) 
+        if (root(j,2) > stake || root(j,2) < -.1) 
             m=j;
             break
         end

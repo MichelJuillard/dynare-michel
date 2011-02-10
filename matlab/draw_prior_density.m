@@ -113,7 +113,7 @@ end
 k = [1:length(dens)];
 if pshape(indx) ~= 5 
     [junk,k1] = max(dens);
-    if k1 == 1 | k1 == length(dens)
+    if k1 == 1 || k1 == length(dens)
         k = find(dens < 10);
     end
 end

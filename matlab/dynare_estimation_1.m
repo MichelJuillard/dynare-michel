@@ -77,10 +77,10 @@ if options_.prefilter == 1
 end
 
 %% Set options related to filtered variables.
-if options_.filtered_vars ~= 0 & isempty(options_.filter_step_ahead), 
+if options_.filtered_vars ~= 0 && isempty(options_.filter_step_ahead), 
     options_.filter_step_ahead = 1;
 end
-if options_.filtered_vars ~= 0 & options_.filter_step_ahead == 0,
+if options_.filtered_vars ~= 0 && options_.filter_step_ahead == 0,
     options_.filter_step_ahead = 1;
 end
 if options_.filter_step_ahead ~= 0
@@ -120,7 +120,7 @@ if ~isempty(estim_params_)
     end
     % Test if initial values of the estimated parameters are all between
     % the prior lower and upper bounds.
-    if any(xparam1 < bounds(:,1)) | any(xparam1 > bounds(:,2))
+    if any(xparam1 < bounds(:,1)) || any(xparam1 > bounds(:,2))
         find(xparam1 < bounds(:,1))
         find(xparam1 > bounds(:,2))
         error('Initial parameter values are outside parameter bounds')
@@ -684,7 +684,7 @@ if ~options_.mh_posterior_mode_estimation
     end
 end
 
-if options_.mode_check == 1 & ~options_.mh_posterior_mode_estimation
+if options_.mode_check == 1 && ~options_.mh_posterior_mode_estimation
     mode_check(xparam1,0,hh,gend,data,lb,ub,data_index,number_of_observations,no_more_missing_observations);
 end
 
@@ -703,7 +703,7 @@ else
 end
 
 
-if any(bayestopt_.pshape > 0) & ~options_.mh_posterior_mode_estimation
+if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
     disp(' ')
     disp('RESULTS FROM POSTERIOR MAXIMIZATION')
     tstath = zeros(nx,1);
@@ -815,7 +815,7 @@ if any(bayestopt_.pshape > 0) & ~options_.mh_posterior_mode_estimation
     disp(' ')
     disp(sprintf('Log data density [Laplace approximation] is %f.',md_Laplace))
     disp(' ')
-elseif ~any(bayestopt_.pshape > 0) & options_.mh_posterior_mode_estimation
+elseif ~any(bayestopt_.pshape > 0) && options_.mh_posterior_mode_estimation
     disp(' ')
     disp('RESULTS FROM MAXIMUM LIKELIHOOD')
     tstath = zeros(nx,1);
@@ -900,7 +900,7 @@ end
 
 OutputDirectoryName = CheckPath('Output');
 
-if any(bayestopt_.pshape > 0) & options_.TeX %% Bayesian estimation (posterior mode) Latex output
+if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior mode) Latex output
     if np
         filename = [OutputDirectoryName '/' M_.fname '_Posterior_Mode_1.TeX'];
         fidTeX = fopen(filename,'w');
@@ -1083,21 +1083,21 @@ if np > 0
     save([M_.fname '_params.mat'],'pindx');
 end
 
-if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
-        (any(bayestopt_.pshape >0 ) & options_.load_mh_file)  %% not ML estimation
+if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
+        (any(bayestopt_.pshape >0 ) && options_.load_mh_file)  %% not ML estimation
     bounds = prior_bounds(bayestopt_);
     bounds(:,1)=max(bounds(:,1),lb);
     bounds(:,2)=min(bounds(:,2),ub);
     bayestopt_.lb = bounds(:,1);
     bayestopt_.ub = bounds(:,2);
-    if any(xparam1 < bounds(:,1)) | any(xparam1 > bounds(:,2))
+    if any(xparam1 < bounds(:,1)) || any(xparam1 > bounds(:,2))
         find(xparam1 < bounds(:,1))
         find(xparam1 > bounds(:,2))
         error('Mode values are outside prior bounds. Reduce prior_trunc.')
     end
     % runs MCMC
     if options_.mh_replic
-        if options_.load_mh_file & options_.use_mh_covariance_matrix
+        if options_.load_mh_file && options_.use_mh_covariance_matrix
             invhess = compute_mh_covariance_matrix;
         end
         if options_.dsge_var
@@ -1111,7 +1111,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
         CutSample(M_, options_, estim_params_);
         return
     else
-        if ~options_.nodiagnostic & options_.mh_replic > 1000 & options_.mh_nblck > 1
+        if ~options_.nodiagnostic && options_.mh_replic > 1000 && options_.mh_nblck > 1
             McMCDiagnostics(options_, estim_params_, M_);
         end
         %% Here i discard first half of the draws:
@@ -1131,7 +1131,7 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
         if options_.moments_varendo
             oo_ = compute_moments_varendo('posterior',options_,M_,oo_,var_list_);
         end
-        if options_.smoother | ~isempty(options_.filter_step_ahead) | options_.forecast
+        if options_.smoother || ~isempty(options_.filter_step_ahead) || options_.forecast
             prior_posterior_statistics('posterior',data,gend,data_index,missing_value);
         end
         xparam = get_posterior_parameters('mean');
@@ -1139,9 +1139,9 @@ if (any(bayestopt_.pshape  >0 ) & options_.mh_replic) | ...
     end
 end
 
-if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape ...
-                                                      > 0) & options_.load_mh_file)) ...
-    | ~options_.smoother ) & M_.endo_nbr^2*gend < 1e7 & options_.partial_information == 0  % to be fixed   
+if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.pshape ...
+                                                      > 0) && options_.load_mh_file)) ...
+    || ~options_.smoother ) && M_.endo_nbr^2*gend < 1e7 && options_.partial_information == 0  % to be fixed   
     %% ML estimation, or posterior mode without metropolis-hastings or metropolis without bayesian smooth variable
     [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp] = DsgeSmoother(xparam1,gend,data,data_index,missing_value);
     oo_.Smoother.SteadyState = ys;
@@ -1713,7 +1713,7 @@ if (~((any(bayestopt_.pshape > 0) & options_.mh_replic) | (any(bayestopt_.pshape
     end
 end
 
-if options_.forecast > 0 & options_.mh_replic == 0 & ~options_.load_mh_file 
+if options_.forecast > 0 && options_.mh_replic == 0 && ~options_.load_mh_file 
     forecast(var_list_,'smoother');
 end
 

@@ -11,7 +11,7 @@ function [result,info] = check
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2010 Dynare Team
+% Copyright (C) 2001-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -33,7 +33,7 @@ global M_ options_ oo_
 
 temp_options = options_;
 tempex = oo_.exo_simul;
-if ~options_.initval_file & M_.exo_nbr > 1
+if ~options_.initval_file && M_.exo_nbr > 1
     oo_.exo_simul = ones(M_.maximum_lead+M_.maximum_lag+1,1)*oo_.exo_steady_state';
 end
 
@@ -47,7 +47,7 @@ end
 
 oo_.dr = dr;
 
-if info(1) ~= 0 & info(1) ~= 3 & info(1) ~= 4
+if info(1) ~= 0 && info(1) ~= 3 && info(1) ~= 4
     print_info(info, options_.noprint);
 end  
 
@@ -76,7 +76,7 @@ if options_.noprint == 0
     disp(sprintf('\nThere are %d eigenvalue(s) larger than 1 in modulus ', n_explod));
     disp(sprintf('for %d forward-looking variable(s)',nyf));
     disp(' ')
-    if dr.rank == nyf & nyf == n_explod
+    if dr.rank == nyf && nyf == n_explod
         disp('The rank condition is verified.')
     else
         disp('The rank conditions ISN''T verified!')

@@ -11,7 +11,7 @@ function dynare_estimation(var_list,varargin)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2010 Dynare Team
+% Copyright (C) 2003-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -62,13 +62,13 @@ else
     dynare_estimation_1(var_list,varargin{:});
 end
 
-if nnobs > 1 & horizon > 0
+if nnobs > 1 && horizon > 0
     mh_replic = options_.mh_replic;
     rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
     gend = options_.nobs;
     rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
     % Take the log of the variables if needed
-    if options_.loglinear & ~options_.logdata   % and if the data are not in logs, then...
+    if options_.loglinear && ~options_.logdata   % and if the data are not in logs, then...
         rawdata = log(rawdata);  
     end
 

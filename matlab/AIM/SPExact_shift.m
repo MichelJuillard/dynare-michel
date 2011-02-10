@@ -34,7 +34,7 @@ left   = 1:qcols;
 right  = qcols+1:qcols+neq;
 zerorows = find( sum(abs( hs(:,right)' ))==0 );
 
-while( any(zerorows) & iq <= qrows )
+while( any(zerorows) && iq <= qrows )
    nz = length(zerorows);
    q(iq+1:iq+nz,:) = hs(zerorows,left);
    hs(zerorows,:)   = SPShiftright(hs(zerorows,:),neq);

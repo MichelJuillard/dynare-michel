@@ -78,7 +78,7 @@ if (options_.order > 1)
 end
 
 % expanding system for Optimal Linear Regulator
-if options_.ramsey_policy & options_.ACES_solver == 0
+if options_.ramsey_policy && options_.ACES_solver == 0
     if isfield(M_,'orig_model')
         orig_model = M_.orig_model;
         M_.endo_nbr = orig_model.endo_nbr;
@@ -194,7 +194,7 @@ end % end if useAIM and...
         %end
         if isfield(lq_instruments,'names')
             num_inst=size(lq_instruments.names,1);
-            if ~isfield(lq_instruments,'inst_var_indices') & num_inst>0
+            if ~isfield(lq_instruments,'inst_var_indices') && num_inst>0
                 for i=1:num_inst
                     i_tmp = strmatch(deblank(lq_instruments.names(i,:)),M_.endo_names,'exact');
                     if isempty(i_tmp)
@@ -213,7 +213,7 @@ end % end if useAIM and...
                 i_var=[];
                 num_inst=0;
             end
-            if size(i_var,2)>0 & size(i_var,2)==num_inst
+            if size(i_var,2)>0 && size(i_var,2)==num_inst
                 m_var=zeros(nendo,1);
                 for i=1:nendo
                     if isempty(find(i_var==i))
@@ -262,7 +262,7 @@ end % end if useAIM and...
                 fnd = find(lead_lag(:,M_.maximum_lag+2));
                 AA0(:, fnd)= jacobia_(:,nonzeros(lead_lag(:,M_.maximum_lag+2))); %forwd jacobian
             end
-            if npred>0 & M_.maximum_lag ==1  
+            if npred>0 && M_.maximum_lag ==1  
                 fnd = find(lead_lag(:,1));
                 AA2(:, fnd)= jacobia_(:,nonzeros(lead_lag(:,1))); %backward
             end
@@ -285,7 +285,7 @@ end % end if useAIM and...
                 lq_instruments.B0=[lq_instruments.ij0; eye(num_inst)];
                 AA0=[AA0, zeros(xlen,num_inst); zeros(num_inst,xlen+num_inst)];
             end
-            if npred>0 & M_.maximum_lag ==1  
+            if npred>0 && M_.maximum_lag ==1  
                 AA_all(:,:)=0.0;
                 fnd = find(lead_lag(:,1));
                 AA_all(:, fnd)= jacobia_(:,nonzeros(lead_lag(:,1))); %backward
@@ -353,7 +353,7 @@ end % end if useAIM and...
         end
 
         % reuse some of the bypassed code and tests that may be needed 
-        if eu ~=[1; 1] & options_.ACES_solver==0
+        if eu ~=[1; 1] && options_.ACES_solver==0
             info(1) = abs(eu(1)+eu(2));
             info(2) = 1.0e+8;
             %     return

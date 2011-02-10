@@ -97,7 +97,7 @@ epsilonhat          = zeros(rr,smpl);
 r               = zeros(mm,smpl+1);
 
 t = 0;
-while rank(Pinf(:,:,t+1),crit1) & t<smpl
+while rank(Pinf(:,:,t+1),crit1) && t<smpl
     t = t+1;
     di = data_index{t};
     if isempty(di)
@@ -160,7 +160,7 @@ Kstar = Kstar(:,:,1:d);
 Pstar = Pstar(:,:,1:d);
 Pinf  = Pinf(:,:,1:d);
 notsteady = 1;
-while notsteady & t<smpl
+while notsteady && t<smpl
     t = t+1;
     P(:,:,t)=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));
     di = data_index{t};

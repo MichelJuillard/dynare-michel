@@ -23,7 +23,7 @@ function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel1(fcn,x0,H0,grad,crit,nit,m
 % http://sims.princeton.edu/yftp/optimize/mfiles/csminwel.m
 
 % Copyright (C) 1993-2007 Christopher Sims
-% Copyright (C) 2006-2010 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -105,7 +105,7 @@ while ~done
     % itct=itct+1;
     fcount = fcount+fc;
     % erased on 8/4/94
-    % if (retcode == 1) | (abs(f1-f) < crit)
+    % if (retcode == 1) || (abs(f1-f) < crit)
     %    done=1;
     % end
     % if itct > nit
@@ -113,7 +113,7 @@ while ~done
     %    retcode = -retcode;
     % end
     if retcode1 ~= 1
-        if retcode1==2 | retcode1==4
+        if retcode1==2 || retcode1==4
             wall1=1; badg1=1;
         else
             if NumGrad
@@ -134,7 +134,7 @@ while ~done
             %ARGLIST
             %save g1 g1 x1 f1 P1 P2 P3 P4 P5 P6 P7 P8 P9 P10 P11 P12 P13;
         end
-        if wall1 % & (~done) by Jinill
+        if wall1 % && (~done) by Jinill
                  % Bad gradient or back and forth on step length.  Possibly at
                  % cliff edge.  Try perturbing search direction.
                  %
@@ -147,7 +147,7 @@ while ~done
             %     P5,P6,P7,P8,P9,P10,P11,P12,P13);
             fcount = fcount+fc; % put by Jinill
             if  f2 < f
-                if retcode2==2 | retcode2==4
+                if retcode2==2 || retcode2==4
                     wall2=1; badg2=1;
                 else
                     if NumGrad
@@ -182,7 +182,7 @@ while ~done
                         %         P4,P5,P6,P7,P8,...
                         %      P9,P10,P11,P12,P13);
                         fcount = fcount+fc; % put by Jinill
-                        if retcode3==2 | retcode3==4
+                        if retcode3==2 || retcode3==4
                             wall3=1; badg3=1;
                         else
                             if NumGrad
@@ -218,13 +218,13 @@ while ~done
         f2=f;f3=f;f1=f;retcode2=retcode1;retcode3=retcode1;
     end
     %how to pick gh and xh
-    if f3 < f - crit & badg3==0 & f3 < f2 & f3 < f1
+    if f3 < f - crit && badg3==0 && f3 < f2 && f3 < f1
         ih=3;
         fh=f3;xh=x3;gh=g3;badgh=badg3;retcodeh=retcode3;
-    elseif f2 < f - crit & badg2==0 & f2 < f1
+    elseif f2 < f - crit && badg2==0 && f2 < f1
         ih=2;
         fh=f2;xh=x2;gh=g2;badgh=badg2;retcodeh=retcode2;
-    elseif f1 < f - crit & badg1==0
+    elseif f1 < f - crit && badg1==0
         ih=1;
         fh=f1;xh=x1;gh=g1;badgh=badg1;retcodeh=retcode1;
     else
@@ -271,7 +271,7 @@ while ~done
     %gh
     %badgh
     stuck = (abs(fh-f) < crit);
-    if (~badg)&(~badgh)&(~stuck)
+    if (~badg) && (~badgh) && (~stuck)
         H = bfgsi(H,gh-g,xh-x);
     end
     if Verbose
@@ -293,7 +293,7 @@ while ~done
         disp('smallest step still improving too slow, reversed gradient')
     elseif rc == 5
         disp('largest step still improving too fast')
-    elseif (rc == 4) | (rc==2)
+    elseif (rc == 4) || (rc==2)
         disp('back and forth on step length never finished')
     elseif rc == 3
         disp('smallest step still improving too slow')

@@ -42,7 +42,7 @@ function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
 %    - bvar_prior_{tau,decay,lambda,mu,omega,flat,train}
 
 % Copyright (C) 2003-2007 Christopher Sims
-% Copyright (C) 2007-2009 Dynare Team
+% Copyright (C) 2007-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -87,7 +87,7 @@ end
 idx = options_.first_obs+options_.presample-train-nlags:options_.first_obs+options_.nobs-1;
 
 % Prepare dataset
-if options_.loglinear & ~options_.logdata
+if options_.loglinear && ~options_.logdata
     dataset = log(dataset);
 end
 if options_.prefilter
@@ -106,7 +106,7 @@ mu = options_.bvar_prior_mu;
 flat = options_.bvar_prior_flat;
 
 ny = size(dataset, 2);
-if options_.prefilter | options_.noconstant
+if options_.prefilter || options_.noconstant
     nx = 0;
 else
     nx = 1;
@@ -204,7 +204,7 @@ else
     breaks = [];
     lbreak = 0;
 end
-if ~isempty(vprior) & vprior.w>0
+if ~isempty(vprior) && vprior.w>0
     ydum2 = zeros(lags+1,nv,nv);
     xdum2 = zeros(lags+1,nx,nv);
     ydum2(end,:,:) = diag(vprior.sig);
@@ -286,7 +286,7 @@ y = ydata(smpl,:);
 % Everything now set up with input data for y=Xb+e 
 
 % Add persistence dummies
-if lambda ~= 0 | mu > 0
+if lambda ~= 0 || mu > 0
     ybar = mean(ydata(1:lags,:),1);
     if ~nox
         xbar = mean(xdata(1:lags,:),1);

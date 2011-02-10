@@ -47,14 +47,14 @@ nobs            = size(options_.varobs,1);
 %------------------------------------------------------------------------------
 % 1. Get the structural parameters & define penalties
 %------------------------------------------------------------------------------
-if options_.mode_compute ~= 1 & any(xparam1 < bayestopt_.lb)
+if options_.mode_compute ~= 1 && any(xparam1 < bayestopt_.lb)
     k = find(xparam1 < bayestopt_.lb);
     fval = bayestopt_.penalty+sum((bayestopt_.lb(k)-xparam1(k)).^2);
     cost_flag = 0;
     info = 41;
     return;
 end
-if options_.mode_compute ~= 1 & any(xparam1 > bayestopt_.ub)
+if options_.mode_compute ~= 1 && any(xparam1 > bayestopt_.ub)
     k = find(xparam1 > bayestopt_.ub);
     fval = bayestopt_.penalty+sum((xparam1(k)-bayestopt_.ub(k)).^2);
     cost_flag = 0;

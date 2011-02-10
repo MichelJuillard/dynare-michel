@@ -96,7 +96,7 @@ ipred = nstatic+(1:npred)';
 % Compute stationary variables (before HP filtering),
 % and compute 2nd order mean correction on stationary variables (in case of
 % HP filtering, this mean correction is computed *before* filtering)
-if options_.order == 2 | options_.hp_filter == 0
+if options_.order == 2 || options_.hp_filter == 0
     [vx, u] =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold);
     iky = inv_order_var(ivar);
     stationary_vars = (1:length(ivar))';

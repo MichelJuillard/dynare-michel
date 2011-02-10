@@ -90,7 +90,7 @@ try
     end
     warning('on','MATLAB:singularMatrix');
     warning('on','MATLAB:nearlySingularMatrix');
-    if (isinf(UAVinv) | isnan(UAVinv)) 
+    if (isinf(UAVinv) || isnan(UAVinv)) 
         if(options_.useACES==1)
             disp('ERROR! saving PI_gensys_data_dump');
             save PI_gensys_data_dump
@@ -232,14 +232,14 @@ for i=1:nn
             % bug detected by Vasco Curdia and Daria Finocchiaro, 2/25/2004  A root of
             % exactly 1.01 and no root between 1 and 1.02, led to div being stuck at 1.01
             % and the 1.01 root being misclassified as stable.  Changing < to <= below fixes this.
-            if 1+realsmall<divhat & divhat<=div
+            if 1+realsmall<divhat && divhat<=div
                 div=.5*(1+divhat);
             end
         end
     end
     % ----------------------------------------
     nunstab=nunstab+(abs(b(i,i))>div*abs(a(i,i)));
-    if abs(a(i,i))<realsmall & abs(b(i,i))<realsmall
+    if abs(a(i,i))<realsmall && abs(b(i,i))<realsmall
         zxz=1;
     end
 end
@@ -257,7 +257,7 @@ if zxz
     nmat=[]; %;gev=[]
     return
 end
-if (FL_RANK ~= nunstab & options_.ACES_solver~=1)
+if (FL_RANK ~= nunstab && options_.ACES_solver~=1)
     disp(['Number of unstable variables ' num2str(nunstab)]);
     disp( ['does not match number of expectational equations ' num2str(FL_RANK)]); 
     nmat=[];% gev=[];

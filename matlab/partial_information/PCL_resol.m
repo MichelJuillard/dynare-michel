@@ -125,7 +125,7 @@ if ~isreal(dr.ys)
 end
 
 dr.fbias = zeros(M_.endo_nbr,1);
-if( (options_.partial_information ==1) | (options_.ACES_solver==1))%&& (check_flag == 0)
+if( (options_.partial_information ==1) || (options_.ACES_solver==1))%&& (check_flag == 0)
     [dr,info,M_,options_,oo_] = dr1_PI(dr,check_flag,M_,options_,oo_);
 else
     [dr,info,M_,options_,oo_] = dr1(dr,check_flag,M_,options_,oo_);
