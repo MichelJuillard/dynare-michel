@@ -3373,7 +3373,7 @@ end;
       <listitem><para>...</para></listitem>
     </varlistentry>
     <varlistentry>
-      <term><option>kalman_tol</option> = <replaceable>INTEGER</replaceable></term>
+      <term><option>kalman_tol</option> = <replaceable>DOUBLE</replaceable></term>
       <listitem><para>...</para></listitem>
     </varlistentry>
     <varlistentry id="filter_covariance" xreflabel="filter_covariance">
