@@ -1,7 +1,7 @@
 function tau = thet2tau(params, indx, indexo, flagmoments,mf,nlags,useautocorr)
 
 %
-% Copyright (C) 2010 Dynare Team
+% Copyright (C) 2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -28,7 +28,7 @@ end
 if nargin<4,
     flagmoments=0;
 end
-if nargin<7 | isempty(useautocorr),
+if nargin<7 || isempty(useautocorr),
     useautocorr=0;
 end
 

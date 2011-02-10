@@ -93,15 +93,15 @@ for i=fpar:npar,
         if max(abs(MeanIRF(:,j,i))) > 10^(-6)
             subplotnum = subplotnum+1;
             if options_.nograph
-                if subplotnum == 1 & options_.relative_irf
+                if subplotnum == 1 && options_.relative_irf
                     hh = figure('Name',['Relative response to orthogonalized shock to ' tit(i,:)],'Visible','off');
-                elseif subplotnum == 1 & ~options_.relative_irf
+                elseif subplotnum == 1 && ~options_.relative_irf
                     hh = figure('Name',['Orthogonalized shock to ' tit(i,:)],'Visible','off');
                 end
             else
-                if subplotnum == 1 & options_.relative_irf
+                if subplotnum == 1 && options_.relative_irf
                     hh = figure('Name',['Relative response to orthogonalized shock to ' tit(i,:)]);
-                elseif subplotnum == 1 & ~options_.relative_irf
+                elseif subplotnum == 1 && ~options_.relative_irf
                     hh = figure('Name',['Orthogonalized shock to ' tit(i,:)]);
                 end
             end
@@ -143,7 +143,7 @@ for i=fpar:npar,
             title(name,'Interpreter','none')
         end
         
-        if subplotnum == MaxNumberOfPlotPerFigure | (j == nvar  & subplotnum> 0)
+        if subplotnum == MaxNumberOfPlotPerFigure || (j == nvar  && subplotnum> 0)
             figunumber = figunumber+1;
             set(hh,'visible','on')
             eval(['print -depsc2 ' DirectoryName '/'  M_.fname '_Bayesian_IRF_' deblank(tit(i,:)) '_' int2str(figunumber) '.eps']);

@@ -232,13 +232,13 @@ while fpar<npar
             stock_irf_dsgevar = zeros(options_.irf,nvobs,M_.exo_nbr,MAX_nirfs_dsgevar);
         end
     end
-    if irun == MAX_nirfs_dsge | irun == npar | fpar == npar
+    if irun == MAX_nirfs_dsge || irun == npar || fpar == npar
         if fpar == npar
             stock_irf_dsge = stock_irf_dsge(:,:,:,1:irun);
-            if MAX_nirfs_dsgevar & (fpar == npar | IRUN == npar)
+            if MAX_nirfs_dsgevar && (fpar == npar || IRUN == npar)
                 stock_irf_bvardsge = stock_irf_bvardsge(:,:,:,1:IRUN);
                 instr = [MhDirectoryName '/' M_.fname '_irf_bvardsge' ...
-                         int2str(NumberOfIRFfiles_dsgevar) '.mat stock_irf_bvardsge;'];,
+                         int2str(NumberOfIRFfiles_dsgevar) '.mat stock_irf_bvardsge;'];
                 eval(['save ' instr]);
                 NumberOfIRFfiles_dsgevar = NumberOfIRFfiles_dsgevar+1;
                 if RemoteFlag==1,
@@ -254,7 +254,7 @@ while fpar<npar
         NumberOfIRFfiles_dsge = NumberOfIRFfiles_dsge+1;
         irun = 0;
     end
-    if irun2 == MAX_nruns | fpar == npar
+    if irun2 == MAX_nruns || fpar == npar
         if fpar == npar
             stock_param = stock_param(1:irun2,:);
         end

@@ -90,7 +90,7 @@ else
     if options_.steadystate_flag,
         NamFileInput(length(NamFileInput)+1,:)={'',[ModelName '_steadystate.m']};
     end
-    if (options_.load_mh_file~=0)  & any(fline>1) ,
+    if (options_.load_mh_file~=0) && any(fline>1) ,
         NamFileInput(length(NamFileInput)+1,:)={[M_.dname '/metropolis/'],[ModelName '_mh' int2str(NewFile(1)) '_blck*.mat']};
     end
     if exist([ModelName '_optimal_mh_scale_parameter.mat'])

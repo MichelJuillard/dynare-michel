@@ -190,7 +190,7 @@ if iload <=0,
             else
                 iteration = iteration + 1;
                 run_index = run_index + 1;
-                if iteration==1 & BurninSampleSize,
+                if iteration==1 && BurninSampleSize,
                     indJJ = (find(std(GAM')>1.e-8));
                     indH = (find(std(TAU')>1.e-8));
                     indLRE = (find(std(LRE')>1.e-8));
@@ -300,7 +300,7 @@ if iload <=0,
                 %                 rhoM=sqrt(1-1./diag(inv(tildaM)));
                 %                 deltaM = deltaM.*params(indok)';
                 %                 ide_strength_H(iteration,indok) = (1./[sqrt(diag(inv(MIM)))./params(indok)']);
-                if run_index==MAX_tau | iteration==SampleSize,
+                if run_index==MAX_tau || iteration==SampleSize,
                     file_index = file_index + 1;
                     if run_index<MAX_tau,
                         stoH = stoH(:,:,1:run_index);
@@ -427,7 +427,7 @@ if SampleSize>1,
 end
 
 
-if nargout>3 & iload,
+if nargout>3 && iload,
     filnam = dir([IdentifDirectoryName '/' M_.fname '_identif_*.mat']);
     H=[];
     JJ = [];
@@ -867,7 +867,7 @@ end
 %         text(ip,-1.02,deblank(M_.param_names(indx(immm(ip+1)),:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
 %     end
 %     title(deblank(M_.param_names(indx(j),:))),
-%     if j==np | mod(j,12)==0  
+%     if j==np || mod(j,12)==0  
 %         saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_PCORR_LRE',int2str(ifig)])
 %         eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_LRE',int2str(ifig)]);
 %         eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_LRE',int2str(ifig)]);
@@ -902,7 +902,7 @@ end
 %         text(ip,-1.02,name{immm(ip+1)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 %     end
 %     title(name{j}),
-%     if j==nparam | mod(j,12)==0  
+%     if j==nparam || mod(j,12)==0  
 %         saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_PCORR_model',int2str(ifig)])
 %         eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_model',int2str(ifig)]);
 %         eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_model',int2str(ifig)]);
@@ -937,7 +937,7 @@ end
 %         text(ip,-1.02,name{immm(ip+1)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 %     end
 %     title(name{j}),
-%     if j==nparam | mod(j,12)==0  
+%     if j==nparam || mod(j,12)==0  
 %         saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_PCORR_moments',int2str(ifig)])
 %         eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_moments',int2str(ifig)]);
 %         eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_PCORR_moments',int2str(ifig)]);

@@ -99,7 +99,7 @@ jit=0;
 nig=[];
 ig=ones(nx,1);
 ggx=zeros(nx,1);
-while norm(gg)>gtol & check==0 & jit<nit,
+while norm(gg)>gtol && check==0 && jit<nit,
     jit=jit+1;
     tic
     icount=icount+1;
@@ -117,7 +117,7 @@ while norm(gg)>gtol & check==0 & jit<nit,
         fval=fval1;
         x0=x01;        
     end
-    if (fval0(icount)-fval)<1.e-2*(gg'*(H*gg))/2 & igibbs,
+    if (fval0(icount)-fval)<1.e-2*(gg'*(H*gg))/2 && igibbs,
         if length(find(ig))<nx,
             ggx=ggx*0;
             ggx(find(ig))=gg(find(ig));
@@ -139,7 +139,7 @@ while norm(gg)>gtol & check==0 & jit<nit,
         end
         fval=fvala;
     end
-    if (fval0(icount)-fval)<ftol & flagit==0,
+    if (fval0(icount)-fval)<ftol && flagit==0,
         disp('Try diagonal Hessian')
         ihh=diag(1./(diag(hhg)));        
         [fval2 x0 fc retcode2] = csminit(func2str(func),x0,fval,gg,0,ihh,varargin{:});
@@ -149,7 +149,7 @@ while norm(gg)>gtol & check==0 & jit<nit,
         end
         fval=fval2;
     end        
-    if (fval0(icount)-fval)<ftol & flagit==0,
+    if (fval0(icount)-fval)<ftol && flagit==0,
         disp('Try gradient direction')
         ihh0=inx.*1.e-4;        
         [fval3 x0 fc retcode3] = csminit(func2str(func),x0,fval,gg,0,ihh0,varargin{:});
@@ -163,7 +163,7 @@ while norm(gg)>gtol & check==0 & jit<nit,
     xparam1=x0;
     x(:,icount+1)=xparam1;
     fval0(icount+1)=fval;
-    %if (fval0(icount)-fval)<ftol*ftol & flagg==1;,
+    %if (fval0(icount)-fval)<ftol*ftol && flagg==1;,
     mr_gstep(1,x);
     mr_hessian(1,x);
     if (fval0(icount)-fval)<ftol,

@@ -105,7 +105,7 @@ for i=fpar:nvar
         end
     end
     
-    if subplotnum == MaxNumberOfPlotsPerFigure | i == nvar
+    if subplotnum == MaxNumberOfPlotsPerFigure || i == nvar
         eval(['print -depsc2 ' M_.dname '/Output/'  M_.fname '_' name3 '_' deblank(tit3(i,:)) '.eps' ]);
         if ~exist('OCTAVE_VERSION')
             eval(['print -dpdf ' M_.dname '/Output/' M_.fname  '_' name3 '_' deblank(tit3(i,:))]);

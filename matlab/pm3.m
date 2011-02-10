@@ -115,7 +115,7 @@ if options_.TeX
             texname = deblank(varlist_TeX(i,:));
             TEXNAMES = ['$' texname '$'];
         end
-        if subplotnum == MaxNumberOfPlotsPerFigure | i == nvar
+        if subplotnum == MaxNumberOfPlotsPerFigure || i == nvar
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:size(TEXNAMES,1)
                 fprintf(fidTeX,['\\psfrag{%s}[1][][0.5][0]{%s}\n'],deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));

@@ -72,9 +72,9 @@ while i<n,
     
     icount = 0;
     h0=h1(i);
-%     while (abs(dx(it))<0.5*htol | abs(dx(it))>(2*htol)) & icount<10 & ic==0,
-    while (abs(dx(it))<0.5*htol) & icount<10 & ic==0,
-        %while abs(dx(it))<0.5*htol & icount< 10 & ic==0,
+%     while (abs(dx(it))<0.5*htol || abs(dx(it))>(2*htol)) && icount<10 && ic==0,
+    while (abs(dx(it))<0.5*htol) && icount<10 && ic==0,
+        %while abs(dx(it))<0.5*htol && icount< 10 && ic==0,
         icount=icount+1;
         if abs(dx(it)) ~= 0,
             if abs(dx(it))<0.5*htol
@@ -125,7 +125,7 @@ while i<n,
     %         xh1(i)=x(i)+h1(i);
     %         f1(:,i)=feval(func,xh1,varargin{:});
     %     end
-    if hcheck & htol<1,
+    if hcheck && htol<1,
         htol=min(1,max(min(abs(dx))*2,htol*10));
         h1(i)=h10;
         xh1(i)=x(i);

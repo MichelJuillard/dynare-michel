@@ -28,7 +28,7 @@ function [alphahat,etahat,atilde, aK] = missing_DiffuseKalmanSmoother1(T,R,Q,Pin
 %   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
 %   Analysis, vol. 24(1), pp. 85-98). 
 
-% Copyright (C) 2004-2010 Dynare Team
+% Copyright (C) 2004-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -87,7 +87,7 @@ for i=1:pp;
 end
 
 t = 0;
-while rank(Pinf(:,:,t+1),crit1) & t<smpl
+while rank(Pinf(:,:,t+1),crit1) && t<smpl
     t = t+1;
     di = data_index{t};
     if isempty(di)
@@ -127,7 +127,7 @@ Kstar = Kstar(:,:,1:d);
 Pstar = Pstar(:,:,1:d);
 Pinf  = Pinf(:,:,1:d);
 notsteady = 1;
-while notsteady & t<smpl
+while notsteady && t<smpl
     t = t+1;
     P(:,:,t)=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));
     di = data_index{t};

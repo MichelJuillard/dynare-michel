@@ -148,7 +148,7 @@ Kstar = Kstar(:,:,1:d);
 Pstar = Pstar(:,:,1:d);
 Pinf  = Pinf(:,:,1:d);
 notsteady = 1;
-while notsteady & t<smpl
+while notsteady && t<smpl
     t = t+1;
     v(:,t)      = Y(:,t) - Z*a(:,t);
     P(:,:,t)=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));

@@ -39,7 +39,7 @@ end
 options_.order = 1;
 dynare_resolve;
 
-if ~isempty(options_gsa.datafile) | isempty(bayestopt_),
+if ~isempty(options_gsa.datafile) || isempty(bayestopt_),
     options_.datafile = options_gsa.datafile;
     if isfield(options_gsa,'first_obs'),
         options_.first_obs=options_gsa.first_obs;
@@ -103,7 +103,7 @@ if options_gsa.redform,
     options_gsa.ppost=0;
 end
 
-if ~(exist('stab_map_','file')==6 | exist('stab_map_','file')==2),
+if ~(exist('stab_map_','file')==6 || exist('stab_map_','file')==2),
     dynare_root = strrep(which('dynare.m'),'dynare.m','');
     gsa_path = [dynare_root 'gsa'];
     if exist(gsa_path)
@@ -117,7 +117,7 @@ if ~(exist('stab_map_','file')==6 | exist('stab_map_','file')==2),
 end
 
 
-if options_gsa.morris==1 | options_gsa.morris==3,
+if options_gsa.morris==1 || options_gsa.morris==3,
     if ~options_gsa.identification,
         options_gsa.redform=1;
     end
@@ -141,8 +141,8 @@ end
 
 options_.opt_gsa = options_gsa;
 
-if (options_gsa.load_stab | options_gsa.load_rmse | options_gsa.load_redform) ...
-        & options_gsa.pprior,
+if (options_gsa.load_stab || options_gsa.load_rmse || options_gsa.load_redform) ...
+        && options_gsa.pprior,
     filetoload=[OutputDirectoryName '/' fname_ '_prior.mat'];
     if isempty(ls(filetoload)),
         disp([filetoload,' not found!'])
@@ -155,10 +155,10 @@ if (options_gsa.load_stab | options_gsa.load_rmse | options_gsa.load_redform) ..
             disp('The saved files are generated with previous version of GSA package') % trap for files previous 
         else
             load(filetoload,'bkpprior'),
-            if any(bayestopt_.pshape~=bkpprior.pshape) | ...
-                    any(bayestopt_.p1~=bkpprior.p1) | ...
-                    any(bayestopt_.p2~=bkpprior.p2) | ...
-                    any(bayestopt_.p3(~isnan(bayestopt_.p3))~=bkpprior.p3(~isnan(bkpprior.p3))) | ...
+            if any(bayestopt_.pshape~=bkpprior.pshape) || ...
+                    any(bayestopt_.p1~=bkpprior.p1) || ...
+                    any(bayestopt_.p2~=bkpprior.p2) || ...
+                    any(bayestopt_.p3(~isnan(bayestopt_.p3))~=bkpprior.p3(~isnan(bkpprior.p3))) || ...
                     any(bayestopt_.p4(~isnan(bayestopt_.p4))~=bkpprior.p4(~isnan(bkpprior.p4))),
                 disp('WARNING!')
                 disp('The saved sample has different priors w.r.t. to current ones!!')
@@ -170,7 +170,7 @@ if (options_gsa.load_stab | options_gsa.load_rmse | options_gsa.load_redform) ..
     end
 end
 
-if options_gsa.stab & ~options_gsa.ppost,
+if options_gsa.stab && ~options_gsa.ppost,
     x0 = stab_map_(OutputDirectoryName);
 end
 
@@ -189,8 +189,8 @@ if options_gsa.identification,
     map_ident_(OutputDirectoryName);
 end
 
-if options_gsa.redform & ~isempty(options_gsa.namendo) ...
-        & ~options_gsa.ppost,
+if options_gsa.redform && ~isempty(options_gsa.namendo) ...
+        && ~options_gsa.ppost,
     if strmatch(':',options_gsa.namendo,'exact'),
         options_gsa.namendo=M_.endo_names;
     end
@@ -205,7 +205,7 @@ if options_gsa.redform & ~isempty(options_gsa.namendo) ...
         redform_screen(OutputDirectoryName);
     else
         % check existence of the SS_ANOVA toolbox
-        if ~(exist('gsa_sdp','file')==6 | exist('gsa_sdp','file')==2),
+        if ~(exist('gsa_sdp','file')==6 || exist('gsa_sdp','file')==2),
             disp('Download Mapping routines at:')
             disp('http://eemc.jrc.ec.europa.eu/softwareDYNARE-Dowload.htm')
             disp(' ' )

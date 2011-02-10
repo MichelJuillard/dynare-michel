@@ -100,7 +100,7 @@ end
 t = 0;
 icc=0;
 newRank   = rank(Pinf(:,:,1),crit1);
-while newRank & t < smpl
+while newRank && t < smpl
     t = t+1;
     a(:,t) = a1(:,t);
     Pstar(:,:,t)=tril(Pstar(:,:,t))+transpose(tril(Pstar(:,:,t),-1));
@@ -112,7 +112,7 @@ while newRank & t < smpl
         Fstar(i,t)      = Pstar(mf(i),mf(i),t);
         Finf(i,t)       = Pinf(mf(i),mf(i),t);
         Kstar(:,i,t)    = Pstar(:,mf(i),t);
-        if Finf(i,t) > crit & newRank,  % original MJ: if Finf(i,t) > crit
+        if Finf(i,t) > crit && newRank,  % original MJ: if Finf(i,t) > crit
             icc=icc+1;
             Kinf(:,i,t) = Pinf(:,mf(i),t);
             Linf(:,:,i,t)       = eye(mm) - Kinf(:,i,t)*Z(i,:)/Finf(i,t);
@@ -129,7 +129,7 @@ while newRank & t < smpl
         elseif Fstar(i,t) > crit 
             %% Note that : (1) rank(Pinf)=0 implies that Finf = 0, (2) outside this loop (when for some i and t the condition
             %% rank(Pinf)=0 is satisfied we have P = Pstar and F = Fstar and (3) Finf = 0 does not imply that
-            %% rank(Pinf)=0. [stéphane,11-03-2004].       
+            %% rank(Pinf)=0. [stï¿½phane,11-03-2004].       
             Li(:,:,i,t)    = eye(mm)-Kstar(:,i,t)*Z(i,:)/Fstar(i,t);  % we need to store Li for DKF smoother
             a(:,t)              = a(:,t) + Kstar(:,i,t)*v(i,t)/Fstar(i,t);
             Pstar(:,:,t)        = Pstar(:,:,t) - Kstar(:,i,t)*transpose(Kstar(:,i,t))/Fstar(i,t);
@@ -170,7 +170,7 @@ Pinf  = Pinf(:,:,1:d);
 Pstar1 = Pstar1(:,:,1:d);
 Pinf1  = Pinf1(:,:,1:d);
 notsteady = 1;
-while notsteady & t<smpl
+while notsteady && t<smpl
     t = t+1;
     a(:,t) = a1(:,t);
     P(:,:,t)=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));
@@ -250,7 +250,7 @@ if d
     r1 = zeros(mm,d);
     for t = d:-1:1
         for i=pp:-1:1
-            if Finf(i,t) > crit & ~(t==d & i>options_.diffuse_d),  % use of options_.diffuse_d to be sure of DKF termination
+            if Finf(i,t) > crit && ~(t==d && i>options_.diffuse_d),  % use of options_.diffuse_d to be sure of DKF termination
                                                                    %r1(:,t) = transpose(Z)*v(:,t)/Finf(i,t) + ... BUG HERE in transpose(Z)
                 r1(:,t) = Z(i,:)'*v(i,t)/Finf(i,t) + ...
                           L0(:,:,i,t)'*r0(:,t) + Linf(:,:,i,t)'*r1(:,t);

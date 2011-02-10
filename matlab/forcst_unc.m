@@ -15,7 +15,7 @@ function forcst_unc(y0,var_list)
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2006-2010 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -90,7 +90,7 @@ end
 
 oo_.forecast.accept_rate = (replic-m1)/replic;
 
-if options_.noprint == 0 & m1 < replic
+if options_.noprint == 0 && m1 < replic
     disp(' ')
     disp(' ')
     disp('FORECASTING WITH PARAMETER UNCERTAINTY:')

@@ -20,7 +20,7 @@ function SampleAddress = selec_posterior_draws(SampleSize,drsize)
 %   None.
 % 
 
-% Copyright (C) 2006-2010 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -105,7 +105,7 @@ if info
         for i = 1:SampleSize
             mhfile = SampleAddress(i,3);
             mhblck = SampleAddress(i,2);
-            if (mhfile ~= old_mhfile) | (mhblck ~= old_mhblck)
+            if (mhfile ~= old_mhfile) || (mhblck ~= old_mhblck)
                 load([fname '_mh' num2str(mhfile) '_blck' num2str(mhblck) '.mat'],'x2')
             end
             pdraws(i,1) = {x2(SampleAddress(i,4),:)};
@@ -132,7 +132,7 @@ if info
             linee = linee+1;
             mhfile = SampleAddress(i,3);
             mhblck = SampleAddress(i,2);
-            if (mhfile ~= old_mhfile) | (mhblck ~= old_mhblck)
+            if (mhfile ~= old_mhfile) || (mhblck ~= old_mhblck)
                 load([fname '_mh' num2str(mhfile) '_blck' num2str(mhblck) '.mat'],'x2')
             end
             pdraws(linee,1) = {x2(SampleAddress(i,4),:)};

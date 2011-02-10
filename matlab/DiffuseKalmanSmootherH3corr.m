@@ -29,7 +29,7 @@ function [alphahat,epsilonhat,etahat,a,aK] = DiffuseKalmanSmootherH3corr(T,R,Q,H
 %   Models", S.J. Koopman and J. Durbin (2000, in Journal of Time Series 
 %   Analysis, vol. 21(3), pp. 281-296).  
 
-% Copyright (C) 2004-2010 Dynare Team
+% Copyright (C) 2004-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -94,7 +94,7 @@ end
 %% [1] Kalman filter...
 t = 0;
 newRank   = rank(Pinf(:,:,1),crit);
-while newRank & t < smpl
+while newRank && t < smpl
     t = t+1;
     a(:,t) = a1(:,t);
     Pstar1(:,:,t) = Pstar(:,:,t);
@@ -143,7 +143,7 @@ Pinf  = Pinf(:,:,1:d);
 Pstar1 = Pstar1(:,:,1:d);
 Pinf1  = Pinf1(:,:,1:d);
 notsteady = 1;
-while notsteady & t<smpl
+while notsteady && t<smpl
     t = t+1;
     a(:,t) = a1(:,t);
     P(:,:,t)=tril(P(:,:,t))+transpose(tril(P(:,:,t),-1));

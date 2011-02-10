@@ -36,7 +36,7 @@ function PosteriorIRF(type)
 
 global options_ estim_params_ oo_ M_ bayestopt_
 % Set the number of periods
-if isempty(options_.irf) | ~options_.irf 
+if isempty(options_.irf) || ~options_.irf 
     options_.irf = 40;
 end
 % Set varlist if necessary

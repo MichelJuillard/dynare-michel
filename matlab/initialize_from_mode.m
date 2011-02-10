@@ -14,7 +14,7 @@ function estim_params_ = initialize_from_mode(fname,M_,estim_params_)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2009 Dynare Team
+% Copyright (C) 2003-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -76,7 +76,7 @@ for i=1:length(parameter_names)
     else
         k1 = strmatch(name(1:k3-1),exo_names,'exact');
         k1a = strmatch(name(k3+1:end),exo_names,'exact');
-        if ~isempty(k1) & ~isempty(k1a)
+        if ~isempty(k1) && ~isempty(k1a)
             k2 = find(corrx(:,1) == k1 & corrx(:,2) == k1a);
             if ~isempty(k2)
                 estim_params_.corrx(k2,3) = xparam1(i);
@@ -87,7 +87,7 @@ for i=1:length(parameter_names)
         end
         k1 = strmatch(name(1:k3-1),endo_names,'exact');
         k1a = strmatch(name(k3+1:end),endo_names,'exact');
-        if ~isempty(k1) & ~isempty(k1a)
+        if ~isempty(k1) && ~isempty(k1a)
             k2 = find(corrn(:,1) == k1 & corrn(:,2) == k1a);
             if ~isempty(k2)
                 estim_params_.corrn(k2,3) = xparam1(i);

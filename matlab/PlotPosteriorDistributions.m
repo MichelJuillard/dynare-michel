@@ -16,7 +16,7 @@ function oo_ = PlotPosteriorDistributions(estim_params_, M_, options_, bayestopt
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2010 Dynare Team
+% Copyright (C) 2005-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -155,7 +155,7 @@ for i=1:npar
     title(nam,'Interpreter','none');
     hold off;
     drawnow
-    if subplotnum == MaxNumberOfPlotPerFigure | i == npar;
+    if subplotnum == MaxNumberOfPlotPerFigure || i == npar;
         eval(['print -depsc2 ' OutputDirectoryName '/' M_.fname '_PriorsAndPosteriors' int2str(figunumber) '.eps']);
         if ~exist('OCTAVE_VERSION')
             eval(['print -dpdf ' OutputDirectoryName '/' M_.fname '_PriorsAndPosteriors' int2str(figunumber)]);

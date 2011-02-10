@@ -19,9 +19,9 @@ function [H, dA, dOm, Hss, gp, info] = getH(A, B, M_,oo_,kronflag,indx,indexo)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if nargin<3 | isempty(kronflag), kronflag = 0; end
-if nargin<4 | isempty(indx), indx = [1:M_.param_nbr];, end,
-if nargin<5 | isempty(indexo), indexo = [];, end,
+if nargin<3 || isempty(kronflag), kronflag = 0; end
+if nargin<4 || isempty(indx), indx = [1:M_.param_nbr];, end,
+if nargin<5 || isempty(indexo), indexo = [];, end,
 
 
 [I,J]=find(M_.lead_lag_incidence');

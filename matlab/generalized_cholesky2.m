@@ -16,7 +16,7 @@ function AA = generalized_cholesky2(A)
 % Factorization," SIAM Journal of Scientific Statistical Computating,
 % 11, 6: 1136-58.
 
-% Copyright (C) 2003-2009 Dynare Team
+% Copyright (C) 2003-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -51,7 +51,7 @@ Pprod = eye(n);
 if n > 2; 
     for k = 1,n-2;
         if min((diag(A(k+1:n,k+1:n))' - A(k,k+1:n).^2/A(k,k))') < tau*gamm ...
-                & min(eig(A((k+1):n,(k+1):n))) < 0;
+                && min(eig(A((k+1):n,(k+1):n))) < 0;
             [tmp,dmax] = max(diag(A(k:n,k:n)));
             if A(k+dmax-1,k+dmax-1) > A(k,k);
                 P = eye(n);

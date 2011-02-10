@@ -99,7 +99,7 @@ end
 % McoJ
 
 ixno = 0;
-if rankH<npar | rankHH<npar | min(1-McoH)<1.e-10
+if rankH<npar || rankHH<npar || min(1-McoH)<1.e-10
     %         - find out which parameters are involved,
     % using something like the vnorm and the eigenvalue decomposition of H;
     %   disp('Some parameters are NOT identified in the model: H rank deficient')
@@ -130,7 +130,7 @@ end
 ixnoH=ixno;
 
 ixno = 0;
-if rankJ<npar | rankJJ<npar | min(1-McoJ)<1.e-10
+if rankJ<npar || rankJJ<npar || min(1-McoJ)<1.e-10
     %         - find out which parameters are involved
     %   disp('Some parameters are NOT identified by the moments included in J')
     %   disp(' ')

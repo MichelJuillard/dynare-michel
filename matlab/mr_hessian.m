@@ -103,9 +103,9 @@ while i<n,
     
     icount = 0;
     h0=h1(i);
-%     while (abs(dx(it))<0.5*htol | abs(dx(it))>(2*htol)) & icount<10 & ic==0,
-    while (abs(dx(it))<0.5*htol) & icount<10 & ic==0,
-        %while abs(dx(it))<0.5*htol & icount< 10 & ic==0,
+%     while (abs(dx(it))<0.5*htol || abs(dx(it))>(2*htol)) && icount<10 && ic==0,
+    while (abs(dx(it))<0.5*htol) && icount<10 && ic==0,
+        %while abs(dx(it))<0.5*htol && icount< 10 && ic==0,
         icount=icount+1;
         %if abs(dx(it)) ~= 0,
         if abs(dx(it))<0.5*htol
@@ -147,7 +147,7 @@ while i<n,
         it=it+1;
         dx(it)=(fx-f0);
         h0(it)=h1(i);
-        if h1(i)<1.e-12*min(1,h2(i)) & h1(i)<0.5*hmax(i),
+        if h1(i)<1.e-12*min(1,h2(i)) && h1(i)<0.5*hmax(i),
             ic=1;
             hcheck=1;
         end
@@ -156,12 +156,12 @@ while i<n,
         % ic=1;
         %end
     end
-    %     if (it>2 & dx(1)<10^(log10(htol)/2)) ,        
+    %     if (it>2 && dx(1)<10^(log10(htol)/2)) ,        
     %         [dum, is]=sort(h0); 
     %         if find(diff(sign(diff(dx(is)))));
     %             hcheck=1;
     %         end           
-    %     elseif (it>3 & dx(1)>10^(log10(htol)/2)) ,        
+    %     elseif (it>3 && dx(1)>10^(log10(htol)/2)) ,        
     %         [dum, is]=sort(h0); 
     %         if find(diff(sign(diff(dx(is(1:end-1))))));
     %             hcheck=1;
@@ -199,7 +199,7 @@ while i<n,
 %         ggh(:,i)=(ff1-ff0)./h1(i);
 %     end
     xh1(i)=x(i);
-    if hcheck & htol<1,
+    if hcheck && htol<1,
         htol=min(1,max(min(abs(dx))*2,htol*10));
         h1(i)=h10;
         i=0;
@@ -287,7 +287,7 @@ hh_mat0=ggh'*ggh;  % outer product hessian
 A=diag(2.*h1);  % rescaling matrix
 igg=inv(hh_mat);  % inverted rescaled outer product hessian
 ihh=A'*igg*A;  % inverted outer product hessian
-if hflag>0 & min(eig(reshape(hessian_mat,n,n)))>0,
+if hflag>0 && min(eig(reshape(hessian_mat,n,n)))>0,
     hh0 = A*reshape(hessian_mat,n,n)*A';  %rescaled second order derivatives
     hh = reshape(hessian_mat,n,n);  %rescaled second order derivatives
     sd0=sqrt(diag(hh0));   %rescaled 'standard errors' using second order derivatives

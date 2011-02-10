@@ -34,7 +34,7 @@ function [alphahat,etahat,a,P,aK,PK,d,decomp] = DiffuseKalmanSmoother3_Z(T,Z,R,Q
 %   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
 %   Analysis, vol. 24(1), pp. 85-98). 
 
-% Copyright (C) 2004-2010 Dynare Team
+% Copyright (C) 2004-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -109,7 +109,7 @@ r                       = zeros(mm,smpl);
 t = 0;
 icc=0;
 newRank   = rank(Pinf(:,:,1),crit1);
-while newRank & t < smpl
+while newRank && t < smpl
     t = t+1;
     a(:,t) = a1(:,t);
     Pstar(:,:,t)=tril(Pstar(:,:,t))+tril(Pstar(:,:,t),-1)';
@@ -122,7 +122,7 @@ while newRank & t < smpl
         Fstar(i,t)  = Zi*Pstar(:,:,t)*Zi';
         Finf(i,t)   = Zi*Pinf(:,:,t)*Zi';
         Kstar(:,i,t)        = Pstar(:,:,t)*Zi';
-        if Finf(i,t) > crit & newRank
+        if Finf(i,t) > crit && newRank
             icc=icc+1;
             Kinf(:,i,t)       = Pinf(:,:,t)*Zi';
             %            Linf(:,:,i,t)     = eye(mm) - Kinf(:,i,t)*Z(i,:)/Finf(i,t);
@@ -139,7 +139,7 @@ while newRank & t < smpl
             P0=Pinf(:,:,t);
             if ~isempty(options_.diffuse_d),  
                 newRank = (icc<options_.diffuse_d);  
-                if newRank & (any(diag(Z*P0*Z')>crit)==0 & rank(P0,crit1)==0); 
+                if newRank && (any(diag(Z*P0*Z')>crit)==0 && rank(P0,crit1)==0); 
                     disp('WARNING!! Change in OPTIONS_.DIFFUSE_D in univariate DKF')
                     options_.diffuse_d = icc;
                     newRank=0;
@@ -187,7 +187,7 @@ Pinf  = Pinf(:,:,1:d);
 Pstar1 = Pstar1(:,:,1:d);
 Pinf1  = Pinf1(:,:,1:d);
 notsteady = 1;
-while notsteady & t<smpl
+while notsteady && t<smpl
     t = t+1;
     a(:,t) = a1(:,t);
     P(:,:,t)=tril(P(:,:,t))+tril(P(:,:,t),-1)';
@@ -267,7 +267,7 @@ if d
     r1 = zeros(mm,d);
     for t = d:-1:1
         for i=pp:-1:1
-            %      if Finf(i,t) > crit & ~(t==d & i>options_.diffuse_d),  % use of options_.diffuse_d to be sure of DKF termination
+            %      if Finf(i,t) > crit && ~(t==d && i>options_.diffuse_d),  % use of options_.diffuse_d to be sure of DKF termination
             if Finf(i,t) > crit 
                 r1(:,t) = Z(i,:)'*v(i,t)/Finf(i,t) + ...
                           (Kinf(:,i,t)'*Fstar(i,t)/Finf(i,t)-Kstar(:,i,t)')*r0(:,t)/Finf(i,t)*Z(i,:)' + ...

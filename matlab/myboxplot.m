@@ -22,10 +22,10 @@ function sout = myboxplot (data,notched,symbol,vertical,maxwhisker)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % % % % endif
-if nargin < 5 | isempty(maxwhisker), maxwhisker = 1.5; end
-if nargin < 4 | isempty(vertical), vertical = 1; end
-if nargin < 3 | isempty(symbol), symbol = ['+','o']; end
-if nargin < 2 | isempty(notched), notched = 0; end
+if nargin < 5 || isempty(maxwhisker), maxwhisker = 1.5; end
+if nargin < 4 || isempty(vertical), vertical = 1; end
+if nargin < 3 || isempty(symbol), symbol = ['+','o']; end
+if nargin < 2 || isempty(notched), notched = 0; end
 
 if length(symbol)==1, symbol(2)=symbol(1); end
 

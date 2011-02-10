@@ -34,7 +34,7 @@ function [data,rawdata]=dynare_estimation_init(var_list_, igsa)
 global M_ options_ oo_ estim_params_ 
 global bayestopt_
 
-if nargin<2 | isempty(igsa),
+if nargin<2 || isempty(igsa),
     igsa=0;
 end
 
@@ -59,7 +59,7 @@ if options_.prefilter == 1
     options_.noconstant = 1;
 end
 
-if options_.filtered_vars ~= 0 & options_.filter_step_ahead == 0
+if options_.filtered_vars ~= 0 && options_.filter_step_ahead == 0
     options_.filter_step_ahead = 1;
 end
 if options_.filter_step_ahead ~= 0
@@ -92,7 +92,7 @@ if ~isempty(estim_params_)
     bounds(:,1)=max(bounds(:,1),lb);
     bounds(:,2)=min(bounds(:,2),ub);
 
-    if any(xparam1 < bounds(:,1)) | any(xparam1 > bounds(:,2))
+    if any(xparam1 < bounds(:,1)) || any(xparam1 > bounds(:,2))
         find(xparam1 < bounds(:,1))
         find(xparam1 > bounds(:,2))
         error('Initial parameter values are outside parameter bounds')
@@ -237,7 +237,7 @@ options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs
 gend = options_.nobs;
 
 rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
-if options_.loglinear == 1 & ~options_.logdata
+if options_.loglinear == 1 && ~options_.logdata
     rawdata = log(rawdata);
 end
 if options_.prefilter == 1
