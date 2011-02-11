@@ -82,67 +82,60 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   // Check the number of arguments and set some flags.
   int measurement_error_flag = 1;
-  if (nrhs > 4)
-    {
-      mexErrMsgTxt("This function requires at most 4 input arguments!");
-    }
-  if (nrhs < 3)
-    {
-      mexErrMsgTxt("This function requires at least 3 input arguments!");
-    }
-  if (nrhs < 4)
-    {
-      measurement_error_flag = 0;
-    }
-  if (nlhs > 1)
-    {
-      mexErrMsgTxt("This function gives at most 1 output argument!");
-    }
+  if (nrhs < 3 || 4 < nrhs)
+    DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state accepts either 3 or 4 input arguments!");
+
+  if (nlhs < 1 || 2 < nlhs)
+    DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state requires at least 1, but no more than 2, output arguments!");
+
+  if (nrhs == 3)
+    measurement_error_flag = 0;
+
   // Check the type of the input arguments and get the size of the matrices.
   mwSize n = mxGetM(prhs[0]);
   if (n != mxGetN(prhs[0]))
     {
-      mexErrMsgTxt("The first input argument (T) must be a square matrix!");
+      DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state: The first input argument (T) must be a square matrix!");
     }
   if ((mxIsNumeric(prhs[0]) == 0) || (mxIsComplex(prhs[0]) == 1))
     {
-      mexErrMsgTxt("The first input argument (T) must be a real matrix!");
+      DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state: The first input argument (T) must be a real matrix!");
     }
   mwSize q = mxGetM(prhs[1]);
   if (q != mxGetN(prhs[1]))
     {
-      mexErrMsgTxt("The second input argument (QQ) must be a square matrix!");
+      DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state: The second input argument (QQ) must be a square matrix!");
     }
   if ((mxIsNumeric(prhs[1]) == 0) || (mxIsComplex(prhs[1]) == 1))
     {
-      mexErrMsgTxt("The second input argument (QQ) must be a real matrix!");
+      DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state: The second input argument (QQ) must be a real matrix!");
     }
   if (q != n)
     {
-      mexErrMsgTxt("The size of the second input argument (QQ) must match the size of the first argument (T)!");
+      DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state: The size of the second input argument (QQ) must match the size of the first argument (T)!");
     }
   mwSize p = mxGetN(prhs[2]);
   if (mxGetM(prhs[2]) != n)
     {
-      mexErrMsgTxt("The number of rows of the third argument (Z) must match the number of rows of the first argument (T)!");
+      DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state: The number of rows of the third argument (Z) must match the number of rows of the first argument (T)!");
     }
   if ((mxIsNumeric(prhs[2]) == 0) || (mxIsComplex(prhs[2]) == 1))
     {
-      mexErrMsgTxt("The third input argument (Z) must be a real matrix!");
+      DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state: The third input argument (Z) must be a real matrix!");
     }
   if (measurement_error_flag)
     {
       if (mxGetM(prhs[3]) != mxGetN(prhs[3]))
         {
-          mexErrMsgTxt("The fourth input argument (H) must be a square matrix!");
+          DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state: The fourth input argument (H) must be a square matrix!");
         }
       if (mxGetM(prhs[3]) != p)
         {
-          mexErrMsgTxt("The number of rows of the fourth input argument (H) must match the number of rows of the third input argument!");
+          DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state: The number of rows of the fourth input argument (H) must match the number of rows of the third input argument!");
         }
       if ((mxIsNumeric(prhs[3]) == 0) || (mxIsComplex(prhs[3]) == 1))
         {
-          mexErrMsgTxt("The fifth input argument (H) must be a real matrix!");
+          DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state: The fifth input argument (H) must be a real matrix!");
         }
     }
   // Get input matrices.
@@ -205,8 +198,8 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   BWORK = (lapack_int *) mxCalloc(nn, sizeof(lapack_int));
   // Initialize the output of the mex file
   double *P;
-  plhs[0] = mxCreateDoubleMatrix(n, n, mxREAL);
-  P = mxGetPr(plhs[0]);
+  plhs[1] = mxCreateDoubleMatrix(n, n, mxREAL);
+  P = mxGetPr(plhs[1]);
   // Call the slicot routine
   sb02od(DICO, JOBB, FACT, UPLO, JOBL, SORT, &n, &p, &p, &T[0], &LDA, &Z[0], &LDB, &QQ[0], &LDQ, &H[0], &LDR, &L[0], &LDL, &rcond, &P[0], &LDX, &WR[0], &WI[0], &BETA[0], &S[0], &LDS, &TT[0], &LDT, &UU[0], &LDU, &tolerance, &IWORK[0], &DWORK[0], &LDWORK, &BWORK[0], &INFO);
   mxFree(T);
@@ -271,5 +264,5 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           }
         }
     }
-  return;
+  plhs[0] = mxCreateDoubleScalar(0);
 }
