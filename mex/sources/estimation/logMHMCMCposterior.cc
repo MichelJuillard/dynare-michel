@@ -27,7 +27,7 @@
 #include "LogPosteriorDensity.hh"
 #include "RandomWalkMetropolisHastings.hh"
 
-#include "mex.h"
+#include <dynmex.h>
 #if defined MATLAB_MEX_FILE
 # include "mat.h"
 #else   //  OCTAVE_MEX_FILE e.t.c.

@@ -26,8 +26,7 @@
 #include "Matrix.hh"
 #include "LogPosteriorDensity.hh"
 
-#include "dynmex.h"
-#include "mex.h"
+#include <dynmex.h>
 
 class LogposteriorMexErrMsgTxtException
 {
@@ -155,7 +154,7 @@ logposterior(const VectorConstView &estParams, const MatrixConstView &data,
                  std::bind2nd(std::minus<size_t>(), 1));
 
   if (data.getRows() != n_varobs)
-    throw LogposteriorMexErrMsgTxtException("Data has not as many rows as there are observed variables");
+    throw LogposteriorMexErrMsgTxtException("Data does not have as many rows as there are observed variables");
 
   std::vector<EstimationSubsample> estSubsamples;
   estSubsamples.push_back(EstimationSubsample(0, data.getCols() - 1));
