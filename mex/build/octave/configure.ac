@@ -36,7 +36,7 @@ CFLAGS="$CFLAGS -Wall -Wno-parentheses"
 FFLAGS="$FFLAGS -Wall"
 CXXFLAGS="$CXXFLAGS -Wall -Wno-parentheses"
 
-AC_PROG_F77
+AC_PROG_F77([gfortran g77 f77])
 AM_CONDITIONAL([HAVE_FORT], [test "x$F77" != "x"])
 AC_PROG_CC
 AC_PROG_CXX
