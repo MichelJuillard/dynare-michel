@@ -1,6 +1,6 @@
-Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=135
-Name: Dynare
-Maintainer: Dynare Team, whose members in 2011 are:
+Format-Specification: http://svn.debian.org/wsvn/dep/web/deps/dep5.mdwn?op=file&rev=166
+Upstream-Name: Dynare
+Upstream-Contact: Dynare Team, whose members in 2011 are:
  Stéphane Adjemian <stephane.adjemian@ens.fr>
  Houtan Bastani <houtan.bastani@ens.fr>
  Michel Juillard <michel.juillard@ens.fr>
@@ -27,8 +27,8 @@ License: GPL-3+
  along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 Files: matlab/AIM/SP*
-Copyright: Public domain
-License: Public domain
+Copyright: public-domain
+License: public-domain
 
 Files: matlab/bfgsi.m
 Copyright: 1993-2009, Christopher Sims
