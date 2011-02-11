@@ -40,6 +40,16 @@
 # define DIRECTORY_SEPARATOR "/"
 #endif
 
+class LogMHMCMCposteriorMexErrMsgTxtException
+{
+public:
+  std::string errMsg;
+  LogMHMCMCposteriorMexErrMsgTxtException(const std::string &msg) : errMsg(msg)
+  {
+  }
+  inline const char *getErrMsg() { return errMsg.c_str(); }
+};
+
 void
 fillEstParamsInfo(const mxArray *estim_params_info, EstimatedParameter::pType type,
                   std::vector<EstimatedParameter> &estParamsInfo)
@@ -639,7 +649,7 @@ logMCMCposterior(const VectorConstView &estParams, const MatrixConstView &data, 
   const mxArray *lli_mx = mxGetField(M_, 0, "lead_lag_incidence");
   MatrixConstView lli(mxGetPr(lli_mx), mxGetM(lli_mx), mxGetN(lli_mx), mxGetM(lli_mx));
   if (lli.getRows() != 3 || lli.getCols() != n_endo)
-    mexErrMsgTxt("Incorrect lead/lag incidence matrix");
+    throw LogMHMCMCposteriorMexErrMsgTxtException("Error in logMCMCposterior: Incorrect lead/lag incidence matrix");
   for (size_t i = 0; i < n_endo; i++)
     {
       if (lli(0, i) == 0 && lli(2, i) == 0)
@@ -662,13 +672,13 @@ logMCMCposterior(const VectorConstView &estParams, const MatrixConstView &data, 
   std::vector<size_t> varobs;
   const mxArray *varobs_mx = mxGetField(options_, 0, "varobs_id");
   if (mxGetM(varobs_mx) != 1)
-    mexErrMsgTxt("options_.varobs_id must be a row vector");
+    throw LogMHMCMCposteriorMexErrMsgTxtException("Error in logMCMCposterior: options_.varobs_id must be a row vector");
   size_t n_varobs = mxGetN(varobs_mx);
   std::transform(mxGetPr(varobs_mx), mxGetPr(varobs_mx) + n_varobs, back_inserter(varobs),
                  std::bind2nd(std::minus<size_t>(), 1));
 
   if (data.getRows() != n_varobs)
-    mexErrMsgTxt("Data has not as many rows as there are observed variables");
+    throw LogMHMCMCposteriorMexErrMsgTxtException("Error in logMCMCposterior: Data does not have as many rows as there are observed variables");
 
   std::vector<EstimationSubsample> estSubsamples;
   estSubsamples.push_back(EstimationSubsample(0, data.getCols() - 1));
@@ -736,25 +746,24 @@ mexFunction(int nlhs, mxArray *plhs[],
             int nrhs, const mxArray *prhs[])
 {
   if (nrhs != 7)
-    mexErrMsgTxt("logposterior: exactly seven arguments are required.");
-  if (nlhs != 1)
-    mexErrMsgTxt("logposterior: exactly one return argument is required.");
+    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: exactly seven arguments are required.");
+  if (nlhs != 2)
+    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: exactly two return arguments are required.");
 
-  plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
   // Check and retrieve the arguments
 
   if (!mxIsDouble(prhs[0]) || mxGetN(prhs[0]) != 1)
-    mexErrMsgTxt("logposterior: First argument must be a column vector of double-precision numbers");
+    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: First argument must be a column vector of double-precision numbers");
 
   VectorConstView estParams(mxGetPr(prhs[0]), mxGetM(prhs[0]), 1);
 
   if (!mxIsDouble(prhs[1]))
-    mexErrMsgTxt("logposterior: Second argument must be a matrix of double-precision numbers");
+    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: Second argument must be a matrix of double-precision numbers");
 
   MatrixConstView data(mxGetPr(prhs[1]), mxGetM(prhs[1]), mxGetN(prhs[1]), mxGetM(prhs[1]));
 
   if (!mxIsChar(prhs[2]))
-    mexErrMsgTxt("logposterior: Third argument must be a character string");
+    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: Third argument must be a character string");
 
   char *mexext_mx = mxArrayToString(prhs[2]);
   std::string mexext(mexext_mx);
@@ -767,7 +776,15 @@ mexFunction(int nlhs, mxArray *plhs[],
 
   MatrixConstView D(mxGetPr(prhs[6]), mxGetM(prhs[6]), mxGetN(prhs[6]), mxGetM(prhs[6]));
   //calculate MHMCMC draws and get get last line run in the last MH block sub-array
-  int lastMHblockArrayLine = logMCMCposterior(estParams, data, mexext, fblock, nBlocks, nMHruns, D);
-
-  *mxGetPr(plhs[0]) = (double) lastMHblockArrayLine;
+  try
+    {
+      int lastMHblockArrayLine = logMCMCposterior(estParams, data, mexext, fblock, nBlocks, nMHruns, D);
+      plhs[1] = mxCreateDoubleMatrix(1, 1, mxREAL);
+      *mxGetPr(plhs[1]) = (double) lastMHblockArrayLine;
+    }
+  catch (LogMHMCMCposteriorMexErrMsgTxtException e)
+    {
+      DYN_MEX_FUNC_ERR_MSG_TXT(e.getErrMsg());
+    }
+  plhs[0] = mxCreateDoubleScalar(0);
 }
