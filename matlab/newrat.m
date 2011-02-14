@@ -82,6 +82,7 @@ else
     hhg=hh;
     igg=inv(hh);
 end
+H = igg;
 disp(['Gradient norm ',num2str(norm(gg))])
 ee=eig(hh);
 disp(['Minimum Hessian eigenvalue ',num2str(min(ee))])
@@ -105,7 +106,7 @@ while norm(gg)>gtol & check==0 & jit<nit,
     bayestopt_.penalty = fval0(icount);
     disp([' '])
     disp(['Iteration ',num2str(icount)])
-    [fval x0 fc retcode] = csminit(func0,xparam1,fval0(icount),gg,0,igg,varargin{:});
+    [fval x0 fc retcode] = csminit(func0,xparam1,fval0(icount),gg,0,H,varargin{:});
     if igrad,
         [fval1 x01 fc retcode1] = csminit(func0,x0,fval,gg,0,inx,varargin{:});
         if (fval-fval1)>1, %(fval0(icount)-fval),
@@ -116,7 +117,7 @@ while norm(gg)>gtol & check==0 & jit<nit,
         fval=fval1;
         x0=x01;        
     end
-    if (fval0(icount)-fval)<1.e-2*(gg'*(igg*gg))/2 & igibbs,
+    if (fval0(icount)-fval)<1.e-2*(gg'*(H*gg))/2 & igibbs,
         if length(find(ig))<nx,
             ggx=ggx*0;
             ggx(find(ig))=gg(find(ig));
@@ -126,6 +127,9 @@ while norm(gg)>gtol & check==0 & jit<nit,
             [fvala x0 fc retcode] = csminit(func0,x0,fval,ggx,0,iggx,varargin{:});
         end
         [fvala, x0, ig] = mr_gstep(0,x0,func0,htol,varargin{:});
+        % if length(find(ig))==0,
+            % [fvala, x0, ig] = mr_gstep(0,x0,func0,htol/10,varargin{:});
+        % end
         nig=[nig ig];
         if (fval-fvala)<gibbstol*(fval0(icount)-fval),
             igibbs=0;
@@ -160,6 +164,8 @@ while norm(gg)>gtol & check==0 & jit<nit,
     x(:,icount+1)=xparam1;
     fval0(icount+1)=fval;
     %if (fval0(icount)-fval)<ftol*ftol & flagg==1;,
+    mr_gstep(1,x);
+    mr_hessian(1,x);
     if (fval0(icount)-fval)<ftol,
         disp('No further improvement is possible!')
         check=1;
@@ -228,6 +234,7 @@ while norm(gg)>gtol & check==0 & jit<nit,
                 end
             end
         end
+
         disp(['Gradient norm  ',num2str(norm(gg))])
         ee=eig(hh);
         disp(['Minimum Hessian eigenvalue ',num2str(min(ee))])
@@ -237,7 +244,9 @@ while norm(gg)>gtol & check==0 & jit<nit,
         disp(['Elapsed time for iteration ',num2str(t),' s.'])
         
         g(:,icount+1)=gg;
-        save m1.mat x hh g hhg igg fval0 nig
+%         H = bfgsi(H,g(:,end)-g(:,end-1),x(:,end)-x(:,end-1));
+        H = igg;
+        save m1.mat x hh g hhg igg fval0 nig H
     end
 end
 
