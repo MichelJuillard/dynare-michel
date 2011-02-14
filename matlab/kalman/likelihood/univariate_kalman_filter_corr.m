@@ -1,4 +1,4 @@
-function [LIK, lik] = ...
+function [LIK, llik] = ...
     univariate_kalman_filter_corr(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations)
 % Computes the likelihood of a stationnary state space model (univariate
 % approach + correlated measurement errors).
@@ -20,7 +20,7 @@ function [LIK, lik] = ...
 %
 % OUTPUTS
 %    LIK        [double]    scalar, MINUS loglikelihood
-%    lik        [double]    vector, density of observations in each period.
+%    llik        [double]    vector, density of observations in each period.
 %
 % REFERENCES
 %   See "Filtering and Smoothing of State Vector for Diffuse State Space
@@ -54,6 +54,7 @@ smpl   = size(Y,2);                        % Number of periods in the dataset.
 a      = zeros(mm+pp,1);                      % Initial condition of the state vector.
 t      = 0;
 lik    = zeros(smpl,1); 
+llik    = zeros(smpl,pp); 
 notsteady   = 1;
 
 TT = zeros(mm+pp);
@@ -82,8 +83,9 @@ while notsteady && t<smpl
         prediction_error = Y(d_index(i),t) - a(MF(i)) - a( mm+i );
         Fi = PP(MF(i),MF(i)) + PP(mm+i,mm+i);         
         if Fi > kalman_tol
-            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
+            llik(t,i) = log(Fi) + prediction_error*prediction_error/Fi ...
                      + l2pi;
+            lik(t) = lik(t) + llik(t,i);
             Ki     = sum(PP(:,[MF(i) mm+i]),2)/Fi;
             a      = a + Ki*prediction_error;
             PP     = PP - (Ki*Fi)*transpose(Ki);
@@ -111,8 +113,9 @@ while t < smpl
             Ki = ( PPPP(:,mf(i)) + PPPP(:,mm+i) )/Fi;
             a  = a + Ki*prediction_error;
             PPPP  = PPPP - (Fi*Ki)*transpose(Ki);
-            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
+            llik(t,i) = log(Fi) + prediction_error*prediction_error/Fi ...
                      + l2pi;
+            lik(t) = lik(t) + llik(t,i);
         end
     end
     a(1:mm) = T*a(1:mm);
@@ -120,5 +123,6 @@ while t < smpl
 end
 
 lik = lik/2;
+llik = llik/2;
 
 LIK = sum(lik(start:end));

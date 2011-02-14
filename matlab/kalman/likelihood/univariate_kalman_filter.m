@@ -1,4 +1,4 @@
-function [LIK, lik] = univariate_kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations)
+function [LIK, llik] = univariate_kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations)
 % Computes the likelihood of a stationnary state space model (univariate approach).
 %
 % INPUTS
@@ -18,7 +18,7 @@ function [LIK, lik] = univariate_kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,r
 %
 % OUTPUTS
 %    LIK        [double]    scalar, MINUS loglikelihood
-%    lik        [double]    vector, density of observations in each period.
+%    llik        [double]    vector, density of observations in each period.
 %
 % REFERENCES
 %   See "Filtering and Smoothing of State Vector for Diffuse State Space
@@ -52,6 +52,7 @@ a      = zeros(mm,1);                          % Initial condition of the state 
 QQ     = R*Q*transpose(R);
 t      = 0;
 lik    = zeros(smpl,1); 
+llik    = zeros(smpl,pp); 
 notsteady   = 1;
 l2pi = log(2*pi);
 
@@ -67,8 +68,9 @@ while notsteady && t<smpl
             Ki     = P(:,MF(i))/Fi;
             a      = a + Ki*prediction_error;
             P      = P - (Fi*Ki)*transpose(Ki);
-            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
+            llik(t,i) = log(Fi) + prediction_error*prediction_error/Fi ...
                      + l2pi;
+            lik(t) = lik(t) + llik(t,i);
         end
     end
     a = T*a;
@@ -89,13 +91,15 @@ while t < smpl
             Ki = PP(:,mf(i))/Fi;
             a  = a + Ki*prediction_error;
             PP  = PP - (Fi*Ki)*transpose(Ki);
-            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
+            llik(t,i) = log(Fi) + prediction_error*prediction_error/Fi ...
                      + l2pi;
+            lik(t) = lik(t) + llik(t,i);
         end
     end
     a = T*a;
 end
 
 lik = lik/2;
+llik = llik/2;
 
 LIK = sum(lik(start:end));
