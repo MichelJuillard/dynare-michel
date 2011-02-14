@@ -1,4 +1,3 @@
-addpath '../../matlab/swz';
 var Y Pie R;
 
 model;

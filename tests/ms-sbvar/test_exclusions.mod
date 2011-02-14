@@ -1,5 +1,4 @@
-// same as test_upper_cholesky.mod, but with reordered variables. Results must be the same.
-addpath '../../matlab/swz';
+// same as test_lower_cholesky.mod, but using exclusion syntax
 var R Pie Y;
 
 model;
@@ -11,7 +10,9 @@ end;
 varobs Y Pie R;
 
 svar_identification;
-lower_cholesky;
+exclusion lag 0;
+equation 1, Pie, Y;
+equation 2, Y;
 end;
 
 sbvar(datafile = data,freq=4,initial_year=1959,final_year=2005,nlags=4);

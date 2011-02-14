@@ -1,7 +1,7 @@
 function swz_sbvar(ms_flag, M, options)
 
 dynareroot = strrep(which('dynare'),'dynare.m','');
-swz_root = [dynareroot '/swz'];
+swz_root = [dynareroot '/ms-sbvar'];
 
 addpath([swz_root '/cstz']);
 addpath([swz_root '/identification']);

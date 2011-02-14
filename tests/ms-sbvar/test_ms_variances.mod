@@ -1,5 +1,4 @@
 // same as test_upper_cholesky.mod, but with reordered variables. Results must be the same.
-addpath '../../matlab/swz';
 var R Pie Y;
 
 model;
@@ -14,7 +13,7 @@ svar_identification;
 lower_cholesky;
 end;
 
-markov_switching(chain=1,number_of_states=4,duration=2.5);
+markov_switching(chain=1,number_of_states=2,duration=2.5);
 
 svar(variances, chain=1);
 

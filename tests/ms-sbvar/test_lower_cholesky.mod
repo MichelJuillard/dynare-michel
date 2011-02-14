@@ -1,5 +1,4 @@
 // same as test_upper_cholesky.mod, but with reordered variables. Results must be the same.
-addpath '../../matlab/swz';
 var R Pie Y;
 
 model;
