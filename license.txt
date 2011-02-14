@@ -3,7 +3,7 @@ Upstream-Name: Dynare
 Upstream-Contact: Dynare Team, whose members in 2011 are:
  Stéphane Adjemian <stephane.adjemian@ens.fr>
  Houtan Bastani <houtan.bastani@ens.fr>
- Michel Juillard <michel.juillard@ens.fr>
+ Michel Juillard <michel.juillard@mjui.fr>
  Ferhat Mihoubi <fmihoubi@univ-evry.fr>
  George Perendia <george@perendia.orangehome.co.uk>
  Marco Ratto <marco.ratto@jrc.it>
