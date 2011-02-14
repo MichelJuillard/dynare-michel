@@ -1509,35 +1509,32 @@ end;
   </refnamediv>
 
   <refsynopsisdiv>
+    <refsect2><title>In deterministic context</title>
     <cmdsynopsis>
       <command>shocks</command><arg choice="plain">;</arg><sbr/>
-      <arg rep="repeat">
-        <group>
-	        <arg choice="plain">
-	          <synopfragmentref linkend="det_shock">DETERMINISTIC SHOCK STATEMENT</synopfragmentref>
-	        </arg>
-	        <arg choice="plain">
-	          <synopfragmentref linkend="sto_shock">STOCHASTIC SHOCK STATEMENT</synopfragmentref>
-	        </arg>
-        </group>
+      <arg rep="repeat" choice="plain">
+        <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable>;</arg><sbr/>
+        <arg choice="plain">periods <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg><arg rep="repeat"><arg>,</arg> <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg></arg>;</arg><sbr/>
+        <arg choice="plain">values <group choice="plain"><arg choice="plain"><replaceable>DOUBLE</replaceable></arg><arg choice="plain">(<replaceable>EXPRESSION</replaceable>)</arg></group> <arg rep="repeat"><arg>,</arg> <group choice="plain"><arg choice="plain"><replaceable>DOUBLE</replaceable></arg><arg choice="plain">(<replaceable>EXPRESSION</replaceable>)</arg></group></arg>;</arg>
         </arg><sbr/>
         <command>end</command><arg choice="plain">;</arg>
-
-        <synopfragment id="det_shock">
-          <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable>;</arg>
-          <arg choice="plain">periods <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg><arg rep="repeat"><arg>,</arg> <replaceable>INTEGER</replaceable><arg>:<replaceable>INTEGER</replaceable></arg></arg>;</arg>
-          <arg choice="plain">values <group choice="plain"><arg choice="plain"><replaceable>DOUBLE</replaceable></arg><arg choice="plain">(<replaceable>EXPRESSION</replaceable>)</arg></group> <arg rep="repeat"><arg>,</arg> <group choice="plain"><arg choice="plain"><replaceable>DOUBLE</replaceable></arg><arg choice="plain">(<replaceable>EXPRESSION</replaceable>)</arg></group></arg>;</arg>
-        </synopfragment>
-
-        <synopfragment id="sto_shock">
-          <group choice="plain">
-            <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable>; stderr <replaceable>EXPRESSION</replaceable>;</arg>
-            <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;</arg>
-            <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable>, <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;</arg>
-            <arg choice="plain">corr <replaceable>VARIABLE_NAME</replaceable>, <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;</arg>
-          </group>
-        </synopfragment>
     </cmdsynopsis>
+    </refsect2>
+
+    <refsect2><title>In stochastic context</title>
+    <cmdsynopsis>
+      <command>shocks</command><arg choice="plain">;</arg><sbr/>
+      <arg rep="repeat" choice="plain">
+        <group choice="plain">
+          <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable>; stderr <replaceable>EXPRESSION</replaceable>;</arg><sbr/>
+          <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;</arg><sbr/>
+          <arg choice="plain">var <replaceable>VARIABLE_NAME</replaceable>, <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;</arg><sbr/>
+          <arg choice="plain">corr <replaceable>VARIABLE_NAME</replaceable>, <replaceable>VARIABLE_NAME</replaceable> = <replaceable>EXPRESSION</replaceable>;</arg>
+        </group>
+      </arg><sbr/>
+      <command>end</command><arg choice="plain">;</arg>
+    </cmdsynopsis>
+    </refsect2>
   </refsynopsisdiv>
 
   <refsect1><title>Description</title>
@@ -2931,7 +2928,7 @@ end;
 	        </arg>
 
           <arg choice="plain">
-	          , <synopfragmentref linkend="prior_shape">PRIOR_SHAPE</synopfragmentref>
+	          , <replaceable>PRIOR_SHAPE</replaceable>
           </arg>
           <arg choice="plain">
 	          , <replaceable>PRIOR_MEAN</replaceable>
@@ -2952,17 +2949,6 @@ end;
           </arg><sbr/>
           <command>end</command><arg choice="plain">;</arg>
 
-          <synopfragment id="prior_shape">
-            <group choice="plain">
-              <arg choice="plain"><option>beta_pdf</option></arg>
-              <arg choice="plain"><option>gamma_pdf</option></arg>
-              <arg choice="plain"><option>normal_pdf</option></arg>
-              <arg choice="plain"><option>uniform_pdf</option></arg>
-              <arg choice="plain"><option>inv_gamma_pdf</option></arg>
-              <arg choice="plain"><option>inv_gamma1_pdf</option></arg>
-              <arg choice="plain"><option>inv_gamma2_pdf</option></arg>
-            </group>
-          </synopfragment>
       </cmdsynopsis>
     </refsect2>
   </refsynopsisdiv>
@@ -3003,7 +2989,13 @@ end;
       </varlistentry>
       <varlistentry>
         <term><replaceable>PRIOR_SHAPE</replaceable></term>
-        <listitem><para>A keyword specifying the shape of the prior density. See the <link linkend="prior_shape">list of possible values</link>. Note that <option>inv_gamma_pdf</option> is equivalent to <option>inv_gamma1_pdf</option></para></listitem>
+        <listitem><para>A keyword specifying the shape of the prior density.
+        The possible values are: <option>beta_pdf</option>,
+        <option>gamma_pdf</option>, <option>normal_pdf</option>,
+        <option>uniform_pdf</option>, <option>inv_gamma_pdf</option>,
+        <option>inv_gamma1_pdf</option>, <option>inv_gamma2_pdf</option>. Note
+        that <option>inv_gamma_pdf</option> is equivalent to
+        <option>inv_gamma1_pdf</option></para></listitem>
       </varlistentry>
       <varlistentry>
         <term><replaceable>PRIOR_MEAN</replaceable></term>
