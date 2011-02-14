@@ -115,7 +115,7 @@ switch TYPEarray
             eval(['STOCK_' CAPtype ' = zeros(NumberOfPeriodsPerTYPEfiles,TYPEsize(2),TYPEsize(3),B);'])
             for f2 = 1:NumberOfTYPEfiles
                 load([MhDirectoryName M_.fname '_' type int2str(f2) '.mat']);
-                eval(['STOCK_' CAPtype '(:,:,:,idx+1:idx+size(stock_' type ',4))=stock_' ...
+                eval(['STOCK_' CAPtype '(:,:,1:+size(stock_' type ',3),idx+1:idx+size(stock_' type ',4))=stock_' ...
                       type '(jdx+1:jdx+NumberOfPeriodsPerTYPEfiles,:,:,:);'])
                 eval(['idx = idx + size(stock_' type ',4);'])
             end
