@@ -266,4 +266,6 @@ end
 lnprior = priordens(xparam1,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7,bayestopt_.p3,bayestopt_.p4);
 fval    = (likelihood-lnprior);
 options_.kalman_algo = kalman_algo;
-llik=[-lnprior; lik(start:end)];
+lik=lik(start:end,:);
+llik=[-lnprior; lik(:)];
+% llik=[-lnprior; lik(start:end)];

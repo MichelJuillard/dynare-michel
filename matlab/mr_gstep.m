@@ -27,7 +27,8 @@ n=size(x,1);
 
 if init,
     gstep_ = options_.gstep;
-    h1=max(abs(x),sqrt(gstep_)*ones(n,1))*eps^(1/4);
+%     h1=max(abs(x),sqrt(gstep_)*ones(n,1))*eps^(1/4);
+    h1=options_.gradient_epsilon*ones(n,1);
     return
 end
 if nargin<4, 
@@ -71,7 +72,8 @@ while i<n,
     
     icount = 0;
     h0=h1(i);
-    while (abs(dx(it))<0.5*htol | abs(dx(it))>(2*htol)) & icount<10 & ic==0,
+%     while (abs(dx(it))<0.5*htol | abs(dx(it))>(2*htol)) & icount<10 & ic==0,
+    while (abs(dx(it))<0.5*htol) & icount<10 & ic==0,
         %while abs(dx(it))<0.5*htol & icount< 10 & ic==0,
         icount=icount+1;
         if abs(dx(it)) ~= 0,
@@ -86,10 +88,10 @@ while i<n,
                 %                     ic=1;
                 %                 end  
             end
-            if abs(dx(it))>(2*htol),
-                h1(i)= htol/abs(dx(it))*h1(i);
-                xh1(i)=x(i)+h1(i);
-            end
+%             if abs(dx(it))>(2*htol),
+%                 h1(i)= htol/abs(dx(it))*h1(i);
+%                 xh1(i)=x(i)+h1(i);
+%             end
             try
                 fx = feval(func,xh1,varargin{:});
             catch

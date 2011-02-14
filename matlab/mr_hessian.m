@@ -50,7 +50,8 @@ if init,
     htol = 1.e-4; 
     %h1=max(abs(x),gstep_*ones(n,1))*eps^(1/3);
     %h1=max(abs(x),sqrt(gstep_)*ones(n,1))*eps^(1/6);
-    h1=max(abs(x),sqrt(gstep_)*ones(n,1))*eps^(1/4);
+%     h1=max(abs(x),sqrt(gstep_)*ones(n,1))*eps^(1/4);
+    h1=options_.gradient_epsilon*ones(n,1);
     return,
 end
 func = str2func(func);
@@ -102,7 +103,8 @@ while i<n,
     
     icount = 0;
     h0=h1(i);
-    while (abs(dx(it))<0.5*htol | abs(dx(it))>(2*htol)) & icount<10 & ic==0,
+%     while (abs(dx(it))<0.5*htol | abs(dx(it))>(2*htol)) & icount<10 & ic==0,
+    while (abs(dx(it))<0.5*htol) & icount<10 & ic==0,
         %while abs(dx(it))<0.5*htol & icount< 10 & ic==0,
         icount=icount+1;
         %if abs(dx(it)) ~= 0,
@@ -127,21 +129,21 @@ while i<n,
                 fx=1.e8;
             end
         end
-        if abs(dx(it))>(2*htol),
-            h1(i)= htol/abs(dx(it))*h1(i);
-            xh1(i)=x(i)+h1(i);
-            try
-                [fx, ffx]=feval(func,xh1,varargin{:});
-            catch
-                fx=1.e8;
-            end
-            while (fx-f0)==0,
-                h1(i)= h1(i)*2;
-                xh1(i)=x(i)+h1(i);
-                [fx, ffx]=feval(func,xh1,varargin{:});
-                ic=1;
-            end
-        end
+%         if abs(dx(it))>(2*htol),
+%             h1(i)= htol/abs(dx(it))*h1(i);
+%             xh1(i)=x(i)+h1(i);
+%             try
+%                 [fx, ffx]=feval(func,xh1,varargin{:});
+%             catch
+%                 fx=1.e8;
+%             end
+%             while (fx-f0)==0,
+%                 h1(i)= h1(i)*2;
+%                 xh1(i)=x(i)+h1(i);
+%                 [fx, ffx]=feval(func,xh1,varargin{:});
+%                 ic=1;
+%             end
+%         end
         it=it+1;
         dx(it)=(fx-f0);
         h0(it)=h1(i);
@@ -171,7 +173,7 @@ while i<n,
     else
         ff1=ffx;
     end
-    if hflag,  % two point based derivatives
+%     if hflag,  % two point based derivatives
         xh1(i)=x(i)-h1(i);
         %         c=mr_nlincon(xh1,varargin{:});
         %        ic=0;
@@ -193,9 +195,9 @@ while i<n,
         %             [f1(:,i), ff1]=feval(func,xh1,varargin{:});
         %         end
         ggh(:,i)=(ff1-ff_1)./(2.*h1(i));
-    else
-        ggh(:,i)=(ff1-ff0)./h1(i);
-    end
+%     else
+%         ggh(:,i)=(ff1-ff0)./h1(i);
+%     end
     xh1(i)=x(i);
     if hcheck & htol<1,
         htol=min(1,max(min(abs(dx))*2,htol*10));
@@ -209,11 +211,11 @@ h_1=h1;
 xh1=x;
 xh_1=xh1;
 
-if hflag,
+% if hflag,
     gg=(f1'-f_1')./(2.*h1);
-else
-    gg=(f1'-f0)./h1;
-end
+% else
+%     gg=(f1'-f0)./h1;
+% end
 
 if hflag==2,
     gg=(f1'-f_1')./(2.*h1);

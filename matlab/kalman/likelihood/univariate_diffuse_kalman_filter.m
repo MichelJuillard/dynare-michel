@@ -1,4 +1,4 @@
-function [LIK, lik] = univariate_diffuse_kalman_filter(T,R,Q,H,Pinf,Pstar,Y,start,Z,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations)
+function [LIK, llik] = univariate_diffuse_kalman_filter(T,R,Q,H,Pinf,Pstar,Y,start,Z,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations)
 % Computes the likelihood of a stationnary state space model (univariate approach).
 %
 % INPUTS
@@ -52,6 +52,7 @@ a  = zeros(mm,1);
 QQ = R*Q*transpose(R);
 t  = 0;
 lik = zeros(smpl,1);
+llik=zeros(smpl,pp);
 notsteady = 1;
 crit = 1.e-6;
 newRank = rank(Pinf,crit);
@@ -74,10 +75,12 @@ while newRank && (t<smpl)
             Pstar  = Pstar + Kinf*(Kinf_Finf'*(Fstar/Finf)) - Kstar*Kinf_Finf' ...
                      - Kinf_Finf*Kstar';
             Pinf   = Pinf - Kinf*Kinf_Finf';
-            lik(t) = lik(t) + log(Finf) + l2pi;
+            llik(t,i) = log(Finf) + l2pi;
+            lik(t) = lik(t) + llik(t,i);
         elseif Fstar>kalman_tol
-            lik(t) = lik(t) + log(Fstar) + prediction_error* ...
+            llik(t,i) = log(Fstar) + prediction_error* ...
                      prediction_error/Fstar + l2pi;
+            lik(t) = lik(t) + llik(t,i);
             a = a + Kstar*(prediction_error/Fstar);
             Pstar = Pstar - Kstar*(Kstar'/Fstar);
         end
@@ -116,8 +119,9 @@ while notsteady && (t<smpl)
         if Fi > kalman_tol
             a      = a + Ki*(prediction_error/Fi);
             Pstar  = Pstar - Ki*(Ki'/Fi);
-            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
+            llik(t,i) = log(Fi) + prediction_error*prediction_error/Fi ...
                      + l2pi;
+            lik(t) = lik(t) + llik(t,i);
         end
     end 
     a     = T*a;
@@ -138,13 +142,15 @@ while t < smpl
             Ki     = Pstar*Zi';
             a      = a + Ki*prediction_error/Fi;
             Pstar  = Pstar - Ki*Ki'/Fi;
-            lik(t) = lik(t) + log(Fi) + prediction_error*prediction_error/Fi ...
+            llik(t,i) = log(Fi) + prediction_error*prediction_error/Fi ...
                      + l2pi;
+            lik(t) = lik(t) + llik(t,i);
         end
     end 
     a = T*a;
 end
 
 lik = lik/2;
+llik = llik/2;
 
 LIK = sum(lik(start:end));
