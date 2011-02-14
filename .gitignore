@@ -42,6 +42,8 @@ ylwrap
 *.blg
 *.lof
 /doc/manual-html/
+/doc/manual.texi
+/doc/manual.info
 !/doc/guide.bbl
 !/doc/macroprocessor/new-design.pdf
 !/doc/macroprocessor/old-design.pdf

@@ -135,6 +135,10 @@ AX_PROG_XSLTPROC
 AX_CHECK_DOCBOOK_XSLT_MIN(1.69.0)
 AM_CONDITIONAL([HAVE_XSLT], [test "x$XSLTPROC" != "x" -a "x$DOCBOOK_XSLT_CURRENT_VERSION" != "xno"])
 
+AC_CHECK_PROG([DOCBOOK2XTEXI], [docbook2x-texi], [docbook2x-texi])
+AC_CHECK_PROG([MAKEINFO], [makeinfo], [makeinfo])
+AM_CONDITIONAL([HAVE_DOCBOOK2XTEXI_MAKEINFO], [test "x$DOCBOOK2XTEXI" != "x" -a "x$MAKEINFO" != "x"])
+
 AC_CHECK_PROG([DOXYGEN], [doxygen], [doxygen])
 AM_CONDITIONAL([HAVE_DOXYGEN], [test "x$DOXYGEN" != "x"])
 
@@ -275,6 +279,12 @@ else
   BUILD_DYNARE_INTERNAL_DOC="no (Org export not enabled)"
 fi
 
+if test "x$DOCBOOK2XTEXI" != "x" -a "x$MAKEINFO" != "x"; then
+  BUILD_DYNARE_INFO="yes"
+else
+  BUILD_DYNARE_INFO="no (missing docbook2x-texi and/or makeinfo)"
+fi
+
 if test "x$OCTAVE" != "x"; then
   TESTSUITE_OCTAVE="yes"
 else
@@ -306,6 +316,8 @@ HTML documentation (with "make html"):
  Dynare reference manual:               $BUILD_DYNARE_HTML_MANUAL
  Dynare preprocessor developer doc:     $BUILD_DYNARE_PREPROC_DOC
  Dynare internal doc:                   $BUILD_DYNARE_INTERNAL_DOC
+
+Info documentation (with "make info"):  $BUILD_DYNARE_INFO
 
 Testsuites (run with "make check"):
  Dynare for Octave:                     $TESTSUITE_OCTAVE
