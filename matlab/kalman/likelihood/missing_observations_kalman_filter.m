@@ -29,7 +29,7 @@ function  [LIK, lik] = missing_observations_kalman_filter(T,R,Q,H,P,Y,start,mf,k
 % NOTES
 %   The vector "lik" is used to evaluate the jacobian of the likelihood.   
 
-% Copyright (C) 2004-2010 Dynare Team
+% Copyright (C) 2004-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -59,7 +59,7 @@ oldK = Inf;
 notsteady   = 1;                                % Steady state flag.
 F_singular  = 1;
 
-while notsteady & t<smpl 
+while notsteady && t<smpl 
     t  = t+1;
     d_index = data_index{t};
     if isempty(d_index)

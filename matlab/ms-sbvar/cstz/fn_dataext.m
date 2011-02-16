@@ -12,7 +12,7 @@ function [xdsube,Brow,Erow] = fn_dataext(Byrqm,Eyrqm,xdatae)
 %
 % Tao Zha, April 2000
 
-if (Byrqm(2)==0) & (Eyrqm(2)~=0)
+if (Byrqm(2)==0) && (Eyrqm(2)~=0)
    error('If annual data, make sure both Byrqm(2) and Eyrqm(2) are zero')
 end
 

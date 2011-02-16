@@ -29,7 +29,7 @@ function [LIK, llik] = univariate_diffuse_kalman_filter_corr(T,R,Q,H,Pinf,Pstar,
 % NOTES
 %   The vector "lik" is used to evaluate the jacobian of the likelihood.
 
-% Copyright (C) 2004-2010 Dynare Team
+% Copyright (C) 2004-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -109,7 +109,7 @@ while newRank && (t<smpl)
             lik(t) = lik(t) + llik(t,i);
             if ~isempty(options_.diffuse_d)
                 newRank = (icc<options_.diffuse_d);
-                if newRank && (any(diag(Za*Pinf*Za')>kalman_tol)==0 & rank(Pinf,crit)==0); 
+                if newRank && (any(diag(Za*Pinf*Za')>kalman_tol)==0 && rank(Pinf,crit)==0); 
                     options_.diffuse_d = icc;
                     newRank=0;
                     disp('WARNING: Change in OPTIONS_.DIFFUSE_D in univariate DKF')

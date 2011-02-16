@@ -36,7 +36,7 @@ if nargin==4
    nyr = floor((Erow-Brow+1)/q_m);
    yrsg = [xdatae(q_m+1,1):xdatae(q_m+1,1)+nyr-2]';    % for annual growth later on
 else
-   if Byrqm(2)<1 | Eyrqm(2)<1
+   if Byrqm(2)<1 || Eyrqm(2)<1
       error('This function requires specifying both years and months (quarters) in Byrqm and Eyrqm')
    end
 

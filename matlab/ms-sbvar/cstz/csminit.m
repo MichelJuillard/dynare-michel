@@ -44,7 +44,7 @@ fhat=f0;
 g = g0;
 gnorm = norm(g);
 %
-if (gnorm < 1.e-12) & ~badg % put ~badg 8/4/94
+if (gnorm < 1.e-12) && ~badg % put ~badg 8/4/94
    retcode =1;
    dxnorm=0;
    % gradient convergence
@@ -126,14 +126,14 @@ else
       fcount=fcount+1;
       shrinkSignal = (~badg & (f0-f < max([-THETA*dfhat*lambda 0]))) | (badg & (f0-f) < 0) ;
       growSignal = ~badg & ( (lambda > 0)  &  (f0-f > -(1-THETA)*dfhat*lambda) );
-      if  shrinkSignal  &   ( (lambda>lambdaPeak) | (lambda<0) )
-         if (lambda>0) & ((~shrink) | (lambda/factor <= lambdaPeak))
+      if  shrinkSignal  &&   ( (lambda>lambdaPeak) || (lambda<0) )
+         if (lambda>0) && ((~shrink) || (lambda/factor <= lambdaPeak))
             shrink=1;
             factor=factor^.6;
             while lambda/factor <= lambdaPeak
                factor=factor^.6;
             end
-            %if (abs(lambda)*(factor-1)*dxnorm < MINDX) | (abs(lambda)*(factor-1) < MINLAMB)
+            %if (abs(lambda)*(factor-1)*dxnorm < MINDX) || (abs(lambda)*(factor-1) < MINLAMB)
             if abs(factor-1)<MINDFAC
                if abs(lambda)<4
                   retcode=2;
@@ -143,12 +143,12 @@ else
                done=1;
             end
          end
-         if (lambda<lambdaMax) & (lambda>lambdaPeak)
+         if (lambda<lambdaMax) && (lambda>lambdaPeak)
             lambdaMax=lambda;
          end
          lambda=lambda/factor;
          if abs(lambda) < MINLAMB
-            if (lambda > 0) & (f0 <= fhat)
+            if (lambda > 0) && (f0 <= fhat)
                % try going against gradient, which may be inaccurate
                if dispIndx, lambda = -lambda*factor^6, end
             else
@@ -160,11 +160,11 @@ else
                done = 1;
             end
          end
-      elseif  (growSignal & lambda>0) |  (shrinkSignal & ((lambda <= lambdaPeak) & (lambda>0)))
+      elseif  (growSignal && lambda>0) ||  (shrinkSignal && ((lambda <= lambdaPeak) && (lambda>0)))
          if shrink
             shrink=0;
             factor = factor^.6;
-            %if ( abs(lambda)*(factor-1)*dxnorm< MINDX ) | ( abs(lambda)*(factor-1)< MINLAMB)
+            %if ( abs(lambda)*(factor-1)*dxnorm< MINDX ) || ( abs(lambda)*(factor-1)< MINLAMB)
             if abs(factor-1)<MINDFAC
                if abs(lambda)<4
                   retcode=4;
@@ -174,7 +174,7 @@ else
                done=1;
             end
          end
-         if ( f<fPeak ) & (lambda>0)
+         if ( f<fPeak ) && (lambda>0)
             fPeak=f;
             lambdaPeak=lambda;
             if lambdaMax<=lambdaPeak

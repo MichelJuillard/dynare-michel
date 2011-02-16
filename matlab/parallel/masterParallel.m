@@ -322,7 +322,7 @@ for j=1:totCPU,
         
         
       case 1
-        if Parallel(indPC).Local == 1 & newInstance,                   % 1.1 Run on the local machine.
+        if Parallel(indPC).Local == 1 && newInstance,                   % 1.1 Run on the local machine.
             if ~ispc, %isunix || (~matlab_ver_less_than('7.4') && ismac),
                 if exist('OCTAVE_VERSION')
                     command1=['octave --eval "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),')" &'];

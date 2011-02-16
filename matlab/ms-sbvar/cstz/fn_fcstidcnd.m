@@ -68,7 +68,7 @@ function [yhat,Estr,rcon,Rcon,u,v,d] = fn_fcstidcnd(valuecon,stepcon,varcon,nste
 DLSIdShock = ~isempty(eq_ms);   % if not empty, the MS shock is identified as in DLS
 
 impsteps=size(imf3s_h,1);
-if (forep<nstepsm) | (impsteps<nstepsm)
+if (forep<nstepsm) || (impsteps<nstepsm)
 	disp('Increase # of forecast or impulse steps!!')
    disp('Or decrease # of constraints (nconstr) or constrained steps (stepcon(i))!!')
 	error('Maximum of conditional steps > # of forecast or impulse steps!!')
@@ -142,7 +142,7 @@ end
 %  No uncertainty at all or only random (A0,A+)
 %  In other words, no future shocks
 %---------------------------------------
-if (~Sband) %| (nconstr & (length(eq_ms)==1))
+if (~Sband) %|| (nconstr && (length(eq_ms)==1))
          % length(eq_ms)==1 implies one-one mapping between MS shocks and, say, FFR
          %  if nstepsm==nconstr.  If this condition does not hold, this procedure
          %  is incorrect.  I don't have time to fix it now (3/20/99).  So I use
@@ -175,7 +175,7 @@ else
 	%--------------
 	% Condition on variables and A random
 	%--------------
-	if nconstr & Aband
+	if nconstr && Aband
       warning(' ')
 		disp('This situation (both E and A random) is still under construction')
       disp('It is closely related to Waggoner and Zha ReStat Gibbs sampling method')

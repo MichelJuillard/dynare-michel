@@ -164,7 +164,7 @@ else
    return
 end
 %
-if nEnd>0 | nStart<0
+if nEnd>0 || nStart<0
    disp('Warning: this particular sample consider is out of bounds of the data!!!')
    return
 end
@@ -639,7 +639,7 @@ if options_.ms.indxestima
    end
 
    if cnum
-      if options_.ms.real_pseudo_forecast & options_.ms.banact
+      if options_.ms.real_pseudo_forecast && options_.ms.banact
          for i=1:length(banstp{1})
             banval{1}(1:length(banstp{1}),1) = ...
                 yactCalyg(yAg-yFg+1:yAg-yFg+length(banstp{1}),banvar(1)) - 2;
@@ -662,7 +662,7 @@ if options_.ms.indxestima
    %===== Converted to mg, qg, and calendar yg
    [yacyrghate,yacyrhate,yacqmyghate] = fn_datana(yachate,options_.ms.freq,options_.ms.log_var(1:nlogeno),options_.ms.percent_var(1:npereno));
                          % actual and conditional forecast growth rates
-   if options_.ms.indxgdls & nconstr
+   if options_.ms.indxgdls && nconstr
       keyindx = [1:nvar];
       %  conlab=['conditional on' ylab{PorR(1)}];
       conlab=['v-conditions'];
@@ -732,7 +732,7 @@ end
 %   SpHR=A0in'*A0in;
 %end
 %%
-%if ~isnan(SpHR) & ~options_.ms.contemp_reduced_form 
+%if ~isnan(SpHR) && ~options_.ms.contemp_reduced_form 
 %   warning(' ')
 %   disp('Make sure you run the program with options_.ms.contemp_reduced_form =1 first.')
 %   disp('Otherwise, the following test results such as Schwartz are incorrect.')
@@ -779,8 +779,8 @@ end
 
 %***** Simply regression
 %X=[phi(:,3) y(:,2)-phi(:,2) y(:,1)-phi(:,7) ones(fss,1)];
-%» Y=y(:,3);
-%» b=regress(Y,X)
+%ï¿½ Y=y(:,3);
+%ï¿½ b=regress(Y,X)
 
 %=== Computes the roots for the whole system.
 rootsinv = fn_varoots(Bhat,nvar,options_.ms.nlags )
