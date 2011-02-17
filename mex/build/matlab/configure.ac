@@ -73,7 +73,7 @@ AC_LANG_POP([C++])
 # Check for dlopen(), needed by k_order_perturbation DLL
 AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])
 AC_SUBST([LIBADD_DLOPEN])
-# Check for GSL, needed by SWZ
+# Check for GSL, needed by MS-SBVAR
 AX_GSL
 AM_CONDITIONAL([HAVE_GSL], [test "x$has_gsl" = "xyes"])
 
@@ -93,6 +93,12 @@ if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x
    BUILD_KALMAN_STEADY_STATE_MATLAB="yes"
 else
    BUILD_KALMAN_STEADY_STATE_MATLAB="no (missing Fortran Compiler for compilation of libslicot)"
+fi
+
+if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$has_gsl" = "xyes"; then
+   BUILD_MS_SBVAR_MEX_MATLAB="yes"
+else
+   BUILD_MS_SBVAR_MEX_MATLAB="no (missing GSL)"
 fi
 
 AC_ARG_ENABLE([openmp], AS_HELP_STRING([--enable-openmp], [use OpenMP for parallelization of some MEX files]), [
@@ -118,9 +124,10 @@ AC_MSG_NOTICE([
 Dynare is now configured for building the following components...
 
 Binaries (with "make"):
- MEX files for MATLAB (except Kalman Steady State):     $BUILD_MEX_MATLAB
- Kalman Steady State MEX file for MATLAB:               $BUILD_KALMAN_STEADY_STATE_MATLAB
- M2HTML documentation:                                  $BUILD_M2HTML
+ MEX files for MATLAB (except MS-SBVAR and Kalman Steady State):     $BUILD_MEX_MATLAB
+ MS-SBVAR MEX files for MATLAB:                                      $BUILD_MS_SBVAR_MEX_MATLAB
+ Kalman Steady State MEX file for MATLAB:                            $BUILD_KALMAN_STEADY_STATE_MATLAB
+ M2HTML documentation:                                               $BUILD_M2HTML
 
 ])
 
@@ -134,6 +141,7 @@ AC_CONFIG_FILES([Makefile
                  dynare_simul_/Makefile
                  estimation/Makefile
                  libslicot/Makefile
-                 kalman_steady_state/Makefile])
+                 kalman_steady_state/Makefile
+                 ms_sbvar/Makefile])
 
 AC_OUTPUT

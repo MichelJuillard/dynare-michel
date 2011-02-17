@@ -1,0 +1,61 @@
+noinst_PROGRAMS = ms_create_init_file ms_command_line
+
+DWSWITCHDIR = $(top_srcdir)/../../../ms-sbvar/switch_dw
+DWUTILITIESDIR = $(top_srcdir)/../../../ms-sbvar/utilities_dw
+
+DYNMEXSRCDIR = $(top_srcdir)/../../sources
+MSMEXSRCDIR = $(DYNMEXSRCDIR)/ms-sbvar
+
+CPPFLAGS += -DSTRUCTURED_COLUMN_MAJOR -I$(DYNMEXSRCDIR) -I$(MSMEXSRCDIR) -I$(DWUTILITIESDIR)/include -I$(DWSWITCHDIR)/switching -I$(DWSWITCHDIR)/state_space -I$(DWSWITCHDIR)/state_space/sbvar
+
+LIBS += $(GSL_LIBS)
+LDFLAGS += $(GSL_LDFLAGS)
+
+DWUTILS = \
+	$(DWUTILITIESDIR)/arrays/dw_array.c \
+	$(DWUTILITIESDIR)/arrays/dw_matrix_array.c \
+	$(DWUTILITIESDIR)/ascii/dw_ascii.c \
+	$(DWUTILITIESDIR)/ascii/dw_parse_cmd.c \
+	$(DWUTILITIESDIR)/elliptical/dw_elliptical.c \
+	$(DWUTILITIESDIR)/error/dw_error.c \
+	$(DWUTILITIESDIR)/histogram/dw_histogram.c \
+	$(DWUTILITIESDIR)/math/dw_math.c \
+	$(DWUTILITIESDIR)/matrix/dw_matrix.c \
+	$(DWUTILITIESDIR)/matrix/bmatrix.c \
+	$(DWUTILITIESDIR)/sort/dw_matrix_sort.c \
+	$(DWUTILITIESDIR)/stat/dw_rand_gsl.c \
+	$(DWUTILITIESDIR)/stat/dw_matrix_rand.c
+
+MSMEXSRC = \
+	$(MSMEXSRCDIR)/mex_top_level.cc \
+	$(MSMEXSRCDIR)/modify_for_mex.cc
+
+nodist_ms_create_init_file_SOURCES = \
+	$(DWSWITCHDIR)/switching/dw_switch.c \
+	$(DWSWITCHDIR)/switching/dw_switchio.c \
+	$(DWSWITCHDIR)/switching/dw_dirichlet_restrictions.c \
+	$(DWSWITCHDIR)/switching/dw_metropolis_theta.c \
+	$(DWSWITCHDIR)/state_space/sbvar/create_init_file.c \
+	$(DWSWITCHDIR)/state_space/sbvar/VARbase.c \
+	$(DWSWITCHDIR)/state_space/sbvar/VARio.c \
+	$(DWSWITCHDIR)/state_space/sbvar/VARio_matlab.c \
+	$(DWUTILS) \
+	$(MSMEXSRC)
+
+nodist_ms_command_line_SOURCES = \
+	$(DWSWITCHDIR)/switching/dw_switch.c \
+	$(DWSWITCHDIR)/switching/dw_switchio.c \
+	$(DWSWITCHDIR)/switching/dw_dirichlet_restrictions.c \
+	$(DWSWITCHDIR)/switching/dw_metropolis_theta.c \
+	$(DWSWITCHDIR)/switching/dw_switch_opt.c \
+	$(DWSWITCHDIR)/switching/dw_mdd_switch.c \
+	$(DWSWITCHDIR)/state_space/sbvar/VARbase.c \
+	$(DWSWITCHDIR)/state_space/sbvar/VARio.c \
+	$(DWSWITCHDIR)/state_space/sbvar/dw_sbvar_command_line.c \
+	$(DWSWITCHDIR)/state_space/sbvar/sbvar_estimate.c \
+	$(DWSWITCHDIR)/state_space/sbvar/sbvar_simulate.c \
+	$(DWSWITCHDIR)/state_space/sbvar/sbvar_probabilities.c \
+	$(DWSWITCHDIR)/state_space/sbvar/sbvar_mdd.c \
+	$(DWSWITCHDIR)/state_space/sbvar/dw_csminwel.c \
+	$(DWUTILS) \
+	$(MSMEXSRC)

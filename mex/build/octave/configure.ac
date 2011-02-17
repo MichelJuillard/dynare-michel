@@ -56,7 +56,7 @@ AC_LANG_POP([C++])
 # Check for dlopen(), needed by k_order_perturbation DLL
 AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])
 AC_SUBST([LIBADD_DLOPEN])
-# Check for GSL, needed by SWZ
+# Check for GSL, needed by MS-SBVAR
 AX_GSL
 AM_CONDITIONAL([HAVE_GSL], [test "x$has_gsl" = "xyes"])
 
@@ -90,6 +90,12 @@ else
    BUILD_KALMAN_STEADY_STATE_OCTAVE="no (missing Fortran Compiler for compilation of libslicot)"
 fi
 
+if test "x$MKOCTFILE" != "x" -a "x$has_gsl" = "xyes"; then
+   BUILD_MS_SBVAR_MEX_OCTAVE="yes"
+else
+   BUILD_MS_SBVAR_MEX_OCTAVE="no (missing GSL)"
+fi
+
 AC_ARG_ENABLE([openmp], AS_HELP_STRING([--enable-openmp], [use OpenMP for parallelization of some MEX files]), [
   if test "x$enable_openmp" = "xyes"; then
     CPPFLAGS="$CPPFLAGS -DUSE_OMP"
@@ -103,9 +109,10 @@ AC_MSG_NOTICE([
 Dynare is now configured for building the following components...
 
 Binaries (with "make"):
- MEX files for Octave (except Kalman Steady State):     $BUILD_MEX_OCTAVE
- Kalman Steady State MEX file for Octave:               $BUILD_KALMAN_STEADY_STATE_OCTAVE
- Estimation MEX for Octave:                             $BUILD_ESTIMATION_MEX_OCTAVE
+ MEX files for Octave (except MS-SBVAR and Kalman Steady State):     $BUILD_MEX_OCTAVE
+ MS-SBVAR MEX files for Octave:                                      $BUILD_MS_SBVAR_MEX_OCTAVE
+ Kalman Steady State MEX file for Octave:                            $BUILD_KALMAN_STEADY_STATE_OCTAVE
+ Estimation MEX for Octave:                                          $BUILD_ESTIMATION_MEX_OCTAVE
 
 ])
 
@@ -121,6 +128,7 @@ AC_CONFIG_FILES([Makefile
                  qzcomplex/Makefile
                  ordschur/Makefile
                  libslicot/Makefile
-                 kalman_steady_state/Makefile])
+                 kalman_steady_state/Makefile
+                 ms_sbvar/Makefile])
 
 AC_OUTPUT
