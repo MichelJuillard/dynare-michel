@@ -31,8 +31,8 @@ MATLAB_CPPFLAGS="-I$MATLAB/extern/include"
 case ${MATLAB_ARCH} in
   glnx86 | glnxa64)
     MATLAB_DEFS="$MATLAB_DEFS -D_GNU_SOURCE -DNDEBUG"
-    MATLAB_CFLAGS="-ansi -fexceptions -fPIC -pthread -g -O2"
-    MATLAB_CXXFLAGS="-ansi -fPIC -pthread -g -O2"
+    MATLAB_CFLAGS="-fexceptions -fPIC -pthread -g -O2"
+    MATLAB_CXXFLAGS="-fPIC -pthread -g -O2"
     MATLAB_FFLAGS="-fPIC -g -O2 -fexceptions"
     MATLAB_LDFLAGS="-shared -Wl,--version-script,$MATLAB/extern/lib/${MATLAB_ARCH}/mexFunction.map -Wl,--no-undefined -Wl,-rpath-link,$MATLAB/bin/${MATLAB_ARCH} -L$MATLAB/bin/${MATLAB_ARCH}"
     MATLAB_LIBS="-lmx -lmex -lmat -lm -lstdc++ -lmwlapack"
