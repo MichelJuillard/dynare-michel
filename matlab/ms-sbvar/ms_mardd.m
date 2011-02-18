@@ -1,4 +1,4 @@
-function swz_mardd(options_)
+function ms_mardd(options_)
 % Applies to both linear and exclusion restrictions.
 % (1) Marginal likelihood function p(Y) for constant structural VAR models, using Chib (1995)'s ``Marginal Likelihood from the Gibbs Output'' in JASA.
 % (2) Conditional likelihood function f(Y|A0, A+) on the ML estimate for constant exclusion-identified models.

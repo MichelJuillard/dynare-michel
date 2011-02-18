@@ -36,7 +36,7 @@ extern "C"
   int constant_seed;
 
   void
-  swz_fprintf_err(char *str, ...)
+  ms_fprintf_err(char *str, ...)
   {
     va_list ap;
     va_start(ap, str);
@@ -53,10 +53,10 @@ extern "C"
 
 
   void
-  swzExit(int status)
+  msExit(int status)
   {
 #if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
-    throw "Error in SWZ mex file.\n";
+    throw "Error in MS-SBVAR MEX file.\n";
 #else
     exit(status);
 #endif

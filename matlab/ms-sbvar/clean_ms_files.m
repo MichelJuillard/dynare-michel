@@ -1,6 +1,6 @@
-function clean_swz_files(mod_name)
-% function clean_swz_files()
-% removes SWZ intermediary files
+function clean_ms_files(mod_name)
+% function clean_ms_files()
+% removes MS intermediary files
 %
 % INPUTS
 %    none
@@ -11,7 +11,7 @@ function clean_swz_files(mod_name)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2007-2008, 2010 Dynare Team
+% Copyright (C) 2007-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

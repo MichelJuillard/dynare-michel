@@ -20,8 +20,8 @@
 #ifndef _MEXMOD
 #define _MEXMOD
 
-void swz_exit(int status);
-void swz_fprintf_err(const char * str, ...);
+void ms_exit(int status);
+void ms_fprintf_err(const char * str, ...);
 extern int constant_seed;
 
 #endif
@@ -34,10 +34,10 @@ extern int constant_seed;
 #include <dynlapack.h>
 #include <mat.h>
 
-#define swzMalloc mxMalloc
-#define swzCalloc mxCalloc
-#define swzRealloc mxRealloc
-#define swzFree mxFree
+#define msMalloc mxMalloc
+#define msCalloc mxCalloc
+#define msRealloc mxRealloc
+#define msFree mxFree
 
 mxArray *globalMatlabStruct;
 
@@ -52,10 +52,10 @@ mxArray *getMxArray(double *, int, int);
 
 #else
 
-#define swz_fprintf_stdout printf
-#define swzMalloc malloc
-#define swzCalloc calloc
-#define swzRealloc realloc
-#define swzFree free
+#define ms_fprintf_stdout printf
+#define msMalloc malloc
+#define msCalloc calloc
+#define msRealloc realloc
+#define msFree free
 
 #endif

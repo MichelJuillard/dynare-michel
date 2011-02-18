@@ -1,4 +1,4 @@
-function swz_write_mhm_input(fname,options_ms)
+function ms_write_mhm_input(fname,options_ms)
 
     fh = fopen(fname,'w');
 

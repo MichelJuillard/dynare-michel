@@ -40,6 +40,7 @@
 !/ls2003/data_ca1.m
 !/objectives/sgu_ex1.mat
 !/missing/simulate_data_with_missing_observations.m
+!/ms-sbvar/data.m
 !/parallel/data_ca1.m
 !/pi2004/idata.m
 !/pi2004/ych.dat
@@ -51,6 +52,5 @@
 !/recursive/data_ca1.m
 !/run_test.m
 !/run_test_octave.m
-!/swz/data.m
 !/test.m
 !/fs2000_ssfile_aux.m

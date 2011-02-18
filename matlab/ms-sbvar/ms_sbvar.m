@@ -1,14 +1,14 @@
-function swz_sbvar(ms_flag, M, options)
+function ms_sbvar(ms_flag, M, options)
 
 dynareroot = strrep(which('dynare'),'dynare.m','');
-swz_root = [dynareroot '/ms-sbvar'];
+ms_root = [dynareroot '/ms-sbvar'];
 
-addpath([swz_root '/cstz']);
-addpath([swz_root '/identification']);
-addpath([swz_root '/switching_specification']);
-addpath([swz_root '/mhm_specification']);
+addpath([ms_root '/cstz']);
+addpath([ms_root '/identification']);
+addpath([ms_root '/switching_specification']);
+addpath([ms_root '/mhm_specification']);
 
-clean_swz_files(M.fname);
+clean_ms_files(M.fname);
 
 options.data = read_variables(options.datafile,options.varobs,[],options.xls_sheet,options.xls_range);
 
@@ -35,7 +35,7 @@ elseif ~isempty(options.ms.Qi) && ~isempty(options.ms.Ri)
 end
 
 if ms_flag == 1
-    % changing some option names to match SWZ code 
+    % changing some option names to match MS code
     options.ms.firstMetrop = options.ms.draws_nbr_burn_in_1;
     options.ms.secondMetrop = options.ms.draws_nbr_burn_in_2;
     options.ms.ndrawsmv = options.ms.draws_nbr_mean_var_estimate;
@@ -50,5 +50,5 @@ if ms_flag == 1
     options.ms.markov_file = 'markov_file';
     sz_prd(M,options);
 else
-    swz_mardd(options);
+    ms_mardd(options);
 end

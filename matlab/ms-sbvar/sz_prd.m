@@ -6,17 +6,17 @@ function sz_prd(M,options_)
 %generation of mhm file
 %generateMHM_input(options_);
 
-swz_root = strrep(which('swz_sbvar'),'/swz_sbvar.m','');
+ms_root = strrep(which('ms_sbvar'),'/ms_sbvar.m','');
 
 % path for C executables
 %c_path='./c-executables';
-c_path = [swz_root '/bin'];
+c_path = [ms_root '/bin'];
 
 % path for Markov specification
-m_spec_path=[swz_root '/switching_specification'];
+m_spec_path=[ms_root '/switching_specification'];
 
 % path for MHM specification
-mhm_spec_path=[swz_root '/mhm_specification'];
+mhm_spec_path=[ms_root '/mhm_specification'];
 
 %==========================================================================
 %== Processing control
@@ -486,7 +486,7 @@ if options_.ms.create_initialization_file == 1
     %======================================================================
     %== Create C initialization filename
     %======================================================================
-    swz_write_markov_file(markov_file,M,options_)
+    ms_write_markov_file(markov_file,M,options_)
     if options_.ms.standalone == 1
         if use_linux == 1
             create_init_file=[c_path,'/sbvar_init_file ',matlab_filename,' ',markov_file,' ',options_.ms.output_file_tag];
@@ -527,7 +527,7 @@ end
 %==========================================================================
 if options_.ms.compute_mdd == 1
     mhm_file = ['mhm_input_' M.fname '.dat'];
-    swz_write_mhm_input(mhm_file,options_.ms);
+    ms_write_mhm_input(mhm_file,options_.ms);
     if options_.ms.standalone == 1
         if use_linux == 1
             compute_mdd1=[c_path,'/sbvar_mhm_1 -cseed 5 -ft ',options_.ms.output_file_tag,' -fi ',mhm_file];
