@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Dynare Team
+ * Copyright (C) 2010-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -17,51 +17,23 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <stdarg.h>
-#include <string.h>
-
-
-#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 #include <dynmex.h>
-#endif
 
   int constant_seed;
 
   void
-  ms_fprintf_err(char *str, ...)
-  {
-    va_list ap;
-    va_start(ap, str);
-
-#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
-    mexPrintf(str, ap);
-#else
-    vfprintf(stderr, str, ap);
-#endif
-
-    va_end(ap);
-  }
-
-
-
-  void
   msExit(int status)
   {
-#if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
     throw "Error in MS-SBVAR MEX file.\n";
-#else
-    exit(status);
-#endif
   }
 
 #ifdef __cplusplus
 }
+#endif
 #endif

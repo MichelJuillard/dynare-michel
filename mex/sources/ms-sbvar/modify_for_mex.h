@@ -20,42 +20,26 @@
 #ifndef _MEXMOD
 #define _MEXMOD
 
-void ms_exit(int status);
-void ms_fprintf_err(const char * str, ...);
-extern int constant_seed;
-
-#endif
-
-
 #if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 
 #include <dynmex.h>
 #include <dynblas.h>
 #include <dynlapack.h>
-#include <mat.h>
 
-#define msMalloc mxMalloc
-#define msCalloc mxCalloc
-#define msRealloc mxRealloc
-#define msFree mxFree
+#define dw_malloc(n) mxMalloc(n)
+#define dw_calloc(n) mxCalloc(n)
+#define dw_realloc(buffer,n) mxRealloc(buffer,n)
+#define dw_free(buffer) mxFree(buffer)
+#define dw_exit(n) msExit(n)
 
+void msExit(int status);
+extern int constant_seed;
+
+/* Write Matlab Output */
 mxArray *globalMatlabStruct;
-
-#ifndef _MEXWRITE
-#define _MEXWRITE
-
 void mex_write_to_matlab_matfile(double *, int, int, const char *, const char *);
 void mex_write_to_matlab_global_struct(double *, int, int, const char *);
 mxArray *getMxArray(double *, int, int);
 
 #endif
-
-#else
-
-#define ms_fprintf_stdout printf
-#define msMalloc malloc
-#define msCalloc calloc
-#define msRealloc realloc
-#define msFree free
-
 #endif
