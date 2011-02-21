@@ -1,5 +1,5 @@
-Dynare version 4.1
-==================
+Dynare
+======
 
 For information about how to use Dynare, you should have a look at the
 documentation located in the 'doc' subdirectory of your Dynare installation (you
@@ -61,10 +61,10 @@ Using Dynare with Octave
 Dynare is now available for GNU Octave, a free clone of MATLAB (R) (see
 <http://www.octave.org>).
 
-The recommended Octave distribution is the Octave/MinGW 3.2.3
+The recommended Octave distribution is the Octave/MinGW 3.2.4
 precompiled binaries from Octave Forge, available at:
 
-  http://sourceforge.net/projects/octave/files/Octave_Windows%20-%20MinGW/Octave%203.2.3%20for%20Windows%20MinGW32%20Installer/Octave-3.2.3-2_i686-pc-mingw32_gcc-4.4.0_setup.exe/download
+  http://sourceforge.net/projects/octave/files/Octave_Windows%20-%20MinGW/
 
 Every time you run Octave, you should type the two following commands (assuming
 that you have installed Dynare at the standard location, and replacing '4.x.y'
