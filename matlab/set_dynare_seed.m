@@ -75,7 +75,12 @@ if matlab_random_streams% Use new matlab interface.
 else% Use old matlab interface.
     if nargin==1
         if ischar(a) && strcmpi(a,'default')
-            options_.DynareRandomStreams.algo = 'twister';
+            if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.4')
+                options_.DynareRandomStreams.algo = 'state';
+            else
+                % Twister was introduced in MATLAB 7.4
+                options_.DynareRandomStreams.algo = 'twister';
+            end
             options_.DynareRandomStreams.seed = 0;
             rand(options_.DynareRandomStreams.algo,options_.DynareRandomStreams.seed);
             randn('state',options_.DynareRandomStreams.seed);
