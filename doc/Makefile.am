@@ -47,7 +47,7 @@ manual.pdf: manual.xml
 	$(DBLATEX) manual.xml
 
 manual.texi: manual.xml
-	$(DOCBOOK2XTEXI) --encoding=utf-8//TRANSLIT --string-param output-file=manual $<
+	$(DOCBOOK2XTEXI) --encoding=utf-8//TRANSLIT --string-param output-file=manual --string-param directory-category=Math --string-param directory-description="A platform for handling a wide class of economic models." $<
 
 manual.info: manual.texi
 	$(MAKEINFO) $<
