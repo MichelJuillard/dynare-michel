@@ -31,7 +31,11 @@ function dynare_estimation_1(var_list_,dname)
 
 global M_ options_ oo_ estim_params_ bayestopt_
 
-[data,rawdata,xparam1] = dynare_estimation_init(var_list_,dname);
+if nargin > 1
+  [data,rawdata,xparam1] = dynare_estimation_init(var_list_,dname);
+else
+  [data,rawdata,xparam1] = dynare_estimation_init(var_list_);
+end
 
 %% Set various options.
 options_ = set_default_option(options_,'mh_nblck',2); 
