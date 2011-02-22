@@ -90,7 +90,7 @@ try
     end
     warning('on','MATLAB:singularMatrix');
     warning('on','MATLAB:nearlySingularMatrix');
-    if (isinf(UAVinv) || isnan(UAVinv)) 
+    if (any(any(isinf(UAVinv))) || any(any(isnan(UAVinv))))
         if(options_.useACES==1)
             disp('ERROR! saving PI_gensys_data_dump');
             save PI_gensys_data_dump
@@ -102,7 +102,9 @@ try
         end
     end
 catch
-    [errmsg, errcode]=lasterror;
+    lerror = lasterror;
+    errmsg = lerror.message;
+    disp(errmsg)
     warning(['error callig PI_gensys_singularC: ' errmsg ],'errcode');
     error('errcode',['error callig PI_gensys_singularC: ' errmsg ]);
 end

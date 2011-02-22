@@ -353,7 +353,7 @@ end % end if useAIM and...
         end
 
         % reuse some of the bypassed code and tests that may be needed 
-        if eu ~=[1; 1] && options_.ACES_solver==0
+        if (eu(1) ~= 1 || eu(2) ~= 1) && options_.ACES_solver==0
             info(1) = abs(eu(1)+eu(2));
             info(2) = 1.0e+8;
             %     return
@@ -448,9 +448,8 @@ end % end if useAIM and...
             disp('Problem with using Part Info ACES solver:');
             error(lerror.message);
         else
-            disp('Problem with using Part Info solver - Using Dynare solver instead');
-            disp (lerror.message);
-            options_.partial_information = 0; % and then try mjdgges instead
+            disp('Problem with using Part Info solver');
+            error(lerror.message);
         end
     end
 
