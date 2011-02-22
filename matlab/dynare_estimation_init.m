@@ -1,4 +1,4 @@
-function [data,rawdata,xparam1]=dynare_estimation_init(var_list_, gsa_flag)
+function [data,rawdata,xparam1]=dynare_estimation_init(var_list_, dname, gsa_flag)
 
 % function dynare_estimation_init(var_list_, gsa_flag)
 % preforms initialization tasks before estimation or
@@ -6,6 +6,7 @@ function [data,rawdata,xparam1]=dynare_estimation_init(var_list_, gsa_flag)
 %  
 % INPUTS
 %   var_list_:  selected endogenous variables vector
+%   dname:      alternative directory name
 %   gsa_flag:   flag for GSA operation (optional)
 %  
 % OUTPUTS
@@ -36,7 +37,7 @@ function [data,rawdata,xparam1]=dynare_estimation_init(var_list_, gsa_flag)
 
 global M_ options_ oo_ estim_params_ bayestopt_
 
-if nargin < 2 || isempty(gsa_flag)
+if nargin < 3 || isempty(gsa_flag)
     gsa_flag = 0;
 end
 
