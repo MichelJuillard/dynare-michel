@@ -129,6 +129,16 @@ extern "C" {
   void dsyr(BLCHAR uplo, CONST_BLINT n, CONST_BLDOU alpha, CONST_BLDOU x,
             CONST_BLINT incx, BLDOU a, CONST_BLINT lda);
 
+#define dtrmm FORTRAN_WRAPPER(dtrmm)
+  void dtrmm(BLCHAR side, BLCHAR uplo, BLCHAR transa, BLCHAR diag, CONST_BLINT m,
+             CONST_BLINT n, CONST_BLDOU alpha, CONST_BLDOU a, CONST_BLINT lda,
+             BLDOU b, CONST_BLINT ldb);
+
+#define strmm FORTRAN_WRAPPER(strmm)
+  void strmm(BLCHAR side, BLCHAR uplo, BLCHAR transa, BLCHAR diag, CONST_BLINT m,
+             CONST_BLINT n, CONST_BLFLT alpha, CONST_BLFLT a, CONST_BLINT lda,
+             BLFLT b, CONST_BLINT ldb);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif
