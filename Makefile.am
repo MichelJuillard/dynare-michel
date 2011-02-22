@@ -18,6 +18,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = \
 	matlab \
+	ms-sbvar \
 	uncrustify.cfg \
 	license.txt \
 	dynare.el \
@@ -32,3 +33,4 @@ dist-hook:
 	rm -rf `find $(distdir)/matlab $(distdir)/examples -name *~`
 	rm -f $(distdir)/matlab/dynare_m$(EXEEXT) $(distdir)/matlab/dynare_version.m
 	$(MKDIR_P) $(distdir)/mex/matlab $(distdir)/mex/octave
+	rm -rf `find $(distdir)/ms-sbvar -name '.git*'`

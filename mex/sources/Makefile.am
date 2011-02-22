@@ -11,7 +11,8 @@ EXTRA_DIST = \
 	k_order_perturbation \
 	ordschur \
 	libslicot \
-	kalman_steady_state
+	kalman_steady_state \
+	ms-sbvar
 
 clean-local:
 	rm -rf `find mex/sources -name *.o`
