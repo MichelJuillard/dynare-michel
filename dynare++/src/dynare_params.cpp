@@ -1,5 +1,4 @@
-// $Id: dynare_params.cpp 2348 2009-03-24 11:55:16Z kamenik $
-//Copyright 2004, Ondra Kamenik
+// Copyright (C) 2004-2011, Ondra Kamenik
 
 #include "dynare_params.h"
 
@@ -38,7 +37,7 @@ const char* help_str =
 "    --check-scale <num>  scaling of checked points [2.0]\n"
 "    --no-irfs            shuts down IRF simulations [do IRFs]\n"
 "    --irfs               performs IRF simulations [do IRFs]\n"
-"    --qz-criterium <num> treshold for stable eigenvalues [1.000001]\n"
+"    --qz-criterium <num> threshold for stable eigenvalues [1.000001]\n"
 "\n\n";
 
 // returns the pointer to the first character after the last slash or
