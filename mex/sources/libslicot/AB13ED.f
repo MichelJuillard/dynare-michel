@@ -229,7 +229,7 @@ C
 C
       SUFWRK = LDWORK-IWK.GE.N2
 C
-C     Computation of the tolerances and the treshold for termination of
+C     Computation of the tolerances and the threshold for termination of
 C     the bisection method. SEPS is the square root of the machine
 C     precision.
 C
