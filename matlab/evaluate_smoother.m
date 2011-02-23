@@ -24,7 +24,7 @@ function oo = evaluate_smoother(parameters)
 % [1] This function use persistent variables for the dataset and the description of the missing observations. Consequently, if this function 
 %     is called more than once (by changing the value of parameters) the sample *must not* change.
 
-% Copyright (C) 2010 Dynare Team
+% Copyright (C) 2010-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -145,7 +145,7 @@ bayestopt_.pshape = Inf(size(bayestopt_.pshape));
 clear('priordens')%
 
 [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp] ...
-    = DsgeSmoother(parameters,gend,data,data_index,number_of_observations);
+    = DsgeSmoother(parameters,gend,data,data_index,missing_value);
 oo.Smoother.SteadyState = ys;
 oo.Smoother.TrendCoeffs = trend_coeff;
 if options_.filter_covariance
