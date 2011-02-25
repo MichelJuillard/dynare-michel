@@ -82,7 +82,7 @@ if whoiam
 end
 
 
-MhDirectoryName = CheckPath('metropolis');
+MhDirectoryName = myinputs.MhDirectoryName;
 
 RemoteFlag = 0;
 

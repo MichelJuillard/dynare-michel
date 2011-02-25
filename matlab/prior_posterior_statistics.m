@@ -65,23 +65,44 @@ if horizon
 end
 maxlag = M_.maximum_endo_lag;
 %%
-DirectoryName = CheckPath('metropolis');
-load([ DirectoryName '/'  M_.fname '_mh_history'])
-FirstMhFile = record.KeepedDraws.FirstMhFile;
-FirstLine = record.KeepedDraws.FirstLine;
-TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); LastMhFile = TotalNumberOfMhFiles;
-TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
-NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
-clear record;
-if ~isempty(options_.subdraws)
-    B = options_.subdraws;
-    if B > NumberOfDraws
-        B = NumberOfDraws;
+if strcmpi(type,'posterior')
+    DirectoryName = CheckPath('metropolis');
+    load([ DirectoryName '/'  M_.fname '_mh_history'])
+    FirstMhFile = record.KeepedDraws.FirstMhFile;
+    FirstLine = record.KeepedDraws.FirstLine;
+    TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); LastMhFile = TotalNumberOfMhFiles;
+    TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
+    NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
+    clear record;
+    if ~isempty(options_.subdraws)
+        B = options_.subdraws;
+        if B > NumberOfDraws
+            B = NumberOfDraws;
+        end
+    else
+        B = min(1200, round(0.25*NumberOfDraws));
     end
-else
-    B = min(1200, round(0.25*NumberOfDraws));
+elseif strcmpi(type,'gsa')
+    RootDirectoryName = CheckPath('GSA');
+    if options_.opt_gsa.pprior
+        DirectoryName = CheckPath(['GSA',filesep,'prior']);
+        load([ RootDirectoryName filesep  M_.fname '_prior.mat'],'lpmat0','lpmat','istable')
+    else
+        DirectoryName = CheckPath(['GSA',filesep,'mc']);
+        load([ RootDirectoryName filesep  M_.fname '_mc.mat'],'lpmat0','lpmat','istable')
+    end
+    x=[lpmat0(istable,:) lpmat(istable,:)];
+    clear lpmat istable
+    NumberOfDraws=size(x,1);
+    B=NumberOfDraws; 
+elseif strcmpi(type,'prior')
+    DirectoryName = CheckPath('prior');
+    if ~isempty(options_.subdraws)
+        B = options_.subdraws;
+    else
+        B = 1200;
+    end
 end
-
 %%
 MAX_nruns = min(B,ceil(MaxNumberOfBytes/(npar+2)/8));
 MAX_nsmoo = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*gend)/8));
@@ -176,7 +197,7 @@ end
 localVars.MAX_nruns=MAX_nruns;
 localVars.MAX_momentsno = MAX_momentsno;
 localVars.ifil=ifil;
-
+localVars.DirectoryName = DirectoryName;
 
 if strcmpi(type,'posterior'),
     b=0;
@@ -184,11 +205,11 @@ if strcmpi(type,'posterior'),
         b = b + 1;
         [x(b,:), logpost(b,1)] = GetOneDraw(type);
     end
+    localVars.logpost=logpost;
 end
 
 if ~strcmpi(type,'prior'),
     localVars.x=x;
-    localVars.logpost=logpost;
 end
 
 b=0;
@@ -240,6 +261,10 @@ stock_gend=gend;
 stock_data=Y;
 save([DirectoryName '/' M_.fname '_data.mat'],'stock_gend','stock_data');
 
+if strcmpi(type,'gsa')
+    return
+end
+
 if ~isnumeric(options_.parallel),
     leaveSlaveOpen = options_.parallel_info.leaveSlaveOpen;
     if options_.parallel_info.leaveSlaveOpen == 0,
@@ -251,10 +276,10 @@ end
 if options_.smoother
     pm3(endo_nbr,gend,ifil(1),B,'Smoothed variables',...
         '',M_.endo_names(1:M_.orig_endo_nbr, :),'tit_tex',M_.endo_names,...
-        varlist,'SmoothedVariables',[M_.dname '/metropolis'],'_smooth');
+        varlist,'SmoothedVariables',DirectoryName,'_smooth');
     pm3(exo_nbr,gend,ifil(2),B,'Smoothed shocks',...
         '',M_.exo_names,'tit_tex',M_.exo_names,...
-        M_.exo_names,'SmoothedShocks',[M_.dname '/metropolis'],'_inno');
+        M_.exo_names,'SmoothedShocks',DirectoryName,'_inno');
     if nvn
         % needs to  be fixed
         %        pm3(endo_nbr,gend,ifil(3),B,'Smoothed measurement errors',...
@@ -266,20 +291,20 @@ end
 if options_.filtered_vars
     pm3(endo_nbr,gend,ifil(1),B,'Updated Variables',...
         '',varlist,'tit_tex',M_.endo_names,...
-        varlist,'UpdatedVariables',[M_.dname '/metropolis'], ...
+        varlist,'UpdatedVariables',DirectoryName, ...
         '_update');
     pm3(endo_nbr,gend+1,ifil(4),B,'One step ahead forecast',...
         '',varlist,'tit_tex',M_.endo_names,...
-        varlist,'FilteredVariables',[M_.dname '/metropolis'],'_filter_step_ahead');
+        varlist,'FilteredVariables',DirectoryName,'_filter_step_ahead');
 end
 
 if options_.forecast
     pm3(endo_nbr,horizon+maxlag,ifil(6),B,'Forecasted variables (mean)',...
         '',varlist,'tit_tex',M_.endo_names,...
-        varlist,'MeanForecast',[M_.dname '/metropolis'],'_forc_mean');
+        varlist,'MeanForecast',DirectoryName,'_forc_mean');
     pm3(endo_nbr,horizon+maxlag,ifil(6),B,'Forecasted variables (point)',...
         '',varlist,'tit_tex',M_.endo_names,...
-        varlist,'PointForecast',[M_.dname '/metropolis'],'_forc_point');
+        varlist,'PointForecast',DirectoryName,'_forc_point');
 end
 
 

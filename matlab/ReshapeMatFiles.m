@@ -54,8 +54,10 @@ else
             MhDirectoryName = [CheckPath('GSA\SCREEN') filesep ];
         elseif options_.opt_gsa.morris==2,
             MhDirectoryName = [CheckPath('GSA\IDENTIF') filesep ];
+        elseif options_.opt_gsa.pprior
+            MhDirectoryName = [CheckPath(['GSA' filesep 'prior']) filesep ];
         else
-            MhDirectoryName = [CheckPath('GSA') filesep ];
+            MhDirectoryName = [CheckPath(['GSA' filesep 'mc']) filesep ];
         end
     else
         MhDirectoryName = [CheckPath('prior') filesep ];

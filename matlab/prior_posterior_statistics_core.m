@@ -87,13 +87,15 @@ ifil=myinputs.ifil;
 
 if ~strcmpi(type,'prior'),
     x=myinputs.x;
-    logpost=myinputs.logpost;
+    if strcmpi(type,'posterior'),
+        logpost=myinputs.logpost;
+    end
 end
 if whoiam
     Parallel=myinputs.Parallel;
 end
 
-DirectoryName = CheckPath('metropolis');
+DirectoryName = myinputs.DirectoryName;
 
 RemoteFlag = 0;
 if whoiam
@@ -103,7 +105,7 @@ if whoiam
         end
     end
     ifil=ifil(:,whoiam);
-    waitbarString = ['Please wait... Bayesian (posterior) subdraws (' int2str(fpar) 'of' int2str(B) ')...'];
+    waitbarString = ['Please wait... ',type,' subdraws (' int2str(fpar) 'of' int2str(B) ')...'];
     if Parallel(ThisMatlab).Local,
         waitbarTitle=['Local '];
     else
@@ -114,7 +116,7 @@ else
     if exist('OCTAVE_VERSION')
         diary off;
     else
-        h = waitbar(0,'Taking subdraws...');
+        h = waitbar(0,['Taking ',type,' subdraws...']);
     end
 
 end
@@ -142,7 +144,11 @@ for b=fpar:B
 
     else
         deep = x(b,:);
-        logpo = logpost(b);
+        if strcmpi(type,'posterior')
+            logpo = logpost(b);
+        else
+            logpo = evaluate_posterior_kernel(deep');
+        end
     end
     set_all_parameters(deep);
     [dr,info] = resol(oo_.steady_state,0);

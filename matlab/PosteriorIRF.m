@@ -80,7 +80,11 @@ DirectoryName = CheckPath('Output');
 if strcmpi(type,'posterior')
     MhDirectoryName = CheckPath('metropolis');
 elseif strcmpi(type,'gsa')
-    MhDirectoryName = CheckPath('GSA');
+    if options_.opt_gsa.pprior
+        MhDirectoryName = CheckPath(['GSA' filesep 'prior']);
+    else
+        MhDirectoryName = CheckPath(['GSA' filesep 'mc']);
+    end
 else
     MhDirectoryName = CheckPath('prior');
 end
@@ -91,7 +95,12 @@ if strcmpi(type,'posterior')
     TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
     NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
 elseif strcmpi(type,'gsa')
-    load([ MhDirectoryName filesep  M_.fname '_prior.mat'],'lpmat0','lpmat','istable')
+    RootDirectoryName = CheckPath('gsa');
+    if options_.opt_gsa.pprior
+        load([ RootDirectoryName filesep  M_.fname '_prior.mat'],'lpmat0','lpmat','istable')
+    else
+        load([ RootDirectoryName filesep  M_.fname '_mc.mat'],'lpmat0','lpmat','istable')
+    end
     x=[lpmat0(istable,:) lpmat(istable,:)];
     clear lpmat istable
     NumberOfDraws=size(x,1);
@@ -193,6 +202,7 @@ localVars.MAX_nruns=MAX_nruns;
 localVars.NumberOfIRFfiles_dsge=NumberOfIRFfiles_dsge;
 localVars.NumberOfIRFfiles_dsgevar=NumberOfIRFfiles_dsgevar;
 localVars.ifil2=ifil2;
+localVars.MhDirectoryName=MhDirectoryName;
 
 % Like sequential execution!
 if isnumeric(options_.parallel),
@@ -238,7 +248,7 @@ if nosaddle
     disp(['PosteriorIRF :: Percentage of discarded posterior draws = ' num2str(nosaddle/(B+nosaddle))]) 
 end
 
-ReshapeMatFiles('irf_dsge')
+ReshapeMatFiles('irf_dsge',type)
 if MAX_nirfs_dsgevar
     ReshapeMatFiles('irf_bvardsge')
 end

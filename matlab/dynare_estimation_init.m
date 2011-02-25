@@ -1,4 +1,4 @@
-function [data,rawdata,xparam1]=dynare_estimation_init(var_list_, dname, gsa_flag)
+function [data,rawdata,xparam1,data_info]=dynare_estimation_init(var_list_, dname, gsa_flag)
 
 % function dynare_estimation_init(var_list_, gsa_flag)
 % preforms initialization tasks before estimation or
@@ -39,6 +39,14 @@ global M_ options_ oo_ estim_params_ bayestopt_
 
 if nargin < 3 || isempty(gsa_flag)
     gsa_flag = 0;
+else
+    %% Decide if a DSGE or DSGE-VAR has to be estimated.
+    if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
+        options_.dsge_var = 1;
+    end
+    
+    var_list_ = check_list_of_variables(options_, M_, var_list_);
+    options_.varlist = var_list_;
 end
 
 options_.lgyidx2varobs = zeros(size(M_.endo_names,1),1);
@@ -262,6 +270,7 @@ if isempty(options_.datafile)
     if gsa_flag
         data = [];
         rawdata = [];
+        data_info = [];
         return
     else
         error('datafile option is missing')
@@ -308,3 +317,44 @@ end
 % Transpose the dataset array.
 data = transpose(rawdata);
 
+if nargout>3
+    %% Compute the steady state: 
+    if options_.steadystate_flag% if the *_steadystate.m file is provided.
+        [ys,tchek] = feval([M_.fname '_steadystate'],...
+                           [zeros(M_.exo_nbr,1);...
+                            oo_.exo_det_steady_state]);
+        if size(ys,1) < M_.endo_nbr 
+            if length(M_.aux_vars) > 0
+                ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars,...
+                                                            M_.fname,...
+                                                            zeros(M_.exo_nbr,1),...
+                                                            oo_.exo_det_steady_state,...
+                                                            M_.params,...
+                                                            options_.bytecode);
+            else
+                error([M_.fname '_steadystate.m doesn''t match the model']);
+            end
+        end
+        oo_.steady_state = ys;
+    else% if the steady state file is not provided.
+        [dd,info] = resol(oo_.steady_state,0);
+        oo_.steady_state = dd.ys; clear('dd');
+    end
+    if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
+        options_.noconstant = 1;
+    else
+        options_.noconstant = 0;
+    end
+    
+    [data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,n_varobs);
+    missing_value = ~(number_of_observations == gend*n_varobs);
+    
+    initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+
+    data_info.gend = gend;
+    data_info.data = data;
+    data_info.data_index = data_index;
+    data_info.number_of_observations = number_of_observations;
+    data_info.no_more_missing_observations = no_more_missing_observations;
+    data_info.missing_value = missing_value;
+end

@@ -24,7 +24,6 @@ function x0=dynare_sensitivity(options_gsa)
 global M_ options_ oo_ bayestopt_ estim_params_
 
 fname_ = M_.fname;
-M_.dname = fname_;
 lgy_ = M_.endo_names;
 x0=[];
 
@@ -57,7 +56,9 @@ if ~isempty(options_gsa.datafile) || isempty(bayestopt_),
         options_.loglinear=options_gsa.loglinear;
     end
     options_.mode_compute = 0;
-    [data,rawdata]=dynare_estimation_init([],1);
+    options_.filtered_vars = 1;
+    options_.plot_priors = 0;
+    [data,rawdata,xparam1,data_info]=dynare_estimation_init([],fname_,1);
     % computes a first linear solution to set up various variables
 end
 
@@ -233,7 +234,11 @@ if options_gsa.rmse,
             a=whos('-file',[OutputDirectoryName,'/',fname_,'_mc'],'logpo2');
         end
         if isempty(a),
-            dynare_MC([],OutputDirectoryName);
+%             dynare_MC([],OutputDirectoryName,data,rawdata,data_info);
+            prior_posterior_statistics('gsa',data,data_info.gend,data_info.data_index,data_info.missing_value);
+            if options_.bayesian_irf
+                PosteriorIRF('gsa');
+            end
             options_gsa.load_rmse=0;
             %   else
             %     if options_gsa.load_rmse==0,
@@ -252,6 +257,7 @@ if options_gsa.rmse,
         end
     end
     clear a;
+%     filt_mc_(OutputDirectoryName,data_info);
     filt_mc_(OutputDirectoryName);
 end
 
