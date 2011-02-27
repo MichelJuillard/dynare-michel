@@ -36,7 +36,6 @@ max_lead = M_.maximum_endo_lead;
 max_lag = M_.maximum_endo_lag;
 endo_nbr = M_.endo_nbr;
 lead_lag_incidence = M_.lead_lag_incidence;
-xlen = max_lead + max_lag + 1;
 klen = max_lag + max_lead + 1;
 
 fwrd_var = find(any(lead_lag_incidence(max_lag+2:end,:),1))';
@@ -71,9 +70,19 @@ end
 
 kmask = kmask';
 kmask = kmask(:);
-i_kmask = find(kmask);          % index of nonzero entries in kmask
-nd = size(i_kmask,1);           % size of the state vector
-kmask(i_kmask) = [1:nd];
+i_kmask = find(kmask);
+nd = nnz(kmask);           % size of the state vector
+kmask(i_kmask) = (1:nd);
+% auxiliary equations
+
+% elements that are both in z(t+1) and z(t)
+k1 = find([kmask(1:end-M_.endo_nbr) & kmask(M_.endo_nbr+1:end)] );
+kad = [];
+kae = [];
+if ~isempty(k1)
+    kad = kmask(k1+M_.endo_nbr);
+    kae = kmask(k1);
+end
 
 % composition of state vector
 % col 1: variable;           col 2: lead/lag in z(t+1); 
@@ -83,7 +92,7 @@ kstate = [ repmat([1:endo_nbr]',klen-1,1) kron([klen:-1:2]',ones(endo_nbr,1)) ..
 kiy = flipud(lead_lag_incidence(:,order_var))';
 kiy = kiy(:);
 kstate(1:endo_nbr,3) = kiy(1:endo_nbr)-nnz(lead_lag_incidence(2,:));  
-kstate(find(kstate(:,3) < 0),3) = 0;
+kstate(kstate(:,3) < 0,3) = 0;
 kstate(endo_nbr+1:end,4) = kiy(2*endo_nbr+1:end);  
 % put in E only the current variables that are not already in D
 kstate = kstate(i_kmask,:);
@@ -93,8 +102,8 @@ dr.inv_order_var = inv_order_var';
 dr.nstatic = nstatic;
 dr.npred = npred+nboth;
 dr.kstate = kstate;
-dr.kad = [];
-dr.kae = [];
+dr.kad = kad;
+dr.kae = kae;
 dr.nboth = nboth;
 dr.nfwrd = nfwrd;
 % number of forward variables in the state vector
