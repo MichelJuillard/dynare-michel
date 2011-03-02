@@ -1,4 +1,4 @@
-noinst_PROGRAMS = ms_create_init_file ms_command_line
+noinst_PROGRAMS = ms_sbvar_create_init_file ms_sbvar_command_line
 
 DWSWITCHDIR = $(top_srcdir)/../../../ms-sbvar/switch_dw
 DWUTILITIESDIR = $(top_srcdir)/../../../ms-sbvar/utilities_dw
@@ -30,7 +30,7 @@ MSMEXSRC = \
 	$(MSMEXSRCDIR)/mex_top_level.cc \
 	$(MSMEXSRCDIR)/modify_for_mex.cc
 
-nodist_ms_create_init_file_SOURCES = \
+nodist_ms_sbvar_create_init_file_SOURCES = \
 	$(DWSWITCHDIR)/switching/dw_switch.c \
 	$(DWSWITCHDIR)/switching/dw_switchio.c \
 	$(DWSWITCHDIR)/switching/dw_dirichlet_restrictions.c \
@@ -42,7 +42,7 @@ nodist_ms_create_init_file_SOURCES = \
 	$(DWUTILS) \
 	$(MSMEXSRC)
 
-nodist_ms_command_line_SOURCES = \
+nodist_ms_sbvar_command_line_SOURCES = \
 	$(DWSWITCHDIR)/switching/dw_switch.c \
 	$(DWSWITCHDIR)/switching/dw_switchio.c \
 	$(DWSWITCHDIR)/switching/dw_dirichlet_restrictions.c \
