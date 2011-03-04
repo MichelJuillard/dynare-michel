@@ -10,13 +10,13 @@ ms_root = strrep(which('ms_sbvar'),'/ms_sbvar.m','');
 
 % path for C executables
 %c_path='./c-executables';
-c_path = [ms_root '/bin'];
+c_path = [ms_root '../../ms-sbvar'];
 
 % path for Markov specification
-m_spec_path=[ms_root '/switching_specification'];
+%m_spec_path=[ms_root '/switching_specification'];
 
 % path for MHM specification
-mhm_spec_path=[ms_root '/mhm_specification'];
+%mhm_spec_path=[ms_root '/mhm_specification'];
 
 %==========================================================================
 %== Processing control
@@ -59,7 +59,7 @@ markov_file = [options_.ms.markov_file '.dat'];
 %options_.ms.mhm_file = 'MHM_input.dat';
 
 
-mhm_file = '/MHM_input.dat';
+%mhm_file = '/MHM_input.dat';
 %options_.ms.proposal_draws = 100000;
 
 %==========================================================================
@@ -492,13 +492,13 @@ if options_.ms.create_initialization_file == 1
             create_init_file=[c_path,'/sbvar_init_file ',matlab_filename,' ',markov_file,' ',options_.ms.output_file_tag];
             system(create_init_file); %Run operating system command and return result
         else
-            create_init_file=[c_path,'\sbvar_init.exe ',matlab_filename,' ',markov_file,' ',options_.ms.output_file_tag];
+            create_init_file=[c_path,'\sbvar_init_file.exe ',matlab_filename,' ',markov_file,' ',options_.ms.output_file_tag];
             dos(create_init_file)            
         end
     else           
         create_init_file=[matlab_filename,' ',markov_file,' ',options_.ms.output_file_tag];
-        [err] = mex_sbvar_init_file(create_init_file);
-        mexErrCheck('mex_sbvar_init_file',err);
+        [err] = ms_sbvar_create_init_file(create_init_file);
+        mexErrCheck('ms_sbvar_create_init_file',err);
     end
 end
 
@@ -508,46 +508,56 @@ end
 if options_.ms.estimate_msmodel == 1
     if options_.ms.standalone == 1
         if use_linux == 1
-            perform_estimation=[c_path,'/sbvar_estimation -cseed 5 -ft ',options_.ms.output_file_tag];
+            perform_estimation=[c_path,'/sbvar_commandline -estimate -seed 5 -ft ',options_.ms.output_file_tag];
             system(perform_estimation);
         else
-            perform_estimation=[c_path,'\sbvar_estimation.exe -cseed 5 -ft ',options_.ms.output_file_tag];
+            perform_estimation=[c_path,'\sbvar_commandline.exe -estimate -seed 5 -ft ',options_.ms.output_file_tag];
             dos(perform_estimation)            
         end
     else
-        perform_estimation=['-cseed 5 -ft ',options_.ms.output_file_tag];
-        [err] = mex_sbvar_estimation(perform_estimation);
-        mexErrCheck('mex_sbvar_estimation',err);
+        perform_estimation=['-estimate -seed 5 -ft ',options_.ms.output_file_tag];
+        [err] = ms_sbvar_command_line(perform_estimation);
+        mexErrCheck('ms_sbvar_command_line estimation',err);
     end
 end
 
+%==========================================================================
+%== Simulation
+%==========================================================================
+if options_.ms.print_draws == 1
+    if options_.ms.standalone == 1
+        if use_linux == 1
+            print_draws=[c_path,'/sbvar_commandline -simulate -seed 5 -ft ',options_.ms.output_file_tag,' -ndraws ',int2str(options_.ms.n_draws),' -thin ',int2str(options_.ms.thinning_factor)];
+            system(print_draws);
+        else
+            print_draws=[c_path,'\sbvar_commandline.exe -simulate -seed 5 -ft ',options_.ms.output_file_tag,' -ndraws ',int2str(options_.ms.n_draws),' -thin ',int2str(options_.ms.thinning_factor)];
+            system(print_draws);
+        end
+    else
+        print_draws=['-simulate -seed 5 -ft ',options_.ms.output_file_tag,' -ndraws ',int2str(options_.ms.n_draws),' -thin ',int2str(options_.ms.thinning_factor)];
+        [err] = ms_sbvar_command_line(print_draws);
+        mexErrCheck('ms_sbvar_command_line simulation',err);
+    end
+end
 
 %==========================================================================
 %== Compute marginal data density
 %==========================================================================
 if options_.ms.compute_mdd == 1
-    mhm_file = ['mhm_input_' M.fname '.dat'];
-    ms_write_mhm_input(mhm_file,options_.ms);
+%    mhm_file = ['mhm_input_' M.fname '.dat'];
+%    ms_write_mhm_input(mhm_file,options_.ms);
     if options_.ms.standalone == 1
         if use_linux == 1
-            compute_mdd1=[c_path,'/sbvar_mhm_1 -cseed 5 -ft ',options_.ms.output_file_tag,' -fi ',mhm_file];
-            system(compute_mdd1);
-            compute_mdd2=[c_path,'/sbvar_mhm_2 -cseed 5 -ft ',options_.ms.output_file_tag,' -d ',int2str(options_.ms.proposal_draws),' -t 3'];
-            system(compute_mdd2);
+            compute_mdd=[c_path,'/sbvar_commandline -mdd -seed 5 -ft ',options_.ms.output_file_tag,' -d ',int2str(options_.ms.proposal_draws),' -pt 3'];
+            system(compute_mdd);
         else
-            compute_mdd1=[c_path,'\sbvar_mhm_1.exe -cseed 5 -ft ',options_.ms.output_file_tag,' -fi ',mhm_file];
-            system(compute_mdd1);
-            compute_mdd2=[c_path,'\sbvar_mhm_2.exe -cseed 5 -ft ',options_.ms.output_file_tag,' -d ',int2str(options_.ms.proposal_draws),' -t 3'];
-            system(compute_mdd2);            
+            compute_mdd=[c_path,'\sbvar_commandline.exe -mdd -seed 5 -ft ',options_.ms.output_file_tag,' -d ',int2str(options_.ms.proposal_draws),' -pt 3'];
+            system(compute_mdd);
         end
     else
-        compute_mdd1=['-cseed 5 -ft ',options_.ms.output_file_tag,' -fi ',mhm_file];
-        [err] = mex_sbvar_mhm_1(compute_mdd1);
-        mexErrCheck('mex_sbvar_mhm_1',err);
-        compute_mdd2=['-cseed 5 -ft ',options_.ms.output_file_tag,' -d ',int2str(options_.ms.proposal_draws),' -t 3'];
-
-        [err] = mex_sbvar_mhm_2(compute_mdd2);
-        mexErrCheck('mex_sbvar_mhm_2',err);
+        compute_mdd=['-mdd -seed 5 -ft ',options_.ms.output_file_tag,' -d ',int2str(options_.ms.proposal_draws),' -pt 3'];
+        [err] = ms_sbvar_command_line(compute_mdd);
+        mexErrCheck('ms_sbvar_command_line marginal data density',err);
     end
 end
 
@@ -555,37 +565,18 @@ end
 %==========================================================================
 %== Compute posterior mode regime probabilities
 %==========================================================================
-if options_.ms.compute_probabilities == 1 %error registers here
+if options_.ms.compute_probabilities == 1
     if options_.ms.standalone == 1
         if use_linux == 1
-            compute_prob=[c_path,'/sbvar_probabilities -ft ',options_.ms.output_file_tag];
+            compute_prob=[c_path,'/sbvar_commandline -probabilities -ft ',options_.ms.output_file_tag];
             system(compute_prob);
         else
-            compute_prob=[c_path,'\sbvar_probabilities -ft ',options_.ms.output_file_tag];
-            system(compute_prob);            
+            compute_prob=[c_path,'\sbvar_commandline.exe -probabilities -ft ',options_.ms.output_file_tag];
+            system(compute_prob);
         end
     else
-        compute_prob=['-ft ',options_.ms.output_file_tag];
-        [err] = mex_sbvar_probabilities(compute_prob);
-        mexErrCheck('mex_sbvar_probabilities',err);
-    end
-end
-
-%==========================================================================
-%== Print Draws
-%==========================================================================
-if options_.ms.print_draws == 1 %error here as well
-    if options_.ms.standalone == 1
-        if use_linux == 1
-            print_draws=[c_path,'/sbvar_draws -cseed 5 -ft ',options_.ms.output_file_tag,' -i ',int2str(options_.ms.n_draws),' -t ',int2str(options_.ms.thinning_factor)];
-            system(print_draws);
-        else
-            print_draws=[c_path,'\sbvar_draws -cseed 5 -ft ',options_.ms.output_file_tag,' -i ',int2str(options_.ms.n_draws),' -t ',int2str(options_.ms.thinning_factor)];
-            system(print_draws);            
-        end
-    else
-        print_draws=['-cseed 5 -ft ',options_.ms.output_file_tag,' -i ',int2str(options_.ms.n_draws),' -t ',int2str(options_.ms.thinning_factor)];
-        [err] = mex_sbvar_draws(print_draws);
-        mexErrCheck('mex_sbvar_draws',err);
+        compute_prob=['-probabilities -ft ',options_.ms.output_file_tag];
+        [err] = ms_sbvar_command_line(compute_prob);
+        mexErrCheck('ms_sbvar_command_line probabilities',err);
     end
 end
