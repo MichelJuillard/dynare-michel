@@ -26,11 +26,11 @@
 #include <dynblas.h>
 #include <dynlapack.h>
 
-#define dw_malloc(n) mxMalloc(n)
-#define dw_calloc(n) mxCalloc(n)
-#define dw_realloc(buffer,n) mxRealloc(buffer,n)
-#define dw_free(buffer) mxFree(buffer)
-#define dw_exit(n) msExit(n)
+#define dw_malloc mxMalloc
+#define dw_calloc mxCalloc
+#define dw_realloc mxRealloc
+#define dw_free mxFree
+#define dw_exit msExit
 
 void msExit(int status);
 extern int constant_seed;
