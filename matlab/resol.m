@@ -1,9 +1,9 @@
-function [dr,info]=resol(ys,check_flag)
-% function [dr,info]=resol(ys,check_flag)
+function [dr,info]=resol(steady_state_0,check_flag)
+% function [dr,info]=resol(steady_state_0,check_flag)
 % Computes first and second order approximations
 %
 % INPUTS
-%    ys:             vector of variables in steady state
+%    steady_state_0: vector of variables in steady state
 %    check_flag=0:   all the approximation is computed
 %    check_flag=1:   computes only the eigenvalues
 %
@@ -60,14 +60,14 @@ if M_.exo_nbr == 0
     oo_.exo_steady_state = [] ;
 end
 
-% check if ys is steady state
+% check if steady_state_0 is steady state
 tempex = oo_.exo_simul;
 oo_.exo_simul = repmat(oo_.exo_steady_state',M_.maximum_lag+M_.maximum_lead+1,1);
 if M_.exo_det_nbr > 0 
     tempexdet = oo_.exo_det_simul;
     oo_.exo_det_simul = repmat(oo_.exo_det_steady_state',M_.maximum_lag+M_.maximum_lead+1,1);
 end
-dr.ys = ys;
+steady_state = steady_state_0;
 check1 = 0;
 % testing for steadystate file
 if (~options_.bytecode)
@@ -75,12 +75,12 @@ if (~options_.bytecode)
 end;
 
 if options_.steadystate_flag
-    [dr.ys,check1] = feval([M_.fname '_steadystate'],dr.ys,...
+    [steady_state,check1] = feval([M_.fname '_steadystate'],steady_state,...
                            [oo_.exo_steady_state; ...
                         oo_.exo_det_steady_state]);
-    if size(dr.ys,1) < M_.endo_nbr 
+    if size(steady_state,1) < M_.endo_nbr 
         if length(M_.aux_vars) > 0
-            dr.ys = add_auxiliary_variables_to_steadystate(dr.ys,M_.aux_vars,...
+            steady_state = add_auxiliary_variables_to_steadystate(steady_state,M_.aux_vars,...
                                                            M_.fname,...
                                                            oo_.exo_steady_state,...
                                                            oo_.exo_det_steady_state,...
@@ -92,53 +92,57 @@ if options_.steadystate_flag
     end
 
 else
-    % testing if ys isn't a steady state or if we aren't computing Ramsey policy
+    % testing if steady_state_0 isn't a steady state or if we aren't computing Ramsey policy
     if  options_.ramsey_policy == 0
         if options_.linear == 0
             % nonlinear models
             if (options_.block == 0 && options_.bytecode == 0)
-                if max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; ...
+                if max(abs(feval(fh,steady_state,[oo_.exo_steady_state; ...
                                         oo_.exo_det_steady_state], M_.params))) > options_.dynatol
-                    [dr.ys,check1] = dynare_solve(fh,dr.ys,options_.jacobian_flag,...
+                    [steady_state,check1] = dynare_solve(fh,steady_state,options_.jacobian_flag,...
                                                   [oo_.exo_steady_state; ...
                                         oo_.exo_det_steady_state], M_.params);
                 end
             else
-                [dr.ys,check1] = dynare_solve_block_or_bytecode(dr.ys,...
+                [steady_state,check1] = dynare_solve_block_or_bytecode(steady_state,...
                                                                 [oo_.exo_steady_state; ...
                                     oo_.exo_det_steady_state], M_.params);
             end;
         else
             % linear models
-            [fvec,jacob] = feval(fh,dr.ys,[oo_.exo_steady_state;...
+            [fvec,jacob] = feval(fh,steady_state,[oo_.exo_steady_state;...
                                 oo_.exo_det_steady_state], M_.params);
             if max(abs(fvec)) > 1e-12
-                dr.ys = dr.ys-jacob\fvec;
+                steady_state = steady_state-jacob\fvec;
             end
         end
     end
 end
 % testing for problem
+dr.ys = steady_state;
+oo_.steady_state = steady_state;
+
 if check1
     if options_.steadystate_flag
         info(1)= 19;
         resid = check1 ;
     else
         info(1)= 20;
-        resid = feval(fh,ys,oo_.exo_steady_state, M_.params);
+        resid = feval(fh,steady_state_0,oo_.exo_steady_state, M_.params);
     end
     info(2) = resid'*resid ;
     return
 end
 
-if ~isreal(dr.ys)
+if ~isreal(steady_state)
     info(1) = 21;
-    info(2) = sum(imag(ys).^2);
-    dr.ys = real(dr.ys);
+    info(2) = sum(imag(steady_state).^2);
+    steady_state = real(steady_state);
+    dr.ys = steady_state;
+    oo_.steady_state = steady_state;
     return
 end
 
-dr.fbias = zeros(M_.endo_nbr,1);
 if options_.block
     [dr,info,M_,options_,oo_] = dr_block(dr,check_flag,M_,options_,oo_);
 else
