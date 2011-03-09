@@ -91,12 +91,15 @@ kstate = [ repmat([1:endo_nbr]',klen-1,1) kron([klen:-1:2]',ones(endo_nbr,1)) ..
            zeros((klen-1)*endo_nbr,2)];
 kiy = flipud(lead_lag_incidence(:,order_var))';
 kiy = kiy(:);
-kstate(1:endo_nbr,3) = kiy(1:endo_nbr)-nnz(lead_lag_incidence(2,:));  
-kstate(kstate(:,3) < 0,3) = 0;
-kstate(endo_nbr+1:end,4) = kiy(2*endo_nbr+1:end);  
-% put in E only the current variables that are not already in D
+if max_lead > 0
+    kstate(1:endo_nbr,3) = kiy(1:endo_nbr)-nnz(lead_lag_incidence(2,:));  
+    kstate(kstate(:,3) < 0,3) = 0;
+    kstate(endo_nbr+1:end,4) = kiy(2*endo_nbr+1:end);  
+else
+    kstate(:,4) = kiy(endo_nbr+1:end);  
+end
 kstate = kstate(i_kmask,:);
-
+   
 dr.order_var = order_var;
 dr.inv_order_var = inv_order_var';
 dr.nstatic = nstatic;
