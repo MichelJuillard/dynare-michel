@@ -131,7 +131,7 @@ end
 % singular Jacobian of static model
 %
 
-[res,jacob]=feval(fh,dr.ys,[dr.ys; oo_.exo_det_steady_state], ...
+[res,jacob]=feval(fh,dr.ys,[oo_.exo_steady_state; oo_.exo_det_steady_state], ...
                   M_.params);
 rank_jacob = rank(jacob);
 if rank_jacob < endo_nbr
