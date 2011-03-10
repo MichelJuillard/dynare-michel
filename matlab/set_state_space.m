@@ -112,6 +112,6 @@ dr.nfwrd = nfwrd;
 % number of forward variables in the state vector
 dr.nsfwrd = nfwrd;
 % number of predetermined variables in the state vector
-dr.nspred = npred;
+dr.nspred = npred+nboth;
 
 dr.transition_auxiliary_variables = [];
