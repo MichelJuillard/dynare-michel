@@ -10,7 +10,7 @@
 
 \author{Ondra Kamen\'\i k}
 
-\date{January 2011}
+\date{February 2011}
 \maketitle
 
 \tableofcontents
@@ -950,8 +950,17 @@ The options are as follows:
 exits.
 
 \item[\desc{\tt --per \it num}] This sets a number of simulated
-periods to {\it num}. This number is used when calculating
-unconditional mean and covariance and for IRFs. Default is 100.
+periods to {\it num} in addition to the burn-in periods. This number
+is used when calculating unconditional mean and covariance and for
+IRFs. Default is 100.
+
+\item[\desc{\tt --burn \it num}] This sets a number of initial periods
+which should be ignored from the statistics. The burn-in periods are
+used to eliminate the influence of the starting point when
+calculating ergodic distributions or/and impulse response
+functions. The number of simulated period given by {\tt --per \it
+  num} option does not include the number of burn-in
+periods. Default is 0.
 
 \item[\desc{\tt --sim \it num}] This sets a number of stochastic
 simulations. This number is used when calculating unconditional mean
@@ -962,8 +971,10 @@ or {\tt +-Inf}, then it is thrown away and is not considered for the
 mean nor the variance. The same is valid for IRF. Default is 80.
 
 \item[\desc{\tt --rtsim \it num}] This sets a number of stochastic
-simulations whose statistics are calculated in the real-time. See
-\ref{rt_simul} for more details. Default is 0, no simulations.
+simulations whose statistics are calculated in the real-time. This
+number excludes the burn-in periods set by {\tt --burn \it num}
+option. See \ref{rt_simul} for more details. Default is 0, no
+simulations.
 
 \item[\desc{\tt --rtper \it num}] This sets a number of simulated
 periods per one simulation with real-time statistics to {\it num}. See
