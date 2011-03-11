@@ -1,8 +1,14 @@
 @q $Id: main.web 2333 2009-01-14 10:32:55Z kamenik $ @>
 @q Copyright 2005, Ondra Kamenik @>
 
+@q cwebmac.tex defines its own \ifpdf, which is incompatible with the \ifpdf defined by eplain, so undefine it @>
 \let\ifpdf\relax
 \input eplain
+
+@q now define \ifpdf to be always false: PDF macros of cwebmac are buggy @>
+\newif\ifpdf
+\iffalse\fi
+
 \def\title{{\mainfont Numerical Integration Module}}
 
 
