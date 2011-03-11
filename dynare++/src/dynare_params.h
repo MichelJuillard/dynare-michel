@@ -17,6 +17,7 @@ struct DynareParams {
 	const char* modname;
 	std::string basename;
 	int num_per;
+	int num_burn;
 	int num_sim;
 	int num_rtper;
 	int num_rtsim;
@@ -56,7 +57,8 @@ struct DynareParams {
 	int getCheckPathPoints() const
 		{return 10*check_num;}
 private:
-	enum {opt_per, opt_sim, opt_rtper, opt_rtsim, opt_condper, opt_condsim, opt_prefix, opt_threads,
+	enum {opt_per, opt_burn, opt_sim, opt_rtper, opt_rtsim, opt_condper, opt_condsim,
+		  opt_prefix, opt_threads,
 		  opt_steps, opt_seed, opt_order, opt_ss_tol, opt_check,
 		  opt_check_along_path, opt_check_along_shocks, opt_check_on_ellipse,
 		  opt_check_evals, opt_check_scale, opt_check_num, opt_noirfs, opt_irfs,

@@ -13,9 +13,10 @@ const char* help_str =
 "    --version            print version and return\n"
 "\n"
 "options:\n"
-"    --per <num>          number of periods simulated [100]\n"
+"    --per <num>          number of periods simulated after burnt [100]\n"
+"    --burn <num>         number of periods burnt [0]\n"
 "    --sim <num>          number of simulations [80]\n"
-"    --rtper <num>        number of RT periods simulated [0]\n"
+"    --rtper <num>        number of RT periods simulated after burnt [0]\n"
 "    --rtsim <num>        number of RT simulations [0]\n"
 "    --condper <num>      number of periods in cond. simulations [0]\n"
 "    --condsim <num>      number of conditional simulations [0]\n"
@@ -45,7 +46,7 @@ const char* help_str =
 const char* dyn_basename(const char* str);
 
 DynareParams::DynareParams(int argc, char** argv)
-	: modname(NULL), num_per(100), num_sim(80), 
+	: modname(NULL), num_per(100), num_burn(0), num_sim(80), 
 	  num_rtper(0), num_rtsim(0),
 	  num_condper(0), num_condsim(0),
 	  num_threads(2), num_steps(0),
@@ -70,6 +71,7 @@ DynareParams::DynareParams(int argc, char** argv)
 	struct option const opts [] = {
 		{"periods", required_argument, NULL, opt_per},
 		{"per", required_argument, NULL, opt_per},
+		{"burn", required_argument, NULL, opt_burn},
 		{"simulations", required_argument, NULL, opt_sim},
 		{"sim", required_argument, NULL, opt_sim},
 		{"rtperiods", required_argument, NULL, opt_rtper},
@@ -106,6 +108,10 @@ DynareParams::DynareParams(int argc, char** argv)
 		switch (ret) {
 		case opt_per:
 			if (1 != sscanf(optarg, "%d", &num_per))
+				fprintf(stderr, "Couldn't parse integer %s, ignored\n", optarg);
+			break;
+		case opt_burn:
+			if (1 != sscanf(optarg, "%d", &num_burn))
 				fprintf(stderr, "Couldn't parse integer %s, ignored\n", optarg);
 			break;
 		case opt_sim:
