@@ -34,7 +34,7 @@ class DynamicModelMFile : public DynamicModelAC
 private:
   const string DynamicMFilename;
   const static int nlhs_dynamic = 4;
-  const static int nrhs_dynamic = 4;
+  const static int nrhs_dynamic = 5;
 public:
   DynamicModelMFile(const string &modName) throw (DynareException);
   virtual ~DynamicModelMFile();

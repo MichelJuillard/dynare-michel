@@ -1,4 +1,4 @@
-function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_kmin_l, y_kmax_l, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo)
+function y = solve_two_boundaries(fname, y, x, params, steady_state, y_index, nze, periods, y_kmin_l, y_kmax_l, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo)
 % Computes the deterministic simulation of a block of equation containing
 % both lead and lag variables using relaxation methods 
 %
@@ -8,6 +8,7 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
 %   y                   [matrix]        All the endogenous variables of the model
 %   x                   [matrix]        All the exogenous variables of the model
 %   params              [vector]        All the parameters of the model
+%   steady_state        [vector]        steady state of the model
 %   y_index             [vector of int] The index of the endogenous variables of
 %                                       the block
 %   nze                 [integer]       number of non-zero elements in the
@@ -73,7 +74,7 @@ Jacobian_Size=Blck_size*(y_kmin+y_kmax_l +periods);
 g1=spalloc( Blck_size*periods, Jacobian_Size, nze*periods);
 reduced = 0;
 while ~(cvg==1 || iter>maxit_),
-    [r, y, g1, g2, g3, b]=feval(fname, y, x, params, periods, 0, y_kmin, Blck_size);
+    [r, y, g1, g2, g3, b]=feval(fname, y, x, params, steady_state, periods, 0, y_kmin, Blck_size);
     %     fjac = zeros(Blck_size, Blck_size*(y_kmin_l+1+y_kmax_l));
     %     disp(['Blck_size=' int2str(Blck_size) ' size(y_index)=' int2str(size(y_index,2))]);
     %     dh = max(abs(y(y_kmin+1-y_kmin_l:y_kmin+1+y_kmax_l, y_index)),options_.gstep*ones(y_kmin_l+1+y_kmax_l, Blck_size))*eps^(1/3);
@@ -302,7 +303,8 @@ while ~(cvg==1 || iter>maxit_),
             g = (ra'*g1a)';
             f = 0.5*ra'*ra;
             p = -g1a\ra;
-            [yn,f,ra,check]=lnsrch1(ya,f,g,p,stpmax,'lnsrch1_wrapper_two_boundaries',nn,nn,  fname, y, y_index, x, params, periods, y_kmin, Blck_size);
+            [yn,f,ra,check]=lnsrch1(ya,f,g,p,stpmax, ...
+                                    'lnsrch1_wrapper_two_boundaries',nn,nn,  fname, y, y_index, x, params, steady_state, periods, y_kmin, Blck_size);
             dx = ya - yn;
             y(1+y_kmin:periods+y_kmin,y_index)=reshape(yn',length(y_index),periods)';
         end

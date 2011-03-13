@@ -62,9 +62,11 @@ else
     Size = 1;
 end;
 if (options_.bytecode)
-    [chck, zz, data]= bytecode('dynamic','evaluate',z,[oo_.exo_simul oo_.exo_det_simul], M_.params, 1, data);
+    [chck, zz, data]= bytecode('dynamic','evaluate',z,[oo_.exo_simul ...
+                        oo_.exo_det_simul], M_.params, dr.ys, 1, data);
 else
-    [r, data] = feval([M_.fname '_dynamic'], z', [oo_.exo_simul oo_.exo_det_simul], M_.params, 2, data);
+    [r, data] = feval([M_.fname '_dynamic'], z', [oo_.exo_simul ...
+                        oo_.exo_det_simul], M_.params, dr.ys, 2, data);
     chck = 0;
 end;
 mexErrCheck('bytecode', chck);

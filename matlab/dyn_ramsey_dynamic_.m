@@ -73,7 +73,8 @@ Uy = Uy';
 Uyy = reshape(Uyy,endo_nbr,endo_nbr);
 
 % retrieving derivatives of original model
-[f,fJ,fH] = feval([fname '_dynamic'],y(k),zeros(2,exo_nbr), M_.params, it_);
+[f,fJ,fH] = feval([fname '_dynamic'],y(k),zeros(2,exo_nbr), M_.params, ys, ...
+                  it_);
 instr_nbr = endo_nbr - size(f,1);
 mult_nbr = endo_nbr-instr_nbr;
 

@@ -37,11 +37,13 @@ DynamicModelMFile::eval(const Vector &y, const Vector &x, const Vector &modParam
   prhs[0] = mxCreateDoubleMatrix(y.length(), 1, mxREAL);
   prhs[1] = mxCreateDoubleMatrix(1, x.length(), mxREAL);
   prhs[2] = mxCreateDoubleMatrix(modParams.length(), 1, mxREAL);
-  prhs[3] = mxCreateDoubleScalar(1.0);
+  prhs[3] = mxCreateDoubleMatrix(ySteady.length(), 1, mxREAL);
+  prhs[4] = mxCreateDoubleScalar(1.0);
 
   memcpy((void *) (mxGetPr(prhs[0])), (void *) y.base(), y.length()*sizeof(double));
   memcpy((void *) (mxGetPr(prhs[1])), (void *) x.base(), x.length()*sizeof(double));
   memcpy((void *) (mxGetPr(prhs[2])), (void *) modParams.base(), modParams.length()*sizeof(double));
+  memcpy((void *) (mxGetPr(prhs[3])), (void *) ySteady.base(), modParams.length()*sizeof(double));
 
   int retVal = mexCallMATLAB(nlhs_dynamic, plhs, nrhs_dynamic, prhs, DynamicMFilename.c_str());
   if (retVal != 0)

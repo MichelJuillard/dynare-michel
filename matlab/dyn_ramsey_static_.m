@@ -87,7 +87,8 @@ y = repmat(x(i_endo),1,max_lag+max_lead+1);
 k = find(i_lag');
 it_ = 1;
 %  [f,fJ,fH] = feval([fname '_dynamic'],y(k),ex);
-[f,fJ] = feval([fname '_dynamic'],y(k),[oo.exo_simul oo.exo_det_simul], M_.params, it_);
+[f,fJ] = feval([fname '_dynamic'],y(k),[oo.exo_simul oo.exo_det_simul], ...
+               M_.params, x, it_);
 % indices of Lagrange multipliers
 inst_nbr = endo_nbr - size(f,1);
 i_mult = [endo_nbr+1:2*endo_nbr-inst_nbr]';

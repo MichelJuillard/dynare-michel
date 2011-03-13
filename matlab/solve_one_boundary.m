@@ -1,4 +1,5 @@
-function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo, forward_backward, is_dynamic, verbose)
+function [y, info] = solve_one_boundary(fname, y, x, params, steady_state, ...
+                                        y_index_eq, nze, periods, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo, forward_backward, is_dynamic, verbose)
 % Computes the deterministic simulation of a block of equation containing
 % lead or lag variables 
 %
@@ -8,6 +9,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
 %   y                   [matrix]        All the endogenous variables of the model
 %   x                   [matrix]        All the exogenous variables of the model
 %   params              [vector]        All the parameters of the model
+%   steady_state        [vector]        steady state of the model
 %   y_index_eq          [vector of int] The index of the endogenous variables of
 %                                       the block
 %   nze                 [integer]       number of non-zero elements in the
@@ -95,9 +97,10 @@ for it_=start:incr:finish
     g1=spalloc( Blck_size, Blck_size, nze);
     while ~(cvg==1 || iter>maxit_),
         if(is_dynamic)
-            [r, y, g1, g2, g3] = feval(fname, y, x, params, it_, 0);
+            [r, y, g1, g2, g3] = feval(fname, y, x, params, steady_state, ...
+                                       it_, 0);
         else
-            [r, y, g1] = feval(fname, y, x, params);
+            [r, y, g1] = feval(fname, y, x, params, steady_state);
         end;
         if(~isreal(r))
             max_res=(-(max(max(abs(r))))^2)^0.5;
@@ -233,7 +236,8 @@ for it_=start:incr:finish
                 options.TolFun=1e-8;
                 options.Display = 'iter';
                 options.Jacobian = 'on';
-                [yn,fval,exitval,output] = fsolve(@local_fname, y(y_index_eq), options, x, params, y, y_index_eq, fname, 0);
+                [yn,fval,exitval,output] = fsolve(@local_fname, y(y_index_eq), ...
+                                                  options, x, params, steady_state, y, y_index_eq, fname, 0);
                 y(y_index_eq) = yn;
                 if exitval > 0
                     info = 0;
@@ -256,10 +260,13 @@ for it_=start:incr:finish
                 f = 0.5*r'*r;
                 p = -g1\r ;
                 if (is_dynamic)
-                    [ya,f,r,check]=lnsrch1(y(it_,:)',f,g,p,stpmax,'lnsrch1_wrapper_one_boundary',nn,  y_index_eq, y_index_eq, fname, y, x, params, it_);
+                    [ya,f,r,check]=lnsrch1(y(it_,:)',f,g,p,stpmax, ...
+                                           'lnsrch1_wrapper_one_boundary',nn, ...
+                                           y_index_eq, y_index_eq, fname, y, x, params, steady_state, it_);
                     dx = ya' - y(it_, :);
                 else
-                    [ya,f,r,check]=lnsrch1(y,f,g,p,stpmax,fname,nn,y_index_eq,x, params, 0);
+                    [ya,f,r,check]=lnsrch1(y,f,g,p,stpmax,fname,nn,y_index_eq,x, ...
+                                           params, steady_state,0);
                     dx = ya - y(y_index_eq);
                 end;
                 
@@ -272,7 +279,8 @@ for it_=start:incr:finish
                 if (verbose == 1)
                     disp('steady: csolve');
                 end
-                [yn,info] = csolve(@local_fname, y(y_index_eq),@local_fname,1e-6,500, x, params, y, y_index_eq, fname, 1);
+                [yn,info] = csolve(@local_fname, y(y_index_eq),@ ...
+                                   local_fname,1e-6,500, x, params, steady_state, y, y_index_eq, fname, 1);
                 dx = ya - yn;
                 y(y_index_eq) = yn;
             elseif((stack_solve_algo==1 && is_dynamic) || (stack_solve_algo==0 && is_dynamic) || (~is_dynamic && (options_.solve_algo==1 || options_.solve_algo==6))),
@@ -330,9 +338,10 @@ for it_=start:incr:finish
                         y(y_index_eq) = phat;
                     end;
                     if(is_dynamic)
-                        [r, y, g1, g2, g3] = feval(fname, y, x, params, it_, 0);
+                        [r, y, g1, g2, g3] = feval(fname, y, x, params, ...
+                                                   steady_state, it_, 0);
                     else
-                        [r, y, g1] = feval(fname, y, x, params);
+                        [r, y, g1] = feval(fname, y, x, params, steady_state);
                     end;
                     if max(abs(r)) >= options_.solve_tolf
                         [dx,flag1] = bicgstab(g1,-r,1e-7,Blck_size,L1,U1);
@@ -404,9 +413,9 @@ else
 end;
 return;
 
-function [err, G]=local_fname(yl, x, params, y, y_index_eq, fname, is_csolve)
+function [err, G]=local_fname(yl, x, params, steady_state, y, y_index_eq, fname, is_csolve)
 y(y_index_eq) = yl;
-[err, y, G] = feval(fname, y, x, params, 0);
+[err, y, G] = feval(fname, y, x, params, steady_state, 0);
 if(is_csolve)
     G = full(G);
 end;

@@ -68,14 +68,15 @@ for iter = 1:options_.maxit_
     
     it_ = it_init ;
     z = [oo_.endo_simul(iyp,it_-1) ; oo_.endo_simul(:,it_) ; oo_.endo_simul(iyf,it_+1)] ;
-    [d1,jacobian] = feval([M_.fname '_dynamic'],z,oo_.exo_simul, M_.params, it_);
+    [d1,jacobian] = feval([M_.fname '_dynamic'],z,oo_.exo_simul, M_.params, oo_.steady_state,it_);
     jacobian = [jacobian(:,iz) -d1] ;
     ic = [1:ny] ;
     icp = iyp ;
     c (ic,:) = jacobian(:,is)\jacobian(:,isf1) ;
     for it_ = it_init+(1:options_.periods-1)
         z = [oo_.endo_simul(iyp,it_-1) ; oo_.endo_simul(:,it_) ; oo_.endo_simul(iyf,it_+1)] ;
-        [d1,jacobian] = feval([M_.fname '_dynamic'],z,oo_.exo_simul, M_.params, it_);
+        [d1,jacobian] = feval([M_.fname '_dynamic'],z,oo_.exo_simul, ...
+                              M_.params, oo_.steady_state, it_);
         jacobian = [jacobian(:,iz) -d1] ;
         jacobian(:,[isf nrs]) = jacobian(:,[isf nrs])-jacobian(:,isp)*c(icp,:) ;
         ic = ic + ny ;

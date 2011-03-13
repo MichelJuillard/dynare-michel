@@ -1,4 +1,5 @@
-function ra = lnsrch1_wrapper_two_boundaries(ya, fname, y, y_index, x, params, periods, y_kmin, y_size)
+function ra = lnsrch1_wrapper_two_boundaries(ya, fname, y, y_index, x, ...
+                                             params, steady_state, periods, y_kmin, y_size)
 % wrapper for solve_one_boundary m-file when it is used with a dynamic
 % model
 %
@@ -44,5 +45,5 @@ function ra = lnsrch1_wrapper_two_boundaries(ya, fname, y, y_index, x, params, p
 
 %reshape the input arguments of the dynamic function
 y(y_kmin+1:y_kmin+periods, y_index) = reshape(ya',length(y_index),periods)';
-[r, y, g1, g2, g3, b]=feval(fname, y, x, params, periods, 0, y_kmin, y_size);
+[r, y, g1, g2, g3, b]=feval(fname, y, x, params, steady_state, periods, 0, y_kmin, y_size);
 ra = reshape(r(:, y_kmin+1:periods+y_kmin),periods*y_size, 1);

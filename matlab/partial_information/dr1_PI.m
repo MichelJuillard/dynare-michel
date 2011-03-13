@@ -133,7 +133,7 @@ else
     end
     z = z(iyr0) ;
     [junk,jacobia_] = feval([M_.fname '_dynamic'],z,[oo_.exo_simul ...
-                        oo_.exo_det_simul], M_.params, it_);
+                        oo_.exo_det_simul], M_.params, dr.ys, it_);
 
     if options_.ACES_solver==1 && (length(sim_ruleids)>0 || length(tct_ruleids)>0 )
         if length(sim_ruleids)>0
