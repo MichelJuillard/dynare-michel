@@ -3,7 +3,7 @@
 var c k w;
 varexo x;
 
-parameters alph gam delt bet aa c_steady_state;
+parameters alph gam delt bet aa;
 alph=0.5;
 gam=0.5;
 delt=0.02;
