@@ -120,7 +120,6 @@ else
 end
 % testing for problem
 dr.ys = steady_state;
-oo_.steady_state = steady_state;
 
 if check1
     if options_.steadystate_flag
@@ -139,7 +138,6 @@ if ~isreal(steady_state)
     info(2) = sum(imag(steady_state).^2);
     steady_state = real(steady_state);
     dr.ys = steady_state;
-    oo_.steady_state = steady_state;
     return
 end
 
