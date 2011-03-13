@@ -62,6 +62,12 @@ check_model;
 
 if PI_PCL_solver
     [oo_.dr, info] = PCL_resol(oo_.steady_state,0);
+elseif options_.discretionary_policy
+    if ~options_.linear
+        error(['discretionary_policy solves only linear_quadratic ' ...
+               'problems']);
+    end
+    [oo_.dr,ys,info] = discretionary_policy_1(oo_,options_.instruments);
 else
     [oo_.dr, info] = resol(oo_.steady_state,0);
 end

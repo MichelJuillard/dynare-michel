@@ -249,6 +249,9 @@ options_.initial_date.freq = 1;
 options_.initial_date.period = 1;
 options_.initial_date.subperiod = 0;
 
+% discretionary policy
+options_.discretionary_policy = 0;
+
 % SWZ SBVAR
 options_.ms.freq = 1;
 options_.ms.initial_subperiod = 1;
