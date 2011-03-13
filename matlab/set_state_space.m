@@ -110,7 +110,7 @@ dr.kae = kae;
 dr.nboth = nboth;
 dr.nfwrd = nfwrd;
 % number of forward variables in the state vector
-dr.nsfwrd = nfwrd;
+dr.nsfwrd = nfwrd+nboth;
 % number of predetermined variables in the state vector
 dr.nspred = npred+nboth;
 
