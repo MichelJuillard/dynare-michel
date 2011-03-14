@@ -178,7 +178,9 @@ if iload <=0,
             oo0=oo_;
             tau=[oo_.dr.ys(oo_.dr.order_var); vec(A); dyn_vech(B*M_.Sigma_e*B')];
             yy0=oo_.dr.ys(I);    
-            [residual, g1 ] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', M_.params,1);    
+            [residual, g1 ] = feval([M_.fname,'_dynamic'],yy0, ...
+                                    oo_.exo_steady_state', M_.params, ...
+                                    oo_.dr.ys, 1);    
 
             if burnin_iteration<BurninSampleSize,
                 burnin_iteration = burnin_iteration + 1;
