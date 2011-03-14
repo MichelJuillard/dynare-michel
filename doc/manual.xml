@@ -23,6 +23,11 @@
       <address><street>142 rue du Chevaleret</street><postcode>75013</postcode><city>Paris</city><country>France</country></address>
     </author>
     <author>
+      <firstname>Junior</firstname><surname>Maih</surname>
+      <affiliation><orgname>Norges Bank</orgname></affiliation>
+      <email>junior.maih@gmail.com</email>
+    </author>
+    <author>
       <firstname>Ferhat</firstname><surname>Mihoubi</surname>
       <affiliation><orgname>Université d'Évry and CEPREMAP</orgname></affiliation>
       <email>fmihoubi@univ-evry.fr</email>
