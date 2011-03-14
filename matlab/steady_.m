@@ -88,7 +88,7 @@ if options_.steadystate_flag
         elseif options_.bytecode
             [check1, residuals] = bytecode('evaluate','static',oo_.steady_state,...
                                            [oo_.exo_steady_state; ...
-                                oo_.exo_det_steady_state], M_.params, 1);
+                                oo_.exo_det_steady_state], M_.params, oo_.steady_state, 1);
             mexErrCheck('bytecode', check1);
             check1 = max(abs(residuals)) > options_.dynatol ;
         else

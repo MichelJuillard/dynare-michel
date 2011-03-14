@@ -23,4 +23,4 @@ global M_ oo_
 indx = M_.blocksMFS{b};
 y_all(indx) = y;
 x = [oo_.exo_steady_state; oo_.exo_det_steady_state];
-[chk, r, g1] = bytecode( y_all, x, M_.params, 1, y_all, 'evaluate', 'static', ['block = ' int2str(b) ]);
+[chk, r, g1] = bytecode( y_all, x, M_.params, y_all, 1, y_all, 'evaluate', 'static', ['block = ' int2str(b) ]);

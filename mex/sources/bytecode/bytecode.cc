@@ -59,7 +59,9 @@ Get_Arguments_and_global_variables(int nrhs,
                                    int &count_array_argument,
                                    double *yd[], unsigned int &row_y, unsigned int &col_y,
                                    double *xd[], unsigned int &row_x, unsigned int &col_x,
-                                   double *params[], unsigned int &periods,
+                                   double *params[], 
+                                   double *steady_yd[], unsigned int &steady_row_y, unsigned int &steady_col_y,
+                                   unsigned int &periods,
 #ifndef DEBUG_EX
                                    mxArray *block_structur[],
 #endif
@@ -93,12 +95,17 @@ Get_Arguments_and_global_variables(int nrhs,
                 *params = mxGetPr(prhs[i]);
                 break;
               case 3:
-                periods = mxGetScalar(prhs[i]);
+                *steady_yd = mxGetPr(prhs[i]);
+                steady_row_y = mxGetM(prhs[i]);
+                steady_col_y = mxGetN(prhs[i]);
                 break;
               case 4:
-                *block_structur = mxDuplicateArray(prhs[i]);
+                periods = mxGetScalar(prhs[i]);
                 break;
               case 5:
+                *block_structur = mxDuplicateArray(prhs[i]);
+                break;
+              case 6:
                 global_temporary_terms = true;
                 *GlobalTemporaryTerms = mxDuplicateArray(prhs[i]);
                 break;
@@ -140,14 +147,14 @@ Get_Arguments_and_global_variables(int nrhs,
                 }
             }
       }
-  if (count_array_argument > 0 && count_array_argument < 4)
+  if (count_array_argument > 0 && count_array_argument < 5)
     {
       if (count_array_argument == 3 && steady_state)
         periods = 1;
       else
         {
           ostringstream tmp;
-          tmp << " in main, missing arguments. All the following arguments have to be indicated y, x, params, it_\n";
+          tmp << " in main, missing arguments. All the following arguments have to be indicated y, x, params, it_, ys\n";
           throw FatalExceptionHandling(tmp.str());
         }
     }
@@ -195,7 +202,7 @@ main(int nrhs, const char *prhs[])
 #endif
   //ErrorHandlingException error_handling;
   unsigned int i, row_y = 0, col_y = 0, row_x = 0, col_x = 0, nb_row_xd = 0;
-  int steady_row_y, steady_col_y, steady_row_x, steady_col_x, steady_nb_row_xd;
+  unsigned int steady_row_y, steady_col_y, steady_row_x, steady_col_x, steady_nb_row_xd;
   int y_kmin = 0, y_kmax = 0, y_decal = 0;
   unsigned int periods = 1;
   double *direction;
@@ -207,13 +214,16 @@ main(int nrhs, const char *prhs[])
   int count_array_argument = 0;
   bool global_temporary_terms = false;
   bool print = false;
-
+  double *steady_yd = NULL, *steady_xd = NULL;
+  
   try
     {
       Get_Arguments_and_global_variables(nrhs, prhs, count_array_argument,
                                          &yd, row_y, col_y,
                                          &xd, row_x, col_x,
-                                         &params, periods,
+                                         &params, 
+                                         &steady_yd, steady_row_y, steady_col_y,
+                                         periods,
 #ifndef DEBUG_EX
                                          &block_structur,
 #endif
@@ -229,7 +239,7 @@ main(int nrhs, const char *prhs[])
   if (!count_array_argument)
     params = mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "params")));
 
-  double *steady_yd = NULL, *steady_xd = NULL;
+  
   if (!steady_state)
     {
       if (!count_array_argument)
@@ -248,10 +258,12 @@ main(int nrhs, const char *prhs[])
       y_decal = max(0, y_kmin-int (floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "maximum_endo_lag")))))));
       if (!count_array_argument)
         periods = int (floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "periods"))))));
-
-      steady_yd = mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "steady_state")));
-      steady_row_y = mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "steady_state")));
-      steady_col_y = mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "steady_state")));;
+      if (!steady_yd )
+        {
+          steady_yd = mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "steady_state")));
+          steady_row_y = mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "steady_state")));
+          steady_col_y = mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "steady_state")));;  
+        }
       steady_xd = mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "exo_steady_state")));
       steady_row_x = mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "exo_steady_state")));
       steady_col_x = mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "exo_steady_state")));

@@ -21,4 +21,4 @@ function [r, g1] = bytecode_steadystate(y)
 
 global M_ oo_
 x = [oo_.exo_steady_state; oo_.exo_det_steady_state];
-eval('[chk, r, g1] = bytecode( y, x, M_.params, 1, x, ''evaluate'', ''static'', ''block = 1'');');
+eval('[chk, r, g1] = bytecode( y, x, M_.params, oo_.steady_state, 1, x, ''evaluate'', ''static'', ''block = 1'');');
