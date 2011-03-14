@@ -4529,8 +4529,8 @@ option1 = choice1
     <cmdsynopsis>
       <command>[cluster]</command><sbr></sbr>
       <arg choice="plain"><option>Name</option> = <replaceable>CLUSTER_NAME</replaceable></arg><sbr></sbr>
-      <arg choice="plain"><option>Members</option> = <replaceable>NODE_NAME</replaceable>
-      <arg choice="opt" rep="repeat"><replaceable>NODE_NAME</replaceable></arg></arg>
+      <arg choice="plain"><option>Members</option> = <replaceable>NODE_NAME</replaceable><arg choice="opt">(<replaceable>WEIGHT</replaceable>)</arg>
+      <arg choice="opt" rep="repeat"><replaceable>NODE_NAME</replaceable><arg choice="opt">(<replaceable>WEIGHT</replaceable>)</arg></arg></arg>
     </cmdsynopsis>
   </refsynopsisdiv>
 
@@ -4545,8 +4545,8 @@ option1 = choice1
       <listitem><para>The reference name of this cluster.</para></listitem>
     </varlistentry>
     <varlistentry>
-      <term><option>Members</option> = <replaceable>NODE_NAME</replaceable> <replaceable>NODE_NAME</replaceable> ...</term>
-      <listitem><para>A list of nodes that comprise the cluster. Each node is separated by at least one space.</para><important><para>At the current time, all nodes specified by <option>Members</option> must run the same type of operating system (<foreignphrase>i.e.</foreignphrase> all Windows or all Linux/Mac OS X). The platform versions don't matter (<foreignphrase>i.e.</foreignphrase> you can mix Windows XP and 7).</para></important></listitem>
+      <term><option>Members</option> = <replaceable>NODE_NAME</replaceable>[(<replaceable>WEIGHT</replaceable>)] <replaceable>NODE_NAME</replaceable>[(<replaceable>WEIGHT</replaceable>)] ...</term>
+      <listitem><para>A list of nodes that comprise the cluster with an optional computing weight specified for that node. The computing weight indicates how much more powerful one node is with respect to the others (<foreignphrase>e.g.</foreignphrase> <literal>n1(2) n2(1) n3(3)</literal>, means that <literal>n1</literal> is two times more powerful than <literal>n2</literal> whereas <literal>n3</literal> is three times more powerful than <literal>n2</literal>). Each node is separated by at least one space and the weights are in parenthesis with no spaces separating them from their node.</para></listitem>
     </varlistentry>
   </variablelist>
   </refsect1>
@@ -4557,6 +4557,10 @@ option1 = choice1
 [cluster]
 Name = c1
 Members = n1 n2 n3
+
+[cluster]
+Name = c2
+Members = n1(4) n2 n3
     </programlisting>
   </informalexample>
   </refsect1>
@@ -4599,6 +4603,8 @@ Members = n1 n2 n3
       <arg choice="opt"><option>MatlabOctavePath</option> = <replaceable>PATH_AND_FILE</replaceable></arg>
       <sbr></sbr>
       <arg choice="opt"><option>SingleCompThread</option> = <replaceable>BOOLEAN</replaceable></arg>
+      <sbr></sbr>
+      <arg choice="opt"><option>OperatingSystem</option> = <replaceable>OPERATING_SYSTEM</replaceable></arg>
       <sbr></sbr>
     </cmdsynopsis>
   </refsynopsisdiv>
@@ -4648,6 +4654,10 @@ Members = n1 n2 n3
     <varlistentry>
       <term><option>SingleCompThread</option> = <replaceable>BOOLEAN</replaceable></term>
       <listitem><para>Whether or not to disable <trademark class="registered">MATLAB</trademark>'s native multithreading. The default value is <literal>true</literal>.</para></listitem>
+    </varlistentry>
+    <varlistentry>
+      <term><option>OperatingSystem</option> = <replaceable>OPERATING_SYSTEM</replaceable></term>
+      <listitem><para>The operating system associated with a node. Only necessary when creating a cluster with nodes from different operating systems.  Possible values are <literal>unix</literal> or <literal>windows</literal>. There is no default value.</para></listitem>
     </varlistentry>
   </variablelist>
   </refsect1>
