@@ -11,6 +11,7 @@ MODS = \
 	osr_example.mod \
 	optimal_policy/ramsey.mod \
 	optimal_policy/mult_elimination_test.mod \
+	discretionary_policy/dennis_1.mod \
 	ramst_initval_file.mod \
 	ramst_normcdf_and_friends.mod \
 	example1_varexo_det.mod \
