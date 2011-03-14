@@ -3913,6 +3913,7 @@ plot_conditional_forecast(periods = 10) e u;
   <listitem><para><xref linkend='osr_params'/></para></listitem>
   <listitem><para><xref linkend='planner_objective'/></para></listitem>
   <listitem><para><xref linkend='ramsey_policy'/></para></listitem>
+  <listitem><para><xref linkend='discretionary_policy'/></para></listitem>
 </itemizedlist>
 
 <refentry id="optim_weights">
@@ -4030,7 +4031,7 @@ plot_conditional_forecast(periods = 10) e u;
 
   <refnamediv>
     <refname>planner_objective</refname>
-    <refpurpose>declares the policy maker objective, for use with <xref linkend="ramsey_policy"/></refpurpose>
+    <refpurpose>declares the policy maker objective, for use with <xref linkend="ramsey_policy"/> and <xref linkend="discretionary_policy"/></refpurpose>
   </refnamediv>
 
   <refsynopsisdiv>
@@ -4081,6 +4082,32 @@ plot_conditional_forecast(periods = 10) e u;
   <refsect1><title>Output variables</title>
   <para>This command generates all the output variables of <xref linkend="stoch_simul"/>.</para>
   <para>In addition, it stores the value of planner objective function under Ramsey policy in <varname>oo_.planner_objective_value</varname>.</para>
+  </refsect1>
+
+</refentry>
+
+<refentry id="discretionary_policy">
+  <refmeta>
+    <refentrytitle>discretionary_policy</refentrytitle>
+  </refmeta>
+
+  <refnamediv>
+    <refname>discretionary_policy</refname>
+    <refpurpose>computes an approximation of the optimal policy under discretion</refpurpose>
+  </refnamediv>
+
+  <refsynopsisdiv>
+    <cmdsynopsis>
+      <command>discretionary_policy</command>
+      <arg>(<replaceable>OPTION</replaceable><arg rep="repeat">, <replaceable>OPTION</replaceable></arg>)</arg>
+      <arg rep="repeat"><replaceable>VARIABLE_NAME</replaceable></arg><arg choice="plain">;</arg>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+
+  <refsect1><title>Options</title>
+
+  <para>Same options than <xref linkend="ramsey_policy"/>.</para>
+
   </refsect1>
 
 </refentry>
