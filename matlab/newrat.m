@@ -60,11 +60,11 @@ func = str2func(func0);
 fval0=feval(func,x,varargin{:});
 fval=fval0;
 % initialize mr_gstep and mr_hessian
-mr_gstep(1,x);
+% mr_gstep(1,x);
 mr_hessian(1,x);
 
 if isempty(hh)
-    [dum, gg, htol0, igg, hhg]=mr_hessian(0,x,func_hh,flagit,htol,varargin{:});
+    [dum, gg, htol0, igg, hhg, h1]=mr_hessian(0,x,func_hh,flagit,htol,varargin{:});
     hh0 = reshape(dum,nx,nx);
     hh=hhg;
     if min(eig(hh0))<0,
@@ -126,17 +126,12 @@ while norm(gg)>gtol && check==0 && jit<nit,
             iggx(find(ig),find(ig)) = inv( hhx(find(ig),find(ig)) );
             [fvala x0 fc retcode] = csminit(func0,x0,fval,ggx,0,iggx,varargin{:});
         end
-        [fvala, x0, ig] = mr_gstep(0,x0,func0,htol,varargin{:});
+        [fvala, x0, ig] = mr_gstep(h1,x0,func0,htol,varargin{:});
         % if length(find(ig))==0,
-            % [fvala, x0, ig] = mr_gstep(0,x0,func0,htol/10,varargin{:});
+            % [fvala, x0, ig] = mr_gstep(h1,x0,func0,htol/10,varargin{:});
         % end
         nig=[nig ig];
-        if (fval-fvala)<gibbstol*(fval0(icount)-fval),
-            igibbs=0;
-            disp('Last sequence of univariate step, gain too small!!')
-        else
-            disp('Sequence of univariate steps!!')
-        end
+        disp('Sequence of univariate steps!!')
         fval=fvala;
     end
     if (fval0(icount)-fval)<ftol && flagit==0,
@@ -163,16 +158,13 @@ while norm(gg)>gtol && check==0 && jit<nit,
     xparam1=x0;
     x(:,icount+1)=xparam1;
     fval0(icount+1)=fval;
-    %if (fval0(icount)-fval)<ftol*ftol && flagg==1;,
-    mr_gstep(1,x);
-    mr_hessian(1,x);
     if (fval0(icount)-fval)<ftol,
         disp('No further improvement is possible!')
         check=1;
         if flagit==2,
             hh=hh0;
         elseif flagg>0,
-            [dum, gg, htol0, igg, hhg]=mr_hessian(0,xparam1,func_hh,flagg,ftol0,varargin{:});   
+            [dum, gg, htol0, igg, hhg,h1]=mr_hessian(0,xparam1,func_hh,flagg,ftol0,varargin{:});   
             if flagg==2,
                 hh = reshape(dum,nx,nx);
                 ee=eig(hh);
@@ -202,9 +194,10 @@ while norm(gg)>gtol && check==0 && jit<nit,
         disp(['Ftol          ',num2str(ftol)])
         disp(['Htol          ',num2str(htol0)])
 
-        if df<htol0,
-            htol=max(htol_base,df/10);
-        end
+%         if df<htol0,
+%             htol=max(htol_base,df/10);
+%         end
+        htol=htol_base;
         
         if norm(x(:,icount)-xparam1)>1.e-12,
             try 
@@ -212,7 +205,7 @@ while norm(gg)>gtol && check==0 && jit<nit,
             catch
                 save m1.mat x fval0 nig 
             end
-            [dum, gg, htol0, igg, hhg]=mr_hessian(0,xparam1,func_hh,flagit,htol,varargin{:});
+            [dum, gg, htol0, igg, hhg, h1]=mr_hessian(0,xparam1,func_hh,flagit,htol,varargin{:});
             if htol0>htol, %ftol,
                            %ftol=htol0;
                 htol=htol0;
