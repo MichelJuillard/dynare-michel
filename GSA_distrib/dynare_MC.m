@@ -1,4 +1,4 @@
-function dynare_MC(var_list_,OutDir)
+function dynare_MC(var_list_,OutDir,data,rawdata,data_info)
 %
 % Adapted by M. Ratto from dynare_estimation.m and posteriorsmoother.m
 % (dynare_estimation.m and posteriorsmoother.m are part of DYNARE,
@@ -52,29 +52,13 @@ if isempty(options_.varobs)
   error('ESTIMATION: VAROBS is missing')
 end
 
-%% Read and demean data 
-rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
-
-options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
-gend = options_.nobs;
+gend = data_info.gend;
 n_varobs = size(options_.varobs,1);
 
-rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
-if options_.loglinear == 1 & ~options_.logdata
-  rawdata = log(rawdata);
-end
-if options_.prefilter == 1
-  bayestopt_.mean_varobs = mean(rawdata,1);
-  data = transpose(rawdata-ones(gend,1)*bayestopt_.mean_varobs);
-else
-  data = transpose(rawdata);
-end
-[data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,n_varobs);
-
-if ~isreal(rawdata)
-  error(['There are complex values in the data. Probably  a wrong' ...
-	 ' transformation'])
-end
+data_index = data_info.data_index;
+number_of_observations = data_info.number_of_observations;
+no_more_missing_observations = data_info.no_more_missing_observations;
+missing_value = data_info.missing_value;
 
 offset = npar-np;
 fname_=M_.fname;
@@ -95,7 +79,7 @@ load([OutDir,'/',namfile],'lpmat', 'lpmat0', 'istable')
 x=[lpmat0(istable,:) lpmat(istable,:)];
 clear lpmat lpmat0 istable %iunstable egg yys T
 B = size(x,1);
-[atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff, aK] = DsgeSmoother(x(1,:)',gend,data,{},0);
+[atT,innov,measurement_error,updated_variables,ys,trend_coeff, aK] = DsgeSmoother(x(1,:)',gend,data,data_index,missing_value);
 n1=size(atT,1);
 
 nfil=B/40;
@@ -118,9 +102,9 @@ for b=1:B
   %deep(1:offset) = xparam1(1:offset);
   logpo2(b,1) = DsgeLikelihood(deep,gend,data,data_index,number_of_observations,no_more_missing_observations);
   if opt_gsa.lik_only==0,
-  [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff, aK] = DsgeSmoother(deep,gend,data,data_index,0);
+  [atT,innov,measurement_error,updated_variables,ys,trend_coeff, aK] = DsgeSmoother(deep,gend,data,data_index,missing_value);
   stock_smooth(:,:,ib)=atT(1:M_.endo_nbr,:);
-%   stock_filter(:,:,ib)=filtered_state_vector(1:M_.endo_nbr,:);
+%   stock_filter(:,:,ib)=updated_variables(1:M_.endo_nbr,:);
   stock_filter(:,:,ib)=aK(1,1:M_.endo_nbr,:);
   stock_ys(ib,:)=ys';
   if ib==40,
