@@ -56,6 +56,8 @@ nodist_ms_sbvar_command_line_SOURCES = \
 	$(DWSWITCHDIR)/state_space/sbvar/sbvar_simulate.c \
 	$(DWSWITCHDIR)/state_space/sbvar/sbvar_probabilities.c \
 	$(DWSWITCHDIR)/state_space/sbvar/sbvar_mdd.c \
+	$(DWSWITCHDIR)/state_space/sbvar/sbvar_forecast.c \
+	$(DWSWITCHDIR)/state_space/sbvar/sbvar_impulse_responses.c \
 	$(DWSWITCHDIR)/state_space/sbvar/dw_csminwel.c \
 	$(DWUTILS) \
 	$(MSMEXSRC)
