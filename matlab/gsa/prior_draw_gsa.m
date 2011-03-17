@@ -59,19 +59,19 @@ if init
           lbcum(i) = 0.5 * erfc(-(bayestopt_.lb(i)-p6(i))/p7(i) ./ sqrt(2));;
           ubcum(i) = 0.5 * erfc(-(bayestopt_.ub(i)-p6(i))/p7(i) ./ sqrt(2));;
         case 2% Gamma prior.
-          lbcum(i) = gamm_cdf((bayestopt_.lb(i)-p3(i))/p7(i),p6(i));
-          ubcum(i) = gamm_cdf((bayestopt_.ub(i)-p3(i))/p7(i),p6(i));
+          lbcum(i) = gamcdf(bayestopt_.lb(i)-p3(i),p6(i),p7(i));
+          ubcum(i) = gamcdf(bayestopt_.ub(i)-p3(i),p6(i),p7(i));
         case 1% Beta distribution (TODO: generalized beta distribution)
           lbcum(i) = betainc((bayestopt_.lb(i)-p3(i))./(p4(i)-p3(i)),p6(i),p7(i));
           ubcum(i) = betainc((bayestopt_.ub(i)-p3(i))./(p4(i)-p3(i)),p6(i),p7(i));
         case 4% INV-GAMMA1 distribution
           % TO BE CHECKED
-          lbcum(i) = gamm_cdf((1/(bayestopt_.ub(i)-p3(i))^2)/(2/p6(i)),p7(i)/2);
-          ubcum(i) = gamm_cdf((1/(bayestopt_.lb(i)-p3(i))^2)/(2/p6(i)),p7(i)/2);
+          lbcum(i) = gamcdf(1/(bayestopt_.ub(i)-p3(i))^2,p7(i)/2,2/p6(i));
+          ubcum(i) = gamcdf(1/(bayestopt_.lb(i)-p3(i))^2,p7(i)/2,2/p6(i));
         case 6% INV-GAMMA2 distribution
           % TO BE CHECKED
-          lbcum(i) = gamm_cdf((1/(bayestopt_.ub(i)-p3(i)))/(2/p6(i)),p7(i)/2);
-          ubcum(i) = gamm_cdf((1/(bayestopt_.lb(i)-p3(i)))/(2/p6(i)),p7(i)/2);
+          lbcum(i) = gamcdf(1/(bayestopt_.ub(i)-p3(i)),p7(i)/2,2/p6(i));
+          ubcum(i) = gamcdf(1/(bayestopt_.lb(i)-p3(i)),p7(i)/2,2/p6(i));
         otherwise
           % Nothing to do here.
       end
@@ -86,17 +86,17 @@ for i = 1:npar
       case 5% Uniform prior.
         pdraw(:,i) = rdraw(:,i)*(p4(i)-p3(i)) + p3(i);
       case 3% Gaussian prior.
-        pdraw(:,i) = norm_inv(rdraw(:,i),p6(i),p7(i));
+        pdraw(:,i) = norminv(rdraw(:,i),p6(i),p7(i));
       case 2% Gamma prior.
-        pdraw(:,i) = gamm_inv(rdraw(:,i),p6(i),p7(i))+p3(i);
+        pdraw(:,i) = gaminv(rdraw(:,i),p6(i),p7(i))+p3(i);
       case 1% Beta distribution (TODO: generalized beta distribution)
-        pdraw(:,i) = beta_inv(rdraw(:,i),p6(i),p7(i))*(p4(i)-p3(i))+p3(i);
+        pdraw(:,i) = betainv(rdraw(:,i),p6(i),p7(i))*(p4(i)-p3(i))+p3(i);
       case 4% INV-GAMMA1 distribution 
         % TO BE CHECKED
-        pdraw(:,i) =  sqrt(1./gamm_inv(rdraw(:,i),p7(i)/2,2/p6(i)))+p3(i);
+        pdraw(:,i) =  sqrt(1./gaminv(rdraw(:,i),p7(i)/2,2/p6(i)))+p3(i);
       case 6% INV-GAMMA2 distribution  
         % TO BE CHECKED
-        pdraw(:,i) =  1./gamm_inv(rdraw(:,i),p7(i)/2,2/p6(i))+p3(i);
+        pdraw(:,i) =  1./gaminv(rdraw(:,i),p7(i)/2,2/p6(i))+p3(i);
       otherwise
         % Nothing to do here.
     end
