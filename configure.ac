@@ -84,6 +84,8 @@ AC_DEFINE([BOOST_NO_HASH], [], [Don't use deprecated STL hash structures])
 AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])
 AC_SUBST([LIBADD_DLOPEN])
 
+AC_CHECK_PROG([MAKEINFO], [makeinfo], [makeinfo])
+
 AC_CHECK_PROG([PDFTEX], [pdftex], [pdftex])
 AM_CONDITIONAL([HAVE_PDFTEX], [test "x$PDFTEX" != "x"])
 
@@ -104,6 +106,12 @@ AM_CONDITIONAL([HAVE_PDFLATEX], [test "x$PDFLATEX" != "x"])
 
 AC_CHECK_PROG([BIBTEX], [bibtex], [bibtex])
 AM_CONDITIONAL([HAVE_BIBTEX], [test "x$BIBTEX" != "x"])
+
+AC_CHECK_PROG([TEXI2HTML], [texi2html], [texi2html])
+AM_CONDITIONAL([HAVE_TEXI2HTML], [test "x$TEXI2HTML" != "x"])
+
+AC_CHECK_PROG([LATEX2HTML], [latex2html], [latex2html])
+AM_CONDITIONAL([HAVE_LATEX2HTML], [test "x$LATEX2HTML" != "x"])
 
 if test "x$PDFLATEX" != "x" -a "x$BIBTEX" != "x"; then
   AC_MSG_CHECKING([for econometrica BST])
@@ -127,17 +135,6 @@ if test "x$PDFLATEX" != "x" -a "x$BIBTEX" != "x"; then
 fi
 AM_CONDITIONAL([HAVE_ECONOMETRICA], [test "x$ax_latex_have_econometrica" = "xyes"])
 AM_CONDITIONAL([HAVE_BEAMER], [test "x$ax_latex_have_beamer" = "xyes"])
-
-AC_CHECK_PROG([DBLATEX], [dblatex], [dblatex])
-AM_CONDITIONAL([HAVE_DBLATEX], [test "x$DBLATEX" != "x"])
-
-AX_PROG_XSLTPROC
-AX_CHECK_DOCBOOK_XSLT_MIN(1.69.0)
-AM_CONDITIONAL([HAVE_XSLT], [test "x$XSLTPROC" != "x" -a "x$DOCBOOK_XSLT_CURRENT_VERSION" != "xno"])
-
-AC_CHECK_PROG([DOCBOOK2XTEXI], [docbook2x-texi], [docbook2x-texi])
-AC_CHECK_PROG([MAKEINFO], [makeinfo], [makeinfo])
-AM_CONDITIONAL([HAVE_DOCBOOK2XTEXI_MAKEINFO], [test "x$DOCBOOK2XTEXI" != "x" -a "x$MAKEINFO" != "x"])
 
 AC_CHECK_PROG([DOXYGEN], [doxygen], [doxygen])
 AM_CONDITIONAL([HAVE_DOXYGEN], [test "x$DOXYGEN" != "x"])
@@ -238,18 +235,6 @@ else
   BUILD_DYNAREPLUSPLUS_SRCDOC="no (missing one of: cweave, pdftex, eplain)"
 fi
 
-if test "x$XSLTPROC" != "x" -a "x$DOCBOOK_XSLT_CURRENT_VERSION" != "xno"; then
-  BUILD_DYNARE_HTML_MANUAL="yes"
-else
-  BUILD_DYNARE_HTML_MANUAL="no (missing one of: xsltproc, DocBook stylesheets)"
-fi
-
-if test "x$PDFLATEX" != "x" -a "x$DBLATEX" != "x"; then
-  BUILD_DYNARE_PDF_MANUAL="yes"
-else
-  BUILD_DYNARE_PDF_MANUAL="no (missing one of: pdflatex, dblatex)"
-fi
-
 if test "x$PDFLATEX" != "x" -a "x$BIBTEX" != "x" -a "x$ax_latex_have_econometrica" = "xyes"; then
   BUILD_DYNARE_USERGUIDE="yes"
 else
@@ -280,10 +265,18 @@ else
   BUILD_DYNARE_INTERNAL_DOC="no (Org export not enabled)"
 fi
 
-if test "x$DOCBOOK2XTEXI" != "x" -a "x$MAKEINFO" != "x"; then
+if test "x$MAKEINFO" != "x"; then
   BUILD_DYNARE_INFO="yes"
+  if test "x$TEXI2HTML" != "x" -a "x$LATEX2HTML" != "x"; then
+    BUILD_DYNARE_HTML_MANUAL="yes"
+  else
+    BUILD_DYNARE_HTML_MANUAL="yes (but with ugly math formulas, missing texi2html or latex2html)"
+  fi
+  BUILD_DYNARE_PDF_MANUAL="yes"
 else
-  BUILD_DYNARE_INFO="no (missing docbook2x-texi and/or makeinfo)"
+  BUILD_DYNARE_INFO="no (missing makeinfo)"
+  BUILD_DYNARE_HTML_MANUAL="no (missing makeinfo)"
+  BUILD_DYNARE_PDF_MANUAL="no (missing makeinfo)"
 fi
 
 if test "x$OCTAVE" != "x"; then

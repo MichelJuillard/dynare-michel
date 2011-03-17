@@ -1,0 +1,5009 @@
+\input texinfo
+@c %**start of header
+@setfilename dynare.info
+@documentencoding UTF-8
+@settitle Dynare Reference Manual
+@afourwide
+@dircategory Math
+@direntry
+* Dynare: (dynare).             A platform for handling a wide class
+                                  of economic models.
+@end direntry
+
+@include version.texi
+
+@c Define some macros
+
+@macro descriptionhead
+@ifnothtml
+@sp 1
+@end ifnothtml
+@emph{Description}
+@end macro
+
+@macro optionshead
+@iftex
+@sp 1
+@end iftex
+@emph{Options}
+@end macro
+
+@macro examplehead
+@iftex
+@sp 1
+@end iftex
+@emph{Example}
+@end macro
+
+@macro outputhead
+@iftex
+@sp 1
+@end iftex
+@emph{Output}
+@end macro
+
+@macro customhead{title}
+@iftex
+@sp 1
+@end iftex
+@emph{\title\}
+@end macro
+
+@c %**end of header
+
+@copying
+Copyright @copyright{} 1996-2011, Dynare Team.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
+A copy of the license can be found at @uref{http://www.gnu.org/licenses/fdl.txt}.
+@end quotation
+@end copying
+
+@titlepage
+@title Dynare
+@subtitle Reference Manual, version @value{VERSION}
+@author Stéphane Adjemian
+@author Houtan Bastani
+@author Michel Juillard
+@author Junior Maih
+@author Ferhat Mihoubi
+@author George Perendia
+@author Marco Ratto
+@author Sébastien Villemot
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top Dynare
+This is Dynare Reference Manual, version @value{VERSION}.
+
+@insertcopying
+@end ifnottex
+
+@menu
+* Introduction::                
+* Installation and configuration::  
+* Dynare invocation::           
+* The Model file::              
+* The Configuration File::      
+* Examples::                    
+* Bibliography::                
+* Command and Function Index::  
+* Variable Index::              
+
+@detailmenu
+ --- The Detailed Node Listing ---
+
+Introduction
+
+* What is Dynare ?::            
+* Documentation sources::       
+
+Installation and configuration
+
+* Software requirements::       
+* Installation of Dynare::      
+* Configuration::               
+
+Installation of Dynare
+
+* On Windows::                  
+* On Debian GNU/Linux and Ubuntu::  
+* On Mac OS X::                 
+* For other systems::           
+
+Configuration
+
+* For MATLAB::                  
+* For GNU Octave::              
+* Some words of warning::       
+
+The Model file
+
+* Conventions::                 
+* Variable declarations::       
+* Expressions::                 
+* Parameter initialization::    
+* Model declaration::           
+* Auxiliary variables::         
+* Initial and terminal conditions::  
+* Shocks on exogenous variables::  
+* Other general declarations::  
+* Steady state::                
+* Getting information about the model::  
+* Deterministic simulation::    
+* Stochastic solution and simulation::  
+* Estimation::                  
+* Forecasting::                 
+* Optimal policy::              
+* Sensitivity and identification analysis::  
+* Displaying and saving results::  
+* Macro-processing language::   
+* Misc commands::               
+
+Expressions
+
+* Parameters and variables::    
+* Operators::                   
+* Functions::                   
+
+Parameters and variables
+
+* Inside the model::            
+* Outside the model::           
+
+Functions
+
+* Built-in Functions::          
+* External Functions::          
+
+Steady state
+
+* Finding the steady state with Dynare nonlinear solver::  
+* Using a steady state file::   
+
+Stochastic solution and simulation
+
+* Computing the stochastic solution::  
+* Typology and ordering of variables::  
+* First order approximation::   
+* Second order approximation::  
+* Third order approximation::   
+
+The Configuration File
+
+* Parallel Configuration::      
+
+@end detailmenu
+@end menu
+
+@node Introduction
+@chapter Introduction
+
+@menu
+* What is Dynare ?::            
+* Documentation sources::       
+@end menu
+
+@node What is Dynare ?
+@section What is Dynare ?
+
+Dynare is a software platform for handling a wide class of economic
+models, in particular dynamic stochastic general equilibrium (DSGE)
+and overlapping generations (OLG) models. The models solved by Dynare
+include those relying on the @i{rational expectations} hypothesis, wherein
+agents form their expectations about the future in a way consistent
+with the model. But Dynare is also able to handle models where
+expectations are formed differently: on one extreme, models where
+agents perfectly anticipate the future; on the other extreme, models
+where agents have limited rationality or imperfect knowledge of the
+state of the economy and, hence, form their expectations through a
+learning process. In terms of types of agents, models solved by Dynare
+can incorporate consumers, productive firms, governments, monetary
+authorities, investors and financial intermediaries. Some degree of
+heterogeneity can be achieved by including several distinct classes of
+agents in each of the aforementioned agent categories.
+
+Dynare offers a user-friendly and intuitive way of describing these
+models. It is able to perform simulations of the model given a
+calibration of the model parameters and is also able to estimate these
+parameters given a dataset. In practice, the user will write a text
+file containing the list of model variables, the dynamic equations
+linking these variables together, the computing tasks to be performed
+and the desired graphical or numerical outputs.
+
+A large panel of applied mathematics and computer science techniques
+are internally employed by Dynare: multivariate nonlinear solving and
+optimization, matrix factorizations, local functional approximation,
+Kalman filters and smoothers, MCMC techniques for Bayesian estimation,
+graph algorithms, optimal control, @dots{}
+
+Various public bodies (central banks, ministries of economy and
+finance, international organisations) and some private financial
+institutions use Dynare for performing policy analysis exercises and
+as a support tool for forecasting exercises. In the academic world,
+Dynare is used for research and teaching purposes in postgraduate
+macroeconomics courses.
+
+Dynare is a free software, which means that it can be downloaded free
+of charge, that its source code is freely available, and that it can
+be used for both non-profit and for-profit purposes. Most of the
+source files are covered by the GNU General Public Licence (GPL)
+version 3 or later (there are some exceptions to this, see the file
+@file{license.txt} in Dynare distribution). It is available for the
+Windows, Mac and Linux platforms and is fully documented through a
+user guide and a reference manual. Part of Dynare is programmed in
+C++, while the rest is written using the
+@uref{http://www.mathworks.com/products/matlab/, MATLAB} programming
+language.  The latter implies that commercially-available MATLAB
+software is required in order to run Dynare. However, as an
+alternative to MATLAB, Dynare is also able to run on top of
+@uref{http://www.octave.org, GNU Octave} (basically a free clone of
+MATLAB): this possibility is particularly interesting for students or
+institutions who cannot afford, or do not want to pay for, MATLAB and
+are willing to bear the concomitant performance loss.
+
+The development of Dynare is mainly done at
+@uref{http://www.cepremap.ens.fr, Cepremap} by a core team of
+researchers who devote part of their time to software
+development. Currently the development team of Dynare is composed of
+Stéphane Adjemian (Université du Maine, Gains and Cepremap), Houtan
+Bastani (Cepremap), Michel Juillard (Banque de France), Frédéric
+Karamé (Université d'Évry, Epee and Cepremap), Junior Maih (Norges
+Bank), Ferhat Mihoubi (Université d'Évry, Epee and Cepremap), George
+Perendia, Marco Ratto (JRC) and Sébastien Villemot (Cepremap and Paris
+School of Economics). Financial support is provided by Cepremap,
+Banque de France and DSGE-net (an international research network for
+DSGE modeling). Increasingly, the developer base is expanding, as
+tools developed by researchers outside of Cepremap are integrated into
+Dynare.
+
+Interaction between developers and users of Dynare is central to the
+project. A @uref{http://www.dynare.org/phpBB3, web forum} is available
+for users who have questions about the usage of Dynare or who want to
+report bugs. Training sessions are given through the Dynare Summer
+School, which is organized every year and is attended by about 40
+people. Finally, priorities in terms of future developments and
+features to be added are decided in cooperation with the institutions
+providing financial support.
+
+@node Documentation sources
+@section Documentation sources
+
+The present document is the reference manual for Dynare. It documents
+all commands and features in a systematic fashion.
+
+New users should rather begin with Dynare User Guide (@cite{Mancini
+(2007)}), distributed with Dynare and also available from the
+@uref{http://www.dynare.org,official Dynare web site}.
+
+Other useful sources of information include the
+@uref{http://www.dynare.org,Dynare wiki} and the
+@uref{http://www.dynare.org/phpBB3, Dynare forums}.
+
+@node Installation and configuration
+@chapter Installation and configuration
+
+@menu
+* Software requirements::       
+* Installation of Dynare::      
+* Configuration::               
+@end menu
+
+@node Software requirements
+@section Software requirements
+
+Packaged versions of Dynare are available for Windows XP/Vista,
+@uref{http://www.debian.org,Debian GNU/Linux},
+@uref{http://www.ubuntu.com/,Ubuntu} and Mac OS X Leopard/Snow
+Leopard.  Dynare should work on other systems, but some compilation
+steps are necessary in that case.
+
+In order to run Dynare, you need at least one of the following:
+
+@itemize 
+
+@item
+MATLAB version 6.5 or above; note that no toolbox is needed by Dynare,
+
+@item
+GNU Octave version 3.0.0 or above.
+@end itemize
+
+Some installation instructions for GNU Octave can be found on the
+@uref{http://www.dynare.org/DynareWiki/DynareOctave,Dynare Wiki}.
+
+If you plan to use the @code{use_dll} option of the @code{model}
+command, you will need to install the necessary requirements for
+compiling MEX files on your machine. If you are using MATLAB under
+Windows, install a C++ compiler on your machine and configure it with
+MATLAB: see
+@uref{http://www.dynare.org/DynareWiki/ConfigureMatlabWindowsForMexCompilation,instructions
+on the Dynare wiki}. Users of Octave under Linux should install the
+package for MEX file compilation (under Debian or Ubuntu, it is called
+@file{octave3.2-headers} or @file{octave3.0-headers}). If you are
+using Octave or MATLAB under Mac OS X, you should install the latest
+version of XCode: see
+@uref{http://www.dynare.org/DynareWiki/InstallOnMacOSX,instructions on
+the Dynare wiki}. Mac OS X Octave users will also need to install
+gnuplot if they want graphing capabilities. Users of MATLAB under
+Linux and Mac OS X, and users of Octave under Windows, normally need
+to do nothing, since a working compilation environment is available by
+default.
+
+@node Installation of Dynare
+@section Installation of Dynare
+
+After installation, Dynare can be used in any directory on your
+computer. It is best practice to keep your model files in directories
+different from the one containing the Dynare toolbox. That way you can
+upgrade Dynare and discard the previous version without having to worry
+about your own files.
+
+@menu
+* On Windows::                  
+* On Debian GNU/Linux and Ubuntu::  
+* On Mac OS X::                 
+* For other systems::           
+@end menu
+
+@node On Windows
+@subsection On Windows
+
+Execute the automated installer called @file{dynare-4.@var{x}.@var{y}-win.exe}
+(where 4.@var{x}.@var{y} is the version number), and follow the instructions. The
+default installation directory is @file{c:\dynare\4.@var{x}.@var{y}}.
+
+After installation, this directory will contain several sub-directories,
+among which are @file{matlab}, @file{mex} and @file{doc}.
+
+The installer will also add an entry in your Start Menu with a shortcut
+to the documentation files and uninstaller.
+
+Note that you can have several versions of Dynare coexisting (for
+example in @file{c:\dynare}), as long as you correctly adjust your path
+settings (@pxref{Some words of warning}).
+
+@node On Debian GNU/Linux and Ubuntu
+@subsection On Debian GNU/Linux and Ubuntu
+
+Please refer to the
+@uref{http://www.dynare.org/DynareWiki/InstallOnDebianOrUbuntu,Dynare
+Wiki} for detailed instructions.
+
+Dynare will be installed under @file{/usr/share/dynare} and
+@file{/usr/lib/dynare}. Documentation will be under
+@file{/usr/share/doc/dynare}.
+
+@node On Mac OS X
+@subsection On Mac OS X
+
+Execute the automated installer called
+@file{dynare-4.@var{x}.@var{y}-macosx-10.5+10.6.pkg} (where
+4.@var{x}.@var{y} is the version number), and follow the
+instructions. The default installation directory is
+@file{/Applications/Dynare/4.@var{x}.@var{y}}.
+
+Please refer to the
+@uref{http://www.dynare.org/DynareWiki/InstallOnMacOSX,Dynare Wiki} for
+detailed instructions.
+
+After installation, this directory will contain several sub-directories,
+among which are @file{matlab}, @file{mex} and @file{doc}.
+
+Note that you can have several versions of Dynare coexisting (for
+example in @file{c:\dynare}), as long as you correctly adjust your path
+settings (@pxref{Some words of warning}).
+
+@node For other systems
+@subsection For other systems
+
+You need to download Dynare source code from the
+@uref{http://www.dynare.org,Dynare website} and unpack it somewhere.
+
+Then you will need to recompile the pre-processor and the dynamic
+loadable libraries. Please refer to
+@uref{http://www.dynare.org/DynareWiki/BuildingDynareFromSource,Dynare
+Wiki}.
+
+@node Configuration
+@section Configuration
+
+@menu
+* For MATLAB::                  
+* For GNU Octave::              
+* Some words of warning::       
+@end menu
+
+@node For MATLAB
+@subsection For MATLAB
+
+You need to add the @file{matlab} subdirectory of your Dynare
+installation to MATLAB path. You have two options for doing that:
+
+@itemize 
+
+@item
+Using the @code{addpath} command in the MATLAB command window:
+
+Under Windows, assuming that you have installed Dynare in the standard
+location, and replacing @code{4.@var{x}.@var{y}} with the correct
+version number, type:
+
+@example
+addpath c:\dynare\4.@var{x}.@var{y}\matlab
+@end example
+
+Under Debian GNU/Linux or Ubuntu, type:
+
+@example
+addpath /usr/share/dynare/matlab
+@end example
+
+Under Mac OS X, assuming that you have installed Dynare in the standard
+location, and replacing @code{4.@var{x}.@var{y}} with the correct version
+number, type:
+
+@example
+addpath /Applications/Dynare/4.@var{x}.@var{y}/matlab/
+@end example
+
+MATLAB will not remember this setting next time you run it, and you
+will have to do it again.
+
+@item
+Via the menu entries:
+
+Select the ``Set Path'' entry in the ``File'' menu, then click on
+``Add Folder@dots{}'', and select the @file{matlab} subdirectory of your
+Dynare installation. Note that you @emph{should not} use ``Add with
+Subfolders@dots{}''. Apply the settings by clicking on ``Save''. Note that
+MATLAB will remember this setting next time you run it.
+@end itemize
+
+@node For GNU Octave
+@subsection For GNU Octave
+
+You need to add the @file{matlab} subdirectory of your Dynare
+installation to Octave path, using the @code{addpath} at the Octave
+command prompt.
+
+Under Windows, assuming that you have installed Dynare in the standard
+location, and replacing ``4.@var{x}.@var{y}'' with the correct version
+number, type:
+
+@example
+addpath c:\dynare\4.@var{x}.@var{y}\matlab
+@end example
+
+Under Debian GNU/Linux or Ubuntu, there is no need to use the
+@code{addpath} command; the packaging does it for you.
+
+Under Mac OS X, assuming that you have installed Dynare in the
+standard location, and replacing ``4.@var{x}.@var{y}'' with the correct
+version number, type:
+
+@example
+addpath /Applications/Dynare/4.@var{x}.@var{y}/matlab
+@end example
+
+If you are using an Octave version strictly older than 3.2.0, you will
+also want to tell to Octave to accept the short syntax (without
+parentheses and quotes) for the @code{dynare} command, by typing:
+
+@example
+mark_as_command dynare
+@end example
+
+If you don't want to type this command every time you run Octave, you
+can put it in a file called @file{.octaverc} in your home directory
+(under Windows this will generally by @file{c:\Documents and
+Settings\USERNAME\}). This file is run by Octave at every startup.
+
+@node Some words of warning
+@subsection Some words of warning
+
+You should be very careful about the content of your MATLAB or Octave
+path. You can display its content by simply typing @code{path} in the
+command window.
+
+The path should normally contain system directories of MATLAB or Octave,
+and some subdirectories of your Dynare installation. You have to
+manually add the @file{matlab} subdirectory, and Dynare will
+automatically add a few other subdirectories at runtime (depending on
+your configuration). You must verify that there is no directory coming
+from another version of Dynare than the one you are planning to use.
+
+You have to be aware that adding other directories to your path can
+potentially create problems, if some of your M-files have the same names
+than Dynare files. Your files would then override Dynare files, and make
+Dynare unusable.
+
+@node Dynare invocation
+@chapter Dynare invocation
+
+In order to give instructions to Dynare, the user has to write a
+@emph{model file} whose filename extension must be @file{.mod}. This
+file contains the description of the model and the computing tasks
+required by the user. Its contents is described in @ref{The Model file}.
+
+Once the model file is written, Dynare is invoked using the
+@code{dynare} command at the MATLAB or Octave prompt (with the filename
+of the @file{.mod} given as argument).
+
+In practice, the handling of the model file is done in two steps: in the
+first one, the model and the processing instructions written by the user
+in a @emph{model file} are interpreted and the proper MATLAB or GNU
+Octave instructions are generated; in the second step, the program
+actually runs the computations. Boths steps are triggered automatically
+by the @code{dynare} command.
+
+@deffn {MATLAB/Octave command} dynare @var{FILENAME}[.mod] [@var{OPTIONS}@dots{}]
+
+@descriptionhead
+
+This command launches Dynare and executes the instructions included in
+@file{@var{FILENAME}.mod}.  This user-supplied file contains the model
+and the processing instructions, as described in @ref{The Model file}.
+
+@code{dynare} begins by launching the preprocessor on the @file{.mod}
+file.  By default (unless @code{use_dll} option has been given to
+@code{model}), the preprocessor creates three intermediary files:
+
+@table @file
+
+@item @var{FILENAME}.m
+Contains variable declarations, and computing tasks
+
+@item @var{FILENAME}_dynamic.m
+Contains the dynamic model equations
+
+@item @var{FILENAME}_static.m
+Contains the long run static model equations
+@end table
+
+@noindent
+These files may be looked at to understand errors reported at the simulation stage.
+
+@code{dynare} will then run the computing tasks by executing @file{@var{FILENAME}.m}.
+
+@optionshead
+
+@table @code
+
+@item noclearall
+By default, @code{dynare} will issue a @code{clear all} command to
+MATLAB or Octave, thereby deleting all workspace variables; this options
+instructs @code{dynare} not to clear the workspace
+
+@item debug
+Instructs the preprocessor to write some debugging information about the
+scanning and parsing of the @file{.mod} file
+
+@item notmpterms
+Instructs the preprocessor to omit temporary terms in the static and
+dynamic files; this generally decreases performance, but is used for
+debugging purposes since it makes the static and dynamic files more
+readable
+
+@item savemacro[=@var{FILENAME}]
+Instructs @code{dynare} to save the intermediary file which is obtained
+after macro-processing (@pxref{Macro-processing language}); the saved
+output will go in the file specified, or if no file is specified in
+@file{@var{FILENAME}-macroexp.mod}
+
+@item onlymacro
+Instructs the preprocessor to only perform the macro-processing step,
+and stop just after. Mainly useful for debugging purposes or for using
+the macro-processor independently of the rest of Dynare toolbox.
+
+@item nolinemacro
+Instructs the macro-preprocessor to omit line numbering information in
+the intermediary @file{.mod} file created after the maco-processing
+step. Useful in conjunction with @code{savemacro} when one wants that to
+reuse the intermediary @file{.mod} file, without having it cluttered by
+line numbering directives.
+
+@item warn_uninit
+Display a warning for each variable or parameter which is not
+initialized. @xref{Parameter initialization}, or
+@ref{load_params_and_steady_state} for initialization of parameters.
+@xref{Initial and terminal conditions}, or
+@ref{load_params_and_steady_state} for initialization of endogenous
+and exogenous variables.
+
+@item console
+Activate console mode: Dynare will not use graphical waitbars for long
+computations. Note that this option is only useful under MATLAB, since
+Octave does not provide graphical waitbar capabilities.
+
+@item cygwin
+Tells Dynare that your MATLAB is configured for compiling MEX files with
+Cygwin (@pxref{Software requirements}). This option is only available
+under Windows, and is used in conjunction with @code{use_dll}.
+
+@item msvc
+Tells Dynare that your MATLAB is configured for compiling MEX files with
+Microsoft Visual C++ (@pxref{Software requirements}). This option is
+only available under Windows, and is used in conjunction with
+@code{use_dll}.
+
+@item parallel[=@var{CLUSTER_NAME}]
+Tells Dynare to perform computations in parallel. If @var{CLUSTER_NAME}
+is passed, Dynare will use the specified cluster to perform parallel
+computations. Otherwise, Dynare will use the first cluster specified in
+the configuration file. @xref{The Configuration File}, for more
+information about the configuration file.
+
+@item conffile=@var{FILENAME}
+Specifies the location of the configuration file if it differs from the
+default. @xref{The Configuration File}, for more information about the
+configuration file and its default location.
+
+@item parallel_slave_open_mode
+Instructs Dynare to leave the connection to the slave node open after
+computation is complete, closing this connection only when Dynare
+finishes processing.
+
+@item parallel_test
+Tests the parallel setup specified in the configuration file without
+executing the @file{.mod} file. @xref{The Configuration File}, for more
+information about the configuration file.
+@end table
+
+@outputhead
+
+Depending on the computing tasks requested in the @file{.mod} file,
+executing command @code{dynare} will leave in the workspace variables
+containing results available for further processing. More details are
+given under the relevant computing tasks.
+
+The @code{M_}, @code{oo_} and @code{options_} structures are also saved
+in a file called @file{@var{FILENAME}_results.mat}.
+
+@examplehead
+
+@example
+dynare ramst
+dynare ramst.mod savemacro   
+@end example
+
+@end deffn
+
+The output of Dynare is left into three main variables in the
+MATLAB/Octave workspace:
+
+@defvr {MATLAB/Octave variable} M_
+Structure containing various informations about the model.
+@end defvr
+
+@defvr {MATLAB/Octave variable} options_
+Structure contains the values of the various options used by Dynare
+during the computation.
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_
+Structure containing the various results of the computations.
+@end defvr
+
+@node The Model file
+@chapter The Model file
+
+@menu
+* Conventions::                 
+* Variable declarations::       
+* Expressions::                 
+* Parameter initialization::    
+* Model declaration::           
+* Auxiliary variables::         
+* Initial and terminal conditions::  
+* Shocks on exogenous variables::  
+* Other general declarations::  
+* Steady state::                
+* Getting information about the model::  
+* Deterministic simulation::    
+* Stochastic solution and simulation::  
+* Estimation::                  
+* Forecasting::                 
+* Optimal policy::              
+* Sensitivity and identification analysis::  
+* Displaying and saving results::  
+* Macro-processing language::   
+* Misc commands::               
+@end menu
+
+@node Conventions
+@section Conventions
+
+A model file contains a list of commands and of blocks.  Each command
+and each element of a block is terminated by a semicolon
+(@code{;}). Blocks are terminated by @code{end;}.
+
+Most Dynare commands have arguments and several accept options,
+indicated in parentheses after the command keyword. Several options
+are separated by commas.
+
+In the description of Dynare commands, the following conventions are
+observed:
+
+@itemize 
+
+@item
+optional arguments or options are indicated between square brackets:
+@samp{[]};
+
+@item
+repreated arguments are indicated by ellipses: ``@dots{}'';
+
+@item
+mutually exclusive arguments are separated by vertical bars: @samp{|};
+
+@item
+@var{INTEGER} indicates an integer number;
+
+@item
+@var{DOUBLE} indicates a double precision number. The following syntaxes
+are valid: @code{1.1e3}, @code{1.1E3}, @code{1.1d3}, @code{1.1D3};
+
+@item
+@var{EXPRESSION} indicates a mathematical expression valid outside the
+model description (@pxref{Expressions});
+
+@item
+@var{MODEL_EXPRESSION} indicates a mathematical expression valid in the
+model description (@pxref{Expressions} and @ref{Model declaration});
+
+@item
+@var{VARIABLE_NAME} indicates a variable name starting with an
+alphabetical character and can't contain: @samp{()+-*/^=!;:@@#.} or
+accentuated characters;
+
+@item
+@var{PARAMETER_NAME} indicates a parameter name starting with an
+alphabetical character and can't contain: @samp{()+-*/^=!;:@@#.} or
+accentuated characters;
+
+@item
+@var{LATEX_NAME} indicates a valid LaTeX expression in math mode (not
+including the dollar signs);
+
+@item
+@var{FUNCTION_NAME} indicates a valid MATLAB function name;
+
+@item
+@var{FILENAME} indicates a filename valid in the underlying operating
+system; it is necessary to put it between double quotes when specifying
+the extension or if the filename contains a non-alphanumeric character;
+
+@end itemize
+
+@node Variable declarations
+@section Variable declarations
+
+Declarations of variables and parameters are made with the following commands:
+
+@deffn Command var @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
+@deffnx Command var (deflator = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
+
+@descriptionhead
+
+This required command declares the endogenous variables in the
+model. @xref{Conventions}, for the syntax of @var{VARIABLE_NAME} and
+@var{MODEL_EXPRESSION}. Optionally it is possible to give a LaTeX name
+to the variable or, if it nonstationary, provide information regarding
+its deflator.
+
+@code{var} commands can appear several times in the file and Dynare will
+concatenate them.
+
+@optionshead
+
+If the model is nonstationary and is to be written as such in the
+@code{model} block, Dynare will need the trend deflator for the
+appropriate endogenous variables in order to stationarize the model. The
+trend deflator must be provided alongside the variables that follow this
+trend.
+
+@table @code
+
+@item deflator = @var{MODEL_EXPRESSION}
+The expression used to detrend an endogenous variable. All trend
+variables, endogenous variables and parameters referenced in
+@var{MODEL_EXPRESSION} must already have been declared by the
+@code{trend_var}, @code{var} and @code{parameters} commands.
+@end table
+
+@examplehead
+
+@example
+var c gnp q1 q2;
+var(deflator=A) i b;
+@end example
+
+@end deffn
+
+@deffn Command varexo @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
+
+@descriptionhead
+
+This optional command declares the exogenous variables in the model.
+@xref{Conventions}, for the syntax of @var{VARIABLE_NAME}. Optionally it
+is possible to give a LaTeX name to the variable.
+
+Exogenous variables are required if the user wants to be able to apply
+shocks to her model.
+
+@code{varexo} commands can appear several times in the file and Dynare
+will concatenate them.
+
+@examplehead
+
+@example
+varexo m gov;
+@end example
+
+@end deffn
+
+@deffn Command varexo_det @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
+
+@descriptionhead
+
+This optional command declares exogenous deterministic variables in a
+stochastic model. See @ref{Conventions}, for the syntax of
+@var{VARIABLE_NAME}. Optionally it is possible to give a LaTeX name to
+the variable.
+
+It is possible to mix deterministic and stochastic shocks to build
+models where agents know from the start of the simulation about future
+exogenous changes. In that case @code{stoch_simul} will compute the
+rational expectation solution adding future information to the state
+space (nothing is shown in the output of @code{stoch_simul}) and
+@code{forecast} will compute a simulation conditional on initial
+conditions and future information.
+
+@code{varexo_det} commands can appear several times in the file and
+Dynare will concatenate them.
+
+@examplehead
+
+@example
+
+varexo m gov;
+varexo_det tau;
+    
+@end example
+
+@end deffn
+
+@deffn Command parameters @var{PARAMETER_NAME} [$@var{LATEX_NAME}$]@dots{};
+
+@descriptionhead
+
+This command declares parameters used in the model, in variable
+initialization or in shocks declarations. See @ref{Conventions}, for the
+syntax of @var{PARAMETER_NAME}. Optionally it is possible to give a
+LaTeX name to the parameter.
+
+The parameters must subsequently be assigned values (@pxref{Parameter
+initialization}).
+
+@code{parameters} commands can appear several times in the file and
+Dynare will concatenate them.
+
+@examplehead
+
+@example
+parameters alpha, bet;
+@end example
+
+@end deffn
+
+@deffn Command change_type (var | varexo | varexo_det | parameters) @var{VARIABLE_NAME} | @var{PARAMETER_NAME}@dots{};
+
+@descriptionhead
+
+Changes the types of the specified variables/parameters to another type:
+endogenous, exogenous, exogenous deterministic or parameter.
+
+It is important to understand that this command has a global effect on
+the @file{.mod} file: the type change is effective after, but also
+before, the @code{change_type} command. This command is typically used
+when flipping some variables for steady state calibration: typically a
+separate model file is used for calibration, which includes the list of
+variable declarations with the macro-processor, and flips some variable.
+
+@examplehead
+
+@example
+var y, w;
+parameters alpha, bet;
+@dots{}
+change_type(var) alpha, bet;
+change_type(parameters) y, w;
+@end example
+
+Here, in the whole model file, @code{alpha} and @code{beta} will be
+endogenous and @code{y} and @code{w} will be parameters.
+
+@end deffn
+
+@anchor{predetermined_variables}
+@deffn Command predetermined_variables @var{VARIABLE_NAME}@dots{};
+
+@descriptionhead
+
+In Dynare, the default convention is that the timing of a variable
+reflects when this variable is decided. The typical example is for
+capital stock: since the capital stock used at current period is
+actually decided at the previous period, then the capital stock entering
+the production function is @code{k(-1)}, and the law of motion of
+capital must be written:
+
+@example
+k = i + (1-delta)*k(-1)
+@end example
+
+Put another way, for stock variables, the default in Dynare is to use a
+``stock at the end of the period'' concept, instead of a ``stock at the
+beginning of the period'' convention.
+
+The @code{predetermined_variables} is used to change that
+convention. The endogenous variables declared as predetermined variables
+are supposed to be decided one period ahead of all other endogenous
+variables. For stock variables, they are supposed to follow a ``stock at
+the beginning of the period'' convention.
+
+@examplehead
+
+The following two program snippets are strictly equivalent.
+
+@emph{Using default Dynare timing convention:} 
+
+@example
+var y, k, i;
+@dots{}
+model;
+y = k(-1)^alpha;
+k = i + (1-delta)*k(-1);
+@dots{}
+end;
+@end example
+
+@emph{Using the alternative timing convention:} 
+
+@example
+var y, k, i;
+predetermined_variables k;
+@dots{}
+model;
+y = k^alpha;
+k(+1) = i + (1-delta)*k;
+@dots{}
+end;
+@end example
+
+@end deffn
+
+@deffn Command trend_var (growth_factor = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
+
+@descriptionhead
+
+This optional command declares the trend variables in the
+model. @xref{Conventions}, for the syntax of @var{MODEL_EXPRESSION} and
+@var{VARIABLE_NAME}. Optionally it is possible to give a LaTeX name to
+the variable.
+
+Trend variables are required if the user wants to be able to write a
+nonstationary model in the @code{model} block. The @code{trend_var}
+command must appear before the @code{var} command that references the
+trend variable.
+
+@code{trend_var} commands can appear several times in the file and
+Dynare will concatenate them.
+
+If the model is nonstationary and is to be written as such in the
+@code{model} block, Dynare will need the growth factor of every trend
+variable in order to stationarize the model. The growth factor must be
+provided within the declaration of the trend variable, using the
+@code{growth_factor} keyword. All endogenous variables and
+parameters referenced in @var{MODEL_EXPRESSION} must already have been
+declared by the @code{var} and @code{parameters} commands.
+
+@examplehead
+
+@example
+trend_var (growth_factor=gA) A;
+@end example
+
+@end deffn
+
+@node Expressions
+@section Expressions
+
+Dynare distinguishes between two types of mathematical expressions:
+those that are used to describe the model, and those that are used
+outside the model block (@i{e.g.} for initializing parameters or
+variables, or as command options). In this manual, those two types of
+expressions are respectively denoted by @var{MODEL_EXPRESSION} and
+@var{EXPRESSION}.
+
+Unlike MATLAB or Octave expressions, Dynare expressions are necessarily
+scalar ones: they cannot contain matrices or evaluate to
+matrices@footnote{Note that arbitrary MATLAB or Octave expressions can
+be put in a @file{.mod} file, but those expressions have to be on
+separate lines, generally at the end of the file for post-processing
+purposes. They are not interpreted by Dynare, and are simply passed on
+unmodified to MATLAB or Octave. Those constructions are not addresses in
+this section.}.
+
+Expressions can be constructed using integers (@var{INTEGER}), floating
+point numbers (@var{DOUBLE}), parameter names (@var{PARAMETER_NAME}),
+variable names (@var{VARIABLE_NAME}), operators and functions.
+
+The following special constants are also accepted in some contexts:
+
+@deffn Constant inf
+Represents infinity.
+@end deffn
+
+@deffn Constant nan
+``Not a number'': represents an undefined or unrepresentable value.
+@end deffn
+
+@menu
+* Parameters and variables::    
+* Operators::                   
+* Functions::                   
+@end menu
+
+@node Parameters and variables
+@subsection Parameters and variables
+
+Parameters and variables can be introduced in expressions by simply
+typing their names. The semantics of parameters and variables is quite
+different whether they are used inside or outside the model block.
+
+@menu
+* Inside the model::            
+* Outside the model::           
+@end menu
+
+@node Inside the model
+@subsubsection Inside the model
+
+Parameters used inside the model refer to the value given through
+parameter initialization (@pxref{Parameter initialization}) or
+@code{homotopy_setup} when doing a simulation, or are the estimated
+variables when doing an estimation.
+
+Variables used in a @var{MODEL_EXPRESSION} denote @emph{current period}
+values when neither a lead or a lag is given. A lead or a lag can be
+given by enclosing an integer between parenthesis just after the
+variable name: a positive integer means a lead, a negative one means a
+lag. Leads or lags of more than one period are allowed. For example, if
+@code{c} is an endogenous variable, then @code{c(+1)} is the variable
+one period ahead, and @code{c(-2)} is the variable two periods before.
+
+When specifying the leads and lags of endogenous variables, it is
+important to respect the following convention: in Dynare, the timing of
+a variable reflects when that variable is decided. A control variable ---
+which by definition is decided in the current period --- must have no
+lead. A predetermined variable --- which by definition has been decided in
+a previous period --- must have a lag. A consequence of this is that all
+stock variables must use the ``stock at the end of the period''
+convention. Please refer to @cite{Mancini-Griffoli (2007)} for more
+details and concrete examples.
+
+Leads and lags are primarily used for endogenous variables, but can be
+used for exogenous variables. They have no effect on parameters and are
+forbidden for local model variables (@pxref{Model declaration}).
+
+@node Outside the model
+@subsubsection Outside the model
+
+When used in an expression outside the model block, a parameter or a
+variable simply refers to the last value given to that variable. More
+precisely, for a parameter it refers to the value given in the
+corresponding parameter initialization (@pxref{Parameter
+initialization}); for an endogenous or exogenous variable, it refers to
+the value given in the most recent @code{initval} or @code{endval} block.
+
+@node Operators
+@subsection Operators
+
+The following operators are allowed in both @var{MODEL_EXPRESSION} and
+@var{EXPRESSION}:
+
+@itemize 
+
+@item
+binary arithmetic operators: @code{+}, @code{-}, @code{*}, @code{/}, @code{^}
+
+@item
+unary arithmetic operators: @code{+}, @code{-}
+
+@item
+binary comparison operators (which evaluate to either @code{0} or
+@code{1}): @code{<}, @code{>}, @code{<=}, @code{>=}, @code{==},
+@code{!=}
+@end itemize
+
+The following special operators are accepted in @var{MODEL_EXPRESSION}
+(but not in @var{EXPRESSION}):
+
+@deffn Operator STEADY_STATE (@var{MODEL_EXPRESSION})
+This operator is used to take the value of the enclosed expression at
+the steady state. A typical usage is in the Taylor rule, where you may
+want to use the value of GDP at steady state to compute the output gap.
+@end deffn
+
+@anchor{expectation}
+@deffn Operator EXPECTATION (@var{INTEGER}) (@var{MODEL_EXPRESSION})
+This operator is used to take the expectation of some expression using
+a different information set than the information available at current
+period. For example, @code{EXPECTATION(-1)(x(+1))} is equal to the
+expected value of variable @code{x} at next period, using the
+information set available at the previous period. Note that a value
+of @code{0} for the time shift component is reserved for partial
+information models (not yet fully implemented). @xref{Auxiliary
+variables}, for an explanation of how this operator is handled
+internally and how this affects the output.
+@end deffn
+
+@node Functions
+@subsection Functions
+
+@menu
+* Built-in Functions::          
+* External Functions::          
+@end menu
+
+@node Built-in Functions
+@subsubsection Built-in Functions
+
+The following standard functions are supported internally for both
+@var{MODEL_EXPRESSION} and @var{EXPRESSION}:
+
+@defun exp (@var{x})
+Natural exponential.
+@end defun
+
+@defun log (@var{x})
+@defunx ln (@var{x})
+Natural logarithm.
+@end defun
+
+@defun log10 (@var{x})
+Base 10 logarithm.
+@end defun
+
+@defun sqrt (@var{x})
+Square root.
+@end defun
+
+@defun sin (@var{x})
+@defunx cos (@var{x})
+@defunx tan (@var{x})
+@defunx asin (@var{x})
+@defunx acos (@var{x})
+@defunx atan (@var{x})
+Trigonometric functions.
+@end defun
+
+@defun max (@var{a}, @var{b})
+@defunx min (@var{a}, @var{b})
+Maximum and minimum of two reals.
+@end defun
+
+@defun normcdf (@var{x})
+@defunx normcdf (@var{x}, @var{mu}, @var{sigma})
+Gaussian cumulative density function, with mean @var{mu} and standard
+deviation @var{sigma}. Note that @code{normcdf(@var{x})} is equivalent
+to @code{normcdf(@var{x},0,1)}.
+@end defun
+
+@defun normpdf (@var{x})
+@defunx normpdf (@var{x}, @var{mu}, @var{sigma})
+Gaussian probability density function, with mean @var{mu} and standard
+deviation @var{sigma}. Note that @code{normpdf(@var{x})} is equivalent
+to @code{normpdf(@var{x},0,1)}.
+@end defun
+
+@defun erf (@var{x})
+Gauss error function.
+@end defun
+
+@node External Functions
+@subsubsection External Functions
+
+Any other user-defined (or built-in) MATLAB or Octave function may be
+used in both a @var{MODEL_EXPRESSION} and an @var{EXPRESSION}, provided
+that this function has a scalar argument as a return value.
+
+To use an external function in a @var{MODEL_EXPRESSION}, one must
+declare the function using the @code{external_function} statement. This
+is not necessary for external functions used in an @var{EXPRESSION}.
+
+@deffn Command external_function (@var{OPTIONS}@dots{});
+
+@descriptionhead
+
+This command declares the external functions used in the model block. It
+is required for every unique function used in the model block.
+
+@code{external_function} commands can appear several times in the file
+and must come before the model block.
+
+@optionshead
+
+@table @code
+
+@item name = @var{NAME}
+The name of the function, which must also be the name of the M-/MEX file
+implementing it. This option is mandatory.
+
+@item nargs = @var{INTEGER}
+The number of arguments of the function. If this option is not provided,
+Dynare assumes @code{nargs = 1}.
+
+@item first_deriv_provided [= @var{NAME}]
+If @var{NAME} is provided, this tells Dynare that the Jacobian is
+provided as the only output of the M-/MEX file given as the option
+argument. If @var{NAME} is not provided, this tells Dynare that the
+M-/MEX file specified by the argument passed to @code{name} returns the
+Jacobian as its second output argument.
+
+@item second_deriv_provided [= @var{NAME}]
+If @var{NAME} is provided, this tells Dynare that the Hessian is
+provided as the only output of the M-/MEX file given as the option
+argument. If @var{NAME} is not provided, this tells Dynare that the
+M-/MEX file specified by the argument passed to @code{name} returns the
+Hessian as its third output argument. NB: This option can only be used
+if the @code{first_deriv_provided} option is used in the same
+@code{external_function} command.
+@end table
+
+@examplehead
+
+@example
+external_function(name = funcname);
+external_function(name = otherfuncname, nargs = 2,
+                  first_deriv_provided, second_deriv_provided);
+external_function(name = yetotherfuncname, nargs = 3,
+                  first_deriv_provided = funcname_deriv);
+@end example
+
+@end deffn
+
+@node Parameter initialization
+@section Parameter initialization
+
+When using Dynare for computing simulations, it is necessary to
+calibrate the parameters of the model. This is done through parameter
+initialization.
+
+The syntax is the following:
+
+@example
+@var{PARAMETER_NAME} = @var{EXPRESSION};
+@end example
+
+Here is an example of calibration:
+
+@example
+parameters alpha, bet;
+
+beta = 0.99;
+alpha = 0.36;
+A = 1-alpha*beta;
+@end example
+
+Internally, the parameter values are stored in @code{M_.params}:
+
+@defvr {MATLAB/Octave variable} M_.params
+
+Contains the values of model parameters. The parameters are in the
+order that was used in the @code{parameters} command.
+
+@end defvr
+
+
+@node Model declaration
+@section Model declaration
+
+The model is declared inside a @code{model} block:
+
+@deffn Block model ;
+@deffnx Block model (@var{OPTIONS}@dots{});
+
+@descriptionhead
+
+The equations of the model are written in a block delimited by
+@code{model} and @code{end} keywords.
+
+There must be as many equations as there are endogenous variables in the
+model, except when computing the unconstrained optimal policy with
+@code{ramsey_policy} or @code{discretionary_policy}.
+
+The syntax of equations must follow the conventions for
+@var{MODEL_EXPRESSION} as described in @ref{Expressions}. Each equation
+must be terminated by a semicolon (@samp{;}). A normal equation looks
+like:
+@example
+@var{MODEL_EXPRESSION} = @var{MODEL_EXPRESSION};
+@end example
+
+When the equations are written in homogenous form, it is possible to
+omit the @samp{=0} part and write only the left hand side of the
+equation. A homogenous equation looks like:
+@example
+@var{MODEL_EXPRESSION};
+@end example
+
+Inside the model block, Dynare allows the creation of @emph{model-local
+variables}, which constitute a simple way to share a common expression
+between several equations. The syntax consists of a pound sign
+(@code{#}) followed by the name of the new model local variable (which
+must @strong{not} be declared as in @ref{Variable declarations}), an equal
+sign, and the expression for which this new variable will stand. Later
+on, every time this variable appears in the model, Dynare will
+substitute it by the expression assigned to the variable. Note that the
+scope of this variable is restricted to the model block; it cannot be
+used outside. A model local variable declaration looks like:
+@example
+# @var{VARIABLE_NAME} = @var{MODEL_EXPRESSION};
+@end example
+
+@optionshead
+
+@table @code
+
+@item linear
+Declares the model as being linear. It spares oneself from having to
+declare initial values for computing the steady state, and it sets
+automatically @code{order=1} in @code{stoch_simul}.
+
+@item use_dll
+@anchor{use_dll}
+Instructs the preprocessor to create dynamic loadable libraries (DLL)
+containing the model equations and derivatives, instead of writing those
+in M-files. You need a working compilation environment, @i{i.e.}
+a working @code{mex} command (see @ref{Software requirements} for more
+details). Using this option can result in faster simulations or
+estimations, at the expense of some initial compilation
+time.@footnote{In particular, for big models, the compilation step can
+be very time-consuming, and use of this option may be counter-productive
+in those cases.}
+
+@item block
+@anchor{block}
+Perform the block decomposition of the model, and exploit it in
+computations. See
+@uref{http://www.dynare.org/DynareWiki/FastDeterministicSimulationAndSteadyStateComputation,Dynare
+wiki} for details on the algorithm.
+
+@item bytecode
+@anchor{bytecode}
+Instead of M-files, use a bytecode representation of the model, @i{i.e.}
+a binary file containing a compact representation of all the equations.
+
+@item cutoff = @var{DOUBLE}
+Threshold under which a jacobian element is considered as null during
+the model normalization. Only available with option
+@code{block}. Default: @code{1e-15}
+
+@item mfs = @var{INTEGER}
+Controls the handling of minimum feedback set of endogenous
+variables. Only available with option @code{block}. Possible values:
+
+@table @code
+
+@item 0
+All the endogenous variables are considered as feedback variables (Default).
+
+@item 1
+The endogenous variables assigned to equation naturally normalized
+(@i{i.e.} of the form @math{x=f(Y)} where @math{x} does not appear in
+@math{Y}) are potentially recursive variables. All the other variables
+are forced to belong to the set of feedback variables.
+
+@item 2
+In addition of variables with @code{mfs = 1} the endogenous variables
+related to linear equations which could be normalized are potential
+recursive variables. All the other variables are forced to belong to
+the set of feedback variables.
+
+@item 3
+In addition of variables with @code{mfs = 2} the endogenous variables
+related to non-linear equations which could be normalized are
+potential recursive variables. All the other variables are forced to
+belong to the set of feedback variables.
+@end table
+
+@item no_static
+Don't create the static model file. This can be useful for models which
+don't have a steady state.
+@end table
+
+@customhead{Example 1: elementary RBC model}
+
+@example
+var c k;
+varexo x;
+parameters aa alph bet delt gam;
+
+model;
+c =  - k + aa*x*k(-1)^alph + (1-delt)*k(-1);
+c^(-gam) = (aa*alph*x(+1)*k^(alph-1) + 1 - delt)*c(+1)^(-gam)/(1+bet);
+end;
+@end example
+
+@customhead{Example 2: use of model local variables}
+
+The following program:
+
+@example
+model;
+# gamma = 1 - 1/sigma;
+u1 = c1^gamma/gamma;
+u2 = c2^gamma/gamma;
+end;
+@end example
+
+@noindent
+@dots{}is formally equivalent to:
+
+@example
+model;
+u1 = c1^(1-1/sigma)/(1-1/sigma);
+u2 = c2^(1-1/sigma)/(1-1/sigma);
+end;
+@end example
+
+@customhead{Example 3: a linear model}
+
+@example
+model(linear);
+x = a*x(-1)+b*y(+1)+e_x;
+y = d*y(-1)+e_y;
+end;
+@end example
+
+@end deffn
+
+Dynare has the ability to output the list of model equations to a
+LaTeX file, using the @code{write_latex_dynamic_model} command. The
+static model can also be written with the
+@code{write_latex_static_model} command.
+
+@anchor{write_latex_dynamic_model}
+@deffn Command write_latex_dynamic_model ;
+
+@descriptionhead
+
+This command creates a LaTeX file containing the (dynamic) model.
+
+If your @file{.mod} file is @file{@var{FILENAME}.mod}, then Dynare
+will create a file called @file{@var{FILENAME}_dynamic.tex},
+containing the list of all the dynamic model equations.
+
+If LaTeX names were given for variables and parameters
+(@pxref{Variable declarations}), then those will be used; otherwise,
+the plain text names will be used.
+
+Time subscripts (@code{t}, @code{t+1}, @code{t-1}, @dots{}) will be
+appended to the variable names, as LaTeX subscripts.
+
+Note that the model written in the TeX file will differ from the model
+declared by the user in the following dimensions:
+
+@itemize 
+
+@item
+the timing convention of predetermined variables
+(@pxref{predetermined_variables}) will have been changed to the
+default Dynare timing convention; in other words, variables declared
+as predetermined will be lagged on period back,
+
+@item
+the expectation operators (@pxref{expectation}) will have
+been removed, replaced by auxiliary variables and new equations as
+explained in the documentation of the operator,
+
+@item
+endogenous variables with leads or lags greater or equal than two will
+have been removed, replaced by new auxiliary variables and equations,
+
+@item
+for a stochastic model, exogenous variables with leads or lags will
+also have been replaced by new auxiliary variables and equations.
+@end itemize
+
+@end deffn
+
+@deffn Command write_latex_static_model ;
+
+@descriptionhead
+
+This command creates a LaTeX file containing the static model.
+
+If your @file{.mod} file is @file{@var{FILENAME}.mod}, then Dynare
+will create a file called @file{@var{FILENAME}_static.tex}, containing
+the list of all the equations of the steady state model.
+
+If LaTeX names were given for variables and parameters
+(@pxref{Variable declarations}), then those will be used; otherwise,
+the plain text names will be used.
+
+Note that the model written in the TeX file will differ from the model
+declared by the user in the some dimensions
+(@pxref{write_latex_dynamic_model} for details).
+
+Also note that this command will not output the contents of the
+optional @code{steady_state_model} block (@pxref{steady_state_model});
+it will rather output a static version (@i{i.e.} without leads and
+lags) of the dynamic model declared in the @code{model} block.
+
+@end deffn
+
+@node Auxiliary variables
+@section Auxiliary variables
+
+The model which will is solved internally by Dynare is not exactly the
+model declared by the user. In some cases, Dynare will introduce
+auxiliary endogenous variables --- along with corresponding auxiliary
+equations ---, which will appear in the final output.
+
+The main transformation concerns leads and lags. Dynare will perform a
+transformation of the model so that there is only one lead and one lag
+on endogenous, and, in the case of a stochastic model, no lead/lag on
+exogenous.
+
+This transformation is achieved by the creation of auxiliary
+variables, and corresponding equations. For example, if @code{x(+2)}
+exists in the model, Dynare will create one auxiliary variable
+@code{AUX_ENDO_LEAD = x(+1)}, and replace @code{x(+2)} by
+@code{AUX_ENDO_LEAD(+1)}.
+
+A similar transformation is done for lags greater than 2 on endogenous
+(auxiliary variables will have a name beginning with
+@code{AUX_ENDO_LAG}), and for exogenous with leads and lags (auxiliary
+variables will have a name beginning with @code{AUX_EXO_LEAG} or
+@code{AUX_EXO_LAG} respectively).
+
+Another transformation is done for the @code{EXPECTATION}
+operator. For each occurence of this operator, Dynare creates an
+auxiliary variable equal to @code{AUX_EXPECT_LAG_1 = x(+2)}, and
+replaces the expectation operator by @code{AUX_EXPECT_LAG_1(-1)}.
+
+Once created, all auxiliary variables are included in the set of
+endogenous variables. The output of decision rules (see below) is such
+that auxiliary variable names are replaced by the original variables
+they refer to.
+
+@vindex M_.orig_endo_nbr
+@vindex M_.endo_nbr
+The number of endogenous variables before the creation of auxiliary
+variables is stored in @code{M_.orig_endo_nbr}, and the number of
+endogenous variables after the creation of auxiliary variables is
+stored in @code{M_.endo_nbr}.
+
+See @uref{http://www.dynare.org/DynareWiki/AuxiliaryVariables,Dynare
+Wiki} for more technical details on auxiliary variables.
+
+@node Initial and terminal conditions
+@section Initial and terminal conditions
+
+For most simulation exercises, it is necessary to provide initial (and
+possibly terminal) conditions. It is also necessary to provide initial
+guess values for non-linear solvers. This section describes the
+statements used for those purposes.
+
+In many contexts (determistic or stochastic), it is necessary to
+compute the steady state of a non-linear model: @code{initval} then
+specifies numerical initial values for the non-linear solver. The
+command @code{resid} can be used to compute the equation residuals for
+the given initial values.
+
+Used in perfect foresight mode, the types of forward-loking models for
+which Dynare was designed require both initial and terminal
+conditions. Most often these initial and terminal conditions are
+static equilibria, but not necessarily.
+
+One typical application is to consider an economy at the equilibrium,
+trigger a shock in first period, and study the trajectory of return at
+the initial equilbrium. To do that, one needs @code{initval} and
+@code{shocks} (@pxref{Shocks on exogenous variables}.
+
+Another one is to study, how an economy, starting from arbitrary
+initial conditions converges toward equilibrium. To do that, one needs
+@code{initval} and @code{endval}.
+
+For models with lags on more than one period, the command
+@code{histval} permits to specify different historical initial values
+for periods before the beginning of the simulation.
+
+@deffn Block initval ;
+
+@descriptionhead
+
+The @code{initval} block serves two purposes: declaring the initial
+(and possibly terminal) conditions in a simulation exercise, and
+providing guess values for non-linear solvers.
+
+This block is terminated by @code{end;}, and contains lines of the
+form:
+@example
+@var{VARIABLE_NAME} = @var{EXPRESSION};
+@end example
+
+@customhead{In a deterministic (@i{i.e.} perfect foresight) model}
+
+First, it provides the initial conditions for all the endogenous and
+exogenous variables at all the periods preceeding the first simulation
+period (unless some of these initial values are modified by
+@code{histval}).
+
+Second, in the absence of an @code{endval} block, it sets the terminal
+conditions for all the periods succeeding the last simulation period.
+
+Third, in the absence of an @code{endval} block, it provides initial
+guess values at all simulation dates for the non-linear solver
+implemented in @code{simul}.
+
+For this last reason, it necessary to provide values for all the
+endogenous variables in an @code{initval} block (even though,
+theoretically, initial conditions are only necessary for lagged
+variables). If some exogenous variables are not mentionned in the
+@code{initval} block, a zero value is assumed.
+
+Note that if the @code{initval} block is immediately followed by a
+@code{steady} command, its semantics is changed. The @code{steady}
+command will compute the steady state of the model for all the
+endogenous variables, assuming that exogenous variables are kept
+constant to the value declared in the @code{initval} block, and using
+the values declared for the endogenous as initial guess values for the
+non-linear solver. An @code{initval} block followed by @code{steady}
+is formally equivalent to an @code{initval} block with the same values
+for the exogenous, and with the associated steady state values for the
+endogenous.
+
+@customhead{In a stochastic model}
+
+The main purpose of @code{initval} is to provide initial guess values
+for the non-linear solver in the steady state computation. Note that
+if the @code{initval} block is not followed by @code{steady}, the
+steady state computation will still be triggered by subsequent
+commands (@code{stoch_simul}, @code{estimation}@dots{}).
+
+It is not necessary to declare @code{0} as initial value for exogenous
+stochastic variables, since it is the only possible value.
+
+This steady state will be used as the initial condition at all the
+periods preceeding the first simulation period for the two possible
+types of simulations in stochastic mode:
+
+@itemize 
+
+@item
+in @code{stoch_simul}, if the @code{periods} options is specified
+
+@item
+in @code{forecast} (in this case, note that it is still possible to
+modify some of these initial values with @code{histval})
+@end itemize
+
+@examplehead
+
+@example
+initval;
+c = 1.2;
+k = 12;
+x = 1;
+end;
+
+steady;
+@end example
+
+@end deffn
+
+@deffn Block endval ;
+
+@descriptionhead
+
+This block is terminated by @code{end;}, and contains lines of the
+form:
+@example
+@var{VARIABLE_NAME} = @var{EXPRESSION};
+@end example
+
+The @code{endval} block makes only sense in a determistic model, and
+serves two purposes.
+
+First, it sets the terminal conditions for all the periods succeeding
+the last simulation period.
+
+Second, it provides initial guess values at all the simulation dates
+for the non-linear solver implemented in @code{simul}.
+
+For this last reason, it necessary to provide values for all the
+endogenous variables in an @code{endval} block (even though,
+theoretically, initial conditions are only necessary for forward
+variables). If some exogenous variables are not mentionned in the
+@code{endval} block, a zero value is assumed.
+
+Note that if the @code{endval} block is immediately followed by a
+@code{steady} command, its semantics is changed. The @code{steady}
+command will compute the steady state of the model for all the
+endogenous variables, assuming that exogenous variables are kept
+constant to the value declared in the @code{endval} block, and using
+the values declared for the endogenous as initial guess values for the
+non-linear solver. An @code{endval} block followed by @code{steady} is
+formally equivalent to an @code{endval} block with the same values for
+the exogenous, and with the associated steady state values for the
+endogenous.
+
+@examplehead
+
+@example
+var c k;
+varexo x;
+@dots{}
+initval;
+c = 1.2;
+k = 12;
+x = 1;
+end;
+
+steady;
+
+endval;
+c = 2;
+k = 20;
+x = 2;
+end;
+
+steady;
+@end example
+
+The initial equilibrium is computed by @code{steady} for @code{x=1},
+and the terminal one, for @code{x=2}.
+
+@end deffn
+
+@deffn Block histval ;
+
+@descriptionhead
+
+In models with lags on more than one period, the @code{histval} block
+permits to specify different historical initial values for different
+periods.
+
+This block is terminated by @code{end;}, and contains lines of the
+form:
+@example
+@var{VARIABLE_NAME}(@var{INTEGER}) = @var{EXPRESSION};
+@end example
+
+@var{EXPRESSION} is any valid expression returning a numerical value
+and can contain already initialized variable names.
+
+By convention in Dynare, period 1 is the first period of the
+simulation. Going backward in time, the first period before the start
+of the simulation is period @code{0}, then period @code{-1}, and so on.
+
+If your lagged variables are linked by identities, be careful to
+satisfy these identities when you set historical initial values.
+
+@examplehead
+
+@example
+var x y;
+varexo e;
+
+model;
+x = y(-1)^alpha*y(-2)^(1-alpha)+e;
+@dots{}
+end;
+
+initval;
+x = 1;
+y = 1;
+e = 0.5;
+end;
+
+steady;
+
+histval;
+y(0) = 1.1;
+y(-1) = 0.9;
+end;
+@end example
+
+@end deffn
+
+@deffn Command resid ;
+
+This command will display the residuals of the static equations of the
+model, using the values given for the endogenous in the last
+@code{initval} or @code{endval} block (or the steady state file if you
+provided one, @pxref{Steady state}).
+
+@end deffn
+
+
+@deffn Command initval_file (filename = @var{FILENAME});
+
+@descriptionhead
+
+In a deterministic setup, this command is used to specify a path for
+all endogenous and exogenous variables. The length of these paths must
+be equal to the number of simulation periods, plus the number of leads
+and the number of lags of the model (for example, with 50 simulation
+periods, in a model with 2 lags and 1 lead, the paths must have a
+length of 53). Note that these paths cover two different things:
+
+@itemize 
+
+@item
+the constraints of the problem, which are given by the path for
+exogenous and the initial and terminal values for endogenous
+
+@item
+the initial guess for the non-linear solver, which is given by the
+path for endogenous variables for the simulation periods (excluding
+initial and terminal conditions)
+@end itemize
+
+The command accepts three file formats:
+
+@itemize 
+
+@item
+M-file (extension @file{.m}): for each endogenous and exogenous
+variable, the file must contain a row vector of the same name.
+
+@item
+MAT-file (extension @file{.mat}): same as for M-files.
+
+@item
+Excel file (extension @file{.xls}): for each endogenous and exogenous,
+the file must contain a column of the same name (not supported under Octave).
+@end itemize
+
+@customhead{Warning}
+
+The extension must be omitted in the command argument. Dynare will
+automatically figure out the extension and select the appropriate file
+type.
+
+@end deffn
+
+@node Shocks on exogenous variables
+@section Shocks on exogenous variables
+
+In a deterministic context, when one wants to study the transition of
+one equilibrium position to another, it is equivalent to analyze the
+consequences of a permanent shock and this in done in Dynare through
+the proper use of @code{initval} and @code{endval}.
+
+Another typical experiment is to study the effects of a temporary
+shock after which the system goes back to the original equilibrium (if
+the model is stable@dots{}). A temporary shock is a temporary change of
+value of one or several exogenous variables in the model. Temporary
+shocks are specified with the command @code{shocks}.
+
+In a stochastic framework, the exogenous variables take random values
+in each period. In Dynare, these random values follow a normal
+distribution with zero mean, but it belongs to the user to specify the
+variability of these shocks. The non-zero elements of the matrix of
+variance-covariance of the shocks can be entered with the @code{shocks}
+command. Or, the entire matrix can be direclty entered with
+@code{Sigma_e} (this use is however deprecated).
+
+If the variance of an exogenous variable is set to zero, this variable
+will appear in the report on policy and transition functions, but
+isn't used in the computation of moments and of Impulse Response
+Functions. Setting a variance to zero is an easy way of removing an
+exogenous shock.
+
+@deffn Block shocks ;
+
+@customhead{In deterministic context}
+
+For deterministic simulations, the @code{shocks} block specifies
+temporary changes in the value of an exogenous variables. For
+permanent shocks, use an @code{endval} block.
+
+The block should contain one or several occurrences of the following
+group of three lines:
+
+@example
+var @var{VARIABLE_NAME}; 
+periods @var{INTEGER}[:@var{INTEGER}] [[,] @var{INTEGER}[:@var{INTEGER}]]@dots{};
+values @var{DOUBLE} | (@var{EXPRESSION})  [[,] @var{DOUBLE} | (@var{EXPRESSION}) ]@dots{};
+@end example
+
+It is possible to specify shocks which last several periods and which can
+vary over time. The @code{periods} keyword accepts a list of
+several dates or date ranges, which must be matched by as many shock values
+in the @code{values} keyword. Note that a range in the
+@code{periods} keyword must be matched by only one value in the
+@code{values} keyword: this syntax means that the exogenous
+will have a constant value over the range.
+
+Note that shock values are not restricted to numerical constants:
+arbitrary expressions are also allowed, but you have to enclose them
+inside parentheses.
+
+Here is an example:
+
+@example
+shocks;
+var e;
+periods 1;
+values 0.5;
+var u;
+periods 4:5;
+values 0;
+var v;
+periods 4:5 6 7:9;
+values 1 1.1 0.9;
+var w;
+periods 1 2;
+values (1+p) (exp(z));
+end;
+@end example
+
+@customhead{In stochastic context}
+
+For stochastic simulations, the @code{shocks} block specifies the non
+zero elements of the covariance matrix of the shocks of exogenous
+variables.
+
+You can use the following types of entries in the block:
+
+@table @code
+
+@item var @var{VARIABLE_NAME}; stderr @var{EXPRESSION};
+Specifies the standard error of a variable.
+
+@item var @var{VARIABLE_NAME} = @var{EXPRESSION};
+Specifies the variance error of a variable.
+
+@item var @var{VARIABLE_NAME}, @var{VARIABLE_NAME} = @var{EXPRESSION};
+Specifies the covariance of two variables.
+
+@item corr @var{VARIABLE_NAME}, @var{VARIABLE_NAME} = @var{EXPRESSION};
+Specifies the correlation of two variables.
+
+@end table
+
+In an estimation context, it is also possible to specify variances and
+covariances on endogenous variables: in that case, these values are
+interpreted as the calibration of the measurement errors on these
+variables.
+
+Here is an example:
+
+@example
+shocks;
+var e = 0.000081;
+var u; stderr 0.009;
+corr e, u = 0.8;
+var v, w = 2;
+end;
+@end example
+
+@customhead{Mixing determininistic and stochastic shocks}
+
+It is possible to mix deterministic and stochastic shocks to build
+models where agents know from the start of the simulation about future
+exogenous changes. In that case @code{stoch_simul} will compute the
+rational expectation solution adding future information to the state
+space (nothing is shown in the output of @code{stoch_simul}) and
+@code{forecast} will compute a simulation conditional on initial
+conditions and future information.
+
+Here is an example:
+
+@example
+varexo_det tau;
+varexo e;
+
+@dots{}
+
+shocks;
+var e; stderr 0.01;
+var tau;
+periods 1:9;
+values -0.15;
+end;
+
+stoch_simul(irf=0);
+
+forecast;
+@end example
+
+@end deffn
+
+
+@deffn Block mshocks ;
+
+The purpose of this block is similar to that of the @code{shocks}
+block for deterministic shocks, except that the numeric values given
+will be interpreted in a multiplicative way. For example, if a value
+of @code{1.05} is given as shock value for some exogenous at some
+date, it means 5% above its steady state value (as given by the last
+@code{initval} or @code{endval} block).
+
+The syntax is the same than @code{shocks} in a deterministic context.
+
+This command is only meaningful in two situations:
+
+@itemize 
+
+@item
+on exogenous variables with a non-zero steady state, in a deterministic setup,
+
+@item
+on deterministic exogenous variables with a non-zero steady state, in
+a stochastic setup.
+@end itemize
+
+@end deffn
+
+@defvr {Special variable} Sigma_e
+
+@customhead{Warning}
+
+@strong{The use of this special variable is deprecated and is strongly
+discouraged.} You should use a @code{shocks} block instead.
+
+@descriptionhead
+
+This special variable specifies directly the covariance matrix of the
+stochastic shocks, as an upper (or lower) triangular matrix. Dynare
+builds the corresponding symmetrix matrix. Each row of the triangular
+matrix, except the last one, must be terminated by a semi-colon
+@code{;}. For a given element, an arbitrary @var{EXPRESSION} is
+allowed (instead of a simple constant), but in that case you need to
+enclose the expression in parentheses. @emph{The order of the
+covariances in the matrix is the same as the one used in the
+@code{varexo} declaration.}
+
+@examplehead
+
+@example
+
+varexo u, e;
+@dots{}
+Sigma_e = [ 0.81 (phi*0.9*0.009);
+            0.000081];
+@end example
+
+This sets the variance of @code{u} to 0.81, the variance of @code{e}
+to 0.000081, and the correlation between @code{e} and @code{u} to
+@code{phi}.
+
+@end defvr
+
+@node Other general declarations
+@section Other general declarations
+
+@deffn {Command} dsample @var{INTEGER} [@var{INTEGER}];
+Reduces the number of periods considered in subsequent output commands.
+@end deffn
+
+@deffn {Command} periods @var{INTEGER};
+
+@descriptionhead
+
+This command is now deprecated (but will still work for older model
+files). It is not necessary when no simulation is performed and is
+replaced by an option @code{periods} in @code{simul} and
+@code{stoch_simul}.
+
+This command sets the number of periods in the simulation. The periods
+are numbered from @code{1} to @var{INTEGER}. In perfect foresight
+simulations, it is assumed that all future events are perfectly known
+at the beginning of period @code{1}.
+
+@examplehead
+
+@example
+periods 100;
+@end example
+
+@end deffn
+
+@node Steady state
+@section Steady state
+
+There are two ways of computing the steady state (@i{i.e.} the static
+equilibrium) of a model. The first way is to let Dynare compute the
+steady state using a nonlinear Newton-type solver; this should work
+for most models, and is relatively simple to use. The second way is to
+give more guidance to Dynare, using your knowledge of the model, by
+providing it with a ``steady state file''.
+
+@menu
+* Finding the steady state with Dynare nonlinear solver::  
+* Using a steady state file::   
+@end menu
+
+@node Finding the steady state with Dynare nonlinear solver
+@subsection Finding the steady state with Dynare nonlinear solver
+
+@deffn Command steady ;
+@deffnx Command steady (@var{OPTIONS}@dots{});
+
+@descriptionhead
+
+This command computes the steady state of a model using a nonlinear
+Newton-type solver.
+
+More precisely, it computes the equilibrium value of the endogenous
+variables for the value of the exogenous variables specified in the
+previous @code{initval} or @code{endval} block.
+
+@code{steady} uses an iterative procedure and takes as initial guess
+the value of the endogenous variables set in the previous
+@code{initval} or @code{endval} block.
+
+For complicated models, finding good numerical initial values for the
+endogenous variables is the trickiest part of finding the equilibrium
+of that model. Often, it is better to start with a smaller model and
+add new variables one by one.
+
+@optionshead
+
+@table @code
+
+@item solve_algo = @var{INTEGER}
+@anchor{solve_algo}
+Determines the non-linear solver to use. Possible values for the option are:
+
+@table @code
+
+@item 0
+Use @code{fsolve} (under MATLAB, only available if you have the
+Optimization Toolbox; always available under Octave)
+
+@item 1
+Use Dynare's own nonlinear equation solver
+
+@item 2
+Splits the model into recursive blocks and solves each block in turn
+
+@item 3
+Use Chris Sims' solver
+
+@item 4
+Similar to value @code{2}, except that it deals differently with
+nearly singular Jacobian
+
+@item 5
+Newton algorithm with a sparse Gaussian elimination (SPE) (requires
+@code{bytecode} option, @pxref{Model declaration})
+
+@item 6
+Newton algorithm with a sparse LU solver at each iteration (requires
+@code{bytecode} and/or @code{block} option, @pxref{Model declaration})
+
+@item 7
+Newton algorithm with a Generalized Minimal Residual (GMRES) solver at
+each iteration (requires @code{bytecode} and/or @code{block} option,
+@pxref{Model declaration}; not available under Octave))
+
+@item 8
+Newton algorithm with a Stabilized Bi-Conjugate Gradient (BICGSTAB)
+solver at each iteration (requires @code{bytecode} and/or @code{block}
+option, @pxref{Model declaration})
+@end table
+
+@noindent
+Default value is @code{2}.
+
+@item homotopy_mode = @var{INTEGER}
+Use a homotopy (or divide-and-conquer) technique to solve for the
+steady state. If you use this option, you must specify a
+@code{homotopy_setup} block. This option can take three possible
+values:
+
+@table @code
+
+@item 1
+In this mode, all the parameters are changed simultaneously, and the
+distance between the boudaries for each parameter is divided in as
+many intervals as there are steps (as defined by @code{homotopy_steps}
+option); the problem is solves as many times as there are steps.
+
+@item 2
+Same as mode @code{1}, except that only one parameter is changed at a
+time; the problem is solved as many times as steps times number of
+parameters.
+
+@item 3
+Dynare tries first the most extreme values. If it fails to compute the
+steady state, the interval between initial and desired values is
+divided by two for all parameters. Every time that it is impossible to
+find a steady state, the previous interval is divided by two. When it
+succeeds to find a steady state, the previous interval is multiplied
+by two. In that last case @code{homotopy_steps} contains the maximum
+number of computations attempted before giving up.
+@end table
+
+@item homotopy_steps = @var{INTEGER}
+Defines the number of steps when performing a homotopy. See
+@code{homotopy_mode} option for more details.
+@end table
+
+@examplehead
+
+@xref{Initial and terminal conditions}.
+
+@end deffn
+
+After computation, the steady state is available in the following
+variable:
+
+@defvr {MATLAB/Octave variable} oo_.steady_state
+
+Contains the computed steady state.
+
+Endogenous variables are ordered in order of declaration used in
+@code{var} command (which is also the order used in @code{M_.endo_names}). 
+
+@end defvr
+
+@deffn Block homotopy_setup ;
+
+@descriptionhead
+
+This block is used to declare initial and final values when using
+a homotopy method. It is used in conjunction with the option
+@code{homotopy_mode} of the @code{steady} command.
+
+The idea of homotopy (also called divide-and-conquer by some authors)
+is to subdivide the problem of finding the steady state into smaller
+problems. It assumes that you know how to compute the steady state for
+a given set of parameters, and it helps you finding the steady state
+for another set of parameters, by incrementally moving from one to
+another set of parameters.
+
+The purpose of the @code{homotopy_setup} block is to declare the final
+(and possibly also the initial) values for the parameters or exogenous
+that will be changed during the homotopy. It should contain lines of
+the form:
+
+@example
+@var{VARIABLE_NAME}, @var{EXPRESSION}, @var{EXPRESSION};
+@end example
+
+This syntax specifies the initial and final values of a given
+parameter/exogenous.
+
+There is an alternative syntax:
+@example
+@var{VARIABLE_NAME}, @var{EXPRESSION};
+@end example
+
+Here only the final value is specified for a given
+parameter/exogenous; the initial value is taken from the preceeding
+@code{initval} block.
+
+A necessary condition for a successful homotopy is that Dynare must be
+able to solve the steady state for the initial parameters/exogenous
+without additional help (using the guess values given in the
+@code{initval} block).
+
+If the homotopy fails, a possible solution is to increase the number
+of steps (given in @code{homotopy_steps} option of @code{steady}).
+
+@examplehead
+
+In the following example, Dynare will first compute the steady state
+for the initial values (@code{gam=0.5} and @code{x=1}), and then
+subdivide the problem into 50 smaller problems to find the steady
+state for the final values (@code{gam=2} and @code{x=2}).
+
+@example
+var c k;
+varexo x;
+
+parameters alph gam delt bet aa;
+alph=0.5;
+delt=0.02;
+aa=0.5;
+bet=0.05;
+
+model;
+c + k - aa*x*k(-1)^alph - (1-delt)*k(-1);
+c^(-gam) - (1+bet)^(-1)*(aa*alph*x(+1)*k^(alph-1) + 1 - delt)*c(+1)^(-gam);
+end;
+
+initval;
+x = 1;
+k = ((delt+bet)/(aa*x*alph))^(1/(alph-1));
+c = aa*x*k^alph-delt*k;
+end;
+
+homotopy_setup;
+gam, 0.5, 2;
+x, 2;
+end;
+
+steady(homotopy_mode = 1, homotopy_steps = 50);
+@end example
+
+@end deffn
+
+@node Using a steady state file
+@subsection Using a steady state file
+
+If you know how to compute the steady state for your model, you can
+provide a MATLAB/Octave function doing the computation instead of
+using @code{steady}. If your MOD-file is called
+@file{@var{FILENAME}.mod}, the steady state file should be called
+@file{@var{FILENAME}_steadystate.m}.
+
+Again, there are two options for creating this file:
+
+@itemize
+
+@item
+You can write this file by hand. See @file{fs2000_steadystate.m}
+in the @file{examples} directory for an example. This is the option
+which gives the most flexibility, at the expense of a heavier
+programming burden.
+
+@item
+You can use the @code{steady_state_model} block, for a more
+user-friendly interface.
+
+@end itemize
+
+@anchor{steady_state_model}
+@deffn Block steady_state_model ;
+
+@descriptionhead
+
+When the analytical solution of the model is known, this command can
+be used to help Dynare find the steady state in a more efficient and
+reliable way, especially during estimation where the steady state has
+to be recomputed for every point in the parameter space.
+
+Each line of this block consists of a variable (either an endogenous,
+a temporary variable or a parameter) which is assigned an expression
+(which can contain parameters, exogenous at the steady state, or any
+endogenous or temporary variable already declared above). Each line
+therefore looks like:
+
+@example
+@var{VARIABLE_NAME} = @var{EXPRESSION};
+@end example
+
+Note that it is also possible to assign several variables at the same
+time, if the main function in the right hand side is a MATLAB/Octave
+function returning several arguments:
+
+@example
+[ @var{VARIABLE_NAME}, @var{VARIABLE_NAME}@dots{} ] = @var{EXPRESSION};
+@end example
+
+Dynare will automatically generate a steady state file using the
+information provided in this block.
+
+@examplehead
+
+@example
+var m P c e W R k d n l gy_obs gp_obs y dA;
+varexo e_a e_m;
+
+parameters alp bet gam mst rho psi del;
+
+@dots{}
+// parameter calibration, (dynamic) model declaration, shock calibration@dots{}
+@dots{}
+
+steady_state_model;
+  dA = exp(gam);
+  gst = 1/dA; // A temporary variable
+  m = mst;
+  
+  // Three other temporary variables
+  khst = ( (1-gst*bet*(1-del)) / (alp*gst^alp*bet) )^(1/(alp-1));
+  xist = ( ((khst*gst)^alp - (1-gst*(1-del))*khst)/mst )^(-1);
+  nust = psi*mst^2/( (1-alp)*(1-psi)*bet*gst^alp*khst^alp );
+
+  n  = xist/(nust+xist);
+  P  = xist + nust;
+  k  = khst*n;
+
+  l  = psi*mst*n/( (1-psi)*(1-n) );
+  c  = mst/P;
+  d  = l - mst + 1;
+  y  = k^alp*n^(1-alp)*gst^alp;
+  R  = mst/bet;
+
+  // You can use MATLAB functions which return several arguments
+  [W, e] = my_function(l, n);
+  
+  gp_obs = m/dA;
+  gy_obs = dA;
+end;
+
+steady;
+@end example
+
+@end deffn
+
+
+@node Getting information about the model
+@section Getting information about the model
+
+@deffn Command check ;
+@deffnx Command check (solve_algo = @var{INTEGER}) ;
+
+@descriptionhead
+
+Computes the eigenvalues of the model linearized around the values
+specified by the last @code{initval}, @code{endval} or @code{steady}
+statement. Generally, the eigenvalues are only meaningful if the
+linearization is done around a steady state of the model. It is a
+device for local analysis in the neighborhood of this steady state.
+
+A necessary condition for the uniqueness of a stable equilibrium in
+the neighborhood of the steady state is that there are as many
+eigenvalues larger than one in modulus as there are forward looking
+variables in the system. An additional rank condition requires that
+the square submatrix of the right Schur vectors corresponding to the
+forward looking variables (jumpers) and to the explosive eigenvalues
+must have full rank.
+
+@optionshead
+
+@table @code
+
+@item solve_algo = @var{INTEGER}
+@xref{solve_algo}, for the possible values and their meaning.
+@end table
+
+@outputhead
+
+@code{check} returns the eigenvalues in the global variable
+@code{oo_.dr.eigval}.
+
+@end deffn
+
+@defvr {MATLAB/Octave variable} oo_.dr.eigval
+Contains the eigenvalues of the model, as computed by the @code{check}
+command.
+@end defvr
+
+@deffn Command model_info ;
+
+@descriptionhead
+
+This command provides information about:
+
+@itemize 
+
+@item
+the normalization of the model: an endogenous variable is attributed
+to each equation of the model;
+
+@item
+the block structure of the model: for each block model_info indicates
+its type, the equations number and endogenous variables belonging to
+this block.
+
+@end itemize
+
+This command can only be used in conjunction with the @code{block}
+option of the @code{model} block.
+
+There are five different types of blocks depending on the simulation
+method used:
+
+@table @samp
+
+@item EVALUATE FORWARD
+In this case the block contains only equations where endogenous
+variable attributed to the equation appears currently on the left hand
+side and where no forward looking endogenous variables appear. The
+block has the form: @math{y_{j,t} = f_j(y_t, y_{t-1}, \ldots, y_{t-k})}.
+
+@item EVALUATE BACKWARD
+The block contains only equations where endogenous variable attributed
+to the equation appears currently on the left hand side and where no
+backward looking endogenous variables appear. The block has the form:
+@math{y_{j,t} = f_j(y_t, y_{t+1}, \ldots, y_{t+k})}.
+
+@item SOLVE FORWARD @var{x}
+The block contains only equations where endogenous variable attributed
+to the equation does not appear currently on the left hand side and
+where no forward looking endogenous variables appear. The block has
+the form: @math{g_j(y_{j,t}, y_t, y_{t-1}, \ldots, y_{t-k})=0}.
+@var{x} is equal to @samp{SIMPLE} if the block has only one
+equation. If several equation appears in the block, @var{x} is equal
+to @samp{COMPLETE}.
+
+@item SOLVE FORWARD @var{x}
+The block contains only equations where endogenous variable attributed
+to the equation does not appear currently on the left hand side and
+where no backward looking endogenous variables appear. The block has
+the form: @math{g_j(y_{j,t}, y_t, y_{t+1}, \ldots,
+y_{t+k})=0}. @var{x} is equal to @samp{SIMPLE} if the block has only
+one equation. If several equation appears in the block, @var{x} is
+equal to @samp{COMPLETE}.
+
+@item SOLVE TWO BOUNDARIES @var{x}
+The block contains equations depending on both forward and backward
+variables. The block looks like: @math{g_j(y_{j,t}, y_t, y_{t-1},
+\ldots, y_{t-k} ,y_t, y_{t+1}, \ldots, y_{t+k})=0}. @var{x} is equal
+to @samp{SIMPLE} if the block has only one equation. If several
+equation appears in the block, @var{x} is equal to @samp{COMPLETE}.
+@end table
+
+@end deffn
+
+@deffn Command print_bytecode_dynamic_model ;
+Prints the equations and the Jacobian matrix of the dynamic model
+stored in the bytecode binary format file. Can only be used in
+conjunction with the @code{bytecode} option of the @code{model} block.
+@end deffn
+
+@deffn Command print_bytecode_static_model ;
+Prints the equations and the Jacobian matrix of the static model
+stored in the bytecode binary format file. Can only be used in
+conjunction with the @code{bytecode} option of the @code{model} block.
+@end deffn
+
+@node Deterministic simulation
+@section Deterministic simulation
+
+When the framework is deterministic, Dynare can be used for models
+with the assumption of perfect foresight. Typically, the system is
+supposed to be in a state of equilibrium before a period @samp{1} when
+the news of a contemporaneous or of a future shock is learned by the
+agents in the model. The purpose of the simulation is to describe the
+reaction in anticipation of, then in reaction to the shock, until the
+system returns to the old or to a new state of equilibrium. In most
+models, this return to equilibrium is only an asymptotic phenomenon,
+which one must approximate by an horizon of simulation far enough in
+the future.  Another exercise for which Dynare is well suited is to
+study the transition path to a new equilibrium following a permanent
+shock.  For deterministic simulations, Dynare uses a Newton-type
+algorithm, first proposed by @cite{Laffargue (1990)} and
+@cite{Boucekkine (1995)}, instead of a first order technique like the
+one proposed by @cite{Fair and Taylor (1983)}, and used in earlier
+generation simulation programs. We believe this approach to be in
+general both faster and more robust. The details of the algorithm can
+be found in @cite{Juillard (1996)}.
+
+@deffn Command simul ;
+@deffnx Command simul (@var{OPTIONS}@dots{});
+
+@descriptionhead
+
+Triggers the computation of a deterministic simulation of the model
+for the number of periods set in the option @code{periods}.
+
+@optionshead
+
+@table @code
+
+@item periods = @var{INTEGER}
+Number of periods of the simulation
+
+@item stack_solve_algo = @var{INTEGER}
+Algorithm used for computing the solution. Possible values are:
+
+@table @code
+
+@item 0
+Newton method to solve simultaneously all the equations for every
+period, see @cite{Juillard (1996)} (Default).
+
+@item 1
+Use a Newton algorithm with a sparse LU solver at each iteration
+(requires @code{bytecode} and/or @code{block} option, @pxref{Model
+declaration}).
+
+@item 2
+Use a Newton algorithm with a Generalized Minimal Residual (GMRES)
+solver at each iteration (requires @code{bytecode} and/or @code{block}
+option, @pxref{Model declaration}; not available under Octave)
+
+@item 3
+Use a Newton algorithm with a Stabilized Bi-Conjugate Gradient
+(BICGSTAB) solver at each iteration (requires @code{bytecode} and/or
+@code{block} option, @pxref{Model declaration}).
+
+@item 4
+Use a Newton algorithm with a optimal path length at each iteration
+(requires @code{bytecode} and/or @code{block} option, @pxref{Model
+declaration}).
+
+@item 5
+Use a Newton algorithm with a sparse Gaussian elimination (SPE) solver
+at each iteration (requires @code{bytecode} option, @pxref{Model
+declaration}).
+@end table
+
+@item markowitz = @var{DOUBLE}
+Value of the Markowitz criterion, used to select the pivot. Only used
+when @code{stack_solve_algo = 5}. Default: @code{0.5}.
+
+@item minimal_solving_periods = @var{INTEGER}
+Specify the minimal number of periods where the model has to be
+solved, before using a constant set of operations for the remaining
+periods. Only used when @code{stack_solve_algo = 5}. Default: @code{1}.
+
+@item datafile = @var{FILENAME}
+If the variables of the model are not constant over time, their
+initial values, stored in a text file, could be loaded, using that
+option, as initial values before a deteministic simulation.
+@end table
+
+@outputhead
+
+The simulated endogenous variables are available in global matrix
+@code{oo_.endo_simul}.
+
+@end deffn
+
+@anchor{oo_.endo_simul}
+@defvr {MATLAB/Octave variable} oo_.endo_simul
+This variable stores the result of a deterministic simulation
+(computed by @code{simul}) or of a stochastic simulation (computed by
+@code{stoch_simul} with the @code{periods} option).
+
+The variables are arranged row by row, in order of declaration (as in
+@code{M_.endo_names}). Note that this variable also contains initial
+and terminal conditions, so it has more columns than the value of
+@code{periods} option.
+@end defvr
+
+@node Stochastic solution and simulation
+@section Stochastic solution and simulation
+
+In a stochastic context, Dynare computes one or several simulations
+corresponding to a random draw of the shocks. Dynare uses a Taylor
+approximation, up to third order, of the expectation functions (see
+@cite{Judd (1996)}, @cite{Collard and Juillard (2001a)}, @cite{Collard
+and Juillard (2001b)}, and @cite{Schmitt-Grohé and Uríbe (2004)}).
+
+@menu
+* Computing the stochastic solution::  
+* Typology and ordering of variables::  
+* First order approximation::   
+* Second order approximation::  
+* Third order approximation::   
+@end menu
+
+@node Computing the stochastic solution
+@subsection Computing the stochastic solution
+
+@deffn Command stoch_simul [@var{VARIABLE_NAME}@dots{}];
+@deffnx Command stoch_simul (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
+
+@descriptionhead
+
+@code{stoch_simul} solves a stochastic (@i{i.e.} rational
+expectations) model, using perturbation techniques.
+
+More precisely, @code{stoch_simul} computes a Taylor approximation of
+the decision and transition functions for the model. Using this, it
+computes impulse response functions and various descriptive statistics
+(moments, variance decomposition, correlation and autocorrelation
+coefficients). For correlated shocks, the variance decomposition is
+computed as in the VAR literature through a Cholesky decomposition of
+the covariance matrix of the exogenous variables. When the shocks are
+correlated, the variance decomposition depends upon the order of the
+variables in the @code{varexo} command.
+
+The Taylor approximation is computed around the steady state
+(@pxref{Steady state}).
+
+The IRFs are computed as the difference between the trajectory of a
+variable following a shock at the beginning of period 1 and its steady
+state value.
+
+Variance decomposition, correlation, autocorrelation are only
+displayed for variables with positive variance. Impulse response
+functions are only plotted for variables with response larger than
+@math{10^{-10}}.
+
+Variance decomposition is computed relative to the sum of the
+contribution of each shock. Normally, this is of course equal to
+aggregate variance, but if a model generates very large variances, it
+may happen that, due to numerical error, the two differ by a
+significant amount. Dynare issues a warning if the maximum relative
+difference between the sum of the contribution of each shock and
+aggregate variance is larger than 0.01%.
+
+Currently, the IRFs are only plotted for 12 variables. Select the ones
+you want to see, if your model contains more than 12 endogenous
+variables.
+
+The covariance matrix of the shocks is specified with the
+@code{shocks} command (@pxref{Shocks on exogenous variables}).
+
+When a list of @var{VARIABLE_NAME} is specified, results are displayed
+only for these variables.
+
+@optionshead
+
+@table @code
+
+@item ar = @var{INTEGER}
+@anchor{ar}
+Order of autocorrelation coefficients to compute and to print. Default: @code{5}.
+
+@item drop = @var{INTEGER}
+Number of points dropped at the beginning of simulation before
+computing the summary statistics. Default: @code{100}.
+
+@item hp_filter = @var{INTEGER}
+Uses HP filter with @math{\lambda} = @var{INTEGER} before computing
+moments. Default: no filter.
+
+@item hp_ngrid = @var{INTEGER}
+Number of points in the grid for the discrete Inverse Fast Fourier
+Transform used in the HP filter computation. It may be necessary to
+increase it for highly autocorrelated processes. Default: @code{512}.
+
+@item irf = @var{INTEGER}
+@anchor{irf} 
+Number of periods on which to compute the IRFs. Setting @code{irf=0},
+suppresses the plotting of IRF's. Default: @code{40}.
+
+@item relative_irf
+Requests the computation of normalized IRFs in percentage of the
+standard error of each shock.
+
+@item linear
+Indicates that the original model is linear (put it rather in the
+@code{model} command).
+
+@item nocorr
+Don't print the correlation matrix (printing them is the default).
+
+@item nofunctions
+Don't print the coefficients of the approximated solution (printing
+them is the default).
+
+@item nomoments
+Don't print moments of the endogenous variables (printing them is the
+default).
+
+@item nograph.
+@anchor{nograph}
+Doesn't do the graphs. Useful for loops.
+
+@item noprint
+Don't print anything. Useful for loops.
+
+@item print
+Print results (opposite of @code{noprint}).
+
+@item order = @var{INTEGER}
+@anchor{order}
+Order of Taylor approximation. Acceptable values are @code{1},
+@code{2} and @code{3}. Note that for third order,
+@code{k_order_solver} option is implied and only empirical moments are
+available (you must provide a value for @code{periods}
+option). Default: @code{2}.
+
+@item k_order_solver
+@anchor{k_order_solver}
+Use a k-order solver (implemented in C++) instead of the default
+Dynare solver. This option is not yet compatible with the
+@code{bytecode} option (@pxref{Model declaration}. Default: disabled
+for order 1 and 2, enabled otherwise
+
+@item periods = @var{INTEGER}
+@vindex oo_.endo_simul
+If different from zero, empirical moments will be computed instead of
+theoretical moments. The value of the option specifies the number of
+periods to use in the simulations. Values of the @code{initval} block,
+possibly recomputed by @code{steady}, will be used as starting point
+for the simulation. The simulated endogenous variables are made
+available to the user in a vector for each variable and in the global
+matrix @code{oo_.endo_simul} (@pxref{oo_.endo_simul}). Default: @code{0}.
+
+@item qz_criterium = @var{DOUBLE}
+Value used to split stable from unstable eigenvalues in reordering the
+Generalized Schur decomposition used for solving 1^st order
+problems. Default: @code{1.000001} (except when estimating with
+@code{lik_init} option equal to @code{1}: the default is
+@code{0.999999} in that case; @pxref{Estimation}).
+
+@item replic = @var{INTEGER}
+Number of simulated series used to compute the IRFs. Default: @code{1}
+if @code{order}=@code{1}, and @code{50} otherwise.
+
+@item solve_algo = @var{INTEGER}
+@xref{solve_algo}, for the possible values and their meaning.
+
+@item aim_solver
+@anchor{aim_solver}
+Use the Anderson-Moore Algorithm (AIM) to compute the decision rules,
+instead of using Dynare's default method based on a generalized Schur
+decomposition. This option is only valid for first order
+approximation. See
+@uref{http://www.federalreserve.gov/Pubs/oss/oss4/aimindex.html,AIM
+website} for more details on the algorithm.
+
+@item conditional_variance_decomposition = @var{INTEGER}
+@anchor{conditional_variance_decomposition = INTEGER}
+See below.
+
+@item conditional_variance_decomposition = [@var{INTEGER1}:@var{INTEGER2}]
+See below.
+
+@item conditional_variance_decomposition = [@var{INTEGER1} @var{INTEGER2} @dots{}]
+Computes a conditional variance decomposition for the specified
+period(s). Conditional variances are given by
+@math{var(y_{t+k}|t)}. For period 1, the conditional variance
+decomposition provides the decomposition of the effects of shocks upon
+impact.
+
+@item pruning
+Discard higher order terms when iteratively computing simulations of
+the solution, as in @cite{Schaumburg and Sims (2008)}.
+
+@item partial_information
+@anchor{partial_information}
+Computes the solution of the model under partial information, along
+the lines of @cite{Currie and Levine (1986)}. Agents are supposed to
+observe only some variables of the economy. The set of observed
+variables is declared using the @code{varobs} command. Note that if
+@code{varobs} is not present or contains all endogenous variables, then
+this is the full information case and this option has no effect.
+@end table
+
+@outputhead
+
+This command sets @code{oo_.dr}, @code{oo_.mean}, @code{oo_.var} and
+@code{oo_.autocorr}, which are described below.
+
+If option @code{periods} is present, sets @code{oo_.endo_simul}
+(@pxref{oo_.endo_simul}), and also saves the simulated variables in
+MATLAB/Octave vectors of the global workspace with the same name as
+the endogenous variables.
+
+If options @code{irf} is different from zero, sets @code{oo_.irfs}
+(see below) and also saves the IRFs in MATLAB/Octave vectors of
+the global workspace (this latter way of accessing the IRFs is
+deprecated and will disappear in a future version).
+
+
+@customhead{Example 1}
+
+@example
+shocks;
+var e;
+stderr 0.0348;
+end;
+
+stoch_simul;
+@end example
+
+Performs the simulation of the 2nd order approximation of a model
+with a single stochastic shock @code{e}, with a standard error of
+0.0348.
+
+@customhead{Example 2}
+
+@example
+stoch_simul(linear,irf=60) y k;
+@end example
+
+Performs the simulation of a linear model and displays impulse
+response functions on 60 periods for variables @code{y} and @code{k}.
+@end deffn
+
+@defvr {MATLAB/Octave variable} oo_.mean
+After a run of @code{stoch_simul}, contains the mean of the endogenous
+variables. Contains theoretical mean if the @code{periods} option is
+not present, and empirical mean otherwise. The variables are arranged
+in declaration order.
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.var
+After a run of @code{stoch_simul}, contains the variance-covariance of
+the endogenous variables. Contains theoretical variance if the
+@code{periods} option is not present, and empirical variance
+otherwise. The variables are arranged in declaration order.
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.autocorr
+After a run of @code{stoch_simul}, contains a cell array of the
+autocorrelation matrices of the endogenous variables. The element
+number of the matrix in the cell array corresponds to the order of
+autocorrelation. The option @code{ar} specifies the number of
+autocorrelation matrices available. Contains theoretical
+autocorrelations if the @code{periods} option is not present, and
+empirical autocorrelations otherwise.
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.irfs
+After a run of @code{stoch_simul} with option @code{irf} different
+from zero, contains the impulse responses, with the following naming
+convention: @code{@var{VARIABLE_NAME}_@var{SHOCK_NAME}}.
+
+For example, @code{oo_.irfs.gnp_ea} contains the effect on @code{gnp}
+of a one standard deviation shock on @code{ea}.
+@end defvr
+
+@vindex oo_.dr
+The approximated solution of a model takes the form of a set of decision
+rules or transition equations expressing the current value of the endogenous
+variables of the model as function of the previous state of the model and
+shocks oberved at the beginning of the period. The decision rules are stored
+in the structure @code{oo_.dr} which is described below.
+
+@node Typology and ordering of variables
+@subsection Typology and ordering of variables
+
+Dynare distinguishes four types of endogenous variables:
+
+@table @emph
+
+@item Purely backward (or purely predetermined) variables
+@vindex oo_.dr.npred
+@vindex oo_.dr.nboth
+Those that appear only at current and past period in the model, but
+not at future period (@i{i.e.} at @math{t} and @math{t-1} but not
+@math{t+1}). The number of such variables is equal to
+@code{oo_.dr.npred - oo_.dr.nboth}.
+
+@item Purely forward variables
+@vindex oo_.dr.nfwrd
+Those that appear only at current and future period in the model, but
+not at past period (@i{i.e.} at @math{t} and @math{t+1} but not
+@math{t-1}). The number of such variables is stored in
+@code{oo_.dr.nfwrd}.
+
+@item Mixed variables
+@vindex oo_.dr.nboth
+Those that appear at current, past and future period in the model
+(@i{i.e.} at @math{t}, @math{t+1} and @math{t-1}). The number of such
+variables is stored in @code{oo_.dr.nboth}.
+
+@item Static variables
+@vindex oo_.dr.nstatic
+Those that appear only at current, not past and future period in the
+model (@i{i.e.} only at @math{t}, not at @math{t+1} or
+@math{t-1}). The number of such variables is stored in
+@code{oo_.dr.nstatic}.
+@end table
+
+Note that all endogenous variables fall into one of these four
+categories, since after the creation of auxiliary variables
+(@pxref{Auxiliary variables}), all endogenous have at most one lead
+and one lag. We therefore have the following identity:
+
+@example
+oo_.dr.npred + oo_.dr.nfwrd + oo_.dr.nstatic = M_.endo_nbr
+@end example
+
+Internally, Dynare uses two orderings of the endogenous variables: the
+order of declaration (which is reflected in @code{M_.endo_names}), and
+an order based on the four types described above, which we will call
+the DR-order (``DR'' stands for decision rules). Most of the time, the
+declaration order is used, but for elements of the decision rules, the
+DR-order is used.
+
+The DR-order is the following: static variables appear first, then purely
+backward variables, then mixed variables, and finally purely forward
+variables. Inside each category, variables are arranged according to the
+declaration order.
+
+@vindex oo_.dr.order_var
+@vindex oo_.dr.inv_order_var
+Variable @code{oo_.dr.order_var} maps DR-order to declaration
+order, and variable @code{oo_.dr.inv_order_var} contains the
+inverse map. In other words, the k-th variable in the DR-order corresponds
+to the endogenous variable numbered @code{oo_.dr_order_var(k)} in
+declaration order. Conversely, k-th declared variable is numbered
+@code{oo_.dr.inv_order_var(k)} in DR-order.
+
+@vindex oo_.dr.npred
+Finally, the state variables of the model are the purely backward variables
+and the mixed variables. They are orderer in DR-order when they appear in
+decision rules elements. There are @code{oo_.dr.npred} such
+variables.
+
+@node First order approximation
+@subsection First order approximation
+
+The approximation has the form:
+
+@math{y_t = y^s + A y^h_{t-1} + B u_t}
+
+where @math{y^s} is the steady state value of @math{y} and
+@math{y^h_t=y_t-y^s}.
+
+The coefficients of the decision rules are stored as follows:
+
+@itemize 
+
+@item
+@vindex oo_.dr.ys
+@math{y^s} is stored in @code{oo_.dr.ys}. The vector rows
+correspond to all endogenous in the declaration order.
+
+@item
+@vindex oo_.dr.ghx
+A is stored in @code{oo_.dr.ghx}. The matrix rows correspond to all
+endogenous in DR-order. The matrix columns correspond to state
+variables in DR-order.
+
+@item
+@vindex oo_.dr.ghu
+B is stored @code{oo_.dr.ghu}. The matrix rows correspond to all
+endogenous in DR-order. The matrix columns correspond to exogenous
+variables in declaration order.
+@end itemize
+
+@node Second order approximation
+@subsection Second order approximation
+
+The approximation has the form:
+
+@math{y_t = y^s + 0.5 \Delta^2 +
+A y^h_{t-1} + B u_t + 0.5 C
+(y^h_{t-1}\otimes y^h_{t-1}) + 0.5 D
+(u_t \otimes u_t) + E
+(y^h_{t-1} \otimes u_t)}
+
+where @math{y^s} is the steady state value of @math{y},
+@math{y^h_t=y_t-y^s}, and @math{\Delta^2} is the shift effect of the
+variance of future shocks.
+
+The coefficients of the decision rules are stored in the variables
+described for first order approximation, plus the following variables:
+
+@itemize 
+
+@item
+@vindex oo_.dr.ghs2
+@math{\Delta^2} is stored in @code{oo_.dr.ghs2}. The vector rows
+correspond to all endogenous in DR-order.
+
+@item
+@vindex oo_.dr.ghxx
+@math{C} is stored in @code{oo_.dr.ghxx}. The matrix rows
+correspond to all endogenous in DR-order. The matrix columns correspond
+to the Kronecker product of the vector of state variables in DR-order.
+
+@item
+@vindex oo_.dr.ghuu
+@math{D} is stored in @code{oo_.dr.ghuu}. The matrix rows correspond
+to all endogenous in DR-order. The matrix columns correspond to the
+Kronecker product of exogenous variables in declaration order.
+
+@item
+@vindex oo_.dr.ghxu
+@math{E} is stored in @code{oo_.dr.ghxu}. The matrix rows correspond
+to all endogenous in DR-order. The matrix columns correspond to the
+Kronecker product of the vector of state variables (in DR-order) by
+the vector of exogenous variables (in declaration order).
+@end itemize
+
+@node Third order approximation
+@subsection Third order approximation
+
+The approximation has the form:
+
+@math{y_t = y^s + G_0 +
+G_1 z_t +
+G_2 (z_t \otimes z_t) +
+G_3 (z_t \otimes z_t \otimes z_t)}
+
+where @math{y^s} is the steady state value of @math{y}, and @math{z_t} is a
+vector consisting of the deviation from the steady state of the state
+variables (in DR-order) at date @math{t-1} followed by the exogenous variables at
+date @math{t} (in declaration order). The vector @math{z_t} is
+therefore of size @math{n_z} = @code{oo_.dr.npred +
+M_.exo_nbr}.
+
+The coefficients of the decision rules are stored as follows:
+
+@itemize 
+
+@item
+@vindex oo_.dr.ys
+@math{y^s} is stored in @code{oo_.dr.ys}. The vector rows
+correspond to all endogenous in the declaration order.
+
+@item
+@vindex oo_.dr.g_0
+@math{G_0} is stored in @code{oo_.dr.g_0}. The
+vector rows correspond to all endogenous in DR-order.
+
+@item
+@vindex oo_.dr.g_1
+@math{G_1} is stored in @code{oo_.dr.g_1}. The matrix rows correspond
+to all endogenous in DR-order. The matrix columns correspond to state
+variables in DR-order, followed by exogenous in declaration order.
+
+@item
+@vindex oo_.dr.g_2
+@math{G_2} is stored in @code{oo_.dr.g_2}. The matrix rows correspond
+to all endogenous in DR-order. The matrix columns correspond to the
+Kronecker product of state variables (in DR-order), followed by
+exogenous (in declaration order). Note that the Kronecker product is
+stored in a folded way, @i{i.e.} symmetric elements are stored only
+once, which implies that the matrix has @math{n_z(n_z+1)/2} columns.  More
+precisely, each column of this matrix corresponds to a pair @math{(i_1, i_2)}
+where each index represents an element of @math{z_t} and is therefore between
+@math{1} and @math{n_z}. Only non-decreasing pairs are stored, @i{i.e.} those for
+which @math{i_1 \leq i_2}. The columns are arranged in the lexicographical order
+of non-decreasing pairs. Also note that for those pairs where @math{i_1 \neq
+i_2}, since the element is stored only once but appears two times in
+the unfolded @math{G_2} matrix, it must be multiplied by 2 when computing the
+decision rules.
+
+@item
+@vindex oo_.dr.g_3
+@math{G_3} is stored in @code{oo_.dr.g_3}. The matrix rows correspond
+to all endogenous in DR-order. The matrix columns correspond to the
+third Kronecker power of state variables (in DR-order), followed by
+exogenous (in declaration order). Note that the third Kronecker power
+is stored in a folded way, @i{i.e.} symmetric elements are stored only
+once, which implies that the matrix has @math{n_z(n_z+1)(n_z+2)/6}
+columns.  More precisely, each column of this matrix corresponds to a
+tuple @math{(i_1, i_2, i_3)} where each index represents an element of
+@math{z_t} and is therefore between @math{1} and @math{n_z}. Only
+non-decreasing tuples are stored, @i{i.e.} those for which @math{i_1
+\leq i_2 \leq i_3}. The columns are arranged in the lexicographical
+order of non-decreasing tuples. Also note that for tuples that have
+three distinct indices (@i{i.e.} @math{i_1 \neq i_2} and @math{i_1
+\neq i_3} and @math{i_2 \neq i_3}, since these elements are stored
+only once but appears six times in the unfolded @math{G_3} matrix,
+they must be multiplied by 6 when computing the decision
+rules. Similarly, for those tuples that have two equal indices
+(@i{i.e.} of the form @math{(a,a,b)} or @math{(a,b,a)} or
+@math{(b,a,a)}), since these elements are stored only once but appears
+three times in the unfolded @math{G_3} matrix, they must be multiplied
+by 3 when computing the decision rules.
+@end itemize
+
+
+@node Estimation
+@section Estimation
+
+Provided that you have observations on some endogenous variables, it
+is possible to use Dynare to estimate some or all parameters. Both
+maximum likelihood (as in @cite{Ireland (2004)}) and Bayesian
+techniques (as in @cite{Rabanal and Rubio-Ramirez (2003)},
+@cite{Schorfheide (2000)} or @cite{Smets and Wouters (2003)}) are
+available. Using Bayesian methods, it is possible to estimate DSGE
+models, VAR models, or a combination of the two techniques called
+DSGE-VAR.
+
+Note that in order to avoid stochastic singularity, you must have at
+least as many shocks or measurement errors in your model as you have
+observed variables.
+
+@deffn Command varobs @var{VARIABLE_NAME}@dots{};
+
+@descriptionhead
+
+This command lists the name of observed endogenous variables for the
+estimation procedure. These variables must be available in the data
+file (@pxref{estimation}).
+
+Alternatively, this command is also used in conjunction with the
+@code{partial_information} option of @code{stoch_simul}, for declaring
+the set of observed variables when solving the model under partial
+information.
+
+Only one instance of @code{varobs} is allowed in a model file. If one
+needs to declare observed variables in a loop, the macroprocessor can
+be used as shown in the second example below.
+
+@customhead{Simple example}
+
+@example
+varobs C y rr;
+@end example
+
+@customhead{Example with a loop}
+
+@example
+varobs
+@@#for co in countries
+  GDP_@@@{co@}
+@@#endfor
+;
+@end example
+
+@end deffn
+
+@deffn Block observation_trends ;
+
+@descriptionhead
+
+This block specifies @emph{linear} trends for observed variables as
+functions of model parameters.
+
+Each line inside of the block should be of the form:
+
+@example
+@var{VARIABLE_NAME}(@var{EXPRESSION});
+@end example
+
+In most cases, variables shouldn't be centered when
+@code{observation_trends} is used.
+
+@examplehead
+
+@example
+observation_trends;
+Y (eta);
+P (mu/eta);
+end;
+@end example
+
+@end deffn
+
+
+@anchor{estimated_params}
+@deffn Block estimated_params ;
+
+@descriptionhead
+
+This block lists all parameters to be estimated and specifies bounds
+and priors as necessary.
+
+Each line corresponds to an estimated parameter.
+
+In a maximum likelihood estimation, each line follows this syntax:
+
+@example
+stderr VARIABLE_NAME | corr VARIABLE_NAME_1, VARIABLE_NAME_2 | PARAMETER_NAME
+, INITIAL_VALUE [, LOWER_BOUND, UPPER_BOUND ];
+@end example
+
+In a Bayesian estimation, each line follows this syntax:
+
+@example
+stderr VARIABLE_NAME | corr VARIABLE_NAME_1, VARIABLE_NAME_2 |
+PARAMETER_NAME | DSGE_PRIOR_WEIGHT
+[, INITIAL_VALUE [, LOWER_BOUND, UPPER_BOUND]], PRIOR_SHAPE,
+PRIOR_MEAN, PRIOR_STANDARD_ERROR [, PRIOR_3RD_PARAMETER [,
+PRIOR_4TH_PARAMETER [, SCALE_PARAMETER ] ] ];
+@end example
+
+The first part of the line consists of one of the three following
+alternatives:
+
+@table @code
+
+@item stderr @var{VARIABLE_NAME}
+Indicates that the standard error of the exogenous variable
+@var{VARIABLE_NAME}, or of the observation error associated with
+endogenous observed variable @var{VARIABLE_NAME}, is to be estimated
+
+@item corr @var{VARIABLE_NAME_1}, @var{VARIABLE_NAME_2}
+Indicates that the correlation between the exogenous variables
+@var{VARIABLE_NAME_1} and @var{VARIABLE_NAME_2}, or the correlation of
+the observation errors associated with endogenous observed variables
+@var{VARIABLE_NAME_1} and @var{VARIABLE_NAME_2}, is to be estimated
+
+@item @var{PARAMETER_NAME}
+The name of a model parameter to be estimated
+
+@item DSGE_PRIOR_WEIGHT
+@dots{}
+
+@end table
+
+The rest of the line consists of the following fields, some of them
+being optional:
+
+@table @code
+
+@item @var{INITIAL_VALUE}
+Specifies a starting value for maximum likelihood estimation
+
+@item @var{LOWER_BOUND}
+Specifies a lower bound for the parameter value in maximum likelihood estimation
+
+@item @var{UPPER_BOUND}
+Specifies an upper bound for the parameter value in maximum likelihood estimation
+
+@item @var{PRIOR_SHAPE}
+A keyword specifying the shape of the prior density.
+The possible values are: @code{beta_pdf},
+@code{gamma_pdf}, @code{normal_pdf},
+@code{uniform_pdf}, @code{inv_gamma_pdf},
+@code{inv_gamma1_pdf}, @code{inv_gamma2_pdf}. Note
+that @code{inv_gamma_pdf} is equivalent to
+@code{inv_gamma1_pdf}
+
+@item @var{PRIOR_MEAN}
+The mean of the prior distribution
+
+@item @var{PRIOR_STANDARD_ERROR}
+The standard error of the prior distribution
+
+@item @var{PRIOR_3RD_PARAMETER}
+A third parameter of the prior used for generalized beta distribution,
+generalized gamma and for the uniform distribution. Default: @code{0}
+
+@item @var{PRIOR_4TH_PARAMETER}
+A fourth parameter of the prior used for generalized beta distribution
+and for the uniform distribution. Default: @code{1}
+
+@item @var{SCALE_PARAMETER}
+The scale parameter to be used for the jump distribution of the
+Metropolis-Hasting algorithm
+@end table
+
+Note that @var{INITIAL_VALUE}, @var{LOWER_BOUND}, @var{UPPER_BOUND},
+@var{PRIOR_MEAN}, @var{PRIOR_STANDARD_ERROR},
+@var{PRIOR_3RD_PARAMETER}, @var{PRIOR_4TH_PARAMETER} and
+@var{SCALE_PARAMETER} can be any valid @var{EXPRESSION}. Some of them
+can be empty, in which Dynare will select a default value depending on
+the context and the prior shape.
+
+As one uses options more towards the end of the list, all previous
+options must be filled: for example, if you want to specify
+@var{SCALE_PARAMETER}, you must specify @var{PRIOR_3RD_PARAMETER} and
+@var{PRIOR_4TH_PARAMETER}. Use empty values, if these parameters don't
+apply.
+
+@customhead{Parameter transformation}
+
+Sometimes, it is desirable to estimate a transformation of a parameter
+appearing in the model, rather than the parameter itself. It is of
+course possible to replace the original parameter by a function of the
+estimated parameter everywhere is the model, but it is often
+unpractical.
+
+In such a case, it is possible to declare the parameter to be estimated
+in the @code{parameters} statement and to define the transformation,
+using a pound sign (#) expression (@pxref{Model declaration}).
+
+@examplehead
+
+@example
+parameters bet;
+
+model;
+# sig = 1/bet;
+c = sig*c(+1)*mpk;
+end;
+
+estimated_params;
+bet, normal_pdf, 1, 0.05;
+end;
+@end example
+
+@end deffn
+
+@deffn Block estimated_params_init ;
+
+This block declares numerical initial values for the optimizer when
+these ones are different from the prior mean.
+
+Each line has the following syntax:
+
+@example
+stderr VARIABLE_NAME | corr VARIABLE_NAME_1, VARIABLE_NAME_2 | PARAMETER_NAME
+, INITIAL_VALUE;
+@end example
+
+@xref{estimated_params}, for the meaning and syntax of the various components.
+
+@end deffn
+
+@deffn Block estimated_params_bounds ;
+
+This block declares lower and upper bounds for parameters in maximum
+likelihood estimation.
+
+Each line has the following syntax:
+
+@example
+stderr VARIABLE_NAME | corr VARIABLE_NAME_1, VARIABLE_NAME_2 | PARAMETER_NAME
+, LOWER_BOUND, UPPER_BOUND;
+@end example
+
+@xref{estimated_params}, for the meaning and syntax of the various components.
+
+@end deffn
+
+@anchor{estimation}
+@deffn Command estimation [@var{VARIABLE_NAME}@dots{}];
+@deffnx Command estimation (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
+
+@descriptionhead
+
+This command runs Bayesian or maximum likelihood estimation.
+
+The following information will be displayed by the command:
+@itemize 
+
+@item
+results from posterior optimization (also for maximum likelihood)
+
+@item
+marginal log density
+
+@item
+mean and shortest confidence interval from posterior simulation
+
+@item
+Metropolis-Hastings convergence graphs that still need to be documented
+
+@item
+graphs with prior, posterior and mode
+
+@item
+graphs of smoothed shocks, smoothed observation errors, smoothed and historical variables
+@end itemize
+
+@optionshead
+
+@table @code
+
+@item datafile = @var{FILENAME}
+The datafile (a @file{.m} file, a @file{.mat} file or, under MATLAB, a
+@file{.xls} file)
+
+@item xls_sheet = @var{NAME}
+@anchor{xls_sheet}
+The name of the sheet with the data in an Excel file
+
+@item xls_range = @var{RANGE}
+@anchor{xls_range}
+The range with the data in an Excel file
+
+@item nobs = @var{INTEGER}
+The number of observations to be used. Default: all observations in
+the file
+
+@item nobs = [@var{INTEGER_1}:@var{INTEGER_2}]
+Runs a recursive estimation and forecast for samples of size ranging
+of @var{INTEGER_1} to @var{INTEGER_2}. Option @code{forecast} must
+also be specified
+
+@item first_obs = @var{INTEGER}
+The number of the first observation to be used. Default: @code{1}
+
+@item prefilter = @var{INTEGER}
+A value of @code{1} means that the estimation procedure will demean
+the data. Default: @code{0}, @i{i.e.} no prefiltering
+
+@item presample = @var{INTEGER}
+The number of observations to be skipped before evaluating the
+likelihood. Default: @code{0}
+
+@item loglinear
+Computes a log-linear approximation of the model instead of a linear
+approximation. The data must correspond to the definition of the
+variables used in the model. Default: computes a linear approximation
+
+@item plot_priors = @var{INTEGER}
+Control the plotting of priors:
+
+@table @code
+
+@item 0
+No prior plot
+
+@item 1
+Prior density for each estimated parameter is plotted. It is important
+to check that the actual shape of prior densities matches what you
+have in mind. Ill choosen values for the prior standard density can
+result in absurd prior densities.
+@end table
+
+@noindent
+Default value is @code{1}.
+
+@item nograph
+No graphs should be plotted
+
+@item lik_init = @var{INTEGER}
+@anchor{lik_init}
+Type of initialization of Kalman filter:
+
+@table @code
+
+@item 1
+For stationary models, the initial matrix of variance of the error of
+forecast is set equal to the unconditional variance of the state
+variables
+
+@item 2
+For nonstationary models: a wide prior is used with an initial matrix
+of variance of the error of forecast diagonal with 10 on the diagonal
+
+@item 3
+For nonstationary models: @dots{}
+@end table
+
+@noindent
+Default value is @code{1}.
+
+@item lik_algo = @var{INTEGER}
+@dots{}
+
+@item conf_sig = @var{DOUBLE}
+@xref{conf_sig}.
+
+@item mh_replic = @var{INTEGER}
+@anchor{mh_replic} Number of replications for Metropolis-Hastings
+algorithm. For the time being, @code{mh_replic} should be larger than
+@code{1200}. Default: @code{20000}
+
+@item mh_nblocks = @var{INTEGER}
+Number of parallel chains for Metropolis-Hastings algorithm. Default:
+@code{2}
+
+@item mh_drop = @var{DOUBLE}
+The fraction of initially generated parameter vectors to be dropped
+before using posterior simulations. Default: @code{0.5}
+
+@item mh_jscale = @var{DOUBLE}
+The scale to be used for the jumping distribution in
+Metropolis-Hastings algorithm. The default value is rarely
+satisfactory. This option must be tuned to obtain, ideally, an
+acceptation rate of 25% in the Metropolis-Hastings algorithm. Default:
+@code{0.2}
+
+@item mh_init_scale = @var{DOUBLE}
+The scale to be used for drawing the initial value of the
+Metropolis-Hastings chain. Default: 2*@code{mh_scale}
+
+@item mh_recover
+@anchor{mh_recover} Attempts to recover a Metropolis-Hastings
+simulation that crashed prematurely. Shouldn't be used together with
+@code{load_mh_file}
+
+@item mh_mode = @var{INTEGER}
+@dots{}
+
+@item mode_file = @var{FILENAME}
+Name of the file containing previous value for the mode. When
+computing the mode, Dynare stores the mode (@code{xparam1}) and the
+hessian (@code{hh}) in a file called
+@file{@var{MODEL_FILENAME}_mode.mat}
+
+@item mode_compute = @var{INTEGER} | @var{FUNCTION_NAME}
+Specifies the optimizer for the mode computation:
+
+@table @code
+
+@item 0
+The mode isn't computed. @code{mode_file} option must be specified
+
+@item 1
+Uses @code{fmincon} optimization routine (not available under Octave)
+
+@item 2
+Value no longer used
+
+@item 3
+Uses @code{fminunc} optimization routine
+
+@item 4
+Uses Chris Sims's @code{csminwel}
+
+@item 5
+Uses Marco Ratto's @code{newrat}
+
+@item 6
+Uses a Monte-Carlo based optimization routine (see
+@uref{http://www.dynare.org/DynareWiki/MonteCarloOptimization,Dynare
+wiki} for more details)
+
+@item 7
+Uses @code{fminsearch}, a simplex based optimization routine
+(available under Octave if the
+@uref{http://octave.sourceforge.net/optim/,optim} package from
+Octave-Forge is installed)
+
+@item @var{FUNCTION_NAME}
+It is also possible to give a @var{FUNCTION_NAME} to this option,
+instead of an @var{INTEGER}. In that case, Dynare takes the return
+value of that function as the posterior mode.
+@end table
+
+@noindent
+Default value is @code{4}.
+
+@item mode_check
+Tells Dynare to plot the posterior density for values around the
+computed mode for each estimated parameter in turn. This is helpful to
+diagnose problems with the optimizer
+
+@item prior_trunc = @var{DOUBLE}
+@anchor{prior_trunc} Probability of extreme values of the prior
+density that is ignored when computing bounds for the
+parameters. Default: @code{1e-32}
+
+@item load_mh_file
+@anchor{load_mh_file} Tells Dynare to add to previous
+Metropolis-Hastings simulations instead of starting from
+scratch. Shouldn't be used together with @code{mh_recover}
+
+@item optim = (@var{fmincon options})
+Can be used to set options for @code{fmincon}, the optimizing function
+of MATLAB Optimizaiton toolbox. Use MATLAB's syntax for these
+options. Default:
+@code{('display','iter','LargeScale','off','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6)}
+
+@item nodiagnostic
+Doesn't compute the convergence diagnostics for
+Metropolis-Hastings. Default: diagnostics are computed and displayed
+
+@item bayesian_irf
+@vindex oo_.PosteriorIRF.Dsge
+@anchor{bayesian_irf} Triggers the computation of the posterior
+distribution of IRFs. The length of the IRFs are controlled by the
+@code{irf} option. Results are stored in @code{oo_.PosteriorIRF.Dsge}
+(see below for a description of this variable)
+
+@item dsge_var
+Triggers the estimation of a DSGE-VAR model, where the weight of the
+DSGE prior of the VAR model will be estimated.  The prior on the
+weight of the DSGE prior, @code{dsge_prior_weight}, must be defined in
+the @code{estimated_params} section.  NB: The previous method of
+declaring @code{dsge_prior_weight} as a parameter and then placing it
+in @code{estimated_params} is now deprecated and will be removed in a
+future release of Dynare.
+
+@item dsge_var = @var{DOUBLE}
+Triggers the estimation of a DSGE-VAR model, where the weight of the
+DSGE prior of the VAR model is calibrated to the value passed. NB: The
+previous method of declaring @code{dsge_prior_weight} as a parameter
+and then calibrating it is now deprecated and will be removed in a
+future release of Dynare.
+
+@item dsge_varlag = @var{INTEGER}
+@anchor{dsge_varlag} The number of lags used to estimate a DSGE-VAR
+model. Default: @code{4}.
+
+@item moments_varendo
+@vindex oo_.PosteriorTheoreticalMoments
+@anchor{moments_varendo} Triggers the computation of the posterior
+distribution of the theoretical moments of the endogenous
+variables. Results are stored in
+@code{oo_.PosteriorTheoreticalMoments} (see below for a description of
+this variable)
+
+@item filtered_vars
+@vindex oo_.FilteredVariables
+@anchor{filtered_vars} Triggers the computation of the posterior
+distribution of filtered endogenous variables and shocks. Results are
+stored in @code{oo_.FilteredVariables} (see below for a description of
+this variable)
+
+@item smoother
+@vindex oo_.SmoothedVariables
+@vindex oo_.SmoothedShocks
+@vindex oo_.SmoothedMeasurementErrors
+@anchor{smoother} Triggers the computation of the posterior
+distribution of smoothered endogenous variables and shocks. Results
+are stored in @code{oo_.SmoothedVariables}, @code{oo_.SmoothedShocks}
+and @code{oo_.SmoothedMeasurementErrors} (see below for a description
+of these variables)
+
+@item forecast = @var{INTEGER}
+@vindex oo_.forecast
+@anchor{forecast} Computes the posterior distribution of a forecast on
+@var{INTEGER} periods after the end of the sample used in
+estimation. The result is stored in variable @code{oo_.forecast}
+(@pxref{Forecasting})
+
+@item tex
+@anchor{tex} Requests the printing of results and graphs in TeX tables
+and graphics that can be later directly included in LaTeX files (not
+yet implemented)
+
+@item kalman_algo = @var{INTEGER}
+@dots{}
+
+@item kalman_tol = @var{DOUBLE}
+@dots{}
+
+@item filter_covariance
+@anchor{filter_covariance} Saves the series of one step ahead error of
+forecast covariance matrices.
+
+@item filter_step_ahead = [@var{INTEGER_1}:@var{INTEGER_2}]
+@anchor{filter_step_ahead} Triggers the computation k-step ahead
+filtered values.
+
+@item filter_decomposition
+@anchor{filter_decomposition} Triggers the computation of the shock
+decomposition of the above k-step ahead filtered values.
+
+@item constant
+@dots{}
+
+@item noconstant
+@dots{}
+
+@item diffuse_filter
+@dots{}
+
+@item selected_variables_only
+Only run the smoother on the variables listed just after the
+@code{estimation} command. Default: run the smoother on all the
+declared endogenous variables.
+
+@item cova_compute = @var{INTEGER}
+When @code{0}, the covariance matrix of estimated parameters is not
+computed after the computation of posterior mode (or maximum
+likelihood). This increases speed of computation in large models
+during development, when this information is not always necessary. Of
+course, it will break all successive computations that would require
+this covariance matrix. Default is @code{1}.
+
+@item solve_algo = @var{INTEGER}
+@xref{solve_algo}.
+
+@item order = @var{INTEGER}
+@xref{order}.
+
+@item irf = @var{INTEGER}
+@xref{irf}.
+
+@item aim_solver
+@xref{aim_solver}.
+@end table
+
+@customhead{Note}
+
+If no @code{mh_jscale} parameter is used in estimated_params, the
+procedure uses @code{mh_jscale} for all parameters. If
+@code{mh_jscale} option isn't set, the procedure uses @code{0.2} for
+all parameters.
+
+@outputhead
+
+@vindex M_.params
+@vindex M_.Sigma_e
+After running @code{estimation}, the parameters @code{M_.params} and
+the variance matrix @code{M_.Sigma_e} of the shocks are set to the
+mode for maximum likelihood estimation or posterior mode computation
+without Metropolis iterations.
+
+After @code{estimation} with Metropolis iterations (option
+@code{mh_replic} > 0 or option @code{load_mh_file} set) the parameters
+@code{M_.params} and the variance matrix @code{M_.Sigma_e} of the
+shocks are set to the posterior mean.
+
+Depending on the options, @code{estimation} stores results in various
+fields of the @code{oo_} structure, described below.
+
+@customhead{Running the smoother with calibrated parameters}
+
+It is possible to compute smoothed value of the endogenous variables
+and the shocks with calibrated parameters, without estimation
+proper. For this usage, there should be no @code{estimated_params}
+block. Observed variables must be declared. A dataset must be
+specified in the @code{estimation} instruction. In addition, use the
+following options:
+@code{mode_compute=0,mh_replic=0,smoother}. Currently, there is no
+specific output for this usage of the @code{estimation} command. The
+results are made available in fields of @code{oo_} structure. An
+example is available in @file{./tests/smoother/calibrated_model.mod}.
+
+@end deffn
+
+In the following variables, we will adopt the following shortcuts for
+specific field names:
+
+@table @var
+
+@item MOMENT_NAME
+
+This field can take the following values:
+
+@table @code
+
+@item HPDinf
+Lower bound of a 90% HPD interval@footnote{See option @ref{conf_sig}
+to change the size of the HPD interval}
+
+@item HPDsup
+Upper bound of a 90% HPD interval 
+
+@item Mean
+Mean of the posterior distribution
+
+@item Median
+Median of the posterior distribution
+
+@item Std
+Standard deviation of the posterior distribution
+@end table
+
+@item ESTIMATED_OBJECT
+
+This field can take the following values:
+
+@table @code
+
+@item measurement_errors_corr
+Correlation between two measurement errors
+
+@item measurement_errors_std
+Standard deviation of measurement errors
+
+@item parameters
+Parameters
+
+@item shocks_corr
+Correlation between two structural shocks
+
+@item shocks_std
+Standard deviation of structural shocks
+
+@end table
+@end table
+
+
+@defvr {MATLAB/Octave variable} oo_.MarginalDensity.LaplaceApproximation
+Variable set by the @code{estimation} command.
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.MarginalDensity.ModifiedHarmonicMean
+Variable set by the @code{estimation} command, if it is used with
+@code{mh_replic > 0} or @code{load_mh_file} option.
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.FilteredVariables
+Variable set by the @code{estimation} command, if it is used with the
+@code{filtered_vars} option. Fields are of the form:
+@example
+@code{oo_.FilteredVariables.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.PosteriorIRF.Dsge
+Variable set by the @code{estimation} command, if it is used with the
+@code{bayesian_irf} option. Fields are of the form:
+@example
+@code{oo_.PosteriorIRF.Dsge.@var{MOMENT_NAME}.@var{VARIABLE_NAME}_@var{SHOCK_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.SmoothedMeasurementErrors
+Variable set by the @code{estimation} command, if it is used with the
+@code{smoother} option. Fields are of the form:
+@example
+@code{oo_.SmoothedMeasurementErrors.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.SmoothedShocks
+Variable set by the @code{estimation} command, if it is used with the
+@code{smoother} option. Fields are of the form:
+@example
+@code{oo_.SmoothedShocks.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.SmoothedVariables
+Variable set by the @code{estimation} command, if it is used with the
+@code{smoother} option. Fields are of the form:
+@example
+@code{oo_.SmoothedVariables.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.PosteriorTheoreticalMoments
+Variable set by the @code{estimation} command, if it is used with the
+@code{moments_varendo} option. Fields are of the form:
+@example
+@code{oo_.PosteriorTheoreticalMoments.@var{THEORETICAL_MOMENT}.@var{ESTIMATED_OBJECT}.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
+@end example
+where @var{THEORETICAL_MOMENT} is one of the following:
+
+@table @code
+
+@item Autocorrelation
+Autocorrelation of endogenous variables@footnote{The autocorrlation
+coefficients are computed for the number of periods specified in
+option @code{ar}.}
+
+@item Correlation
+Correlation between two endogenous variables
+
+@item Decomp
+Decomposition of variance@footnote{When the shocks are correlated, it
+is the decomposition of orthogonalized shocks via Cholesky
+decompostion according to the order of declaration of shocks
+(@pxref{Variable declarations})}
+
+@item Expectation
+Expectation of endogenous variables
+
+@item Variance
+
+(co-)variance of endogenous variables
+
+@end table
+
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.posterior_density
+Variable set by the @code{estimation} command, if it is used with
+@code{mh_replic > 0} or @code{load_mh_file} option. Fields are of the form:
+@example
+@code{oo_.posterior_density.@var{PARAMETER_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.posterior_hpdinf
+Variable set by the @code{estimation} command, if it is used with
+@code{mh_replic > 0} or @code{load_mh_file} option. Fields are of the form:
+@example
+@code{oo_.posterior_hpdinf.@var{ESTIMATED_OBJECT}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.posterior_hpdsup
+Variable set by the @code{estimation} command, if it is used with
+@code{mh_replic > 0} or @code{load_mh_file} option. Fields are of the form:
+@example
+@code{oo_.posterior_hpdsup.@var{ESTIMATED_OBJECT}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.posterior_mean
+Variable set by the @code{estimation} command, if it is used with
+@code{mh_replic > 0} or @code{load_mh_file} option. Fields are of the form:
+@example
+@code{oo_.posterior_mean.@var{ESTIMATED_OBJECT}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.posterior_mode
+Variable set by the @code{estimation} command, if it is used with
+@code{mh_replic > 0} or @code{load_mh_file} option. Fields are of the form:
+@example
+@code{oo_.posterior_mode.@var{ESTIMATED_OBJECT}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.posterior_std
+Variable set by the @code{estimation} command, if it is used with
+@code{mh_replic > 0} or @code{load_mh_file} option. Fields are of the form:
+@example
+@code{oo_.posterior_std.@var{ESTIMATED_OBJECT}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+Here are some examples of generated variables:
+
+@example
+oo_.posterior_mode.parameters.alp
+oo_.posterior_mean.shocks_std.ex
+oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
+@end example
+
+
+@deffn Command model_comparison @var{FILENAME}[(@var{DOUBLE})]@dots{};
+@deffnx Command model_comparison (marginal_density = laplace | modifiedharmonicmean) @var{FILENAME}[(@var{DOUBLE})]@dots{};
+
+This command computes odds ratios and estimate a posterior density
+over a colletion of models. The priors over models can be specified as
+the @var{DOUBLE} values, otherwise a uniform prior is assumed.
+
+@end deffn
+
+@deffn Command shock_decomposition [@var{VARIABLE_NAME}]@dots{};
+@deffnx Command shock_decomposition (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}]@dots{};
+
+@descriptionhead
+
+This command computes and displays shock decomposition according to
+the model for a given sample.
+
+@optionshead
+
+@table @code
+
+@item parameter_set = @var{PARAMETER_SET}
+Specify the parameter set to use for running the smoother. The
+@var{PARAMETER_SET} can take one of the following five values:
+@code{prior_mode}, @code{prior_mean}, @code{posterior_mode},
+@code{posterior_mean}, @code{posterior_median}. Default value:
+@code{posterior_mean} if Metropolis has been run, else
+@code{posterior_mode}.
+
+@item shocks = (@var{VARIABLE_NAME} [@var{VARIABLE_NAME} @dots{}]  [ ; @var{VARIABLE_NAME} [@var{VARIABLE_NAME} @dots{}] @dots{}] )
+@dots{}
+
+@item labels = ( @var{VARIABLE_NAME} [@var{VARIABLE_NAME} @dots{}] )
+@dots{}
+@end table
+
+@end deffn
+
+
+@deffn Command unit_root_vars @var{VARIABLE_NAME}@dots{};
+
+@code{unit_root_vars} is used to declare a list of unit-root
+endogenous variables of a model so that dynare won't check the steady
+state levels (defined in the steadystate file) file for these
+variables. The information given by this command is no more used for
+the initialization of the diffuse kalman filter (as described in
+@cite{Durbin and Koopman (2001)} and @cite{Koopman and Durbin
+(2003)}).
+
+When @code{unit_root_vars} is used the @code{lik_init} option of
+@code{estimation} has no effect.
+
+When there are nonstationary variables in a model, there is no unique
+deterministic steady state. The user must supply a MATLAB/Octave
+function that computes the steady state values of the stationary
+variables in the model and returns dummy values for the nonstationary
+ones. The function should be called with the name of the @file{.mod}
+file followed by @file{_steadystate}. See @file{fs2000_steadystate.m}
+in @file{examples} directory for an example.
+
+Note that the nonstationary variables in the model must be integrated
+processes (their first difference or k-difference must be stationary).
+@end deffn
+
+Dynare also has the ability to estimate Bayesian VARs:
+
+@deffn Command bvar_density ;
+Computes the marginal density of an estimated BVAR model, using
+Minnesota priors.
+
+See @file{bvar-a-la-sims.pdf}, which comes with Dynare distribution,
+for more information on this command.
+@end deffn
+
+
+@node Forecasting
+@section Forecasting
+
+On a calibrated model, forecasting is done using the @code{forecast}
+command. On an estimated command, use the @code{forecast} option of
+@code{estimation} command.
+
+It is also possible to compute forecasts on a calibrated or estimated
+model for a given constrained path of the future endogenous
+variables. This is done, from the reduced form representation of the
+DSGE model, by finding the structural shocks that are needed to match
+the restricted paths. Use @code{conditional_forecast},
+@code{conditional_forecast_paths} and @code{plot_conditional_forecast}
+for that purpose.
+
+Finally, it is possible to do forecasting with a Bayesian VAR using
+the @code{bvar_forecast} command.
+
+@deffn Command forecast [@var{VARIABLE_NAME}@dots{}];
+@deffnx Command forecast (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
+
+@descriptionhead
+
+This command computes a simulation of a stochastic model from an
+arbitrary initial point.
+
+When the model also contains deterministic exogenous shocks, the
+simulation is computed conditionaly to the agents knowing the future
+values of the deterministic exogenous variables.
+
+@code{forecast} must be called after @code{stoch_simul}.
+
+@code{forecast} plots the trajectory of endogenous variables. When a
+list of variable names follows the command, only those variables are
+plotted. A 90% confidence interval is plotted around the mean
+trajectory. Use option @code{conf_sig} to change the level of the
+confidence interval.
+
+@optionshead
+
+@table @code
+
+@item periods = @var{INTEGER}
+Number of periods of the forecast. Default: @code{40}
+
+@item conf_sig = @var{DOUBLE}
+@anchor{conf_sig} Level of significance for confidence
+interval. Default: @code{0.90}
+
+@item nograph
+Don't display graphics.
+@end table
+
+@outputhead
+
+The results are stored in @code{oo_.forecast}, which is described below.
+
+@examplehead
+
+@example
+varexo_det tau;
+varexo e;
+
+@dots{}
+
+shocks;
+var e; stderr 0.01;
+var tau;
+periods 1:9;
+values -0.15;
+end;
+
+stoch_simul(irf=0);
+
+forecast;    
+@end example
+
+@end deffn
+
+@defvr {MATLAB/Octave variable} oo_.forecast
+Variable set by the @code{forecast} command, or by the
+@code{estimation} command if used with the @code{forecast}
+option. Fields are of the form:
+@example
+@code{oo_.forecast.@var{FORECAST_MOMENT}.@var{VARIABLE_NAME}}
+@end example
+where @var{FORECAST_MOMENT} is one of the following:
+
+@table @code
+
+@item HPDinf
+Lower bound of a 90% HPD interval@footnote{See option @ref{conf_sig}
+to change the size of the HPD interval} of forecast due to parameter
+uncertainty
+
+@item HPDsup
+Lower bound of a 90% HPD interval due to parameter uncertainty
+
+@item HPDTotalinf
+Lower bound of a 90% HPD interval of forecast due to parameter
+uncertainty and future shocks (only with the @code{estimation} command)
+
+@item HPDTotalsup
+Lower bound of a 90% HPD interval due to parameter uncertainty and
+future shocks (only with the @code{estimation} command)
+
+@item Mean
+Mean of the posterior distribution of forecasts
+
+@item Median
+Median of the posterior distribution of forecasts
+
+@item Std
+Standard deviation of the posterior distribution of forecasts
+@end table
+
+@end defvr
+
+@deffn Command conditional_forecast (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
+
+@descriptionhead
+
+This command computes forecasts on an estimated model for a given
+constrained path of some future endogenous variables. This is done,
+from the reduced form representation of the DSGE model, by finding the
+structural shocks that are needed to match the restricted paths. This
+command has to be called after estimation.
+
+Use @code{conditional_forecast_paths} block to give the list of
+constrained endogenous, and their constrained future path. Option
+@code{controlled_varexo} is used to specify the structural shocks
+which will be matched to generate the constrained path.
+
+Use @code{plot_conditional_forecast} to graph the results.
+
+@optionshead
+
+@table @code
+
+@item parameter_set = @code{prior_mode} | @code{prior_mean} | @code{posterior_mode} | @code{posterior_mean} | @code{posterior_median}
+Specify the parameter set to use for the forecasting. No default
+value, mandatory option.
+
+@item controlled_varexo = (@var{VARIABLE_NAME}@dots{})
+Specify the exogenous variables to use as control variables. No
+default value, mandatory option.
+
+@item periods = @var{INTEGER}
+Number of periods of the forecast. Default: @code{40}.  @code{periods}
+cannot be less than the number of constrained periods.
+
+@item replic = @var{INTEGER}
+Number of simulations. Default: @code{5000}.
+
+@item conf_sig = @var{DOUBLE}
+Level of significance for confidence interval. Default: @code{0.80}
+@end table
+
+@examplehead
+
+@example
+var y a
+varexo e u;
+
+@dots{}
+
+estimation(@dots{});
+
+conditional_forecast_paths;
+var y;
+periods 1:3, 4:5;
+values 2, 5;
+var a;
+periods 1:5;
+values 3;
+end;
+
+conditional_forecast(parameter_set = calibration, controlled_varexo = (e, u), replic = 3000);
+
+plot_conditional_forecast(periods = 10) e u;
+@end example
+
+@end deffn
+
+@deffn Block conditional_forecast_paths ;
+
+Describes the path of constrained endogenous, before calling
+@code{conditional_forecast}. The syntax is similar to deterministic
+shocks in @code{shocks}, see @code{conditional_forecast} for an
+example.
+
+The syntax of the block is the same than the deterministic shocks in
+the @code{shocks} blocks (@pxref{Shocks on exogenous variables}).
+
+@end deffn
+
+@deffn Command plot_conditional_forecast [@var{VARIABLE_NAME}@dots{}];
+@deffnx Command plot_conditional_forecast (periods = @var{INTEGER}) [@var{VARIABLE_NAME}@dots{}];
+
+@descriptionhead
+
+Plots the conditional forecasts.
+
+To be used after @code{conditional_forecast}.
+
+@optionshead
+
+@table @code
+
+@item periods = @var{INTEGER}
+Number of periods to be plotted. Default: equal to @code{periods} in
+@code{conditional_forecast}. The number of periods declared in
+@code{plot_conditional_forecast} cannot be greater than the one
+declared in @code{conditional_forecast}.
+@end table
+
+@end deffn
+
+@deffn Command bvar_forecast ;
+This command computes in-sample or out-sample forecasts for an
+estimated BVAR model, using Minnesota priors.
+
+See @file{bvar-a-la-sims.pdf}, which comes with Dynare distribution,
+for more information on this command.
+@end deffn
+
+
+@node Optimal policy
+@section Optimal policy
+
+Dynare has tools to compute optimal policies for quadratic
+objectives. You can either solve for optimal policy under commitment
+with @code{ramsey_policy}, for optimal policy under discretion with
+@code{discretionary_policy} or for optimal simple rule with @code{osr}.
+
+
+@anchor{osr}
+
+@deffn Command osr [@var{VARIABLE_NAME}@dots{}];
+@deffnx Command osr (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
+
+@descriptionhead
+
+This command computes optimal simple policy rules for
+linear-quadratic problems of the form:
+
+@quotation
+@math{\max_\gamma E(y'_tWy_t)}
+@end quotation
+
+such that:
+@quotation
+@math{A_1 E_ty_{t+1}+A_2 y_t+ A_3 y_{t-1}+C e_t=0}
+@end quotation
+
+where:
+
+@itemize
+
+@item
+@math{\gamma} are parameters to be optimized. They must be elements of matrices
+@math{A_1}, @math{A_2}, @math{A_3};
+
+@item
+@math{y} are the endogenous variables;
+
+@item
+@math{e} are the exogenous stochastic shocks;
+@end itemize
+
+The parameters to be optimized must be listed with @code{osr_params}.
+
+The quadratic objectives must be listed with @code{optim_weights}.
+
+This problem is solved using a numerical optimizer.
+
+@optionshead
+
+This command accept the same options than @code{stoch_simul}
+(@pxref{Computing the stochastic solution}).
+
+@end deffn
+
+@anchor{osr_params}
+@deffn Command osr_params @var{PARAMETER_NAME}@dots{};
+This command declares parameters to be optimized by @code{osr}.
+@end deffn
+
+@anchor{optim_weights}
+@deffn Block optim_weights ;
+
+This block specifies quadratic objectives for optimal policy problems
+
+More precisely, this block specifies the nonzero elements of the
+quadratic weight matrices for the objectives in @code{osr}.
+
+A element of the diagonal of the weight matrix is given by a line of
+the form:
+@example
+@var{VARIABLE_NAME} @var{EXPRESSION};
+@end example
+
+An off-the-diagonal element of the weight matrix is given by a line of
+the form:
+@example
+@var{VARIABLE_NAME},  @var{VARIABLE_NAME} @var{EXPRESSION};
+@end example
+
+@end deffn
+
+@deffn Command ramsey_policy [@var{VARIABLE_NAME}@dots{}];
+@deffnx Command ramsey_policy (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
+
+@descriptionhead
+
+This command computes the first order approximation of the policy that
+maximizes the policy maker objective function submitted to the
+constraints provided by the equilibrium path of the economy.
+
+The planner objective must be declared with the
+@code{planner_objective} command.
+
+@optionshead
+
+This command accepts all options of @code{stoch_simul}, plus:
+
+@table @code
+
+@item planner_discount = @var{DOUBLE}
+Declares the discount factor of the central planner. Default: @code{1.0}
+@end table
+
+Note that only first order approximation is available (@i{i.e.}
+@code{order=1} must be specified).
+
+@outputhead
+
+This command generates all the output variables of @code{stoch_simul}.
+
+@vindex oo_.planner_objective_value
+In addition, it stores the value of planner objective function under
+Ramsey policy in @code{oo_.planner_objective_value}.
+
+@end deffn
+
+@anchor{discretionary_policy}
+@deffn Command discretionary_policy [@var{VARIABLE_NAME}@dots{}];
+@deffnx Command discretionary_policy (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
+
+@descriptionhead
+
+This command computes an approximation of the optimal policy under
+discretion
+
+@optionshead
+
+This command accepts the same options than @code{ramsey_policy}.
+
+@end deffn
+
+
+@anchor{planner_objective}
+@deffn Command planner_objective @var{MODEL_EXPRESSION};
+
+This command declares the policy maker objective, for use with
+@code{ramsey_policy} or @code{discretionary_policy}.
+@end deffn
+
+@node Sensitivity and identification analysis
+@section Sensitivity and identification analysis
+
+
+@deffn Command dynare_sensitivity ;
+@deffnx Command dynare_sensitivity (@var{OPTIONS}@dots{});
+
+This function is an interface to the global sensitivity analysis (GSA)
+toolbox developed by the Joint Research Center (JRC) of the European
+Commission. The GSA toolbox is now part of the official Dynare distribution.
+
+Please refer to the documentation of the GSA toolbox on the official
+website (@uref{http://eemc.jrc.ec.europa.eu/Software-DYNARE.htm,JRC
+web site}) for more details on the usage of this command.
+@end deffn
+
+@deffn Command identification ;
+@deffnx Command identification (@var{OPTIONS}@dots{});
+
+@descriptionhead
+
+This command triggers identification analysis.
+
+@optionshead
+
+@table @code
+
+@item ar = @var{INTEGER}
+Number of lags of computed autocorrelations (theoretical moments). Default: @code{3}
+
+@item useautocorr = @var{INTEGER}
+If equal to @code{1}, compute derivatives of autocorrelation. If equal
+to @code{0}, compute derivatives of autocovariances. Default: @code{1}
+
+@item load_ident_files = @var{INTEGER}
+If equal to @code{1}, allow Dynare to load previously 
+computed analyzes. Default: @code{0}
+
+@item prior_mc = @var{INTEGER}
+Size of Monte Carlo sample. Default: @code{2000}
+@end table
+
+@end deffn
+
+@node Displaying and saving results
+@section Displaying and saving results
+
+Dynare has comments to plot the results of a simulation and to save the results.
+
+@deffn Command rplot @var{VARIABLE_NAME}@dots{};
+
+Plots the simulated path of one or several variables, as stored in
+@var{oo_.endo_simul} by either @var{simul} (@pxref{Deterministic
+simulation}) or @var{stoch_simul} with
+option @var{periods} (@pxref{Computing the stochastic solution}). The
+variables are plotted in levels.
+
+@end deffn
+
+
+@deffn Command dynatype (@var{FILENAME}) [@var{VARIABLE_NAME}@dots{}];
+This command prints the listed variables in a text file named
+@var{FILENAME}. If no @var{VARIABLE_NAME} is listed, all endogenous
+variables are printed.
+@end deffn
+
+@deffn Command dynasave (@var{FILENAME}) [@var{VARIABLE_NAME}@dots{}];
+
+This command saves the listed variables in a binary file named
+@var{FILENAME}. If no @var{VARIABLE_NAME} are listed, all endogenous
+variables are saved.
+
+In MATLAB or Octave, variables saved with the @code{dynasave} command
+can be retrieved by the command:
+
+@example
+load -mat @var{FILENAME}
+@end example
+
+@end deffn
+
+@node Macro-processing language
+@section Macro-processing language
+
+It is possible to use ``macro'' commands in the @file{.mod} file for
+doing the following tasks: source file inclusion, replicating blocks
+of equations through loops, conditional inclusion of code@dots{}
+
+Technically, this macro language is totally independent of the basic
+Dynare language, and is processed by a separate component of the
+Dynare pre-processor. The macro processor transforms a @file{.mod}
+file with macros into a @file{.mod} file without macros (doing
+expansions/inclusions), and then feeds it to the Dynare parser.
+
+@deffn {Macro directive} @@#include "@var{FILENAME}"
+Includes another file.
+@end deffn
+
+@deffn {Macro directive} @@#define @var{MACRO_VARIABLE} = @var{MACRO_EXPRESSION}
+Defines a macro-variable.
+@end deffn
+
+@deffn {Macro directive} @@#if @var{MACRO_EXPRESSION}
+@deffnx {Macro directive} @@#else
+@deffnx {Macro directive} @@#endif
+Conditional inclusion of some part of the @file{.mod} file.
+@end deffn
+
+@deffn {Macro directive} @@#for @var{MACRO_VARIABLE} in @var{MACRO_EXPRESSION}
+@deffnx {Macro directive} @@#endfor
+Loop for replications of portions of the @file{.mod} file.
+@end deffn
+
+@deffn {Macro directive} @@#echo @var{MACRO_EXPRESSION}
+Asks the preprocessor to display some message on standard output.
+@end deffn
+
+@deffn {Macro directive} @@#error @var{MACRO_EXPRESSION}
+Asks the preprocessor to display some error message on standard output
+and to abort.
+@end deffn
+
+@node Misc commands
+@section Misc commands
+
+
+@deffn Command set_dynare_seed (@var{INTEGER})
+@deffnx Command set_dynare_seed ('default')
+@deffnx Command set_dynare_seed ('reset')
+@deffnx Command set_dynare_seed ('@var{ALGORITHM}', @var{INTEGER})
+
+Sets the seed used for random number generation.
+
+@end deffn
+
+@deffn Command save_params_and_steady_state @var{FILENAME};
+
+For all parameters, endogenous and exogenous variables, stores
+their value in a text file, using a simple name/value associative table.
+
+@itemize 
+
+@item
+for parameters, the value is taken from the last parameter
+initialization
+
+@item
+for exogenous, the value is taken from the last initval block
+
+@item
+for endogenous, the value is taken from the last steady state computation
+(or, if no steady state has been computed, from the last initval block)
+@end itemize
+
+Note that no variable type is stored in the file, so that the values
+can be reloaded with @code{load_params_and_steady_state} in a setup where
+the variable types are different.
+
+The typical usage of this function is to compute the steady-state of a
+model by calibrating the steady-state value of some endogenous
+variables (which implies that some parameters must be endogeneized
+during the steady-state computation).
+
+You would then write a first @file{.mod} file which computes the
+steady state and saves the result of the computation at the end of the
+file, using @code{save_params_and_steady_state}.
+
+In a second file designed to perform the actual simulations, you would
+use @code{load_params_and_steady_state} just after your variable
+declarations, in order to load the steady state previously computed
+(including the parameters which had been endogeneized during the
+steady state computation).
+
+The need for two separate @file{.mod} files arises from the fact that
+the variable declarations differ between the files for steady state
+calibration and for simulation (the set of endogenous and parameters
+differ between the two); this leads to different @code{var} and
+@code{parameters} statements.
+
+Also note that you can take advantage of the @code{@@#include}
+directive to share the model equations between the two files
+(@pxref{Macro-processing language}).
+
+@end deffn
+
+@anchor{load_params_and_steady_state}
+@deffn Command load_params_and_steady_state @var{FILENAME};
+
+For all parameters, endogenous and exogenous variables, loads
+their value from a file created with @code{save_params_and_steady_state}.
+
+@itemize 
+
+@item
+for parameters, their value will be initialized as if they
+had been calibrated in the @file{.mod} file
+
+@item
+for endogenous and exogenous, their value will be initialized
+as they would have been from an initval block
+@end itemize
+
+This function is used in conjunction with
+@code{save_params_and_steady_state}; see the documentation of that
+function for more information.
+
+@end deffn
+
+@node The Configuration File
+@chapter The Configuration File
+
+The configuration file is used to provide Dynare with information not
+related to the model (and hence not placed in the model file). At the
+moment, it is only used when using Dynare to run parallel
+computations.
+
+On Linux and Mac OS X, the default location of the configuration file
+is @file{$HOME/.dynare}, while on Windows it is
+@file{%APPDATA%\dynare.ini} (typically @file{C:\Documents and
+Settings\@var{USERNAME}\Application Data\dynare.ini} under Windows XP,
+or @file{C:\Users\@var{USERNAME}\AppData\dynare.ini} under Windows
+Vista or Windows 7).
+
+The parsing of the configuration file is case-sensitive and it should
+take the following form, with each option/choice pair placed on a
+newline:
+
+@example
+[command0]
+option0 = choice0
+option1 = choice1
+
+[command1]
+option0 = choice0
+option1 = choice1 
+@end example
+
+The configuration file follows a few conventions (self-explanatory
+conventions such as @var{USER_NAME} have been excluded for concision):
+
+@table @var
+
+@item COMPUTER_NAME
+Indicates the valid name of a server (@i{e.g.} @code{localhost},
+@code{server.cepremap.org}) or an IP address.
+
+@item DRIVE_NAME
+Indicates a valid drive name in Windows, without the trailing colon (@i{e.g.} @code{C}).
+
+@item PATH
+Indicates a valid path in the underlying operating system (@i{e.g.}
+@code{/home/user/dynare/matlab/}).
+
+@item PATH_AND_FILE
+Indicates a valid path to a file in the underlying operating system
+(@i{e.g.} @code{/usr/local/MATLAB/R2010b/bin/matlab}).
+
+@item BOOLEAN
+Is @code{true} or @code{false}.
+@end table
+
+@menu
+* Parallel Configuration::      
+@end menu
+
+@node Parallel Configuration
+@section Parallel Configuration
+
+@deffn {Configuration block} [cluster]
+
+@descriptionhead
+
+When working in parallel, @code{[cluster]} is required to specify the
+group of computers that will be used. It is required even if you are
+only invoking multiple processes on one computer.
+
+@optionshead
+
+@table @code
+
+@item Name = @var{CLUSTER_NAME}
+The reference name of this cluster.
+
+@item Members = @var{NODE_NAME}[(@var{WEIGHT})] @var{NODE_NAME}[(@var{WEIGHT})] @dots{}
+A list of nodes that comprise the cluster with an optional computing
+weight specified for that node. The computing weight indicates how
+much more powerful one node is with respect to the others (@i{e.g.}
+@code{n1(2) n2(1) n3(3)}, means that @code{n1} is two times more
+powerful than @code{n2} whereas @code{n3} is three times more powerful
+than @code{n2}). Each node is separated by at least one space and the
+weights are in parenthesis with no spaces separating them from their
+node.
+@end table
+
+@examplehead
+
+@example
+[cluster]
+Name = c1
+Members = n1 n2 n3
+
+[cluster]
+Name = c2
+Members = n1(4) n2 n3
+@end example
+
+@end deffn
+
+@deffn {Configuration block} [node]
+
+@descriptionhead
+
+When working in parallel, @code{[node]} is required for every computer
+that will be used. The options that are required differ, depending on
+the underlying operating system and whether you are working locally or
+remotely.
+
+@optionshead
+
+@table @code
+
+@item Name = @var{NODE_NAME}
+The reference name of this node.
+
+@item CPUnbr = @var{INTEGER} | [@var{INTEGER}:@var{INTEGER}]
+If just one integer is passed, the number of processors to use. If a
+range of integers is passed, the specific processors to use (processor
+counting is defined to begin at one as opposed to zero). Note that
+using specific processors is only possible under Windows; under Linux
+and Mac OS X, if a range is passed the same number of processors will
+be used but the range will be adjusted to begin at one.
+
+@item ComputerName = @var{COMPUTER_NAME}
+The name or IP address of the node. If you want to run locally, use
+@code{localhost} (case-sensitive).
+
+@item UserName = @var{USER_NAME}
+The username used to log into a remote system. Required for remote
+runs on all platforms.
+
+@item Password = @var{PASSWORD}
+The password used to log into the remote system. Required for remote
+runs originating from Windows.
+
+@item RemoteDrive = @var{DRIVE_NAME}
+The drive to be used for remote computation. Required for remote runs
+originating from Windows.
+
+@item RemoteDirectory = @var{PATH}
+The directory to be used for remote computation. Required for remote
+runs on all platforms.
+
+@item DynarePath = @var{PATH}
+The path to the @file{matlab} subdirectory within the Dynare
+installation directory. The default is the empty string.
+
+@item MatlabOctavePath = @var{PATH_AND_FILE}
+The path to the MATLAB or Octave executable. The default value is
+@code{matlab}.
+
+@item SingleCompThread = @var{BOOLEAN}
+Whether or not to disable MATLAB's native multithreading. The default
+value is @code{true}. Option meaningless under Octave.
+
+@item OperatingSystem = @var{OPERATING_SYSTEM}
+The operating system associated with a node. Only necessary when
+creating a cluster with nodes from different operating systems.
+Possible values are @code{unix} or @code{windows}. There is no default
+value.
+@end table
+
+@examplehead
+
+@example
+[node]
+Name = n1
+ComputerName = localhost
+CPUnbr = 1
+
+[node]
+Name = n2
+ComputerName = dynserv.cepremap.org
+CPUnbr = 5
+UserName = usern
+RemoteDirectory = /home/usern/Remote
+DynarePath = /home/usern/dynare/matlab
+MatlabOctavePath = matlab
+
+[node]
+Name = n3
+ComputerName = dynserv.dynare.org
+CPUnbr = [2:4]
+UserName = usern
+RemoteDirectory = /home/usern/Remote
+DynarePath = /home/usern/dynare/matlab
+MatlabOctavePath = matlab    
+@end example
+
+@end deffn
+
+@node Examples
+@chapter Examples
+
+Dynare comes with a database of example @file{.mod} files, which are
+designed to show a broad range of Dynare features, and are taken from
+academic papers for most of them. You should have these files in the
+@file{examples} subdirectory of your distribution.
+
+Here is a short list of the examples included. For a more complete
+description, please refer to the comments inside the files themselves.
+
+@table @file
+
+@item ramst.mod
+An elementary real business cycle (RBC) model, simulated in a
+deterministic setup.
+
+@item example1.mod
+@itemx example2.mod
+Two examples of a small RBC model in a stochastic setup, presented in
+@cite{Collard (2001)} (see the file @file{guide.pdf} which comes with
+Dynare).
+
+@item fs2000.mod
+A cash in advance model, estimated by @cite{Schorfheide (2000)}.
+
+@item fs2000_nonstationary.mod
+The same model than @file{fs2000.mod}, but written in non-stationary
+form. Detrending of the equations is done by Dynare.
+
+@item bkk.mod
+Multi-country RBC model with time to build, presented in @cite{Backus,
+Kehoe and Kydland (1992)}.
+@end table
+
+@node Bibliography
+@chapter Bibliography
+
+@itemize
+
+@item
+Backus, David K., Patrick J. Kehoe, and Finn E. Kydland (1992):
+``International Real Business Cycles,'' @i{Journal of Political
+Economy}, 100(4), 745--775.
+
+@item
+Boucekkine, Raouf (1995): ``An alternative methodology for solving
+nonlinear forward-looking models,'' @i{Journal of Economic Dynamics
+and Control}, 19, 711--734.
+
+@item
+Collard, Fabrice (2001): ``Stochastic simulations with Dynare: A practical guide''.
+
+@item
+Collard, Fabrice and Michel Juillard (2001a): ``Accuracy of stochastic
+perturbation methods: The case of asset pricing models,'' @i{Journal
+of Economic Dynamics and Control}, 25, 979--999.
+
+@item
+Collard, Fabrice and Michel Juillard (2001b): ``A Higher-Order Taylor
+Expansion Approach to Simulation of Stochastic Forward-Looking Models
+with an Application to a Non-Linear Phillips Curve,'' @i{Computational
+Economics}, 17, 125--139.
+
+@item
+Durbin, J. and S. J. Koopman (2001), @i{Time Series Analysis by State
+Space Methods}, Oxford University Press.
+
+@item
+Fair, Ray and John Taylor (1983): ``Solution and Maximum Likelihood
+Estimation of Dynamic Nonlinear Rational Expectation Models,''
+@i{Econometrica}, 51, 1169--1185.
+
+@item
+Fernandez-Villaverde, Jesus and Juan Rubio-Ramirez (2004): ``Comparing
+Dynamic Equilibrium Economies to Data: A Bayesian Approach,''
+@i{Journal of Econometrics}, 123, 153--187.
+
+@item
+Ireland, Peter (2004): ``A Method for Taking Models to the Data,''
+@i{Journal of Economic Dynamics and Control}, 28, 1205--26.
+
+@item
+Judd, Kenneth (1996): ``Approximation, Perturbation, and Projection
+Methods in Economic Analysis'', in @i{Handbook of Computational
+Economics}, ed. by Hans Amman, David Kendrick, and John Rust, North
+Holland Press, 511--585.
+
+@item
+Juillard, Michel (1996): ``Dynare: A program for the resolution and
+simulation of dynamic models with forward variables through the use of
+a relaxation algorithm,'' CEPREMAP, @i{Couverture Orange}, 9602.
+
+@item
+Kim, Jinill, Sunghyun Kim, Ernst Schaumburg, and Christopher A. Sims
+(2008): ``Calculating and using second-order accurate solutions of
+discrete time dynamic equilibrium models,'' @i{Journal of Economic
+Dynamics and Control}, 32(11), 3397--3414. 
+
+@item
+Koopman, S. J. and J. Durbin (2003): ``Filtering and Smoothing of
+State Vector for Diffuse State Space Models,'' @i{Journal of Time
+Series Analysis}, 24(1), 85--98.
+
+@item
+Laffargue, Jean-Pierre (1990): ``Résolution d'un modèle
+macroéconomique avec anticipations rationnelles'', @i{Annales
+d'Économie et Statistique}, 17, 97--119.
+
+@item
+Lubik, Thomas and Frank Schorfheide (2007): ``Do Central Banks Respond
+to Exchange Rate Movements? A Structural Investigation,'' @i{Journal
+of Monetary Economics}, 54(4), 1069--1087.
+
+@item
+Mancini-Griffoli, Tommaso (2007): ``Dynare User Guide: An introduction
+to the solution and estimation of DSGE models''.
+
+@item
+Pearlman, Joseph, David Currie, and Paul Levine (1986): ``Rational
+expectations models with partial information,'' @i{Economic
+Modelling}, 3(2), 90--105.
+
+@item
+Rabanal, Pau and Juan Rubio-Ramirez (2003): ``Comparing New Keynesian
+Models of the Business Cycle: A Bayesian Approach,'' Federal Reserve
+of Atlanta, @i{Working Paper Series}, 2003-30.
+
+@item
+Schorfheide, Frank (2000): ``Loss Function-based evaluation of DSGE
+models,'' @i{Journal of Applied Econometrics}, 15(6), 645--670.
+
+@item
+Schmitt-Grohé, Stephanie and Martin Uríbe (2004): ``Solving Dynamic
+General Equilibrium Models Using a Second-Order Approximation to the
+Policy Function,'' @i{Journal of Economic Dynamics and Control},
+28(4), 755--775.
+
+@item
+Smets, Frank and Rafael Wouters (2003): ``An Estimated Dynamic
+Stochastic General Equilibrium Model of the Euro Area,'' @i{Journal of
+the European Economic Association}, 1(5), 1123--1175.
+
+@end itemize
+
+@node Command and Function Index
+@unnumbered Command and Function Index
+
+@printindex fn
+
+@node Variable Index
+@unnumbered Variable Index
+
+@printindex vr
+
+@bye
