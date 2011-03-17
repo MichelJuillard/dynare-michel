@@ -1,0 +1,30 @@
+This is BibTeX, Version 0.99cThe top-level auxiliary file: dyn_tbx.aux
+The style file: plainnat.bst
+Database file #1: marco.bib
+I was expecting a `,' or a `}'---line 921 of file marco.bib
+ :   
+ :   pages =        {},
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+I was expecting a `,' or a `}'---line 1177 of file marco.bib
+ :   
+ :   organisation = {Los Alamos National Laboratories}
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+I was expecting a `,' or a `}'---line 1364 of file marco.bib
+ :   
+ :   organisation = {}
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+You're missing a field name---line 2210 of file marco.bib
+ : 
+ : %@ARTICLE{kn:NIH,
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+You're missing a field name---line 2211 of file marco.bib
+ : 
+ : %  author =  {NIH},
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+Warning--empty institution in Iskrev2009
+(There were 5 error messages)
