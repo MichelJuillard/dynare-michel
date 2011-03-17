@@ -1,4 +1,4 @@
-SUBDIRS = preprocessor macroprocessor userguide parallel internals
+SUBDIRS = preprocessor macroprocessor userguide parallel internals gsa
 
 PDF_TARGETS =
 

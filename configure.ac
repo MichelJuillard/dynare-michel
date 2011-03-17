@@ -174,6 +174,7 @@ AC_CONFIG_FILES([Makefile
                  doc/userguide/Makefile
                  doc/parallel/Makefile
                  doc/internals/Makefile
+                 doc/gsa/Makefile
                  tests/Makefile
                  matlab/dynare_version.m
                  windows/dynare-version.nsi
