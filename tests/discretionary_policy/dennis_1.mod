@@ -32,6 +32,3 @@ planner_objective pi_c^2 + y^2;
 
 discretionary_policy(instruments=(i),irf=0,qz_criterium=0.999999);
 
-return;
-
-ramsey_policy;
