@@ -44,6 +44,7 @@ addpath([dynareroot '/AIM/'])
 addpath([dynareroot '/partial_information/'])
 addpath([dynareroot '/ms-sbvar/'])
 addpath([dynareroot '/parallel/'])
+addpath([dynareroot '/gsa/'])
 
 % For functions that exist only under some Octave versions
 % or some MATLAB versions, and for which we provide some replacement functions
