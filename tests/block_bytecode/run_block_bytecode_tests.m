@@ -45,7 +45,16 @@ for block = 0:1
 
     for i = 1:length(solve_algos)
       save ws
-      run_ls2003(block, bytecode, solve_algos(i), default_stack_solve_algo)
+      if !block && !bytecode && (i == 1)
+          run_ls2003(block, bytecode, solve_algos(i), default_stack_solve_algo)
+          y_ref = oo_.endo_simul;
+          save('test.mat','y_ref');
+      else
+          run_ls2003(block, bytecode, solve_algos(i), default_stack_solve_algo)
+          load('test.mat','y_ref');
+          diff = oo_.endo_simul - y_ref;
+          assert(abs(diff) <= options_.dynatol);
+          endif
       load ws
     endfor
     for i = 1:length(stack_solve_algos)
