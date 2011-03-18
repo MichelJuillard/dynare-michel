@@ -349,7 +349,7 @@ if nargout>3
     [data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,n_varobs);
     missing_value = ~(number_of_observations == gend*n_varobs);
     
-    initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+%     initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
 
     data_info.gend = gend;
     data_info.data = data;
