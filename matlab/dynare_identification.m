@@ -39,9 +39,9 @@ function [pdraws, TAU, GAM, LRE, gp, H, JJ] = dynare_identification(options_iden
 global M_ options_ oo_ bayestopt_ estim_params_
 
 if exist('OCTAVE_VERSION')
-    warning('off', 'Octave:divide-by-zero')
+    warning('off'),
 else
-    warning off MATLAB:dividebyzero
+    warning off,
 end
 
 fname_ = M_.fname;
@@ -78,9 +78,15 @@ options_.Schur_vec_tol = 1.e-8;
 options_ = set_default_option(options_,'datafile',[]);
 options_.mode_compute = 0;
 options_.plot_priors = 0;
-[data,rawdata]=dynare_estimation_init([],fname_,1);
-
-
+[data,rawdata,xparam1,data_info]=dynare_estimation_init([],fname_,1);
+if isempty(data_info),
+    data_info.gend = periods;
+    data_info.data = [];
+    data_info.data_index = [];
+    data_info.number_of_observations = periods*length(options_.varobs);
+    data_info.no_more_missing_observations = 0;
+    data_info.missing_value = 0;
+end
 
 
 SampleSize = options_ident.prior_mc;
@@ -104,7 +110,10 @@ end
 IdentifDirectoryName = CheckPath('identification');
 if prior_exist,
 
-    indx = estim_params_.param_vals(:,1);
+    indx = [];
+    if ~isempty(estim_params_.param_vals),
+        indx = estim_params_.param_vals(:,1);
+    end
     indexo=[];
     if ~isempty(estim_params_.var_exo)
         indexo = estim_params_.var_exo(:,1);
@@ -113,6 +122,7 @@ if prior_exist,
     nparam = length(bayestopt_.name);
     np = estim_params_.np;
     name = bayestopt_.name;
+    name_tex = char(M_.exo_names_tex(indexo,:),M_.param_names_tex(indx,:));
 
     offset = estim_params_.nvx;
     offset = offset + estim_params_.nvn;
@@ -125,6 +135,7 @@ else
     np = M_.param_nbr;
     nparam = np+offset;
     name = [cellstr(M_.exo_names); cellstr(M_.param_names)];
+    name_tex = [cellstr(M_.exo_names_tex); cellstr(M_.param_names_tex)];
 end
 
 MaxNumberOfBytes=options_.MaxNumberOfBytes;
@@ -155,7 +166,20 @@ if iload <=0,
         loop_indx = loop_indx+1;
         if prior_exist,
             if SampleSize==1,
-                params = set_prior(estim_params_,M_,options_)';
+                if exist([fname_,'_mean.mat'],'file'),
+                    disp('Testing posterior mean')
+                    load([fname_,'_mean'],'xparam1')
+                    params = xparam1';
+                    clear xparam1
+                elseif exist([fname_,'_mode.mat'],'file'),
+                    disp('Testing posterior mode')
+                    load([fname_,'_mode'],'xparam1')
+                    params = xparam1';
+                    clear xparam1
+                else
+                    disp('Testing prior mean')
+                    params = set_prior(estim_params_,M_,options_)';
+                end
             else
                 if nargin==2,
                     if burnin_iteration>=BurninSampleSize,
@@ -189,9 +213,9 @@ if iload <=0,
                 LRE(:,burnin_iteration)=[oo_.dr.ys(oo_.dr.order_var); vec(g1)];
                 [gam,stationary_vars] = th_autocovariances(oo0.dr,bayestopt_.mfys,M_,options_);
                 if exist('OCTAVE_VERSION')
-                    warning('off', 'Octave:divide-by-zero')
+                    warning('off')
                 else
-                    warning off MATLAB:dividebyzero
+                    warning off,
                 end
                 sdy = sqrt(diag(gam{1}));
                 sy = sdy*sdy';
@@ -228,7 +252,10 @@ if iload <=0,
             end
 
             if iteration,
-                [JJ, H, gam, gp] = getJJ(A, B, M_,oo0,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
+                [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo0,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
+                derivatives_info.dA=dA;
+                derivatives_info.dOm=dOm;
+                derivatives_info.dYss=dYss;
                 if BurninSampleSize == 0,
                     indJJ = (find(max(abs(JJ'))>1.e-8));
                     indH = (find(max(abs(H'))>1.e-8));
@@ -297,8 +324,12 @@ if iload <=0,
                     identification_checks(H(indH,:)./normH(:,ones(nparam,1)),JJ(indJJ,:)./normJ(:,ones(nparam,1)), gp(indLRE,:)./normLRE(:,ones(size(gp,2),1)));
                 %                  identification_checks(H(indH,:),JJ(indJJ,:), gp(indLRE,:), bayestopt_);
                 indok = find(max(idemoments.indno{iteration},[],1)==0);
-                ide_strength_J(iteration,:)=NaN(1,nparam);
                 if iteration ==1 && ~isempty(indok),
+                    ide_strength_J=NaN(1,nparam);
+                    ide_strength_J_prior=NaN(1,nparam);
+                    if advanced,
+                        [pars, cosnJ] = ident_bruteforce(JJ(indJJ,:)./normJ(:,ones(nparam,1)),2,1,name_tex);
+                    end
                     normaliz = abs(params);
                     if prior_exist,
                         if ~isempty(estim_params_.var_exo),
@@ -309,18 +340,36 @@ if iload <=0,
                         if ~isempty(estim_params_.param_vals),
                             normaliz1 = [normaliz1; estim_params_.param_vals(:,7)]'; % normalize with prior standard deviation
                         end
-                        normaliz = max([normaliz; normaliz1]);
+%                         normaliz = max([normaliz; normaliz1]);
+                    else
+                        normaliz1 = ones(1,nparam);
                     end
-                    cmm = simulated_moment_uncertainty(indJJ, periods, replic);
-                    %                 Jinv=(siJ(:,indok)'*siJ(:,indok))\siJ(:,indok)';
-                    %                 MIM=inv(Jinv*cmm*Jinv');
-                    MIM=siJ(:,indok)'*inv(cmm)*siJ(:,indok);
-                    deltaM = sqrt(diag(MIM));
-                    tildaM = MIM./((deltaM)*(deltaM'));
-                    rhoM=sqrt(1-1./diag(inv(tildaM)));
-                    deltaM = deltaM.*normaliz(indok)';
-                    ide_strength_J(iteration,indok) = (1./(sqrt(diag(inv(MIM)))./normaliz(indok)'));
-                    
+                    replic = max([replic, length(indJJ)*3]);
+                    try,
+                        options_.irf = 0;
+                        options_.noprint = 1;
+                        options_.order = 1;
+                        options_.periods = data_info.gend+100;
+                        info = stoch_simul(options_.varobs);
+                        datax=oo_.endo_simul(options_.varobs_id,100+1:end);
+%                         datax=data;
+                        [fval,cost_flag,ys,trend_coeff,info,DLIK,AHess] = DsgeLikelihood(params',data_info.gend,datax,data_info.data_index,data_info.number_of_observations,derivatives_info);
+                        cparam = inv(-AHess);
+                        normaliz(indok) = sqrt(diag(cparam))';
+                        cmm = siJ*((-AHess)\siJ');
+                    catch,
+                        cmm = simulated_moment_uncertainty(indJJ, periods, replic);
+                        %                 Jinv=(siJ(:,indok)'*siJ(:,indok))\siJ(:,indok)';
+                        %                 MIM=inv(Jinv*cmm*Jinv');
+                        MIM=siJ(:,indok)'*(cmm\siJ(:,indok));
+                        deltaM = sqrt(diag(MIM));
+                        tildaM = MIM./((deltaM)*(deltaM'));
+                        rhoM=sqrt(1-1./diag(inv(tildaM)));
+                        deltaM = deltaM.*normaliz(indok)';
+                        normaliz(indok) = sqrt(diag(inv(MIM)))';
+                    end
+                    ide_strength_J(indok) = (1./(normaliz(indok)'./abs(params(indok)')));
+                    ide_strength_J_prior(indok) = (1./(normaliz(indok)'./normaliz1(indok)'));
                     %                 indok = find(max(idemodel.indno{iteration},[],1)==0);
                     %                 ide_strength_H(iteration,:)=zeros(1,nparam);
                     %                 mim=inv(siH(:,indok)'*siH(:,indok))*siH(:,indok)';
@@ -333,7 +382,6 @@ if iload <=0,
                     %                 rhoM=sqrt(1-1./diag(inv(tildaM)));
                     %                 deltaM = deltaM.*params(indok)';
                     %                 ide_strength_H(iteration,indok) = (1./[sqrt(diag(inv(MIM)))./params(indok)']);
-                    normaliz(indok) = sqrt(diag(inv(MIM)))';
                     %                 inok = find((abs(GAM(:,iteration))==0));
                     %                 isok = find((abs(GAM(:,iteration))));
                     %                 quant(isok,:) = siJ(isok,:)./repmat(GAM(isok,iteration),1,nparam);
@@ -465,9 +513,9 @@ if SampleSize>1,
     tstLREmean = derLREmean*0;
 
     if exist('OCTAVE_VERSION')
-        warning('off', 'Octave:divide-by-zero')
+        warning('off'),
     else
-        warning off MATLAB:dividebyzero
+        warning off,
     end
 
     for j=1:nparam,
@@ -632,17 +680,18 @@ end
 if SampleSize>1,
     myboxplot(log(ide_strength_J(:,is)))
 else
-    bar(log(ide_strength_J(:,is)))
+    bar(log([ide_strength_J(:,is)' ide_strength_J_prior(:,is)']))
 end
 % set(gca,'ylim',[0 1.05])
 set(gca,'xlim',[0 nparam+1])
 set(gca,'xticklabel','')
 dy = get(gca,'ylim');
 % dy=dy(2)-dy(1);
-% for ip=1:nparam,
-%     text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
-% end
-title('Identification strength in the moments')
+for ip=1:nparam,
+    text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+end
+legend('relative to param value','relative to prior std','Location','Best')
+title('Identification strength in the moments (log-scale)')
 
 subplot(212)
 % mmm = mean(siJmean);
@@ -694,6 +743,19 @@ title('Sensitivity in the moments')
 
 if SampleSize==1 && advanced,
     % identificaton patterns
+    for  j=1:size(cosnJ,2),
+        fprintf('\n\n')
+        disp(['Collinearity patterns with ', int2str(j) ,' parameter(s)'])
+        fprintf('%-15s [%-*s] %10s\n','Parameter',(15+1)*j,' Expl. params ','cosn')
+        for i=1:nparam,
+            namx='';
+            for in=1:j,
+                namx=[namx ' ' sprintf('%-15s',name{pars{i,j}(in)})];
+            end
+            fprintf('%-15s [%s] %10.3f\n',name{i},namx,cosnJ(i,j))
+        end
+    end
+    disp('')
     [U,S,V]=svd(siJ./normJ(:,ones(nparam,1)),0);
     if nparam<5,
       f1 = figure('name','Identification patterns (moments)');
@@ -830,9 +892,9 @@ end
 
 
 if exist('OCTAVE_VERSION')
-    warning('on', 'Octave:divide-by-zero')
+    warning('on'),
 else
-    warning on MATLAB:dividebyzero
+    warning on,
 end
 
 disp(' ')

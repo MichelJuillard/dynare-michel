@@ -1,4 +1,4 @@
-function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
+function [fval,cost_flag,ys,trend_coeff,info,DLIK,AHess] = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations,derivatives_info)
 % function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
 % Evaluates the posterior kernel of a dsge model. 
 % 
@@ -17,6 +17,8 @@ function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data
 %   info        :     vector of informations about the penalty:
 %                     41: one (many) parameter(s) do(es) not satisfied the lower bound
 %                     42: one (many) parameter(s) do(es) not satisfied the upper bound
+%   DLIK        :     vector of analytic scores
+%   AHess       :     asymptotic Hessian matrix
 %               
 % SPECIAL REQUIREMENTS
 %
@@ -44,6 +46,11 @@ ys              = [];
 trend_coeff     = [];
 cost_flag       = 1;
 nobs            = size(options_.varobs,1);
+if nargout > 5,
+    analytic_derivation=1;
+else
+    analytic_derivation=0;
+end    
 %------------------------------------------------------------------------------
 % 1. Get the structural parameters & define penalties
 %------------------------------------------------------------------------------
@@ -189,12 +196,59 @@ kalman_tol = options_.kalman_tol;
 riccati_tol = options_.riccati_tol;
 mf = bayestopt_.mf1;
 Y   = data-trend;
+
+if analytic_derivation,
+    if nargin<7 || isempty(derivatives_info)
+        [A,B] = dynare_resolve;
+        [dum, DT, DOm, DYss] = getH(A, B, M_,oo_,0, ...
+            estim_params_.param_vals(:,1),estim_params_.var_exo(:,1));
+    else
+        DT = derivatives_info.DT;
+        DOm = derivatives_info.DOm;
+        DYss = derivatives_info.DYss;
+        clear derivatives_info,
+    end
+    iv = oo_.dr.restrict_var_list;
+    DYss = [zeros(length(DYss),offset) DYss];
+    DT = DT(iv,iv,:);
+    DOm = DOm(iv,iv,:);
+    DYss = DYss(iv,:);
+    DH=zeros([size(H),length(xparam1)]);
+    DQ=zeros([size(Q),length(xparam1)]);
+    DP=zeros([size(T),length(xparam1)]);
+    for i=1:estim_params_.nvx,
+        k =estim_params_.var_exo(i,1);
+        DQ(k,k,i) = 2*sqrt(Q(k,k));
+        dum =  lyapunov_symm(T,DOm(:,:,i),options_.qz_criterium,options_.lyapunov_complex_threshold);
+        kk = find(abs(dum) < 1e-12);
+        dum(kk) = 0;
+        DP(:,:,i)=dum;
+    end
+    offset = estim_params_.nvx;
+    for i=1:estim_params_.nvn,
+        k = estim_params_.var_endo(i,1);
+        DH(k,k,i+offset) = 2*sqrt(H(k,k));
+    end
+    
+    offset = offset + estim_params_.nvn;
+    for j=1:estim_params_.np,
+        dum =  lyapunov_symm(T,DT(:,:,j+offset)*Pstar*T'+T*Pstar*DT(:,:,j+offset)'+DOm(:,:,j+offset),options_.qz_criterium,options_.lyapunov_complex_threshold);
+        kk = find(abs(dum) < 1e-12);
+        dum(kk) = 0;
+        DP(:,:,j+offset)=dum;
+    end
+end
+
 %------------------------------------------------------------------------------
 % 4. Likelihood evaluation
 %------------------------------------------------------------------------------
 if (kalman_algo==1)% Multivariate Kalman Filter
     if no_missing_data_flag
         LIK = kalman_filter(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol); 
+        if analytic_derivation,
+            [DLIK] = score(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,riccati_tol);
+            [AHess] = AHessian(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,riccati_tol);
+        end
     else
         LIK = ...
             missing_observations_kalman_filter(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol, ...
