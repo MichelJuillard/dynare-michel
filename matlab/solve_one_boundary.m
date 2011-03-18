@@ -100,7 +100,7 @@ for it_=start:incr:finish
             [r, y, g1, g2, g3] = feval(fname, y, x, params, steady_state, ...
                                        it_, 0);
         else
-            [r, y, g1] = feval(fname, y, x, params, steady_state);
+            [r, y, g1] = feval(fname, y, x, params);
         end;
         if(~isreal(r))
             max_res=(-(max(max(abs(r))))^2)^0.5;
