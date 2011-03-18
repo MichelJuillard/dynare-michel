@@ -30,15 +30,10 @@ yy0=oo_.dr.ys(I);
 % for j=1:size(M_.lead_lag_incidence,1);
 %     yy0 = [ yy0; oo_.dr.ys(find(M_.lead_lag_incidence(j,:)))];
 % end
-[df, gp] = feval([M_.fname,'_params_derivs'],yy0, oo_.exo_steady_state', ...
-                 M_.params, oo_.dr.ys, 1);
-[residual, g1 ] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', ...
-                        M_.params, oo_.dr.ys, 1);
-
-[residual, g1, g2 ] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', ...
-                            M_.params, oo_.dr.ys, 1);
+dyssdtheta=zeros(length(oo_.dr.ys),M_.param_nbr);
+df = feval([M_.fname,'_params_derivs'],yy0, oo_.exo_steady_state', ...
+           M_.params, oo_.dr.ys, 1, dyssdtheta);
 [residual, gg1] = feval([M_.fname,'_static'],oo_.dr.ys, oo_.exo_steady_state', M_.params);
-% df = feval([M_.fname,'_model_derivs'],yy0, oo_.exo_steady_state', M_.params, 1);
 dyssdtheta = -gg1\df;
 if any(any(isnan(dyssdtheta))),    
     [U,T] = schur(gg1);
@@ -51,6 +46,10 @@ if any(any(isnan(dyssdtheta))),
     T = T(k+1:end,k+1:end);
     dyssdtheta = -U(:,k+1:end)*(T\U(:,k+1:end)')*df;
 end
+[df, gp] = feval([M_.fname,'_params_derivs'],yy0, oo_.exo_steady_state', ...
+           M_.params, oo_.dr.ys, 1, dyssdtheta);
+[residual, g1, g2 ] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', ...
+                            M_.params, oo_.dr.ys, 1);
 
 Hss = dyssdtheta(oo_.dr.order_var,indx);
 dyssdtheta = dyssdtheta(I,:);

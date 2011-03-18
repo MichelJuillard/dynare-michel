@@ -36,14 +36,14 @@ if kronflag == -1,
     assignin('base','M_', M_);
     assignin('base','oo_', oo_);
 else
-    [H, dA, dOm, dYss, gp] = getH(A, B, M_,oo_,kronflag,indx,indexo);  
+    [H, dA, dOm, dYss, gp] = getH(A, B, M_,oo_,kronflag,indx,indexo);
     gp = reshape(gp,size(gp,1)*size(gp,2),size(gp,3));
     gp = [dYss; gp];
     %   if isempty(H),
     %     JJ = [];
     %     GAM = [];
     %     return
-    %   end  
+    %   end
     m = length(A);
     GAM =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold,1);
     k = find(abs(GAM) < 1e-12);
@@ -113,27 +113,27 @@ else
     
     JJ = [ [zeros(length(mf),nexo) dYss(mf,:)]; JJ];
     
-    if nargout >2,
-        %     sy=sy(mf,mf);
-        options_.ar=nlags;
-        [GAM,stationary_vars] = th_autocovariances(oo_.dr,oo_.dr.order_var(mf),M_,options_);
-        sy=sqrt(diag(GAM{1}));
-        sy=sy*sy';
-        if useautocorr,
-            sy=sy-diag(diag(sy))+eye(length(mf));
-            GAM{1}=GAM{1}./sy;
-        else
-            for j=1:nlags,
-                GAM{j+1}=GAM{j+1}.*sy;
-            end
-        end
-        gam = dyn_vech(GAM{1});
+end
+if nargout >2,
+    %     sy=sy(mf,mf);
+    options_.ar=nlags;
+    [GAM,stationary_vars] = th_autocovariances(oo_.dr,oo_.dr.order_var(mf),M_,options_);
+    sy=sqrt(diag(GAM{1}));
+    sy=sy*sy';
+    if useautocorr,
+        sy=sy-diag(diag(sy))+eye(length(mf));
+        GAM{1}=GAM{1}./sy;
+    else
         for j=1:nlags,
-            gam = [gam; vec(GAM{j+1})];
+            GAM{j+1}=GAM{j+1}.*sy;
         end
     end
-    gam = [oo_.dr.ys(oo_.dr.order_var(mf)); gam];
+    gam = dyn_vech(GAM{1});
+    for j=1:nlags,
+        gam = [gam; vec(GAM{j+1})];
+    end
 end
+gam = [oo_.dr.ys(oo_.dr.order_var(mf)); gam];
 
 %   if useautocorr,
 warning('on','MATLAB:divideByZero')
