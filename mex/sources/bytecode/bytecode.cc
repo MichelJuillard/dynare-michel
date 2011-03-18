@@ -250,8 +250,8 @@ main(int nrhs, const char *prhs[])
           xd = mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "exo_simul")));
           row_x = mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "exo_simul")));
           col_x = mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "exo_simul")));
+          nb_row_xd = row_x;
         }
-      nb_row_xd = int (floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_det_nbr"))))));
 
       y_kmin = int (floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "maximum_lag"))))));
       y_kmax = int (floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "maximum_lead"))))));
@@ -267,7 +267,7 @@ main(int nrhs, const char *prhs[])
       steady_xd = mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "exo_steady_state")));
       steady_row_x = mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "exo_steady_state")));
       steady_col_x = mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "exo_steady_state")));
-      steady_nb_row_xd = int (floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_det_nbr"))))));
+      steady_nb_row_xd = steady_row_x;
     }
   else
     {
@@ -280,8 +280,8 @@ main(int nrhs, const char *prhs[])
           xd = mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "exo_steady_state")));
           row_x = mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "exo_steady_state")));
           col_x = mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "exo_steady_state")));
+          nb_row_xd = row_x;
         }
-      nb_row_xd = int (floor(*(mxGetPr(mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "exo_det_nbr"))))));
     }
   int maxit_ = int (floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "maxit_"))))));
   double slowc = double (*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "slowc")))));

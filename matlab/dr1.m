@@ -160,7 +160,7 @@ else
         if (options_.bytecode)
             [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,[oo_.exo_simul ...
                                 oo_.exo_det_simul], M_.params, dr.ys, 1);
-            jacobia_ = [loc_dr.g1 loc_dr.g1_x];
+            jacobia_ = [loc_dr.g1 loc_dr.g1_x loc_dr.g1_xd];
         else
             [junk,jacobia_] = feval([M_.fname '_dynamic'],z,[oo_.exo_simul ...
                                 oo_.exo_det_simul], M_.params, dr.ys, it_);
