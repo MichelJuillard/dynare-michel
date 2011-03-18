@@ -192,16 +192,16 @@ if ~any(idemoments.ino) && ~any(any(idemoments.ind==0))
     disp(' ')
 end
 
-if ~ options_.noprint && advanced,
-    disp('Press KEY to continue with identification analysis')
-    pause;
-    dyntable('Multi collinearity in the model:',char('param','min','mean','max'), ...
-             char(name(kok)),[mmin, mmean, mmax],10,10,6);
-    disp(' ')
-    dyntable('Multi collinearity for moments in J:',char('param','min','mean','max'), ...
-             char(name(kokJ)),[mminJ, mmeanJ, mmaxJ],10,10,6);
-    disp(' ')
-end
+% if ~ options_.noprint && advanced,
+%     disp('Press KEY to continue with identification analysis')
+%     pause;
+%     dyntable('Multi collinearity in the model:',char('param','min','mean','max'), ...
+%              char(name(kok)),[mmin, mmean, mmax],10,10,6);
+%     disp(' ')
+%     dyntable('Multi collinearity for moments in J:',char('param','min','mean','max'), ...
+%              char(name(kokJ)),[mminJ, mmeanJ, mmaxJ],10,10,6);
+%     disp(' ')
+% end
 
 
 % if advanced && (~options_.noprint),
