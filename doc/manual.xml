@@ -2296,10 +2296,6 @@ steady;
       <listitem><para>Number of simulated series used to compute the IRFs. Default: <literal>1</literal> if <option>order</option>=<literal>1</literal>, and <literal>50</literal> otherwise</para></listitem>
     </varlistentry>
     <varlistentry>
-      <term><option>simul_seed</option> = <replaceable>INTEGER</replaceable></term>
-      <listitem><para>Specifies a seed for the random generator so as to obtain the same random sample at each run of the program. Otherwise a different sample is used for each run. Default: seed not specified</para></listitem>
-    </varlistentry>
-    <varlistentry>
       <term><option>simul_algo</option> = <replaceable>INTEGER</replaceable></term>
       <listitem><para>Obsolete. Use only the default = 0</para></listitem>
     </varlistentry>
