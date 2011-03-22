@@ -1,7 +1,8 @@
 @q $Id: main.web 2333 2009-01-14 10:32:55Z kamenik $ @>
 @q Copyright 2004, Ondra Kamenik @>
 
-@q cwebmac.tex defines its own \ifpdf, which is incompatible with the \ifpdf defined by eplain, so undefine it @>
+@q cwebmac.tex defines its own \ifpdf, which is incompatible with the @>
+@q \ifpdf defined by eplain, so undefine it @>
 \let\ifpdf\relax
 \input eplain
 
