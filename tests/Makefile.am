@@ -16,6 +16,7 @@ MODS = \
 	ramst_normcdf_and_friends.mod \
 	example1_varexo_det.mod \
 	predetermined_variables.mod \
+	fs2000_nonstationary.mod \
 	fs2000_ssfile.mod \
 	comments.mod \
 	histval_sto.mod \
