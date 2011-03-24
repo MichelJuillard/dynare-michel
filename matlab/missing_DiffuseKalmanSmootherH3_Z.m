@@ -1,4 +1,4 @@
-function [alphahat,epsilonhat,etahat,a,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmootherH3_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index)
+function [alphahat,epsilonhat,etahat,a,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH3_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index)
 % function [alphahat,epsilonhat,etahat,a1,P,aK,PK,d,decomp_filt] = missing_DiffuseKalmanSmoother3_Z(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
 % Computes the diffuse kalman smoother without measurement error, in the case of a singular var-cov matrix.
 % Univariate treatment of multivariate time series.
@@ -28,8 +28,6 @@ function [alphahat,epsilonhat,etahat,a,P,aK,PK,d,decomp] = missing_DiffuseKalman
 %              matrices
 %    PK:       4D array of k-step ahead forecast error variance
 %              matrices (meaningless for periods 1:d)
-%    d:        number of periods where filter remains in diffuse part
-%              (should be equal to the order of integration of the model)
 %    decomp:   decomposition of the effect of shocks on filtered values
 %
 % SPECIAL REQUIREMENTS
@@ -274,9 +272,7 @@ if d
     end
 end
 
-disp('smoother done');
-
-if nargout > 7
+if nargout > 8
     decomp = zeros(nk,mm,rr,smpl+nk);
     ZRQinv = inv(Z*QQ*Z');
     for t = max(d,1):smpl

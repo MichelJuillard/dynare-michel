@@ -151,7 +151,6 @@ options_.MaximumNumberOfMegaBytes = 111;
 options_.PosteriorSampleSize = 1000;
 options_.bayesian_irf = 0;
 options_.bayesian_th_moments = 0;
-options_.diffuse_d = [];
 options_.diffuse_filter = 0;
 options_.filter_step_ahead = [];
 options_.filtered_vars = 0;

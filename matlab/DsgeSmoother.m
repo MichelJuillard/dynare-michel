@@ -153,7 +153,7 @@ if kalman_algo == 1 || kalman_algo == 2
 end
 
 if kalman_algo == 1 || kalman_algo == 3
-    [alphahat,epsilonhat,etahat,ahat,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmootherH1_Z(ST, ...
+    [alphahat,epsilonhat,etahat,ahat,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH1_Z(ST, ...
                                                       Z,R1,Q,H,Pinf,Pstar, ...
                                                       data1,nobs,np,smpl,kalman_tol,riccati_tol,data_index);
     if isequal(alphahat,0)
@@ -179,7 +179,7 @@ if kalman_algo == 2 || kalman_algo == 4
         end
         
     end
-    [alphahat,epsilonhat,etahat,ahat,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmootherH3_Z(ST, ...
+    [alphahat,epsilonhat,etahat,ahat,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH3_Z(ST, ...
                                                       Z,R1,Q,diag(H),Pinf,Pstar,data1,nobs,np,smpl,data_index);
 end
 
