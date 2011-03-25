@@ -31,7 +31,7 @@ var e_y; stderr 0.05;
 var e_z; stderr 0.05;
 end;
 
-stoch_simul(periods=2000,irf=0,simul_seed=7);
+stoch_simul(periods=2000,irf=0);
 
 plot([w x y z]);
 

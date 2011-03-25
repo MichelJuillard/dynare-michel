@@ -155,7 +155,8 @@ end
 if kalman_algo == 1 || kalman_algo == 3
     [alphahat,epsilonhat,etahat,ahat,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH1_Z(ST, ...
                                                       Z,R1,Q,H,Pinf,Pstar, ...
-                                                      data1,nobs,np,smpl,kalman_tol,riccati_tol,data_index);
+                                                      data1,nobs,np,smpl,data_index, ...
+                                                      options_.nk,kalman_tol,options_.filter_decomposition);
     if isequal(alphahat,0)
         if kalman_algo == 1
             kalman_algo = 2;
@@ -180,7 +181,10 @@ if kalman_algo == 2 || kalman_algo == 4
         
     end
     [alphahat,epsilonhat,etahat,ahat,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH3_Z(ST, ...
-                                                      Z,R1,Q,diag(H),Pinf,Pstar,data1,nobs,np,smpl,data_index);
+                                                      Z,R1,Q,diag(H), ...
+                                                      Pinf,Pstar,data1,nobs,np,smpl,data_index, ...
+                                                      options_.nk,kalman_tol,...
+                                                      options_.filter_decomposition);
 end
 
 if kalman_algo == 3 || kalman_algo == 4
@@ -192,8 +196,10 @@ if kalman_algo == 3 || kalman_algo == 4
         for i=1:size(PK,4)
             PK(jnk,:,:,i) = QT*dynare_squeeze(PK(jnk,:,:,i))*QT';
         end
-        for i=1:size(decomp,4)
-            decomp(jnk,:,:,i) = QT*dynare_squeeze(decomp(jnk,:,:,i));
+        if options_.filter_decomposition
+            for i=1:size(decomp,4)
+                decomp(jnk,:,:,i) = QT*dynare_squeeze(decomp(jnk,:,:,i));
+            end
         end
     end
     for i=1:size(P,4)

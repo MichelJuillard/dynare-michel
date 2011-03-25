@@ -1,6 +1,6 @@
-function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH1_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,kalman_tol,riccati_tol,data_index)
+function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH1_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,decomp_flag)
 
-% function [alphahat,epsilonhat,etahat,a, aK] = DiffuseKalmanSmoother1(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl)
+% function [alphahat,epsilonhat,etahat,a,aK,PK,decomp] = DiffuseKalmanSmoother1(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,decomp_flag)
 % Computes the diffuse kalman smoother without measurement error, in the case of a non-singular var-cov matrix 
 %
 % INPUTS
@@ -15,9 +15,10 @@ function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,decomp] = missing_DiffuseKal
 %    pp:       number of observed variables
 %    mm:       number of state variables
 %    smpl:     sample size
-%    kalman_tol tolerance for singular matrix
-%    riccati_tol
 %    data_index                   [cell]      1*smpl cell of column vectors of indices.
+%    nk        number of forecasting periods
+%    kalman_tol   tolerance for reciprocal condition number
+%    decomp_flag  if true, compute filter decomposition
 %             
 % OUTPUTS
 %    alphahat: smoothed variables (a_{t|T})
@@ -60,12 +61,8 @@ function [alphahat,epsilonhat,etahat,atilde,P,aK,PK,decomp] = missing_DiffuseKal
 % new crit1 value for rank of Pinf
 % it is assured that P is symmetric 
 
-
-global options_
-
 d = 0;
 decomp = [];
-nk = options_.nk;
 spinf           = size(Pinf1);
 spstar          = size(Pstar1);
 v               = zeros(pp,smpl);
@@ -83,7 +80,6 @@ Kstar           = zeros(mm,pp,smpl);
 P               = zeros(mm,mm,smpl+1);
 Pstar           = zeros(spstar(1),spstar(2),smpl+1); Pstar(:,:,1) = Pstar1;
 Pinf            = zeros(spinf(1),spinf(2),smpl+1); Pinf(:,:,1) = Pinf1;
-crit            = options_.kalman_tol;
 crit1       = 1.e-8;
 steady          = smpl;
 rr              = size(Q,1);
@@ -170,7 +166,7 @@ while notsteady && t<smpl
         ZZ = Z(di,:);
         v(di,t)      = Y(di,t) - ZZ*a(:,t);
         F = ZZ*P(:,:,t)*ZZ' + H(di,di);
-        if rcond(F) < crit
+        if rcond(F) < kalman_tol
             return              
         end    
         iF(di,di,t)   = inv(F);
@@ -190,7 +186,7 @@ while notsteady && t<smpl
             aK(jnk,:,t+jnk) = T*dynare_squeeze(aK(jnk-1,:,t+jnk-1));
         end
     end
-    %    notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
+    %    notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<kalman_tol);
 end
 % $$$ if t<smpl
 % $$$     PZI_s = PZI;
@@ -245,7 +241,7 @@ if d
     end
 end
 
-if nargout > 8
+if decomp_flag
     decomp = zeros(nk,mm,rr,smpl+nk);
     ZRQinv = inv(Z*QQ*Z');
     for t = max(d,1):smpl

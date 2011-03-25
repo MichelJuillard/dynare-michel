@@ -1,5 +1,5 @@
-function [alphahat,epsilonhat,etahat,a,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH3_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index)
-% function [alphahat,epsilonhat,etahat,a1,P,aK,PK,d,decomp_filt] = missing_DiffuseKalmanSmoother3_Z(T,Z,R,Q,Pinf1,Pstar1,Y,pp,mm,smpl)
+function [alphahat,epsilonhat,etahat,a,P,aK,PK,decomp] = missing_DiffuseKalmanSmootherH3_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,decomp_flag)
+% function [alphahat,epsilonhat,etahat,a1,P,aK,PK,d,decomp] = missing_DiffuseKalmanSmootherH3_Z(T,Z,R,Q,H,Pinf1,Pstar1,Y,pp,mm,smpl,data_index,nk,kalman_tol,decomp_flag)
 % Computes the diffuse kalman smoother without measurement error, in the case of a singular var-cov matrix.
 % Univariate treatment of multivariate time series.
 %
@@ -16,7 +16,10 @@ function [alphahat,epsilonhat,etahat,a,P,aK,PK,decomp] = missing_DiffuseKalmanSm
 %    mm:       number of state variables
 %    smpl:     sample size
 %    data_index                   [cell]      1*smpl cell of column vectors of indices.
-%             
+%    nk        number of forecasting periods
+%    kalman_tol   tolerance for zero divider 
+%    decomp_flag  if true, compute filter decomposition
+%
 % OUTPUTS
 %    alphahat: smoothed state variables (a_{t|T})
 %    epsilonhat: measurement errors
@@ -55,20 +58,9 @@ function [alphahat,epsilonhat,etahat,a,P,aK,PK,decomp] = missing_DiffuseKalmanSm
 % Modified by M. Ratto
 % New output argument aK: 1-step to nk-stpe ahed predictions)
 % New input argument nk: max order of predictions in aK
-% New option options_.diffuse_d where the DKF stops (common with
-% diffuselikelihood3)
-% New icc variable to count number of iterations for Finf steps
-% Pstar % Pinf simmetric
-% New termination of DKF iterations based on options_.diffuse_d 
-% Li also stored during DKF iterations !!
-% some bugs corrected in the DKF part of the smoother (Z matrix and
-% alphahat)
-
-global options_
 
 d = 0;
 decomp = [];
-nk = options_.nk;
 spinf           = size(Pinf1);
 spstar          = size(Pstar1);
 v               = zeros(pp,smpl);
@@ -76,28 +68,18 @@ a               = zeros(mm,smpl);
 a1              = zeros(mm,smpl+1);
 aK          = zeros(nk,mm,smpl+nk);
 
-if isempty(options_.diffuse_d),
-    smpl_diff = 1;
-else
-    smpl_diff=rank(Pinf1);
-end
-
-Fstar           = zeros(pp,smpl_diff);
-Finf            = zeros(pp,smpl_diff);
+Fstar           = zeros(pp,smpl);
+Finf            = zeros(pp,smpl);
 Fi              = zeros(pp,smpl);
 Ki              = zeros(mm,pp,smpl);
-%Li              = zeros(mm,mm,pp,smpl);
-%Linf            = zeros(mm,mm,pp,smpl_diff);
-%L0              = zeros(mm,mm,pp,smpl_diff);
-Kstar           = zeros(mm,pp,smpl_diff);
+Kstar           = zeros(mm,pp,smpl);
 P               = zeros(mm,mm,smpl+1);
 P1              = P;
 PK              = zeros(nk,mm,mm,smpl+nk);
-Pstar           = zeros(spstar(1),spstar(2),smpl_diff+1); Pstar(:,:,1) = Pstar1;
-Pinf            = zeros(spinf(1),spinf(2),smpl_diff+1); Pinf(:,:,1) = Pinf1;
+Pstar           = zeros(spstar(1),spstar(2),smpl); Pstar(:,:,1) = Pstar1;
+Pinf            = zeros(spinf(1),spinf(2),smpl); Pinf(:,:,1) = Pinf1;
 Pstar1          = Pstar;
 Pinf1           = Pinf;
-crit            = options_.kalman_tol;
 crit1       = 1.e-6;
 steady          = smpl;
 rr              = size(Q,1); % number of structural shocks
@@ -123,7 +105,7 @@ while newRank && t < smpl
         Fstar(i,t)  = Zi*Pstar(:,:,t)*Zi' +H(i);
         Finf(i,t)   = Zi*Pinf(:,:,t)*Zi';
         Kstar(:,i,t) = Pstar(:,:,t)*Zi';
-        if Finf(i,t) > crit && newRank
+        if Finf(i,t) > kalman_tol && newRank
             icc=icc+1;
             Kinf(:,i,t)       = Pinf(:,:,t)*Zi';
             Kinf_Finf         = Kinf(:,i,t)/Finf(i,t);
@@ -133,7 +115,7 @@ while newRank && t < smpl
                 Kstar(:,i,t)*Kinf_Finf' - ...
                 Kinf_Finf*Kstar(:,i,t)';
             Pinf(:,:,t)       = Pinf(:,:,t) - Kinf(:,i,t)*Kinf(:,i,t)'/Finf(i,t);
-        elseif Fstar(i,t) > crit 
+        elseif Fstar(i,t) > kalman_tol 
             a(:,t)            = a(:,t) + Kstar(:,i,t)*v(i,t)/Fstar(i,t);
             Pstar(:,:,t)      = Pstar(:,:,t) - Kstar(:,i,t)*Kstar(:,i,t)'/Fstar(i,t);
         end
@@ -180,8 +162,7 @@ while notsteady && t<smpl
         v(i,t)  = Y(i,t) - Zi*a(:,t);
         Fi(i,t) = Zi*P(:,:,t)*Zi' + H(i);
         Ki(:,i,t) = P(:,:,t)*Zi';
-        if Fi(i,t) > crit
-            %Li(:,:,i,t)    = eye(mm)-Ki(:,i,t)*Z(i,:)/Fi(i,t);
+        if Fi(i,t) > kalman_tol
             a(:,t) = a(:,t) + Ki(:,i,t)*v(i,t)/Fi(i,t);
             P(:,:,t) = P(:,:,t) - Ki(:,i,t)*Ki(:,i,t)'/Fi(i,t);
         end
@@ -197,7 +178,7 @@ while notsteady && t<smpl
         end
     end
     P(:,:,t+1) = T*P(:,:,t)*T' + QQ;
-    %  notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<crit);
+    %  notsteady   = ~(max(max(abs(P(:,:,t+1)-P(:,:,t))))<kalman_tol);
 end
 % $$$ P_s=tril(P(:,:,t))+tril(P(:,:,t),-1)';
 % $$$ P1_s=tril(P1(:,:,t))+tril(P1(:,:,t),-1)';
@@ -218,7 +199,7 @@ end
 % $$$   for i=di
 % $$$     Zi = Z(i,:);
 % $$$     v(i,t)      = Y(i,t) - Zi*a(:,t);
-% $$$     if Fi_s(i) > crit
+% $$$     if Fi_s(i) > kalman_tol
 % $$$       a(:,t) = a(:,t) + Ki_s(:,i)*v(i,t)/Fi_s(i);
 % $$$     end
 % $$$   end
@@ -236,7 +217,7 @@ while t > d+1
     t = t-1;
     di = flipud(data_index{t})';
     for i = di
-        if Fi(i,t) > crit
+        if Fi(i,t) > kalman_tol
             ri = Z(i,:)'/Fi(i,t)*v(i,t)+ri-Ki(:,i,t)'*ri/Fi(i,t)*Z(i,:)';
         end
     end
@@ -252,13 +233,12 @@ if d
     for t = d:-1:1
         di = flipud(data_index{t})';
         for i = di
-            %      if Finf(i,t) > crit && ~(t==d && i>options_.diffuse_d),  % use of options_.diffuse_d to be sure of DKF termination
-            if Finf(i,t) > crit 
+            if Finf(i,t) > kalman_tol 
                 r1(:,t) = Z(i,:)'*v(i,t)/Finf(i,t) + ...
                           (Kinf(:,i,t)'*Fstar(i,t)/Finf(i,t)-Kstar(:,i,t)')*r0(:,t)/Finf(i,t)*Z(i,:)' + ...
                           r1(:,t)-Kinf(:,i,t)'*r1(:,t)/Finf(i,t)*Z(i,:)';
                 r0(:,t) = r0(:,t)-Kinf(:,i,t)'*r0(:,t)/Finf(i,t)*Z(i,:)';
-            elseif Fstar(i,t) > crit % step needed whe Finf == 0
+            elseif Fstar(i,t) > kalman_tol % step needed whe Finf == 0
                 r0(:,t) = Z(i,:)'/Fstar(i,t)*v(i,t)+r0(:,t)-(Kstar(:,i,t)'*r0(:,t))/Fstar(i,t)*Z(i,:)';
             end
         end
@@ -272,14 +252,14 @@ if d
     end
 end
 
-if nargout > 8
+if decomp_flag
     decomp = zeros(nk,mm,rr,smpl+nk);
     ZRQinv = inv(Z*QQ*Z');
     for t = max(d,1):smpl
         ri_d = zeros(mm,1);
         di = flipud(data_index{t})';
         for i = di
-            if Fi(i,t) > crit
+            if Fi(i,t) > kalman_tol
                 ri_d = Z(i,:)'/Fi(i,t)*v(i,t)+ri_d-Ki(:,i,t)'*ri_d/Fi(i,t)*Z(i,:)';
             end
         end
