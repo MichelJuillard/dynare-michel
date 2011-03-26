@@ -174,7 +174,7 @@ for i=1:length(k)
     if length(m)==1
         bayestopt_.p5(k(i)) = m;
     else
-        disp(['Prior distribution for parameter ' int2str(k(i))  ' has two modes!'])
+        disp(['Prior distribution for parameter ' bayestopt_.name(k(i))  ' has two modes!'])
         bayestopt_.p5(k(i)) = bayestopt_.p1(k(i)) ; 
     end
 end
