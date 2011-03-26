@@ -217,7 +217,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         else
             flag = 1;
         end
-        if ~exist('igg'),  % by M. Ratto
+        if ~exist('igg','var'),  % by M. Ratto
             hh=[];
             gg=[];
             igg=[];
@@ -246,10 +246,10 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
             fval = DsgeVarLikelihood(xparam1,gend);
         end
         OldMode = fval;
-        if ~exist('MeanPar')
+        if ~exist('MeanPar','var')
             MeanPar = xparam1;
         end
-        if exist('hh')
+        if exist('hh','var')
             CovJump = inv(hh);
         else% The covariance matrix is initialized with the prior
             % covariance (a diagonal matrix) %%Except for infinite variances ;-)
