@@ -121,9 +121,11 @@ if options_.ramsey_policy
         oo_.steady_state = x;
         [junk,junk,multbar] = dyn_ramsey_static_(oo_.steady_state(k_inst),M_,options_,oo_,it_);
     else
-        [oo_.steady_state,info1] = dynare_solve('dyn_ramsey_static_', ...
-                                                oo_.steady_state,0,M_,options_,oo_,it_);
-        [junk,junk,multbar] = dyn_ramsey_static_(oo_.steady_state,M_,options_,oo_,it_);
+        xx = oo_.steady_state([1:M_.orig_endo_nbr (M_.orig_endo_nbr+M_.orig_eq_nbr+1):end]);
+        [xx,info1] = dynare_solve('dyn_ramsey_static_', ...
+                                                xx,0,M_,options_,oo_,it_);
+        [junk,junk,multbar] = dyn_ramsey_static_(xx,M_,options_,oo_,it_);
+        oo_.steady_state = [xx; multbar];
     end
     
     check1 = max(abs(feval([M_.fname '_static'],...
@@ -135,51 +137,46 @@ if options_.ramsey_policy
         info(2) = check1'*check1;
         return
     end
-    
-    [jacobia_,M_,dr] = dyn_ramsey_dynamic_(oo_.steady_state,multbar,M_,options_,dr,it_);
-    klen = M_.maximum_lag + M_.maximum_lead + 1;
-    dr.ys = [oo_.steady_state;zeros(M_.exo_nbr,1);multbar];
-    oo_.steady_state = dr.ys;
-else
-    klen = M_.maximum_lag + M_.maximum_lead + 1;
-    iyv = M_.lead_lag_incidence';
-    iyv = iyv(:);
-    iyr0 = find(iyv) ;
-    it_ = M_.maximum_lag + 1 ;
-    
-    if M_.exo_nbr == 0
-        oo_.exo_steady_state = [] ;
-    end
-    
-    it_ = M_.maximum_lag + 1;
-    z = repmat(dr.ys,1,klen);
-    if ~options_.bytecode
-        z = z(iyr0) ;
+    dr.ys = oo_.steady_state;
+end    
+klen = M_.maximum_lag + M_.maximum_lead + 1;
+iyv = M_.lead_lag_incidence';
+iyv = iyv(:);
+iyr0 = find(iyv) ;
+it_ = M_.maximum_lag + 1 ;
+
+if M_.exo_nbr == 0
+    oo_.exo_steady_state = [] ;
+end
+
+it_ = M_.maximum_lag + 1;
+z = repmat(dr.ys,1,klen);
+if ~options_.bytecode
+    z = z(iyr0) ;
+end;
+if options_.order == 1
+    if (options_.bytecode)
+        [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,[oo_.exo_simul ...
+                            oo_.exo_det_simul], M_.params, dr.ys, 1);
+        jacobia_ = [loc_dr.g1 loc_dr.g1_x loc_dr.g1_xd];
+    else
+        [junk,jacobia_] = feval([M_.fname '_dynamic'],z,[oo_.exo_simul ...
+                            oo_.exo_det_simul], M_.params, dr.ys, it_);
     end;
-    if options_.order == 1
-        if (options_.bytecode)
-            [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,[oo_.exo_simul ...
-                                oo_.exo_det_simul], M_.params, dr.ys, 1);
-            jacobia_ = [loc_dr.g1 loc_dr.g1_x loc_dr.g1_xd];
-        else
-            [junk,jacobia_] = feval([M_.fname '_dynamic'],z,[oo_.exo_simul ...
-                                oo_.exo_det_simul], M_.params, dr.ys, it_);
-        end;
-    elseif options_.order == 2
-        if (options_.bytecode)
-            [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,[oo_.exo_simul ...
-                                oo_.exo_det_simul], M_.params, dr.ys, 1);
-            jacobia_ = [loc_dr.g1 loc_dr.g1_x];
-        else
-            [junk,jacobia_,hessian1] = feval([M_.fname '_dynamic'],z,...
-                                             [oo_.exo_simul ...
-                                oo_.exo_det_simul], M_.params, dr.ys, it_);
-        end;
-        if options_.use_dll
-            % In USE_DLL mode, the hessian is in the 3-column sparse representation
-            hessian1 = sparse(hessian1(:,1), hessian1(:,2), hessian1(:,3), ...
-                              size(jacobia_, 1), size(jacobia_, 2)*size(jacobia_, 2));
-        end
+elseif options_.order == 2
+    if (options_.bytecode)
+        [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,[oo_.exo_simul ...
+                            oo_.exo_det_simul], M_.params, dr.ys, 1);
+        jacobia_ = [loc_dr.g1 loc_dr.g1_x];
+    else
+        [junk,jacobia_,hessian1] = feval([M_.fname '_dynamic'],z,...
+                                         [oo_.exo_simul ...
+                            oo_.exo_det_simul], M_.params, dr.ys, it_);
+    end;
+    if options_.use_dll
+        % In USE_DLL mode, the hessian is in the 3-column sparse representation
+        hessian1 = sparse(hessian1(:,1), hessian1(:,2), hessian1(:,3), ...
+                          size(jacobia_, 1), size(jacobia_, 2)*size(jacobia_, 2));
     end
 end
 

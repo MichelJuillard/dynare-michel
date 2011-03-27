@@ -239,6 +239,10 @@ for i = 1:length(M_.aux_vars)
           case 4
             str = sprintf('EXPECTATION(%d)(...)', aux_lead_lag);
             return
+          case 6
+            str = sprintf('%s(%d)', ...
+                          deblank(M_.endo_names(M_.aux_vars(i).endo_index, :)),aux_lead_lag);
+            return
           otherwise
             error(sprintf('Invalid auxiliary type: %s', M_.endo_names(aux_index, :)))
         end
