@@ -35,9 +35,13 @@ global oo_ M_
 % recovering usefull fields
 endo_nbr = M.endo_nbr;
 exo_nbr = M.exo_nbr;
+orig_endo_nbr = M_.orig_endo_nbr;
+orig_eq_nbr = M_.orig_eq_nbr;
+inst_nbr = orig_endo_nbr - orig_eq_nbr;
+% indices of Lagrange multipliers
+i_mult = [orig_endo_nbr+(1:orig_eq_nbr)]';
+x = [x(1:orig_endo_nbr); zeros(orig_eq_nbr,1); x(orig_endo_nbr+1:end)];
 fname = M.fname;
-% inst_nbr = M.inst_nbr;
-% i_endo_no_inst = M.endogenous_variables_without_instruments;
 max_lead = M.maximum_lead;
 max_lag = M.maximum_lag;
 beta =  options_.planner_discount;
@@ -75,47 +79,28 @@ if options_.steadystate_flag
     end
 end
 
-oo_.steady_state = x;
 % value and Jacobian of objective function
 ex = zeros(1,M.exo_nbr);
 [U,Uy,Uyy] = feval([fname '_objective_static'],x(i_endo),ex, M_.params);
 Uy = Uy';
 Uyy = reshape(Uyy,endo_nbr,endo_nbr);
 
-y = repmat(x(i_endo),1,max_lag+max_lead+1);
-% value and Jacobian of dynamic function
-k = find(i_lag');
+% set multipliers to 0 to compute residuals
 it_ = 1;
-%  [f,fJ,fH] = feval([fname '_dynamic'],y(k),ex);
-[f,fJ] = feval([fname '_dynamic'],y(k),[oo.exo_simul oo.exo_det_simul], ...
-               M_.params, x, it_);
-% indices of Lagrange multipliers
-inst_nbr = endo_nbr - size(f,1);
-i_mult = [endo_nbr+1:2*endo_nbr-inst_nbr]';
+[f,fJ] = feval([fname '_static'],x,[oo.exo_simul oo.exo_det_simul], ...
+               M_.params);
 
-% derivatives of Lagrangian with respect to endogenous variables
-%  res1 = Uy;
-A = zeros(endo_nbr,endo_nbr-inst_nbr);
-for i=1:max_lag+max_lead+1
-    % select variables present in the model at a given lag
-    [junk,k1,k2] = find(i_lag(i,:));
-    %    res1(k1) = res1(k1) + beta^(max_lag-i+1)*fJ(:,k2)'*x(i_mult); 
-    A(k1,:) = A(k1,:) + beta^(max_lag-i+1)*fJ(:,k2)';
-end
+A = fJ(1:orig_endo_nbr,i_mult);
+y = f(1:orig_endo_nbr);
+mult = -A\y;
 
-%  i_inst = var_index(options_.olr_inst);
-%  k = setdiff(1:size(A,1),i_inst);
-%  mult = -A(k,:)\Uy(k);
-mult = -A\Uy;
-%  resids = [f; Uy(i_inst)+A(i_inst,:)*mult];
-resids1 = Uy+A*mult;
-%  resids = [f; sqrt(resids1'*resids1/endo_nbr)]; 
-[q,r,e] = qr([A Uy]');
+resids1 = y+A*mult;
+[q,r,e] = qr([A y]');
 if options_.steadystate_flag
-    resids = [r(end,(endo_nbr-inst_nbr+1:end))'];
+    resids = [r(end,(orig_endo_nbr-inst_nbr+1:end))'];
     resids = resids1'*resids1;
 else
-    resids = [f; r(end,(endo_nbr-inst_nbr+1:end))'];
+    resids = [f(i_mult); r(end,(orig_endo_nbr-inst_nbr+1:end))'];
 end
 rJ = [];
 return;
