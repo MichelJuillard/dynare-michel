@@ -70,7 +70,7 @@ post_deciles = xx([round(0.1*number_of_draws) ...
 density = [];
 if info
     number_of_grid_points = 2^9;      % 2^9 = 512 !... Must be a power of two.
-    if post_var > 0
+    if post_var > 1e-12
         bandwidth = 0;                    % Rule of thumb optimal bandwidth parameter.
         kernel_function = 'gaussian';     % Gaussian kernel for Fast Fourrier Transform approximaton.  
         optimal_bandwidth = mh_optimal_bandwidth(xx,number_of_draws,bandwidth,kernel_function);
