@@ -4411,7 +4411,7 @@ This command accepts all options of @code{stoch_simul}, plus:
 
 @table @code
 
-@item planner_discount = @var{DOUBLE}
+@item planner_discount = @var{EXPRESSION}
 Declares the discount factor of the central planner. Default: @code{1.0}
 @end table
 
