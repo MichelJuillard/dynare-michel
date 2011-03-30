@@ -1586,6 +1586,13 @@ operator. For each occurence of this operator, Dynare creates an
 auxiliary variable equal to @code{AUX_EXPECT_LAG_1 = x(+2)}, and
 replaces the expectation operator by @code{AUX_EXPECT_LAG_1(-1)}.
 
+Auxiliary variables are also introduced by the preprocessor for the
+@code{ramsey_policy} command. In this case, they are used to represent the Lagrange
+multipliers when first order conditions of the ramsey problem are computed.
+The new variables take the form @code{MULT_@var{i}}, where @var{i} represents
+the constraint with which the multiplier is associated (counted from the
+order of declaration in the model block).
+
 Once created, all auxiliary variables are included in the set of
 endogenous variables. The output of decision rules (see below) is such
 that auxiliary variable names are replaced by the original variables
@@ -4402,8 +4409,11 @@ This command computes the first order approximation of the policy that
 maximizes the policy maker objective function submitted to the
 constraints provided by the equilibrium path of the economy.
 
-The planner objective must be declared with the
-@code{planner_objective} command.
+The planner objective must be declared with the @code{planner_objective} command.
+
+@xref{Auxiliary
+variables}, for an explanation of how this operator is handled
+internally and how this affects the output.
 
 @optionshead
 
