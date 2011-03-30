@@ -1559,18 +1559,18 @@ lags) of the dynamic model declared in the @code{model} block.
 @node Auxiliary variables
 @section Auxiliary variables
 
-The model which will is solved internally by Dynare is not exactly the
+The model which is solved internally by Dynare is not exactly the
 model declared by the user. In some cases, Dynare will introduce
-auxiliary endogenous variables --- along with corresponding auxiliary
-equations ---, which will appear in the final output.
+auxiliary endogenous variables---along with corresponding auxiliary
+equations---which will appear in the final output.
 
 The main transformation concerns leads and lags. Dynare will perform a
 transformation of the model so that there is only one lead and one lag
-on endogenous, and, in the case of a stochastic model, no lead/lag on
-exogenous.
+on endogenous variables and, in the case of a stochastic model, no leads/lags on
+exogenous variables.
 
 This transformation is achieved by the creation of auxiliary
-variables, and corresponding equations. For example, if @code{x(+2)}
+variables and corresponding equations. For example, if @code{x(+2)}
 exists in the model, Dynare will create one auxiliary variable
 @code{AUX_ENDO_LEAD = x(+1)}, and replace @code{x(+2)} by
 @code{AUX_ENDO_LEAD(+1)}.
@@ -1578,7 +1578,7 @@ exists in the model, Dynare will create one auxiliary variable
 A similar transformation is done for lags greater than 2 on endogenous
 (auxiliary variables will have a name beginning with
 @code{AUX_ENDO_LAG}), and for exogenous with leads and lags (auxiliary
-variables will have a name beginning with @code{AUX_EXO_LEAG} or
+variables will have a name beginning with @code{AUX_EXO_LEAD} or
 @code{AUX_EXO_LAG} respectively).
 
 Another transformation is done for the @code{EXPECTATION}
