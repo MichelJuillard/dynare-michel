@@ -659,6 +659,10 @@ finishes processing.
 Tests the parallel setup specified in the configuration file without
 executing the @file{.mod} file. @xref{The Configuration File}, for more
 information about the configuration file.
+
+@item -D@var{MACRO_VARIABLE}=@var{MACRO_EXPRESSION}
+Defines a macro-variable from the command line (the same effect as using
+the Macro directive @code{@@#define} in a model file, @pxref{Macro-processing language}).
 @end table
 
 @outputhead
