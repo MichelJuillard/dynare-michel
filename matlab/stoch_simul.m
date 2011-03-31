@@ -153,7 +153,6 @@ if options_.irf
         fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
         fprintf(fidTeX,' \n');
     end
-    olditer = iter_;% Est-ce vraiment utile ? Il y a la même ligne dans irf... 
     SS(M_.exo_names_orig_ord,M_.exo_names_orig_ord)=M_.Sigma_e+1e-14*eye(M_.exo_nbr);
     cs = transpose(chol(SS));
     tit(M_.exo_names_orig_ord,:) = M_.exo_names;
@@ -318,7 +317,6 @@ if options_.irf
                 end
             end
         end
-        iter_ = olditer;
     end
     if TeX
         fprintf(fidTeX,' \n');
