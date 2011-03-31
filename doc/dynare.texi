@@ -1933,10 +1933,10 @@ exogenous shock.
 @customhead{In deterministic context}
 
 For deterministic simulations, the @code{shocks} block specifies
-temporary changes in the value of an exogenous variables. For
+temporary changes in the value of exogenous variables. For
 permanent shocks, use an @code{endval} block.
 
-The block should contain one or several occurrences of the following
+The block should contain one or more occurrences of the following
 group of three lines:
 
 @example
@@ -1950,7 +1950,7 @@ vary over time. The @code{periods} keyword accepts a list of
 several dates or date ranges, which must be matched by as many shock values
 in the @code{values} keyword. Note that a range in the
 @code{periods} keyword must be matched by only one value in the
-@code{values} keyword: this syntax means that the exogenous
+@code{values} keyword: this syntax means that the exogenous variable
 will have a constant value over the range.
 
 Note that shock values are not restricted to numerical constants:
