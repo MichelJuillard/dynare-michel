@@ -2782,6 +2782,10 @@ increase it for highly autocorrelated processes. Default: @code{512}.
 Number of periods on which to compute the IRFs. Setting @code{irf=0},
 suppresses the plotting of IRF's. Default: @code{40}.
 
+@item irf_shocks = ( @var{VARIABLE_NAME} [@var{VARIABLE_NAME} @dots{}] )
+@anchor{irf_shocks}
+The exogenous variables for which to compute IRFs. Default: all.
+
 @item relative_irf
 Requests the computation of normalized IRFs in percentage of the
 standard error of each shock.

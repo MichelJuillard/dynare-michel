@@ -132,7 +132,8 @@ if options_.irf
     if TeX
         titTeX(M_.exo_names_orig_ord,:) = M_.exo_names_tex;
     end
-    for i=1:M_.exo_nbr
+    irf_shocks_indx = getIrfShocksIndx();
+    for i=irf_shocks_indx
         if SS(i,i) > 1e-13
             y=irf(oo_.dr,cs(M_.exo_names_orig_ord,i), options_.irf, options_.drop, ...
                   options_.replic, options_.order);

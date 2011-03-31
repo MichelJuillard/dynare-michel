@@ -159,7 +159,8 @@ if options_.irf
     if TeX
         titTeX(M_.exo_names_orig_ord,:) = M_.exo_names_tex;
     end
-    for i=1:M_.exo_nbr
+    irf_shocks_indx = getIrfShocksIndx();
+    for i=irf_shocks_indx
         if SS(i,i) > 1e-13
             if PI_PCL_solver
                 y=PCL_Part_info_irf (0, PCL_varobs, i_var, M_, oo_.dr, options_.irf, i);
