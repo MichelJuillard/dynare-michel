@@ -65,30 +65,59 @@ end
 H10=H0(endo_augm_id,endo_augm_id);
 F10=H0(instr_id,endo_augm_id);
 
-yy_nbr=numel(endo_augm_id);
-
-[H1,F1,retcode]=Iterate(H10,F10);
+iter=0;
+H1=H10;
+F1=F10;
+while 1
+    iter=iter+1;
+    P=SylvesterDoubling(W+beta*F1'*Q*F1,beta*H1',H1,discretion_tol,solve_maxit);
+    if any(any(isnan(P)))
+        P=SylvesterHessenbergSchur(W+beta*F1'*Q*F1,beta*H1',H1);
+        if any(any(isnan(P)))
+            retcode=2;
+            return
+        end
+    end
+    D=A0-A2*H1-A4*F1;
+    Dinv=inv(D);
+    A3DPD=A3'*Dinv'*P*Dinv;
+    F1=-(Q+A3DPD*A3)\(A3DPD*A1);
+    H1=Dinv*(A1+A3*F1);
+    
+    [rcode,NQ]=CheckConvergence([H1;F1]-[H10;F10],iter,solve_maxit,discretion_tol);
+    if rcode
+        break
+    else
+        if verbose
+            disp(NQ)
+        end
+    end
+    H10=H1;
+    F10=F1;
+end
+retcode=rcode-1;
 
 switch retcode
-    case 2 % nan
+  case 3 % nan
+    retcode=3;
+    retcode(2)=10000;
+    if verbose
+        disp([mfilename,':: NAN elements in the solution'])
+    end
+  case 2% maxiter
+    retcode = 1
+    if verbose
+        disp([mfilename,':: Maximum Number of Iterations reached'])
+    end
+  case 1
+    BadEig=max(abs(eig(H1)))>qz_criterium;
+    if BadEig
         retcode=3;
-        retcode(2)=10000;
+        retcode(2)=100*max(abs(eig(H1)));
         if verbose
-            disp([mfilename,':: NAN elements in the solution'])
+            disp([mfilename,':: Some eigenvalues greater than qz_criterium, Model potentially unstable'])
         end
-    case 1% maxiter
-        if verbose
-            disp([mfilename,':: Maximum Number of Iterations reached'])
-        end
-    case 0
-        BadEig=max(abs(eig(H1)))>qz_criterium;
-        if BadEig
-            retcode=3;
-            retcode(2)=100*max(abs(eig(H1)));
-            if verbose
-                disp([mfilename,':: Some eigenvalues greater than qz_criterium, Model potentially unstable'])
-            end
-        end
+    end
 end
 
 if retcode(1)
@@ -110,41 +139,8 @@ else
     G=G(1:endo_nbr,:);
 end
 
-    function [H1,F1,retcode]=Iterate(H10,F10)
-        iter=0;
-        H1=H10;
-        F1=F10;
-        while 1
-            iter=iter+1;
-            P=SylvesterDoubling(W+beta*F1'*Q*F1,beta*H1',H1,discretion_tol,solve_maxit);
-            if any(any(isnan(P)))
-                P=SylvesterHessenbergSchur(W+beta*F1'*Q*F1,beta*H1',H1);
-                if any(any(isnan(P)))
-                    retcode=2;
-                    return
-                end
-            end
-            D=A0-A2*H1-A4*F1;
-            Dinv=D\eye(yy_nbr);
-            A3DPD=A3'*Dinv'*P*Dinv;
-            F1=-(Q+A3DPD*A3)\(A3DPD*A1);
-            H1=Dinv*(A1+A3*F1);
-            
-            [rcode,NQ]=CheckConvergence([H1;F1]-[H10;F10],iter,solve_maxit,discretion_tol);
-            if rcode
-                break
-            else
-                if verbose
-                    disp(NQ)
-                end
-            end
-            H10=H1;
-            F10=F1;
-        end
-        retcode=rcode-1;
-    end
-
 end
+
 
 function [rcode,NQ]=CheckConvergence(Q,iter,MaxIter,crit)
 
@@ -158,6 +154,7 @@ elseif NQ<crit
 else
     rcode=0;
 end
+
 end
 
 function [A00,A11,A22,A33,A44,A55,WW,Q,endo_nbr,exo_nbr,aux,endo_augm_id]=GetDennisMatrices(AAlag,AA0,AAlead,BB,bigw,instr_id)
@@ -188,6 +185,7 @@ A44=zeros(m,instr_nbr);A44(1:ny,1:end)=A4;
 A55=zeros(m,exo_nbr);A55(1:ny,1:end)=A5;
 WW=zeros(m);WW(1:ny,1:ny)=W;
 endo_augm_id=setdiff(1:endo_nbr+AuxiliaryVariables_nbr,instr_id);
+
 end
 
 function v= SylvesterDoubling (d,g,h,tol,maxit)
@@ -207,6 +205,7 @@ for i =1:maxit,
     g = g*g;
     h = h*h;
 end
+
 end
 
 function v = SylvesterHessenbergSchur(d,g,h)
@@ -230,6 +229,7 @@ else
     [vbar] = sylvest_private(hbarp,t'*d'*u,gbar,1e-15);
     v = u*vbar'*t';
 end
+
 end
 
 
@@ -294,4 +294,5 @@ if i==n,
     temp = [temp g*v(:,size(temp,2)+1:b)];
     v(:,i) = (w-g*h(i,i))\(d(:,i) + temp*h(1:b,i));
 end
+
 end
