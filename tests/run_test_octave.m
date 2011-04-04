@@ -107,6 +107,7 @@ putenv("GNUTERM", "dumb")
 failed = {};
 
 top_test_dir = [pwd '/'];
+addpath(top_test_dir);
 
 for i=1:size(name,2)
   save('makecheck.mat', 'name', 'failed', 'i', 'top_test_dir');
@@ -120,6 +121,7 @@ for i=1:size(name,2)
     dynare([testfile ext], 'noclearall')
   catch
     failed{size(failed,2)+1} = name{i};
+    printMakeCheckErrMsg(name{i}, lasterror);
   end_try_catch
 end
 
@@ -157,6 +159,7 @@ for block = 0:1
           save('test.mat','y_ref');
         catch
           failed{size(failed,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(block) num2str(bytecode) num2str(solve_algos(i)) num2str(default_stack_solve_algo) ')'];
+          printMakeCheckErrMsg(['block_bytecode/run_ls2003.m(' num2str(block) num2str(bytecode) num2str(solve_algos(i)) num2str(default_stack_solve_algo) ')'], lasterror);
         end_try_catch
       else
         try
@@ -166,9 +169,11 @@ for block = 0:1
           diff = oo_.endo_simul - y_ref;
           if (abs(diff) <= options_.dynatol)
             failed{size(failed,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(block) num2str(bytecode) num2str(solve_algos(i)) num2str(default_stack_solve_algo) ')'];
+            printMakeCheckErrMsg(['block_bytecode/run_ls2003.m(' num2str(block) num2str(bytecode) num2str(solve_algos(i)) num2str(default_stack_solve_algo) ')'], lasterror);
           end
         catch
           failed{size(failed,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(block) num2str(bytecode) num2str(solve_algos(i)) num2str(default_stack_solve_algo) ')'];
+          printMakeCheckErrMsg(['block_bytecode/run_ls2003.m(' num2str(block) num2str(bytecode) num2str(solve_algos(i)) num2str(default_stack_solve_algo) ')'], lasterror);
         end_try_catch
       endif
       load ws
@@ -180,6 +185,7 @@ for block = 0:1
         run_ls2003(block, bytecode, default_solve_algo, stack_solve_algos(i))
       catch
         failed{size(failed,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(block) num2str(bytecode) num2str(solve_algos(i)) num2str(default_stack_solve_algo) ')'];
+        printMakeCheckErrMsg(['block_bytecode/run_ls2003.m(' num2str(block) num2str(bytecode) num2str(solve_algos(i)) num2str(default_stack_solve_algo) ')'], lasterror);
       end_try_catch
       load ws
     endfor
