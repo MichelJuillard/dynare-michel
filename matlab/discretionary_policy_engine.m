@@ -95,24 +95,24 @@ while 1
     H10=H1;
     F10=F1;
 end
-retcode=rcode-1;
 
-switch retcode
+retcode = 0;
+switch rcode
   case 3 % nan
-    retcode=3;
+    retcode=63;
     retcode(2)=10000;
     if verbose
         disp([mfilename,':: NAN elements in the solution'])
     end
   case 2% maxiter
-    retcode = 1
+    retcode = 61
     if verbose
         disp([mfilename,':: Maximum Number of Iterations reached'])
     end
   case 1
     BadEig=max(abs(eig(H1)))>qz_criterium;
     if BadEig
-        retcode=3;
+        retcode=62;
         retcode(2)=100*max(abs(eig(H1)));
         if verbose
             disp([mfilename,':: Some eigenvalues greater than qz_criterium, Model potentially unstable'])

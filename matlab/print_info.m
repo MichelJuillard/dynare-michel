@@ -68,7 +68,16 @@ if ~noprint
         error('You are estimating a DSGE-VAR model, but the value of the dsge prior weight is too low!')
       case 52 %DsgeVarLikelihood
         error('');
-
+      case 61 %Discretionary policy
+        error(['Discretionary policy: maximum number of iterations has ' ...
+               'been reached. Procedure failed. ']);
+      case 62
+        error(['Discretionary policy: some eigenvalues greater than ' ...
+               'options_.qz_criterium. Model potentially unstable.']);
+      case 63
+        error(['Discretionary policy: NaN elements are present in the ' ...
+               'solution. Procedure failed.']);
+        
         % Aim Code Conversions by convertAimCodeToInfo.m
       case 102
         error('Aim: roots not correctly computed by real_schur.');
