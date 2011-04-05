@@ -106,16 +106,12 @@ putenv("GNUTERM", "dumb")
 ## BASE TESTS
 failed = {};
 
-top_test_dir = [pwd '/'];
+top_test_dir = pwd;
 addpath(top_test_dir);
-
+addpath([top_test_dir '../matlab']);
 for i=1:size(name,2)
-  save('makecheck.mat', 'name', 'failed', 'i', 'top_test_dir');
-  clear -all;
-  load 'makecheck.mat';
-
   try
-    [directory, testfile, ext] = fileparts([top_test_dir name{i}]);
+    [directory, testfile, ext] = fileparts([top_test_dir '/' name{i}]);
     cd(directory);
     printf("***  TESTING: %s ***\n", name{i});
     dynare([testfile ext], 'noclearall')
@@ -123,14 +119,17 @@ for i=1:size(name,2)
     failed{size(failed,2)+1} = name{i};
     printMakeCheckErrMsg(name{i}, lasterror);
   end_try_catch
+
+  cd(top_test_dir);
+  save('makeCheckBase.mat', 'name', 'failed', 'i', 'top_test_dir');
+  clear -all;
+  load('makeCheckBase.mat');
 end
 
-save('makecheck.mat', 'name', 'failed', 'top_test_dir');
-clear -all;
-load 'makecheck.mat';
-
 ## BLOCK TEST
-cd([top_test_dir 'block_bytecode/']);
+clear i;
+clear name;
+failed = {};
 num_block_tests = 0;
 for block = 0:1
   for bytecode = 0:1
@@ -150,68 +149,90 @@ for block = 0:1
     endif
 
     for i = 1:length(solve_algos)
-      save ws
+      cd([top_test_dir '/block_bytecode']);
+      num_block_tests = num_block_tests + 1;
       if !block && !bytecode && (i == 1)
         try
-          num_block_tests = num_block_tests + 1;
           run_ls2003(block, bytecode, solve_algos(i), default_stack_solve_algo)
           y_ref = oo_.endo_simul;
           save('test.mat','y_ref');
         catch
-          failed{size(failed,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(block) num2str(bytecode) num2str(solve_algos(i)) num2str(default_stack_solve_algo) ')'];
-          printMakeCheckErrMsg(['block_bytecode/run_ls2003.m(' num2str(block) num2str(bytecode) num2str(solve_algos(i)) num2str(default_stack_solve_algo) ')'], lasterror);
+          failed{size(failed,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(block) ', ' num2str(bytecode) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
+          printMakeCheckErrMsg(['block_bytecode/run_ls2003.m(' num2str(block) ', ' num2str(bytecode) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], lasterror);
         end_try_catch
       else
         try
-          num_block_tests = num_block_tests + 1;
           run_ls2003(block, bytecode, solve_algos(i), default_stack_solve_algo)
           load('test.mat','y_ref');
           diff = oo_.endo_simul - y_ref;
           if (abs(diff) <= options_.dynatol)
-            failed{size(failed,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(block) num2str(bytecode) num2str(solve_algos(i)) num2str(default_stack_solve_algo) ')'];
-            printMakeCheckErrMsg(['block_bytecode/run_ls2003.m(' num2str(block) num2str(bytecode) num2str(solve_algos(i)) num2str(default_stack_solve_algo) ')'], lasterror);
+            failed{size(failed,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(block) ', ' num2str(bytecode) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
+            printMakeCheckErrMsg(['block_bytecode/run_ls2003.m(' num2str(block) ', ' num2str(bytecode) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], lasterror);
           end
         catch
-          failed{size(failed,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(block) num2str(bytecode) num2str(solve_algos(i)) num2str(default_stack_solve_algo) ')'];
-          printMakeCheckErrMsg(['block_bytecode/run_ls2003.m(' num2str(block) num2str(bytecode) num2str(solve_algos(i)) num2str(default_stack_solve_algo) ')'], lasterror);
+          failed{size(failed,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(block) ', ' num2str(bytecode) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
+          printMakeCheckErrMsg(['block_bytecode/run_ls2003.m(' num2str(block) ', ' num2str(bytecode) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], lasterror);
         end_try_catch
       endif
-      load ws
+
+      cd(top_test_dir);
+      save('makeCheckBlock.mat', 'failed', 'num_block_tests', 'top_test_dir', 'i', ...
+	   'solve_algos', 'block', 'bytecode', 'default_stack_solve_algo', 'default_solve_algo', 'stack_solve_algos');
+      clear -all;
+      load('makeCheckBlock.mat');
     endfor
+
     for i = 1:length(stack_solve_algos)
-      save ws
+      cd([top_test_dir '/block_bytecode']);
+      num_block_tests = num_block_tests + 1;
       try
-        num_block_tests = num_block_tests + 1;
         run_ls2003(block, bytecode, default_solve_algo, stack_solve_algos(i))
       catch
-        failed{size(failed,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(block) num2str(bytecode) num2str(solve_algos(i)) num2str(default_stack_solve_algo) ')'];
-        printMakeCheckErrMsg(['block_bytecode/run_ls2003.m(' num2str(block) num2str(bytecode) num2str(solve_algos(i)) num2str(default_stack_solve_algo) ')'], lasterror);
+        failed{size(failed,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(block) ', ' num2str(bytecode) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
+        printMakeCheckErrMsg(['block_bytecode/run_ls2003.m(' num2str(block) ', ' num2str(bytecode) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], lasterror);
       end_try_catch
-      load ws
+
+      cd(top_test_dir);
+      save('makeCheckBlock.mat', 'failed', 'num_block_tests', 'top_test_dir', 'i', ...
+	   'solve_algos', 'block', 'bytecode', 'default_stack_solve_algo', 'default_solve_algo', 'stack_solve_algos');
+      clear -all;
+      load('makeCheckBlock.mat');
     endfor
   endfor
 endfor
 
-save('makecheck.mat', 'name', 'failed', 'top_test_dir', 'num_block_tests');
-clear -all;
-load 'makecheck.mat';
-delete 'makecheck.mat';
+cd(top_test_dir);
+clear -all
+
+load('makeCheckBase.mat');
+failedBase = failed;
+delete('makeCheckBase.mat');
+
+load('makeCheckBlock.mat');
+failedBlock = failed;
+delete('makeCheckBlock.mat');
 
 total_tests = size(name,2)+num_block_tests;
+
 printf("\n\n\n");
 printf("***************************************\n");
 printf("*         DYNARE TEST RESULTS         *\n");
 printf("***************************************\n");
-printf("  %d tests PASSED out of %d tests run\n", total_tests-size(failed,2), total_tests);
+printf("  %d tests PASSED out of %d tests run\n", total_tests-size(failedBase,2)-size(failedBlock,2), total_tests);
 printf("***************************************\n");
-if size(failed,2) > 0
-  printf("List of %d tests FAILED:\n", size(failed,2));
-  for i=1:size(failed,2)
-    printf("   * %s\n",failed{i});
+if size(failedBase,2) > 0 || size(failedBlock,2) > 0
+  printf("List of %d tests FAILED:\n", size(failedBase,2)+size(failedBlock,2));
+  for i=1:size(failedBase,2)
+    printf("   * %s\n",failedBase{i});
+  end
+  for i=1:size(failedBlock,2)
+    printf("   * %s\n",failedBlock{i});
   end
   printf("***************************************\n\n");
+  clear -all
   error("Make Check FAILED");
 end
+clear -all
 
 ## Local variables:
 ## mode: Octave
