@@ -1324,7 +1324,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             end
             xlim([1 gend])
             if options_.TeX
-                idx = strmatch(options_.varobs(i),M_.endo_names,'exact');
+                idx = strmatch(options_.varobs(i,:),M_.endo_names,'exact');
                 texname = M_.endo_names_tex(idx,:);
                 if isempty(TeXNAMES)
                     TeXNAMES = ['$ ' deblank(texname) ' $'];
@@ -1379,7 +1379,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 end
                 xlim([1 gend])
                 if options_.TeX
-                    idx = strmatch(options_.varobs(k),M_.endo_names,'exact');
+                    idx = strmatch(options_.varobs(k,:),M_.endo_names,'exact');
                     texname = M_.endo_names_tex(idx,:);
                     if isempty(TeXNAMES)
                         TeXNAMES = ['$ ' deblank(texname) ' $'];
@@ -1435,7 +1435,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             end
             xlim([1 gend])
             if options_.TeX
-                idx = strmatch(options_.varobs(i),M_.endo_names,'exact');
+                idx = strmatch(options_.varobs(i,:),M_.endo_names,'exact');
                 texname = M_.endo_names_tex(idx,:);
                 if isempty(TeXNAMES)
                     TeXNAMES = ['$ ' deblank(texname) ' $'];
