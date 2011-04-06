@@ -149,17 +149,25 @@ localVars.Mean=Mean;
 
 
 if ~exist('OCTAVE_VERSION')
-% Commenting for testing!
-if isnumeric(options_.parallel) || ceil(size(varlist,1)/MaxNumberOfPlotsPerFigure)<4,
-      fout = pm3_core(localVars,1,nvar,0);
- 
- % Parallel execution!
- else
-    globalVars = struct('M_',M_, ...
-      'options_', options_, ...
-      'oo_', oo_);
-     [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, 1, nvar, [],'pm3_core', localVars,globalVars, options_.parallel_info);
- end
+    % Commenting for testing!
+    if isnumeric(options_.parallel) || ceil(size(varlist,1)/MaxNumberOfPlotsPerFigure)<4,
+        fout = pm3_core(localVars,1,nvar,0);
+        
+        % Parallel execution!
+    else
+        isRemoteOctave = 0;
+        for indPC=1:length(options_.parallel),
+            isRemoteOctave = isRemoteOctave + (findstr(options_.parallel(indPC).MatlabOctavePath, 'octave'));
+        end
+        if isRemoteOctave
+            fout = pm3_core(localVars,1,nvar,0);
+        else
+            globalVars = struct('M_',M_, ...
+                'options_', options_, ...
+                'oo_', oo_);
+            [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, 1, nvar, [],'pm3_core', localVars,globalVars, options_.parallel_info);
+        end
+    end
 else
     % For the time being in Octave enviroment the pm3.m is executed only in
     % serial modality, to avoid problem with the plots.
