@@ -118,7 +118,7 @@ if info
             old_mhblck = mhblck;
         end
         clear('x2')
-        save([fname '_posterior_draws1'],'pdraws')
+        save([fname '_posterior_draws1.mat'],'pdraws')
     else% The posterior draws are saved in xx files.
         NumberOfDrawsPerFile = fix(MAX_mega_bytes/drawsize);
         NumberOfFiles = ceil(SampleSize*drawsize/MAX_mega_bytes);      
@@ -145,7 +145,7 @@ if info
             old_mhblck = mhblck;
             if fnum < NumberOfFiles && linee == NumberOfDrawsPerFile
                 linee = 0;
-                save([fname '_posterior_draws' num2str(fnum)],'pdraws')
+                save([fname '_posterior_draws' num2str(fnum) '.mat'],'pdraws')
                 fnum = fnum+1;
                 if fnum < NumberOfFiles
                     pdraws = cell(NumberOfDrawsPerFile,info);
@@ -154,6 +154,6 @@ if info
                 end
             end
         end
-        save([fname '_posterior_draws' num2str(fnum)],'pdraws')
+        save([fname '_posterior_draws' num2str(fnum) '.mat'],'pdraws')
     end
 end

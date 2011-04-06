@@ -238,7 +238,7 @@ elseif options.optimization_routine==0% Compute the variance of the SMM estimato
 elseif options.optimization_routine<0
     T = -options.optimization_routine;% length of the simulated time series.            
     time_series = extended_path(oo_.steady_state,T,1);
-    save time_series;           
+    save time_series.mat;
 end
 
 
