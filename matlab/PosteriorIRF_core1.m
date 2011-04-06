@@ -82,7 +82,18 @@ if whoiam
 end
 
 
-MhDirectoryName = myinputs.MhDirectoryName;
+% MhDirectoryName = myinputs.MhDirectoryName;
+if strcmpi(type,'posterior')
+    MhDirectoryName = CheckPath('metropolis');
+elseif strcmpi(type,'gsa')
+    if options_.opt_gsa.pprior
+        MhDirectoryName = CheckPath(['GSA' filesep 'prior']);
+    else
+        MhDirectoryName = CheckPath(['GSA' filesep 'mc']);
+    end
+else
+    MhDirectoryName = CheckPath('prior');
+end
 
 RemoteFlag = 0;
 

@@ -95,7 +95,18 @@ if whoiam
     Parallel=myinputs.Parallel;
 end
 
-DirectoryName = myinputs.DirectoryName;
+% DirectoryName = myinputs.DirectoryName;
+if strcmpi(type,'posterior')
+    DirectoryName = CheckPath('metropolis');
+elseif strcmpi(type,'gsa')
+    if options_.opt_gsa.pprior
+        DirectoryName = CheckPath(['GSA',filesep,'prior']);
+    else
+        DirectoryName = CheckPath(['GSA',filesep,'mc']);
+    end
+elseif strcmpi(type,'prior')
+    DirectoryName = CheckPath('prior');
+end
 
 RemoteFlag = 0;
 if whoiam
