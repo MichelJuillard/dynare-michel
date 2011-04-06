@@ -163,6 +163,18 @@ end
 [nCPU, totCPU, nBlockPerCPU, totSlaves] = distributeJobs(Parallel, fBlock, nBlock);
 offset0 = fBlock-1;
 
+% Only for testing!
+
+% fBlock
+% nBlock
+%
+%
+% nCPU
+% totCPU
+% nBlockPerCPU
+% totSlaves
+
+% keyboard
 
 % Clean up remnants of previous runs.
 mydelete(['comp_status_',fname,'*.mat']);
@@ -281,8 +293,8 @@ for j=1:totCPU,
                     command1=[Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')" &'];
                 end
             else
-                if exist('OCTAVE_VERSION')
-                    command1=['start /B psexec -W ',DyMo, ' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  octave --eval "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
+                if (exist('OCTAVE_VERSION') || (findstr(Parallel(indPC).MatlabOctavePath, 'octave'))) % exist('OCTAVE_VERSION') 
+                    command1=['start /B psexec -W ',DyMo, ' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  octave --eval "default_save_options(''-v7''); addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                 else
                     command1=['start /B psexec -W ',DyMo, ' -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)),' -low  ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                 end
@@ -301,7 +313,7 @@ for j=1:totCPU,
                 end
             else
                 if ~strcmp(Parallel(indPC).ComputerName,MasterName),  % 0.3 Run on a remote machine!
-                    if exist('OCTAVE_VERSION'),
+                    if (exist('OCTAVE_VERSION') || (findstr(Parallel(indPC).MatlabOctavePath, 'octave'))) % exist('OCTAVE_VERSION'),
                         command1=['start /B psexec \\',Parallel(indPC).ComputerName,' -e -u ',Parallel(indPC).UserName,' -p ',Parallel(indPC).Password,' -W ',Parallel(indPC).RemoteDrive,':\',Parallel(indPC).RemoteDirectory,'\',PRCDir,'\ -a ',int2str(Parallel(indPC).CPUnbr(j-nCPU0)), ...
                                   ' -low  octave --eval "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')"'];
                     else
@@ -389,6 +401,22 @@ while (1)
     end
 end
 
+% Snapshot  of the contents of all the directories involved in parallel
+% computing. This is necessary when I want to copy continuously the files produced by
+% the slaves ...
+% If the compuation is 'Local' it is not necessary to do it ...
+
+% PRCDirSnapshot={};
+% 
+% for indPC=1:totSlaves
+%     
+%     if Parallel(indPC).Local==0;
+%         PRCDirSnapshot{indPC}=dynareParallelListAllFiles(['\\',Parallel(indPC).ComputerName,'\',Parallel(indPC).RemoteDrive,'$\',Parallel(indPC).RemoteDirectory,'\',PRCDir]);
+%     end
+%     
+% end
+
+
 % Run the slaves.
 if ~ispc, %isunix || (~matlab_ver_less_than('7.4') && ismac),
     system('sh ConcurrentCommand1.bat &');
@@ -409,7 +437,6 @@ end
 % create a parallel (local/remote) specialized computational status bars!
 
 global options_
-
 
 
 % Create a parallel (local/remote) specialized computational status bars!
@@ -505,8 +532,7 @@ if (options_.console_mode == 1) ||  exist('OCTAVE_VERSION')
 end
 
 
-
-
+    
 ForEver=1;
 statusString = '';
 
@@ -573,6 +599,25 @@ while (ForEver)
         end
     end
     
+% Check if any slave has generated some new files remotely.
+    
+%     for i ...
+%             NewFiles=dynareParallelFindNewFiles(...,...)
+%             if ~isempty(NewFiles)
+%             if Parallel(indPC).Local==0;
+%                 Se decidiamo di farlo qui e non in dynareParallelFindNewFiles,
+%                 Confronta NewFiles e PRCDirSnapshot{i} per trovare i nuovi files ...
+%                 Copia i nuovi files qui ...
+%                 Metti PRCDirSnapshot{i}=NewFiles
+%                 NewFiles=[];
+%             else
+%                 continue
+%             end
+%             end
+%     end
+
+
+
     if isempty(dynareParallelDir(['P_',fname,'_*End.txt'],PRCDir,Parallel(1:totSlaves)));
         HoTuttiGliOutput=0;
         for j=1:totCPU,
