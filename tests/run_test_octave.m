@@ -158,6 +158,7 @@ for block = 0:1
           y_ref = oo_.endo_simul;
           save('test.mat','y_ref');
         catch
+          load ws
           load('makeCheckBlockByte.mat', 'failedBlock', 'top_test_dir');
           failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
           printMakeCheckErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], lasterror);
@@ -169,17 +170,19 @@ for block = 0:1
           load('test.mat','y_ref');
           diff = oo_.endo_simul - y_ref;
           if(abs(diff) > options_.dynatol)
+            load ws
             load('makeCheckBlockByte.mat', 'failedBlock', 'top_test_dir');
             failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
             differr.message = ["makecheck found error: if (abs(diff) <= options_.dynatol) FAILS." ];
             differr.stack(1).file = "run_test_octave.m";
             differr.stack(1).name = "run_test_octave.m";
-            differr.stack(1).line = 68;
+            differr.stack(1).line = 72;
             differr.stack(1).column = 1;
             printMakeCheckErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], differr);
             save('makeCheckBlockByte.mat', 'failedBlock', 'top_test_dir');
           endif
         catch
+          load ws
           load('makeCheckBlockByte.mat', 'failedBlock', 'top_test_dir');
           failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
           printMakeCheckErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], lasterror);
@@ -194,6 +197,7 @@ for block = 0:1
       try
         run_ls2003(block, bytecode, default_solve_algo, stack_solve_algos(i))
       catch
+        load ws
         load('makeCheckBlockByte.mat', 'failedBlock', 'top_test_dir');
         failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
         printMakeCheckErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], lasterror);
