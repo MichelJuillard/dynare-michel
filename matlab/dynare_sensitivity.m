@@ -36,7 +36,6 @@ if isfield(options_gsa,'mode_file'),
 end
 
 options_.order = 1;
-dynare_resolve;
 
 if ~isempty(options_gsa.datafile) || isempty(bayestopt_),
     options_.datafile = options_gsa.datafile;
@@ -60,7 +59,12 @@ if ~isempty(options_gsa.datafile) || isempty(bayestopt_),
     options_.plot_priors = 0;
     [data,rawdata,xparam1,data_info]=dynare_estimation_init([],fname_,1);
     % computes a first linear solution to set up various variables
+else
+    if isempty(options_.qz_criterium)
+        options_.qz_criterium = 1+1e-6;
+    end    
 end
+dynare_resolve;
 
 options_gsa = set_default_option(options_gsa,'identification',0);
 if options_gsa.identification,
