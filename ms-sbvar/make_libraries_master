@@ -1,0 +1,283 @@
+# -*- Makefile -*- 
+# Generic makefile for IMSL, MKL, blas/lapack, and FORTRAN libraries
+# Generic makefile Tao's and Dan's C routines 
+
+# LIBRARIES SUPPORTED
+#USE_TZ                  - TZ_DIR may be defined
+#USE_DW                  - DW_BASE_DIR may be defined
+#  USE_DW_MATRIX         - matrix.o bmatrix_blas_laback.o dw_error.o
+#  USE_DW_ERROR          - dw_error.o
+#  USE_DW_ARRAY          - dw_array.o (dw_matrix_array.o if USE_DW_MATRIX is set)
+#  USE_DW_ASCII          - dw_ascii.o  dw_parse_cmd.o
+#  USE_DW_STAT           - dw_rand_gsl.o if USE_GSL is set, otherwise dw_rand.o (dw_matrix_rand.o if USE_DW_MATRIX is set)
+#  USE_DW_SORT           - dw_matrix_sort.o
+#  USE_DW_ELLIPTICAL     - dw_elliptical.o
+#  USE_DW_HISTO          - dw_histogram.o
+#  USE_DW_MATH           - dw_math.o
+#  USE_DW_SWITCH         - only VPATH is set
+#  USE_DW_STATE_SPACE    - only VPATH is set
+#  USE_DW_MIXTURE_MODELS - only VPATH is set
+#USE_MKL                 - MKL_BASE_DIR and MKL_LIBS
+#USE_ATLAS               - ATLAS_LIBS_BASE and ATLAS_LIBS
+#USE_IMSL                - IMSL_BASE_DIR
+#USE_LAPACK              - none (LAPACK_LIBS and LAPACK_LIBS_DIR may be defined)
+#USE_GSL                 - none (GSL_LIBS_DIR and GSL_INCLUDE_DIR may be defined)
+#USE_GSL_CBLAS           - none (GSL_LIBS_DIR and GSL_INCLUDE_DIR may be defined)
+#USE_NPSOL               - NPSOL_LIBS and NPSOL_DIR
+#USE_FORTRAN             - none (FORTRAN_LIBS and FORTRAN_DIR may be defined)
+#USE_MATH                - none
+#USE_PTHREAD             - none 
+#USE_BOOST               - BOOST_DIR
+#USE_MYSQL_CPP_CONN      - CPPCONN_DIR
+#USE_LOG4CXX             - LOG4CXX
+#USE_LIBCONFIG 	         - none
+
+
+### TAO'S FILES #################################################################
+ifdef USE_TZ
+  ifndef TZ_DIR
+    TZ_DIR=$(BASE_DIR)/TZcode/CFiles
+  endif
+  VPATH := $(VPATH) $(TZ_DIR)
+  INCLUDE_DIR := $(INCLUDE_DIR) -I$(TZ_DIR)
+endif
+#################################################################################
+
+### DAN'S FILES #################################################################
+# DW_BASE_DIR MUST be defined.  The directories utilities_dw and switch_dw must 
+# be subdirectories of DW_BASE_DIR.
+ifdef USE_DW
+  ifndef DW_BASE_DIR
+    DW_BASE_DIR = $(BASE_DIR)
+  endif
+
+  DW_UTILITIES_BASE = $(DW_BASE_DIR)/utilities_dw
+  DW_MATRIX_DIR =$(DW_UTILITIES_BASE)/matrix
+  DW_ERROR_DIR = $(DW_UTILITIES_BASE)/error
+  DW_ARRAY_DIR = $(DW_UTILITIES_BASE)/arrays
+  DW_ASCII_DIR = $(DW_UTILITIES_BASE)/ascii 
+  DW_STAT_DIR = $(DW_UTILITIES_BASE)/stat
+  DW_SORT_DIR = $(DW_UTILITIES_BASE)/sort
+  DW_HISTO_DIR = $(DW_UTILITIES_BASE)/histogram
+  DW_ELLIPTICAL_DIR = $(DW_UTILITIES_BASE)/elliptical
+  DW_MATH_DIR = $(DW_UTILITIES_BASE)/math
+
+  DW_SWITCH_BASE = $(DW_BASE_DIR)/switch_dw
+  DW_SWITCH_DIR = $(DW_SWITCH_BASE)/switching
+  DW_STATE_SPACE_DIR = $(DW_SWITCH_BASE)/state_space
+  DW_MIXTURE_MODELS_DIR = $(DW_SWITCH_BASE)/mixture_models
+
+  INCLUDE_DIR := $(INCLUDE_DIR) -I$(DW_UTILITIES_BASE)/include
+
+  ifdef USE_DW_MATRIX
+    VPATH := $(VPATH) $(DW_MATRIX_DIR)
+    OBJS := $(OBJS) dw_matrix.o bmatrix.o
+    USE_DW_ERROR = USE_DW_ERROR
+  endif
+  ifdef USE_DW_ERROR 
+    VPATH := $(VPATH) $(DW_ERROR_DIR)
+    OBJS := $(OBJS) dw_error.o
+  endif
+  ifdef USE_DW_ARRAY  
+    VPATH := $(VPATH) $(DW_ARRAY_DIR)
+    OBJS := $(OBJS) dw_array.o
+    ifdef USE_DW_MATRIX
+      OBJS := $(OBJS) dw_matrix_array.o
+    endif
+  endif
+  ifdef USE_DW_ASCII
+    VPATH := $(VPATH) $(DW_ASCII_DIR)
+    OBJS := $(OBJS) dw_ascii.o dw_parse_cmd.o
+  endif
+  ifdef USE_DW_STAT 
+    VPATH := $(VPATH) $(DW_STAT_DIR)
+    ifdef USE_GSL
+      OBJS := $(OBJS) dw_rand_gsl.o
+    else
+      OBJS := $(OBJS) dw_rand.o
+    endif
+    ifdef USE_DW_MATRIX
+      OBJS := $(OBJS) dw_matrix_rand.o
+    endif
+  endif
+  ifdef USE_DW_SORT 
+    VPATH := $(VPATH) $(DW_SORT_DIR)
+    OBJS := $(OBJS) dw_matrix_sort.o
+  endif
+  ifdef USE_DW_HISTO
+    VPATH := $(VPATH) $(DW_HISTO_DIR)
+    OBJS := $(OBJS) dw_histogram.o
+  endif
+  ifdef USE_DW_ELLIPTICAL 
+    VPATH := $(VPATH) $(DW_ELLIPTICAL_DIR)
+    OBJS := $(OBJS) dw_elliptical.o
+  endif
+  ifdef USE_DW_MATH 
+    VPATH := $(VPATH) $(DW_MATH_DIR)
+    OBJS := $(OBJS) dw_math.o
+  endif
+
+  ifdef USE_DW_SWITCH 
+    VPATH := $(VPATH) $(DW_SWITCH_DIR)
+    INCLUDE_DIR := $(INCLUDE_DIR) -I$(DW_SWITCH_DIR)
+    # dw_dirichlet_restrictions.o dw_mdd_switch.o dw_metropolis_simulation.o
+    # dw_metropolis_theta.o dw_switch.o dw_switch_opt.o dw_switchio.o dw_temp_output.o
+  endif
+  ifdef USE_DW_STATE_SPACE
+    VPATH := $(VPATH) $(DW_STATE_SPACE_DIR)
+    INCLUDE_DIR := $(INCLUDE_DIR) -I$(DW_STATE_SPACE_DIR)
+    # dw_MSStateSpace.o  dw_state_space_impulse_response.o dw_state_space_forecast.o
+  endif
+  ifdef USE_DW_MIXTURE_MODELS
+    VPATH := $(VPATH) $(DW_MIXTURE_MODELS_DIR)
+    INCLUDE_DIR := $(INCLUDE_DIR) -I$(DW_MIXTURE_MODELS_DIR)
+    # dw_mixture.o
+  endif
+endif
+#################################################################################
+
+### GLS #########################################################################
+# GSL_LIBS_DIR and GSL_INCLUDE_DIR must be defined.  Following GSL convention,
+# .h files are in GSL_INCLUDE_DIR/include and this is encoded in the include
+# directive
+ifdef USE_GSL
+  ifdef GSL_INCLUDE_DIR
+    INCLUDE_DIR := $(INCLUDE_DIR) -I$(GSL_INCLUDE_DIR)
+  endif
+  ifdef GSL_LIBS_DIR
+    LIBS_DIR := $(LIBS_DIR) -L$(GSL_LIBS_DIR)
+  endif
+  LIBS := $(LIBS) -lgsl
+endif
+#################################################################################
+
+### GLS CBLAS ###################################################################
+# GSL_LIBS_DIR and GSL_INCLUDE_DIR muste be defined
+ifdef USE_GSL_CBLAS
+  ifndef USE_GSL
+    INCLUDE_DIR := $(INCLUDE_DIR) -I$(GSL_INCLUDE_DIR)
+    LIBS_DIR := $(LIBS_DIR) -L$(GSL_LIBS_DIR)
+  endif
+  LIBS := $(LIBS) -lgslcblas
+endif
+#################################################################################
+
+### IMSL ########################################################################
+# IMSL_BASE_DIR must be defined.
+ifdef USE_IMSL
+  USE_PTHREAD = USE_PTHREAD 
+  IMSL_LIBS_DIR =$(IMSL_BASE_DIR)/lib/lib.linux_icc
+  INCLUDE_DIR := $(INCLUDE_DIR) -I$(IMSL_BASE_DIR)/include
+  LIBS_DIR := $(LIBS_DIR) -L$(IMSL_LIBS_DIR)
+  LIBS := $(LIBS) $(IMSL_LIBS_DIR)/libimslcmath.a $(IMSL_LIBS_DIR)/libimslcstat.a 
+endif
+#################################################################################
+
+### MKL #########################################################################
+# MKL_BASE_DIR and MKL_LIBS must be defined.  The directory include must be a 
+# subdirectory of MKL_BASE_DIR.
+ifdef USE_MKL
+  USE_PTHREAD = USE_PTHREAD 
+  INCLUDE_DIR := $(INCLUDE_DIR) -I$(MKL_BASE_DIR)/include
+  LIBS_DIR := $(LIBS_DIR) -L$(MKL_LIBS_DIR)
+  LIBS := $(LIBS) $(MKL_LIBS)
+endif
+#################################################################################
+
+### NPSOL #######################################################################
+# NPSOL_DIR must be defined.
+ifdef USE_NPSOL
+  # CFLAGS := $(CFLAGS) -D_NPSOL_  # D_NPSOL is not a standard flag - this should be in make_machine_master
+  USE_FORTRAN = USE_FORTRAN
+  NPSOL_LIBS = -lnpsol_f77 -llssol_f77
+  LIBS_DIR := $(LIBS_DIR) -L$(NPSOL_DIR) 
+  LIBS := $(LIBS) $(NPSOL_LIBS)
+endif
+#################################################################################
+
+### ATLAS #######################################################################
+# ATLAS_LIBS_BASE and ATLAS_LIBS must be defined.  The directory lib must be a 
+# subdirectory of ATLAS_LIBS_BASE.
+ifdef USE_ATLAS
+  USE_PTHREAD = USE_PTHREAD 
+  USE_FORTRAN = USE_FORTRAN
+  LIBS_DIR := $(LIBS_DIR) -L$(ATLAS_LIBS_BASE)/lib
+  LIBS := $(LIBS) $(ATLAS_LIBS)
+endif
+#################################################################################
+
+### BLAS / LAPACK LIBRARIES #####################################################
+# LAPACK_LIBS and LAPACK_LIBS_DIR may be defined.
+ifdef USE_LAPACK
+  ifndef USE_MKL
+    ifndef USE_ATLAS
+      USE_FORTRAN = USE_FORTRAN
+      ifdef LAPACK_LIBS_DIR
+        LIBS_DIR := $(LIBS_DIR) -L$(LAPACK_LIBS_DIR)
+      endif
+      ifdef LAPACK_LIBS
+        LIBS := $(LIBS) $(LAPACK_LIBS)
+      else
+        LIBS := $(LIBS) -llapack -lblas
+      endif
+    endif
+  endif
+endif
+#################################################################################
+
+### FORTRAN #####################################################################
+# FORTRAN_LIBS and FORTRAN_LIBS_DIR may be defined.
+ifdef USE_FORTRAN
+  ifdef FORTRAN_LIBS_DIR
+    LIBS_DIR := $(LIBS_DIR) -L$(FORTRAN_LIBS_DIR)
+  endif
+  ifdef FORTRAN_LIBS
+    LIBS := $(LIBS) $(FORTRAN_LIBS)
+  endif
+endif
+#################################################################################
+
+### PTHREAD #####################################################################
+ifdef USE_PTHREAD
+  LIBS := $(LIBS) -lpthread
+endif
+#################################################################################
+
+### BOOST #######################################################################
+# BOOST_DIR must be defined
+ifdef USE_BOOST
+  INCLUDE_DIR := $(INCLUDE_DIR) -I$(BOOST_DIR)/include
+  LIBS_DIR := $(LIBS_DIR) -L$(BOOST_DIR)/lib
+  LIBS := $(LIBS) -lboost_thread
+endif
+#################################################################################
+
+### MySQL C++ Connection ########################################################
+# CPPCONN_DIR must be defined
+ifdef USE_MYSQL_CPP_CONN 
+  INCLUDE_DIR := $(INCLUDE_DIR) -I$(CPPCONN_DIR)/cppconn
+  LIBS_DIR := $(LIBS_DIR) -L$(CPPCONN_DIR)/driver -L/usr/lib64/mysql -L/usr/lib64
+  LIBS := $(LIBS) -lmysqlcppconn-static -lmysqlclient -lz -lcrypt -lnsl -lm -lssl -lcrypto
+endif
+#################################################################################
+
+### LOG4CXX #####################################################################
+# LOG4CXX must be defined
+ifdef USE_LOG4CXX
+  INCLUDE_DIR := $(INCLUDE_DIR) -I$(LOG4CXX_DIR)/include
+  LIBS_DIR := $(LIBS_DIR) -L$(LOG4CXX_DIR)/lib
+  LIBS := $(LIBS) -llog4cxx
+endif
+#################################################################################
+
+### MATH LIBRARY ################################################################
+ifdef USE_MATH
+  LIBS := $(LIBS) -lm
+endif
+#################################################################################
+
+### LIBCONFIG LIBRARY ###########################################################
+ifdef USE_LIBCONFIG
+  LIBS := $(LIBS) -lconfig
+endif
+#################################################################################
