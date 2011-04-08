@@ -402,8 +402,8 @@ After installation, this directory will contain several sub-directories,
 among which are @file{matlab}, @file{mex} and @file{doc}.
 
 Note that you can have several versions of Dynare coexisting (for
-example in @file{c:\dynare}), as long as you correctly adjust your path
-settings (@pxref{Some words of warning}).
+example in @file{/Applications/Dynare}), as long as you correctly
+adjust your path settings (@pxref{Some words of warning}).
 
 @node For other systems
 @subsection For other systems
@@ -455,7 +455,7 @@ location, and replacing @code{4.@var{x}.@var{y}} with the correct version
 number, type:
 
 @example
-addpath /Applications/Dynare/4.@var{x}.@var{y}/matlab/
+addpath /Applications/Dynare/4.@var{x}.@var{y}/matlab
 @end example
 
 MATLAB will not remember this setting next time you run it, and you
@@ -804,7 +804,7 @@ Declarations of variables and parameters are made with the following commands:
 This required command declares the endogenous variables in the
 model. @xref{Conventions}, for the syntax of @var{VARIABLE_NAME} and
 @var{MODEL_EXPRESSION}. Optionally it is possible to give a LaTeX name
-to the variable or, if it nonstationary, provide information regarding
+to the variable or, if it is nonstationary, provide information regarding
 its deflator.
 
 @code{var} commands can appear several times in the file and Dynare will
