@@ -14,7 +14,10 @@ endif
 PDF_TARGETS =
 
 if HAVE_PDFLATEX
-PDF_TARGETS += guide.pdf bvar-a-la-sims.pdf dr.pdf
+PDF_TARGETS += guide.pdf bvar-a-la-sims.pdf
+if HAVE_BIBTEX
+PDF_TARGETS += dr.pdf
+endif
 endif
 
 pdf-local: $(PDF_TARGETS)
@@ -30,6 +33,8 @@ bvar-a-la-sims.pdf: bvar-a-la-sims.tex
 	$(PDFLATEX) bvar-a-la-sims
 
 dr.pdf: dr.tex
+	$(PDFLATEX) dr
+	$(BIBTEX) dr
 	$(PDFLATEX) dr
 	$(PDFLATEX) dr
 
