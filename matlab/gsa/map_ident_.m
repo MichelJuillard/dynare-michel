@@ -96,15 +96,10 @@ if opt_gsa.load_ident_files==0,
     npred = oo_.dr.npred;
     iv = (1:endo_nbr)';
     ic = [ nstatic+(1:npred) endo_nbr+(1:size(oo_.dr.ghx,2)-npred) ]';
-    aux = oo_.dr.transition_auxiliary_variables;
-    k = find(aux(:,2) > npred);
-    aux(:,2) = aux(:,2) + nstatic;
-    aux(k,2) = aux(k,2) + oo_.dr.nfwrd;
   
-  dr.ghx = T(:, [1:(nc1-M_.exo_nbr)],1);
-  dr.ghu = T(:, [(nc1-M_.exo_nbr+1):end], 1);
-  [Aa,Bb] = kalman_transition_matrix(dr, ...
-    iv, ic, aux, M_.exo_nbr);
+    dr.ghx = T(:, [1:(nc1-M_.exo_nbr)],1);
+    dr.ghu = T(:, [(nc1-M_.exo_nbr+1):end], 1);
+    [Aa,Bb] = kalman_transition_matrix(dr,iv,ic,M_.exo_nbr);
 %     bayestopt_.restrict_var_list, ...
 %     bayestopt_.restrict_columns, ...
 %     bayestopt_.restrict_aux, M_.exo_nbr);
@@ -115,8 +110,7 @@ if opt_gsa.load_ident_files==0,
   for j=2:length(istable),
     dr.ghx = T(:, [1:(nc1-M_.exo_nbr)],j);
     dr.ghu = T(:, [(nc1-M_.exo_nbr+1):end], j);
-    [Aa,Bb] = kalman_transition_matrix(dr, ...
-    iv, ic, aux, M_.exo_nbr);
+    [Aa,Bb] = kalman_transition_matrix(dr, iv, ic, M_.exo_nbr);
 %       bayestopt_.restrict_var_list, ...
 %       bayestopt_.restrict_columns, ...
 %       bayestopt_.restrict_aux, M_.exo_nbr);
