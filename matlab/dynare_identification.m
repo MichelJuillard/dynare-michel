@@ -83,7 +83,7 @@ if isempty(data_info),
     data_info.gend = periods;
     data_info.data = [];
     data_info.data_index = [];
-    data_info.number_of_observations = periods*length(options_.varobs);
+    data_info.number_of_observations = periods*size(options_.varobs,1);
     data_info.no_more_missing_observations = 0;
     data_info.missing_value = 0;
 end
