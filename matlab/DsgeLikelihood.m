@@ -200,8 +200,19 @@ Y   = data-trend;
 if analytic_derivation,
     if nargin<7 || isempty(derivatives_info)
         [A,B] = dynare_resolve;
+        if ~isempty(estim_params_.var_exo),
+            indexo=estim_params_.var_exo(:,1);
+        else
+            indexo=[];
+        end
+        if ~isempty(estim_params_.param_vals),
+            indparam=estim_params_.param_vals(:,1);;
+        else
+            indparam=[];
+        end
+            
         [dum, DT, DOm, DYss] = getH(A, B, M_,oo_,0, ...
-            estim_params_.param_vals(:,1),estim_params_.var_exo(:,1));
+            indparam,indexo);
     else
         DT = derivatives_info.DT;
         DOm = derivatives_info.DOm;
@@ -209,7 +220,7 @@ if analytic_derivation,
         clear derivatives_info,
     end
     iv = oo_.dr.restrict_var_list;
-    DYss = [zeros(length(DYss),offset) DYss];
+    DYss = [zeros(size(DYss,1),offset) DYss];
     DT = DT(iv,iv,:);
     DOm = DOm(iv,iv,:);
     DYss = DYss(iv,:);

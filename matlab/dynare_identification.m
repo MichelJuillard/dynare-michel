@@ -257,9 +257,9 @@ if iload <=0,
 
             if iteration,
                 [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo0,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
-                derivatives_info.dA=dA;
-                derivatives_info.dOm=dOm;
-                derivatives_info.dYss=dYss;
+                derivatives_info.DT=dA;
+                derivatives_info.DOm=dOm;
+                derivatives_info.DYss=dYss;
                 if BurninSampleSize == 0,
                     indJJ = (find(max(abs(JJ'))>1.e-8));
                     indH = (find(max(abs(H'))>1.e-8));
@@ -361,10 +361,11 @@ if iload <=0,
                         info = stoch_simul(options_.varobs);
                         datax=oo_.endo_simul(options_.varobs_id,100+1:end);
 %                         datax=data;
-                        [fval,cost_flag,ys,trend_coeff,info,DLIK,AHess] = DsgeLikelihood(params',data_info.gend,datax,data_info.data_index,data_info.number_of_observations,derivatives_info);
+                        [fval,cost_flag,ys,trend_coeff,info,DLIK,AHess] = DsgeLikelihood(params',data_info.gend,datax,data_info.data_index,data_info.number_of_observations,data_info.no_more_missing_observations,derivatives_info);
                         cparam = inv(-AHess);
                         normaliz(indok) = sqrt(diag(cparam))';
                         cmm = siJ*((-AHess)\siJ');
+                        flag_score=1;
                     catch,
                         cmm = simulated_moment_uncertainty(indJJ, periods, replic);
                         %                 Jinv=(siJ(:,indok)'*siJ(:,indok))\siJ(:,indok)';
@@ -375,6 +376,7 @@ if iload <=0,
                         rhoM=sqrt(1-1./diag(inv(tildaM)));
                         deltaM = deltaM.*normaliz(indok)';
                         normaliz(indok) = sqrt(diag(inv(MIM)))';
+                        flag_score=0;
                     end
                     ide_strength_J(indok) = (1./(normaliz(indok)'./abs(params(indok)')));
                     ide_strength_J_prior(indok) = (1./(normaliz(indok)'./normaliz1(indok)'));
@@ -589,13 +591,15 @@ subplot(211)
 set(gca,'xlim',[0 nparam+1])
 set(gca,'xticklabel','')
 dy = get(gca,'ylim');
-% dy=dy(2)-dy(1);
 for ip=1:nparam,
     text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 legend('relative to param value','relative to prior std','Location','Best')
-title('Identification strength in the moments (log-scale)')
-
+if  flag_score,
+    title('Identification strength using likelihood scores (log-scale)')
+else
+    title('Identification strength in the moments (log-scale)')
+end
 subplot(212)
 % mmm = mean(siJmean);
 % [ss, is] = sort(mmm);
