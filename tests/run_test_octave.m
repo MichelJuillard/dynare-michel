@@ -132,16 +132,16 @@ failedBlock = {};
 num_block_tests = 0;
 cd([top_test_dir '/block_bytecode']);
 save('makeCheckBlockByte.mat', 'failedBlock', 'top_test_dir');
-for block = 0:1
-  for bytecode = 0:1
+for blockFlag = 0:1
+  for bytecodeFlag = 0:1
     ## Recall that solve_algo=7 and stack_solve_algo=2 are not supported
     ## under Octave
     default_solve_algo = 2;
     default_stack_solve_algo = 0;
-    if !block && !bytecode
+    if !blockFlag && !bytecodeFlag
       solve_algos = 0:4;
       stack_solve_algos = 0;
-    elseif block && !bytecode
+    elseif blockFlag && !bytecodeFlag
       solve_algos = [0:4 6 8];
       stack_solve_algos = [0 1 3 4];
     else
@@ -152,9 +152,9 @@ for block = 0:1
     for i = 1:length(solve_algos)
       num_block_tests = num_block_tests + 1;
       save ws
-      if !block && !bytecode && (i == 1)
+      if !blockFlag && !bytecodeFlag && (i == 1)
         try
-          run_ls2003(block, bytecode, solve_algos(i), default_stack_solve_algo)
+          run_ls2003(blockFlag, bytecodeFlag, solve_algos(i), default_stack_solve_algo)
           y_ref = oo_.endo_simul;
           save('test.mat','y_ref');
         catch
@@ -166,7 +166,7 @@ for block = 0:1
         end_try_catch
       else
         try
-          run_ls2003(block, bytecode, solve_algos(i), default_stack_solve_algo)
+          run_ls2003(blockFlag, bytecodeFlag, solve_algos(i), default_stack_solve_algo)
           load('test.mat','y_ref');
           diff = oo_.endo_simul - y_ref;
           if(abs(diff) > options_.dynatol)
@@ -195,7 +195,7 @@ for block = 0:1
       num_block_tests = num_block_tests + 1;
       save ws
       try
-        run_ls2003(block, bytecode, default_solve_algo, stack_solve_algos(i))
+        run_ls2003(blockFlag, bytecodeFlag, default_solve_algo, stack_solve_algos(i))
       catch
         load ws
         load('makeCheckBlockByte.mat', 'failedBlock', 'top_test_dir');
