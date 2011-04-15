@@ -24,8 +24,8 @@ function [McoH, McoJ, McoGP, PcoH, PcoJ, PcoGP, condH, condJ, condGP, eH, eJ, eG
 %    o eH               eigevectors of H
 %    o eJ               eigevectors of JJ
 %    o eGP              eigevectors of gp
-%    o ind01            [array] binary indicator for zero columns of H
-%    o ind02            [array] binary indicator for zero columns of JJ
+%    o ind01            [array] binary indicator for non-zero columns of H
+%    o ind02            [array] binary indicator for non-zero columns of JJ
 %    o indnoH           [matrix] index of non-identified params in H
 %    o indnoJ           [matrix] index of non-identified params in JJ
 %    o ixnoH            number of rows in ind01
@@ -131,7 +131,7 @@ if rankH<npar || rankHH<npar || min(1-McoH)<1.e-10
     for j=1:length(e0),
         % linearely dependent parameters in H
         ixno = ixno + 1;
-        indnoH(ixno,ind1) = (abs(e1(:,e0(j))) > 1.e-6 )';
+        indnoH(ixno,ind1) = (abs(e1(:,e0(j))) > 1.e-3 )';
     end
 else % rank(H)==length(theta), go to 2
      % 2. check rank of J
@@ -154,7 +154,7 @@ if rankJ<npar || rankJJ<npar || min(1-McoJ)<1.e-10
     for j=1:length(ee0),
         % linearely dependent parameters in JJ
         ixno = ixno + 1;
-        indnoJ(ixno,ind2) = (abs(ee1(:,ee0(j))) > 1.e-6)';
+        indnoJ(ixno,ind2) = (abs(ee1(:,ee0(j))) > 1.e-3)';
     end
 else  %rank(J)==length(theta) =>
       %         disp('All parameters are identified at theta by the moments included in J')
