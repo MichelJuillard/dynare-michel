@@ -151,12 +151,6 @@ disp(' ')
 if iload <=0,
     
     iteration = 0;
-    burnin_iteration = 0;
-    if SampleSize==1,
-        BurninSampleSize=0;
-    else
-        BurninSampleSize=50;
-    end
     loop_indx = 0;
     file_index = 0;
     run_index = 0;
@@ -186,11 +180,7 @@ if iload <=0,
                 end
             else
                 if nargin==2,
-                    if burnin_iteration>=BurninSampleSize,
-                        params = pdraws0(iteration+1,:);
-                    else
-                        params = pdraws0(burnin_iteration+1,:);
-                    end
+                    params = pdraws0(iteration+1,:);
                 else
                     params = prior_draw();
                 end
@@ -210,57 +200,15 @@ if iload <=0,
                                     oo_.exo_steady_state', M_.params, ...
                                     oo_.dr.ys, 1);    
 
-            if burnin_iteration<BurninSampleSize,
-                burnin_iteration = burnin_iteration + 1;
-                pdraws(burnin_iteration,:) = params;
-                TAU(:,burnin_iteration)=tau;
-                LRE(:,burnin_iteration)=[oo_.dr.ys(oo_.dr.order_var); vec(g1)];
-                [gam,stationary_vars] = th_autocovariances(oo0.dr,bayestopt_.mfys,M_,options_);
-                if exist('OCTAVE_VERSION')
-                    warning('off')
-                else
-                    warning off,
-                end
-                sdy = sqrt(diag(gam{1}));
-                sy = sdy*sdy';
-                if useautocorr,
-                    sy=sy-diag(diag(sy))+eye(length(sy));
-                    gam{1}=gam{1}./sy;
-                else
-                    for j=1:nlags,
-                        gam{j+1}=gam{j+1}.*sy;
-                    end
-                end
-                dum = dyn_vech(gam{1});
-                for j=1:nlags,
-                    dum = [dum; vec(gam{j+1})];
-                end
-                GAM(:,burnin_iteration)=[oo_.dr.ys(bayestopt_.mfys); dum];
-                %                 warning warning_old_state;
-            else
-                iteration = iteration + 1;
-                run_index = run_index + 1;
-                if iteration==1 && BurninSampleSize,
-                    indJJ = (find(std(GAM')>1.e-8));
-                    indH = (find(std(TAU')>1.e-8));
-                    indLRE = (find(std(LRE')>1.e-8));
-                    TAU = zeros(length(indH),SampleSize);
-                    GAM = zeros(length(indJJ),SampleSize);
-                    LRE = zeros(length(indLRE),SampleSize);
-                    MAX_tau   = min(SampleSize,ceil(MaxNumberOfBytes/(length(indH)*nparam)/8));
-                    MAX_gam   = min(SampleSize,ceil(MaxNumberOfBytes/(length(indJJ)*nparam)/8));
-                    stoH = zeros([length(indH),nparam,MAX_tau]);
-                    stoJJ = zeros([length(indJJ),nparam,MAX_tau]);
-                    delete([IdentifDirectoryName '/' M_.fname '_identif_*.mat'])
-                end
-            end
+            iteration = iteration + 1;
+            run_index = run_index + 1;
 
             if iteration,
                 [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo0,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
                 derivatives_info.DT=dA;
                 derivatives_info.DOm=dOm;
                 derivatives_info.DYss=dYss;
-                if BurninSampleSize == 0,
+                if iteration==1,
                     indJJ = (find(max(abs(JJ'))>1.e-8));
                     indH = (find(max(abs(H'))>1.e-8));
                     indLRE = (find(max(abs(gp'))>1.e-8));
@@ -280,44 +228,15 @@ if iload <=0,
                 stoLRE(:,:,run_index) = gp(indLRE,:);
                 stoH(:,:,run_index) = H(indH,:);
                 stoJJ(:,:,run_index) = JJ(indJJ,:);
-                % use relative changes
-                %       siJ = abs(JJ(indJJ,:).*(1./gam(indJJ)*params));
-                %       siH = abs(H(indH,:).*(1./tau(indH)*params));
                 % use prior uncertainty
                 siJ = (JJ(indJJ,:));
                 siH = (H(indH,:));
 
                 siLRE = (gp(indLRE,:));
-                %       siJ = abs(JJ(indJJ,:).*(ones(length(indJJ),1)*bayestopt_.p2'));
-                %       siH = abs(H(indH,:).*(ones(length(indH),1)*bayestopt_.p2'));
-                %       siJ = abs(JJ(indJJ,:).*(1./mGAM'*bayestopt_.p2'));
-                %       siH = abs(H(indH,:).*(1./mTAU'*bayestopt_.p2'));
-                
-                siJnorm(iteration,:) = vnorm(siJ./repmat(GAM(:,iteration),1,nparam)).*params;        
-                siHnorm(iteration,:) = vnorm(siH./repmat(TAU(:,iteration),1,nparam)).*params;        
-                siLREnorm(iteration,:) = vnorm(siLRE./repmat(LRE(:,iteration),1,nparam-offset)).*params(offset+1:end);        
-                if iteration ==1,
-                    siJmean = abs(siJ)./SampleSize;
-                    siHmean = abs(siH)./SampleSize;
-                    siLREmean = abs(siLRE)./SampleSize;
-                    derJmean = (siJ)./SampleSize;
-                    derHmean = (siH)./SampleSize;
-                    derLREmean = (siLRE)./SampleSize;
-                else
-                    siJmean = abs(siJ)./SampleSize+siJmean;
-                    siHmean = abs(siH)./SampleSize+siHmean;
-                    siLREmean = abs(siLRE)./SampleSize+siLREmean;
-                    derJmean = (siJ)./SampleSize+derJmean;
-                    derHmean = (siH)./SampleSize+derHmean;
-                    derLREmean = (siLRE)./SampleSize+derLREmean;
-                end
                 pdraws(iteration,:) = params;
                 normH = max(abs(stoH(:,:,run_index))')';
                 normJ = max(abs(stoJJ(:,:,run_index))')';
                 normLRE = max(abs(stoLRE(:,:,run_index))')';
-                %               normH = TAU(:,iteration);
-                %               normJ = GAM(:,iteration);
-                %               normLRE = LRE(:,iteration);
                 [idemodel.Mco(:,iteration), idemoments.Mco(:,iteration), idelre.Mco(:,iteration), ...
                     idemodel.Pco(:,:,iteration), idemoments.Pco(:,:,iteration), idelre.Pco(:,:,iteration), ...
                     idemodel.cond(iteration), idemoments.cond(iteration), idelre.cond(iteration), ...
@@ -360,7 +279,8 @@ if iload <=0,
                         options_.periods = data_info.gend+100;
                         info = stoch_simul(options_.varobs);
                         datax=oo_.endo_simul(options_.varobs_id,100+1:end);
-%                         datax=data;
+%                         datax=data; 
+                        derivatives_info.no_DLIK=1;
                         [fval,cost_flag,ys,trend_coeff,info,DLIK,AHess] = DsgeLikelihood(params',data_info.gend,datax,data_info.data_index,data_info.number_of_observations,data_info.no_more_missing_observations,derivatives_info);
                         cparam = inv(-AHess);
                         normaliz(indok) = sqrt(diag(cparam))';
@@ -380,34 +300,19 @@ if iload <=0,
                     end
                     ide_strength_J(indok) = (1./(normaliz(indok)'./abs(params(indok)')));
                     ide_strength_J_prior(indok) = (1./(normaliz(indok)'./normaliz1(indok)'));
-                    %                 indok = find(max(idemodel.indno{iteration},[],1)==0);
-                    %                 ide_strength_H(iteration,:)=zeros(1,nparam);
-                    %                 mim=inv(siH(:,indok)'*siH(:,indok))*siH(:,indok)';
-                    % %                 mim=mim*diag(GAM(:,iteration))*mim';
-                    % %                 MIM=inv(mim);
-                    %                 mim=mim.*repmat(TAU(:,iteration),1,length(indok))';
-                    %                 MIM=inv(mim*mim');
-                    %                 deltaM = sqrt(diag(MIM));
-                    %                 tildaM = MIM./((deltaM)*(deltaM'));
-                    %                 rhoM=sqrt(1-1./diag(inv(tildaM)));
-                    %                 deltaM = deltaM.*params(indok)';
-                    %                 ide_strength_H(iteration,indok) = (1./[sqrt(diag(inv(MIM)))./params(indok)']);
-                    %                 inok = find((abs(GAM(:,iteration))==0));
-                    %                 isok = find((abs(GAM(:,iteration))));
-                    %                 quant(isok,:) = siJ(isok,:)./repmat(GAM(isok,iteration),1,nparam);
-                    %                 quant(inok,:) = siJ(inok,:)./repmat(mean(abs(GAM(:,iteration))),length(inok),nparam);
+                    ide_strength_J(params==0)=ide_strength_J_prior(params==0);
                     quant = siJ./repmat(sqrt(diag(cmm)),1,nparam);
                     siJnorm(iteration,:) = vnorm(quant).*normaliz;
                     %                 siJnorm(iteration,:) = vnorm(siJ(inok,:)).*normaliz;
                     quant=[];
-                    inok = find((abs(TAU(:,iteration))==0));
+                    inok = find((abs(TAU(:,iteration))<1.e-8));
                     isok = find((abs(TAU(:,iteration))));
                     quant(isok,:) = siH(isok,:)./repmat(TAU(isok,iteration),1,nparam);
                     quant(inok,:) = siH(inok,:)./repmat(mean(abs(TAU(:,iteration))),length(inok),nparam);
                     siHnorm(iteration,:) = vnorm(quant).*normaliz;
                     %                 siHnorm(iteration,:) = vnorm(siH./repmat(TAU(:,iteration),1,nparam)).*normaliz;
                     quant=[];
-                    inok = find((abs(LRE(:,iteration))==0));
+                    inok = find((abs(LRE(:,iteration))<1.e-8));
                     isok = find((abs(LRE(:,iteration))));
                     quant(isok,:) = siLRE(isok,:)./repmat(LRE(isok,iteration),1,np);
                     quant(inok,:) = siLRE(inok,:)./repmat(mean(abs(LRE(:,iteration))),length(inok),np);
@@ -454,106 +359,15 @@ if iload <=0,
     end
     
     save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'pdraws', 'idemodel', 'idemoments', 'idelre', 'indJJ', 'indH', 'indLRE', ...
-        'siHmean', 'siJmean', 'siLREmean', 'derHmean', 'derJmean', 'derLREmean', 'TAU', 'GAM', 'LRE')
+        'siJnorm', 'siHnorm', 'siLREnorm', 'TAU', 'GAM', 'LRE')
 else
     load([IdentifDirectoryName '/' M_.fname '_identif'], 'pdraws', 'idemodel', 'idemoments', 'idelre', 'indJJ', 'indH', 'indLRE', ...
-        'siHmean', 'siJmean', 'siLREmean', 'derHmean', 'derJmean', 'derLREmean', 'TAU', 'GAM', 'LRE')
+        'siJnorm', 'siHnorm', 'siLREnorm', 'TAU', 'GAM', 'LRE')
     identFiles = dir([IdentifDirectoryName '/' M_.fname '_identif_*']);
     options_ident.prior_mc=size(pdraws,1);
     SampleSize = options_ident.prior_mc;
     options_.options_ident = options_ident;
-    if iload>1,
-        idemodel0=idemodel;
-        idemoments0=idemoments;
-        idelre0 = idelre;
-        iteration = 0;
-        h = waitbar(0,'Monte Carlo identification checks ...');
-        for file_index=1:length(identFiles)
-            load([IdentifDirectoryName '/' M_.fname '_identif_' int2str(file_index)], 'stoH', 'stoJJ', 'stoLRE')
-            for index=1:size(stoH,3),
-                iteration = iteration+1;
-                normH = max(abs(stoH(:,:,index))')';
-                normJ = max(abs(stoJJ(:,:,index))')';
-                normLRE = max(abs(stoLRE(:,:,index))')';
-                %             normH = TAU(:,iteration);
-                %             normJ = GAM(:,iteration);
-                %             normLRE = LRE(:,iteration);
-                [idemodel.Mco(:,iteration), idemoments.Mco(:,iteration), idelre.Mco(:,iteration), ...
-                    idemodel.Pco(:,:,iteration), idemoments.Pco(:,:,iteration), idelre.Pco(:,:,iteration), ...
-                    idemodel.cond(iteration), idemoments.cond(iteration), idelre.cond(iteration), ...
-                    idemodel.ee(:,:,iteration), idemoments.ee(:,:,iteration), idelre.ee(:,:,iteration), ...
-                    idemodel.ind(:,iteration), idemoments.ind(:,iteration), ...
-                    idemodel.indno{iteration}, idemoments.indno{iteration}, ...
-                    idemodel.ino(iteration), idemoments.ino(iteration)] = ...
-                    identification_checks(stoH(:,:,index)./normH(:,ones(nparam,1)), ...
-                    stoJJ(:,:,index)./normJ(:,ones(nparam,1)), ...
-                    stoLRE(:,:,index)./normLRE(:,ones(size(stoLRE,2),1)));
-                waitbar(iteration/SampleSize,h,['MC Identification checks ',int2str(iteration),'/',int2str(SampleSize)])
-            end
-        end
-        close(h);
-        save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idemodel', 'idemoments', 'idelre', '-append')
-    end
-    iteration = 0;
-    h = waitbar(0,'Monte Carlo identification checks ...');
-    for file_index=1:length(identFiles)
-        load([IdentifDirectoryName '/' M_.fname '_identif_' int2str(file_index)], 'stoH', 'stoJJ', 'stoLRE')
-        for index=1:size(stoH,3),
-            iteration = iteration+1;
-            fobj(iteration)=sum(((GAM(:,iteration)-GAM(:,1))).^2);
-            fobjH(iteration)=sum(((TAU(:,iteration)-TAU(:,1))).^2);
-            fobjR(iteration)=sum(((GAM(:,iteration)./GAM(:,1)-1)).^2);
-            fobjHR(iteration)=sum(((TAU(:,iteration)./TAU(:,1)-1)).^2);
-            FOC(iteration,:) = (GAM(:,iteration)-GAM(:,1))'*stoJJ(:,:,index);
-            FOCH(iteration,:) = (TAU(:,iteration)-TAU(:,1))'*stoH(:,:,index);
-            FOCR(iteration,:) = ((GAM(:,iteration)./GAM(:,1)-1)./GAM(:,1))'*stoJJ(:,:,index);
-            FOCHR(iteration,:) = ((TAU(:,iteration)./TAU(:,1)-1)./TAU(:,1))'*stoH(:,:,index);
-            
-            waitbar(iteration/SampleSize,h,['MC Identification checks ',int2str(iteration),'/',int2str(SampleSize)])
-        end
-    end
-    close(h);
 end  
-
-% if SampleSize>1,
-%     siJmean = siJmean.*(ones(length(indJJ),1)*std(pdraws));
-%     siHmean = siHmean.*(ones(length(indH),1)*std(pdraws));
-%     siLREmean = siLREmean.*(ones(length(indLRE),1)*std(pdraws(:, offset+1:end )));
-% 
-%     derJmean = derJmean.*(ones(length(indJJ),1)*std(pdraws));
-%     derHmean = derHmean.*(ones(length(indH),1)*std(pdraws));
-%     derLREmean = derLREmean.*(ones(length(indLRE),1)*std(pdraws(:, offset+1:end )));
-% 
-%     derHmean = abs(derHmean./(max(siHmean')'*ones(1,size(pdraws,2))));
-%     derJmean = abs(derJmean./(max(siJmean')'*ones(1,size(pdraws,2))));
-%     derLREmean = abs(derLREmean./(max(siLREmean')'*ones(1,np)));
-% 
-%     siHmean = siHmean./(max(siHmean')'*ones(1,size(pdraws,2)));
-%     siJmean = siJmean./(max(siJmean')'*ones(1,size(pdraws,2)));
-%     siLREmean = siLREmean./(max(siLREmean')'*ones(1,np));
-% 
-%     tstJmean = derJmean*0;
-%     tstHmean = derHmean*0;
-%     tstLREmean = derLREmean*0;
-% 
-%     if exist('OCTAVE_VERSION')
-%         warning('off'),
-%     else
-%         warning off,
-%     end
-% 
-%     for j=1:nparam,
-%         indd = 1:length(siJmean(:,j));
-%         tstJmean(indd,j) = abs(derJmean(indd,j))./siJmean(indd,j);
-%         indd = 1:length(siHmean(:,j));
-%         tstHmean(indd,j) = abs(derHmean(indd,j))./siHmean(indd,j);
-%         if j>offset
-%             indd = 1:length(siLREmean(:,j-offset));
-%             tstLREmean(indd,j-offset) = abs(derLREmean(indd,j-offset))./siLREmean(indd,j-offset);
-%         end
-%     end
-% end
-
 
 if nargout>3 && iload,
     filnam = dir([IdentifDirectoryName '/' M_.fname '_identif_*.mat']);
@@ -573,21 +387,9 @@ disp_identification(pdraws, idemodel, idemoments, name, advanced)
 
 figure('Name','Identification in the moments'),
 subplot(211)
-% mmm = mean(siHmean);
-% [ss, is] = sort(mmm);
-% myboxplot(siHmean(:,is))
-% if SampleSize>1,
-%     mmm = mean(ide_strength_J);
-% else
-    mmm = (ide_strength_J);
-% end
+mmm = (ide_strength_J);
 [ss, is] = sort(mmm);
-% if SampleSize>1,
-%     myboxplot(log(ide_strength_J(:,is)))
-% else
     bar(log([ide_strength_J(:,is)' ide_strength_J_prior(:,is)']))
-% end
-% set(gca,'ylim',[0 1.05])
 set(gca,'xlim',[0 nparam+1])
 set(gca,'xticklabel','')
 dy = get(gca,'ylim');
@@ -596,30 +398,21 @@ for ip=1:nparam,
 end
 legend('relative to param value','relative to prior std','Location','Best')
 if  flag_score,
-    title('Identification strength using likelihood scores (log-scale)')
+    title('Identification strength using asymptotic Information matrix (log-scale)')
 else
     title('Identification strength in the moments (log-scale)')
 end
 subplot(212)
-% mmm = mean(siJmean);
-% [ss, is] = sort(mmm);
-% myboxplot(siJmean(:,is))
+
 if SampleSize > 1,
     mmm = mean(siJnorm);
 else
     mmm = (siJnorm);
 end
-% [ss, is] = sort(mmm);
-% if SampleSize > 1,
-%     myboxplot(log(siJnorm(:,is)))
-% else
-    bar(mmm(is))
-% end
-% set(gca,'ylim',[0 1.05])
+bar(mmm(is))
 set(gca,'xlim',[0 nparam+1])
 set(gca,'xticklabel','')
 dy = get(gca,'ylim');
-% dy=dy(2)-dy(1);
 for ip=1:nparam,
     text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
@@ -634,43 +427,22 @@ if advanced,
         mmm = (siLREnorm);
     end
     mmm = [NaN(1, offset), mmm];
-%     [ss, is] = sort(mmm);
-%     if SampleSize ==1,
-        bar(mmm(is))
-%     else
-%         myboxplot(log(siLREnorm(:,is)))
-%     end
-    % mmm = mean(siLREmean);
-    % [ss, is] = sort(mmm);
-    % myboxplot(siLREmean(:,is))
-    % set(gca,'ylim',[0 1.05])
+    bar(mmm(is))
     set(gca,'xticklabel','')
-%     for ip=1:np,
-%         text(ip,-0.02,deblank(M_.param_names(indx(is(ip)),:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
     for ip=1:nparam,
         text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
     end
     title('Sensitivity in the LRE model')
         
     subplot(212)
-    % mmm = mean(siHmean);
-    % [ss, is] = sort(mmm);
-    % myboxplot(siHmean(:,is))
     if SampleSize>1,
         mmm = mean(siHnorm);
     else
         mmm = (siHnorm);
     end
-%     [ss, is] = sort(mmm);
-%     if SampleSize>1,
-%         myboxplot(log(siHnorm(:,is)))
-%     else
-        bar(mmm(is))
-%     end
-    % set(gca,'ylim',[0 1.05])
+    bar(mmm(is))
     set(gca,'xticklabel','')
     dy = get(gca,'ylim');
-    % dy=dy(2)-dy(1);
     for ip=1:nparam,
         text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
     end
@@ -704,18 +476,34 @@ if advanced,
         ax=colormap;
         ax(1,:)=[0.9 0.9 0.9];
         colormap(ax);
+        if nparam>10,
+            set(gca,'xtick',(5:5:nparam))
+            set(gca,'ytick',(5:5:nparam))
+        end
+        set(gca,'xgrid','on')
+        set(gca,'ygrid','on')
         saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_collinearity_', int2str(j)])
         eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_', int2str(j)]);
         eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_', int2str(j)]);
         if options_.nograph, close(gcf); end
     end
     disp('')
-    [U,S,V]=svd(siJ./normJ(:,ones(nparam,1)),0);
-    if nparam<5,
-      f1 = figure('name','Identification patterns (moments)');
+    if flag_score,
+        [U,S,V]=svd(AHess,0);
+        if nparam<5,
+            f1 = figure('name','Identification patterns (Information matrix)');
+        else
+            f1 = figure('name','Identification patterns (Information matrix): SMALLEST SV');
+            f2 = figure('name','Identification patterns (Information matrix): HIGHEST SV');
+        end
     else
-      f1 = figure('name','Identification patterns (moments): SMALLEST SV');
-      f2 = figure('name','Identification patterns (moments): HIGHEST SV');
+        [U,S,V]=svd(siJ./normJ(:,ones(nparam,1)),0);
+        if nparam<5,
+            f1 = figure('name','Identification patterns (moments)');
+        else
+            f1 = figure('name','Identification patterns (moments): SMALLEST SV');
+            f2 = figure('name','Identification patterns (moments): HIGHEST SV');
+        end
     end
     for j=1:min(nparam,8),
         if j<5,
@@ -729,15 +517,9 @@ if advanced,
         if j<5
             bar(abs(V(:,end-j+1))),
             Stit = S(end-j+1,end-j+1);
-%             if j==4 || j==nparam, 
-%                 xlabel('SMALLEST singular values'), 
-%             end,
         else
             bar(abs(V(:,jj))),
             Stit = S(jj,jj);
-%             if j==8 || j==nparam, 
-%                 xlabel('LARGEST singular values'), 
-%             end,
         end
         set(gca,'xticklabel','')
         if j==4 || j==nparam || j==8, 
