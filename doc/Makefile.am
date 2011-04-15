@@ -22,7 +22,7 @@ endif
 
 pdf-local: $(PDF_TARGETS)
 
-EXTRA_DIST = guide.tex guide.bbl bibmad.sty bvar-a-la-sims.tex dr.tex
+EXTRA_DIST = guide.tex guide.bbl bibmad.sty bvar-a-la-sims.tex dr.tex dr.bib
 
 guide.pdf: guide.tex guide.bbl bibmad.sty
 	$(PDFLATEX) guide
