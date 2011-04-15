@@ -198,6 +198,9 @@ mf = bayestopt_.mf1;
 Y   = data-trend;
 
 if analytic_derivation,
+    no_DLIK = 0;
+    DLIK = [];
+    AHess = [];
     if nargin<7 || isempty(derivatives_info)
         [A,B] = dynare_resolve;
         if ~isempty(estim_params_.var_exo),
@@ -217,6 +220,9 @@ if analytic_derivation,
         DT = derivatives_info.DT;
         DOm = derivatives_info.DOm;
         DYss = derivatives_info.DYss;
+        if isfield(derivatives_info,'no_DLIK'),
+            no_DLIK = derivatives_info.no_DLIK;
+        end
         clear derivatives_info,
     end
     iv = oo_.dr.restrict_var_list;
@@ -257,8 +263,12 @@ if (kalman_algo==1)% Multivariate Kalman Filter
     if no_missing_data_flag
         LIK = kalman_filter(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol); 
         if analytic_derivation,
-            [DLIK] = score(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,riccati_tol);
-            [AHess] = AHessian(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,riccati_tol);
+            if no_DLIK==0,
+                [DLIK] = score(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,riccati_tol);
+            end
+            if nargout==7,
+                [AHess] = AHessian(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,riccati_tol);
+            end
         end
     else
         LIK = ...
