@@ -2715,7 +2715,9 @@ In a stochastic context, Dynare computes one or several simulations
 corresponding to a random draw of the shocks. Dynare uses a Taylor
 approximation, up to third order, of the expectation functions (see
 @cite{Judd (1996)}, @cite{Collard and Juillard (2001a)}, @cite{Collard
-and Juillard (2001b)}, and @cite{Schmitt-Grohé and Uríbe (2004)}).
+and Juillard (2001b)}, and @cite{Schmitt-Grohé and Uríbe (2004)}). The
+details of the Dynare implementation of the first order solution are
+given in @cite{Villemot (2011)}.
 
 @menu
 * Computing the stochastic solution::  
@@ -5031,6 +5033,11 @@ Policy Function,'' @i{Journal of Economic Dynamics and Control},
 Smets, Frank and Rafael Wouters (2003): ``An Estimated Dynamic
 Stochastic General Equilibrium Model of the Euro Area,'' @i{Journal of
 the European Economic Association}, 1(5), 1123--1175.
+
+@item
+Villemot, Sébastien (2011): ``Solving rational expectations models at
+first order: what Dynare does,'' @i{Dynare Working Papers}, 2,
+CEPREMAP
 
 @end itemize
 
