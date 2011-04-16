@@ -107,8 +107,4 @@ end
 
 oo_.shock_decomposition = z;
 
-options_.initial_date.freq = 1;
-options_.initial_date.period = 1;
-options_.initial_date.sub_period = 0;
-
 graph_decomp(z,M_.exo_names,M_.endo_names,i_var,options_.initial_date)
