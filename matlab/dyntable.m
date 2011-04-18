@@ -24,25 +24,44 @@ if options_.noprint
     return
 end
 
-label_width = max(size(deblank(char(headers(1,:),labels)),2)+2, ...
-                  label_width);
-val_width = max(size(deblank(headers(2:end,:)),2)+2,val_width);
+%label_width = max(size(deblank(char(headers(1,:),labels)),2)+2, ...
+%                  label_width);
+label_width = max(size(deblank(char(headers(1,:),labels)),2))+2;
+
 label_fmt = sprintf('%%-%ds',label_width);
-header_fmt = sprintf('%%-%ds',val_width);
+
+values_length = max(ceil(max(max(log10(abs(values))))),1)+val_precis+1;
+if any(values) < 0
+    values_length = values_length+1;
+end
+headers_length = max(size(deblank(headers(2:end,:)),2));
+%val_width = max(values_length,val_width);
+val_width = max(headers_length,values_length)+2;
+%header_fmt = sprintf('%%-%ds',val_width);
 val_fmt = sprintf('%%%d.%df',val_width,val_precis);
+
+headers_offset = 0;
+values_offset = 0;
+if headers_length > values_length
+    %    values_offset = ceil((val_width-values_length)/2);
+end
+
 if length(title) > 0
     disp(sprintf('\n\n%s\n',title));
 end
 if length(headers) > 0
     hh = sprintf(label_fmt,headers(1,:));
-    hh = [hh char(32*ones(1,floor(val_width/4)))];
     for i=2:size(headers,1)
-        hh = [hh sprintf(header_fmt,headers(i,:))];
+        hla = size(deblank(headers(i,:)),2);
+        hlb = ceil((val_width - hla)/2);
+        hla = val_width - hla - hlb;
+        hh  = [hh char(32*ones(1,hlb)) deblank(headers(i,:)) ...
+              char(32*ones(1,hla))];
     end
     disp(hh);
 end
 for i=1:size(values,1)
-    disp([sprintf(label_fmt,labels(i,:)) sprintf(val_fmt,values(i,:))]);
+    disp([sprintf(label_fmt,deblank(labels(i,:))) char(32*ones(1,values_offset)) sprintf(val_fmt,values(i,:))]);
 end
 
 % 10/30/02 MJ
