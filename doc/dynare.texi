@@ -4531,6 +4531,13 @@ computed analyzes. Default: @code{0}
 
 @item prior_mc = @var{INTEGER}
 Size of Monte Carlo sample. Default: @code{2000}
+
+@item advanced = @var{INTEGER}
+@dots{} Default: @code{0}
+
+@item max_dim_cova_group = @var{INTEGER}
+@dots{}
+
 @end table
 
 @end deffn
