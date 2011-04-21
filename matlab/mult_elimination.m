@@ -36,7 +36,7 @@ npred = dr.npred;
 order_var = dr.order_var;
 nstates = M_.endo_names(order_var(nstatic+(1:npred)),:);
 
-il = strmatch('mult_',nstates);
+il = strmatch('MULT_',nstates);
 nil = setdiff(1:dr.npred,il);
 m_nbr = length(il);
 nm_nbr = length(nil);
@@ -71,7 +71,7 @@ M4 = AA2*E2*[R2_1*Q2(:,1:n2)'*[Q1_12' Q1_22']*[B1;B2]; zeros(m_nbr-n2,size(B,2))
 k1 = nstatic+(1:npred);
 k1 = k1(nil);
 
-endo_nbr = M_.orig_model.endo_nbr;
+endo_nbr = M_.orig_endo_nbr;
 exo_nbr = M_.exo_nbr;
 
 lead_lag_incidence = M_.lead_lag_incidence(:,1:endo_nbr+exo_nbr);
@@ -101,23 +101,32 @@ dr.M4 = M4;
 
 nvar = length(varlist);
 nspred = dr.nspred;
-nspred = 6;
 if nvar > 0
-    res_table = zeros(2*(nspred+M_.exo_nbr),nvar);
+    res_table = zeros(2*(nm_nbr+M_.exo_nbr),nvar);
     headers = 'Variables';
     for i=1:length(varlist)
         k = strmatch(varlist{i},M_.endo_names(dr.order_var,:),'exact');
         headers = char(headers,varlist{i});
         
-        res_table(1:nspred,i) = M1(k,:)';
-        res_table(nspred+(1:nspred),i) = M2(k,:)';
-        res_table(2*nspred+(1:M_.exo_nbr),i) = M3(k,:)';
-        res_table(2*nspred+M_.exo_nbr+(1:M_.exo_nbr),i) = M4(k,:)';
+        res_table(1:nm_nbr,i) = M1(k,:)';
+        res_table(nm_nbr+(1:nm_nbr),i) = M2(k,:)';
+        res_table(2*nm_nbr+(1:M_.exo_nbr),i) = M3(k,:)';
+        res_table(2*nm_nbr+M_.exo_nbr+(1:M_.exo_nbr),i) = M4(k,:)';
     end
     
     my_title='ELIMINATION OF THE MULTIPLIERS';
-    lab1 = M_.endo_names(dr.order_var(dr.nstatic+[ 1 2 5:8]),:);
-    labels = char(lab1,lab1,M_.exo_names,M_.exo_names);
+    lab = nstates(nil,:);
+    labels = '';
+    for i = 1:size(lab,1)
+        labels = char(labels,strcat(deblank(lab(i,:)),'(-1)'));
+    end
+    for i = 1:size(lab,1)
+        labels = char(labels,strcat(deblank(lab(i,:)),'(-2)'));
+    end
+    labels = char(labels,M_.exo_names);
+    for i = 1:M_.exo_nbr
+        labels = char(labels,strcat(deblank(M_.exo_names(i,:)),'(-1)'));
+    end
     lh = size(labels,2)+2;
     dyntable(my_title,headers,labels,res_table,lh,10,6);
     disp(' ')
