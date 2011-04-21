@@ -108,7 +108,6 @@ failedBase = {};
 
 top_test_dir = pwd;
 addpath(top_test_dir);
-addpath([top_test_dir '../matlab']);
 for i=1:size(name,2)
   try
     [directory, testfile, ext] = fileparts([top_test_dir '/' name{i}]);
