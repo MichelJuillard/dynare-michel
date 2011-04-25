@@ -35,17 +35,6 @@ elseif ~isempty(options.ms.Qi) && ~isempty(options.ms.Ri)
 end
 
 if ms_flag == 1
-    % changing some option names to match MS code
-    options.ms.firstMetrop = options.ms.draws_nbr_burn_in_1;
-    options.ms.secondMetrop = options.ms.draws_nbr_burn_in_2;
-    options.ms.ndrawsmv = options.ms.draws_nbr_mean_var_estimate;
-    options.ms.ndrawsmhm = options.ms.draws_nbr_modified_harmonic_mean;
-    options.ms.tfmhm = options.ms.thinning_factor;
-    options.ms.svd = options.ms.dirichlet_scale;
-    % are these options necessary ?
-    options.ms.opt1 = 1;
-    options.ms.opt2 = 1;
-    options.ms.opt3 = 1;
     % temporary fix
     options.ms.markov_file = 'markov_file';
     sz_prd(M,options);

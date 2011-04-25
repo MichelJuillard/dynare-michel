@@ -15,7 +15,7 @@ function ms_write_markov_file(fname,M,options)
     fprintf(fh,'//== Number Observations ==//\n');
     fprintf(fh,'0\n\n');
 
-    fprintf(fh,'//== Number Independent State Variables ==//\n');
+    fprintf(fh,'//== Number independent state variables ==//\n');
     fprintf(fh,'%d\n\n',n_chains);
 
     for i_chain = 1:n_chains

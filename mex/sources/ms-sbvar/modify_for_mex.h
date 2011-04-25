@@ -35,8 +35,8 @@
 void msExit(int status);
 extern int constant_seed;
 
-/* Write Matlab Output */
-mxArray *globalMatlabStruct;
+/* Write Matlab Output 
+mxArray *globalMatlabStruct;*/
 void mex_write_to_matlab_matfile(double *, int, int, const char *, const char *);
 void mex_write_to_matlab_global_struct(double *, int, int, const char *);
 mxArray *getMxArray(double *, int, int);
