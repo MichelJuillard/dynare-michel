@@ -334,7 +334,8 @@ In order to run Dynare, you need at least one of the following:
 @itemize 
 
 @item
-MATLAB version 6.5 or above; note that no toolbox is needed by Dynare,
+MATLAB version 7.0 (R14) or above; note that no toolbox is needed by
+Dynare,
 
 @item
 GNU Octave version 3.0.0 or above.
