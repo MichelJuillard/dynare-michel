@@ -71,7 +71,7 @@ if exist('OCTAVE_VERSION') && octave_ver_less_than('3.2.0')
     addpath([dynareroot '/missing/bicgstab'])
 end
 
-% bsxfun is missing in old versions of matlab (octave?)
+% bsxfun is missing in old versions of MATLAB (and exists in Octave)
 if ~exist('OCTAVE_VERSION') && matlab_ver_less_than('7.4')
     addpath([dynareroot '/missing/bsxfun'])
 end
