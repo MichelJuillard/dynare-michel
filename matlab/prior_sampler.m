@@ -46,6 +46,7 @@ count_steadystate_file_exit = 0;
 count_dll_problem = 0;
 count_complex_jacobian = 0;
 count_complex_steadystate = 0;
+count_nan_steadystate = 0;
 count_unknown_problem = 0;
 NumberOfSimulations = options_.prior_mc;
 NumberOfParameters = length(bayestopt_.p1);
@@ -78,7 +79,7 @@ while iteration < NumberOfSimulations
     params = prior_draw();
     set_all_parameters(params);
     [dr,INFO] = resol(oo_.steady_state,work);
-    switch INFO(1)  
+    switch INFO(1)
       case 0
         file_line_number = file_line_number + 1 ;
         iteration = iteration + 1;
@@ -106,6 +107,8 @@ while iteration < NumberOfSimulations
         count_complex_jacobian = count_complex_jacobian + 1 ;
       case 21
         count_complex_steadystate = count_complex_steadystate + 1 ;
+      case 22
+        count_nan_steadystate = count_nan_steadystate + 1 ;
       otherwise
         count_unknown_problem = count_unknown_problem + 1 ;
     end
