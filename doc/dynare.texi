@@ -181,6 +181,16 @@ Stochastic solution and simulation
 * Second order approximation::  
 * Third order approximation::   
 
+Sensitivity and identification analysis
+
+* Sampling::                    
+* Stability Mapping::           
+* Reduced Form Mapping::        
+* RMSE::                        
+* Screening Analysis::          
+* Identification Analysis::     
+* Performing Sensitivity and Identification Analysis::  
+
 The Configuration File
 
 * Parallel Configuration::      
@@ -2829,7 +2839,6 @@ Don't print moments of the endogenous variables (printing them is the
 default).
 
 @item nograph.
-@anchor{nograph}
 Doesn't do the graphs. Useful for loops.
 
 @item noprint
@@ -3505,6 +3514,7 @@ graphs of smoothed shocks, smoothed observation errors, smoothed and historical 
 @table @code
 
 @item datafile = @var{FILENAME}
+@anchor{datafile}
 The datafile (a @file{.m} file, a @file{.mat} file or, under MATLAB, a
 @file{.xls} file)
 
@@ -3517,26 +3527,32 @@ The name of the sheet with the data in an Excel file
 The range with the data in an Excel file
 
 @item nobs = @var{INTEGER}
+@anchor{nobs}
 The number of observations to be used. Default: all observations in
 the file
 
 @item nobs = [@var{INTEGER_1}:@var{INTEGER_2}]
+@anchor{nobs1}
 Runs a recursive estimation and forecast for samples of size ranging
 of @var{INTEGER_1} to @var{INTEGER_2}. Option @code{forecast} must
 also be specified
 
 @item first_obs = @var{INTEGER}
+@anchor{first_obs}
 The number of the first observation to be used. Default: @code{1}
 
 @item prefilter = @var{INTEGER}
+@anchor{prefilter}
 A value of @code{1} means that the estimation procedure will demean
 the data. Default: @code{0}, @i{i.e.} no prefiltering
 
 @item presample = @var{INTEGER}
+@anchor{presample}
 The number of observations to be skipped before evaluating the
 likelihood. Default: @code{0}
 
 @item loglinear
+@anchor{loglinear}
 Computes a log-linear approximation of the model instead of a linear
 approximation. The data must correspond to the definition of the
 variables used in the model. Default: computes a linear approximation
@@ -3560,6 +3576,7 @@ result in absurd prior densities.
 Default value is @code{1}.
 
 @item nograph
+@anchor{nograph}
 No graphs should be plotted
 
 @item lik_init = @var{INTEGER}
@@ -3623,6 +3640,7 @@ simulation that crashed prematurely. Shouldn't be used together with
 @dots{}
 
 @item mode_file = @var{FILENAME}
+@anchor{mode_file}
 Name of the file containing previous value for the mode. When
 computing the mode, Dynare stores the mode (@code{xparam1}) and the
 hessian (@code{hh}) in a file called
@@ -4495,17 +4513,539 @@ This command declares the policy maker objective, for use with
 @node Sensitivity and identification analysis
 @section Sensitivity and identification analysis
 
+Dynare provides an interface to the global sensitivity analysis (GSA)
+toolbox (developed by the Joint Research Center (JRC) of the European
+Commission), which is now part of the official Dynare distribution. The
+GSA toolbox can be used to answer the following questions:
+
+@enumerate
+@item
+What is the domain of structural coefficients assuring the stability and determinacy
+of a DSGE model?
+
+@item
+Which parameters mostly drive the fit of, @i{e.g.}, GDP and which the fit of inflation?
+Is there any conflict between the optimal fit of one observed series versus another?
+
+@item
+How to represent in a direct, albeit approximated, form the relationship between
+structural parameters and the reduced form of a rational expectations model?
+@end enumerate
+
+The discussion of the methodologies and their application is described in
+@cite{Ratto (2008)}.
+
+With respect to the previous version of the toolbox, in order to work
+properly, the GSA toolbox no longer requires that the Dynare
+estimation environment is setup.
+
+Sensitivity analysis results are saved locally in @code{<mod_file>/GSA},
+where @code{<mod_file>.mod} is the name of the DYNARE model file.
+
+@menu
+* Sampling::                    
+* Stability Mapping::           
+* Reduced Form Mapping::        
+* RMSE::                        
+* Screening Analysis::          
+* Identification Analysis::     
+* Performing Sensitivity and Identification Analysis::  
+@end menu
+
+@node Sampling
+@subsection Sampling
+
+The following binary files are produced:
+@itemize
+@item
+@code{<mod_file>_prior.mat}: this file stores information about the analyses
+performed sampling from the prior ranges, @i{i.e.} @code{pprior=1} and @code{ppost=0};
+
+@item
+@code{<mod_file>_mc.mat}: this file stores information about the analyses performed
+sampling from multivariate normal, @i{i.e.} @code{pprior=0} and @code{ppost=0};
+
+@item
+@code{<mod_file>_post.mat}: this file stores information about analyses performed
+using the Metropolis posterior sample, @i{i.e.} @code{ppost=1}.
+@end itemize
+
+@node Stability Mapping
+@subsection Stability Mapping
+
+Figure files produced are of the form @code{<mod_file>_prior_*.fig} and store results
+for stability mapping from prior Monte-Carlo samples:
+@itemize
+@item
+@code{<mod_file>_prior_stab_SA_*.fig}: plots of the Smirnov test analyses
+confronting the cdf of the sample fulfilling Blanchard-Kahn conditions
+with the cdf of the rest of the sample;
+
+@item
+@code{<mod_file>_prior_stab_indet_SA_*.fig}: plots of the Smirnov test
+analyses confronting the cdf of the sample producing indeterminacy
+with the cdf of the original prior sample;
+
+@item
+@code{<mod_file>_prior_stab_unst_SA_*.fig}: plots of the Smirnov test
+analyses confronting the cdf of the sample producing unstable (explosive
+roots) behavior with the cdf of the original prior sample;
+
+@item
+@code{<mod_file>_prior_stable_corr_*.fig}: plots of bivariate projections
+of the sample fulfilling Blanchard-Kahn conditions;
+
+@item
+@code{<mod_file>_prior_indeterm_corr_*.fig}: plots of bivariate projections
+of the sample producing indeterminacy;
+
+@item
+@code{<mod_file>_prior_unstable_corr_*.fig}: plots of bivariate projections
+of the sample producing instability;
+
+@item
+@code{<mod_file>_prior_unacceptable_corr_*.fig}: plots of bivariate projections
+of the sample producing unacceptable solutions, @i{i.e.} either
+instability or indeterminacy or the solution could not be found (@i{e.g.}
+the steady state solution could not be found by the solver).
+@end itemize
+
+Similar conventions apply for @code{<mod_file>_mc_*.fig} files, obtained when
+samples from multivariate normal are used.
+
+@node Reduced Form Mapping
+@subsection Reduced Form Mapping
+
+The mapping of the reduced form solution forces the use of samples from
+prior ranges or prior distributions, @i{i.e.}: @code{pprior=1} and @code{ppost=0}. It
+uses 250 samples to optimize smoothing parameters and 1000 samples to compute the
+fit. The rest of the sample is used for out-of-sample validation. One can also
+load a previously estimated mapping with a new Monte-Carlo sample, to look at the
+forecast for the new Monte-Carlo sample.
+
+The following synthetic figures are produced:
+@itemize
+@item
+@code{<mod_file>_redform_<endo name>_vs_lags_*.fig}: shows bar charts
+of the sensitivity indices for the ten most important parameters driving
+the reduced form coefficients of the selected endogenous variables
+(@code{namendo}) versus lagged endogenous variables (@code{namlagendo}); suffix
+@code{log} indicates the results for log-transformed entries;
+
+@item
+@code{<mod_file>_redform_<endo name>_vs_shocks_*.fig}: shows bar charts
+of the sensitivity indices for the ten most important parameters driving
+the reduced form coefficients of the selected endogenous variables
+(@code{namendo}) versus exogenous variables (@code{namexo}); suffix @code{log}
+indicates the results for log-transformed entries;
+
+@item
+@code{<mod_file>_redform_GSA(_log).fig}: shows bar chart of all sensitivity
+indices for each parameter: this allows one to notice parameters that
+have a minor effect for any of the reduced form coefficients.
+@end itemize
+
+Detailed results of the analyses are shown in the subfolder @code{<mod_file>/GSA/redform_stab},
+where the detailed results of the estimation of the single functional relationships
+between parameters @math{\theta} and reduced form coefficient are stored in separate directories
+named as:
+
+@itemize
+@item
+@code{<namendo>_vs_<namlagendo>}: for the entries of the transition matrix;
+
+@item
+@code{<namendo>_vs_<namexo>}: for entries of the matrix of the shocks.
+@end itemize
+Moreover, analyses for log-transformed entries are denoted with the following
+suffixes (@math{y} denotes the generic reduced form coefficient):
+@itemize
+@item
+@code{log}: @math{y^* = \log(y)};
+@item
+@code{minuslog}: @math{y^* = \log(-y)};
+@item
+@code{logsquared}: @math{y^* = \log(y^2)} for symmetric fat tails;
+@item
+@code{logskew}: @math{y^* = \log(|y + \lambda|)} for asymmetric fat tails.
+@end itemize
+The optimal type of transformation is automatically selected without the
+need of user intervention.
+
+@node RMSE
+@subsection RMSE
+
+The RMSE analysis can be performed with different types of sampling options:
+@enumerate
+@item
+When @code{pprior=1} and @code{ppost=0}, the toolbox analyzes the RMSE’s for
+the Monte-Carlo sample obtained by sampling parameters from their prior distributions
+(or prior ranges): this analysis provides some hints about
+what parameter drives the fit of which observed series, prior to the full
+estimation;
+
+@item
+When @code{pprior=0} and @code{ppost=0}, the toolbox analyzes the RMSE’s for
+a multivariate normal Monte-Carlo sample, with covariance matrix based on
+the inverse Hessian at the optimum: this analysis is useful when maximum likelihood
+estimation is done (@i{i.e.} no Bayesian estimation);
+
+@item
+When @code{ppost=1} the toolbox analyzes the RMSE’s for the posterior sample
+obtained by Dynare’s Metropolis procedure.
+@end enumerate
+
+The use of cases 2 and 3 requires an estimation step beforehand. To
+facilitate the sensitivity analysis after estimation, the @code{dynare_sensitivity}
+command also allows you to indicate some options of the @code{estimation}
+command. These are:
+@itemize @bullet
+@item @code{datafile}
+@item @code{nobs}
+@item @code{first_obs}
+@item @code{prefilter}
+@item @code{presample}
+@item @code{nograph}
+@item @code{conf_sig}
+@item @code{loglinear}
+@item @code{mode_file}
+@end itemize
+
+Binary files produced my RMSE analysis are:
+@itemize
+@item
+@code{<mod_file>_prior_*.mat}: these files store the filtered and smoothed
+    variables for the prior Monte-Carlo sample, generated when doing RMSE analysis
+    (@code{pprior=1} and @code{ppost=0});
+@item
+@code{<mode_file>_mc_*.mat}: these files store the filtered and smoothed variables
+    for the multivariate normal Monte-Carlo sample, generated when doing
+    RMSE analysis (@code{pprior=0} and @code{ppost=0}).
+@end itemize
+
+Figure files @code{<mod_file>_rmse_*.fig} store results for the RMSE analysis.
+
+@itemize
+@item
+@code{<mod_file>_rmse_prior*.fig}: save results for the analysis using prior
+Monte-Carlo samples;
+
+@item
+@code{<mod_file>_rmse_mc*.fig}: save results for the analysis using multivariate
+normal Monte-Carlo samples;
+
+@item
+@code{<mod_file>_rmse_post*.fig}: save results for the analysis using Metropolis
+posterior samples.
+@end itemize
+
+The following types of figures are saved (we show prior sample to fix ideas,
+but the same conventions are used for multivariate normal and posterior):
+
+@itemize
+@item
+@code{<mod_file>_rmse_prior_*.fig}: for each parameter, plots the cdf’s
+corresponding to the best 10% RMES’s of each observed series;
+
+@item
+@code{<mod_file>_rmse_prior_dens_*.fig}: for each parameter, plots the
+pdf’s corresponding to the best 10% RMES’s of each observed series;
+
+@item
+@code{<mod_file>_rmse_prior_<name of observedseries>_corr_*.fig}: for
+each observed series plots the bi-dimensional projections of samples
+with the best 10% RMSE’s, when the correlation is significant;
+
+@item
+@code{<mod_file>_rmse_prior_lnlik*.fig}: for each observed series, plots
+in red the cdf of the log-likelihood corresponding to the best 10%
+RMSE’s, in green the cdf of the rest of the sample and in blue the
+cdf of the full sample; this allows one to see the presence of some
+idiosyncratic behavior;
+
+@item
+@code{<mod_file>_rmse_prior_lnpost*.fig}: for each observed series, plots
+in red the cdf of the log-posterior corresponding to the best 10% RMSE’s,
+in green the cdf of the rest of the sample and in blue the cdf of the full
+sample; this allows one to see idiosyncratic behavior;
+
+@item
+@code{<mod_file>_rmse_prior_lnprior*.fig}: for each observed series, plots
+in red the cdf of the log-prior corresponding to the best 10% RMSE’s,
+in green the cdf of the rest of the sample and in blue the cdf of the full
+sample; this allows one to see idiosyncratic behavior;
+
+@item
+@code{<mod_file>_rmse_prior_lik_SA_*.fig}: when @code{lik_only=1}, this shows
+the Smirnov tests for the filtering of the best 10% log-likelihood values;
+
+@item
+@code{<mod_file>_rmse_prior_post_SA_*.fig}: when @code{lik_only=1}, this shows
+the Smirnov test for the filtering of the best 10% log-posterior values.
+@end itemize
+
+@node Screening Analysis
+@subsection Screening Analysis
+
+Screening analysis does not require any additional options with respect to
+those listed in @ref{Sampling Options}. The toolbox performs all the
+analyses required and displays results.
+
+The results of the screening analysis with Morris sampling design are stored
+in the subfolder @code{<mod_file>/GSA/SCREEN}. The data file @code{<mod_file>_prior} stores
+all the information of the analysis (Morris sample, reduced form coefficients,
+etc.).
+
+Screening analysis merely concerns reduced form coefficients. Similar
+synthetic bar charts as for the reduced form analysis with Monte-Carlo samples are
+saved:
+@itemize
+@item
+@code{<mod_file>_redform_<endo name>_vs_lags_*.fig}: shows bar charts
+of the elementary effect tests for the ten most important parameters
+driving the reduced form coefficients of the selected endogenous variables
+(@code{namendo}) versus lagged endogenous variables (@code{namlagendo});
+
+@item
+@code{<mod_file>_redform_<endo name>_vs_shocks_*.fig}: shows bar charts
+of the elementary effect tests for the ten most important parameters
+driving the reduced form coefficients of the selected endogenous variables
+(@code{namendo}) versus exogenous variables (@code{namexo});
+
+@item
+@code{<mod_file>_redform_screen.fig}: shows bar chart of all elementary
+effect tests for each parameter: this allows one to identify parameters that
+have a minor effect for any of the reduced form coefficients.
+@end itemize
+
+@node Identification Analysis
+@subsection Identification Analysis
+
+Setting the option @code{identification=1}, an identification analysis based on
+theoretical moments is performed. Sensitivity plots are provided that allow
+to infer which parameters are most likely to be less identifiable.
+
+Prerequisite for properly running all the identification routines, is the keyword
+@code{identification}; in the Dynare model file. This keyword triggers
+the computation of analytic derivatives of the model with respect to estimated
+parameters and shocks. This is required for option @code{morris=2},
+which implements @cite{Iskrev (2010)} identification analysis.
+
+For example, the placing @code{identification; dynare_sensitivity(identification=1, morris=2);}
+in the Dynare model file trigger identification analysis using analytic derivatives
+@cite{Iskrev (2010)}, jointly with the mapping of the acceptable region.
+
+The identification analysis with derivatives can also be triggered by the
+commands @code{identification;} This does not do the mapping of
+acceptable regions for the model and uses the standard random sampler of Dynare.
+It completely offsets any use of the sensitivity analysis toolbox.
+
+@node Performing Sensitivity and Identification Analysis
+@subsection Performing Sensitivity and Identification Analysis
 
 @deffn Command dynare_sensitivity ;
 @deffnx Command dynare_sensitivity (@var{OPTIONS}@dots{});
 
-This function is an interface to the global sensitivity analysis (GSA)
-toolbox developed by the Joint Research Center (JRC) of the European
-Commission. The GSA toolbox is now part of the official Dynare distribution.
+@descriptionhead
 
-Please refer to the documentation of the GSA toolbox on the official
-website (@uref{http://eemc.jrc.ec.europa.eu/Software-DYNARE.htm,JRC
-web site}) for more details on the usage of this command.
+This command triggers sensitivity analysis on a DSGE model.
+
+@optionshead
+@customhead{Sampling Options}
+@anchor{Sampling Options}
+@table @code
+
+@item nsam = @var{INTEGER}
+Size of the Monte-Carlo sample. Default: @code{2048}
+
+@item ilptau = @var{INTEGER}
+If equal to @code{1}, use @math{LP_\tau} quasi-Monte-Carlo.
+If equal to @code{0}, use LHS Monte-Carlo. Default: @code{1}
+
+@item pprior = @var{INTEGER}
+If equal to @code{1}, sample from the prior distributions.
+If equal to @code{0}, sample from the multivariate normal @math{N(\bar{\theta},\Sigma)},
+where @math{\bar{\theta}} is the posterior mode and @math{\Sigma=H^{-1}}, @math{H}
+is the Hessian at the mode. Default: @code{1}
+
+@item prior_range = @var{INTEGER}
+If equal to @code{1}, sample uniformly from prior ranges.
+If equal to @code{0}, sample from prior distributions. Default: @code{1}
+
+@item morris = @var{INTEGER}
+@anchor{morris}
+If equal to @code{0}, ANOVA mapping (Type I error)
+If equal to @code{1}, Screening analysis (Type II error)
+If equal to @code{2}, Analytic derivatives (similar to Type II error, only valid when
+@code{identification=1}).Default: @code{1} when @code{identification=1}, @code{0} otherwise
+
+@item morris_nliv = @var{INTEGER}
+@anchor{morris_nliv}
+Number of levels in Morris design. Default: @code{6}
+
+@item morris_ntra = @var{INTEGER}
+@anchor{morris_ntra}
+Number trajectories in Morris design. Default: @code{20}
+
+@item ppost = @var{INTEGER}
+If equal to @code{1}, use Metropolis posterior sample.
+If equal to @code{0}, do not use Metropolis posterior sample. NB: This
+overrides any other sampling option. Default: @code{0}
+
+@end table
+@customhead{Stability Mapping Options}
+@table @code
+
+@item stab = @var{INTEGER}
+If equal to @code{1}, perform stability mapping.
+If equal to @code{0}, do not perform stability mapping. Default: @code{1}
+
+@item load_stab = @var{INTEGER}
+If equal to @code{1}, load a previously created sample.
+If equal to @code{0}, generate a new sample. Default: @code{0}
+
+@item alpha2_stab = @var{DOUBLE}
+Critical value for correlations @math{\rho} in filtered samples:
+plot couples of parmaters with @math{\left|\rho\right|>} @code{alpha2_stab}.
+Default: @code{0.3}
+
+@item ksstat = @var{DOUBLE}
+Critical value for Smirnov statistics @math{d}: plot parameters with
+@math{d>} @code{ksstat}. Default: @code{0.1}
+
+@end table
+@customhead{Reduced Form Mapping Options}
+@table @code
+
+@item redform = @var{INTEGER}
+If equal to @code{1}, prepare Monte-Carlo sample of reduced form matrices.
+If equal to @code{0}, do not prepare Monte-Carlo sample of reduced form matrices. Default: @code{0}
+
+@item load_redform = @var{INTEGER}
+If equal to @code{1}, load previously estimated mapping.
+If equal to @code{0}, estimate the mapping of the reduced form model. Default: @code{0}
+
+@item logtrans_redform = @var{INTEGER}
+If equal to @code{1}, use log-transformed entries.
+If equal to @code{0}, use raw entries. Default: @code{0}
+
+@item threshold_redform = [@var{DOUBLE} @var{DOUBLE}]
+The range over which the filtered Monte-Carlo entries of the reduced form coefficients
+should be analyzed. The first number is the lower bound and the second is the upper bound.
+An empty vector indicates that these entries will not be filtered. Default: @code{empty}
+
+@item ksstat_redform = @var{DOUBLE}
+Critical value for Smirnov statistics @math{d} when reduced form entries
+are filtered. Default: @code{0.1}
+
+@item alpha2_redform = @var{DOUBLE}
+Critical value for correlations @math{\rho}  when reduced form entries
+are filtered. Default: @code{0.3}
+
+@item namendo = (@var{VARIABLE_NAME}@dots{})
+List of endogenous variables. `@code{:}' indicates all endogenous variables.
+Default: @code{empty}
+
+@item namlagendo = (@var{VARIABLE_NAME}@dots{})
+List of lagged endogenous variables. `@code{:}' indicates all lagged endogenous variables.
+Analyze entries @code{[namendo}@math{\times}@code{namlagendo]} Default: @code{empty}
+
+@item namexo = (@var{VARIABLE_NAME}@dots{})
+List of exogenous variables. `@code{:}' indicates all exogenous variables.
+Analyze entries @code{[namendo}@math{\times}@code{namexo]}. Default: @code{empty}
+
+@end table
+@customhead{RMSE Options}
+@table @code
+
+@item rmse = @var{INTEGER}
+If equal to @code{1}, perform RMSE analysis.
+If equal to @code{0}, do not perform RMSE analysis. Default: @code{0}
+
+@item load_rmse = @var{INTEGER}
+If equal to @code{1}, load previous RMSE analysis.
+If equal to @code{0}, make a new RMSE analysis. Default: @code{0}
+
+@item lik_only = @var{INTEGER}
+If equal to @code{1}, compute only likelihood and posterior.
+If equal to @code{0}, compute RMSE's for all observed series. Default: @code{0}
+
+@item var_rmse = (@var{VARIABLE_NAME}@dots{})
+List of observed series to be considered. `@code{:}' indicates all observed
+variables. Default: @code{varobs}
+
+@item pfilt_rmse = @var{DOUBLE}
+Filtering threshold for RMSE's. Default: @code{0.1}
+
+@item istart_rmse = @var{INTEGER}
+Value at which to start computing RMSE's (use @code{2} to avoid big intitial
+error). Default: @code{presample+1}
+
+@item alpha_rmse = @var{DOUBLE}
+Critical value for Smirnov statistics @math{d}: plot parameters with
+@math{d>} @code{alpha_rmse}. Default: @code{0.002}
+
+@item alpha2_rmse = @var{DOUBLE}
+Critical value for correlation @math{\rho}: plot couples of parmaters with
+@math{\left|\rho\right|=} @code{alpha2_rmse}. Default: @code{1.0}
+
+@item datafile = @var{FILENAME}
+@xref{datafile}.
+
+@item nobs = @var{INTEGER}
+@item nobs = [@var{INTEGER_1}:@var{INTEGER_2}]
+@xref{nobs}.
+
+@item first_obs = @var{INTEGER}
+@xref{first_obs}.
+
+@item prefilter = @var{INTEGER}
+@xref{prefilter}.
+
+@item presample = @var{INTEGER}
+@xref{presample}.
+
+@item nograph
+@xref{nograph}.
+
+@item conf_sig = @var{DOUBLE}
+@xref{conf_sig}.
+
+@item loglinear
+@xref{loglinear}.
+
+@item mode_file = @var{FILENAME}
+@xref{mode_file}.
+
+@end table
+@customhead{Identification Analysis Options}
+@table @code
+
+@item identification = @var{INTEGER}
+If equal to @code{1}, performs identification anlysis (forcing @code{redform=0} and @code{morris=1})
+If equal to @code{0}, no identification analysis. Default: @code{0}
+
+@item morris = @var{INTEGER}
+@xref{morris}.
+
+@item morris_nliv = @var{INTEGER}
+@xref{morris_nliv}.
+
+@item morris_ntra = @var{INTEGER}
+@xref{morris_ntra}.
+
+@item load_ident_files = @var{INTEGER}
+Loads previously performed identification analysis. Default: @code{0}
+
+@item useautocorr = @var{INTEGER}
+Use autocorrelation matrices in place of autocovariance matrices in moments
+for identification analysis. Default: @code{0}
+
+@item ar = @var{INTEGER}
+Maximum number of lags for moments in identification analysis. Default: @code{1}
+
+@end table
+
 @end deffn
 
 @deffn Command identification ;
@@ -4524,20 +5064,24 @@ Number of lags of computed autocorrelations (theoretical moments). Default: @cod
 
 @item useautocorr = @var{INTEGER}
 If equal to @code{1}, compute derivatives of autocorrelation. If equal
-to @code{0}, compute derivatives of autocovariances. Default: @code{1}
+to @code{0}, compute derivatives of autocovariances. Default: @code{0}
 
 @item load_ident_files = @var{INTEGER}
-If equal to @code{1}, allow Dynare to load previously 
+If equal to @code{1}, allow Dynare to load previously
 computed analyzes. Default: @code{0}
 
 @item prior_mc = @var{INTEGER}
-Size of Monte Carlo sample. Default: @code{2000}
+Size of Monte-Carlo sample. Default: @code{1}
 
 @item advanced = @var{INTEGER}
-@dots{} Default: @code{0}
+Shows a more detailed analysis, comprised of an analysis for the linearized rational
+expectation model as well as the associated reduced form solution. Further performs a brute
+force search of the groups of parameters best reproducing the behavior of each single parameter.
+The maximum dimension of the group searched is triggered by @code{max_dim_cova_group}. Default: @code{0}
 
 @item max_dim_cova_group = @var{INTEGER}
-@dots{}
+In the brute force search (performed when @code{advanced=1}) this option sets the maximum dimension of groups
+of parameters that best reproduce the behavior of each single model parameter.
 
 @end table
 
@@ -4982,6 +5526,10 @@ Ireland, Peter (2004): ``A Method for Taking Models to the Data,''
 @i{Journal of Economic Dynamics and Control}, 28, 1205--26.
 
 @item
+Iskrev, Nikolay (2010). ``Local identification in DSGE models,''
+@i{Journal of Monetary Economics}, 57(2), 189--202.
+
+@item
 Judd, Kenneth (1996): ``Approximation, Perturbation, and Projection
 Methods in Economic Analysis'', in @i{Handbook of Computational
 Economics}, ed. by Hans Amman, David Kendrick, and John Rust, North
@@ -5026,6 +5574,10 @@ Modelling}, 3(2), 90--105.
 Rabanal, Pau and Juan Rubio-Ramirez (2003): ``Comparing New Keynesian
 Models of the Business Cycle: A Bayesian Approach,'' Federal Reserve
 of Atlanta, @i{Working Paper Series}, 2003-30.
+
+@item
+Ratto, Marco (2008): ``Analysing dsge models with global sensitivity
+analysis''. @i{Computational Economics}, 31, 115--139.
 
 @item
 Schorfheide, Frank (2000): ``Loss Function-based evaluation of DSGE
