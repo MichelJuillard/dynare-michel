@@ -17,9 +17,10 @@ function [dr,info]=resol(steady_state_0,check_flag)
 %    info=6:         The jacobian evaluated at the steady state is complex.
 %    info=19:        The steadystate file did not compute the steady state (inconsistent deep parameters).
 %    info=20:        can't find steady state info(2) contains sum of sqare residuals
-%    info=21:        steady state is complex 
+%    info=21:        steady state is complex valued scalars
 %                               info(2) contains sum of sqare of
 %                               imaginary part of steady state
+%    info=22:        steady state has NaNs
 %    info=30:        Variance can't be computed
 %
 % SPECIAL REQUIREMENTS
@@ -118,6 +119,7 @@ else
         end
     end
 end
+
 % testing for problem
 dr.ys = steady_state;
 
@@ -140,6 +142,14 @@ if ~isreal(steady_state)
     dr.ys = steady_state;
     return
 end
+
+if ~isempty(find(isnan(steady_state)))
+    info(1) = 22;
+    info(2) = NaN;
+    dr.ys = steady_state;
+    return
+end
+
 
 if options_.block
     [dr,info,M_,options_,oo_] = dr_block(dr,check_flag,M_,options_,oo_);
