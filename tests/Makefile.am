@@ -1,5 +1,3 @@
-.NOTPARALLEL: check-local
-
 DYNARE_ROOT = $(abs_top_srcdir)/matlab
 
 TESTS_ENVIRONMENT = \
