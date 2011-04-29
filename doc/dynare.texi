@@ -5073,6 +5073,10 @@ computed analyzes. Default: @code{0}
 @item prior_mc = @var{INTEGER}
 Size of Monte-Carlo sample. Default: @code{1}
 
+@item prior_range = @var{INTEGER}
+Triggers uniform sample within the range implied by the prior specifications (when
+@code{prior_mc>1}). Default: @code{0}
+
 @item advanced = @var{INTEGER}
 Shows a more detailed analysis, comprised of an analysis for the linearized rational
 expectation model as well as the associated reduced form solution. Further performs a brute
@@ -5081,7 +5085,28 @@ The maximum dimension of the group searched is triggered by @code{max_dim_cova_g
 
 @item max_dim_cova_group = @var{INTEGER}
 In the brute force search (performed when @code{advanced=1}) this option sets the maximum dimension of groups
-of parameters that best reproduce the behavior of each single model parameter.
+of parameters that best reproduce the behavior of each single model parameter. Default: @code{2}
+
+@item periods = @var{INTEGER}
+When the analytic Hessian is not available (@i{i.e.} with missing values or diffuse
+Kalman filter or univariate Kalman filter), this triggers the length of stochastic simulation
+to compute Simulated Moments Uncertainty. Default: @code{300}
+
+@item replic = @var{INTEGER}
+When the analytic Hessian is not available, this triggers the number of replicas
+to compute Simulated Moments Uncertainty. Default: @code{100}
+
+@item gsa_sample_file = @var{INTEGER}
+If equal to @code{0}, do not use sample file.
+If equal to @code{1}, triggers gsa prior sample.
+If equal to @code{2}, triggers gsa Monte-Carlo sample (@i{i.e.} loads a sample corresponding to
+@code{pprior=0} and @code{ppost=0} in the @code{dynare_sensitivity} options). Default: @code{0}
+
+@item gsa_sample_file = @var{FILENAME}
+Uses the provided path to a specific user defined sample file. Default: @code{0}
+
+@item parameter_set = @code{prior_mode} | @code{prior_mean} | @code{posterior_mode} | @code{posterior_mean} | @code{posterior_median}
+Specify the parameter set to use. Default: @code{prior_mode}
 
 @end table
 
