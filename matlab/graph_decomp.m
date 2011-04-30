@@ -23,7 +23,7 @@ comp_nbr = size(z,2)-1;
 
 gend = size(z,3);
 freq = initial_date.freq;
-initial_period = initial_date.period + initial_date.sub_period/freq;
+initial_period = initial_date.period + initial_date.subperiod/freq;
 x = initial_period-1/freq:(1/freq):initial_period+(gend-1)/freq;
 
 nvar = length(i_var);
