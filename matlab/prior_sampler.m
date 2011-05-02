@@ -109,6 +109,10 @@ while iteration < NumberOfSimulations
         count_complex_steadystate = count_complex_steadystate + 1 ;
       case 22
         count_nan_steadystate = count_nan_steadystate + 1 ;
+      case 23
+        count_complex_params = count_complex_params + 1 ;
+      case 24
+        count_nan_params = count_nan_params + 1 ;
       otherwise
         count_unknown_problem = count_unknown_problem + 1 ;
     end
