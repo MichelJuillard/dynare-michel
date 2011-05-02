@@ -1,5 +1,23 @@
 function plot_identification(params,idemoments,idehess,idemodel, idelre, advanced, tittxt, name, IdentifDirectoryName, save_figure)
 % function plot_identification(params,idemoments,idehess,idemodel, idelre, advanced, tittxt, name, IdentifDirectoryName, save_figure)
+%
+% INPUTS
+%    o params             [array] parameter values for identification checks
+%    o idemoments         [structure] identification results for the moments
+%    o idehess            [structure] identification results for the Hessian
+%    o idemodel           [structure] identification results for the reduced form solution
+%    o idelre             [structure] identification results for the LRE model
+%    o advanced           [integer] flag for advanced identification checks
+%    o tittxt             [char] name of the results to plot 
+%    o name               [char] list of names
+%    o IdentifDirectoryName   [char] directory name
+%    o save_figure        [integer] flag  for saving plots (=1) or not (=0)
+%    
+% OUTPUTS
+%    None
+%    
+% SPECIAL REQUIREMENTS
+%    None
 
 % Copyright (C) 2008-2011 Dynare Team
 %
