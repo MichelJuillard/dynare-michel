@@ -1,4 +1,4 @@
-function disp_identification(pdraws, idemodel, idemoments, name, advanced)
+function disp_identification(pdraws, idemodel, idemoments, name)
 
 % Copyright (C) 2008-2011 Dynare Team
 %
@@ -19,69 +19,66 @@ function disp_identification(pdraws, idemodel, idemoments, name, advanced)
 
 global options_
 
-if nargin<5 || isempty(advanced),
-    advanced=0;
-end
-
 [SampleSize, npar] = size(pdraws);
-jok = 0;
-jokP = 0;
-jokJ = 0;
-jokPJ = 0;
+% jok = 0;
+% jokP = 0;
+% jokJ = 0;
+% jokPJ = 0;
 
-for j=1:npar,
-    %     if any(idemodel.ind(j,:)==0),
-    %         pno = 100*length(find(idemodel.ind(j,:)==0))/SampleSize;
-    %         disp(['Parameter ',name{j},' is not identified in the model for ',num2str(pno),'% of MC runs!' ])
-    %         disp(' ')
-    %     end
-    %     if any(idemoments.ind(j,:)==0),
-    %         pno = 100*length(find(idemoments.ind(j,:)==0))/SampleSize;
-    %         disp(['Parameter ',name{j},' is not identified by J moments for ',num2str(pno),'% of MC runs!' ])
-    %         disp(' ')
-    %     end
-    if any(idemodel.ind(j,:)==1),
-        iok = find(idemodel.ind(j,:)==1);
-        jok = jok+1;
-        kok(jok) = j;
-        mmin(jok,1) = min(idemodel.Mco(j,iok));
-        mmean(jok,1) = mean(idemodel.Mco(j,iok));
-        mmax(jok,1) = max(idemodel.Mco(j,iok));
-        [ipmax, jpmax] = find(abs(squeeze(idemodel.Pco(j,[1:j-1,j+1:end],iok)))>0.95);
-        if ~isempty(ipmax)
-            jokP = jokP+1;
-            kokP(jokP) = j;
-            ipmax(find(ipmax>=j))=ipmax(find(ipmax>=j))+1;
-            [N,X]=hist(ipmax,[1:npar]);
-            jpM(jokP)={find(N)};
-            NPM(jokP)={N(find(N))./SampleSize.*100};
-            pmeanM(jokP)={mean(squeeze(idemodel.Pco(j,find(N),iok))')};
-            pminM(jokP)={min(squeeze(idemodel.Pco(j,find(N),iok))')};
-            pmaxM(jokP)={max(squeeze(idemodel.Pco(j,find(N),iok))')};
-        end
-    end
-    if any(idemoments.ind(j,:)==1),
-        iok = find(idemoments.ind(j,:)==1);
-        jokJ = jokJ+1;
-        kokJ(jokJ) = j;
-        mminJ(jokJ,1) = min(idemoments.Mco(j,iok));
-        mmeanJ(jokJ,1) = mean(idemoments.Mco(j,iok));
-        mmaxJ(jokJ,1) = max(idemoments.Mco(j,iok));
-        [ipmax, jpmax] = find(abs(squeeze(idemoments.Pco(j,[1:j-1,j+1:end],iok)))>0.95);
-        if ~isempty(ipmax)
-            jokPJ = jokPJ+1;
-            kokPJ(jokPJ) = j;
-            ipmax(find(ipmax>=j))=ipmax(find(ipmax>=j))+1;
-            [N,X]=hist(ipmax,[1:npar]);
-            jpJ(jokPJ)={find(N)};
-            NPJ(jokPJ)={N(find(N))./SampleSize.*100};
-            pmeanJ(jokPJ)={mean(squeeze(idemoments.Pco(j,find(N),iok))')};
-            pminJ(jokPJ)={min(squeeze(idemoments.Pco(j,find(N),iok))')};
-            pmaxJ(jokPJ)={max(squeeze(idemoments.Pco(j,find(N),iok))')};
-        end
-    end
-end
+% for j=1:npar,
+%     %     if any(idemodel.ind(j,:)==0),
+%     %         pno = 100*length(find(idemodel.ind(j,:)==0))/SampleSize;
+%     %         disp(['Parameter ',name{j},' is not identified in the model for ',num2str(pno),'% of MC runs!' ])
+%     %         disp(' ')
+%     %     end
+%     %     if any(idemoments.ind(j,:)==0),
+%     %         pno = 100*length(find(idemoments.ind(j,:)==0))/SampleSize;
+%     %         disp(['Parameter ',name{j},' is not identified by J moments for ',num2str(pno),'% of MC runs!' ])
+%     %         disp(' ')
+%     %     end
+%     if any(idemodel.ind(j,:)==1),
+%         iok = find(idemodel.ind(j,:)==1);
+%         jok = jok+1;
+%         kok(jok) = j;
+%         mmin(jok,1) = min(idemodel.Mco(j,iok));
+%         mmean(jok,1) = mean(idemodel.Mco(j,iok));
+%         mmax(jok,1) = max(idemodel.Mco(j,iok));
+%         [ipmax, jpmax] = find(abs(squeeze(idemodel.Pco(j,[1:j-1,j+1:end],iok)))>0.95);
+%         if ~isempty(ipmax)
+%             jokP = jokP+1;
+%             kokP(jokP) = j;
+%             ipmax(find(ipmax>=j))=ipmax(find(ipmax>=j))+1;
+%             [N,X]=hist(ipmax,[1:npar]);
+%             jpM(jokP)={find(N)};
+%             NPM(jokP)={N(find(N))./SampleSize.*100};
+%             pmeanM(jokP)={mean(squeeze(idemodel.Pco(j,find(N),iok))')};
+%             pminM(jokP)={min(squeeze(idemodel.Pco(j,find(N),iok))')};
+%             pmaxM(jokP)={max(squeeze(idemodel.Pco(j,find(N),iok))')};
+%         end
+%     end
+%     if any(idemoments.ind(j,:)==1),
+%         iok = find(idemoments.ind(j,:)==1);
+%         jokJ = jokJ+1;
+%         kokJ(jokJ) = j;
+%         mminJ(jokJ,1) = min(idemoments.Mco(j,iok));
+%         mmeanJ(jokJ,1) = mean(idemoments.Mco(j,iok));
+%         mmaxJ(jokJ,1) = max(idemoments.Mco(j,iok));
+%         [ipmax, jpmax] = find(abs(squeeze(idemoments.Pco(j,[1:j-1,j+1:end],iok)))>0.95);
+%         if ~isempty(ipmax)
+%             jokPJ = jokPJ+1;
+%             kokPJ(jokPJ) = j;
+%             ipmax(find(ipmax>=j))=ipmax(find(ipmax>=j))+1;
+%             [N,X]=hist(ipmax,[1:npar]);
+%             jpJ(jokPJ)={find(N)};
+%             NPJ(jokPJ)={N(find(N))./SampleSize.*100};
+%             pmeanJ(jokPJ)={mean(squeeze(idemoments.Pco(j,find(N),iok))')};
+%             pminJ(jokPJ)={min(squeeze(idemoments.Pco(j,find(N),iok))')};
+%             pmaxJ(jokPJ)={max(squeeze(idemoments.Pco(j,find(N),iok))')};
+%         end
+%     end
+% end
 
+disp(['  ']),
 
 if any(idemodel.ino),
     disp('WARNING !!!')
@@ -90,76 +87,120 @@ if any(idemodel.ino),
     else
         disp(['The rank of H (model) is deficient!'  ]),
     end
-end
-for j=1:npar,
-    if any(idemodel.ind(j,:)==0),
-        pno = 100*length(find(idemodel.ind(j,:)==0))/SampleSize;
-        if SampleSize>1
-            disp([name{j},' is not identified in the model for ',num2str(pno),'% of MC runs!' ])
-        else
-            disp([name{j},' is not identified in the model!' ])
+    disp(' ')
+    for j=1:npar,
+        if any(idemodel.ind0(:,j)==0),
+            pno = 100*length(find(idemodel.ind0(:,j)==0))/SampleSize;
+            if SampleSize>1
+                disp(['    ',name{j},' is not identified in the model for ',num2str(pno),'% of MC runs!' ])
+            else
+                disp(['    ',name{j},' is not identified in the model!' ])
+            end
+            disp(['    [dJ/d(',name{j},')=0 for all tau elements in the model solution!]' ])
         end
     end
-    iweak = length(find(idemodel.Mco(j,:)'>(1-1.e-10)));
-    if iweak, 
-        %         disp('WARNING !!!')
-        %         disp(['Model derivatives of parameter ',name{j},' are multi-collinear (with tol = 1.e-10) for ',num2str(iweak/SampleSize*100),'% of MC runs!' ])
-        if SampleSize>1
-            disp([name{j},' is collinear w.r.t. all other params ',num2str(iweak/SampleSize*100),'% of MC runs!' ])
-        else
-            disp([name{j},' is collinear w.r.t. all other params!' ])
+    npairs=size(idemodel.jweak_pair,2);
+    jmap_pair=dyn_unvech(1:npairs);
+    jstore=[];
+    disp(' ')
+    for j=1:npairs,
+        iweak = length(find(idemodel.jweak_pair(:,j)));
+        if iweak,
+            [jx,jy]=find(jmap_pair==j);
+            jstore=[jstore jx(1) jy(1)];
+            if SampleSize > 1
+                disp(['    [',name{jx(1)},',',name{jy(1)},'] are PAIRWISE collinear (with tol = 1.e-10) for ',num2str(length(iweak)/SampleSize*100),'% of MC runs!' ])
+            else
+                disp(['    [',name{jx(1)},',',name{jy(1)},'] are PAIRWISE collinear (with tol = 1.e-10) !' ])
+            end
         end
-        if npar>(j+1),
-            [ipair, jpair] = find(squeeze(idemodel.Pco(j,j+1:end,:))'>(1-1.e-10));
-        else
-            [ipair, jpair] = find(squeeze(idemodel.Pco(j,j+1:end,:))>(1-1.e-10));
-        end
-        if ~isempty(jpair),
-            for jx=j+1:npar,
-                ixp = find(jx==(jpair+j));
-                if ~isempty(ixp)
-                    if SampleSize > 1,
-                        disp(['    [',name{j},',',name{jx},'] are PAIRWISE collinear (with tol = 1.e-10) for ',num2str(length(ixp)/SampleSize*100),'% of MC runs!' ])            
-                    else
-                        disp(['    [',name{j},',',name{jx},'] are PAIRWISE collinear (with tol = 1.e-10)!' ])            
-                    end
-                end
+        
+    end
+    disp(' ')
+    for j=1:npar,
+        iweak = length(find(idemodel.jweak(:,j)));
+        if iweak && ~ismember(j,jstore),
+            %         disp('WARNING !!!')
+            %         disp(['Model derivatives of parameter ',name{j},' are multi-collinear (with tol = 1.e-10) for ',num2str(iweak/SampleSize*100),'% of MC runs!' ])
+            if SampleSize>1
+                disp([name{j},' is collinear w.r.t. all other params ',num2str(iweak/SampleSize*100),'% of MC runs!' ])
+            else
+                disp([name{j},' is collinear w.r.t. all other params!' ])
             end
         end
     end
+%         if npar>(j+1),
+%             [ipair, jpair] = find(squeeze(idemodel.Pco(j,j+1:end,:))'>(1-1.e-10));
+%         else
+%             [ipair, jpair] = find(squeeze(idemodel.Pco(j,j+1:end,:))>(1-1.e-10));
+%         end
+%         if ~isempty(jpair),
+%             for jx=j+1:npar,
+%                 ixp = find(jx==(jpair+j));
+%                 if ~isempty(ixp)
+%                     if SampleSize > 1,
+%                         disp(['    [',name{j},',',name{jx},'] are PAIRWISE collinear (with tol = 1.e-10) for ',num2str(length(ixp)/SampleSize*100),'% of MC runs!' ])
+%                     else
+%                         disp(['    [',name{j},',',name{jx},'] are PAIRWISE collinear (with tol = 1.e-10)!' ])
+%                     end
+%                 end
+%             end
+%         end
 end
-if ~any(idemodel.ino) && ~any(any(idemodel.ind==0))
+
+if ~any(idemodel.ino) && ~any(any(idemodel.ind0==0))
     disp(['All parameters are identified in the model (rank of H).' ]),
     disp(' ')
 end
 
 if any(idemoments.ino),
+    disp(' ')
     disp('WARNING !!!')
     if SampleSize > 1,
         disp(['The rank of J (moments) is deficient for ', num2str(length(find(idemoments.ino))/SampleSize*100),'% of MC runs!'  ]),
     else
         disp(['The rank of J (moments) is deficient!'  ]),
     end
-end
-if any(idemoments.ino),
     %     disp('WARNING !!!')
     %     disp(['The rank of J (moments) is deficient for ', num2str(length(find(idemoments.ino))/SampleSize*100),'% of MC runs!'  ]),
-    indno=[];
-    for j=1:SampleSize, indno=[indno;idemoments.indno{j}]; end
-    freqno = mean(indno)*100;
-    ifreq=find(freqno);
+%     indno=[];
+%     for j=1:SampleSize, indno=[indno;idemoments.indno{j}]; end
+%     freqno = mean(indno)*100;
+%     ifreq=find(freqno);
     %     disp('MOMENT RANK FAILURE DUE TO COLLINEARITY OF PARAMETERS:');
+    disp(' ')
     for j=1:npar,
-        if any(idemoments.ind(j,:)==0),
-            pno = 100*length(find(idemoments.ind(j,:)==0))/SampleSize;
+        if any(idemoments.ind0(:,j)==0),
+            pno = 100*length(find(idemoments.ind0(:,j)==0))/SampleSize;
             if SampleSize > 1
-                disp([name{j},' is not identified by J moments for ',num2str(pno),'% of MC runs!' ])
+                disp(['    ',name{j},' is not identified by J moments for ',num2str(pno),'% of MC runs!' ])
             else
-                disp([name{j},' is not identified by J moments!' ])
+                disp(['    ',name{j},' is not identified by J moments!' ])
+            end
+            disp(['    [dJ/d(',name{j},')=0 for all J moments!]' ])
+        end
+    end
+    disp(' ')
+    npairs=size(idemoments.jweak_pair,2);
+    jmap_pair=dyn_unvech(1:npairs);
+    jstore=[];
+    for j=1:npairs,
+        iweak = length(find(idemoments.jweak_pair(:,j)));
+        if iweak,
+            [jx,jy]=find(jmap_pair==j);
+            jstore=[jstore  jx(1) jy(1)]';
+            if SampleSize > 1
+                disp(['    [',name{jx(1)},',',name{jy(1)},'] are PAIRWISE collinear (with tol = 1.e-10) for ',num2str(length(iweak)/SampleSize*100),'% of MC runs!' ])
+            else
+                disp(['    [',name{jx(1)},',',name{jy(1)},'] are PAIRWISE collinear (with tol = 1.e-10) !' ])
             end
         end
-        iweak = length(find(idemoments.Mco(j,:)'>(1-1.e-10)));
-        if iweak,
+        
+    end
+    disp(' ')
+    for j=1:npar,
+        iweak = length(find(idemoments.jweak(:,j)));
+        if iweak && ~ismember(j,jstore),
             %             disp('WARNING !!!')
             %             disp(['Moment derivatives of parameter ',name{j},' are multi-collinear (with tol = 1.e-10) for ',num2str(iweak/SampleSize*100),'% of MC runs!' ])
             if SampleSize > 1,
@@ -167,27 +208,30 @@ if any(idemoments.ino),
             else
                 disp([name{j},' is collinear w.r.t. all other params!' ])
             end
-            if npar>(j+1),
-                [ipair, jpair] = find(squeeze(idemoments.Pco(j,j+1:end,:))'>(1-1.e-10));
-            else
-                [ipair, jpair] = find(squeeze(idemoments.Pco(j,j+1:end,:))>(1-1.e-10));
-            end
-            if ~isempty(jpair),
-                for jx=j+1:npar,
-                    ixp = find(jx==(jpair+j));
-                    if ~isempty(ixp)
-                        if SampleSize > 1
-                            disp(['    [',name{j},',',name{jx},'] are PAIRWISE collinear (with tol = 1.e-10) for ',num2str(length(ixp)/SampleSize*100),'% of MC runs!' ])
-                        else
-                            disp(['    [',name{j},',',name{jx},'] are PAIRWISE collinear (with tol = 1.e-10) !' ])
-                        end
-                    end
-                end
-            end
         end
     end
+%             if npar>(j+1),
+%                 [ipair, jpair] = find(squeeze(idemoments.Pco(j,j+1:end,:))'>(1-1.e-10));
+%             else
+%                 [ipair, jpair] = find(squeeze(idemoments.Pco(j,j+1:end,:))>(1-1.e-10));
+%             end
+%             if ~isempty(jpair),
+%                 for jx=j+1:npar,
+%                     ixp = find(jx==(jpair+j));
+%                     if ~isempty(ixp)
+%                         if SampleSize > 1
+%                             disp(['    [',name{j},',',name{jx},'] are PAIRWISE collinear (with tol = 1.e-10) for ',num2str(length(ixp)/SampleSize*100),'% of MC runs!' ])
+%                         else
+%                             disp(['    [',name{j},',',name{jx},'] are PAIRWISE collinear (with tol = 1.e-10) !' ])
+%                         end
+%                     end
+%                 end
+%             end
+%         end
+%     end
 end
-if ~any(idemoments.ino) && ~any(any(idemoments.ind==0))
+if ~any(idemoments.ino) && ~any(any(idemoments.ind0==0))
+    disp(' ')
     disp(['All parameters are identified by J moments (rank of J)' ]),
     disp(' ')
 end
