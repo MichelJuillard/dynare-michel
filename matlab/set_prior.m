@@ -166,6 +166,9 @@ bayestopt_.p3(k(k1)) = zeros(length(k1),1);
 k1 = find(isnan(bayestopt_.p4(k)));
 bayestopt_.p4(k(k1)) = ones(length(k1),1);
 for i=1:length(k)
+    if (bayestopt_.p1(k(i))<bayestopt_.p3(k(i))) || (bayestopt_.p1(k(i))>bayestopt_.p4(k(i)))
+        error(['The prior mean of ' bayestopt_.name{k(i)} ' has to be between the lower (' num2str(bayestopt_.p3(k(i))) ') and upper (' num2str(bayestopt_.p4(k(i))) ') bounds of the beta prior density!']);
+    end
     mu = (bayestopt_.p1(k(i))-bayestopt_.p3(k(i)))/(bayestopt_.p4(k(i))-bayestopt_.p3(k(i)));
     stdd = bayestopt_.p2(k(i))/(bayestopt_.p4(k(i))-bayestopt_.p3(k(i)));
     bayestopt_.p6(k(i)) = (1-mu)*mu^2/stdd^2 - mu ;
