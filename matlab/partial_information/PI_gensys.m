@@ -84,14 +84,12 @@ try
     if singular == 1 || strcmp('MATLAB:nearlySingularMatrix',LastWarningID) == 1 || ...
                  strcmp('MATLAB:illConditionedMatrix',LastWarningID)==1 || ...
                  strcmp('MATLAB:singularMatrix',LastWarningID)==1 
-        [C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, M1, M2, UAVinv, FL_RANK] = PI_gensys_singularC(C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, 0);
-        V02=[V02 V01*M2];
-        V01=V01*M1;
+        [C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, M1, M2, UAVinv, FL_RANK, V01, V02] = PI_gensys_singularC(C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, V01, V02, 0);
     end
     warning('on','MATLAB:singularMatrix');
     warning('on','MATLAB:nearlySingularMatrix');
-    if (any(any(isinf(UAVinv))) || any(any(isnan(UAVinv))))
-        if(options_.useACES==1)
+    if (any(any(isinf(UAVinv))) || any(any(isnan(UAVinv)))) 
+        if(options_.ACES_solver==1)
             disp('ERROR! saving PI_gensys_data_dump');
             save PI_gensys_data_dump
             error('PI_gensys: Inversion of poss. zero matrix UAVinv=inv(U02''*a1*V02)!');
@@ -102,11 +100,9 @@ try
         end
     end
 catch
-    lerror = lasterror;
-    errmsg = lerror.message;
-    disp(errmsg)
-    warning(['error callig PI_gensys_singularC: ' errmsg ],'errcode');
-    error('errcode',['error callig PI_gensys_singularC: ' errmsg ]);
+    errmsg=lasterror;
+    warning(['error callig PI_gensys_singularC: ' errmsg.message ],'errmsg.identifier');
+    %error('errcode',['error callig PI_gensys_singularC: ' errmsg.message ]);
 end
 %
 % Define TT1, TT2

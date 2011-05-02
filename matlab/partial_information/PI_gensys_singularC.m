@@ -1,6 +1,6 @@
-function [C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, M1, M2, UAVinv, FL_RANK]=PI_gensys_singularC(C1in, C2in, C3in, C4in, C5in, F1, F2, F3, F4, F5, level)
-% [C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, M1, M2, UAVinv,FL_RANK]...
-%         =PI_gensys_singularC(C1in, C2in, C3in, C4in, C5in, F1, F2, F3, F4, F5, level)
+function [C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, M1, M2, UAVinv, FL_RANK, V01, V02]=PI_gensys_singularC(C1in, C2in, C3in, C4in, C5in, F1, F2, F3, F4, F5, V01, V02, level)
+% [C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, M1, M2, UAVinv,FL_RANK, V01, V02]...
+%         =PI_gensys_singularC(C1in, C2in, C3in, C4in, C5in, F1, F2, F3, F4, F5, V01, V02, level)
 % 
 % Recursive extension for PI_gensys function PCL general DSGE solver
 % devised by Prof. Joseph Pearlman 
@@ -60,6 +60,10 @@ F4 =[M*F4  M*F3*M2];
 F3 = M*F3*M1;
 F2 =[M*F2  M*F1*M2];
 F1 = M*F1*M1;
+
+V02=[V02 V01*M2];
+V01=V01*M1;
+
 warning('', '');
 singular=0;
 try
@@ -76,7 +80,7 @@ try
     if  singular==1 || strcmp('MATLAB:nearlySingularMatrix',LastWarningID)==1 || ...
                  strcmp('MATLAB:illConditionedMatrix',LastWarningID)==1 || ...
                  strcmp('MATLAB:singularMatrix',LastWarningID)==1
-        [C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, M1, M2, UAVinv, FL_RANK] = PI_gensys_singularC(C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, level);
+        [C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, M1, M2, UAVinv, FL_RANK, V01, V02] = PI_gensys_singularC(C1,C2,C3,C4, C5, F1, F2, F3, F4, F5, V01, V02, level);
     end
 catch
     [errmsg, errcode]=lasterr;
