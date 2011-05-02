@@ -125,8 +125,11 @@ else
 end
 
 % test if M_.params_has changed.
-updated_params_flag = max(abs(M_.params-params0))>1e-12;
-
+if options_.steadystate_flag
+    updated_params_flag = max(abs(M_.params-params0))>1e-12;
+else
+    updated_params_flag = 0;
+end
 
 % testing for problem.
 dr.ys = steady_state;
@@ -161,14 +164,14 @@ if ~isempty(find(isnan(steady_state)))
     return
 end
 
-if updated_params_flag && ~isreal(steady_state)
+if options_.steadystate_flag && updated_params_flag && ~isreal(M_.params)
     info(1) = 23;
     info(2) = sum(imag(M_.params).^2);
     dr.ys = steady_state;
     return
 end
 
-if updated_params_flag  && ~isempty(find(isnan(M_.params)))
+if options_.steadystate_flag && updated_params_flag  && ~isempty(find(isnan(M_.params)))
     info(1) = 24;
     info(2) = NaN;
     dr.ys = steady_state;
