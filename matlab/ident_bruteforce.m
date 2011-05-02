@@ -46,11 +46,21 @@ for ll = 1:n,
         tmp = find([1:k]~=ii);
         tmp2  = nchoosek(tmp,ll);
         cosnJ2=zeros(size(tmp2,1),1);
+        b=[];
         for jj = 1:size(tmp2,1)
-            cosnJ2(jj,1) = cosn([J(:,ii),J(:,tmp2(jj,:))]);
+            [cosnJ2(jj,1), b(:,jj)] = cosn([J(:,ii),J(:,tmp2(jj,:))]);
         end
         cosnJ(ii,ll) = max(cosnJ2(:,1));
-        pars{ii,ll} = tmp2(find(cosnJ2(:,1)==max(cosnJ2(:,1))),:);
+        if cosnJ(ii,ll)>1.e-8,
+            if ll>1 && ((cosnJ(ii,ll)-cosnJ(ii,ll-1))<1.e-8),
+                pars{ii,ll} = [pars{ii,ll-1} NaN];
+                cosnJ(ii,ll) = cosnJ(ii,ll-1);
+            else
+                pars{ii,ll} = tmp2(find(cosnJ2(:,1)==max(cosnJ2(:,1))),:);
+            end
+        else
+            pars{ii,ll} = NaN(1,ll);
+        end
         waitbar(ii/k,h)
     end
     close(h),
