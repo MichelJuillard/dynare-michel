@@ -134,9 +134,6 @@ end
 % testing for problem.
 dr.ys = steady_state;
 
-steady_state
-M_.params
-
 if check1
     if options_.steadystate_flag
         info(1)= 19;
