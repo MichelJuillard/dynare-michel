@@ -18,9 +18,11 @@ function [dr,info]=resol(steady_state_0,check_flag)
 %    info=19:        The steadystate file did not compute the steady state (inconsistent deep parameters).
 %    info=20:        can't find steady state info(2) contains sum of sqare residuals
 %    info=21:        steady state is complex valued scalars
-%                               info(2) contains sum of sqare of
+%                               info(2) contains sum of square of
 %                               imaginary part of steady state
 %    info=22:        steady state has NaNs
+%    info=23:        M_.params has been updated in the steady state file and has complex valued scalars.
+%    info=24:        M_.params has been updated in the steady state file and has some NaNs.
 %    info=30:        Variance can't be computed
 %
 % SPECIAL REQUIREMENTS
@@ -60,6 +62,8 @@ it_ = M_.maximum_lag + 1 ;
 if M_.exo_nbr == 0
     oo_.exo_steady_state = [] ;
 end
+
+params0 = M_.params;
 
 % check if steady_state_0 is steady state
 tempex = oo_.exo_simul;
@@ -120,8 +124,15 @@ else
     end
 end
 
-% testing for problem
+% test if M_.params_has changed.
+updated_params_flag = max(abs(M_.params-params0))>1e-12;
+
+
+% testing for problem.
 dr.ys = steady_state;
+
+steady_state
+M_.params
 
 if check1
     if options_.steadystate_flag
@@ -145,6 +156,20 @@ end
 
 if ~isempty(find(isnan(steady_state)))
     info(1) = 22;
+    info(2) = NaN;
+    dr.ys = steady_state;
+    return
+end
+
+if updated_params_flag && ~isreal(steady_state)
+    info(1) = 23;
+    info(2) = sum(imag(M_.params).^2);
+    dr.ys = steady_state;
+    return
+end
+
+if updated_params_flag  && ~isempty(find(isnan(M_.params)))
+    info(1) = 24;
     info(2) = NaN;
     dr.ys = steady_state;
     return
