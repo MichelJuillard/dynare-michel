@@ -79,7 +79,11 @@ if nvn
         M_.H = zeros(nvarobs,nvarobs);
     end
     for i=1:nvn
-        estim_params_.var_endo(i,1) = strmatch(deblank(M_.endo_names(estim_params_.var_endo(i,1),:)),deblank(options_.varobs),'exact');
+        obsi_ = strmatch(deblank(M_.endo_names(estim_params_.var_endo(i,1),:)),deblank(options_.varobs),'exact');
+        if isempty(obsi_)
+            error(['The variable ' deblank(M_.endo_names(estim_params_.var_endo(i,1),:)) ' has to be declared as observable since you assume a measurement error on it.'])
+        end
+        estim_params_.var_endo(i,1) = obsi_;
     end
     xparam1 = [xparam1; estim_params_.var_endo(:,2)];
     ub = [ub; estim_params_.var_endo(:,4)]; 
