@@ -5106,7 +5106,7 @@ If equal to @code{2}, triggers gsa Monte-Carlo sample (@i{i.e.} loads a sample c
 Uses the provided path to a specific user defined sample file. Default: @code{0}
 
 @item parameter_set = @code{prior_mode} | @code{prior_mean} | @code{posterior_mode} | @code{posterior_mean} | @code{posterior_median}
-Specify the parameter set to use. Default: @code{prior_mode}
+Specify the parameter set to use. Default: @code{prior_mean}
 
 @end table
 
