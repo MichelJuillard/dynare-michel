@@ -31,20 +31,22 @@ for i=1:n
     k = k+1;
 end
 
-for i=1:aux_lead_nbr+1;
-    if byte_code
-        [info, res] = bytecode('static','evaluate',ys1,...
-                               [exo_steady_state; ...
-                            exo_det_steady_state],params);
-    else
-        res = feval([fname '_static'],ys1,...
-                    [exo_steady_state; ...
-                     exo_det_steady_state],params);
-    end;
-    for j=1:n
-        if aux_vars(j).type == 0
-            el = aux_vars(j).endo_index;
-            ys1(el) = ys1(el)-res(el);
+if aux_lead_nbr
+    for i=1:aux_lead_nbr+1;
+        if byte_code
+            [info, res] = bytecode('static','evaluate',ys1,...
+                                   [exo_steady_state; ...
+                                exo_det_steady_state],params);
+        else
+            res = feval([fname '_static'],ys1,...
+                        [exo_steady_state; ...
+                         exo_det_steady_state],params);
+        end;
+        for j=1:n
+            if aux_vars(j).type == 0
+                el = aux_vars(j).endo_index;
+                ys1(el) = ys1(el)-res(el);
+            end
         end
     end
 end
