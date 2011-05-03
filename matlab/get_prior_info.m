@@ -1,4 +1,4 @@
-function get_prior_info(info)
+function get_prior_info(info,plt_flag)
 % Computes various prior statistics.
 %  
 % INPUTS
@@ -30,12 +30,25 @@ global options_ M_ estim_params_ oo_
 
 if ~nargin
     info = 0;
+    plt_flag = 0;
+end
+
+if nargin==1
+    plt_flag = 1;
+end
+
+changed_qz_criterium_flag  = 0;
+if isempty(options_.qz_criterium)
+    options_.qz_criterium = 1+1e-9;
+    changed_qz_criterium_flag  = 1;
 end
 
 M_.dname = M_.fname;
 
 [xparam1,estim_params_,bayestopt_,lb,ub,M_] = set_prior(estim_params_,M_,options_);
-plot_priors(bayestopt_,M_,options_);
+if plt_flag
+    plot_priors(bayestopt_,M_,options_);
+end
 
 PriorNames = { 'Beta' , 'Gamma' , 'Gaussian' , 'Inverted Gamma' , 'Uniform' , 'Inverted Gamma -- 2' };
 
@@ -155,6 +168,11 @@ end
 if info==3% Prior simulations (2nd order moments).
     oo_ = compute_moments_varendo('prior',options_,M_,oo_);
 end 
+
+if changed_qz_criterium_flag
+    options_.qz_criterium = [];
+end
+
 
 
 function format_string = build_format_string(bayestopt,i)
