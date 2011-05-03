@@ -86,7 +86,7 @@ if any(abs(t4(:))>1e-12)
    error('Test failure:: Problem with the seed of the random number algorithm')
 end
 
-if ~exist('OCTAVE_VERSION') && ~matlab_ver_less_than(7.7)
+if ~exist('OCTAVE_VERSION') && ~matlab_ver_less_than('7.7')
 
     set_dynare_seed('mlfg6331_64',0)
     stoch_simul(periods=1000,irf=0,nomoments);
