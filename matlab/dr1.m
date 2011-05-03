@@ -345,6 +345,10 @@ else  % use original Dynare solver
     % 2) In  global_initialization.m, if mjdgges.m is visible exist(...)==2, 
     % this means that the DLL isn't avaiable and use_qzdiv is set to 1
     
+    if isempty(options_.qz_criterium)
+        error('I cannot solve the model because qz_criterium option is empty!')
+    end
+
     [err,ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
     mexErrCheck('mjdgges', err);
 
