@@ -29,7 +29,7 @@ function dirlist = dynareParallelDir(filename,PRCDir,Parallel)
 
 dirlist=[];
 for indPC=1:length(Parallel),
-    if ~ispc, %isunix || (~matlab_ver_less_than('7.4') && ismac),
+    if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem), %isunix || (~matlab_ver_less_than('7.4') && ismac),
         if Parallel(indPC).Local==0,
             if exist('OCTAVE_VERSION') % Patch for peculiar behaviour of ssh-ls under Linux.
                 % It is necessary to capture the ls warning message.

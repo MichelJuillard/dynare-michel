@@ -34,14 +34,14 @@ function dynareParallelGetFiles(NamFileInput,PRCDir,Parallel)
 
 if ischar(NamFileInput),
     for j=1:size(NamFileInput,1),
-        NamFile(j,:)={['.',filesep],deblank(NamFileInput(j,:))};
+        NamFile(j,:)={'',deblank(NamFileInput(j,:))};
     end
     NamFileInput = NamFile;
 end
 
 for indPC=1:length(Parallel),
     if Parallel(indPC).Local==0,
-        if ~ispc, %isunix || (~matlab_ver_less_than('7.4') && ismac),
+        if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem), %isunix || (~matlab_ver_less_than('7.4') && ismac),
             for jfil=1:size(NamFileInput,1),
                 % if ~isempty(dynareParallelDir(NamFileInput{jfil,2},[PRCDir,filesep,NamFileInput{jfil,1}],Parallel(indPC))),
 

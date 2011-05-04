@@ -41,7 +41,7 @@ end
 
 for indPC=1:length(Parallel),
     if Parallel(indPC).Local==0,
-        if ~ispc, %isunix || (~matlab_ver_less_than('7.4') && ismac),
+        if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem), %isunix || (~matlab_ver_less_than('7.4') && ismac),
             for jfil=1:size(NamFileInput,1),
                 if ~isempty(NamFileInput{jfil,1})
                     [NonServeL NonServeR]=system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' mkdir -p ',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',NamFileInput{jfil,1}]);

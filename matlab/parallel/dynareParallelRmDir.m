@@ -37,7 +37,7 @@ end
 
 for indPC=1:length(Parallel),
     while (1)
-        if ~ispc
+        if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem)
             stat = system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' rm -fr ',Parallel(indPC).RemoteDirectory,'/',PRCDir]);
             break;
         else
