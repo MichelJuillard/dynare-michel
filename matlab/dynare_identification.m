@@ -45,6 +45,11 @@ else
 end
 
 fname_ = M_.fname;
+if ~isfield(M_,'dname'),
+    M_.dname = M_.fname;
+end
+options_ident = set_default_option(options_ident,'gsa_sample_file',0);
+options_ident = set_default_option(options_ident,'parameter_set','prior_mean');
 options_ident = set_default_option(options_ident,'load_ident_files',0);
 options_ident = set_default_option(options_ident,'useautocorr',0);
 options_ident = set_default_option(options_ident,'ar',3);
@@ -53,8 +58,33 @@ options_ident = set_default_option(options_ident,'prior_range',0);
 options_ident = set_default_option(options_ident,'periods',300);
 options_ident = set_default_option(options_ident,'replic',100);
 options_ident = set_default_option(options_ident,'advanced',0);
-if nargin==2,
+if options_ident.gsa_sample_file,
+    GSAFolder = checkpath('GSA');
+    if options_ident.gsa_sample_file==1,
+        load([GSAFolder,filesep,fname_,'_prior'],'lpmat','lpmat0','istable');
+    elseif options_ident.gsa_sample_file==2,
+        load([GSAFolder,filesep,fname_,'_mc'],'lpmat','lpmat0','istable');
+    else
+        load([GSAFolder,filesep,options_ident.gsa_sample_file],'lpmat','lpmat0','istable');
+    end
+    if isempty(istable),
+        istable=1:size(lpmat,1);
+    end
+    if ~isempty(lpmat0),
+        lpmatx=lpmat0(istable,:);
+    else
+        lpmatx=[];
+    end
+    pdraws0 = [lpmatx lpmat(istable,:)];
+    clear lpmat lpmat0 istable;
+else
+    pdraws0=[];
+end
+external_sample=0;
+if nargin==2 || ~isempty(pdraws0),
     options_ident.prior_mc=size(pdraws0,1);
+    options_ident.load_ident_files = 0;
+    external_sample=1;
 end
 if isempty(estim_params_),
     options_ident.prior_mc=1;
@@ -62,6 +92,7 @@ if isempty(estim_params_),
     prior_exist=0;
 else
     prior_exist=1;
+    parameters = options_ident.parameter_set;
 end
 
 % options_ident.load_ident_files=1;
@@ -145,7 +176,7 @@ max_dim_cova_group = options_ident.max_dim_cova_group;
 
 
 MaxNumberOfBytes=options_.MaxNumberOfBytes;
-
+store_options_ident = options_ident;
 disp(' ')
 disp(['==== Identification analysis ====' ]),
 disp(' ')
@@ -166,43 +197,48 @@ if iload <=0,
             pmode = xparam1';
             clear xparam1
         end
-        disp('Testing prior mean')
         params = set_prior(estim_params_,M_,options_)';
+        switch parameters
+            case 'posterior_mode'
+                disp('Testing posterior mode')
+                params(1,:) = get_posterior_parameters('mode');
+            case 'posterior_mean'
+                disp('Testing posterior mean')
+                params(1,:) = get_posterior_parameters('mean');
+            case 'posterior_median'
+                disp('Testing posterior median')
+                params(1,:) = get_posterior_parameters('median');
+            case 'prior_mode'
+                disp('Testing prior mode')
+                params(1,:) = bayestopt_.p5(:);
+            case 'prior_mean'
+                disp('Testing prior mean')
+                params(1,:) = bayestopt_.p1;
+            otherwise
+                disp('The option parameter_set has to be equal to:')
+                disp('                   ''posterior_mode'', ')
+                disp('                   ''posterior_mean'', ')
+                disp('                   ''posterior_median'', ')
+                disp('                   ''prior_mode'' or')
+                disp('                   ''prior_mean''.')
+                error;
+        end
     else
         params = [sqrt(diag(M_.Sigma_e))', M_.params'];
+        parameters = 'Current_params';
     end
-    [idehess_prior, idemoments_prior, idemodel_prior, idelre_prior, derivatives_info_prior] = ...
+    [idehess_point, idemoments_point, idemodel_point, idelre_point, derivatives_info_point] = ...
         identification_analysis(params,indx,indexo,options_ident,data_info, prior_exist, name_tex,1);
-    idehess_prior.params=params;
-%     siH = idemodel_prior.siH;
-%     siJ = idemoments_prior.siJ;
-%     siLRE = idelre_prior.siLRE;
+    idehess_point.params=params;
+%     siH = idemodel_point.siH;
+%     siJ = idemoments_point.siJ;
+%     siLRE = idelre_point.siLRE;
 %     normH = max(abs(siH)')';
 %     normJ = max(abs(siJ)')';
 %     normLRE = max(abs(siLRE)')';
-    save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_prior', 'idemoments_prior','idemodel_prior', 'idelre_prior')
-    disp_identification(params, idemodel_prior, idemoments_prior, name);
-    plot_identification(params,idemoments_prior,idehess_prior,idemodel_prior,idelre_prior,advanced,'Prior mean - ',name);
-
-
-    if exist('pmode','var'),
-         disp('Testing posterior mode')
-         [idehess_mode, idemoments_mode, idemodel_mode, idelre_mode, derivatives_info_mode] = ...
-             identification_analysis(pmode,indx,indexo,options_ident,data_info, prior_exist, name_tex,0);
-         idehess_mode.params=pmode;
-         save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_mode', 'idemoments_mode','idemodel_mode', 'idelre_mode','-append')
-         disp_identification(params, idemodel_mode, idemoments_mode, name);
-         plot_identification(params,idemoments_mode,idehess_mode,idemodel_mode,idelre_mode,advanced,'Posterior mode - ',name);
-    end
-    if exist('pmean','var'),
-         disp('Testing posterior mean')
-         [idehess_mean, idemoments_mean, idemodel_mean, idelre_mean, derivatives_info_mean] = ...
-             identification_analysis(pmean,indx,indexo,options_ident,data_info, prior_exist, name_tex,0);
-         idehess_mean.params=pmean;
-         save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_mean', 'idemoments_mean','idemodel_mean', 'idelre_mean','-append')
-         disp_identification(params, idemodel_mean, idemoments_mean, name);
-         plot_identification(params,idemoments_mean,idehess_mean,idemodel_mean,idelre_mean,advanced,'Posterior mean - ',name);
-    end
+    save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_point', 'idemoments_point','idemodel_point', 'idelre_point','store_options_ident')
+    disp_identification(params, idemodel_point, idemoments_point, name);
+    plot_identification(params,idemoments_point,idehess_point,idemodel_point,idelre_point,advanced,parameters,name);
 
     if SampleSize > 1,
         disp(' ')
@@ -220,7 +256,7 @@ if iload <=0,
     end
     while iteration < SampleSize,
         loop_indx = loop_indx+1;
-        if nargin==2,
+        if external_sample,
             params = pdraws0(iteration+1,:);
         else
             params = prior_draw();
@@ -330,14 +366,16 @@ if iload <=0,
         save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'pdraws', 'idemodel', 'idemoments', 'idelre', ... %'indJJ', 'indH', 'indLRE', ...
             'TAU', 'GAM', 'LRE','-append')
     else
-        siJnorm = idemoments_prior.siJnorm;
-        siHnorm = idemodel_prior.siHnorm;
-        siLREnorm = idelre_prior.siLREnorm;
+        siJnorm = idemoments_point.siJnorm;
+        siHnorm = idemodel_point.siHnorm;
+        siLREnorm = idelre_point.siLREnorm;
     end
     
 else
     load([IdentifDirectoryName '/' M_.fname '_identif'])
-    identFiles = dir([IdentifDirectoryName '/' M_.fname '_identif_*']);
+%     identFiles = dir([IdentifDirectoryName '/' M_.fname '_identif_*']);
+    parameters = store_options_ident.parameter_set;
+    options_ident.parameter_set = parameters;
     options_ident.prior_mc=size(pdraws,1);
     SampleSize = options_ident.prior_mc;
     options_.options_ident = options_ident;
@@ -358,28 +396,27 @@ if nargout>3 && iload,
 end
 
 if iload,
-    disp('Testing prior mean')
-    disp_identification(idehess_prior.params, idemodel_prior, idemoments_prior, name);
-    if advanced, disp('Press ENTER to display advanced diagnostics'), pause, end
-    plot_identification(idehess_prior.params,idemoments_prior,idehess_prior,idemodel_prior,idelre_prior,advanced,'Prior mean - ',name);
+    disp(['Testing ',parameters])
+    disp_identification(idehess_point.params, idemodel_point, idemoments_point, name);
+    plot_identification(idehess_point.params,idemoments_point,idehess_point,idemodel_point,idelre_point,advanced,parameters,name);
 end
 if SampleSize > 1,
-    fprintf('\n\n')
+    fprintf('\n')
     disp('Testing MC sample')
     disp_identification(pdraws, idemodel, idemoments, name);
-    plot_identification(pdraws,idemoments,idehess_prior,idemodel,idelre,advanced,'MC sample - ',name, IdentifDirectoryName, 1);
+    plot_identification(pdraws,idemoments,idehess_point,idemodel,idelre,advanced,'MC sample - ',name, IdentifDirectoryName, 1);
     if advanced,
         jcrit=find(idemoments.ino);
         for j=1:length(jcrit),
+            tittxt = ['Rank deficient draw n. ',int2str(j)];
+            fprintf('\n')
+            disp(['Testing ',tittxt, '. Press ENTER']), pause,
             if ~iload,
                 [idehess_(j), idemoments_(j), idemodel_(j), idelre_(j), derivatives_info_(j)] = ...
                     identification_analysis(pdraws(jcrit(j),:),indx,indexo,options_ident,data_info, prior_exist, name_tex,1);
             end
-            tittxt = ['Critical draw n. ',int2str(j),' - '];
-            fprintf('\n\n')
-            disp(['Testing ',tittxt, 'Press ENTER']), pause,
             plot_identification(pdraws(jcrit(j),:),idemoments_(j),idehess_(j),idemodel_(j),idelre_(j),1,tittxt,name);
-%             disp_identification(pdraws(jcrit(j),:), idemodel_(j), idemoments_(j), name, advanced);
+            disp_identification(pdraws(jcrit(j),:), idemodel_(j), idemoments_(j), name);
         end        
         if ~iload,
             save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_', 'idemoments_','idemodel_', 'idelre_', 'jcrit', '-append');
