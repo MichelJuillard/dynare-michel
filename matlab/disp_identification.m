@@ -83,7 +83,7 @@ disp(['  ']),
 if any(idemodel.ino),
     disp('WARNING !!!')
     if SampleSize>1,
-        disp(['The rank of H (model) is deficient for ', num2str(length(find(idemodel.ino))/SampleSize*100),'% of MC runs!'  ]),
+        disp(['The rank of H (model) is deficient for ', num2str(length(find(idemodel.ino))),' out of ',int2str(SampleSize),' MC runs!'  ]),
     else
         disp(['The rank of H (model) is deficient!'  ]),
     end
@@ -157,7 +157,7 @@ if any(idemoments.ino),
     disp(' ')
     disp('WARNING !!!')
     if SampleSize > 1,
-        disp(['The rank of J (moments) is deficient for ', num2str(length(find(idemoments.ino))/SampleSize*100),'% of MC runs!'  ]),
+        disp(['The rank of J (moments) is deficient for ', num2str(length(find(idemoments.ino))),' out of ',int2str(SampleSize),' MC runs!'  ]),
     else
         disp(['The rank of J (moments) is deficient!'  ]),
     end
