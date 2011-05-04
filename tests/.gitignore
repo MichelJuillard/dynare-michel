@@ -10,15 +10,17 @@
 *.dat
 *_simul
 
-/block_bytecode/ws
+/block_bytecode/wsOct
 /block_bytecode/ls2003_tmp.mod
 /partial_information/PItest3aHc0PCLsimModPiYrVarobsAll_PCL*
 /partial_information/PItest3aHc0PCLsimModPiYrVarobsCNR_PCL*
 
 !/fs2000_ssfile_aux.m
-!/printMakeCheckErrMsg.m
+!/printMakeCheckMatlabErrMsg.m
+!/printMakeCheckOctaveErrMsg.m
 !/ramst_initval_file_data.m
 !/run_test.m
+!/run_test_matlab.m
 !/run_test_octave.m
 !/test.m
 !/AIM/data_ca1.m
