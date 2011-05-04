@@ -1,5 +1,5 @@
-function [proba, dproba] = stab_map_1(lpmat, ibehaviour, inonbehaviour, aname, iplot, ipar, dirname)
-%function [proba, dproba] = stab_map_1(lpmat, ibehaviour, inonbehaviour, aname, iplot, ipar, dirname)
+function [proba, dproba] = stab_map_1(lpmat, ibehaviour, inonbehaviour, aname, iplot, ipar, dirname, dcrit)
+%function [proba, dproba] = stab_map_1(lpmat, ibehaviour, inonbehaviour, aname, iplot, ipar, dirname, dcrit)
 %
 % lpmat =  Monte Carlo matrix
 % ibehaviour = index of behavioural runs
@@ -10,6 +10,7 @@ function [proba, dproba] = stab_map_1(lpmat, ibehaviour, inonbehaviour, aname, i
 % ipar = index array of parameters to plot
 % dirname = (OPTIONAL) path of the directory where to save 
 %            (default: current directory)
+% dcrit = (OPTIONAL) critical value of the D-stat above which show the plots
 %
 % Plots: dotted lines for BEHAVIOURAL
 %        solid lines for NON BEHAVIOURAL
@@ -49,10 +50,12 @@ nshock = nshock + estim_params_.ncn;
 npar=size(lpmat,2);
 ishock= npar>estim_params_.np;
 
-if nargin<6 | isempty(ipar),
-  ipar=[1:npar];
+if nargin<6,
+  ipar=[];
 end
-nparplot=length(ipar);
+if nargin<8 || isempty(dcrit),
+  dcrit=0;
+end
 
 % Smirnov test for Blanchard; 
 for j=1:npar,
@@ -60,6 +63,10 @@ for j=1:npar,
   proba(j)=P;
   dproba(j)=KSSTAT;
 end
+if isempty(ipar),
+    ipar=find(dproba>dcrit);
+end
+nparplot=length(ipar);
 if iplot
   lpmat=lpmat(:,ipar);
   ftit=bayestopt_.name(ipar+nshock*(1-ishock));
