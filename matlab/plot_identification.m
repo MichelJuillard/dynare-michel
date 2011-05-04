@@ -56,7 +56,7 @@ siLREnorm = idelre.siLREnorm;
 if SampleSize == 1,
     siJ = idemoments.siJ;
     normJ = max(abs(siJ)')';
-    figure('Name',[tittxt, 'Identification using info from observables']),
+    figure('Name',[tittxt, ' - Identification using info from observables']),
     subplot(211)
     mmm = (idehess.ide_strength_J);
     [ss, is] = sort(mmm);
@@ -99,10 +99,11 @@ if SampleSize == 1,
     title('Sensitivity bars')
     
     if advanced
+        disp('Press ENTER to display advanced diagnostics'), pause,
         % identificaton patterns
         for  j=1:size(idemoments.cosnJ,2),
             pax=NaN(nparam,nparam);
-            fprintf('\n\n')
+            fprintf('\n')
             disp(['Collinearity patterns with ', int2str(j) ,' parameter(s)'])
             fprintf('%-15s [%-*s] %10s\n','Parameter',(15+1)*j,' Expl. params ','cosn')
             for i=1:nparam,
@@ -118,7 +119,7 @@ if SampleSize == 1,
                 end
                 fprintf('%-15s [%s] %10.3f\n',name{i},namx,idemoments.cosnJ(i,j))
             end
-            figure('name',[tittxt,'Collinearity patterns with ', int2str(j) ,' parameter(s)']),
+            figure('name',[tittxt,' - Collinearity patterns with ', int2str(j) ,' parameter(s)']),
             imagesc(pax,[0 1]);
             set(gca,'xticklabel','')
             set(gca,'yticklabel','')
@@ -147,18 +148,18 @@ if SampleSize == 1,
         if idehess.flag_score,
             [U,S,V]=svd(idehess.AHess,0);
             if nparam<5,
-                f1 = figure('name',[tittxt,'Identification patterns (Information matrix)']);
+                f1 = figure('name',[tittxt,' - Identification patterns (Information matrix)']);
             else
-                f1 = figure('name',[tittxt,'Identification patterns (Information matrix): SMALLEST SV']);
-                f2 = figure('name',[tittxt,'Identification patterns (Information matrix): HIGHEST SV']);
+                f1 = figure('name',[tittxt,' - Identification patterns (Information matrix): SMALLEST SV']);
+                f2 = figure('name',[tittxt,' - Identification patterns (Information matrix): HIGHEST SV']);
             end
         else
             [U,S,V]=svd(siJ./normJ(:,ones(nparam,1)),0);
             if nparam<5,
-                f1 = figure('name',[tittxt,'Identification patterns (moments)']);
+                f1 = figure('name',[tittxt,' - Identification patterns (moments)']);
             else
-                f1 = figure('name',[tittxt,'Identification patterns (moments): SMALLEST SV']);
-                f2 = figure('name',[tittxt,'Identification patterns (moments): HIGHEST SV']);
+                f1 = figure('name',[tittxt,' - Identification patterns (moments): SMALLEST SV']);
+                f2 = figure('name',[tittxt,' - Identification patterns (moments): HIGHEST SV']);
             end
         end
         for j=1:min(nparam,8),
@@ -226,6 +227,7 @@ else
     end
     title('MC mean of sensitivity measures')
     if advanced,
+        disp('Press ENTER to display advanced diagnostics'), pause,
         options_.nograph=1;
         figure('Name','MC Condition Number'),
         subplot(221)
