@@ -204,9 +204,9 @@ AC_ARG_ENABLE([matlab], AS_HELP_STRING([--disable-matlab], [disable compilation 
 if test "x$enable_matlab" = "xyes"; then
   AC_CONFIG_SUBDIRS([mex/build/matlab])
   AX_MATLAB
-  AM_CONDITIONAL([HAVE_CMD_LINE_MATLAB], [test "x$ax_enable_matlab" = "xyes" -a "x$have_windows" = "x"])
 fi
 AM_CONDITIONAL([ENABLE_MATLAB], [test "x$enable_matlab" = "xyes"])
+AM_CONDITIONAL([HAVE_CMD_LINE_MATLAB], [test "x$ax_enable_matlab" = "xyes" -a "x$have_windows" = "x"])
 
 AC_ARG_ENABLE([octave], AS_HELP_STRING([--disable-octave], [disable compilation of MEX files for Octave]), [], [enable_octave=yes])
 if test "x$enable_octave" = "xyes"; then
