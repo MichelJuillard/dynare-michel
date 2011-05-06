@@ -249,7 +249,17 @@ for i=1:length(k)
 end
 
 k = find(isnan(xparam1));
-xparam1(k) = bayestopt_.p1(k);
+if ~isempty(k)
+    xparam1(k) = bayestopt_.p1(k);
+end
+
+if options_.initialize_estimated_parameters_with_the_prior_mode
+    xparam1 = bayestopt_.p5;
+    k = find(isnan(xparam1));% Because the uniform density do not have a mode!
+    if ~isempty(k)
+        xparam1(k) = bayestopt_.p1(k);
+    end
+end 
 
 % I create subfolder M_.dname/prior if needed.
 CheckPath('prior');
