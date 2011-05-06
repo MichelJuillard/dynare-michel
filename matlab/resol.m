@@ -77,7 +77,7 @@ check1 = 0;
 % testing for steadystate file
 if (~options_.bytecode)
     fh = str2func([M_.fname '_static']);
-end;
+end
 
 if options_.steadystate_flag
     [steady_state,check1] = feval([M_.fname '_steadystate'],steady_state,...
