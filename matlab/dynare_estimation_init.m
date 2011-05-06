@@ -44,7 +44,6 @@ else
     if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
         options_.dsge_var = 1;
     end
-    
     var_list_ = check_list_of_variables(options_, M_, var_list_);
     options_.varlist = var_list_;
 end
@@ -53,6 +52,10 @@ options_.lgyidx2varobs = zeros(size(M_.endo_names,1),1);
 for i = 1:size(M_.endo_names,1)
     tmp = strmatch(deblank(M_.endo_names(i,:)),options_.varobs,'exact');
     if ~isempty(tmp)
+        if length(tmp)>1
+            disp(' ')
+            error(['Multiple declarations of ' deblank(M_.endo_names(i,:)) ' as an observed variable is not allowed!'])
+        end
         options_.lgyidx2varobs(i,1) = tmp;
     end
 end
