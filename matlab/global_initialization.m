@@ -231,6 +231,9 @@ M_.bvar = [];
 options_.homotopy_mode = 0;
 options_.homotopy_steps = 1;
 
+% Simplex routine (variation on Nelder Mead algorithm)
+options_.simplex = [];
+
 % prior analysis
 options_.prior_mc = 20000;
 options_.prior_analysis_endo_var_list = [];

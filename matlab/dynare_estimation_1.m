@@ -336,7 +336,13 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         else
             [xparam1,fval,exitflag] = fminsearch(fh,xparam1,optim_options,gend);
         end
-        
+      case 8
+        % Dynare implementation of the simplex algorithm
+        if ~options_.dsge_var
+            [xparam1,fval,exitflag] = simplex_optimization_routine(fh,xparam1,options_.simplex,gend,data,data_index,number_of_observations,no_more_missing_observations);
+        else
+            [xparam1,fval,exitflag] = simplex_optimization_routine(fh,xparam1,options_.simplex,gend);
+        end
       case 101
         myoptions=soptions;
         myoptions(2)=1e-6; %accuracy of argument

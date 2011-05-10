@@ -3693,10 +3693,14 @@ Uses a Monte-Carlo based optimization routine (see
 wiki} for more details)
 
 @item 7
-Uses @code{fminsearch}, a simplex based optimization routine
-(available under Octave if the
+Uses  @code{fminsearch} from matlab's optimization toolbox, a simplex
+based optimization routine (available under Octave if the
 @uref{http://octave.sourceforge.net/optim/,optim} package from
 Octave-Forge is installed)
+
+@item 8
+Uses Dynare implementation of the Nelder-Mead simplex optimization 
+routine (generally more efficient than matlab's implementation).
 
 @item @var{FUNCTION_NAME}
 It is also possible to give a @var{FUNCTION_NAME} to this option,
