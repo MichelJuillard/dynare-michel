@@ -134,7 +134,7 @@ switch Strategy
             save([fname,'_input.mat'],'fInputVar')
         end
         save([fname,'_input.mat'],'Parallel','-append')
-
+        
     case 1
         if exist('fGlobalVar'),
             save(['temp_input.mat'],'fInputVar','fGlobalVar')
@@ -199,7 +199,6 @@ end
 % End
 
 for j=1:totCPU,
-    
     
     if Strategy==1
         command1 = ' ';
@@ -284,16 +283,16 @@ for j=1:totCPU,
     end
     
     % DA SINTETIZZARE:
-
+    
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % The following 'switch - case' code is the core of this function!
     switch Strategy
         case 0
-
+            
             if Parallel(indPC).Local == 1,                                  % 0.1 Run on the local machine (localhost).
-
-                if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem), % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
-                    if strfind([Parallel(indPC).MatlabOctavePath], 'octave')
+                
+                if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem), % Hybrid computing Windows(Master)-> Unix(Slaves)!
+                    if strfind([Parallel(indPC).MatlabOctavePath], 'octave') % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
                         command1=['octave --eval "default_save_options(''-v7''); addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')" &'];
                     else
                         command1=[Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r "addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''')" &'];
@@ -310,12 +309,12 @@ for j=1:totCPU,
                     dynareParallelSendFiles([fname,'_input.mat'],PRCDir,Parallel(indPC));
                     dynareParallelSendFiles(NamFileInput,PRCDir,Parallel(indPC));
                 end
-
-                if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem), % Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
-                    if ispc, token='start /B '; 
+                
+                if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem), % Hybrid computing Windows(Master)-> Unix(Slaves)!
+                    if ispc, token='start /B ';
                     else token = '';
                     end
-                    if strfind([Parallel(indPC).MatlabOctavePath], 'octave'),
+                    if strfind([Parallel(indPC).MatlabOctavePath], 'octave'),% Hybrid computing Matlab(Master)->Octave(Slaves) and Vice Versa!
                         command1=[token, 'ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' "cd ',Parallel(indPC).RemoteDirectory,'/',PRCDir, '; octave --eval \"default_save_options(''-v7''); addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''');\" " &'];
                     else
                         command1=[token, 'ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' "cd ',Parallel(indPC).RemoteDirectory,'/',PRCDir, '; ',Parallel(indPC).MatlabOctavePath,' -nosplash -nodesktop -minimize ',compThread,' -r \"addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); fParallel(',int2str(offset+1),',',int2str(sum(nBlockPerCPU(1:j))),',',int2str(j),',',int2str(indPC),',''',fname,''');\" " &'];
@@ -342,11 +341,11 @@ for j=1:totCPU,
                     end
                 end
             end
-
-
+            
+            
         case 1
             if Parallel(indPC).Local == 1 && newInstance,                   % 1.1 Run on the local machine.
-                if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem),
+                if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem), % Hybrid computing Windows(Master)-> Unix(Slaves)!
                     % Hybrid computing Matlab(Master)-> Octave(Slaves) and Vice Versa!
                     if strfind([Parallel(indPC).MatlabOctavePath], 'octave')
                         command1=['octave --eval "default_save_options(''-v7''); addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),')" &'];
@@ -370,10 +369,10 @@ for j=1:totCPU,
                     dynareParallelSendFiles(['slaveJob',int2str(j),'.mat'],PRCDir,Parallel(indPC));
                     delete(['slaveJob',int2str(j),'.mat']);
                     dynareParallelSendFiles(['slaveParallel_input',int2str(j),'.mat'],PRCDir,Parallel(indPC))
-                    if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem),
-                    if ispc, token='start /B '; 
-                    else token = '';
-                    end
+                    if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem), % Hybrid computing Windows(Master)-> Unix(Slaves)!
+                        if ispc, token='start /B ';
+                        else token = '';
+                        end
                         % Hybrid computing Matlab(Master)-> Octave(Slaves) and Vice Versa!
                         if strfind([Parallel(indPC).MatlabOctavePath], 'octave')
                             command1=[token, 'ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' "cd ',Parallel(indPC).RemoteDirectory,'/',PRCDir '; octave --eval \"default_save_options(''-v7''); addpath(''',Parallel(indPC).DynarePath,'''), dynareroot = dynare_config(); slaveParallel(',int2str(j),',',int2str(indPC),');\" " &'];
@@ -402,6 +401,10 @@ for j=1:totCPU,
                         end
                     end
                 else
+                    % When the user user strategy is equal to 1, you must
+                    % do PRCDirSnapshot here to to avoid problems of
+                    % synchronization.
+                    
                     if isempty(PRCDirSnapshot{indPC}),
                         PRCDirSnapshot(indPC)=dynareParallelSnapshot(PRCDir,Parallel(indPC));
                     else
@@ -412,7 +415,7 @@ for j=1:totCPU,
                     
                 end
             end
-
+            
     end
     
     fprintf(fid,'%s\n',command1);
@@ -433,15 +436,15 @@ end
 % the slaves ...
 % If the compuation is 'Local' it is not necessary to do it ...
 
-if Strategy==0 || newInstance,
+if Strategy==0 || newInstance, % See above.
     PRCDirSnapshot=dynareParallelSnapshot(PRCDir,Parallel(1:totSlaves));
-
+    
     % Run the slaves.
     if ~ispc, %isunix || (~matlab_ver_less_than('7.4') && ismac),
         system('sh ConcurrentCommand1.bat &');
         pause(1)
     else
-
+        
         if exist('OCTAVE_VERSION')
             % Redirect the standard output to the file 'OctaveStandardOutputMessage.txt'!
             % This file is saved in the Model directory.
@@ -477,7 +480,7 @@ else
         'NumberTitle','off', ...
         'Renderer','Painters', ...
         'Resize','off');
-
+    
     vspace = 0.1;
     ncol = ceil(totCPU/10);
     hspace = 0.9/ncol;
@@ -515,14 +518,14 @@ delete(['comp_status_',fname,'*.mat']);
 % Caption for console mode computing ...
 
 if (options_.console_mode == 1) ||  exist('OCTAVE_VERSION')
-
+    
     if ~exist('OCTAVE_VERSION')
         if strcmp([Parallel(indPC).MatlabOctavePath], 'octave')
             RjInformation='Hybrid Computing Is Active: Remote jobs are computed by Octave!';
             fprintf([RjInformation,'\n\n']);
         end
     end
-
+    
     fnameTemp=fname;
     
     L=length(fnameTemp);
@@ -633,17 +636,17 @@ while (ForEver)
             end
         end
     end
-
+    
     % Check if the slave(s) has generated some new files remotely.
     % 1. The files .log and .txt are not copied.
     % 2. The comp_status_*.mat files are managed separately.
-
+    
     PRCDirSnapshot=dynareParallelGetNewFiles(PRCDir,Parallel(1:totSlaves),PRCDirSnapshot);
     
     if isempty(dynareParallelDir(['P_',fname,'_*End.txt'],PRCDir,Parallel(1:totSlaves)));
         HoTuttiGliOutput=0;
         for j=1:totCPU,
-
+            
             % Checking if the remote computation is finished and if we copied all the output here.
             if ~isempty(dir([fname,'_output_',int2str(j),'.mat']))
                 HoTuttiGliOutput=HoTuttiGliOutput+1;
@@ -715,22 +718,22 @@ switch Strategy
             if Parallel(indPC).Local == 0
                 dynareParallelRmDir(PRCDir,Parallel(indPC));
             end
-
+            
             if isempty(dir('dynareParallelLogFiles'))
                 [A B C]=rmdir('dynareParallelLogFiles');
                 mkdir('dynareParallelLogFiles');
             end
-
+            
             copyfile('*.log','dynareParallelLogFiles');
             delete([fname,'*.log']);
-
+            
             mydelete(['*_core*_input*.mat']);
             %             if Parallel(indPC).Local == 1
             %                 delete(['slaveParallel_input*.mat']);
             %             end
-
+            
         end
-
+        
         delete ConcurrentCommand1.bat
     case 1
         delete(['temp_input.mat'])
