@@ -4,12 +4,14 @@ function [PRCDirSnapshot]=dynareParallelGetNewFiles(PRCDir,Parallel,PRCDirSnapsh
 %
 %
 % INPUTS
-%  o NamFileInput   []   ...
-%  o PRCDir         []   ...
-%  o Parallel       []   ...
+%
+%  o PRCDir           []   ...
+%  o Parallel         []   ...
+%  o PRCDirSnapshot   []   ...
+%
 %
 %  OUTPUTS
-%  None
+%  o PRCDirSnapshot   []   ...
 %
 %
 %
@@ -56,7 +58,7 @@ for indPC=1:length(Parallel),
                 fileaddress={sT(1:SlashNumberAndPosition(end)),sT(SlashNumberAndPosition(end)+1:end)};
                 dynareParallelGetFiles(fileaddress,PRCDir,Parallel(indPC));
 
-                display('NuovoFilecopiato -->');
+                display('New file copied in local -->');
                 display(fileaddress{2});
                 display('<--');
 
