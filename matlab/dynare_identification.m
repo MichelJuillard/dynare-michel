@@ -290,6 +290,8 @@ if iload <=0,
             idemoments.Mco = zeros(SampleSize,nparam);
             idemodel.Mco = zeros(SampleSize,nparam);
             idelre.Mco = zeros(SampleSize,np);
+            idemoments.S = zeros(SampleSize,min(8,nparam));
+            idemoments.V = zeros(SampleSize,nparam,min(8,nparam));
             delete([IdentifDirectoryName '/' M_.fname '_identif_*.mat'])
         end
         if info(1)==0,
@@ -316,6 +318,8 @@ if iload <=0,
             idemoments.Mco(iteration,:)=ideJ.Mco;
             idemodel.Mco(iteration,:)=ideH.Mco;
             idelre.Mco(iteration,:)=ideGP.Mco;
+            idemoments.S(iteration,:)=ideJ.S;
+            idemoments.V(iteration,:,:)=ideJ.V;
             stoLRE(:,:,run_index) = ideGP.siLRE;
             stoH(:,:,run_index) = ideH.siH;
             stoJJ(:,:,run_index) = ideJ.siJ;
@@ -407,19 +411,48 @@ if SampleSize > 1,
     plot_identification(pdraws,idemoments,idehess_point,idemodel,idelre,advanced,'MC sample - ',name, IdentifDirectoryName, 1);
     if advanced,
         jcrit=find(idemoments.ino);
-        for j=1:length(jcrit),
-            tittxt = ['Rank deficient draw n. ',int2str(j)];
-            fprintf('\n')
-            disp(['Testing ',tittxt, '. Press ENTER']), pause,
-            if ~iload,
-                [idehess_(j), idemoments_(j), idemodel_(j), idelre_(j), derivatives_info_(j)] = ...
-                    identification_analysis(pdraws(jcrit(j),:),indx,indexo,options_ident,data_info, prior_exist, name_tex,1);
+        if length(jcrit)<SampleSize,
+            if isempty(jcrit),
+                [~,jmax]=max(idemoments.cond);
+                fprintf('\n')
+                tittxt = 'Draw with HIGHEST condition number';
+                fprintf('\n')
+                disp(['Testing ',tittxt, '. Press ENTER']), pause,
+                if ~iload,
+                    [idehess_max, idemoments_max, idemodel_max, idelre_max, derivatives_info_max] = ...
+                        identification_analysis(pdraws(jmax,:),indx,indexo,options_ident,data_info, prior_exist, name_tex,1);
+                    save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_max', 'idemoments_max','idemodel_max', 'idelre_max', 'jmax', '-append');
+                end
+                disp_identification(pdraws(jmax,:), idemodel_max, idemoments_max, name);
+                plot_identification(pdraws(jmax,:),idemoments_max,idehess_max,idemodel_max,idelre_max,1,tittxt,name);
+                [~,jmin]=min(idemoments.cond);
+                fprintf('\n')
+                tittxt = 'Draw with SMALLEST condition number';
+                fprintf('\n')
+                disp(['Testing ',tittxt, '. Press ENTER']), pause,
+                if ~iload,
+                    [idehess_min, idemoments_min, idemodel_min, idelre_min, derivatives_info_min] = ...
+                        identification_analysis(pdraws(jmin,:),indx,indexo,options_ident,data_info, prior_exist, name_tex,1);
+                    save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_min', 'idemoments_min','idemodel_min', 'idelre_min', 'jmin', '-append');
+                end
+                disp_identification(pdraws(jmin,:), idemodel_min, idemoments_min, name);
+                plot_identification(pdraws(jmin,:),idemoments_min,idehess_min,idemodel_min,idelre_min,1,tittxt,name);
+            else
+                for j=1:length(jcrit),
+                    tittxt = ['Rank deficient draw n. ',int2str(j)];
+                    fprintf('\n')
+                    disp(['Testing ',tittxt, '. Press ENTER']), pause,
+                    if ~iload,
+                        [idehess_(j), idemoments_(j), idemodel_(j), idelre_(j), derivatives_info_(j)] = ...
+                            identification_analysis(pdraws(jcrit(j),:),indx,indexo,options_ident,data_info, prior_exist, name_tex,1);
+                    end
+                    disp_identification(pdraws(jcrit(j),:), idemodel_(j), idemoments_(j), name);
+                    plot_identification(pdraws(jcrit(j),:),idemoments_(j),idehess_(j),idemodel_(j),idelre_(j),1,tittxt,name);
+                end
+                if ~iload,
+                    save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_', 'idemoments_','idemodel_', 'idelre_', 'jcrit', '-append');
+                end
             end
-            plot_identification(pdraws(jcrit(j),:),idemoments_(j),idehess_(j),idemodel_(j),idelre_(j),1,tittxt,name);
-            disp_identification(pdraws(jcrit(j),:), idemodel_(j), idemoments_(j), name);
-        end        
-        if ~iload,
-            save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_', 'idemoments_','idemodel_', 'idelre_', 'jcrit', '-append');
         end
     end
 end
