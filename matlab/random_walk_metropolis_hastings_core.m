@@ -97,7 +97,7 @@ if whoiam
     Parallel=myinputs.Parallel;
     % initialize persistent variables in priordens()
     priordens(xparam1,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7, ...
-              bayestopt_.p3,bayestopt_.p4,1);
+        bayestopt_.p3,bayestopt_.p4,1);
 end
 
 % (re)Set the penalty
@@ -132,13 +132,20 @@ end
 
 jloop=0;
 
+JSUM = 0;
 for b = fblck:nblck,
     jloop=jloop+1;
-    randn('state',record.Seeds(b).Normal);
-    rand('state',record.Seeds(b).Unifor);
+    try  % Trap in the case matlab slave is called from an octave master.
+        randn('state',record.Seeds(b).Normal);
+        rand('state',record.Seeds(b).Unifor);
+    catch
+        JSUM  = JSUM + sum(100*clock);
+        randn('state',JSUM);
+        rand('state',JSUM);
+    end
     if (options_.load_mh_file~=0) && (fline(b)>1) && OpenOldFile(b)
         load(['./' MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) ...
-              '_blck' int2str(b) '.mat'])
+            '_blck' int2str(b) '.mat'])
         x2 = [x2;zeros(InitSizeArray(b)-fline(b)+1,npar)];
         logpo2 = [logpo2;zeros(InitSizeArray(b)-fline(b)+1,1)];
         OpenOldFile(b) = 0;
@@ -160,7 +167,7 @@ for b = fblck:nblck,
             hh = waitbar(0,['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...']);
             set(hh,'Name','Metropolis-Hastings');
         end
-
+        
     end
     if whoiam
         if options_.parallel(ThisMatlab).Local,
@@ -212,8 +219,13 @@ for b = fblck:nblck,
             end
             if mod(j,50)==0 && whoiam
                 %             keyboard;
-                waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) '), ' sprintf('accept. %3.f%%', 100 * isux/j)];
-                fMessageStatus((b-fblck)/(nblck-fblck+1)+prtfrc/(nblck-fblck+1),whoiam,waitbarString, '', options_.parallel(ThisMatlab));
+                if (strcmp([options_.parallel(ThisMatlab).MatlabOctavePath], 'octave'))
+                    waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) '), ' sprintf('accept. %3.f%%',100 *prtfrc)];
+                    fMessageStatus(prtfrc,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab));
+                else
+                    waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) '), ' sprintf('accept. %3.f%%', 100 * isux/j)];
+                    fMessageStatus((b-fblck)/(nblck-fblck+1)+prtfrc/(nblck-fblck+1),whoiam,waitbarString, '', options_.parallel(ThisMatlab));
+                end
             end
         else
             if mod(j, 3)==0 && ~whoiam
@@ -224,7 +236,7 @@ for b = fblck:nblck,
                 fMessageStatus(prtfrc,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab));
             end
         end
-
+        
         if (irun == InitSizeArray(b)) || (j == nruns(b)) % Now I save the simulations
             save([MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'],'x2','logpo2');
             fidlog = fopen([MhDirectoryName '/metropolis.log'],'a');
