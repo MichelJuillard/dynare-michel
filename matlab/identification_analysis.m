@@ -115,6 +115,15 @@ if info(1)==0,
         identification_checks(H(indH,:)./normH(:,ones(nparam,1)), 0);
     [ide_lre.cond, ide_lre.ind0, ide_lre.indno, ide_lre.ino, ide_lre.Mco, ide_lre.Pco, ide_lre.jweak, ide_lre.jweak_pair] = ...
         identification_checks(gp(indLRE,:)./normLRE(:,ones(size(gp,2),1)), 0);
+    [U, S, V]=svd(JJ(indJJ,:)./normJ(:,ones(nparam,1)),0);
+    S=diag(S);
+    if nparam>8
+        ide_moments.S = S([1:4, end-3:end]);
+        ide_moments.V = V(:,[1:4, end-3:end]);
+    else
+        ide_moments.S = S;
+        ide_moments.V = V;
+    end
     
     indok = find(max(ide_moments.indno,[],1)==0);
     ide_strength_J=NaN(1,nparam);
