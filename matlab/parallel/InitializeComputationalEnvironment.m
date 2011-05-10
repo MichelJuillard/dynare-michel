@@ -71,4 +71,34 @@ end
 delete(['P_slave_*End.txt']);
 masterParallel(options_.parallel,[],[],[],[],[],[],options_.parallel_info,1);
 
+
+%  We sort in the user CPUWeight and most important the Parallel vector
+%  in accord with this operation.
+
+lP=length(options_.parallel);
+for j=1:lP
+    CPUWeight(j)=str2num(options_.parallel(j).NodeWeight);
+end
+
+NewPosition=ones(1,lP)*(-1);
+CPUWeightTemp=ones(1,lP)*(-1);
+
+CPUWeightTemp=CPUWeight;
+
+for i=1:lP
+    [NoNServes mP]=max(CPUWeightTemp);
+    NewPosition(i)=mP;
+    CPUWeightTemp(mP)=-1;
+end
+
+CPUWeight=sort(CPUWeight,'descend');
+
+
+for i=1:lP
+    ParallelTemp(i)=options_.parallel(NewPosition(i));
+end
+
+Parallel=[];
+options_.parallel=ParallelTemp;
+
 return
