@@ -99,6 +99,7 @@ if SampleSize == 1,
     title('Sensitivity bars')
     
     if advanced
+        disp(' ')
         disp('Press ENTER to display advanced diagnostics'), pause,
         % identificaton patterns
         for  j=1:size(idemoments.cosnJ,2),
@@ -227,6 +228,7 @@ else
     end
     title('MC mean of sensitivity measures')
     if advanced,
+        disp(' ')
         disp('Press ENTER to display advanced diagnostics'), pause,
         options_.nograph=1;
         figure('Name','MC Condition Number'),
@@ -251,14 +253,67 @@ else
         [~,is]=sort(idemoments.cond);
         [proba, dproba] = stab_map_1(params, is(1:ncut), is(ncut+1:end), 'MC_HighestCondNumberMoments', 1, [], IdentifDirectoryName, 0.1);
 %         [proba, dproba] = stab_map_1(idemoments.Mco', is(1:ncut), is(ncut+1:end), 'HighestCondNumberMoments_vs_Mco', 1, [], IdentifDirectoryName);
-        for j=1:nparam,
-%             ibeh=find(idemoments.Mco(j,:)<0.9);
-%             inonbeh=find(idemoments.Mco(j,:)>=0.9);
-%             if ~isempty(ibeh) && ~isempty(inonbeh)
-%                 [proba, dproba] = stab_map_1(params, ibeh, inonbeh, ['HighestMultiCollinearity_',name{j}], 1, [], IdentifDirectoryName);
-%             end
-            [~,is]=sort(idemoments.Mco(:,j));
-            [proba, dproba] = stab_map_1(params, is(1:ncut), is(ncut+1:end), ['MC_HighestMultiCollinearity_',name{j}], 1, [], IdentifDirectoryName, 0.15);
+%         for j=1:nparam,
+% %             ibeh=find(idemoments.Mco(j,:)<0.9);
+% %             inonbeh=find(idemoments.Mco(j,:)>=0.9);
+% %             if ~isempty(ibeh) && ~isempty(inonbeh)
+% %                 [proba, dproba] = stab_map_1(params, ibeh, inonbeh, ['HighestMultiCollinearity_',name{j}], 1, [], IdentifDirectoryName);
+% %             end
+%             [~,is]=sort(idemoments.Mco(:,j));
+%             [proba, dproba] = stab_map_1(params, is(1:ncut), is(ncut+1:end), ['MC_HighestMultiCollinearity_',name{j}], 1, [], IdentifDirectoryName, 0.15);
+%         end
+
+        if nparam<5,
+            f1 = figure('name',[tittxt,' - MC Identification patterns (moments)']);
+        else
+            f1 = figure('name',[tittxt,' - MC Identification patterns (moments): SMALLEST SV']);
+            f2 = figure('name',[tittxt,' - MC Identification patterns (moments): HIGHEST SV']);
+        end
+        nplots=min(nparam,8);
+        if nplots>4,
+            nsubplo=ceil(nplots/2);
+        else
+            nsubplo=nplots;
+        end
+        for j=1:nplots,
+            if (nparam>4 && j<=ceil(nplots/2)) || nparam<5,
+                figure(f1),
+                jj=j;
+                VVV=squeeze(abs(idemoments.V(:,:,end-j+1)));
+                SSS = idemoments.S(:,end-j+1);
+            else
+                figure(f2),
+                jj=j-ceil(nplots/2);
+                VVV=squeeze(abs(idemoments.V(:,:,jj)));
+                SSS = idemoments.S(:,jj);
+            end
+            subplot(nsubplo,1,jj),
+            for i=1:nparam,
+                [post_mean, post_median(:,i), post_var, hpd_interval(i,:), post_deciles] = posterior_moments(VVV(:,i),0,0.9);
+            end
+            bar(post_median)
+            hold on, plot(hpd_interval,'--*r'),
+            Stit=mean(SSS);
+
+            set(gca,'xticklabel','')
+            if j==4 || j==nparam || j==8,
+                for ip=1:nparam,
+                    text(ip,-0.02,name{ip},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+                end
+            end
+            title(['MEAN Singular value ',num2str(Stit)])
+        end
+        if save_figure,
+            figure(f1);
+            saveas(f1,[IdentifDirectoryName,'/',M_.fname,'_MC_dent_pattern_1'])
+            eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_1']);
+            eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_1']);
+            if nparam>4,
+                figure(f2),
+                saveas(f2,[IdentifDirectoryName,'/',M_.fname,'_MC_ident_pattern_2'])
+                eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_2']);
+                eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_2']);
+            end
         end
     end
 end
