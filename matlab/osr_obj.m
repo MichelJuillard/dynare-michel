@@ -45,6 +45,9 @@ switch info(1)
   case 5
     loss = 1e8;
     return
+  case 6
+    loss = 1e8*min(1e3,info(2));
+    return
   case 20
     loss = 1e8*min(1e3,info(2));
     return
