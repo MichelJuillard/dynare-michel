@@ -1,4 +1,3 @@
-// same as test_upper_cholesky.mod, but with reordered variables. Results must be the same.
 var R Pie Y;
 
 model;
@@ -17,5 +16,7 @@ markov_switching(chain=1,number_of_states=2,duration=2.5);
 
 svar(variances, chain=1);
 
-ms_sbvar(datafile = data,freq=4,initial_year=1959,final_year=2005,nlags=4,draws_nbr_modified_harmonic_mean=10000);
-
+ms_estimation(datafile=data,freq=4,initial_year=1959,final_year=2005,nlags=4);
+ms_simulation(mh_replic=1000);
+ms_compute_mdd;
+ms_compute_probabilities;

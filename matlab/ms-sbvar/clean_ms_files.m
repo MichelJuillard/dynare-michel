@@ -1,4 +1,4 @@
-function clean_ms_files(mod_name)
+function clean_ms_files(output_file_tag)
 % function clean_ms_files()
 % removes MS intermediary files
 %
@@ -28,29 +28,26 @@ function clean_ms_files(mod_name)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    delete_if_exist(['./draws_' mod_name '.dat'])
-    delete_if_exist(['est_aux_' mod_name '.dat'])
-    delete_if_exist(['est_csminwel_' mod_name '.dat'])
-    delete_if_exist(['est_final_' mod_name '.dat'])
-    delete_if_exist(['est_flat_header_' mod_name '.dat'])
-    delete_if_exist(['est_flat_' mod_name '.dat'])
-    delete_if_exist(['est_intermediate_' mod_name '.dat'])
-    delete_if_exist(['header_' mod_name '.dat'])
-    delete_if_exist(['init_' mod_name '.dat'])
-    delete_if_exist('markov_file.dat')
-    delete_if_exist(['matlab_' mod_name '.prn'])
-    delete_if_exist(['mhm_draws_' mod_name '.dat'])
-    delete_if_exist(['mhm_input_' mod_name '.dat'])
-    delete_if_exist(['mhm_intermediate_draws_' mod_name '.dat'])
-    delete_if_exist(['mhm_intermediate_' mod_name '.dat'])
-    delete_if_exist(['mhm_regime_counts_' mod_name '.dat'])
-    delete_if_exist(['probabilities_' mod_name '.dat'])
-    delete_if_exist(['truncatedpower_md_posterior_' mod_name '.dat'])
-    delete_if_exist(['truncatedpower_md_proposal_' mod_name '.dat'])
-    delete_if_exist(['truncatedpower_md_' mod_name '.dat'])
+delete_if_exist(['est_aux_' output_file_tag '.out']);
+delete_if_exist(['est_csminwel_' output_file_tag '.out']);
+delete_if_exist(['est_final_' output_file_tag '.out']);
+delete_if_exist(['est_flat_header_' output_file_tag '.out']);
+delete_if_exist(['est_flat_' output_file_tag '.out']);
+delete_if_exist(['est_free_' output_file_tag '.out']);
+delete_if_exist(['est_intermediate_' output_file_tag '.out']);
+delete_if_exist('g1.mat');
+delete_if_exist('H.dat');
+delete_if_exist(['init_' output_file_tag '.dat']);
+delete_if_exist(['matlab_' output_file_tag '.prn']);
+delete_if_exist(['mdd_t3_' output_file_tag '.out']);
+delete_if_exist(['proposal_t3_' output_file_tag '.out']);
+delete_if_exist(['simulation_info_' output_file_tag '.out']);
+delete_if_exist(['simulation_' output_file_tag '.out']);
+delete_if_exist([output_file_tag '_markov_file.dat']);
+end
 
 function delete_if_exist(fname)
-    if exist(fname) == 2
-        delete(fname)
-    end
-    
+if exist(fname,'file') == 2
+    delete(fname);
+end
+end

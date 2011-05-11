@@ -1,4 +1,4 @@
-function ms_write_markov_file(fname,M,options)
+function ms_write_markov_file(fname,options)
 
     n_chains = length(options.ms.ms_chain);
     nvars = size(options.varobs,1);
