@@ -101,7 +101,8 @@ dr.M4 = M4;
 
 nvar = length(varlist);
 nspred = dr.nspred;
-if nvar > 0
+
+if nvar > 0 && options_.noprint == 0
     res_table = zeros(2*(nm_nbr+M_.exo_nbr),nvar);
     headers = 'Variables';
     for i=1:length(varlist)
@@ -116,8 +117,8 @@ if nvar > 0
     
     my_title='ELIMINATION OF THE MULTIPLIERS';
     lab = nstates(nil,:);
-    labels = '';
-    for i = 1:size(lab,1)
+    labels = strcat(deblank(lab(i,:)),'(-1)');
+    for i = 2:size(lab,1)
         labels = char(labels,strcat(deblank(lab(i,:)),'(-1)'));
     end
     for i = 1:size(lab,1)
