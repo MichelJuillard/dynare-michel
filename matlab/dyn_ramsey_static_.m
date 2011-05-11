@@ -40,7 +40,6 @@ orig_eq_nbr = M_.orig_eq_nbr;
 inst_nbr = orig_endo_nbr - orig_eq_nbr;
 % indices of Lagrange multipliers
 i_mult = [orig_endo_nbr+(1:orig_eq_nbr)]';
-x = [x(1:orig_endo_nbr); zeros(orig_eq_nbr,1); x(orig_endo_nbr+1:end)];
 fname = M.fname;
 max_lead = M.maximum_lead;
 max_lag = M.maximum_lag;
@@ -77,6 +76,9 @@ if options_.steadystate_flag
             error([M.fname '_steadystate.m doesn''t match the model']);
         end
     end
+    
+else
+    x = [x(1:orig_endo_nbr); zeros(orig_eq_nbr,1); x(orig_endo_nbr+1:end)];
 end
 
 % value and Jacobian of objective function
