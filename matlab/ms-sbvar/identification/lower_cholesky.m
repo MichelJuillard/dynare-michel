@@ -1,4 +1,4 @@
-function [Ui,Vi,n0,np,ixmC0Pres] = upper_cholesky(nvar,nexo,options_ms)
+function [Ui,Vi,n0,np,ixmC0Pres] = lower_cholesky(nvar,nexo,options_ms)
 
 lags = options_ms.nlags;
 indxC0Pres = options_ms.cross_restrictions;
