@@ -451,9 +451,11 @@ if options_.mode_check == 1 && ~options_.mh_posterior_mode_estimation && options
     end
 end
 
-if ~options_.mh_posterior_mode_estimation && options_.cova_compute
-    invhess = inv(hh);
-    stdh = sqrt(diag(invhess));
+if ~options_.mh_posterior_mode_estimation
+    if options_.cova_compute
+        invhess = inv(hh);
+        stdh = sqrt(diag(invhess));
+    end
 else
     variances = bayestopt_.p2.*bayestopt_.p2;
     idInf = isinf(variances);
