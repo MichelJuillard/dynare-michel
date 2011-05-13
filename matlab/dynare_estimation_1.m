@@ -415,8 +415,6 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
             else
                 hh = reshape(hessian('DsgeVarLikelihood',xparam1,options_.gstep,gend),nx,nx);
             end
-        else
-            nn = repmat(NaN,length(xparam1),length(xparam1))
         end
     end
     parameter_names = bayestopt_.name;
@@ -428,10 +426,10 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
 end
 
 if options_.cova_compute == 0
-    hh = repmat(NaN,length(xparam1),length(xparam1));
+    hh = NaN(length(xparam1),length(xparam1));
 end
 
-if ~options_.mh_posterior_mode_estimation
+if ~options_.mh_posterior_mode_estimation && options_.cova_compute
     try
         chol(hh);
     catch
@@ -445,11 +443,11 @@ if ~options_.mh_posterior_mode_estimation
     end
 end
 
-if options_.mode_check == 1 && ~options_.mh_posterior_mode_estimation
+if options_.mode_check == 1 && ~options_.mh_posterior_mode_estimation && options_.cova_compute
     mode_check(xparam1,0,hh,gend,data,lb,ub,data_index,number_of_observations,no_more_missing_observations);
 end
 
-if ~options_.mh_posterior_mode_estimation
+if ~options_.mh_posterior_mode_estimation && options_.cova_compute
     invhess = inv(hh);
     stdh = sqrt(diag(invhess));
 else
@@ -463,6 +461,9 @@ else
     xparam1 = transpose(xparam1);
 end
 
+if ~options_.cova_compute
+    stdh = NaN(length(xparam1),1);
+end
 
 if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
     disp(' ')
