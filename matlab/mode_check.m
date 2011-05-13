@@ -38,20 +38,25 @@ function mode_check(x,fval,hessian,gend,data,lb,ub,data_index,number_of_observat
 global bayestopt_ M_ options_
 
 TeX = options_.TeX;
-[ s_min, k ] = min(diag(hessian)) ;
+if ~isempty(hessian);
+    [ s_min, k ] = min(diag(hessian));
+end
 if options_.dsge_var
     fval = DsgeVarLikelihood(x,gend);
 else
     fval = DsgeLikelihood(x,gend,data,data_index,number_of_observations,no_more_missing_observations);    
 end    
-bayestopt_.penalty=fval;  
-disp(' ')
-disp('MODE CHECK')
-disp(' ')
-disp(sprintf('Fval obtained by the minimization routine: %f', fval))
-disp(' ')
-if s_min<eps
-    disp(sprintf('Most negative variance %f for parameter %d (%s = %f)', s_min, k , bayestopt_.name{k}, x(k)))
+bayestopt_.penalty=fval;
+
+if ~isempty(hessian);
+    disp(' ')
+    disp('MODE CHECK')
+    disp(' ')
+    disp(sprintf('Fval obtained by the minimization routine: %f', fval))
+    disp(' ')
+    if s_min<eps
+        disp(sprintf('Most negative variance %f for parameter %d (%s = %f)', s_min, k , bayestopt_.name{k}, x(k)))
+    end
 end
 
 [nbplt,nr,nc,lr,lc,nstar] = pltorg(length(x));
