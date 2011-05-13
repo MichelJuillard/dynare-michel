@@ -569,20 +569,22 @@ if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
         end
     end
     %% Laplace approximation to the marginal log density:
-    estim_params_nbr = size(xparam1,1);
-    scale_factor = -sum(log10(diag(invhess)));
-    log_det_invhess = -estim_params_nbr*log(scale_factor)+log(det(scale_factor*invhess));
-    if ~options_.dsge_var
-        md_Laplace = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess ...
-            - DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
-    else
-        md_Laplace = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess ...
-            - DsgeVarLikelihood(xparam1,gend);
+    if options_.cova_compute
+        estim_params_nbr = size(xparam1,1);
+        scale_factor = -sum(log10(diag(invhess)));
+        log_det_invhess = -estim_params_nbr*log(scale_factor)+log(det(scale_factor*invhess));
+        if ~options_.dsge_var
+            md_Laplace = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess ...
+                - DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+        else
+            md_Laplace = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess ...
+                - DsgeVarLikelihood(xparam1,gend);
+        end
+        oo_.MarginalDensity.LaplaceApproximation = md_Laplace;    
+        disp(' ')
+        disp(sprintf('Log data density [Laplace approximation] is %f.',md_Laplace))
+        disp(' ')
     end
-    oo_.MarginalDensity.LaplaceApproximation = md_Laplace;    
-    disp(' ')
-    disp(sprintf('Log data density [Laplace approximation] is %f.',md_Laplace))
-    disp(' ')
 elseif ~any(bayestopt_.pshape > 0) && options_.mh_posterior_mode_estimation
     disp(' ')
     disp('RESULTS FROM MAXIMUM LIKELIHOOD')
@@ -868,11 +870,15 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
         if options_.load_mh_file && options_.use_mh_covariance_matrix
             invhess = compute_mh_covariance_matrix;
         end
-        if options_.dsge_var
-            feval(options_.posterior_sampling_method,'DsgeVarLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,gend);
+        if options_.cova_compute
+            if options_.dsge_var
+                feval(options_.posterior_sampling_method,'DsgeVarLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,gend);
+            else
+                feval(options_.posterior_sampling_method,'DsgeLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,gend,data,...
+                      data_index,number_of_observations,no_more_missing_observations);
+            end
         else
-            feval(options_.posterior_sampling_method,'DsgeLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,gend,data,...
-                  data_index,number_of_observations,no_more_missing_observations);
+            error('I Cannot start the MCMC because the hessian of the posterior kernel at the mode was not computed.')
         end
     end
     if options_.mh_posterior_mode_estimation
