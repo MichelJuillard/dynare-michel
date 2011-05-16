@@ -376,10 +376,12 @@ set_options(SbvarOption *options, int nrhs, const mxArray *prhs[])
                 }
               else
                 {
-                  printf("The you must pass an integer after specifying the 'horizon' option");
+                  printf("You must pass an integer after specifying the 'horizon' option");
                   return 1;
                 }
             }
+          else if (strstr(input_buf, "filtered"))
+            options->filtered_probabilities = true;
           else if (strstr(input_buf, "error_bands"))
             {
               mxFree(options->percentiles);
