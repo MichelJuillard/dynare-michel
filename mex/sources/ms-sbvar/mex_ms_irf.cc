@@ -52,8 +52,8 @@ mexFunction(int nlhs, mxArray *plhs[],
   // Check the left hand and right hand side arguments to make sure they conform
   if (mxIsChar(prhs[0]) != 1)
     DYN_MEX_FUNC_ERR_MSG_TXT("First argument has to be a string to the init_filename.");
-  if (nlhs != 1)
-    DYN_MEX_FUNC_ERR_MSG_TXT("You must specify one output argument");
+  if (nlhs != 2)
+    DYN_MEX_FUNC_ERR_MSG_TXT("You must specify two output arguments.");
 
   // copy the string data from prhs[0] into a C string input_ buf.    */
   input_buf = mxArrayToString(prhs[0]);
@@ -78,30 +78,30 @@ mexFunction(int nlhs, mxArray *plhs[],
       {
         // regimes x percentile x horizon x (nvar*nvar)
         mwSize dims[4] = {nstates, options->num_percentiles, options->horizon, (nvars*nvars)};
-        plhs[0] = mxCreateNumericArray(4, dims, mxDOUBLE_CLASS, mxREAL);
-        out_buf = mxGetPr(plhs[0]);
+        plhs[1] = mxCreateNumericArray(4, dims, mxDOUBLE_CLASS, mxREAL);
+        out_buf = mxGetPr(plhs[1]);
       }
     else
       {
         // regimes x horizon x (nvar*nvar)
         mwSize dims[3] = {nstates, options->horizon, (nvars*nvars)};
-        plhs[0] = mxCreateNumericArray(3, dims, mxDOUBLE_CLASS, mxREAL);
-        out_buf = mxGetPr(plhs[0]);
+        plhs[1] = mxCreateNumericArray(3, dims, mxDOUBLE_CLASS, mxREAL);
+        out_buf = mxGetPr(plhs[1]);
       }
   else
   if (options->num_percentiles > 1)
     {
       // percentile x horizon x (nvar*nvar)
       mwSize dims[3] = {options->num_percentiles, options->horizon, (nvars*nvars)};
-      plhs[0] = mxCreateNumericArray(3, dims, mxDOUBLE_CLASS, mxREAL);
-      out_buf = mxGetPr(plhs[0]);
+      plhs[1] = mxCreateNumericArray(3, dims, mxDOUBLE_CLASS, mxREAL);
+      out_buf = mxGetPr(plhs[1]);
     }
   else
     {
       // horizon x (nvar*nvar)
       mwSize dims[2] = {options->horizon, (nvars*nvars)};
-      plhs[0] = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
-      out_buf = mxGetPr(plhs[0]);
+      plhs[1] = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
+      out_buf = mxGetPr(plhs[1]);
     }
 
   // Use filter probabilities?
@@ -188,7 +188,7 @@ mexFunction(int nlhs, mxArray *plhs[],
 
   mxFree(model);
   mxFree(p);
-
+  plhs[0] = mxCreateDoubleScalar(0);
 }
 
 #endif

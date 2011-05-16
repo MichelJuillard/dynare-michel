@@ -53,8 +53,8 @@ mexFunction(int nlhs, mxArray *plhs[],
   if (!mxIsDouble(prhs[1]))
     DYN_MEX_FUNC_ERR_MSG_TXT("Second argument is a vector of free parameters");
 
-  if (nlhs < 3)
-    DYN_MEX_FUNC_ERR_MSG_TXT("You must specify at least three output arguments [A0,Aplus,Zeta]");
+  if (nlhs < 4)
+    DYN_MEX_FUNC_ERR_MSG_TXT("You must specify at least four output arguments [err,A0,Aplus,Zeta]");
 
   // copy the string data from prhs[0] into a C string input_ buf.    */
   input_buf = mxArrayToString(prhs[0]);
@@ -86,17 +86,17 @@ mexFunction(int nlhs, mxArray *plhs[],
 
   // Ao (nstates x nvars x nvars)
   mwSize dims[3] = {nstates, nvars, nvars};
-  plhs[0] = mxCreateNumericArray(3, dims, mxDOUBLE_CLASS, mxREAL);
-  a0 = mxGetPr(plhs[0]);
+  plhs[1] = mxCreateNumericArray(3, dims, mxDOUBLE_CLASS, mxREAL);
+  a0 = mxGetPr(plhs[1]);
 
   // Zeta (nstates x nvars x nvars)
-  plhs[2] = mxCreateNumericArray(3, dims, mxDOUBLE_CLASS, mxREAL);
-  zeta = mxGetPr(plhs[2]);
+  plhs[3] = mxCreateNumericArray(3, dims, mxDOUBLE_CLASS, mxREAL);
+  zeta = mxGetPr(plhs[3]);
 
   // Aplus (nstates x (nlags*nvars +nconstant) x nvars)
   dims[1] = npre;
-  plhs[1] = mxCreateNumericArray(3, dims, mxDOUBLE_CLASS, mxREAL);
-  aplus = mxGetPr(plhs[1]);
+  plhs[2] = mxCreateNumericArray(3, dims, mxDOUBLE_CLASS, mxREAL);
+  aplus = mxGetPr(plhs[2]);
 
   // Grand Transition Matrix
   Q = mxCreateDoubleMatrix(nstates, nstates, mxREAL);
@@ -112,11 +112,11 @@ mexFunction(int nlhs, mxArray *plhs[],
     }
 
   // if they have passed 4 arguments then pass back Q
-  if (nlhs > 3)
-    plhs[3] = Q;
+  if (nlhs > 4)
+    plhs[4] = Q;
 
   mxFree(model);
-
+  plhs[0] = mxCreateDoubleScalar(0);
 }
 
 #endif
