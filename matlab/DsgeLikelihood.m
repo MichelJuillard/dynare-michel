@@ -133,11 +133,11 @@ M_.H = H;
 %------------------------------------------------------------------------------
 [T,R,SteadyState,info] = dynare_resolve('restrict');
 
-if info(1) == 1 || info(1) == 2 || info(1) == 5
+if info(1) == 1 || info(1) == 2 || info(1) == 5 || info(1) == 22 || info(1) == 24
     fval = bayestopt_.penalty+1;
     cost_flag = 0;
     return
-elseif info(1) == 3 || info(1) == 4 || info(1)==6 ||info(1) == 19 || info(1) == 20 || info(1) == 21
+elseif info(1) == 3 || info(1) == 4 || info(1)==6 ||info(1) == 19 || info(1) == 20 || info(1) == 21  || info(1) == 23
     fval = bayestopt_.penalty+info(2);
     cost_flag = 0;
     return
