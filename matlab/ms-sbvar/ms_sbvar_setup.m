@@ -63,8 +63,8 @@ if options_.ms.upper_cholesky
     end
 elseif options_.ms.lower_cholesky
     options_.ms.restriction_fname = 'lower_cholesky';
-%elseif ~isempty(options_.ms.Qi) && ~isempty(options_.ms.Ri)
-%    options_.ms.restriction_fname = 'exclusions';
+elseif ~isempty(options_.ms.Qi) && ~isempty(options_.ms.Ri)
+    options_.ms.restriction_fname = 'exclusions';
 else
     options_.ms.restriction_fname = 0;
 end
