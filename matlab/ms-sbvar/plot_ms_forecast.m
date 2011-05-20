@@ -1,8 +1,9 @@
-function plot_ms_forecast(forecast,title_)
+function plot_ms_forecast(M_,forecast,title_)
 % function [] = plot_ms_forecast(forecast,names)
 % plots the forecast from the output from a ms-sbvar
 %
 % INPUTS
+%   M_
 %   forecast should be in the form (percentile x horizon x nvar ), if banded otherwise
 %     ( horizon x nvar )
 %
@@ -26,9 +27,6 @@ function plot_ms_forecast(forecast,title_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
   
-  
-  global M_ oo_ options_
-
   nc = 2;
   nr = 2;
   nvars = M_.endo_nbr;

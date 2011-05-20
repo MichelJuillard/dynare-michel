@@ -1,12 +1,15 @@
-function ms_simulation(options_)
+function [options_, oo_]=ms_simulation(M_, options_, oo_)
 %function ms_simulation()
-% calls ms sbvar simulation mex file
+% MS Sbvar Simulation
 %
 % INPUTS
+%    M_
 %    options_
+%    oo_
 %
 % OUTPUTS
-%    none
+%    options_
+%    oo_
 %
 % SPECIAL REQUIREMENTS
 %    none
@@ -28,22 +31,22 @@ function ms_simulation(options_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-perform_simulation = create_simulation_commandline(options_);
-[err] = ms_sbvar_command_line(perform_simulation);
+disp('Simulation');
+options_ = set_ms_estimation_flags_for_other_mex(options_);
+oo_ = set_oo_w_estimation_output(options_, oo_);
+
+% setup command line options
+opt = ['-simulate -seed ' num2str(options_.DynareRandomStreams.seed)];
+opt = [opt ' -ft ' options_.ms.output_file_tag];
+opt = [opt ' -ndraws ' num2str(options_.ms.mh_replic)];
+opt = [opt ' -burnin ' num2str(options_.ms.drop)];
+opt = [opt ' -thin ' num2str(options_.ms.thinning_factor)];
+opt = [opt ' -mh ' num2str(options_.ms.adaptive_mh_draws)];
+
+% simulation
+[err] = ms_sbvar_command_line(opt);
 mexErrCheck('ms_sbvar_command_line simulate',err);
 
-end
-
-function opt=create_simulation_commandline(options_)
-
-opt = '-simulate';
-opt = [opt set_flag_if_exists(options_.ms, 'output_file_tag')];
-opt = [opt set_flag_if_exists(options_.ms, 'mh_replic')];
-opt = [opt set_flag_if_exists(options_.ms, 'drop')];
-opt = [opt set_flag_if_exists(options_.ms, 'thinning_factor')];
-opt = [opt set_flag_if_exists(options_.ms, 'adaptive_mh_draws')];
-
-if options_.DynareRandomStreams.seed
-    opt = [' -seed' num2str(options_.DynareRandomStreams.seed)];
-end
+options_.ms.simulation_file_tag = options_.ms.output_file_tag;
+options_ = initialize_ms_sbvar_options(M_, options_);
 end

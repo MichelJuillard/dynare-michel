@@ -1,8 +1,9 @@
-function plot_ms_irf(irf,names,title_)
+function plot_ms_irf(M_,irf,names,title_)
 % function [] = plot_ms_irf(irf,names)
 % plots the impulse responses from the output from a ms-sbvar
 %
 % INPUTS
+%   M_
 %   irf should be in the form (percentile x horizon x (nvar x nvar)), if banded otherwise
 %     ( horizon x (nvar x nvar) )
 %
@@ -30,8 +31,6 @@ function plot_ms_irf(irf,names,title_)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-  
-  global M_ oo_ options_
 
   nc = 2;
   nr = 2;

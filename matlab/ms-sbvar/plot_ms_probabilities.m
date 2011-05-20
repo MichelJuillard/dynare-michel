@@ -1,4 +1,4 @@
-function plot_ms_probabilities(computed_probabilities)
+function plot_ms_probabilities(options_, computed_probabilities)
 % function plot_ms_probabilities(computed_probabilities)
 % Plots the regime probablities for each graph
 %
@@ -27,8 +27,6 @@ function plot_ms_probabilities(computed_probabilities)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-  global M_ oo_ options_
   
   [T,num_grand_regimes] = size(computed_probabilities);
   num_chains = length(options_.ms.ms_chain);

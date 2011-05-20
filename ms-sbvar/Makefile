@@ -76,7 +76,7 @@ EXEC_OBJS = $(OBJS) dw_switch.o dw_switchio.o dw_dirichlet_restrictions.o dw_met
 # EXEC_OBJS := $(EXEC_OBJS)  tzmatlab.o csminwel.o
 
 # PROJECT FILES
-EXEC_OBJS := $(EXEC_OBJS) VARbase.o VARio.o dw_sbvar_command_line.o sbvar_estimate.o sbvar_simulate.o \
+EXEC_OBJS := $(EXEC_OBJS) VARbase.o VARio.o dw_sbvar_command_line.o sbvar_estimate.o sbvar_simulate.o sbvar_variance_decomposition.o \
                           sbvar_probabilities.o sbvar_mdd.o dw_csminwel.o sbvar_impulse_responses.o sbvar_forecast.o
 
 # OUTPUT

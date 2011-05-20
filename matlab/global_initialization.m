@@ -255,55 +255,11 @@ options_.initial_date.subperiod = 0;
 % discretionary policy
 options_.discretionary_policy = 0;
 
-% SWZ SBVAR
-% prepare ms sbvar
-options_.ms.coefficients_prior_hyperparameters = [1.0 1.0 0.1 1.2 1.0 1.0];
-options_.ms.freq = 1;
-options_.ms.initial_subperiod = 1;
-options_.ms.final_subperiod=4;
-options_.ms.nlags = 1;
-options_.ms.cross_restrictions = 0;
-options_.ms.contemp_reduced_form = 0;
-options_.ms.bayesian_prior = 1;
-options_.ms.alpha = 1.0;
-options_.ms.beta = 1.0;
-options_.ms.gsig2_lmd = 50^2;
-options_.ms.gsig2_lmdm = 50^2;
-options_.ms.lower_cholesky = 0;
-options_.ms.upper_cholesky = 0;
-% all mex functions
-options_.ms.output_file_tag = M_.fname;
-%simulate
-options_.ms.mh_replic = 10000; % default differs from Dan's code
-% mdd
-options_.ms.mdd_proposal_type = [3 0.1 0.9];
-% irf
-options_.ms.bayesian_irf = 0;
-options_.ms.thinning_factor = 1;
-options_.ms.shock_draws = 10000;
-options_.ms.shocks_per_parameter = 10;
-options_.ms.percentiles = [.16 .5 .84];
-options_.ms.mode_compute = 1;
-options_.ms.mode_file = 0;
-options_.ms.load_mh_file = 0;
-options_.ms.filtered_probabilities = 0;
-options_.ms.real_time_smoothed_probabilities = 0;
-options_.ms.irf_shocks_per_parameter = options_.ms.shocks_per_parameter;
-options_.ms.irf_shock_draws = options_.ms.shock_draws;
-options_.ms.irf_thinning_factor = 1;
-options_.ms.irf_filtered = 0;
-options_.ms.forecast_shocks_per_parameter = options_.ms.shocks_per_parameter;
-options_.ms.forecast_shock_draws = options_.ms.shock_draws;
-options_.ms.forecast_thinning_factor = 1;
-options_.ms.forecast_data_obs = 0;
-options_.ms.vd_shocks_per_parameter = options_.ms.shocks_per_parameter;
-options_.ms.vd_shock_draws = options_.ms.shock_draws;
-options_.ms.vd_thinning_factor = 1;
-options_.ms.vd_filtered = 0;
-
-
 % Shock decomposition
 options_.parameter_set = [];
+
+% MS Sbvar options
+options_ = initialize_ms_sbvar_options(M_, options_);
 
 % initialize persistent variables in priordens()
 priordens([],[],[],[],[],[],1);

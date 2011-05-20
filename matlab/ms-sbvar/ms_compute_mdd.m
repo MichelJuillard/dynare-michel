@@ -1,12 +1,15 @@
-function oo_=ms_compute_mdd(options_,oo_)
+function [options_, oo_]=ms_compute_mdd(M_, options_, oo_)
 %function ms_compute_mdd()
-% calls ms sbvar mdd mex file
+% Compute marginal data density
 %
 % INPUTS
+%    M_
 %    options_
+%    oo_
 %
 % OUTPUTS
-%    none
+%    options_
+%    oo_
 %
 % SPECIAL REQUIREMENTS
 %    none
@@ -28,8 +31,28 @@ function oo_=ms_compute_mdd(options_,oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-compute_mdd = create_mdd_commandline(options_);
-[err] = ms_sbvar_command_line(compute_mdd);
+disp('Marginal Data Density');
+options_ = set_ms_estimation_flags_for_other_mex(options_);
+options_ = set_ms_simulation_flags_for_other_mex(options_);
+oo_ = set_oo_w_estimation_output(options_, oo_);
+
+% setup command line options
+opt = ['-mdd -seed ' num2str(options_.DynareRandomStreams.seed)];
+opt = [opt ' -ft ' options_.ms.output_file_tag];
+opt = [opt ' -d ' num2str(options_.ms.mdd_proposal_draws)];
+if options_.ms.mdd_use_mean_center
+    opt = [opt ' -use_mean'];
+end
+if size(options_.ms.mdd_proposal_type, 2) ~= 3
+    error('ERROR: mdd_proposal_type takes exactly 3 arguments');
+else
+    opt = [opt ' -pt ' num2str(options_.ms.mdd_proposal_type(1))];
+    opt = [opt ' -l '  num2str(options_.ms.mdd_proposal_type(2))];
+    opt = [opt ' -h '  num2str(options_.ms.mdd_proposal_type(3))];
+end
+
+% compute mdd
+[err] = ms_sbvar_command_line(opt);
 mexErrCheck('ms_sbvar_command_line mdd',err);
 
 % grab the muller/bridge log mdd from the output file
@@ -54,25 +77,5 @@ if exist(mdd_filename,'file')
     oo_.ms.mueller_log_mdd = muller_mdd;
     oo_.ms.bridged_log_mdd = bridge_mdd;
 end
-end
-
-function opt=create_mdd_commandline(options_)
-
-opt = '-mdd';
-opt = [opt set_flag_if_exists(options_.ms, 'output_file_tag')];
-opt = [opt set_flag_if_exists(options_.ms, 'load_mh_file ')];
-opt = [opt set_flag_if_exists(options_.ms, 'mdd_proposal_draws ')];
-opt = [opt set_flag_if_exists(options_.ms, 'mdd_use_mean_center')];
-
-if size(options_.ms.mdd_proposal_type, 2) ~= 3
-    error('ERROR: mdd_proposal_type takes exactly 3 arguments');
-else
-    opt = [opt ' -pt ' num2str(options_.ms.mdd_proposal_type(1))];
-    opt = [opt ' -l '  num2str(options_.ms.mdd_proposal_type(2))];
-    opt = [opt ' -h '  num2str(options_.ms.mdd_proposal_type(3))];
-end
-
-if options_.DynareRandomStreams.seed
-    opt = [' -seed' num2str(options_.DynareRandomStreams.seed)];
-end
+options_ = initialize_ms_sbvar_options(M_, options_);
 end

@@ -1,7 +1,8 @@
-function plot_ms_variance_decomposition(vd, title_, varargin)
+function plot_ms_variance_decomposition(M_, vd, title_, varargin)
 % plot the variance decomposition of shocks
 %
 % Inputs
+%       M_
 %		shocks: matrix of the individual shocks Tx(KxK)with J=number of shocks
 %
 % Optional Inputs
@@ -31,8 +32,7 @@ function plot_ms_variance_decomposition(vd, title_, varargin)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-	
-	global M_ oo_ options_
+
   nvars = M_.endo_nbr;
   endo_names = M_.endo_names;
 

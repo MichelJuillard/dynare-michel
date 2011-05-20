@@ -35,14 +35,24 @@ delete_if_exist(['est_flat_header_' output_file_tag '.out']);
 delete_if_exist(['est_flat_' output_file_tag '.out']);
 delete_if_exist(['est_free_' output_file_tag '.out']);
 delete_if_exist(['est_intermediate_' output_file_tag '.out']);
+delete_if_exist(['filtered_' output_file_tag '.out']);
 delete_if_exist('g1.mat');
 delete_if_exist('H.dat');
 delete_if_exist(['init_' output_file_tag '.dat']);
 delete_if_exist(['matlab_' output_file_tag '.prn']);
+delete_if_exist(['mdd_t1_' output_file_tag '.out']);
+delete_if_exist(['proposal_t1_' output_file_tag '.out']);
+delete_if_exist(['mdd_t2_' output_file_tag '.out']);
+delete_if_exist(['proposal_t2_' output_file_tag '.out']);
 delete_if_exist(['mdd_t3_' output_file_tag '.out']);
 delete_if_exist(['proposal_t3_' output_file_tag '.out']);
+delete_if_exist(['mdd_t4_' output_file_tag '.out']);
+delete_if_exist(['proposal_t4_' output_file_tag '.out']);
+delete_if_exist(['mdd_t5_' output_file_tag '.out']);
+delete_if_exist(['proposal_t5_' output_file_tag '.out']);
 delete_if_exist(['simulation_info_' output_file_tag '.out']);
 delete_if_exist(['simulation_' output_file_tag '.out']);
+delete_if_exist(['smoothed_' output_file_tag '.out']);
 delete_if_exist([output_file_tag '_markov_file.dat']);
 end
 

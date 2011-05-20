@@ -1,12 +1,15 @@
-function ms_compute_probabilities(options_)
+function [options_, oo_]=ms_compute_probabilities(M_, options_, oo_)
 %function ms_simulation()
-% calls ms sbvar probabilities mex file
+% Compute posterior mode regime probabilities
 %
 % INPUTS
+%    M_
 %    options_
+%    oo_
 %
 % OUTPUTS
-%    none
+%    options_
+%    oo_
 %
 % SPECIAL REQUIREMENTS
 %    none
@@ -28,20 +31,34 @@ function ms_compute_probabilities(options_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-compute_probabilities = create_probabilities_commandline(options_);
-[err] = ms_sbvar_command_line(compute_probabilities);
+disp('Compute Marginal Data Density');
+options_ = set_ms_estimation_flags_for_other_mex(options_);
+options_ = set_ms_simulation_flags_for_other_mex(options_);
+oo_ = set_oo_w_estimation_output(options_, oo_);
+
+% setup command line options
+opt = ['-probabilities -seed ' num2str(options_.DynareRandomStreams.seed)];
+opt = [opt ' -ft ' options_.ms.output_file_tag];
+
+if options_.ms.filtered_probabilities
+    opt = [opt ' -filtered' ];
+    prob_out_file = ['filtered_' options_.ms.output_file_tag '.out'];
+elseif options_.ms.real_time_smoothed_probabilities
+    opt = [opt ' -real_time_smoothed' ];
+    prob_out_file = 0;
+else
+    opt = [opt ' -smoothed' ];
+    prob_out_file = ['smoothed_' options_.ms.output_file_tag '.out'];
+end
+
+% compute probabilities
+[err] = ms_sbvar_command_line(opt);
 mexErrCheck('ms_sbvar_command_line probabilities',err);
 
+% now we want to plot the probabilities for each chain
+if ischar(prob_out_file)
+    computed_probabilities = load(prob_out_file);
+    plot_ms_probabilities(options_, computed_probabilities);
 end
-
-function opt=create_probabilities_commandline(options_)
-
-opt = '-simulate';
-opt = [opt set_flag_if_exists(options_.ms, 'output_file_tag')];
-opt = [opt set_flag_if_exists(options_.ms, 'filtered_probabilities')];
-opt = [opt set_flag_if_exists(options_.ms, 'output_file_tag')];
-
-if options_.DynareRandomStreams.seed
-    opt = [' -seed' num2str(options_.DynareRandomStreams.seed)];
-end
+options_ = initialize_ms_sbvar_options(M_, options_);
 end

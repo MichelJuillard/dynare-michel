@@ -1,12 +1,15 @@
-function ms_estimation(options_)
+function [options_, oo_]=ms_estimation(M_, options_, oo_)
 %function ms_estimation()
-% calls ms sbvar estimation mex file
+% MS Sbvar Estimation
 %
 % INPUTS
+%    M_
 %    options_
+%    oo_
 %
 % OUTPUTS
-%    none
+%    options_
+%    oo_
 %
 % SPECIAL REQUIREMENTS
 %    none
@@ -28,45 +31,38 @@ function ms_estimation(options_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+disp('Estimation');
+
 % cleanup old files
 clean_ms_files(options_.ms.output_file_tag);
 
 % general setup
 ms_sbvar_setup(options_);
 
+% setup command line options
+opt = ['-estimate -seed ' num2str(options_.DynareRandomStreams.seed)];
+opt = [opt ' -ft ' options_.ms.output_file_tag];
+opt = [opt ' -cb ' num2str(options_.ms.convergence_starting_value)];
+opt = [opt ' -ce ' num2str(options_.ms.convergence_ending_value)];
+opt = [opt ' -ci ' num2str(options_.ms.convergence_increment_value)];
+opt = [opt ' -ib ' num2str(options_.ms.max_iterations_starting_value)];
+opt = [opt ' -ii ' num2str(options_.ms.max_iterations_increment_value)];
+opt = [opt ' -mb ' num2str(options_.ms.max_block_iterations)];
+opt = [opt ' -repeat_max ' num2str(options_.ms.max_repeated_optimization_runs)];
+opt = [opt ' -repeat_tol_obj ' num2str(options_.ms.function_convergence_criterion)];
+opt = [opt ' -repeat_tol_parms ' num2str(options_.ms.parameter_convergence_criterion)];
+opt = [opt ' -random ' num2str(options_.ms.number_of_large_perturbations)];
+opt = [opt ' -random_small ' num2str(options_.ms.number_of_small_perturbations)];
+opt = [opt ' -random_small_ndraws ' num2str(options_.ms.number_of_posterior_draws_after_perturbation)];
+opt = [opt ' -random_max ' num2str(options_.ms.max_number_of_stages)];
+opt = [opt ' -random_tol_obj ' num2str(options_.ms.random_function_convergence_criterion)];
+opt = [opt ' -random_tol_parms ' num2str(options_.ms.random_parameter_convergence_criterion)];
+
 % estimation
-perform_estimation = create_estimation_commandline(options_);
-[err] = ms_sbvar_command_line(perform_estimation);
-mexErrCheck('ms_sbvar_command_line estimation',err);
+[err] = ms_sbvar_command_line(opt);
+mexErrCheck('ms_sbvar_command_line estimation', err);
 
-end
-
-function opt=create_estimation_commandline(options_)
-
-opt = '-estimate';
-opt = [opt set_flag_if_exists(options_.ms, 'output_file_tag')];
-opt = [opt set_flag_if_exists(options_.ms, 'convergence_starting_value')];
-opt = [opt set_flag_if_exists(options_.ms, 'convergence_ending_value')];
-opt = [opt set_flag_if_exists(options_.ms, 'convergence_increment_value')];
-opt = [opt set_flag_if_exists(options_.ms, 'max_iterations_starting_value')];
-opt = [opt set_flag_if_exists(options_.ms, 'max_iterations_increment_value')];
-opt = [opt set_flag_if_exists(options_.ms, 'max_block_iterations')];
-opt = [opt set_flag_if_exists(options_.ms, 'max_repeated_optimization_runs')];
-opt = [opt set_flag_if_exists(options_.ms, 'function_convergence_criterion')];
-opt = [opt set_flag_if_exists(options_.ms, 'parameter_convergence_criterion')];
-opt = [opt set_flag_if_exists(options_.ms, 'number_of_large_perturbations')];
-opt = [opt set_flag_if_exists(options_.ms, 'number_of_small_perturbations')];
-opt = [opt set_flag_if_exists(options_.ms, 'number_of_posterior_draws_after_perturbation')];
-opt = [opt set_flag_if_exists(options_.ms, 'max_number_of_stages')];
-opt = [opt set_flag_if_exists(options_.ms, 'random_function_convergence_criterion')];
-opt = [opt set_flag_if_exists(options_.ms, 'random_parameter_convergence_criterion')];
-
-if options_.DynareRandomStreams.seed
-    opt = [' -seed' num2str(options_.DynareRandomStreams.seed)];
-end
-
-% if ischar(options_.ms.mode_file) > 0 && exist(options_.ms.mode_file) > 0
-%     opt = [opt ' -fp ' options_.ms.mode_file];
-% end
-
+options_ = set_ms_estimation_flags_for_other_mex(options_);
+oo_ = set_oo_w_estimation_output(options_, oo_);
+options_ = initialize_ms_sbvar_options(M_, options_);
 end
