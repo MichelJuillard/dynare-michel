@@ -103,21 +103,21 @@ extern "C" {
       qz_criterium = (double) mxGetScalar(mxFldp);
 
     mxFldp = mxGetField(M_, 0, "params");
-    double *dparams = (double *) mxGetData(mxFldp);
+    double *dparams = mxGetPr(mxFldp);
     int npar = (int) mxGetM(mxFldp);
     Vector modParams(dparams, npar);
     if (!modParams.isFinite())
       DYN_MEX_FUNC_ERR_MSG_TXT("The parameters vector contains NaN or Inf");
 
     mxFldp = mxGetField(M_, 0, "Sigma_e");
-    dparams = (double *) mxGetData(mxFldp);
+    dparams = mxGetPr(mxFldp);
     npar = (int) mxGetN(mxFldp);
     TwoDMatrix vCov(npar, npar, dparams);
     if (!vCov.isFinite())
       DYN_MEX_FUNC_ERR_MSG_TXT("The covariance matrix of shocks contains NaN or Inf");
 
     mxFldp = mxGetField(dr, 0, "ys");  // and not in order of dr.order_var
-    dparams = (double *) mxGetData(mxFldp);
+    dparams = mxGetPr(mxFldp);
     const int nSteady = (int) mxGetM(mxFldp);
     Vector ySteady(dparams, nSteady);
     if (!ySteady.isFinite())
@@ -146,7 +146,7 @@ extern "C" {
     nPred -= nBoth; // correct nPred for nBoth.
 
     mxFldp = mxGetField(dr, 0, "order_var");
-    dparams = (double *) mxGetData(mxFldp);
+    dparams = mxGetPr(mxFldp);
     npar = (int) mxGetM(mxFldp);
     if (npar != nEndo)
       DYN_MEX_FUNC_ERR_MSG_TXT("Incorrect number of input var_order vars.");
@@ -157,7 +157,7 @@ extern "C" {
 
     // the lag, current and lead blocks of the jacobian respectively
     mxFldp = mxGetField(M_, 0, "lead_lag_incidence");
-    dparams = (double *) mxGetData(mxFldp);
+    dparams = mxGetPr(mxFldp);
     npar = (int) mxGetN(mxFldp);
     int nrows = (int) mxGetM(mxFldp);
 
@@ -170,7 +170,7 @@ extern "C" {
       }
     //get NNZH =NNZD(2) = the total number of non-zero Hessian elements
     mxFldp = mxGetField(M_, 0, "NNZDerivatives");
-    dparams = (double *) mxGetData(mxFldp);
+    dparams = mxGetPr(mxFldp);
     Vector NNZD(dparams, (int) mxGetM(mxFldp));
     if (NNZD[kOrder-1] == -1)
       DYN_MEX_FUNC_ERR_MSG_TXT("The derivatives were not computed for the required order. Make sure that you used the right order option inside the stoch_simul command");
