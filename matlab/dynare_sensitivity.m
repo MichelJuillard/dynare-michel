@@ -97,6 +97,7 @@ options_gsa = set_default_option(options_gsa,'redform',0);
 options_gsa = set_default_option(options_gsa,'pprior',1);
 options_gsa = set_default_option(options_gsa,'prior_range',1);
 options_gsa = set_default_option(options_gsa,'ppost',0);
+options_gsa = set_default_option(options_gsa,'neighborhood_width',0);
 options_gsa = set_default_option(options_gsa,'ilptau',1);
 options_gsa = set_default_option(options_gsa,'morris',0);
 options_gsa = set_default_option(options_gsa,'glue',0);

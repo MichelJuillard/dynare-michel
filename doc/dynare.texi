@@ -4915,6 +4915,11 @@ If equal to @code{1}, use Metropolis posterior sample.
 If equal to @code{0}, do not use Metropolis posterior sample. NB: This
 overrides any other sampling option. Default: @code{0}
 
+@item neighborhood_width = @var{DOUBLE}
+When @code{pprior=0} and @code{ppost=0}, allows for the sampling of
+parameters around the value specified in the @code{mode_file}, in the range
+@code{xparam1}@math{\pm\left|@code{xparam1}\times@code{neighborhood_width}\right|}. Default: @code{0}
+
 @end table
 @customhead{Stability Mapping Options}
 @table @code
