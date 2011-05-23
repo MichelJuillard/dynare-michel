@@ -64,10 +64,6 @@ mexFunction(int nlhs, mxArray *plhs[],
   // second element should be vector of free parameters */
   free_parameters = mxGetPr(prhs[1]);
 
-  // copy the string data from prhs[0] into a C string input_ buf.    */
-  input_buf = mxArrayToString(prhs[0]);
-  if (input_buf == NULL)
-    DYN_MEX_FUNC_ERR_MSG_TXT("Could not convert input to string.");
   model =  initialize_model_and_options(input_buf, &options, nrhs, prhs, &nstates, &nvars, &npre, &nfree);
   if (model == NULL || options == NULL)
     DYN_MEX_FUNC_ERR_MSG_TXT("There was a problem initializing the model, can not continue");
