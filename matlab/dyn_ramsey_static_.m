@@ -43,7 +43,6 @@ i_mult = [orig_endo_nbr+(1:orig_eq_nbr)]';
 fname = M.fname;
 max_lead = M.maximum_lead;
 max_lag = M.maximum_lag;
-beta =  options_.planner_discount;
 
 % indices of all endogenous variables
 i_endo = [1:endo_nbr]';
@@ -105,24 +104,3 @@ else
     resids = [f(i_mult); r(end,(orig_endo_nbr-inst_nbr+1:end))'];
 end
 rJ = [];
-return;
-
-% Jacobian of first order conditions
-n = nnz(i_lag)+exo_nbr;
-iH = reshape(1:n^2,n,n);
-rJ = zeros(2*endo_nbr-inst_nbr,2*endo_nbr-inst_nbr);
-
-rJ(i_endo,i_endo) = Uyy;
-for i=1:max_lag+max_lead+1
-    % select variables present in the model at a given lag
-    [junk,k1,k2] = find(i_lag(i,:));
-    k3 = length(k2);
-    rJ(k1,k1) = rJ(k1,k1) + beta^(max_lag-i+1)*reshape(fH(:,iH(k2,k2))'*x(i_mult),k3,k3); 
-    rJ(k1,i_mult) = rJ(k1,i_mult) + beta^(max_lag-1+1)*fJ(:,k2)';
-    rJ(i_mult,k1) = rJ(i_mult,k1) + fJ(:,k2);
-end
-
-%  rJ = 1e-3*rJ;
-%  rJ(209,210) = rJ(209,210)+1-1e-3;
-
-
