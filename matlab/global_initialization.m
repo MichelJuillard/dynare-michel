@@ -140,7 +140,6 @@ options_.ACES_solver = 0;
 options_.conditional_variance_decomposition = [];
 
 % Ramsey policy
-options_.planner_discount = 1.0;
 options_.ramsey_policy = 0;
 options_.timeless = 0;
 

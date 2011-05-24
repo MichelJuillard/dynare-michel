@@ -39,7 +39,7 @@ else
 	M_.orig_model = M_;
 end
 
-beta = options_.planner_discount;
+beta = get_optimal_policy_discount_factor(M_.params,M_.param_names);
 
 exo_nbr = M_.exo_nbr;
 if isfield(M_,'orig_model')
