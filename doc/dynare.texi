@@ -4090,9 +4090,19 @@ oo_.posterior_hpdsup.measurement_errors_corr.gdp_conso
 @deffn Command model_comparison @var{FILENAME}[(@var{DOUBLE})]@dots{};
 @deffnx Command model_comparison (marginal_density = laplace | modifiedharmonicmean) @var{FILENAME}[(@var{DOUBLE})]@dots{};
 
+@descriptionhead
+
 This command computes odds ratios and estimate a posterior density
-over a colletion of models. The priors over models can be specified as
-the @var{DOUBLE} values, otherwise a uniform prior is assumed.
+over a collection of models. The priors over models can be specified
+as the @var{DOUBLE} values, otherwise a uniform prior is assumed.
+
+@examplehead
+
+@example
+model_comparison my_model(0.7) alt_model(0.3);
+@end example
+This example attributes a 70% prior over @code{my_model} and 30% prior
+over @code{alt_model}.
 
 @end deffn
 
