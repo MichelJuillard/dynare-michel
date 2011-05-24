@@ -35,6 +35,6 @@ if options_.noprint == 0
 end
 
 
-%oo_ = evaluate_planner_objective(oo_.dr,M_,oo_,options_);
+oo_.planner_objective_value = evaluate_planner_objective(M_,oo_,options_);
 
 options_ = oldoptions;
