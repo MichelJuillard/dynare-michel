@@ -5,9 +5,10 @@ For information about how to use Dynare, you should have a look at the
 documentation located in the 'doc' subdirectory of your Dynare installation (you
 should have a shortcut in your Start Menu to access it directly).
 
-Beginners should start with the Dynare user guide. There is also a
-complete reference manual documenting all Dynare functions (under HTML
-format in 'manual\index.html', under PDF format in 'manual.pdf').
+Beginners should start with the Dynare user guide (under PDF format in
+'UserGuide.pdf'). There is also a complete reference manual documenting all
+Dynare functions (under HTML format in 'dynare.html\index.html', under PDF
+format in 'dynare.pdf').
 
 You can also get more information on the web, on Dynare homepage:
 
@@ -24,13 +25,8 @@ NOTE: Dynare comes with an automated uninstaller, which you can run from the
 Using Dynare with MATLAB (R)
 ----------------------------
 
-Dynare requires MATLAB (R) version 6.5 or above. With older versions of MATLAB (R),
+Dynare requires MATLAB (R) version 7.0 or above. With older versions of MATLAB (R),
 it may fail or give unexpected results.
-
-In order to have functional MEX files, users of the 64-bit version of MATLAB
-should install Microsoft Visual C++ runtime libraries, available at:
-
-  http://www.microsoft.com/downloads/details.aspx?familyid=bd2a6171-e2d6-4230-b809-9a8d7548c1b6&displaylang=en
 
 To use Dynare, you just have to add the 'matlab' subdirectory of your Dynare
 installation to MATLAB (R) path. You have two options for doing that:
