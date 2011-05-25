@@ -39,4 +39,4 @@ dr.pdf: dr.tex
 	$(PDFLATEX) dr
 
 clean-local:
-	rm -f *~ *.pdf *.log *.aux *.out
+	rm -f *~ *.pdf *.log *.aux *.out *.blg *.bbl
