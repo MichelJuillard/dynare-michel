@@ -128,7 +128,7 @@ options_.drop = 100;
 % There exists now qz/mjdgges.m that contains the calls to the old Sims code 
 % Hence, if mjdgges.m is visible exist(...)==2, 
 % this means that the DLL isn't avaiable and use_qzdiv is set to 1
-if exist('mjdgges')==2
+if exist('mjdgges','file')==2
     options_.use_qzdiv = 1;
 else
     options_.use_qzdiv = 0;
