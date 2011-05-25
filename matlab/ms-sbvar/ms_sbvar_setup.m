@@ -28,13 +28,6 @@ function ms_sbvar_setup(options_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-dynareroot = strrep(which('dynare'),'dynare.m','');
-ms_root = [dynareroot '/ms-sbvar'];
-addpath([ms_root '/cstz']);
-addpath([ms_root '/identification']);
-addpath([ms_root '/switching_specification']);
-addpath([ms_root '/mhm_specification']);
-
 if ~isfield(options_.ms,'initial_year')
     error('Must set initial_year option');
 end

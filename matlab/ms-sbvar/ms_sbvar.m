@@ -1,13 +1,5 @@
 function ms_sbvar(ms_flag, M, options)
 
-dynareroot = strrep(which('dynare'),'dynare.m','');
-ms_root = [dynareroot '/ms-sbvar'];
-
-addpath([ms_root '/cstz']);
-addpath([ms_root '/identification']);
-addpath([ms_root '/switching_specification']);
-addpath([ms_root '/mhm_specification']);
-
 clean_ms_files(M.fname);
 
 options.data = read_variables(options.datafile,options.varobs,[],options.xls_sheet,options.xls_range);
