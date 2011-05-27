@@ -62,9 +62,10 @@ function ms_write_markov_file(fname,options)
                 M = zeros(n_states,2);
                 M(i_state+[-1 1],1) = ones(2,1)/2;
                 M(i_state,2) = 1;
+                disp(M)
             end
             for j_state = 1:n_states
-                fprintf(fh,'%d ',M(j_state,:));
+                fprintf(fh,'%f ',M(j_state,:));
                 fprintf(fh,'\n');
             end
             fprintf(fh,'\n');
