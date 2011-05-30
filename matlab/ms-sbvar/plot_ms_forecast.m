@@ -83,8 +83,13 @@ function plot_ms_forecast(M_,forecast,title_,save_graph_formats,TeX)
 end
 
 function plot_point_forecast(forecast,nvars,nr,nc,endo_names,title_,save_graph_formats,TeX,names,tex_names,dirname)
-    graph_name = 'MS-Forecast (1)';
-    fig = figure('Name','Forecast (I)'); 
+    if nvars > nr*nc
+        graph_name = 'MS-Forecast (1)';
+        fig = figure('Name','Forecast (I)'); 
+    else
+        graph_name = 'MS-Forecast';
+        fig = figure('Name','Forecast'); 
+    end    
     m = 1;
     n_fig = 1;
     for j=1:nvars
@@ -110,8 +115,13 @@ function plot_point_forecast(forecast,nvars,nr,nc,endo_names,title_,save_graph_f
 end
 
 function plot_banded_forecast(forecast,nvars,nr,nc,endo_names,num_percentiles,title_,save_graph_formats,TeX,names,tex_names,dirname)
-    fig = figure('Name',[title_ ' (1)']); 
-    graph_name = 'MS-Forecast (1)';
+    if nvars > nr*nc
+        graph_name = 'MS-Forecast (1)';
+        fig = figure('Name','Forecast (I)'); 
+    else
+        graph_name = 'MS-Forecast';
+        fig = figure('Name','Forecast'); 
+    end    
     m = 1;
     n_fig = 1;
     for j=1:nvars

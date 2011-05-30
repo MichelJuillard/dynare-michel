@@ -100,7 +100,7 @@ function plot_ms_irf(M_,options_,irf,names,title_,varlist)
             for i=1:nvars
                 shock(:,i) = irf(:,((i-1) + ((s-1)*nvars)+1));
             end
-            plot_point_irf_for_shock(shock,nvars,endo_names,endo_names(s,:),title_,fname,options_,names,tex_names);
+            plot_point_irf_for_shock(shock,nvars,endo_names,deblank(endo_names(s,:)),title_,fname,options_,names,tex_names);
         end
     else
         for s=1:nvars
@@ -110,7 +110,7 @@ function plot_ms_irf(M_,options_,irf,names,title_,varlist)
                     shock(:,i,n) = irf(n,:,((i-1) + ((s-1)*nvars)+1));
                 end
             end
-            plot_banded_irf_for_shock(shock,nvars,endo_names,endo_names(s,:),title_,fname,options_,names,tex_names);
+            plot_banded_irf_for_shock(shock,nvars,endo_names,deblank(endo_names(s,:)),title_,fname,options_,names,tex_names);
         end
     end
     
@@ -124,8 +124,8 @@ function [fig] = plot_point_irf_for_shock(irf,nvars,endo_names,shock_name,title_
         disp([endo_names(k,:) ' shock from ' shock_name]);
         title([endo_names(k,:) ' shock from ' shock_name]);
     end
-    dyn_save_graph(dirname,['MS-Variance-Decomposition-' shock_name],options_.graph_save_formats, ...
-                   options_.TeX,names,tex_names,['Variance decomposition ' shock_name]);
+    dyn_save_graph(dirname,['MS-IRF-' shock_name],options_.graph_save_formats, ...
+                   options_.TeX,names,tex_names,['IRF ' shock_name]);
 end
 
 function [fig] = plot_banded_irf_for_shock(irf,nvars, endo_names, shock_name,title_,dirname,options_,names,tex_names)
@@ -141,8 +141,8 @@ function [fig] = plot_banded_irf_for_shock(irf,nvars, endo_names, shock_name,tit
         disp([endo_names(k,:) ' shock from ' shock_name]);
         title([endo_names(k,:) ' shock from ' shock_name]);
     end
-    dyn_save_graph(dirname,['MS-Variance-Decomposition-' shock_name],options_.graph_save_formats, ...
-                   options_.TeX,names,tex_names,['Variance decomposition ' shock_name]);
+    dyn_save_graph(dirname,['MS-IRF-' shock_name],options_.graph_save_formats, ...
+                   options_.TeX,names,tex_names,['IRF ' shock_name]);
 end
 
 
