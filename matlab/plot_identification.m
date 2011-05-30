@@ -52,7 +52,7 @@ siLREnorm = idelre.siLREnorm;
 % else
 %     tittxt = '';
 % end
-
+tittxt1=regexprep(tittxt, ' ', '_');
 if SampleSize == 1,
     siJ = idemoments.siJ;
     normJ = max(abs(siJ)')';
@@ -69,38 +69,59 @@ if SampleSize == 1,
     end
     legend('relative to param value','relative to prior std','Location','Best')
     if  idehess.flag_score,
-        title('Identification strength in the asymptotic Information matrix (log-scale)')
+        title('Identification strength with asymptotic Information matrix (log-scale)')
     else
-        title('Identification strength in the moments (log-scale)')
+        title('Identification strength with moments Information matrix (log-scale)')
     end
     
     subplot(212)
-    
-    mmm = (siJnorm)'./max(siJnorm);
-    if advanced,
-        mmm1 = (siHnorm)'./max(siHnorm);
-        mmm=[mmm mmm1];
-        mmm1 = (siLREnorm)'./max(siLREnorm);
-        offset=length(siHnorm)-length(siLREnorm);
-        mmm1 = [NaN(offset,1); mmm1];
-        mmm=[mmm mmm1];
-    end        
-        
-    bar(mmm(is,:))
+    bar(log([idehess.deltaM(is) idehess.deltaM_prior(is)]))
     set(gca,'xlim',[0 nparam+1])
     set(gca,'xticklabel','')
     dy = get(gca,'ylim');
     for ip=1:nparam,
         text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
     end
-    if advanced,
-        legend('Moments','Model','LRE model','Location','Best')
+    legend('relative to param value','relative to prior std','Location','Best')
+    if  idehess.flag_score,
+        title('Sensitivity component with asymptotic Information matrix (log-scale)')
+    else
+        title('Sensitivity component with moments Information matrix (log-scale)')
     end
-    title('Sensitivity bars')
+    saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_strength_',tittxt1])
+    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_strength_' tittxt1]);
+    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_strength_' tittxt1]);
     
-    if advanced
+    if advanced,
         disp(' ')
         disp('Press ENTER to display advanced diagnostics'), pause,
+        figure('Name',[tittxt, ' - Sensitivity plot']),
+        subplot(211)
+        mmm = (siJnorm)'./max(siJnorm);
+        mmm1 = (siHnorm)'./max(siHnorm);
+        mmm=[mmm mmm1];
+        mmm1 = (siLREnorm)'./max(siLREnorm);
+        offset=length(siHnorm)-length(siLREnorm);
+        mmm1 = [NaN(offset,1); mmm1];
+        mmm=[mmm mmm1];
+        
+        bar(log(mmm(is,:).*100))
+        set(gca,'xlim',[0 nparam+1])
+        set(gca,'xticklabel','')
+        dy = get(gca,'ylim');
+        for ip=1:nparam,
+            text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
+        end
+        if advanced,
+            legend('Moments','Model','LRE model','Location','Best')
+        end
+        title('Sensitivity bars using derivatives (log-scale)')
+        if save_figure
+            saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_sensitivity_',tittxt1])
+            eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_sensitivity_' tittxt1]);
+            eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_sensitivity_' tittxt1]);
+        end
+        
         % identificaton patterns
         for  j=1:size(idemoments.cosnJ,2),
             pax=NaN(nparam,nparam);
@@ -138,10 +159,11 @@ if SampleSize == 1,
             end
             set(gca,'xgrid','on')
             set(gca,'ygrid','on')
+            xlabel([tittxt,' - Collinearity patterns with ', int2str(j) ,' parameter(s)'])
             if save_figure
-                saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_collinearity_', int2str(j)])
-                eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_', int2str(j)]);
-                eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_', int2str(j)]);
+                saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_collinearity_', tittxt1, '_', int2str(j)])
+                eval(['print -depsc ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_' tittxt1 '_' int2str(j)]);
+                eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_' tittxt1 '_' int2str(j)]);
                 if options_.nograph, close(gcf); end
             end
         end
@@ -189,20 +211,21 @@ if SampleSize == 1,
         end
         if save_figure,
             figure(f1);
-            saveas(f1,[IdentifDirectoryName,'/',M_.fname,'_ident_pattern_1'])
-            eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_pattern_1']);
-            eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_pattern_1']);
+            saveas(f1,[IdentifDirectoryName,'/',M_.fname,'_ident_pattern_',tittxt1,'_1'])
+            eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_1']);
+            eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_1']);
             if nparam>4,
                 figure(f2),
-                saveas(f2,[IdentifDirectoryName,'/',M_.fname,'_ident_pattern_2'])
-                eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_pattern_2']);
-                eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_pattern_2']);
+                saveas(f2,[IdentifDirectoryName,'/',M_.fname,'_ident_pattern_',tittxt1,'_2'])
+                eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_2']);
+                eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_2']);
             end
         end
     end
     
 else
     figure('Name',['MC sensitivities']),
+    subplot(211)
     mmm = (idehess.ide_strength_J);
     [ss, is] = sort(mmm);
     mmm = mean(siJnorm)';
@@ -227,6 +250,10 @@ else
         legend('Moments','Model','LRE model','Location','Best')
     end
     title('MC mean of sensitivity measures')
+    saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_MC_sensitivity'])
+    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_MC_sensitivity']);
+    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_MC_sensitivity']);
+    if options_.nograph, close(gcf); end
     if advanced,
         disp(' ')
         disp('Press ENTER to display advanced diagnostics'), pause,
