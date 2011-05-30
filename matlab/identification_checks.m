@@ -65,14 +65,15 @@ if hess_flag==0,
         McoJ(ind1(ii),:) = cosn([JJ1(:,ii),JJ1(:,find([1:1:size(JJ1,2)]~=ii))]);
     end
 else
-    deltaJ = sqrt(diag(JJ));
-    tildaJ = JJ./((deltaJ)*(deltaJ'));
-    McoJ(:,1)=(1-1./diag(inv(tildaJ)));
+    deltaJ = sqrt(diag(JJ(ind1,ind1)));
+    tildaJ = JJ(ind1,ind1)./((deltaJ)*(deltaJ'));
+    McoJ(ind1,1)=(1-1./diag(inv(tildaJ)));
     rhoM=sqrt(1-McoJ);
 %     PcoJ=inv(tildaJ);
-    PcoJ=inv(JJ);
+    PcoJ=NaN(npar,npar);
+    PcoJ(ind1,ind1)=inv(JJ(ind1,ind1));
     sd=sqrt(diag(PcoJ));
-    PcoJ = PcoJ./((sd)*(sd'));
+    PcoJ = abs(PcoJ./((sd)*(sd')));
 end
 
 
