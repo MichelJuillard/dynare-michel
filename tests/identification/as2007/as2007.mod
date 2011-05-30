@@ -61,3 +61,5 @@ stderr 1;
 end;
 
 identification;
+
+identification(advanced=1,max_dim_cova_group=3,prior_mc=250);
