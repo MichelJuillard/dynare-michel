@@ -1,4 +1,4 @@
-function ms_sbvar(ms_flag, M, options)
+function ms_sbvar(M, options)
 
 clean_ms_files(M.fname);
 
@@ -26,10 +26,5 @@ elseif ~isempty(options.ms.Qi) && ~isempty(options.ms.Ri)
     options.ms.restriction_fname = 'exclusions';
 end
 
-if ms_flag == 1
-    % temporary fix
-    options.ms.markov_file = 'markov_file';
-    sz_prd(M,options);
-else
-    ms_mardd(options);
+ms_mardd(options);
 end
