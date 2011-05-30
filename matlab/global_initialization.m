@@ -257,6 +257,46 @@ options_.discretionary_policy = 0;
 % Shock decomposition
 options_.parameter_set = [];
 
+% SBVAR
+options_.ms.vlistlog = [];
+options_.ms.restriction_fname = 0;
+options_.ms.forecast = 1;
+options_.ms.cross_restrictions = 0;
+options_.ms.contemp_reduced_form = 0;
+options_.ms.real_pseudo_forecast = 0;
+options_.ms.dummy_obs = 0;
+options_.ms.nstates = 2;
+options_.ms.indxscalesstates = 0;
+options_.ms.q_diag = 0.85;
+options_.ms.flat_prior = 0;
+options_.ms.ncsk = 0;
+options_.ms.nstd = 6;
+options_.ms.ninv = 1000;
+options_.ms.indxparr = 1;
+options_.ms.indxovr = 0;
+options_.ms.aband = 1;
+options_.ms.indxap = 1;
+options_.ms.apband = 1;
+options_.ms.indximf = 1;
+options_.ms.imfband = 1;
+options_.ms.indxfore = 0;
+options_.ms.foreband = 0;
+options_.ms.indxgforhat = 1;
+options_.ms.cnum = 0;
+options_.ms.indxgimfhat = 1;
+options_.ms.indxestima = 1;
+options_.ms.indxgdls = 1;
+options_.ms.cms =0;
+options_.ms.ncms = 0;
+options_.ms.eq_cms = 1;
+options_.ms.banact = 1;
+options_.ms.lower_cholesky = 0;
+options_.ms.upper_cholesky = 0;
+options_.ms.log_var = [];
+options_.ms.vlistlog = [];
+options_.ms.Qi = [];
+options_.ms.Ri = [];
+
 % MS Sbvar options
 options_ = initialize_ms_sbvar_options(M_, options_);
 
