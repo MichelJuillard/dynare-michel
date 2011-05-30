@@ -1,4 +1,4 @@
-function plot_ms_probabilities(options_, computed_probabilities)
+function plot_ms_probabilities(computed_probabilities,options,fname)
 % function plot_ms_probabilities(computed_probabilities)
 % Plots the regime probablities for each graph
 %
@@ -29,9 +29,9 @@ function plot_ms_probabilities(options_, computed_probabilities)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
   
   [T,num_grand_regimes] = size(computed_probabilities);
-  num_chains = length(options_.ms.ms_chain);
+  num_chains = length(options.ms.ms_chain);
   for i=1:num_chains
-    chains(i).num_regimes = length(options_.ms.ms_chain(i).state);
+    chains(i).num_regimes = length(options.ms.ms_chain(i).state);
     chains(i).probabilities = zeros([T,chains(i).num_regimes]);
   end
   
@@ -40,18 +40,18 @@ function plot_ms_probabilities(options_, computed_probabilities)
   end
   
   for i=1:num_chains
-    figure
+    graph_name = ['MS-Probabilities, Chain ' int2str(i)];
+    figure('Name',graph_name)
     plot(chains(i).probabilities,'LineWidth', 1.2);
     ltxt = {};
     for j=1:chains(i).num_regimes
-      ltxt{j} = ['Regime ' num2str(j)];
+      ltxt{j} = ['Regime ' int2str(j)];
     end
     legend(ltxt{:});
-    title(['Chain ' num2str(i)]);
+    title(['Chain ' int2str(i)]);
     ylim([0 1.0]);
+    dyn_save_graph(fname,['MS-Probabilities-Chain-' int2str(i)],options.graph_save_formats,options.TeX,[],[],graph_name);
   end
-  
-  
 end
 
 function [chains] = iterate_chain(probs, t, chains, chain, num_chains)

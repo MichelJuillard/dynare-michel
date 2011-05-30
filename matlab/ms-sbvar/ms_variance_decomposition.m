@@ -49,7 +49,7 @@ opt = {options_.ms.output_file_tag, ...
 
 [err, vd] = mex_ms_variance_decomposition(opt{:},'free_parameters',oo_.ms.maxparams,'shocks',options_.ms.shock_draws);
 mexErrCheck('mex_ms_variance_decomposition ergodic ', err);
-plot_ms_variance_decomposition(M_,vd, 'Ergodic Variance Decomposition');
+plot_ms_variance_decomposition(M_,vd, 'Ergodic Variance Decomposition',options_.graph_save_formats,options_.TeX);
 
 [err, regime_vd] = mex_ms_variance_decomposition(opt{:},'free_parameters',oo_.ms.maxparams,'shocks',options_.ms.shock_draws,'regimes');
 mexErrCheck('mex_ms_variance_decomposition ergodic regimes', err);

@@ -1,15 +1,16 @@
-function [options_, oo_]=ms_irf(M_, options_, oo_)
+function [options_, oo_]=ms_irf(varlist,M_, options_, oo_)
 %function ms_irf()
 % calls ms irf mex function
 %
 % INPUTS
-%    M_
-%    options_
-%    oo_
+%    varlist:     (chararray) list of selected endogenous variables
+%    M_:          (struct)    model structure
+%    options_     (struct)    options
+%    oo_          (struct)    results
 %
 % OUTPUTS
-%    options_
-%    oo_
+%    options_     (struct)    options
+%    oo_          (struct)    results
 %
 % SPECIAL REQUIREMENTS
 %    none
@@ -46,7 +47,7 @@ opt = {options_.ms.output_file_tag, ...
 
 [err, irf] = mex_ms_irf(opt{:}, 'free_parameters', oo_.ms.maxparams, 'shocks_per_parameter', options_.ms.shock_draws);
 mexErrCheck('mex_ms_irf ergodic ', err);
-plot_ms_irf(M_,irf,options_.varobs,'Ergodic Impulse Responses');
+plot_ms_irf(M_,options_,irf,options_.varobs,'Ergodic Impulse Responses',varlist);
 
 [err, regime_irfs] = mex_ms_irf(opt{:}, 'free_parameters',oo_.ms.maxparams,'shocks_per_parameter', options_.ms.shock_draws,'regimes');
 mexErrCheck('mex_ms_irf ergodic regimes ',err);
@@ -56,7 +57,7 @@ if exist(options_.ms.load_mh_file,'file') > 0
     [err, irf] = mex_ms_irf(opt{:}, 'shocks_per_parameter', options_.ms.shocks_per_parameter, ...
         'parameter_uncertainty','simulation_file',options_.ms.load_mh_file);
     mexErrCheck('mex_ms_irf bayesian ',err);
-    plot_ms_irf(M_,irf,options_.varobs,'Impulse Responses w/ Parameter Uncertainty');
+    plot_ms_irf(M_,options_,irf,options_.varobs,'Impulse Responses w/ Parameter Uncertainty',varlist);
     
     [err, regime_irfs] = mex_ms_irf(opt{:}, 'shocks_per_parameter', options_.ms.shocks_per_parameter, ...
         'simulation_file',options_.ms.load_mh_file,'parameter_uncertainty','regimes');

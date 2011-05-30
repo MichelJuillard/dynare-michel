@@ -46,7 +46,7 @@ opt = {options_.ms.output_file_tag, ...
 
 [err, forecast] = mex_ms_forecast(opt{:},'free_parameters',oo_.ms.maxparams,'shocks_per_parameter', options_.ms.shock_draws);
 mexErrCheck('mex_ms_forecast ergodic ', err);
-plot_ms_forecast(M_,forecast,'Forecast');
+plot_ms_forecast(M_,forecast,'Forecast',options_.graph_save_formats,options_.TeX);
 
 [err, regime_forecast] = mex_ms_forecast(opt{:},'free_parameters',oo_.ms.maxparams,'shocks_per_parameter', options_.ms.shock_draws,'regimes');
 mexErrCheck('mex_ms_forecast ergodic regimes', err);
@@ -56,7 +56,7 @@ if exist(options_.ms.load_mh_file,'file') > 0
     [err, forecast] = mex_ms_forecast(opt{:},'free_parameters',oo_.ms.maxparams,'shocks_per_parameter', options_.ms.shocks_per_parameter, ...
         'simulation_file',options_.ms.load_mh_file,'parameter_uncertainty');
     mexErrCheck('mex_ms_forecast bayesian ', err);
-    plot_ms_forecast(M_,forecast,'Forecast w/ Parameter Uncertainty');
+    plot_ms_forecast(M_,forecast,'Forecast w/ Parameter Uncertainty',options_.graph_save_formats,options_.TeX);
 
     [err, regime_forecast] = mex_ms_forecast(opt{:},'free_parameters',oo_.ms.maxparams,'shocks_per_parameter', options_.ms.shocks_per_parameter, ...
         'simulation_file',options_.ms.load_mh_file,'parameter_uncertainty','regimes');

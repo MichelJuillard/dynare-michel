@@ -260,9 +260,17 @@ options_.parameter_set = [];
 % MS Sbvar options
 options_ = initialize_ms_sbvar_options(M_, options_);
 
+% saved graph formats
+options_.graph_save_formats.eps = 1;
+options_.graph_save_formats.pdf = 0;
+options_.graph_save_formats.fig = 0;
+
 % initialize persistent variables in priordens()
 priordens([],[],[],[],[],[],1);
 
 % Set dynare random generator and seed.
 set_dynare_seed('default');
 
+% Create directories
+[junk,junk]=mkdir(M_.fname);
+[junk,junk]=mkdir([M_.fname '/Output']);

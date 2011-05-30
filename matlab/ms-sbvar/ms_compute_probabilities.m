@@ -58,7 +58,7 @@ mexErrCheck('ms_sbvar_command_line probabilities',err);
 % now we want to plot the probabilities for each chain
 if ischar(prob_out_file)
     computed_probabilities = load(prob_out_file);
-    plot_ms_probabilities(options_, computed_probabilities);
+    plot_ms_probabilities(computed_probabilities,options_,M_.fname);
 end
 options_ = initialize_ms_sbvar_options(M_, options_);
 end
