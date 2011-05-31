@@ -384,7 +384,7 @@ set_options(SbvarOption *options, int nrhs, const mxArray *prhs[])
             options->filtered_probabilities = true;
           else if (strstr(input_buf, "error_bands"))
             {
-              mxFree(options->percentiles);
+              free(options->percentiles);
               options->num_percentiles = 3;
               options->percentiles = new double[3];
               options->percentiles[0] = 0.16;
@@ -407,7 +407,7 @@ set_options(SbvarOption *options, int nrhs, const mxArray *prhs[])
             }
           else if (strstr(input_buf, "median"))
             {
-              mxFree(options->percentiles);
+              free(options->percentiles);
               options->num_percentiles = 1;
               options->percentiles = new double[1];
               options->percentiles[0] = 0.5;
