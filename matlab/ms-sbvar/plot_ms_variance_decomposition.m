@@ -145,9 +145,9 @@ function plot_ms_variance_decomposition(M_, vd, title_, graph_save_formats, ...
         end
         if k==K
 	    if exist('OCTAVE_VERSION')
-                lh = legend(shock_names,'Location','BestOutside');
+                legend(shock_names,'Location','SouthOutside');
 	    else 
-                lh = legend(shock_names,'Location','BestOutside','Orientation','horizontal'); 
+                legend(shock_names,'Location','BestOutside','Orientation','horizontal'); 
             end
         end
         
