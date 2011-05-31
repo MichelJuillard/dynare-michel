@@ -102,7 +102,6 @@ vlog_ap_Ya0 = -0.5*totparsp*log(2*pi) + tmpd + Apexpt;
 vlog_a0_Yao = zeros(nvar,1);
   % the log value of p(a0k|Y,ao) where ao: other a's at some point such as the peak of ONLY some a0's
 vlog=zeros(ndraws2,1);
-tic
 for k=1:nvar
    bk = Uiconst{k}'*A0xhat(:,k);
    indx_ks=[k:nvar];  % the columns that exclude 1-(k-1)th columns
@@ -161,7 +160,6 @@ for k=1:nvar
       vlog_a0_Yao(k) = vloglast;
    end
 end
-timimutes=toc/60
 ndraws2
 
 disp('Prior pdf -- log(p(a0hat, a+hat)):');

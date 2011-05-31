@@ -279,10 +279,8 @@ else
     crit = 1.0e-9;
     nit = 10000;
     %
-    tic
     [fhat,xhat,grad,Hhat,itct,fcount,retcodehat] = csminwel('fn_a0freefun',x,H0,'fn_a0freegrad',crit,nit,Ui,nvar,n0,fss,H0inv);
-    endtime = toc;
-    
+
     A0hat = fn_tran_b2a(xhat,Ui,nvar,n0);
     
     xhat = fn_tran_a2b(A0hat,Ui,nvar,n0);

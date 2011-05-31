@@ -322,10 +322,8 @@ if options_.ms.indxestima
          crit = 1.0e-9;
          nit = 10000;
          %
-         tic
          [fhat,xhat,grad,Hhat,itct,fcount,retcodehat] = ...
                csminwel('fn_a0freefun',x,H0,'fn_a0freegrad',crit,nit,Uiconst,nvar,n0,fss,H0inv);
-         endtime = toc
 
          A0hat = fn_tran_b2a(xhat,Uiconst,nvar,n0)
          A0hatinv = inv(A0hat);
@@ -335,7 +333,7 @@ if options_.ms.indxestima
          itct
          fcount
          retcodehat
-         save outm endtime xhat A0hat A0hatinv grad fhat itct itct fcount retcodehat
+         save outm xhat A0hat A0hatinv grad fhat itct itct fcount retcodehat
       end
    else
       %*** Obtain the posterior matrices for estimation and inference
@@ -354,10 +352,8 @@ if options_.ms.indxestima
          crit = 1.0e-9;
          nit = 10000;
          %
-         tic
          [fhat,xhat,grad,Hhat,itct,fcount,retcodehat] = ...
                csminwel('fn_a0freefun',x,H0,'fn_a0freegrad',crit,nit,Uiconst,nvar,n0,fss,H0inv);
-         endtime = toc
 
          A0hat = fn_tran_b2a(xhat,Uiconst,nvar,n0)
          A0hatinv = inv(A0hat);
@@ -367,7 +363,7 @@ if options_.ms.indxestima
          itct
          fcount
          retcodehat
-         save outm endtime xhat A0hat A0hatinv grad fhat itct itct fcount retcodehat
+         save outm xhat A0hat A0hatinv grad fhat itct itct fcount retcodehat
       end
    end
 
