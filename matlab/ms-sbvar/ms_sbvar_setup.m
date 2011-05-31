@@ -43,10 +43,6 @@ end
 options_.data = read_variables(options_.datafile, ...
     options_.varobs, [], options_.xls_sheet, options_.xls_range);
 
-if ~isfield(options_.ms, 'forecast')
-    options_.ms.forecast = 4;
-end
-
 if options_.ms.upper_cholesky
     if options_.ms.lower_cholesky
         error(['Upper Cholesky and lower Cholesky decomposition can''t be ' ...
@@ -72,7 +68,7 @@ markov_file = [options_.ms.output_file_tag '_markov_file.dat'];
 %==========================================================================
 
 %=== The following mu is effective only if indxPrior==1.
-mu = zeros(6,1);   % hyperparameters
+%mu = zeros(6,1);   % hyperparameters
 if length(options_.ms.coefficients_prior_hyperparameters) ~= 6
     error('When specifying the coefficients_prior_hyperparameters, you must pass a vector of 6 numbers')
 end
@@ -137,7 +133,7 @@ pctindx = [];
 % Select the variable to use and rearrange columns if desired
 %vlist = [3 1 2];
 %options_.ms.vlist = [1 2 3];
-options_.ms.vlist = [1:size(options_.varobs,1)];
+options_.ms.vlist = 1:size(options_.varobs,1);
 vlist1=options_.ms.vlist;
 
 %==========================================================================
