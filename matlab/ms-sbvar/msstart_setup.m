@@ -111,7 +111,6 @@ indxDummy = options_.ms.bayesian_prior;  % 1: add dummy observations to the data
 %end
 %=== The following mu is effective only if options_.ms.bayesian_prior==1.
 mu = zeros(6,1);   % hyperparameters
-mu = zeros(6,1);   % hyperparameters
 mu(1) = 0.57;
 mu(2) = 0.13;
 mu(3) = 0.1;

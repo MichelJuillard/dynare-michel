@@ -74,7 +74,7 @@ nconstr1=nfqm;      % number of the 1st set of constraints
 nconstr2=options_.forecast ;     % number of the 2nd set of constraints
 nconstr=nconstr1+nconstr2;   % q: 4 years -- 4*12 months.
                          % When 0, no conditions directly on variables <<>>
-nconstr=0   %6*nconstr1;
+nconstr=0 ;  %6*nconstr1;
 options_.ms.eq_ms = [];      % location of MS equation; if [], all shocks
 PorR = [4*ones(nconstr1,1);2*ones(nconstr1,1);3*ones(nconstr1,1)];   % the variable conditioned.  1: Pcm; 3: FFR; 4: CPI
 PorR = [PorR;1*ones(nconstr1,1);5*ones(nconstr1,1);6*ones(nconstr1,1)];
