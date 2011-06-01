@@ -3,13 +3,13 @@ function [options_, oo_]=ms_compute_mdd(M_, options_, oo_)
 % Compute marginal data density
 %
 % INPUTS
-%    M_
-%    options_
-%    oo_
+%    M_:          (struct)    model structure
+%    options_:    (struct)    options
+%    oo_:         (struct)    results
 %
 % OUTPUTS
-%    options_
-%    oo_
+%    options_:    (struct)    options
+%    oo_:         (struct)    results
 %
 % SPECIAL REQUIREMENTS
 %    none

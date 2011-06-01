@@ -3,13 +3,13 @@ function [options_, oo_]=ms_simulation(M_, options_, oo_)
 % MS Sbvar Simulation
 %
 % INPUTS
-%    M_
-%    options_
-%    oo_
+%    M_:          (struct)    model structure
+%    options_:    (struct)    options
+%    oo_:         (struct)    results
 %
 % OUTPUTS
-%    options_
-%    oo_
+%    options_:    (struct)    options
+%    oo_:         (struct)    results
 %
 % SPECIAL REQUIREMENTS
 %    none

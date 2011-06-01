@@ -3,13 +3,13 @@ function [options_, oo_]=ms_compute_probabilities(M_, options_, oo_)
 % Compute posterior mode regime probabilities
 %
 % INPUTS
-%    M_
-%    options_
-%    oo_
+%    M_:          (struct)    model structure
+%    options_:    (struct)    options
+%    oo_:         (struct)    results
 %
 % OUTPUTS
-%    options_
-%    oo_
+%    options_:    (struct)    options
+%    oo_:         (struct)    results
 %
 % SPECIAL REQUIREMENTS
 %    none

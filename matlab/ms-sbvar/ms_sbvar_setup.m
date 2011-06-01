@@ -3,7 +3,7 @@ function ms_sbvar_setup(options_)
 % does the general file initialization for ms sbvar
 %
 % INPUTS
-%    options_
+%    options_:    (struct)    options
 %
 % OUTPUTS
 %    none

@@ -3,10 +3,10 @@ function options_=set_ms_simulation_flags_for_other_mex(options_)
 % MS Sbvar Estimation
 %
 % INPUTS
-%    options_
+%    options_:    (struct)    options
 %
 % OUTPUTS
-%    options_
+%    options_:    (struct)    options
 %
 % SPECIAL REQUIREMENTS
 %    none

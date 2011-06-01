@@ -3,11 +3,11 @@ function options_=initialize_ms_sbvar_options(M_, options_)
 % sets ms sbvar options back to their default values
 %
 % INPUTS
-%    M_
-%    options_
+%    M_:          (struct)    model structure
+%    options_:    (struct)    options
 %
 % OUTPUTS
-%    options_
+%    options_:    (struct)    options
 %
 % SPECIAL REQUIREMENTS
 %    none

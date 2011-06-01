@@ -3,11 +3,11 @@ function oo_=set_oo_w_estimation_output(options_, oo_)
 % places estimation output in oo_ structure
 %
 % INPUTS
-%    options_
-%    oo_
+%    options_:    (struct)    options
+%    oo_:         (struct)    results
 %
 % OUTPUTS
-%    oo_
+%    oo_:         (struct)    results
 %
 % SPECIAL REQUIREMENTS
 %    none

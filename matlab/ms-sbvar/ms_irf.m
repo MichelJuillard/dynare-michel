@@ -5,12 +5,12 @@ function [options_, oo_]=ms_irf(varlist,M_, options_, oo_)
 % INPUTS
 %    varlist:     (chararray) list of selected endogenous variables
 %    M_:          (struct)    model structure
-%    options_     (struct)    options
-%    oo_          (struct)    results
+%    options_:    (struct)    options
+%    oo_:         (struct)    results
 %
 % OUTPUTS
-%    options_     (struct)    options
-%    oo_          (struct)    results
+%    options_:    (struct)    options
+%    oo_:         (struct)    results
 %
 % SPECIAL REQUIREMENTS
 %    none

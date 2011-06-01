@@ -3,13 +3,13 @@ function [options_, oo_]=ms_variance_decomposition(M_, options_, oo_)
 % calls ms_variance_decomposition mex function
 %
 % INPUTS
-%    M_
-%    options_
-%    oo_
+%    M_:          (struct)    model structure
+%    options_:    (struct)    options
+%    oo_:         (struct)    results
 %
 % OUTPUTS
-%    options_
-%    oo_
+%    options_:    (struct)    options
+%    oo_:         (struct)    results
 %
 % SPECIAL REQUIREMENTS
 %    none
