@@ -31,20 +31,19 @@ function options_=initialize_ms_sbvar_options(M_, options_)
 
 % MS SBVAR
 % all mex functions
+options_.ms.file_tag = M_.fname;
 options_.ms.output_file_tag = M_.fname;
 % prepare ms sbvar & estimation
-%options_.ms.mode_file
 options_.ms.coefficients_prior_hyperparameters = [1.0 1.0 0.1 1.2 1.0 1.0];
-options_.ms.freq = 1;
+options_.ms.freq = 4;
 options_.ms.initial_subperiod = 1;
 options_.ms.final_subperiod=4;
-%options_.ms_varlist
 options_.ms.nlags = 1;
 options_.ms.cross_restrictions = 0;
 options_.ms.contemp_reduced_form = 0;
 options_.ms.bayesian_prior = 1;
-options_.ms.alpha = 1.0;
-options_.ms.beta = 1.0;
+options_.ms.alpha = 1;
+options_.ms.beta = 1;
 options_.ms.gsig2_lmd = 50^2;
 options_.ms.gsig2_lmdm = 50^2;
 options_.ms.lower_cholesky = 0;
@@ -57,9 +56,6 @@ if isfield(options_.ms,'final_year')
 end
 if isfield(options_.ms,'datafile')
     options_.ms = rmfield(options_.ms,'datafile');
-end
-if isfield(options_.ms,'varlist')
-    options_.ms = rmfield(options_.ms,'varlist');
 end
 % estimation
 options_.ms.convergence_starting_value = 1e-3;
