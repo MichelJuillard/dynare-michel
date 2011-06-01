@@ -31,7 +31,7 @@ function [options_, oo_]=ms_compute_probabilities(M_, options_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-disp('Compute Marginal Data Density');
+disp('Compute Regime Probabilities');
 options_ = set_ms_estimation_flags_for_other_mex(options_);
 options_ = set_ms_simulation_flags_for_other_mex(options_);
 oo_ = set_oo_w_estimation_output(options_, oo_);
