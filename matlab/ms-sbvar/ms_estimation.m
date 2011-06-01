@@ -34,7 +34,8 @@ function [options_, oo_]=ms_estimation(M_, options_, oo_)
 disp('Estimation');
 
 % cleanup old files
-clean_ms_files(options_.ms.output_file_tag);
+clean_ms_init_files(options_.ms.output_file_tag);
+clean_ms_estimation_files(options_.ms.output_file_tag);
 
 % general setup
 ms_sbvar_setup(options_);

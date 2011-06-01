@@ -1,6 +1,6 @@
 function sbvar(M, options)
 
-clean_ms_files(M.fname);
+clean_sbvar_files();
 
 options.data = read_variables(options.datafile,options.varobs,[],options.xls_sheet,options.xls_range);
 

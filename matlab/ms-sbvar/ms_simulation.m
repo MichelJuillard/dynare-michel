@@ -32,6 +32,7 @@ function [options_, oo_]=ms_simulation(M_, options_, oo_)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 disp('Simulation');
+clean_ms_simulation_files(options_.ms.output_file_tag);
 options_ = set_ms_estimation_flags_for_other_mex(options_);
 oo_ = set_oo_w_estimation_output(options_, oo_);
 
