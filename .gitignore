@@ -174,3 +174,9 @@ mex/build/matlab/run_m2html.m
 
 # MacOS stuff
 .DS_Store
+
+# MS-Sbvar
+/ms-sbvar/*.prn
+/ms-sbvar/*.dat
+/ms-sbvar/sbvar_commandline
+/ms-sbvar/sbvar_init_file
