@@ -121,7 +121,7 @@ end
 if any(isnan(bayestopt_.jscale))
     if exist([ModelName '_optimal_mh_scale_parameter.mat'])% This file is created by mode_compute=6.
         load([ModelName '_optimal_mh_scale_parameter'])
-        proposal_covariance_Choleksy_decomposition = d*Scale;
+        proposal_covariance_Cholesky_decomposition = d*Scale;
     else
         error('mh:: Something is wrong. I can''t figure out the value of the scale parameter.')
     end
