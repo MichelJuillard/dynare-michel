@@ -443,7 +443,7 @@ if ~options_.mh_posterior_mode_estimation && options_.cova_compute
     end
 end
 
-if options_.mode_check == 1 && ~options_.mh_posterior_mode_estimation && options_.cova_compute
+if options_.mode_check == 1 && ~options_.mh_posterior_mode_estimation
     if options_.cova_compute
         mode_check(xparam1,0,hh,gend,data,lb,ub,data_index,number_of_observations,no_more_missing_observations);
     else
