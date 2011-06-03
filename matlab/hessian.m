@@ -1,5 +1,5 @@
 function hessian_mat = hessian(func,x,gstep,varargin)
-% function hessian_mat = hessian(func,x,varargin)
+% function hessian_mat = hessian(func,x,gstep,varargin)
 % Computes second order partial derivatives
 %
 % INPUTS
