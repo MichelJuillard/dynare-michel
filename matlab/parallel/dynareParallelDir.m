@@ -40,7 +40,7 @@ for indPC=1:length(Parallel),
             else
                 [check, ax]=system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' ls ',Parallel(indPC).RemoteDirectory,'/',PRCDir,'/',filename]);
             end
-            if check ~ 0;
+            if check ~= 0 || ~isempty(strfind(ax,'No such file or directory'));
                 ax=[];
             end
         else
@@ -50,7 +50,7 @@ for indPC=1:length(Parallel),
                 % It is necessary to capture the ls warning message and properly manage the jolly char '*'!
                 [check ax]=system(['ls ' ,filename, ' 2> OctaveStandardOutputMessage.txt']);
                 
-                if check ~ 0;
+                if check ~= 0 || ~isempty(strfind(ax,'No such file or directory'));
                     ax=[];
                 end
             else
