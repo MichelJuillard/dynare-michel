@@ -80,6 +80,11 @@ if info(1)==0,
     derivatives_info.DYss=dYss;
     if init,
         indJJ = (find(max(abs(JJ'))>1.e-8));
+        if length(indJJ)<nparam,
+            disp('The number of moments with non-zero derivative is smaller than the number of parameters')
+            disp('Either increase ar or reduce the list of estimated parameters')           
+            error ,
+        end
         indH = (find(max(abs(H'))>1.e-8));
         indLRE = (find(max(abs(gp'))>1.e-8));
     end
