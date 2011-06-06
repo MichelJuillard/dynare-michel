@@ -107,6 +107,7 @@ options_.ar=nlags;
 options_.prior_mc = options_ident.prior_mc;
 options_.options_ident = options_ident;
 options_.Schur_vec_tol = 1.e-8;
+options_.nomoments=0;
 
 options_ = set_default_option(options_,'datafile',[]);
 options_.mode_compute = 0;
