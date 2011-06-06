@@ -177,7 +177,7 @@ if info(1)==0,
             cmm = siJ(:,ind1)*((AHess(ind1,ind1))\siJ(:,ind1)');
             chh = siH(:,ind1)*((AHess(ind1,ind1))\siH(:,ind1)');
             ind1=ind1(ind1>offset);
-            clre = siLRE(:,ind1)*((AHess(ind1,ind1))\siLRE(:,ind1)');
+            clre = siLRE(:,ind1-offset)*((AHess(ind1,ind1))\siLRE(:,ind1-offset)');
             rhoM=sqrt(1./diag(inv(tildaM(indok,indok))));
 %             deltaM = deltaM.*abs(params');
             flag_score=1;
@@ -201,7 +201,7 @@ if info(1)==0,
             ind1=find(ide_hess.ind0);
             chh = siH(:,ind1)*((MIM(ind1,ind1))\siH(:,ind1)');
             ind1=ind1(ind1>offset);
-            clre = siLRE(:,ind1)*((MIM(ind1,ind1))\siLRE(:,ind1)');
+            clre = siLRE(:,ind1-offset)*((MIM(ind1,ind1))\siLRE(:,ind1-offset)');
             rhoM(indok)=sqrt(1./diag(inv(tildaM(indok,indok))));
             normaliz(indok) = (sqrt(diag(inv(tildaM(indok,indok))))./deltaM(indok))'; %sqrt(diag(inv(MIM(indok,indok))))';
 %             deltaM = deltaM.*abs(params');
