@@ -122,18 +122,21 @@ if isempty(data_info),
     data_info.missing_value = 0;
 end
 
-
-SampleSize = options_ident.prior_mc;
-
 % results = prior_sampler(0,M_,bayestopt_,options_,oo_);
 
 if prior_exist
-    if options_ident.prior_range
-        prior_draw(1,1);
+    if (~isnan(bayestopt_.pshape))
+        if options_ident.prior_range
+            prior_draw(1,1);
+        else
+            prior_draw(1);
+        end
     else
-        prior_draw(1);
+        options_ident.prior_mc=1;
     end
 end
+
+SampleSize = options_ident.prior_mc;
 
 if ~(exist('sylvester3mr','file')==2),
 
@@ -186,19 +189,23 @@ if iload <=0,
     
     [I,J]=find(M_.lead_lag_incidence');
     if prior_exist,
-        if exist([fname_,'_mean.mat'],'file'),
-%             disp('Testing posterior mean')
-            load([fname_,'_mean'],'xparam1')
-            pmean = xparam1';
-            clear xparam1
-        end
-        if exist([fname_,'_mode.mat'],'file'),
-%             disp('Testing posterior mode')
-            load([fname_,'_mode'],'xparam1')
-            pmode = xparam1';
-            clear xparam1
-        end
+%         if exist([fname_,'_mean.mat'],'file'),
+% %             disp('Testing posterior mean')
+%             load([fname_,'_mean'],'xparam1')
+%             pmean = xparam1';
+%             clear xparam1
+%         end
+%         if exist([fname_,'_mode.mat'],'file'),
+% %             disp('Testing posterior mode')
+%             load([fname_,'_mode'],'xparam1')
+%             pmode = xparam1';
+%             clear xparam1
+%         end
         params = set_prior(estim_params_,M_,options_)';
+        if isnan(bayestopt_.pshape)
+        parameters = 'ML_Starting_value';
+        disp('Testing ML Starting value')
+        else
         switch parameters
             case 'posterior_mode'
                 disp('Testing posterior mode')
@@ -224,9 +231,11 @@ if iload <=0,
                 disp('                   ''prior_mean''.')
                 error;
         end
+        end
     else
         params = [sqrt(diag(M_.Sigma_e))', M_.params'];
         parameters = 'Current_params';
+        disp('Testing current parameter values')
     end
     [idehess_point, idemoments_point, idemodel_point, idelre_point, derivatives_info_point] = ...
         identification_analysis(params,indx,indexo,options_ident,data_info, prior_exist, name_tex,1);
