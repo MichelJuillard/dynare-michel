@@ -5755,7 +5755,9 @@ is @file{$HOME/.dynare}, while on Windows it is
 @file{%APPDATA%\dynare.ini} (typically @file{C:\Documents and
 Settings\@var{USERNAME}\Application Data\dynare.ini} under Windows XP,
 or @file{C:\Users\@var{USERNAME}\AppData\dynare.ini} under Windows
-Vista or Windows 7).
+Vista or Windows 7). You can specify a non standard location using the
+@code{conffile} option of the @code{dynare} command (@pxref{Dynare
+invocation}).
 
 The parsing of the configuration file is case-sensitive and it should
 take the following form, with each option/choice pair placed on a
@@ -5801,6 +5803,85 @@ Is @code{true} or @code{false}.
 
 @node Parallel Configuration
 @section Parallel Configuration
+
+This section explains how to configure Dynare for parallelizing some
+tasks which require very little inter-process communication.
+
+The parallelization is done by running several MATLAB or Octave
+processes, either on local or on remote machines. Communication
+between master and slave processes are done through SMB on Windows and
+SSH on UNIX. Input and output data, and also some short status
+messages, are exchanged through network filesystems. Currently the
+system works only with homogenous grids: only Windows or only Unix
+machines.
+
+The following routines are currently parallelized:
+
+@itemize
+
+@item
+the Metropolis-Hastings algorithm;
+
+@item
+the Metropolis-Hastings diagnostics;
+
+@item
+the posterior IRFs;
+
+@item
+the prior and posterior statistics;
+
+@item
+some plotting routines.
+
+@end itemize
+
+Note that creating the configuration file is not enough in order to
+trigger parallelization of the computations: you also need to specify
+the @code{parallel} option to the @code{dynare} command. @xref{Dynare
+invocation} for more details, and for other options related to the
+parallelization engine.
+
+You also need to verify that the following requirements are met by
+your cluster (which is composed of a master and of one or more
+slaves):
+
+@table @asis
+
+@item For a Windows grid
+
+@itemize
+
+@item
+a standard Windows network (SMB) must be in place;
+
+@item
+@uref{http://technet.microsoft.com/en-us/sysinternals/bb896649.aspx,
+PsTools} must be installed in the path of the master Windows machine;
+
+@item
+the Windows user on the master machine has to be user of any other
+slave machine in the cluster, and that user will be used for the
+remote computations.
+
+@end itemize
+
+@item For a UNIX grid
+
+@itemize
+
+@item
+SSH must be installed on the master and on the slave machines;
+
+@item
+SSH keys must be installed so that the SSH connection from the master
+to the slaves can be done without passwords, or using an SSH agent
+
+@end itemize
+
+@end table
+
+We now turn to the description of the configuration directives:
 
 @deffn {Configuration block} [cluster]
 
