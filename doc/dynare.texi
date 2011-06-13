@@ -2933,12 +2933,15 @@ the solution, as in @cite{Schaumburg and Sims (2008)}.
 
 @item partial_information
 @anchor{partial_information}
+
 Computes the solution of the model under partial information, along
-the lines of @cite{Currie and Levine (1986)}. Agents are supposed to
-observe only some variables of the economy. The set of observed
-variables is declared using the @code{varobs} command. Note that if
-@code{varobs} is not present or contains all endogenous variables, then
-this is the full information case and this option has no effect.
+the lines of @cite{Pearlman, Currie and Levine (1986)}. Agents are
+supposed to observe only some variables of the economy. The set of
+observed variables is declared using the @code{varobs} command. Note
+that if @code{varobs} is not present or contains all endogenous
+variables, then this is the full information case and this option has
+no effect. More references can be found at
+@uref{http://www.dynare.org/DynareWiki/PartialInformation}.
 @end table
 
 @outputhead
