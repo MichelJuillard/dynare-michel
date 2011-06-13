@@ -32,9 +32,9 @@
 /* Starting from version 7.8, MATLAB BLAS expects ptrdiff_t arguments for integers */
 #if defined(MATLAB_MEX_FILE) && MATLAB_VERSION >= 0x0708
 # ifdef __cplusplus
-#  include <cstdlib>
+#  include <cstddef>
 # else
-#  include <stdlib.h>
+#  include <stddef.h>
 # endif
 typedef ptrdiff_t blas_int;
 #else
