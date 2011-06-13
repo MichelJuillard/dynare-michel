@@ -2264,7 +2264,7 @@ Newton algorithm with a sparse LU solver at each iteration (requires
 @item 7
 Newton algorithm with a Generalized Minimal Residual (GMRES) solver at
 each iteration (requires @code{bytecode} and/or @code{block} option,
-@pxref{Model declaration}; not available under Octave))
+@pxref{Model declaration}; not available under Octave)
 
 @item 8
 Newton algorithm with a Stabilized Bi-Conjugate Gradient (BICGSTAB)
