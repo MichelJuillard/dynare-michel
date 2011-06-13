@@ -23,7 +23,7 @@ function homotopy1(values, step_nbr)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2008-2009 Dynare Team
+% Copyright (C) 2008-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -62,13 +62,13 @@ oldvalues(ixn) = oo_.exo_steady_state(values(ixn, 2));
 ixdn = find(values(:,1) == 2 & isnan(oldvalues));
 oldvalues(ixdn) = oo_.exo_det_steady_state(values(ixdn, 2));
 
-if any(oldvalues == values(:,4))
-    error('HOMOTOPY mode 1: initial and final values should be different')
-end
-
 points = zeros(nv, step_nbr+1);
 for i = 1:nv
-    points(i,:) = oldvalues(i):(values(i,4)-oldvalues(i))/step_nbr:values(i,4);
+    if (oldvalues(i) ~= values(i, 4))
+        points(i,:) = oldvalues(i):(values(i,4)-oldvalues(i))/step_nbr:values(i,4);
+    else
+        points(i,:) = values(i,4);
+    end
 end
 
 for i=1:step_nbr+1
