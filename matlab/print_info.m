@@ -54,8 +54,12 @@ if ~noprint
                ' are too far from the solution'])
       case 21
         error('The steady state is complex.')
-      case 21
+      case 22
         error('The steady state contains NaN.')
+      case 23
+        error('Some updated params are complex.')
+      case 24
+        error('Some updated params contain NaN.')
       case 30 
         error('Variance can''t be computed')
       case 41
