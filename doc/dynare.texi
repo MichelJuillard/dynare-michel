@@ -835,8 +835,8 @@ including the dollar signs);
 
 @item
 @var{FILENAME} indicates a filename valid in the underlying operating
-system; it is necessary to put it between double quotes when specifying
-the extension or if the filename contains a non-alphanumeric character;
+system; it is necessary to put it between quotes when specifying the
+extension or if the filename contains a non-alphanumeric character;
 
 @end itemize
 
@@ -5669,7 +5669,7 @@ Sets the seed used for random number generation.
 
 @end deffn
 
-@deffn Command save_params_and_steady_state @var{FILENAME};
+@deffn Command save_params_and_steady_state (@var{FILENAME});
 
 For all parameters, endogenous and exogenous variables, stores
 their value in a text file, using a simple name/value associative table.
@@ -5720,7 +5720,7 @@ directive to share the model equations between the two files
 @end deffn
 
 @anchor{load_params_and_steady_state}
-@deffn Command load_params_and_steady_state @var{FILENAME};
+@deffn Command load_params_and_steady_state (@var{FILENAME});
 
 For all parameters, endogenous and exogenous variables, loads
 their value from a file created with @code{save_params_and_steady_state}.
