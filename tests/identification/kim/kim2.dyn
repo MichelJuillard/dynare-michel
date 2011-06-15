@@ -29,7 +29,7 @@ k=(delta*(i/delta)^(1-phi)+(1-delta)*k(-1)^(1-phi))^(1/(1-phi));
 (betae*delta*alph/(1-betae+delta*betae))*(i/(betae*delta*alph/(1-betae+delta*betae)))^(1+theta))^(1/(1+theta))=
 (a*k(-1)^alph);
 a = as+ea;
-//lam = (1-(betae*delta*alph/(1-betae+delta*betae)))^theta/c^(1+theta)/(1+theta);
+lam = (1-(betae*delta*alph/(1-betae+delta*betae)))^theta/c^(1+theta)/(1+theta);
 //cobs = c+ec;
 end;
 
@@ -38,7 +38,7 @@ check;
 
 shocks;
 var ea = 1;
-var ec = 0;
+//var ec = 0;
 end;
 
 estimated_params;
