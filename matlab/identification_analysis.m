@@ -80,10 +80,21 @@ if info(1)==0,
     derivatives_info.DYss=dYss;
     if init,
         indJJ = (find(max(abs(JJ'))>1.e-8));
+        while length(indJJ)<nparam && nlags<10,
+            disp('The number of moments with non-zero derivative is smaller than the number of parameters')
+            disp(['Try increasing ar = ', int2str(nlags+1)])           
+            nlags=nlags+1;
+            [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo0,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
+            derivatives_info.DT=dA;
+            derivatives_info.DOm=dOm;
+            derivatives_info.DYss=dYss;
+            evalin('caller',['options_ident.ar=',int2str(nlags),';']);
+        end
         if length(indJJ)<nparam,
             disp('The number of moments with non-zero derivative is smaller than the number of parameters')
-            disp('Either increase ar or reduce the list of estimated parameters')           
-            error ,
+            disp('up to 10 lags: check your model')           
+            disp('Either further increase ar or reduce the list of estimated parameters')           
+            error('IDETooManyParams',''),
         end
         indH = (find(max(abs(H'))>1.e-8));
         indLRE = (find(max(abs(gp'))>1.e-8));

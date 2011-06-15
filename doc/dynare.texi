@@ -5101,7 +5101,7 @@ This command triggers identification analysis.
 @table @code
 
 @item ar = @var{INTEGER}
-Number of lags of computed autocorrelations (theoretical moments). Default: @code{3}
+Number of lags of computed autocorrelations (theoretical moments). Default: @code{1}
 
 @item useautocorr = @var{INTEGER}
 If equal to @code{1}, compute derivatives of autocorrelation. If equal
