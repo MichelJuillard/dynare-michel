@@ -58,6 +58,7 @@ ksstat = opt_gsa.ksstat;
 alpha2 = opt_gsa.alpha2_stab;
 prepSA = (opt_gsa.redform | opt_gsa.identification);
 pprior = opt_gsa.pprior;
+neighborhood_width = opt_gsa.neighborhood_width;
 ilptau = opt_gsa.ilptau;
 nliv   = opt_gsa.morris_nliv;
 ntra   = opt_gsa.morris_ntra;
@@ -206,18 +207,32 @@ if fload==0,
         %         end
         %load([fname_,'_mode'])
         eval(['load ' options_.mode_file ';']');
-        d = chol(inv(hh));
-        lp=randn(Nsam*2,nshock+np)*d+kron(ones(Nsam*2,1),xparam1');
-        for j=1:Nsam*2,
-            lnprior(j) = any(lp(j,:)'<=bayestopt_.lb | lp(j,:)'>=bayestopt_.ub);
+        if neighborhood_width>0,
+            for j=1:nshock,
+                lpmat0(:,j) = randperm(Nsam)'./(Nsam+1); %latin hypercube
+                ub=min([bayestopt_.ub(j) xparam1(j)*(1+neighborhood_width)]);
+                lb=max([bayestopt_.lb(j) xparam1(j)*(1-neighborhood_width)]);
+                lpmat0(:,j)=lpmat0(:,j).*(ub-lb)+lb;
+            end
+            for j=1:np,
+                ub=min([bayestopt_.ub(j+nshock) xparam1(j+nshock)*(1+neighborhood_width)]);
+                lb=max([bayestopt_.lb(j+nshock) xparam1(j+nshock)*(1-neighborhood_width)]);
+                lpmat(:,j)=lpmat(:,j).*(ub-lb)+lb;
+            end            
+        else
+            d = chol(inv(hh));
+            lp=randn(Nsam*2,nshock+np)*d+kron(ones(Nsam*2,1),xparam1');
+            for j=1:Nsam*2,
+                lnprior(j) = any(lp(j,:)'<=bayestopt_.lb | lp(j,:)'>=bayestopt_.ub);
+            end
+            ireal=[1:2*Nsam];
+            ireal=ireal(find(lnprior==0));
+            lp=lp(ireal,:);
+            Nsam=min(Nsam, length(ireal));
+            lpmat0=lp(1:Nsam,1:nshock);
+            lpmat=lp(1:Nsam,nshock+1:end);
+            clear lp lnprior ireal;
         end
-        ireal=[1:2*Nsam];
-        ireal=ireal(find(lnprior==0));
-        lp=lp(ireal,:);
-        Nsam=min(Nsam, length(ireal));
-        lpmat0=lp(1:Nsam,1:nshock);
-        lpmat=lp(1:Nsam,nshock+1:end);
-        clear lp lnprior ireal;
     end
     %
     h = waitbar(0,'Please wait...');
