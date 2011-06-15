@@ -124,8 +124,8 @@ function [fig] = plot_point_irf_for_shock(irf,nvars,endo_names,shock_name,title_
         disp([endo_names(k,:) ' shock from ' shock_name]);
         title([endo_names(k,:) ' shock from ' shock_name]);
     end
-    dyn_save_graph(dirname,['MS-IRF-' shock_name],options_.graph_save_formats, ...
-                   options_.TeX,names,tex_names,['IRF ' shock_name]);
+    dyn_save_graph(dirname,[title_ ' ' shock_name],options_.graph_save_formats, ...
+                   options_.TeX,names,tex_names,[title_ ' ' shock_name]);
 end
 
 function [fig] = plot_banded_irf_for_shock(irf,nvars, endo_names, shock_name,title_,dirname,options_,names,tex_names)
@@ -141,8 +141,8 @@ function [fig] = plot_banded_irf_for_shock(irf,nvars, endo_names, shock_name,tit
         disp([endo_names(k,:) ' shock from ' shock_name]);
         title([endo_names(k,:) ' shock from ' shock_name]);
     end
-    dyn_save_graph(dirname,['MS-IRF-' shock_name],options_.graph_save_formats, ...
-                   options_.TeX,names,tex_names,['IRF ' shock_name]);
+    dyn_save_graph(dirname,[title_ ' ' shock_name],options_.graph_save_formats, ...
+                   options_.TeX,names,tex_names,[title_ ' ' shock_name]);
 end
 
 

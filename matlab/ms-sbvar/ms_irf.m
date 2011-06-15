@@ -51,17 +51,25 @@ plot_ms_irf(M_,options_,irf,options_.varobs,'Ergodic Impulse Responses',varlist)
 
 [err, regime_irfs] = mex_ms_irf(opt{:}, 'free_parameters',oo_.ms.maxparams,'shocks_per_parameter', options_.ms.shock_draws,'regimes');
 mexErrCheck('mex_ms_irf ergodic regimes ',err);
+for i=1:size(regime_irfs,1)
+    plot_ms_irf(M_,options_,squeeze(regime_irfs(1,:,:,:)),options_.varobs,['Ergodic ' ...
+                        'Impulse Responses State ' int2str(i)],varlist);
+end
 save([M_.fname '/' options_.ms.output_file_tag '_ergodic_irf.mat'], 'irf', 'regime_irfs');
 
 if exist(options_.ms.load_mh_file,'file') > 0
     [err, irf] = mex_ms_irf(opt{:}, 'shocks_per_parameter', options_.ms.shocks_per_parameter, ...
         'parameter_uncertainty','simulation_file',options_.ms.load_mh_file);
     mexErrCheck('mex_ms_irf bayesian ',err);
-    plot_ms_irf(M_,options_,irf,options_.varobs,'Impulse Responses w/ Parameter Uncertainty',varlist);
+    plot_ms_irf(M_,options_,irf,options_.varobs,'Impulse Responses with Parameter Uncertainty',varlist);
     
     [err, regime_irfs] = mex_ms_irf(opt{:}, 'shocks_per_parameter', options_.ms.shocks_per_parameter, ...
         'simulation_file',options_.ms.load_mh_file,'parameter_uncertainty','regimes');
     mexErrCheck('mex_ms_irf bayesian regimes ',err);
+    for i=1:size(regime_irfs,1)
+        plot_ms_irf(M_,options_,squeeze(regime_irfs(1,:,:,:)),options_.varobs,['Impulse ' ...
+                            'Responses with Parameter Uncertainty State ' int2str(i)],varlist);
+    end
     save([M_.fname '/' options_.ms.output_file_tag '_bayesian_irf.mat'], 'irf', 'regime_irfs');
 end
 options_ = initialize_ms_sbvar_options(M_, options_);

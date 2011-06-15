@@ -30,7 +30,7 @@ function dyn_graph_save(dirname,graph_name,graph_formats,TeX,names,texnames,capt
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
   
-    graph_name = [dirname '/Output/' graph_name];
+    graph_name = [dirname '/Output/' regexprep(graph_name,' ','_')];
     if nargin <= 2
         Tex = 0
     elseif nargin <= 4
