@@ -3,9 +3,11 @@
 #
 # BEGIN EDIT
 #
-DYNAREV=4.2.0
+DYNAREV=4.3-unstable
 TOPDIR=..
-VIRGINTOPDIR=../../untouchedDynare420/dynare-4.2.0
+VIRGINTOPDIR=../../untouchedDynare430/dynare-4.3-unstable
+DOCDIR=doc
+DYNPPDIR=dynare++
 #
 # END EDIT
 #
@@ -49,13 +51,14 @@ cp    $TOPDIR/preprocessor/dynare_m       $INSTALDIR/matlab
 #
 mkdir "$INSTALDIR/mex"
 mkdir "$INSTALDIR/mex/matlab"
-mkdir "$INSTALDIR/mex/octave"
 
 # Octave
+mkdir "$INSTALDIR/mex/octave"
 cp $TOPDIR/mex/build/octave/bytecode/*.mex              $INSTALDIR/mex/octave
 cp $TOPDIR/mex/build/octave/dynare_simul_/*.mex         $INSTALDIR/mex/octave
 cp $TOPDIR/mex/build/octave/gensylv/*.mex               $INSTALDIR/mex/octave
 cp $TOPDIR/mex/build/octave/k_order_perturbation/*.mex  $INSTALDIR/mex/octave
+cp $TOPDIR/mex/build/octave/kalman_steady_state/*.mex   $INSTALDIR/mex/octave
 cp $TOPDIR/mex/build/octave/kronecker/*.mex             $INSTALDIR/mex/octave
 cp $TOPDIR/mex/build/octave/mjdgges/*.mex               $INSTALDIR/mex/octave
 cp $TOPDIR/mex/build/octave/ordschur/*.oct              $INSTALDIR/mex/octave
@@ -76,28 +79,30 @@ cp $TOPDIR/dynare++/extern/matlab/dynare_simul.m  $INSTALDIR/dynare++
 
 # pdf (dynare)
 mkdir "$INSTALDIR/doc"
-cp $TOPDIR/doc/bvar-a-la-sims.pdf                 $INSTALDIR/doc
-cp $TOPDIR/doc/dr.pdf                             $INSTALDIR/doc
-cp $TOPDIR/doc/guide.pdf                          $INSTALDIR/doc
-cp $TOPDIR/doc/manual.pdf                         $INSTALDIR/doc
-cp $TOPDIR/doc/macroprocessor/macroprocessor.pdf  $INSTALDIR/doc
-cp $TOPDIR/doc/parallel/parallel.pdf              $INSTALDIR/doc
-cp $TOPDIR/doc/preprocessor/preprocessor.pdf      $INSTALDIR/doc
-cp $TOPDIR/doc/userguide/UserGuide.pdf            $INSTALDIR/doc
+cp $DOCDIR/bvar-a-la-sims.pdf                 $INSTALDIR/doc
+cp $DOCDIR/dr.pdf                             $INSTALDIR/doc
+cp $DOCDIR/dynare.pdf                         $INSTALDIR/doc
+cp $DOCDIR/guide.pdf                          $INSTALDIR/doc
+cp $DOCDIR/macroprocessor/macroprocessor.pdf  $INSTALDIR/doc
+cp $DOCDIR/parallel/parallel.pdf              $INSTALDIR/doc
+cp $DOCDIR/preprocessor/preprocessor.pdf      $INSTALDIR/doc
+cp $DOCDIR/userguide/UserGuide.pdf            $INSTALDIR/doc
 
 # html
-cp -r $TOPDIR/doc/manual-html                     $INSTALDIR/doc
+mkdir "$INSTALDIR/doc/dynare.html"
+cp -r $DOCDIR/dynare.html/*.png                      $INSTALDIR/doc/dynare.html
+cp -r $DOCDIR/dynare.html/*.html                     $INSTALDIR/doc/dynare.html
 
 # pdf (dynare++)
 mkdir "$INSTALDIR/doc/dynare++"
-cp $TOPDIR/dynare++/doc/dynare++-tutorial.pdf     $INSTALDIR/doc/dynare++
-cp $TOPDIR/dynare++/doc/dynare++-ramsey.pdf       $INSTALDIR/doc/dynare++
-cp $TOPDIR/dynare++/sylv/sylvester.pdf            $INSTALDIR/doc/dynare++
-cp $TOPDIR/dynare++/tl/cc/tl.pdf                  $INSTALDIR/doc/dynare++
-cp $TOPDIR/dynare++/integ/cc/integ.pdf            $INSTALDIR/doc/dynare++
-cp $TOPDIR/dynare++/kord/kord.pdf                 $INSTALDIR/doc/dynare++
+cp $DYNPPDIR/doc/dynare++-tutorial.pdf     $INSTALDIR/doc/dynare++
+cp $DYNPPDIR/doc/dynare++-ramsey.pdf       $INSTALDIR/doc/dynare++
+cp $DYNPPDIR/sylv/sylvester.pdf            $INSTALDIR/doc/dynare++
+cp $DYNPPDIR/tl/cc/tl.pdf                  $INSTALDIR/doc/dynare++
+cp $DYNPPDIR/integ/cc/integ.pdf            $INSTALDIR/doc/dynare++
+cp $DYNPPDIR/kord/kord.pdf                 $INSTALDIR/doc/dynare++
 
 #
 # EXAMPLES
 #
-cp -r $TOPDIR/examples $INSTALDIR/
+cp -r $VIRGINTOPDIR/examples $INSTALDIR/
