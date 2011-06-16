@@ -114,6 +114,7 @@ mexFunction(int nlhs, mxArray *plhs[],
         for (s = 0; s < nstates; s++)
           {
             printf("Constructing percentiles for impulse responses - regime %d\n", s);
+            if (options->simulation_file) rewind(options->simulation_file);
             if (histogram = impulse_response_percentile_regime(options->simulation_file, options->thin, s, options->horizon, model, type))
               {
                 for (k = 0; k < options->num_percentiles; k++)

@@ -130,6 +130,7 @@ mexFunction(int nlhs, mxArray *plhs[],
                 }
               else
                 {
+                  if (options->simulation_file) rewind(options->simulation_file);
                   if (histogram = variance_decomposition_percentiles_regime(options->simulation_file, options->thin, s, options->horizon, model, type))
                     {
                       tvd = CreateMatrix(options->horizon, nvars*nvars);
