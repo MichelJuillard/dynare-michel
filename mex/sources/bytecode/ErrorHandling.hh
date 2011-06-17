@@ -505,9 +505,6 @@ public:
                 Stack.push(get_variable(eParameter, var));
                 if (compute)
                   Stackf.push(params[var]);
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case eEndogenous:
                 var = ((FLDV_ *) it_code->second)->get_pos();
@@ -530,10 +527,6 @@ public:
                     else
                       Stackf.push(y[(it_+lag)*y_size+var]);
                   }
-
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case eExogenous:
                 var = ((FLDV_ *) it_code->second)->get_pos();
@@ -549,9 +542,6 @@ public:
                 Stack.push(tmp_out.str());
                 if (compute)
                   Stackf.push(x[it_+lag+var*nb_row_x]);
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case eExogenousDet:
                 var = ((FLDV_ *) it_code->second)->get_pos();
@@ -567,9 +557,6 @@ public:
                 Stack.push(tmp_out.str());
                 if (compute)
                   Stackf.push(x[it_+lag+var*nb_row_xd]);
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case eModelLocalVariable:
                 break;
@@ -590,9 +577,6 @@ public:
                 Stack.push(get_variable(eParameter, var));
                 if (compute)
                   Stackf.push(params[var]);
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case eEndogenous:
                 var = ((FLDSV_ *) it_code->second)->get_pos();
@@ -612,9 +596,6 @@ public:
                     else
                       Stackf.push(steady_y[var]);
                   }
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case eExogenous:
                 var = ((FLDSV_ *) it_code->second)->get_pos();
@@ -627,9 +608,6 @@ public:
 #endif
                 if (compute)
                   Stackf.push(x[var]);
-#ifdef DEBUG
-                mexPrintf("okb\n");
-#endif
                 break;
               case eExogenousDet:
                 var = ((FLDSV_ *) it_code->second)->get_pos();
@@ -639,9 +617,6 @@ public:
                 Stack.push(get_variable(eExogenousDet, var));
                 if (compute)
                   Stackf.push(x[var]);
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case eModelLocalVariable:
                 break;
@@ -660,9 +635,6 @@ public:
             Stack.push(tmp_out.str());
             if (compute)
               Stackf.push(T[var*(periods+y_kmin+y_kmax)+it_]);
-#ifdef DEBUG
-            mexPrintf("ok\n");
-#endif
             break;
           case FLDST:
             //load a temporary variable in the processor
@@ -675,9 +647,6 @@ public:
             Stack.push(tmp_out.str());
             if (compute)
               Stackf.push(T[var]);
-#ifdef DEBUG
-            mexPrintf("ok\n");
-#endif
             break;
           case FLDU:
             //load u variable in the processor
@@ -691,9 +660,6 @@ public:
             var += Per_u_;
             if (compute)
               Stackf.push(u[var]);
-#ifdef DEBUG
-            mexPrintf("ok\n");
-#endif
             break;
           case FLDSU:
             //load u variable in the processor
@@ -706,9 +672,6 @@ public:
             Stack.push(tmp_out.str());
             if (compute)
               Stackf.push(u[var]);
-#ifdef DEBUG
-            mexPrintf("ok\n");
-#endif
             break;
           case FLDR:
             var = ((FLDR_ *) it_code->second)->get_pos();
@@ -720,9 +683,6 @@ public:
             Stack.push(tmp_out.str());
             if (compute)
               Stackf.push(r[var]);
-#ifdef DEBUG
-            mexPrintf("ok\n");
-#endif
             break;
           case FLDZ:
             //load 0 in the processor
@@ -734,9 +694,6 @@ public:
             Stack.push(tmp_out.str());
             if (compute)
               Stackf.push(0.0);
-#ifdef DEBUG
-            mexPrintf("ok\n");
-#endif
             break;
           case FLDC:
             //load a numerical constant in the processor
@@ -749,9 +706,6 @@ public:
             Stack.push(tmp_out.str());
             if (compute)
               Stackf.push(ll);
-#ifdef DEBUG
-            mexPrintf("ok\n");
-#endif
             break;
           case FSTPV:
             //load a variable in the processor
@@ -773,10 +727,6 @@ public:
                     params[var] = Stackf.top();
                     Stackf.pop();
                   }
-
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case eEndogenous:
                 var = ((FSTPV_ *) it_code->second)->get_pos();
@@ -799,9 +749,6 @@ public:
                     y[(it_+lag)*y_size+var] = Stackf.top();
                     Stackf.pop();
                   }
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case eExogenous:
                 var = ((FSTPV_ *) it_code->second)->get_pos();
@@ -822,9 +769,6 @@ public:
                     x[it_+lag+var*nb_row_x]  = Stackf.top();
                     Stackf.pop();
                   }
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case eExogenousDet:
                 var = ((FSTPV_ *) it_code->second)->get_pos();
@@ -845,9 +789,6 @@ public:
                     x[it_+lag+var*nb_row_xd] = Stackf.top();
                     Stackf.pop();
                   }
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               default:
                 mexPrintf("FSTPV: Unknown variable type\n");
@@ -874,9 +815,6 @@ public:
                     params[var] = Stackf.top();
                     Stackf.pop();
                   }
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case eEndogenous:
                 var = ((FSTPSV_ *) it_code->second)->get_pos();
@@ -894,9 +832,6 @@ public:
                     y[var] = Stackf.top();
                     Stackf.pop();
                   }
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case eExogenous:
               case eExogenousDet:
@@ -915,9 +850,6 @@ public:
                     x[var]  = Stackf.top();
                     Stackf.pop();
                   }
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               default:
                 mexPrintf("FSTPSV: Unknown variable type\n");
@@ -938,9 +870,6 @@ public:
                 T[var*(periods+y_kmin+y_kmax)+it_] = Stackf.top();
                 Stackf.pop();
               }
-#ifdef DEBUG
-            mexPrintf("ok\n");
-#endif
             break;
           case FSTPST:
             go_on = false;
@@ -957,9 +886,6 @@ public:
                 T[var] = Stackf.top();
                 Stackf.pop();
               }
-#ifdef DEBUG
-            mexPrintf("ok\n");
-#endif
             break;
           case FSTPU:
             go_on = false;
@@ -977,9 +903,6 @@ public:
                 u[var] = Stackf.top();
                 Stackf.pop();
               }
-#ifdef DEBUG
-            mexPrintf("ok\n");
-#endif
             break;
           case FSTPSU:
             go_on = false;
@@ -996,9 +919,6 @@ public:
                 u[var] = Stackf.top();
                 Stackf.pop();
               }
-#ifdef DEBUG
-            mexPrintf("ok\n");
-#endif
             break;
           case FSTPR:
             go_on = false;
@@ -1015,9 +935,6 @@ public:
                 r[var] = Stackf.top();
                 Stackf.pop();
               }
-#ifdef DEBUG
-            mexPrintf("ok\n");
-#endif
             break;
           case FSTPG:
             go_on = false;
@@ -1034,9 +951,6 @@ public:
                 g1[var] = Stackf.top();
                 Stackf.pop();
               }
-#ifdef DEBUG
-            mexPrintf("ok\n");
-#endif
             break;
           case FSTPG2:
             go_on = false;
@@ -1054,9 +968,6 @@ public:
                 jacob[eq + size*var] = Stackf.top();
                 Stackf.pop();
               }
-#ifdef DEBUG
-            mexPrintf("ok\n");
-#endif
             break;
           case FSTPG3:
             //store in derivative (g) variable from the processor
@@ -1148,9 +1059,6 @@ public:
                 tmp_out.str("");
                 tmp_out << v1 << " + " << v2;
                 Stack.push(tmp_out.str());
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case oMinus:
 #ifdef DEBUG
@@ -1173,9 +1081,6 @@ public:
                 if (found != string::npos)
                   tmp_out << ")";
                 Stack.push(tmp_out.str());
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case oTimes:
 #ifdef DEBUG
@@ -1198,9 +1103,6 @@ public:
                 if (found != string::npos)
                   tmp_out << ")";
                 Stack.push(tmp_out.str());
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case oDivide:
 #ifdef DEBUG
@@ -1235,9 +1137,6 @@ public:
                 if (found != string::npos)
                   tmp_out << ")";
                 Stack.push(tmp_out.str());
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case oLess:
 #ifdef DEBUG
@@ -1260,9 +1159,6 @@ public:
                 if (found != string::npos)
                   tmp_out << ")";
                 Stack.push(tmp_out.str());
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case oGreater:
 #ifdef DEBUG
@@ -1285,9 +1181,6 @@ public:
                 if (found != string::npos)
                   tmp_out << ")";
                 Stack.push(tmp_out.str());
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case oLessEqual:
 #ifdef DEBUG
@@ -1310,9 +1203,6 @@ public:
                 if (found != string::npos)
                   tmp_out << ")";
                 Stack.push(tmp_out.str());
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case oGreaterEqual:
 #ifdef DEBUG
@@ -1335,9 +1225,6 @@ public:
                 if (found != string::npos)
                   tmp_out << ")";
                 Stack.push(tmp_out.str());
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case oEqualEqual:
 #ifdef DEBUG
@@ -1360,9 +1247,6 @@ public:
                 if (found != string::npos)
                   tmp_out << ")";
                 Stack.push(tmp_out.str());
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case oDifferent:
 #ifdef DEBUG
@@ -1385,9 +1269,6 @@ public:
                 if (found != string::npos)
                   tmp_out << ")";
                 Stack.push(tmp_out.str());
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case oPower:
 #ifdef DEBUG
@@ -1421,9 +1302,6 @@ public:
                 if (found != string::npos)
                   tmp_out << ")";
                 Stack.push(tmp_out.str());
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case oPowerDeriv:
                 {
@@ -1475,9 +1353,6 @@ public:
                 tmp_out.str("");
                 tmp_out << "max(" << v1 << ", " << v2 << ")";
                 Stack.push(tmp_out.str());
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case oMin:
 #ifdef DEBUG
@@ -1488,9 +1363,6 @@ public:
                 tmp_out.str("");
                 tmp_out << "min(" << v1 << ", " << v2 << ")";
                 Stack.push(tmp_out.str());
-#ifdef DEBUG
-                mexPrintf("ok\n");
-#endif
                 break;
               case oEqual:
               default:

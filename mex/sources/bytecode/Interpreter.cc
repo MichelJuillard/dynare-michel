@@ -33,7 +33,7 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
                          int nb_row_x_arg, int nb_row_xd_arg, int periods_arg, int y_kmin_arg, int y_kmax_arg,
                          int maxit_arg_, double solve_tolf_arg, int size_of_direction_arg, double slowc_arg, int y_decal_arg, double markowitz_c_arg,
                          string &filename_arg, int minimal_solving_periods_arg, int stack_solve_algo_arg, int solve_algo_arg,
-                         bool global_temporary_terms_arg, bool print_arg, mxArray *GlobalTemporaryTerms_arg)
+                         bool global_temporary_terms_arg, bool print_arg, bool print_error_arg, mxArray *GlobalTemporaryTerms_arg)
 {
   params = params_arg;
   y = y_arg;
@@ -64,6 +64,7 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
   global_temporary_terms = global_temporary_terms_arg;
   print = print_arg;
   GlobalTemporaryTerms = GlobalTemporaryTerms_arg;
+  print_error = print_error_arg;
 }
 
 double
@@ -74,7 +75,8 @@ Interpreter::pow1(double a, double b)
     {
       res1 = NAN;
       r = 0.0000000000000000000000001;
-      throw PowExceptionHandling(a, b);
+      if (print_error)
+        throw PowExceptionHandling(a, b);
     }
   return r;
 }
@@ -87,7 +89,8 @@ Interpreter::divide(double a, double b)
     {
       res1 = NAN;
       r = 1e70;
-      throw DivideExceptionHandling(a, b);
+      if (print_error)
+        throw DivideExceptionHandling(a, b);
     }
   return r;
 }
@@ -100,7 +103,8 @@ Interpreter::log1(double a)
     {
       res1 = NAN;
       r = -1e70;
-      throw LogExceptionHandling(a);
+      if (print_error)
+        throw LogExceptionHandling(a);
     }
   return r;
 }
@@ -113,7 +117,8 @@ Interpreter::log10_1(double a)
     {
       res1 = NAN;
       r = -1e70;
-      throw Log10ExceptionHandling(a);
+      if (print_error)
+        throw Log10ExceptionHandling(a);
     }
   return r;
 }

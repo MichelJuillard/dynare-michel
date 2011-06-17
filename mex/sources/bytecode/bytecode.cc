@@ -68,6 +68,7 @@ Get_Arguments_and_global_variables(int nrhs,
                                    bool &steady_state, bool &evaluate, int &block,
                                    mxArray *M_[], mxArray *oo_[], mxArray *options_[], bool &global_temporary_terms,
                                    bool &print,
+                                   bool &print_error,
                                    mxArray *GlobalTemporaryTerms[])
 {
 #ifdef DEBUG_EX
@@ -127,6 +128,8 @@ Get_Arguments_and_global_variables(int nrhs,
             global_temporary_terms = true;
           else if (Get_Argument(prhs[i]) == "print")
             print = true;
+          else if (Get_Argument(prhs[i]) == "no_print_error")
+            print_error = false;
           else
             {
               int pos = Get_Argument(prhs[i]).find("block");
@@ -213,7 +216,7 @@ main(int nrhs, const char *prhs[])
   double *yd = NULL, *xd = NULL;
   int count_array_argument = 0;
   bool global_temporary_terms = false;
-  bool print = false;
+  bool print = false, print_error = true;
   double *steady_yd = NULL, *steady_xd = NULL;
   
   try
@@ -229,7 +232,7 @@ main(int nrhs, const char *prhs[])
 #endif
                                          steady_state, evaluate, block,
                                          &M_, &oo_, &options_, global_temporary_terms,
-                                         print, &GlobalTemporaryTerms);
+                                         print, print_error, &GlobalTemporaryTerms);
     }
   catch (GeneralExceptionHandling &feh)
     {
@@ -330,7 +333,7 @@ main(int nrhs, const char *prhs[])
   int nb_row_x = row_x;
   clock_t t0 = clock();
 
-  Interpreter interprete(params, y, ya, x, steady_yd, steady_xd, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal, markowitz_c, file_name, minimal_solving_periods, stack_solve_algo, solve_algo, global_temporary_terms, print, GlobalTemporaryTerms);
+  Interpreter interprete(params, y, ya, x, steady_yd, steady_xd, direction, y_size, nb_row_x, nb_row_xd, periods, y_kmin, y_kmax, maxit_, solve_tolf, size_of_direction, slowc, y_decal, markowitz_c, file_name, minimal_solving_periods, stack_solve_algo, solve_algo, global_temporary_terms, print, print_error, GlobalTemporaryTerms);
 
   string f(fname);
   mxFree(fname);
@@ -405,7 +408,7 @@ main(int nrhs, const char *prhs[])
                       jacob_field_number = 0;
                       jacob_exo_field_number = 1;
                       jacob_exo_det_field_number = 2;
-                      jacob_other_endo_field_number = 2;
+                      jacob_other_endo_field_number = 3;
                       mwSize dims[1] = {nb_blocks };
                       plhs[2] = mxCreateStructArray(1, dims, 4, field_names);
                     }

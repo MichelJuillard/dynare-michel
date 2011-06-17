@@ -74,14 +74,14 @@ protected:
   int minimal_solving_periods;
   int stack_solve_algo, solve_algo;
   bool global_temporary_terms;
-  bool print;
+  bool print, print_error;
 public:
   ~Interpreter();
   Interpreter(double *params_arg, double *y_arg, double *ya_arg, double *x_arg, double *steady_y_arg, double *steady_x_arg,
               double *direction_arg, int y_size_arg, int nb_row_x_arg,
               int nb_row_xd_arg, int periods_arg, int y_kmin_arg, int y_kmax_arg, int maxit_arg_, double solve_tolf_arg, int size_o_direction_arg,
               double slowc_arg, int y_decal_arg, double markowitz_c_arg, string &filename_arg, int minimal_solving_periods_arg, int stack_solve_algo_arg, int solve_algo_arg,
-              bool global_temporary_terms_arg, bool print_arg, mxArray *GlobalTemporaryTerms_arg);
+              bool global_temporary_terms_arg, bool print_arg, bool print_error_arg, mxArray *GlobalTemporaryTerms_arg);
   bool compute_blocks(string file_name, string bin_basename, bool steady_state, bool evaluate, int block, int &nb_blocks);
   inline mxArray *
   get_jacob(int block_num)
