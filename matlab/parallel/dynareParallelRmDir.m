@@ -38,7 +38,7 @@ end
 for indPC=1:length(Parallel),
     while (1)
         if ~ispc || strcmpi('unix',Parallel(indPC).OperatingSystem)
-            stat = system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' rm -fr ',Parallel(indPC).RemoteDirectory,'/',PRCDir]);
+            [stat NonServe] = system(['ssh ',Parallel(indPC).UserName,'@',Parallel(indPC).ComputerName,' rm -fr ',Parallel(indPC).RemoteDirectory,'/',PRCDir,]);
             break;
         else
             if exist('OCTAVE_VERSION'), % Patch for peculiar behaviour of rmdir under Windows.
