@@ -55,7 +55,7 @@ oo_.exo_simul = tempex;
 
 eigenvalues_ = dr.eigval;
 if (options_.block)
-    nyf = dr.nfwrd+dr.nboth;
+    nyf = dr.nyf;
 else
     nyf = nnz(dr.kstate(:,2)>M_.maximum_endo_lag+1);
 end;

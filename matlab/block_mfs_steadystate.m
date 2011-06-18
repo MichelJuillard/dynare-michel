@@ -21,9 +21,7 @@ function [r, g1] = block_mfs_steadystate(y, b, y_all)
 
 global M_ oo_
 
-indx = M_.blocksMFS{b};
-
-y_all(indx) = y;
+y_all(M_.blocksMFS{b}) = y;
 x = [oo_.exo_steady_state; oo_.exo_det_steady_state];
 
 eval(['[r,g1] = ' M_.fname '_static(b, y_all, x, M_.params);']);

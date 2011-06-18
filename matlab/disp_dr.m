@@ -109,7 +109,11 @@ for k=1:nx
     end;
     str = sprintf('%-20s',str1);
     for i=1:nvar
-        x = dr.ghx(ivar(i),k);
+        if options_.block
+            x = dr.ghx(i,k);
+        else
+            x = dr.ghx(ivar(i),k);
+        end;
         if abs(x) > 1e-6
             flag = 1;
             str = [str sprintf('%16.6f',x)];
@@ -128,7 +132,11 @@ for k=1:nu
     flag = 0;
     str = sprintf('%-20s',M_.exo_names(k,:));
     for i=1:nvar
-        x = dr.ghu(ivar(i),k);
+        if options_.block
+            x = dr.ghu(i,k);
+        else
+            x = dr.ghu(ivar(i),k);
+        end;
         if abs(x) > 1e-6
             flag = 1;
             str = [str sprintf('%16.6f',x)];

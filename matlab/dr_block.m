@@ -27,7 +27,7 @@ function [dr,info,M_,options_,oo_] = dr_block(dr,task,M_,options_,oo_)
 %  
 % ALGORITHM
 %   first order block relaxation method applied to the model
-%    E[A Yt-1 + B Yt + C Yt-1 + ut] = 0
+%    E[A Yt-1 + B Yt + C Yt+1 + ut] = 0
 %    
 % SPECIAL REQUIREMENTS
 %   none.
@@ -52,7 +52,10 @@ function [dr,info,M_,options_,oo_] = dr_block(dr,task,M_,options_,oo_)
 
 info = 0;
 verbose = 0;
-%it_ = M_.maximum_lag + 1;
+if options_.order > 1
+    error('2nd and 3rd order approximation not implemented with block option')
+end
+
 z = repmat(dr.ys,1,M_.maximum_lead + M_.maximum_lag + 1);
 if (isfield(M_,'block_structure'))
     data = M_.block_structure.block;
@@ -62,11 +65,9 @@ else
     Size = 1;
 end;
 if (options_.bytecode)
-    [chck, zz, data]= bytecode('dynamic','evaluate',z,[oo_.exo_simul ...
-                        oo_.exo_det_simul], M_.params, dr.ys, 1, data);
+    [chck, zz, data]= bytecode('dynamic','evaluate',z,[oo_.exo_simul oo_.exo_det_simul], M_.params, dr.ys, 1, data);
 else
-    [r, data] = feval([M_.fname '_dynamic'], z', [oo_.exo_simul ...
-                        oo_.exo_det_simul], M_.params, dr.ys, 2, data);
+    [r, data] = feval([M_.fname '_dynamic'], z', [oo_.exo_simul oo_.exo_det_simul], M_.params, dr.ys, M_.maximum_lag+1, data);
     chck = 0;
 end;
 mexErrCheck('bytecode', chck);
@@ -77,14 +78,26 @@ dr.nfwrd = 0;
 dr.npred = 0;
 dr.nboth = 0;
 dr.nd = 0;
-dr.state_var = [];
-dr.exo_var = [];
+
 dr.ghx = [];
 dr.ghu = [];
+%Determine the global list of state variables:
+dr.state_var = M_.state_var;
+M_.block_structure.state_var = dr.state_var;
+n_sv = size(dr.state_var, 2);
+dr.ghx = zeros(M_.endo_nbr, length(dr.state_var));
+dr.exo_var = 1:M_.exo_nbr;
+dr.ghu = zeros(M_.endo_nbr, M_.exo_nbr);
+dr.nstatic = M_.nstatic;
+dr.nfwrd = M_.nfwrd;
+dr.npred = M_.npred;
+dr.nboth = M_.nboth;
+dr.nyf = 0;
 for i = 1:Size;
     ghx = [];
     indexi_0 = 0;
     if (verbose)
+        disp('======================================================================');
         disp(['Block ' int2str(i)]);
         disp('-----------');
         data(i)
@@ -93,15 +106,13 @@ for i = 1:Size;
     n_fwrd = data(i).n_forward;
     n_both = data(i).n_mixed;
     n_static = data(i).n_static;
-    dr.nstatic = dr.nstatic + n_static;
-    dr.nfwrd = dr.nfwrd + n_fwrd;
-    dr.npred = dr.npred + n_pred;
-    dr.nboth = dr.nboth + n_both;
+    dr.nyf = dr.nyf  + n_fwrd + n_both;
     nd = n_pred + n_fwrd + 2*n_both;
     dr.nd = dr.nd + nd;
     n_dynamic = n_pred + n_fwrd + n_both;
     exo_nbr = M_.block_structure.block(i).exo_nbr;
     exo_det_nbr = M_.block_structure.block(i).exo_det_nbr;
+    other_endo_nbr = M_.block_structure.block(i).other_endo_nbr;
     jacob = full(data(i).g1);
     lead_lag_incidence = data(i).lead_lag_incidence;
     endo = data(i).variable;
@@ -116,48 +127,120 @@ for i = 1:Size;
     maximum_lead = data(i).maximum_endo_lead;
     n = n_dynamic + n_static;
     
-
-    switch M_.block_structure.block(i).Simulation_Type
+    block_type = M_.block_structure.block(i).Simulation_Type;
+    if task ~= 1
+        if block_type == 2 || block_type == 4 || block_type == 6 
+            block_type = 8;
+        end;
+    end;
+    if maximum_lag > 0 && n_pred > 0 && block_type ~= 1 
+        indexi_0 = min(lead_lag_incidence(2,:));
+    end;
+    switch block_type
       case 1
+      %% ------------------------------------------------------------------
         %Evaluate Forward
         if maximum_lag > 0 && n_pred > 0
             indx_r = find(M_.block_structure.block(i).lead_lag_incidence(1,:));
             indx_c = M_.block_structure.block(i).lead_lag_incidence(1,indx_r);
             data(i).eigval = diag(jacob(indx_r, indx_c));
-            data(i).rank = sum(abs(data(i).eigval) > 0);
+            data(i).rank = 0;
         else
             data(i).eigval = [];
             data(i).rank = 0;
         end
         dr.eigval = [dr.eigval ; data(i).eigval];
+        dr.rank = dr.rank + data(i).rank;
         %First order approximation
         if task ~= 1
-            if (maximum_lag > 0)
-                indexi_0 = min(lead_lag_incidence(2,:));
-                indx_r = find(M_.block_structure.block(i).lead_lag_incidence(1,:));
-                indx_c = M_.block_structure.block(i).lead_lag_incidence(1,indx_r);
-                ghx = jacob(indx_r, indx_c);
+            [tmp1, tmp2, indx_c] = find(M_.block_structure.block(i).lead_lag_incidence(2,:));
+            B = jacob(:,indx_c);
+            if (maximum_lag > 0 && n_pred > 0)
+                [indx_r, tmp1, indx_r_v]  = find(M_.block_structure.block(i).lead_lag_incidence(1,:));
+                ghx = - B \ jacob(:,indx_r_v);
             end;
-            ghu = data(i).g1_x;
+            if other_endo_nbr
+                fx = data(i).g1_o;
+                % retrieves the derivatives with respect to endogenous
+                % variable belonging to previous blocks
+                fx_tm1 = zeros(n,other_endo_nbr);
+                fx_t = zeros(n,other_endo_nbr);
+                fx_tp1 = zeros(n,other_endo_nbr);
+                % stores in fx_tm1 the lagged values of fx
+                [r, c, lag] = find(data(i).lead_lag_incidence_other(1,:));
+                fx_tm1(:,c) = fx(:,lag);
+                % stores in fx the current values of fx
+                [r, c, curr] = find(data(i).lead_lag_incidence_other(2,:));
+                fx_t(:,c) = fx(:,curr);
+                % stores in fx_tm1 the leaded values of fx
+                [r, c, lead] = find(data(i).lead_lag_incidence_other(3,:));
+                fx_tp1(:,c) = fx(:,lead);
+
+                l_x = dr.ghx(data(i).other_endogenous,:);
+                l_x_sv = dr.ghx(dr.state_var, 1:n_sv);
+
+                selector_tm1 = M_.block_structure.block(i).tm1;
+               
+                ghx_other = - B \ (fx_t * l_x + (fx_tp1 * l_x * l_x_sv) + fx_tm1 * selector_tm1);
+                dr.ghx(endo, :) = dr.ghx(endo, :) + ghx_other;
+            end;
+            
+            if exo_nbr
+                fu = data(i).g1_x;
+                exo = dr.exo_var;
+                if other_endo_nbr > 0
+                    l_u_sv = dr.ghu(dr.state_var,:);
+                    l_x = dr.ghx(data(i).other_endogenous,:);
+                    l_u = dr.ghu(data(i).other_endogenous,:);
+                    fu_complet = zeros(n, M_.exo_nbr);
+                    fu_complet(:,data(i).exogenous) = fu;
+                    ghu = - B \ (fu_complet + fx_tp1 * l_x * l_u_sv + (fx_t) * l_u );
+                else
+                    fu_complet = zeros(n, M_.exo_nbr);
+                    fu_complet(:,data(i).exogenous) = fu;
+                    ghu = - B \ fu_complet;
+                end;
+            else
+                exo = dr.exo_var;
+                if other_endo_nbr > 0
+                     l_u_sv = dr.ghu(dr.state_var,:);
+                     l_x = dr.ghx(data(i).other_endogenous,:);
+                     l_u = dr.ghu(data(i).other_endogenous,:);
+                     ghu = -B \ (fx_tp1 * l_x * l_u_sv + (fx_t) * l_u );
+                else
+                    ghu = [];
+                end
+            end
         end
       case 2
+      %% ------------------------------------------------------------------
         %Evaluate Backward
         if maximum_lead > 0 && n_fwrd > 0
             indx_r = find(M_.block_structure.block(i).lead_lag_incidence(2,:));
             indx_c = M_.block_structure.block(i).lead_lag_incidence(2,indx_r);
-            data(i).eigval = 1./ diag(jacob(indx_r, indx_c));
+            data(i).eigval = 1 ./ diag(jacob(indx_r, indx_c));
             data(i).rank = sum(abs(data(i).eigval) > 0);
         else
             data(i).eigval = [];
             data(i).rank = 0;
         end
-        dr.rank = dr.rank + data(i).rank;
         dr.eigval = [dr.eigval ; data(i).eigval];
+        dr.rank = dr.rank + data(i).rank;
+        %First order approximation
+        if task ~= 1
+            if (maximum_lag > 0)
+                indx_r = find(M_.block_structure.block(i).lead_lag_incidence(3,:));
+                indx_c = M_.block_structure.block(i).lead_lag_incidence(3,indx_r);
+                ghx = - inv(jacob(indx_r, indx_c));
+            end;
+            ghu =  - inv(jacob(indx_r, indx_c)) * data(i).g1_x;
+        end
       case 3
-        %Solve Forward simple
+      %% ------------------------------------------------------------------
+        %Solve Forward single equation
         if maximum_lag > 0 && n_pred > 0
             data(i).eigval = - jacob(1 , 1 : n_pred) / jacob(1 , n_pred + n_static + 1 : n_pred + n_static + n_pred + n_both);
-            data(i).rank = sum(abs(data(i).eigval) > 0);
+            data(i).rank = 0;
         else
             data(i).eigval = [];
             data(i).rank = 0;
@@ -166,13 +249,63 @@ for i = 1:Size;
         %First order approximation
         if task ~= 1
             if (maximum_lag > 0)
-                indexi_0 = min(lead_lag_incidence(2,:));
-                ghx = - jacob(1 , 1 : n_pred) / jacob(1 , n_pred + n_static + 1 : n_pred + n_static + n_pred + n_both);
+                 ghx = - jacob(1 , 1 : n_pred) / jacob(1 , n_pred + n_static + 1 : n_pred + n_static + n_pred + n_both);
+            else
+                 ghx = 0;
             end;
-            ghu = data(i).g1_x;
+            if other_endo_nbr
+                fx = data(i).g1_o;
+                % retrieves the derivatives with respect to endogenous
+                % variable belonging to previous blocks
+                fx_tm1 = zeros(n,other_endo_nbr);
+                fx_t = zeros(n,other_endo_nbr);
+                fx_tp1 = zeros(n,other_endo_nbr);
+                % stores in fx_tm1 the lagged values of fx
+                [r, c, lag] = find(data(i).lead_lag_incidence_other(1,:));
+                fx_tm1(:,c) = fx(:,lag);
+                % stores in fx the current values of fx
+                [r, c, curr] = find(data(i).lead_lag_incidence_other(2,:));
+                fx_t(:,c) = fx(:,curr);
+                % stores in fx_tm1 the leaded values of fx
+                [r, c, lead] = find(data(i).lead_lag_incidence_other(3,:));
+                fx_tp1(:,c) = fx(:,lead);
+
+                l_x = dr.ghx(data(i).other_endogenous,:);
+                l_x_sv = dr.ghx(dr.state_var, 1:n_sv);
+                
+                selector_tm1 = M_.block_structure.block(i).tm1;
+                ghx_other = - (fx_t * l_x + (fx_tp1 * l_x * l_x_sv) + fx_tm1 * selector_tm1) / jacob(1 , n_pred + 1 : n_pred + n_static + n_pred + n_both);
+                dr.ghx(endo, :) = dr.ghx(endo, :) + ghx_other;
+
+            end;
+            if exo_nbr
+                fu = data(i).g1_x;
+                if other_endo_nbr > 0
+                    l_u_sv = dr.ghu(dr.state_var,:);
+                    l_x = dr.ghx(data(i).other_endogenous,:);
+                    l_u = dr.ghu(data(i).other_endogenous,:);
+                    fu_complet = zeros(n, M_.exo_nbr);
+                    fu_complet(:,data(i).exogenous) = fu;
+                    ghu = -(fu_complet + fx_tp1 * l_x * l_u_sv + (fx_t) * l_u ) / jacob(1 , n_pred + 1 : n_pred + n_static + n_pred + n_both);
+                    exo = dr.exo_var;
+                else
+                    ghu = - fu  / jacob(1 , n_pred + 1 : n_pred + n_static + n_pred + n_both);
+                end;
+            else
+                 if other_endo_nbr > 0
+                     l_u_sv = dr.ghu(dr.state_var,:);
+                     l_x = dr.ghx(data(i).other_endogenous,:);
+                     l_u = dr.ghu(data(i).other_endogenous,:);
+                     ghu = -(fx_tp1 * l_x * l_u_sv + (fx_t) * l_u ) / jacob(1 , n_pred + 1 : n_pred + n_static + n_pred + n_both);
+                     exo = dr.exo_var;
+                 else
+                     ghu = [];
+                 end
+            end
         end
       case 4
-        %Solve Backward simple
+      %% ------------------------------------------------------------------
+        %Solve Backward single equation
         if maximum_lead > 0 && n_fwrd > 0
             data(i).eigval = - jacob(1 , n_pred + n - n_fwrd + 1 : n_pred + n) / jacob(1 , n_pred + n + 1 : n_pred + n + n_fwrd) ;
             data(i).rank = sum(abs(data(i).eigval) > 0);
@@ -183,17 +316,74 @@ for i = 1:Size;
         dr.rank = dr.rank + data(i).rank;
         dr.eigval = [dr.eigval ; data(i).eigval];
       case 5
+      %% ------------------------------------------------------------------
         %Solve Forward complete
         if maximum_lag > 0 && n_pred > 0
             data(i).eigval = eig(- jacob(: , 1 : n_pred) / ...
                                  jacob(: , (n_pred + n_static + 1 : n_pred + n_static + n_pred )));
-            data(i).rank = sum(abs(data(i).eigval) > 0);
+            data(i).rank = 0;
         else
             data(i).eigval = [];
             data(i).rank = 0;
         end;
         dr.eigval = [dr.eigval ; data(i).eigval];
+        if task ~= 1
+            if (maximum_lag > 0)
+                 ghx = - jacob(1 , 1 : n_pred) / jacob(1 , n_pred + n_static + 1 : n_pred + n_static + n_pred + n_both);
+            else
+                 ghx = 0;
+            end;
+            if other_endo_nbr
+                fx = data(i).g1_o;
+                % retrieves the derivatives with respect to endogenous
+                % variable belonging to previous blocks
+                fx_tm1 = zeros(n,other_endo_nbr);
+                fx_t = zeros(n,other_endo_nbr);
+                fx_tp1 = zeros(n,other_endo_nbr);
+                % stores in fx_tm1 the lagged values of fx
+                [r, c, lag] = find(data(i).lead_lag_incidence_other(1,:));
+                fx_tm1(:,c) = fx(:,lag);
+                % stores in fx the current values of fx
+                [r, c, curr] = find(data(i).lead_lag_incidence_other(2,:));
+                fx_t(:,c) = fx(:,curr);
+                % stores in fx_tm1 the leaded values of fx
+                [r, c, lead] = find(data(i).lead_lag_incidence_other(3,:));
+                fx_tp1(:,c) = fx(:,lead);
+
+                l_x = dr.ghx(data(i).other_endogenous,:);
+                l_x_sv = dr.ghx(dr.state_var, 1:n_sv);
+                
+                selector_tm1 = M_.block_structure.block(i).tm1;
+                ghx_other = - (fx_t * l_x + (fx_tp1 * l_x * l_x_sv) + fx_tm1 * selector_tm1) / jacob(1 , n_pred + 1 : n_pred + n_static + n_pred + n_both);
+                dr.ghx(endo, :) = dr.ghx(endo, :) + ghx_other;
+            end;
+            if exo_nbr
+                fu = data(i).g1_x;
+                if other_endo_nbr > 0
+                    l_u_sv = dr.ghu(dr.state_var,:);
+                    l_x = dr.ghx(data(i).other_endogenous,:);
+                    l_u = dr.ghu(data(i).other_endogenous,:);
+                    fu_complet = zeros(n, M_.exo_nbr);
+                    fu_complet(:,data(i).exogenous) = fu;
+                    ghu = -(fu_complet + fx_tp1 * l_x * l_u_sv + (fx_t) * l_u ) / jacob(1 , n_pred + 1 : n_pred + n_static + n_pred + n_both);
+                    exo = dr.exo_var;
+                else
+                    ghu = - fu  / jacob(1 , n_pred + 1 : n_pred + n_static + n_pred + n_both);
+                end;
+            else
+                 if other_endo_nbr > 0
+                     l_u_sv = dr.ghu(dr.state_var,:);
+                     l_x = dr.ghx(data(i).other_endogenous,:);
+                     l_u = dr.ghu(data(i).other_endogenous,:);
+                     ghu = -(fx_tp1 * l_x * l_u_sv + (fx_t) * l_u ) / jacob(1 , n_pred + 1 : n_pred + n_static + n_pred + n_both);
+                     exo = dr.exo_var;
+                 else
+                     ghu = [];
+                 end
+            end
+        end
       case 6
+      %% ------------------------------------------------------------------
         %Solve Backward complete
         if maximum_lead > 0 && n_fwrd > 0
             data(i).eigval = eig(- jacob(: , n_pred + n - n_fwrd + 1: n_pred + n))/ ...
@@ -206,26 +396,25 @@ for i = 1:Size;
         dr.rank = dr.rank + data(i).rank;
         dr.eigval = [dr.eigval ; data(i).eigval];
       case 8
-        %The lead_lag_incidence contains columns in the following order :
+      %% ------------------------------------------------------------------
+        %The lead_lag_incidence contains columns in the following order:
         %  static variables, backward variable, mixed variables and forward variables
         %  
-        %Procedes to a QR decomposition on the jacobian matrix to reduce the problem size
+        %Proceeds to a QR decomposition on the jacobian matrix in order to reduce the problem size
         index_c = lead_lag_incidence(2,:);             % Index of all endogenous variables present at time=t
         index_s = lead_lag_incidence(2,1:n_static);    % Index of all static endogenous variables present at time=t
         if n_static > 0
-            [Q, R] = qr(jacob(:,index_s));
+            [Q, junk] = qr(jacob(:,index_s));
             aa = Q'*jacob;
         else
             aa = jacob;
         end;
-        indexi_0 = min(lead_lag_incidence(2,:));
         index_0m = (n_static+1:n_static+n_pred) + indexi_0 - 1;
         index_0p = (n_static+n_pred+1:n) + indexi_0 - 1;
         index_m = 1:(n_pred+n_both);
         indexi_p = max(lead_lag_incidence(2,:))+1;
         index_p = indexi_p:size(jacob, 2);
         nyf = n_fwrd + n_both;
-
         A = aa(:,index_m);  % Jacobain matrix for lagged endogeneous variables
         B = aa(:,index_c);  % Jacobian matrix for contemporaneous endogeneous variables
         C = aa(:,index_p);  % Jacobain matrix for led endogeneous variables
@@ -236,6 +425,7 @@ for i = 1:Size;
         E = [-aa(row_indx,[index_m index_0p])  ; [zeros(n_both, n_both + n_pred) eye(n_both, n_both + n_fwrd) ] ];
 
         [err, ss, tt, w, sdim, data(i).eigval, info1] = mjdgges(E,D,options_.qz_criterium);
+
         if (verbose)
             disp('eigval');
             disp(data(i).eigval);
@@ -245,7 +435,6 @@ for i = 1:Size;
             info(2) = info1;
             return
         end
-        %sdim
         nba = nd-sdim;
         if task == 1
             data(i).rank = rank(w(nd-nyf+1:end,nd-nyf+1:end));
@@ -268,11 +457,11 @@ for i = 1:Size;
                 if isfield(options_,'indeterminacy_continuity')
                     if options_.indeterminacy_msv == 1
                         [ss,tt,w,q] = qz(e',d');
-                        [ss,tt,w,q] = reorder(ss,tt,w,q);
+                        [ss,tt,w,junk] = reorder(ss,tt,w,q);
                         ss = ss';
                         tt = tt';
                         w  = w';
-                        nba = nyf;
+                        %nba = nyf;
                     end
                 else
                     if nba > nyf
@@ -286,24 +475,24 @@ for i = 1:Size;
                     return
                 end
             end
-            indx_stable_root = 1: (nd - nyf);    %=> index of stable roots
-            indx_explosive_root = n_pred + 1:nd;  %=> index of explosive roots
-
+            indx_stable_root = 1: (nd - nyf);     %=> index of stable roots
+            indx_explosive_root = n_pred + n_both + 1:nd;  %=> index of explosive roots
             % derivatives with respect to dynamic state variables
             % forward variables
             Z = w';
             Z11t = Z(indx_stable_root,    indx_stable_root)';
             Z21  = Z(indx_explosive_root, indx_stable_root);
             Z22  = Z(indx_explosive_root, indx_explosive_root);
-            
             if ~isfloat(Z21) && (condest(Z21) > 1e9)
                 % condest() fails on a scalar under Octave
                 info(1) = 5;
                 info(2) = condest(Z21);
                 return;
             else
-                gx = -inv(Z22) * Z21;
+                %gx = -inv(Z22) * Z21;
+                gx = - Z22 \ Z21;
             end
+
             % predetermined variables
             hx =  Z11t * inv(tt(indx_stable_root, indx_stable_root)) * ss(indx_stable_root, indx_stable_root) * inv(Z11t);
             
@@ -312,157 +501,178 @@ for i = 1:Size;
 
             ghx = [hx(k1,:); gx(k2(n_both+1:end),:)];
             
-            if (verbose)
-                disp('ghx');
-                disp(ghx);
-            end;
-            
             %lead variables actually present in the model
             
-            j4 = n_static+n_pred+1:n_static+n_pred+n_both+n_fwrd;
-            j3 = nonzeros(lead_lag_incidence(2,j4)) - n_static - 2 * n_pred - n_both;
-            j4 = find(lead_lag_incidence(2,j4));
-            if (verbose)
-                disp('j3');
-                disp(j3);
-                disp('j4');
-                disp(j4);
+            j4 = n_static+n_pred+1:n_static+n_pred+n_both+n_fwrd;   % Index on the forward and both variables
+            j3 = nonzeros(lead_lag_incidence(2,j4)) - n_static - 2 * n_pred - n_both;  % Index on the non-zeros forward and both variables
+            j4 = find(lead_lag_incidence(2,j4)); 
+            
+            if n_static > 0
+                B_static = B(:,1:n_static);  % submatrix containing the derivatives w.r. to static variables
+            else
+                B_static = [];
+            end;
+            %static variables, backward variable, mixed variables and forward variables
+            B_pred = B(:,n_static+1:n_static+n_pred+n_both);
+            B_fyd = B(:,n_static+n_pred+n_both+1:end);
+
+            % static variables
+            if n_static > 0
+                temp = - C(1:n_static,j3)*gx(j4,:)*hx;
+                j5 = index_m;
+                b = aa(:,index_c);
+                b10 = b(1:n_static, 1:n_static);
+                b11 = b(1:n_static, n_static+1:n);
+                temp(:,j5) = temp(:,j5)-A(1:n_static,:);
+                temp = b10\(temp-b11*ghx);
+                ghx = [temp; ghx];
+                temp = [];
+            end;
+            
+            if other_endo_nbr
+                if n_static > 0
+                     fx = Q' * data(i).g1_o;
+                else
+                    fx = data(i).g1_o;
+                end;
+                % retrieves the derivatives with respect to endogenous
+                % variable belonging to previous blocks
+                fx_tm1 = zeros(n,other_endo_nbr);
+                fx_t = zeros(n,other_endo_nbr);
+                fx_tp1 = zeros(n,other_endo_nbr);
+                % stores in fx_tm1 the lagged values of fx
+                [r, c, lag] = find(data(i).lead_lag_incidence_other(1,:));
+                fx_tm1(:,c) = fx(:,lag);
+                % stores in fx the current values of fx
+                [r, c, curr] = find(data(i).lead_lag_incidence_other(2,:));
+                fx_t(:,c) = fx(:,curr);
+                % stores in fx_tp1 the leaded values of fx
+                [r, c, lead] = find(data(i).lead_lag_incidence_other(3,:));
+                fx_tp1(:,c) = fx(:,lead);
+
+                l_x = dr.ghx(data(i).other_endogenous,:);
+                
+                l_x_sv = dr.ghx(dr.state_var, :);
+                
+                selector_tm1 = M_.block_structure.block(i).tm1; 
+
+                A_ = real([B_static C(:,j3)*gx+B_pred B_fyd]); % The state_variable of the block are located at [B_pred B_both]
+                B_ = [zeros(size(B_static)) zeros(n,n_pred) C(:,j3) ];
+                C_ = l_x_sv;
+                D_ = (fx_t * l_x + fx_tp1 * l_x * l_x_sv + fx_tm1 * selector_tm1 );
+                % Solve the Sylvester equation:
+                % A_ * gx + B_ * gx * C_ + D_ = 0
+                %vghx_other = - inv(kron(eye(size(D_,2)), A_) + kron(C_', B_)) * vec(D_);
+                %ghx_other = reshape(vghx_other, size(D_,1), size(D_,2));
+                ghx_other = sylvester3(A_, B_, C_, -D_);
+                if options_.aim_solver ~= 1 && options_.use_qzdiv
+                   % Necessary when using Sims' routines for QZ
+                   ghx_other = real(ghx_other);
+                end
+                
+                dr.ghx(endo, :) = dr.ghx(endo, :) + ghx_other;
             end;
 
-            % derivatives with respect to exogenous variables
             if exo_nbr
                 if n_static > 0
                     fu = Q' * data(i).g1_x;
                 else
                     fu = data(i).g1_x;
                 end;
-                
-                B_static = [];
-                if n_static > 0
-                    B_static = B(:,1:n_static);  % submatrix containing the derivatives w.r. to static variables
-                end
-                B_pred = B(:,n_static+1:n_static+n_pred);
-                B_fyd = B(:,n_static+n_pred+1:end);
 
-                ghu = -[B_static C(:,j3)*gx(j4,1:n_pred)+B_pred B_fyd]\fu;
-                if (verbose)
-                    disp('ghu');
-                    disp(ghu);
+                if other_endo_nbr > 0
+                    l_u_sv = dr.ghu(dr.state_var,:);
+                    l_x = dr.ghx(data(i).other_endogenous,:);
+                    l_u = dr.ghu(data(i).other_endogenous,:);
+                    fu_complet = zeros(n, M_.exo_nbr);
+                    fu_complet(:,data(i).exogenous) = fu;
+                    % Solve the equation in ghu:
+                    % A_ * ghu + (fu_complet + fx_tp1 * l_x * l_u_sv + (fx_t + B_ * ghx_other) * l_u ) = 0
+                    
+                    ghu = -A_\ (fu_complet + fx_tp1 * l_x * l_u_sv + fx_t * l_u + B_ * ghx_other  * l_u_sv  );
+                    exo = dr.exo_var;
+                else
+                    ghu = - A_ / fu;
                 end;
             else
-                ghu = [];
+                if other_endo_nbr > 0
+                    l_u_sv = dr.ghu(dr.state_var,:);
+                    l_x = dr.ghx(data(i).other_endogenous,:);
+                    l_u = dr.ghu(data(i).other_endogenous,:);
+                    % Solve the equation in ghu:
+                    % A_ * ghu + (fx_tp1 * l_x * l_u_sv + (fx_t + B_ * ghx_other) * l_u ) = 0
+                    ghu = -real(A_)\ (fx_tp1 * l_x * l_u_sv + (fx_t * l_u + B_ * ghx_other * l_u_sv) );
+                    exo = dr.exo_var;
+                else
+                    ghu = [];
+                end;
             end
 
-            % static variables
-            if n_static > 0
-                temp = - C(1:n_static,j3)*gx(j4,:)*hx;
-                if (verbose)
-                    disp('temp');
-                    disp(temp);
-                end;
-                j5 = index_m;
-                if (verbose)
-                    disp('j5');
-                    disp(j5);
-                end;
-                b = aa(:,index_c);
-                b10 = b(1:n_static, 1:n_static);
-                b11 = b(1:n_static, n_static+1:n);
-                if (verbose)
-                    disp('b10');
-                    disp(b10);
-                    disp('b11');
-                    disp(b11);
-                end;
-                temp(:,j5) = temp(:,j5)-A(1:n_static,:);
-                if (verbose)
-                    disp('temp');
-                    disp(temp);
-                end;
-                disp(temp-b11*ghx);
-                temp = b10\(temp-b11*ghx);
-                if (verbose)
-                    disp('temp');
-                    disp(temp);
-                end;
-                ghx = [temp; ghx];
-                temp = [];
-                if (verbose)
-                    disp('ghx');
-                    disp(ghx);
-                end;
-            end
+
             
             if options_.loglinear == 1
-                k = find(dr.kstate(:,2) <= M_.maximum_endo_lag+1);
-                klag = dr.kstate(k,[1 2]);
-                k1 = dr.order_var;
-                
-                ghx = repmat(1./dr.ys(k1),1,size(ghx,2)).*ghx.* ...
-                      repmat(dr.ys(k1(klag(:,1)))',size(ghx,1),1);
-                ghu = repmat(1./dr.ys(k1),1,size(ghu,2)).*ghu;
+                error('log linear option is for the moment not supported in first order approximation for a block decomposed mode');
+%                 k = find(dr.kstate(:,2) <= M_.maximum_endo_lag+1);
+%                 klag = dr.kstate(k,[1 2]);
+%                 k1 = dr.order_var;
+%                 
+%                 ghx = repmat(1./dr.ys(k1),1,size(ghx,2)).*ghx.* ...
+%                       repmat(dr.ys(k1(klag(:,1)))',size(ghx,1),1);
+%                 ghu = repmat(1./dr.ys(k1),1,size(ghu,2)).*ghu;
             end
+
 
             if options_.aim_solver ~= 1 && options_.use_qzdiv
                 % Necessary when using Sims' routines for QZ
-                gx = real(gx);
-                hx = real(hx);
                 ghx = real(ghx);
                 ghu = real(ghu);
             end
-            ghx
+
             %exogenous deterministic variables
             if exo_det_nbr > 0
-                f1 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+2:end,order_var))));
-                f0 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+1,order_var))));
-                fudet = data(i).g1_xd;
-                M1 = inv(f0+[zeros(n,n_static) f1*gx zeros(n,nyf-n_both)]);
-                M2 = M1*f1;
-                dr.ghud = cell(M_.exo_det_length,1);
-                dr.ghud{1} = -M1*fudet;
-                for i = 2:M_.exo_det_length
-                    dr.ghud{i} = -M2*dr.ghud{i-1}(end-nyf+1:end,:);
-                end
+                error('deterministic exogenous are not yet implemented in first order approximation for a block decomposed model');
+%                 f1 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+2:end,order_var))));
+%                 f0 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+1,order_var))));
+%                 fudet = data(i).g1_xd;
+%                 M1 = inv(f0+[zeros(n,n_static) f1*gx zeros(n,nyf-n_both)]);
+%                 M2 = M1*f1;
+%                 dr.ghud = cell(M_.exo_det_length,1);
+%                 dr.ghud{1} = -M1*fudet;
+%                 for i = 2:M_.exo_det_length
+%                     dr.ghud{i} = -M2*dr.ghud{i-1}(end-nyf+1:end,:);
+%                 end
             end
-            
-            
-            %Endogeneous variables of the previous blocks
-            
-            
         end
     end;
     if task ~=1
-        if (maximum_lag > 0)
-            lead_lag_incidence(maximum_lag+1, n_static+1:n_static + n_pred + n_both) - indexi_0 + 1
-            state_var = endo(lead_lag_incidence(maximum_lag+1, n_static+1:n_static + n_pred + n_both) - indexi_0 + 1);
-            [common_state_var, indx_common_dr_state_var, indx_common_state_var]  = intersect(dr.state_var, state_var);
-            [diff_state_var, indx_diff_dr_state_var, indx_diff_state_var] =  setxor(dr.state_var, state_var);
-            [union_state_var, indx_union_dr_state_var, indx_union_state_var] = union(dr.state_var, state_var);
-            [row_dr_ghx, col_dr_ghx] = size(dr.ghx);
-            ghx_new = zeros(row_dr_ghx + n, length(union_state_var));
-            ghx_new(1:row_dr_ghx,  1:col_dr_ghx) = dr.ghx;
-            ghx_new(row_dr_ghx + 1: row_dr_ghx + n, indx_common_dr_state_var) = ghx(:, indx_common_state_var);
-            ghx_new(row_dr_ghx + 1: row_dr_ghx + n, length(dr.state_var)+1:length(dr.state_var)+length(indx_diff_state_var)) = ghx(:, indx_diff_state_var);
-            dr.ghx = ghx_new;
-            dr.state_var = [dr.state_var state_var(indx_diff_state_var)];
+        if (maximum_lag > 0 && n_pred > 0)
+            sorted_col_dr_ghx = M_.block_structure.block(i).sorted_col_dr_ghx;
+            dr.ghx(endo, sorted_col_dr_ghx) = dr.ghx(endo, sorted_col_dr_ghx) + ghx;
+            data(i).ghx = ghx;
+            data(i).pol.i_ghx = sorted_col_dr_ghx;
+        else
+            data(i).pol.i_ghx = [];
         end;
-        exo_var = exo;
-        [common_exo_var, indx_common_dr_exo_var, indx_common_exo_var]  = intersect(dr.exo_var, exo_var);
-        [diff_exo_var, indx_diff_dr_exo_var, indx_diff_exo_var] =  setxor(dr.exo_var, exo_var);
-        [union_exo_var, indx_union_dr_exo_var, indx_union_exo_var] = union(dr.exo_var, exo_var);
-        [row_dr_ghu, col_dr_ghu] = size(dr.ghu);
-        ghu_new = zeros(row_dr_ghu + exo_nbr, length(union_exo_var));
-        ghu_new(1:row_dr_ghu,  1:col_dr_ghu) = dr.ghu;
-        ghu_new(row_dr_ghu + 1: row_dr_ghu + n, indx_common_dr_exo_var) = ghu(:, indx_common_exo_var);
-        ghu_new(row_dr_ghu + 1: row_dr_ghu + n, length(dr.exo_var)+1:length(dr.exo_var)+length(indx_diff_exo_var)) = ghu(:, indx_diff_exo_var);
-        dr.ghu = ghu_new;
-        dr.exo_var = [dr.exo_var exo_var(indx_diff_exo_var)];
-    end
+        data(i).ghu = ghu;
+        dr.ghu(endo, exo) = ghu;
+        data(i).pol.i_ghu = exo;
+    end;
+    
+   if (verbose)
+        disp('dr.ghx');
+        dr.ghx
+        disp('dr.ghu');
+        dr.ghu
+   end; 
+   
 end;
+M_.block_structure.block = data ;
 if (verbose)
-    dr.ghx
-    dr.ghu
-end;
+        disp('dr.ghx');
+        disp(real(dr.ghx));
+        disp('dr.ghu');
+        disp(real(dr.ghu));
+end; 
 if (task == 1)
     return;
 end;

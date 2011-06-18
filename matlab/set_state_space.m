@@ -31,6 +31,7 @@ function dr=set_state_space(dr,M_)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+global options_
 
 max_lead = M_.maximum_endo_lead;
 max_lag = M_.maximum_endo_lag;
@@ -54,7 +55,11 @@ nboth = length(both_var);
 npred = length(pred_var);
 nfwrd = length(fwrd_var);
 nstatic = length(stat_var);
-order_var = [ stat_var(:); pred_var(:); both_var(:); fwrd_var(:)];
+if options_.block == 1
+    order_var = M_.block_structure.variable_reordered;
+else
+    order_var = [ stat_var(:); pred_var(:); both_var(:); fwrd_var(:)];
+end;
 inv_order_var(order_var) = (1:endo_nbr);
 
 % building kmask for z state vector in t+1
