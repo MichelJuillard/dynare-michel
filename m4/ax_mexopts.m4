@@ -62,8 +62,8 @@ case ${MATLAB_ARCH} in
     ax_mexopts_ok="yes"
     ;;
   maci | maci64)
-    SDKROOT='/Developer/SDKs/MacOSX10.5.sdk'
-    MACOSX_DEPLOYMENT_TARGET='10.5'
+    SDKROOT='/Developer/SDKs/MacOSX10.6.sdk'
+    MACOSX_DEPLOYMENT_TARGET='10.6'
     if test "${MATLAB_ARCH}" = "maci"; then
         ARCHS='i386'
         MATLAB_FFLAGS=''
