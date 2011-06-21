@@ -207,6 +207,21 @@ for i=1:n_varobs
     var_obs_index = [var_obs_index strmatch(deblank(options_.varobs(i,:)),M_.endo_names(dr.order_var,:),'exact')];
     k1 = [k1 strmatch(deblank(options_.varobs(i,:)),M_.endo_names, 'exact')];
 end
+
+k3 = [];
+k3p = [];
+if options_.selected_variables_only
+    for i=1:size(var_list_,1)
+        k3 = [k3; strmatch(var_list_(i,:),M_.endo_names(dr.order_var,:), ...
+                           'exact')];
+        k3p = [k3; strmatch(var_list_(i,:),M_.endo_names, ...
+                           'exact')];
+    end
+else
+    k3 = (1:M_.endo_nbr)';
+    k3p = (1:M_.endo_nbr)';
+end
+
 % Define union of observed and state variables
 if options_.block == 1
     [k2, i_posA, i_posB] = union(k1', M_.state_var', 'rows');
@@ -220,6 +235,14 @@ if options_.block == 1
     bayestopt_.mf2  = var_obs_index;
     bayestopt_.mfys = k1;
     oo_.dr.restrict_columns = [size(i_posA,1)+(1:size(M_.state_var,2))];
+
+    [k2, i_posA, i_posB] = union(k3p, M_.state_var', 'rows');
+    bayestopt_.smoother_var_list = [k3p(i_posA); M_.state_var(sort(i_posB))'];
+    [junk,bayestopt_.smoother_saved_var_list] = intersect(k3p,bayestopt_.smoother_var_list(:));
+    [junk,ic] = intersect(bayestopt_.smoother_var_list,M_.state_var);
+    bayestopt_.smoother_restrict_columns = ic;
+    [junk,bayestopt_.smoother_mf] = ismember(k1, ...
+                                             bayestopt_.smoother_var_list);
 else
     k2 = union(var_obs_index',[dr.nstatic+1:dr.nstatic+dr.npred]', 'rows');
     % Set restrict_state to postion of observed + state variables in expanded state vector.
@@ -233,23 +256,15 @@ else
     bayestopt_.mfys = k1;
     [junk,ic] = intersect(k2,nstatic+(1:npred)');
     oo_.dr.restrict_columns = [ic; length(k2)+(1:nspred-npred)'];
+
+    bayestopt_.smoother_var_list = union(k2,k3);
+    [junk,bayestopt_.smoother_saved_var_list] = intersect(k3,bayestopt_.smoother_var_list(:));
+    [junk,ic] = intersect(bayestopt_.smoother_var_list,nstatic+(1:npred)');
+    bayestopt_.smoother_restrict_columns = ic;
+    [junk,bayestopt_.smoother_mf] = ismember(var_obs_index, ...
+                                             bayestopt_.smoother_var_list);
 end;
 
-k3 = [];
-if options_.selected_variables_only
-    for i=1:size(var_list_,1)
-        k3 = [k3; strmatch(var_list_(i,:),M_.endo_names(dr.order_var,:), ...
-                           'exact')];
-    end
-else
-    k3 = (1:M_.endo_nbr)';
-end
-bayestopt_.smoother_var_list = union(k2,k3);
-[junk,bayestopt_.smoother_saved_var_list] = intersect(k3,bayestopt_.smoother_var_list(:));
-[junk,ic] = intersect(bayestopt_.smoother_var_list,nstatic+(1:npred)');
-bayestopt_.smoother_restrict_columns = ic;
-[junk,bayestopt_.smoother_mf] = ismember(var_obs_index, ...
-                                         bayestopt_.smoother_var_list);
 
 %% Initialization with unit-root variables.
 if ~isempty(options_.unit_root_vars)
