@@ -271,7 +271,7 @@ if iload <=0,
         else
             params = prior_draw();
         end
-        [~, ideJ, ideH, ideGP, ~ , info] = ...
+        [dum1, ideJ, ideH, ideGP, dum2 , info] = ...
             identification_analysis(params,indx,indexo,options_MC,data_info, prior_exist, name_tex,0);
         if iteration==0,
             MAX_tau   = min(SampleSize,ceil(MaxNumberOfBytes/(size(ideH.siH,1)*nparam)/8));
@@ -423,7 +423,7 @@ if SampleSize > 1,
         jcrit=find(idemoments.ino);
         if length(jcrit)<SampleSize,
             if isempty(jcrit),
-                [~,jmax]=max(idemoments.cond);
+                [dum,jmax]=max(idemoments.cond);
                 fprintf('\n')
                 tittxt = 'Draw with HIGHEST condition number';
                 fprintf('\n')
@@ -436,7 +436,7 @@ if SampleSize > 1,
                 disp_identification(pdraws(jmax,:), idemodel_max, idemoments_max, name);
                 close all,
                 plot_identification(pdraws(jmax,:),idemoments_max,idehess_max,idemodel_max,idelre_max,1,tittxt,name,IdentifDirectoryName,1);
-                [~,jmin]=min(idemoments.cond);
+                [dum,jmin]=min(idemoments.cond);
                 fprintf('\n')
                 tittxt = 'Draw with SMALLEST condition number';
                 fprintf('\n')
