@@ -96,11 +96,15 @@ y = f(1:orig_endo_nbr);
 mult = -A\y;
 
 resids1 = y+A*mult;
-[q,r,e] = qr([A y]');
-if options_.steadystate_flag
-    resids = [r(end,(orig_endo_nbr-inst_nbr+1:end))'];
-    resids = resids1'*resids1;
+if inst_nbr == 1
+    r1 = sqrt(resids1'*resids1);
 else
-    resids = [f(i_mult); r(end,(orig_endo_nbr-inst_nbr+1:end))'];
+    [q,r,e] = qr([A y]');
+    r1 = r(end,(orig_endo_nbr-inst_nbr+1:end))';
+end
+if options_.steadystate_flag
+    resids = r1;
+else
+    resids = [f(i_mult); r1];
 end
 rJ = [];
