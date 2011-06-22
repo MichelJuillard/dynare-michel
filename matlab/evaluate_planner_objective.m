@@ -106,8 +106,8 @@ else
     Wss = (Uy*gss+beta*(Wuu*M.Sigma_e(:)+Wy*Gss))/(1-beta);
 end
 if options.ramsey_policy
-    yhat = [oo.endo_simul; ...
-            zeros(M.endo_nbr-size(oo.endo_simul,1),1)];
+    yhat = zeros(M.endo_nbr,1);
+    yhat(1:M.orig_endo_nbr) = oo.steady_state(1:M.orig_endo_nbr);
 else
     yhat = oo.endo_simul;
 end
@@ -120,11 +120,15 @@ mexErrCheck('A_times_B_kronecker_C', err);
 mexErrCheck('A_times_B_kronecker_C', err);
 [err,Wyuyhatu] = A_times_B_kronecker_C(Wyu,yhat,u,options.threads.kronecker.A_times_B_kronecker_C);
 mexErrCheck('A_times_B_kronecker_C', err);
-planner_objective_value = Wbar+Wy*yhat+Wu*u+Wyuyhatu ...
+planner_objective_value(1) = Wbar+Wy*yhat+Wu*u+Wyuyhatu ...
     + 0.5*(Wyyyhatyhat + Wuuuu+Wss);
+planner_objective_value(2) = Wbar + 0.5*Wss;
 if ~options.noprint
     disp(' ')
-    disp(['Approximated value of planner objective function: ' ...
-          num2str(planner_objective_value)])
+    disp('Approximated value of planner objective function')
+    disp(['    - with initial Lagrange multipliers set to 0: ' ...
+          num2str(planner_objective_value(1)) ])
+    disp(['    - with initial Lagrange multipliers set to steady state: ' ...
+          num2str(planner_objective_value(2)) ])
     disp(' ')
 end

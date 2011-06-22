@@ -24,8 +24,10 @@ k = size(ys,1)+1;
 aux_lead_nbr = 0;
 for i=1:n
     if aux_vars(i).type == 1
+        % lagged variables 
         ys1(k) = ys(aux_vars(i).orig_index);
     elseif aux_vars(i).type == 0
+        % lead variables
         aux_lead_nbr = aux_lead_nbr + 1;
     end
     k = k+1;

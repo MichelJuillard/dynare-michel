@@ -92,14 +92,20 @@ if options_.ramsey_policy
     if options_.steadystate_flag
         k_inst = [];
         instruments = options_.instruments;
-        for i = 1:size(instruments,1)
+        inst_nbr = size(options_.instruments);
+        for i = 1:inst_nbr
             k_inst = [k_inst; strmatch(options_.instruments(i,:), ...
                                        M_.endo_names,'exact')];
         end
         ys = oo_.steady_state;
-        [inst_val,info1] = dynare_solve('dyn_ramsey_static_', ...
-                                        oo_.steady_state(k_inst),0, ...
-                                        M_,options_,oo_,it_);
+        if inst_nbr == 1
+           nl_func = @(x) dyn_ramsey_static_(x,0,M_,options_,oo_,it_);
+           inst_val = fzero(nl_func,oo_.steady_state(k_inst));
+        else
+            [inst_val,info1] = dynare_solve('dyn_ramsey_static_', ...
+                                            oo_.steady_state(k_inst),0, ...
+                                            M_,options_,oo_,it_);
+        end
         M_.params = evalin('base','M_.params;');
         ys(k_inst) = inst_val;
         [x,check] = feval([M_.fname '_steadystate'],...
@@ -120,6 +126,7 @@ if options_.ramsey_policy
         end
         oo_.steady_state = x;
         [junk,junk,multbar] = dyn_ramsey_static_(oo_.steady_state(k_inst),M_,options_,oo_,it_);
+        oo_.steady_state = [x(1:M_.orig_endo_nbr); multbar];
     else
         xx = oo_.steady_state([1:M_.orig_endo_nbr (M_.orig_endo_nbr+M_.orig_eq_nbr+1):end]);
         [xx,info1] = dynare_solve('dyn_ramsey_static_', ...
