@@ -564,7 +564,7 @@ for i = 1:Size;
                 % A_ * gx + B_ * gx * C_ + D_ = 0
                 %vghx_other = - inv(kron(eye(size(D_,2)), A_) + kron(C_', B_)) * vec(D_);
                 %ghx_other = reshape(vghx_other, size(D_,1), size(D_,2));
-                ghx_other = sylvester3(A_, B_, C_, -D_);
+                [err, ghx_other] = gensylv(1, A_, B_, C_, -D_);
                 if options_.aim_solver ~= 1 && options_.use_qzdiv
                    % Necessary when using Sims' routines for QZ
                    ghx_other = real(ghx_other);
