@@ -41,6 +41,7 @@ function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel1(fcn,x0,H0,grad,crit,nit,m
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global bayestopt_
+
 fh = [];
 xh = [];
 [nx,no]=size(x0);
@@ -72,7 +73,7 @@ end
 if NumGrad
     switch method
       case 2
-        [g,badg] = numgrad(fcn, f0, x0, epsilon, varargin{:});
+        [g,badg] = numgrad2(fcn, f0, x0, epsilon, varargin{:});
       case 3
         [g,badg] = numgrad3(fcn, f0, x0, epsilon, varargin{:});
       case 5
@@ -98,7 +99,7 @@ while ~done
     %   disp([sprintf('x = ') sprintf('%15.8g %15.8g %15.8g %15.8g\n',x)]);
     %-------------------------
     itct=itct+1;
-    [f1 x1 fc retcode1] = csminit(fcn,x,f,g,badg,H,varargin{:});
+    [f1 x1 fc retcode1] = csminit1(fcn,x,f,g,badg,H,varargin{:});
     %ARGLIST
     %[f1 x1 fc retcode1] = csminit(fcn,x,f,g,badg,H,P1,P2,P3,P4,P5,P6,P7,...
     %           P8,P9,P10,P11,P12,P13);
@@ -119,7 +120,7 @@ while ~done
             if NumGrad
                 switch method 
                   case 2
-                    [g1 badg1] = numgrad(fcn, f1, x1, epsilon, varargin{:});
+                    [g1 badg1] = numgrad2(fcn, f1, x1, epsilon, varargin{:});
                   case 3
                     [g1 badg1] = numgrad3(fcn, f1, x1, epsilon, varargin{:});
                   case 5
@@ -141,7 +142,7 @@ while ~done
                  %fcliff=fh;xcliff=xh;
             Hcliff=H+diag(diag(H).*rand(nx,1));
             disp('Cliff.  Perturbing search direction.')
-            [f2 x2 fc retcode2] = csminit(fcn,x,f,g,badg,Hcliff,varargin{:});
+            [f2 x2 fc retcode2] = csminit1(fcn,x,f,g,badg,Hcliff,varargin{:});
             %ARGLIST
             %[f2 x2 fc retcode2] = csminit(fcn,x,f,g,badg,Hcliff,P1,P2,P3,P4,...
             %     P5,P6,P7,P8,P9,P10,P11,P12,P13);
@@ -153,7 +154,7 @@ while ~done
                     if NumGrad
                         switch method
                           case 2
-                            [g2 badg2] = numgrad(fcn, f2, x2, epsilon, varargin{:});
+                            [g2 badg2] = numgrad2(fcn, f2, x2, epsilon, varargin{:});
                           case 3
                             [g2 badg2] = numgrad3(fcn, f2, x2, epsilon, varargin{:});
                           case 5
@@ -176,7 +177,7 @@ while ~done
                     else
                         gcliff=((f2-f1)/((norm(x2-x1))^2))*(x2-x1);
                         if(size(x0,2)>1), gcliff=gcliff', end
-                        [f3 x3 fc retcode3] = csminit(fcn,x,f,gcliff,0,eye(nx),varargin{:});
+                        [f3 x3 fc retcode3] = csminit1(fcn,x,f,gcliff,0,eye(nx),varargin{:});
                         %ARGLIST
                         %[f3 x3 fc retcode3] = csminit(fcn,x,f,gcliff,0,eye(nx),P1,P2,P3,...
                         %         P4,P5,P6,P7,P8,...
@@ -188,7 +189,7 @@ while ~done
                             if NumGrad
                                 switch method
                                   case 2
-                                    [g3 badg3] = numgrad(fcn, f3, x3, epsilon, varargin{:});
+                                    [g3 badg3] = numgrad2(fcn, f3, x3, epsilon, varargin{:});
                                   case 3
                                     [g3 badg3] = numgrad3(fcn, f3, x3, epsilon, varargin{:});
                                   case 5
@@ -252,7 +253,7 @@ while ~done
             if NumGrad
                 switch method
                   case 2
-                    [gh,badgh] = numgrad(fcn, fh, xh, epsilon, varargin{:});
+                    [gh,badgh] = numgrad2(fcn, fh, xh, epsilon, varargin{:});
                   case 3
                     [gh,badgh] = numgrad3(fcn, fh, xh, epsilon, varargin{:});
                   case 5
