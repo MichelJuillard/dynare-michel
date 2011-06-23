@@ -3616,7 +3616,10 @@ For nonstationary models: a wide prior is used with an initial matrix
 of variance of the error of forecast diagonal with 10 on the diagonal
 
 @item 3
-For nonstationary models: @dots{}
+For nonstationary models: use a diffuse filter
+
+@item 4
+The filter is initialized with the fixed point of the Riccati equation
 @end table
 
 @noindent
