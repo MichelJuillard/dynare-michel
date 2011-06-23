@@ -47,7 +47,7 @@ License: GPL-3+
  You should have received a copy of the GNU General Public License
  along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-Files: matlab/csolve.m, matlab/csminit.m, matlab/numgrad.m, matlab/numgrad3.m,
+Files: matlab/csolve.m, matlab/csminit1.m, matlab/numgrad2.m, matlab/numgrad3.m,
  matlab/numgrad5.m, matlab/csminwel.m, matlab/bvar_density.m,
  matlab/bvar_toolbox.m, matlab/partial_information/PI_gensys.m,
  matlab/qzswitch.m, matlab/qzdiv.m
