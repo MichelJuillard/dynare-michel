@@ -39,7 +39,7 @@ C = C0;
 for i=1:(kron_prod-1);
     C  = kron(C0,C); 
 end;
-C - C0
+
 x0 = sylvester3(A,B,C,D);
 E  = sylvester3a(x0,A,B,C,D);
 err = 0;
