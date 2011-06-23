@@ -81,6 +81,8 @@ if estim_params_.nvn
         H(k,k) = xparam1(i+offset)*xparam1(i+offset);
     end
     offset = offset+estim_params_.nvn;
+else
+    H = zeros(nobs);
 end
 if estim_params_.ncx
     for i=1:estim_params_.ncx
@@ -189,6 +191,14 @@ elseif options_.lik_init == 3   % Diffuse Kalman filter
         kalman_algo = 3;
     end
     [Z,ST,R1,QT,Pstar,Pinf] = schur_statespace_transformation(mf,T,R,Q,options_.qz_criterium);
+elseif options_.lik_init==4
+    % Start from the solution of the Riccati equation.
+    [err, Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(mf,np,length(mf))),H);
+    mexErrCheck('kalman_steady_state',err);
+    Pinf  = [];
+    if kalman_algo~=2
+        kalman_algo = 1;
+    end
 end
 if kalman_algo == 2
 end

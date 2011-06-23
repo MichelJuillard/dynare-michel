@@ -108,6 +108,10 @@ mf    = bayestopt_.smoother_mf;
 Q = M_.Sigma_e;
 H = M_.H;
 
+if isequal(H,0)
+    H = zeros(nobs,nobs);
+end
+
 kalman_algo = options_.kalman_algo;
 if options_.lik_init == 1               % Kalman filter
     if kalman_algo ~= 2
@@ -126,6 +130,14 @@ elseif options_.lik_init == 3 % Diffuse Kalman filter
         kalman_algo = 3;
     end
     [Z,ST,R1,QT,Pstar,Pinf] = schur_statespace_transformation(mf,T,R,Q,options_.qz_criterium);
+elseif options_.lik_init == 4
+    % Start from the solution of the Riccati equation.
+    [err, Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(mf,np,nobs)),H);
+    mexErrCheck('kalman_steady_state',err);
+    Pinf  = [];
+    if kalman_algo~=2
+        kalman_algo = 1;
+    end
 end
 kalman_tol = options_.kalman_tol;
 riccati_tol = options_.riccati_tol;
@@ -133,9 +145,6 @@ data1 = Y-trend;
 % -----------------------------------------------------------------------------
 %  4. Kalman smoother
 % -----------------------------------------------------------------------------
-if isequal(H,0)
-    H = zeros(nobs,nobs);
-end
 
 if ~missing_value
     for i=1:smpl
