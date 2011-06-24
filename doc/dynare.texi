@@ -4408,10 +4408,11 @@ for more information on this command.
 @node Optimal policy
 @section Optimal policy
 
-Dynare has tools to compute optimal policies for quadratic
+Dynare has tools to compute optimal policies for various types of
 objectives. You can either solve for optimal policy under commitment
 with @code{ramsey_policy}, for optimal policy under discretion with
-@code{discretionary_policy} or for optimal simple rule with @code{osr}.
+@code{discretionary_policy} or for optimal simple rule with
+@code{osr}.
 
 
 @anchor{osr}
@@ -4547,6 +4548,13 @@ This command accepts the same options than @code{ramsey_policy}.
 
 This command declares the policy maker objective, for use with
 @code{ramsey_policy} or @code{discretionary_policy}.
+
+You need to give the one-period objective, not the discounted lifetime
+objective. The discount factor is given by the @code{planner_discount}
+option of @code{ramsey_policy} and @code{discretionary_policy}.
+
+Note that with this command you are not limited to quadratic
+objectives: you can give any arbitrary nonlinear expression.
 @end deffn
 
 @node Sensitivity and identification analysis
