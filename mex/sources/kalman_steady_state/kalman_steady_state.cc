@@ -228,39 +228,37 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         {
         case 1:
           {
-            mexPrintf("The computed extended matrix pencil is singular, possibly due to rounding errors.\n");
+            DYN_MEX_FUNC_ERR_MSG_TXT("The computed extended matrix pencil is singular, possibly due to rounding errors.\n");
             break;
           }
         case 2:
           {
-            mexPrintf("The QZ (or QR) algorithm failed!\n");
+            DYN_MEX_FUNC_ERR_MSG_TXT("The QZ (or QR) algorithm failed!\n");
             break;
           }
         case 3:
           {
-            mexPrintf("The reordering of the (generalized) eigenvalues failed!\n");
+            DYN_MEX_FUNC_ERR_MSG_TXT("The reordering of the (generalized) eigenvalues failed!\n");
             break;
           }
         case 4:
           {
-            mexPrintf("After reordering, roundoff changed values of some complex eigenvalues so that leading eigenvalues\n");
-            mexPrintf("in the (generalized) Schur form no longer satisfy the stability condition; this could also be caused\n");
-            mexPrintf("due to scaling.\n");
+            DYN_MEX_FUNC_ERR_MSG_TXT("After reordering, roundoff changed values of some complex eigenvalues so that leading eigenvalues\n in the (generalized) Schur form no longer satisfy the stability condition; this could also be caused due to scaling.");
             break;
           }
         case 5:
           {
-            mexPrintf("The computed dimension of the solution does not equal n!\n");
+            DYN_MEX_FUNC_ERR_MSG_TXT("The computed dimension of the solution does not equal n!\n");
             break;
           }
         case 6:
           {
-            mexPrintf("A singular matrix was encountered during the computation of the solution matrix P!\n");
+            DYN_MEX_FUNC_ERR_MSG_TXT("A singular matrix was encountered during the computation of the solution matrix P!\n");
             break;
           }
         default:
           {
-            mexPrintf("Unknown problem!\n");
+            DYN_MEX_FUNC_ERR_MSG_TXT("Unknown problem!\n");
           }
         }
     }
