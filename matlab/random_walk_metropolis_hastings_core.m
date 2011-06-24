@@ -220,7 +220,7 @@ for b = fblck:nblck,
             if mod(j,50)==0 && whoiam
                 %             keyboard;
                 if (strcmp([options_.parallel(ThisMatlab).MatlabOctavePath], 'octave'))
-                    waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) '), ' sprintf('accept. %3.f%%',100 *prtfrc)];
+                    waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) '), ' sprintf('accept. %3.f%%',100 * isux / j)];
                     fMessageStatus(prtfrc,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab));
                 else
                     waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) '), ' sprintf('accept. %3.f%%', 100 * isux/j)];
