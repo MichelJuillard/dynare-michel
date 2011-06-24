@@ -109,7 +109,13 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
     OScallerUnix=~ispc;
     OScallerWindows=ispc;
     OStargetUnix=strcmpi('unix',DataInput(Node).OperatingSystem);
+    if isempty(DataInput(Node).OperatingSystem),
+        OStargetUnix=OScallerUnix;
+    end
     OStargetWindows=strcmpi('windows',DataInput(Node).OperatingSystem);
+    if isempty(DataInput(Node).OperatingSystem),
+        OStargetWindows=OScallerWindows;
+    end
     
     Environment= (OScallerUnix || OStargetUnix);
     
@@ -561,7 +567,11 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
         end
     else
         if Environment,
-            [si0 de0]=system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' grep processor /proc/cpuinfo']);
+            if OStargetUnix,
+                [si0 de0]=system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' grep processor /proc/cpuinfo']);
+            else
+                [si0 de0]=system(['ssh ',DataInput(Node).UserName,'@',DataInput(Node).ComputerName,' psinfo']);
+            end
         else
             [si0 de0]=system(['psinfo \\',DataInput(Node).ComputerName,' -u ',DataInput(Node).UserName,' -p ',DataInput(Node).Password]);
         end
@@ -569,13 +579,14 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
     
     
     RealCPUnbr='';
-    RealCPUnbr=GiveCPUnumber(de0);
+    keyboard;
+    RealCPUnbr=GiveCPUnumber(de0,OStargetUnix);
     
     % Questo controllo penso che si possa MIGLIORARE!!!!!
     if  isempty (RealCPUnbr) && Environment==0,
         [si0 de0]=system(['psinfo \\',DataInput(Node).ComputerName]);
     end        
-    RealCPUnbr=GiveCPUnumber(de0);
+    RealCPUnbr=GiveCPUnumber(de0,OStargetUnix);
 
     if  isempty (RealCPUnbr)
         % An error occurred when we try to know the Cpu/Cores
