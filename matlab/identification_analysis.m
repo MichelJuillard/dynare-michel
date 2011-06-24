@@ -99,54 +99,14 @@ if info(1)==0,
         indH = (find(max(abs(H'))>1.e-8));
         indLRE = (find(max(abs(gp'))>1.e-8));
     end
-    ide_moments.indJJ=indJJ;
-    ide_model.indH=indH;
-    ide_lre.indLRE=indLRE;
     TAU(:,1)=tau(indH);
     LRE(:,1)=vg1(indLRE);
     GAM(:,1)=gam(indJJ);
     siJ = (JJ(indJJ,:));
     siH = (H(indH,:));   
     siLRE = (gp(indLRE,:));
-    normH = max(abs(siH)')';
-    normJ = max(abs(siJ)')';
-    normLRE = max(abs(siLRE)')';
-    ide_moments.siJ=siJ;
-    ide_model.siH=siH;
-    ide_lre.siLRE=siLRE;
-    ide_moments.GAM=GAM;
-    ide_model.TAU=TAU;
-    ide_lre.LRE=LRE;
-%     [ide_checks.idemodel_Mco, ide_checks.idemoments_Mco, ide_checks.idelre_Mco, ...
-%         ide_checks.idemodel_Pco, ide_checks.idemoments_Pco, ide_checks.idelre_Pco, ...
-%         ide_checks.idemodel_cond, ide_checks.idemoments_cond, ide_checks.idelre_cond, ...
-%         ide_checks.idemodel_ee, ide_checks.idemoments_ee, ide_checks.idelre_ee, ...
-%         ide_checks.idemodel_ind, ide_checks.idemoments_ind, ...
-%         ide_checks.idemodel_indno, ide_checks.idemoments_indno, ...
-%         ide_checks.idemodel_ino, ide_checks.idemoments_ino] = ...
-%         identification_checks(H(indH,:)./normH(:,ones(nparam,1)),JJ(indJJ,:)./normJ(:,ones(nparam,1)), gp(indLRE,:)./normLRE(:,ones(size(gp,2),1)));
-    [ide_moments.cond, ide_moments.ind0, ide_moments.indno, ide_moments.ino, ide_moments.Mco, ide_moments.Pco, ide_moments.jweak, ide_moments.jweak_pair] = ...
-        identification_checks(JJ(indJJ,:)./normJ(:,ones(nparam,1)), 0);
-    [ide_model.cond, ide_model.ind0, ide_model.indno, ide_model.ino, ide_model.Mco, ide_model.Pco, ide_model.jweak, ide_model.jweak_pair] = ...
-        identification_checks(H(indH,:)./normH(:,ones(nparam,1)), 0);
-    [ide_lre.cond, ide_lre.ind0, ide_lre.indno, ide_lre.ino, ide_lre.Mco, ide_lre.Pco, ide_lre.jweak, ide_lre.jweak_pair] = ...
-        identification_checks(gp(indLRE,:)./normLRE(:,ones(size(gp,2),1)), 0);
-    [U, S, V]=svd(JJ(indJJ,:)./normJ(:,ones(nparam,1)),0);
-    S=diag(S);
-    if nparam>8
-        ide_moments.S = S([1:4, end-3:end]);
-        ide_moments.V = V(:,[1:4, end-3:end]);
-    else
-        ide_moments.S = S;
-        ide_moments.V = V;
-    end
-    
-    indok = find(max(ide_moments.indno,[],1)==0);
     ide_strength_J=NaN(1,nparam);
     ide_strength_J_prior=NaN(1,nparam);
-    if advanced,
-        [ide_moments.pars, ide_moments.cosnJ] = ident_bruteforce(JJ(indJJ,:)./normJ(:,ones(nparam,1)),max_dim_cova_group,options_.TeX,name_tex);
-    end
     if init, %~isempty(indok),
         normaliz = abs(params);
         if prior_exist,
@@ -201,6 +161,19 @@ if info(1)==0,
             replic = max([replic, length(indJJ)*3]);
             cmm = simulated_moment_uncertainty(indJJ, periods, replic);
 %             MIM=siJ(:,indok)'*(cmm\siJ(:,indok));
+%           look for independent moments!
+            sd=sqrt(diag(cmm));
+            cc=cmm./(sd*sd');
+            ix=[];
+            for jc=1:length(cmm),
+                jcheck=find(abs(cc(:,jc))>(1-1.e-6));
+                ix=[ix; jcheck(jcheck>jc)];
+            end
+            iy=find(~ismember([1:length(cmm)],ix));
+            indJJ=indJJ(iy);
+            GAM=GAM(iy);
+            cmm=cmm(iy,iy);
+            siJ = (JJ(indJJ,:));
             MIM=siJ'*(cmm\siJ);
             ide_hess.AHess= MIM;
             deltaM = sqrt(diag(MIM));
@@ -257,4 +230,44 @@ if info(1)==0,
         ide_lre.siLREnorm=siLREnorm; 
         ide_hess.flag_score=flag_score; 
     end,
+    normH = max(abs(siH)')';
+    normJ = max(abs(siJ)')';
+    normLRE = max(abs(siLRE)')';
+    ide_moments.indJJ=indJJ;
+    ide_model.indH=indH;
+    ide_lre.indLRE=indLRE;
+    ide_moments.siJ=siJ;
+    ide_model.siH=siH;
+    ide_lre.siLRE=siLRE;
+    ide_moments.GAM=GAM;
+    ide_model.TAU=TAU;
+    ide_lre.LRE=LRE;
+%     [ide_checks.idemodel_Mco, ide_checks.idemoments_Mco, ide_checks.idelre_Mco, ...
+%         ide_checks.idemodel_Pco, ide_checks.idemoments_Pco, ide_checks.idelre_Pco, ...
+%         ide_checks.idemodel_cond, ide_checks.idemoments_cond, ide_checks.idelre_cond, ...
+%         ide_checks.idemodel_ee, ide_checks.idemoments_ee, ide_checks.idelre_ee, ...
+%         ide_checks.idemodel_ind, ide_checks.idemoments_ind, ...
+%         ide_checks.idemodel_indno, ide_checks.idemoments_indno, ...
+%         ide_checks.idemodel_ino, ide_checks.idemoments_ino] = ...
+%         identification_checks(H(indH,:)./normH(:,ones(nparam,1)),JJ(indJJ,:)./normJ(:,ones(nparam,1)), gp(indLRE,:)./normLRE(:,ones(size(gp,2),1)));
+    [ide_moments.cond, ide_moments.ind0, ide_moments.indno, ide_moments.ino, ide_moments.Mco, ide_moments.Pco, ide_moments.jweak, ide_moments.jweak_pair] = ...
+        identification_checks(JJ(indJJ,:)./normJ(:,ones(nparam,1)), 0);
+    [ide_model.cond, ide_model.ind0, ide_model.indno, ide_model.ino, ide_model.Mco, ide_model.Pco, ide_model.jweak, ide_model.jweak_pair] = ...
+        identification_checks(H(indH,:)./normH(:,ones(nparam,1)), 0);
+    [ide_lre.cond, ide_lre.ind0, ide_lre.indno, ide_lre.ino, ide_lre.Mco, ide_lre.Pco, ide_lre.jweak, ide_lre.jweak_pair] = ...
+        identification_checks(gp(indLRE,:)./normLRE(:,ones(size(gp,2),1)), 0);
+    [U, S, V]=svd(JJ(indJJ,:)./normJ(:,ones(nparam,1)),0);
+    S=diag(S);
+    if nparam>8
+        ide_moments.S = S([1:4, end-3:end]);
+        ide_moments.V = V(:,[1:4, end-3:end]);
+    else
+        ide_moments.S = S;
+        ide_moments.V = V;
+    end
+    
+    indok = find(max(ide_moments.indno,[],1)==0);
+    if advanced,
+        [ide_moments.pars, ide_moments.cosnJ] = ident_bruteforce(JJ(indJJ,:)./normJ(:,ones(nparam,1)),max_dim_cova_group,options_.TeX,name_tex);
+    end
 end    
