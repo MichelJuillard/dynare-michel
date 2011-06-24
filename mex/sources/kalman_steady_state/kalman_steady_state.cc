@@ -228,39 +228,39 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         {
         case 1:
           {
-            mexPrintf("The computed extended matrix pencil is singular, possibly due to rounding errors");
+            mexPrintf("The computed extended matrix pencil is singular, possibly due to rounding errors.\n");
             break;
           }
         case 2:
           {
-            mexPrintf("The QZ (or QR) algorithm failed");
+            mexPrintf("The QZ (or QR) algorithm failed!\n");
             break;
           }
         case 3:
           {
-            mexPrintf("The reordering of the (generalized) eigenvalues failed");
+            mexPrintf("The reordering of the (generalized) eigenvalues failed!\n");
             break;
           }
         case 4:
           {
-            mexPrintf("After reordering, roundoff changed values of some complex eigenvalues so that leading eigenvalues");
-            mexPrintf("in the (generalized) Schur form no longer satisfy the stability condition; this could also be caused");
-            mexPrintf("due to scaling");
+            mexPrintf("After reordering, roundoff changed values of some complex eigenvalues so that leading eigenvalues\n");
+            mexPrintf("in the (generalized) Schur form no longer satisfy the stability condition; this could also be caused\n");
+            mexPrintf("due to scaling.\n");
             break;
           }
         case 5:
           {
-            mexPrintf("The computed dimension of the solution does not equal n");
+            mexPrintf("The computed dimension of the solution does not equal n!\n");
             break;
           }
         case 6:
           {
-            mexPrintf("a singular matrix was encountered during the computation of the solution matrix P");
+            mexPrintf("A singular matrix was encountered during the computation of the solution matrix P!\n");
             break;
           }
         default:
           {
-            mexPrintf("Unknown problem!");
+            mexPrintf("Unknown problem!\n");
           }
         }
     }
