@@ -178,7 +178,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   mwSize LDX = LDA;
   mwSize LDWORK = max((mwSize) 7*((mwSize) 2*n + (mwSize) 1) + (mwSize) 16, (mwSize) 16*n);
   LDWORK = max(LDWORK, (mwSize) 2*n + p, (mwSize) 3*p);
-  double tolerance = -1.0;
+  double tolerance = .0000000000000001;
   lapack_int INFO;
   // Outputs of subroutine sb02OD
   double rcond;
