@@ -1,0 +1,8 @@
+% testing
+dynare ls2003 conffile='c:\dynare_git\dynare\tests\parallel\windows\JaguarCluster.txt' parallel_test
+% open-close
+dynare ls2003 conffile='c:\dynare_git\dynare\tests\parallel\windows\JaguarCluster.txt' parallel
+% always open
+dynare ls2003 conffile='c:\dynare_git\dynare\tests\parallel\windows\JaguarCluster.txt' parallel parallel_slave_open_mode
+% console
+dynare ls2003 conffile='c:\dynare_git\dynare\tests\parallel\windows\JaguarCluster.txt' parallel parallel_slave_open_mode console
