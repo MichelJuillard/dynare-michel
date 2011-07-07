@@ -24,6 +24,6 @@ if (isfield(options_,'irf_shocks')==0)
 else
     irf_shocks_indx = zeros(1,size(options_.irf_shocks,1));
     for i=1:size(options_.irf_shocks,1)
-        irf_shocks_indx(i) = find(M_.exo_names==options_.irf_shocks(i));
+        irf_shocks_indx(i) = find(strcmp(deblank(options_.irf_shocks(i,:)), cellstr(M_.exo_names)));
     end
 end
