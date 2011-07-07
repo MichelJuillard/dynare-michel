@@ -1,5 +1,5 @@
-function [proba, dproba] = stab_map_1(lpmat, ibehaviour, inonbehaviour, aname, iplot, ipar, dirname, dcrit)
-%function [proba, dproba] = stab_map_1(lpmat, ibehaviour, inonbehaviour, aname, iplot, ipar, dirname, dcrit)
+function [proba, dproba] = stab_map_1(lpmat, ibehaviour, inonbehaviour, aname, iplot, ipar, dirname, pcrit)
+%function [proba, dproba] = stab_map_1(lpmat, ibehaviour, inonbehaviour, aname, iplot, ipar, dirname, pcrit)
 %
 % lpmat =  Monte Carlo matrix
 % ibehaviour = index of behavioural runs
@@ -10,7 +10,7 @@ function [proba, dproba] = stab_map_1(lpmat, ibehaviour, inonbehaviour, aname, i
 % ipar = index array of parameters to plot
 % dirname = (OPTIONAL) path of the directory where to save 
 %            (default: current directory)
-% dcrit = (OPTIONAL) critical value of the D-stat above which show the plots
+% pcrit = (OPTIONAL) critical value of the pvalue below which show the plots
 %
 % Plots: dotted lines for BEHAVIOURAL
 %        solid lines for NON BEHAVIOURAL
@@ -54,7 +54,7 @@ if nargin<6,
   ipar=[];
 end
 if nargin<8 || isempty(dcrit),
-  dcrit=0;
+  pcrit=1;
 end
 
 % Smirnov test for Blanchard; 
@@ -64,7 +64,8 @@ for j=1:npar,
   dproba(j)=KSSTAT;
 end
 if isempty(ipar),
-    ipar=find(dproba>dcrit);
+%     ipar=find(dproba>dcrit);
+    ipar=find(proba<pcrit);
 end
 nparplot=length(ipar);
 if iplot
@@ -84,7 +85,8 @@ for i=1:ceil(nparplot/12),
       h=cumplot(lpmat(inonbehaviour,j));
       set(h,'color',[0 0 0])
     end
-    title([ftit{j},'. D-stat ', num2str(dproba(ipar(j)),2)],'interpreter','none')
+%     title([ftit{j},'. D-stat ', num2str(dproba(ipar(j)),2)],'interpreter','none')
+    title([ftit{j},'. p-value ', num2str(proba(ipar(j)),2)],'interpreter','none')
   end
   saveas(gcf,[dirname,'/',fname_,'_',aname,'_SA_',int2str(i)])
   eval(['print -depsc2 ' dirname '/' fname_ '_' aname '_SA_' int2str(i)]);

@@ -56,6 +56,8 @@ Nsam   = opt_gsa.Nsam;
 fload  = opt_gsa.load_stab;
 ksstat = opt_gsa.ksstat;
 alpha2 = opt_gsa.alpha2_stab;
+pvalue_ks = opt_gsa.pvalue_ks;
+pvalue_corr = opt_gsa.pvalue_corr;
 prepSA = (opt_gsa.redform | opt_gsa.identification);
 pprior = opt_gsa.pprior;
 neighborhood_width = opt_gsa.neighborhood_width;
@@ -252,7 +254,7 @@ if fload==0,
                 egg=zeros(length(dr_.eigval),Nsam);
             end
             if infox{j},
-                disp('no solution'),
+%                 disp('no solution'),
                 if isfield(oo_.dr,'ghx'),
                     oo_.dr=rmfield(oo_.dr,'ghx');
                 end
@@ -448,22 +450,23 @@ delete([OutputDirectoryName,'/',fname_,'_',aunstname,'_corr_*.*']);
 delete([OutputDirectoryName,'/',fname_,'_',aindname,'_corr_*.*']);
 
 if length(iunstable)>0 & length(iunstable)<Nsam,
-    disp([num2str(length(istable)/Nsam*100,3),'\% of the prior support is stable.'])
-    disp([num2str( (length(iunstable)-length(iwrong)-length(iindeterm) )/Nsam*100),'\% of the prior support is unstable.'])
+    fprintf(['%4.1f%% of the prior support is stable.\n'],length(istable)/Nsam*100)
+    fprintf(['%4.1f%% of the prior support is unstable.\n'],(length(iunstable)-length(iwrong)-length(iindeterm) )/Nsam*100)
     if ~isempty(iindeterm),
-        disp([num2str(length(iindeterm)/Nsam*100,3),'\% of the prior support gives indeterminacy.'])
+        fprintf(['%4.1f%% of the prior support gives indeterminacy.'],length(iindeterm)/Nsam*100)
     end
     if ~isempty(iwrong),
         disp(' ');
-        disp(['For ',num2str(length(iwrong)/Nsam*100,3),'\% of the prior support dynare could not find a solution.'])
+        disp(['For ',num2str(length(iwrong)/Nsam*100,'%1.3f'),'\% of the prior support dynare could not find a solution.'])
     end
     disp(' ');
     % Blanchard Kahn
     [proba, dproba] = stab_map_1(lpmat, istable, iunstable, aname,0);
-    indstab=find(dproba>ksstat);
+%     indstab=find(dproba>ksstat);
+    indstab=find(proba<pvalue_ks);
     disp('Smirnov statistics in driving acceptable behaviour')
-    for j=1:np,
-        disp([M_.param_names(estim_params_.param_vals(j,1),:),'   d-stat = ', num2str(dproba(j),3)])
+    for j=1:length(indstab),
+        disp([M_.param_names(estim_params_.param_vals(indstab(j),1),:),'   d-stat = ', num2str(dproba(indstab(j)),'%1.3f'),'   p-value = ', num2str(proba(indstab(j)),'%1.3f')])
     end
     disp(' ');
     if ~isempty(indstab)
@@ -472,10 +475,11 @@ if length(iunstable)>0 & length(iunstable)<Nsam,
     ixun=iunstable(find(~ismember(iunstable,[iindeterm,iwrong])));
     if ~isempty(iindeterm),
         [proba, dproba] = stab_map_1(lpmat, [1:Nsam], iindeterm, [aname, '_indet'],0);
-        indindet=find(dproba>ksstat);
+%         indindet=find(dproba>ksstat);
+        indindet=find(proba<pvalue_ks);
         disp('Smirnov statistics in driving indeterminacy')
-        for j=1:np,
-            disp([M_.param_names(estim_params_.param_vals(j,1),:),' d-stat = ', num2str(dproba(j),3)])
+        for j=1:length(indindet),
+            disp([M_.param_names(estim_params_.param_vals(indindet(j),1),:),'   d-stat = ', num2str(dproba(indindet(j)),'%1.3f'),'   p-value = ', num2str(proba(indindet(j)),'%1.3f')])
         end
         disp(' ');
         if ~isempty(indindet)
@@ -485,10 +489,11 @@ if length(iunstable)>0 & length(iunstable)<Nsam,
     
     if ~isempty(ixun),
         [proba, dproba] = stab_map_1(lpmat, [1:Nsam], ixun, [aname, '_unst'],0);
-        indunst=find(dproba>ksstat);
+%         indunst=find(dproba>ksstat);
+        indunst=find(proba<pvalue_ks);
         disp('Smirnov statistics in driving instability')
-        for j=1:np,
-            disp([M_.param_names(estim_params_.param_vals(j,1),:),'   d-stat = ', num2str(dproba(j),3)])
+        for j=1:length(indunst),
+            disp([M_.param_names(estim_params_.param_vals(indunst(j),1),:),'   d-stat = ', num2str(dproba(indunst(j)),'%1.3f'),'   p-value = ', num2str(proba(indunst(j)),'%1.3f')])
         end
         disp(' ');
         if ~isempty(indunst)
@@ -498,10 +503,11 @@ if length(iunstable)>0 & length(iunstable)<Nsam,
     
     if ~isempty(iwrong),
         [proba, dproba] = stab_map_1(lpmat, [1:Nsam], iwrong, [aname, '_wrong'],0);
-        indwrong=find(dproba>ksstat);
+%         indwrong=find(dproba>ksstat);
+        indwrong=find(proba<pvalue_ks);
         disp('Smirnov statistics in driving no solution')
-        for j=1:np,
-            disp([M_.param_names(estim_params_.param_vals(j,1),:),'   d-stat = ', num2str(dproba(j),3)])
+        for j=1:length(indwrong),
+            disp([M_.param_names(estim_params_.param_vals(indwrong(j),1),:),'   d-stat = ', num2str(dproba(indwrong(j)),'%1.3f'),'   p-value = ', num2str(proba(indwrong(j)),'%1.3f')])
         end
         disp(' ');
         if ~isempty(indwrong)
@@ -515,18 +521,18 @@ if length(iunstable)>0 & length(iunstable)<Nsam,
     c0=corrcoef(lpmat(istable,:));
     c00=tril(c0,-1);
     
-    stab_map_2(lpmat(istable,:),alpha2, asname, OutputDirectoryName);
+    stab_map_2(lpmat(istable,:),alpha2, pvalue_corr, asname, OutputDirectoryName);
     if length(iunstable)>10,
-        stab_map_2(lpmat(iunstable,:),alpha2, auname, OutputDirectoryName);
+        stab_map_2(lpmat(iunstable,:),alpha2, pvalue_corr, auname, OutputDirectoryName);
     end
     if length(iindeterm)>10,
-        stab_map_2(lpmat(iindeterm,:),alpha2, aindname, OutputDirectoryName);
+        stab_map_2(lpmat(iindeterm,:),alpha2, pvalue_corr, aindname, OutputDirectoryName);
     end
     if length(ixun)>10,
-        stab_map_2(lpmat(ixun,:),alpha2, aunstname, OutputDirectoryName);
+        stab_map_2(lpmat(ixun,:),alpha2, pvalue_corr, aunstname, OutputDirectoryName);
     end
     if length(iwrong)>10,
-        stab_map_2(lpmat(iwrong,:),alpha2, awrongname, OutputDirectoryName);
+        stab_map_2(lpmat(iwrong,:),alpha2, pvalue_corr, awrongname, OutputDirectoryName);
     end
     
     x0=0.5.*(bayestopt_.ub(1:nshock)-bayestopt_.lb(1:nshock))+bayestopt_.lb(1:nshock);

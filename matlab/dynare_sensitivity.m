@@ -109,6 +109,8 @@ options_gsa = set_default_option(options_gsa,'load_rmse',0);
 options_gsa = set_default_option(options_gsa,'load_stab',0);
 options_gsa = set_default_option(options_gsa,'alpha2_stab',0.3);
 options_gsa = set_default_option(options_gsa,'ksstat',0.1);
+options_gsa = set_default_option(options_gsa,'pvalue_ks',0.001);
+options_gsa = set_default_option(options_gsa,'pvalue_corr',0.001);
 %options_gsa = set_default_option(options_gsa,'load_mh',0);
 
 if options_gsa.redform,

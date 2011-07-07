@@ -1,6 +1,5 @@
-%function stab_map_2(x,alpha2,istab,fnam)
-function stab_map_2(x,alpha2,fnam, dirname)
-% function stab_map_2(x,alpha2,fnam, dirname)
+function stab_map_2(x,alpha2, pvalue, fnam, dirname)
+% function stab_map_2(x, alpha2, pvalue, fnam, dirname)
 %
 % Part of the Sensitivity Analysis Toolbox for DYNARE
 %
@@ -22,11 +21,12 @@ function stab_map_2(x,alpha2,fnam, dirname)
 global bayestopt_ estim_params_ options_ oo_ M_
 
 npar=size(x,2);
+nsam=size(x,1);
 ishock= npar>estim_params_.np;
-if nargin<3,
+if nargin<4,
   fnam='';
 end
-if nargin<4,
+if nargin<5,
   dirname='';
 end
 
@@ -53,6 +53,9 @@ for j=1:npar,
   i2=find(abs(c00(:,j))>alpha2);
   if length(i2)>0,
     for jx=1:length(i2),
+          tval  = abs(c00(i2(jx),j)*sqrt( (nsam-2)/(1-c00(i2(jx),j)^2) ));
+          tcr = tcrit(nsam-2,pvalue);
+          if tval>tcr,
       j2=j2+1;
       if mod(j2,12)==1,
         ifig=ifig+1;
@@ -81,6 +84,7 @@ for j=1:npar,
         eval(['print -dpdf ' dirname '/' fig_nam_ int2str(ifig)]);
         if options_.nograph, close(gcf), end
       end
+          end
     end
   end
   if (j==(npar)) & j2>0,
