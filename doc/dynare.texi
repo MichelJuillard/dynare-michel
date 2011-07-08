@@ -4965,6 +4965,14 @@ Default: @code{0.3}
 Critical value for Smirnov statistics @math{d}: plot parameters with
 @math{d>} @code{ksstat}. Default: @code{0.1}
 
+@item pvalue_ks = @var{DOUBLE}
+The threshold @math{pvalue} for significant Kolmogorov-Smirnov test (@i{i.e.} plot parameters with
+@math{pvalue<} @code{pvalue_ks}). Default: @code{0.001}
+
+@item pvalue_corr = @var{DOUBLE}
+The threshold @math{pvalue} for significant correlation in filtered samples
+(@i{i.e.} plot bivariate samples when @math{pvalue<} @code{pvalue_corr}). Default: @code{0.001}
+
 @end table
 @customhead{Reduced Form Mapping Options}
 @table @code
