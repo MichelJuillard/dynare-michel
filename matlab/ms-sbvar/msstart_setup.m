@@ -110,13 +110,9 @@ indxDummy = options_.ms.bayesian_prior;  % 1: add dummy observations to the data
 %   options_.ms.dummy_obs=0;    % no dummy observations
 %end
 %=== The following mu is effective only if options_.ms.bayesian_prior==1.
-mu = zeros(6,1);   % hyperparameters
-mu(1) = 0.57;
-mu(2) = 0.13;
-mu(3) = 0.1;
-mu(4) = 1.5;  %1.4 or 1.5, faster decay, produces much better inflation forecast.
-mu(5) = 5;  %10;
-mu(6) = 5;  %10;
+
+mu = options_.ms.coefficients_prior_hyperparameters;
+
 %   mu(1): overall tightness and also for A0;
 %   mu(2): relative tightness for A+;
 %   mu(3): relative tightness for the constant term;
