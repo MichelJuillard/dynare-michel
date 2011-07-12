@@ -3854,7 +3854,7 @@ this covariance matrix. Default is @code{1}.
 @xref{order}.
 
 @item irf = @var{INTEGER}
-@xref{irf}.
+@xref{irf}. Only used if @ref{bayesian_irf} is passed.
 
 @item aim_solver
 @xref{aim_solver}.
