@@ -3760,6 +3760,7 @@ in @code{estimated_params} is now deprecated and will be removed in a
 future release of Dynare.
 
 @item dsge_var = @var{DOUBLE}
+@anchor{dsge_var}
 Triggers the estimation of a DSGE-VAR model, where the weight of the
 DSGE prior of the VAR model is calibrated to the value passed. NB: The
 previous method of declaring @code{dsge_prior_weight} as a parameter
@@ -3855,6 +3856,10 @@ this covariance matrix. Default is @code{1}.
 
 @item irf = @var{INTEGER}
 @xref{irf}. Only used if @ref{bayesian_irf} is passed.
+
+@item irf_shocks = ( @var{VARIABLE_NAME} [[,] @var{VARIABLE_NAME} @dots{}] )
+@xref{irf_shocks}. Only used if @ref{bayesian_irf} is passed. Cannot be used
+with @ref{dsge_var}.
 
 @item aim_solver
 @xref{aim_solver}.
