@@ -95,7 +95,7 @@ function plot_point_forecast(forecast,nvars,nr,nc,endo_names,title_,save_graph_f
     for j=1:nvars
         if m > nr*nc
             graph_name = ['MS-Forecast (' int2str(n_fig) ')']
-            dyn_save_graph(M_.fname,['MS-forecast-' int2str(n_fig)],...
+            dyn_save_graph(dirname,['MS-forecast-' int2str(n_fig)],...
                            save_graph_formats,TeX,names,tex_names,graph_name);
             n_fig =n_fig+1;
             figure('Name',['MS-Forecast (' int2str(n_fig) ')']);
@@ -127,7 +127,7 @@ function plot_banded_forecast(forecast,nvars,nr,nc,endo_names,num_percentiles,ti
     for j=1:nvars
         if m > nr*nc
             graph_name = ['MS-Forecast (' int2str(n_fig) ')'];
-            dyn_save_graph(M_.fname,['MS-forecast-' int2str(n_fig)],...
+            dyn_save_graph(dirname,['MS-forecast-' int2str(n_fig)],...
                            save_graph_formats,TeX,names,tex_names,graph_name);
             n_fig =n_fig+1;
             figure('Name',graph_name);
@@ -155,5 +155,3 @@ function plot_banded_forecast(forecast,nvars,nr,nc,endo_names,num_percentiles,ti
                        save_graph_formats,TeX,names,tex_names,graph_name);
     end
 end
-
-
