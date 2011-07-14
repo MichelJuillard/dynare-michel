@@ -91,6 +91,9 @@ elseif options_.solve_algo == 2 || options_.solve_algo == 4
         disp(['STEADY:  numerical initial values incompatible with the following' ...
               ' equations'])
         disp(i')
+        disp('Please check for example')
+        disp('   i) if all parameters occurring in these equations are defined')
+        disp('  ii) that no division by an endogenous variable initialized to 0 occurs') 
         error('exiting ...')
     end
     
