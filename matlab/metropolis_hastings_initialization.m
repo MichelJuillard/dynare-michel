@@ -35,6 +35,19 @@ function [ ix2, ilogpo2, ModelName, MhDirectoryName, fblck, fline, npar, nblck, 
 
 global M_ options_ bayestopt_
 
+ix2 = [];
+ilogpo2 = [];
+ModelName = []; 
+MhDirectoryName = [];
+fblck = [];
+fline = [];
+npar = [];
+nblck = [];
+nruns = [];
+NewFile = [];
+MAX_nruns = [];
+d = [];
+
 ModelName = M_.fname;
 
 if ~isempty(M_.bvar)
