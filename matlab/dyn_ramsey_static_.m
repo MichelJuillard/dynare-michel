@@ -77,22 +77,31 @@ if options_.steadystate_flag
     end
     
 else
-    x = [x(1:orig_endo_nbr); zeros(orig_eq_nbr,1); x(orig_endo_nbr+1:end)];
+    xx = zeros(endo_nbr,1);
+    xx(1:orig_endo_nbr) = x;
+
+    xx = feval([M_.fname '_set_auxiliary_variables'],xx,...
+                                                       [oo.exo_steady_state,...
+                                                       oo.exo_det_steady_state],...
+                                                       M_.params);
+
+%    x = [x(1:orig_endo_nbr); zeros(orig_eq_nbr,1); x(orig_endo_nbr+1:end)];
 end
 
 % value and Jacobian of objective function
 ex = zeros(1,M.exo_nbr);
-[U,Uy,Uyy] = feval([fname '_objective_static'],x(i_endo),ex, M_.params);
+[U,Uy,Uyy] = feval([fname '_objective_static'],xx,ex, M_.params);
 Uy = Uy';
 Uyy = reshape(Uyy,endo_nbr,endo_nbr);
 
 % set multipliers to 0 to compute residuals
 it_ = 1;
-[f,fJ] = feval([fname '_static'],x,[oo.exo_simul oo.exo_det_simul], ...
+[f,fJ] = feval([fname '_static'],xx,[oo.exo_simul oo.exo_det_simul], ...
                M_.params);
 
-A = fJ(1:orig_endo_nbr,i_mult);
-y = f(1:orig_endo_nbr);
+aux_eq = [1:orig_endo_nbr orig_endo_nbr+orig_eq_nbr+1:size(fJ,1)];
+A = fJ(aux_eq,orig_endo_nbr+1:end);
+y = f(aux_eq);
 mult = -A\y;
 
 resids1 = y+A*mult;

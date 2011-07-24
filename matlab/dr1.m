@@ -128,7 +128,8 @@ if options_.ramsey_policy
         [junk,junk,multbar] = dyn_ramsey_static_(oo_.steady_state(k_inst),M_,options_,oo_,it_);
         oo_.steady_state = [x(1:M_.orig_endo_nbr); multbar];
     else
-        xx = oo_.steady_state([1:M_.orig_endo_nbr (M_.orig_endo_nbr+M_.orig_eq_nbr+1):end]);
+%        xx = oo_.steady_state([1:M_.orig_endo_nbr (M_.orig_endo_nbr+M_.orig_eq_nbr+1):end]);
+        xx = oo_.steady_state(1:M_.orig_endo_nbr);
         [xx,info1] = dynare_solve('dyn_ramsey_static_', ...
                                                 xx,0,M_,options_,oo_,it_);
         [junk,junk,multbar] = dyn_ramsey_static_(xx,M_,options_,oo_,it_);
