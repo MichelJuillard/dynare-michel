@@ -117,8 +117,8 @@ for i=1:maxit
         X = [ones(i,1) Scales(1:i)];
         b = X\(AvRates(1:i)-accept_target);
         Scales(i+1) = -b(1)/b(2);
-        if Scales(i+1) < 0.05
-            Scales(i+1) = 0.05;
+        if Scales(i+1) < 0.001
+            Scales(i+1) = 0.001;
         elseif Scales(i+1) > 2
             Scales(i+1) = 2;
         end
