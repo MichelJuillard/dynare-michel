@@ -1,5 +1,5 @@
-function random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin)
-%function random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin)
+function record=random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin)
+%function record=random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin)
 % Random walk Metropolis-Hastings algorithm. 
 % 
 % INPUTS 
@@ -11,7 +11,7 @@ function random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bou
 %   o varargin              list of argument following mh_bounds
 %  
 % OUTPUTS 
-%   None  
+%   o record     [struct]   structure describing the iterations
 %
 % ALGORITHM 
 %   Metropolis-Hastings.       
