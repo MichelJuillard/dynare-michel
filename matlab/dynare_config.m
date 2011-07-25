@@ -49,6 +49,7 @@ addpath([dynareroot '/ms-sbvar/switching_specification']);
 addpath([dynareroot '/ms-sbvar/mhm_specification']);
 addpath([dynareroot '/parallel/'])
 addpath([dynareroot '/gsa/'])
+addpath([dynareroot '../doc/m/'])
 
 % For functions that exist only under some Octave versions
 % or some MATLAB versions, and for which we provide some replacement functions

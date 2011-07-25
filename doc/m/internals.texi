@@ -1,0 +1,433 @@
+\input texinfo
+@c %**start of header
+@setfilename dynare.info
+@documentencoding UTF-8
+@settitle Dynare Internal Documentation
+@afourwide
+@dircategory Math
+@direntry
+* Dynare: (dynare).             A platform for handling a wide class
+                                  of economic models.
+@end direntry
+
+@include ../version.texi
+
+@c Define some macros
+
+@macro descriptionhead
+@ifnothtml
+@sp 1
+@end ifnothtml
+@emph{Description}
+@end macro
+
+@macro optionshead
+@iftex
+@sp 1
+@end iftex
+@emph{Options}
+@end macro
+
+@macro examplehead
+@iftex
+@sp 1
+@end iftex
+@emph{Example}
+@end macro
+
+@macro outputhead
+@iftex
+@sp 1
+@end iftex
+@emph{Output}
+@end macro
+
+@macro customhead{title}
+@iftex
+@sp 1
+@end iftex
+@emph{\title\}
+@end macro
+
+@c %**end of header
+
+@copying
+Copyright @copyright{} 1996-2011, Dynare Team.
+
+@quotation
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
+A copy of the license can be found at @uref{http://www.gnu.org/licenses/fdl.txt}.
+@end quotation
+@end copying
+
+@titlepage
+@title Dynare
+@subtitle Internal documentation, version @value{VERSION}
+@author Stéphane Adjemian
+@author Houtan Bastani
+@author Michel Juillard
+@author Junior Maih
+@author Ferhat Mihoubi
+@author George Perendia
+@author Marco Ratto
+@author Sébastien Villemot
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@contents
+
+@ifnottex
+@node Top
+@top Dynare
+This is Dynare Internal Documentation, version @value{VERSION}.
+
+@insertcopying
+@end ifnottex
+
+@menu
+* Introduction::           
+* Dynare Structures::
+* Data::
+* Estimation::
+* Simulation::                    
+* Bibliography::                
+* Function Index::  
+* Variable Index::              
+
+@detailmenu
+ --- The Detailed Node Listing ---
+
+Introduction
+
+* What is Dynare ?::            
+* Documentation sources::       
+
+Dynare structures
+
+* dataset_::       
+* M_::      
+* options_::
+* oo_::               
+
+Data
+
+* Create a data structure::                  
+* Compute descripive statistics::
+* Functions::
+
+Estimation
+
+* Likelihood of DSGE models::
+* DsgeVar likelihood::
+* Simulated Method of Moments::
+
+Simulation
+
+* Perfect foresight models::
+* Solve rational expectation models with perturbation::
+
+
+@end detailmenu
+@end menu
+
+@node Introduction
+@chapter Introduction
+
+@menu
+* What is Dynare ?::            
+* Documentation sources::       
+@end menu
+
+@node What is Dynare ?
+@section What is Dynare ?
+
+Dynare is a software platform for handling a wide class of economic
+models, in particular dynamic stochastic general equilibrium (DSGE)
+and overlapping generations (OLG) models. The models solved by Dynare
+include those relying on the @i{rational expectations} hypothesis, wherein
+agents form their expectations about the future in a way consistent
+with the model. But Dynare is also able to handle models where
+expectations are formed differently: on one extreme, models where
+agents perfectly anticipate the future; on the other extreme, models
+where agents have limited rationality or imperfect knowledge of the
+state of the economy and, hence, form their expectations through a
+learning process. In terms of types of agents, models solved by Dynare
+can incorporate consumers, productive firms, governments, monetary
+authorities, investors and financial intermediaries. Some degree of
+heterogeneity can be achieved by including several distinct classes of
+agents in each of the aforementioned agent categories.
+
+Dynare offers a user-friendly and intuitive way of describing these
+models. It is able to perform simulations of the model given a
+calibration of the model parameters and is also able to estimate these
+parameters given a dataset. In practice, the user will write a text
+file containing the list of model variables, the dynamic equations
+linking these variables together, the computing tasks to be performed
+and the desired graphical or numerical outputs.
+
+A large panel of applied mathematics and computer science techniques
+are internally employed by Dynare: multivariate nonlinear solving and
+optimization, matrix factorizations, local functional approximation,
+Kalman filters and smoothers, MCMC techniques for Bayesian estimation,
+graph algorithms, optimal control, @dots{}
+
+Various public bodies (central banks, ministries of economy and
+finance, international organisations) and some private financial
+institutions use Dynare for performing policy analysis exercises and
+as a support tool for forecasting exercises. In the academic world,
+Dynare is used for research and teaching purposes in postgraduate
+macroeconomics courses.
+
+Dynare is a free software, which means that it can be downloaded free
+of charge, that its source code is freely available, and that it can
+be used for both non-profit and for-profit purposes. Most of the
+source files are covered by the GNU General Public Licence (GPL)
+version 3 or later (there are some exceptions to this, see the file
+@file{license.txt} in Dynare distribution). It is available for the
+ Windows, Mac and Linux platforms and is fully documented through a
+user guide and a reference manual. Part of Dynare is programmed in
+C++, while the rest is written using the
+@uref{http://www.mathworks.com/products/matlab/, MATLAB} programming
+language.  The latter implies that commercially-available MATLAB
+software is required in order to run Dynare. However, as an
+alternative to MATLAB, Dynare is also able to run on top of
+@uref{http://www.octave.org, GNU Octave} (basically a free clone of
+MATLAB): this possibility is particularly interesting for students or
+institutions who cannot afford, or do not want to pay for, MATLAB and
+are willing to bear the concomitant performance loss.
+
+The development of Dynare is mainly done at
+@uref{http://www.cepremap.ens.fr, Cepremap} by a core team of
+researchers who devote part of their time to software
+development. Currently the development team of Dynare is composed of
+Stéphane Adjemian (Université du Maine, Gains and Cepremap), Houtan
+Bastani (Cepremap), Michel Juillard (Banque de France), Frédéric
+Karamé (Université d'Évry, Epee and Cepremap), Junior Maih (Norges
+Bank), Ferhat Mihoubi (Université d'Évry, Epee and Cepremap), George
+Perendia, Marco Ratto (JRC) and Sébastien Villemot (Cepremap and Paris
+School of Economics). Financial support is provided by Cepremap,
+Banque de France and DSGE-net (an international research network for
+DSGE modeling). Increasingly, the developer base is expanding, as
+tools developed by researchers outside of Cepremap are integrated into
+Dynare.
+
+Interaction between developers and users of Dynare is central to the
+project. A @uref{http://www.dynare.org/phpBB3, web forum} is available
+for users who have questions about the usage of Dynare or who want to
+report bugs. Training sessions are given through the Dynare Summer
+School, which is organized every year and is attended by about 40
+people. Finally, priorities in terms of future developments and
+features to be added are decided in cooperation with the institutions
+providing financial support.
+
+@node Documentation sources
+@section Documentation sources
+
+The present document is a reference manual for Dynare codes. It is not
+intended for basic usage, but for users willing to use Dynare as a library.
+
+There is also a reference manual for Dynare, documenting
+all commands and features in a systematic fashion.
+
+New users should rather begin with Dynare User Guide (@cite{Mancini
+(2007)}), distributed with Dynare and also available from the
+@uref{http://www.dynare.org,official Dynare web site}.
+
+Other useful sources of information include the
+@uref{http://www.dynare.org,Dynare wiki} and the
+@uref{http://www.dynare.org/phpBB3, Dynare forums}.
+
+
+
+
+@node Dynare structures
+@chapter Dynare structures
+
+@menu
+* options_::       
+* dataset_::
+* M_::                 
+* oo_::    
+* StateSpaceModel_::            
+@end menu
+
+The data are organized in structures. General options are stored in @var{options_}, the model is decribed
+in @var{M_}, the dataset used for estimation purposes is given in @var{dataset_}, results are saved in @var{oo_}, ... 
+
+@node options_
+@section options_
+
+The following table documents the options appearing in this structure and specify the default values.
+
+
+@node dataset_
+@section dataset_
+
+
+@node M_
+@section M_
+
+
+@node oo_
+@section oo_
+
+
+@node StateSpaceModel_
+@section StateSpaceModel_
+
+
+
+@node Data
+@chapter Data
+
+@include data.texi
+
+
+
+@node Estimation
+@chapter Estimation
+
+@include estimation.texi
+
+
+
+@node Simulation
+@chapter Simulation
+
+@include simulation.texi
+
+
+
+@node Miscellaneous
+@chapter Miscellaneous
+
+@include misc.texi
+
+
+@node Bibliography
+@chapter Bibliography
+
+@itemize
+
+@item
+Backus, David K., Patrick J. Kehoe, and Finn E. Kydland (1992):
+``International Real Business Cycles,'' @i{Journal of Political
+Economy}, 100(4), 745--775.
+
+@item
+Boucekkine, Raouf (1995): ``An alternative methodology for solving
+nonlinear forward-looking models,'' @i{Journal of Economic Dynamics
+and Control}, 19, 711--734.
+
+@item
+Collard, Fabrice (2001): ``Stochastic simulations with Dynare: A practical guide''.
+
+@item
+Collard, Fabrice and Michel Juillard (2001a): ``Accuracy of stochastic
+perturbation methods: The case of asset pricing models,'' @i{Journal
+of Economic Dynamics and Control}, 25, 979--999.
+
+@item
+Collard, Fabrice and Michel Juillard (2001b): ``A Higher-Order Taylor
+Expansion Approach to Simulation of Stochastic Forward-Looking Models
+with an Application to a Non-Linear Phillips Curve,'' @i{Computational
+Economics}, 17, 125--139.
+
+@item
+Durbin, J. and S. J. Koopman (2001), @i{Time Series Analysis by State
+Space Methods}, Oxford University Press.
+
+@item
+Fair, Ray and John Taylor (1983): ``Solution and Maximum Likelihood
+Estimation of Dynamic Nonlinear Rational Expectation Models,''
+@i{Econometrica}, 51, 1169--1185.
+
+@item
+Fernandez-Villaverde, Jesus and Juan Rubio-Ramirez (2004): ``Comparing
+Dynamic Equilibrium Economies to Data: A Bayesian Approach,''
+@i{Journal of Econometrics}, 123, 153--187.
+
+@item
+Ireland, Peter (2004): ``A Method for Taking Models to the Data,''
+@i{Journal of Economic Dynamics and Control}, 28, 1205--26.
+
+@item
+Judd, Kenneth (1996): ``Approximation, Perturbation, and Projection
+Methods in Economic Analysis'', in @i{Handbook of Computational
+Economics}, ed. by Hans Amman, David Kendrick, and John Rust, North
+Holland Press, 511--585.
+
+@item
+Juillard, Michel (1996): ``Dynare: A program for the resolution and
+simulation of dynamic models with forward variables through the use of
+a relaxation algorithm,'' CEPREMAP, @i{Couverture Orange}, 9602.
+
+@item
+Kim, Jinill, Sunghyun Kim, Ernst Schaumburg, and Christopher A. Sims
+(2008): ``Calculating and using second-order accurate solutions of
+discrete time dynamic equilibrium models,'' @i{Journal of Economic
+Dynamics and Control}, 32(11), 3397--3414. 
+
+@item
+Koopman, S. J. and J. Durbin (2003): ``Filtering and Smoothing of
+State Vector for Diffuse State Space Models,'' @i{Journal of Time
+Series Analysis}, 24(1), 85--98.
+
+@item
+Laffargue, Jean-Pierre (1990): ``Résolution d'un modèle
+macroéconomique avec anticipations rationnelles'', @i{Annales
+d'Économie et Statistique}, 17, 97--119.
+
+@item
+Lubik, Thomas and Frank Schorfheide (2007): ``Do Central Banks Respond
+to Exchange Rate Movements? A Structural Investigation,'' @i{Journal
+of Monetary Economics}, 54(4), 1069--1087.
+
+@item
+Mancini-Griffoli, Tommaso (2007): ``Dynare User Guide: An introduction
+to the solution and estimation of DSGE models''.
+
+@item
+Pearlman, Joseph, David Currie, and Paul Levine (1986): ``Rational
+expectations models with partial information,'' @i{Economic
+Modelling}, 3(2), 90--105.
+
+@item
+Rabanal, Pau and Juan Rubio-Ramirez (2003): ``Comparing New Keynesian
+Models of the Business Cycle: A Bayesian Approach,'' Federal Reserve
+of Atlanta, @i{Working Paper Series}, 2003-30.
+
+@item
+Schorfheide, Frank (2000): ``Loss Function-based evaluation of DSGE
+models,'' @i{Journal of Applied Econometrics}, 15(6), 645--670.
+
+@item
+Schmitt-Grohé, Stephanie and Martin Uríbe (2004): ``Solving Dynamic
+General Equilibrium Models Using a Second-Order Approximation to the
+Policy Function,'' @i{Journal of Economic Dynamics and Control},
+28(4), 755--775.
+
+@item
+Smets, Frank and Rafael Wouters (2003): ``An Estimated Dynamic
+Stochastic General Equilibrium Model of the Euro Area,'' @i{Journal of
+the European Economic Association}, 1(5), 1123--1175.
+
+@end itemize
+
+@node Command and Function Index
+@unnumbered Command and Function Index
+
+@printindex fn
+
+@node Variable Index
+@unnumbered Variable Index
+
+@printindex vr
+
+@bye
