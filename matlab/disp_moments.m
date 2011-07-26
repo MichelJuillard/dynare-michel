@@ -69,13 +69,15 @@ end
 
 if options_.nocorr == 0
     corr = (y'*y/size(y,1))./(s'*s);
-    title = 'CORRELATION OF SIMULATED VARIABLES';
-    if options_.hp_filter
-        title = [title ' (HP filter, lambda = ' ...
-                 int2str(options_.hp_filter) ')'];
+    if options_.noprint == 0
+        title = 'CORRELATION OF SIMULATED VARIABLES';
+        if options_.hp_filter
+            title = [title ' (HP filter, lambda = ' ...
+                     int2str(options_.hp_filter) ')'];
+        end
+        headers = char('VARIABLE',M_.endo_names(ivar,:));
+        dyntable(title,headers,labels,corr,size(labels,2)+2,8,4);
     end
-    headers = char('VARIABLE',M_.endo_names(ivar,:));
-    dyntable(title,headers,labels,corr,size(labels,2)+2,8,4);
 end
 
 ar = options_.ar;
@@ -87,13 +89,15 @@ if ar > 0
         oo_.autocorr{i} = y(ar+1:end,:)'*y(ar+1-i:end-i,:)./((size(y,1)-ar)*std(y(ar+1:end,:))'*std(y(ar+1-i:end-i,:)));
         autocorr = [ autocorr diag(oo_.autocorr{i}) ];
     end
-    title = 'AUTOCORRELATION OF SIMULATED VARIABLES';
-    if options_.hp_filter
-        title = [title ' (HP filter, lambda = ' ...
-                 int2str(options_.hp_filter) ')'];
+    if options_.noprint == 0
+        title = 'AUTOCORRELATION OF SIMULATED VARIABLES';
+        if options_.hp_filter
+            title = [title ' (HP filter, lambda = ' ...
+                     int2str(options_.hp_filter) ')'];
+        end
+        headers = char('VARIABLE',int2str([1:ar]'));
+        dyntable(title,headers,labels,autocorr,size(labels,2)+2,8,4);
     end
-    headers = char('VARIABLE',int2str([1:ar]'));
-    dyntable(title,headers,labels,autocorr,size(labels,2)+2,8,4);
 end
 
 warning(warning_old_state);
