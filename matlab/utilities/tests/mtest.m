@@ -1,4 +1,4 @@
-function check = test(fname,fpath)
+function check = mtest(fname,fpath)
 % Extract test sections from matlab's routine executes the test and report errors.
 
 % Copyright (C) 2011 Dynare Team
