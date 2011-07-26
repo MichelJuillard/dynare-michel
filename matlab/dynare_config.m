@@ -1,4 +1,4 @@
-function dynareroot = dynare_config(path_to_dynare)
+function dynareroot = dynare_config(path_to_dynare,verbose)
 %function dynareroot = dynare_config(path_to_dynare)
 % This function tests the existence of valid mex files (for qz
 % decomposition, solution to sylvester equation and kronecker
@@ -32,10 +32,15 @@ function dynareroot = dynare_config(path_to_dynare)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if nargin
+if nargin && ~isempty(path_to_dynare)
     addpath(path_to_dynare);
 end
 dynareroot = strrep(which('dynare'),'dynare.m','');
+
+if ~nargin || nargin==1 
+    verbose = 1;
+end
+
 
 addpath([dynareroot '/distributions/'])
 addpath([dynareroot '/kalman/'])
@@ -49,7 +54,7 @@ addpath([dynareroot '/ms-sbvar/switching_specification']);
 addpath([dynareroot '/ms-sbvar/mhm_specification']);
 addpath([dynareroot '/parallel/'])
 addpath([dynareroot '/gsa/'])
-addpath([dynareroot '../doc/m/'])
+addpath([dynareroot '/doc/'])
 
 % For functions that exist only under some Octave versions
 % or some MATLAB versions, and for which we provide some replacement functions
@@ -159,8 +164,10 @@ for i=1:number_of_mex_files
 end
 %% Test if valid mex files are available, if a mex file is not available
 %% a matlab version of the routine is included in the path.
-disp(' ')
-disp('Configuring Dynare ...')
+if verbose
+    disp(' ')
+    disp('Configuring Dynare ...')
+end
 
 for i=1:number_of_mex_files
     test = (exist(mex_status{i,1},'file') == 3);
@@ -170,7 +177,9 @@ for i=1:number_of_mex_files
     else
         message = '[mex] ';
     end
-    disp([ message mex_status{i,3} '.' ])
+    if verbose
+        disp([ message mex_status{i,3} '.' ])
+    end
 end
 
 % Test if bytecode DLL is present
@@ -179,7 +188,9 @@ if exist('bytecode', 'file') == 3
 else
     message = '[no]  ';
 end
-disp([ message 'Bytecode evaluation.' ])
+if verbose
+    disp([ message 'Bytecode evaluation.' ])
+end
 
 % Test if k-order perturbation DLL is present
 if exist('k_order_perturbation', 'file') == 3
@@ -187,7 +198,9 @@ if exist('k_order_perturbation', 'file') == 3
 else
     message = '[no]  ';
 end
-disp([ message 'k-order perturbation solver.' ])
+if verbose
+    disp([ message 'k-order perturbation solver.' ])
+end
 
 % Test if dynare_simul_ DLL is present
 if exist('dynare_simul_', 'file') == 3
@@ -195,6 +208,7 @@ if exist('dynare_simul_', 'file') == 3
 else
     message = '[no]  ';
 end
-disp([ message 'k-order solution simulation.' ])
-
-disp(' ')
+if verbose
+    disp([ message 'k-order solution simulation.' ])
+    disp(' ')
+end
