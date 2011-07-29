@@ -22,6 +22,12 @@ for ii=2:nvar
     Qi(:,:,nvar)=zeros(nvar,nvar);
 end
 
+if options_ms.constants_exclusion
+    for i=1:nvar
+        Ri(i,k,i) = 1;
+    end
+end
+
 for n=1:nvar 
    Ui{n} = null(Qi(:,:,n));
    Vi{n} = null(Ri(:,:,n));
