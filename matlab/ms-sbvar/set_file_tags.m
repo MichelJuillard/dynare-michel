@@ -1,12 +1,12 @@
-function clean_ms_probabilities_files(file_tag)
-% function clean_ms_probabilities_files()
-% removes MS probabilities files
+function [options_]=set_file_tags(options_)
+%function set_file_tags()
+% Sets the appropriate file tags for first type of mex function
 %
 % INPUTS
-%    file_tag: string indicating tag to use when deleting files
+%    options_:    (struct)    options
 %
 % OUTPUTS
-%    none
+%    options_:    (struct)    options
 %
 % SPECIAL REQUIREMENTS
 %    none
@@ -28,7 +28,7 @@ function clean_ms_probabilities_files(file_tag)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-delete_if_exists(['smoothed_' file_tag '.out']);
-delete_if_exists(['filtered_' file_tag '.out']);
-delete_dir_if_exists([file_tag filesep 'Output' filesep 'Probabilities']);
+if ~isfield(options_.ms,'output_file_tag')
+    options_.ms.output_file_tag = options_.ms.file_tag;
+end
 end

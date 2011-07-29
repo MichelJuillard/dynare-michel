@@ -1,6 +1,6 @@
 function [options_, oo_]=ms_forecast(M_, options_, oo_)
 %function ms_forecast()
-% calls ms irf mex function
+% MS-SBVAR Forecast
 %
 % INPUTS
 %    M_:          (struct)    model structure
@@ -31,12 +31,15 @@ function [options_, oo_]=ms_forecast(M_, options_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-disp('Forecasts');
-options_ = set_ms_estimation_flags_for_other_mex(options_);
-options_ = set_ms_simulation_flags_for_other_mex(options_);
-oo_ = set_oo_w_estimation_output(options_, oo_);
+disp('MS-SBVAR Forecasts');
+options_ = set_file_tags(options_);
+[options_, oo_] = set_ms_estimation_file(options_, oo_);
+options_ = set_ms_simulation_file(options_);
+clean_files_for_second_type_of_mex(M_, options_, 'forecast')
+forecastdir = [options_.ms.output_file_tag filesep 'Forecast'];
+create_dir(forecastdir);
 
-opt = {options_.ms.output_file_tag, ...
+opt = {options_.ms.estimation_file_tag, ...
     'seed', options_.DynareRandomStreams.seed, ...
     'horizon', options_.ms.horizon, ...
     'data',options_.ms.forecast_data_obs ...
@@ -46,22 +49,22 @@ opt = {options_.ms.output_file_tag, ...
 
 [err, forecast] = mex_ms_forecast(opt{:},'free_parameters',oo_.ms.maxparams,'shocks_per_parameter', options_.ms.shock_draws);
 mexErrCheck('mex_ms_forecast ergodic ', err);
-plot_ms_forecast(M_,forecast,'Forecast',options_.graph_save_formats,options_.TeX);
+plot_ms_forecast(M_,options_,forecast,'Forecast',options_.graph_save_formats,options_.TeX);
 
 [err, regime_forecast] = mex_ms_forecast(opt{:},'free_parameters',oo_.ms.maxparams,'shocks_per_parameter', options_.ms.shock_draws,'regimes');
 mexErrCheck('mex_ms_forecast ergodic regimes', err);
-save([M_.fname '/' options_.ms.output_file_tag '_ergodic_forecast.mat'], 'forecast', 'regime_forecast');
+save([forecastdir filesep 'ergodic_forecast.mat'], 'forecast', 'regime_forecast');
 
-if exist(options_.ms.load_mh_file,'file') > 0
+if exist(options_.ms.mh_file,'file') > 0
     [err, forecast] = mex_ms_forecast(opt{:},'free_parameters',oo_.ms.maxparams,'shocks_per_parameter', options_.ms.shocks_per_parameter, ...
-        'simulation_file',options_.ms.load_mh_file,'parameter_uncertainty');
+        'simulation_file',options_.ms.mh_file,'parameter_uncertainty');
     mexErrCheck('mex_ms_forecast bayesian ', err);
-    plot_ms_forecast(M_,forecast,'Forecast w/ Parameter Uncertainty',options_.graph_save_formats,options_.TeX);
+    plot_ms_forecast(M_,options_,forecast,'Forecast w/ Parameter Uncertainty',options_.graph_save_formats,options_.TeX);
 
     [err, regime_forecast] = mex_ms_forecast(opt{:},'free_parameters',oo_.ms.maxparams,'shocks_per_parameter', options_.ms.shocks_per_parameter, ...
-        'simulation_file',options_.ms.load_mh_file,'parameter_uncertainty','regimes');
+        'simulation_file',options_.ms.mh_file,'parameter_uncertainty','regimes');
     mexErrCheck('mex_ms_forecast bayesian regimes ', err);
-    save([M_.fname '/' options_.ms.output_file_tag '_bayesian_forecast.mat'], 'forecast', 'regime_forecast');
+    save([forecastdir filesep 'bayesian_forecast.mat'], 'forecast', 'regime_forecast');
 end
 options_ = initialize_ms_sbvar_options(M_, options_);
 end

@@ -32,7 +32,27 @@ function options_=initialize_ms_sbvar_options(M_, options_)
 % MS SBVAR
 % all mex functions
 options_.ms.file_tag = M_.fname;
-options_.ms.output_file_tag = M_.fname;
+if isfield(options_.ms,'initialization_file_tag')
+    options_.ms = rmfield(options_.ms,'initialization_file_tag');
+end
+if isfield(options_.ms,'init_file')
+    options_.ms = rmfield(options_.ms,'init_file');
+end
+if isfield(options_.ms,'estimation_file_tag')
+    options_.ms = rmfield(options_.ms,'estimation_file_tag');
+end
+if isfield(options_.ms,'free_param_file')
+    options_.ms = rmfield(options_.ms,'free_param_file');
+end
+if isfield(options_.ms,'simulation_file_tag')
+    options_.ms = rmfield(options_.ms,'simulation_file_tag');
+end
+if isfield(options_.ms,'mh_file')
+    options_.ms = rmfield(options_.ms,'mh_file');
+end
+if isfield(options_.ms,'output_file_tag')
+    options_.ms = rmfield(options_.ms,'output_file_tag');
+end
 % prepare ms sbvar & estimation
 options_.ms.coefficients_prior_hyperparameters = [1.0 1.0 0.1 1.2 1.0 1.0];
 options_.ms.freq = 4;
@@ -97,10 +117,4 @@ options_.ms.shocks_per_parameter = 10;
 options_.ms.median = 0;
 % forecast
 options_.ms.forecast_data_obs = 0;
-if isfield(options_.ms,'free_parameters')
-    options_.ms = rmfield(options_.ms,'free_parameters');
-end
-if isfield(options_.ms,'simulation_file')
-    options_.ms = rmfield(options_.ms,'simulation_file');
-end
 end

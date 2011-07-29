@@ -31,18 +31,21 @@ function [options_, oo_]=ms_estimation(M_, options_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-disp('Estimation');
-
-% cleanup old files
-clean_ms_init_files(options_.ms.output_file_tag);
+disp('MS-SBVAR Estimation');
+options_ = set_file_tags(options_);
 clean_ms_estimation_files(options_.ms.output_file_tag);
 
 % general setup
-ms_sbvar_setup(options_);
+if ~isfield(options_.ms, 'initialization_file_tag')
+    clean_ms_init_files(options_.ms.output_file_tag);
+    ms_sbvar_setup(options_);
+end
+options_ = set_ms_init_file(options_);
 
 % setup command line options
 opt = ['-estimate -seed ' num2str(options_.DynareRandomStreams.seed)];
-opt = [opt ' -ft ' options_.ms.output_file_tag];
+opt = [opt ' -ft ' options_.ms.file_tag];
+opt = [opt ' -fto ' options_.ms.output_file_tag];
 opt = [opt ' -cb ' num2str(options_.ms.convergence_starting_value)];
 opt = [opt ' -ce ' num2str(options_.ms.convergence_ending_value)];
 opt = [opt ' -ci ' num2str(options_.ms.convergence_increment_value)];
@@ -61,9 +64,11 @@ opt = [opt ' -random_tol_parms ' num2str(options_.ms.random_parameter_convergenc
 
 % estimation
 [err] = ms_sbvar_command_line(opt);
-mexErrCheck('ms_sbvar_command_line estimation', err);
+mexErrCheck('ms_estimation', err);
 
-options_ = set_ms_estimation_flags_for_other_mex(options_);
-oo_ = set_oo_w_estimation_output(options_, oo_);
+[options_, oo_] = set_ms_estimation_file(options_, oo_);
+[err, oo_.ms.A0, oo_.ms.Aplus, oo_.ms.Zeta, oo_.ms.Q] = ...
+    mex_ms_convert_free_parameters(options_.ms.estimation_file_tag, oo_.ms.maxparams);
+mexErrCheck('mex_ms_convert_free_parameters', err);
 options_ = initialize_ms_sbvar_options(M_, options_);
 end

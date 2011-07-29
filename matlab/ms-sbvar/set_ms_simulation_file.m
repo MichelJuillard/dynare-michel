@@ -1,6 +1,6 @@
-function options_=set_ms_estimation_flags_for_other_mex(options_)
-%function set_ms_estimation_flags_for_other_mex()
-% MS Sbvar Estimation
+function options_=set_ms_simulation_file(options_)
+%function set_ms_simulation_file()
+% Set options_.ms.mh_file based on user input
 %
 % INPUTS
 %    options_:    (struct)    options
@@ -28,17 +28,12 @@ function options_=set_ms_estimation_flags_for_other_mex(options_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ~isfield(options_.ms,'estimation_file_tag')
-    options_.ms.estimation_file_tag = options_.ms.output_file_tag;
+if ~isfield(options_.ms, 'simulation_file_tag')
+    options_.ms.simulation_file_tag = options_.ms.file_tag;
 end
-options_.ms.free_param_file = ['est_free_' options_.ms.estimation_file_tag '.out'];
-options_.ms.init_file = ['init_' options_.ms.estimation_file_tag '.dat'];
+options_.ms.mh_file = ['simulation_' options_.ms.simulation_file_tag '.out'];
 
-if ~exist(options_.ms.init_file,'file')
-    error(['ERROR: Could not find initialization file: ' options_.ms.init_file]);
-end
-
-if ~exist(options_.ms.free_param_file,'file')
-    error(['ERROR: Could not find free parameter file: ' options_.ms.free_param_file]);
+if ~exist(options_.ms.mh_file,'file')
+    error(['ERROR: Could not find Metropolis Hastings file: ' options_.ms.mh_file]);
 end
 end

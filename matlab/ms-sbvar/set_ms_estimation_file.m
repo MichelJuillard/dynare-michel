@@ -1,9 +1,8 @@
-function [options_, oo_]=ms_simulation(M_, options_, oo_)
-%function ms_simulation()
-% MS Sbvar Simulation
+function [options_, oo_]=set_ms_estimation_file(options_, oo_)
+%function set_ms_estimation_file()
+% Set options_.ms.free_param_file based on user input
 %
 % INPUTS
-%    M_:          (struct)    model structure
 %    options_:    (struct)    options
 %    oo_:         (struct)    results
 %
@@ -31,23 +30,15 @@ function [options_, oo_]=ms_simulation(M_, options_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-disp('MS-SBVAR Simulation');
-options_ = set_file_tags(options_);
-clean_ms_simulation_files(options_.ms.output_file_tag);
-[options_, oo_] = set_ms_estimation_file(options_, oo_);
+if ~isfield(options_.ms, 'estimation_file_tag')
+    options_.ms.estimation_file_tag = options_.ms.file_tag;
+end
+options_.ms.free_param_file = ['est_free_' options_.ms.estimation_file_tag '.out'];
 
-% setup command line options
-opt = ['-simulate -seed ' num2str(options_.DynareRandomStreams.seed)];
-opt = [opt ' -ft ' options_.ms.estimation_file_tag];
-opt = [opt ' -fto ' options_.ms.output_file_tag];
-opt = [opt ' -ndraws ' num2str(options_.ms.mh_replic)];
-opt = [opt ' -burnin ' num2str(options_.ms.drop)];
-opt = [opt ' -thin ' num2str(options_.ms.thinning_factor)];
-opt = [opt ' -mh ' num2str(options_.ms.adaptive_mh_draws)];
+if ~exist(options_.ms.free_param_file,'file')
+    error(['ERROR: Could not find free parameter file: ' options_.ms.free_param_file]);
+end
 
-% simulation
-[err] = ms_sbvar_command_line(opt);
-mexErrCheck('ms_simulation',err);
-
-options_ = initialize_ms_sbvar_options(M_, options_);
+oo_.ms.maxparams = load(options_.ms.free_param_file);
+oo_.ms.maxparams = oo_.ms.maxparams(3:end)';
 end

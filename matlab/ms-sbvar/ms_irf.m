@@ -1,6 +1,6 @@
 function [options_, oo_]=ms_irf(varlist,M_, options_, oo_)
 %function ms_irf()
-% calls ms irf mex function
+% MS-SBVAR Impulse Response Function
 %
 % INPUTS
 %    varlist:     (chararray) list of selected endogenous variables
@@ -32,12 +32,15 @@ function [options_, oo_]=ms_irf(varlist,M_, options_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-disp('IRFs');
-options_ = set_ms_estimation_flags_for_other_mex(options_);
-options_ = set_ms_simulation_flags_for_other_mex(options_);
-oo_ = set_oo_w_estimation_output(options_, oo_);
+disp('MS-SBVAR Impulse Response Function');
+options_ = set_file_tags(options_);
+[options_, oo_] = set_ms_estimation_file(options_, oo_);
+options_ = set_ms_simulation_file(options_);
+clean_files_for_second_type_of_mex(M_, options_, 'irf')
+irfdir = [options_.ms.output_file_tag filesep 'IRF'];
+create_dir(irfdir);
 
-opt = {options_.ms.output_file_tag, ...
+opt = {options_.ms.estimation_file_tag, ...
     'seed', options_.DynareRandomStreams.seed, ...
     'horizon', options_.ms.horizon, ...
     'filtered', options_.ms.filtered_probabilities, ...
@@ -55,22 +58,22 @@ for i=1:size(regime_irfs,1)
     plot_ms_irf(M_,options_,squeeze(regime_irfs(i,:,:,:)),options_.varobs,['Ergodic ' ...
                         'Impulse Responses State ' int2str(i)],varlist);
 end
-save([M_.fname '/' options_.ms.output_file_tag '_ergodic_irf.mat'], 'irf', 'regime_irfs');
+save([irfdir filesep 'ergodic_irf.mat'], 'irf', 'regime_irfs');
 
-if exist(options_.ms.load_mh_file,'file') > 0
+if exist(options_.ms.mh_file,'file') > 0
     [err, irf] = mex_ms_irf(opt{:}, 'shocks_per_parameter', options_.ms.shocks_per_parameter, ...
-        'parameter_uncertainty','simulation_file',options_.ms.load_mh_file);
+        'parameter_uncertainty','simulation_file',options_.ms.mh_file);
     mexErrCheck('mex_ms_irf bayesian ',err);
     plot_ms_irf(M_,options_,irf,options_.varobs,'Impulse Responses with Parameter Uncertainty',varlist);
     
     [err, regime_irfs] = mex_ms_irf(opt{:}, 'shocks_per_parameter', options_.ms.shocks_per_parameter, ...
-        'simulation_file',options_.ms.load_mh_file,'parameter_uncertainty','regimes');
+        'simulation_file',options_.ms.mh_file,'parameter_uncertainty','regimes');
     mexErrCheck('mex_ms_irf bayesian regimes ',err);
     for i=1:size(regime_irfs,1)
         plot_ms_irf(M_,options_,squeeze(regime_irfs(i,:,:,:)),options_.varobs,['Impulse ' ...
                             'Responses with Parameter Uncertainty State ' int2str(i)],varlist);
     end
-    save([M_.fname '/' options_.ms.output_file_tag '_bayesian_irf.mat'], 'irf', 'regime_irfs');
+    save([irfdir filesep 'bayesian_irf.mat'], 'irf', 'regime_irfs');
 end
 options_ = initialize_ms_sbvar_options(M_, options_);
 end

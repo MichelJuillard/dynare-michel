@@ -1,6 +1,6 @@
-function oo_=set_oo_w_estimation_output(options_, oo_)
-%function set_oo_w_estimation_output()
-% places estimation output in oo_ structure
+function options_=set_ms_init_file(options_)
+%function set_ms_init_file()
+% Set options_.ms.init_file based on user input
 %
 % INPUTS
 %    options_:    (struct)    options
@@ -29,14 +29,12 @@ function oo_=set_oo_w_estimation_output(options_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+if ~isfield(options_.ms, 'initialization_file_tag')
+    options_.ms.initialization_file_tag = options_.ms.output_file_tag;
+end
+options_.ms.init_file = ['init_' options_.ms.initialization_file_tag '.dat'];
 
-oo_.ms.maxparams = load(options_.ms.free_param_file);
-oo_.ms.maxparams = oo_.ms.maxparams(3:end)';
-
-if ~isfield(oo_.ms, 'A0') || ~isfield(oo_.ms, 'Aplus') ...
-        || ~isfield(oo_.ms, 'Zeta') || ~isfield(oo_.ms, 'Q')
-    [err, oo_.ms.A0, oo_.ms.Aplus, oo_.ms.Zeta, oo_.ms.Q] = ...
-        mex_ms_convert_free_parameters(options_.ms.output_file_tag, oo_.ms.maxparams);
-    mexErrCheck('mex_ms_convert_free_parameters', err);
+if ~exist(options_.ms.init_file,'file')
+    error(['ERROR: Could not find initialization file: ' options_.ms.init_file]);
 end
 end

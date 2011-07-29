@@ -1,4 +1,4 @@
-function plot_ms_forecast(M_,forecast,title_,save_graph_formats,TeX)
+function plot_ms_forecast(M_,options_,forecast,title_,save_graph_formats,TeX)
 % function [] = plot_ms_forecast(forecast,names)
 % plots the forecast from the output from a ms-sbvar
 %
@@ -31,7 +31,6 @@ function plot_ms_forecast(M_,forecast,title_,save_graph_formats,TeX)
     nr = 2;
     nvars = M_.endo_nbr;
     endo_names = M_.endo_names;
-    fname = M_.fname;
     
     var_list = endo_names(1:M_.orig_endo_nbr,:);
 
@@ -73,11 +72,13 @@ function plot_ms_forecast(M_,forecast,title_,save_graph_formats,TeX)
     end
 
     if num_percentiles == 1
-        plot_point_forecast(forecast,nvars,nr,nc,var_list,title_,save_graph_formats,...
-                            TeX,names,tex_names,fname);
+        plot_point_forecast(forecast, nvars, nr, nc, var_list, title_, ...
+            save_graph_formats, TeX, names, tex_names, ...
+            [options_.ms.output_file_tag filesep 'Output' filesep 'Forecast']);
     else
-        plot_banded_forecast(forecast,nvars,nr,nc,var_list,num_percentiles,...
-                             title_,save_graph_formats,TeX,names,tex_names,fname);
+        plot_banded_forecast(forecast, nvars, nr, nc, var_list, num_percentiles, ...
+            title_, save_graph_formats, TeX, names, tex_names, ...
+            [options_.ms.output_file_tag filesep 'Output' filesep 'Forecast']);
     end
 
 end

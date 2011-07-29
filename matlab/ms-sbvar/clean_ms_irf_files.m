@@ -1,12 +1,12 @@
-function options_=set_ms_simulation_flags_for_other_mex(options_)
-%function set_ms_simulation_flags_for_other_mex()
-% MS Sbvar Estimation
+function clean_ms_irf_files(file_tag)
+% function clean_ms_irf_files()
+% removes MS irf files
 %
 % INPUTS
-%    options_:    (struct)    options
+%    file_tag: string indicating tag to use when deleting files
 %
 % OUTPUTS
-%    options_:    (struct)    options
+%    none
 %
 % SPECIAL REQUIREMENTS
 %    none
@@ -28,12 +28,6 @@ function options_=set_ms_simulation_flags_for_other_mex(options_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ~isfield(options_.ms,'simulation_file_tag')
-    options_.ms.simulation_file_tag = options_.ms.output_file_tag;
-end
-options_.ms.load_mh_file = ['simulation_' options_.ms.simulation_file_tag '.out'];
-
-if ~exist(options_.ms.load_mh_file,'file')
-    error(['ERROR: Could not find Metropolis Hastings file: ' options_.ms.load_mh_file]);
-end
+delete_dir_if_exists([file_tag filesep 'IRF']);
+delete_dir_if_exists([file_tag filesep 'Output' filesep 'IRF']);
 end

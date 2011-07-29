@@ -1,6 +1,6 @@
-function clean_ms_probabilities_files(file_tag)
-% function clean_ms_probabilities_files()
-% removes MS probabilities files
+function clean_ms_variance_decomposition_files(file_tag)
+% function clean_ms_variance_decomposition_files()
+% removes MS variance decomposition files
 %
 % INPUTS
 %    file_tag: string indicating tag to use when deleting files
@@ -28,7 +28,6 @@ function clean_ms_probabilities_files(file_tag)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-delete_if_exists(['smoothed_' file_tag '.out']);
-delete_if_exists(['filtered_' file_tag '.out']);
-delete_dir_if_exists([file_tag filesep 'Output' filesep 'Probabilities']);
+delete_dir_if_exists([file_tag filesep 'Variance_Decomposition']);
+delete_dir_if_exists([file_tag filesep 'Output' filesep 'Variance_Decomposition']);
 end

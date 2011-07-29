@@ -1,6 +1,6 @@
 function [options_, oo_]=ms_compute_mdd(M_, options_, oo_)
 %function ms_compute_mdd()
-% Compute marginal data density
+% MS Sbvar Compute Marginal Data Density
 %
 % INPUTS
 %    M_:          (struct)    model structure
@@ -31,15 +31,17 @@ function [options_, oo_]=ms_compute_mdd(M_, options_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-disp('Marginal Data Density');
-clean_ms_mdd_files(options_.ms.output_file_tag,options_.ms.mdd_proposal_type(1));
-options_ = set_ms_estimation_flags_for_other_mex(options_);
-options_ = set_ms_simulation_flags_for_other_mex(options_);
-oo_ = set_oo_w_estimation_output(options_, oo_);
+disp('MS-SBVAR Marginal Data Density');
+options_ = set_file_tags(options_);
+clean_ms_mdd_files(options_.ms.output_file_tag, options_.ms.mdd_proposal_type(1));
+[options_, oo_] = set_ms_estimation_file(options_, oo_);
+options_ = set_ms_simulation_file(options_);
 
 % setup command line options
 opt = ['-mdd -seed ' num2str(options_.DynareRandomStreams.seed)];
-opt = [opt ' -ft ' options_.ms.output_file_tag];
+opt = [opt ' -ft ' options_.ms.simulation_file_tag];
+opt = [opt ' -fto ' options_.ms.output_file_tag];
+opt = [opt ' -pf ' options_.ms.mh_file];
 opt = [opt ' -d ' num2str(options_.ms.mdd_proposal_draws)];
 if options_.ms.mdd_use_mean_center
     opt = [opt ' -use_mean'];
@@ -54,7 +56,7 @@ end
 
 % compute mdd
 [err] = ms_sbvar_command_line(opt);
-mexErrCheck('ms_sbvar_command_line mdd',err);
+mexErrCheck('ms_compute_mdd',err);
 
 % grab the muller/bridge log mdd from the output file
 mull_exp = 'Muller \w+\(\w+\) \= (\d+.\d+e\+\d+)';

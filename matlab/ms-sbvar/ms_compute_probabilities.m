@@ -1,6 +1,6 @@
 function [options_, oo_]=ms_compute_probabilities(M_, options_, oo_)
 %function ms_simulation()
-% Compute posterior mode regime probabilities
+% MS Sbvar Compute Posterior Mode Regime Probabilities
 %
 % INPUTS
 %    M_:          (struct)    model structure
@@ -31,14 +31,15 @@ function [options_, oo_]=ms_compute_probabilities(M_, options_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-disp('Compute Regime Probabilities');
-options_ = set_ms_estimation_flags_for_other_mex(options_);
-options_ = set_ms_simulation_flags_for_other_mex(options_);
-oo_ = set_oo_w_estimation_output(options_, oo_);
+disp('MS-SBVAR Compute Regime Probabilities');
+options_ = set_file_tags(options_);
+clean_ms_probabilities_files(options_.ms.output_file_tag);
+[options_, oo_] = set_ms_estimation_file(options_, oo_);
 
 % setup command line options
 opt = ['-probabilities -seed ' num2str(options_.DynareRandomStreams.seed)];
-opt = [opt ' -ft ' options_.ms.output_file_tag];
+opt = [opt ' -ft ' options_.ms.estimation_file_tag];
+opt = [opt ' -fto ' options_.ms.output_file_tag];
 
 if options_.ms.filtered_probabilities
     opt = [opt ' -filtered' ];
@@ -53,12 +54,12 @@ end
 
 % compute probabilities
 [err] = ms_sbvar_command_line(opt);
-mexErrCheck('ms_sbvar_command_line probabilities',err);
+mexErrCheck('ms_compute_probabilities',err);
 
 % now we want to plot the probabilities for each chain
 if ischar(prob_out_file)
     computed_probabilities = load(prob_out_file);
-    plot_ms_probabilities(computed_probabilities,options_,M_.fname);
+    plot_ms_probabilities(computed_probabilities,options_);
 end
 options_ = initialize_ms_sbvar_options(M_, options_);
 end

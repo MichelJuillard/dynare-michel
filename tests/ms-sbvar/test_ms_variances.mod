@@ -23,6 +23,7 @@ ms_estimation(datafile=data
 		,nlags=4
 		,max_repeated_optimization_runs=1
 		,max_number_of_stages=0
+                ,lower_cholesky
 );
 ms_simulation(mh_replic=1000);
 ms_compute_mdd;

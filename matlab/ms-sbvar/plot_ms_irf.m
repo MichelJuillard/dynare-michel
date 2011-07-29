@@ -1,4 +1,4 @@
-function plot_ms_irf(M_,options_,irf,names,title_,varlist)
+function plot_ms_irf(M_, options_, irf, names, title_, varlist)
 % function [] = plot_ms_irf(irf,names)
 % plots the impulse responses from the output from a ms-sbvar
 %
@@ -40,7 +40,6 @@ function plot_ms_irf(M_,options_,irf,names,title_,varlist)
     nr = 2;
     nvars = M_.endo_nbr;
     endo_names = M_.endo_names;
-    fname = M_.fname;
     
     if isempty(varlist)
         var_list = endo_names(1:M_.orig_endo_nbr,:);
@@ -100,7 +99,8 @@ function plot_ms_irf(M_,options_,irf,names,title_,varlist)
             for i=1:nvars
                 shock(:,i) = irf(:,((i-1) + ((s-1)*nvars)+1));
             end
-            plot_point_irf_for_shock(shock,nvars,endo_names,deblank(endo_names(s,:)),title_,fname,options_,names,tex_names);
+            plot_point_irf_for_shock(shock, nvars,endo_names, deblank(endo_names(s,:)), ...
+                title_, [options_.ms.output_file_tag filesep 'Output' filesep 'IRF'], options_, names, tex_names);
         end
     else
         for s=1:nvars
@@ -110,7 +110,8 @@ function plot_ms_irf(M_,options_,irf,names,title_,varlist)
                     shock(:,i,n) = irf(n,:,((i-1) + ((s-1)*nvars)+1));
                 end
             end
-            plot_banded_irf_for_shock(shock,nvars,endo_names,deblank(endo_names(s,:)),title_,fname,options_,names,tex_names);
+            plot_banded_irf_for_shock(shock, nvars,endo_names, deblank(endo_names(s,:)), ...
+                title_, [options_.ms.output_file_tag filesep 'Output' filesep 'IRF'], options_, names, tex_names);
         end
     end
     
