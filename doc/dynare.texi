@@ -4322,7 +4322,7 @@ Use @code{plot_conditional_forecast} to graph the results.
 
 @table @code
 
-@item parameter_set = @code{prior_mode} | @code{prior_mean} | @code{posterior_mode} | @code{posterior_mean} | @code{posterior_median}
+@item parameter_set = @code{calibration} | @code{prior_mode} | @code{prior_mean} | @code{posterior_mode} | @code{posterior_mean} | @code{posterior_median}
 Specify the parameter set to use for the forecasting. No default
 value, mandatory option.
 
@@ -4362,7 +4362,7 @@ end;
 
 conditional_forecast(parameter_set = calibration, controlled_varexo = (e, u), replic = 3000);
 
-plot_conditional_forecast(periods = 10) e u;
+plot_conditional_forecast(periods = 10) a y;
 @end example
 
 @end deffn

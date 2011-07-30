@@ -45,36 +45,8 @@ function imcforecast(constrained_paths, constrained_vars, options_cond_fcst)
 
 global options_ oo_ M_ bayestopt_
 
-if isfield(options_cond_fcst,'parameter_set') || isempty(options_cond_fcst.parameter_set)
+if ~isfield(options_cond_fcst,'parameter_set') || isempty(options_cond_fcst.parameter_set)
     options_cond_fcst.parameter_set = 'posterior_mode';
-end
-
-if ischar(options_cond_fcst.parameter_set)
-    switch options_cond_fcst.parameter_set
-      case 'posterior_mode'
-        xparam = get_posterior_parameters('mode');
-      case 'posterior_mean'
-        xparam = get_posterior_parameters('mean');
-      case 'posterior_median'
-        xparam = get_posterior_parameters('median');
-      case 'prior_mode'
-        xparam = bayestopt_.p5(:);
-      case 'prior_mean'
-        xparam = bayestopt_.p1;
-      otherwise
-        disp('eval_likelihood:: If the input argument is a string, then it has to be equal to:')
-        disp('                   ''posterior_mode'', ')
-        disp('                   ''posterior_mean'', ')
-        disp('                   ''posterior_median'', ')
-        disp('                   ''prior_mode'' or')
-        disp('                   ''prior_mean''.')
-        error('imcforecast:: Wrong argument type!')
-    end
-else
-    xparam = options_cond_fcst.parameter_set;
-    if length(xparam)~=length(M_.params)
-        error('imcforecast:: The dimension of the vector of parameters doesn''t match the number of estimated parameters!')
-    end
 end
 
 if ~isfield(options_cond_fcst,'replic') || isempty(options_cond_fcst.replic)
@@ -89,56 +61,100 @@ if ~isfield(options_cond_fcst,'conf_sig') || isempty(options_cond_fcst.conf_sig)
     options_cond_fcst.conf_sig = .8;
 end
 
-set_parameters(xparam);
+if isequal(options_cond_fcst.parameter_set,'calibration')
+    estimated_model = 0;
+else
+    estimated_model = 1;
+end
 
-n_varobs = size(options_.varobs,1);
-rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
-options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
-gend = options_.nobs;
-rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
-% Transform the data.
-if options_.loglinear
-    if ~options_.logdata
-        rawdata = log(rawdata);  
-    end
-end
-% Test if the data set is real.
-if ~isreal(rawdata)
-    error('There are complex values in the data! Probably  a wrong transformation')
-end
-% Detrend the data.
-options_.missing_data = any(any(isnan(rawdata)));
-if options_.prefilter == 1
-    if options_.missing_data
-        bayestopt_.mean_varobs = zeros(n_varobs,1);
-        for variable=1:n_varobs
-            rdx = find(~isnan(rawdata(:,variable)));
-            m = mean(rawdata(rdx,variable));
-            rawdata(rdx,variable) = rawdata(rdx,variable)-m;
-            bayestopt_.mean_varobs(variable) = m;
+if estimated_model
+    if ischar(options_cond_fcst.parameter_set)
+        switch options_cond_fcst.parameter_set
+          case 'posterior_mode'
+            xparam = get_posterior_parameters('mode');
+          case 'posterior_mean'
+            xparam = get_posterior_parameters('mean');
+          case 'posterior_median'
+            xparam = get_posterior_parameters('median');
+          case 'prior_mode'
+            xparam = bayestopt_.p5(:);
+          case 'prior_mean'
+            xparam = bayestopt_.p1;
+          otherwise
+            disp('imcforecast:: If the input argument is a string, then it has to be equal to:')
+            disp('                   ''calibration'', ')
+            disp('                   ''posterior_mode'', ')
+            disp('                   ''posterior_mean'', ')
+            disp('                   ''posterior_median'', ')
+            disp('                   ''prior_mode'' or')
+            disp('                   ''prior_mean''.')
+            error('imcforecast:: Wrong argument type!')
         end
     else
-        bayestopt_.mean_varobs = mean(rawdata,1)';
-        rawdata = rawdata-repmat(bayestopt_.mean_varobs',gend,1);
+        xparam = options_cond_fcst.parameter_set;
+        if length(xparam)~=length(M_.params)
+            error('imcforecast:: The dimension of the vector of parameters doesn''t match the number of estimated parameters!')
+        end
     end
-end
-data = transpose(rawdata);
-% Handle the missing observations.
-[data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,n_varobs);
-missing_value = ~(number_of_observations == gend*n_varobs);
 
-[atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(xparam,gend,data,data_index,number_of_observations);
+    set_parameters(xparam);
 
-trend = repmat(ys,1,options_cond_fcst.periods+1);
-for i=1:M_.endo_nbr
-    j = strmatch(deblank(M_.endo_names(i,:)),options_.varobs,'exact');
-    if ~isempty(j)
-        trend(i,:) = trend(i,:)+trend_coeff(j)*(gend+(0:options_cond_fcst.periods));
+    n_varobs = size(options_.varobs,1);
+    rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
+    options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
+    gend = options_.nobs;
+    rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
+    % Transform the data.
+    if options_.loglinear
+        if ~options_.logdata
+            rawdata = log(rawdata);  
+        end
     end
-end
-trend = trend(oo_.dr.order_var,:);
+    % Test if the data set is real.
+    if ~isreal(rawdata)
+        error('There are complex values in the data! Probably  a wrong transformation')
+    end
+    % Detrend the data.
+    options_.missing_data = any(any(isnan(rawdata)));
+    if options_.prefilter == 1
+        if options_.missing_data
+            bayestopt_.mean_varobs = zeros(n_varobs,1);
+            for variable=1:n_varobs
+                rdx = find(~isnan(rawdata(:,variable)));
+                m = mean(rawdata(rdx,variable));
+                rawdata(rdx,variable) = rawdata(rdx,variable)-m;
+                bayestopt_.mean_varobs(variable) = m;
+            end
+        else
+            bayestopt_.mean_varobs = mean(rawdata,1)';
+            rawdata = rawdata-repmat(bayestopt_.mean_varobs',gend,1);
+        end
+    end
+    data = transpose(rawdata);
+    % Handle the missing observations.
+    [data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,n_varobs);
+    missing_value = ~(number_of_observations == gend*n_varobs);
 
-InitState(:,1) = atT(:,end);
+    [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(xparam,gend,data,data_index,number_of_observations);
+
+    trend = repmat(ys,1,options_cond_fcst.periods+1);
+    for i=1:M_.endo_nbr
+        j = strmatch(deblank(M_.endo_names(i,:)),options_.varobs,'exact');
+        if ~isempty(j)
+            trend(i,:) = trend(i,:)+trend_coeff(j)*(gend+(0:options_cond_fcst.periods));
+        end
+    end
+    trend = trend(oo_.dr.order_var,:);
+
+    InitState(:,1) = atT(:,end);
+else
+    InitState(:,1) = zeros(M_.endo_nbr,1);
+    trend = repmat(oo_.steady_state(oo_.dr.order_var),1,options_cond_fcst.periods+1);
+end
+
+if isempty(options_.qz_criterium)
+    options_.qz_criterium = 1+1e-6;
+end
 [T,R,ys,info] = dynare_resolve;
 
 sQ = sqrt(M_.Sigma_e);
@@ -146,9 +162,7 @@ sQ = sqrt(M_.Sigma_e);
 NumberOfStates = length(InitState);
 FORCS1 = zeros(NumberOfStates,options_cond_fcst.periods+1,options_cond_fcst.replic);
 
-for b=1:options_cond_fcst.replic
-    FORCS1(:,1,b) = InitState;
-end
+FORCS1(:,1,:) = repmat(InitState,1,options_cond_fcst.replic);
 
 EndoSize = M_.endo_nbr;
 ExoSize = M_.exo_nbr;
@@ -164,7 +178,7 @@ idx = [];
 jdx = [];
 
 for i = 1:n1
-    idx = [idx ; oo_.dr.inv_order_var(strmatch(deblank(constrained_vars(i,:)),M_.endo_names,'exact'))];
+    idx = [idx ; oo_.dr.inv_order_var(constrained_vars(i,:))];
     jdx = [jdx ; strmatch(deblank(options_cond_fcst.controlled_varexo(i,:)),M_.exo_names,'exact')];
 end
 mv = zeros(n1,NumberOfStates);
@@ -182,7 +196,7 @@ end
 
 constrained_paths = bsxfun(@minus,constrained_paths,trend(idx,1:cL));
 
-randn('state',0);
+%randn('state',0);
 
 for b=1:options_cond_fcst.replic
     shocks = sQ*randn(ExoSize,options_cond_fcst.periods);
