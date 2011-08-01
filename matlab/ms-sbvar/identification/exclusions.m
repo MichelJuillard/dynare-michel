@@ -17,6 +17,12 @@ Ri = zeros(k,k,nvar);
 sR = size(Ri1);
 Ri(1:sR(1),1:sR(2),1:sR(3)) = Ri1;
 
+if options_ms.constants_exclusion
+    for i=1:nvar
+        Ri(i,k,i) = 1;
+    end
+end
+
 for n=1:nvar
  Ui{n} = null(Qi(:,:,n));
  Vi{n} = null(Ri(:,:,n));
