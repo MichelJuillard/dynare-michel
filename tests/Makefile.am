@@ -75,7 +75,19 @@ MODFILES = \
 	external_function/example1_no_deriv_functions_provided.mod \
 	external_function/example1_no_deriv_functions_provided_dll.mod \
 	seeds.mod \
-	simul/example1.mod
+	simul/example1.mod \
+	conditional_forecasts/fs2000_cal.mod \
+	conditional_forecasts/fs2000_est.mod \
+	ms-sbvar/test_exclusions.mod \
+	ms-sbvar/test_exclusions_nc.mod \
+	ms-sbvar/test_lower_cholesky.mod \
+	ms-sbvar/test_lower_cholesky_a.mod \
+	ms-sbvar/test_lower_cholesky_nc.mod \
+	ms-sbvar/test_upper_cholesky.mod \
+	ms-sbvar/test_upper_cholesky_nc.mod \
+	ms-sbvar/test1.mod \
+	ms-sbvar/test_ms.mod \
+	ms-sbvar/test_ms_variances.mod
 
 EXTRA_DIST = \
 	$(MODFILES) \
@@ -104,7 +116,8 @@ EXTRA_DIST = \
 	ls2003/data_ca1.m \
 	measurement_errors/data_ca1.m \
 	missing/simulate_data_with_missing_observations.m \
-	objectives/sgu_ex1.mat
+	objectives/sgu_ex1.mat \
+	conditional_forecasts/fsdat_simul.m
 
 TARGETS = check-test-file
 
