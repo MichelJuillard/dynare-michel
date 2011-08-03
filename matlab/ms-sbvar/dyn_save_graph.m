@@ -1,4 +1,4 @@
-function dyn_graph_save(dirname,graph_name,graph_formats,TeX,names,texnames,caption)
+function dyn_save_graph(dirname,graph_name,graph_formats,TeX,names,texnames,caption)
 % function dyn_graph_save(graph_name,graph_formats,TeX)
 % saves Dynare graphs
 %
@@ -29,10 +29,10 @@ function dyn_graph_save(dirname,graph_name,graph_formats,TeX,names,texnames,capt
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-  
-    graph_name = [dirname '/Output/' regexprep(graph_name,' ','_')];
+
+    graph_name = [dirname filesep 'Output' filesep regexprep(graph_name,' ','_')];
     if nargin <= 2
-        Tex = 0
+        TeX = 0;
     elseif nargin <= 4
         names = {};
         texnames = {};
@@ -51,7 +51,7 @@ function dyn_graph_save(dirname,graph_name,graph_formats,TeX,names,texnames,capt
     end
     
     if TeX
-        fh = fopen([graph_name '.tex'],'w')
+        fh = fopen([graph_name '.tex'],'w');
         for i=1:length(names)
             fprintf(fh,'\\psfrag{%s}[1][][0.5][0]{%s}\n',names{i},texnames{i});
         end
@@ -66,4 +66,4 @@ function dyn_graph_save(dirname,graph_name,graph_formats,TeX,names,texnames,capt
         fprintf(fh,'%% End of TeX file.\n');
         fclose(fh);
     end
-        
+
