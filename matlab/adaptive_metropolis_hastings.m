@@ -64,12 +64,15 @@ for i=1:options_.amh.cova_steps
     options_.mh_replic = options_.amh.cova_replic;
     random_walk_metropolis_hastings(TargetFun,ProposalFun, ...
                                     xparam1,vv,mh_bounds,varargin{:});
+    tot_draws = total_draws(M_);
+    options_.mh_drop = (tot_draws-options_.amh.cova_replic)/tot_draws;
     CutSample(M_,options_,estim_params_);
     [junk,vv] = compute_mh_covariance_matrix();
     bayestopt_.jscale = tune_scale_parameter(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin{:});
 end
 
 options_.mh_replic = old_options.mh_replic;
+options_.mh_drop = old_options.mh_drop;
 record = random_walk_metropolis_hastings(TargetFun,ProposalFun, ...
                                          xparam1,vv,mh_bounds,varargin{:});
                 
@@ -95,38 +98,48 @@ for i=1:maxit
                                              xparam1,vv, ...
                                              mh_bounds,varargin{:});
     AvRates(i) = mean(record.AcceptationRates);    
-    disp(AvRates(1:i)')
 
-    if i >= test_runs
-        a_mean = mean(AvRates((i-test_runs+1):i));
+    if i < test_runs
+        i_kept_runs = 1:i;
+    else
+        i_kept_runs = i_kept_runs+1;
+    end
+    
+    kept_runs_s = Scales(i_kept_runs);
+    kept_runs_a = AvRates(i_kept_runs);
+    
+    if i > test_runs
+        a_mean = mean(kept_runs_a);
         if (a_mean > (1-tolerance)*accept_target) && ...
-                (a_mean < (1+tolerance)*accept_target)
+                (a_mean < (1+tolerance)*accept_target) && ...
+                all(kept_runs_a > (1-test_runs*tolerance)*accept_target) && ...
+                all(kept_runs_a < (1+test_runs*tolerance)*accept_target)
             selected_scale = mean(Scales((i-test_runs+1):i));
             disp(['Selected scale: ' num2str(selected_scale)])
             return
         end
     end
     
-    if i == 1
-        if AvRates(1) > accept_target
-            Scales(i+1) = 2*Scales(i);
-        else
-            Scales(i+1) = Scales(i)/2;
-        end
-    elseif i < maxit
-        X = [ones(i,1) Scales(1:i)];
-        b = X\(AvRates(1:i)-accept_target);
-        Scales(i+1) = -b(1)/b(2);
-        if Scales(i+1) < 0.001
-            Scales(i+1) = 0.001;
-        elseif Scales(i+1) > 2
-            Scales(i+1) = 2;
-        end
+    mean_kept_runs_a = mean(kept_runs_a);
+    if (mean_kept_runs_a/accept_target < 1-test_runs*tolerance) ...
+            || (mean_kept_runs_a/accept_target > 1+test_runs*tolerance)
+        damping_factor = 1
     else
-        error('AMH scale tuning: tuning didn''t converge')
+        damping_factor = 1/3
     end
-    
+    Scales(i+1) = mean(kept_runs_s)*(mean(kept_runs_a)/ ...
+                                     accept_target)^damping_factor;
+
+
     options_.load_mh_file = 1;
     
-    disp(Scales(1:i)')
+    disp(100*kept_runs_s')
+    disp(100*kept_runs_a')
+    disp(['Selected scale ' num2str(Scales(i+1))])    
 end
+
+error('AMH scale tuning: tuning didn''t converge')
+
+function y = total_draws(M_)
+load([M_.fname '/metropolis/' M_.fname '_mh_history'])
+y = sum(record.MhDraws(:,1));
