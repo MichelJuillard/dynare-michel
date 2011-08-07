@@ -1891,7 +1891,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
         }
       else
         {
-          for (it_ = periods+y_kmin; it_ > y_kmin; it_--)
+          for (it_ = periods+y_kmin-1; it_ >= y_kmin; it_--)
             {
               cvg = false;
               iter = 0;
@@ -2239,7 +2239,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
           if (!is_linear)
             {
               max_res_idx = 0;
-              for (it_ = periods+y_kmin; it_ > y_kmin; it_--)
+              for (it_ = periods+y_kmin-1; it_ >= y_kmin; it_--)
                 {
                   cvg = false;
                   iter = 0;
@@ -2297,7 +2297,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
             }
           else
             {
-              for (it_ = periods+y_kmin; it_ > y_kmin; it_--)
+              for (it_ = periods+y_kmin-1; it_ >= y_kmin; it_--)
                 {
                   it_code = begining;
                   Per_y_ = it_*y_size;
