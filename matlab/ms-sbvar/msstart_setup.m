@@ -130,7 +130,7 @@ tdf = 3;          % degrees of freedom for t-dist for initial draw of the MC loo
 nbuffer = 1000;        % a block or buffer of draws (buffer) that is saved to the disk (not memory)
 ndraws1=1*nbuffer;         % 1st part of Monte Carlo draws
 ndraws2=10*ndraws1         % 2nd part of Monte Carlo draws
-seednumber = 0; %7910;    %472534;   % if 0, random state at each clock time
+seednumber = options_.DynareRandomStreams.seed; %7910;    %472534;   % if 0, random state at each clock time
            % good one 420 for [29 45], [29 54]
 if seednumber
    randn('state',seednumber);
