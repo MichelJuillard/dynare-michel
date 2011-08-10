@@ -45,8 +45,8 @@ xlab = options_.ms.varlist;
 
 %----------------
 nvar = size(options_.varobs,1);   % number of endogenous variables
-nlogeno = length(options_.ms.log_var)  % number of endogenous variables in options_.ms.log_var
-npereno = length(options_.ms.percent_var)  % number of endogenous variables in options_.ms.percent_var
+nlogeno = length(options_.ms.log_var);  % number of endogenous variables in options_.ms.log_var
+npereno = length(options_.ms.percent_var);  % number of endogenous variables in options_.ms.percent_var
 if (nvar~=(nlogeno+npereno))
    disp(' ')
    warning('Check xlab, nlogeno or npereno to make sure of endogenous variables in options_.ms.vlist')
@@ -129,7 +129,7 @@ indxmsmdeqn = [0; 0; 0; 0];  %This option disenable using this in fn_rnrprior_co
 tdf = 3;          % degrees of freedom for t-dist for initial draw of the MC loop
 nbuffer = 1000;        % a block or buffer of draws (buffer) that is saved to the disk (not memory)
 ndraws1=1*nbuffer;         % 1st part of Monte Carlo draws
-ndraws2=10*ndraws1         % 2nd part of Monte Carlo draws
+ndraws2=10*ndraws1;        % 2nd part of Monte Carlo draws
 seednumber = options_.DynareRandomStreams.seed; %7910;    %472534;   % if 0, random state at each clock time
            % good one 420 for [29 45], [29 54]
 if seednumber
