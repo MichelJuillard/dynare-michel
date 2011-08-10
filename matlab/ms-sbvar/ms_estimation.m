@@ -70,5 +70,4 @@ mexErrCheck('ms_estimation', err);
 [err, oo_.ms.A0, oo_.ms.Aplus, oo_.ms.Zeta, oo_.ms.Q] = ...
     mex_ms_convert_free_parameters(options_.ms.estimation_file_tag, oo_.ms.maxparams);
 mexErrCheck('mex_ms_convert_free_parameters', err);
-options_ = initialize_ms_sbvar_options(M_, options_);
 end

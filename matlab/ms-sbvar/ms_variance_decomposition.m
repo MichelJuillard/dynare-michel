@@ -66,5 +66,4 @@ if exist(options_.ms.mh_file,'file') > 0
     mexErrCheck('mex_ms_variance_decomposition bayesian regimes ', err);
     save([vddir filesep 'bayesian_vd.mat'], 'vd', 'regime_vd');
 end
-options_ = initialize_ms_sbvar_options(M_, options_);
 end

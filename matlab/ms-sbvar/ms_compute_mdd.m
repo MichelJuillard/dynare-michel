@@ -80,5 +80,4 @@ if exist(mdd_filename,'file')
     oo_.ms.mueller_log_mdd = muller_mdd;
     oo_.ms.bridged_log_mdd = bridge_mdd;
 end
-options_ = initialize_ms_sbvar_options(M_, options_);
 end

@@ -48,6 +48,4 @@ opt = [opt ' -mh ' num2str(options_.ms.adaptive_mh_draws)];
 % simulation
 [err] = ms_sbvar_command_line(opt);
 mexErrCheck('ms_simulation',err);
-
-options_ = initialize_ms_sbvar_options(M_, options_);
 end

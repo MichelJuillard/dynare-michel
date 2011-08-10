@@ -66,5 +66,4 @@ if exist(options_.ms.mh_file,'file') > 0
     mexErrCheck('mex_ms_forecast bayesian regimes ', err);
     save([forecastdir filesep 'bayesian_forecast.mat'], 'forecast', 'regime_forecast');
 end
-options_ = initialize_ms_sbvar_options(M_, options_);
 end

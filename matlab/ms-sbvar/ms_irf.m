@@ -75,5 +75,4 @@ if exist(options_.ms.mh_file,'file') > 0
     end
     save([irfdir filesep 'bayesian_irf.mat'], 'irf', 'regime_irfs');
 end
-options_ = initialize_ms_sbvar_options(M_, options_);
 end

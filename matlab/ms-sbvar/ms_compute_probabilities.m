@@ -61,5 +61,4 @@ if ischar(prob_out_file)
     computed_probabilities = load(prob_out_file);
     plot_ms_probabilities(computed_probabilities,options_);
 end
-options_ = initialize_ms_sbvar_options(M_, options_);
 end
