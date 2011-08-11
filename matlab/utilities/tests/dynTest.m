@@ -6,26 +6,26 @@ function dynTest(fun)
 %! Tests matlab/octave routine @var{fun.m}.
 %!
 %! @strong{Inputs}
-%! @table @var
+%! @table @ @var
 %! @item fun
-%! string, name of the matlab/octave routine to be tested.     
+%! string, name of the matlab/octave routine to be tested.
 %! @end table
 %!
 %! @strong{Outputs}
 %! None
-%! 
-%! @strong{This function is called by:} 
+%!
+%! @strong{This function is called by:}
 %! @ref{dynare}, @ref{mroutines}
-%! 
+%!
 %! @strong{This function calls:}
 %! @ref{mtest}
-%!    
+%!
 %! @end deftypefn
 %@eod:
 
 % Copyright (C) 2011 Dynare Team
 % stephane DOT adjemian AT univ DASH lemans DOT fr
-%    
+%
 % This file is part of Dynare.
 %
 % Dynare is free software: you can redistribute it and/or modify
