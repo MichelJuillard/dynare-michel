@@ -8,10 +8,10 @@ function dynareroot = dynare_config(path_to_dynare,verbose)
 %
 % INPUTS
 %   none
-%             
+%
 % OUTPUTS
 %   none
-%        
+%
 % SPECIAL REQUIREMENTS
 %   none
 
@@ -37,7 +37,7 @@ if nargin && ~isempty(path_to_dynare)
 end
 dynareroot = strrep(which('dynare'),'dynare.m','');
 
-if ~nargin || nargin==1 
+if ~nargin || nargin==1
     verbose = 1;
 end
 
