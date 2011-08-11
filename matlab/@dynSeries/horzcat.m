@@ -1,15 +1,15 @@
-function a = horzcat(b,c)
+function a = horzcat(varargin)
 
 %@info:
-%! @deftypefn {Function file} {@var{a} =} horzcat (@var{b},@var{c})
+%! @deftypefn {Function file} {@var{a} =} horzcat (@var{b},@var{c}, ...)
 %! @anchor{horzcat}
 %! @sp 1
 %! Method of the dynSeries class.
 %! @sp 1
-%! Merge two Dynare time series class. This method overloads the horizontal concatenation operator, so that
-%! two time series objects can be merged using the following syntax
+%! Merge Dynare time series objects. This method overloads the horizontal concatenation operator, so that
+%! two (or more) time series objects can be merged using the following syntax:
 %!
-%!     a = [b, c];
+%!     a = [b, c, d];
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
@@ -31,7 +31,7 @@ function a = horzcat(b,c)
 %! @ref{descriptive_statistics}
 %!
 %! @strong{This function calls:}
-%! @ref{dynSeries}
+%! @ref{dynSeries}, @ref{private/horzcat2} 
 %!
 %! @strong{Remark 1.} It is assumed that the two time series objects have the same frequencies. The two time series objects can cover
 %! different time ranges.
@@ -57,96 +57,18 @@ function a = horzcat(b,c)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ~isa(b,'dynSeries')
-    error('dynSeries::horzcat: First input argument has to be a Dynare time series object!')
+if nargin==0 || nargin==1
+    error('dynSeries::horzcat: I need at least two input arguments!')
 end
 
-if ~isa(c,'dynSeries')
-    error('dynSeries::horzcat: Second input argument has to be a Dynare time series object!')
-end
-
-if b.freq ~= c.freq
-    error('dynSeries::horzcat: Two time series objects must have common frequency!')
+if nargin==2
+    a = horzcat2(varargin{1},varargin{2});
 else
-    a = dynSeries();
-    a.freq = b.freq;
-end
-
-d_nobs_flag = 0;
-if b.nobs ~= c.nobs
-    % error('dynSeries::horzcat: Two time series objects must have the same number of observations!')
-    d_nobs_flag = 1;
-else
-    a.nobs = b.nobs;
-end
-
-d_init_flag = 0;
-if isequal(b.init,c.init)
-    a.init = b.init;
-else
-    % error('dynSeries:: Two time series objects must have common initial date!')
-    % set a.init equal to min(b.init,c.init)
-    if b.init(1)<c.init(1)
-        d_init_flag = 1;
-        a.init = b.init;
-    elseif b.init(1)==c.init(1)
-        if b.init(2)<c.init(2)
-            d_init_flag = 1;
-            a.init = b.init;
-        else
-            d_init_flag = 2;
-            a.init = c.init;
-        end
-    else
-        d_init_flag = 2;
-        a.init = c.init;
+    a = horzcat2(varargin{1},varargin{2});
+    for i=3:nargin
+        a = horzcat2(a,varargin{i});
     end
 end
-
-d_last_flag = 0;
-if isequal(b.last,c.last)
-    a.last = b.last;
-else
-    % error('dynSeries:: Two time series objects must have common initial date!')
-    % set a.last equal to max(b.last,c.last)
-    if b.last(1)<c.last(1)
-        d_last_flag = 2;
-        a.last = c.last;
-    elseif b.last(1)==c.last(1)
-        if b.last(2)<c.last(2)
-            d_last_flag = 2;
-            a.last = c.last;
-        else
-            d_last_flag = 1;
-            a.last = b.last;
-        end
-    else
-        d_last_flag = 1;
-        a.last = b.last;
-    end
-end
-
-a.vobs = b.vobs+c.vobs;
-a.name = char(b.name,c.name);
-a.tex  = char(b.tex,c.tex);
-
-if ~( d_nobs_flag(1) || d_init_flag(1) || d_last_flag(1) )
-    a.time = b.time;
-    a.data = [b.data,c.data];
-else
-    [junk,ib] = setdiff(b.time,c.time,'rows');
-    [junk,ic] = setdiff(c.time,b.time,'rows');
-    [junk,jb,jc] = intersect(b.time,c.time,'rows');
-    a.time = [b.time(ib,:); b.time(jb,:); c.time(ic,:)];
-    a.time = sortrows(a.time,[1 2]);
-    a.nobs = rows(a.time);
-    a.data = NaN(a.nobs,a.vobs);
-    [junk,ia,ib] = intersect(a.time,b.time,'rows');
-    a.data(ia,1:b.vobs) = b.data;
-    [junk,ia,ic] = intersect(a.time,c.time,'rows');
-    a.data(ia,b.vobs+(1:c.vobs)) = c.data;
-end
-
 
 %@test:1
 %$ addpath ../matlab
@@ -283,3 +205,37 @@ end
 %$ t(4) = dyn_assert(ts3.name,e.name);
 %$ T = all(t);
 %@eof:4
+
+%@test:5
+%$ addpath ../matlab
+%$ % Define a data set.
+%$ A = [transpose(1:10),2*transpose(1:10)];
+%$ B = [transpose(1:10),3*transpose(1:10)];
+%$ C = [transpose(1:10),4*transpose(1:10)];
+%$
+%$ % Define names
+%$ A_name = char('A1','A2');
+%$ B_name = char('B1','B2');
+%$ C_name = char('C1','C2');
+%$
+%$ % Define expected results.
+%$ e.time = [transpose(1:10), ones(10,1)];
+%$ e.freq = 1;
+%$ e.name = char('A1','A2','B1','B2','C1','C2');
+%$ e.data = [A,B,C];
+%$
+%$ % Instantiate two time series objects.
+%$ ts1 = dynSeries(A,[],A_name,[]);
+%$ ts2 = dynSeries(B,[],B_name,[]);
+%$ ts3 = dynSeries(C,[],C_name,[]);
+%$
+%$ % Call the tested method.
+%$ ts4 = [ts1,ts2,ts3];
+%$
+%$ % Check the results.
+%$ t(1) = dyn_assert(ts4.time,e.time);
+%$ t(2) = dyn_assert(ts4.freq,e.freq);
+%$ t(3) = dyn_assert(ts4.data,e.data);
+%$ t(4) = dyn_assert(ts4.name,e.name);
+%$ T = all(t);
+%@eof:5
