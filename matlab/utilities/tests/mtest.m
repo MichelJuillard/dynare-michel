@@ -3,7 +3,7 @@ function check = mtest(fname,fpath)
 
 % Copyright (C) 2011 Dynare Team
 % stephane DOT adjemian AT univ DASH lemans DOT fr
-%    
+%
 % This file is part of Dynare.
 %
 % Dynare is free software: you can redistribute it and/or modify
@@ -19,9 +19,9 @@ function check = mtest(fname,fpath)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% Default answer (no problem).    
-check = 1;    
-    
+% Default answer (no problem).
+check = 1;
+
 % Open the matlab file.
 fid = fopen([fpath '/' fname '.m'],'r');
 
@@ -43,28 +43,28 @@ end
 
 % Perform the tests.
 for i=1:nn
-    % Write the temporary test routine. 
+    % Write the temporary test routine.
     tid = fopen([fname '_test_' int2str(i) '.m'],'w');
-    fprintf(tid,['function [T,t,log] = ' fname '_test_' int2str(i) '()\n']);
+    fprintf(tid,['function [T,t,LOG] = ' fname '_test_' int2str(i) '()\n']);
     fprintf(tid,['try\n']);
     for j=b1(i):b2(i)
         str = file{j};
         fprintf(tid,[str(4:end) '\n']);
     end
-    fprintf(tid,['log = NaN;\n']);
+    fprintf(tid,['LOG = NaN;\n']);
     fprintf(tid,['catch exception\n']);
-    fprintf(tid,['log = getReport(exception,''extended'');\n']);
+    fprintf(tid,['LOG = getReport(exception,''extended'');\n']);
     fprintf(tid,['T = NaN;\n']);
     fprintf(tid,['t = NaN;\n']);
     fprintf(tid,['end\n']);
     fclose(tid);
     % Call the temporary test routine.
-    [TestFlag,TestDetails,log] = feval([fname '_test_' int2str(i)]);
+    [TestFlag,TestDetails,LOG] = feval([fname '_test_' int2str(i)]);
     if isnan(TestFlag)
         fprintf(['\n'])
         fprintf(['Call to ' fname ' test routine n°' int2str(i) ' failed (' datestr(now) ')!\n'])
         fprintf(['\n'])
-        disp(log)
+        disp(LOG)
         check = 0;
         continue
     end
