@@ -144,10 +144,11 @@ switch nargin
             ts.last = ts.time(end,:);
         end
     else% If b is empty.
+        ts.freq = 1;
         ts.init = 1;
         ts.last = ts.nobs;
-        ts.freq = 1;
         ts = set_time(ts);
+        ts.init = ts.time(1,:);
         ts.last = ts.time(end,:);
     end
     % Get the names of the variables.
