@@ -57,8 +57,32 @@ global M_ options_ bayestopt_ estim_params_ oo_
 old_options = options_;
 
 accept_target = options_.amh.accept_target;
+m_directory = [M_.fname '/metropolis/']; 
 
-options_.mh_jscale = tune_scale_parameter(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin{:});
+if options_.load_mh_file == 0
+    delete([m_directory 'adaptive_metropolis_proposal_*.mat']);
+    nP = 0;
+else
+    D = dir([m_directory 'adaptive_metropolis_proposal_*.mat']);
+    nP = size(D,1);
+end;
+
+if nP == 0
+    jscale = options_.mh_jscale;
+    bayestopt_.jscale = jscale;
+    save([m_directory 'adaptive_metropolis_proposal_0'],'vv','jscale');
+    nP = 1;
+else
+    tmp = load([m_directory 'adaptive_metropolis_proposal_' ...
+                int2str(nP-1)],'vv','jscale');
+    vv = tmp.vv;
+    bayestopt_.jscale = tmp.jscale;
+end
+
+if options_.amh.cova_steps
+    bayestopt_.jscale = tune_scale_parameter(TargetFun, ...
+                                              ProposalFun,xparam1,vv,mh_bounds,varargin{:});
+end
 
 for i=1:options_.amh.cova_steps
     options_.mh_replic = options_.amh.cova_replic;
@@ -68,7 +92,11 @@ for i=1:options_.amh.cova_steps
     options_.mh_drop = (tot_draws-options_.amh.cova_replic)/tot_draws;
     CutSample(M_,options_,estim_params_);
     [junk,vv] = compute_mh_covariance_matrix();
-    bayestopt_.jscale = tune_scale_parameter(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin{:});
+    jscale = tune_scale_parameter(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin{:});
+    bayestopt_.jscale = jscale;
+    save([m_directory 'adaptive_metropolis_proposal_' ...
+          int2str(nP)],'vv','jscale');
+    nP = nP + 1;
 end
 
 options_.mh_replic = old_options.mh_replic;
@@ -89,7 +117,7 @@ test_runs = options_.amh.scale_tuning_test_runs;
 tolerance = options_.amh.scale_tuning_tolerance;
 Scales = zeros(maxit,1);
 AvRates = zeros(maxit,1);
-Scales(1) = options_.mh_jscale;
+Scales(1) = bayestopt_.jscale;
 
 for i=1:maxit
     options_.mh_replic = options_.amh.scale_tuning_blocksize;
