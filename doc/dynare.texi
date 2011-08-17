@@ -1244,6 +1244,14 @@ Base 10 logarithm.
 Square root.
 @end defun
 
+@defun abs (@var{x})
+Absolute value.
+@end defun
+
+@defun sign (@var{x})
+Signum function.
+@end defun
+
 @defun sin (@var{x})
 @defunx cos (@var{x})
 @defunx tan (@var{x})
