@@ -114,12 +114,18 @@ else
                                     oo_.exo_det_steady_state], M_.params);
             end;
         else
-            % linear models
-            [fvec,jacob] = feval(fh,steady_state,[oo_.exo_steady_state;...
-                                oo_.exo_det_steady_state], M_.params);
-            if max(abs(fvec)) > 1e-12
-                steady_state = steady_state-jacob\fvec;
-            end
+            if (options_.block == 0 && options_.bytecode == 0)
+                % linear models
+                [fvec,jacob] = feval(fh,steady_state,[oo_.exo_steady_state;...
+                                    oo_.exo_det_steady_state], M_.params);
+                if max(abs(fvec)) > 1e-12
+                    steady_state = steady_state-jacob\fvec;
+                end
+            else
+                [steady_state,check1] = dynare_solve_block_or_bytecode(steady_state,...
+                                                                [oo_.exo_steady_state; ...
+                                    oo_.exo_det_steady_state], M_.params);
+            end;
         end
     end
 end
