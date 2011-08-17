@@ -5182,7 +5182,7 @@ Uses the provided path to a specific user defined sample file. Default: @code{0}
 Specify the parameter set to use. Default: @code{prior_mean}
 
 @item lik_init = @var{INTEGER}
-@xref{lik_init}
+@xref{lik_init}.
 
 @end table
 
@@ -5876,9 +5876,9 @@ some plotting routines.
 
 Note that creating the configuration file is not enough in order to
 trigger parallelization of the computations: you also need to specify
-the @code{parallel} option to the @code{dynare} command. @xref{Dynare
-invocation} for more details, and for other options related to the
-parallelization engine.
+the @code{parallel} option to the @code{dynare} command. For more
+details, and for other options related to the parallelization engine,
+see @pxref{Dynare invocation}.
 
 You also need to verify that the following requirements are met by
 your cluster (which is composed of a master and of one or more
