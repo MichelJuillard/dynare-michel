@@ -8,7 +8,7 @@ MODFILES = \
 	example1_use_dll.mod \
 	example1_with_tags.mod \
 	example1_irf_shocks.mod \
-	example1_abs_sign_dynamic.mod \
+	example1_abs_sign.mod \
 	t_sgu_ex1.mod \
 	osr_example.mod \
 	optimal_policy/ramsey.mod \
