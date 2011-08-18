@@ -99,7 +99,7 @@ if options_.ramsey_policy
         end
         ys = oo_.steady_state;
         if inst_nbr == 1
-           nl_func = @(x) dyn_ramsey_static_(x,0,M_,options_,oo_,it_);
+           nl_func = @(x) dyn_ramsey_static_(x,M_,options_,oo_,it_);
            inst_val = fzero(nl_func,oo_.steady_state(k_inst));
         else
             [inst_val,info1] = dynare_solve('dyn_ramsey_static_', ...
@@ -192,7 +192,11 @@ if options_.debug
     save([M_.fname '_debug.mat'],'jacobia_')
 end
 
-if ~isreal(jacobia_)
+if ~all(isfinite(jacobia_(:)))
+    info(1) = 6;
+    info(2) = 1;
+    return
+elseif ~isreal(jacobia_)
     if max(max(abs(imag(jacobia_)))) < 1e-15
         jacobia_ = real(jacobia_);
     else
@@ -321,10 +325,6 @@ else  % use original Dynare solver
     b10 = b(1:nstatic,1:nstatic);
     b11 = b(1:nstatic,nstatic+1:end);
     b2 = b(nstatic+1:end,nstatic+1:end);
-    if any(isinf(a(:)))
-        info = 1;
-        return
-    end
 
     % buildind D and E
     d = zeros(nd,nd) ;
