@@ -146,25 +146,40 @@ delete('makeCheckOctaveBase.mat');
 
 total_tests = size(name,2)+num_block_tests;
 
+% print output to screen and to file
+fid = fopen("run_test_octave_output.txt", "w");
+
 printf("\n\n\n");
+fprintf(fid,'\n\n\n');
 printf("***************************************\n");
+fprintf(fid,"***************************************\n");
 printf("*         DYNARE TEST RESULTS         *\n");
+fprintf(fid,"*         DYNARE TEST RESULTS         *\n");
 printf("*        for make check-octave        *\n");
+fprintf(fid,"*        for make check-octave        *\n");
 printf("***************************************\n");
+fprintf(fid,"***************************************\n");
 printf("  %d tests PASSED out of %d tests run\n", total_tests-size(failedBase,2)-size(failedBlock,2), total_tests);
+fprintf(fid," %d tests PASSED out of %d tests run\n", total_tests-size(failedBase,2)-size(failedBlock,2), total_tests);
 printf("***************************************\n");
+fprintf(fid,"***************************************\n");
 if size(failedBase,2) > 0 || size(failedBlock,2) > 0
   printf("List of %d tests FAILED:\n", size(failedBase,2)+size(failedBlock,2));
+  fprintf(fid,"List of %d tests FAILED:\n", size(failedBase,2)+size(failedBlock,2));
   for i=1:size(failedBase,2)
     printf("   * %s\n",failedBase{i});
+    fprintf(fid,"   * %s\n", failedBase{i});
   end
   for i=1:size(failedBlock,2)
     printf("   * %s\n",failedBlock{i});
+    fprintf(fid,"   * %s\n", failedBlock{i});
   end
   printf("***************************************\n\n");
+  fprintf(fid,"***************************************\n\n");
   clear -all
   error("make check-octave FAILED");
 end
+fclose(fid);
 clear -all
 
 ## Local variables:

@@ -131,21 +131,36 @@ delete('makeCheckMatlabBase.mat');
 
 total_tests = size(name,2)+num_block_tests;
 
+% print output to screen and to file
+fid = fopen('run_test_matlab_output.txt', 'w');
+
 fprintf('\n\n\n');
+fprintf(fid,'\n\n\n');
 disp('***************************************');
+fprintf(fid,'***************************************\n');
 disp('*         DYNARE TEST RESULTS         *');
+fprintf(fid,'*         DYNARE TEST RESULTS         *\n');
 disp('*        for make check-matlab        *');
+fprintf(fid,'*        for make check-matlab        *\n');
 disp('***************************************');
+fprintf(fid,'***************************************\n');
 disp(['  ' num2str(total_tests-size(failedBase,2)-size(failedBlock,2)) ' tests PASSED out of ' num2str(total_tests) ' tests run']);
+fprintf(fid,' %d tests PASSED out of %d tests run\n', total_tests-size(failedBase,2)-size(failedBlock,2), total_tests);
 disp('***************************************');
+fprintf(fid,'***************************************\n');
 if size(failedBase,2) > 0 || size(failedBlock,2) > 0
     disp(['List of ' num2str(size(failedBase,2)+size(failedBlock,2)) ' tests FAILED:']);
+    fprintf(fid,'List of %d tests FAILED:\n', size(failedBase,2)+size(failedBlock,2));
     for i=1:size(failedBase,2)
         disp(['   * ' failedBase{i}]);
+        fprintf(fid,'   * %s\n', failedBase{i});
     end
     for i=1:size(failedBlock,2)
         disp(['   * ' failedBlock{i}]);
+        fprintf(fid,'   * %s\n', failedBlock{i});
     end
     fprintf('***************************************\n\n');
+    fprintf(fid,'***************************************\n\n');
 end
+fclose(fid);
 exit;

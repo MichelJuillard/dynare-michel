@@ -190,3 +190,5 @@ clean-local:
 	rm -rf partial_information/PItest3aHc0PCLsimModPiYrVarobsAll_PCL* partial_information/PItest3aHc0PCLsimModPiYrVarobsCNR_PCL*
 
 	rm -rf block_bytecode/ws block_bytecode/ls2003_tmp*
+
+	rm -f run_test_matlab_output.txt run_test_octave_output.txt
