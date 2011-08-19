@@ -46,7 +46,7 @@ if ~noprint
                ' indeterminacy due to rank failure'])
       case 6
         error(['The Jacobian matrix evaluated at the steady state contains elements ' ...
-               'that are not real or finite'])
+               'that are not real or are infinite'])
       case 19
         error('The steadystate file did not compute the steady state (inconsistent deep parameters).')
       case 20
