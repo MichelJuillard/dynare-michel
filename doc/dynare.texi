@@ -1206,9 +1206,7 @@ This operator is used to take the expectation of some expression using
 a different information set than the information available at current
 period. For example, @code{EXPECTATION(-1)(x(+1))} is equal to the
 expected value of variable @code{x} at next period, using the
-information set available at the previous period. Note that a value
-of @code{0} for the time shift component is reserved for partial
-information models (not yet fully implemented). @xref{Auxiliary
+information set available at the previous period. @xref{Auxiliary
 variables}, for an explanation of how this operator is handled
 internally and how this affects the output.
 @end deffn
@@ -1644,8 +1642,11 @@ variables will have a name beginning with @code{AUX_EXO_LEAD} or
 
 Another transformation is done for the @code{EXPECTATION}
 operator. For each occurence of this operator, Dynare creates an
-auxiliary variable equal to @code{AUX_EXPECT_LAG_1 = x(+2)}, and
-replaces the expectation operator by @code{AUX_EXPECT_LAG_1(-1)}.
+auxiliary variable defined by a new equation, and replaces the
+expectation operator by a reference to the new auxiliary variable. For
+example, the expression @code{EXPECTATION(-1)(x(+1))} is replaced by
+@code{AUX_EXPECT_LAG_1(-1)}, and the new auxiliary variable is
+declared as @code{AUX_EXPECT_LAG_1 = x(+2)}.
 
 Auxiliary variables are also introduced by the preprocessor for the
 @code{ramsey_policy} command. In this case, they are used to represent the Lagrange
