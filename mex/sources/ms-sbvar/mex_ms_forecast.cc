@@ -36,10 +36,6 @@ void
 mexFunction(int nlhs, mxArray *plhs[],
             int nrhs, const mxArray *prhs[])
 {
-
-  using namespace std;
-
-  char *input_buf;
   double *out_buf;
   int i, j, k, s, nfree, nstates, nvars, npre, T;
 
@@ -52,16 +48,12 @@ mexFunction(int nlhs, mxArray *plhs[],
   int type = F_FREE;
 
   // Check the left hand and right hand side arguments to make sure they conform
-  if (mxIsChar(prhs[0]) != 1)
-    DYN_MEX_FUNC_ERR_MSG_TXT("First argument has to be a string to the init_filename.");
+  if (nrhs != 1)
+    DYN_MEX_FUNC_ERR_MSG_TXT("ms_forecast takes one cell array as an input argument.");
   if (nlhs != 2)
     DYN_MEX_FUNC_ERR_MSG_TXT("You must specify two output arguments.");
 
-  // copy the string data from prhs[0] into a C string input_ buf.    */
-  input_buf = mxArrayToString(prhs[0]);
-  if (input_buf == NULL)
-    DYN_MEX_FUNC_ERR_MSG_TXT("Could not convert input to string.");
-  model =  initialize_model_and_options(input_buf, &options, nrhs, prhs, &nstates, &nvars, &npre, &nfree);
+  model = initialize_model_and_options(&options, prhs, &nstates, &nvars, &npre, &nfree);
   if (model == NULL || options == NULL)
     DYN_MEX_FUNC_ERR_MSG_TXT("There was a problem initializing the model, can not continue");
 

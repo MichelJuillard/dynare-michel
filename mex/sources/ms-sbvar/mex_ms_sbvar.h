@@ -61,13 +61,13 @@ typedef struct sbvar_options_t {
 int file_exist(char *filename);
 char* CreateFilenameFromTag(const char *fmt,const  char *tag,const  char *dir);
 SbvarOption * initialize_sbvar_options(char *file_tag);
-int set_options(SbvarOption *options, int nrhs, const mxArray *prhs[]);
+int set_options(SbvarOption *options, const mxArray *prhs[]);
 int print_sbvar_options(SbvarOption *options);
 TStateModel * initialize_ms_model(char *filename);
 int get_var_dimensions(TStateModel *model, int *nstates, int *nvars, int *npre, int *nfree); 
 int set_parameters_in_VAR(TStateModel *model, double *free_parameters); 
 int convert_free_parameters_to_VAR(TStateModel *model, double *free_parameters, double *A0, double *Aplus, double *Zeta, double *Q );
-TStateModel * initialize_model_and_options(char *name,SbvarOption **options, int nrhs, const mxArray *prhs[], int *nstates, int *nvars, int *npre, int *nfree);
+TStateModel * initialize_model_and_options(SbvarOption **options, const mxArray *prhs[], int *nstates, int *nvars, int *npre, int *nfree);
 
 #endif
 #endif

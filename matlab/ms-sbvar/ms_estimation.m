@@ -68,6 +68,6 @@ mexErrCheck('ms_estimation', err);
 
 [options_, oo_] = set_ms_estimation_file(options_, oo_);
 [err, oo_.ms.A0, oo_.ms.Aplus, oo_.ms.Zeta, oo_.ms.Q] = ...
-    mex_ms_convert_free_parameters(options_.ms.estimation_file_tag, oo_.ms.maxparams);
+    mex_ms_convert_free_parameters({{'file_tag',options_.ms.estimation_file_tag}}, oo_.ms.maxparams);
 mexErrCheck('mex_ms_convert_free_parameters', err);
 end

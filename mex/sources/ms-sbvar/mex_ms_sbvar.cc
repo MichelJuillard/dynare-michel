@@ -348,205 +348,182 @@ initialize_sbvar_options(char *file_tag)
 }
 
 int
-set_options(SbvarOption *options, int nrhs, const mxArray *prhs[])
+set_options(SbvarOption *options, const mxArray *prhs[])
 {
   if (options == NULL)
     options = initialize_sbvar_options((char *) NULL);
 
-  int i, buf_len, buf_len2;
-  char *input_buf = NULL;
   double *temp_buf;
   bool shocks_passed = false;
-
-  /* deal with optional arguments */
-  for (i = 0; i < nrhs; i++)
+  int num_options = mxGetN(prhs[0]);
+  for (int i = 1; i < num_options; i++)
     {
-      if (mxIsChar(prhs[i]) == 1)
+      mxArray *this_option = mxGetCell(prhs[0],i);
+      char *option_name_c = mxArrayToString(mxGetCell(this_option,0));
+      string option_name (option_name_c);
+      mxArray *this_option_value = NULL;
+      if (mxGetN(this_option) > 1)
+        this_option_value = mxGetCell(this_option,1);
+
+      if (option_name == "horizon")
+        if (this_option_value && mxIsNumeric(this_option_value))
+          {
+            temp_buf = (double *) mxGetData(this_option_value);
+            options->horizon = (int) temp_buf[0];
+          }
+        else
+          {
+            cout << "You must pass an integer after specifying the 'horizon' option" << endl;
+            return 1;
+          }
+      else if (option_name == "filtered")
+        options->filtered_probabilities = true;
+      else if (option_name == "error_bands")
         {
-          buf_len = mxGetN(prhs[i])*sizeof(mxChar)+1;
-          input_buf = (char *) mxMalloc(buf_len);
-          mxGetString(prhs[i], input_buf, buf_len);
+          free(options->percentiles);
+          options->num_percentiles = 3;
+          options->percentiles = new double[3];
+          options->percentiles[0] = 0.16;
+          options->percentiles[1] = 0.5;
+          options->percentiles[2] = 0.84;
 
-          if (strstr(input_buf, "horizon"))
+          // Check if the user specified to turn off error bands
+          if (this_option_value && mxIsNumeric(this_option_value))
             {
-              if (nrhs >= i+1 && mxIsNumeric(prhs[i+1]))
+              temp_buf = (double *) mxGetData(this_option_value);
+              if (temp_buf[0] == 0)
                 {
-                  temp_buf = (double *) mxGetData(prhs[i+1]);
-                  options->horizon = (int) temp_buf[0];
-                }
-              else
-                {
-                  printf("You must pass an integer after specifying the 'horizon' option");
-                  return 1;
+                  options->num_percentiles = 1;
+                  options->percentiles = new double[1];
+                  options->percentiles[0] = 0.50;
                 }
             }
-          else if (strstr(input_buf, "filtered"))
-            options->filtered_probabilities = true;
-          else if (strstr(input_buf, "error_bands"))
+        }
+      else if (option_name == "median")
+        {
+          free(options->percentiles);
+          options->num_percentiles = 1;
+          options->percentiles = new double[1];
+          options->percentiles[0] = 0.5;
+        }
+      else if (option_name == "percentiles")
+        if (this_option_value)
+          {
+            options->num_percentiles = mxGetN(this_option_value)
+              > mxGetM(this_option_value) ? mxGetN(this_option_value)
+              : mxGetM(this_option_value);
+            options->percentiles = mxGetPr(this_option_value);
+          }
+        else
+          {
+            cout << "You must pass a vector after the 'percentiles' argument with the "
+                 << "percentiles that you want to have computed, ex "
+                 << "'percentiles',[.16 .5 .84]" << endl;
+            return 1;
+          }
+      else if (option_name == "parameter_uncertainty")
+        {
+          options->parameter_uncertainty = true;
+          if (shocks_passed == false)
+            options->shocks = 1;
+        }
+      else if (option_name == "shocks" || option_name == "shocks_per_parameter")
+        if (this_option_value && mxIsNumeric(this_option_value))
+          {
+            temp_buf = (double *) mxGetData(this_option_value);
+            options->shocks = (int) temp_buf[0];
+            shocks_passed = true;
+          }
+        else
+          {
+            cout << "You must pass an integer after specifying the 'shocks' option" << endl;
+            return 1;
+          }
+      else if (option_name == "thin")
+        if (this_option_value && mxIsNumeric(this_option_value))
+          {
+            temp_buf = (double *) mxGetData(this_option_value);
+            options->thin = (int) temp_buf[0];
+          }
+        else
+          {
+            cout << "You must pass an integer after specifying the 'thin' option" << endl;
+            return 1;
+          }
+      else if (option_name == "simulation_file")
+        {
+          char *posterior_filename = mxArrayToString(this_option_value);
+          strcpy(options->simulation_filename, posterior_filename);
+          if (!(options->simulation_file = fopen(posterior_filename, "rt")))
             {
-              free(options->percentiles);
-              options->num_percentiles = 3;
-              options->percentiles = new double[3];
-              options->percentiles[0] = 0.16;
-              options->percentiles[1] = 0.5;
-              options->percentiles[2] = 0.84;
-
-              // Check if the specified to turn off error bands
-              if (nrhs > i+1)
-                if (mxIsNumeric(prhs[i+1]))
-                  {
-                    temp_buf = (double *) mxGetData(prhs[i+1]);
-                    if (temp_buf[0] == 0)
-                      {
-                        options->num_percentiles = 1;
-                        options->percentiles = new double[1];
-                        options->percentiles[0] = 0.50;
-                      }
-                  }
-
+              cout << "Can not open posterior file " << options->simulation_file
+                   << " for reading. " << endl;
+              return 1;
             }
-          else if (strstr(input_buf, "median"))
-            {
-              free(options->percentiles);
-              options->num_percentiles = 1;
-              options->percentiles = new double[1];
-              options->percentiles[0] = 0.5;
-
-            }
-          else if (strstr(input_buf, "percentiles"))
-            {
-              if (nrhs >= i+1)
-                {
-                  options->num_percentiles = mxGetN(prhs[i+1]) > mxGetM(prhs[i+1]) ? mxGetN(prhs[i+1]) : mxGetM(prhs[i+1]);
-                  options->percentiles = mxGetPr(prhs[i+1]);
-                }
-              else
-                {
-                  printf("You must pass a vector after the 'percentiles' argument with the percentiles that you want to have computed, ex 'percentiles',[.16 .5 .84]");
-                  return 1;
-
-                }
-
-            }
-          else if (strstr(input_buf, "parameter_uncertainty"))
-            {
-              options->parameter_uncertainty = true;
-              if (shocks_passed == false)
-                options->shocks = 1;
-
-            }
-          else if (strstr(input_buf, "shocks") || strstr(input_buf, "shocks_per_parameter"))
-            {
-              if (nrhs >= i+1 && mxIsNumeric(prhs[i+1]))
-                {
-                  temp_buf = (double *) mxGetData(prhs[i+1]);
-                  options->shocks = (int) temp_buf[0];
-                  shocks_passed = true;
-                }
-              else
-                {
-                  printf("You must pass an integer after specifying the 'shocks' option");
-                  return 1;
-                }
-
-            }
-          else if (strstr(input_buf, "thin"))
-            {
-              if (nrhs >= i+1 && mxIsNumeric(prhs[i+1]))
-                {
-                  temp_buf = (double *) mxGetData(prhs[i+1]);
-                  options->thin = (int) temp_buf[0];
-                }
-              else
-                {
-                  printf("You must pass an integer after specifying the 'thin' option");
-                  return 1;
-                }
-
-            }
-          else if (strstr(input_buf, "simulation_file"))
-            {
-              buf_len2 = mxGetN(prhs[i+1])*sizeof(mxChar)+1;
-              char *posterior_filename = (char *) mxMalloc(buf_len2);
-              mxGetString(prhs[i+1], posterior_filename, buf_len2);
-
-              strcpy(options->simulation_filename, posterior_filename);
-
-              if (!(options->simulation_file = fopen(posterior_filename, "rt")))
-                {
-                  printf("The posterior simulation file does not exist");
-                  return 1;
-                }
-
-            }
-          else if (strstr(input_buf, "regimes"))
-            {
-              options->regimes = true;
-
-            }
-          else if (strstr(input_buf, "regime"))
-            {
-              if (nrhs >= i+1 && mxIsNumeric(prhs[i+1]))
-                {
-                  temp_buf = (double *) mxGetData(prhs[i+1]);
-                  options->regime = (int) temp_buf[0];
-                }
-              else
-                {
-                  printf("You must pass an integer after specifying the 'regime' option, or alternatively you can specify 'regimes'");
-                  return 1;
-                }
-
-            }
-          else if (strstr(input_buf, "number_observations"))
-            {
-              if (nrhs >= i+1 && mxIsNumeric(prhs[i+1]))
-                {
-                  temp_buf = (double *) mxGetData(prhs[i+1]);
-                  options->number_observations = (int) temp_buf[0];
-                }
-              else
-                {
-                  printf("You must pass an integer after specifying the 'regime' option, or alternatively you can specify 'regimes'");
-                  return 1;
-                }
-            }
-          else if (strstr(input_buf, "free_parameters"))
-            {
-              if (nrhs >= i+1 && mxIsNumeric(prhs[i+1]))
-                {
-                  options->num_parameters = mxGetM(prhs[i+1]);
-                  options->free_parameters = mxGetPr(prhs[i+1]);
-                }
-              else
-                {
-                  printf("You must pass a vector of free parameters after specifying 'free_parameters'");
-                  return 1;
-                }
-
-            }
-          else if (strstr(input_buf, "mean"))
-            {
-              options->mean = true;
-              options->num_percentiles = 0;
-              options->percentiles = (double *) NULL;
-
-            }
-          else if (strstr(input_buf, "seed"))
-            {
-              if (nrhs >= i+1 && mxIsNumeric(prhs[i+1]))
-                {
-                  temp_buf = (double *) mxGetData(prhs[i+1]);
-                  options->seed = (long) temp_buf[0];
-                }
-              else
-                {
-                  printf("You must pass an integer after specifying the 'seed' option");
-                  return 1;
-                }
-            }
+          mxFree(posterior_filename);
+        }
+      else if (option_name == "regimes")
+        options->regimes = true;
+      else if (option_name == "regime")
+        if (this_option_value && mxIsNumeric(this_option_value))
+          {
+            temp_buf = (double *) mxGetData(this_option_value);
+            options->regime = (int) temp_buf[0];
+          }
+        else
+          {
+            cout << "You must pass an integer after specifying the 'regime' "
+                 << "option, or alternatively you can specify 'regimes'" << endl;
+            return 1;
+          }
+      else if (option_name == "number_observations")
+        if (this_option_value && mxIsNumeric(this_option_value))
+          {
+            temp_buf = (double *) mxGetData(this_option_value);
+            options->number_observations = (int) temp_buf[0];
+          }
+        else
+          {
+            cout << "You must pass an integer after specifying the "
+                 << "'number_observations' option" << endl;
+            return 1;
+          }
+      else if (option_name == "free_parameters")
+        if (this_option_value && mxIsNumeric(this_option_value))
+          {
+            options->num_parameters = mxGetM(this_option_value);
+            options->free_parameters = mxGetPr(this_option_value);
+          }
+        else
+          {
+            cout << "You must pass a vector of free parameters after "
+                 << "specifying 'free_parameters'" << endl;
+            return 1;
+          }
+      else if (option_name == "mean")
+        {
+          options->mean = true;
+          options->num_percentiles = 0;
+          options->percentiles = (double *) NULL;
 
         }
+      else if (option_name == "seed")
+        if (this_option_value && mxIsNumeric(this_option_value))
+          {
+            temp_buf = (double *) mxGetData(this_option_value);
+            options->seed = (long) temp_buf[0];
+          }
+        else
+          {
+            cout << "You must pass an integer after specifying the 'seed' option" << endl;
+            return 1;
+          }
+      else
+          {
+            cout << "set_options error: option '" << option_name << "' not matched" << endl;
+            return 1;
+          }
+      mxFree(option_name_c);
     } // End Optional Arguments
   return 0;
 }
@@ -583,16 +560,14 @@ print_sbvar_options(SbvarOption *options)
 }
 
 TStateModel *
-initialize_model_and_options(char *name, SbvarOption **options, int nrhs, const mxArray *prhs[], int *nstates, int *nvars, int *npre, int *nfree)
+initialize_model_and_options(SbvarOption **options, const mxArray *prhs[], int *nstates, int *nvars, int *npre, int *nfree)
 {
-
-  using namespace std;
-
+  char *name;
   TStateModel *model = (TStateModel *) NULL;
-  int ret;
   SbvarOption *opt;
 
   // Initialize the StateSpace Model with the initialization file
+  name = mxArrayToString(mxGetCell(mxGetCell(prhs[0],0),1));
   model = initialize_ms_model(name);
   if (model == NULL)
     {
@@ -607,7 +582,8 @@ initialize_model_and_options(char *name, SbvarOption **options, int nrhs, const 
 
   // Process the rest of the options
   opt = initialize_sbvar_options(name);
-  if (set_options(opt, nrhs, prhs) > 0)
+  mxFree(name);
+  if (set_options(opt, prhs) > 0)
     {
       cout << "There was a problem with the options passed." << endl;
       return (TStateModel *) NULL;

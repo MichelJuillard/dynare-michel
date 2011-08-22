@@ -37,9 +37,6 @@ void
 mexFunction(int nlhs, mxArray *plhs[],
             int nrhs, const mxArray *prhs[])
 {
-  using namespace std;
-
-  char *input_buf;
   double *free_parameters;
   int nvars, npre, nstates, nfree;
   double *aplus = NULL, *a0 = NULL, *zeta = NULL, *q = NULL;
@@ -48,23 +45,18 @@ mexFunction(int nlhs, mxArray *plhs[],
   SbvarOption *options = NULL;
 
   /* input must be a string */
-  if (mxIsChar(prhs[0]) != 1)
-    DYN_MEX_FUNC_ERR_MSG_TXT("First argument has to be a string to the init_filename.");
+  if (nrhs !=2)
+    DYN_MEX_FUNC_ERR_MSG_TXT("This function takes exactly two arguments");
   if (!mxIsDouble(prhs[1]))
     DYN_MEX_FUNC_ERR_MSG_TXT("Second argument is a vector of free parameters");
 
   if (nlhs < 4)
     DYN_MEX_FUNC_ERR_MSG_TXT("You must specify at least four output arguments [err,A0,Aplus,Zeta]");
 
-  // copy the string data from prhs[0] into a C string input_ buf.    */
-  input_buf = mxArrayToString(prhs[0]);
-  if (input_buf == NULL)
-    DYN_MEX_FUNC_ERR_MSG_TXT("Could not convert input to string.");
-
   // second element should be vector of free parameters */
   free_parameters = mxGetPr(prhs[1]);
 
-  model =  initialize_model_and_options(input_buf, &options, nrhs, prhs, &nstates, &nvars, &npre, &nfree);
+  model = initialize_model_and_options(&options, prhs, &nstates, &nvars, &npre, &nfree);
   if (model == NULL || options == NULL)
     DYN_MEX_FUNC_ERR_MSG_TXT("There was a problem initializing the model, can not continue");
 
