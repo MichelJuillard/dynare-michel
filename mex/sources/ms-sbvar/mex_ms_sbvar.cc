@@ -427,7 +427,7 @@ set_options(SbvarOption *options, const mxArray *prhs[])
           if (shocks_passed == false)
             options->shocks = 1;
         }
-      else if (option_name == "shocks" || option_name == "shocks_per_parameter")
+      else if (option_name == "shocks_per_parameter")
         if (this_option_value && mxIsNumeric(this_option_value))
           {
             temp_buf = (double *) mxGetData(this_option_value);
