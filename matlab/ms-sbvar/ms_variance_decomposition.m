@@ -52,6 +52,10 @@ opt = {
     {'mean'} ...
     };
 
+if options_.ms.median
+    opt = [opt(:)' {{'median'}}];
+end
+
 [err, vd] = mex_ms_variance_decomposition([opt(:)', {{'free_parameters',oo_.ms.maxparams}, ...
     {'shocks', options_.ms.shock_draws}}]);
 mexErrCheck('mex_ms_variance_decomposition ergodic ', err);

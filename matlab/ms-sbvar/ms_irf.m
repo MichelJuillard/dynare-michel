@@ -50,6 +50,10 @@ opt = { ...
     {'thin', options_.ms.thinning_factor}
     };
 
+if options_.ms.median
+    opt = [opt(:)' {{'median'}}];
+end
+
 [err, irf] = mex_ms_irf([opt(:)', {{'free_parameters', oo_.ms.maxparams}, {'shocks_per_parameter', options_.ms.shock_draws}}]);
 mexErrCheck('mex_ms_irf ergodic ', err);
 plot_ms_irf(M_,options_,irf,options_.varobs,'Ergodic Impulse Responses',varlist);

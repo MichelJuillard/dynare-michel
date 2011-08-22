@@ -49,6 +49,10 @@ opt = { ...
     {'thin', options_.ms.thinning_factor}
     };
 
+if options_.ms.median
+    opt = [opt(:)' {{'median'}}];
+end
+
 [err, forecast] = mex_ms_forecast([opt(:)', {{'free_parameters',oo_.ms.maxparams}, ...
     {'shocks_per_parameter', options_.ms.shock_draws}}]);
 mexErrCheck('mex_ms_forecast ergodic ', err);
