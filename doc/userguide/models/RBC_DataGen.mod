@@ -64,6 +64,6 @@ end;
 
 steady;
 
-stoch_simul(periods=1000,irf=0,simul_seed=3);
+stoch_simul(periods=1000,irf=0);
 datatomfile('simuldataRBC',[]);
 return;
