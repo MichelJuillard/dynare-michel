@@ -3939,6 +3939,13 @@ Median of the posterior distribution
 
 @item Std
 Standard deviation of the posterior distribution
+
+@item deciles
+Deciles of the distribution.
+
+@item density
+Non parametric estimate of the posterior density. First and second
+columns are respectively abscissa and ordinate coordinates.
 @end table
 
 @item ESTIMATED_OBJECT
@@ -4019,32 +4026,27 @@ Variable set by the @code{estimation} command, if it is used with the
 Variable set by the @code{estimation} command, if it is used with the
 @code{moments_varendo} option. Fields are of the form:
 @example
-@code{oo_.PosteriorTheoreticalMoments.@var{THEORETICAL_MOMENT}.@var{ESTIMATED_OBJECT}.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
+@code{oo_.PosteriorTheoreticalMoments.dsge.@var{THEORETICAL_MOMENT}.@var{ESTIMATED_OBJECT}.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
 @end example
 where @var{THEORETICAL_MOMENT} is one of the following:
 
 @table @code
 
-@item Autocorrelation
-Autocorrelation of endogenous variables@footnote{The autocorrlation
-coefficients are computed for the number of periods specified in
-option @code{ar}.}
+@item covariance
+Variance-covariance of endogenous variables
 
-@item Correlation
-Correlation between two endogenous variables
+@item correlation
+Correlation between endogenous variables
 
-@item Decomp
+@item VarianceDecomposition
 Decomposition of variance@footnote{When the shocks are correlated, it
 is the decomposition of orthogonalized shocks via Cholesky
 decompostion according to the order of declaration of shocks
 (@pxref{Variable declarations})}
 
-@item Expectation
-Expectation of endogenous variables
-
-@item Variance
-
-(co-)variance of endogenous variables
+@item ConditionalVarianceDecomposition
+Only if the @code{conditional_variance_decomposition} option has been
+specified
 
 @end table
 
