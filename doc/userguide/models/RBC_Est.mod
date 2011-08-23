@@ -30,9 +30,9 @@ estimated_params;
 alpha, beta_pdf, 0.35, 0.02;
 beta, beta_pdf, 0.99, 0.002;
 delta, beta_pdf, 0.025, 0.003;
-psi, gamma_pdf, 1.75, 0.02;
+psi, gamma_pdf, 1.75, 0.1;
 rho, beta_pdf, 0.95, 0.05;
-epsilon, gamma_pdf, 10, 0.003;
+epsilon, gamma_pdf, 10, 0.5;
 stderr e, inv_gamma_pdf, 0.01, inf;
 end;
 
