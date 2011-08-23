@@ -53,7 +53,7 @@ ishock= npar>estim_params_.np;
 if nargin<6,
   ipar=[];
 end
-if nargin<8 || isempty(dcrit),
+if nargin<8 || isempty(pcrit),
   pcrit=1;
 end
 

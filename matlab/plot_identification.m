@@ -53,6 +53,7 @@ siLREnorm = idelre.siLREnorm;
 %     tittxt = '';
 % end
 tittxt1=regexprep(tittxt, ' ', '_');
+tittxt1=strrep(tittxt1, '.', '');
 if SampleSize == 1,
     siJ = idemoments.siJ;
     normJ = max(abs(siJ)')';
