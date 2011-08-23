@@ -2934,7 +2934,9 @@ Computes a conditional variance decomposition for the specified
 period(s). Conditional variances are given by
 @math{var(y_{t+k}|t)}. For period 1, the conditional variance
 decomposition provides the decomposition of the effects of shocks upon
-impact.
+impact. The results are stored in
+@var{oo_.conditional_variance_decomposition}
+(@pxref{oo_.conditional_variance_decomposition}).
 
 @item pruning
 Discard higher order terms when iteratively computing simulations of
@@ -3262,6 +3264,16 @@ three times in the unfolded @math{G_3} matrix, they must be multiplied
 by 3 when computing the decision rules.
 @end itemize
 
+@anchor{oo_.conditional_variance_decomposition}
+@defvr {MATLAB/Octave variable} oo_.conditional_variance_decomposition
+After a run of @code{stoch_simul} with the
+@code{conditional_variance_decomposition} option, contains a
+three-dimensional array with the result of the decomposition. The
+first dimension corresponds to forecast horizons (as declared with the
+option), the second dimension corresponds to endogenous variables (in
+the order of declaration), the third dimension corresponds to
+exogenous variables (in the order of declaration).
+@end defvr
 
 @node Estimation
 @section Estimation
