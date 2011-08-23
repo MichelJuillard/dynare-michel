@@ -46,8 +46,6 @@ P_obs (log(mst)-gam);
 Y_obs (gam);
 end;
 
-unit_root_vars P_obs Y_obs;
-
 initval;
 k = 6;
 m = mst;
@@ -67,8 +65,6 @@ end;
 // of your model, since the estimation will use the Matlab
 // steady state file also provided and discussed above.
 
-steady;
-
 estimated_params;
 alp, beta_pdf, 0.356, 0.02;
 bet, beta_pdf, 0.993, 0.002;
@@ -82,4 +78,4 @@ stderr e_m, inv_gamma_pdf, 0.008862, inf;
 end;
 
 estimation(datafile=fsdat,nobs=192,loglinear,mh_replic=2000,
-	mode_compute=4,mh_nblocks=2,mh_drop=0.45,mh_jscale=0.65);
+	mode_compute=4,mh_nblocks=2,mh_drop=0.45,mh_jscale=0.65,diffuse_filter);
