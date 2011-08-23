@@ -36,4 +36,4 @@ epsilon, gamma_pdf, 10, 0.003;
 stderr e, inv_gamma_pdf, 0.01, inf;
 end;
 
-estimation(datafile=simuldataRBC,nobs=200,first_obs=500,mh_replic=2000,mh_nblocks=2,mh_drop=0.45,mh_jscale=0.8,mode_compute=6);
+estimation(datafile=simuldataRBC,nobs=200,first_obs=500,mh_replic=2000,mh_nblocks=2,mh_drop=0.45,mh_jscale=0.8,mode_compute=4);

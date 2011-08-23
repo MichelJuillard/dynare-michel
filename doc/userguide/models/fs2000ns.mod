@@ -82,4 +82,4 @@ stderr e_m, inv_gamma_pdf, 0.008862, inf;
 end;
 
 estimation(datafile=fsdat,nobs=192,loglinear,mh_replic=2000,
-	mode_compute=6,mh_nblocks=2,mh_drop=0.45,mh_jscale=0.65);
+	mode_compute=4,mh_nblocks=2,mh_drop=0.45,mh_jscale=0.65);

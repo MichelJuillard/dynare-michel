@@ -225,7 +225,7 @@ end;}\\
 We add the following commands to ask Dynare to run a basic estimation of our model:\\
 \\
 \texttt{estimation(datafile=fsdat,nobs=192,loglinear,mh\_replic=2000,\\
-mode\_compute=6,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.65);}\\
+mode\_compute=4,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.65);}\\
 
 \textsf{\textbf{NOTE!}} As mentioned earlier, we need to instruct Dynare to log-linearize our model, since it contains non-linear equations in non-stationary variables. A simple linearization would fail as these variables do not have a steady state. Fortunately, taking the log of the equations involving non-stationary variables does the job of linearizing them.\\
 
@@ -298,7 +298,7 @@ stderr e\_m, inv\_gamma\_pdf, 0.008862, inf;\\
 end;\\
 \\
 estimation(datafile=fsdat,nobs=192,loglinear,mh\_replic=2000,\\
-mode\_compute=6,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.65);}\\
+mode\_compute=4,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.65);}\\
 \\
 
 \subsection{Summing it up}
