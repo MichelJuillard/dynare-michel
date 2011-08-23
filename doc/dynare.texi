@@ -3753,10 +3753,10 @@ Doesn't compute the convergence diagnostics for
 Metropolis-Hastings. Default: diagnostics are computed and displayed
 
 @item bayesian_irf
-@vindex oo_.PosteriorIRF.Dsge
+@vindex oo_.PosteriorIRF.dsge
 @anchor{bayesian_irf} Triggers the computation of the posterior
 distribution of IRFs. The length of the IRFs are controlled by the
-@code{irf} option. Results are stored in @code{oo_.PosteriorIRF.Dsge}
+@code{irf} option. Results are stored in @code{oo_.PosteriorIRF.dsge}
 (see below for a description of this variable)
 
 @item dsge_var
@@ -3983,11 +3983,11 @@ Variable set by the @code{estimation} command, if it is used with the
 @end example
 @end defvr
 
-@defvr {MATLAB/Octave variable} oo_.PosteriorIRF.Dsge
+@defvr {MATLAB/Octave variable} oo_.PosteriorIRF.dsge
 Variable set by the @code{estimation} command, if it is used with the
 @code{bayesian_irf} option. Fields are of the form:
 @example
-@code{oo_.PosteriorIRF.Dsge.@var{MOMENT_NAME}.@var{VARIABLE_NAME}_@var{SHOCK_NAME}}
+@code{oo_.PosteriorIRF.dsge.@var{MOMENT_NAME}.@var{VARIABLE_NAME}_@var{SHOCK_NAME}}
 @end example
 @end defvr
 
