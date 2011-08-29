@@ -82,6 +82,13 @@ if ~options_.noprint %options_.nomoments == 0
     end
 end
 
+if length(i1) == 0
+    disp(' ')
+    disp('All endogenous are constant or non stationary, not displaying correlations and auto-correlations')
+    disp(' ')
+    return;
+end
+
 if options_.nocorr == 0 && size(stationary_vars, 1) > 0
     corr = oo_.gamma_y{1}(i1,i1)./(sd(i1)*sd(i1)');
     if ~options_.noprint,
