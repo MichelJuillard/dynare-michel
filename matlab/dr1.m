@@ -363,6 +363,7 @@ else  % use original Dynare solver
     if info1
         info(1) = 2;
         info(2) = info1;
+        info(3) = size(e,2);
         return
     end
 
