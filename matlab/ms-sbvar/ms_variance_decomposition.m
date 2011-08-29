@@ -57,22 +57,22 @@ if options_.ms.median
 end
 
 [err, vd] = mex_ms_variance_decomposition([opt(:)', {{'free_parameters',oo_.ms.maxparams}, ...
-    {'shocks', options_.ms.shock_draws}}]);
+    {'shocks_per_parameter', options_.ms.shock_draws}}]);
 mexErrCheck('mex_ms_variance_decomposition ergodic ', err);
 plot_ms_variance_decomposition(M_,options_,vd, 'Ergodic Variance Decomposition',options_.graph_save_formats,options_.TeX);
 
 [err, regime_vd] = mex_ms_variance_decomposition([opt(:)', {{'free_parameters',oo_.ms.maxparams}, ...
-    {'shocks', options_.ms.shock_draws}, {'regimes'}}]);
+    {'shocks_per_parameter', options_.ms.shock_draws}, {'regimes'}}]);
 mexErrCheck('mex_ms_variance_decomposition ergodic regimes', err);
 save([vddir filesep 'ergodic_vd.mat'], 'vd', 'regime_vd');
 
 if exist(options_.ms.mh_file,'file') > 0
     [err, vd] = mex_ms_variance_decomposition([opt(:)', {{'simulation_file',options_.ms.mh_file}, ...
-        {'shocks', options_.ms.shocks_per_parameter}, {'parameter_uncertainty'}}]);
+        {'shocks_per_parameter', options_.ms.shocks_per_parameter}, {'parameter_uncertainty'}}]);
     mexErrCheck('mex_ms_variance_decomposition bayesian ', err);
 
     [err, regime_vd] = mex_ms_variance_decomposition([opt(:)', {{'simulation_file',options_.ms.mh_file}, ...
-        {'shocks', options_.ms.shocks_per_parameter}, {'parameter_uncertainty'}, {'regimes'}}]);
+        {'shocks_per_parameter', options_.ms.shocks_per_parameter}, {'parameter_uncertainty'}, {'regimes'}}]);
     mexErrCheck('mex_ms_variance_decomposition bayesian regimes ', err);
     save([vddir filesep 'bayesian_vd.mat'], 'vd', 'regime_vd');
 end

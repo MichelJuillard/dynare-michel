@@ -276,7 +276,7 @@ convert_free_parameters_to_VAR(TStateModel *model, double *free_parameters, doub
       Apply parameter uncertainty when computing error bands or median. When set,
       will default shocks = 1
 
-   'shocks' or 'shocks_per_parameter', <integer>
+   'shocks_per_parameter', <integer>
       Number of regime paths to draw for each parameter draw.  The default value
       is 1 if parameter_uncertainty is set and 10,000 otherwise.
 
@@ -436,7 +436,7 @@ set_options(SbvarOption *options, const mxArray *prhs[])
           }
         else
           {
-            cout << "You must pass an integer after specifying the 'shocks' option" << endl;
+            cout << "You must pass an integer after specifying the 'shocks_per_parameter' option" << endl;
             return 1;
           }
       else if (option_name == "thin")
