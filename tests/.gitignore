@@ -8,6 +8,7 @@
 *.jnl
 *.swp
 *.dat
+*.prn
 *_simul
 
 /block_bytecode/wsOct
