@@ -91,123 +91,123 @@ This is Dynare Reference Manual, version @value{VERSION}.
 @end ifnottex
 
 @menu
-* Introduction::                
-* Installation and configuration::  
-* Dynare invocation::           
-* The Model file::              
-* The Configuration File::      
-* Examples::                    
-* Bibliography::                
-* Command and Function Index::  
-* Variable Index::              
+* Introduction::
+* Installation and configuration::
+* Dynare invocation::
+* The Model file::
+* The Configuration File::
+* Examples::
+* Bibliography::
+* Command and Function Index::
+* Variable Index::
 
 @detailmenu
  --- The Detailed Node Listing ---
 
 Introduction
 
-* What is Dynare ?::            
-* Documentation sources::       
-* Citing Dynare in your research::  
+* What is Dynare ?::
+* Documentation sources::
+* Citing Dynare in your research::
 
 Installation and configuration
 
-* Software requirements::       
-* Installation of Dynare::      
-* Configuration::               
+* Software requirements::
+* Installation of Dynare::
+* Configuration::
 
 Installation of Dynare
 
-* On Windows::                  
-* On Debian GNU/Linux and Ubuntu::  
-* On Mac OS X::                 
-* For other systems::           
+* On Windows::
+* On Debian GNU/Linux and Ubuntu::
+* On Mac OS X::
+* For other systems::
 
 Configuration
 
-* For MATLAB::                  
-* For GNU Octave::              
-* Some words of warning::       
+* For MATLAB::
+* For GNU Octave::
+* Some words of warning::
 
 The Model file
 
-* Conventions::                 
-* Variable declarations::       
-* Expressions::                 
-* Parameter initialization::    
-* Model declaration::           
-* Auxiliary variables::         
-* Initial and terminal conditions::  
-* Shocks on exogenous variables::  
-* Other general declarations::  
-* Steady state::                
-* Getting information about the model::  
-* Deterministic simulation::    
-* Stochastic solution and simulation::  
-* Estimation::                  
-* Forecasting::                 
-* Optimal policy::              
-* Sensitivity and identification analysis::  
-* Displaying and saving results::  
-* Macro-processing language::   
-* Misc commands::               
+* Conventions::
+* Variable declarations::
+* Expressions::
+* Parameter initialization::
+* Model declaration::
+* Auxiliary variables::
+* Initial and terminal conditions::
+* Shocks on exogenous variables::
+* Other general declarations::
+* Steady state::
+* Getting information about the model::
+* Deterministic simulation::
+* Stochastic solution and simulation::
+* Estimation::
+* Forecasting::
+* Optimal policy::
+* Sensitivity and identification analysis::
+* Displaying and saving results::
+* Macro-processing language::
+* Misc commands::
 
 Expressions
 
-* Parameters and variables::    
-* Operators::                   
-* Functions::                   
+* Parameters and variables::
+* Operators::
+* Functions::
 
 Parameters and variables
 
-* Inside the model::            
-* Outside the model::           
+* Inside the model::
+* Outside the model::
 
 Functions
 
-* Built-in Functions::          
-* External Functions::          
+* Built-in Functions::
+* External Functions::
 
 Steady state
 
-* Finding the steady state with Dynare nonlinear solver::  
-* Using a steady state file::   
+* Finding the steady state with Dynare nonlinear solver::
+* Using a steady state file::
 
 Stochastic solution and simulation
 
-* Computing the stochastic solution::  
-* Typology and ordering of variables::  
-* First order approximation::   
-* Second order approximation::  
-* Third order approximation::   
+* Computing the stochastic solution::
+* Typology and ordering of variables::
+* First order approximation::
+* Second order approximation::
+* Third order approximation::
 
 Sensitivity and identification analysis
 
-* Sampling::                    
-* Stability Mapping::           
-* Reduced Form Mapping::        
-* RMSE::                        
-* Screening Analysis::          
-* Identification Analysis::     
-* Performing Sensitivity and Identification Analysis::  
+* Sampling::
+* Stability Mapping::
+* Reduced Form Mapping::
+* RMSE::
+* Screening Analysis::
+* Identification Analysis::
+* Performing Sensitivity and Identification Analysis::
 
 Macro-processing language
 
-* Macro expressions::           
-* Macro directives::            
-* Typical usages::              
-* MATLAB/Octave loops versus macro-processor loops::  
+* Macro expressions::
+* Macro directives::
+* Typical usages::
+* MATLAB/Octave loops versus macro-processor loops::
 
 Typical usages
 
-* Modularization::              
-* Indexed sums or products::    
-* Multi-country models::        
-* Endogeneizing parameters::    
+* Modularization::
+* Indexed sums or products::
+* Multi-country models::
+* Endogeneizing parameters::
 
 The Configuration File
 
-* Parallel Configuration::      
+* Parallel Configuration::
 
 @end detailmenu
 @end menu
@@ -216,9 +216,9 @@ The Configuration File
 @chapter Introduction
 
 @menu
-* What is Dynare ?::            
-* Documentation sources::       
-* Citing Dynare in your research::  
+* What is Dynare ?::
+* Documentation sources::
+* Citing Dynare in your research::
 @end menu
 
 @node What is Dynare ?
@@ -339,9 +339,9 @@ If you want to give a URL, use the address of the Dynare website:
 @chapter Installation and configuration
 
 @menu
-* Software requirements::       
-* Installation of Dynare::      
-* Configuration::               
+* Software requirements::
+* Installation of Dynare::
+* Configuration::
 @end menu
 
 @node Software requirements
@@ -355,7 +355,7 @@ steps are necessary in that case.
 
 In order to run Dynare, you need at least one of the following:
 
-@itemize 
+@itemize
 
 @item
 MATLAB version 7.0 (R14) or above; note that no toolbox is needed by
@@ -396,10 +396,10 @@ upgrade Dynare and discard the previous version without having to worry
 about your own files.
 
 @menu
-* On Windows::                  
-* On Debian GNU/Linux and Ubuntu::  
-* On Mac OS X::                 
-* For other systems::           
+* On Windows::
+* On Debian GNU/Linux and Ubuntu::
+* On Mac OS X::
+* For other systems::
 @end menu
 
 @node On Windows
@@ -465,9 +465,9 @@ Wiki}.
 @section Configuration
 
 @menu
-* For MATLAB::                  
-* For GNU Octave::              
-* Some words of warning::       
+* For MATLAB::
+* For GNU Octave::
+* Some words of warning::
 @end menu
 
 @node For MATLAB
@@ -476,7 +476,7 @@ Wiki}.
 You need to add the @file{matlab} subdirectory of your Dynare
 installation to MATLAB path. You have two options for doing that:
 
-@itemize 
+@itemize
 
 @item
 Using the @code{addpath} command in the MATLAB command window:
@@ -724,7 +724,7 @@ in a file called @file{@var{FILENAME}_results.mat}.
 
 @example
 dynare ramst
-dynare ramst.mod savemacro   
+dynare ramst.mod savemacro
 @end example
 
 @end deffn
@@ -749,26 +749,26 @@ Structure containing the various results of the computations.
 @chapter The Model file
 
 @menu
-* Conventions::                 
-* Variable declarations::       
-* Expressions::                 
-* Parameter initialization::    
-* Model declaration::           
-* Auxiliary variables::         
-* Initial and terminal conditions::  
-* Shocks on exogenous variables::  
-* Other general declarations::  
-* Steady state::                
-* Getting information about the model::  
-* Deterministic simulation::    
-* Stochastic solution and simulation::  
-* Estimation::                  
-* Forecasting::                 
-* Optimal policy::              
-* Sensitivity and identification analysis::  
-* Displaying and saving results::  
-* Macro-processing language::   
-* Misc commands::               
+* Conventions::
+* Variable declarations::
+* Expressions::
+* Parameter initialization::
+* Model declaration::
+* Auxiliary variables::
+* Initial and terminal conditions::
+* Shocks on exogenous variables::
+* Other general declarations::
+* Steady state::
+* Getting information about the model::
+* Deterministic simulation::
+* Stochastic solution and simulation::
+* Estimation::
+* Forecasting::
+* Optimal policy::
+* Sensitivity and identification analysis::
+* Displaying and saving results::
+* Macro-processing language::
+* Misc commands::
 @end menu
 
 @node Conventions
@@ -785,7 +785,7 @@ are separated by commas.
 In the description of Dynare commands, the following conventions are
 observed:
 
-@itemize 
+@itemize
 
 @item
 optional arguments or options are indicated between square brackets:
@@ -933,7 +933,7 @@ Dynare will concatenate them.
 
 varexo m gov;
 varexo_det tau;
-    
+
 @end example
 
 @end deffn
@@ -1020,7 +1020,7 @@ the beginning of the period'' convention.
 
 The following two program snippets are strictly equivalent.
 
-@emph{Using default Dynare timing convention:} 
+@emph{Using default Dynare timing convention:}
 
 @example
 var y, k, i;
@@ -1032,7 +1032,7 @@ k = i + (1-delta)*k(-1);
 end;
 @end example
 
-@emph{Using the alternative timing convention:} 
+@emph{Using the alternative timing convention:}
 
 @example
 var y, k, i;
@@ -1114,9 +1114,9 @@ Represents infinity.
 @end deffn
 
 @menu
-* Parameters and variables::    
-* Operators::                   
-* Functions::                   
+* Parameters and variables::
+* Operators::
+* Functions::
 @end menu
 
 @node Parameters and variables
@@ -1127,8 +1127,8 @@ typing their names. The semantics of parameters and variables is quite
 different whether they are used inside or outside the model block.
 
 @menu
-* Inside the model::            
-* Outside the model::           
+* Inside the model::
+* Outside the model::
 @end menu
 
 @node Inside the model
@@ -1177,7 +1177,7 @@ the value given in the most recent @code{initval} or @code{endval} block.
 The following operators are allowed in both @var{MODEL_EXPRESSION} and
 @var{EXPRESSION}:
 
-@itemize 
+@itemize
 
 @item
 binary arithmetic operators: @code{+}, @code{-}, @code{*}, @code{/}, @code{^}
@@ -1215,8 +1215,8 @@ internally and how this affects the output.
 @subsection Functions
 
 @menu
-* Built-in Functions::          
-* External Functions::          
+* Built-in Functions::
+* External Functions::
 @end menu
 
 @node Built-in Functions
@@ -1566,7 +1566,7 @@ appended to the variable names, as LaTeX subscripts.
 Note that the model written in the TeX file will differ from the model
 declared by the user in the following dimensions:
 
-@itemize 
+@itemize
 
 @item
 the timing convention of predetermined variables
@@ -1762,7 +1762,7 @@ This steady state will be used as the initial condition at all the
 periods preceeding the first simulation period for the two possible
 types of simulations in stochastic mode:
 
-@itemize 
+@itemize
 
 @item
 in @code{stoch_simul}, if the @code{periods} options is specified
@@ -1922,7 +1922,7 @@ and the number of lags of the model (for example, with 50 simulation
 periods, in a model with 2 lags and 1 lead, the paths must have a
 length of 53). Note that these paths cover two different things:
 
-@itemize 
+@itemize
 
 @item
 the constraints of the problem, which are given by the path for
@@ -1936,7 +1936,7 @@ initial and terminal conditions)
 
 The command accepts three file formats:
 
-@itemize 
+@itemize
 
 @item
 M-file (extension @file{.m}): for each endogenous and exogenous
@@ -1998,7 +1998,7 @@ The block should contain one or more occurrences of the following
 group of three lines:
 
 @example
-var @var{VARIABLE_NAME}; 
+var @var{VARIABLE_NAME};
 periods @var{INTEGER}[:@var{INTEGER}] [[,] @var{INTEGER}[:@var{INTEGER}]]@dots{};
 values @var{DOUBLE} | (@var{EXPRESSION})  [[,] @var{DOUBLE} | (@var{EXPRESSION}) ]@dots{};
 @end example
@@ -2120,7 +2120,7 @@ The syntax is the same than @code{shocks} in a deterministic context.
 
 This command is only meaningful in two situations:
 
-@itemize 
+@itemize
 
 @item
 on exogenous variables with a non-zero steady state, in a deterministic setup,
@@ -2207,8 +2207,8 @@ give more guidance to Dynare, using your knowledge of the model, by
 providing it with a ``steady state file''.
 
 @menu
-* Finding the steady state with Dynare nonlinear solver::  
-* Using a steady state file::   
+* Finding the steady state with Dynare nonlinear solver::
+* Using a steady state file::
 @end menu
 
 @node Finding the steady state with Dynare nonlinear solver
@@ -2332,7 +2332,7 @@ variable:
 Contains the computed steady state.
 
 Endogenous variables are ordered in order of declaration used in
-@code{var} command (which is also the order used in @code{M_.endo_names}). 
+@code{var} command (which is also the order used in @code{M_.endo_names}).
 
 @end defvr
 
@@ -2490,7 +2490,7 @@ steady_state_model;
   dA = exp(gam);
   gst = 1/dA; // A temporary variable
   m = mst;
-  
+
   // Three other temporary variables
   khst = ( (1-gst*bet*(1-del)) / (alp*gst^alp*bet) )^(1/(alp-1));
   xist = ( ((khst*gst)^alp - (1-gst*(1-del))*khst)/mst )^(-1);
@@ -2508,7 +2508,7 @@ steady_state_model;
 
   // You can use MATLAB functions which return several arguments
   [W, e] = my_function(l, n);
-  
+
   gp_obs = m/dA;
   gy_obs = dA;
 end;
@@ -2567,7 +2567,7 @@ command.
 
 This command provides information about:
 
-@itemize 
+@itemize
 
 @item
 the normalization of the model: an endogenous variable is attributed
@@ -2758,11 +2758,11 @@ details of the Dynare implementation of the first order solution are
 given in @cite{Villemot (2011)}.
 
 @menu
-* Computing the stochastic solution::  
-* Typology and ordering of variables::  
-* First order approximation::   
-* Second order approximation::  
-* Third order approximation::   
+* Computing the stochastic solution::
+* Typology and ordering of variables::
+* First order approximation::
+* Second order approximation::
+* Third order approximation::
 @end menu
 
 @node Computing the stochastic solution
@@ -2838,7 +2838,7 @@ Transform used in the HP filter computation. It may be necessary to
 increase it for highly autocorrelated processes. Default: @code{512}.
 
 @item irf = @var{INTEGER}
-@anchor{irf} 
+@anchor{irf}
 Number of periods on which to compute the IRFs. Setting @code{irf=0},
 suppresses the plotting of IRF's. Default: @code{40}.
 
@@ -3120,7 +3120,7 @@ where @math{y^s} is the steady state value of @math{y} and
 
 The coefficients of the decision rules are stored as follows:
 
-@itemize 
+@itemize
 
 @item
 @vindex oo_.dr.ys
@@ -3158,7 +3158,7 @@ variance of future shocks.
 The coefficients of the decision rules are stored in the variables
 described for first order approximation, plus the following variables:
 
-@itemize 
+@itemize
 
 @item
 @vindex oo_.dr.ghs2
@@ -3204,7 +3204,7 @@ M_.exo_nbr}.
 
 The coefficients of the decision rules are stored as follows:
 
-@itemize 
+@itemize
 
 @item
 @vindex oo_.dr.ys
@@ -3530,7 +3530,7 @@ stderr VARIABLE_NAME | corr VARIABLE_NAME_1, VARIABLE_NAME_2 | PARAMETER_NAME
 This command runs Bayesian or maximum likelihood estimation.
 
 The following information will be displayed by the command:
-@itemize 
+@itemize
 
 @item
 results from posterior optimization (also for maximum likelihood)
@@ -3941,7 +3941,7 @@ Lower bound of a 90% HPD interval@footnote{See option @ref{conf_sig}
 to change the size of the HPD interval}
 
 @item HPDsup
-Upper bound of a 90% HPD interval 
+Upper bound of a 90% HPD interval
 
 @item Mean
 Mean of the posterior distribution
@@ -4280,7 +4280,7 @@ end;
 
 stoch_simul(irf=0);
 
-forecast;    
+forecast;
 @end example
 
 @end deffn
@@ -4618,13 +4618,13 @@ Sensitivity analysis results are saved locally in @code{<mod_file>/GSA},
 where @code{<mod_file>.mod} is the name of the DYNARE model file.
 
 @menu
-* Sampling::                    
-* Stability Mapping::           
-* Reduced Form Mapping::        
-* RMSE::                        
-* Screening Analysis::          
-* Identification Analysis::     
-* Performing Sensitivity and Identification Analysis::  
+* Sampling::
+* Stability Mapping::
+* Reduced Form Mapping::
+* RMSE::
+* Screening Analysis::
+* Identification Analysis::
+* Performing Sensitivity and Identification Analysis::
 @end menu
 
 @node Sampling
@@ -5302,10 +5302,10 @@ types: integer, character string, array of integers, array of
 strings.
 
 @menu
-* Macro expressions::           
-* Macro directives::            
-* Typical usages::              
-* MATLAB/Octave loops versus macro-processor loops::  
+* Macro expressions::
+* Macro directives::
+* Typical usages::
+* MATLAB/Octave loops versus macro-processor loops::
 @end menu
 
 @node Macro expressions
@@ -5434,7 +5434,7 @@ end;
 @deffn {Macro directive} @@#if @var{MACRO_EXPRESSION}
 @deffnx {Macro directive} @@#else
 @deffnx {Macro directive} @@#endif
-Conditional inclusion of some part of the @file{.mod} file. 
+Conditional inclusion of some part of the @file{.mod} file.
 The lines between @code{@@#if} and the next @code{@@#else} or
 @code{@@#end} is executed only if the condition evaluates to a
 non-null integer. The @code{@@#else} branch is optional and, if
@@ -5496,10 +5496,10 @@ and to abort. The argument must evaluate to a string.
 @subsection Typical usages
 
 @menu
-* Modularization::              
-* Indexed sums or products::    
-* Multi-country models::        
-* Endogeneizing parameters::    
+* Modularization::
+* Indexed sums or products::
+* Multi-country models::
+* Endogeneizing parameters::
 @end menu
 
 @node Modularization
@@ -5613,7 +5613,7 @@ In the model, @math{\alpha} is a (share) parameter, and
 @code{lab_rat} is an endogenous variable.
 
 It is clear that calibrating @math{\alpha} is not straigthforward; but
-on the contrary, we have real world data for @code{lab_rat}, and 
+on the contrary, we have real world data for @code{lab_rat}, and
 it is clear that these two variables are economically linked.
 
 The solution is to use a method called @emph{variable flipping}, which
@@ -5727,7 +5727,7 @@ Sets the seed used for random number generation.
 For all parameters, endogenous and exogenous variables, stores
 their value in a text file, using a simple name/value associative table.
 
-@itemize 
+@itemize
 
 @item
 for parameters, the value is taken from the last parameter
@@ -5778,7 +5778,7 @@ directive to share the model equations between the two files
 For all parameters, endogenous and exogenous variables, loads
 their value from a file created with @code{save_params_and_steady_state}.
 
-@itemize 
+@itemize
 
 @item
 for parameters, their value will be initialized as if they
@@ -5823,7 +5823,7 @@ option1 = choice1
 
 [command1]
 option0 = choice0
-option1 = choice1 
+option1 = choice1
 @end example
 
 The configuration file follows a few conventions (self-explanatory
@@ -5851,7 +5851,7 @@ Is @code{true} or @code{false}.
 @end table
 
 @menu
-* Parallel Configuration::      
+* Parallel Configuration::
 @end menu
 
 @node Parallel Configuration
@@ -6063,7 +6063,7 @@ CPUnbr = [2:4]
 UserName = usern
 RemoteDirectory = /home/usern/Remote
 DynarePath = /home/usern/dynare/matlab
-MatlabOctavePath = matlab    
+MatlabOctavePath = matlab
 @end example
 
 @end deffn
@@ -6169,7 +6169,7 @@ a relaxation algorithm,'' CEPREMAP, @i{Couverture Orange}, 9602.
 Kim, Jinill, Sunghyun Kim, Ernst Schaumburg, and Christopher A. Sims
 (2008): ``Calculating and using second-order accurate solutions of
 discrete time dynamic equilibrium models,'' @i{Journal of Economic
-Dynamics and Control}, 32(11), 3397--3414. 
+Dynamics and Control}, 32(11), 3397--3414.
 
 @item
 Koopman, S. J. and J. Durbin (2003): ``Filtering and Smoothing of
