@@ -4407,7 +4407,7 @@ the @code{shocks} blocks (@pxref{Shocks on exogenous variables}).
 
 @descriptionhead
 
-Plots the conditional forecasts.
+Plots the conditional (plain lines) and unconditional (dashed lines) forecasts.
 
 To be used after @code{conditional_forecast}.
 
