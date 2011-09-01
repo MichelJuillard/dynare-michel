@@ -378,6 +378,11 @@ else  % use original Dynare solver
         if ~exist('OCTAVE_VERSION')
             dr.eigval = eig(e,d);
         end
+        for i=1:nd
+            if abs(ss(i,i)) < 1e-6 && abs(tt(i,i)) < 1e-6
+                info(7) = 1;
+            end
+        end
         return
     end
 
@@ -412,7 +417,7 @@ else  % use original Dynare solver
     % derivatives with respect to dynamic state variables
     % forward variables
     w1 =w(1:n3,n2:nd);
-    if ~isfloat(w1) && (condest(w1) > 1e9)
+    if ~isscalar(w1) && (condest(w1) > 1e9)
         % condest() fails on a scalar under Octave
         info(1) = 5;
         info(2) = condest(w1);

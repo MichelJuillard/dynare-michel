@@ -48,6 +48,9 @@ if ~noprint
       case 6
         error(['The Jacobian matrix evaluated at the steady state contains elements ' ...
                'that are not real or are infinite'])
+      case 7
+        error(['One of the eigenvalue is is close to 0/0 (the absolute ' ...
+               'value of numerator and denominator is smaller than 1e-6).'])
       case 19
         error('The steadystate file did not compute the steady state (inconsistent deep parameters).')
       case 20
