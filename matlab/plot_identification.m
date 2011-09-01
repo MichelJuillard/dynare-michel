@@ -56,7 +56,6 @@ tittxt1=regexprep(tittxt, ' ', '_');
 tittxt1=strrep(tittxt1, '.', '');
 if SampleSize == 1,
     siJ = idemoments.siJ;
-    normJ = max(abs(siJ)')';
     figure('Name',[tittxt, ' - Identification using info from observables']),
     subplot(211)
     mmm = (idehess.ide_strength_J);
@@ -171,6 +170,7 @@ if SampleSize == 1,
         disp('')
         if idehess.flag_score,
             [U,S,V]=svd(idehess.AHess,0);
+            S=diag(S);
             if nparam<5,
                 f1 = figure('name',[tittxt,' - Identification patterns (Information matrix)']);
             else
@@ -178,7 +178,8 @@ if SampleSize == 1,
                 f2 = figure('name',[tittxt,' - Identification patterns (Information matrix): HIGHEST SV']);
             end
         else
-            [U,S,V]=svd(siJ./normJ(:,ones(nparam,1)),0);
+            S = idemoments.S;
+            V = idemoments.V;
             if nparam<5,
                 f1 = figure('name',[tittxt,' - Identification patterns (moments)']);
             else
@@ -197,10 +198,10 @@ if SampleSize == 1,
             subplot(4,1,jj),
             if j<5
                 bar(abs(V(:,end-j+1))),
-                Stit = S(end-j+1,end-j+1);
+                Stit = S(end-j+1);
             else
                 bar(abs(V(:,jj))),
-                Stit = S(jj,jj);
+                Stit = S(jj);
             end
             set(gca,'xticklabel','')
             if j==4 || j==nparam || j==8,

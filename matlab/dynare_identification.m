@@ -58,6 +58,7 @@ options_ident = set_default_option(options_ident,'prior_range',0);
 options_ident = set_default_option(options_ident,'periods',300);
 options_ident = set_default_option(options_ident,'replic',100);
 options_ident = set_default_option(options_ident,'advanced',0);
+options_ident = set_default_option(options_ident,'normalize_jacobians',1);
 options_ident = set_default_option(options_ident,'lik_init',1);
 if options_ident.gsa_sample_file,
     GSAFolder = checkpath('GSA');
