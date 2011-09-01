@@ -56,6 +56,7 @@ advanced = options_ident.advanced;
 replic = options_ident.replic;
 periods = options_ident.periods;
 max_dim_cova_group = options_ident.max_dim_cova_group;
+normalize_jacobians = options_ident.normalize_jacobians;
 [I,J]=find(M_.lead_lag_incidence');
 
 ide_hess = struct();
@@ -230,9 +231,18 @@ if info(1)==0,
         ide_lre.siLREnorm=siLREnorm; 
         ide_hess.flag_score=flag_score; 
     end,
-    normH = max(abs(siH)')';
-    normJ = max(abs(siJ)')';
-    normLRE = max(abs(siLRE)')';
+    if normalize_jacobians,
+        normH = max(abs(siH)')';
+        normH = normH(:,ones(nparam,1));
+        normJ = max(abs(siJ)')';
+        normJ = normJ(:,ones(nparam,1));
+        normLRE = max(abs(siLRE)')';
+        normLRE = normLRE(:,ones(size(gp,2),1));
+    else
+        normH = 1;
+        normJ = 1;
+        normLRE = 1;
+    end
     ide_moments.indJJ=indJJ;
     ide_model.indH=indH;
     ide_lre.indLRE=indLRE;
@@ -251,12 +261,13 @@ if info(1)==0,
 %         ide_checks.idemodel_ino, ide_checks.idemoments_ino] = ...
 %         identification_checks(H(indH,:)./normH(:,ones(nparam,1)),JJ(indJJ,:)./normJ(:,ones(nparam,1)), gp(indLRE,:)./normLRE(:,ones(size(gp,2),1)));
     [ide_moments.cond, ide_moments.ind0, ide_moments.indno, ide_moments.ino, ide_moments.Mco, ide_moments.Pco, ide_moments.jweak, ide_moments.jweak_pair] = ...
-        identification_checks(JJ(indJJ,:)./normJ(:,ones(nparam,1)), 0);
+        identification_checks(JJ(indJJ,:)./normJ, 0);
     [ide_model.cond, ide_model.ind0, ide_model.indno, ide_model.ino, ide_model.Mco, ide_model.Pco, ide_model.jweak, ide_model.jweak_pair] = ...
-        identification_checks(H(indH,:)./normH(:,ones(nparam,1)), 0);
+        identification_checks(H(indH,:)./normH, 0);
     [ide_lre.cond, ide_lre.ind0, ide_lre.indno, ide_lre.ino, ide_lre.Mco, ide_lre.Pco, ide_lre.jweak, ide_lre.jweak_pair] = ...
-        identification_checks(gp(indLRE,:)./normLRE(:,ones(size(gp,2),1)), 0);
-    [U, S, V]=svd(JJ(indJJ,:)./normJ(:,ones(nparam,1)),0);
+        identification_checks(gp(indLRE,:)./normLRE, 0);
+    normJ=1;
+    [U, S, V]=svd(JJ(indJJ,:)./normJ,0);
     S=diag(S);
     if nparam>8
         ide_moments.S = S([1:4, end-3:end]);
@@ -268,6 +279,6 @@ if info(1)==0,
     
     indok = find(max(ide_moments.indno,[],1)==0);
     if advanced,
-        [ide_moments.pars, ide_moments.cosnJ] = ident_bruteforce(JJ(indJJ,:)./normJ(:,ones(nparam,1)),max_dim_cova_group,options_.TeX,name_tex);
+        [ide_moments.pars, ide_moments.cosnJ] = ident_bruteforce(JJ(indJJ,:)./normJ,max_dim_cova_group,options_.TeX,name_tex);
     end
 end    
