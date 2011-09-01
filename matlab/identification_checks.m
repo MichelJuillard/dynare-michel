@@ -49,11 +49,11 @@ ind1 = find(vnorm(JJ)>=eps); % take non-zero columns
 JJ1 = JJ(:,ind1);
 [eu,ee2,ee1] = svd( JJ1, 0 );
 condJ= cond(JJ1);
-rankJ = rank(JJ);
+rankJ = rank(JJ./norm(JJ),1.e-10);
 rankJJ = rankJ;
-if hess_flag==0,
-    rankJJ = rank(JJ'*JJ);
-end   
+% if hess_flag==0,
+%     rankJJ = rank(JJ'*JJ);
+% end   
 
 ind0 = zeros(1,npar);
 ind0(ind1) = 1;
