@@ -41,15 +41,25 @@ function dynTest(fun)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-dynare_config([],0);
+if isempty(strfind(fun,'@')) & (~isempty(strfind(fun,'/')) || ~isempty(strfind(fun,'\')) )
+    [pathstr1, name, ext] = fileparts(fun);
+    addpath(pathstr1);
+    rm_path = 1;
+else
+    rm_path = 0;
+end
 
-[pathstr, name, ext] = fileparts(which(fun));
+[pathstr2, name, ext] = fileparts(which(fun));
 
-if ~( isempty(pathstr) || isempty(name) || isempty(ext) ) && strcmp(ext(2:end),'m')
-    check = mtest(name,pathstr);
+if ~( isempty(pathstr2) || isempty(name) || isempty(ext) ) && strcmp(ext(2:end),'m')
+    check = mtest(name,pathstr2);
     if check
         disp(['Succesfull test(s) for ' fun ' routine!'])
     end
 else
     disp([fun  'is not a known matlab/octave routine!'])
+end
+
+if rm_path
+    rmpath(pathstr1)
 end
