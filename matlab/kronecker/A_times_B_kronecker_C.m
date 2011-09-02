@@ -1,7 +1,7 @@
 function [D, err] = A_times_B_kronecker_C(A,B,C,fake)
 
 %@info:
-%! @deftypefn {Function File} {@var{D}, @var{err} =} A_timesB_kronecker_C (@var{A},@var{B},@var{C},@var{fake})
+%! @deftypefn {Function File} {[@var{D}, @var{err}] =} A_times_B_kronecker_C (@var{A},@var{B},@var{C},@var{fake})
 %! @anchor{kronecker/A_times_B_kronecker_C}
 %! @sp 1
 %! Computes A*kron(B,C).
@@ -22,37 +22,29 @@ function [D, err] = A_times_B_kronecker_C(A,B,C,fake)
 %! @strong{Outputs}
 %! @sp 1
 %! @table @ @var
-%! @item c
-%! Integer scalar, the number of years, quarters, months or weeks between @var{a} and @var{B}.
+%! @item D
+%! mA*(nC*nB) or mA*(nB*nB) matrix of doubles.
+%! @item err
+%! Integer scalar equal to zero (if all goes well).
 %! @end table
 %! @sp 2
+%! @strong{Remarks}
+%! @sp 1
+%! [1] This routine is called by Dynare if and only the mex version is not compiled (also used for testing purposes).
+%! @sp 1
+%! [2] This routine can be called with three or four arguments. In the first case A*kron(B,B) is computed.
+%! @sp 2
 %! @strong{This function is called by:}
+%! @sp 1
+%! @ref{kronecker/sparse_hessian_times_B_kronecker_C}, @ref{dr1}, @ref{simult_}
 %! @sp 2
 %! @strong{This function calls:}
-%! @ref{@@dynDates/eq},@ref{@@dynDates/lt}
 %!
 %! @end deftypefn
 %@eod:
 
-%function [err, D] = A_times_B_kronecker_C(A,B,C)
-% Computes A * kron(B,C). 
-%
-% INPUTS
-%   A   [double] mA*nA matrix.
-%   B   [double] mB*nB matrix.
-%   C   [double] mC*nC matrix.
-%
-% OUTPUTS
-%   err [double] scalar: 1 indicates failure, 0 indicates success
-%   D   [double] mA*(nC*nB) or mA*(nB*nB) matrix.
-%
-% ALGORITHM
-%   none.    
-%
-% SPECIAL REQUIREMENTS
-%   none.
-
-% Copyright (C) 1996-2010 Dynare Team
+% Copyright (C) 1996-2011 Dynare Team
+% stephane DOT adjemian AT univ DASH lemans DOT fr
 %
 % This file is part of Dynare.
 %
@@ -70,8 +62,8 @@ function [D, err] = A_times_B_kronecker_C(A,B,C,fake)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % Chek number of inputs and outputs.
-if nargin>4 || nargin<3 || nargout~=2
-    error('A_times_B_kronecker_C takes 3 or 4 input arguments and provides exactly 2 output arguments.')
+if nargin>4 || nargin<3
+    error('A_times_B_kronecker_C takes 3 or 4 input arguments and provides 2 output arguments.')
 end
 
 
@@ -95,11 +87,11 @@ end
 % Computational part.
 if loop
     if nargin == 4
-        k1 = 1; 
+        k1 = 1;
         for i1=1:nB
             for i2=1:nC
                 D(:,k1) = A * kron(B(:,i1),C(:,i2));
-                k1 = k1 + 1; 
+                k1 = k1 + 1;
             end
         end
     else
@@ -107,7 +99,7 @@ if loop
         for i1=1:nB
             for i2=1:nB
                 D(:,k1) = A * kron(B(:,i1),B(:,i2));
-                k1 = k1 + 1; 
+                k1 = k1 + 1;
             end
         end
     end
