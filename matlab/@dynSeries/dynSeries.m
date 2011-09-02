@@ -95,6 +95,7 @@ ts.freq = [];
 ts.time = [];
 ts.init = [];
 ts.last = [];
+ts.Time = dynTime();
 
 ts = class(ts,'dynSeries');
 
@@ -121,18 +122,30 @@ switch nargin
                 ts.init = [str2num(b(1:quaterly-1)) str2num(b(quaterly+1:end))];
                 ts = set_time(ts);
                 ts.last = ts.time(end,:);
+                ts.Time = ts.Time.setSize(ts.nobs);
+                ts.Time = ts.Time.setFreq(4);
+                ts.Time = ts.Time.setTime(1,[str2num(b(1:quaterly-1)) str2num(b(quaterly+1:end))]);
+                init = dynDates(b);
             end
             if ~isempty(monthly)
                 ts.freq = 12;
                 ts.init = [str2num(b(1:monthly-1)) str2num(b(monthly+1:end))];
                 ts = set_time(ts);
                 ts.last = ts.time(end,:);
+                ts.Time = ts.Time.setSize(ts.nobs);
+                ts.Time = ts.Time.setFreq(12);
+                ts.Time = ts.Time.setTime(1,[str2num(b(1:monthly-1)) str2num(b(monthly+1:end))]);
+                init = dynDates(b);
             end
             if ~isempty(weekly)
                 ts.freq = 52;
                 ts.init = [str2num(b(1:weekly-1)) str2num(b(weekly+1:end))];
                 ts = set_time(ts);
                 ts.last = ts.time(end,:);
+                ts.Time = ts.Time.setSize(ts.nobs);
+                ts.Time = ts.Time.setFreq(52);
+                ts.Time = ts.Time.setTime(1,[str2num(b(1:weekly-1)) str2num(b(weekly+1:end))]);
+                init = dynDates(b);
             end
             if isempty(quaterly) && isempty(monthly) && isempty(weekly)
                 error('dynSeries:: Using a string as a second input argument, I can only handle weekly (W), monthly (M) or quaterly (Q) data!');
@@ -142,6 +155,10 @@ switch nargin
             ts.freq = 1;
             ts = set_time(ts);
             ts.last = ts.time(end,:);
+            ts.Time = ts.Time.setSize(ts.nobs);
+            ts.Time = ts.Time.setFreq(1);
+            ts.Time = ts.Time.setTime(1,[b 1]);
+            init = dynDates(b);
         end
     else% If b is empty.
         ts.freq = 1;
@@ -150,6 +167,9 @@ switch nargin
         ts = set_time(ts);
         ts.init = ts.time(1,:);
         ts.last = ts.time(end,:);
+        ts.Time = ts.Time.setSize(ts.nobs);
+        ts.Time = ts.Time.setFreq(1);
+        ts.Time = ts.Time.setTime(1,[1 1]);
     end
     % Get the names of the variables.
     if ~isempty(c)
@@ -205,7 +225,6 @@ end
 %$ ts2 = dynSeries(A,B2);
 %$ ts3 = dynSeries(A,B3);
 %$ ts4 = dynSeries(A,B4);
-%$
 %$ % Check the results.
 %$ t(1) = dyn_assert(getTime(ts1),e1.Time);
 %$ t(2) = dyn_assert(getTime(ts2),e2.Time);
