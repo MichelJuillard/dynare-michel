@@ -8,24 +8,24 @@ function dynInfo(fun)
 %! @strong{Inputs}
 %! @table @var
 %! @item fun
-%! string, name of the matlab/octave routine for which internal documentation is needed.     
+%! string, name of the matlab/octave routine for which internal documentation is needed.
 %! @end table
 %!
 %! @strong{Outputs}
 %! None
-%! 
-%! @strong{This function is called by:} 
+%!
+%! @strong{This function is called by:}
 %! @ref{dynare}, @ref{build_internal_documentation}
-%! 
+%!
 %! @strong{This function calls:}
 %! @ref{get_internal_doc_block}.
-%!    
+%!
 %! @end deftypefn
 %@eod:
-    
+
 % Copyright (C) 2011 Dynare Team
 % stephane DOT adjemian AT univ DASH lemans DOT fr
-%    
+%
 % This file is part of Dynare.
 %
 % Dynare is free software: you can redistribute it and/or modify
@@ -40,7 +40,9 @@ function dynInfo(fun)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    
+
+dynare_config([],0);
+
 [pathstr, name, ext] = fileparts(which(fun));
 if strcmp(ext(2:end),'m')
     block = get_internal_doc_block(name,pathstr);

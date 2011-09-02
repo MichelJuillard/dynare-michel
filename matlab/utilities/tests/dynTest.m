@@ -41,7 +41,10 @@ function dynTest(fun)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+dynare_config([],0);
+
 [pathstr, name, ext] = fileparts(which(fun));
+
 if ~( isempty(pathstr) || isempty(name) || isempty(ext) ) && strcmp(ext(2:end),'m')
     check = mtest(name,pathstr);
     if check
