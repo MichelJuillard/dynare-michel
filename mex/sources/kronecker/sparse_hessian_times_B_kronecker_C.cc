@@ -143,8 +143,8 @@ void
 mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   // Check input and output:
-  if ((nrhs > 4) || (nrhs < 3) || nlhs != 2)
-    DYN_MEX_FUNC_ERR_MSG_TXT("sparse_hessian_times_B_kronecker_C takes 3 or 4 input arguments and provides exactly 2 output argument.");
+  if ((nrhs > 4) || (nrhs < 3) )
+    DYN_MEX_FUNC_ERR_MSG_TXT("sparse_hessian_times_B_kronecker_C takes 3 or 4 input arguments and provides 2 output arguments.");
 
   if (!mxIsSparse(prhs[0]))
     DYN_MEX_FUNC_ERR_MSG_TXT("sparse_hessian_times_B_kronecker_C: First input must be a sparse (dynare) hessian matrix.");
@@ -185,13 +185,13 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   double *D;
   if (nrhs == 4)
     {
-      plhs[1] = mxCreateDoubleMatrix(mA, nB*nC, mxREAL);
+      plhs[0] = mxCreateDoubleMatrix(mA, nB*nC, mxREAL);
     }
   else
     {
-      plhs[1] = mxCreateDoubleMatrix(mA, nB*nB, mxREAL);
+      plhs[0] = mxCreateDoubleMatrix(mA, nB*nB, mxREAL);
     }
-  D = mxGetPr(plhs[1]);
+  D = mxGetPr(plhs[0]);
   // Computational part:
   if (nrhs == 3)
     {
@@ -201,5 +201,5 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     {
       sparse_hessian_times_B_kronecker_C(isparseA, jsparseA, vsparseA, B, C, D, mA, nA, mB, nB, mC, nC, numthreads);
     }
-  plhs[0] = mxCreateDoubleScalar(0);
+  plhs[1] = mxCreateDoubleScalar(0);
 }

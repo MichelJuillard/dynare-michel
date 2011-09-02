@@ -1,4 +1,39 @@
-function [err, D] = A_times_B_kronecker_C(A,B,C,fake)
+function [D, err] = A_times_B_kronecker_C(A,B,C,fake)
+
+%@info:
+%! @deftypefn {Function File} {@var{D}, @var{err} =} A_timesB_kronecker_C (@var{A},@var{B},@var{C},@var{fake})
+%! @anchor{kronecker/A_times_B_kronecker_C}
+%! @sp 1
+%! Computes A*kron(B,C).
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item A
+%! mA*nA matrix of doubles.
+%! @item B
+%! mB*nB matrix of doubles.
+%! @item C
+%! mC*nC matrix of doubles.
+%! @item fake
+%! Anything you want, just a fake parameter (because the mex version admits a last argument specifying the number of threads to be used in parallel mode).
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item c
+%! Integer scalar, the number of years, quarters, months or weeks between @var{a} and @var{B}.
+%! @end table
+%! @sp 2
+%! @strong{This function is called by:}
+%! @sp 2
+%! @strong{This function calls:}
+%! @ref{@@dynDates/eq},@ref{@@dynDates/lt}
+%!
+%! @end deftypefn
+%@eod:
+
 %function [err, D] = A_times_B_kronecker_C(A,B,C)
 % Computes A * kron(B,C). 
 %

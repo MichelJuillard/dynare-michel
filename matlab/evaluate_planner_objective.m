@@ -77,11 +77,11 @@ u = oo.exo_simul(1,:)';
 
 Uyy = full(Uyy);
 
-[err,Uyygygy] = A_times_B_kronecker_C(Uyy,gy,gy,options.threads.kronecker.A_times_B_kronecker_C);
+[Uyygygy, err] = A_times_B_kronecker_C(Uyy,gy,gy,options.threads.kronecker.A_times_B_kronecker_C);
 mexErrCheck('A_times_B_kronecker_C', err);
-[err,Uyygugu] = A_times_B_kronecker_C(Uyy,gu,gu,options.threads.kronecker.A_times_B_kronecker_C);
+[Uyygugu, err] = A_times_B_kronecker_C(Uyy,gu,gu,options.threads.kronecker.A_times_B_kronecker_C);
 mexErrCheck('A_times_B_kronecker_C', err);
-[err,Uyygygu] = A_times_B_kronecker_C(Uyy,gy,gu,options.threads.kronecker.A_times_B_kronecker_C);
+[Uyygygu, err] = A_times_B_kronecker_C(Uyy,gy,gu,options.threads.kronecker.A_times_B_kronecker_C);
 mexErrCheck('A_times_B_kronecker_C', err);
 
 Wbar =U/(1-beta);
@@ -92,9 +92,9 @@ if LQ
 else
     Wyy = (Uy*gyy+Uyygygy+beta*Wy*Gyy)/(eye(npred*npred)-beta*kron(Gy,Gy));
 end
-[err,Wyygugu] = A_times_B_kronecker_C(Wyy,Gu,Gu,options.threads.kronecker.A_times_B_kronecker_C);
+[Wyygugu, err] = A_times_B_kronecker_C(Wyy,Gu,Gu,options.threads.kronecker.A_times_B_kronecker_C);
 mexErrCheck('A_times_B_kronecker_C', err);
-[err,Wyygygu] = A_times_B_kronecker_C(Wyy,Gy,Gu,options.threads.kronecker.A_times_B_kronecker_C);
+[Wyygygu,err] = A_times_B_kronecker_C(Wyy,Gy,Gu,options.threads.kronecker.A_times_B_kronecker_C);
 mexErrCheck('A_times_B_kronecker_C', err);
 if LQ
     Wuu = Uyygugu+beta*Wyygugu;
@@ -114,11 +114,11 @@ end
 yhat = yhat(dr.order_var(nstatic+(1:npred)),1)-dr.ys(dr.order_var(nstatic+(1:npred)));
 u = oo.exo_simul(1,:)';
 
-[err,Wyyyhatyhat] = A_times_B_kronecker_C(Wyy,yhat,yhat,options.threads.kronecker.A_times_B_kronecker_C);
+[Wyyyhatyhat, err] = A_times_B_kronecker_C(Wyy,yhat,yhat,options.threads.kronecker.A_times_B_kronecker_C);
 mexErrCheck('A_times_B_kronecker_C', err);
-[err,Wuuuu] = A_times_B_kronecker_C(Wuu,u,u,options.threads.kronecker.A_times_B_kronecker_C);
+[Wuuuu, err] = A_times_B_kronecker_C(Wuu,u,u,options.threads.kronecker.A_times_B_kronecker_C);
 mexErrCheck('A_times_B_kronecker_C', err);
-[err,Wyuyhatu] = A_times_B_kronecker_C(Wyu,yhat,u,options.threads.kronecker.A_times_B_kronecker_C);
+[Wyuyhatu, err] = A_times_B_kronecker_C(Wyu,yhat,u,options.threads.kronecker.A_times_B_kronecker_C);
 mexErrCheck('A_times_B_kronecker_C', err);
 planner_objective_value(1) = Wbar+Wy*yhat+Wu*u+Wyuyhatu ...
     + 0.5*(Wyyyhatyhat + Wuuuu+Wss);

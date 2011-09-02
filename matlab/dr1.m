@@ -555,7 +555,7 @@ zx=[zx; zeros(M_.exo_nbr,np);zeros(M_.exo_det_nbr,np)];
 zu=[zu; eye(M_.exo_nbr);zeros(M_.exo_det_nbr,M_.exo_nbr)];
 [nrzx,nczx] = size(zx);
 
-[err, rhs] = sparse_hessian_times_B_kronecker_C(hessian,zx,options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
+[rhs, err] = sparse_hessian_times_B_kronecker_C(hessian,zx,options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
 mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
 rhs = -rhs;
 
@@ -615,7 +615,7 @@ hu = dr.ghu(nstatic+1:nstatic+npred,:);
 %kk = kk(1:npred,1:npred);
 %rhs = -hessian*kron(zx,zu)-f1*dr.ghxx(end-nyf+1:end,kk(:))*kron(hx(1:npred,:),hu(1:npred,:));
 
-[err, rhs] = sparse_hessian_times_B_kronecker_C(hessian,zx,zu,options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
+[rhs, err] = sparse_hessian_times_B_kronecker_C(hessian,zx,zu,options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
 mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
 
 nyf1 = sum(kstate(:,2) == M_.maximum_endo_lag+2);
@@ -624,7 +624,7 @@ hu1 = [hu;zeros(np-npred,M_.exo_nbr)];
 [nrhx,nchx] = size(hx);
 [nrhu1,nchu1] = size(hu1);
 
-[err, abcOut] = A_times_B_kronecker_C(dr.ghxx,hx,hu1,options_.threads.kronecker.A_times_B_kronecker_C);
+[abcOut,err] = A_times_B_kronecker_C(dr.ghxx,hx,hu1,options_.threads.kronecker.A_times_B_kronecker_C);
 mexErrCheck('A_times_B_kronecker_C', err);
 B1 = B*abcOut;
 rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B1;
@@ -638,10 +638,10 @@ dr.ghxu = A\rhs;
 kk = reshape([1:np*np],np,np);
 kk = kk(1:npred,1:npred);
 
-[err, rhs] = sparse_hessian_times_B_kronecker_C(hessian,zu,options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
+[rhs, err] = sparse_hessian_times_B_kronecker_C(hessian,zu,options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
 mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
 
-[err, B1] = A_times_B_kronecker_C(B*dr.ghxx,hu1,options_.threads.kronecker.A_times_B_kronecker_C);
+[B1, err] = A_times_B_kronecker_C(B*dr.ghxx,hu1,options_.threads.kronecker.A_times_B_kronecker_C);
 mexErrCheck('A_times_B_kronecker_C', err);
 rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B1;
 
@@ -686,7 +686,7 @@ for i=1:M_.maximum_endo_lead
         [junk,k3a,k3] = ...
             find(M_.lead_lag_incidenceordered(M_.maximum_endo_lag+j+1,:));
         nk3a = length(k3a);
-        [err, B1] = sparse_hessian_times_B_kronecker_C(hessian(:,kh(k3,k3)),gu(k3a,:),options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
+        [B1, err] = sparse_hessian_times_B_kronecker_C(hessian(:,kh(k3,k3)),gu(k3a,:),options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
         mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
         RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+B1;
     end
@@ -701,9 +701,9 @@ for i=1:M_.maximum_endo_lead
     kk = find(kstate(:,2) == M_.maximum_endo_lag+i+1);
     gu = dr.ghx*Gu;
     [nrGu,ncGu] = size(Gu);
-    [err, G1] = A_times_B_kronecker_C(dr.ghxx,Gu,options_.threads.kronecker.A_times_B_kronecker_C);
+    [G1, err] = A_times_B_kronecker_C(dr.ghxx,Gu,options_.threads.kronecker.A_times_B_kronecker_C);
     mexErrCheck('A_times_B_kronecker_C', err);
-    [err, G2] = A_times_B_kronecker_C(hxx,Gu,options_.threads.kronecker.A_times_B_kronecker_C);
+    [G2, err] = A_times_B_kronecker_C(hxx,Gu,options_.threads.kronecker.A_times_B_kronecker_C);
     mexErrCheck('A_times_B_kronecker_C', err);
     guu = dr.ghx*Guu+G1;
     Gu = hx*Gu;

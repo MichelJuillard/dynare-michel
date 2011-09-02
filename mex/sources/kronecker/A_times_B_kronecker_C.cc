@@ -126,8 +126,8 @@ void
 mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   // Check input and output:
-  if (nrhs > 4 || nrhs < 3 || nlhs != 2)
-    DYN_MEX_FUNC_ERR_MSG_TXT("A_times_B_kronecker_C takes 3 or 4 input arguments and provides exactly 2 output arguments.");
+  if (nrhs > 4 || nrhs < 3)
+    DYN_MEX_FUNC_ERR_MSG_TXT("A_times_B_kronecker_C takes 3 or 4 input arguments and provides 2 output arguments.");
 
   // Get & Check dimensions (columns and rows):
   mwSize mA, nA, mB, nB, mC, nC;
@@ -164,13 +164,13 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   double *D;
   if (nrhs == 4)
     {
-      plhs[1] = mxCreateDoubleMatrix(mA, nB*nC, mxREAL);
+      plhs[0] = mxCreateDoubleMatrix(mA, nB*nC, mxREAL);
     }
   else
     {
-      plhs[1] = mxCreateDoubleMatrix(mA, nB*nB, mxREAL);
+      plhs[0] = mxCreateDoubleMatrix(mA, nB*nB, mxREAL);
     }
-  D = mxGetPr(plhs[1]);
+  D = mxGetPr(plhs[0]);
   // Computational part:
   if (nrhs == 3)
     {
@@ -180,5 +180,5 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     {
       full_A_times_kronecker_B_C(A, B, C, &D[0], mA, nA, mB, nB, mC, nC, numthreads);
     }
-  plhs[0] = mxCreateDoubleScalar(0);
+  plhs[1] = mxCreateDoubleScalar(0);
 }
