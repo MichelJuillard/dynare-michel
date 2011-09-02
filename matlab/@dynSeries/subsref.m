@@ -1,7 +1,7 @@
 function us = subsref(ts, S)
 %@info:
 %! @deftypefn {Function File} {@var{us} =} subsref (@var{ts},S)
-%! @anchor{subsref}
+%! @anchor{@dynSeries/subsref}
 %! @sp 1
 %! Overloads the subsref method for the Dynare time series class (@ref{dynSeries}).
 %! @sp 2
@@ -52,7 +52,7 @@ function us = subsref(ts, S)
 
 if isequal(S.type,'.')
     switch S.subs
-      case {'data','nobs','vobs','name','tex','freq','time','init','last'} % Public members.
+      case {'data','nobs','vobs','name','tex','freq','time','init','last','Time'} % Public members.
         us = builtin('subsref', ts, S);
       case {'log','exp'}                                                   % Give "dot access" to public methods.
         us = feval(S.subs,ts);
