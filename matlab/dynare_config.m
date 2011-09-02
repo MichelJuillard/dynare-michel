@@ -53,6 +53,7 @@ addpath([dynareroot '/ms-sbvar/identification']);
 addpath([dynareroot '/ms-sbvar/switching_specification']);
 addpath([dynareroot '/ms-sbvar/mhm_specification']);
 addpath([dynareroot '/parallel/'])
+addpath([dynareroot '/particle/'])
 addpath([dynareroot '/gsa/'])
 addpath([dynareroot '/utilities/doc/'])
 addpath([dynareroot '/utilities/tests/'])
