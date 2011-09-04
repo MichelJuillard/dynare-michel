@@ -99,8 +99,9 @@ if options_.ramsey_policy
         end
         ys = oo_.steady_state;
         if inst_nbr == 1
-           nl_func = @(x) dyn_ramsey_static_(x,M_,options_,oo_,it_);
-           inst_val = fzero(nl_func,oo_.steady_state(k_inst));
+            nl_func = @(x) dyn_ramsey_static_(x,M_,options_,oo_,it_);
+            %           inst_val = fzero(nl_func,oo_.steady_state(k_inst));
+            inst_val = csolve(nl_func,oo_.steady_state(k_inst),'',options_.solve_tolf,100);
         else
             [inst_val,info1] = dynare_solve('dyn_ramsey_static_', ...
                                             oo_.steady_state(k_inst),0, ...
@@ -380,7 +381,7 @@ else  % use original Dynare solver
         end
         for i=1:nd
             if abs(ss(i,i)) < 1e-6 && abs(tt(i,i)) < 1e-6
-                info(7) = 1;
+                info(1) = 7;
             end
         end
         return
