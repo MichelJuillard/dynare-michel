@@ -142,9 +142,8 @@ end
 %$ addpath ../matlab
 %$ old_path = pwd;
 %$ cd([fileparts(which('dynare')) '/../tests/']);
-%$ global oo_
 %$ dynare('dsge_base2');
-%$ load dsge_base2
+%$ load dsge_base2;
 %$ cd(old_path);
 %$ dr = oo_.dr;
 %$ clear('oo_','options_','M_');
@@ -154,12 +153,12 @@ end
 %$ q = size(dr.ghu,2);
 %$ yhat = zeros(n,1);
 %$ epsilon = zeros(q,1);
-%$ ghx = dr.ghx(istates,:);ghx
-%$ ghu = dr.ghu(istates,:);ghu
+%$ ghx = dr.ghx(istates,:);
+%$ ghu = dr.ghu(istates,:);
 %$ constant = dr.ys(istates,:)+dr.ghs2(istates,:);
-%$ ghxx = dr.ghxx(istates,:);ghxx
-%$ ghuu = dr.ghuu(istates,:);ghuu
-%$ ghxu = dr.ghxu(istates,:);ghxu
+%$ ghxx = dr.ghxx(istates,:);
+%$ ghuu = dr.ghuu(istates,:);
+%$ ghxu = dr.ghxu(istates,:);
 %$ yhat_ = zeros(n,1);
 %$ ss = dr.ys(istates,:);
 %$
