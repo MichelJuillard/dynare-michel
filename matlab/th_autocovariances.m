@@ -15,7 +15,7 @@ function [Gamma_y,stationary_vars] = th_autocovariances(dr,ivar,M_,options_,node
 %   Gamma_y           [cell]         Matlab cell of nar+3 (second order approximation) or nar+2 (first order approximation) arrays, 
 %                                    where nar is the order of the autocorrelation function.
 %                                      Gamma_y{1}       [double]  Covariance matrix.
-%                                      Gamma_y{i}       [double]  Autocorrelation function (for i=1,...,options_.nar).
+%                                      Gamma_y{i+1}     [double]  Autocorrelation function (for i=1,...,options_.nar).
 %                                      Gamma_y{nar+2}   [double]  Variance decomposition.  
 %                                      Gamma_y{nar+3}   [double]  Expectation of the endogenous variables associated with a second 
 %                                                                 order approximation.    
