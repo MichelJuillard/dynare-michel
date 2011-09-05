@@ -5655,7 +5655,7 @@ and endogenous at steady state in a file, using the
 @item simul.mod
 This file computes the simulation. It begins with:
 @example
-@@#define steady = 1
+@@#define steady = 0
 @@#include "modeqs.mod"
 @end example
 Then it loads values of parameters and endogenous at steady state from
