@@ -3010,6 +3010,7 @@ the endogenous variables. Contains theoretical variance if the
 otherwise. The variables are arranged in declaration order.
 @end defvr
 
+@anchor{oo_.autocorr}
 @defvr {MATLAB/Octave variable} oo_.autocorr
 After a run of @code{stoch_simul}, contains a cell array of the
 autocorrelation matrices of the endogenous variables. The element
@@ -3018,6 +3019,39 @@ autocorrelation. The option @code{ar} specifies the number of
 autocorrelation matrices available. Contains theoretical
 autocorrelations if the @code{periods} option is not present, and
 empirical autocorrelations otherwise.
+
+The element @code{oo_.autocorr@{i@}(k,l)} is equal to the correlation
+between @math{y^k_t} and @math{y^l_{t-i}}, where @math{y^k}
+(resp. @math{y^l}) is the @math{k}-th (resp. @math{l}-th) endogenous
+variable in the declaration order.
+
+Note that if theoretical moments have been requested,
+@code{oo_.autocorr@{i@}} is the same than @code{oo_.gamma_y@{i+1@}}.
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.gamma_y
+After a run of @code{stoch_simul}, if theoretical moments have been
+requested (@i{i.e.} if the @code{periods} option is not present), this
+variable contains a cell array with the following values (where
+@code{ar} is the value of the option of the same name):
+
+@table @code
+@item oo_.gamma@{1@}
+Variance/co-variance matrix.
+
+@item oo_.gamma@{i+1@} (for i=1:ar)
+Autocorrelation function. @pxref{oo_.autocorr} for more
+details. Beware, this is the @i{autocorrelation} function, not the
+@i{autocovariance} function.
+
+@item oo_.gamma@{nar+2@}
+Variance decomposition.
+
+@item oo_.gamma@{nar+3@}
+If a second order approximation has been requested, contains the
+vector of the mean correction terms.
+@end table
+
 @end defvr
 
 @defvr {MATLAB/Octave variable} oo_.irfs
