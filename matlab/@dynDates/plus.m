@@ -32,7 +32,6 @@ function c = plus(a,b)
 %@eod:
 
 % Copyright (C) 2011 Dynare Team
-% stephane DOT adjemian AT univ DASH lemans DOT fr
 %
 % This file is part of Dynare.
 %
@@ -49,11 +48,13 @@ function c = plus(a,b)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+% AUTHORS(S) stephane DOT adjemian AT univ DASH lemans DOT fr
+
 if ~isa(a,'dynDates')
     error(['dynDates::plus: Input argument ' inputname(1) ' must be a dynDates object!'])
 end
 
-if b<0
+if b<0 || ~isint(b)
     error(['dynDates::plus: Input argument ' inputname(2) ' must be a positive integer'])
 end
 
@@ -65,46 +66,47 @@ end
 
 switch a.freq
   case 1
-    c = a.time(1)-b.time(1);
+    c = a;
+    c.time(1) = a.time(1) + b - 1;
   case {4,12,52}
-    c = a.time(2)-b.time(2) + (a.time(1)-b.time(1))*a.freq;
+    c = a;
+    n1 = b;
+    n2 = floor(n1/a.freq);
+    n3 = mod(n1,a.freq);
+    c.time(2) = c.time(2)+n3-1;
+    c.time(1) = c.time(1)+n2;
   otherwise
-    error('dynDates::minus: Unknown frequency!')
+    error('dynDates::plus: Unknown frequency!')
 end
 
 %@test:1
 %$ addpath ../matlab
 %$
 %$ % Define some dates
-%$ date_0_1 = 1950;
-%$ date_0_2 = 1950;
-%$ date_0_3 = 1940;
-%$ date_1_1 = '1950Q4';
-%$ date_1_2 = '1950Q1';
-%$ date_1_3 = '1940Q3';
-%$ date_2_1 = '2000M3';
-%$ date_2_2 = '1998M8';
+%$ date_1 = 1950;
+%$ date_2 = '1950Q4';
+%$ date_3 = '2000M3';
 %$
 %$ % Call the tested routine.
-%$ d_0_1 = dynDates(date_0_1);
-%$ d_0_2 = dynDates(date_0_2);
-%$ d_0_3 = dynDates(date_0_3);
-%$ d_1_1 = dynDates(date_1_1);
-%$ d_1_2 = dynDates(date_1_2);
-%$ d_1_3 = dynDates(date_1_3);
-%$ d_2_1 = dynDates(date_2_1);
-%$ d_2_2 = dynDates(date_2_2);
-%$ e1 = d_0_1-d_0_2;
-%$ e2 = d_0_1-d_0_3;
-%$ e3 = d_1_1-d_1_2;
-%$ e4 = d_1_1-d_1_3;
-%$ e5 = d_2_1-d_2_2;
+%$ d_1 = dynDates(date_1);
+%$ d_2 = dynDates(date_2);
+%$ d_3 = dynDates(date_3);
+%$
+%$ d1 = d_1+3;
+%$ d2 = d_2+5;
+%$ d3 = d_3+15;
+%$ d4 = d_3+10;
+%$
+%$ % Expected results.
+%$ e1 = dynDates(1952);
+%$ e2 = dynDates('1951Q4');
+%$ e3 = dynDates('2001M5');
+%$ e4 = dynDates('2000M12');
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(e1,0);
-%$ t(2) = dyn_assert(e2,10);
-%$ t(3) = dyn_assert(e3,3);
-%$ t(4) = dyn_assert(e4,41);
-%$ t(4) = dyn_assert(e5,19);
+%$ t(1) = dyn_assert(e1.time,d1.time);
+%$ t(2) = dyn_assert(e2.time,d2.time);
+%$ t(3) = dyn_assert(e3.time,d3.time);
+%$ t(4) = dyn_assert(e4.time,d4.time);
 %$ T = all(t);
 %@eof:1
