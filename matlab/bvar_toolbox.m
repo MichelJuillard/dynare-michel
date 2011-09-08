@@ -98,7 +98,7 @@ mnprior.tight = options_.bvar_prior_tau;
 mnprior.decay = options_.bvar_prior_decay;
 
 % Use only initializations lags for the variance prior
-vprior.sig = std(dataset(options_.first_obs+options_.presample-nlags:options_.first_obs+options_.presample-1,:))';
+vprior.sig = std(dataset(options_.first_obs+options_.presample-nlags:options_.first_obs+options_.presample,:))'
 vprior.w = options_.bvar_prior_omega;
 
 lambda = options_.bvar_prior_lambda;

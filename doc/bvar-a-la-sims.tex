@@ -102,7 +102,13 @@ Before constructing the dummy observations, one needs to choose values for the f
 \item $d$: the decay factor for scaling down the coefficients of lagged values. Controlled by option \texttt{bvar\_prior\_decay}, with a default of 0.5
 \item $\omega$ controls the tightness for the prior on $\Sigma$. Must be an integer. Controlled by option \texttt{bvar\_prior\_omega}, with a default of 1
 \item $\lambda$ and $\mu$: additional tuning parameters, respectively controlled by option \texttt{bvar\_prior\_lambda} (with a default of 5) and option \texttt{bvar\_prior\_mu} (with a default of 2)
-\item based on a short presample $Y^0$ (in Dynare implementation, this presample consists of the $p$ observations used to initialize the VAR), one also calculates $\sigma = std(Y^0)$ and $\bar{y} = mean(Y^0)$
+\item based on a short presample $Y^0$ (in Dynare implementation, this
+  presample consists of the $p$ observations used to initialize the VAR, plus
+  one extra observation at the beginning of the sample\footnote{In Dynare 4.2.1
+    and older versions, only $p$ observations where used. As a consequence the
+    case $p=1$ was buggy, since the standard error of a one observation sample
+    is undefined.}), one also calculates $\sigma = std(Y^0)$ and $\bar{y} =
+  mean(Y^0)$
 \end{itemize}
 
 Below is a description of the different dummy observations. For the sake of simplicity, we should assume that $ny = 2$, $nx = 1$ and $p = 3$. The generalization is straigthforward.
