@@ -8,8 +8,8 @@ end;
 
 varobs Y Pie R;
 
+svar_identification;
+upper_cholesky;
+end;
 
-sbvar(datafile = data,freq=4,initial_year=1959,final_year=2005,nlags=4,restriction_fname=upper_cholesky);//for SBVAR
-
-//ms_sbvar(datafile = data,freq=4,initial_year=1959,final_year=2005,nlags=4,restriction_fname=ftd_upperchol3v,
-//         markov_file=specification_2v2c,mhm_file=MHM_input); //for markov switching
+sbvar(datafile = data,freq=4,initial_year=1959,final_year=2005,nlags=4);
