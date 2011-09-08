@@ -53,7 +53,7 @@ oo_.var = oo_.gamma_y{1};
 if ~options_.noprint %options_.nomoments == 0
     title='THEORETICAL MOMENTS';
     if options_.hp_filter
-        title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];
+        title = [title ' (HP filter, lambda = ' num2str(options_.hp_filter) ')'];
     end
     headers=char('VARIABLE','MEAN','STD. DEV.','VARIANCE');
     labels = deblank(M_.endo_names(ivar,:));
@@ -64,7 +64,7 @@ if ~options_.noprint %options_.nomoments == 0
         title='VARIANCE DECOMPOSITION (in percent)';
         if options_.hp_filter
             title = [title ' (HP filter, lambda = ' ...
-                     int2str(options_.hp_filter) ')'];
+                     num2str(options_.hp_filter) ')'];
         end
         headers = M_.exo_names;
         headers(M_.exo_names_orig_ord,:) = headers;
@@ -95,7 +95,7 @@ if options_.nocorr == 0 && size(stationary_vars, 1) > 0
         disp(' ')
         title='MATRIX OF CORRELATIONS';
         if options_.hp_filter
-            title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];
+            title = [title ' (HP filter, lambda = ' num2str(options_.hp_filter) ')'];
         end
         labels = deblank(M_.endo_names(ivar(i1),:));
         headers = char('Variables',labels);
@@ -113,7 +113,7 @@ if options_.ar > 0 && size(stationary_vars, 1) > 0
         disp(' ')    
         title='COEFFICIENTS OF AUTOCORRELATION';      
         if options_.hp_filter        
-            title = [title ' (HP filter, lambda = ' int2str(options_.hp_filter) ')'];      
+            title = [title ' (HP filter, lambda = ' num2str(options_.hp_filter) ')'];      
         end      
         labels = deblank(M_.endo_names(ivar(i1),:));      
         headers = char('Order ',int2str([1:options_.ar]'));

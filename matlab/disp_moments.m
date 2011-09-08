@@ -60,7 +60,7 @@ if options_.nomoments == 0
     title='MOMENTS OF SIMULATED VARIABLES';
     if options_.hp_filter
         title = [title ' (HP filter, lambda = ' ...
-                 int2str(options_.hp_filter) ')'];
+                 num2str(options_.hp_filter) ')'];
     end
     headers=char('VARIABLE','MEAN','STD. DEV.','VARIANCE','SKEWNESS', ...
                  'KURTOSIS');
@@ -73,7 +73,7 @@ if options_.nocorr == 0
         title = 'CORRELATION OF SIMULATED VARIABLES';
         if options_.hp_filter
             title = [title ' (HP filter, lambda = ' ...
-                     int2str(options_.hp_filter) ')'];
+                     num2str(options_.hp_filter) ')'];
         end
         headers = char('VARIABLE',M_.endo_names(ivar,:));
         dyntable(title,headers,labels,corr,size(labels,2)+2,8,4);
@@ -93,7 +93,7 @@ if ar > 0
         title = 'AUTOCORRELATION OF SIMULATED VARIABLES';
         if options_.hp_filter
             title = [title ' (HP filter, lambda = ' ...
-                     int2str(options_.hp_filter) ')'];
+                     num2str(options_.hp_filter) ')'];
         end
         headers = char('VARIABLE',int2str([1:ar]'));
         dyntable(title,headers,labels,autocorr,size(labels,2)+2,8,4);

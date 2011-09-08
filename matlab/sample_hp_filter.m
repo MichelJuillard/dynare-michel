@@ -3,7 +3,7 @@ function [hptrend,hpcycle] = sample_hp_filter(y,s)
 % 
 % INPUTS 
 %   y                        [double]   T*n matrix of data (n is the number of variables)
-%   s                        [integer]  scalar, smoothing parameter.
+%   s                        [double]   scalar, smoothing parameter.
 % 
 % OUTPUTS 
 %   hptrend                  [double]   T*n matrix, trend component of y.

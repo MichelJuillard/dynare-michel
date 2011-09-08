@@ -2828,8 +2828,8 @@ Order of autocorrelation coefficients to compute and to print. Default: @code{5}
 Number of points dropped at the beginning of simulation before
 computing the summary statistics. Default: @code{100}.
 
-@item hp_filter = @var{INTEGER}
-Uses HP filter with @math{\lambda} = @var{INTEGER} before computing
+@item hp_filter = @var{DOUBLE}
+Uses HP filter with @math{\lambda} = @var{DOUBLE} before computing
 moments. Default: no filter.
 
 @item hp_ngrid = @var{INTEGER}
