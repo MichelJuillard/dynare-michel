@@ -84,8 +84,6 @@ MODFILES = \
 	ms-sbvar/test_lower_cholesky_nc.mod \
 	ms-sbvar/test_upper_cholesky.mod \
 	ms-sbvar/test_upper_cholesky_nc.mod \
-	ms-sbvar/test1.mod \
-	ms-sbvar/test_ms.mod \
 	ms-sbvar/test_ms_variances.mod
 
 EXTRA_DIST = \
