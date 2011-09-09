@@ -50,7 +50,26 @@ function us = subsref(ts, S)
 %! @end deftypefn
 %@eod:
 
-if isequal(S.type,'.')
+% Copyright (C) 2011 Dynare Team
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
+% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
+
+if isequal(S.type,'.') & length(S)==1
     switch S.subs
       case {'data','nobs','vobs','name','tex','freq','time','init','last','Time'} % Public members.
         us = builtin('subsref', ts, S);
@@ -76,7 +95,7 @@ if isequal(S.type,'.')
     end
     return
 end
-if isequal(S.type,'()')                                                    % Extract a sub-object by selecting a sub-sample.
+if isequal(S.type,'()') & length(S)==1                                                    % Extract a sub-object by selecting a sub-sample.
     us = dynSeries();
     if size(ts.data,2)>1
         S.subs = [S.subs, ':'];
@@ -90,6 +109,14 @@ if isequal(S.type,'()')                                                    % Ext
     us.last = us.time(end,:);
     us.name = ts.name;
     us.tex  = ts.tex;
+end
+
+if (length(S)==2) & (isequal(S(1).subs,'Time'))
+    if isequal(S(2).type,'.')
+        us = builtin('subsref', ts.Time, S(2));
+    else
+        error('dynSeries:subsref:: I don''t understand what you are trying to do!')
+    end
 end
 
 %@test:1
