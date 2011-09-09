@@ -15,38 +15,56 @@
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% List of files to be tested
-name=filesToTest();
-
-% BASE TESTS
-failedBase = {};
+% Implementation notes:
+%
+% Before every call to Dynare, the contents of the workspace is saved in
+% 'wsMat.mat', and reloaded after Dynare has finished (this is necessary since
+% Dynare does a 'clear -all').  Also note that we take care of clearing the
+% 'exception' variable in all 'catch' block, because otherwise the next 'load
+% wsMat' within a 'catch' block will overwrite the last exception.
 
 top_test_dir = pwd;
 addpath(top_test_dir);
 addpath([top_test_dir '/../matlab']);
-for i=1:size(name,2)
-    try
-        [directory, testfile, ext] = fileparts([top_test_dir '/' name{i}]);
-        cd(directory);
-        disp(['***  TESTING: ' name{i} ' ***']);
-        dynare([testfile ext], 'noclearall')
-    catch exception
-        failedBase{size(failedBase,2)+1} = name{i};
-        printMakeCheckMatlabErrMsg(name{i}, exception);
-    end
 
-    cd(top_test_dir);
-    save('makeCheckMatlabBase.mat', 'name', 'failedBase', 'i', 'top_test_dir');
-    clear -all;
-    load('makeCheckMatlabBase.mat');
+% Test Dynare Version
+if ~strcmp(dynare_version(), getenv('DYNARE_VERSION'))
+  error('Incorrect version of Dynare is being tested')
 end
 
-% BLOCK TEST
-clear i name;
+% Test MOD files listed in Makefile.am
+name=getenv('MODFILES');
+num_modfiles = 0;
+
+failedBase = {};
+
+while ~isempty(name)
+    [modfile, name] = strtok(name);
+    num_modfiles = num_modfiles + 1;
+    [directory, testfile, ext] = fileparts([top_test_dir '/' modfile]);
+    cd(directory);
+    disp('');
+    disp(['***  TESTING: ' modfile ' ***']);
+    try
+        save wsMat
+        dynare([testfile ext])
+        load wsMat
+    catch exception
+        load wsMat
+        failedBase{size(failedBase,2)+1} = modfile;
+        printMakeCheckMatlabErrMsg(modfile, exception);
+        clear exception
+    end
+    delete('wsMat.mat')
+
+    cd(top_test_dir);
+end
+
+% Test block_bytecode/ls2003.mod with various combinations of
+% block/bytecode/solve_algo/stack_solve_algo
 failedBlock = {};
 num_block_tests = 0;
 cd([top_test_dir '/block_bytecode']);
-save('makeCheckBlockByteMatlab.mat', 'failedBlock', 'top_test_dir');
 for blockFlag = 0:1
     for bytecodeFlag = 0:1
         default_solve_algo = 2;
@@ -64,72 +82,72 @@ for blockFlag = 0:1
 
         for i = 1:length(solve_algos)
             num_block_tests = num_block_tests + 1;
-            save wsMat
             if ~blockFlag && ~bytecodeFlag && (i == 1)
+                % This is the reference simulation path against which all
+                % other simulations will be tested
                 try
+                    save wsMat
                     run_ls2003(blockFlag, bytecodeFlag, solve_algos(i), default_stack_solve_algo)
+                    load wsMat
                     y_ref = oo_.endo_simul;
                     save('test.mat','y_ref');
                 catch exception
                     load wsMat
-                    load('makeCheckBlockByteMatlab.mat', 'failedBlock', 'top_test_dir');
                     failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
                     printMakeCheckMatlabErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], exception);
-                    save('makeCheckBlockByteMatlab.mat', 'failedBlock', 'top_test_dir');
+                    clear exception
                 end
             else
                 try
+                    save wsMat
                     run_ls2003(blockFlag, bytecodeFlag, solve_algos(i), default_stack_solve_algo)
+                    load wsMat
+                    % Test against the reference simulation path
                     load('test.mat','y_ref');
                     diff = oo_.endo_simul - y_ref;
                     if(abs(diff) > options_.dynatol)
-                        load wsMat
-                        load('makeCheckBlockByteMatlab.mat', 'failedBlock', 'top_test_dir');
                         failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
-                        exception = MException('ERROR: diff fails for block code in run_test_octave.m', ['makecheck found error: if (abs(diff) <= options_.dynatol) FAILS. line 85, col 1.' ]);
+                        exception = MException('ERROR: simulation path differs from the reference path');
                         printMakeCheckMatlabErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], exception);
-                        save('makeCheckBlockByteMatlab.mat', 'failedBlock', 'top_test_dir');
+                        clear exception
                     end
                 catch exception
                     load wsMat
-                    load('makeCheckBlockByteMatlab.mat', 'failedBlock', 'top_test_dir');
                     failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
                     printMakeCheckMatlabErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], exception);
-                    save('makeCheckBlockByteMatlab.mat', 'failedBlock', 'top_test_dir');
+                    clear exception
                 end
             end
-            load wsMat
         end
         for i = 1:length(stack_solve_algos)
             num_block_tests = num_block_tests + 1;
-            save wsMat
             try
+                save wsMat
                 run_ls2003(blockFlag, bytecodeFlag, default_solve_algo, stack_solve_algos(i))
+                load wsMat
+                % Test against the reference simulation path
+                load('test.mat','y_ref');
+                diff = oo_.endo_simul - y_ref;
+                if(abs(diff) > options_.dynatol)
+                    failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(default_solve_algo) ', ' num2str(stack_solve_algos(i)) ')'];
+                    exception = MException('ERROR: simulation path difers from the reference path');
+                    printMakeCheckMatlabErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(default_solve_algo) ', ' num2str(stack_solve_algos(i)) ')'], exception);
+                    clear exception
+                end
             catch exception
                 load wsMat
-                load('makeCheckBlockByteMatlab.mat', 'failedBlock', 'top_test_dir');
                 failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
                 printMakeCheckMatlabErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], exception);
-                save('makeCheckBlockByteMatlab.mat', 'failedBlock', 'top_test_dir');
+                clear exception
             end
-            load wsMat
         end
     end
 end
-
-load('makeCheckBlockByteMatlab.mat');
-save('makeCheckBlockByteMatlab.mat', 'failedBlock', 'top_test_dir', 'num_block_tests');
-delete('wsMat.mat');
-clear -all;
-
-load('makeCheckBlockByteMatlab.mat');
-delete('makeCheckBlockByteMatlab.mat');
+delete('wsMat.mat')
 
 cd(top_test_dir);
-load('makeCheckMatlabBase.mat');
-delete('makeCheckMatlabBase.mat');
 
-total_tests = size(name,2)+num_block_tests;
+total_tests = num_modfiles+num_block_tests;
 
 % print output to screen and to file
 fid = fopen('run_test_matlab_output.txt', 'w');

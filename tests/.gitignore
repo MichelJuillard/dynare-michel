@@ -11,7 +11,10 @@
 *.prn
 *_simul
 
-/block_bytecode/wsOct
+wsOct
+/run_test_octave_output.txt
+/run_test_matlab_output.txt
+
 /block_bytecode/ls2003_tmp.mod
 /partial_information/PItest3aHc0PCLsimModPiYrVarobsAll_PCL*
 /partial_information/PItest3aHc0PCLsimModPiYrVarobsCNR_PCL*

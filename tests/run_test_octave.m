@@ -15,47 +15,53 @@
 ## You should have received a copy of the GNU General Public License
 ## along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+## Implementation notes:
+##
+## Before every call to Dynare, the contents of the workspace is saved in
+## 'wsOct', and reloaded after Dynare has finished (this is necessary since
+## Dynare does a 'clear -all').
+
+top_test_dir = pwd;
+addpath(top_test_dir);
+addpath([top_test_dir '/../matlab']);
+
 ## Test Dynare Version
-if !strcmp(dynare_version(), dynver)
+if !strcmp(dynare_version(), getenv("DYNARE_VERSION"))
   error("Incorrect version of Dynare is being tested")
 endif
-
-## List of files to be tested
-name = filesToTest();
 
 ## Ask gnuplot to create graphics in text mode
 ## Note that setenv() was introduced in Octave 3.0.2, for compatibility
 ## with MATLAB
 putenv("GNUTERM", "dumb")
 
-## BASE TESTS
+## Test MOD files listed in Makefile.am
+name = strsplit(getenv("MODFILES"), " ");
+
 failedBase = {};
 
-top_test_dir = pwd;
-addpath(top_test_dir);
 for i=1:size(name,2)
+  [directory, testfile, ext] = fileparts([top_test_dir '/' name{i}]);
+  cd(directory);
+  printf("\n***  TESTING: %s ***\n", name{i});
   try
-    [directory, testfile, ext] = fileparts([top_test_dir '/' name{i}]);
-    cd(directory);
-    printf("***  TESTING: %s ***\n", name{i});
-    dynare([testfile ext], 'noclearall')
+    save wsOct
+    dynare([testfile ext])
+    load wsOct
   catch
+    load wsOct
     failedBase{size(failedBase,2)+1} = name{i};
     printMakeCheckOctaveErrMsg(name{i}, lasterror);
   end_try_catch
-
+  delete('wsOct');
   cd(top_test_dir);
-  save('makeCheckOctaveBase.mat', 'name', 'failedBase', 'i', 'top_test_dir');
-  clear -all;
-  load('makeCheckOctaveBase.mat');
 end
 
-## BLOCK TEST
-clear i name;
+## Test block_bytecode/ls2003.mod with various combinations of
+## block/bytecode/solve_algo/stack_solve_algo
 failedBlock = {};
 num_block_tests = 0;
 cd([top_test_dir '/block_bytecode']);
-save('makeCheckOctaveBlockByte.mat', 'failedBlock', 'top_test_dir');
 for blockFlag = 0:1
   for bytecodeFlag = 0:1
     ## Recall that solve_algo=7 and stack_solve_algo=2 are not supported
@@ -75,74 +81,66 @@ for blockFlag = 0:1
 
     for i = 1:length(solve_algos)
       num_block_tests = num_block_tests + 1;
-      save wsOct
       if !blockFlag && !bytecodeFlag && (i == 1)
+        ## This is the reference simulation path against which all
+        ## other simulations will be tested
         try
+          save wsOct
           run_ls2003(blockFlag, bytecodeFlag, solve_algos(i), default_stack_solve_algo)
+          load wsOct
           y_ref = oo_.endo_simul;
           save('test.mat','y_ref');
         catch
           load wsOct
-          load('makeCheckOctaveBlockByte.mat', 'failedBlock', 'top_test_dir');
           failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
           printMakeCheckOctaveErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], lasterror);
-          save('makeCheckOctaveBlockByte.mat', 'failedBlock', 'top_test_dir');
         end_try_catch
       else
         try
+          save wsOct
           run_ls2003(blockFlag, bytecodeFlag, solve_algos(i), default_stack_solve_algo)
+          load wsOct
+          ## Test against the reference simulation path
           load('test.mat','y_ref');
           diff = oo_.endo_simul - y_ref;
           if(abs(diff) > options_.dynatol)
-            load wsOct
-            load('makeCheckOctaveBlockByte.mat', 'failedBlock', 'top_test_dir');
             failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
-            differr.message = ["makecheck found error: if (abs(diff) <= options_.dynatol) FAILS." ];
-            differr.stack(1).file = "run_test_octave.m";
-            differr.stack(1).name = "run_test_octave.m";
-            differr.stack(1).line = 96;
-            differr.stack(1).column = 1;
+            differr.message = ["ERROR: simulation path differs from the reference path" ];
             printMakeCheckOctaveErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], differr);
-            save('makeCheckOctaveBlockByte.mat', 'failedBlock', 'top_test_dir');
           endif
         catch
           load wsOct
-          load('makeCheckOctaveBlockByte.mat', 'failedBlock', 'top_test_dir');
           failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
           printMakeCheckOctaveErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], lasterror);
-          save('makeCheckOctaveBlockByte.mat', 'failedBlock', 'top_test_dir');
         end_try_catch
       endif
-      load wsOct
     endfor
     for i = 1:length(stack_solve_algos)
       num_block_tests = num_block_tests + 1;
-      save wsOct
       try
+        save wsOct
         run_ls2003(blockFlag, bytecodeFlag, default_solve_algo, stack_solve_algos(i))
+        load wsOct
+        ## Test against the reference simulation path
+        load('test.mat','y_ref');
+        diff = oo_.endo_simul - y_ref;
+        if(abs(diff) > options_.dynatol)
+          failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(default_solve_algo) ', ' num2str(stack_solve_algos(i)) ')'];
+          differr.message = ["ERROR: simulation path differs from the reference path" ];
+          printMakeCheckOctaveErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(default_solve_algo) ', ' num2str(stack_solve_algos(i)) ')'], differr);
+        endif
       catch
         load wsOct
-        load('makeCheckOctaveBlockByte.mat', 'failedBlock', 'top_test_dir');
         failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
         printMakeCheckOctaveErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], lasterror);
-        save('makeCheckOctaveBlockByte.mat', 'failedBlock', 'top_test_dir');
       end_try_catch
-      load wsOct
     endfor
   endfor
 endfor
 
-load('makeCheckOctaveBlockByte.mat');
-save('makeCheckOctaveBlockByte.mat', 'failedBlock', 'top_test_dir', 'num_block_tests');
 delete('wsOct');
-clear -all;
-
-load('makeCheckOctaveBlockByte.mat');
-delete('makeCheckOctaveBlockByte.mat');
 
 cd(top_test_dir);
-load('makeCheckOctaveBase.mat');
-delete('makeCheckOctaveBase.mat');
 
 total_tests = size(name,2)+num_block_tests;
 
@@ -180,7 +178,6 @@ if size(failedBase,2) > 0 || size(failedBlock,2) > 0
   error("make check-octave FAILED");
 end
 fclose(fid);
-clear -all
 
 ## Local variables:
 ## mode: Octave

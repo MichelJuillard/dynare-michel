@@ -1,5 +1,3 @@
-DYNARE_ROOT = $(abs_top_srcdir)/matlab
-
 MODFILES = \
 	ramst.mod \
 	ramst_a.mod \
@@ -132,22 +130,11 @@ endif
 
 check-local: $(TARGETS)
 
-check-test-file: $(MODFILES)
-	@set -e; \
-	echo "function name=filesToTest()" > filesToTest.m; \
-	echo "name = { ..." >> filesToTest.m; \
-	for modfile in $(MODFILES); do \
-		echo "    '"$$modfile"' ..." >> filesToTest.m; \
-	done
-	@set -e; \
-	echo "    };"  >> filesToTest.m; \
-	echo "end"  >> filesToTest.m;
-
 check-matlab:
-	$(MATLAB)/bin/matlab -nodesktop -nosplash -r run_test_matlab
+	DYNARE_VERSION="$(PACKAGE_VERSION)" MODFILES="$(MODFILES)" $(MATLAB)/bin/matlab -nodesktop -nosplash -r run_test_matlab
 
 check-octave:
-	$(OCTAVE) --norc --silent --no-history --path $(DYNARE_ROOT) --eval dynver=\"$(PACKAGE_VERSION)\" run_test_octave.m
+	DYNARE_VERSION="$(PACKAGE_VERSION)" MODFILES="$(MODFILES)" $(OCTAVE) --norc --silent --no-history run_test_octave.m
 
 clean-local:
 	rm -f $(patsubst %.mod, %.m, $(MODS)) \
@@ -189,6 +176,9 @@ clean-local:
 
 	rm -rf partial_information/PItest3aHc0PCLsimModPiYrVarobsAll_PCL* partial_information/PItest3aHc0PCLsimModPiYrVarobsCNR_PCL*
 
-	rm -rf block_bytecode/ws block_bytecode/ls2003_tmp*
+	rm -rf block_bytecode/ls2003_tmp*
+
+	rm -f $(shell find -name wsOct) \
+		$(shell find -name wsMat.mat)
 
 	rm -f run_test_matlab_output.txt run_test_octave_output.txt
