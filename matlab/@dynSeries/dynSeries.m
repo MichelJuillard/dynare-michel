@@ -61,13 +61,12 @@ function ts = dynSeries(a,b,c,d)
 %! @strong{This function is called by:}
 %! @sp 2
 %! @strong{This function calls:}
-%! @ref{set_time}
+%! @ref{@@dynTime/dynTime}, @ref{@@dynTime/setTime}, @ref{@@dynTime/setFreq} 
 %!
 %! @end deftypefn
 %@eod:
 
 % Copyright (C) 2011 Dynare Team
-% stephane DOT adjemian AT univ DASH lemans DOT fr
 %
 % This file is part of Dynare.
 %
@@ -84,6 +83,8 @@ function ts = dynSeries(a,b,c,d)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
+
 ts = struct;
 
 ts.data = [];
@@ -92,9 +93,6 @@ ts.vobs = 0;
 ts.name = [];
 ts.tex  = [];
 ts.freq = [];
-ts.time = [];
-ts.init = [];
-ts.last = [];
 ts.Time = dynTime();
 
 ts = class(ts,'dynSeries');
@@ -119,57 +117,25 @@ switch nargin
             weekly   = findstr('W',b);
             if ~isempty(quaterly)
                 ts.freq = 4;
-                ts.init = [str2num(b(1:quaterly-1)) str2num(b(quaterly+1:end))];
-                ts = set_time(ts);
-                ts.last = ts.time(end,:);
-                ts.Time = ts.Time.setSize(ts.nobs);
-                ts.Time = ts.Time.setFreq(4);
-                ts.Time = ts.Time.setTime(1,[str2num(b(1:quaterly-1)) str2num(b(quaterly+1:end))]);
-                init = dynDates(b);
             end
             if ~isempty(monthly)
                 ts.freq = 12;
-                ts.init = [str2num(b(1:monthly-1)) str2num(b(monthly+1:end))];
-                ts = set_time(ts);
-                ts.last = ts.time(end,:);
-                ts.Time = ts.Time.setSize(ts.nobs);
-                ts.Time = ts.Time.setFreq(12);
-                ts.Time = ts.Time.setTime(1,[str2num(b(1:monthly-1)) str2num(b(monthly+1:end))]);
-                init = dynDates(b);
             end
             if ~isempty(weekly)
                 ts.freq = 52;
-                ts.init = [str2num(b(1:weekly-1)) str2num(b(weekly+1:end))];
-                ts = set_time(ts);
-                ts.last = ts.time(end,:);
-                ts.Time = ts.Time.setSize(ts.nobs);
-                ts.Time = ts.Time.setFreq(52);
-                ts.Time = ts.Time.setTime(1,[str2num(b(1:weekly-1)) str2num(b(weekly+1:end))]);
-                init = dynDates(b);
             end
             if isempty(quaterly) && isempty(monthly) && isempty(weekly)
                 error('dynSeries:: Using a string as a second input argument, I can only handle weekly (W), monthly (M) or quaterly (Q) data!');
             end
         else% If b is not a string then yearly data are assumed.
-            ts.init = [b 1];
             ts.freq = 1;
-            ts = set_time(ts);
-            ts.last = ts.time(end,:);
-            ts.Time = ts.Time.setSize(ts.nobs);
-            ts.Time = ts.Time.setFreq(1);
-            ts.Time = ts.Time.setTime(1,[b 1]);
-            init = dynDates(b);
         end
+        ts.Time = ts.Time.setFreq(ts.freq);
+        ts.Time = ts.Time.setTime(dynDates(b):dynDates(b)+ts.nobs);
     else% If b is empty.
         ts.freq = 1;
-        ts.init = 1;
-        ts.last = ts.nobs;
-        ts = set_time(ts);
-        ts.init = ts.time(1,:);
-        ts.last = ts.time(end,:);
-        ts.Time = ts.Time.setSize(ts.nobs);
         ts.Time = ts.Time.setFreq(1);
-        ts.Time = ts.Time.setTime(1,[1 1]);
+        ts.Time = ts.Time.setTime([transpose(1:ts.nobs) ones(ts.nobs,1)]);
     end
     % Get the names of the variables.
     if ~isempty(c)
@@ -225,6 +191,7 @@ end
 %$ ts2 = dynSeries(A,B2);
 %$ ts3 = dynSeries(A,B3);
 %$ ts4 = dynSeries(A,B4);
+%$
 %$ % Check the results.
 %$ t(1) = dyn_assert(getTime(ts1),e1.Time);
 %$ t(2) = dyn_assert(getTime(ts2),e2.Time);

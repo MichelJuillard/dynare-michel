@@ -39,6 +39,25 @@ function a = horzcat2(b,c)
 %! @end deftypefn
 %@eod:
 
+% Copyright (C) 2011 Dynare Team
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
+% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
+
 if ~(isa(b,'dynSeries') && isa(c,'dynSeries'))
     error('dynSeries::horzcat: All input arguments have to be Dynare time series objects!')
 end
@@ -58,47 +77,13 @@ else
 end
 
 d_init_flag = 0;
-if isequal(b.init,c.init)
-    a.init = b.init;
-else
-    % set a.init equal to min(b.init,c.init)
-    if b.init(1)<c.init(1)
-        d_init_flag = 1;
-        a.init = b.init;
-    elseif b.init(1)==c.init(1)
-        if b.init(2)<c.init(2)
-            d_init_flag = 1;
-            a.init = b.init;
-        else
-            d_init_flag = 2;
-            a.init = c.init;
-        end
-    else
-        d_init_flag = 2;
-        a.init = c.init;
-    end
+if ~isequal(b.Time(1),c.Time(1))
+    d_init_flag = 1;
 end
 
 d_last_flag = 0;
-if isequal(b.last,c.last)
-    a.last = b.last;
-else
-    % set a.last equal to max(b.last,c.last)
-    if b.last(1)<c.last(1)
-        d_last_flag = 2;
-        a.last = c.last;
-    elseif b.last(1)==c.last(1)
-        if b.last(2)<c.last(2)
-            d_last_flag = 2;
-            a.last = c.last;
-        else
-            d_last_flag = 1;
-            a.last = b.last;
-        end
-    else
-        d_last_flag = 1;
-        a.last = b.last;
-    end
+if ~isequal(b.Time(end),c.Time(end))
+    d_last_flag = 1;
 end
 
 a.vobs = b.vobs+c.vobs;
@@ -106,18 +91,17 @@ a.name = char(b.name,c.name);
 a.tex  = char(b.tex,c.tex);
 
 if ~( d_nobs_flag(1) || d_init_flag(1) || d_last_flag(1) )
-    a.time = b.time;
+    a.Time = b.Time;
     a.data = [b.data,c.data];
 else
-    [junk,ib] = setdiff(b.time,c.time,'rows');
-    [junk,ic] = setdiff(c.time,b.time,'rows');
-    [junk,jb,jc] = intersect(b.time,c.time,'rows');
-    a.time = [b.time(ib,:); b.time(jb,:); c.time(ic,:)];
-    a.time = sortrows(a.time,[1 2]);
-    a.nobs = rows(a.time);
+    [JUNK,IB] = setdiff(b.Time(:),c.Time(:),'rows');
+    [JUNK,IC] = setdiff(c.Time(:),b.Time(:),'rows');
+    [JUNK,JB,JC] = intersect(b.Time(:),c.Time(:),'rows');
+    a.Time = a.Time.setTime(sortrows([b.Time(IB); b.Time(JB); c.Time(IC)],[1 2]));
+    a.nobs = rows(a.Time(:));
     a.data = NaN(a.nobs,a.vobs);
-    [junk,ia,ib] = intersect(a.time,b.time,'rows');
+    [junk,ia,ib] = intersect(a.Time(:),b.Time(:),'rows');
     a.data(ia,1:b.vobs) = b.data;
-    [junk,ia,ic] = intersect(a.time,c.time,'rows');
+    [junk,ia,ic] = intersect(a.Time(:),c.Time(:),'rows');
     a.data(ia,b.vobs+(1:c.vobs)) = c.data;
 end

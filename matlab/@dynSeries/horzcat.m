@@ -31,7 +31,7 @@ function a = horzcat(varargin)
 %! @ref{descriptive_statistics}
 %!
 %! @strong{This function calls:}
-%! @ref{dynSeries}, @ref{private/horzcat2} 
+%! @ref{dynSeries}, @ref{private/horzcat2}
 %!
 %! @strong{Remark 1.} It is assumed that the two time series objects have the same frequencies. The two time series objects can cover
 %! different time ranges.
@@ -94,7 +94,8 @@ end
 %$ ts3 = [ts1,ts2];
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(ts3.time,e.time);
+%$
+%$ t(1) = dyn_assert(ts3.Time.time,e.time);
 %$ t(2) = dyn_assert(ts3.freq,e.freq);
 %$ t(3) = dyn_assert(ts3.data,e.data);
 %$ t(4) = dyn_assert(ts3.name,e.name);
@@ -129,7 +130,7 @@ end
 %$ ts3 = [ts1,ts2];
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(ts3.time,e.time);
+%$ t(1) = dyn_assert(ts3.Time.time,e.time);
 %$ t(2) = dyn_assert(ts3.freq,e.freq);
 %$ t(3) = dyn_assert(ts3.data,e.data);
 %$ t(4) = dyn_assert(ts3.name,e.name);
@@ -164,7 +165,7 @@ end
 %$ ts3 = [ts1,ts2];
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(ts3.time,e.time);
+%$ t(1) = dyn_assert(ts3.Time.time,e.time);
 %$ t(2) = dyn_assert(ts3.freq,e.freq);
 %$ t(3) = dyn_assert(ts3.data,e.data);
 %$ t(4) = dyn_assert(ts3.name,e.name);
@@ -199,7 +200,7 @@ end
 %$ ts3 = [ts1,ts2];
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(ts3.time,e.time);
+%$ t(1) = dyn_assert(ts3.Time.time,e.time);
 %$ t(2) = dyn_assert(ts3.freq,e.freq);
 %$ t(3) = dyn_assert(ts3.data,e.data);
 %$ t(4) = dyn_assert(ts3.name,e.name);
@@ -233,7 +234,7 @@ end
 %$ ts4 = [ts1,ts2,ts3];
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(ts4.time,e.time);
+%$ t(1) = dyn_assert(ts4.Time.time,e.time);
 %$ t(2) = dyn_assert(ts4.freq,e.freq);
 %$ t(3) = dyn_assert(ts4.data,e.data);
 %$ t(4) = dyn_assert(ts4.name,e.name);
