@@ -1,5 +1,4 @@
 function ts = log(ts)
-% Apply the logarithm function to a Dynare time series object.
 
 %@info:
 %! @deftypefn {Function File} {@var{ts} =} log(@var{ts})
@@ -17,10 +16,10 @@ function ts = log(ts)
 %! @item ts
 %! Dynare time series object with transformed data field.
 %! @end table
-%! 
-%! @strong{This function is called by:} 
+%!
+%! @strong{This function is called by:}
 %! None.
-%! 
+%!
 %! @strong{This function calls:}
 %! None.
 %!
@@ -28,8 +27,7 @@ function ts = log(ts)
 %@eod:
 
 % Copyright (C) 2011 Dynare Team
-% stephane DOT adjemian AT univ DASH lemans DOT fr
-%    
+%
 % This file is part of Dynare.
 %
 % Dynare is free software: you can redistribute it and/or modify
@@ -44,7 +42,9 @@ function ts = log(ts)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    
+
+% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
+
 if ~isa(ts,'dynSeries')
     error('dynSeries::log: Input argument has to be a Dynare time series object!')
 end
