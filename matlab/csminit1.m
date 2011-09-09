@@ -1,5 +1,5 @@
-function [fhat,xhat,fcount,retcode] = csminit(fcn,x0,f0,g0,badg,H0,varargin)
-% [fhat,xhat,fcount,retcode] = csminit(fcn,x0,f0,g0,badg,H0,...
+function [fhat,xhat,fcount,retcode] = csminit1(fcn,x0,f0,g0,badg,H0,varargin)
+% [fhat,xhat,fcount,retcode] = csminit1(fcn,x0,f0,g0,badg,H0,...
 %                                       P1,P2,P3,P4,P5,P6,P7,P8)
 % retcodes: 0, normal step.  5, largest step still improves too fast.
 % 4,2 back and forth adjustment of stepsize didn't finish.  3, smallest
