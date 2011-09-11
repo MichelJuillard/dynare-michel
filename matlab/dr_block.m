@@ -216,8 +216,8 @@ for i = 1:Size;
       %% ------------------------------------------------------------------
         %Evaluate Backward
         if maximum_lead > 0 && n_fwrd > 0
-            indx_r = find(M_.block_structure.block(i).lead_lag_incidence(2,:));
-            indx_c = M_.block_structure.block(i).lead_lag_incidence(2,indx_r);
+            indx_r = find(M_.block_structure.block(i).lead_lag_incidence(3,:));
+            indx_c = M_.block_structure.block(i).lead_lag_incidence(3,indx_r);
             data(i).eigval = 1 ./ diag(jacob(indx_r, indx_c));
             data(i).rank = sum(abs(data(i).eigval) > 0);
         else
@@ -315,7 +315,7 @@ for i = 1:Size;
         end;
         dr.rank = dr.rank + data(i).rank;
         dr.eigval = [dr.eigval ; data(i).eigval];
-      case 5
+      case 6
       %% ------------------------------------------------------------------
         %Solve Forward complete
         if maximum_lag > 0 && n_pred > 0
@@ -382,7 +382,7 @@ for i = 1:Size;
                  end
             end
         end
-      case 6
+      case 7
       %% ------------------------------------------------------------------
         %Solve Backward complete
         if maximum_lead > 0 && n_fwrd > 0
@@ -395,7 +395,7 @@ for i = 1:Size;
         end;
         dr.rank = dr.rank + data(i).rank;
         dr.eigval = [dr.eigval ; data(i).eigval];
-      case 8
+      case {5,8}
       %% ------------------------------------------------------------------
         %The lead_lag_incidence contains columns in the following order:
         %  static variables, backward variable, mixed variables and forward variables
