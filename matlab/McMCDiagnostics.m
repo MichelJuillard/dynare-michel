@@ -332,9 +332,9 @@ for iter  = Origin:StepSize:NumberOfDraws
 end
 MDIAG(:,[2 4 6],:) = MDIAG(:,[2 4 6],:)/nblck;  
 if options_.nograph
-    h = figure('Name','Multivatiate diagnostic','Visible','off');
+    h = figure('Name','Multivariate diagnostic','Visible','off');
 else
-    h = figure('Name','Multivatiate diagnostic');
+    h = figure('Name','Multivariate diagnostic');
 end
 boxplot = 1;
 for crit = 1:3
