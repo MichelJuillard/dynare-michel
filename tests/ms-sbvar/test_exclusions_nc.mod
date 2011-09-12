@@ -1,12 +1,6 @@
 // same as test_lower_cholesky.mod, but using exclusion syntax
 var R Pie Y;
 
-model;
-Y = 0;
-Pie = 0;
-R = 0;
-end;
-
 varobs Y Pie R;
 
 svar_identification;
