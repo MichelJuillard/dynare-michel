@@ -28,6 +28,13 @@
 @emph{Options}
 @end macro
 
+@macro flagshead
+@iftex
+@sp 1
+@end iftex
+@emph{Flags}
+@end macro
+
 @macro examplehead
 @iftex
 @sp 1
@@ -94,6 +101,7 @@ This is Dynare Reference Manual, version @value{VERSION}.
 * Introduction::
 * Installation and configuration::
 * Dynare invocation::
+* Dynare internal documentation and unitary tests::
 * The Model file::
 * The Configuration File::
 * Examples::
@@ -744,6 +752,49 @@ during the computation.
 @defvr {MATLAB/Octave variable} oo_
 Structure containing the various results of the computations.
 @end defvr
+
+-*-
+
+@node Dynare internal documentation and unitary tests
+@chapter Dynare internal documentation and unitary tests
+
+One can obtain internal documentation of matlab/octave's routines or perform unitary tests
+using the @code{internals} command. This is a new feature, and, at this time, will work properly for
+a small number of routines. At the top of the (available) matlab/octave routines a commented block for
+the internal documentation is written in the GNU texinfo documentation format. This block is
+processed by calling texinfo from matlab. Consequently, texinfo has to be installed
+on your machine.
+
+@deffn {MATLAB/Octave command} internals @var{FLAG} @var{ROUTINENAME}[.m]
+
+@descriptionhead
+
+Depending on the @var{FLAG} this command prints internal documentation of a matlab/octave
+routine or triggers unitary tests associated to this routine.
+
+@flagshead
+
+@table @code
+
+@item --info
+Prints on screen the internal documentation of @var{ROUTINENAME} (if this routine exists and if this
+routine has texinfo internal documentation header). If the command is executed in the matlab directory
+of Dynare, then the path to @var{ROUTINENAME} has to be provided.
+
+@item --test
+Performs the unitary test associated to  @var{ROUTINENAME} (if this routine exists and if the matalab/octave m
+file has unitary test sections).
+
+@end table
+
+@examplehead
+
+@example
+internals --info particle/local_state_iteration
+internals --test particle/local_state_iteration
+@end example
+
+@end deffn
 
 @node The Model file
 @chapter The Model file
