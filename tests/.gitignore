@@ -19,6 +19,7 @@ wsOct
 /partial_information/PItest3aHc0PCLsimModPiYrVarobsAll_PCL*
 /partial_information/PItest3aHc0PCLsimModPiYrVarobsCNR_PCL*
 
+!/internals/tests.m
 !/fs2000_ssfile_aux.m
 !/printMakeCheckMatlabErrMsg.m
 !/printMakeCheckOctaveErrMsg.m
