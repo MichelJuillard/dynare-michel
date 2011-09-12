@@ -3,21 +3,29 @@ function dynInfo(fun)
 %@info:
 %! @deftypefn {Function File} dynInfo (@var{fun})
 %! @anchor{dynInfo}
-%! Displays internal documentation of matlab/octave routine @var{fun.m}.
+%! @sp 1
+%! Displays internal documentation of matlab/octave routine @var{fun}.m.
+%! @sp 2
 %!
 %! @strong{Inputs}
-%! @table @var
+%! @sp 1
+%! @table @ @var
 %! @item fun
 %! string, name of the matlab/octave routine for which internal documentation is needed.
 %! @end table
+%! @sp 2
 %!
 %! @strong{Outputs}
-%! None
+%! @sp 1
+%! None.
+%! @sp 2
 %!
 %! @strong{This function is called by:}
-%! @ref{dynare}, @ref{build_internal_documentation}
+%! @sp 1
+%! @ref{internals}, @ref{build_internal_documentation}
 %!
 %! @strong{This function calls:}
+%! @sp 1
 %! @ref{get_internal_doc_block}.
 %!
 %! @end deftypefn

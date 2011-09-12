@@ -3,21 +3,30 @@ function dynTest(fun)
 %@info:
 %! @deftypefn {Function File} dynTest (@var{fun})
 %! @anchor{dynTest}
-%! Tests matlab/octave routine @var{fun.m}.
+%! @sp 1
+%! Tests matlab/octave routine @var{fun}.m.
+%! @sp 2
 %!
 %! @strong{Inputs}
+%! @sp 1
 %! @table @ @var
 %! @item fun
 %! string, name of the matlab/octave routine to be tested.
 %! @end table
+%! @sp 2
 %!
 %! @strong{Outputs}
+%! @sp 1
 %! None
+%! @sp 2
 %!
 %! @strong{This function is called by:}
-%! @ref{dynare}, @ref{mroutines}
+%! @sp 1
+%! @ref{internals}, @ref{mroutines}
+%! @sp 2
 %!
 %! @strong{This function calls:}
+%! @sp 1
 %! @ref{mtest}
 %!
 %! @end deftypefn

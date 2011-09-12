@@ -64,34 +64,6 @@ if exist('OCTAVE_VERSION')
     default_save_options('-mat')
 end
 
-% Escape if test or doc flag
-if strcmpi(fname,'--test')
-    if nargin>1
-        dynare_config([],0);
-        number_of_matlab_routines = length(varargin);
-        for i=1:number_of_matlab_routines
-            dynTest(varargin{i});
-        end
-    else
-        disp('You have to specify at least one matlab routine after --test flag!')
-    end
-    return
-end
-
-if strcmpi(fname,'--doc')
-    if nargin==2
-        dynare_config([],0);
-        dynInfo(varargin{1})
-    else
-        if nargin<2
-            disp('You have to specify a matlab routine after --doc flag!')
-        else
-            disp('I can only show internal documentation for one matlab routine!')
-        end
-    end
-    return
-end
-
 % detect if MEX files are present; if not, use alternative M-files
 dynareroot = dynare_config;
 
