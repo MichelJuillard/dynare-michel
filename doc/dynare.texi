@@ -3476,11 +3476,11 @@ Indicates that the standard error of the exogenous variable
 @var{VARIABLE_NAME}, or of the observation error associated with
 endogenous observed variable @var{VARIABLE_NAME}, is to be estimated
 
-@item corr @var{VARIABLE_NAME_1}, @var{VARIABLE_NAME_2}
+@item corr @var{VARIABLE_NAME1}, @var{VARIABLE_NAME2}
 Indicates that the correlation between the exogenous variables
-@var{VARIABLE_NAME_1} and @var{VARIABLE_NAME_2}, or the correlation of
+@var{VARIABLE_NAME1} and @var{VARIABLE_NAME2}, or the correlation of
 the observation errors associated with endogenous observed variables
-@var{VARIABLE_NAME_1} and @var{VARIABLE_NAME_2}, is to be estimated
+@var{VARIABLE_NAME1} and @var{VARIABLE_NAME2}, is to be estimated
 
 @item @var{PARAMETER_NAME}
 The name of a model parameter to be estimated
@@ -3658,10 +3658,10 @@ The range with the data in an Excel file
 The number of observations to be used. Default: all observations in
 the file
 
-@item nobs = [@var{INTEGER_1}:@var{INTEGER_2}]
+@item nobs = [@var{INTEGER1}:@var{INTEGER2}]
 @anchor{nobs1}
 Runs a recursive estimation and forecast for samples of size ranging
-of @var{INTEGER_1} to @var{INTEGER_2}. Option @code{forecast} must
+of @var{INTEGER1} to @var{INTEGER2}. Option @code{forecast} must
 also be specified
 
 @item first_obs = @var{INTEGER}
@@ -3924,7 +3924,7 @@ yet implemented)
 @anchor{filter_covariance} Saves the series of one step ahead error of
 forecast covariance matrices.
 
-@item filter_step_ahead = [@var{INTEGER_1}:@var{INTEGER_2}]
+@item filter_step_ahead = [@var{INTEGER1}:@var{INTEGER2}]
 @anchor{filter_step_ahead} Triggers the computation k-step ahead
 filtered values.
 
@@ -5166,7 +5166,7 @@ Critical value for correlation @math{\rho}: plot couples of parmaters with
 @xref{datafile}.
 
 @item nobs = @var{INTEGER}
-@item nobs = [@var{INTEGER_1}:@var{INTEGER_2}]
+@item nobs = [@var{INTEGER1}:@var{INTEGER2}]
 @xref{nobs}.
 
 @item first_obs = @var{INTEGER}
