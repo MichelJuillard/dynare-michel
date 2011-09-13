@@ -35,9 +35,6 @@ options_.ms.file_tag = M_.fname;
 if isfield(options_.ms,'initialization_file_tag')
     options_.ms = rmfield(options_.ms,'initialization_file_tag');
 end
-if isfield(options_.ms,'init_file')
-    options_.ms = rmfield(options_.ms,'init_file');
-end
 if isfield(options_.ms,'estimation_file_tag')
     options_.ms = rmfield(options_.ms,'estimation_file_tag');
 end
