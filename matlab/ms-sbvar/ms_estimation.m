@@ -33,14 +33,18 @@ function [options_, oo_]=ms_estimation(M_, options_, oo_)
 
 disp('MS-SBVAR Estimation');
 options_ = set_file_tags(options_);
-clean_ms_estimation_files(options_.ms.output_file_tag);
 
 % general setup
-if ~isfield(options_.ms, 'initialization_file_tag')
-    clean_ms_init_files(options_.ms.output_file_tag);
+if options_.ms.create_init
+    clean_ms_init_files(options_.ms.file_tag);
     ms_sbvar_setup(options_);
+    clean_ms_estimation_files(options_.ms.file_tag);
+    clean_ms_estimation_files(options_.ms.output_file_tag);
+else
+    if ~strcmp(options_.ms.file_tag, options_.ms.output_file_tag)
+        clean_ms_estimation_files(options_.ms.output_file_tag);
+    end
 end
-options_ = set_ms_init_file(options_);
 
 % setup command line options
 opt = ['-estimate -seed ' num2str(options_.DynareRandomStreams.seed)];

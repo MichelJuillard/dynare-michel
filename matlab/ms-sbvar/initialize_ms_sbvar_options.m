@@ -32,12 +32,10 @@ function options_=initialize_ms_sbvar_options(M_, options_)
 % MS SBVAR
 % all mex functions
 options_.ms.file_tag = M_.fname;
-if isfield(options_.ms,'initialization_file_tag')
-    options_.ms = rmfield(options_.ms,'initialization_file_tag');
-end
 if isfield(options_.ms,'estimation_file_tag')
     options_.ms = rmfield(options_.ms,'estimation_file_tag');
 end
+options_.ms.create_init = 1;
 if isfield(options_.ms,'free_param_file')
     options_.ms = rmfield(options_.ms,'free_param_file');
 end

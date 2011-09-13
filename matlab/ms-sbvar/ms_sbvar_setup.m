@@ -434,7 +434,7 @@ fclose(fidForC);
 %== Create C initialization filename
 %======================================================================
 ms_write_markov_file(markov_file,options_)
-create_init_file = [matlab_filename,' ',markov_file,' ',options_.ms.output_file_tag];
+create_init_file = [matlab_filename,' ',markov_file,' ',options_.ms.file_tag];
 [err] = ms_sbvar_create_init_file(create_init_file);
 mexErrCheck('ms_sbvar_create_init_file',err);
 end
