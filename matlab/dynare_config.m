@@ -48,8 +48,8 @@ addpath([dynareroot '/kalman/likelihood'])
 addpath([dynareroot '/AIM/'])
 addpath([dynareroot '/partial_information/'])
 addpath([dynareroot '/ms-sbvar/'])
-addpath([dynareroot '/ms-sbvar/cstz']);
-addpath([dynareroot '/ms-sbvar/identification']);
+addpath([dynareroot '/ms-sbvar/cstz/'])
+addpath([dynareroot '/ms-sbvar/identification/'])
 addpath([dynareroot '/parallel/'])
 addpath([dynareroot '/particle/'])
 addpath([dynareroot '/gsa/'])
