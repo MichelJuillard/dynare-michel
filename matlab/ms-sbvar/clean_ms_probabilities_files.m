@@ -30,5 +30,6 @@ function clean_ms_probabilities_files(file_tag)
 
 delete_if_exists(['smoothed_' file_tag '.out']);
 delete_if_exists(['filtered_' file_tag '.out']);
+delete_if_exists(['real_time_smoothed_' file_tag '.out']);
 delete_dir_if_exists([file_tag filesep 'Output' filesep 'Probabilities']);
 end
