@@ -175,9 +175,11 @@ if size(failedBase,2) > 0 || size(failedBlock,2) > 0
   printf("***************************************\n\n");
   fprintf(fid,"***************************************\n\n");
   clear -all
+  fclose(fid);
   error("make check-octave FAILED");
-end
-fclose(fid);
+else
+  fclose(fid);
+endif
 
 ## Local variables:
 ## mode: Octave
