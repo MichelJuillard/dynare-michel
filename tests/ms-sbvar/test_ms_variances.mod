@@ -10,6 +10,8 @@ markov_switching(chain=1,number_of_states=2,duration=2.5);
 
 svar(variances, chain=1);
 
+set_dynare_seed(5);
+
 ms_estimation(datafile=data
 		,freq=4
 		,initial_year=1959
