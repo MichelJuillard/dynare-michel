@@ -4838,21 +4838,21 @@ need of user intervention.
 The RMSE analysis can be performed with different types of sampling options:
 @enumerate
 @item
-When @code{pprior=1} and @code{ppost=0}, the toolbox analyzes the RMSE’s for
+When @code{pprior=1} and @code{ppost=0}, the toolbox analyzes the RMSEs for
 the Monte-Carlo sample obtained by sampling parameters from their prior distributions
 (or prior ranges): this analysis provides some hints about
 what parameter drives the fit of which observed series, prior to the full
 estimation;
 
 @item
-When @code{pprior=0} and @code{ppost=0}, the toolbox analyzes the RMSE’s for
+When @code{pprior=0} and @code{ppost=0}, the toolbox analyzes the RMSEs for
 a multivariate normal Monte-Carlo sample, with covariance matrix based on
 the inverse Hessian at the optimum: this analysis is useful when maximum likelihood
 estimation is done (@i{i.e.} no Bayesian estimation);
 
 @item
-When @code{ppost=1} the toolbox analyzes the RMSE’s for the posterior sample
-obtained by Dynare’s Metropolis procedure.
+When @code{ppost=1} the toolbox analyzes the RMSEs for the posterior sample
+obtained by Dynare's Metropolis procedure.
 @end enumerate
 
 The use of cases 2 and 3 requires an estimation step beforehand. To
@@ -4904,34 +4904,34 @@ but the same conventions are used for multivariate normal and posterior):
 
 @itemize
 @item
-@code{<mod_file>_rmse_prior_*.fig}: for each parameter, plots the cdf’s
-corresponding to the best 10% RMES’s of each observed series;
+@code{<mod_file>_rmse_prior_*.fig}: for each parameter, plots the cdfs
+corresponding to the best 10% RMSEs of each observed series;
 
 @item
 @code{<mod_file>_rmse_prior_dens_*.fig}: for each parameter, plots the
-pdf’s corresponding to the best 10% RMES’s of each observed series;
+pdfs corresponding to the best 10% RMESs of each observed series;
 
 @item
 @code{<mod_file>_rmse_prior_<name of observedseries>_corr_*.fig}: for
 each observed series plots the bi-dimensional projections of samples
-with the best 10% RMSE’s, when the correlation is significant;
+with the best 10% RMSEs, when the correlation is significant;
 
 @item
 @code{<mod_file>_rmse_prior_lnlik*.fig}: for each observed series, plots
 in red the cdf of the log-likelihood corresponding to the best 10%
-RMSE’s, in green the cdf of the rest of the sample and in blue the
+RMSEs, in green the cdf of the rest of the sample and in blue the
 cdf of the full sample; this allows one to see the presence of some
 idiosyncratic behavior;
 
 @item
 @code{<mod_file>_rmse_prior_lnpost*.fig}: for each observed series, plots
-in red the cdf of the log-posterior corresponding to the best 10% RMSE’s,
+in red the cdf of the log-posterior corresponding to the best 10% RMSEs,
 in green the cdf of the rest of the sample and in blue the cdf of the full
 sample; this allows one to see idiosyncratic behavior;
 
 @item
 @code{<mod_file>_rmse_prior_lnprior*.fig}: for each observed series, plots
-in red the cdf of the log-prior corresponding to the best 10% RMSE’s,
+in red the cdf of the log-prior corresponding to the best 10% RMSEs,
 in green the cdf of the rest of the sample and in blue the cdf of the full
 sample; this allows one to see idiosyncratic behavior;
 
