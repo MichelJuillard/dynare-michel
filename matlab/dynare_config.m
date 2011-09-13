@@ -50,8 +50,6 @@ addpath([dynareroot '/partial_information/'])
 addpath([dynareroot '/ms-sbvar/'])
 addpath([dynareroot '/ms-sbvar/cstz']);
 addpath([dynareroot '/ms-sbvar/identification']);
-addpath([dynareroot '/ms-sbvar/switching_specification']);
-addpath([dynareroot '/ms-sbvar/mhm_specification']);
 addpath([dynareroot '/parallel/'])
 addpath([dynareroot '/particle/'])
 addpath([dynareroot '/gsa/'])
