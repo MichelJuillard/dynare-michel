@@ -66,9 +66,6 @@ options_.ms.alpha = 1;
 options_.ms.beta = 1;
 options_.ms.gsig2_lmd = 50^2;
 options_.ms.gsig2_lmdm = 50^2;
-options_.ms.lower_cholesky = 0;
-options_.ms.upper_cholesky = 0;
-options_.ms.constants_exclusion = 0;
 if isfield(options_.ms,'initial_year')
     options_.ms = rmfield(options_.ms,'initial_year');
 end
