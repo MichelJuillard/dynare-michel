@@ -3382,7 +3382,7 @@ observed variables.
 
 This command lists the name of observed endogenous variables for the
 estimation procedure. These variables must be available in the data
-file (@pxref{estimation}).
+file (@pxref{estimation_cmd}).
 
 Alternatively, this command is also used in conjunction with the
 @code{partial_information} option of @code{stoch_simul}, for declaring
@@ -3606,7 +3606,7 @@ stderr VARIABLE_NAME | corr VARIABLE_NAME_1, VARIABLE_NAME_2 | PARAMETER_NAME
 
 @end deffn
 
-@anchor{estimation}
+@anchor{estimation_cmd}
 @deffn Command estimation [@var{VARIABLE_NAME}@dots{}];
 @deffnx Command estimation (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
 
