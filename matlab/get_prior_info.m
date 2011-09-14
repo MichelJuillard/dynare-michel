@@ -63,7 +63,7 @@ if size(M_.param_names,1)==size(M_.param_names_tex,1)% All the parameters have a
     % Column 7: the upper bound of the interval containing 80% of the prior mass.
     prior_trunc_backup = options_.prior_trunc ;
     options_.prior_trunc = (1-options_.prior_interval)/2 ;
-    PriorIntervals = prior_bounds(bayestopt_) ;
+    PriorIntervals = prior_bounds(bayestopt_,options_) ;
     options_.prior_trunc = prior_trunc_backup ;
     for i=1:size(bayestopt_.name,1)
         [tmp,TexName] = get_the_name(i,1,M_,estim_params_,options_);

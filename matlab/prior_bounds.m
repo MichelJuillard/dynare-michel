@@ -1,4 +1,41 @@
-function bounds = prior_bounds(bayestopt)
+function bounds = prior_bounds(bayestopt,option)
+
+%@info:
+%! @deftypefn {Function File} {@var{bounds} =} prior_bounds (@var{bayesopt},@var{option})
+%! @anchor{prior_bounds}
+%! @sp 1
+%! Returns bounds for the prior densities. For each estimated parameter the upper and lower bounds
+%! are such that the defined intervals contains a probability mass equal to 1-2*@var{option}.prior_trunc. The
+%! default value for @var{option}.prior_trunc is 1e-10 (set in @ref{global_initialization}).
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item bayestopt
+%! Matlab's structure describing the prior distribution (initialized by @code{dynare}).
+%! @item option
+%! Matlab's structure describing the options (initialized by @code{dynare}).
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item bounds
+%! p*2 matrix of doubles, where p is the number of estimated parameters. The first and second columns report
+%! respectively the lower and upper bounds.
+%! @end table
+%! @sp 2
+%! @strong{This function is called by:}
+%! @sp 1
+%! @ref{get_prior_info}, @ref{dynare_estimation_1}, @ref{dynare_estimation_init}
+%! @sp 2
+%! @strong{This function calls:}
+%! @sp 1
+%! None.
+%! @end deftypefn
+%@eod:
+
+
 % function bounds = prior_bounds(bayestopt)
 % computes bounds for prior density.
 %
@@ -28,14 +65,12 @@ function bounds = prior_bounds(bayestopt)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global options_
-
 pshape = bayestopt.pshape;
 p3 = bayestopt.p3;
 p4 = bayestopt.p4;
 p6 = bayestopt.p6;
 p7 = bayestopt.p7;
-prior_trunc = options_.prior_trunc;
+prior_trunc = options.prior_trunc;
 
 bounds = zeros(length(p6),2);
 

@@ -857,7 +857,7 @@ end
 
 if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
         (any(bayestopt_.pshape >0 ) && options_.load_mh_file)  %% not ML estimation
-    bounds = prior_bounds(bayestopt_);
+    bounds = prior_bounds(bayestopt_,options_);
     bounds(:,1)=max(bounds(:,1),lb);
     bounds(:,2)=min(bounds(:,2),ub);
     bayestopt_.lb = bounds(:,1);
