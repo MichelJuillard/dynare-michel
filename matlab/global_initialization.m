@@ -257,6 +257,9 @@ options_.discretionary_policy = 0;
 % Shock decomposition
 options_.parameter_set = [];
 
+% Nonlinearfilters
+options_.nonlinear_filter = [];
+
 % SBVAR & MS SBVAR initializations:
 % SBVAR
 options_.ms.vlistlog = [];
