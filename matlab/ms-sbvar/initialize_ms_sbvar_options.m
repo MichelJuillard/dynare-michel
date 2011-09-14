@@ -59,7 +59,6 @@ options_.ms.contemp_reduced_form = 0;
 options_.ms.bayesian_prior = 1;
 options_.ms.alpha = 1;
 options_.ms.beta = 1;
-options_.ms.gsig2_lmd = 50^2;
 options_.ms.gsig2_lmdm = 50^2;
 if isfield(options_.ms,'initial_year')
     options_.ms = rmfield(options_.ms,'initial_year');
