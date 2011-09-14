@@ -1,4 +1,4 @@
-function plot_priors(bayestopt_,M_,options_)
+function plot_priors(bayestopt_,M_,estim_params_,options_)
 % function plot_priors
 % plots prior density
 %
@@ -6,10 +6,10 @@ function plot_priors(bayestopt_,M_,options_)
 %    o bayestopt_  [structure]
 %    o M_          [structure]
 %    o options_    [structure]
-%    
+%
 % OUTPUTS
 %    None
-%    
+%
 % SPECIAL REQUIREMENTS
 %    None
 
@@ -46,11 +46,11 @@ if nbplt == 1
     h1 = figure('Name',figurename);
     if TeX
         TeXNAMES = [];
-        NAMES    = []; 
-    end    
+        NAMES    = [];
+    end
     for i=1:npar
         [x,f,abscissa,dens,binf,bsup] = draw_prior_density(i,bayestopt_);
-        [nam,texnam] = get_the_name(i,TeX);
+        [nam,texnam] = get_the_name(i,TeX,M_,estim_params_,options_);
         if TeX
             if i==1
                 TeXNAMES = texnam;
@@ -59,7 +59,7 @@ if nbplt == 1
                 TeXNAMES = char(TeXNAMES,texnam);
                 NAMES = char(NAMES,nam);
             end
-        end    
+        end
         subplot(nr,nc,i)
         hh = plot(x,f,'-k','linewidth',2);
         set(hh,'color',[0.7 0.7 0.7]);
@@ -77,7 +77,7 @@ if nbplt == 1
         fprintf(fidTeX,'\\begin{figure}[H]\n');
         for jj = 1:npar
             fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-        end    
+        end
         fprintf(fidTeX,'\\centering\n');
         fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Priors%s}\n',M_.fname,int2str(1));
         fprintf(fidTeX,'\\caption{Priors.}');
@@ -92,13 +92,13 @@ else
         hplt = figure('Name',figurename);
         if TeX
             TeXNAMES = [];
-            NAMES    = []; 
-        end    
+            NAMES    = [];
+        end
         for index=1:nstar
             names = [];
             i = (plt-1)*nstar + index;
-            [nam,texnam] = get_the_name(i,TeX);
-            [x,f,abscissa,dens,binf,bsup] = draw_prior_density(i,bayestopt_);            
+            [nam,texnam] = get_the_name(i,TeX,M_,estim_params_,options_);
+            [x,f,abscissa,dens,binf,bsup] = draw_prior_density(i,bayestopt_);
             if TeX
                 if index==1
                     TeXNAMES = texnam;
@@ -125,24 +125,24 @@ else
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:nstar
                 fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-            end    
+            end
             fprintf(fidTeX,'\\centering\n');
             fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Priors%s}\n',M_.fname,int2str(plt));
             fprintf(fidTeX,'\\caption{Priors.}');
             fprintf(fidTeX,'\\label{Fig:Priors:%s}\n',int2str(plt));
             fprintf(fidTeX,'\\end{figure}\n');
             fprintf(fidTeX,' \n');
-        end    
+        end
     end % plt = 1:nbplt-1
     hplt = figure('Name',figurename);
     if TeX
         TeXNAMES = [];
-        NAMES    = []; 
-    end    
+        NAMES    = [];
+    end
     for index=1:npar-(nbplt-1)*nstar
         i = (nbplt-1)*nstar +  index;
         [x,f,abscissa,dens,binf,bsup] = draw_prior_density(i,bayestopt_);
-        [nam,texnam] = get_the_name(i,TeX);
+        [nam,texnam] = get_the_name(i,TeX,M_,estim_params_,options_);
         if TeX
             if index==1
                 TeXNAMES = texnam;
@@ -151,12 +151,12 @@ else
                 TeXNAMES = char(TeXNAMES,texnam);
                 NAMES = char(NAMES,nam);
             end
-        end    
+        end
         if lr
             subplot(lc,lr,index);
         else
             subplot(nr,nc,index);
-        end    
+        end
         hh = plot(x,f,'-k','linewidth',2);
         set(hh,'color',[0.7 0.7 0.7]);
         box on
@@ -173,7 +173,7 @@ else
         fprintf(fidTeX,'\\begin{figure}[H]\n');
         for jj = 1:npar-(nbplt-1)*nstar
             fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-        end    
+        end
         fprintf(fidTeX,'\\centering\n');
         fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Priors%s}\n',M_.fname,int2str(nbplt));
         fprintf(fidTeX,'\\caption{Priors.}');
@@ -184,5 +184,3 @@ else
         fclose(fidTeX);
     end
 end
-
-% SA 01-11-2005 v3TOv4

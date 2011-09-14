@@ -35,7 +35,7 @@ function mode_check(x,fval,hessian,gend,data,lb,ub,data_index,number_of_observat
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global bayestopt_ M_ options_
+global bayestopt_ M_ options_ estim_params_
 
 TeX = options_.TeX;
 if ~isempty(hessian);
@@ -77,7 +77,7 @@ for plt = 1:nbplt,
     for k=1:min(nstar,length(x)-(plt-1)*nstar)
         subplot(nr,nc,k)
         kk = (plt-1)*nstar+k;
-        [name,texname] = get_the_name(kk,TeX);
+        [name,texname] = get_the_name(kk,TeX,M_,estim_params_,options_);
         if TeX
             if isempty(NAMES)
                 NAMES = name;

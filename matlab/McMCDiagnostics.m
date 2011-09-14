@@ -138,7 +138,7 @@ for i = 1:pages
     boxplot = 1;
     for j = 1:3 % Loop over parameters
         k = k+1;
-        [nam,namtex] = get_the_name(k,TeX);
+        [nam,namtex] = get_the_name(k,TeX,M_,estim_params_,options_);
         for crit = 1:3% Loop over criteria
             if crit == 1
                 plt1 = UDIAG(:,1,k);
@@ -213,7 +213,7 @@ if reste
     boxplot = 1;
     for j = 1:reste
         k = k+1;
-        [nam,namtex] = get_the_name(k,TeX);
+        [nam,namtex] = get_the_name(k,TeX,M_,estim_params_,options_);
         for crit = 1:3
             if crit == 1
                 plt1 = UDIAG(:,1,k);

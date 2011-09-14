@@ -66,7 +66,7 @@ if size(M_.param_names,1)==size(M_.param_names_tex,1)% All the parameters have a
     PriorIntervals = prior_bounds(bayestopt_) ;
     options_.prior_trunc = prior_trunc_backup ;
     for i=1:size(bayestopt_.name,1)
-        [tmp,TexName] = get_the_name(i,1);
+        [tmp,TexName] = get_the_name(i,1,M_,estim_params_,options_);
         PriorShape = PriorNames{ bayestopt_.pshape(i) };
         PriorMean = bayestopt_.p1(i);
         PriorStandardDeviation = bayestopt_.p2(i);
@@ -157,7 +157,7 @@ if info==2% Prior optimization.
     disp('------------------')
     disp(' ')
     for i = 1:length(xparams)
-        disp(['deep parameter ' int2str(i) ': ' get_the_name(i,0) '.'])
+        disp(['deep parameter ' int2str(i) ': ' get_the_name(i,0,M_,estim_params_,options_) '.'])
         disp(['  Initial condition ....... ' num2str(xinit(i)) '.'])
         disp(['  Prior mode .............. ' num2str(bayestopt_.p5(i)) '.'])
         disp(['  Optimized prior mode .... ' num2str(xparams(i)) '.'])

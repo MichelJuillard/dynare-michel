@@ -69,7 +69,7 @@ for i=1:npar
             hfig = figure('Name',figurename);
         end
     end
-    [nam,texnam] = get_the_name(i,TeX);
+    [nam,texnam] = get_the_name(i,TeX,M_,estim_params_,options_);
     if subplotnum == 1
         NAMES = nam;
         if TeX
