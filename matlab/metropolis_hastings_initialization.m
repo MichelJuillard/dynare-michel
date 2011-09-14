@@ -214,7 +214,7 @@ elseif options_.load_mh_file && ~options_.mh_recover
     %% Here we consider previous mh files (previous mh did not crash).
     disp('MH: I''m loading past metropolis-hastings simulations...')
     file = dir([ MhDirectoryName '/'  ModelName '_mh_history.mat' ]);
-    files = dir([ MhDirectoryName '/' ModelName '_mh*.mat']);
+    files = dir([ MhDirectoryName filesep ModelName '_mh*.mat']);
     if ~length(files)
         disp('MH:: FAILURE! there is no MH file to load here!')
         return
