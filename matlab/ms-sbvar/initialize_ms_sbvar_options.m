@@ -87,8 +87,8 @@ options_.ms.random_function_convergence_criterion = 0.1;
 options_.ms.random_parameter_convergence_criterion = 0.1;
 % simulation
 options_.ms.mh_replic = 10000; % default differs from Dan's code
-options_.ms.drop = 0.1*options_.ms.mh_replic;
 options_.ms.thinning_factor = 1;
+options_.ms.drop = 0.1*options_.ms.mh_replic*options_.ms.thinning_factor;
 options_.ms.adaptive_mh_draws = 30000;
 % mdd
 options_.ms.mdd_proposal_draws = 100000;
