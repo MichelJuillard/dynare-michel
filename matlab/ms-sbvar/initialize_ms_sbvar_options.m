@@ -66,8 +66,8 @@ end
 if isfield(options_.ms,'final_year')
     options_.ms = rmfield(options_.ms,'final_year');
 end
-if isfield(options_.ms,'datafile')
-    options_.ms = rmfield(options_.ms,'datafile');
+if isfield(options_,'datafile')
+    options_ = rmfield(options_,'datafile');
 end
 % estimation
 options_.ms.convergence_starting_value = 1e-3;
