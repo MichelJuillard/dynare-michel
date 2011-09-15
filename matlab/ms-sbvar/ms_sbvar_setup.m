@@ -358,6 +358,10 @@ nrows = 1;
 ncols = nvar;
 fn_fprintmatrix(fidForC, xM', nrows, ncols, indxFloat)
 
+%=== Specification
+fprintf(fidForC,'\n%s','//== Specification (0=default  1=Sims-Zha  2=Random Walk) ==//');
+fprintf(fidForC,'\n%d\n\n',options_.ms.specification);
+
 %=== Uiconst: nvar-by-1 cell.  In each cell, nvar-by-qi orthonormal basis for the null of the ith
 %           equation contemporaneous restriction matrix where qi is the number of free parameters.
 %           With this transformation, we have ai = Ui*bi or Ui'*ai = bi where ai is a vector
