@@ -91,8 +91,8 @@ options_.ms.thinning_factor = 1;
 options_.ms.drop = 0.1*options_.ms.mh_replic*options_.ms.thinning_factor;
 options_.ms.adaptive_mh_draws = 30000;
 % mdd
-options_.ms.mdd_proposal_draws = 100000;
-options_.ms.mdd_use_mean_center = 0;
+options_.ms.proposal_draws = 100000;
+options_.ms.use_mean_center = 0;
 options_.ms.proposal_type = 3;
 options_.ms.proposal_lower_bound = 0.1;
 options_.ms.proposal_upper_bound = 0.9;

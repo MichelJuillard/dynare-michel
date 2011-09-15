@@ -42,11 +42,11 @@ opt = ['-mdd -seed ' num2str(options_.DynareRandomStreams.seed)];
 opt = [opt ' -ft ' options_.ms.simulation_file_tag];
 opt = [opt ' -fto ' options_.ms.output_file_tag];
 opt = [opt ' -pf ' options_.ms.mh_file];
-opt = [opt ' -d ' num2str(options_.ms.mdd_proposal_draws)];
+opt = [opt ' -d ' num2str(options_.ms.proposal_draws)];
 opt = [opt ' -pt ' num2str(options_.ms.proposal_type)];
 opt = [opt ' -l '  num2str(options_.ms.proposal_lower_bound)];
 opt = [opt ' -h '  num2str(options_.ms.proposal_upper_bound)];
-if options_.ms.mdd_use_mean_center
+if options_.ms.use_mean_center
     opt = [opt ' -use_mean'];
 end
 
