@@ -93,7 +93,9 @@ options_.ms.adaptive_mh_draws = 30000;
 % mdd
 options_.ms.mdd_proposal_draws = 100000;
 options_.ms.mdd_use_mean_center = 0;
-options_.ms.mdd_proposal_type = [3 0.1 0.9];
+options_.ms.proposal_type = 3;
+options_.ms.proposal_lower_bound = 0.1;
+options_.ms.proposal_upper_bound = 0.9;
 % probabilities
 options_.ms.filtered_probabilities = 0;
 options_.ms.real_time_smoothed_probabilities = 0;

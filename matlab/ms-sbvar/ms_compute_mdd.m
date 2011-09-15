@@ -33,7 +33,7 @@ function [options_, oo_]=ms_compute_mdd(M_, options_, oo_)
 
 disp('MS-SBVAR Marginal Data Density');
 options_ = set_file_tags(options_);
-clean_ms_mdd_files(options_.ms.output_file_tag, options_.ms.mdd_proposal_type(1));
+clean_ms_mdd_files(options_.ms.output_file_tag, options_.ms.proposal_type);
 [options_, oo_] = set_ms_estimation_file(options_, oo_);
 options_ = set_ms_simulation_file(options_);
 
@@ -43,15 +43,11 @@ opt = [opt ' -ft ' options_.ms.simulation_file_tag];
 opt = [opt ' -fto ' options_.ms.output_file_tag];
 opt = [opt ' -pf ' options_.ms.mh_file];
 opt = [opt ' -d ' num2str(options_.ms.mdd_proposal_draws)];
+opt = [opt ' -pt ' num2str(options_.ms.proposal_type)];
+opt = [opt ' -l '  num2str(options_.ms.proposal_lower_bound)];
+opt = [opt ' -h '  num2str(options_.ms.proposal_upper_bound)];
 if options_.ms.mdd_use_mean_center
     opt = [opt ' -use_mean'];
-end
-if size(options_.ms.mdd_proposal_type, 2) ~= 3
-    error('ERROR: mdd_proposal_type takes exactly 3 arguments');
-else
-    opt = [opt ' -pt ' num2str(options_.ms.mdd_proposal_type(1))];
-    opt = [opt ' -l '  num2str(options_.ms.mdd_proposal_type(2))];
-    opt = [opt ' -h '  num2str(options_.ms.mdd_proposal_type(3))];
 end
 
 % compute mdd
@@ -62,7 +58,7 @@ mexErrCheck('ms_compute_mdd',err);
 mull_exp = 'Muller \w+\(\w+\) \= (\d+.\d+e\+\d+)';
 bridge_exp = 'Bridge \w+\(\w+\) \= (\d+.\d+e\+\d+)';
 bridge_mdd = -1; muller_mdd = -1;
-mdd_filename = ['mdd_t' num2str(options_.ms.mdd_proposal_type(1)) '_' options_.ms.output_file_tag '.out'];
+mdd_filename = ['mdd_t' num2str(options_.ms.proposal_type) '_' options_.ms.output_file_tag '.out'];
 if exist(mdd_filename,'file')
     mdd_fid = fopen(mdd_filename);
     tline = fgetl(mdd_fid);
