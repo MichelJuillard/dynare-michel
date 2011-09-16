@@ -68,7 +68,7 @@ if(isfield(M_,'block_structure'))
     end;
     
     %printing the gross incidence matrix
-    IM_star = [kron(ones(M_.endo_nbr, M_.endo_nbr-1), blanks(3)) blanks(M_.endo_nbr)'];
+    IM_star = char([kron(ones(M_.endo_nbr, M_.endo_nbr-1), double(blanks(3))) double(blanks(M_.endo_nbr)')]);
     for i = 1:3
         n = size(M_.block_structure.incidence(i).sparse_IM,1);
         for j = 1:n
@@ -89,14 +89,14 @@ if(isfield(M_,'block_structure'))
         end;
     end;
     if nargin == 1 && strcmp(varargin{1},'incidence')
-        topp = [char(kron(blanks(ceil(log10(M_.endo_nbr))),ones(size(M_.endo_names,2),1))) var_names' ];
+        topp = [char(kron(double(blanks(ceil(log10(M_.endo_nbr)))),ones(size(M_.endo_names,2),1))) var_names' ];
         bott = [int2str(seq') blanks(M_.endo_nbr)' blanks(M_.endo_nbr)' IM_star];
         fprintf('\n                                          Gross incidence matrix\n');
         fprintf('                                          =======================\n');
         disp([topp; bott]);
     
         %printing the reordered incidence matrix
-        IM_star_reordered = [kron(ones(M_.endo_nbr, M_.endo_nbr-1), blanks(3)) blanks(M_.endo_nbr)'];
+        IM_star_reordered = char([kron(ones(M_.endo_nbr, M_.endo_nbr-1), double(blanks(3))) double(blanks(M_.endo_nbr)')]);
         eq(M_.block_structure.equation_reordered) = seq;
         va(M_.block_structure.variable_reordered) = seq;
         barre_blank = [ barre(size(M_.endo_names,2)); blanks(size(M_.endo_names,2))];
@@ -116,7 +116,7 @@ if(isfield(M_,'block_structure'))
                 end
             end;
         end;
-        topp = [char(kron(blanks(ceil(log10(M_.endo_nbr))),ones(size(M_.endo_names,2),1))) var_names' ];
+        topp = [char(kron(double(blanks(ceil(log10(M_.endo_nbr)))),ones(size(M_.endo_names,2),1))) var_names' ];
         n_state_var = length(M_.state_var);
         IM_state_var = zeros(n_state_var, n_state_var);
         inv_variable_reordered(M_.block_structure.variable_reordered) = 1:M_.endo_nbr;
