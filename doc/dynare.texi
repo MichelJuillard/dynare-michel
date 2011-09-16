@@ -2290,6 +2290,13 @@ add new variables one by one.
 
 @table @code
 
+@item maxit = @var{INTEGER}
+Determines the maximum number of iterations used in the non-linear solver. 
+The default value of @code{maxit} is 10. The @code{maxit} option is shared with the 
+@code{simul} command. So a change in @code{maxit} in a @code{steady} command will 
+also be considered in the following @code{simul} commands.
+
+
 @item solve_algo = @var{INTEGER}
 @anchor{solve_algo}
 Determines the non-linear solver to use. Possible values for the option are:
@@ -2340,6 +2347,7 @@ Use a homotopy (or divide-and-conquer) technique to solve for the
 steady state. If you use this option, you must specify a
 @code{homotopy_setup} block. This option can take three possible
 values:
+
 
 @table @code
 
@@ -2727,6 +2735,13 @@ for the number of periods set in the option @code{periods}.
 
 @item periods = @var{INTEGER}
 Number of periods of the simulation
+
+@item maxit = @var{INTEGER}
+Determines the maximum number of iterations used in the non-linear solver. 
+The default value of @code{maxit} is 10. The @code{maxit} option is shared with the 
+@code{steady} command. So a change in @code{maxit} in a @code{simul} command will 
+also be considered in the following @code{steady} commands.
+
 
 @item stack_solve_algo = @var{INTEGER}
 Algorithm used for computing the solution. Possible values are:
