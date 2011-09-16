@@ -341,7 +341,7 @@ for it_=start:incr:finish
                         [r, y, g1, g2, g3] = feval(fname, y, x, params, ...
                                                    steady_state, it_, 0);
                     else
-                        [r, y, g1] = feval(fname, y, x, params, steady_state);
+                        [r, y, g1] = feval(fname, y, x, params);
                     end;
                     if max(abs(r)) >= options_.solve_tolf
                         [dx,flag1] = bicgstab(g1,-r,1e-7,Blck_size,L1,U1);
