@@ -55,6 +55,8 @@ addpath([dynareroot '/particle/'])
 addpath([dynareroot '/gsa/'])
 addpath([dynareroot '/utilities/doc/'])
 addpath([dynareroot '/utilities/tests/'])
+addpath([dynareroot '/utilities/dataset/'])
+addpath([dynareroot '/utilities/general/'])
 
 % For functions that exist only under some Octave versions
 % or some MATLAB versions, and for which we provide some replacement functions

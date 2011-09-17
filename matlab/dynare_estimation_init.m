@@ -164,7 +164,7 @@ else% If estim_params_ is empty...
     estim_params_.np = 0;
 end
 
-%% Is there a linear trend in the measurement equation?
+% Is there a linear trend in the measurement equation?
 if ~isfield(options_,'trend_coeffs') % No!
     bayestopt_.with_trend = 0;
 else% Yes!
@@ -181,28 +181,43 @@ else% Yes!
     end
 end
 
-%% Set the "size" of penalty.
+% Set the "size" of penalty.
 bayestopt_.penalty = 1e8;
 
-%% Get informations about the variables of the model.
+% Get informations about the variables of the model.
 dr = set_state_space(oo_.dr,M_);
 oo_.dr = dr;
 nstatic = dr.nstatic;          % Number of static variables.
 npred = dr.npred;              % Number of predetermined variables.
 nspred = dr.nspred;            % Number of predetermined variables in the state equation.
 
-%% Test if observed variables are declared.
+% Test if observed variables are declared.
 if isempty(options_.varobs)
     error('VAROBS is missing')
 end
 
-%% Setting resticted state space (observed + predetermined variables)
+% Setting resticted state space (observed + predetermined variables)
 var_obs_index = [];
 k1 = [];
 for i=1:n_varobs
     var_obs_index = [var_obs_index strmatch(deblank(options_.varobs(i,:)),M_.endo_names(dr.order_var,:),'exact')];
     k1 = [k1 strmatch(deblank(options_.varobs(i,:)),M_.endo_names, 'exact')];
 end
+
+% Define union of observed and state variables
+k2 = union(var_obs_index',[dr.nstatic+1:dr.nstatic+dr.npred]', 'rows');
+% Set restrict_state to postion of observed + state variables in expanded state vector.
+oo_.dr.restrict_var_list = k2;
+% set mf0 to positions of state variables in restricted state vector for likelihood computation.
+[junk,bayestopt_.mf0] = ismember([dr.nstatic+1:dr.nstatic+dr.npred]',k2);
+% Set mf1 to positions of observed variables in restricted state vector for likelihood computation.
+[junk,bayestopt_.mf1] = ismember(var_obs_index,k2);
+% Set mf2 to positions of observed variables in expanded state vector for filtering and smoothing.
+bayestopt_.mf2  = var_obs_index;
+bayestopt_.mfys = k1;
+
+[junk,ic] = intersect(k2,nstatic+(1:npred)');
+oo_.dr.restrict_columns = [ic; length(k2)+(1:nspred-npred)'];
 
 k3 = [];
 k3p = [];
@@ -262,7 +277,7 @@ else
 end;
 
 
-%% Initialization with unit-root variables.
+% Initialization with unit-root variables.
 if ~isempty(options_.unit_root_vars)
     n_ur = size(options_.unit_root_vars,1);
     i_ur = zeros(n_ur,1);
@@ -292,7 +307,7 @@ if ~isempty(options_.unit_root_vars)
     options_.lik_init = 3;
 end % if ~isempty(options_.unit_root_vars)
 
-%% Test if the data file is declared.
+% Test if the data file is declared.
 if isempty(options_.datafile)
     if gsa_flag
         data = [];
@@ -304,48 +319,61 @@ if isempty(options_.datafile)
     end
 end
 
-%% If jscale isn't specified for an estimated parameter, use global option options_.jscale, set to 0.2, by default.
+% If jscale isn't specified for an estimated parameter, use global option options_.jscale, set to 0.2, by default.
 k = find(isnan(bayestopt_.jscale));
 bayestopt_.jscale(k) = options_.mh_jscale;
 
-%% Load and transform data.
-rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
-% Set the number of observations (nobs) and build a subsample between first_obs and nobs.
-options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
-gend = options_.nobs;
-rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
-% Take the log of the variables if needed
-if options_.loglinear      % If the model is log-linearized...
-    if ~options_.logdata   % and if the data are not in logs, then...
-        rawdata = log(rawdata);
-    end
+% Load and transform data.
+transformation = [];
+if options_.loglinear && ~options_.logdata
+    transformation = @log;
 end
-% Test if the observations are real numbers.
-if ~isreal(rawdata)
-    error('There are complex values in the data! Probably  a wrong transformation')
-end
-% Test for missing observations.
-options_.missing_data = any(any(isnan(rawdata)));
-% Prefilter the data if needed.
-if options_.prefilter == 1
-    if options_.missing_data
-        bayestopt_.mean_varobs = zeros(n_varobs,1);
-        for variable=1:n_varobs
-            rdx = find(~isnan(rawdata(:,variable)));
-            m = mean(rawdata(rdx,variable));
-            rawdata(rdx,variable) = rawdata(rdx,variable)-m;
-            bayestopt_.mean_varobs(variable) = m;
-        end
-    else
-        bayestopt_.mean_varobs = mean(rawdata,1)';
-        rawdata = rawdata-repmat(bayestopt_.mean_varobs',gend,1);
-    end
-end
-% Transpose the dataset array.
-data = transpose(rawdata);
+xls.sheet = options_.xls_sheet;
+xls.range = options_.xls_range;
 
-if nargout>3
-    %% Compute the steady state:
+if ~isfield(options_,'nobs')
+    options_.nobs = [];
+end
+
+dataset_ = initialize_dataset(options_.datafile,options_.varobs,options_.first_obs,options_.nobs,transformation,options_.prefilter,xls);
+
+% $$$ rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
+% $$$ % Set the number of observations (nobs) and build a subsample between first_obs and nobs.
+% $$$ options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
+% $$$ gend = options_.nobs;
+% $$$ rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
+% $$$ % Take the log of the variables if needed
+% $$$ if options_.loglinear      % If the model is log-linearized...
+% $$$     if ~options_.logdata   % and if the data are not in logs, then...
+% $$$         rawdata = log(rawdata);
+% $$$     end
+% $$$ end
+% $$$ % Test if the observations are real numbers.
+% $$$ if ~isreal(rawdata)
+% $$$     error('There are complex values in the data! Probably  a wrong transformation')
+% $$$ end
+% $$$ % Test for missing observations.
+% $$$ options_.missing_data = any(any(isnan(rawdata)));
+% $$$ % Prefilter the data if needed.
+% $$$ if options_.prefilter == 1
+% $$$     if options_.missing_data
+% $$$         bayestopt_.mean_varobs = zeros(n_varobs,1);
+% $$$         for variable=1:n_varobs
+% $$$             rdx = find(~isnan(rawdata(:,variable)));
+% $$$             m = mean(rawdata(rdx,variable));
+% $$$             rawdata(rdx,variable) = rawdata(rdx,variable)-m;
+% $$$             bayestopt_.mean_varobs(variable) = m;
+% $$$         end
+% $$$     else
+% $$$         bayestopt_.mean_varobs = mean(rawdata,1)';
+% $$$         rawdata = rawdata-repmat(bayestopt_.mean_varobs',gend,1);
+% $$$     end
+% $$$ end
+% $$$ % Transpose the dataset array.
+% $$$ data = transpose(rawdata);
+
+if nargout>7
+    % Compute the steady state:
     if options_.steadystate_flag% if the *_steadystate.m file is provided.
         [ys,tchek] = feval([M_.fname '_steadystate'],...
                            [zeros(M_.exo_nbr,1);...
@@ -364,7 +392,7 @@ if nargout>3
         end
         oo_.steady_state = ys;
     else% if the steady state file is not provided.
-        [dd,info] = resol(oo_.steady_state,0);
+        [dd,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
         oo_.steady_state = dd.ys; clear('dd');
     end
     if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
@@ -373,15 +401,16 @@ if nargout>3
         options_.noconstant = 0;
     end
 
-    [data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,n_varobs);
-    missing_value = ~(number_of_observations == gend*n_varobs);
-
-%     initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
-
-    data_info.gend = gend;
-    data_info.data = data;
-    data_info.data_index = data_index;
-    data_info.number_of_observations = number_of_observations;
-    data_info.no_more_missing_observations = no_more_missing_observations;
-    data_info.missing_value = missing_value;
+    fake = [];
+% $$$     [data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,n_varobs);
+% $$$     missing_value = ~(number_of_observations == gend*n_varobs);
+% $$$ 
+% $$$ %     initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+% $$$ 
+% $$$     data_info.gend = gend;
+% $$$     data_info.data = data;
+% $$$     data_info.data_index = data_index;
+% $$$     data_info.number_of_observations = number_of_observations;
+% $$$     data_info.no_more_missing_observations = no_more_missing_observations;
+% $$$     data_info.missing_value = missing_value;
 end

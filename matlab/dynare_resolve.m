@@ -40,7 +40,8 @@ function [A,B,ys,info] = dynare_resolve(mode)
 
 global oo_ M_ options_
 
-[oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
+[dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
+oo_.dr = dr;
 
 if info(1) > 0
     A = [];

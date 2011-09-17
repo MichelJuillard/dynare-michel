@@ -1,11 +1,11 @@
 function dynare_estimation_1(var_list_,dname)
 % function dynare_estimation_1(var_list_,dname)
 % runs the estimation of the model
-%  
+%
 % INPUTS
 %   var_list_:  selected endogenous variables vector
 %   dname:      alternative directory name
-%  
+%
 % OUTPUTS
 %   none
 %
@@ -31,21 +31,20 @@ function dynare_estimation_1(var_list_,dname)
 
 global M_ options_ oo_ estim_params_ bayestopt_
 
-if nargin > 1
-  [data,rawdata,xparam1] = dynare_estimation_init(var_list_,dname);
-else
-  [data,rawdata,xparam1] = dynare_estimation_init(var_list_);
-end
+[dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_, fake] = dynare_estimation_init(var_list_, dname, [], M_, options_, oo_, estim_params_, bayestopt_);
 
-%% Set various options.
-options_ = set_default_option(options_,'mh_nblck',2); 
+data = dataset_.data;
+rawdata = dataset_.rawdata;
+
+% Set various options.
+options_ = set_default_option(options_,'mh_nblck',2);
 options_ = set_default_option(options_,'nodiagnostic',0);
 
-%% Set number of observations
+% Set number of observations
 gend = options_.nobs;
-%% Set the number of observed variables.
+% Set the number of observed variables.
 n_varobs = size(options_.varobs,1);
-%% Get the number of parameters to be estimated. 
+% Get the number of parameters to be estimated.
 nvx = estim_params_.nvx;  % Variance of the structural innovations (number of parameters).
 nvn = estim_params_.nvn;  % Variance of the measurement innovations (number of parameters).
 ncx = estim_params_.ncx;  % Covariance of the structural innovations (number of parameters).
@@ -65,7 +64,7 @@ if ~isempty(options_.mode_file) && ~options_.mh_posterior_mode_estimation
     load(options_.mode_file);
 end
 
-%% Compute the steady state: 
+%% Compute the steady state:
 if ~isempty(estim_params_)
     set_parameters(xparam1);
 end
@@ -73,7 +72,7 @@ if options_.steadystate_flag% if the *_steadystate.m file is provided.
     [ys,tchek] = feval([M_.fname '_steadystate'],...
                        [zeros(M_.exo_nbr,1);...
                         oo_.exo_det_steady_state]);
-    if size(ys,1) < M_.endo_nbr 
+    if size(ys,1) < M_.endo_nbr
         if length(M_.aux_vars) > 0
             ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars,...
                                                         M_.fname,...
@@ -87,7 +86,7 @@ if options_.steadystate_flag% if the *_steadystate.m file is provided.
     end
     oo_.steady_state = ys;
 else% if the steady state file is not provided.
-    [dd,info] = resol(oo_.steady_state,0);
+    [dd,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
     oo_.steady_state = dd.ys; clear('dd');
 end
 if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
@@ -105,7 +104,7 @@ if options_.dsge_var
     if options_.noconstant
         evalin('base',...
                ['[mYY,mXY,mYX,mXX,Ydata,Xdata] = ' ...
-                'var_sample_moments(options_.first_obs,' ... 
+                'var_sample_moments(options_.first_obs,' ...
                 'options_.first_obs+options_.nobs-1,options_.dsge_varlag,-1,' ...
                 'options_.datafile, options_.varobs,options_.xls_sheet,options_.xls_range);'])
     else% The steady state is non zero ==> a constant in the VAR is needed!
@@ -116,8 +115,11 @@ if options_.dsge_var
     end
 end
 
-[data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,n_varobs);
-missing_value = ~(number_of_observations == gend*n_varobs);
+% [data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,n_varobs);
+missing_value = dataset_.missing.state; %~(number_of_observations == gend*n_varobs);
+data_index = [];
+number_of_observations = gend*n_varobs;
+no_more_missing_observations = [];
 
 initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
 
@@ -254,15 +256,15 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         else% The covariance matrix is initialized with the prior
             % covariance (a diagonal matrix) %%Except for infinite variances ;-)
             varinit = 'prior';
-            if strcmpi(varinit,'prior')  
+            if strcmpi(varinit,'prior')
                 stdev = bayestopt_.p2;
                 indx = find(isinf(stdev));
                 stdev(indx) = ones(length(indx),1)*sqrt(10);
                 vars = stdev.^2;
                 CovJump = diag(vars);
             elseif strcmpi(varinit,'eye')
-                vars = ones(length(bayestopt_.p2),1)*0.1;  
-                CovJump = diag(vars);          
+                vars = ones(length(bayestopt_.p2),1)*0.1;
+                CovJump = diag(vars);
             else
                 disp('gmhmaxlik :: Error!')
                 return
@@ -312,7 +314,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                     [xparam1,PostVar,Scale,PostMean] = ...
                         gmhmaxlik('DsgeVarLikelihood',xparam1,[lb ub],...
                                   options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend);
-                    fval = DsgeVarLikelihood(xparam1,gend);          
+                    fval = DsgeVarLikelihood(xparam1,gend);
                 end
                 options_.mh_jscale = Scale;
                 mouvement = max(max(abs(PostVar-OldPostVar)));
@@ -325,7 +327,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
             save([M_.fname '_mode.mat'],'xparam1','hh');
             save([M_.fname '_optimal_mh_scale_parameter.mat'],'Scale');
             bayestopt_.jscale = ones(length(xparam1),1)*Scale;%??!
-        end    
+        end
       case 7
         optim_options = optimset('display','iter','MaxFunEvals',1000000,'MaxIter',6000,'TolFun',1e-8,'TolX',1e-6);
         if isfield(options_,'optim_opt')
@@ -348,7 +350,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         myoptions(2)=1e-6; %accuracy of argument
         myoptions(3)=1e-6; %accuracy of function (see Solvopt p.29)
         myoptions(5)= 1.0;
-        
+
         [xparam1,fval]=solvopt(xparam1,fh,[],myoptions,gend,data);
       case 102
         %simulating annealing
@@ -357,7 +359,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         LB = xparam1 - 1;
         UB = xparam1 + 1;
         neps=10;
-        %  Set input parameters. 
+        %  Set input parameters.
         maxy=0;
         epsilon=1.0e-9;
         rt_=.10;
@@ -367,11 +369,11 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         maxevl=100000000;
         idisp =1;
         npar=length(xparam1);
-        
-        disp(['size of param',num2str(length(xparam1))])    
+
+        disp(['size of param',num2str(length(xparam1))])
         c=.1*ones(npar,1);
         %*  Set input values of the input/output parameters.*
-        
+
         vm=1*ones(npar,1);
         disp(['number of parameters= ' num2str(npar) 'max= '  num2str(maxy) 't=  ' num2str(t)]);
         disp(['rt_=  '  num2str(rt_) 'eps=  '  num2str(epsilon) 'ns=  '  num2str(ns)]);
@@ -384,8 +386,8 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         disp(['lower bound(lb)', 'initial conditions', 'upper bound(ub)' ]);
         disp([LB xparam1 UB]);
         disp(['c vector   ' num2str(c')]);
-        
-        %  keyboard 
+
+        %  keyboard
         if ~options_.dsge_var
             [xparam1, fval, nacc, nfcnev, nobds, ier, t, vm] = sa(fh,xparam1,maxy,rt_,epsilon,ns,nt ...
                                                               ,neps,maxevl,LB,UB,c,idisp ,t,vm,gend,data,data_index,number_of_observations,no_more_missing_observations);
@@ -480,9 +482,9 @@ if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
     for i = 1:nx
         tstath(i) = abs(xparam1(i))/stdh(i);
     end
-    
+
     header_width = row_header_width(M_,estim_params_,bayestopt_);
-    
+
     tit1 = sprintf('%-*s %7s %8s %7s %6s %4s %6s\n',header_width-2,' ','prior mean', ...
                    'mode','s.d.','t-stat','prior','pstdev');
     if np
@@ -497,7 +499,7 @@ if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
                          pnames(bayestopt_.pshape(ip)+1,:), ...
                          bayestopt_.p2(ip)));
             eval(['oo_.posterior_mode.parameters.' name ' = xparam1(ip);']);
-            eval(['oo_.posterior_std.parameters.' name ' = stdh(ip);']); 
+            eval(['oo_.posterior_std.parameters.' name ' = stdh(ip);']);
             ip = ip+1;
         end
     end
@@ -511,10 +513,10 @@ if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
             disp(sprintf('%-*s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
                          header_width,name,bayestopt_.p1(ip),xparam1(ip), ...
                          stdh(ip),tstath(ip),pnames(bayestopt_.pshape(ip)+1,:), ...
-                         bayestopt_.p2(ip))); 
+                         bayestopt_.p2(ip)));
             M_.Sigma_e(k,k) = xparam1(ip)*xparam1(ip);
             eval(['oo_.posterior_mode.shocks_std.' name ' = xparam1(ip);']);
-            eval(['oo_.posterior_std.shocks_std.' name ' = stdh(ip);']); 
+            eval(['oo_.posterior_std.shocks_std.' name ' = stdh(ip);']);
             ip = ip+1;
         end
     end
@@ -530,7 +532,7 @@ if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
                          pnames(bayestopt_.pshape(ip)+1,:), ...
                          bayestopt_.p2(ip)));
             eval(['oo_.posterior_mode.measurement_errors_std.' name ' = xparam1(ip);']);
-            eval(['oo_.posterior_std.measurement_errors_std.' name ' = stdh(ip);']); 
+            eval(['oo_.posterior_std.measurement_errors_std.' name ' = stdh(ip);']);
             ip = ip+1;
         end
     end
@@ -549,7 +551,7 @@ if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
             M_.Sigma_e(k1,k2) = xparam1(ip)*sqrt(M_.Sigma_e(k1,k1)*M_.Sigma_e(k2,k2));
             M_.Sigma_e(k2,k1) = M_.Sigma_e(k1,k2);
             eval(['oo_.posterior_mode.shocks_corr.' NAME ' = xparam1(ip);']);
-            eval(['oo_.posterior_std.shocks_corr.' NAME ' = stdh(ip);']); 
+            eval(['oo_.posterior_std.shocks_corr.' NAME ' = stdh(ip);']);
             ip = ip+1;
         end
     end
@@ -566,7 +568,7 @@ if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
                          header_width,bayestopt_.p1(ip),xparam1(ip),stdh(ip),tstath(ip), ...
                          pnames(bayestopt_.pshape(ip)+1,:), bayestopt_.p2(ip)));
             eval(['oo_.posterior_mode.measurement_errors_corr.' NAME ' = xparam1(ip);']);
-            eval(['oo_.posterior_std.measurement_errors_corr.' NAME ' = stdh(ip);']); 
+            eval(['oo_.posterior_std.measurement_errors_corr.' NAME ' = stdh(ip);']);
             ip = ip+1;
         end
     end
@@ -582,7 +584,7 @@ if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
             md_Laplace = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess ...
                 - DsgeVarLikelihood(xparam1,gend);
         end
-        oo_.MarginalDensity.LaplaceApproximation = md_Laplace;    
+        oo_.MarginalDensity.LaplaceApproximation = md_Laplace;
         disp(' ')
         disp(sprintf('Log data density [Laplace approximation] is %f.',md_Laplace))
         disp(' ')
@@ -605,10 +607,10 @@ elseif ~any(bayestopt_.pshape > 0) && options_.mh_posterior_mode_estimation
             disp(sprintf('%-*s %8.4f %7.4f %7.4f', ...
                          header_width,name,xparam1(ip),stdh(ip),tstath(ip)));
             eval(['oo_.mle_mode.parameters.' name ' = xparam1(ip);']);
-            eval(['oo_.mle_std.parameters.' name ' = stdh(ip);']); 
+            eval(['oo_.mle_std.parameters.' name ' = stdh(ip);']);
             ip = ip+1;
         end
-    end 
+    end
     if nvx
         ip = 1;
         disp('standard deviation of shocks')
@@ -619,7 +621,7 @@ elseif ~any(bayestopt_.pshape > 0) && options_.mh_posterior_mode_estimation
             disp(sprintf('%-*s %8.4f %7.4f %7.4f',header_width,name,xparam1(ip),stdh(ip),tstath(ip)));
             M_.Sigma_e(k,k) = xparam1(ip)*xparam1(ip);
             eval(['oo_.mle_mode.shocks_std.' name ' = xparam1(ip);']);
-            eval(['oo_.mle_std.shocks_std.' name ' = stdh(ip);']); 
+            eval(['oo_.mle_std.shocks_std.' name ' = stdh(ip);']);
             ip = ip+1;
         end
     end
@@ -631,7 +633,7 @@ elseif ~any(bayestopt_.pshape > 0) && options_.mh_posterior_mode_estimation
             name = deblank(options_.varobs(estim_params_.var_endo(i,1),:));
             disp(sprintf('%-*s %8.4f %7.4f %7.4f',header_width,name,xparam1(ip),stdh(ip),tstath(ip)))
             eval(['oo_.mle_mode.measurement_errors_std.' name ' = xparam1(ip);']);
-            eval(['oo_.mle_std.measurement_errors_std.' name ' = stdh(ip);']);      
+            eval(['oo_.mle_std.measurement_errors_std.' name ' = stdh(ip);']);
             ip = ip+1;
         end
     end
@@ -648,7 +650,7 @@ elseif ~any(bayestopt_.pshape > 0) && options_.mh_posterior_mode_estimation
             M_.Sigma_e(k1,k2) = xparam1(ip)*sqrt(M_.Sigma_e(k1,k1)*M_.Sigma_e(k2,k2));
             M_.Sigma_e(k2,k1) = M_.Sigma_e(k1,k2);
             eval(['oo_.mle_mode.shocks_corr.' NAME ' = xparam1(ip);']);
-            eval(['oo_.mle_std.shocks_corr.' NAME ' = stdh(ip);']);      
+            eval(['oo_.mle_std.shocks_corr.' NAME ' = stdh(ip);']);
             ip = ip+1;
         end
     end
@@ -697,10 +699,10 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
                     bayestopt_.p2(ip),...
                     xparam1(ip),...
                     stdh(ip));
-            ip = ip + 1;    
+            ip = ip + 1;
         end
         fprintf(fidTeX,'\\hline\\hline \n');
-        fprintf(fidTeX,'\\end{tabular}\n ');    
+        fprintf(fidTeX,'\\end{tabular}\n ');
         fprintf(fidTeX,'\\caption{Results from posterior parameters (parameters)}\n ');
         fprintf(fidTeX,'\\label{Table:Posterior:1}\n');
         fprintf(fidTeX,'\\end{table}\n');
@@ -732,11 +734,11 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
                     bayestopt_.p1(ip),...
                     bayestopt_.p2(ip),...
                     xparam1(ip), ...
-                    stdh(ip)); 
+                    stdh(ip));
             ip = ip+1;
         end
         fprintf(fidTeX,'\\hline\\hline \n');
-        fprintf(fidTeX,'\\end{tabular}\n ');    
+        fprintf(fidTeX,'\\end{tabular}\n ');
         fprintf(fidTeX,'\\caption{Results from posterior parameters (standard deviation of structural shocks)}\n ');
         fprintf(fidTeX,'\\label{Table:Posterior:2}\n');
         fprintf(fidTeX,'\\end{table}\n');
@@ -763,15 +765,15 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
             idx = strmatch(options_.varobs(estim_params_.var_endo(i,1),:),M_.endo_names);
             fprintf(fidTeX,'$%s$ & %4s & %7.3f & %6.4f & %8.4f & %7.4f \\\\ \n',...
                     deblank(M_.endo_names_tex(idx,:)), ...
-                    deblank(pnames(bayestopt_.pshape(ip)+1,:)), ...        
+                    deblank(pnames(bayestopt_.pshape(ip)+1,:)), ...
                     bayestopt_.p1(ip), ...
-                    bayestopt_.p2(ip),...        
+                    bayestopt_.p2(ip),...
                     xparam1(ip),...
-                    stdh(ip)); 
+                    stdh(ip));
             ip = ip+1;
         end
         fprintf(fidTeX,'\\hline\\hline \n');
-        fprintf(fidTeX,'\\end{tabular}\n ');    
+        fprintf(fidTeX,'\\end{tabular}\n ');
         fprintf(fidTeX,'\\caption{Results from posterior parameters (standard deviation of measurement errors)}\n ');
         fprintf(fidTeX,'\\label{Table:Posterior:3}\n');
         fprintf(fidTeX,'\\end{table}\n');
@@ -806,7 +808,7 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
             ip = ip+1;
         end
         fprintf(fidTeX,'\\hline\\hline \n');
-        fprintf(fidTeX,'\\end{tabular}\n ');    
+        fprintf(fidTeX,'\\end{tabular}\n ');
         fprintf(fidTeX,'\\caption{Results from posterior parameters (correlation of structural shocks)}\n ');
         fprintf(fidTeX,'\\label{Table:Posterior:4}\n');
         fprintf(fidTeX,'\\end{table}\n');
@@ -841,7 +843,7 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
             ip = ip+1;
         end
         fprintf(fidTeX,'\\hline\\hline \n');
-        fprintf(fidTeX,'\\end{tabular}\n ');    
+        fprintf(fidTeX,'\\end{tabular}\n ');
         fprintf(fidTeX,'\\caption{Results from posterior parameters (correlation of measurement errors)}\n ');
         fprintf(fidTeX,'\\label{Table:Posterior:5}\n');
         fprintf(fidTeX,'\\end{table}\n');
@@ -917,7 +919,7 @@ end
 
 if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.pshape ...
                                                       > 0) && options_.load_mh_file)) ...
-    || ~options_.smoother ) && M_.endo_nbr^2*gend < 1e7 && options_.partial_information == 0  % to be fixed   
+    || ~options_.smoother ) && M_.endo_nbr^2*gend < 1e7 && options_.partial_information == 0  % to be fixed
     %% ML estimation, or posterior mode without metropolis-hastings or metropolis without bayesian smooth variable
     [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp] = DsgeSmoother(xparam1,gend,data,data_index,missing_value);
     oo_.Smoother.SteadyState = ys;
@@ -951,7 +953,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n');
         fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
         fprintf(fidTeX,' \n');
-    end    
+    end
     if nbplt == 1
         hh = figure('Name','Smoothed shocks');
         NAMES = [];
@@ -1035,7 +1037,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     else
                         TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
                     end
-                end    
+                end
                 title(name,'Interpreter','none')
                 eval(['oo_.SmoothedShocks.' deblank(name) ' = innov(k,:)'';']);
             end
@@ -1049,14 +1051,14 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 fprintf(fidTeX,'\\begin{figure}[H]\n');
                 for jj = 1:nstar
                     fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-                end    
+                end
                 fprintf(fidTeX,'\\centering \n');
                 fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedShocks%s}\n',M_.fname,int2str(plt));
                 fprintf(fidTeX,'\\caption{Smoothed shocks.}');
                 fprintf(fidTeX,'\\label{Fig:SmoothedShocks:%s}\n',int2str(plt));
                 fprintf(fidTeX,'\\end{figure}\n');
                 fprintf(fidTeX,'\n');
-            end    
+            end
         end
         hh = figure('Name','Smoothed shocks');
         set(0,'CurrentFigure',hh)
@@ -1068,7 +1070,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 subplot(lr,lc,i);
             else
                 subplot(nr,nc,i);
-            end    
+            end
             plot([1 gend],[0 0],'-r','linewidth',0.5)
             hold on
             plot(1:gend,innov(k,:),'-k','linewidth',1)
@@ -1105,7 +1107,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:size(NAMES,1);
                 fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-            end    
+            end
             fprintf(fidTeX,'\\centering \n');
             fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedShocks%s}\n',M_.fname,int2str(nbplt));
             fprintf(fidTeX,'\\caption{Smoothed shocks.}');
@@ -1114,7 +1116,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             fprintf(fidTeX,'\n');
             fprintf(fidTeX,'%% End of TeX file.\n');
             fclose(fidTeX);
-        end    
+        end
     end
     %%
     %%  Smooth observational errors...
@@ -1192,7 +1194,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 fprintf(fidTeX,'\\begin{figure}[H]\n');
                 for jj = 1:number_of_plots_to_draw
                     fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-                end    
+                end
                 fprintf(fidTeX,'\\centering \n');
                 fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedObservationErrors%s}\n',M_.fname,int2str(1));
                 fprintf(fidTeX,'\\caption{Smoothed observation errors.}');
@@ -1246,14 +1248,14 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     fprintf(fidTeX,'\\begin{figure}[H]\n');
                     for jj = 1:nstar
                         fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-                    end    
+                    end
                     fprintf(fidTeX,'\\centering \n');
                     fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedObservationErrors%s}\n',M_.fname,int2str(plt));
                     fprintf(fidTeX,'\\caption{Smoothed observation errors.}');
                     fprintf(fidTeX,'\\label{Fig:SmoothedObservationErrors:%s}\n',int2str(plt));
                     fprintf(fidTeX,'\\end{figure}\n');
                     fprintf(fidTeX,'\n');
-                end    
+                end
             end
             hh = figure('Name','Smoothed observation errors');
             set(0,'CurrentFigure',hh)
@@ -1265,7 +1267,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     subplot(lr,lc,i);
                 else
                     subplot(nr,nc,i);
-                end    
+                end
                 plot([1 gend],[0 0],'-r','linewidth',0.5)
                 hold on
                 plot(1:gend,measurement_error(index(k),:),'-k','linewidth',1)
@@ -1301,7 +1303,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 fprintf(fidTeX,'\\begin{figure}[H]\n');
                 for jj = 1:size(NAMES,1);
                     fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-                end    
+                end
                 fprintf(fidTeX,'\\centering \n');
                 fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedObservedErrors%s}\n',M_.fname,int2str(nbplt));
                 fprintf(fidTeX,'\\caption{Smoothed observed errors.}');
@@ -1310,9 +1312,9 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 fprintf(fidTeX,'\n');
                 fprintf(fidTeX,'%% End of TeX file.\n');
                 fclose(fidTeX);
-            end    
+            end
         end
-    end 
+    end
     %%
     %%  Historical and smoothed variabes
     %%
@@ -1322,7 +1324,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n');
         fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
         fprintf(fidTeX,' \n');
-    end    
+    end
     if nbplt == 1
         hh = figure('Name','Historical and smoothed variables');
         NAMES = [];
@@ -1365,7 +1367,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:n_varobs
                 fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-            end    
+            end
             fprintf(fidTeX,'\\centering \n');
             fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n',M_.fname,int2str(1));
             fprintf(fidTeX,'\\caption{Historical and smoothed variables.}');
@@ -1374,7 +1376,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             fprintf(fidTeX,'\n');
             fprintf(fidTeX,'%% End of TeX file.\n');
             fclose(fidTeX);
-        end    
+        end
     else
         for plt = 1:nbplt-1
             hh = figure('Name','Historical and smoothed variables');
@@ -1407,7 +1409,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     else
                         TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
                     end
-                end    
+                end
                 title(name,'Interpreter','none')
             end
             eval(['print -depsc2 ' M_.fname '_HistoricalAndSmoothedVariables' int2str(plt) '.eps']);
@@ -1420,14 +1422,14 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 fprintf(fidTeX,'\\begin{figure}[H]\n');
                 for jj = 1:nstar
                     fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-                end    
+                end
                 fprintf(fidTeX,'\\centering \n');
                 fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n',M_.fname,int2str(plt));
                 fprintf(fidTeX,'\\caption{Historical and smoothed variables.}');
                 fprintf(fidTeX,'\\label{Fig:HistoricalAndSmoothedVariables:%s}\n',int2str(plt));
                 fprintf(fidTeX,'\\end{figure}\n');
                 fprintf(fidTeX,'\n');
-            end    
+            end
         end
         hh = figure('Name','Historical and smoothed variables');
         set(0,'CurrentFigure',hh)
@@ -1439,7 +1441,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 subplot(lr,lc,i);
             else
                 subplot(nr,nc,i);
-            end    
+            end
             plot(1:gend,yf(k,:),'-r','linewidth',1)
             hold on
             plot(1:gend,rawdata(:,k),'-k','linewidth',1)
@@ -1476,7 +1478,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:size(NAMES,1);
                 fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-            end    
+            end
             fprintf(fidTeX,'\\centering \n');
             fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n',M_.fname,int2str(nbplt));
             fprintf(fidTeX,'\\caption{Historical and smoothed variables.}');
@@ -1489,7 +1491,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
     end
 end
 
-if options_.forecast > 0 && options_.mh_replic == 0 && ~options_.load_mh_file 
+if options_.forecast > 0 && options_.mh_replic == 0 && ~options_.load_mh_file
     forecast(var_list_,'smoother');
 end
 

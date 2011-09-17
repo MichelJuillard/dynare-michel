@@ -1,10 +1,10 @@
-function dynare_estimation(var_list,varargin)
+function dynare_estimation(var_list,dname)
 % function dynare_estimation(var_list)
 % runs the estimation of the model
-%  
+%
 % INPUTS
 %   var_list:  selected endogenous variables vector
-%  
+%
 % OUTPUTS
 %   none
 %
@@ -47,19 +47,20 @@ end
 nnobs = length(nobs);
 horizon = options_.forecast;
 
+if nargin<2 || ~exist(dname) || isempty(dname)
+    dname = M_.fname;
+end
+
+M_.dname = dname;
+
 if nnobs > 1
-    if nargin > 1
-        dname = vargin{1};
-    else
-        dname = M_.fname;
-    end
     for i=1:nnobs
         options_.nobs = nobs(i);
         dynare_estimation_1(var_list,[dname '_' int2str(nobs(i))]);
         oo_recursive_{nobs(i)} = oo_;
     end
 else
-    dynare_estimation_1(var_list,varargin{:});
+    dynare_estimation_1(var_list,dname);
 end
 
 if nnobs > 1 && horizon > 0
@@ -69,12 +70,12 @@ if nnobs > 1 && horizon > 0
     rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
     % Take the log of the variables if needed
     if options_.loglinear && ~options_.logdata   % and if the data are not in logs, then...
-        rawdata = log(rawdata);  
+        rawdata = log(rawdata);
     end
 
     endo_names = M_.endo_names;
     n_varobs = size(options_.varobs,1);
-    
+
     if isempty(var_list)
         var_list = endo_names;
         nvar    = size(endo_names,1);
@@ -89,7 +90,7 @@ if nnobs > 1 && horizon > 0
             else
                 error(['Estimation: ' var_list(i,:) ' isn''t an endogenous' ...
                        'variable'])
-            end   
+            end
         end
     end
 
@@ -100,8 +101,8 @@ if nnobs > 1 && horizon > 0
         end
         if ~isempty(iobs)
             IdObs(j,1) = iobs;
-        end    
-    end 
+        end
+    end
 
     k = 3+min(nobs(end)-nobs(1)+horizon, ...
               size(rawdata,1)-nobs(1));
@@ -125,7 +126,7 @@ if nnobs > 1 && horizon > 0
             offsetx = 3;
         else
             offsetx = 0;
-        end      
+        end
         vname = deblank(var_list(i,:));
         maxlag = M_.maximum_lag;
         for j=1:nnobs
