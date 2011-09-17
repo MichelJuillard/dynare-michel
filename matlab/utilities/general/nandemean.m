@@ -49,10 +49,11 @@ function c = nandemean(x)
 
 % AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
 
-if ndim(x)==1
+switch ndim(x)
+  case 1
     c = x-nanmean(x);
-elseif ndim(x)==2
+  case 2
     c = bsxfun(@minus,x,nanmean(x));
-else
+  otherwise
     error('descriptive_statistics::nandemean:: This function is not implemented for arrays with dimension greater than two!')
 end
