@@ -75,7 +75,7 @@ else
 end
 
 % Compute the empirical mean of the observed variables..
-dataset_.descriptive.mean = nanmean(dataset_.rawdata);
+%dataset_.descriptive.mean = nanmean(dataset_.rawdata);
 
 % Prefilter the data if needed.
 if prefilter == 1
