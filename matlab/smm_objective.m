@@ -32,7 +32,7 @@ function [r,flag] = smm_objective(xparams,sample_moments,weighting_matrix,option
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.    
 
-global M_ options_
+global M_ options_ oo_
 persistent mainStream mainState
 persistent priorObjectiveValue
 
@@ -71,7 +71,7 @@ save('estimated_parameters.mat','xparams');
 
 % Check for local determinacy of the deterministic steady state.
 noprint = options_.noprint; options_.noprint = 1;
-[local_determinacy_and_stability,info] = check; options_.noprint = noprint;
+[local_determinacy_and_stability,info] = check(M_,options_,oo_); options_.noprint = noprint;
 if ~local_determinacy_and_stability
     r = priorObjectiveValue * (1+info(2));
     flag = 0;

@@ -1,15 +1,42 @@
-function [result,info] = check
-% function result = check
-% checks determinacy conditions by computing the eigenvalues
-%
-% INPUTS
-%    none
-%    
-% OUTPUTS
-%    result  [integer]   scalar, equal to 1 if the derterministic steady state satisfies BK conditions. 
-%
-% SPECIAL REQUIREMENTS
-%    none
+function [result,info] = check(M, options, oo)
+% Checks determinacy conditions by computing the generalized eigenvalues.
+
+%@info:
+%! @deftypefn {Function File} {[result,info] =} check (@var{M},@var{options},@var{oo})
+%! @anchor{check}
+%! @sp 1
+%! Checks determinacy conditions by computing the generalized eigenvalues.
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item M
+%! Matlab's structure describing the model (initialized by dynare).
+%! @item options
+%! Matlab's structure describing the options (initialized by dynare).
+%! @item oo
+%! Matlab's structure gathering the results (initialized by dynare).
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item result
+%! Integer scalar equal to one (BK conditions are satisfied) or zero (otherwise).
+%! @item info
+%! Integer scalar, error code as returned by @ref{resol}.
+%! @end table
+%! @sp 2
+%! @strong{This function is called by:}
+%! @sp 1
+%! @ref{smm_objective}
+%! @sp 2
+%! @strong{This function calls:}
+%! @sp 1
+%! @ref{resol}
+%! None.
+%! @end deftypefn
+%@eod:
 
 % Copyright (C) 2001-2011 Dynare Team
 %
@@ -28,46 +55,40 @@ function [result,info] = check
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ oo_
 
-
-temp_options = options_;
-tempex = oo_.exo_simul;
-if ~options_.initval_file && M_.exo_nbr > 1
-    oo_.exo_simul = ones(M_.maximum_lead+M_.maximum_lag+1,1)*oo_.exo_steady_state';
+if ~options.initval_file && M.exo_nbr > 1
+    oo.exo_simul = ones(M.maximum_lead+M.maximum_lag+1,1)*oo.exo_steady_state';
 end
 
-options_.order = 1;
+options.order = 1;
 
-if isempty(options_.qz_criterium)
-    options_.qz_criterium = 1+1e-6;
+if isempty(options.qz_criterium)
+    options.qz_criterium = 1+1e-6;
 end
 
-[dr, info] = resol(oo_.steady_state,1);
+[dr, info] = resol(oo.steady_state,1);
 
-oo_.dr = dr;
+oo.dr = dr;
 
 if info(1) ~= 0 && info(1) ~= 3 && info(1) ~= 4
-    print_info(info, options_.noprint);
-end  
-
-oo_.exo_simul = tempex;
+    print_info(info, options.noprint);
+end
 
 eigenvalues_ = dr.eigval;
-if (options_.block)
+if (options.block)
     nyf = dr.nyf;
 else
-    nyf = nnz(dr.kstate(:,2)>M_.maximum_endo_lag+1);
+    nyf = nnz(dr.kstate(:,2)>M.maximum_endo_lag+1);
 end;
 [m_lambda,i]=sort(abs(eigenvalues_));
-n_explod = nnz(abs(eigenvalues_) > options_.qz_criterium);
+n_explod = nnz(abs(eigenvalues_) > options.qz_criterium);
 
 result = 0;
 if (nyf== n_explod) && (dr.rank == nyf)
     result = 1;
 end
 
-if options_.noprint == 0
+if options.noprint == 0
     disp(' ')
     disp('EIGENVALUES:')
     disp(sprintf('%16s %16s %16s\n','Modulus','Real','Imaginary'))
@@ -83,5 +104,3 @@ if options_.noprint == 0
     end
     disp(' ')
 end
-
-options_ = temp_options;
