@@ -1,4 +1,4 @@
-function bounds = prior_bounds(bayestopt,option)
+function bounds = prior_bounds(bayestopt,options)
 
 %@info:
 %! @deftypefn {Function File} {@var{bounds} =} prior_bounds (@var{bayesopt},@var{option})
