@@ -48,7 +48,8 @@ steady_;
 
 %  Compute the first order perturbation reduced form.
 old_options_order = options_.order; options_.order = 1;
-[oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
+[dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
+oo_.dr = dr;
 options_.order = old_options_order;
 
 % Set various options.
