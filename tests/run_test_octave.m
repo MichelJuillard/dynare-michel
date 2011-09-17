@@ -174,7 +174,6 @@ if size(failedBase,2) > 0 || size(failedBlock,2) > 0
   end
   printf("***************************************\n\n");
   fprintf(fid,"***************************************\n\n");
-  clear -all
   fclose(fid);
   error("make check-octave FAILED");
 else
