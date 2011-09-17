@@ -18,7 +18,7 @@ function [loss,vx,info]=osr_obj(x,i_params,i_var,weights);
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ oo_ optimal_Q_ it_
+global M_ oo_ options_ optimal_Q_ it_
 %  global ys_ Sigma_e_ endo_nbr exo_nbr optimal_Q_ it_ ykmin_ options_
 
 vx = [];
@@ -27,7 +27,7 @@ M_.params(i_params) = x;
 
 % don't change below until the part where the loss function is computed
 it_ = M_.maximum_lag+1;
-[dr,info] = resol(oo_.steady_state,0);
+[dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 
 switch info(1)
   case 1
@@ -54,7 +54,7 @@ switch info(1)
   otherwise
 end
 
-vx = get_variance_of_endogenous_variables(dr,i_var);  
+vx = get_variance_of_endogenous_variables(dr,i_var);
 loss = weights(:)'*vx(:);
 
 

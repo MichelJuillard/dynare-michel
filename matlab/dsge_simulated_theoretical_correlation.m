@@ -1,16 +1,16 @@
 function [nvar,vartan,CorrFileNumber] = dsge_simulated_theoretical_correlation(SampleSize,nar,M_,options_,oo_,type)
 % This function computes the posterior or prior distribution of the endogenous
-% variables second order moments. 
-% 
-% INPUTS 
+% variables second order moments.
+%
+% INPUTS
 %   SampleSize   [integer]
-%   nar          [integer] 
+%   nar          [integer]
 %   M_           [structure]
 %   options_     [structure]
 %   oo_          [structure]
 %   type         [string]
 %
-% OUTPUTS 
+% OUTPUTS
 %   nvar           [integer]
 %   vartan         [char]
 %   CorrFileNumber [integer]
@@ -98,7 +98,7 @@ for file = 1:NumberOfDrawsFiles
             dr = pdraws{linee,2};
         else
             set_parameters(pdraws{linee,1});
-            [dr,info] = resol(oo_.steady_state,0);
+            [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
         end
         tmp = th_autocovariances(dr,ivar,M_,options_,nodecomposition);
         for i=1:nar

@@ -2,13 +2,13 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
 % This function builds a (big) prior sample.
 %
 % INPUTS
-%   drsave      [integer]    Scalar. If equal to 1, then dr structure is saved with each prior draw.     
+%   drsave      [integer]    Scalar. If equal to 1, then dr structure is saved with each prior draw.
 %   M_          [structure]  Model description.
-%   bayestopt_  [structure]  Prior distribution description.  
+%   bayestopt_  [structure]  Prior distribution description.
 %   options_    [structure]  Global options of Dynare.
-%    
+%
 % OUTPUTS:
-%   results     [structure]  Various statistics. 
+%   results     [structure]  Various statistics.
 %
 % SPECIAL REQUIREMENTS
 %   none
@@ -80,7 +80,7 @@ while iteration < NumberOfSimulations
     loop_indx = loop_indx+1;
     params = prior_draw();
     set_all_parameters(params);
-    [dr,INFO] = resol(oo_.steady_state,work);
+    [dr,INFO,M_,options_,oo_] = resol(work,M_,options_,oo_);
     switch INFO(1)
       case 0
         file_line_number = file_line_number + 1 ;

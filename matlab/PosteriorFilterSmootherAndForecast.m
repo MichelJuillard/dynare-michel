@@ -5,14 +5,14 @@ function PosteriorFilterSmootherAndForecast(Y,gend, type,data_index)
 %
 % INPUTS
 %    Y:      data
-%    gend:   number of observations 
+%    gend:   number of observations
 %    type:   posterior
 %            prior
 %            gsa
-%    
+%
 % OUTPUTS
 %    none
-%        
+%
 % SPECIAL REQUIREMENTS
 %    none
 
@@ -59,8 +59,8 @@ CheckPath('Plots/');
 DirectoryName = CheckPath('metropolis');
 load([ DirectoryName '/'  M_.fname '_mh_history.mat'])
 FirstMhFile = record.KeepedDraws.FirstMhFile;
-FirstLine = record.KeepedDraws.FirstLine; 
-TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); LastMhFile = TotalNumberOfMhFiles; 
+FirstLine = record.KeepedDraws.FirstLine;
+TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); LastMhFile = TotalNumberOfMhFiles;
 TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
 NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
 clear record;
@@ -136,17 +136,17 @@ for b=1:B
     %deep = GetOneDraw(NumberOfDraws,FirstMhFile,LastMhFile,FirstLine,MAX_nruns,DirectoryName);
     [deep, logpo] = GetOneDraw(type);
     set_all_parameters(deep);
-    dr = resol(oo_.steady_state,0);
+    [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
     [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = ...
         DsgeSmoother(deep,gend,Y,data_index);
-    
+
     if options_.loglinear
         stock_smooth(dr.order_var,:,irun1) = alphahat(1:endo_nbr,:)+ ...
             repmat(log(dr.ys(dr.order_var)),1,gend);
     else
         stock_smooth(dr.order_var,:,irun1) = alphahat(1:endo_nbr,:)+ ...
             repmat(dr.ys(dr.order_var),1,gend);
-    end    
+    end
     if nvx
         stock_innov(:,:,irun2)  = etahat;
     end
@@ -191,7 +191,7 @@ for b=1:B
         stock_forcst_mean(:,:,irun6) = yf';
         stock_forcst_total(:,:,irun7) = yf1';
     end
-    
+
     irun1 = irun1 + 1;
     irun2 = irun2 + 1;
     irun3 = irun3 + 1;
@@ -206,28 +206,28 @@ for b=1:B
         save([DirectoryName '/' M_.fname '_smooth' int2str(ifil1) '.mat'],'stock');
         irun1 = 1;
     end
-    
+
     if nvx && (irun2 > MAX_ninno || b == B)
         stock = stock_innov(:,:,1:irun2-1);
         ifil2 = ifil2 + 1;
         save([DirectoryName '/' M_.fname '_inno' int2str(ifil2) '.mat'],'stock');
         irun2 = 1;
     end
-    
+
     if nvn && (irun3 > MAX_error || b == B)
         stock = stock_error(:,:,1:irun3-1);
         ifil3 = ifil3 + 1;
         save([DirectoryName '/' M_.fname '_error' int2str(ifil3) '.mat'],'stock');
         irun3 = 1;
     end
-    
+
     if naK && (irun4 > MAX_naK || b == B)
         stock = stock_filter(:,:,:,1:irun4-1);
         ifil4 = ifil4 + 1;
         save([DirectoryName '/' M_.fname '_filter' int2str(ifil4) '.mat'],'stock');
         irun4 = 1;
     end
-    
+
     if irun5 > MAX_nruns || b == B
         stock = stock_param(1:irun5-1,:);
         ifil5 = ifil5 + 1;

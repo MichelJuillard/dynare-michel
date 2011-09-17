@@ -69,7 +69,7 @@ elseif options_.discretionary_policy
     end
     [oo_.dr,ys,info] = discretionary_policy_1(oo_,options_.instruments);
 else
-    [oo_.dr, info] = resol(oo_.steady_state,0);
+    [oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 end
 
 if info(1)
@@ -137,14 +137,14 @@ if options_.nomoments == 0
     if PI_PCL_solver
         PCL_Part_info_moments (0, PCL_varobs, oo_.dr, i_var);
     elseif options_.periods == 0
-        disp_th_moments(oo_.dr,var_list); 
+        disp_th_moments(oo_.dr,var_list);
     else
         disp_moments(oo_.endo_simul,var_list);
     end
 end
 
 
-if options_.irf 
+if options_.irf
     var_listTeX = M_.endo_names_tex(i_var,:);
 
     if TeX
@@ -169,7 +169,7 @@ if options_.irf
                       options_.replic, options_.order);
             end
             if options_.relative_irf
-                y = 100*y/cs(i,i); 
+                y = 100*y/cs(i,i);
             end
             irfs   = [];
             mylist = [];
@@ -180,7 +180,7 @@ if options_.irf
                 assignin('base',[deblank(M_.endo_names(i_var(j),:)) '_' deblank(M_.exo_names(i,:))],...
                          y(i_var(j),:)');
                 eval(['oo_.irfs.' deblank(M_.endo_names(i_var(j),:)) '_' ...
-                      deblank(M_.exo_names(i,:)) ' = y(i_var(j),:);']); 
+                      deblank(M_.exo_names(i,:)) ' = y(i_var(j),:);']);
                 if max(y(i_var(j),:)) - min(y(i_var(j),:)) > 1e-10
                     irfs  = cat(1,irfs,y(i_var(j),:));
                     if isempty(mylist)
@@ -280,7 +280,7 @@ if options_.irf
                         %                                       close(hh);
                     end
                     hh = figure('Name',['Orthogonalized shock to ' tit(i,:) ' figure ' int2str(nbplt) '.']);
-                    m = 0; 
+                    m = 0;
                     for plt = 1:number_of_plots_to_draw-(nbplt-1)*nstar;
                         m = m+1;
                         subplot(lr,lc,m);
@@ -333,4 +333,4 @@ end
 
 options_ = options_old;
 % temporary fix waiting for local options
-options_.partial_information = 0; 
+options_.partial_information = 0;

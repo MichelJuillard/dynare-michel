@@ -9,10 +9,10 @@ function dynare_MC(var_list_,OutDir,data,rawdata,data_info)
 % Written by Marco Ratto, 2006
 % Joint Research Centre, The European Commission,
 % (http://eemc.jrc.ec.europa.eu/),
-% marco.ratto@jrc.it 
+% marco.ratto@jrc.it
 %
-% Disclaimer: This software is not subject to copyright protection and is in the public domain. 
-% It is an experimental system. The Joint Research Centre of European Commission 
+% Disclaimer: This software is not subject to copyright protection and is in the public domain.
+% It is an experimental system. The Joint Research Centre of European Commission
 % assumes no responsibility whatsoever for its use by other parties
 % and makes no guarantees, expressed or implied, about its quality, reliability, or any other
 % characteristic. We would appreciate acknowledgement if the software is used.
@@ -20,7 +20,7 @@ function dynare_MC(var_list_,OutDir,data,rawdata,data_info)
 % M. Ratto, Global Sensitivity Analysis for Macroeconomic models, MIMEO, 2006.
 %
 
-global M_ options_ oo_ estim_params_ 
+global M_ options_ oo_ estim_params_
 global bayestopt_
 
 % if options_.filtered_vars ~= 0 & options_.filter_step_ahead == 0
@@ -31,7 +31,7 @@ global bayestopt_
 % else
 %   options_.nk = 0;
 % end
-% 
+%
 options_.filter_step_ahead=1;
 options_.nk = 1;
 
@@ -98,7 +98,7 @@ for b=1:B
   ib=ib+1;
   deep = x(b,:)';
   set_all_parameters(deep);
-  dr = resol(oo_.steady_state,0);
+  [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
   %deep(1:offset) = xparam1(1:offset);
   logpo2(b,1) = DsgeLikelihood(deep,gend,data,data_index,number_of_observations,no_more_missing_observations);
   if opt_gsa.lik_only==0,
@@ -115,7 +115,7 @@ for b=1:B
     stock_filter = zeros(M_.endo_nbr,gend+1,40);
     stock_ys = zeros(40, M_.endo_nbr);
   end
-  end  
+  end
   waitbar(b/B,h,['MC smoother ...',num2str(b),'/',num2str(B)]);
 end
 close(h)

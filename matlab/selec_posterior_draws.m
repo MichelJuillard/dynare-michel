@@ -1,24 +1,24 @@
 function SampleAddress = selec_posterior_draws(SampleSize,drsize)
 % Selects a sample of draws from the posterior distribution and if nargin>1
 % saves the draws in _pdraws mat files (metropolis folder). If drsize>0
-% the dr structure, associated to the parameters, is also saved in _pdraws. 
+% the dr structure, associated to the parameters, is also saved in _pdraws.
 % This routine is more efficient than metropolis_draw.m because here an
-% _mh file cannot be opened twice. 
-%   
+% _mh file cannot be opened twice.
+%
 % INPUTS
 %   o SampleSize     [integer]  Size of the sample to build.
-%   o drsize         [double]   structure dr is drsize megaoctets. 
+%   o drsize         [double]   structure dr is drsize megaoctets.
 %
 % OUTPUTS
-%   o SampleAddress  [integer]  A (SampleSize*4) array, each line specifies the 
-%                               location of a posterior draw: 
+%   o SampleAddress  [integer]  A (SampleSize*4) array, each line specifies the
+%                               location of a posterior draw:
 %                                  Column 2 --> Chain number
-%                                  Column 3 --> (mh) File number    
+%                                  Column 3 --> (mh) File number
 %                                  Column 4 --> (mh) line number
 %
 % SPECIAL REQUIREMENTS
 %   None.
-% 
+%
 
 % Copyright (C) 2006-2011 Dynare Team
 %
@@ -46,7 +46,7 @@ npar = npar + estim_params_.ncx;
 npar = npar + estim_params_.ncn;
 npar = npar + estim_params_.np;
 
-% Select one task: 
+% Select one task:
 switch nargin
   case 1
     info = 0;
@@ -62,14 +62,14 @@ switch nargin
     error(['selec_posterior_draws:: Unexpected number of input arguments!'])
 end
 
-% Get informations about the mcmc: 
+% Get informations about the mcmc:
 MhDirectoryName = CheckPath('metropolis');
 fname = [ MhDirectoryName '/' M_.fname];
 load([ fname '_mh_history.mat']);
 FirstMhFile = record.KeepedDraws.FirstMhFile;
-FirstLine = record.KeepedDraws.FirstLine; 
-TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); 
-LastMhFile = TotalNumberOfMhFiles; 
+FirstLine = record.KeepedDraws.FirstLine;
+TotalNumberOfMhFiles = sum(record.MhDraws(:,2));
+LastMhFile = TotalNumberOfMhFiles;
 TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
 NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
 MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
@@ -87,7 +87,7 @@ for i = 1:SampleSize
         MhLineNumber = FirstLine+DrawNumber-1;
     else
         DrawNumber  = DrawNumber-(MAX_nruns-FirstLine+1);
-        MhFileNumber = FirstMhFile+ceil(DrawNumber/MAX_nruns); 
+        MhFileNumber = FirstMhFile+ceil(DrawNumber/MAX_nruns);
         MhLineNumber = DrawNumber-(MhFileNumber-FirstMhFile-1)*MAX_nruns;
     end
     SampleAddress(i,3) = MhFileNumber;
@@ -111,7 +111,7 @@ if info
             pdraws(i,1) = {x2(SampleAddress(i,4),:)};
             if info-1
                 set_parameters(pdraws{i,1});
-                [dr,info] = resol(oo_.steady_state,0);
+                [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
                 pdraws(i,2) = { dr };
             end
             old_mhfile = mhfile;
@@ -121,7 +121,7 @@ if info
         save([fname '_posterior_draws1.mat'],'pdraws')
     else% The posterior draws are saved in xx files.
         NumberOfDrawsPerFile = fix(MAX_mega_bytes/drawsize);
-        NumberOfFiles = ceil(SampleSize*drawsize/MAX_mega_bytes);      
+        NumberOfFiles = ceil(SampleSize*drawsize/MAX_mega_bytes);
         NumberOfLines = SampleSize - (NumberOfFiles-1)*NumberOfDrawsPerFile;
         linee = 0;
         fnum  = 1;
@@ -138,7 +138,7 @@ if info
             pdraws(linee,1) = {x2(SampleAddress(i,4),:)};
             if info-1
                 set_parameters(pdraws{linee,1});
-                [dr,info] = resol(oo_.steady_state,0);
+                [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
                 pdraws(linee,2) = { dr };
             end
             old_mhfile = mhfile;

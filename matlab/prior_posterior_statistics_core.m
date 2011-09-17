@@ -162,7 +162,7 @@ for b=fpar:B
         end
     end
     set_all_parameters(deep);
-    [dr,info] = resol(oo_.steady_state,0);
+    [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 
     if run_smoother
         [alphahat,etahat,epsilonhat,alphatilde,SteadyState,trend_coeff,aK] = ...

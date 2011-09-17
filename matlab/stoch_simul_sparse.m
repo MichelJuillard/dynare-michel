@@ -38,13 +38,13 @@ end
 
 check_model;
 
-[oo_.dr, info] = resol(oo_.steady_state,0);
+[oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 
 if info(1)
     options_ = options_old;
     print_info(info, options_.noprint);
     return
-end  
+end
 
 oo_dr_kstate = [];
 oo_dr_nstatic = 0;
@@ -74,7 +74,7 @@ if ~options_.noprint
 end
 
 if options_.periods == 0 && options_.nomoments == 0
-    disp_th_moments(oo_.dr,var_list); 
+    disp_th_moments(oo_.dr,var_list);
 elseif options_.periods ~= 0
     if options_.periods < options_.drop
         disp(['STOCH_SIMUL error: The horizon of simulation is shorter' ...
@@ -91,7 +91,7 @@ end
 
 
 
-if options_.irf 
+if options_.irf
     if size(var_list,1) == 0
         var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
         if TeX
@@ -138,7 +138,7 @@ if options_.irf
             y=irf(oo_.dr,cs(M_.exo_names_orig_ord,i), options_.irf, options_.drop, ...
                   options_.replic, options_.order);
             if options_.relative_irf
-                y = 100*y/cs(i,i); 
+                y = 100*y/cs(i,i);
             end
             irfs   = [];
             mylist = [];
@@ -149,7 +149,7 @@ if options_.irf
                 assignin('base',[deblank(M_.endo_names(ivar(j),:)) '_' deblank(M_.exo_names(i,:))],...
                          y(ivar(j),:)');
                 eval(['oo_.irfs.' deblank(M_.endo_names(ivar(j),:)) '_' ...
-                      deblank(M_.exo_names(i,:)) ' = y(ivar(j),:);']); 
+                      deblank(M_.exo_names(i,:)) ' = y(ivar(j),:);']);
                 if max(y(ivar(j),:)) - min(y(ivar(j),:)) > 1e-10
                     irfs  = cat(1,irfs,y(ivar(j),:));
                     if isempty(mylist)
@@ -249,7 +249,7 @@ if options_.irf
                         %                                       close(hh);
                     end
                     hh = figure('Name',['Orthogonalized shock to ' tit(i,:) ' figure ' int2str(nbplt) '.']);
-                    m = 0; 
+                    m = 0;
                     for plt = 1:number_of_plots_to_draw-(nbplt-1)*nstar;
                         m = m+1;
                         subplot(lr,lc,m);

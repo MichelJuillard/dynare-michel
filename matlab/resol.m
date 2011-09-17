@@ -1,32 +1,80 @@
-function [dr,info]=resol(steady_state_0,check_flag)
-% function [dr,info]=resol(steady_state_0,check_flag)
-% Computes first and second order approximations
-%
-% INPUTS
-%    steady_state_0: vector of variables in steady state
-%    check_flag=0:   all the approximation is computed
-%    check_flag=1:   computes only the eigenvalues
-%
-% OUTPUTS
-%    dr:             structure of decision rules for stochastic simulations
-%    info=1:         the model doesn't determine the current variables '...' uniquely
-%    info=2:         MJDGGES returns the following error code'
-%    info=3:         Blanchard Kahn conditions are not satisfied: no stable '...' equilibrium
-%    info=4:         Blanchard Kahn conditions are not satisfied:'...' indeterminacy
-%    info=5:         Blanchard Kahn conditions are not satisfied:'...' indeterminacy due to rank failure
-%    info=6:         The jacobian evaluated at the steady state is complex.
-%    info=19:        The steadystate file did not compute the steady state (inconsistent deep parameters).
-%    info=20:        can't find steady state info(2) contains sum of sqare residuals
-%    info=21:        steady state is complex valued scalars
-%                               info(2) contains sum of square of
-%                               imaginary part of steady state
-%    info=22:        steady state has NaNs
-%    info=23:        M_.params has been updated in the steady state file and has complex valued scalars.
-%    info=24:        M_.params has been updated in the steady state file and has some NaNs.
-%    info=30:        Variance can't be computed
-%
-% SPECIAL REQUIREMENTS
-%    none
+function [dr,info,M,options,oo] = resol(check_flag,M,options,oo)
+
+%@info:
+%! @deftypefn {Function File} {[@var{dr},@var{info},@var{M},@var{options},@var{oo}] =} resol (@var{check_flag},@var{M},@var{options},@var{oo})
+%! @anchor{resol}
+%! @sp 1
+%! Computes first and second order reduced form of the DSGE model.
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item check_flag
+%! Integer scalar, equal to 0 if all the approximation is required, positive if only the eigenvalues are to be computed.
+%! @item M
+%! Matlab's structure describing the model (initialized by @code{dynare}).
+%! @item options
+%! Matlab's structure describing the options (initialized by @code{dynare}).
+%! @item oo
+%! Matlab's structure gathering the results (initialized by @code{dynare}).
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item dr
+%! Matlab's structure describing the reduced form solution of the model.
+%! @item info
+%! Integer scalar, error code.
+%! @sp 1
+%! @table @ @code
+%! @item info==0
+%! No error.
+%! @item info==1
+%! The model doesn't determine the current variables uniquely.
+%! @item info==2
+%! MJDGGES returned an error code.
+%! @item info==3
+%! Blanchard & Kahn conditions are not satisfied: no stable equilibrium.
+%! @item info==4
+%! Blanchard & Kahn conditions are not satisfied: indeterminacy.
+%! @item info==5
+%! Blanchard & Kahn conditions are not satisfied: indeterminacy due to rank failure.
+%! @item info==6
+%! The jacobian evaluated at the deterministic steady state is complex.
+%! @item info==19
+%! The steadystate routine thrown an exception (inconsistent deep parameters).
+%! @item info==20
+%! Cannot find the steady state, info(2) contains the sum of square residuals (of the static equations).
+%! @item info==21
+%! The steady state is complex, info(2) contains the sum of square of imaginary parts of the steady state.
+%! @item info==22
+%! The steady has NaNs.
+%! @item info==23
+%! M_.params has been updated in the steadystate routine and has complex valued scalars.
+%! @item info==24
+%! M_.params has been updated in the steadystate routine and has some NaNs.
+%! @item info==30
+%! Ergodic variance can't be computed.
+%! @end table
+%! @sp 1
+%! @item M
+%! Matlab's structure describing the model (initialized by @code{dynare}).
+%! @item options
+%! Matlab's structure describing the options (initialized by @code{dynare}).
+%! @item oo
+%! Matlab's structure gathering the results (initialized by @code{dynare}).
+%! @end table
+%! @sp 2
+%! @strong{This function is called by:}
+%! @sp 1
+%! @ref{dynare_estimation_init}
+%! @sp 2
+%! @strong{This function calls:}
+%! @sp 1
+%! None.
+%! @end deftypefn
+%@eod:
 
 % Copyright (C) 2001-2011 Dynare Team
 %
@@ -45,94 +93,93 @@ function [dr,info]=resol(steady_state_0,check_flag)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ oo_
 global it_
 
-jacobian_flag = 0; 
+jacobian_flag = 0;
 
-if isfield(oo_,'dr');
-    dr = oo_.dr;
+if isfield(oo,'dr');
+    dr = oo.dr;
 end
 
-options_ = set_default_option(options_,'jacobian_flag',1);
+options = set_default_option(options,'jacobian_flag',1);
 info = 0;
 
-it_ = M_.maximum_lag + 1 ;
+it_ = M.maximum_lag + 1 ;
 
-if M_.exo_nbr == 0
-    oo_.exo_steady_state = [] ;
+if M.exo_nbr == 0
+    oo.exo_steady_state = [] ;
 end
 
-params0 = M_.params;
+params0 = M.params;
 
 % check if steady_state_0 is steady state
-tempex = oo_.exo_simul;
-oo_.exo_simul = repmat(oo_.exo_steady_state',M_.maximum_lag+M_.maximum_lead+1,1);
-if M_.exo_det_nbr > 0 
-    tempexdet = oo_.exo_det_simul;
-    oo_.exo_det_simul = repmat(oo_.exo_det_steady_state',M_.maximum_lag+M_.maximum_lead+1,1);
+tempex = oo.exo_simul;
+oo.exo_simul = repmat(oo.exo_steady_state',M.maximum_lag+M.maximum_lead+1,1);
+if M.exo_det_nbr > 0
+    tempexdet = oo.exo_det_simul;
+    oo.exo_det_simul = repmat(oo.exo_det_steady_state',M.maximum_lag+M.maximum_lead+1,1);
 end
 steady_state = steady_state_0;
 check1 = 0;
 % testing for steadystate file
-if (~options_.bytecode)
-    fh = str2func([M_.fname '_static']);
+if (~options.bytecode)
+    fh = str2func([M.fname '_static']);
 end
 
-if options_.steadystate_flag
-    [steady_state,check1] = feval([M_.fname '_steadystate'],steady_state,...
-                           [oo_.exo_steady_state; ...
-                        oo_.exo_det_steady_state]);
-    if size(steady_state,1) < M_.endo_nbr 
-        if length(M_.aux_vars) > 0
-            steady_state = add_auxiliary_variables_to_steadystate(steady_state,M_.aux_vars,...
-                                                           M_.fname,...
-                                                           oo_.exo_steady_state,...
-                                                           oo_.exo_det_steady_state,...
-                                                           M_.params,...
-                                                           options_.bytecode);
+if options.steadystate_flag
+    [steady_state,check1] = feval([M.fname '_steadystate'],steady_state,...
+                           [oo.exo_steady_state; ...
+                        oo.exo_det_steady_state]);
+    if size(steady_state,1) < M.endo_nbr
+        if length(M.aux_vars) > 0
+            steady_state = add_auxiliary_variables_to_steadystate(steady_state,M.aux_vars,...
+                                                           M.fname,...
+                                                           oo.exo_steady_state,...
+                                                           oo.exo_det_steady_state,...
+                                                           M.params,...
+                                                           options.bytecode);
         else
-            error([M_.fname '_steadystate.m doesn''t match the model']);
+            error([M.fname '_steadystate.m doesn''t match the model']);
         end
     end
 
 else
     % testing if steady_state_0 isn't a steady state or if we aren't computing Ramsey policy
-    if  options_.ramsey_policy == 0
-        if options_.linear == 0
+    if  options.ramsey_policy == 0
+        if options.linear == 0
             % nonlinear models
-            if (options_.block == 0 && options_.bytecode == 0)
-                if max(abs(feval(fh,steady_state,[oo_.exo_steady_state; ...
-                                        oo_.exo_det_steady_state], M_.params))) > options_.dynatol
-                    [steady_state,check1] = dynare_solve(fh,steady_state,options_.jacobian_flag,...
-                                                  [oo_.exo_steady_state; ...
-                                        oo_.exo_det_steady_state], M_.params);
+            if (options.block == 0 && options.bytecode == 0)
+                if max(abs(feval(fh,steady_state,[oo.exo_steady_state; ...
+                                        oo.exo_det_steady_state], M.params))) > options.dynatol
+                    [steady_state,check1] = dynare_solve(fh,steady_state,options.jacobian_flag,...
+                                                  [oo.exo_steady_state; ...
+                                        oo.exo_det_steady_state], M.params);
                 end
             else
                 [steady_state,check1] = dynare_solve_block_or_bytecode(steady_state,...
-                                                                [oo_.exo_steady_state; ...
-                                    oo_.exo_det_steady_state], M_.params);
+                                                                [oo.exo_steady_state; ...
+                                    oo.exo_det_steady_state], M.params);
             end;
         else
-            if (options_.block == 0 && options_.bytecode == 0)
+            if (options.block == 0 && options.bytecode == 0)
                 % linear models
-                [fvec,jacob] = feval(fh,steady_state,[oo_.exo_steady_state;...
-                                    oo_.exo_det_steady_state], M_.params);
+                [fvec,jacob] = feval(fh,steady_state,[oo.exo_steady_state;...
+                                    oo.exo_det_steady_state], M.params);
                 if max(abs(fvec)) > 1e-12
                     steady_state = steady_state-jacob\fvec;
                 end
             else
                 [steady_state,check1] = dynare_solve_block_or_bytecode(steady_state,...
-                                                                [oo_.exo_steady_state; ...
-                                    oo_.exo_det_steady_state], M_.params);
+                                                                [oo.exo_steady_state; ...
+                                    oo.exo_det_steady_state], M.params);
             end;
         end
     end
 end
 
-% test if M_.params_has changed.
-if options_.steadystate_flag
-    updated_params_flag = max(abs(M_.params-params0))>1e-12;
+% test if M.params_has changed.
+if options.steadystate_flag
+    updated_params_flag = max(abs(M.params-params0))>1e-12;
 else
     updated_params_flag = 0;
 end
@@ -141,12 +188,12 @@ end
 dr.ys = steady_state;
 
 if check1
-    if options_.steadystate_flag
+    if options.steadystate_flag
         info(1)= 19;
         resid = check1 ;
     else
         info(1)= 20;
-        resid = feval(fh,steady_state_0,oo_.exo_steady_state, M_.params);
+        resid = feval(fh,steady_state_0,oo.exo_steady_state, M.params);
     end
     info(2) = resid'*resid ;
     return
@@ -167,14 +214,14 @@ if ~isempty(find(isnan(steady_state)))
     return
 end
 
-if options_.steadystate_flag && updated_params_flag && ~isreal(M_.params)
+if options.steadystate_flag && updated_params_flag && ~isreal(M.params)
     info(1) = 23;
-    info(2) = sum(imag(M_.params).^2);
+    info(2) = sum(imag(M.params).^2);
     dr.ys = steady_state;
     return
 end
 
-if options_.steadystate_flag && updated_params_flag  && ~isempty(find(isnan(M_.params)))
+if options.steadystate_flag && updated_params_flag  && ~isempty(find(isnan(M.params)))
     info(1) = 24;
     info(2) = NaN;
     dr.ys = steady_state;
@@ -182,22 +229,17 @@ if options_.steadystate_flag && updated_params_flag  && ~isempty(find(isnan(M_.p
 end
 
 
-if options_.block
-    [dr,info,M_,options_,oo_] = dr_block(dr,check_flag,M_,options_,oo_);
+if options.block
+    [dr,info,M,options,oo] = dr_block(dr,check_flag,M,options,oo);
 else
-    [dr,info,M_,options_,oo_] = dr1(dr,check_flag,M_,options_,oo_);
+    [dr,info,M,options,oo] = dr1(dr,check_flag,M,options,oo);
 end
 if info(1)
     return
 end
 
-if M_.exo_det_nbr > 0
-    oo_.exo_det_simul = tempexdet;
+if M.exo_det_nbr > 0
+    oo.exo_det_simul = tempexdet;
 end
-oo_.exo_simul = tempex;
+oo.exo_simul = tempex;
 tempex = [];
-
-% 01/01/2003 MJ added dr_algo == 1
-% 08/24/2001 MJ uses Schmitt-Grohe and Uribe (2001) constant correction
-%               in dr.ghs2 
-% 05/26/2003 MJ added temporary values for oo_.exo_simul

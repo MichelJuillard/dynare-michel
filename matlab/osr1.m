@@ -46,7 +46,7 @@ dr = set_state_space(oo_.dr,M_);
 if exist([M_.fname '_steadystate'])
     [ys,check1] = feval([M_.fname '_steadystate'],oo_.steady_state,...
                         [oo_.exo_steady_state; oo_.exo_det_steady_state]);
-    if size(ys,1) < M_.endo_nbr 
+    if size(ys,1) < M_.endo_nbr
         if length(M_.aux_vars) > 0
             ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars,...
                                                         M_.fname,...
@@ -114,6 +114,6 @@ for i=1:np
 end
 disp(sprintf('Objective function : %16.6g\n',f));
 disp(' ')
-oo_.dr=resol(oo_.steady_state,0);
+[oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 
 % 05/10/03 MJ modified to work with osr.m and give full report

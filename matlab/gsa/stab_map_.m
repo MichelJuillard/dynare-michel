@@ -101,12 +101,12 @@ if fload==0,
     %   if prepSA
     %     T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),Nsam/2);
     %   end
-    
+
     if isfield(dr_,'ghx'),
         egg=zeros(length(dr_.eigval),Nsam);
     end
     yys=zeros(length(dr_.ys),Nsam);
-    
+
     if opt_gsa.morris == 1
         [lpmat, OutFact] = Sampling_Function_2(nliv, np+nshock, ntra, ones(np+nshock, 1), zeros(np+nshock,1), []);
         lpmat = lpmat.*(nliv-1)/nliv+1/nliv/2;
@@ -129,7 +129,7 @@ if fload==0,
             for j=1:np,
                 lpmat(:,j) = randperm(Nsam)'./(Nsam+1); %latin hypercube
             end
-            
+
         end
     end
     %   try
@@ -220,7 +220,7 @@ if fload==0,
                 ub=min([bayestopt_.ub(j+nshock) xparam1(j+nshock)*(1+neighborhood_width)]);
                 lb=max([bayestopt_.lb(j+nshock) xparam1(j+nshock)*(1-neighborhood_width)]);
                 lpmat(:,j)=lpmat(:,j).*(ub-lb)+lb;
-            end            
+            end
         else
             d = chol(inv(hh));
             lp=randn(Nsam*2,nshock+np)*d+kron(ones(Nsam*2,1),xparam1');
@@ -318,7 +318,7 @@ if fload==0,
     iunstable=iunstable(find(iunstable));   % unstable params
     iindeterm=iindeterm(find(iindeterm));  % indeterminacy
     iwrong=iwrong(find(iwrong));  % dynare could not find solution
-    
+
     %     % map stable samples
     %     istable=[1:Nsam];
     %     for j=1:Nsam,
@@ -368,7 +368,7 @@ if fload==0,
                 'bkpprior','lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
                 'egg','yys','T','nspred','nboth','nfwrd')
         end
-        
+
     else
         if ~prepSA
             save([OutputDirectoryName '/' fname_ '_mc'], ...
@@ -388,8 +388,8 @@ else
     end
     load(filetoload,'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd')
     Nsam = size(lpmat,1);
-    
-    
+
+
     if prepSA & isempty(strmatch('T',who('-file', filetoload),'exact')),
         h = waitbar(0,'Please wait...');
         options_.periods=0;
@@ -486,7 +486,7 @@ if length(iunstable)>0 & length(iunstable)<Nsam,
             stab_map_1(lpmat, [1:Nsam], iindeterm, [aname, '_indet'], 1, indindet, OutputDirectoryName);
         end
     end
-    
+
     if ~isempty(ixun),
         [proba, dproba] = stab_map_1(lpmat, [1:Nsam], ixun, [aname, '_unst'],0);
 %         indunst=find(dproba>ksstat);
@@ -500,7 +500,7 @@ if length(iunstable)>0 & length(iunstable)<Nsam,
             stab_map_1(lpmat, [1:Nsam], ixun, [aname, '_unst'], 1, indunst, OutputDirectoryName);
         end
     end
-    
+
     if ~isempty(iwrong),
         [proba, dproba] = stab_map_1(lpmat, [1:Nsam], iwrong, [aname, '_wrong'],0);
 %         indwrong=find(dproba>ksstat);
@@ -514,13 +514,13 @@ if length(iunstable)>0 & length(iunstable)<Nsam,
             stab_map_1(lpmat, [1:Nsam], iwrong, [aname, '_wrong'], 1, indwrong, OutputDirectoryName);
         end
     end
-    
+
     disp(' ')
     disp('Starting bivariate analysis:')
-    
+
     c0=corrcoef(lpmat(istable,:));
     c00=tril(c0,-1);
-    
+
     stab_map_2(lpmat(istable,:),alpha2, pvalue_corr, asname, OutputDirectoryName);
     if length(iunstable)>10,
         stab_map_2(lpmat(iunstable,:),alpha2, pvalue_corr, auname, OutputDirectoryName);
@@ -534,12 +534,12 @@ if length(iunstable)>0 & length(iunstable)<Nsam,
     if length(iwrong)>10,
         stab_map_2(lpmat(iwrong,:),alpha2, pvalue_corr, awrongname, OutputDirectoryName);
     end
-    
+
     x0=0.5.*(bayestopt_.ub(1:nshock)-bayestopt_.lb(1:nshock))+bayestopt_.lb(1:nshock);
     x0 = [x0; lpmat(istable(1),:)'];
     if istable(end)~=Nsam
         M_.params(estim_params_.param_vals(:,1)) = lpmat(istable(1),:)';
-        [oo_.dr, info] = resol(oo_.steady_state,0);
+        [oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
         %     stoch_simul([]);
     end
 else
@@ -551,7 +551,7 @@ else
         disp('All parameter values in the specified ranges are not acceptable!')
         x0=[];
     end
-    
+
 end
 
 

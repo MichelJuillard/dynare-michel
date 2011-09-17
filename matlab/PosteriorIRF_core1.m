@@ -150,7 +150,7 @@ while fpar<npar
     end
     stock_param(irun2,:) = deep;
     set_parameters(deep);
-    [dr,info] = resol(oo_.steady_state,0);
+    [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
     if info(1)
         nosaddle = nosaddle + 1;
         fpar = fpar - 1;

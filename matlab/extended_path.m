@@ -1,7 +1,7 @@
 function time_series = extended_path(initial_conditions,sample_size,init)
 % Stochastic simulation of a non linear DSGE model using the Extended Path method (Fair and Taylor 1983). A time
-% series of size T  is obtained by solving T perfect foresight models. 
-%    
+% series of size T  is obtained by solving T perfect foresight models.
+%
 % INPUTS
 %  o initial_conditions     [double]    m*nlags array, where m is the number of endogenous variables in the model and
 %                                       nlags is the maximum number of lags.
@@ -9,13 +9,13 @@ function time_series = extended_path(initial_conditions,sample_size,init)
 %  o init                   [integer]   scalar, method of initialization of the perfect foresight equilibrium paths
 %                                                    init=0  previous solution is used,
 %                                                    init=1  a path generated with the first order reduced form is used.
-%                                                    init=2  mix of cases 0 and 1. 
-%   
+%                                                    init=2  mix of cases 0 and 1.
+%
 % OUTPUTS
 %  o time_series            [double]    m*sample_size array, the simulations.
-%    
+%
 % ALGORITHM
-%  
+%
 % SPECIAL REQUIREMENTS
 
 % Copyright (C) 2009-2010 Dynare Team
@@ -34,11 +34,11 @@ function time_series = extended_path(initial_conditions,sample_size,init)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-global M_ oo_ options_ 
+global M_ oo_ options_
 
 % Set default initial conditions.
-if isempty(initial_conditions) 
-    initial_conditions = repmat(oo_.steady_state,1,M_.maximum_lag); 
+if isempty(initial_conditions)
+    initial_conditions = repmat(oo_.steady_state,1,M_.maximum_lag);
 end
 
 % Set default value for the last input argument
@@ -50,7 +50,7 @@ end
 %options_.periods = 40;
 
 % Initialize the exogenous variables.
-make_ex_; 
+make_ex_;
 
 % Initialize the endogenous variables.
 make_y_;
@@ -59,7 +59,7 @@ make_y_;
 if init
     oldopt = options_;
     options_.order = 1;
-    [dr,info]=resol(oo_.steady_state,0);
+    [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
     oo_.dr = dr;
     options_ = oldopt;
     if init==2
@@ -68,16 +68,16 @@ if init
 end
 
 % Initialize the output array.
-time_series = NaN(M_.endo_nbr,sample_size+1); 
+time_series = NaN(M_.endo_nbr,sample_size+1);
 
 % Set the covariance matrix of the structural innovations.
-variances = diag(M_.Sigma_e); 
-positive_var_indx = find(variances>0); 
-covariance_matrix = M_.Sigma_e(positive_var_indx,positive_var_indx); 
-number_of_structural_innovations = length(covariance_matrix); 
-covariance_matrix_upper_cholesky = chol(covariance_matrix); 
+variances = diag(M_.Sigma_e);
+positive_var_indx = find(variances>0);
+covariance_matrix = M_.Sigma_e(positive_var_indx,positive_var_indx);
+number_of_structural_innovations = length(covariance_matrix);
+covariance_matrix_upper_cholesky = chol(covariance_matrix);
 
-tdx = M_.maximum_lag+1; 
+tdx = M_.maximum_lag+1;
 norme = 0;
 
 % Set verbose option
@@ -106,7 +106,7 @@ while (t<=sample_size)
         if init==1
             oo_.endo_simul = initial_path(:,1:end-1);
         else
-            oo_.endo_simul = initial_path(:,1:end-1)*lambda + oo_.endo_simul*(1-lambda);  
+            oo_.endo_simul = initial_path(:,1:end-1)*lambda + oo_.endo_simul*(1-lambda);
         end
     end
     if init
@@ -141,7 +141,7 @@ while (t<=sample_size)
     if new_draw
         info.time = info.time+time;
         time_series(:,t+1) = oo_.endo_simul(:,tdx);
-        oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end); 
+        oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end);
         oo_.endo_simul(:,end) = oo_.steady_state;
     end
 end

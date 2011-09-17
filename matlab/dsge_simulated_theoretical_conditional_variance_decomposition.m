@@ -2,8 +2,8 @@ function [nvar,vartan,NumberOfConditionalDecompFiles] = ...
     dsge_simulated_theoretical_conditional_variance_decomposition(SampleSize,Steps,M_,options_,oo_,type)
 % This function computes the posterior or prior distribution of the conditional variance
 % decomposition of the endogenous variables (or a subset of the endogenous variables).
-% 
-% INPUTS 
+%
+% INPUTS
 %   SampleSize   [integer]       scalar, number of simulations.
 %   M_           [structure]     Dynare structure describing the model.
 %   options_     [structure]     Dynare structure defining global options.
@@ -11,7 +11,7 @@ function [nvar,vartan,NumberOfConditionalDecompFiles] = ...
 %   type         [string]        'prior' or 'posterior'
 %
 %
-% OUTPUTS  
+% OUTPUTS
 %   nvar                             [integer]  nvar is the number of stationary variables.
 %   vartan                           [char]     array of characters (with nvar rows).
 %   NumberOfConditionalDecompFiles   [integer]  scalar, number of prior or posterior data files (for covariance).
@@ -103,7 +103,7 @@ for file = 1:NumberOfDrawsFiles
             dr = pdraws{linee,2};
         else
             set_parameters(pdraws{linee,1});
-            [dr,info] = resol(oo_.steady_state,0);
+            [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
         end
         if first_call
             endo_nbr = M_.endo_nbr;

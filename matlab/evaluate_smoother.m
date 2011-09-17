@@ -2,10 +2,10 @@ function oo = evaluate_smoother(parameters)
 % Evaluate the smoother at parameters.
 %
 % INPUTS
-%    o parameters  a string ('posterior mode','posterior mean','posterior median','prior mode','prior mean') or a vector of values for 
+%    o parameters  a string ('posterior mode','posterior mean','posterior median','prior mode','prior mean') or a vector of values for
 %                  the (estimated) parameters of the model.
-%    
-%    
+%
+%
 % OUTPUTS
 %    o oo       [structure]  results:
 %                              - SmoothedVariables
@@ -16,12 +16,12 @@ function oo = evaluate_smoother(parameters)
 %                              - SmoothedVariables
 %                              - SmoothedVariables
 %                              - SmoothedVariables
-%    
+%
 % SPECIAL REQUIREMENTS
 %    None
 %
 % REMARKS
-% [1] This function use persistent variables for the dataset and the description of the missing observations. Consequently, if this function 
+% [1] This function use persistent variables for the dataset and the description of the missing observations. Consequently, if this function
 %     is called more than once (by changing the value of parameters) the sample *must not* change.
 
 % Copyright (C) 2010-2011 Dynare Team
@@ -83,7 +83,7 @@ if isempty(load_data)
     % Transform the data.
     if options_.loglinear
         if ~options_.logdata
-            rawdata = log(rawdata);  
+            rawdata = log(rawdata);
         end
     end
     % Test if the data set is real.
@@ -115,7 +115,7 @@ if isempty(load_data)
         [ys,tchek] = feval([M_.fname '_steadystate'],...
                            [zeros(M_.exo_nbr,1);...
                             oo_.exo_det_steady_state]);
-        if size(ys,1) < M_.endo_nbr 
+        if size(ys,1) < M_.endo_nbr
             if length(M_.aux_vars) > 0
                 ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars,...
                                                             M_.fname,...
@@ -129,7 +129,7 @@ if isempty(load_data)
         end
         oo_.steady_state = ys;
     else% if the steady state file is not provided.
-        [dd,info] = resol(oo_.steady_state,0);
+        [dd,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
         oo_.steady_state = dd.ys; clear('dd');
     end
     if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
