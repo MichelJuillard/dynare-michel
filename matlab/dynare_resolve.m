@@ -38,7 +38,7 @@ function [A,B,ys,info] = dynare_resolve(mode)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global oo_ M_ oo_
+global oo_ M_ options_
 
 [oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 
