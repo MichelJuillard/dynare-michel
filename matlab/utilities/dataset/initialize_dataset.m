@@ -3,7 +3,7 @@ function dataset_ = initialize_dataset(datafile,varobs,first,nobs,transformation
 
 % Copyright (C) 2011 Dynare Team
 % stephane DOT adjemian AT univ DASH lemans DOT fr
-%    
+%
 % This file is part of Dynare.
 %
 % Dynare is free software: you can redistribute it and/or modify
@@ -54,7 +54,7 @@ else
     dataset_.rawdata = arrayfun(transformation,rawdata);
 end
 
-% Test if the observations are real numbers. 
+% Test if the observations are real numbers.
 if ~isreal(dataset_.rawdata)
     error('Estimation:: There are complex values in the data! Probably  a wrong (log) transformation...')
 end
@@ -66,16 +66,16 @@ if dataset_.missing.state
     dataset_.missing.aindex = i;
     dataset_.missing.vindex = j;
     dataset_.missing.number_of_observations = n;
-    dataset_.missing.no_more_missing_observations = s; 
+    dataset_.missing.no_more_missing_observations = s;
 else
     dataset_.missing.aindex = [];
     dataset_.missing.vindex = [];
     dataset_.missing.number_of_observations = [];
-    dataset_.missing.no_more_missing_observations = [];     
+    dataset_.missing.no_more_missing_observations = [];
 end
 
 % Compute the empirical mean of the observed variables..
-%dataset_.descriptive.mean = nanmean(dataset_.rawdata);
+dataset_.descriptive.mean = nanmean(dataset_.rawdata);
 
 % Prefilter the data if needed.
 if prefilter == 1
