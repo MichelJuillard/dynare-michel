@@ -112,14 +112,14 @@ end
 
 params0 = M.params;
 
-% check if steady_state_0 is steady state
+% check if steady_state_0 (-> oo.steady_state) is steady state
 tempex = oo.exo_simul;
 oo.exo_simul = repmat(oo.exo_steady_state',M.maximum_lag+M.maximum_lead+1,1);
 if M.exo_det_nbr > 0
     tempexdet = oo.exo_det_simul;
     oo.exo_det_simul = repmat(oo.exo_det_steady_state',M.maximum_lag+M.maximum_lead+1,1);
 end
-steady_state = steady_state_0;
+steady_state = oo.steady_state;
 check1 = 0;
 % testing for steadystate file
 if (~options.bytecode)
@@ -144,7 +144,7 @@ if options.steadystate_flag
     end
 
 else
-    % testing if steady_state_0 isn't a steady state or if we aren't computing Ramsey policy
+    % testing if steady_state_0  (-> oo.steady_state) isn't a steady state or if we aren't computing Ramsey policy
     if  options.ramsey_policy == 0
         if options.linear == 0
             % nonlinear models
@@ -193,7 +193,7 @@ if check1
         resid = check1 ;
     else
         info(1)= 20;
-        resid = feval(fh,steady_state_0,oo.exo_steady_state, M.params);
+        resid = feval(fh,oo.steady_state,oo.exo_steady_state, M.params);
     end
     info(2) = resid'*resid ;
     return

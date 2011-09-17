@@ -66,7 +66,7 @@ if isempty(options.qz_criterium)
     options.qz_criterium = 1+1e-6;
 end
 
-[dr, info] = resol(oo.steady_state,1);
+[dr,info,M,options,oo] = resol(1,M,options,oo);
 
 oo.dr = dr;
 
