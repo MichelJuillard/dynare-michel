@@ -116,7 +116,7 @@ EXTRA_DIST = \
 	objectives/sgu_ex1.mat \
 	conditional_forecasts/fsdat_simul.m
 
-TARGETS = check-test-file
+TARGETS =
 
 if HAVE_CMD_LINE_MATLAB
 TARGETS += check-matlab
