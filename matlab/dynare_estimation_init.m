@@ -337,6 +337,8 @@ end
 
 dataset_ = initialize_dataset(options_.datafile,options_.varobs,options_.first_obs,options_.nobs,transformation,options_.prefilter,xls);
 
+options_.nobs = dataset_.info.ntobs;
+
 % $$$ rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
 % $$$ % Set the number of observations (nobs) and build a subsample between first_obs and nobs.
 % $$$ options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
