@@ -55,6 +55,7 @@ while ~isempty(name)
         printMakeCheckMatlabErrMsg(modfile, exception);
         clear exception
     end
+    close all
     delete('wsMat.mat')
 
     cd(top_test_dir);
