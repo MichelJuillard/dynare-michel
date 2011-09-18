@@ -132,7 +132,7 @@ if estimated_model
     end
     data = transpose(rawdata);
     % Handle the missing observations.
-    [data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,n_varobs);
+    [data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data);
     missing_value = ~(number_of_observations == gend*n_varobs);
 
     [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(xparam,gend,data,data_index,number_of_observations);

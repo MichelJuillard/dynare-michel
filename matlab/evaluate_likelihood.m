@@ -102,7 +102,7 @@ if isempty(load_data)
     end
     data = transpose(rawdata);
     % Handle the missing observations.
-    [data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,n_varobs);
+    [data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data);
     missing_value = ~(number_of_observations == gend*n_varobs);
     % Determine if a constant is needed.
     if options_.steadystate_flag% if the *_steadystate.m file is provided.
