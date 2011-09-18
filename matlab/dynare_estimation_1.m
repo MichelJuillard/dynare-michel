@@ -115,11 +115,11 @@ if options_.dsge_var
     end
 end
 
-% [data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,n_varobs);
+% 
 missing_value = dataset_.missing.state; %~(number_of_observations == gend*n_varobs);
-data_index = [];
 number_of_observations = gend*n_varobs;
-no_more_missing_observations = [];
+[data_index,junk,no_more_missing_observations] = ...
+    describe_missing_data(data);
 
 initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
 
