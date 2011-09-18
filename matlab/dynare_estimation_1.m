@@ -98,7 +98,7 @@ end
 
 %% compute sample moments if needed (bvar-dsge)
 if options_.dsge_var
-    if options_.missing_data
+    if dataset_.missing.state
         error('I cannot estimate a DSGE-VAR model with missing observations!')
     end
     if options_.noconstant
