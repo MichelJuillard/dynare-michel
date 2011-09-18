@@ -331,11 +331,10 @@ end
 xls.sheet = options_.xls_sheet;
 xls.range = options_.xls_range;
 
-if ~isfield(options_,'nobs')
-    options_.nobs = [];
-end
-
 dataset_ = initialize_dataset(options_.datafile,options_.varobs,options_.first_obs,options_.nobs,transformation,options_.prefilter,xls);
+
+options_.nobs = dataset_.info.ntobs;
+
 
 % $$$ rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
 % $$$ % Set the number of observations (nobs) and build a subsample between first_obs and nobs.
