@@ -31,14 +31,16 @@ function dynare_estimation_1(var_list_,dname)
 
 global M_ options_ oo_ estim_params_ bayestopt_
 
+if ~options_.dsge_var
+    objective_function = str2func('DsgeLikelihood');
+else
+    objective_function = str2func('DsgeVarLikelihood');
+end
+
 [dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_, fake] = dynare_estimation_init(var_list_, dname, [], M_, options_, oo_, estim_params_, bayestopt_);
 
 data = dataset_.data;
 rawdata = dataset_.rawdata;
-
-% Set various options.
-options_ = set_default_option(options_,'mh_nblck',2);
-options_ = set_default_option(options_,'nodiagnostic',0);
 
 % Set number of observations
 gend = options_.nobs;
@@ -121,7 +123,7 @@ number_of_observations = gend*n_varobs;
 [data_index,junk,no_more_missing_observations] = ...
     describe_missing_data(data);
 
-initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+oo_ = initial_estimation_checks(xparam1,dataset_,M_,estim_params_,options_,bayestopt_,oo_);
 
 if isequal(options_.mode_compute,0) && isempty(options_.mode_file) && options_.mh_posterior_mode_estimation==0
     if options_.smoother == 1
