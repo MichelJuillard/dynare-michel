@@ -225,10 +225,8 @@ for it_=start:incr:finish
                 if (verbose == 1)
                     disp('steady: fsolve');
                 end
-                if exist('OCTAVE_VERSION') || ~license('test', 'optimization_toolbox')
-                    % Note that fsolve() exists under Octave, but has a different syntax
-                    % So we fail for the moment under Octave, until we add the corresponding code
-                    error('DYNARE_SOLVE: you can''t use solve_algo=0 since you don''t have Matlab''s Optimization Toolbox')
+                if ~exist('OCTAVE_VERSION') && ~license('test', 'optimization_toolbox')
+                    error('SOLVE_ONE_BOUNDARY: you can''t use solve_algo=0 since you don''t have MATLAB''s Optimization Toolbox')
                 end
                 options=optimset('fsolve');
                 options.MaxFunEvals = 50000;
@@ -236,8 +234,22 @@ for it_=start:incr:finish
                 options.TolFun=1e-8;
                 options.Display = 'iter';
                 options.Jacobian = 'on';
-                [yn,fval,exitval,output] = fsolve(@local_fname, y(y_index_eq), ...
-                                                  options, x, params, steady_state, y, y_index_eq, fname, 0);
+                if ~exist('OCTAVE_VERSION')
+                    [yn,fval,exitval,output] = fsolve(@local_fname, y(y_index_eq), ...
+                                                      options, x, params, steady_state, y, y_index_eq, fname, 0);
+                else
+                    % Under Octave, use a wrapper, since fsolve() does not have a 4th arg
+                    func = @(z) local_fname(z, x, params, steady_state, y, y_index_eq, fname, 0);
+                    % The Octave version of fsolve does not converge when it starts from the solution
+                    fvec = feval(func,y(y_index_eq));
+                    if max(abs(fvec)) >= options_.solve_tolf
+                        [yn,fval,exitval,output] = fsolve(func,y(y_index_eq),options);
+                    else
+                        yn = y(y_index_eq);
+                        exitval = 3;
+                    end;
+                end
+                    
                 y(y_index_eq) = yn;
                 if exitval > 0
                     info = 0;
