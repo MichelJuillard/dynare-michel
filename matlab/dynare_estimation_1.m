@@ -98,7 +98,7 @@ else
 end
 
 
-%% compute sample moments if needed (bvar-dsge)
+% compute sample moments if needed (bvar-dsge)
 if options_.dsge_var
     if dataset_.missing.state
         error('I cannot estimate a DSGE-VAR model with missing observations!')
@@ -117,11 +117,6 @@ if options_.dsge_var
     end
 end
 
-% 
-missing_value = dataset_.missing.state; %~(number_of_observations == gend*n_varobs);
-number_of_observations = gend*n_varobs;
-[data_index,junk,no_more_missing_observations] = ...
-    describe_missing_data(data);
 
 oo_ = initial_estimation_checks(xparam1,dataset_,M_,estim_params_,options_,bayestopt_,oo_);
 
@@ -156,8 +151,7 @@ if isequal(options_.mode_compute,0) && isempty(options_.mode_file) && options_.m
             eval(['oo_.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
         end
     end
-
-    return;
+    return
 end
 
 if isequal(options_.mode_compute,6)
@@ -168,11 +162,6 @@ end
 
 %% Estimation of the posterior mode or likelihood mode
 if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
-    if ~options_.dsge_var
-        fh=str2func('DsgeLikelihood');
-    else
-        fh=str2func('DsgeVarLikelihood');
-    end
     switch options_.mode_compute
       case 1
         optim_options = optimset('display','iter','LargeScale','off', ...
@@ -180,13 +169,8 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         if isfield(options_,'optim_opt')
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
         end
-        if ~options_.dsge_var
             [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
-                fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend,data,data_index,number_of_observations,no_more_missing_observations);
-        else
-            [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
-                fmincon(fh,xparam1,[],[],[],[],lb,ub,[],optim_options,gend);
-        end
+                fmincon(objective_function,xparam1,[],[],[],[],lb,ub,[],optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 2
         error('ESTIMATION: mode_compute=2 option (Lester Ingber''s Adaptive Simulated Annealing) is no longer available')
       case 3
@@ -194,27 +178,15 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         if isfield(options_,'optim_opt')
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
         end
-        if ~options_.dsge_var
-            [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend,data,data_index,number_of_observations,no_more_missing_observations);
-        else
-            [xparam1,fval,exitflag] = fminunc(fh,xparam1,optim_options,gend);
-        end
+        [xparam1,fval,exitflag] = fminunc(objective_function,xparam1,optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 4
         H0 = 1e-4*eye(nx);
         crit = 1e-7;
         nit = 1000;
         verbose = 2;
-        if ~options_.dsge_var
             [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-                csminwel1('DsgeLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,options_.gradient_epsilon,gend,data,data_index,number_of_observations,no_more_missing_observations);
+                csminwel1(objective_function,xparam1,H0,[],crit,nit,options_.gradient_method,options_.gradient_epsilon,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
             disp(sprintf('Objective function at mode: %f',fval))
-            disp(sprintf('Objective function at mode: %f',DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)))
-        else
-            [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-                csminwel1('DsgeVarLikelihood',xparam1,H0,[],crit,nit,options_.gradient_method,options_.gradient_epsilon,gend);
-            disp(sprintf('Objective function at mode: %f',fval))
-            disp(sprintf('Objective function at mode: %f',DsgeVarLikelihood(xparam1,gend)))
-        end
       case 5
         if isfield(options_,'hess')
             flag = options_.hess;
@@ -241,14 +213,11 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         else
             [xparam1,hh,gg,fval,invhess] = newrat('DsgeVarLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend);
         end
+        [xparam1,hh,gg,fval,invhess] = newrat(objective_function,xparam1,hh,gg,igg,crit,nit,flag,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         parameter_names = bayestopt_.name;
         save([M_.fname '_mode.mat'],'xparam1','hh','gg','fval','invhess','parameter_names');
       case 6
-        if ~options_.dsge_var
-            fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
-        else
-            fval = DsgeVarLikelihood(xparam1,gend);
-        end
+        fval = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         OldMode = fval;
         if ~exist('MeanPar','var')
             MeanPar = xparam1;
@@ -281,16 +250,9 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                 else
                     flag = 'LastCall';
                 end
-                if ~options_.dsge_var
-                    [xparam1,PostVar,Scale,PostMean] = ...
-                        gmhmaxlik('DsgeLikelihood',xparam1,[lb ub],options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend,data,...
-                                  data_index,number_of_observations,no_more_missing_observations);
-                    fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
-                else
-                    [xparam1,PostVar,Scale,PostMean] = ...
-                        gmhmaxlik('DsgeVarLikelihood',xparam1,[lb ub],options_.Opt6Numb,Scale,flag,MeanPar,CovJump,gend);
-                    fval = DsgeVarLikelihood(xparam1,gend);
-                end
+                [xparam1,PostVar,Scale,PostMean] = ...
+                    gmhmaxlik(objective_function,xparam1,[lb ub],options_.Opt6Numb,Scale,flag,MeanPar,CovJump,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+                fval = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 options_.mh_jscale = Scale;
                 mouvement = max(max(abs(PostVar-OldPostVar)));
                 disp(' ')
@@ -307,17 +269,10 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                 else
                     flag = 'LastCall';
                 end
-                if ~options_.dsge_var
-                    [xparam1,PostVar,Scale,PostMean] = ...
-                        gmhmaxlik('DsgeLikelihood',xparam1,[lb ub],...
-                                  options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend,data,data_index,number_of_observations,no_more_missing_observations);
-                    fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
-                else
-                    [xparam1,PostVar,Scale,PostMean] = ...
-                        gmhmaxlik('DsgeVarLikelihood',xparam1,[lb ub],...
-                                  options_.Opt6Numb,Scale,flag,PostMean,PostVar,gend);
-                    fval = DsgeVarLikelihood(xparam1,gend);
-                end
+                [xparam1,PostVar,Scale,PostMean] = ...
+                    gmhmaxlik(objective_function,xparam1,[lb ub],...
+                              options_.Opt6Numb,Scale,flag,PostMean,PostVar,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+                fval = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 options_.mh_jscale = Scale;
                 mouvement = max(max(abs(PostVar-OldPostVar)));
                 fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
@@ -328,32 +283,24 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
             hh = inv(PostVar);
             save([M_.fname '_mode.mat'],'xparam1','hh');
             save([M_.fname '_optimal_mh_scale_parameter.mat'],'Scale');
-            bayestopt_.jscale = ones(length(xparam1),1)*Scale;%??!
+            bayestopt_.jscale = ones(length(xparam1),1)*Scale;
         end
       case 7
+        % Matlab's simplex (Optimization toolbox needed).
         optim_options = optimset('display','iter','MaxFunEvals',1000000,'MaxIter',6000,'TolFun',1e-8,'TolX',1e-6);
         if isfield(options_,'optim_opt')
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
         end
-        if ~options_.dsge_var
-            [xparam1,fval,exitflag] = fminsearch(fh,xparam1,optim_options,gend,data,data_index,number_of_observations,no_more_missing_observations);
-        else
-            [xparam1,fval,exitflag] = fminsearch(fh,xparam1,optim_options,gend);
-        end
+        [xparam1,fval,exitflag] = fminsearch(objective_function,xparam1,optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 8
-        % Dynare implementation of the simplex algorithm
-        if ~options_.dsge_var
-            [xparam1,fval,exitflag] = simplex_optimization_routine(fh,xparam1,options_.simplex,gend,data,data_index,number_of_observations,no_more_missing_observations);
-        else
-            [xparam1,fval,exitflag] = simplex_optimization_routine(fh,xparam1,options_.simplex,gend);
-        end
+        % Dynare implementation of the simplex algorithm.
+        [xparam1,fval,exitflag] = simplex_optimization-routine(objective_function,xparam1,optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 101
         myoptions=soptions;
         myoptions(2)=1e-6; %accuracy of argument
         myoptions(3)=1e-6; %accuracy of function (see Solvopt p.29)
         myoptions(5)= 1.0;
-
-        [xparam1,fval]=solvopt(xparam1,fh,[],myoptions,gend,data);
+        [xparam1,fval]=solvopt(xparam1,objective_function,[],myoptions,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 102
         %simulating annealing
         %        LB=zeros(size(xparam1))-20;
@@ -389,38 +336,21 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         disp([LB xparam1 UB]);
         disp(['c vector   ' num2str(c')]);
 
-        %  keyboard
-        if ~options_.dsge_var
-            [xparam1, fval, nacc, nfcnev, nobds, ier, t, vm] = sa(fh,xparam1,maxy,rt_,epsilon,ns,nt ...
-                                                              ,neps,maxevl,LB,UB,c,idisp ,t,vm,gend,data,data_index,number_of_observations,no_more_missing_observations);
-        else
-            [xparam1, fval, nacc, nfcnev, nobds, ier, t, vm] = sa(fh,xparam1,maxy,rt_,epsilon,ns,nt ...
-                                                              ,neps,maxevl,LB,UB,c,idisp ,t,vm,gend);
-        end
+        [xparam1, fval, nacc, nfcnev, nobds, ier, t, vm] = sa(objective_function,xparam1,maxy,rt_,epsilon,ns,nt ...
+                                                              ,neps,maxevl,LB,UB,c,idisp ,t,vm,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 'prior'
         hh = diag(bayestopt_.p2.^2);
       otherwise
         if ischar(options_.mode_compute)
-            if options_.dsge_var
-                [xparam1, fval, retcode ] = feval(options_.mode_compute,fh,xparam1,gend,data);
-            else
-                [xparam1, fval, retcode ] = feval(options_.mode_compute, ...
-                                                  fh,xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
-            end
+            [xparam1, fval, retcode ] = feval(options_.mode_compute,objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         else
-            error(['ESTIMATION: mode_compute=' int2str(options_.mode_compute) ...
-                   ' option is unknown!'])
+            error(['dynare_estimation:: mode_compute = ' int2str(options_.mode_compute) ' option is unknown!'])
         end
     end
     if ~isequal(options_.mode_compute,6) && ~isequal(options_.mode_compute,'prior')
         if options_.cova_compute == 1
-            if ~options_.dsge_var
-                hh = reshape(hessian('DsgeLikelihood',xparam1, ...
-                                     options_.gstep,gend,data,data_index,number_of_observations,...
-                                     no_more_missing_observations),nx,nx);
-            else
-                hh = reshape(hessian('DsgeVarLikelihood',xparam1,options_.gstep,gend),nx,nx);
-            end
+            hh = reshape(hessian(objective_function,xparam1, ...
+                                     options_.gstep,dataset_,options_,M_,estim_params_,bayestopt_,oo_),nx,nx);
         end
     end
     parameter_names = bayestopt_.name;
