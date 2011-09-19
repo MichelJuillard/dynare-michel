@@ -34,7 +34,7 @@ function [fval,cost_flag,info,PHI,SIGMAu,iXX,prior] = DsgeVarLikelihood(xparam1,
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global bayestopt_ estim_params_ M_ options_
+global bayestopt_ estim_params_ M_ options_ oo_
 
 nvx = estim_params_.nvx;
 nvn = estim_params_.nvn;
@@ -106,7 +106,7 @@ end
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program
 %------------------------------------------------------------------------------
-[T,R,SteadyState,info] = dynare_resolve('restrict');
+[T,R,SteadyState,info,M_,options_,oo_] = dynare_resolve(M_,options_,oo_);
 
 if info(1) == 1 || info(1) == 2 || info(1) == 5
     fval = bayestopt_.penalty+1;

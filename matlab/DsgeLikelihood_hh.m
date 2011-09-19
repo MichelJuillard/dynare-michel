@@ -125,7 +125,7 @@ M_.H = H;
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program
 %------------------------------------------------------------------------------
-[T,R,SteadyState,info] = dynare_resolve('restrict');
+[T,R,SteadyState,info,M_,options_,oo_] = dynare_resolve(M_,otions_,oo_);
 if info(1) == 1 || info(1) == 2 || info(1) == 5
     fval = bayestopt_.penalty+1;
     cost_flag = 0;

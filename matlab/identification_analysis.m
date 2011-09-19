@@ -65,7 +65,7 @@ ide_model = struct();
 ide_lre = struct();
 derivatives_info = struct();
 
-[A,B,ys,info]=dynare_resolve;
+[A,B,ys,info,M_,options_,oo_] = dynare_resolve(M_,options_,oo_);
 if info(1)==0,
     oo0=oo_;
     tau=[oo_.dr.ys(oo_.dr.order_var); vec(A); dyn_vech(B*M_.Sigma_e*B')];

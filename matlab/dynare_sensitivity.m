@@ -64,7 +64,7 @@ else
         options_.qz_criterium = 1+1e-6;
     end    
 end
-dynare_resolve;
+[make,my,day,punk,M_,options_,oo_] = dynare_resolve(M_,options_,oo_);
 
 options_gsa = set_default_option(options_gsa,'identification',0);
 if options_gsa.identification,

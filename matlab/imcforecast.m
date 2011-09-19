@@ -155,7 +155,7 @@ end
 if isempty(options_.qz_criterium)
     options_.qz_criterium = 1+1e-6;
 end
-[T,R,ys,info] = dynare_resolve;
+[T,R,ys,info,M_,options_,oo_] = dynare_resolve(M_,options_,oo_);
 
 sQ = sqrt(M_.Sigma_e);
 

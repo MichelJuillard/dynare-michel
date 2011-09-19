@@ -1,27 +1,55 @@
-function [A,B,ys,info] = dynare_resolve(mode)
-% function [A,B,ys,info] = dynare_resolve(mode)
-% Computes the linear approximation and the matrices A and B of the
-% transition equation
-%
-% INPUTS
-%    mode:           string 'restrict' returns restricted transition matrices
-%
-% OUTPUTS
-%    A:              matrix of predetermined variables effects in linear solution (ghx)
-%    B:              matrix of shocks effects in linear solution (ghu)
-%    ys:             steady state of original endogenous variables
-%    info=1:         the model doesn't determine the current variables '...' uniquely
-%    info=2:         MJDGGES returns the following error code'
-%    info=3:         Blanchard Kahn conditions are not satisfied: no stable '...' equilibrium
-%    info=4:         Blanchard Kahn conditions are not satisfied:'...' indeterminacy
-%    info=5:         Blanchard Kahn conditions are not satisfied:'...' indeterminacy due to rank failure
-%    info=20:        can't find steady state info(2) contains sum of sqare residuals
-%    info=30:        variance can't be computed
-%
-% SPECIAL REQUIREMENTS
-%    none
+function [A,B,ys,info,Model,DynareOptions,DynareResults] = dynare_resolve(Model,DynareOptions,DynareResults)
+% Computes the linear approximation and the matrices A and B of the transition equation.
 
-% Copyright (C) 2003-2011 Dynare Team
+%@info:
+%! @deftypefn {Function File} {[@var{A},@var{B},@var{ys},@var{info},@var{Model},@var{DynareOptions},@var{DynareResults}] =} resol (@var{Model},@var{DynareOptions},@var{DynareResults})
+%! @anchor{dynare_resolve}
+%! @sp 1
+%! Computes the linear approximation and the matrices A and B of the transition equation.
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item check_flag
+%! Integer scalar, equal to 0 if all the approximation is required, positive if only the eigenvalues are to be computed.
+%! @item Model
+%! Matlab's structure describing the model (initialized by dynare, see @ref{M_}).
+%! @item DynareOptions
+%! Matlab's structure describing the options (initialized by dynare, see @ref{options_}).
+%! @item DynareResults
+%! Matlab's structure gathering the results (initialized by dynare, see @ref{oo_}).
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item A
+%! Matrix of doubles, transition matrix of the state equation.
+%! @item B
+%! Matrix of doubles, matrix relating the endogenous variables to the innovations in the state equation.
+%! @item ys
+%! Vector of doubles, steady state level of the endogenous variables in the state equation.
+%! @item info
+%! Integer scalar, error code as given by @ref{resol}.
+%! @item Model
+%! Matlab's structure describing the model (initialized by dynare, see @ref{M_}).
+%! @item DynareOptions
+%! Matlab's structure describing the options (initialized by dynare, see @ref{options_}).
+%! @item DynareResults
+%! Matlab's structure gathering the results (initialized by dynare, see @ref{oo_}).
+%! @end table
+%! @sp 2
+%! @strong{This function is called by:}
+%! @sp 1
+%! @ref{DsgeLikelihood}, @ref{DsgeLikelihood_hh}, @ref{DsgeVarLikelihood}, @ref{dsge_posterior_kernel}, @ref{DsgeSmoother}, @ref{dynare_sensitivity}, @ref{gsa/thet2tau}, @ref{gsa/stab_map}, @ref{identification_analysis}, @ref{imcforecast}, @ref{thet2tau}
+%! @sp 2
+%! @strong{This function calls:}
+%! @sp 1
+%! @ref{resol}, @ref{kalman_transition_matrix}
+%! @end deftypefn
+%@eod:
+
+% Copyright (C) 2001-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -38,10 +66,8 @@ function [A,B,ys,info] = dynare_resolve(mode)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global oo_ M_ options_
-
-[dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
-oo_.dr = dr;
+[dr,info,Model,DynareOptions,DynareResults] = resol(0,Model,DynareOptions,DynareResults);
+DynareResults.dr = dr;
 
 if info(1) > 0
     A = [];
@@ -55,20 +81,20 @@ if info(1) > 0
 end
 
 if nargin == 0
-    endo_nbr = M_.endo_nbr;
-    nstatic = oo_.dr.nstatic;
-    npred = oo_.dr.npred;
+    endo_nbr = Model.endo_nbr;
+    nstatic = DynareResults.dr.nstatic;
+    npred = DynareResults.dr.npred;
     iv = (1:endo_nbr)';
-    ic = [ nstatic+(1:npred) endo_nbr+(1:size(oo_.dr.ghx,2)-npred) ]';
+    ic = [ nstatic+(1:npred) endo_nbr+(1:size(DynareResults.dr.ghx,2)-npred) ]';
 else
-    iv = oo_.dr.restrict_var_list;
-    ic = oo_.dr.restrict_columns;
+    iv = DynareResults.dr.restrict_var_list;
+    ic = DynareResults.dr.restrict_columns;
 end
 
 if nargout==1
-    A = kalman_transition_matrix(oo_.dr,iv,ic,M_.exo_nbr);
+    A = kalman_transition_matrix(DynareResults.dr,iv,ic,Model.exo_nbr);
     return
 end
 
-[A,B] = kalman_transition_matrix(oo_.dr,iv,ic,M_.exo_nbr);
-ys = oo_.dr.ys;
+[A,B] = kalman_transition_matrix(DynareResults.dr,iv,ic,Model.exo_nbr);
+ys = DynareResults.dr.ys;
