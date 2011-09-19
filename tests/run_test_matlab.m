@@ -71,14 +71,17 @@ for blockFlag = 0:1
         default_solve_algo = 2;
         default_stack_solve_algo = 0;
         if ~blockFlag && ~bytecodeFlag
-            solve_algos = 0:4;
+            solve_algos = 1:4;
             stack_solve_algos = 0;
         elseif blockFlag && ~bytecodeFlag
-            solve_algos = [0:4 6:8];
+            solve_algos = [1:4 6:8];
             stack_solve_algos = 0:4;
         else
-            solve_algos = 0:8;
+            solve_algos = 1:8;
             stack_solve_algos = 0:5;
+        end
+        if license('test', 'optimization_toolbox')
+            solve_algos = [ solve_algos 0 ];
         end
 
         for i = 1:length(solve_algos)
