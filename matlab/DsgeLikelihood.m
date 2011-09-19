@@ -1,4 +1,4 @@
-function [fval,cost_flag,ys,trend_coeff,info,Model,DynareOptions,BayesInfo,DynareResults,DLIK,AHess] = DsgeLikelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults,derivatives_info)
+function [fval,exit_flag,ys,trend_coeff,info,Model,DynareOptions,BayesInfo,DynareResults,DLIK,AHess] = DsgeLikelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults,derivatives_info)
 % Evaluates the posterior kernel of a dsge model.
 
 %@info:
@@ -126,6 +126,14 @@ function [fval,cost_flag,ys,trend_coeff,info,Model,DynareOptions,BayesInfo,Dynar
 
 % AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT FR
 
+% Initialization of the returned variables and others...
+fval        = [];
+ys          = [];
+trend_coeff = [];
+exit_flag   = 1;
+info        = 0;
+
+% Declaration of the penalty as a persistent variable.
 persistent penalty
 
 % Initialization of the persistent variable.
@@ -137,13 +145,6 @@ if nargin==1
     penalty = xparam1;
     return
 end
-
-% Initialization of the returned variables and others...
-fval        = [];
-ys          = [];
-trend_coeff = [];
-exit_flag   = 1;
-nobs        = DynareDataset.info.nvobs;
 
 % Set flag related to analytical derivatives.
 if nargout > 9
@@ -189,7 +190,7 @@ if EstimatedParameters.nvn
     end
     offset = offset+EstimatedParameters.nvn;
 else
-    H = zeros(nobs);
+    H = zeros(DynareDataset.info.nvobs);
 end
 
 % Get the off-diagonal elements of the covariance matrix for the structural innovations. Test if Q is positive definite.
@@ -274,7 +275,7 @@ BayesInfo.mf = BayesInfo.mf1;
 
 % Define the constant vector of the measurement equation.
 if DynareOptions.noconstant
-    constant = zeros(nobs,1);
+    constant = zeros(DynareDataset.info.nvobs,1);
 else
     if DynareOptions.loglinear
         constant = log(SteadyState(BayesInfo.mfys));
@@ -285,7 +286,7 @@ end
 
 % Define the deterministic linear trend of the measurement equation.
 if BayesInfo.with_trend
-    trend_coeff = zeros(nobs,1);
+    trend_coeff = zeros(DynareDataset.info.nvobs,1);
     t = DynareOptions.trend_coeffs;
     for i=1:length(t)
         if ~isempty(t{i})
