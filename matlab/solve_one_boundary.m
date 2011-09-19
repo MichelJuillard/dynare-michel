@@ -225,7 +225,7 @@ for it_=start:incr:finish
                 if (verbose == 1)
                     disp('steady: fsolve');
                 end
-                if exist('OCTAVE_VERSION') || isempty(ver('optim'))
+                if exist('OCTAVE_VERSION') || ~license('test', 'optimization_toolbox')
                     % Note that fsolve() exists under Octave, but has a different syntax
                     % So we fail for the moment under Octave, until we add the corresponding code
                     error('DYNARE_SOLVE: you can''t use solve_algo=0 since you don''t have Matlab''s Optimization Toolbox')
