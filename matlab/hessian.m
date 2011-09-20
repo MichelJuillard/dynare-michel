@@ -35,7 +35,9 @@ function hessian_mat = hessian(func,x,gstep,varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-func = str2func(func);
+if ~isa(func, 'function_handle') 
+    func = str2func(func);
+end
 n=size(x,1);
 h1=max(abs(x),sqrt(gstep)*ones(n,1))*eps^(1/6);
 h_1=h1;
