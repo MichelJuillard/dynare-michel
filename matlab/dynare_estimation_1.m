@@ -852,7 +852,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                                                       > 0) && options_.load_mh_file)) ...
     || ~options_.smoother ) && M_.endo_nbr^2*gend < 1e7 && options_.partial_information == 0  % to be fixed
     %% ML estimation, or posterior mode without metropolis-hastings or metropolis without bayesian smooth variable
-    [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp] = DsgeSmoother(xparam1,gend,data,data_index,missing_value);
+    [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp] = DsgeSmoother(xparam1,dataset_.info.ntobs,dataset_.data,dataset_.missing.aindex,dataset_.missing.state);
     oo_.Smoother.SteadyState = ys;
     oo_.Smoother.TrendCoeffs = trend_coeff;
     oo_.Smoother.variance = P;
