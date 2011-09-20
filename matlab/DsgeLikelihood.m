@@ -278,7 +278,11 @@ end
 %------------------------------------------------------------------------------
 if (kalman_algo==1)% Multivariate Kalman Filter
     if no_missing_data_flag
-        LIK = kalman_filter(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol); 
+        if options_.block == 1
+            LIK = block_kalman_filter(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol, M_.nz_state_var, M_.n_diag); 
+        else
+            LIK = kalman_filter(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol); 
+        end;
         if analytic_derivation,
             if no_DLIK==0,
                 [DLIK] = score(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,riccati_tol);
