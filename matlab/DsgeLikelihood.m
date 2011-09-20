@@ -313,6 +313,7 @@ Y   = DynareDataset.data-trend;
 % 3. Initial condition of the Kalman filter
 %------------------------------------------------------------------------------
 kalman_algo = DynareOptions.kalman_algo;
+diffuse_periods = 0;
 switch DynareOptions.lik_init
   case 1% Standard initialization with the steady state of the state equation.
     if kalman_algo~=2
