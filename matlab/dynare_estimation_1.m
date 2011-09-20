@@ -209,7 +209,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
             nit=1000;
         end
         if ~options_.dsge_var
-            [xparam1,hh,gg,fval,invhess] = newrat('DsgeLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend,data,data_index,number_of_observations,no_more_missing_observations);
+            [xparam1,hh,gg,fval,invhess] = newrat('DsgeLikelihood',xparam1,hh,gg,igg,crit,nit,flag,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         else
             [xparam1,hh,gg,fval,invhess] = newrat('DsgeVarLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend);
         end
@@ -275,7 +275,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                 fval = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 options_.mh_jscale = Scale;
                 mouvement = max(max(abs(PostVar-OldPostVar)));
-                fval = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+                fval = DsgeLikelihood(xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
                 disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
                 OldMode = fval;
@@ -511,7 +511,7 @@ if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
         log_det_invhess = -estim_params_nbr*log(scale_factor)+log(det(scale_factor*invhess));
         if ~options_.dsge_var
             md_Laplace = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess ...
-                - DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations);
+                - DsgeLikelihood(xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         else
             md_Laplace = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess ...
                 - DsgeVarLikelihood(xparam1,gend);
@@ -810,8 +810,7 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
             if options_.dsge_var
                 feval(options_.posterior_sampling_method,'DsgeVarLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,gend);
             else
-                feval(options_.posterior_sampling_method,'DsgeLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,gend,data,...
-                      data_index,number_of_observations,no_more_missing_observations);
+                feval(options_.posterior_sampling_method,'DsgeLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
             end
         else
             error('I Cannot start the MCMC because the hessian of the posterior kernel at the mode was not computed.')
