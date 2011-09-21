@@ -126,25 +126,25 @@ function [fval,exit_flag,ys,trend_coeff,info,Model,DynareOptions,BayesInfo,Dynar
 
 % AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT FR
 
-% Initialization of the returned variables and others...
-fval        = [];
-ys          = [];
-trend_coeff = [];
-exit_flag   = 1;
-info        = 0;
-
 % Declaration of the penalty as a persistent variable.
 persistent penalty
 
 % Initialization of the persistent variable.
 if ~nargin || isempty(penalty)
     penalty = 1e8;
-    return
+    if ~nargin, return, end
 end
 if nargin==1
     penalty = xparam1;
     return
 end
+
+% Initialization of the returned variables and others...
+fval        = [];
+ys          = [];
+trend_coeff = [];
+exit_flag   = 1;
+info        = 0;
 
 % Set flag related to analytical derivatives.
 if nargout > 9
