@@ -304,6 +304,9 @@ if ~isempty(options_.unit_root_vars)
         bayestopt_.restrict_var_list_nonstationary = ...
             nonzeros(l2(:,bayestopt_.restrict_var_list_nonstationary));
     end
+    if options_.lik_init==1
+        options_.lik_init = 3;
+    end
 end % if ~isempty(options_.unit_root_vars)
 
 % Test if the data file is declared.
