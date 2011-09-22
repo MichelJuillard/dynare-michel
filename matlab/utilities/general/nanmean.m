@@ -3,7 +3,7 @@ function y = nanmean(x)
 
 %@info:
 %! @deftypefn {Function File} {@var{y} =} nanmean (@var{x})
-%! @anchor{nandemean}
+%! @anchor{nanmean}
 %! @sp 1
 %! Computes the mean of each column of a matrix with some NaNs.
 %! @sp 2
@@ -16,7 +16,7 @@ function y = nanmean(x)
 %! @strong{Outputs}
 %! @table @ @var
 %! @item y
-%! Matlab matrix (T-by-N). The demeaned x matrix.
+%! Matlab vector (1-by-N), the mean.
 %! @end table
 %! @sp 2
 %! @strong{This function is called by:}
@@ -25,7 +25,7 @@ function y = nanmean(x)
 %! @sp 2
 %! @strong{This function calls:}
 %! @sp 1
-%! @ref{ndim},
+%! @ref{ndim}
 %!
 %! @end deftypefn
 %@eod:

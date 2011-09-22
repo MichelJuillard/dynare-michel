@@ -800,26 +800,27 @@ internals --test particle/local_state_iteration
 @chapter The Model file
 
 @menu
-* Conventions::
-* Variable declarations::
-* Expressions::
-* Parameter initialization::
-* Model declaration::
-* Auxiliary variables::
-* Initial and terminal conditions::
-* Shocks on exogenous variables::
-* Other general declarations::
-* Steady state::
-* Getting information about the model::
-* Deterministic simulation::
-* Stochastic solution and simulation::
-* Estimation::
-* Forecasting::
-* Optimal policy::
-* Sensitivity and identification analysis::
-* Displaying and saving results::
-* Macro-processing language::
-* Misc commands::
+* Conventions::                 
+* Variable declarations::       
+* Expressions::                 
+* Parameter initialization::    
+* Model declaration::           
+* Auxiliary variables::         
+* Initial and terminal conditions::  
+* Shocks on exogenous variables::  
+* Other general declarations::  
+* Steady state::                
+* Getting information about the model::  
+* Deterministic simulation::    
+* Stochastic solution and simulation::  
+* Estimation::                  
+* Forecasting::                 
+* Optimal policy::              
+* Sensitivity and identification analysis::  
+* Markov-switching SBVAR::      
+* Displaying and saving results::  
+* Macro-processing language::   
+* Misc commands::               
 @end menu
 
 @node Conventions
@@ -854,6 +855,10 @@ mutually exclusive arguments are separated by vertical bars: @samp{|};
 @item
 @var{DOUBLE} indicates a double precision number. The following syntaxes
 are valid: @code{1.1e3}, @code{1.1E3}, @code{1.1d3}, @code{1.1D3};
+
+@item
+@var{NUMERICAL_VECTOR} indicates a vector of numbers separated by spaces,
+enclosed by square brackets;
 
 @item
 @var{EXPRESSION} indicates a mathematical expression valid outside the
@@ -5303,6 +5308,634 @@ Specify the parameter set to use. Default: @code{prior_mean}
 
 @end deffn
 
+@node Markov-switching SBVAR
+@section Markov-switching SBVAR
+
+Given a list of variables, observed variables and a data file, Dynare
+can be used to solve a Markov-switching SBVAR model according to
+@cite{Sims, Waggoner and Zha (2008)}. Having done this, you can create
+forecasts and compute the marginal data density, regime probabilities,
+IRFs, and variance decomposition of the model.
+
+The commands have been modularized, allowing for multiple calls to the
+same command within a @code{<mod_file>.mod} file. The default is to use
+@code{<mod_file>} to tag the input (output) files used (produced) by the
+program. Thus, to call any command more than once within a
+@code{<mod_file>.mod} file, you must use the @code{*_tag} options
+described below.
+
+@anchor{markov_switching}
+@deffn Command markov_switching (@var{OPTIONS}@dots{});
+@descriptionhead
+
+Declares the Markov state variable information of a Markov-switching
+SBVAR model.
+
+@optionshead
+
+@table @code
+
+@item chain = @var{INTEGER}
+@anchor{ms_chain} The Markov chain. Default: @code{none}
+
+@item state = @var{INTEGER}
+This state has duration equal to @code{duration}. Exactly one of
+@code{state} and @code{number_of_states} must be passed. Default:
+@code{none}
+
+@item number_of_states = @var{INTEGER}
+Total number of states. Implies that all states have the same
+duration. Exactly one of @code{state} and @code{number_of_states} must
+be passed. Default: @code{none}
+
+@item duration = @var{DOUBLE} | @code{inf}
+The duration of the state or states. Default: @code{none}
+
+@end table
+@end deffn
+
+
+@anchor{svar}
+@deffn Command svar (@var{OPTIONS}@dots{});
+@descriptionhead
+
+Each Makov chain can control the switching of a set of parameters. We
+allow the parameters to be divided equation by equation and by variance
+or slope and intercept.
+
+@optionshead
+
+@table @code
+
+@item coefficients
+Specifies that only the slope and intercept in the given equations are
+controlled by the given chain.  One, but not both, of
+@code{coefficients} or @code{variances} must appear. Default:
+@code{none}
+
+@item variances
+Specifies that only variances in the given equations are controlled by
+the given chain. One, but not both, of @code{coefficients} or
+@code{variances} must appear. Default: @code{none}
+
+@item equations
+Defines the equation controlled by the given chain. If not specificed,
+then all equations are controlled by @code{chain}. Default: @code{none}
+
+@item chain = @var{INTEGER}
+Specifies a Markov chain defined by @ref{markov_switching}. Default:
+@code{none}
+
+@end table
+@end deffn
+
+
+@anchor{ms_estimation}
+@deffn Command ms_estimation (@var{OPTIONS}@dots{});
+@descriptionhead
+
+Triggers the creation of an initialization file for, and the estimation
+of, a Markov-switching SBVAR model. At the end of the run, the
+@math{A^0}, @math{A^+}, @math{Q} and @math{\zeta} matrices are contained
+in the @code{oo_.ms} structure.
+
+@optionshead
+
+@customhead{General Options}
+@table @code
+
+@item file_tag = @var{FILENAME}
+The portion of the filename associated with this run. This will create
+the model initialization file, @code{init_<file_tag>.dat}. Default:
+@code{<mod_file>}
+
+@item output_file_tag = @var{FILENAME}
+The portion of the output filename that will be assigned to this run.
+This will create, among other files,
+@code{est_final_<output_file_tag>.out},
+@code{est_intermediate_<output_file_tag>.out}. Default:
+@code{<file_tag>}
+
+@item no_create_init
+Do not create an initialization file for the model. Passing this option
+will cause the @i{Initialization Options} to be ignored. Further, the
+model will be generated from the output files associated with the
+previous estimation run (@i{i.e.} @code{est_final_<file_tag>.out},
+@code{est_intermediate_<file_tag>.out} or @code{init_<file_tag>.dat},
+searched for in sequential order). This functionality can be useful for
+continuing a previous estimation run to ensure convergence was reached
+or for reusing an initialization file. NB: If this option is not passed,
+the files from the previous estimation run will be overwritten. Default:
+@code{off} (@i{i.e.} create initialization file)
+
+@end table
+@customhead{Initialization Options}
+@table @code
+
+@item coefficients_prior_hyperparameters = [@var{DOUBLE1} @var{DOUBLE2} @var{DOUBLE3} @var{DOUBLE4} @var{DOUBLE5} @var{DOUBLE6}]
+Sets the hyper parameters for the model. The six elements of the
+argument vector have the following interpretations:
+
+@table @code
+
+@item Position
+@code{Interpretation}
+
+@item 1
+Overall tightness for @math{A^0} and @math{A^+}
+
+@item 2
+Relative tightness for @math{A^+}
+
+@item 3
+Relative tightness for the constant term
+
+@item 4
+Tightness on lag decay (range: 1.2 - 1.5); a faster decay produces
+better inflation process
+
+@item 5
+Weight on nvar sums of coeffs dummy observations (unit roots)
+
+@item 6
+Weight on single dummy initial observation including constant
+
+@end table
+
+Default: @code{[1.0 1.0 0.1 1.2 1.0 1.0]}
+
+@item freq = @var{INTEGER} | @code{monthly} | @code{quarterly} | @code{yearly}
+Frequency of the data (@i{e.g.} @code{monthly}, @code{12}). Default:
+@code{4}
+
+@item initial_year = @var{INTEGER}
+The first year of data. Default: @code{none}
+
+@item initial_subperiod = @var{INTEGER}
+The first period of data (@i{i.e.} for quarterly data, an integer in
+[@code{1,4}]). Default: @code{1}
+
+@item final_year = @var{INTEGER}
+The last year of data. Default: @code{none}
+
+@item final_subperiod = @var{INTEGER}
+The final period of data (@i{i.e.} for monthly data, an integer in
+[@code{1,12}]. Default: @code{4}
+
+@item datafile = @var{FILENAME}
+@xref{datafile}.
+
+@item xls_sheet = @var{NAME}
+@xref{xls_sheet}.
+
+@item xls_range = @var{RANGE}
+@xref{xls_range}.
+
+@item nlags = @var{INTEGER}
+The number of lags in the model. Default: @code{1}
+
+@item cross_restrictions
+Use cross @math{A^0} and @math{A^+} restrictions. Default: @code{off}
+
+@item contemp_reduced_form
+Use contemporaneous recursive reduced form. Default: @code{off}
+
+@item no_bayesian_prior = @var{INTEGER}
+Do not use bayesian prior. Default: @code{off} (@i{i.e.} use bayesian
+prior)
+
+@item alpha = @var{INTEGER}
+Alpha value for squared time-varying structural shock lambda. Default:
+@code{1}
+
+@item beta = @var{INTEGER}
+Beta value for squared time-varying structural shock lambda. Default:
+@code{1}
+
+@item gsig2_lmdm = @var{INTEGER}
+The variance for each independent @math{\lambda} parameter under
+@code{SimsZha} restrictions. Default: @code{50^2}
+
+@item specification = @code{sims_zha} | @code{none}
+This controls how restrictions are imposed to reduce the number of
+parameters. Default: @code{Random Walk}
+
+@end table
+@customhead{Estimation Options}
+@table @code
+
+@item convergence_starting_value = @var{DOUBLE}
+This is the tolerance criterion for convergence and refers to changes in
+the objective function value. It should be rather loose since it will
+gradually be tighened during estimation. Default: @code{1e-3}
+
+@item convergence_ending_value = @var{DOUBLE}
+The convergence criterion ending value. Values much smaller than square
+root machine epsilon are probably overkill. Default: @code{1e-6}
+
+@item convergence_increment_value = @var{DOUBLE}
+Determines how quickly the convergence criterion moves from the starting
+value to the ending value. Default: @code{0.1}
+
+@item max_iterations_starting_value = @var{INTEGER}
+This is the maximum number of iterations allowed in the hill-climbing
+optimization routine and should be rather small since it will gradually
+be increased during estimation. Default: @code{50}
+
+@item max_iterations_increment_value = @var{DOUBLE}
+Determines how quickly the maximum number of iterations is
+increased. Default: @code{2}
+
+@item max_block_iterations = @var{INTEGER}
+@anchor{max_block_iterations} The parameters are divided into blocks and
+optimization proceeds over each block. After a set of blockwise
+optimizations are performed, the convergence criterion is checked and
+the blockwise optimizations are repeated if the criterion is
+violated. This controls the maximum number of times the blockwise
+optimization can be performed. Note that after the blockwise
+optimizations have converged, a single optimization over all the
+parameters is performed before updating the convergence value and
+maximum number of iterations. Default: @code{100}
+
+@item max_repeated_optimization_runs = @var{INTEGER}
+The entire process described by @ref{max_block_iterations} is repeated
+until improvement has stopped. This is the maximum number of times the
+process is allowed to repeat. Set this to @code{0} to not allow
+repetitions. Default: @code{10}
+
+@item function_convergence_criterion = @var{DOUBLE}
+The convergence criterion for the objective function when
+@code{max_repeated_optimizations_runs} is positive. Default: @code{0.1}
+
+@item parameter_convergence_criterion = @var{DOUBLE}
+The convergence criterion for parameter values when
+@code{max_repeated_optimizations_runs} is positive. Default: @code{0.1}
+
+@item number_of_large_perturbations = @var{INTEGER}
+The entire process described by @ref{max_block_iterations} is repeated
+with random starting values drawn from the posterior. This specifies the
+number of random starting values used. Set this to @code{0} to not use
+random starting values. A larger number should be specified to ensure
+that the entire parameter space has been covererd. Default: @code{5}
+
+@item number_of_small_perturbations = @var{INTEGER}
+The number of small perturbations to make after the large perturbations
+have stopped improving. Setting this number much above @code{10} is
+probably overkill. Default: @code{5}
+
+@item number_of_posterior_draws_after_perturbation = @var{INTEGER}
+The number of consecutive posterior draws to make when producing a small
+perturbation. Because the posterior draws are serially correlated, a
+small number will result in a small perturbation. Default: @code{1}
+
+@item max_number_of_stages = @var{INTEGER}
+The small and large perturbation are repeated until improvement has
+stopped. This specifices the maximum number of stages allowed. Default:
+@code{20}
+
+@item random_function_convergence_criterion = @var{DOUBLE}
+The convergence criterion for the objective function when
+@code{number_of_large_perturbations} is positive. Default: @code{0.1}
+
+@item random_parameter_convergence_criterion = @var{DOUBLE}
+The convergence criterion for parameter values when
+@code{number_of_large_perturbations} is positive. Default: @code{0.1}
+
+@end table
+@end deffn
+
+@examplehead
+
+@example
+ms_estimation(datafile=data, initial_year=1959, final_year=2005,
+nlags=4, max_repeated_optimization_runs=1, max_number_of_stages=0);
+
+ms_estimation(file_tag=second_run, datafile=data, initial_year=1959,
+final_year=2005, nlags=4, max_repeated_optimization_runs=1,
+max_number_of_stages=0);
+
+ms_estimation(file_tag=second_run, output_file_tag=third_run,
+no_create_init, max_repeated_optimization_runs=5,
+number_of_large_perturbations=10);
+@end example
+
+
+@anchor{ms_simulation}
+@deffn Command ms_simulation ;
+@deffnx Command ms_simulation (@var{OPTIONS}@dots{});
+@descriptionhead
+
+Simulates a Markov-switching SBVAR model.
+
+@optionshead
+
+@table @code
+
+@item file_tag = @var{FILENAME}
+@anchor{file_tag} The portion of the filename associated with the
+@code{ms_estimation} run. Default: @code{<mod_file>}
+
+@item output_file_tag = @var{FILENAME}
+@anchor{output_file_tag} The portion of the output filename that will be
+assigned to this run. Default: @code{<file_tag>}
+
+@item mh_replic = @var{INTEGER}
+The number of draws to save. Default: @code{10,000}
+
+@item drop = @var{INTEGER}
+The number of burn-in draws. Default:
+@code{0.1*mh_replic*thinning_factor}
+
+@item thinning_factor = @var{INTEGER}
+The total number of draws is equal to
+@code{thinning_factor*mh_replic+drop}.  Default: @code{1}
+
+@item adaptive_mh_draws = @var{INTEGER}
+Tuning period for Metropolis-Hasting draws. Default: @code{30,000}
+
+@end table
+@end deffn
+
+@examplehead
+
+@example
+ms_simulation(file_tag=second_run);
+
+ms_simulation(file_tag=third_run, mh_replic=5000, thinning_factor=3);
+@end example
+
+
+@anchor{ms_compute_mdd}
+@deffn Command ms_compute_mdd ;
+@deffnx Command ms_compute_mdd (@var{OPTIONS}@dots{});
+@descriptionhead
+
+Computes the marginal data density of a Markov-switching SBVAR model
+from the posterior draws. At the end of the run, the Muller and Bridged
+log marginal densities are contained in the @code{oo_.ms} structure.
+
+@optionshead
+
+@table @code
+
+@item file_tag = @var{FILENAME}
+@xref{file_tag}.
+
+@item output_file_tag = @var{FILENAME}
+@xref{output_file_tag}.
+
+@item simulation_file_tag = @var{FILENAME}
+@anchor{simulation_file_tag} The portion of the filename associated with
+the simulation run.  Defualt: @code{<file_tag>}
+
+@item proposal_type = @var{INTEGER}
+The proposal type:
+@table @code
+
+@item 1
+Gaussian
+
+@item 2
+Power
+
+@item 3
+Truncated Power
+
+@item 4
+Step
+
+@item 5
+Truncated Gaussian
+
+@end table
+
+Default: @code{3}
+
+@item proposal_lower_bound = @var{DOUBLE}
+The lower cutoff in terms of probability. Not used for
+@code{proposal_type} in [@code{1,2}]. Required for all other proposal
+types. Default: @code{0.1}
+
+@item proposal_upper_bound = @var{DOUBLE}
+The upper cutoff in terms of probability. Not used for
+@code{proposal_type} equal to @code{1}. Required for all other proposal
+types. Default: @code{0.9}
+
+@item mdd_proposal_draws = @var{INTEGER}
+The number of proposal draws. Default: @code{100,000}
+
+@item mdd_use_mean_center
+Use the posterior mean as center. Default: @code{off}
+
+@end table
+
+@end deffn
+
+
+@anchor{ms_compute_probabilities}
+@deffn Command ms_compute_probabilities ;
+@deffnx Command ms_compute_probabilities (@var{OPTIONS}@dots{});
+@descriptionhead
+
+Computes smoothed regime probabilities of a Markov-switching SBVAR
+model. Output @code{.eps} files are contained in
+@code{<output_file_tag/Output/Probabilities>}.
+
+@optionshead
+
+@table @code
+
+@item file_tag = @var{FILENAME}
+@xref{file_tag}.
+
+@item output_file_tag = @var{FILENAME}
+@xref{output_file_tag}.
+
+@item filtered_probabilities
+Filtered probabilities are computed instead of smoothed. Default:
+@code{off}
+
+@item real_time_smoothed
+Smoothed probabilities are computed based on time @code{t} information
+for @math{0\le t\le nobs}. Default: @code{off}
+
+@end table
+
+@end deffn
+
+
+@anchor{ms_irf}
+@deffn Command ms_irf ;
+@deffnx Command ms_irf (@var{OPTIONS}@dots{});
+@descriptionhead
+
+Computes impulse response functions for a Markov-switching SBVAR
+model. Output @code{.eps} files are contained in
+@code{<output_file_tag/Output/IRF>}, while data files are contained in
+@code{<output_file_tag/IRF>}.
+
+@optionshead
+
+@table @code
+
+@item file_tag = @var{FILENAME}
+@xref{file_tag}.
+
+@item output_file_tag = @var{FILENAME}
+@xref{output_file_tag}.
+
+@item simulation_file_tag = @var{FILENAME}
+@xref{simulation_file_tag}.
+
+@item horizon = @var{INTEGER}
+The forecast horizon. Default: @code{12}
+
+@item filtered_probabilities
+@anchor{filtered_probabilities} Uses filtered probabilities at the end
+of the sample as initial conditions for regime probabilities. Default:
+@code{off}
+
+@item no_error_bands
+@anchor{no_error_bands} Do not output error bands. Default: @code{off}
+(@i{i.e.} output error bands)
+
+@item error_band_percentiles = [@var{DOUBLE1} @dots{}]
+@anchor{error_band_percentiles} The percentiles to compute. Default:
+@code{[0.16 0.50 0.84]}. If @code{no_error_bands} is passed, the default
+is @code{[0.5]}
+
+@item shock_draws = @var{INTEGER}
+@anchor{shock_draws} The number of regime paths to draw. Default:
+@code{10,000}
+
+@item shocks_per_parameter = @var{INTEGER}
+@anchor{shocks_per_parameter} The number of regime paths to draw under
+parameter uncertainty. Default: @code{10}
+
+@item thinning_factor = @var{INTEGER}
+@anchor{thinning_factor} Only @math{1/@code{thinning_factor}} of the
+draws in posterior draws file are used. Default: @code{1}
+
+@item free_parameters = @var{NUMERICAL_VECTOR}
+@anchor{free_parameters} A vector of free parameters to initialize theta
+of the model. Default: use estimated parameters
+
+@item median
+@anchor{median}
+
+A shortcut to setting @code{error_band_percentiles=[0.5]}. Default:
+@code{off}
+
+@end table
+
+@end deffn
+
+
+@anchor{ms_forecast}
+@deffn Command ms_forecast ;
+@deffnx Command ms_forecast (@var{OPTIONS}@dots{});
+@descriptionhead
+
+Generates forecasts for a Markov-switching SBVAR model. Output
+@code{.eps} files are contained in @code{<output_file_tag/Output/IRF>},
+while data files are contained in @code{<output_file_tag/IRF>}.
+
+@optionshead
+
+@table @code
+
+@item file_tag = @var{FILENAME}
+@xref{file_tag}.
+
+@item output_file_tag = @var{FILENAME}
+@xref{output_file_tag}.
+
+@item simulation_file_tag = @var{FILENAME}
+@xref{simulation_file_tag}.
+
+@item data_obs_nbr = @var{INTEGER}
+The number of data points included in the output. Default: @code{0}
+
+@item no_error_bands
+@xref{no_error_bands}.
+
+@item error_band_percentiles = [@var{DOUBLE1} @dots{}]
+@xref{error_band_percentiles}.
+
+@item shock_draws = @var{INTEGER}
+@xref{shock_draws}.
+
+@item shocks_per_parameter = @var{INTEGER}
+@xref{shocks_per_parameter}.
+
+@item thinning_factor = @var{INTEGER}
+@xref{thinning_factor}.
+
+@item free_parameters = @var{NUMERICAL_VECTOR}
+@xref{free_parameters}.
+
+@item median
+
+@xref{median}.
+
+@end table
+
+@end deffn
+
+
+@anchor{ms_variance_decomposition}
+@deffn Command ms_variance_decomposition ;
+@deffnx Command ms_variance_decomposition (@var{OPTIONS}@dots{});
+@descriptionhead
+
+Computes the variance decomposition for a Markov-switching SBVAR
+model. Output @code{.eps} files are contained in
+@code{<output_file_tag/Output/Variance_Decomposition>}, while data files
+are contained in @code{<output_file_tag/Variance_Decomposition>}.
+
+@optionshead
+
+@table @code
+
+@item file_tag = @var{FILENAME}
+@xref{file_tag}.
+
+@item output_file_tag = @var{FILENAME}
+@xref{output_file_tag}.
+
+@item simulation_file_tag = @var{FILENAME}
+@xref{simulation_file_tag}.
+
+@item filtered_probabilities
+@xref{filtered_probabilities}.
+
+@item no_error_bands
+@xref{no_error_bands}.
+
+@item error_band_percentiles = [@var{DOUBLE1} @dots{}]
+@xref{error_band_percentiles}.
+
+@item shock_draws = @var{INTEGER}
+@xref{shock_draws}.
+
+@item shocks_per_parameter = @var{INTEGER}
+@xref{shocks_per_parameter}.
+
+@item thinning_factor = @var{INTEGER}
+@xref{thinning_factor}.
+
+@item free_parameters = @var{NUMERICAL_VECTOR}
+@xref{free_parameters}.
+
+@item median
+
+@xref{median}.
+
+@end table
+
+@end deffn
+
+
 @node Displaying and saving results
 @section Displaying and saving results
 
@@ -6313,6 +6946,11 @@ Schmitt-Grohé, Stephanie and Martin Uríbe (2004): ``Solving Dynamic
 General Equilibrium Models Using a Second-Order Approximation to the
 Policy Function,'' @i{Journal of Economic Dynamics and Control},
 28(4), 755--775.
+
+@item
+Sims, Christopher A., Daniel F. Waggoner and Tao Zha (2008): ``Methods for
+inference in large multiple-equation Markov-switching models,''
+@i{Journal of Econometrics}, 146, 255--274.
 
 @item
 Smets, Frank and Rafael Wouters (2003): ``An Estimated Dynamic
