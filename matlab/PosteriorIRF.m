@@ -34,7 +34,7 @@ function PosteriorIRF(type)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 
-global options_ estim_params_ oo_ M_ bayestopt_
+global options_ estim_params_ oo_ M_ bayestopt_ dataset_
 % Set the number of periods
 if isempty(options_.irf) || ~options_.irf 
     options_.irf = 40;
@@ -64,8 +64,8 @@ np   = estim_params_.np ;
 npar = nvx+nvn+ncx+ncn+np;
 offset = npar-np; clear('nvx','nvn','ncx','ncn','np');
 
-nvobs = size(options_.varobs,1);
-gend = options_.nobs;
+nvobs = dataset_.info.nvobs;
+gend = dataset_.info.ntobs;
 MaxNumberOfPlotPerFigure = 9;
 nn = sqrt(MaxNumberOfPlotPerFigure);
 MAX_nirfs_dsge = ceil(options_.MaxNumberOfBytes/(options_.irf*nvar*M_.exo_nbr)/8);
@@ -230,7 +230,8 @@ else
                         'options_', options_, ...
                         'bayestopt_', bayestopt_, ...
                         'estim_params_', estim_params_, ...
-                        'oo_', oo_);
+                        'oo_', oo_, ...
+                        'dataset_',dataset_);
     
     % which files have to be copied to run remotely
     NamFileInput(1,:) = {'',[M_.fname '_static.m']};

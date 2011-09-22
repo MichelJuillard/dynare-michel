@@ -29,7 +29,7 @@ function dynare_estimation_1(var_list_,dname)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ oo_ estim_params_ bayestopt_
+global M_ options_ oo_ estim_params_ bayestopt_ dataset_
 
 if ~options_.dsge_var
     objective_function = str2func('DsgeLikelihood');
@@ -208,11 +208,6 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         else
             nit=1000;
         end
-        if ~options_.dsge_var
-            [xparam1,hh,gg,fval,invhess] = newrat('DsgeLikelihood',xparam1,hh,gg,igg,crit,nit,flag,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
-        else
-            [xparam1,hh,gg,fval,invhess] = newrat('DsgeVarLikelihood',xparam1,hh,gg,igg,crit,nit,flag,gend);
-        end
         [xparam1,hh,gg,fval,invhess] = newrat(objective_function,xparam1,hh,gg,igg,crit,nit,flag,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         parameter_names = bayestopt_.name;
         save([M_.fname '_mode.mat'],'xparam1','hh','gg','fval','invhess','parameter_names');
@@ -362,7 +357,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
 end
 
 if options_.cova_compute == 0
-    hh = NaN(length(xparam1),length(xparam1));
+    hh = [];%NaN(length(xparam1),length(xparam1));
 end
 
 if ~options_.mh_posterior_mode_estimation && options_.cova_compute
@@ -380,11 +375,7 @@ if ~options_.mh_posterior_mode_estimation && options_.cova_compute
 end
 
 if options_.mode_check == 1 && ~options_.mh_posterior_mode_estimation
-    if options_.cova_compute
-        mode_check(xparam1,0,hh,gend,data,lb,ub,data_index,number_of_observations,no_more_missing_observations);
-    else
-        mode_check(xparam1,0,[],gend,data,lb,ub,data_index,number_of_observations,no_more_missing_observations);
-    end
+    mode_check('objective_function',xparam1,hh,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
 end
 
 if ~options_.mh_posterior_mode_estimation
@@ -509,16 +500,10 @@ if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
         estim_params_nbr = size(xparam1,1);
         scale_factor = -sum(log10(diag(invhess)));
         log_det_invhess = -estim_params_nbr*log(scale_factor)+log(det(scale_factor*invhess));
-        if ~options_.dsge_var
-            md_Laplace = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess ...
-                - DsgeLikelihood(xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
-        else
-            md_Laplace = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess ...
-                - DsgeVarLikelihood(xparam1,gend);
-        end
-        oo_.MarginalDensity.LaplaceApproximation = md_Laplace;
+        likelihood = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        oo_.MarginalDensity.LaplaceApproximation = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess - likelihood;
         disp(' ')
-        disp(sprintf('Log data density [Laplace approximation] is %f.',md_Laplace))
+        disp(sprintf('Log data density [Laplace approximation] is %f.',oo_.MarginalDensity.LaplaceApproximation))
         disp(' ')
     end
 elseif ~any(bayestopt_.pshape > 0) && options_.mh_posterior_mode_estimation
@@ -807,11 +792,7 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
             invhess = compute_mh_covariance_matrix;
         end
         if options_.cova_compute
-            if options_.dsge_var
-                feval(options_.posterior_sampling_method,'DsgeVarLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,gend);
-            else
-                feval(options_.posterior_sampling_method,'DsgeLikelihood',options_.proposal_distribution,xparam1,invhess,bounds,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
-            end
+            feval(options_.posterior_sampling_method,objective_function,options_.proposal_distribution,xparam1,invhess,bounds,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         else
             error('I Cannot start the MCMC because the hessian of the posterior kernel at the mode was not computed.')
         end

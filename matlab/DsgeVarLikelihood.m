@@ -1,18 +1,18 @@
-function [fval,cost_flag,info,PHI,SIGMAu,iXX,prior] = DsgeVarLikelihood(xparam1,gend)
-% Evaluates the posterior kernel of the bvar-dsge model. 
-% 
-% INPUTS 
+function [fval,exit_flag,info,PHI,SIGMAu,iXX,prior] = DsgeVarLikelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
+% Evaluates the posterior kernel of the bvar-dsge model.
+%
+% INPUTS
 %   o xparam1       [double]     Vector of model's parameters.
 %   o gend          [integer]    Number of observations (without conditionning observations for the lags).
-%  
-% OUTPUTS 
+%
+% OUTPUTS
 %   o fval          [double]     Value of the posterior kernel at xparam1.
 %   o cost_flag     [integer]    Zero if the function returns a penalty, one otherwise.
 %   o info          [integer]    Vector of informations about the penalty.
 %   o PHI           [double]     Stacked BVAR-DSGE autoregressive matrices (at the mode associated to xparam1).
 %   o SIGMAu        [double]     Covariance matrix of the BVAR-DSGE (at the mode associated to xparam1).
 %   o iXX           [double]     inv(X'X).
-%   o prior         [double]     a matlab structure describing the dsge-var prior.  
+%   o prior         [double]     a matlab structure describing the dsge-var prior.
 %
 % SPECIAL REQUIREMENTS
 %   None.
@@ -34,139 +34,180 @@ function [fval,cost_flag,info,PHI,SIGMAu,iXX,prior] = DsgeVarLikelihood(xparam1,
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global bayestopt_ estim_params_ M_ options_ oo_
+% Declaration of the persistent variables.
+persistent penalty dsge_prior_weight_idx
 
-nvx = estim_params_.nvx;
-nvn = estim_params_.nvn;
-ncx = estim_params_.ncx;
-ncn = estim_params_.ncn;
-np  = estim_params_.np;
-nx = nvx+nvn+ncx+ncn+np;
-ns = nvx+nvn+ncx+ncn;
+% Initialization of the penalty
+if ~nargin || isempty(penalty)
+    penalty = 1e8;
+    if ~nargin, return, end
+end
+if nargin==1
+    penalty = xparam1;
+    return
+end
 
-NumberOfObservedVariables = size(options_.varobs,1);
-NumberOfLags = options_.dsge_varlag;
+% Initialization of of the index for parameter dsge_prior_weight in Model.params.
+if isempty(dsge_prior_weight_idx)
+    dsge_prior_weight_idx = strmatch('dsge_prior_weight',Model.param_names);
+end
+
+% Get the number of estimated (dsge) parameters.
+ns = EstimatedParameters.nvx + ...
+     EstimatedParameters.nvn + ...
+     EstimatedParameters.ncx + ...
+     EstimatedParameters.ncn;
+nx = ns + EstimatedParameters.np;
+
+% Get the number of observed variables in the VAR model.
+NumberOfObservedVariables = DynareDataset.info.nvobs;
+
+% Get the number of lags in the VAR model.
+NumberOfLags = DynareOptions.dsge_varlag;
+
+% Get the number of parameters in the VAR model.
 NumberOfParameters = NumberOfObservedVariables*NumberOfLags ;
-if ~options_.noconstant
+if ~DynareOptions.noconstant
     NumberOfParameters = NumberOfParameters + 1;
 end
 
+% Get empirical second order moments for the observed variables.
 mYY = evalin('base', 'mYY');
 mYX = evalin('base', 'mYX');
 mXY = evalin('base', 'mXY');
 mXX = evalin('base', 'mXX');
 
+% Initialize some of the output arguments.
 fval = [];
-cost_flag = 1;
+exit_flag = 1;
 
-if ~isequal(options_.mode_compute,1) && any(xparam1 < bayestopt_.lb)
-    k = find(xparam1 < bayestopt_.lb);
-    fval = bayestopt_.penalty+sum((bayestopt_.lb(k)-xparam1(k)).^2);
-    cost_flag = 0;
+% Return, with endogenous penalty, if some dsge-parameters are smaller than the lower bound of the prior domain.
+if DynareOptions.mode_compute ~= 1 && any(xparam1 < BayesInfo.lb)
+    k = find(xparam1 < BayesInfo.lb);
+    fval = penalty+sum((BayesInfo.lb(k)-xparam1(k)).^2);
+    exit_flag = 0;
     info = 41;
     return;
 end
 
-if ~isequal(options_.mode_compute,11) && any(xparam1 > bayestopt_.ub)
-    k = find(xparam1 > bayestopt_.ub);
-    fval = bayestopt_.penalty+sum((xparam1(k)-bayestopt_.ub(k)).^2);
-    cost_flag = 0;
+% Return, with endogenous penalty, if some dsge-parameters are greater than the upper bound of the prior domain.
+if DynareOptions.mode_compute ~= 1 && any(xparam1 > BayesInfo.ub)
+    k = find(xparam1 > BayesInfo.ub);
+    fval = penalty+sum((xparam1(k)-BayesInfo.ub(k)).^2);
+    exit_flag = 0;
     info = 42;
     return;
 end
 
-Q = M_.Sigma_e;
-for i=1:estim_params_.nvx
-    k = estim_params_.var_exo(i,1);
+% Get the variance of each structural innovation.
+Q = Model.Sigma_e;
+for i=1:EstimatedParameters.nvx
+    k = EstimatedParameters.var_exo(i,1);
     Q(k,k) = xparam1(i)*xparam1(i);
 end
-offset = estim_params_.nvx;
-if estim_params_.nvn
+offset = EstimatedParameters.nvx;
+
+% Check that the user does not estimate measurment errors.
+% TODO Check that the user does not declare non estimated measurement errors...
+if EstimatedParameters.nvn
     disp('DsgeVarLikelihood :: Measurement errors are not implemented!')
     return
-end 
-if estim_params_.ncx
+end
+
+% Check that the user does not estimate off diagonal elements in the covariance matrix of the structural innovation.
+% TODO Check that Q is a diagonal matrix...
+if EstimatedParameters.ncx
     disp('DsgeVarLikelihood :: Correlated structural innovations are not implemented!')
     return
 end
 
-M_.params(estim_params_.param_vals(:,1)) = xparam1(offset+1:end);
-M_.Sigma_e = Q;
+% Update Model.params and Model.Sigma_e.
+Model.params(EstimatedParameters.param_vals(:,1)) = xparam1(offset+1:end);
+Model.Sigma_e = Q;
 
-%% Weight of the dsge prior:
-dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
-% Is the DSGE prior proper?
-if dsge_prior_weight<(NumberOfParameters+NumberOfObservedVariables)/gend;
-    fval = bayestopt_.penalty+abs(gend*dsge_prior_weight-(NumberOfParameters+NumberOfObservedVariables));
-    cost_flag = 0;
+% Get the weight of the dsge prior.
+dsge_prior_weight = Model.params(dsge_prior_weight_idx);
+
+% Is the dsge prior proper?
+if dsge_prior_weight<(NumberOfParameters+NumberOfObservedVariables)/DynareDataset.info.ntobs;
+    fval = penalty+abs(DynareDataset.info.ntobs*dsge_prior_weight-(NumberOfParameters+NumberOfObservedVariables));
+    exit_flag = 0;
     info = 51;
-    return;
+    return
 end
 
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program
 %------------------------------------------------------------------------------
-[T,R,SteadyState,info,M_,options_,oo_] = dynare_resolve(M_,options_,oo_);
 
+% Solve the Dsge model and get the matrices of the reduced form solution. T and R are the matrices of the
+% state equation
+[T,R,SteadyState,info,Model,DynareOptions,DynareResults] = dynare_resolve(Model,DynareOptions,DynareResults,'restrict');
+
+% Return, with endogenous penalty when possible, if dynare_resolve issues an error code (defined in resol).
 if info(1) == 1 || info(1) == 2 || info(1) == 5
-    fval = bayestopt_.penalty+1;
-    cost_flag = 0;
+    fval = penalty+1;
+    info = info(1);
+    exit_flag = 0;
     return
 elseif info(1) == 3 || info(1) == 4 || info(1) == 19 || info(1) == 20 || info(1) == 21
-    fval = bayestopt_.penalty+info(2);
-    cost_flag = 0;
+    fval = penalty+info(2);
+    info = info(1);
+    exit_flag = 0;
     return
 end
 
-if ~options_.noconstant
-    if options_.loglinear 
-        constant = transpose(log(SteadyState(bayestopt_.mfys)));
+% Define the mean/steady state vector.
+if ~DynareOptions.noconstant
+    if DynareOptions.loglinear
+        constant = transpose(log(SteadyState(BayesInfo.mfys)));
     else
-        constant = transpose(SteadyState(bayestopt_.mfys));
-    end 
+        constant = transpose(SteadyState(BayesInfo.mfys));
+    end
 else
     constant = zeros(1,NumberOfObservedVariables);
 end
-if bayestopt_.with_trend == 1
-    disp('DsgeVarLikelihood :: Linear trend is not yet implemented!')
-    return
+
+% Dsge-VAR with deterministic trends is not implemented
+if BayesInfo.with_trend == 1
+    error('DsgeVarLikelihood :: Linear trend is not yet implemented!')
 end
 
 %------------------------------------------------------------------------------
 % 3. theoretical moments (second order)
 %------------------------------------------------------------------------------
-tmp0 = lyapunov_symm(T,R*Q*R',options_.qz_criterium,options_.lyapunov_complex_threshold);% I compute the variance-covariance matrix
-mf  = bayestopt_.mf1;          % of the restricted state vector.
+
+% Compute the theoretical second order moments
+tmp0 = lyapunov_symm(T,R*Q*R',DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
+mf  = BayesInfo.mf1;
 
 % Get the non centered second order moments
-TheoreticalAutoCovarianceOfTheObservedVariables = ...
-    zeros(NumberOfObservedVariables,NumberOfObservedVariables,NumberOfLags+1);
+TheoreticalAutoCovarianceOfTheObservedVariables = zeros(NumberOfObservedVariables,NumberOfObservedVariables,NumberOfLags+1);
 TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1) = tmp0(mf,mf)+constant'*constant;
 for lag = 1:NumberOfLags
     tmp0 = T*tmp0;
-    TheoreticalAutoCovarianceOfTheObservedVariables(:,:,lag+1) = tmp0(mf,mf) ...
-        + constant'*constant;
+    TheoreticalAutoCovarianceOfTheObservedVariables(:,:,lag+1) = tmp0(mf,mf) + constant'*constant;
 end
+
 % Build the theoretical "covariance" between Y and X
 GYX = zeros(NumberOfObservedVariables,NumberOfParameters);
 for i=1:NumberOfLags
-    GYX(:,(i-1)*NumberOfObservedVariables+1:i*NumberOfObservedVariables) = ...
-        TheoreticalAutoCovarianceOfTheObservedVariables(:,:,i+1);
+    GYX(:,(i-1)*NumberOfObservedVariables+1:i*NumberOfObservedVariables) = TheoreticalAutoCovarianceOfTheObservedVariables(:,:,i+1);
 end
-if ~options_.noconstant
+if ~DynareOptions.noconstant
     GYX(:,end) = constant';
 end
+
 % Build the theoretical "covariance" between X and X
-GXX = kron(eye(NumberOfLags), ...
-           TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1));
+GXX = kron(eye(NumberOfLags), TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1));
 for i = 1:NumberOfLags-1
-    tmp1 = diag(ones(NumberOfLags-i,1),i); 
+    tmp1 = diag(ones(NumberOfLags-i,1),i);
     tmp2 = diag(ones(NumberOfLags-i,1),-i);
     GXX = GXX + kron(tmp1,TheoreticalAutoCovarianceOfTheObservedVariables(:,:,i+1));
     GXX = GXX + kron(tmp2,TheoreticalAutoCovarianceOfTheObservedVariables(:,:,i+1)');
 end
 
-if ~options_.noconstant
+if ~DynareOptions.noconstant
     % Add one row and one column to GXX
     GXX = [GXX , kron(ones(NumberOfLags,1),constant') ; [  kron(ones(1,NumberOfLags),constant) , 1] ];
 end
@@ -177,45 +218,46 @@ assignin('base','GYY',GYY);
 assignin('base','GXX',GXX);
 assignin('base','GYX',GYX);
 
-if ~isinf(dsge_prior_weight)
-    tmp0 = dsge_prior_weight*gend*TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1) + mYY ;
-    tmp1 = dsge_prior_weight*gend*GYX + mYX;
-    tmp2 = inv(dsge_prior_weight*gend*GXX+mXX);
+if ~isinf(dsge_prior_weight)% Evaluation of the likelihood of the dsge-var model when the dsge prior weight is finite.
+    tmp0 = dsge_prior_weight*DynareDataset.info.ntobs*TheoreticalAutoCovarianceOfTheObservedVariables(:,:,1) + mYY ;
+    tmp1 = dsge_prior_weight*DynareDataset.info.ntobs*GYX + mYX;
+    tmp2 = inv(dsge_prior_weight*DynareDataset.info.ntobs*GXX+mXX);
     SIGMAu = tmp0 - tmp1*tmp2*tmp1'; clear('tmp0');
     if ~ispd(SIGMAu)
         v = diag(SIGMAu);
         k = find(v<0);
-        fval = bayestopt_.penalty + sum(v(k).^2);
+        fval = penalty + sum(v(k).^2);
         info = 52;
-        cost_flag = 0;
+        exit_flag = 0;
         return;
     end
-    SIGMAu = SIGMAu / (gend*(1+dsge_prior_weight));
+    SIGMAu = SIGMAu / (DynareDataset.info.ntobs*(1+dsge_prior_weight));
     PHI = tmp2*tmp1'; clear('tmp1');
-    prodlng1 = sum(gammaln(.5*((1+dsge_prior_weight)*gend- ...
+    prodlng1 = sum(gammaln(.5*((1+dsge_prior_weight)*DynareDataset.info.ntobs- ...
                                NumberOfObservedVariables*NumberOfLags ...
                                +1-(1:NumberOfObservedVariables)')));
-    prodlng2 = sum(gammaln(.5*(dsge_prior_weight*gend- ...
+    prodlng2 = sum(gammaln(.5*(dsge_prior_weight*DynareDataset.info.ntobs- ...
                                NumberOfObservedVariables*NumberOfLags ...
-                               +1-(1:NumberOfObservedVariables)')));  
-    lik = .5*NumberOfObservedVariables*log(det(dsge_prior_weight*gend*GXX+mXX)) ...
-          + .5*((dsge_prior_weight+1)*gend-NumberOfParameters)*log(det((dsge_prior_weight+1)*gend*SIGMAu)) ...
-          - .5*NumberOfObservedVariables*log(det(dsge_prior_weight*gend*GXX)) ...
-          - .5*(dsge_prior_weight*gend-NumberOfParameters)*log(det(dsge_prior_weight*gend*(GYY-GYX*inv(GXX)*GYX'))) ...
-          + .5*NumberOfObservedVariables*gend*log(2*pi)  ...
-          - .5*log(2)*NumberOfObservedVariables*((dsge_prior_weight+1)*gend-NumberOfParameters) ...
-          + .5*log(2)*NumberOfObservedVariables*(dsge_prior_weight*gend-NumberOfParameters) ...
+                               +1-(1:NumberOfObservedVariables)')));
+    lik = .5*NumberOfObservedVariables*log(det(dsge_prior_weight*DynareDataset.info.ntobs*GXX+mXX)) ...
+          + .5*((dsge_prior_weight+1)*DynareDataset.info.ntobs-NumberOfParameters)*log(det((dsge_prior_weight+1)*DynareDataset.info.ntobs*SIGMAu)) ...
+          - .5*NumberOfObservedVariables*log(det(dsge_prior_weight*DynareDataset.info.ntobs*GXX)) ...
+          - .5*(dsge_prior_weight*DynareDataset.info.ntobs-NumberOfParameters)*log(det(dsge_prior_weight*DynareDataset.info.ntobs*(GYY-GYX*inv(GXX)*GYX'))) ...
+          + .5*NumberOfObservedVariables*DynareDataset.info.ntobs*log(2*pi)  ...
+          - .5*log(2)*NumberOfObservedVariables*((dsge_prior_weight+1)*DynareDataset.info.ntobs-NumberOfParameters) ...
+          + .5*log(2)*NumberOfObservedVariables*(dsge_prior_weight*DynareDataset.info.ntobs-NumberOfParameters) ...
           - prodlng1 + prodlng2;
-else
+else% Evaluation of the likelihood of the dsge-var model when the dsge prior weight is infinite.
     iGXX = inv(GXX);
     SIGMAu = GYY - GYX*iGXX*transpose(GYX);
     PHI = iGXX*transpose(GYX);
-    lik = gend * ( log(det(SIGMAu)) + NumberOfObservedVariables*log(2*pi) +  ...
-                   trace(inv(SIGMAu)*(mYY - transpose(mYX*PHI) - mYX*PHI + transpose(PHI)*mXX*PHI)/gend));
+    lik = DynareDataset.info.ntobs * ( log(det(SIGMAu)) + NumberOfObservedVariables*log(2*pi) +  ...
+                   trace(inv(SIGMAu)*(mYY - transpose(mYX*PHI) - mYX*PHI + transpose(PHI)*mXX*PHI)/DynareDataset.info.ntobs));
     lik = .5*lik;% Minus likelihood
-end      
+end
 
-lnprior = priordens(xparam1,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7,bayestopt_.p3,bayestopt_.p4);
+% Add the (logged) prior density for the dsge-parameters.
+lnprior = priordens(xparam1,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
 fval = (lik-lnprior);
 
 if (nargout == 6)
@@ -232,10 +274,10 @@ if (nargout==7)
     else
         iXX = tmp2;
     end
-    iGXX = inv(GXX); 
+    iGXX = inv(GXX);
     prior.SIGMAstar = GYY - GYX*iGXX*GYX';
     prior.PHIstar = iGXX*transpose(GYX);
-    prior.ArtificialSampleSize = fix(dsge_prior_weight*gend);
+    prior.ArtificialSampleSize = fix(dsge_prior_weight*DynareDataset.info.ntobs);
     prior.DF = prior.ArtificialSampleSize - NumberOfParameters - NumberOfObservedVariables;
     prior.iGXX = iGXX;
 end

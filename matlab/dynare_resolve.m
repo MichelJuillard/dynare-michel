@@ -1,4 +1,4 @@
-function [A,B,ys,info,Model,DynareOptions,DynareResults] = dynare_resolve(Model,DynareOptions,DynareResults)
+function [A,B,ys,info,Model,DynareOptions,DynareResults] = dynare_resolve(Model,DynareOptions,DynareResults,mode)
 % Computes the linear approximation and the matrices A and B of the transition equation.
 
 %@info:
@@ -80,15 +80,18 @@ if info(1) > 0
     return
 end
 
-if nargin == 0
+switch nargin
+  case 3
     endo_nbr = Model.endo_nbr;
     nstatic = DynareResults.dr.nstatic;
     npred = DynareResults.dr.npred;
     iv = (1:endo_nbr)';
     ic = [ nstatic+(1:npred) endo_nbr+(1:size(DynareResults.dr.ghx,2)-npred) ]';
-else
+  case 4
     iv = DynareResults.dr.restrict_var_list;
     ic = DynareResults.dr.restrict_columns;
+  otherwise
+    error('dynare_resolve:: Error in the calling sequence!')
 end
 
 if nargout==1

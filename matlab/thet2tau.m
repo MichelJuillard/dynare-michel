@@ -36,7 +36,6 @@ M_.params(indx) = params(length(indexo)+1:end);
 if ~isempty(indexo)
     M_.Sigma_e(indexo,indexo) = diag(params(1:length(indexo)).^2);
 end
-% [A(oo_.dr.order_var,oo_.dr.order_var),B(oo_.dr.order_var,:)]=dynare_resolve;
 [A,B,tele,tubbies,M_,options_,oo_] = dynare_resolve(M_,options_,oo_);
 if flagmoments==0,
     tau = [oo_.dr.ys(oo_.dr.order_var); A(:); dyn_vech(B*M_.Sigma_e*B')];

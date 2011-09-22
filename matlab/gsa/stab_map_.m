@@ -247,7 +247,7 @@ if fload==0,
         M_.params(estim_params_.param_vals(:,1)) = lpmat(j,:)';
         %try stoch_simul([]);
         try
-            [Tt,Rr,SteadyState,infox{j},M_,options_,oo_] = dynare_resolve(M_,options_,oo_);
+            [Tt,Rr,SteadyState,infox{j},M_,options_,oo_] = dynare_resolve(M_,options_,oo_,'restrict');
             if infox{j}(1)==0 && ~exist('T'),
                 dr_=oo_.dr;
                 T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),Nsam);
@@ -402,7 +402,7 @@ else
         for j=1:ntrans,
             M_.params(estim_params_.param_vals(:,1)) = lpmat(istable(j),:)';
             %stoch_simul([]);
-            [Tt,Rr,SteadyState,info,M_,options_,oo_] = dynare_resolve(M_,options_,oo_);
+            [Tt,Rr,SteadyState,info,M_,options_,oo_] = dynare_resolve(M_,options_,oo_,'restrict');
             % This syntax is not compatible with the current version of dynare_resolve [stepan].
             %[Tt,Rr,SteadyState,info] = dynare_resolve(bayestopt_.restrict_var_list,...
             %    bayestopt_.restrict_columns,...
