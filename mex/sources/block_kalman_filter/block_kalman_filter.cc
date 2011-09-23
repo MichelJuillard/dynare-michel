@@ -213,8 +213,8 @@ det(double* F, int dim)
 void
 mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-  if (nlhs > 2)
-    DYN_MEX_FUNC_ERR_MSG_TXT("kalman_filter provides at most 2 output argument.");
+  if (nlhs > 3)
+    DYN_MEX_FUNC_ERR_MSG_TXT("kalman_filter provides at most 3 output argument.");
   if (nrhs != 12)
     DYN_MEX_FUNC_ERR_MSG_TXT("kalman_filter requires exactly 12 input arguments.");
 //(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol, block)
@@ -792,16 +792,19 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           t++;
         }
     }
-    
-  if (nlhs >= 1)
+
+  // info = 0
+  plhs[0] = mxCreateDoubleScalar(0);
+  
+  if (nlhs >= 2)
     {
-      plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
-      double* pind = mxGetPr(plhs[0]);
+      plhs[1] = mxCreateDoubleMatrix(1, 1, mxREAL);
+      double* pind = mxGetPr(plhs[1]);
       pind[0] = LIK;
     }
 
-  if (nlhs == 2)
-    plhs[1] = plik;
+  if (nlhs == 3)
+    plhs[2] = plik;
   mxFree(w);
 #ifdef DIRECT
   /*mxDestroyArray(nze);
