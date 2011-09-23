@@ -805,6 +805,9 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
   if (nlhs == 3)
     plhs[2] = plik;
+  else
+    mxDestroyArray(plik);
+  
   mxFree(w);
 #ifdef DIRECT
   /*mxDestroyArray(nze);
