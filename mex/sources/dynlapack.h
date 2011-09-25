@@ -235,6 +235,10 @@ extern "C" {
   void dgeqp3(CONST_LAINT m, CONST_LAINT n, LADOU a, CONST_LAINT lda, LAINT jpvt, LADOU tau,
               LADOU work, CONST_LAINT lwork, LAINT info);
 
+#define dlange FORTRAN_WRAPPER(dlange)
+  double dlange(LACHAR norm, CONST_LAINT m, CONST_LAINT n, CONST_LADOU a, CONST_LAINT lda,
+                LADOU work);
+
 #ifdef __cplusplus
 } /* extern "C" */
 #endif

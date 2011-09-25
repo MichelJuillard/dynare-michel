@@ -129,6 +129,7 @@ AC_CONFIG_FILES([Makefile
                  ordschur/Makefile
                  libslicot/Makefile
                  kalman_steady_state/Makefile
-                 ms_sbvar/Makefile])
+                 ms_sbvar/Makefile
+                 block_kalman_filter/Makefile])
 
 AC_OUTPUT
