@@ -1,4 +1,6 @@
 function sp = setFreq(sp,freq)
+% Set frequency of a dynTime object.
+
 %@info:
 %! @deftypefn {Function File} {@var{sp} =} setFreq (@var{sp}, @var{freq})
 %! @anchor{@dynTime/setFreq}
@@ -41,4 +43,5 @@ function sp = setFreq(sp,freq)
 %!
 %! @end deftypefn
 %@eod:
-    sp.freq = freq;
+
+sp.freq = freq;
