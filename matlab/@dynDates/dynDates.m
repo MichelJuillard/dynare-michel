@@ -26,6 +26,7 @@ function date = dynDates(a)
 %! @sp 1
 %! The constructor defines the following properties:
 %! @sp 1
+%! @table @ @var
 %! @item freq
 %! Scalar integer, the frequency of the time series. @var{freq} is equal to 1 if data are on a yearly basis or if
 %! frequency is unspecified. @var{freq} is equal to 4 if data are on a quaterly basis. @var{freq} is equal to
@@ -91,7 +92,14 @@ switch nargin
             date.time(2) = str2num(a(weekly+1:end));
         end
         if isempty(quaterly) && isempty(monthly) && isempty(weekly)
-            error('dynDates:: Using a string as an input argument, I can only handle weekly (W), monthly (M) or quaterly (Q) data!');
+            if any(isletter(a))
+                error('dynDates:: Using a string as an input argument, I can only handle weekly (W), monthly (M) or quaterly (Q) data!');
+            else
+                % Yearly data declared with a string
+                date.freq = 1;
+                date.time(1) = str2num(a);
+                date.time(2) = 1;
+            end
         end
     elseif isa(a,'dynDates') % If input argument is a dynDates object then do a copy.
         date = a;
@@ -112,6 +120,7 @@ end
 %$ date_2 = '1950Q2';
 %$ date_3 = '1950M10';
 %$ date_4 = '1950W50';
+%$ date_5 = '1950';
 %$
 %$ % Define expected results.
 %$ e_date_1 = [1950 1];
@@ -122,21 +131,26 @@ end
 %$ e_freq_3 = 12;
 %$ e_date_4 = [1950 50];
 %$ e_freq_4 = 52;
+%$ e_date_5 = [1950 1];
+%$ e_freq_5 = 1;
 %$
 %$ % Call the tested routine.
 %$ d1 = dynDates(date_1);
 %$ d2 = dynDates(date_2);
 %$ d3 = dynDates(date_3);
 %$ d4 = dynDates(date_4);
+%$ d5 = dynDates(date_5);
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(d1.time,e_date_1);
 %$ t(2) = dyn_assert(d2.time,e_date_2);
 %$ t(3) = dyn_assert(d3.time,e_date_3);
 %$ t(4) = dyn_assert(d4.time,e_date_4);
-%$ t(5) = dyn_assert(d1.freq,e_freq_1);
-%$ t(6) = dyn_assert(d2.freq,e_freq_2);
-%$ t(7) = dyn_assert(d3.freq,e_freq_3);
-%$ t(8) = dyn_assert(d4.freq,e_freq_4);
+%$ t(5) = dyn_assert(d5.time,e_date_5);
+%$ t(6) = dyn_assert(d1.freq,e_freq_1);
+%$ t(7) = dyn_assert(d2.freq,e_freq_2);
+%$ t(8) = dyn_assert(d3.freq,e_freq_3);
+%$ t(9) = dyn_assert(d4.freq,e_freq_4);
+%$ t(10)= dyn_assert(d5.freq,e_freq_5);
 %$ T = all(t);
 %@eof:1
