@@ -88,6 +88,18 @@ if ~exist('OCTAVE_VERSION') && matlab_ver_less_than('7.4')
     addpath([dynareroot '/missing/bsxfun'])
 end
 
+% nanmean is in Octave Forge Statistics package and in MATLAB Statistics
+% toolbox
+if exist('OCTAVE_VERSION')
+    [desc,flag] = pkg('describe', 'statistics');
+    if ~isequal(flag{1,1}, 'Loaded')
+        addpath([dynareroot '/missing/nanmean'])
+    end
+else
+    if ~license('test', 'statistics_toolbox')
+        addpath([dynareroot '/missing/nanmean'])
+    end
+end
 
 % Add path to MEX files
 if exist('OCTAVE_VERSION')
