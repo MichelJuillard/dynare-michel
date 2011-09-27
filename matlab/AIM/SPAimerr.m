@@ -26,7 +26,8 @@ function e = SPAimerr(c);
 % Anderson, G.
 % "A Reliable and Computationally Efficient Algorithm for Imposing the
 % Saddle Point Property in Dynamic Models"
-% Journal of Economic Dynamics and Control, Forthcoming
+% Journal of Economic Dynamics and Control, 2010, vol. 34, issue 3,
+% pages 472-489
 
     if(c==1)  e='Aim: unique solution.';
 elseif(c==2)  e='Aim: roots not correctly computed by real_schur.';
