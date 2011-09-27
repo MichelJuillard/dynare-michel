@@ -21,7 +21,7 @@ MODFILES = \
 	comments.mod \
 	histval_sto.mod \
 	histval_det.mod \
-	expectation.mod \
+	expectations/expectation.mod \
 	steady_state_operator/standard.mod \
 	steady_state_operator/use_dll.mod \
 	steady_state_operator/block.mod \
