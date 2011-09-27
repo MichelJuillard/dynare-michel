@@ -109,7 +109,7 @@ while ~done
          end
          wall1=badg1;
          % g1
-         save g1 g1 x1 f1 varargin;
+         save g1.mat g1 x1 f1 varargin;
          %ARGLIST
          %save g1 g1 x1 f1 P1 P2 P3 P4 P5 P6 P7 P8 P9 P10 P11 P12 P13;
       end
@@ -150,7 +150,7 @@ while ~done
                wall2=badg2;
                % g2
                if dispIndx, badg2, end
-               save g2 g2 x2 f2 varargin
+               save g2.mat g2 x2 f2 varargin
                %ARGLIST
                %save g2 g2 x2 f2 P1 P2 P3 P4 P5 P6 P7 P8 P9 P10 P11 P12 P13;
             end
@@ -183,7 +183,7 @@ while ~done
                      wall3=badg3;
                      % g3
                      if dispIndx, badg3, end
-                     save g3 g3 x3 f3 varargin;
+                     save g3.mat g3 x3 f3 varargin;
                      %ARGLIST
                      %save g3 g3 x3 f3 P1 P2 P3 P4 P5 P6 P7 P8 P9 P10 P11 P12 P13;
                   end

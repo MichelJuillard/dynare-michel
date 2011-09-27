@@ -333,7 +333,7 @@ if options_.ms.indxestima
          itct
          fcount
          retcodehat
-         save outm xhat A0hat A0hatinv grad fhat itct itct fcount retcodehat
+         save outm.mat xhat A0hat A0hatinv grad fhat itct itct fcount retcodehat
       end
    else
       %*** Obtain the posterior matrices for estimation and inference
@@ -363,7 +363,7 @@ if options_.ms.indxestima
          itct
          fcount
          retcodehat
-         save outm xhat A0hat A0hatinv grad fhat itct itct fcount retcodehat
+         save outm.mat xhat A0hat A0hatinv grad fhat itct itct fcount retcodehat
       end
    end
 
@@ -787,4 +787,4 @@ bhat =xhat;
 n0const=n0;  % For constant parameter models.
 n0const=n0;  % For constant parameter models.
 npconst=np;  % For constant parameter models.
-save outdata_a0dp_const A0hat bhat Aphat n0const
+save outdata_a0dp_const.mat A0hat bhat Aphat n0const

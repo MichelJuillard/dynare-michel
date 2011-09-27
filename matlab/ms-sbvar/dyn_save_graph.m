@@ -42,7 +42,7 @@ function dyn_save_graph(dirname,graph_name,graph_formats,TeX,names,texnames,capt
     end
     
     if graph_formats.eps || TeX
-        print(graph_name,'-depsc2');
+        print([ graph_name '.eps' ],'-depsc2');
     end
     if graph_formats.pdf && ~exist(OCTAVE_VERSION)
         print(graph_name,'-dpdf');
