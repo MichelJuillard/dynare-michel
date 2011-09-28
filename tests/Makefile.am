@@ -74,6 +74,8 @@ MODFILES = \
 	external_function/example1_no_deriv_functions_provided.mod \
 	external_function/example1_no_deriv_functions_provided_dll.mod \
 	seeds.mod \
+    identificaton/kim/kim2.mod \
+    identificaton/as2007/as2007.mod \
 	simul/example1.mod \
 	conditional_forecasts/fs2000_cal.mod \
 	conditional_forecasts/fs2000_est.mod \
