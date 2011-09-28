@@ -119,7 +119,7 @@ mexFunction(int nlhs, mxArray *plhs[],
   b = mxGetPr(prhs[1]);
 
   /* set criterium for stable eigenvalues */
-  if (nrhs == 3)
+  if (nrhs == 3 && mxGetM(prhs[2]) > 0)
     {
       criterium = *mxGetPr(prhs[2]);
     }
