@@ -476,10 +476,10 @@ if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
         end
         if analytic_derivation
             if no_DLIK==0
-                [DLIK] = score(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,riccati_tol);
+                [DLIK] = score(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,Z,kalman_tol,riccati_tol);
             end
-            if nargout==7
-                [AHess] = AHessian(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,riccati_tol);
+            if nargout==11
+                [AHess] = AHessian(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,Z,kalman_tol,riccati_tol);
             end
         end
     else

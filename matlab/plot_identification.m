@@ -94,7 +94,7 @@ if SampleSize == 1,
     
     if advanced,
         disp(' ')
-        disp('Press ENTER to display advanced diagnostics'), pause,
+        disp('Press ENTER to display advanced diagnostics'), pause(5),
         figure('Name',[tittxt, ' - Sensitivity plot']),
         subplot(211)
         mmm = (siJnorm)'./max(siJnorm);
@@ -258,7 +258,7 @@ else
     if options_.nograph, close(gcf); end
     if advanced,
         disp(' ')
-        disp('Press ENTER to display advanced diagnostics'), pause,
+        disp('Press ENTER to display advanced diagnostics'), pause(5),
         options_.nograph=1;
         figure('Name','MC Condition Number'),
         subplot(221)
