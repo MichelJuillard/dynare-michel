@@ -312,9 +312,9 @@ end % if ~isempty(options_.unit_root_vars)
 % Test if the data file is declared.
 if isempty(options_.datafile)
     if gsa_flag
-        data = [];
-        rawdata = [];
-        data_info = [];
+        dataset_ = [];
+%         rawdata = [];
+%         data_info = [];
         return
     else
         error('datafile option is missing')

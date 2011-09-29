@@ -65,7 +65,7 @@ end;
 disp(' ');
 disp('NOW I DO STABILITY MAPPING and prepare sample for Reduced form Mapping');
 disp(' ');
-disp('Press ENTER to continue'); pause;
+disp('Press ENTER to continue'); pause(5);
 
 dynare_sensitivity(redform=1, //create sample of reduced form coefficients
 alpha2_stab=0.4,
@@ -76,7 +76,7 @@ ksstat=0);
 disp(' ');
 disp('ANALYSIS OF REDUCED FORM COEFFICIENTS');
 disp(' ');
-disp('Press ENTER to continue'); pause;
+disp('Press ENTER to continue'); pause(5);
 
 dynare_sensitivity(load_stab=1,  // loead previously generated sample analysed for stability
 redform=1,  // do the reduced form mapping
@@ -94,7 +94,7 @@ disp(' ');
 disp('dynare_sensitivity(alpha2_stab=0.4, ksstat=0, redform=1,')
 disp('logtrans_redform=1, namendo=(pie,R), namexo=(e_R), namlagendo=(R));')
 disp(' ');
-disp('Press ENTER to continue'); pause;
+disp('Press ENTER to continue'); pause(5);
 //dynare_sensitivity(
 //alpha2_stab=0.4,
 //ksstat=0,
@@ -109,7 +109,7 @@ disp('Press ENTER to continue'); pause;
 
 disp(' ');
 disp('MC FILTERING(rmse=1), TO MAP THE FIT FROM PRIORS');
-disp('Press ENTER to continue'); pause;
+disp('Press ENTER to continue'); pause(5);
 
 dynare_sensitivity(datafile=data_ca1,first_obs=8,nobs=79,prefilter=1, // also presample=2,loglinear, are admissible
 load_stab=1,     // load prior sample
@@ -132,7 +132,7 @@ disp('logtrans_redform=1, namendo=(pie,R), namexo=(e_R), namlagendo=(R),')
 disp('datafile=data_ca1,first_obs=8,nobs=79,prefilter=1,')
 disp('istart_rmse=2, rmse=1, pfilt_rmse=0.1, alpha2_rmse=0.3, alpha_rmse=1);')
 disp(' ');
-disp('Press ENTER to continue'); pause;
+disp('Press ENTER to continue'); pause(5);
 //dynare_sensitivity(
 //alpha2_stab=0.4,
 //ksstat=0,
@@ -156,7 +156,7 @@ disp('Press ENTER to continue'); pause;
 disp(' ');
 disp('I ESTIMATE THE MODEL');
 disp(' ');
-disp('Press ENTER to continue'); pause;
+disp('Press ENTER to continue'); pause(5);
 
 // run this to generate posterior mode and Metropolis files if not yet done
 //estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2,
@@ -173,7 +173,7 @@ disp(' ');
 disp('WE DO STABILITY MAPPING AGAIN, BUT FOR MULTIVARIATE SAMPLE AT THE POSTERIOR MODE (or ML) and Hessian (pprior=0 & ppost=0)');
 disp('Typical for ML estimation, also feasible for posterior mode');
 disp(' ');
-disp('Press ENTER to continue'); pause;
+disp('Press ENTER to continue'); pause(5);
 
 dynare_sensitivity(pprior=0,Nsam=2048,alpha2_stab=0.4,
 mode_file=ls2003_mode  // specifies the mode file where the mode and Hessian are stored
@@ -183,7 +183,7 @@ mode_file=ls2003_mode  // specifies the mode file where the mode and Hessian are
 disp(' ');
 disp('RMSE ANALYSIS FOR MULTIVARIATE SAMPLE AT THE POSTERIOR MODE');
 disp(' ');
-disp('Press ENTER to continue'); pause;
+disp('Press ENTER to continue'); pause(5);
 dynare_sensitivity(mode_file=ls2003_mode,
 datafile=data_ca1,first_obs=8,nobs=79,prefilter=1,
 pprior=0,
@@ -201,7 +201,7 @@ disp('dynare_sensitivity(pprior=0,Nsam=2048,alpha2_stab=0.4,mode_file=ls2003_mod
 disp('datafile=data_ca1,first_obs=8,nobs=79,prefilter=1,')
 disp('rmse=1, alpha2_rmse=1, alpha_rmse=1);')
 disp(' ');
-disp('Press ENTER to continue'); pause;
+disp('Press ENTER to continue'); pause(5);
 //dynare_sensitivity(pprior=0,Nsam=2048,alpha2_stab=0.4,mode_file=ls2003_mode,
 //datafile=data_ca1,first_obs=8,nobs=79,prefilter=1,
 //rmse=1,
@@ -212,7 +212,7 @@ disp('Press ENTER to continue'); pause;
 disp(' ');
 disp('RMSE ANALYSIS FOR POSTERIOR MCMC sample (ppost=1)');
 disp('Needs a call to dynare_estimation to load all MH environment');
-disp('Press ENTER to continue'); pause;
+disp('Press ENTER to continue'); pause(5);
 estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2, mode_file=ls2003_mode, load_mh_file,
   prefilter=1,mh_jscale=0.5,mh_replic=0, mode_compute=0, nograph, mh_drop=0.6);
 

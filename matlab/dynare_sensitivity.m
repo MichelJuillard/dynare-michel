@@ -24,6 +24,9 @@ function x0=dynare_sensitivity(options_gsa)
 global M_ options_ oo_ bayestopt_ estim_params_
 
 fname_ = M_.fname;
+if ~isfield(M_,'dname'),
+    M_.dname = M_.fname;
+end
 lgy_ = M_.endo_names;
 x0=[];
 
@@ -57,7 +60,8 @@ if ~isempty(options_gsa.datafile) || isempty(bayestopt_),
     options_.mode_compute = 0;
     options_.filtered_vars = 1;
     options_.plot_priors = 0;
-    [data,rawdata,xparam1,data_info]=dynare_estimation_init([],fname_,1);
+%     [data,rawdata,xparam1,data_info]=dynare_estimation_init([],fname_,1);
+    [dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_]=dynare_estimation_init(M_.endo_names,fname_,1, M_, options_, oo_, estim_params_, bayestopt_);
     % computes a first linear solution to set up various variables
 else
     if isempty(options_.qz_criterium)
