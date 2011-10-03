@@ -2,17 +2,17 @@ function sp = colon(a,b)
 
 %@info:
 %! @deftypefn {Function File} {@var{sp} =} colon (@var{a},@var{b})
-%! @anchor{@dynDates/colon}
+%! @anchor{@dynDate/colon}
 %! @sp 1
-%! Overloads the colon operator for the Dynare Dates class (@ref{dynDates}). Creates a @ref{dynTime} object.
+%! Overloads the colon operator for the Dynare Dates class (@ref{dynDate}). Creates a @ref{dynTime} object.
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
 %! @table @ @var
 %! @item a
-%! Dynare date object instantiated by @ref{dynDates}, initial date.
+%! Dynare date object instantiated by @ref{dynDate}, initial date.
 %! @item b
-%! Dynare date object instantiated by @ref{dynDates}, last date.
+%! Dynare date object instantiated by @ref{dynDate}, last date.
 %! @end table
 %! @sp 1
 %! @strong{Outputs}
@@ -52,8 +52,8 @@ if nargin~=2
     error('dynTime::colon: I need exactly two input arguments!')
 end
 
-if ~( isa(a,'dynDates') && isa(b,'dynDates'))
-    error(['dynTime::colon: Input arguments ' inputname(1) 'and ' inputname(2) ' have to be a dynDates objects!'])
+if ~( isa(a,'dynDate') && isa(b,'dynDate'))
+    error(['dynTime::colon: Input arguments ' inputname(1) 'and ' inputname(2) ' have to be a dynDate objects!'])
 end
 
 if a.freq~=b.freq
@@ -93,8 +93,8 @@ end
 %$ e.time = [1950 2; 1950 3; 1950 4; 1951 1; 1951 2; 1951 3; 1951 4];
 %$
 %$ % Call the tested routine.
-%$ d1 = dynDates(date_1);
-%$ d2 = dynDates(date_2);
+%$ d1 = dynDate(date_1);
+%$ d2 = dynDate(date_2);
 %$ d3 = d1:d2;
 %$
 %$ % Check the results.

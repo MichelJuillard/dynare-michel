@@ -1,25 +1,25 @@
-function c = max(a,b)
+function c = min(a,b)
 
 %@info:
-%! @deftypefn {Function File} {@var{c} =} max (@var{a},@var{b})
-%! @anchor{@dynDates/gt}
+%! @deftypefn {Function File} {@var{c} =} min (@var{a},@var{b})
+%! @anchor{@dynDate/gt}
 %! @sp 1
-%! Overloads the max function for the Dynare dates class @ref{dynDates}.
+%! Overloads the min function for the Dynare dates class (@ref{dynDate}).
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
 %! @table @ @var
 %! @item a
-%! Dynare date object instantiated by @ref{dynDates}.
+%! Dynare date object instantiated by @ref{dynDate}.
 %! @item b
-%! Dynare date object instantiated by @ref{dynDates}.
+%! Dynare date object instantiated by @ref{dynDate}.
 %! @end table
 %! @sp 1
 %! @strong{Outputs}
 %! @sp 1
 %! @table @ @var
 %! @item c
-%! Dynare date object instantiated by @ref{dynDates}. @var{c} is a copy of @var{a} if @var{a}>=@var{b}, a copy of @var{b} otherwise.
+%! Dynare date object instantiated by @ref{dynDate}. @var{c} is a copy of @var{a} if @var{a}<=@var{b}, a copy of @var{b} otherwise.
 %! @end table
 %! @sp 2
 %! @strong{This function is called by:}
@@ -50,18 +50,18 @@ function c = max(a,b)
 verbose = 0;
 
 if nargin~=2
-    error('dynDates::min: I need exactly two input arguments!')
+    error('dynDate::min: I need exactly two input arguments!')
 end
 
-if ~( isa(a,'dynDates') && isa(b,'dynDates'))
-    error(['dynDates::min: Input arguments ' inputname(1) 'and ' inputname(2) ' have to be a dynDates objects!'])
+if ~( isa(a,'dynDate') && isa(b,'dynDate'))
+    error(['dynDate::min: Input arguments ' inputname(1) 'and ' inputname(2) ' have to be a dynDate objects!'])
 end
 
 if verbose && a.freq~=b.freq
-    error(['dynDates::min: Input arguments ' inputname(1) 'and ' inputname(2) ' have no common frequencies!'])
+    error(['dynDate::min: Input arguments ' inputname(1) 'and ' inputname(2) ' have no common frequencies!'])
 end
 
-if a>=b
+if a<=b
     c = a;
 else
     c = b;
@@ -79,18 +79,18 @@ end
 %$ date_6 = '1948M6';
 %$
 %$ % Call the tested routine.
-%$ d1 = dynDates(date_1);
-%$ d2 = dynDates(date_2);
-%$ d3 = dynDates(date_3);
-%$ d4 = dynDates(date_4);
-%$ d5 = dynDates(date_5);
-%$ d6 = dynDates(date_6);
-%$ m1 = max(d1,d2);
-%$ i1 = (m1==d2);
-%$ m2 = max(d3,d4);
-%$ i2 = (m2==d4);
-%$ m3 = max(d5,d6);
-%$ i3 = (m3==d5);
+%$ d1 = dynDate(date_1);
+%$ d2 = dynDate(date_2);
+%$ d3 = dynDate(date_3);
+%$ d4 = dynDate(date_4);
+%$ d5 = dynDate(date_5);
+%$ d6 = dynDate(date_6);
+%$ m1 = min(d1,d2);
+%$ i1 = (m1==d1);
+%$ m2 = min(d3,d4);
+%$ i2 = (m2==d3);
+%$ m3 = min(d5,d6);
+%$ i3 = (m3==d6);
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(i1,1);

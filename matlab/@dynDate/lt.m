@@ -1,25 +1,25 @@
-function c = min(a,b)
+function c = lt(a,b)
 
 %@info:
-%! @deftypefn {Function File} {@var{c} =} min (@var{a},@var{b})
-%! @anchor{@dynDates/gt}
+%! @deftypefn {Function File} {@var{c} =} lt (@var{a},@var{b})
+%! @anchor{@dynDate/lt}
 %! @sp 1
-%! Overloads the min function for the Dynare dates class (@ref{dynDates}).
+%! Overloads the lt (less than) operator for the Dynare dates class (@ref{dynDate}).
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
 %! @table @ @var
 %! @item a
-%! Dynare date object instantiated by @ref{dynDates}.
+%! Dynare date object instantiated by @ref{dynDate}.
 %! @item b
-%! Dynare date object instantiated by @ref{dynDates}.
+%! Dynare date object instantiated by @ref{dynDate}.
 %! @end table
 %! @sp 1
 %! @strong{Outputs}
 %! @sp 1
 %! @table @ @var
 %! @item c
-%! Dynare date object instantiated by @ref{dynDates}. @var{c} is a copy of @var{a} if @var{a}<=@var{b}, a copy of @var{b} otherwise.
+%! scalar integer equal to one if a<b, 0 otherwise.
 %! @end table
 %! @sp 2
 %! @strong{This function is called by:}
@@ -50,21 +50,27 @@ function c = min(a,b)
 verbose = 0;
 
 if nargin~=2
-    error('dynDates::min: I need exactly two input arguments!')
+    error('dynDate::eq: I need exactly two input arguments!')
 end
 
-if ~( isa(a,'dynDates') && isa(b,'dynDates'))
-    error(['dynDates::min: Input arguments ' inputname(1) 'and ' inputname(2) ' have to be a dynDates objects!'])
+if ~( isa(a,'dynDate') && isa(b,'dynDate'))
+    error(['dynDate::eq: Input arguments ' inputname(1) 'and ' inputname(2) ' have to be a dynDate objects!'])
 end
 
 if verbose && a.freq~=b.freq
-    error(['dynDates::min: Input arguments ' inputname(1) 'and ' inputname(2) ' have no common frequencies!'])
+    error(['dynDate::eq: Input arguments ' inputname(1) 'and ' inputname(2) ' have no common frequencies!'])
 end
 
-if a<=b
-    c = a;
+if a.time(1)<b.time(1)
+    c = 1;
+elseif isequal(a.time(1),b.time(1))
+    if a.time(2)<b.time(2)
+        c = 1;
+    else
+        c = 0;
+    end
 else
-    c = b;
+    c = 0;
 end
 
 %@test:1
@@ -72,29 +78,26 @@ end
 %$
 %$ % Define some dates
 %$ date_1 = 1950;
-%$ date_2 = 2000;
-%$ date_3 = '1950Q2';
-%$ date_4 = '1950Q3';
-%$ date_5 = '1950M1';
-%$ date_6 = '1948M6';
+%$ date_2 = '1950Q2';
+%$ date_3 = '1950Q3';
+%$ date_4 = '1950Q1';
+%$ date_5 = '1949Q2';
 %$
 %$ % Call the tested routine.
-%$ d1 = dynDates(date_1);
-%$ d2 = dynDates(date_2);
-%$ d3 = dynDates(date_3);
-%$ d4 = dynDates(date_4);
-%$ d5 = dynDates(date_5);
-%$ d6 = dynDates(date_6);
-%$ m1 = min(d1,d2);
-%$ i1 = (m1==d1);
-%$ m2 = min(d3,d4);
-%$ i2 = (m2==d3);
-%$ m3 = min(d5,d6);
-%$ i3 = (m3==d6);
+%$ d1 = dynDate(date_1);
+%$ d2 = dynDate(date_2);
+%$ d3 = dynDate(date_3);
+%$ d4 = dynDate(date_4);
+%$ d5 = dynDate(date_5);
+%$ i1 = (d2<d3);
+%$ i2 = (d3<d4);
+%$ i3 = (d4<d2);
+%$ i4 = (d5<d4);
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(i1,1);
-%$ t(2) = dyn_assert(i2,1);
+%$ t(2) = dyn_assert(i2,0);
 %$ t(3) = dyn_assert(i3,1);
+%$ t(4) = dyn_assert(i4,1);
 %$ T = all(t);
 %@eof:1

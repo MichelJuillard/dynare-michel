@@ -2,18 +2,18 @@ function c = minus(a,b)
 
 %@info:
 %! @deftypefn {Function File} {@var{c} =} minus (@var{a},@var{b})
-%! @anchor{@dynDates/minus}
+%! @anchor{@dynDate/minus}
 %! @sp 1
-%! Overloads the minus (soustraction) operator for the Dynare dates class (@ref{dynDates}). Depending on the frequency, computes the number
+%! Overloads the minus (soustraction) operator for the Dynare dates class (@ref{dynDate}). Depending on the frequency, computes the number
 %! of years, quarters, months, weeks between two dates @var{a} and @var{b} (it is assumed that @var{a}>@var{B}).
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
 %! @table @ @var
 %! @item a
-%! Dynare date object instantiated by @ref{dynDates}.
+%! Dynare date object instantiated by @ref{dynDate}.
 %! @item b
-%! Dynare date object instantiated by @ref{dynDates}.
+%! Dynare date object instantiated by @ref{dynDate}.
 %! @end table
 %! @sp 1
 %! @strong{Outputs}
@@ -26,7 +26,7 @@ function c = minus(a,b)
 %! @strong{This function is called by:}
 %! @sp 2
 %! @strong{This function calls:}
-%! @ref{@@dynDates/eq},@ref{@@dynDates/lt}
+%! @ref{@@dynDate/eq},@ref{@@dynDate/lt}
 %!
 %! @end deftypefn
 %@eod:
@@ -49,16 +49,16 @@ function c = minus(a,b)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ~( isa(a,'dynDates') && isa(b,'dynDates') )
-    error(['dynDates::minus: Input arguments ' inputname(1) ' and ' inputname(2) ' must be dynDates objects!'])
+if ~( isa(a,'dynDate') && isa(b,'dynDate') )
+    error(['dynDate::minus: Input arguments ' inputname(1) ' and ' inputname(2) ' must be dynDate objects!'])
 end
 
 if a.freq~=b.freq
-    error(['dynDates::minus: ' inputname(1) ' and ' inputname(2) ' must have common frequency!'])
+    error(['dynDate::minus: ' inputname(1) ' and ' inputname(2) ' must have common frequency!'])
 end
 
 if a<b
-    error(['dynDates::minus: ' inputname(1) ' must be posterior to ' inputname(2) '!'])
+    error(['dynDate::minus: ' inputname(1) ' must be posterior to ' inputname(2) '!'])
 end
 
 if a==b
@@ -72,7 +72,7 @@ switch a.freq
   case {4,12,52}
     c = a.time(2)-b.time(2) + (a.time(1)-b.time(1))*a.freq;
   otherwise
-    error('dynDates::minus: Unknown frequency!')
+    error('dynDate::minus: Unknown frequency!')
 end
 
 %@test:1
@@ -89,14 +89,14 @@ end
 %$ date_2_2 = '1998M8';
 %$
 %$ % Call the tested routine.
-%$ d_0_1 = dynDates(date_0_1);
-%$ d_0_2 = dynDates(date_0_2);
-%$ d_0_3 = dynDates(date_0_3);
-%$ d_1_1 = dynDates(date_1_1);
-%$ d_1_2 = dynDates(date_1_2);
-%$ d_1_3 = dynDates(date_1_3);
-%$ d_2_1 = dynDates(date_2_1);
-%$ d_2_2 = dynDates(date_2_2);
+%$ d_0_1 = dynDate(date_0_1);
+%$ d_0_2 = dynDate(date_0_2);
+%$ d_0_3 = dynDate(date_0_3);
+%$ d_1_1 = dynDate(date_1_1);
+%$ d_1_2 = dynDate(date_1_2);
+%$ d_1_3 = dynDate(date_1_3);
+%$ d_2_1 = dynDate(date_2_1);
+%$ d_2_2 = dynDate(date_2_2);
 %$ e1 = d_0_1-d_0_2;
 %$ e2 = d_0_1-d_0_3;
 %$ e3 = d_1_1-d_1_2;

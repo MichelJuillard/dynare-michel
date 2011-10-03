@@ -1,23 +1,25 @@
-function p = format(date)
+function c = eq(a,b)
 
 %@info:
-%! @deftypefn {Function File} {@var{p} =} format (@var{date})
-%! @anchor{@dynDates/format}
+%! @deftypefn {Function File} {@var{c} =} eq (@var{a},@var{b})
+%! @anchor{@dynDate/eq}
 %! @sp 1
-%! Produces a formatted date from a Dynare date object instantiated by @ref{dynDates}.
+%! Overloads the eq (equal) operator for the Dynare dates class (@ref{dynDate}).
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
 %! @table @ @var
-%! @item date
-%! Dynare date object, instantiated by @ref{dynDates}.
+%! @item a
+%! Dynare date object instantiated by @ref{dynDate}.
+%! @item b
+%! Dynare date object instantiated by @ref{dynDate}.
 %! @end table
 %! @sp 1
 %! @strong{Outputs}
 %! @sp 1
 %! @table @ @var
-%! @item p
-%! A string containing the formatted date (for instance, '2000', '2000Q3', '2000M9' or '2000W43').
+%! @item c
+%! scalar integer equal to one if a==b, 0 otherwise.
 %! @end table
 %! @sp 2
 %! @strong{This function is called by:}
@@ -45,27 +47,22 @@ function p = format(date)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+verbose = 0;
 
-if nargin~=1
-    error('dynDates::format: I need exactly one input argument!')
+if nargin~=2
+    error('dynDate::eq: I need exactly two input arguments!')
 end
 
-if ~isa(date,'dynDates')
-    error(['dynDates::format: Input argument ' inputname(1) ' has to be a dynDates object!'])
+if ~( isa(a,'dynDate') && isa(b,'dynDate'))
+    error(['dynDate::eq: Input arguments ' inputname(1) 'and ' inputname(2) ' have to be a dynDate objects!'])
 end
 
-switch date.freq
-  case 1
-    p = num2str(date.time(1));
-  case 4
-    p = [num2str(date.time(1)) 'Q' num2str(date.time(2))];
-  case 12
-    p = [num2str(date.time(1)) 'M' num2str(date.time(2))];
-  case 52
-    p = [num2str(date.time(1)) 'W' num2str(date.time(2))];
-  otherwise
-    error('dynDates::format: Unkonwn frequency!')
+if verbose && a.freq~=b.freq
+    disp(['dynDate::eq: Input arguments ' inputname(1) 'and ' inputname(2) ' have no common frequencies!'])
+    c = 0;
 end
+
+c = isequal(a.time,b.time);
 
 %@test:1
 %$ addpath ../matlab
@@ -75,17 +72,22 @@ end
 %$ date_2 = '1950Q2';
 %$ date_3 = '1950M10';
 %$ date_4 = '1950W50';
+%$ date_5 = '1950W32';
 %$
 %$ % Call the tested routine.
-%$ d1 = dynDates(date_1); DATE_1 = format(d1);
-%$ d2 = dynDates(date_2); DATE_2 = format(d2);
-%$ d3 = dynDates(date_3); DATE_3 = format(d3);
-%$ d4 = dynDates(date_4); DATE_4 = format(d4);
+%$ d1 = dynDate(date_1);
+%$ d2 = dynDate(date_2);
+%$ d3 = dynDate(date_3);
+%$ d4 = dynDate(date_4);
+%$ d5 = dynDate(date_5);
+%$ i1 = (d1==d2);
+%$ i2 = (d2==d2);
+%$ i3 = (d4==d5);
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(num2str(date_1),DATE_1);
-%$ t(2) = dyn_assert(date_2,DATE_2);
-%$ t(3) = dyn_assert(date_3,DATE_3);
-%$ t(4) = dyn_assert(date_4,DATE_4);
+%$ t(1) = dyn_assert(i1,0);
+%$ t(2) = dyn_assert(i2,1);
+%$ t(3) = dyn_assert(i3,0);
 %$ T = all(t);
 %@eof:1
+

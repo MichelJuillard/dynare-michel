@@ -131,7 +131,7 @@ switch nargin
             ts.freq = 1;
         end
         ts.Time = ts.Time.setFreq(ts.freq);
-        ts.Time = ts.Time.setTime(dynDates(b):dynDates(b)+ts.nobs);
+        ts.Time = ts.Time.setTime(dynDate(b):dynDate(b)+ts.nobs);
     else% If b is empty.
         ts.freq = 1;
         ts.Time = ts.Time.setFreq(1);

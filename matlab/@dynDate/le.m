@@ -1,31 +1,31 @@
-function c = ge(a,b)
+function c = le(a,b)
 
 %@info:
-%! @deftypefn {Function File} {@var{c} =} ge (@var{a},@var{b})
-%! @anchor{@dynDates/ge}
+%! @deftypefn {Function File} {@var{c} =} le (@var{a},@var{b})
+%! @anchor{@dynDate/le}
 %! @sp 1
-%! Overloads the ge (greater or equal) operator for the Dynare dates class (@ref{dynDates}).
+%! Overloads the le (less or equal) operator for the Dynare dates class (@ref{dynDate}).
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
 %! @table @ @var
 %! @item a
-%! Dynare date object instantiated by @ref{dynDates}.
+%! Dynare date object instantiated by @ref{dynDate}.
 %! @item b
-%! Dynare date object instantiated by @ref{dynDates}.
+%! Dynare date object instantiated by @ref{dynDate}.
 %! @end table
 %! @sp 1
 %! @strong{Outputs}
 %! @sp 1
 %! @table @ @var
 %! @item c
-%! scalar integer equal to one if a>=b, 0 otherwise.
+%! scalar integer equal to one if a<=b, 0 otherwise.
 %! @end table
 %! @sp 2
 %! @strong{This function is called by:}
 %! @sp 2
 %! @strong{This function calls:}
-%! @ref{@@dynDates/gt}, @ref{@@dynDates/eq}
+%! @ref{@@dynDate/lt}, @ref{@@dynDate/eq}
 %!
 %! @end deftypefn
 %@eod:
@@ -48,7 +48,7 @@ function c = ge(a,b)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if a>b
+if a<b
     c=1;
 else
     if a==b
@@ -68,19 +68,19 @@ end
 %$ date_4 = '1949Q2';
 %$
 %$ % Call the tested routine.
-%$ d1 = dynDates(date_1);
-%$ d2 = dynDates(date_2);
-%$ d3 = dynDates(date_3);
-%$ d4 = dynDates(date_4);
-%$ i1 = (d1>=d2);
-%$ i2 = (d3>=d4);
-%$ i3 = (d4>=d2);
-%$ i4 = (d1>=d4);
+%$ d1 = dynDate(date_1);
+%$ d2 = dynDate(date_2);
+%$ d3 = dynDate(date_3);
+%$ d4 = dynDate(date_4);
+%$ i1 = (d1<=d2);
+%$ i2 = (d3<=d4);
+%$ i3 = (d4<=d2);
+%$ i4 = (d1<=d4);
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(i1,1);
-%$ t(2) = dyn_assert(i2,1);
-%$ t(3) = dyn_assert(i3,0);
-%$ t(4) = dyn_assert(i4,1);
+%$ t(2) = dyn_assert(i2,0);
+%$ t(3) = dyn_assert(i3,1);
+%$ t(4) = dyn_assert(i4,0);
 %$ T = all(t);
 %@eof:1

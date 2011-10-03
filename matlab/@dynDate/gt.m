@@ -1,25 +1,25 @@
-function c = lt(a,b)
+function c = gt(a,b)
 
 %@info:
-%! @deftypefn {Function File} {@var{c} =} lt (@var{a},@var{b})
-%! @anchor{@dynDates/lt}
+%! @deftypefn {Function File} {@var{c} =} gt (@var{a},@var{b})
+%! @anchor{@dynDate/gt}
 %! @sp 1
-%! Overloads the lt (less than) operator for the Dynare dates class (@ref{dynDates}).
+%! Overloads the gt (greater than) operator for the Dynare dates class (@ref{dynDate}).
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
 %! @table @ @var
 %! @item a
-%! Dynare date object instantiated by @ref{dynDates}.
+%! Dynare date object instantiated by @ref{dynDate}.
 %! @item b
-%! Dynare date object instantiated by @ref{dynDates}.
+%! Dynare date object instantiated by @ref{dynDate}.
 %! @end table
 %! @sp 1
 %! @strong{Outputs}
 %! @sp 1
 %! @table @ @var
 %! @item c
-%! scalar integer equal to one if a<b, 0 otherwise.
+%! scalar integer equal to one if a>b, 0 otherwise.
 %! @end table
 %! @sp 2
 %! @strong{This function is called by:}
@@ -50,21 +50,21 @@ function c = lt(a,b)
 verbose = 0;
 
 if nargin~=2
-    error('dynDates::eq: I need exactly two input arguments!')
+    error('dynDate::eq: I need exactly two input arguments!')
 end
 
-if ~( isa(a,'dynDates') && isa(b,'dynDates'))
-    error(['dynDates::eq: Input arguments ' inputname(1) 'and ' inputname(2) ' have to be a dynDates objects!'])
+if ~( isa(a,'dynDate') && isa(b,'dynDate'))
+    error(['dynDate::eq: Input arguments ' inputname(1) 'and ' inputname(2) ' have to be a dynDate objects!'])
 end
 
 if verbose && a.freq~=b.freq
-    error(['dynDates::eq: Input arguments ' inputname(1) 'and ' inputname(2) ' have no common frequencies!'])
+    error(['dynDate::eq: Input arguments ' inputname(1) 'and ' inputname(2) ' have no common frequencies!'])
 end
 
-if a.time(1)<b.time(1)
+if a.time(1)>b.time(1)
     c = 1;
 elseif isequal(a.time(1),b.time(1))
-    if a.time(2)<b.time(2)
+    if a.time(2)>b.time(2)
         c = 1;
     else
         c = 0;
@@ -84,20 +84,20 @@ end
 %$ date_5 = '1949Q2';
 %$
 %$ % Call the tested routine.
-%$ d1 = dynDates(date_1);
-%$ d2 = dynDates(date_2);
-%$ d3 = dynDates(date_3);
-%$ d4 = dynDates(date_4);
-%$ d5 = dynDates(date_5);
-%$ i1 = (d2<d3);
-%$ i2 = (d3<d4);
-%$ i3 = (d4<d2);
-%$ i4 = (d5<d4);
+%$ d1 = dynDate(date_1);
+%$ d2 = dynDate(date_2);
+%$ d3 = dynDate(date_3);
+%$ d4 = dynDate(date_4);
+%$ d5 = dynDate(date_5);
+%$ i1 = (d2>d3);
+%$ i2 = (d3>d4);
+%$ i3 = (d4>d2);
+%$ i4 = (d5>d4);
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(i1,1);
-%$ t(2) = dyn_assert(i2,0);
-%$ t(3) = dyn_assert(i3,1);
-%$ t(4) = dyn_assert(i4,1);
+%$ t(1) = dyn_assert(i1,0);
+%$ t(2) = dyn_assert(i2,1);
+%$ t(3) = dyn_assert(i3,0);
+%$ t(4) = dyn_assert(i4,0);
 %$ T = all(t);
 %@eof:1

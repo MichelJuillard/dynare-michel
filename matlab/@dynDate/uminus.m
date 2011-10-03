@@ -2,29 +2,29 @@ function b = uminus(a)
 
 %@info:
 %! @deftypefn {Function File} {@var{b} =} uminus (@var{a})
-%! @anchor{@dynDates/uplus}
+%! @anchor{@dynDate/uplus}
 %! @sp 1
-%! Overloads the uminus (unary soustraction) operator for the Dynare dates class (@ref{dynDates}). Decrement the date by one year, quarter,
+%! Overloads the uminus (unary soustraction) operator for the Dynare dates class (@ref{dynDate}). Decrement the date by one year, quarter,
 %! month or week depending on the frequency.
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
 %! @table @ @var
 %! @item a
-%! Dynare date object instantiated by @ref{dynDates}.
+%! Dynare date object instantiated by @ref{dynDate}.
 %! @end table
 %! @sp 1
 %! @strong{Outputs}
 %! @sp 1
 %! @table @ @var
 %! @item b
-%! Dynare date object instantiated by @ref{dynDates}.
+%! Dynare date object instantiated by @ref{dynDate}.
 %! @end table
 %! @sp 2
 %! @strong{This function is called by:}
 %! @sp 2
 %! @strong{This function calls:}
-%! @ref{dynDates}
+%! @ref{dynDate}
 %!
 %! @end deftypefn
 %@eod:
@@ -47,11 +47,11 @@ function b = uminus(a)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ~isa(a,'dynDates')
-    error(['dynDates::uminus: Input argument ' inputname(1) ' must be a dynDates object.'])
+if ~isa(a,'dynDate')
+    error(['dynDate::uminus: Input argument ' inputname(1) ' must be a dynDate object.'])
 end
 
-b = dynDates(a);
+b = dynDate(a);
 
 switch b.freq
   case 1
@@ -78,7 +78,7 @@ switch b.freq
         b.time(2) = b.time(2)-1;
     end
   otherwise
-    error('dynDates::minus: Unknown frequency!')
+    error('dynDate::minus: Unknown frequency!')
 end
 
 %@test:1
@@ -94,13 +94,13 @@ end
 %$ date_7 = 2000;
 %$
 %$ % Call the tested routine.
-%$ d1 = dynDates(date_1);
-%$ d2 = dynDates(date_2);
-%$ d3 = dynDates(date_3);
-%$ d4 = dynDates(date_4);
-%$ d5 = dynDates(date_5);
-%$ d6 = dynDates(date_6);
-%$ d7 = dynDates(date_7);
+%$ d1 = dynDate(date_1);
+%$ d2 = dynDate(date_2);
+%$ d3 = dynDate(date_3);
+%$ d4 = dynDate(date_4);
+%$ d5 = dynDate(date_5);
+%$ d6 = dynDate(date_6);
+%$ d7 = dynDate(date_7);
 %$ e1 = -d1;
 %$ e2 = -d2;
 %$ e3 = -d3;

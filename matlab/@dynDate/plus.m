@@ -2,16 +2,16 @@ function c = plus(a,b)
 
 %@info:
 %! @deftypefn {Function File} {@var{c} =} plus (@var{a},@var{b})
-%! @anchor{@dynDates/plus}
+%! @anchor{@dynDate/plus}
 %! @sp 1
-%! Overloads the plus (addition) operator for the Dynare dates class (@ref{dynDates}). Given an initial date @var{a},
+%! Overloads the plus (addition) operator for the Dynare dates class (@ref{dynDate}). Given an initial date @var{a},
 %! computes a new date @var{c} by adding the number of periods @var{b}.
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
 %! @table @ @var
 %! @item a
-%! Dynare date object instantiated by @ref{dynDates}.
+%! Dynare date object instantiated by @ref{dynDate}.
 %! @item b
 %! Positive scalar integer, the number of periods
 %! @end table
@@ -20,13 +20,13 @@ function c = plus(a,b)
 %! @sp 1
 %! @table @ @var
 %! @item c
-%! Dynare date object instantiated by @ref{dynDates}.
+%! Dynare date object instantiated by @ref{dynDate}.
 %! @end table
 %! @sp 2
 %! @strong{This function is called by:}
 %! @sp 2
 %! @strong{This function calls:}
-%! @ref{@@dynDates/eq}
+%! @ref{@@dynDate/eq}
 %!
 %! @end deftypefn
 %@eod:
@@ -50,12 +50,12 @@ function c = plus(a,b)
 
 % AUTHORS(S) stephane DOT adjemian AT univ DASH lemans DOT fr
 
-if ~isa(a,'dynDates')
-    error(['dynDates::plus: Input argument ' inputname(1) ' must be a dynDates object!'])
+if ~isa(a,'dynDate')
+    error(['dynDate::plus: Input argument ' inputname(1) ' must be a dynDate object!'])
 end
 
 if b<0 || ~isint(b)
-    error(['dynDates::plus: Input argument ' inputname(2) ' must be a positive integer'])
+    error(['dynDate::plus: Input argument ' inputname(2) ' must be a positive integer'])
 end
 
 
@@ -76,7 +76,7 @@ switch a.freq
     c.time(2) = c.time(2)+n3-1;
     c.time(1) = c.time(1)+n2;
   otherwise
-    error('dynDates::plus: Unknown frequency!')
+    error('dynDate::plus: Unknown frequency!')
 end
 
 %@test:1
@@ -88,9 +88,9 @@ end
 %$ date_3 = '2000M3';
 %$
 %$ % Call the tested routine.
-%$ d_1 = dynDates(date_1);
-%$ d_2 = dynDates(date_2);
-%$ d_3 = dynDates(date_3);
+%$ d_1 = dynDate(date_1);
+%$ d_2 = dynDate(date_2);
+%$ d_3 = dynDate(date_3);
 %$
 %$ d1 = d_1+3;
 %$ d2 = d_2+5;
@@ -98,10 +98,10 @@ end
 %$ d4 = d_3+10;
 %$
 %$ % Expected results.
-%$ e1 = dynDates(1952);
-%$ e2 = dynDates('1951Q4');
-%$ e3 = dynDates('2001M5');
-%$ e4 = dynDates('2000M12');
+%$ e1 = dynDate(1952);
+%$ e2 = dynDate('1951Q4');
+%$ e3 = dynDate('2001M5');
+%$ e4 = dynDate('2000M12');
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(e1.time,d1.time);

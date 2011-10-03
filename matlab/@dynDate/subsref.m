@@ -2,15 +2,15 @@ function B = subsref(A,S)
 
 %@info:
 %! @deftypefn {Function File} {@var{us} =} subsref (@var{ts},S)
-%! @anchor{@dynDates/subsref}
+%! @anchor{@dynDate/subsref}
 %! @sp 1
-%! Overloads the subsref method for the Dynare dates class (@ref{dynDates}).
+%! Overloads the subsref method for the Dynare dates class (@ref{dynDate}).
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
 %! @table @ @var
 %! @item A
-%! Dynare date object instantiated by @ref{dynDates}.
+%! Dynare date object instantiated by @ref{dynDate}.
 %! @item S
 %! Matlab's structure array S with two fields, type and subs. The type field is string containing '()', '@{@}', or '.', where '()' specifies
 %! integer subscripts, '@{@}' specifies cell array subscripts, and '.' specifies subscripted structure fields. The subs field is a cell array
@@ -21,7 +21,7 @@ function B = subsref(A,S)
 %! @sp 1
 %! @table @ @var
 %! @item B
-%! A matlab object (public member of the @ref{dynDates} object).
+%! A matlab object (public member of the @ref{dynDate} object).
 %! @end table
 %! @sp 2
 %! @strong{This function is called by:}

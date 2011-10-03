@@ -1,8 +1,8 @@
-function date = dynDates(a)
+function date = dynDate(a)
 
 %@info:
 %! @deftypefn {Function File} {@var{date} =} dynDate (@var{a})
-%! @anchor{dynDates}
+%! @anchor{dynDate}
 %! @sp 1
 %! Constructor for the Dynare dates class.
 %! @sp 2
@@ -11,8 +11,8 @@ function date = dynDates(a)
 %! @table @ @var
 %! @item a
 %! Date. For Quaterly, Monthly or Weekly data, a must be a string. For yearly data or if the frequence is not
-%! defined  must be an integer. If @var{a} is a dynDates object, then date will be a copy of this object. If
-%! the constructor is called without input argument, it will return an empty dynDates object.
+%! defined  must be an integer. If @var{a} is a dynDate object, then date will be a copy of this object. If
+%! the constructor is called without input argument, it will return an empty dynDate object.
 %! @end table
 %! @sp 1
 %! @strong{Outputs}
@@ -66,7 +66,7 @@ date = struct;
 date.freq = NaN;
 date.time = NaN(1,2);
 
-date = class(date,'dynDates');
+date = class(date,'dynDate');
 
 switch nargin
   case 0
@@ -93,7 +93,7 @@ switch nargin
         end
         if isempty(quaterly) && isempty(monthly) && isempty(weekly)
             if any(isletter(a))
-                error('dynDates:: Using a string as an input argument, I can only handle weekly (W), monthly (M) or quaterly (Q) data!');
+                error('dynDate:: Using a string as an input argument, I can only handle weekly (W), monthly (M) or quaterly (Q) data!');
             else
                 % Yearly data declared with a string
                 date.freq = 1;
@@ -101,7 +101,7 @@ switch nargin
                 date.time(2) = 1;
             end
         end
-    elseif isa(a,'dynDates') % If input argument is a dynDates object then do a copy.
+    elseif isa(a,'dynDate') % If input argument is a dynDate object then do a copy.
         date = a;
     else% If b is not a string then yearly data are assumed.
         date.freq = 1;
@@ -109,7 +109,7 @@ switch nargin
         date.time(2) = 1;
     end
   otherwise
-    error('dynDates:: Can''t instantiate the class, wrong calling sequence!')
+    error('dynDate:: Can''t instantiate the class, wrong calling sequence!')
 end
 
 %@test:1
@@ -135,11 +135,11 @@ end
 %$ e_freq_5 = 1;
 %$
 %$ % Call the tested routine.
-%$ d1 = dynDates(date_1);
-%$ d2 = dynDates(date_2);
-%$ d3 = dynDates(date_3);
-%$ d4 = dynDates(date_4);
-%$ d5 = dynDates(date_5);
+%$ d1 = dynDate(date_1);
+%$ d2 = dynDate(date_2);
+%$ d3 = dynDate(date_3);
+%$ d4 = dynDate(date_4);
+%$ d5 = dynDate(date_5);
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(d1.time,e_date_1);
