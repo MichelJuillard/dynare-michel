@@ -1,6 +1,6 @@
-function [f0, x, ig] = mr_gstep(h1,x,func0,htol0,varargin)
+function [f0, x, ig] = mr_gstep(h1,x,func0,htol0,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
 % function [f0, x, ig] = mr_gstep(h1,x,func0,htol0,varargin)
-% 
+%
 % Gibbs type step in optimisation
 
 % Copyright (C) 2006-2011 Dynare Team
@@ -22,13 +22,12 @@ function [f0, x, ig] = mr_gstep(h1,x,func0,htol0,varargin)
 
 n=size(x,1);
 
-if nargin<4, 
+if isempty(htol0)
     htol = 1.e-6;
 else
     htol = htol0;
 end
-func = str2func(func0);
-f0=feval(func,x,varargin{:});
+f0=feval(func0,x,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
 
 xh1=x;
 f1=zeros(size(f0,1),n);
@@ -36,37 +35,29 @@ f_1=f1;
 
 i=0;
 ig=zeros(n,1);
-while i<n,
+while i<n
     i=i+1;
     h10=h1(i);
     hcheck=0;
     dx=[];
     xh1(i)=x(i)+h1(i);
-    fx = feval(func,xh1,varargin{:});
+    fx = feval(func0,xh1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
     f1(:,i)=fx;
     xh1(i)=x(i)-h1(i);
-
-    fx = feval(func,xh1,varargin{:});
+    fx = feval(func0,xh1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
     f_1(:,i)=fx;
-
-    if hcheck && htol<1,
+    if hcheck && htol<1
         htol=min(1,max(min(abs(dx))*2,htol*10));
         h1(i)=h10;
         xh1(i)=x(i);
         i=i-1;
     else
-        gg=zeros(size(x));    
+        gg=zeros(size(x));
         hh=gg;
         gg(i)=(f1(i)'-f_1(i)')./(2.*h1(i));
         hh(i) = 1/max(1.e-9,abs( (f1(i)+f_1(i)-2*f0)./(h1(i)*h1(i)) ));
-%         if abs(f1(i)+f_1(i)-2*f0)>1.e-12,
-%             hh(i) = abs(1/( (f1(i)+f_1(i)-2*f0)./(h1(i)*h1(i)) ));
-%         else
-%             hh(i) = 1;
-%         end
-        
-        if gg(i)*(hh(i)*gg(i))/2 > htol,
-            [f0 x fc retcode] = csminit(func0,x,f0,gg,0,diag(hh),varargin{:});
+        if gg(i)*(hh(i)*gg(i))/2 > htol
+            [f0 x fc retcode] = csminit(func0,x,f0,gg,0,diag(hh),DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
             ig(i)=1;
         end
         xh1=x;
