@@ -50,7 +50,22 @@ function [Pi,H0multi,Hpmulti,H0invmulti,Hpinvmulti] ...
 %
 % Tao Zha, February 2000.  Revised, September 2000, February, May 2003.
 
-
+% Copyright (C) 2000-2011 Tao Zha
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if (nargin<=8), nexo=1; end
 ncoef = nvar*lags+nexo;  % number of coefficients in *each* equation, RHS coefficients only.

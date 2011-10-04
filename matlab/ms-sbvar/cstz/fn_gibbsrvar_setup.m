@@ -38,6 +38,22 @@ function [Tinv,UT,VHphalf,PU,VPU] = fn_gibbsrvar_setup(H0inv, Ui, Hpinv, Pmat, V
 % Written by Tao Zha, September 2004.
 % Copyright (c) 2004 by Waggoner and Zha
 
+% Copyright (C) 2004-2011 Tao Zha and Daniel Waggoner
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 %--- For A0.
 Tinv = cell(nvar,1);   % in each cell, inv(T_i) for T_iT_i'=S_i where S_i is defined on p.355 of the WZ JEDC paper.

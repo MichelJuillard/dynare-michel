@@ -64,6 +64,22 @@ function [yhat,Estr,rcon,Rcon,u,v,d] = fn_fcstidcnd(valuecon,stepcon,varcon,nste
 %              programs may not be compatible.
 % 3/15/2004 There are some BUG problems when calling fn_fcstcnd.m().
 
+% Copyright (C) 1998-2011 Tao Zha
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 DLSIdShock = ~isempty(eq_ms);   % if not empty, the MS shock is identified as in DLS
 
