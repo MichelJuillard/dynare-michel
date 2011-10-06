@@ -38,7 +38,7 @@ clean_ms_probabilities_files(options_.ms.output_file_tag);
 
 % setup command line options
 opt = ['-probabilities -seed ' num2str(options_.DynareRandomStreams.seed)];
-opt = [opt ' -ft ' options_.ms.estimation_file_tag];
+opt = [opt ' -ft ' options_.ms.file_tag];
 opt = [opt ' -fto ' options_.ms.output_file_tag];
 
 if options_.ms.filtered_probabilities

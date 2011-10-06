@@ -28,14 +28,8 @@ function clean_files_for_second_type_of_mex(M_, options_, type)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isfield(options_.ms,'estimation_file_tag')
-    tagtouse = options_.ms.estimation_file_tag;
-else
-    tagtouse = options_.ms.file_tag;
-end
-
-if ~strcmp(tagtouse, options_.ms.output_file_tag) || ...
-        ~strcmp(M_.fname, options_.ms.output_file_tag)
+tagtouse = options_.ms.file_tag;
+if ~strcmp(tagtouse, options_.ms.output_file_tag)
     tagtouse = options_.ms.output_file_tag;
 end
 

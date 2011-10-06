@@ -30,11 +30,7 @@ function [options_, oo_]=set_ms_estimation_file(options_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ~isfield(options_.ms, 'estimation_file_tag')
-    options_.ms.estimation_file_tag = options_.ms.file_tag;
-end
-options_.ms.free_param_file = ['est_free_' options_.ms.estimation_file_tag '.out'];
-
+options_.ms.free_param_file = ['est_free_' options_.ms.file_tag '.out'];
 if ~exist(options_.ms.free_param_file,'file')
     error(['ERROR: Could not find free parameter file: ' options_.ms.free_param_file]);
 end

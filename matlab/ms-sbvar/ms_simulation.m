@@ -38,7 +38,7 @@ clean_ms_simulation_files(options_.ms.output_file_tag);
 
 % setup command line options
 opt = ['-simulate -seed ' num2str(options_.DynareRandomStreams.seed)];
-opt = [opt ' -ft ' options_.ms.estimation_file_tag];
+opt = [opt ' -ft ' options_.ms.file_tag];
 opt = [opt ' -fto ' options_.ms.output_file_tag];
 opt = [opt ' -ndraws ' num2str(options_.ms.mh_replic)];
 opt = [opt ' -burnin ' num2str(options_.ms.drop)];
