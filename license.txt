@@ -389,3 +389,36 @@ License: GPL-3+
  .
  If you did not received a copy of the GNU General Public License
  with this software, see <http://www.gnu.org/licenses/>.
+
+Files: matlab/ms-sbvar/cstz/*
+Copyright: 1993-2011 Tao Zha
+License: GPL-3+
+ This free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ .
+ It is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ If you did not received a copy of the GNU General Public License
+ with this software, see <http://www.gnu.org/licenses/>.
+
+Files: matlab/ms-sbvar/cstz/bfgsi.m matlab/ms-sbvar/cstz/csminit.m
+ matlab/ms-sbvar/cstz/csminwel.m
+Copyright: 1993-2011 Tao Zha and Christopher Sims
+License: GPL-3+
+ This free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ .
+ It is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ If you did not received a copy of the GNU General Public License
+ with this software, see <http://www.gnu.org/licenses/>.
