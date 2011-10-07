@@ -122,20 +122,6 @@ if options_gsa.redform,
     options_gsa.ppost=0;
 end
 
-if ~(exist('stab_map_','file')==6 || exist('stab_map_','file')==2),
-    dynare_root = strrep(which('dynare.m'),'dynare.m','');
-    gsa_path = [dynare_root 'gsa'];
-    if exist(gsa_path)
-        addpath(gsa_path,path)
-    else
-        disp('Download Dynare sensitivity routines at:')
-        disp('http://eemc.jrc.ec.europa.eu/softwareDYNARE-Dowload.htm')
-        disp(' ' )
-        error('GSA routines missing!')
-    end
-end
-
-
 if options_gsa.morris==1 || options_gsa.morris==3,
     if ~options_gsa.identification,
         options_gsa.redform=1;
