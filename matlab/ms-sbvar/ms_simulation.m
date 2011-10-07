@@ -34,7 +34,7 @@ function [options_, oo_]=ms_simulation(M_, options_, oo_)
 disp('MS-SBVAR Simulation');
 options_ = set_file_tags(options_);
 clean_ms_simulation_files(options_.ms.output_file_tag);
-[options_, oo_] = set_ms_estimation_file(options_, oo_);
+[options_, oo_] = set_ms_estimation_file(options_.ms.file_tag, options_, oo_);
 
 % setup command line options
 opt = ['-simulate -seed ' num2str(options_.DynareRandomStreams.seed)];

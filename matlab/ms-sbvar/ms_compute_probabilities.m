@@ -34,7 +34,7 @@ function [options_, oo_]=ms_compute_probabilities(M_, options_, oo_)
 disp('MS-SBVAR Compute Regime Probabilities');
 options_ = set_file_tags(options_);
 clean_ms_probabilities_files(options_.ms.output_file_tag);
-[options_, oo_] = set_ms_estimation_file(options_, oo_);
+[options_, oo_] = set_ms_estimation_file(options_.ms.file_tag, options_, oo_);
 
 % setup command line options
 opt = ['-probabilities -seed ' num2str(options_.DynareRandomStreams.seed)];

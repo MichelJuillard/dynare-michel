@@ -1,8 +1,11 @@
-function [options_, oo_]=set_ms_estimation_file(options_, oo_)
+function [options_, oo_]=set_ms_estimation_file(file_tag, options_, oo_)
 %function set_ms_estimation_file()
 % Set options_.ms.free_param_file based on user input
 %
 % INPUTS
+%    file_tag:    (string)    necessary because of different meanings of
+%                             file_tag between ms_estimation and other ms_*
+%                             routines
 %    options_:    (struct)    options
 %    oo_:         (struct)    results
 %
@@ -30,7 +33,7 @@ function [options_, oo_]=set_ms_estimation_file(options_, oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-options_.ms.free_param_file = ['est_free_' options_.ms.file_tag '.out'];
+options_.ms.free_param_file = ['est_free_' file_tag '.out'];
 if ~exist(options_.ms.free_param_file,'file')
     error(['ERROR: Could not find free parameter file: ' options_.ms.free_param_file]);
 end

@@ -34,7 +34,7 @@ function [options_, oo_]=ms_compute_mdd(M_, options_, oo_)
 disp('MS-SBVAR Marginal Data Density');
 options_ = set_file_tags(options_);
 clean_ms_mdd_files(options_.ms.output_file_tag, options_.ms.proposal_type);
-[options_, oo_] = set_ms_estimation_file(options_, oo_);
+[options_, oo_] = set_ms_estimation_file(options_.ms.file_tag, options_, oo_);
 options_ = set_ms_simulation_file(options_);
 
 % setup command line options

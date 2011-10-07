@@ -33,7 +33,7 @@ function [options_, oo_]=ms_forecast(M_, options_, oo_)
 
 disp('MS-SBVAR Forecasts');
 options_ = set_file_tags(options_);
-[options_, oo_] = set_ms_estimation_file(options_, oo_);
+[options_, oo_] = set_ms_estimation_file(options_.ms.file_tag, options_, oo_);
 options_ = set_ms_simulation_file(options_);
 clean_files_for_second_type_of_mex(M_, options_, 'forecast')
 forecastdir = [options_.ms.output_file_tag filesep 'Forecast'];
