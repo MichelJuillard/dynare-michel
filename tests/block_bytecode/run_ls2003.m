@@ -27,5 +27,5 @@ function run_ls2003(block, bytecode, solve_algo, stack_solve_algo)
       '@#include \"ls2003.mod\"\n'], block, bytecode, ...
       solve_algo, stack_solve_algo);
   fclose(fid);
-  dynare('ls2003_tmp.mod')
+  dynare('ls2003_tmp.mod','console')
 end

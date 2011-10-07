@@ -47,7 +47,7 @@ while ~isempty(name)
     disp(['***  TESTING: ' modfile ' ***']);
     try
         save wsMat
-        dynare([testfile ext])
+        dynare([testfile ext],'console')
         load wsMat
     catch exception
         load wsMat
