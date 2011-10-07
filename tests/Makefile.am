@@ -119,7 +119,23 @@ EXTRA_DIST = \
 	measurement_errors/data_ca1.m \
 	missing/simulate_data_with_missing_observations.m \
 	objectives/sgu_ex1.mat \
-	conditional_forecasts/fsdat_simul.m
+	conditional_forecasts/fsdat_simul.m \
+	ms-sbvar/data.m \
+	ms-sbvar/archive-files/ftd_2s_caseall_upperchol3v.m \
+	ms-sbvar/archive-files/ftd_2s_caseall_upperﬁchol4v.m \
+	ms-sbvar/archive-files/ftd_2s_caseall_upperchol6v.m \
+	ms-sbvar/archive-files/ftd_2s_caseall_upperchol7v.m \
+	ms-sbvar/archive-files/ftd_RSvensson_4v.m \
+	ms-sbvar/archive-files/ftd_cholesky.m \
+	ms-sbvar/archive-files/ftd_non_rec_5v.m \
+	ms-sbvar/archive-files/ftd_simszha5v.m \
+	ms-sbvar/archive-files/ftd_upperchol3v.m \
+	ms-sbvar/archive-files/ftd_upperchol4v.m \
+	ms-sbvar/archive-files/ftd_upperchol5v.m \
+	ms-sbvar/archive-files/ftd_upperchol6v.m \
+	ms-sbvar/archive-files/ftd_upperchol7v.m \
+	ms-sbvar/archive-files/specification_2v.dat \
+	ms-sbvar/archive-files/specification_2v2c.dat
 
 TARGETS =
 
