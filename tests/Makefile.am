@@ -122,7 +122,7 @@ EXTRA_DIST = \
 	conditional_forecasts/fsdat_simul.m \
 	ms-sbvar/data.m \
 	ms-sbvar/archive-files/ftd_2s_caseall_upperchol3v.m \
-	ms-sbvar/archive-files/ftd_2s_caseall_upperﬁchol4v.m \
+	ms-sbvar/archive-files/ftd_2s_caseall_upperchol4v.m \
 	ms-sbvar/archive-files/ftd_2s_caseall_upperchol6v.m \
 	ms-sbvar/archive-files/ftd_2s_caseall_upperchol7v.m \
 	ms-sbvar/archive-files/ftd_RSvensson_4v.m \
