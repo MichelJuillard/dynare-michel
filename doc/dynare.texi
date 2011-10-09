@@ -1602,6 +1602,7 @@ static model can also be written with the
 @code{write_latex_static_model} command.
 
 @anchor{write_latex_dynamic_model}
+
 @deffn Command write_latex_dynamic_model ;
 
 @descriptionhead
@@ -1644,6 +1645,9 @@ for a stochastic model, exogenous variables with leads or lags will
 also have been replaced by new auxiliary variables and equations.
 @end itemize
 
+Compiling the TeX file requires the following Latex packages: 
+@code{geometry}, @code{fullpage}, @code{breqn}.
+
 @end deffn
 
 @deffn Command write_latex_static_model ;
@@ -1668,6 +1672,9 @@ Also note that this command will not output the contents of the
 optional @code{steady_state_model} block (@pxref{steady_state_model});
 it will rather output a static version (@i{i.e.} without leads and
 lags) of the dynamic model declared in the @code{model} block.
+
+Compiling the TeX file requires the following Latex packages: 
+@code{geometry}, @code{fullpage}, @code{breqn}.
 
 @end deffn
 
@@ -4363,6 +4370,10 @@ interval. Default: @code{0.90}
 @item nograph
 Don't display graphics.
 @end table
+
+@customhead{Initial Values}
+
+@code{forecast} computes the forecast taking as initial values the values specified in @code{histval} (@pxref{Initial and terminal conditions,histval}). When no @code{histval} block is present, the initial values are the one stated in @code{initval}. When @code{initval} is followed by command @code{steady}, the initial values are the steady state (@pxref{Steady state,steady}).
 
 @outputhead
 
