@@ -227,7 +227,7 @@ for b=1:options_cond_fcst.replic
     FORCS2(:,1,b) = InitState;
 end
 
-randn('state',0);
+%randn('state',0);
 
 for b=1:options_cond_fcst.replic
     shocks = sQ*randn(ExoSize,options_cond_fcst.periods);
