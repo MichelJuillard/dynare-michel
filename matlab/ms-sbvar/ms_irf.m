@@ -15,7 +15,7 @@ function [options_, oo_]=ms_irf(varlist, M_, options_, oo_)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -35,50 +35,91 @@ function [options_, oo_]=ms_irf(varlist, M_, options_, oo_)
 disp('MS-SBVAR Impulse Response Function');
 options_ = set_file_tags(options_);
 [options_, oo_] = set_ms_estimation_file(options_.ms.file_tag, options_, oo_);
-options_ = set_ms_simulation_file(options_);
-clean_files_for_second_type_of_mex(M_, options_, 'irf')
+clean_ms_irf_files(options_.ms.output_file_tag);
 irfdir = [options_.ms.output_file_tag filesep 'IRF'];
 create_dir(irfdir);
 
-opt = { ...
-    {'file_tag', options_.ms.file_tag}, ...
-    {'seed', options_.DynareRandomStreams.seed}, ...
-    {'horizon', options_.ms.horizon}, ...
-    {'filtered', options_.ms.filtered_probabilities}, ...
-    {'error_bands', options_.ms.error_bands}, ...
-    {'percentiles', options_.ms.percentiles}, ...
-    {'thin', options_.ms.thinning_factor}
-    };
+% setup command line options
+opt = ['-ir -seed ' num2str(options_.DynareRandomStreams.seed)];
+opt = [opt ' -do ' irfdir];
+opt = [opt ' -ft ' options_.ms.file_tag];
+opt = [opt ' -fto ' options_.ms.output_file_tag];
+opt = [opt ' -horizon ' num2str(options_.ms.horizon)];
+opt = [opt ' -thin ' num2str(options_.ms.thinning_factor)];
 
+if options_.ms.regimes
+    opt = [opt ' -regimes'];
+elseif options_.ms.regime
+    % regime-1 since regime is 0-indexed in C but 1-indexed in Matlab
+    opt = [opt ' -regime ' num2str(options_.ms.regime-1)];
+elseif options_.ms.filtered_probabilities
+    opt = [opt ' -filtered'];
+end
+
+if options_.ms.parameter_uncertainty
+    options_ = set_ms_simulation_file(options_);
+    opt = [opt ' -parameter_uncertainty'];
+    opt = [opt ' -shocks_per_parameter ' num2str(options_.ms.shocks_per_parameter)];
+else
+    opt = [opt ' -shocks_per_parameter ' num2str(options_.ms.shock_draws)];
+end
+
+percentiles_size = 0;
 if options_.ms.median
-    opt = [opt(:)' {{'median'}}];
-end
-
-[err, irf] = mex_ms_irf([opt(:)', {{'free_parameters', oo_.ms.maxparams}, {'shocks_per_parameter', options_.ms.shock_draws}}]);
-mexErrCheck('mex_ms_irf ergodic ', err);
-plot_ms_irf(M_,options_,irf,options_.varobs,'Ergodic Impulse Responses',varlist);
-
-[err, regime_irfs] = mex_ms_irf([opt(:)', {{'free_parameters',oo_.ms.maxparams}, {'shocks_per_parameter', options_.ms.shock_draws}, {'regimes'}}]);
-mexErrCheck('mex_ms_irf ergodic regimes ',err);
-for i=1:size(regime_irfs,1)
-    plot_ms_irf(M_,options_,squeeze(regime_irfs(i,:,:,:)),options_.varobs,['Ergodic ' ...
-                        'Impulse Responses State ' int2str(i)],varlist);
-end
-save([irfdir filesep 'ergodic_irf.mat'], 'irf', 'regime_irfs');
-
-if exist(options_.ms.mh_file,'file') > 0
-    [err, irf] = mex_ms_irf([opt(:)', {{'shocks_per_parameter', options_.ms.shocks_per_parameter}, ...
-        {'parameter_uncertainty'},{'simulation_file',options_.ms.mh_file}}]);
-    mexErrCheck('mex_ms_irf bayesian ',err);
-    plot_ms_irf(M_,options_,irf,options_.varobs,'Impulse Responses with Parameter Uncertainty',varlist);
-    
-    [err, regime_irfs] = mex_ms_irf([opt(:)', {{'shocks_per_parameter', options_.ms.shocks_per_parameter}, ...
-        {'simulation_file',options_.ms.mh_file},{'parameter_uncertainty'},{'regimes'}}]);
-    mexErrCheck('mex_ms_irf bayesian regimes ',err);
-    for i=1:size(regime_irfs,1)
-        plot_ms_irf(M_,options_,squeeze(regime_irfs(i,:,:,:)),options_.varobs,['Impulse ' ...
-                            'Responses with Parameter Uncertainty State ' int2str(i)],varlist);
+    percentiles_size = 1;
+    opt = [opt ' -percentiles ' num2str(percentiles_size) ' 0.5'];
+else
+    percentiles_size = size(options_.ms.percentiles,2);
+    opt = [opt ' -percentiles ' num2str(percentiles_size)];
+    for i=1:size(options_.ms.percentiles,2)
+        opt = [opt ' ' num2str(options_.ms.percentiles(i))];
     end
-    save([irfdir filesep 'bayesian_irf.mat'], 'irf', 'regime_irfs');
+end
+
+% irf
+[err] = ms_sbvar_command_line(opt);
+mexErrCheck('ms_irf',err);
+
+% Plot IRFs
+if options_.ms.regimes
+    n_chains = length(options_.ms.ms_chain);
+    n_states=1;
+    for i_chain=1:n_chains
+        n_states = n_states*length(options_.ms.ms_chain(i_chain).regime);
+    end
+
+    for state_i=1:n_states
+        irf_data = load([irfdir filesep 'ir_percentiles_regime_' ...
+            num2str(state_i-1) '_' options_.ms.output_file_tag ...
+            '.out'], '-ascii');
+        irf_data = reshape_ascii_irf_data(M_.endo_nbr, percentiles_size, ...
+            options_.ms.horizon, irf_data);
+        save([irfdir filesep 'irf_state_' num2str(state_i-1)], 'irf_data');
+        plot_ms_irf(M_,options_,irf_data,options_.varobs, ...
+            ['Impulse Responses, State ...' num2str(state_i)], varlist);
+    end
+else
+    if options_.ms.regime
+        irf_data = load([irfdir filesep 'ir_percentiles_regime_' ...
+            num2str(options_.ms.regime-1) '_' options_.ms.output_file_tag ...
+            '.out'], '-ascii');
+        irf_title = ['Impulse Response, State ' num2str(options_.ms.regime)];
+        save_filename = ['irf_regime_' num2str(options_.ms.regime-1)];
+    elseif options_.ms.filtered_probabilities
+        irf_data = load([irfdir filesep 'ir_percentiles_filtered_' ...
+            options_.ms.output_file_tag '.out'], '-ascii');
+        irf_title = 'Impulse Response Filtered';
+        save_filename = 'irf';
+    else
+        irf_data = load([irfdir filesep 'ir_percentiles_ergodic_' ...
+            options_.ms.output_file_tag '.out'], '-ascii');
+        irf_title = 'Impulse Response Ergodic';
+        save_filename = 'irf';
+    end
+
+    irf_data = reshape_ascii_irf_data(M_.endo_nbr, percentiles_size, ...
+        options_.ms.horizon, irf_data);
+    save([irfdir filesep save_filename], 'irf_data');
+    plot_ms_irf(M_, options_, irf_data, options_.varobs, irf_title, varlist);
 end
 end

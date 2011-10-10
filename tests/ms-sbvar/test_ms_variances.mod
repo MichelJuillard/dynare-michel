@@ -23,6 +23,6 @@ ms_estimation(datafile=data
 ms_simulation(mh_replic=1000);
 ms_compute_mdd;
 ms_compute_probabilities;
-ms_irf;
+ms_irf(parameter_uncertainty);
 ms_forecast;
 ms_variance_decomposition;

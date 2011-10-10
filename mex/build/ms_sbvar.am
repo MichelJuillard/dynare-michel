@@ -1,4 +1,4 @@
-noinst_PROGRAMS = ms_sbvar_create_init_file ms_sbvar_command_line mex_ms_convert_free_parameters mex_ms_irf mex_ms_forecast mex_ms_variance_decomposition
+noinst_PROGRAMS = ms_sbvar_create_init_file ms_sbvar_command_line mex_ms_convert_free_parameters mex_ms_forecast mex_ms_variance_decomposition
 
 DWSWITCHDIR = $(top_srcdir)/../../../ms-sbvar/switch_dw
 DWUTILITIESDIR = $(top_srcdir)/../../../ms-sbvar/utilities_dw
@@ -75,31 +75,7 @@ nodist_mex_ms_convert_free_parameters_SOURCES = \
 	$(MSMEXSRCDIR)/mex_ms_sbvar.cc \
   $(MSMEXSRCDIR)/modify_for_mex.cc \
 	$(DWUTILS)
-	
-	
-nodist_mex_ms_irf_SOURCES = \
-  $(DWSWITCHDIR)/switching/dw_switch.c \
-  $(DWSWITCHDIR)/switching/dw_switchio.c \
-  $(DWSWITCHDIR)/switching/dw_dirichlet_restrictions.c \
-  $(DWSWITCHDIR)/switching/dw_metropolis_theta.c \
-  $(DWSWITCHDIR)/switching/dw_switch_opt.c \
-  $(DWSWITCHDIR)/switching/dw_mdd_switch.c \
-  $(DWSWITCHDIR)/state_space/sbvar/VARbase.c \
-  $(DWSWITCHDIR)/state_space/sbvar/VARio.c \
-  $(DWSWITCHDIR)/state_space/sbvar/dw_sbvar_command_line.c \
-  $(DWSWITCHDIR)/state_space/sbvar/sbvar_estimate.c \
-  $(DWSWITCHDIR)/state_space/sbvar/sbvar_simulate.c \
-  $(DWSWITCHDIR)/state_space/sbvar/sbvar_probabilities.c \
-  $(DWSWITCHDIR)/state_space/sbvar/sbvar_mdd.c \
-  $(DWSWITCHDIR)/state_space/sbvar/sbvar_forecast.c \
-  $(DWSWITCHDIR)/state_space/sbvar/sbvar_variance_decomposition.c \
-  $(DWSWITCHDIR)/state_space/sbvar/sbvar_impulse_responses.c \
-  $(DWSWITCHDIR)/state_space/sbvar/dw_csminwel.c \
-	$(MSMEXSRCDIR)/mex_ms_sbvar.cc \
-  $(MSMEXSRCDIR)/modify_for_mex.cc \
-	$(MSMEXSRCDIR)/mex_ms_irf.cc \
-	$(DWUTILS)
-	
+
 nodist_mex_ms_forecast_SOURCES = \
   $(DWSWITCHDIR)/switching/dw_switch.c \
   $(DWSWITCHDIR)/switching/dw_switchio.c \

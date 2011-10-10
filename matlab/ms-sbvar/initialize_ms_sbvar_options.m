@@ -12,7 +12,7 @@ function options_=initialize_ms_sbvar_options(M_, options_)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -100,12 +100,14 @@ options_.ms.real_time_smoothed_probabilities = 0;
 % irf
 options_.ms.horizon = 12;
 options_.ms.filtered_probabilities = 0;
-options_.ms.error_bands = 1;
 options_.ms.percentiles = [.16 .5 .84];
 options_.ms.parameter_uncertainty = 0;
 options_.ms.shock_draws = 10000;
 options_.ms.shocks_per_parameter = 10;
 options_.ms.median = 0;
+options_.ms.regime = 0;
+options_.ms.regimes = 0;
 % forecast
+options_.ms.error_bands = 1;
 options_.ms.forecast_data_obs = 0;
 end

@@ -5858,16 +5858,13 @@ The forecast horizon. Default: @code{12}
 
 @item filtered_probabilities
 @anchor{filtered_probabilities} Uses filtered probabilities at the end
-of the sample as initial conditions for regime probabilities. Default:
-@code{off}
-
-@item no_error_bands
-@anchor{no_error_bands} Do not output error bands. Default: @code{off}
-(@i{i.e.} output error bands)
+of the sample as initial conditions for regime probabilities. Only one
+of @code{filtered_probabilities}, @code{regime} and @code{regimes} may
+be passed. Default: @code{off}
 
 @item error_band_percentiles = [@var{DOUBLE1} @dots{}]
 @anchor{error_band_percentiles} The percentiles to compute. Default:
-@code{[0.16 0.50 0.84]}. If @code{no_error_bands} is passed, the default
+@code{[0.16 0.50 0.84]}. If @code{median} is passed, the default
 is @code{[0.5]}
 
 @item shock_draws = @var{INTEGER}
@@ -5886,11 +5883,25 @@ draws in posterior draws file are used. Default: @code{1}
 @anchor{free_parameters} A vector of free parameters to initialize theta
 of the model. Default: use estimated parameters
 
-@item median
-@anchor{median}
+@item parameter_uncertainty
+@anchor{parameter_uncertainty} Calculate IRFs under parameter
+uncertainty. Requires that @command{ms_simulation} has been
+run. Default: @code{off}
 
-A shortcut to setting @code{error_band_percentiles=[0.5]}. Default:
-@code{off}
+@item regime = @var{INTEGER}
+@anchor{regime} Given the data and model parameters, what is the ergodic
+probability of being in the specified regime. Only one of
+@code{filtered_probabilities}, @code{regime} and @code{regimes} may be
+passed. Default: @code{off}
+
+@item regimes
+@anchor{regimes} Describes the evolution of regimes. Only one of
+@code{filtered_probabilities}, @code{regime} and @code{regimes} may be
+passed. Default: @code{off}
+
+@item median
+@anchor{median} A shortcut to setting
+@code{error_band_percentiles=[0.5]}. Default: @code{off}
 
 @end table
 
@@ -5923,7 +5934,8 @@ while data files are contained in @code{<output_file_tag/Forecast>}.
 The number of data points included in the output. Default: @code{0}
 
 @item no_error_bands
-@xref{no_error_bands}.
+@anchor{no_error_bands} Do not output error bands. Default: @code{off}
+(@i{i.e.} output error bands)
 
 @item error_band_percentiles = [@var{DOUBLE1} @dots{}]
 @xref{error_band_percentiles}.
