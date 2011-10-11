@@ -108,6 +108,7 @@ options_.ms.median = 0;
 options_.ms.regime = 0;
 options_.ms.regimes = 0;
 % forecast
-options_.ms.error_bands = 1;
 options_.ms.forecast_data_obs = 0;
+% variance decomposition
+options_.ms.error_bands = 1;
 end

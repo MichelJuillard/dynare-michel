@@ -5933,10 +5933,6 @@ while data files are contained in @code{<output_file_tag/Forecast>}.
 @item data_obs_nbr = @var{INTEGER}
 The number of data points included in the output. Default: @code{0}
 
-@item no_error_bands
-@anchor{no_error_bands} Do not output error bands. Default: @code{off}
-(@i{i.e.} output error bands)
-
 @item error_band_percentiles = [@var{DOUBLE1} @dots{}]
 @xref{error_band_percentiles}.
 
@@ -5951,6 +5947,16 @@ The number of data points included in the output. Default: @code{0}
 
 @item free_parameters = @var{NUMERICAL_VECTOR}
 @xref{free_parameters}.
+
+@item parameter_uncertainty
+@xref{parameter_uncertainty}.
+
+@item regime = @var{INTEGER}
+@xref{regime}.
+
+@item regimes
+
+@xref{regimes}.
 
 @item median
 
@@ -5988,7 +5994,8 @@ are contained in @code{<output_file_tag/Variance_Decomposition>}.
 @xref{filtered_probabilities}.
 
 @item no_error_bands
-@xref{no_error_bands}.
+Do not output error bands. Default: @code{off}
+(@i{i.e.} output error bands)
 
 @item error_band_percentiles = [@var{DOUBLE1} @dots{}]
 @xref{error_band_percentiles}.
