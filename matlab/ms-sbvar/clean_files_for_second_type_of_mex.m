@@ -1,5 +1,5 @@
 function clean_files_for_second_type_of_mex(M_, options_, type)
-%function clean_files_for_second_type_of_mex()
+% function clean_files_for_second_type_of_mex(M_, options_, type)
 % clean the files for the appropriate file tag and mex function
 %
 % INPUTS

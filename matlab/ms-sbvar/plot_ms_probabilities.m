@@ -1,5 +1,5 @@
 function plot_ms_probabilities(computed_probabilities, options_)
-% function plot_ms_probabilities(computed_probabilities)
+% function plot_ms_probabilities(computed_probabilities, options_)
 % Plots the regime probablities for each graph
 %
 % INPUTS

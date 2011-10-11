@@ -1,6 +1,6 @@
 function [options_, oo_]=ms_compute_probabilities(M_, options_, oo_)
-%function ms_simulation()
-% MS Sbvar Compute Posterior Mode Regime Probabilities
+% function [options_, oo_]=ms_compute_probabilities(M_, options_, oo_)
+% Markov-switching SBVAR: Compute Posterior Mode Regime Probabilities
 %
 % INPUTS
 %    M_:          (struct)    model structure

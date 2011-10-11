@@ -1,5 +1,5 @@
 function delete_if_exists(fname)
-% function delete_if_exists()
+% function delete_if_exists(fname)
 % removes MS intermediary files
 %
 % INPUTS

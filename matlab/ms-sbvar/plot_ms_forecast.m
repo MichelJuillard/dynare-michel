@@ -1,5 +1,5 @@
 function plot_ms_forecast(M_,options_,forecast,title_,save_graph_formats,TeX)
-% function [] = plot_ms_forecast(forecast,names)
+% function plot_ms_forecast(M_,options_,forecast,title_,save_graph_formats,TeX)
 % plots the forecast from the output from a ms-sbvar
 %
 % INPUTS

@@ -1,6 +1,6 @@
 function [options_, oo_]=ms_estimation(M_, options_, oo_)
-%function ms_estimation()
-% MS Sbvar Estimation
+% function [options_, oo_]=ms_estimation(M_, options_, oo_)
+% Markov-switching SBVAR: Estimation
 %
 % INPUTS
 %    M_:          (struct)    model structure

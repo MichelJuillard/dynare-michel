@@ -1,5 +1,5 @@
 function clean_ms_probabilities_files(file_tag)
-% function clean_ms_probabilities_files()
+% function clean_ms_probabilities_files(file_tag)
 % removes MS probabilities files
 %
 % INPUTS

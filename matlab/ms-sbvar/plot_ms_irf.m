@@ -1,5 +1,5 @@
 function plot_ms_irf(M_, options_, irf, names, title_, varlist)
-% function [] = plot_ms_irf(irf,names)
+% function plot_ms_irf(M_, options_, irf, names, title_, varlist)
 % plots the impulse responses from the output from a ms-sbvar
 %
 % INPUTS

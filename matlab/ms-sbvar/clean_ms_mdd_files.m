@@ -1,5 +1,5 @@
 function clean_ms_mdd_files(file_tag, pt)
-% function clean_ms_mdd_files()
+% function clean_ms_mdd_files(file_tag, pt)
 % removes MS mdd files
 %
 % INPUTS

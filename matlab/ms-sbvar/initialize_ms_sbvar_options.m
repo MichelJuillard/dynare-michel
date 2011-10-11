@@ -1,5 +1,5 @@
 function options_=initialize_ms_sbvar_options(M_, options_)
-%function initialize_ms_sbvar_options()
+% function options_=initialize_ms_sbvar_options(M_, options_)
 % sets ms sbvar options back to their default values
 %
 % INPUTS

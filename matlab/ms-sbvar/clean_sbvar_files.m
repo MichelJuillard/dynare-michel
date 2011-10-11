@@ -1,5 +1,5 @@
 function clean_sbvar_files()
-%function clean_sbvar_files()
+% function clean_sbvar_files()
 % Remove files created by sbvar
 %
 % INPUTS

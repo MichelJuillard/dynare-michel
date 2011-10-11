@@ -1,6 +1,6 @@
 function [options_, oo_]=ms_variance_decomposition(M_, options_, oo_)
-%function ms_variance_decomposition()
-% MS-SBVAR Variance Decomposition
+% function [options_, oo_]=ms_variance_decomposition(M_, options_, oo_)
+% Markov-switching SBVAR: Variance Decomposition
 %
 % INPUTS
 %    M_:          (struct)    model structure

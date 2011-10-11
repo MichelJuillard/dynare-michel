@@ -1,6 +1,6 @@
 function [options_, oo_]=ms_simulation(M_, options_, oo_)
-%function ms_simulation()
-% MS Sbvar Simulation
+% function [options_, oo_]=ms_simulation(M_, options_, oo_)
+% Markov-switching SBVAR: Simulation
 %
 % INPUTS
 %    M_:          (struct)    model structure

@@ -1,5 +1,5 @@
 function clean_ms_estimation_files(file_tag)
-% function clean_ms_estimation_files()
+% function clean_ms_estimation_files(file_tag)
 % removes MS estimation files
 %
 % INPUTS

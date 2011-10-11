@@ -1,6 +1,6 @@
-function [options_, oo_]=ms_irf(varlist,M_, options_, oo_)
-%function ms_irf()
-% MS-SBVAR Impulse Response Function
+function [options_, oo_]=ms_irf(varlist, M_, options_, oo_)
+% function [options_, oo_]=ms_irf(varlist, M_, options_, oo_)
+% Markov-switching SBVAR: Impulse Response Function
 %
 % INPUTS
 %    varlist:     (chararray) list of selected endogenous variables

@@ -1,5 +1,5 @@
 function ms_sbvar_setup(options_)
-%function ms_sbvar_setup()
+% function ms_sbvar_setup(options_)
 % does the general file initialization for ms sbvar
 %
 % INPUTS
