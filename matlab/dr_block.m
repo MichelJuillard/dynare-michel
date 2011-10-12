@@ -172,7 +172,7 @@ for i = 1:Size;
                 % stores in fx the current values of fx
                 [r, c, curr] = find(data(i).lead_lag_incidence_other(2,:));
                 fx_t(:,c) = fx(:,curr);
-                % stores in fx_tm1 the leaded values of fx
+                % stores in fx_tp1 the leaded values of fx
                 [r, c, lead] = find(data(i).lead_lag_incidence_other(3,:));
                 fx_tp1(:,c) = fx(:,lead);
 
