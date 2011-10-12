@@ -66,31 +66,10 @@ if ~isempty(options_.mode_file) && ~options_.mh_posterior_mode_estimation
     load(options_.mode_file);
 end
 
-%% Compute the steady state:
 if ~isempty(estim_params_)
     set_parameters(xparam1);
 end
-if options_.steadystate_flag% if the *_steadystate.m file is provided.
-    [ys,tchek] = feval([M_.fname '_steadystate'],...
-                       [zeros(M_.exo_nbr,1);...
-                        oo_.exo_det_steady_state]);
-    if size(ys,1) < M_.endo_nbr
-        if length(M_.aux_vars) > 0
-            ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars,...
-                                                        M_.fname,...
-                                                        zeros(M_.exo_nbr,1),...
-                                                        oo_.exo_det_steady_state,...
-                                                        M_.params,...
-                                                        options_.bytecode);
-        else
-            error([M_.fname '_steadystate.m doesn''t match the model']);
-        end
-    end
-    oo_.steady_state = ys;
-else% if the steady state file is not provided.
-    [dd,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
-    oo_.steady_state = dd.ys; clear('dd');
-end
+
 if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
     options_.noconstant = 1;
 else

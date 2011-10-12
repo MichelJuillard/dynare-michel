@@ -42,54 +42,10 @@ exe =zeros(M_.exo_nbr,1);
 
 dr = set_state_space(oo_.dr,M_);
 
-% check if ys is steady state
-if exist([M_.fname '_steadystate'])
-    [ys,check1] = feval([M_.fname '_steadystate'],oo_.steady_state,...
-                        [oo_.exo_steady_state; oo_.exo_det_steady_state]);
-    if size(ys,1) < M_.endo_nbr
-        if length(M_.aux_vars) > 0
-            ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars,...
-                                                        M_.fname,...
-                                                        oo_.exo_steady_state,...
-                                                        oo_.exo_det_steady_state,M_.params,...
-                                                        options_.bytecode);
-        else
-            error([M_.fname '_steadystate.m doesn''t match the model']);
-        end
-    end
-    dr.ys = ys;
-else
-    % testing if ys isn't a steady state or if we aren't computing Ramsey policy
-    fh = str2func([M_.fname '_static']);
-    if max(abs(feval(fh,oo_.steady_state,[oo_.exo_steady_state; oo_.exo_det_steady_state], M_.params))) ...
-            > options_.dynatol && options_.ramsey_policy == 0
-        if options_.linear == 0
-            % nonlinear models
-            [dr.ys,check1] = dynare_solve(fh,dr.ys,options_.jacobian_flag,...
-                                          [oo_.exo_steady_state; ...
-                                oo_.exo_det_steady_state], M_.params);
-        else
-            % linear models
-            [fvec,jacob] = feval(fh,oo_.steady_state,[oo_.exo_steady_state;...
-                                oo_.exo_det_steady_state], M_.params);
-            dr.ys = oo_.steady_state-jacob\fvec;
-        end
-    end
-end
-oo_.dr = dr;
-% $$$   if max(abs(feval(fh, oo_.steady_state, exe, M_.params))) > options_.dynatol
-% $$$     [oo_.dr.ys, check] = dynare_solve([M_.fname '_static'], oo_.steady_state, 1, exe, M_.params);
-% $$$     if check
-% $$$       error('OLR: convergence problem in DYNARE_SOLVE')
-% $$$     end
-% $$$   else
-% $$$     oo_.dr.ys = oo_.steady_state;
-% $$$   end
-
 
 np = size(i_params,1);
 t0 = M_.params(i_params);
-inv_order_var = oo_.dr.inv_order_var;
+inv_order_var = dr.inv_order_var;
 
 H0 = 1e-4*eye(np);
 crit = 1e-7;

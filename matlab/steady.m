@@ -34,9 +34,6 @@ test_for_deep_parameters_calibration(M_);
 
 options_ = set_default_option(options_,'jacobian_flag',1);
 options_ = set_default_option(options_,'steadystate_flag',0);
-if exist([M_.fname '_steadystate.m'])
-    options_.steadystate_flag = 1;
-end 
 
 if options_.steadystate_flag && options_.homotopy_mode
     error('STEADY: Can''t use homotopy when providing a steady state external file');
@@ -51,7 +48,11 @@ switch options_.homotopy_mode
     homotopy3(options_.homotopy_values, options_.homotopy_steps);
 end
 
-steady_;
+[oo_.steady_state,M_.params,info] = steady_(M_,options_,oo_);
+
+if info(1)
+    print_info(info,options_.noprint);
+end
 
 disp_steady_state(M_,oo_);
 

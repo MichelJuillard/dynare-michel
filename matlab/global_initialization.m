@@ -60,12 +60,15 @@ options_.threads.kronecker.A_times_B_kronecker_C = 1;
 options_.threads.kronecker.sparse_hessian_times_B_kronecker_C = 1;
 
 % steady state file
-if exist([M_.fname '_steadystate.m'],'file')
+if exist([M_.fname '_steadystate2.m'],'file')
+    options_.steadystate_flag = 2;
+elseif exist([M_.fname '_steadystate.m'],'file')
     options_.steadystate_flag = 1;
 else
     options_.steadystate_flag = 0;
 end
 options_.steadystate_partial = [];
+options_.steadystate.nocheck = 0;
 
 % subset of the estimated deep parameters
 options_.ParamSubSet = 'None';

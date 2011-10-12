@@ -73,81 +73,6 @@ if M_.exo_nbr == 0
     oo_.exo_steady_state = [] ;
 end
 
-% expanding system for Optimal Linear Regulator
-if options_.ramsey_policy
-    if isfield(M_,'orig_model')
-        orig_model = M_.orig_model;
-        M_.endo_nbr = orig_model.endo_nbr;
-        M_.orig_endo_nbr = orig_model.orig_endo_nbr;
-        M_.aux_vars = orig_model.aux_vars;
-        M_.endo_names = orig_model.endo_names;
-        M_.lead_lag_incidence = orig_model.lead_lag_incidence;
-        M_.maximum_lead = orig_model.maximum_lead;
-        M_.maximum_endo_lead = orig_model.maximum_endo_lead;
-        M_.maximum_lag = orig_model.maximum_lag;
-        M_.maximum_endo_lag = orig_model.maximum_endo_lag;
-        oo_.steady_state = oo_.steady_state(1:M_.endo_nbr);
-    end
-
-    if options_.steadystate_flag
-        k_inst = [];
-        instruments = options_.instruments;
-        inst_nbr = size(options_.instruments);
-        for i = 1:inst_nbr
-            k_inst = [k_inst; strmatch(options_.instruments(i,:), ...
-                                       M_.endo_names,'exact')];
-        end
-        ys = oo_.steady_state;
-        if inst_nbr == 1
-            nl_func = @(x) dyn_ramsey_static_(x,M_,options_,oo_,it_);
-            %           inst_val = fzero(nl_func,oo_.steady_state(k_inst));
-            inst_val = csolve(nl_func,oo_.steady_state(k_inst),'',options_.solve_tolf,100);
-        else
-            [inst_val,info1] = dynare_solve('dyn_ramsey_static_', ...
-                                            oo_.steady_state(k_inst),0, ...
-                                            M_,options_,oo_,it_);
-        end
-        M_.params = evalin('base','M_.params;');
-        ys(k_inst) = inst_val;
-        [x,check] = feval([M_.fname '_steadystate'],...
-                          ys,[oo_.exo_steady_state; ...
-                            oo_.exo_det_steady_state]);
-        M_.params = evalin('base','M_.params;');
-        if size(x,1) < M_.endo_nbr 
-            if length(M_.aux_vars) > 0
-                x = add_auxiliary_variables_to_steadystate(x,M_.aux_vars,...
-                                                           M_.fname,...
-                                                           oo_.exo_steady_state,...
-                                                           oo_.exo_det_steady_state,...
-                                                           M_.params,...
-                                                           options_.bytecode);
-            else
-                error([M_.fname '_steadystate.m doesn''t match the model']);
-            end
-        end
-        oo_.steady_state = x;
-        [junk,junk,multbar] = dyn_ramsey_static_(oo_.steady_state(k_inst),M_,options_,oo_,it_);
-        oo_.steady_state = [x(1:M_.orig_endo_nbr); multbar];
-    else
-%        xx = oo_.steady_state([1:M_.orig_endo_nbr (M_.orig_endo_nbr+M_.orig_eq_nbr+1):end]);
-        xx = oo_.steady_state(1:M_.orig_endo_nbr);
-        [xx,info1] = dynare_solve('dyn_ramsey_static_', ...
-                                                xx,0,M_,options_,oo_,it_);
-        [junk,junk,multbar] = dyn_ramsey_static_(xx,M_,options_,oo_,it_);
-        oo_.steady_state = [xx; multbar];
-    end
-    
-    check1 = max(abs(feval([M_.fname '_static'],...
-                           oo_.steady_state,...
-                           [oo_.exo_steady_state; ...
-                        oo_.exo_det_steady_state], M_.params))) > options_.dynatol ;
-    if check1
-        info(1) = 20;
-        info(2) = check1'*check1;
-        return
-    end
-    dr.ys = oo_.steady_state;
-end    
 klen = M_.maximum_lag + M_.maximum_lead + 1;
 iyv = M_.lead_lag_incidence';
 iyv = iyv(:);
@@ -163,24 +88,25 @@ z = repmat(dr.ys,1,klen);
 if ~options_.bytecode
     z = z(iyr0) ;
 end;
+exo_ss = [oo_.exo_steady_state' oo_.exo_det_steady_state'];
 if options_.order == 1
     if (options_.bytecode)
-        [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,[oo_.exo_simul ...
-                            oo_.exo_det_simul], M_.params, dr.ys, 1);
+        [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,exo_ss, ...
+                                        M_.params, dr.ys, 1);
         jacobia_ = [loc_dr.g1 loc_dr.g1_x loc_dr.g1_xd];
     else
-        [junk,jacobia_] = feval([M_.fname '_dynamic'],z,[oo_.exo_simul ...
-                            oo_.exo_det_simul], M_.params, dr.ys, it_);
+        [junk,jacobia_] = feval([M_.fname '_dynamic'],z,exo_ss, ...
+                            M_.params, dr.ys, 1);
     end;
 elseif options_.order == 2
     if (options_.bytecode)
-        [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,[oo_.exo_simul ...
-                            oo_.exo_det_simul], M_.params, dr.ys, 1);
+        [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,exo_ss, ...
+                            M_.params, dr.ys, 1);
         jacobia_ = [loc_dr.g1 loc_dr.g1_x];
     else
         [junk,jacobia_,hessian1] = feval([M_.fname '_dynamic'],z,...
-                                         [oo_.exo_simul ...
-                            oo_.exo_det_simul], M_.params, dr.ys, it_);
+                                         exo_ss, ...
+                                         M_.params, dr.ys, 1);
     end;
     if options_.use_dll
         % In USE_DLL mode, the hessian is in the 3-column sparse representation

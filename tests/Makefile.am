@@ -21,7 +21,14 @@ MODFILES = \
 	comments.mod \
 	histval_sto.mod \
 	histval_det.mod \
+	auxiliary_variables/test1.mod \
 	expectations/expectation.mod \
+	expectations/expectation_ss.mod \
+	expectations/expectation_ss_old.mod \
+	steady_state/walsh1_initval.mod \
+	steady_state/walsh1_old_ss.mod \
+	steady_state/walsh1_ssm.mod \
+	steady_state/walsh1_ssm_block.mod \
 	steady_state_operator/standard.mod \
 	steady_state_operator/use_dll.mod \
 	steady_state_operator/block.mod \

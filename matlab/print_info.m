@@ -60,11 +60,11 @@ if ~noprint
       case 21
         error('The steady state is complex.')
       case 22
-        error('The steady state contains NaN.')
+        error('The steady state contains NaN or Inf.')
       case 23
         error('Some updated params are complex.')
       case 24
-        error('Some updated params contain NaN.')
+        error('Some updated params contain NaN or Inf.')
       case 30 
         error('Variance can''t be computed')
       case 41

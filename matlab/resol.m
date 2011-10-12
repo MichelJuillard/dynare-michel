@@ -93,10 +93,6 @@ function [dr,info,M,options,oo] = resol(check_flag,M,options,oo)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global it_
-
-jacobian_flag = 0;
-
 if isfield(oo,'dr');
     dr = oo.dr;
 end
@@ -110,136 +106,19 @@ if M.exo_nbr == 0
     oo.exo_steady_state = [] ;
 end
 
-params0 = M.params;
+[dr.ys,M.params,info] = evaluate_steady_state(oo.steady_state,M,options,oo,0);
 
-% check if steady_state_0 (-> oo.steady_state) is steady state
-tempex = oo.exo_simul;
-oo.exo_simul = repmat(oo.exo_steady_state',M.maximum_lag+M.maximum_lead+1,1);
-if M.exo_det_nbr > 0
-    tempexdet = oo.exo_det_simul;
-    oo.exo_det_simul = repmat(oo.exo_det_steady_state',M.maximum_lag+M.maximum_lead+1,1);
-end
-steady_state = oo.steady_state;
-check1 = 0;
-% testing for steadystate file
-if (~options.bytecode)
-    fh = [M.fname '_static'];
-end
-
-if options.steadystate_flag
-    [steady_state,check1] = feval([M.fname '_steadystate'],steady_state,...
-                           [oo.exo_steady_state; ...
-                        oo.exo_det_steady_state]);
-    if size(steady_state,1) < M.endo_nbr
-        if length(M.aux_vars) > 0
-            steady_state = add_auxiliary_variables_to_steadystate(steady_state,M.aux_vars,...
-                                                           M.fname,...
-                                                           oo.exo_steady_state,...
-                                                           oo.exo_det_steady_state,...
-                                                           M.params,...
-                                                           options.bytecode);
-        else
-            error([M.fname '_steadystate.m doesn''t match the model']);
-        end
-    end
-
-else
-    % testing if steady_state_0  (-> oo.steady_state) isn't a steady state or if we aren't computing Ramsey policy
-    if  options.ramsey_policy == 0
-        if options.linear == 0
-            % nonlinear models
-            if (options.block == 0 && options.bytecode == 0)
-                if max(abs(feval(fh,steady_state,[oo.exo_steady_state; ...
-                                        oo.exo_det_steady_state], M.params))) > options.dynatol
-                    [steady_state,check1] = dynare_solve(fh,steady_state,options.jacobian_flag,...
-                                                  [oo.exo_steady_state; ...
-                                        oo.exo_det_steady_state], M.params);
-                end
-            else
-                [steady_state,check1] = dynare_solve_block_or_bytecode(steady_state,...
-                                                                [oo.exo_steady_state; ...
-                                    oo.exo_det_steady_state], M.params);
-            end;
-        else
-            if (options.block == 0 && options.bytecode == 0)
-                % linear models
-                [fvec,jacob] = feval(fh,steady_state,[oo.exo_steady_state;...
-                                    oo.exo_det_steady_state], M.params);
-                if max(abs(fvec)) > 1e-12
-                    steady_state = steady_state-jacob\fvec;
-                end
-            else
-                [steady_state,check1] = dynare_solve_block_or_bytecode(steady_state,...
-                                                                [oo.exo_steady_state; ...
-                                    oo.exo_det_steady_state], M.params);
-            end;
-        end
-    end
-end
-
-% test if M.params_has changed.
-if options.steadystate_flag
-    updated_params_flag = max(abs(M.params-params0))>1e-12;
-else
-    updated_params_flag = 0;
-end
-
-% testing for problem.
-dr.ys = steady_state;
-
-if check1
-    if options.steadystate_flag
-        info(1)= 19;
-        resid = check1 ;
-    else
-        info(1)= 20;
-        resid = feval(fh,oo.steady_state,oo.exo_steady_state, M.params);
-    end
-    info(2) = resid'*resid ;
+if info(1)
     return
 end
-
-if ~isreal(steady_state)
-    info(1) = 21;
-    info(2) = sum(imag(steady_state).^2);
-    steady_state = real(steady_state);
-    dr.ys = steady_state;
-    return
-end
-
-if ~isempty(find(isnan(steady_state)))
-    info(1) = 22;
-    info(2) = NaN;
-    dr.ys = steady_state;
-    return
-end
-
-if options.steadystate_flag && updated_params_flag && ~isreal(M.params)
-    info(1) = 23;
-    info(2) = sum(imag(M.params).^2);
-    dr.ys = steady_state;
-    return
-end
-
-if options.steadystate_flag && updated_params_flag  && ~isempty(find(isnan(M.params)))
-    info(1) = 24;
-    info(2) = NaN;
-    dr.ys = steady_state;
-    return
-end
-
 
 if options.block
     [dr,info,M,options,oo] = dr_block(dr,check_flag,M,options,oo);
 else
     [dr,info,M,options,oo] = dr1(dr,check_flag,M,options,oo);
 end
+
 if info(1)
     return
 end
 
-if M.exo_det_nbr > 0
-    oo.exo_det_simul = tempexdet;
-end
-oo.exo_simul = tempex;
-tempex = [];

@@ -1,10 +1,10 @@
-function [resids, rJ,mult] = dyn_ramsey_static_(x,M,options_,oo,it_)
+function [steady_state,params,check] = dyn_ramsey_static(x,M,options_,oo)
 
-% function [resids, rJ,mult] = dyn_ramsey_static_(x)
+% function  [steady_state,params,check] = dyn_ramsey_static_(x)
 % Computes the static first order conditions for optimal policy
 %
 % INPUTS
-%    x:         vector of endogenous variables
+%    x:         vector of endogenous variables or instruments
 %
 % OUTPUTS
 %    resids:    residuals of non linear equations
@@ -30,13 +30,60 @@ function [resids, rJ,mult] = dyn_ramsey_static_(x,M,options_,oo,it_)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-global oo_ M_
+
+
+steady_state = [];
+params = M.params;
+check = 0;
+nl_func = @(x) dyn_ramsey_static_1(x,M,options_,oo);
+
+if options_.steadystate_flag
+    k_inst = [];
+    instruments = options_.instruments;
+    inst_nbr = size(options_.instruments);
+    for i = 1:inst_nbr
+        k_inst = [k_inst; strmatch(options_.instruments(i,:), ...
+                                   M.endo_names,'exact')];
+    end
+    ys = oo.steady_state;
+    if inst_nbr == 1
+        inst_val = csolve(nl_func,oo_.steady_state(k_inst),'',options_.solve_tolf,100);
+    else
+        [inst_val,info1] = dynare_solve(nl_func,ys(k_inst),0);
+    end
+    ys(k_inst) = inst_val;
+    [x,params,check] = evaluate_steadystate_file(ys,exo_ss,params,M.fname,options_.steadystate_flag);
+    if size(x,1) < M.endo_nbr 
+        if length(M.aux_vars) > 0
+            x =  feval([M.fname '_set_auxiliary_variables'],xx,...
+                       [oo.exo_steady_state,...
+                        oo.exo_det_steady_state],...
+                       M.params);
+        else
+            error([M.fname '_steadystate.m doesn''t match the model']);
+        end
+    end
+    [junk,junk,multbar] = dyn_ramsey_static_1(x(k_inst),M,options_,oo_);
+    steady_state = [x(1:M.orig_endo_nbr); multbar];
+else
+    xx = oo.steady_state(1:M.orig_endo_nbr);
+    [xx,info1] = dynare_solve(nl_func,xx,0);
+    [junk,junk,multbar] = nl_func(xx);
+    steady_state = [xx; multbar];
+end
+
+
+
+function [resids, rJ,mult] = dyn_ramsey_static_1(x,M,options_,oo)
+resids = [];
+rJ = [];
+mult = [];
 
 % recovering usefull fields
 endo_nbr = M.endo_nbr;
 exo_nbr = M.exo_nbr;
-orig_endo_nbr = M_.orig_endo_nbr;
-orig_eq_nbr = M_.orig_eq_nbr;
+orig_endo_nbr = M.orig_endo_nbr;
+orig_eq_nbr = M.orig_eq_nbr;
 inst_nbr = orig_endo_nbr - orig_eq_nbr;
 % indices of Lagrange multipliers
 i_mult = [orig_endo_nbr+(1:orig_eq_nbr)]';
@@ -63,41 +110,26 @@ if options_.steadystate_flag
                       oo.steady_state,...
                       [oo.exo_steady_state; ...
                        oo.exo_det_steady_state]);
-    if size(x,1) < M.endo_nbr 
-        if length(M.aux_vars) > 0
-            x = add_auxiliary_variables_to_steadystate(x,M.aux_vars,...
-                                                       M.fname,...
-                                                       oo.exo_steady_state,...
-                                                       oo.exo_det_steady_state,...
-                                                       M_.params,...
-                                                       options_.bytecode);
-        else
-            error([M.fname '_steadystate.m doesn''t match the model']);
-        end
-    end
-    
-else
-    xx = zeros(endo_nbr,1);
-    xx(1:orig_endo_nbr) = x;
-
-    xx = feval([M_.fname '_set_auxiliary_variables'],xx,...
-                                                       [oo.exo_steady_state,...
-                                                       oo.exo_det_steady_state],...
-                                                       M_.params);
-
-%    x = [x(1:orig_endo_nbr); zeros(orig_eq_nbr,1); x(orig_endo_nbr+1:end)];
 end
+
+% setting steady state of auxiliary variables
+xx = zeros(endo_nbr,1);
+xx(1:orig_endo_nbr) = x(1:orig_endo_nbr);
+
+x = feval([M.fname '_set_auxiliary_variables'],xx,...
+          [oo.exo_steady_state,...
+           oo.exo_det_steady_state],...
+          M.params);
 
 % value and Jacobian of objective function
 ex = zeros(1,M.exo_nbr);
-[U,Uy,Uyy] = feval([fname '_objective_static'],xx,ex, M_.params);
+[U,Uy,Uyy] = feval([fname '_objective_static'],x,ex, M.params);
 Uy = Uy';
 Uyy = reshape(Uyy,endo_nbr,endo_nbr);
 
 % set multipliers to 0 to compute residuals
-it_ = 1;
-[f,fJ] = feval([fname '_static'],xx,[oo.exo_simul oo.exo_det_simul], ...
-               M_.params);
+[f,fJ] = feval([fname '_static'],x,[oo.exo_simul oo.exo_det_simul], ...
+               M.params);
 
 aux_eq = [1:orig_endo_nbr orig_endo_nbr+orig_eq_nbr+1:size(fJ,1)];
 A = fJ(aux_eq,orig_endo_nbr+1:end);
