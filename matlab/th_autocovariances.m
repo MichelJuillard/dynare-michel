@@ -92,11 +92,16 @@ else
     trend = 1:M_.endo_nbr;
     inv_order_var = trend(M_.block_structure.variable_reordered);
     ghu1(1:length(dr.state_var),:) = ghu(dr.state_var,:);
+    npred = npred + dr.nboth;
 end;
 b = ghu1*M_.Sigma_e*ghu1';
 
 
-ipred = nstatic+(1:npred)';
+if options_.block == 0
+    ipred = nstatic+(1:npred)';
+else
+    ipred = dr.state_var;
+end;
 % state space representation for state variables only
 [A,B] = kalman_transition_matrix(dr,ipred,1:nx,M_.exo_nbr);
 % Compute stationary variables (before HP filtering),
@@ -104,7 +109,11 @@ ipred = nstatic+(1:npred)';
 % HP filtering, this mean correction is computed *before* filtering)
 if options_.order == 2 || options_.hp_filter == 0
     [vx, u] =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold);
-    iky = inv_order_var(ivar);
+    if options_.block == 0
+        iky = inv_order_var(ivar);
+    else
+        iky = ivar;
+    end;
     stationary_vars = (1:length(ivar))';
     if ~isempty(u)
         x = abs(ghx*u);
