@@ -123,7 +123,7 @@ steady_state = oo.steady_state;
 check1 = 0;
 % testing for steadystate file
 if (~options.bytecode)
-    fh = str2func([M.fname '_static']);
+    fh = [M.fname '_static'];
 end
 
 if options.steadystate_flag
