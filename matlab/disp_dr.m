@@ -30,7 +30,7 @@ nx =size(dr.ghx,2);
 nu =size(dr.ghu,2);
 if options_.block
     k = dr.npred + dr.nboth;
-    k1 = M_.block_structure.variable_reordered;
+    k1 = 1:M_.endo_nbr;
 else
     k = find(dr.kstate(:,2) <= M_.maximum_lag+1);
     klag = dr.kstate(k,[1 2]);
@@ -109,11 +109,7 @@ for k=1:nx
     end;
     str = sprintf('%-20s',str1);
     for i=1:nvar
-        if options_.block
-            x = dr.ghx(i,k);
-        else
-            x = dr.ghx(ivar(i),k);
-        end;
+        x = dr.ghx(ivar(i),k);
         if abs(x) > 1e-6
             flag = 1;
             str = [str sprintf('%16.6f',x)];
@@ -132,11 +128,7 @@ for k=1:nu
     flag = 0;
     str = sprintf('%-20s',M_.exo_names(k,:));
     for i=1:nvar
-        if options_.block
-            x = dr.ghu(i,k);
-        else
-            x = dr.ghu(ivar(i),k);
-        end;
+        x = dr.ghu(ivar(i),k);
         if abs(x) > 1e-6
             flag = 1;
             str = [str sprintf('%16.6f',x)];
