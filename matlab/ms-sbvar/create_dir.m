@@ -1,5 +1,5 @@
 function create_dir(dirname)
-% function create_dir()
+% function create_dir(dirname)
 % creates directory if it doesn't exist
 %
 % INPUTS

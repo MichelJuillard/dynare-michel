@@ -1,5 +1,5 @@
 function dyn_save_graph(dirname,graph_name,graph_formats,TeX,names,texnames,caption)
-% function dyn_graph_save(graph_name,graph_formats,TeX)
+% function dyn_save_graph(dirname,graph_name,graph_formats,TeX,names,texnames,caption)
 % saves Dynare graphs
 %
 % INPUTS

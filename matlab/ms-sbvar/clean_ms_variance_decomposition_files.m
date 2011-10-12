@@ -1,5 +1,5 @@
 function clean_ms_variance_decomposition_files(file_tag)
-% function clean_ms_variance_decomposition_files()
+% function clean_ms_variance_decomposition_files(file_tag)
 % removes MS variance decomposition files
 %
 % INPUTS

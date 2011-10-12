@@ -1,5 +1,5 @@
 function [options_, oo_]=set_ms_estimation_file(file_tag, options_, oo_)
-%function set_ms_estimation_file()
+% function [options_, oo_]=set_ms_estimation_file(file_tag, options_, oo_)
 % Set options_.ms.free_param_file based on user input
 %
 % INPUTS

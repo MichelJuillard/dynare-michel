@@ -1,5 +1,5 @@
 function options_=set_ms_simulation_file(options_)
-%function set_ms_simulation_file()
+% function options_=set_ms_simulation_file(options_)
 % Set options_.ms.mh_file based on user input
 %
 % INPUTS

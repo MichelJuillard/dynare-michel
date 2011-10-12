@@ -1,5 +1,5 @@
 function clean_ms_irf_files(file_tag)
-% function clean_ms_irf_files()
+% function clean_ms_irf_files(file_tag)
 % removes MS irf files
 %
 % INPUTS

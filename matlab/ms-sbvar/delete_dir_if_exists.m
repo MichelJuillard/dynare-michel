@@ -1,5 +1,5 @@
 function delete_dir_if_exists(dirname)
-% function delete_dir_if_exists()
+% function delete_dir_if_exists(dirname)
 % removes directory if it exists
 %
 % INPUTS

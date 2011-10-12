@@ -1,5 +1,5 @@
-function plot_ms_variance_decomposition(M_, options_, vd, title_, graph_save_formats, ...
-                                        TeX, varargin)
+function plot_ms_variance_decomposition(M_, options_, vd, title_, graph_save_formats, TeX, varargin)
+% function plot_ms_variance_decomposition(M_, options_, vd, title_, graph_save_formats, TeX, varargin)
 % plot the variance decomposition of shocks
 %
 % Inputs

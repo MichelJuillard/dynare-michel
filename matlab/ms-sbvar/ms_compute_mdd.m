@@ -1,6 +1,6 @@
 function [options_, oo_]=ms_compute_mdd(M_, options_, oo_)
-%function ms_compute_mdd()
-% MS Sbvar Compute Marginal Data Density
+% function [options_, oo_]=ms_compute_mdd(M_, options_, oo_)
+% Markov-switching SBVAR: Compute Marginal Data Density
 %
 % INPUTS
 %    M_:          (struct)    model structure

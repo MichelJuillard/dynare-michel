@@ -1,5 +1,5 @@
 function [options_]=set_file_tags(options_)
-%function set_file_tags()
+% function [options_]=set_file_tags(options_)
 % Sets the appropriate file tags for first type of mex function
 %
 % INPUTS

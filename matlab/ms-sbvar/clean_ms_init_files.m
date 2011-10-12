@@ -1,5 +1,5 @@
 function clean_ms_init_files(file_tag)
-% function clean_ms_init_files()
+% function clean_ms_init_files(file_tag)
 % removes MS initialization files
 %
 % INPUTS

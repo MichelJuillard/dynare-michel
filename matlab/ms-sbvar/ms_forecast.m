@@ -1,6 +1,6 @@
 function [options_, oo_]=ms_forecast(M_, options_, oo_)
-%function ms_forecast()
-% MS-SBVAR Forecast
+% function [options_, oo_]=ms_forecast(M_, options_, oo_)
+% Markov-switching SBVAR: Forecast
 %
 % INPUTS
 %    M_:          (struct)    model structure
