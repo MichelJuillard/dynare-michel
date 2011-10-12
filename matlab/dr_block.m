@@ -133,7 +133,7 @@ for i = 1:Size;
             block_type = 8;
         end;
     end;
-    if maximum_lag > 0 && n_pred > 0 && block_type ~= 1 
+    if maximum_lag > 0 && (n_pred > 0  || n_both > 0) && block_type ~= 1 
         indexi_0 = min(lead_lag_incidence(2,:));
     end;
     switch block_type
@@ -529,6 +529,8 @@ for i = 1:Size;
                 temp = [];
             end;
             
+            A_ = real([B_static C(:,j3)*gx+B_pred B_fyd]); % The state_variable of the block are located at [B_pred B_both]
+            
             if other_endo_nbr
                 if n_static > 0
                      fx = Q' * data(i).g1_o;
@@ -556,15 +558,17 @@ for i = 1:Size;
                 
                 selector_tm1 = M_.block_structure.block(i).tm1; 
 
-                A_ = real([B_static C(:,j3)*gx+B_pred B_fyd]); % The state_variable of the block are located at [B_pred B_both]
                 B_ = [zeros(size(B_static)) zeros(n,n_pred) C(:,j3) ];
                 C_ = l_x_sv;
                 D_ = (fx_t * l_x + fx_tp1 * l_x * l_x_sv + fx_tm1 * selector_tm1 );
                 % Solve the Sylvester equation:
                 % A_ * gx + B_ * gx * C_ + D_ = 0
-                %vghx_other = - inv(kron(eye(size(D_,2)), A_) + kron(C_', B_)) * vec(D_);
-                %ghx_other = reshape(vghx_other, size(D_,1), size(D_,2));
-                [err, ghx_other] = gensylv(1, A_, B_, C_, -D_);
+                if block_type == 5
+                    vghx_other = - inv(kron(eye(size(D_,2)), A_) + kron(C_', B_)) * vec(D_);
+                    ghx_other = reshape(vghx_other, size(D_,1), size(D_,2));
+                else
+                    [err, ghx_other] = gensylv(1, A_, B_, C_, -D_);
+                end;
                 if options_.aim_solver ~= 1 && options_.use_qzdiv
                    % Necessary when using Sims' routines for QZ
                    ghx_other = real(ghx_other);
@@ -592,7 +596,7 @@ for i = 1:Size;
                     ghu = -A_\ (fu_complet + fx_tp1 * l_x * l_u_sv + fx_t * l_u + B_ * ghx_other  * l_u_sv  );
                     exo = dr.exo_var;
                 else
-                    ghu = - A_ / fu;
+                    ghu = - A_ \ fu;
                 end;
             else
                 if other_endo_nbr > 0
