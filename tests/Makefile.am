@@ -14,6 +14,7 @@ MODFILES = \
 	discretionary_policy/dennis_1.mod \
 	ramst_initval_file.mod \
 	ramst_normcdf_and_friends.mod \
+	ramst_vec.mod \
 	example1_varexo_det.mod \
 	predetermined_variables.mod \
 	fs2000_nonstationary.mod \
