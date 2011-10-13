@@ -2283,7 +2283,7 @@ providing it with a ``steady state file''.
 @descriptionhead
 
 This command computes the steady state of a model using a nonlinear
-Newton-type solver.
+Newton-type solver and displays it. When a steady state file is used @code{steady} displays the steady state and checks that it is a solution of the static model. 
 
 More precisely, it computes the equilibrium value of the endogenous
 variables for the value of the exogenous variables specified in the
@@ -2387,6 +2387,9 @@ number of computations attempted before giving up.
 @item homotopy_steps = @var{INTEGER}
 Defines the number of steps when performing a homotopy. See
 @code{homotopy_mode} option for more details.
+
+@item nocheck
+Don't check the steady state values when they are provided explicitely either by a steady state file or a @code{steady_state_model} block. This is useful for models with unit roots as, in this case, the steady state is not unique or doesn't exist.
 @end table
 
 @examplehead
@@ -2503,14 +2506,13 @@ Again, there are two options for creating this file:
 @itemize
 
 @item
-You can write this file by hand. See @file{fs2000_steadystate.m}
-in the @file{examples} directory for an example. This is the option
-which gives the most flexibility, at the expense of a heavier
-programming burden.
+The easiest way is to write a @code{steady_state_model} block.
 
 @item
-You can use the @code{steady_state_model} block, for a more
-user-friendly interface.
+You can write the corresponding Matlab function by hand. See @file{fs2000_steadystate.m}
+in the @file{examples} directory for an example. This option
+gives a bit more flexibility, at the expense of a heavier
+programming burden and a lesser efficiency.
 
 @end itemize
 
@@ -3749,17 +3751,17 @@ For nonstationary models: a wide prior is used with an initial matrix
 of variance of the error of forecast diagonal with 10 on the diagonal
 
 @item 3
-For nonstationary models: use a diffuse filter
+For nonstationary models: use a diffuse filter (use rather the @code{diffuse_filter} option)
 
 @item 4
 The filter is initialized with the fixed point of the Riccati equation
 @end table
 
 @noindent
-Default value is @code{1}.
+Default value is @code{1}. For advanced use only.
 
 @item lik_algo = @var{INTEGER}
-@dots{}
+For internal use and testing only.
 
 @item conf_sig = @var{DOUBLE}
 @xref{conf_sig}.
@@ -3966,7 +3968,23 @@ decomposition of the above k-step ahead filtered values.
 @dots{}
 
 @item diffuse_filter
-@dots{}
+Uses the diffuse Kalman filter (as described in
+@cite{Durbin and Koopman (2001)} and @cite{Koopman and Durbin
+(2003)}) to estimate models with non-stationary observed variables.
+
+When @code{diffused_filter} is used the @code{lik_init} option of
+@code{estimation} has no effect.
+
+When there are nonstationary variables in a model, there is no unique
+deterministic steady state. The user must supply a MATLAB/Octave
+function that computes the steady state values of the stationary
+variables in the model and returns dummy values for the nonstationary
+ones. The function should be called with the name of the @file{.mod}
+file followed by @file{_steadystate}. See @file{fs2000_steadystate.m}
+in @file{examples} directory for an example.
+
+Note that the nonstationary variables in the model must be integrated
+processes (their first difference or k-difference must be stationary).
 
 @item selected_variables_only
 Only run the smoother on the variables listed just after the
@@ -4284,27 +4302,7 @@ Specify the parameter set to use for running the smoother. The
 
 @deffn Command unit_root_vars @var{VARIABLE_NAME}@dots{};
 
-@code{unit_root_vars} is used to declare a list of unit-root
-endogenous variables of a model so that dynare won't check the steady
-state levels (defined in the steadystate file) file for these
-variables. The information given by this command is no more used for
-the initialization of the diffuse kalman filter (as described in
-@cite{Durbin and Koopman (2001)} and @cite{Koopman and Durbin
-(2003)}).
-
-When @code{unit_root_vars} is used the @code{lik_init} option of
-@code{estimation} has no effect.
-
-When there are nonstationary variables in a model, there is no unique
-deterministic steady state. The user must supply a MATLAB/Octave
-function that computes the steady state values of the stationary
-variables in the model and returns dummy values for the nonstationary
-ones. The function should be called with the name of the @file{.mod}
-file followed by @file{_steadystate}. See @file{fs2000_steadystate.m}
-in @file{examples} directory for an example.
-
-Note that the nonstationary variables in the model must be integrated
-processes (their first difference or k-difference must be stationary).
+This command is deprecated. Use @code{estimation} option @code{diffuse_filter} instead for estimating a model with non-stationary observed variables or @code{steady} option @code{nocheck} to prevent @code{steady} to check the steady state returned by your steady state file.
 @end deffn
 
 Dynare also has the ability to estimate Bayesian VARs:
