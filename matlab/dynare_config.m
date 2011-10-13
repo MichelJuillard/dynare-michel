@@ -145,6 +145,27 @@ else
         end
     end
 
+    if strcmp(computer, 'MACI')
+        if matlab_ver_less_than('7.5')
+            mexpath = [dynareroot '../mex/matlab/osx32-7.4'];
+            if exist(mexpath, 'dir')
+                addpath(mexpath)
+            end
+        else
+            mexpath = [dynareroot '../mex/matlab/osx32-7.5-7.13'];
+            if exist(mexpath, 'dir')
+                addpath(mexpath)
+            end
+        end
+    end
+
+    if strcmp(computer, 'MACI64')
+        mexpath = [dynareroot '../mex/matlab/osx64'];
+        if exist(mexpath, 'dir')
+            addpath(mexpath)
+        end
+    end
+
     % Add generic MATLAB path (with higher priority than the previous ones)
     addpath([dynareroot '../mex/matlab/']);
 end
