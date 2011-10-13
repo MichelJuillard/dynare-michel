@@ -48,11 +48,19 @@ end
 
 switch flag
   case 0
-    oo_.exo_simul(k,ivar) = repmat(values,length(k),1);
+    if size(values,1) == 1
+        oo_.exo_simul(k,ivar) = repmat(values,length(k),1);
+    else
+        oo_.exo_simul(k,ivar) = values;
+    end
   case 1
     oo_.exo_simul(k,ivar) = oo_.exo_simul(k,ivar).*values;
   case 2
-    oo_.exo_det_simul(k,ivar) = repmat(values,length(k),1);
+    if size(values,1) == 1
+        oo_.exo_det_simul(k,ivar) = repmat(values,length(k),1);
+    else
+        oo_.exo_det_simul(k,ivar) = values;
+    end
   case 3
     oo_.exo_det_simul(k,ivar) = oo_.exo_det_simul(k,ivar).*values;
 end
