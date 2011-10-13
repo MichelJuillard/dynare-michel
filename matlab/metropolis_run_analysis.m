@@ -38,10 +38,13 @@ logPost = [];
 params = [];
 blck = 1;
 for i=1:record.LastFileNumber
-    o=load([M.fname '/metropolis/' M.fname '_mh' int2str(i) '_blck' ...
-            int2str(blck)]);
-    logPost = [logPost; o.logpo2];
-    params  = [params; o.x2];
+    fname = [M.fname '/metropolis/' M.fname '_mh' int2str(i) '_blck' ...
+            int2str(blck) '.mat'];
+    if exist(fname,'file')
+        o=load(fname);
+        logPost = [logPost; o.logpo2];
+        params  = [params; o.x2];
+    end
 end
 
 figure;
