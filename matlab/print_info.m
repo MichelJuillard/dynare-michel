@@ -50,21 +50,21 @@ if ~noprint
                'that are not real or are infinite'])
       case 7
         error(['One of the eigenvalues is is close to 0/0 (the absolute ' ...
-               'value of numerator and denominator is smaller than 1e-6).'])
+               'value of numerator and denominator is smaller than 1e-6)'])
       case 19
-        error('The steadystate file did not compute the steady state (inconsistent deep parameters).')
+        error('The steadystate file did not compute the steady state')
       case 20
         error(['Impossible to find the steady state. Either the model' ...
                ' doesn''t have a unique steady state of the guess values' ...
                ' are too far from the solution'])
       case 21
-        error('The steady state is complex.')
+        error('The steady state is complex')
       case 22
-        error('The steady state contains NaN or Inf.')
+        error('The steady state contains NaN or Inf')
       case 23
-        error('Some updated params are complex.')
+        error('Some updated params are complex')
       case 24
-        error('Some updated params contain NaN or Inf.')
+        error('Some updated params contain NaN or Inf')
       case 30 
         error('Variance can''t be computed')
       case 41
@@ -91,21 +91,21 @@ if ~noprint
         
         % Aim Code Conversions by convertAimCodeToInfo.m
       case 102
-        error('Aim: roots not correctly computed by real_schur.');
+        error('Aim: roots not correctly computed by real_schur');
       case 103
-        error('Aim: too many big roots.');
+        error('Aim: too many big roots');
       case 135
-        error('Aim: too many big roots, and q(:,right) is singular.');
+        error('Aim: too many big roots, and q(:,right) is singular');
       case 104
-        error('Aim: too few big roots.');
+        error('Aim: too few big roots');
       case 145
-        error('Aim: too few big roots, and q(:,right) is singular.');
+        error('Aim: too few big roots, and q(:,right) is singular');
       case 105
-        error('Aim: q(:,right) is singular.');
+        error('Aim: q(:,right) is singular');
       case 161
-        error('Aim: too many exact shiftrights.');
+        error('Aim: too many exact shiftrights');
       case 162
-        error('Aim: too many numeric shiftrights.');
+        error('Aim: too many numeric shiftrights');
       otherwise
         error('This case shouldn''t happen. Contact the authors of Dynare')
     end

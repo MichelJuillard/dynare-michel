@@ -88,25 +88,27 @@ z = repmat(dr.ys,1,klen);
 if ~options_.bytecode
     z = z(iyr0) ;
 end;
-exo_ss = [oo_.exo_steady_state' oo_.exo_det_steady_state'];
+x_length = M_.maximum_lag+M_.maximum_lead+1;
+exo_simul = [repmat(oo_.exo_steady_state',x_length,1) repmat(oo_.exo_det_steady_state',x_length,1)];
+it_ = M_.maximum_lag + 1;
 if options_.order == 1
     if (options_.bytecode)
-        [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,exo_ss, ...
+        [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,exo_simul, ...
                                         M_.params, dr.ys, 1);
         jacobia_ = [loc_dr.g1 loc_dr.g1_x loc_dr.g1_xd];
     else
-        [junk,jacobia_] = feval([M_.fname '_dynamic'],z,exo_ss, ...
-                            M_.params, dr.ys, 1);
+        [junk,jacobia_] = feval([M_.fname '_dynamic'],z,exo_simul, ...
+                            M_.params, dr.ys, it_);
     end;
 elseif options_.order == 2
     if (options_.bytecode)
-        [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,exo_ss, ...
+        [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,exo_simul, ...
                             M_.params, dr.ys, 1);
         jacobia_ = [loc_dr.g1 loc_dr.g1_x];
     else
         [junk,jacobia_,hessian1] = feval([M_.fname '_dynamic'],z,...
-                                         exo_ss, ...
-                                         M_.params, dr.ys, 1);
+                                         exo_simul, ...
+                                         M_.params, dr.ys, 3);
     end;
     if options_.use_dll
         % In USE_DLL mode, the hessian is in the 3-column sparse representation

@@ -46,7 +46,6 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
     params = M.params;
     exo_ss = [oo.exo_steady_state; oo.exo_det_steady_state];
     updated_params_flag = 0;
-    fh_static = str2func([M.fname '_static']);
     
     if length(M.aux_vars) > 0
         h_set_auxiliary_variables = str2func([M.fname '_set_auxiliary_variables']);                       
@@ -95,13 +94,14 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
     elseif (options.bytecode == 0 && options.block == 0)
         if options.linear == 0
             % non linear model
-            [ys,check] = dynare_solve(fh_static,...
+            [ys,check] = dynare_solve([M.fname '_static'],...
                                       ys_init,...
                                       options.jacobian_flag, ...     
                                       exo_ss, params);
         else
             % linear model
-            [fvec,jacob] = feval(fh_static,ys_init,exo_ss, ...
+            fh_static = str2func([M.fname '_static']);
+            [fvec,jacob] = fh_static(ys_init,exo_ss, ...
                                  params);
             if max(abs(fvec)) > 1e-12
                 ys = ys_init-jacob\fvec;

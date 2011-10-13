@@ -77,5 +77,5 @@ for i=1:step_nbr+1
     oo_.exo_steady_state(values(ix,2)) = points(ix,i);
     oo_.exo_det_steady_state(values(ixd,2)) = points(ixd,i);
 
-    steady_;
+    steady_(M_,options_,oo_);
 end
