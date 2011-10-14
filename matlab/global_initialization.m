@@ -189,7 +189,6 @@ options_.prior_trunc = 1e-10;
 options_.smoother = 0;
 options_.student_degrees_of_freedom = 3;
 options_.subdraws = [];
-options_.unit_root_vars = [];
 options_.use_mh_covariance_matrix = 0;
 options_.gradient_method = 2;
 options_.gradient_epsilon = 1e-6;

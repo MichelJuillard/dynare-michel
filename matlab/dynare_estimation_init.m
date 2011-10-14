@@ -276,39 +276,6 @@ else
                                              bayestopt_.smoother_var_list);
 end;
 
-
-% Initialization with unit-root variables.
-if ~isempty(options_.unit_root_vars)
-    n_ur = size(options_.unit_root_vars,1);
-    i_ur = zeros(n_ur,1);
-    for i=1:n_ur
-        i1 = strmatch(deblank(options_.unit_root_vars(i,:)),M_.endo_names(dr.order_var,:),'exact');
-        if isempty(i1)
-            error('Undeclared variable in unit_root_vars statement')
-        end
-        i_ur(i) = i1;
-    end
-    bayestopt_.var_list_stationary = setdiff((1:M_.endo_nbr)',i_ur);
-    [junk,bayestopt_.restrict_var_list_nonstationary] = ...
-        intersect(oo_.dr.restrict_var_list,i_ur);
-    bayestopt_.restrict_var_list_stationary = ...
-        setdiff((1:length(oo_.dr.restrict_var_list))', ...
-                bayestopt_.restrict_var_list_nonstationary);
-    if M_.maximum_lag > 1
-        l1 = flipud([cumsum(M_.lead_lag_incidence(1:M_.maximum_lag-1,dr.order_var),1);ones(1,M_.endo_nbr)]);
-        l2 = l1(:,oo_.dr.restrict_var_list);
-        il2 = find(l2' > 0);
-        l2(il2) = (1:length(il2))';
-        bayestopt_.restrict_var_list_stationary = ...
-            nonzeros(l2(:,bayestopt_.restrict_var_list_stationary));
-        bayestopt_.restrict_var_list_nonstationary = ...
-            nonzeros(l2(:,bayestopt_.restrict_var_list_nonstationary));
-    end
-    if options_.lik_init==1
-        options_.lik_init = 3;
-    end
-end % if ~isempty(options_.unit_root_vars)
-
 % Test if the data file is declared.
 if isempty(options_.datafile)
     if gsa_flag
