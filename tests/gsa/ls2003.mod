@@ -73,6 +73,7 @@ ksstat=0);
 // NOTE: since namendo is emppty by default, 
 // this call does not perform the mapping of reduced form coefficient: just prepares the sample
 
+/*
 disp(' ');
 disp('ANALYSIS OF REDUCED FORM COEFFICIENTS');
 disp(' ');
@@ -86,6 +87,7 @@ namexo=(e_R),     // evaluate relationships with exogenous e_R (use namexo=(:) f
 namlagendo=(R),   // evaluate relationships with lagged R (use namlagendo=(:) for all lagged endogenous)
 stab=0 // don't repeat again the stability mapping
 );
+*/
 
 disp(' ');
 disp('THE PREVIOUS TWO CALLS COULD BE DONE TOGETHER');
