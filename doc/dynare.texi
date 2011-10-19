@@ -5854,7 +5854,7 @@ model. Output @code{.eps} files are contained in
 @xref{simulation_file_tag}.
 
 @item horizon = @var{INTEGER}
-The forecast horizon. Default: @code{12}
+@anchor{horizon} The forecast horizon. Default: @code{12}
 
 @item filtered_probabilities
 @anchor{filtered_probabilities} Uses filtered probabilities at the end
@@ -5990,12 +5990,15 @@ are contained in @code{<output_file_tag/Variance_Decomposition>}.
 @item simulation_file_tag = @var{FILENAME}
 @xref{simulation_file_tag}.
 
+@item horizon = @var{INTEGER}
+@xref{horizon}.
+
 @item filtered_probabilities
 @xref{filtered_probabilities}.
 
 @item no_error_bands
-Do not output error bands. Default: @code{off}
-(@i{i.e.} output error bands)
+Do not output percentile error bands (@i{i.e.} compute mean). Default:
+@code{off} (@i{i.e.} output error bands)
 
 @item error_band_percentiles = [@var{DOUBLE1} @dots{}]
 @xref{error_band_percentiles}.
@@ -6012,9 +6015,15 @@ Do not output error bands. Default: @code{off}
 @item free_parameters = @var{NUMERICAL_VECTOR}
 @xref{free_parameters}.
 
-@item median
+@item parameter_uncertainty
+@xref{parameter_uncertainty}.
 
-@xref{median}.
+@item regime = @var{INTEGER}
+@xref{regime}.
+
+@item regimes
+
+@xref{regimes}.
 
 @end table
 

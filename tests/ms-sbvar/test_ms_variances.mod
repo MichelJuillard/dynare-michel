@@ -25,4 +25,4 @@ ms_compute_mdd;
 ms_compute_probabilities;
 ms_irf(parameter_uncertainty);
 ms_forecast;
-ms_variance_decomposition;
+ms_variance_decomposition(no_error_bands);

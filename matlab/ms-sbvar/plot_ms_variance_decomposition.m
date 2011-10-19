@@ -34,6 +34,11 @@ function plot_ms_variance_decomposition(M_, options_, vd, title_, graph_save_for
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+if length(size(vd)) == 3
+    plot_ms_variance_decomposition_error_bands(M_, options_, vd, title_);
+    return;
+end
+
     nvars = M_.endo_nbr;
     endo_names = M_.endo_names;
 
