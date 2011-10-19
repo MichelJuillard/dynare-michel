@@ -47,25 +47,10 @@ end
 
 steady_state_old = oo_.steady_state;
 
-% If using a steady state file, initialize oo_.steady_state with that file
-if options_.steadystate_flag
-    [ys,check] = feval([M_.fname '_steadystate'], ...
-                       oo_.steady_state, ...
-                       [oo_.exo_steady_state; ...
-                        oo_.exo_det_steady_state]);
-    if size(ys, 1) < M_.endo_nbr 
-        if length(M_.aux_vars) > 0
-            ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars, ...
-                                                        M_.fname, ...
-                                                        oo_.exo_steady_state, ...
-                                                        oo_.exo_det_steady_state, ...
-                                                        M_.params,...
-                                                        options_.bytecode);
-        else
-            error([M_.fname '_steadystate.m doesn''t match the model']);
-        end
-    end
-    oo_.steady_state = ys;
+[oo_.steady_state,M.params,info] = evaluate_steady_state(oo_.steady_state,M_,options_,oo_,0);
+
+if info(1)
+    print_info(info,options_.noprint)
 end
 
 % Compute the residuals
