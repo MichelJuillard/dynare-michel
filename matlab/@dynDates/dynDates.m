@@ -12,8 +12,6 @@ function dd = dynDates(varargin)
 %! @item a
 %! String, date.
 %! @item b
-%! String, date.
-%! @item c
 %! @end table
 %! @sp 2
 %! @strong{Outputs}
@@ -72,7 +70,7 @@ dd.ndat = [];
 dd.freq = [];
 dd.time = dynTime();
 
-dd = class(ts,'dynDates');
+dd = class(dd,'dynDates');
 
 switch nargin
   case 0
@@ -91,108 +89,110 @@ switch nargin
         error('dynDates:: Wrong calling sequence of the constructor!')
     end
   otherwise
-    for i=
-    
+    tmp = dynDate(varargin{1});
+    dd.ndat = nargin;
+    dd.time = NaN(dd.ndat,2);
+    dd.freq = tmp.freq;
+    dd.time(1,:) = tmp.time;
+    for i=2:dd.ndat
+        tmp = dynDate(varargin{i});
+        if ~isequal(dd.freq,tmp.freq)
+            error(['dynDates:: The frequency declared in input argument number ' int2str(i) ' is different from the frequency declared in the first input argument!'])
+        end
+        dd.time(i,:) = tmp.time;
+    end
 end
-    if nargin==2
-        c = [];
-        d = [];
-    end
-    % Get data, number of observations and number of variables.
-    ts.data = a;
-    ts.nobs = size(a,1);
-    ts.vobs = size(a,2);
-    % Get the first date and set the frequency.
-    if ~isempty(b)
-        if ischar(b)% Weekly, Monthly or Quaterly data.
-            quaterly = findstr('Q',b);
-            monthly  = findstr('M',b);
-            weekly   = findstr('W',b);
-            if ~isempty(quaterly)
-                ts.freq = 4;
-            end
-            if ~isempty(monthly)
-                ts.freq = 12;
-            end
-            if ~isempty(weekly)
-                ts.freq = 52;
-            end
-            if isempty(quaterly) && isempty(monthly) && isempty(weekly)
-                error('dynSeries:: Using a string as a second input argument, I can only handle weekly (W), monthly (M) or quaterly (Q) data!');
-            end
-        else% If b is not a string then yearly data are assumed.
-            ts.freq = 1;
-        end
-        ts.Time = ts.Time.setFreq(ts.freq);
-        ts.Time = ts.Time.setTime(dynDate(b):dynDate(b)+ts.nobs);
-    else% If b is empty.
-        ts.freq = 1;
-        ts.Time = ts.Time.setFreq(1);
-        ts.Time = ts.Time.setTime([transpose(1:ts.nobs) ones(ts.nobs,1)]);
-    end
-    % Get the names of the variables.
-    if ~isempty(c)
-        if ts.vobs==size(c,1)
-            ts.name = c;
-        else
-            error('dynSeries:: The number of declared names does not match the number of variables!')
-        end
-    else
-        for i=1:ts.vobs
-            ts.name = char(ts.name,'--NA--');
-        end
-    end
-    if ~isempty(d)
-        if ts.vobs==size(d,1)
-            ts.tex = d;
-        else
-            error('dynSeries:: The number of declared tex names does not match the number of variables!')
-        end
-    else
-        for i=1:ts.vobs
-            ts.tex = char(ts.tex,'--NA--');
-        end
-    end
-  otherwise
-    error('dynSeries:: Can''t instantiate the class, wrong calling sequence!')
-end
-
 
 %@test:1
 %$ addpath ../matlab
-%$ % Define a data set.
-%$ A = transpose(1:10);
 %$
-%$ % Define initial date
-%$ B1 = 1950;
+%$ % Define some dates
+%$ B1 = '1945Q3';
 %$ B2 = '1950Q2';
-%$ B3 = '1950M10';
-%$ B4 = '1950W50';
+%$ B3 = '1950Q1';
+%$ B4 = '1953Q4';
 %$
 %$ % Define expected results.
-%$ e1.Time = transpose([1950 1951 1952 1953 1954 1955 1956 1957 1958 1959]);
-%$ e1.freq = 1;
-%$ e2.Time = char('1950Q2','1950Q3','1950Q4','1951Q1','1951Q2','1951Q3','1951Q4','1952Q1','1952Q2','1952Q3');
-%$ e2.freq = 4;
-%$ e3.Time = char('1950M10','1950M11','1950M12','1951M1','1951M2','1951M3','1951M4','1951M5','1951M6','1951M7');
-%$ e3.freq = 12;
-%$ e4.Time = char('1950W50','1950W51','1950W52','1951W1','1951W2','1951W3','1951W4','1951W5','1951W6','1951W7');
-%$ e4.freq = 52;
+%$ e.time = [1945 3; 1950 2; 1950 1; 1953 4];
+%$ e.freq = 4;
+%$ e.ndat = 4;
 %$
 %$ % Call the tested routine.
-%$ ts1 = dynSeries(A,B1);
-%$ ts2 = dynSeries(A,B2);
-%$ ts3 = dynSeries(A,B3);
-%$ ts4 = dynSeries(A,B4);
+%$ d = dynDates(B1,B2,B3,B4);
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(getTime(ts1),e1.Time);
-%$ t(2) = dyn_assert(getTime(ts2),e2.Time);
-%$ t(3) = dyn_assert(getTime(ts3),e3.Time);
-%$ t(4) = dyn_assert(getTime(ts4),e4.Time);
-%$ t(5) = dyn_assert(ts1.freq,e1.freq);
-%$ t(6) = dyn_assert(ts2.freq,e2.freq);
-%$ t(7) = dyn_assert(ts3.freq,e3.freq);
-%$ t(8) = dyn_assert(ts4.freq,e4.freq);
+%$ t(1) = dyn_assert(d.time,e.time);
+%$ t(2) = dyn_assert(d.freq,e.freq);
+%$ t(3) = dyn_assert(d.ndat,e.ndat);
 %$ T = all(t);
 %@eof:1
+
+%@test:2
+%$ addpath ../matlab
+%$
+%$ % Define some dates
+%$ B1 = '1945M3';
+%$ B2 = '1950M2';
+%$ B3 = '1950M10';
+%$ B4 = '1953M12';
+%$
+%$ % Define expected results.
+%$ e.time = [1945 3; 1950 2; 1950 10; 1953 12];
+%$ e.freq = 12;
+%$ e.ndat = 4;
+%$
+%$ % Call the tested routine.
+%$ d = dynDates(B1,B2,B3,B4);
+%$
+%$ % Check the results.
+%$ t(1) = dyn_assert(d.time,e.time);
+%$ t(2) = dyn_assert(d.freq,e.freq);
+%$ t(3) = dyn_assert(d.ndat,e.ndat);
+%$ T = all(t);
+%@eof:2
+
+%@test:3
+%$ addpath ../matlab
+%$
+%$ % Define some dates
+%$ B1 = '1945';
+%$ B2 = '1950';
+%$ B3 = '1950';
+%$ B4 = '1953';
+%$
+%$ % Define expected results.
+%$ e.time = [1945 1; 1950 1; 1950 1; 1953 1];
+%$ e.freq = 1;
+%$ e.ndat = 4;
+%$
+%$ % Call the tested routine.
+%$ d = dynDates(B1,B2,B3,B4);
+%$
+%$ % Check the results.
+%$ t(1) = dyn_assert(d.time,e.time);
+%$ t(2) = dyn_assert(d.freq,e.freq);
+%$ t(3) = dyn_assert(d.ndat,e.ndat);
+%$ T = all(t);
+%@eof:3
+
+%@test:4
+%$ addpath ../matlab
+%$
+%$ % Define some dates
+%$ B1 = '1945Q1';
+%$ B2 = '1950Q3';
+%$ B3 = '1950M10';
+%$ B4 = '1953Q1';
+%$
+%$
+%$ % Call the tested routine.
+%$ try
+%$     d = dynDates(B1,B2,B3,B4);
+%$     t(1) = 0;
+%$     T = 0;
+%$ catch
+%$     % Expected issue...
+%$     t(1) = 1;
+%$     T = 1;
+%$ end
+%@eof:4
