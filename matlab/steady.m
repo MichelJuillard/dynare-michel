@@ -32,8 +32,6 @@ global M_ oo_ options_ ys0_
 
 test_for_deep_parameters_calibration(M_);
 
-options_ = set_default_option(options_,'steadystate_flag',0);
-
 if options_.steadystate_flag && options_.homotopy_mode
     error('STEADY: Can''t use homotopy when providing a steady state external file');
 end
