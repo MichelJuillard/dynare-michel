@@ -2,7 +2,7 @@ function B = subsref(A,S)
 
 %@info:
 %! @deftypefn {Function File} {@var{us} =} subsref (@var{ts},S)
-%! @anchor{@dynDates/subsref}
+%! @anchor{dynDates/subsref}
 %! @sp 1
 %! Overloads the subsref method for the Dynare dates class (@ref{dynDates}).
 %! @sp 2
@@ -51,3 +51,24 @@ function B = subsref(A,S)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 B = builtin('subsref', A, S);
+
+if isequal(S(1).type,'.')
+    switch S(1).subs
+      case {'time','freq','ndat'}                                   % Public members.
+        B = builtin('subsref', A, S(1));
+      case {'sort'}                                                 % Give "dot access" to public methods.
+        if length(S)==1
+            B = feval(S(1).subs,A);
+        else
+            if isequal(S(2).type,'()')
+                B = feval(S(1).subs,A,S(2).subs{:});
+            else
+                error('dynTime::subsref: Something is wrong in your syntax!')
+            end
+        end
+      otherwise
+        error('dynTime::subsref: Unknown public method or member!')
+    end
+else
+    error('dynTime::subsref: Something is wrong in your syntax!')
+end
