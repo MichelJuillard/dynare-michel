@@ -97,7 +97,6 @@ if isfield(oo,'dr');
     dr = oo.dr;
 end
 
-options = set_default_option(options,'jacobian_flag',1);
 info = 0;
 
 it_ = M.maximum_lag + 1 ;

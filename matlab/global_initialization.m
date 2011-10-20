@@ -59,6 +59,9 @@ options_.deterministic_simulation_initialization = 0;
 options_.threads.kronecker.A_times_B_kronecker_C = 1;
 options_.threads.kronecker.sparse_hessian_times_B_kronecker_C = 1;
 
+% steady state
+options_.jacobian_flag = 1;
+
 % steady state file
 if exist([M_.fname '_steadystate2.m'],'file')
     options_.steadystate_flag = 2;
