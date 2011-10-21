@@ -1,4 +1,4 @@
-function prior_posterior_statistics(type,Y,gend,data_index,missing_value)
+function prior_posterior_statistics(type,dataset)
 
 % function PosteriorFilterSmootherAndForecast(Y,gend, type)
 % Computes posterior filter smoother and forecasts
@@ -7,10 +7,7 @@ function prior_posterior_statistics(type,Y,gend,data_index,missing_value)
 %    type:         posterior
 %                  prior
 %                  gsa
-%    Y:            data
-%    gend:         number of observations
-%    data_index    [cell]      1*smpl cell of column vectors of indices.
-%    missing_value 1 if missing values, 0 otherwise
+%    dataset:      data structure
 %
 % OUTPUTS
 %    none
@@ -42,6 +39,12 @@ function prior_posterior_statistics(type,Y,gend,data_index,missing_value)
 global options_ estim_params_ oo_ M_ bayestopt_
 
 localVars=[];
+
+Y = dataset.data;
+gend = dataset.info.ntobs;
+data_index = dataset.missing.aindex;
+missing_value = dataset.missing.state;
+bayestopt_.mean_varobs = dataset.descriptive.mean';
 
 nvx  = estim_params_.nvx;
 nvn  = estim_params_.nvn;

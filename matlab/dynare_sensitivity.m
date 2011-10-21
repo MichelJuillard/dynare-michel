@@ -239,7 +239,7 @@ if options_gsa.rmse,
         end
         if isempty(a),
 %             dynare_MC([],OutputDirectoryName,data,rawdata,data_info);
-            prior_posterior_statistics('gsa',data,data_info.gend,data_info.data_index,data_info.missing_value);
+            prior_posterior_statistics('gsa',dataset_);
             if options_.bayesian_irf
                 PosteriorIRF('gsa');
             end

@@ -801,7 +801,7 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
             oo_ = compute_moments_varendo('posterior',options_,M_,oo_,var_list_);
         end
         if options_.smoother || ~isempty(options_.filter_step_ahead) || options_.forecast
-            prior_posterior_statistics('posterior',dataset_.data,dataset_.info.ntobs,dataset_.missing.aindex,dataset_.missing.state);
+            prior_posterior_statistics('posterior',dataset_);
         end
         xparam = get_posterior_parameters('mean');
         set_all_parameters(xparam);
