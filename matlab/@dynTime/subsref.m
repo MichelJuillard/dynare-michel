@@ -75,7 +75,7 @@ end
 %$
 %$ % Expected results.
 %$ e.data = [transpose(2:9),2*transpose(2:9)];
-%$ e.nobs = 8;
+%$ e.nobs = 8;g
 %$ e.vobs = 2;
 %$ e.name = char('A1','A2');
 %$ e.freq = 1;

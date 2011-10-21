@@ -61,10 +61,10 @@ dd.time = sortrows(dd.time,[1,2]);
 %$ addpath ../matlab
 %$
 %$ % Define some dates
-%$ B1 = '1945Q3';
+%$ B1 = '1953Q4';
 %$ B2 = '1950Q2';
 %$ B3 = '1950Q1';
-%$ B4 = '1953Q4';
+%$ B4 = '1945Q3';
 %$
 %$ % Define expected results.
 %$ e.time = [1945 3; 1950 1; 1950 2; 1953 4];
