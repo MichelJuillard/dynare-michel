@@ -95,8 +95,8 @@ if options_.ms.regimes
         irf_data = reshape_ascii_irf_data(M_.endo_nbr, percentiles_size, ...
             options_.ms.horizon, irf_data);
         save([irfdir filesep 'irf_state_' num2str(state_i-1)], 'irf_data');
-        plot_ms_irf(M_,options_,irf_data,options_.varobs, ...
-            ['Impulse Responses, State ...' num2str(state_i)], varlist);
+        plot_ms_irf(M_, options_, irf_data, ...
+            ['Impulse Responses, State ' num2str(state_i)], varlist);
     end
 else
     if options_.ms.regime
@@ -120,6 +120,6 @@ else
     irf_data = reshape_ascii_irf_data(M_.endo_nbr, percentiles_size, ...
         options_.ms.horizon, irf_data);
     save([irfdir filesep save_filename], 'irf_data');
-    plot_ms_irf(M_, options_, irf_data, options_.varobs, irf_title, varlist);
+    plot_ms_irf(M_, options_, irf_data, irf_title, varlist);
 end
 end

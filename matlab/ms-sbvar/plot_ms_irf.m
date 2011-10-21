@@ -1,21 +1,18 @@
-function plot_ms_irf(M_, options_, irf, names, title_, varlist)
-% function plot_ms_irf(M_, options_, irf, names, title_, varlist)
+function plot_ms_irf(M_, options_, irf, title_, varlist)
+% function plot_ms_irf(M_, options_, irf, title_, varlist)
 % plots the impulse responses from the output from a ms-sbvar
 %
 % INPUTS
 %   M_
 %   irf should be in the form (percentile x horizon x (nvar x nvar)), if banded otherwise
 %     ( horizon x (nvar x nvar) )
-%
-%   names: character list of the names of the variables
-%
 %   title: optional super title
 %
 % The element in position (k,i+j*nvars) of ir is the response of the ith 
 % variable to the jth shock at horizon k.  Horizon 0 is the contemporaneous 
 % response.
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
