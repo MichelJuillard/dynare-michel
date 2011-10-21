@@ -90,6 +90,8 @@ MODFILES = \
 	simul/example1.mod \
 	conditional_forecasts/fs2000_cal.mod \
 	conditional_forecasts/fs2000_est.mod \
+	recursive/ls2003.mod \
+	recursive/ls2003_bayesian.mod \
 	ms-sbvar/test_exclusions.mod \
 	ms-sbvar/test_exclusions_nc.mod \
 	ms-sbvar/test_lower_cholesky.mod \
