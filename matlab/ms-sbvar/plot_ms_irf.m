@@ -8,8 +8,8 @@ function plot_ms_irf(M_, options_, irf, title_, varlist)
 %     ( horizon x (nvar x nvar) )
 %   title: optional super title
 %
-% The element in position (k,i+j*nvars) of ir is the response of the ith 
-% variable to the jth shock at horizon k.  Horizon 0 is the contemporaneous 
+% The element in position (k,i+j*nvars) of ir is the response of the ith
+% variable to the jth shock at horizon k.  Horizon 0 is the contemporaneous
 % response.
 
 % Copyright (C) 2011-2012 Dynare Team
@@ -32,17 +32,14 @@ function plot_ms_irf(M_, options_, irf, title_, varlist)
     if nargin < 4
         title_ = '';
     end
-    
-    nc = 2;
-    nr = 2;
+
     nvars = M_.endo_nbr;
     endo_names = M_.endo_names;
-    
+
     if isempty(varlist)
         var_list = endo_names(1:M_.orig_endo_nbr,:);
     end
-    
-    i_var = [];
+
     names = {};
     tex_names = {};
     m = 1;
@@ -51,7 +48,6 @@ function plot_ms_irf(M_, options_, irf, title_, varlist)
         if isempty(tmp)
             error([var_list(i,:) ' isn''t and endogenous variable'])
         end
-        i_var = [i_var; tmp];
         tex_name = deblank(M_.endo_names_tex(tmp,:));
         if ~isempty(tex_name)
             names{m} = deblank(var_list(i,:));
@@ -68,11 +64,8 @@ function plot_ms_irf(M_, options_, irf, title_, varlist)
             m = m + 1;
         end
     end
-    
-    nvar = length(i_var);
 
     dims = size(irf);
-    
     if (length(dims) == 2)
         % Point IRF (horizon x (nvarsxnvars) )
         horizon = dims(1);
@@ -84,11 +77,11 @@ function plot_ms_irf(M_, options_, irf, title_, varlist)
     else
         error('The impulse response matrix passed to be plotted does not appear to be the correct size');
     end
-    
+
     if size(endo_names,1) ~= nvars
         error('The names passed are not the same length as the number of variables')
     end
-    
+
     if num_percentiles == 1
         % loop through the shocks
         for s=1:nvars
@@ -111,7 +104,6 @@ function plot_ms_irf(M_, options_, irf, title_, varlist)
                 title_, [options_.ms.output_file_tag filesep 'Output' filesep 'IRF'], options_, names, tex_names);
         end
     end
-    
 end
 
 function [fig] = plot_point_irf_for_shock(irf,nvars,endo_names,shock_name,title_,dirname,options_,names,tex_names)
@@ -142,5 +134,3 @@ function [fig] = plot_banded_irf_for_shock(irf,nvars, endo_names, shock_name,tit
     dyn_save_graph(dirname,[title_ ' ' shock_name],options_.graph_save_formats, ...
                    options_.TeX,names,tex_names,[title_ ' ' shock_name]);
 end
-
-
