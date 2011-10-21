@@ -37,7 +37,7 @@ else
     objective_function = str2func('DsgeVarLikelihood');
 end
 
-[dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_, fake] = dynare_estimation_init(var_list_, dname, [], M_, options_, oo_, estim_params_, bayestopt_);
+[dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list_, dname, [], M_, options_, oo_, estim_params_, bayestopt_);
 
 data = dataset_.data;
 rawdata = dataset_.rawdata;
