@@ -111,17 +111,25 @@ end;
 
 conditional_forecast(parameter_set=prior_mode, controlled_varexo=(e_a,e_m));
 
+if ~(exist('OCTAVE_VERSION') && octave_ver_less_than('3.4.0'))
 plot_conditional_forecast(periods=10) gy_obs gp_obs;
+end
 
 conditional_forecast(parameter_set=posterior_mode, controlled_varexo=(e_a,e_m));
 
+if ~(exist('OCTAVE_VERSION') && octave_ver_less_than('3.4.0'))
 plot_conditional_forecast(periods=10) gy_obs gp_obs;
+end
 
 conditional_forecast(parameter_set=posterior_mean, controlled_varexo=(e_a,e_m));
 
+if ~(exist('OCTAVE_VERSION') && octave_ver_less_than('3.4.0'))
 plot_conditional_forecast(periods=10) gy_obs gp_obs;
+end
 
 conditional_forecast(parameter_set=posterior_median, controlled_varexo=(e_a,e_m));
 
+if ~(exist('OCTAVE_VERSION') && octave_ver_less_than('3.4.0'))
 plot_conditional_forecast(periods=10) gy_obs gp_obs;
+end
 

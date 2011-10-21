@@ -69,4 +69,6 @@ end;
 
 conditional_forecast(parameter_set=calibration, controlled_varexo=(e_a,e_m));
 
+if ~(exist('OCTAVE_VERSION') && octave_ver_less_than('3.4.0'))
 plot_conditional_forecast(periods=10) gy_obs gp_obs;
+end
