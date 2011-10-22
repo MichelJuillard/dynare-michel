@@ -313,6 +313,33 @@ Y   = DynareDataset.data-trend;
 % 3. Initial condition of the Kalman filter
 %------------------------------------------------------------------------------
 kalman_algo = DynareOptions.kalman_algo;
+
+% resetting measurement errors covariance matrix for univariate filters
+no_correlation_flag = 1;
+if (kalman_algo == 2) || (kalman_algo == 4)
+    if isequal(H,0)
+        H = zeros(nobs,1);
+    else
+        if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
+            H = diag(H);
+        else
+            no_correlation_flag = 0;
+        end
+    end
+    if no_correlation_flag
+        mmm = mm;
+    else
+        Z = [Z, eye(pp)];
+        T = blkdiag(T,zeros(pp));
+        Q = blkdiag(Q,H);
+        R = blkdiag(R,eye(pp));
+        Pstar = blkdiag(Pstar,H);
+        Pinf  = blckdiag(Pinf,zeros(pp));
+        mmm   = mm+pp;
+    end
+end
+
+
 diffuse_periods = 0;
 switch DynareOptions.lik_init
   case 1% Standard initialization with the steady state of the state equation.
@@ -363,17 +390,6 @@ switch DynareOptions.lik_init
     end
     if (kalman_algo==4)
         % Univariate Diffuse Kalman Filter
-        if no_correlation_flag
-            mmm = mm;
-        else
-            Z = [Z, eye(pp)];
-            T = blkdiag(T,zeros(pp));
-            Q = blkdiag(Q,H);
-            R = blkdiag(R,eye(pp));
-            Pstar = blkdiag(Pstar,H);
-            Pinf  = blckdiag(Pinf,zeros(pp));
-            mmm   = mm+pp;
-        end
         [dLIK,tmp,a,Pstar] = univariate_kalman_filter_d(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations, ...
                                                               Y, 1, size(Y,2), ...
                                                               zeros(mmm,1), Pinf, Pstar, ...
@@ -498,9 +514,20 @@ if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
     end
 end
 
-if ( (singularity_flag) || (kalman_algo==2) || (kalman_algo==4) )% Univariate Kalman Filter
+if ( singularity_flag || (kalman_algo==2) || (kalman_algo==4) )
+    % Univariate Kalman Filter
+    % resetting measurement error covariance matrix when necessary                                                           % 
     if singularity_flag
-        if no_correlation
+        if isequal(H,0)
+            H = zeros(nobs,1);
+        else
+            if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
+                H = diag(H);
+            else
+                no_correlation_flag = 0;
+            end
+        end
+        if no_correlation_flag
             mmm = mm;
         else
             Z = [Z, eye(pp)];
@@ -510,9 +537,9 @@ if ( (singularity_flag) || (kalman_algo==2) || (kalman_algo==4) )% Univariate Ka
             Pstar = blkdiag(Pstar,H);
             Pinf  = blckdiag(Pinf,zeros(pp));
             mmm   = mm+pp;
-            a = [a; zeros(pp,1)];
         end
     end
+
     LIK = univariate_kalman_filter(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations,Y,diffuse_periods+1,size(Y,2), ...
                                        a,Pstar, ...
                                        DynareOptions.kalman_tol, ...
