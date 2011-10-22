@@ -59,7 +59,7 @@ for obs=1:T
     if rows(tmp(:))
         i(obs) = { tmp(:) };
     else
-        i(obs) = { [] };
+        i(obs) = { variable_index(:) };
     end
 end
 
