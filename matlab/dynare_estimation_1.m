@@ -41,6 +41,8 @@ end
 
 data = dataset_.data;
 rawdata = dataset_.rawdata;
+data_index = dataset_.missing.aindex;
+missing_value = dataset_.missing.state;
 
 % Set number of observations
 gend = options_.nobs;
