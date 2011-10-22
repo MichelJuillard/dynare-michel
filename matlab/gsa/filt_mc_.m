@@ -96,10 +96,10 @@ if options_.opt_gsa.ppost,
 else
     if options_.opt_gsa.pprior
         fnamtmp=[fname_,'_prior'];
-        DirectoryName = CheckPath(['gsa' filesep 'prior']);
+        DirectoryName = CheckPath(['GSA' filesep 'prior']);
     else
         fnamtmp=[fname_,'_mc'];
-        DirectoryName = CheckPath(['gsa' filesep 'mc']);
+        DirectoryName = CheckPath(['GSA' filesep 'mc']);
     end
 end
 if ~loadSA,
