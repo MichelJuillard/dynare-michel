@@ -44,10 +44,13 @@ if length(tags)
 end
 
 
-
 steady_state_old = oo_.steady_state;
 
-[oo_.steady_state,M.params,info] = evaluate_steady_state(oo_.steady_state,M_,options_,oo_,0);
+info = 0;
+if options_.steadystate_flag
+    [oo_.steady_state,M.params,info] = ...
+        evaluate_steady_state(oo_.steady_state,M_,options_,oo_,0);
+end
 
 if info(1)
     print_info(info,options_.noprint)
