@@ -1,39 +1,83 @@
-function [LIK, lik,a,P] = univariate_kalman_filter(data_index,number_of_observations,no_more_missing_observations,Y,start,last,a,P,kalman_tol,riccati_tol,presample,T,Q,R,H,Z,mm,pp,rr,Zflag,diffuse_periods)
+function [LIK, likk,a,P] = univariate_kalman_filter(data_index,number_of_observations,no_more_missing_observations,Y,start,last,a,P,kalman_tol,riccati_tol,presample,T,Q,R,H,Z,mm,pp,rr,Zflag,diffuse_periods)
 % Computes the likelihood of a stationnary state space model (univariate approach).
-%
-% INPUTS
-%    data_index                   [cell]      1*smpl cell of column vectors of indices.
-%    number_of_observations       [integer]   scalar.
-%    no_more_missing_observations [integer]   scalar.
-%    Y                            [double]    pp*smpl matrix of data.
-%    start                        [integer]   scalar, index of the first observation (column of Y).
-%    last                         [integer]   scalar, index of the last observation (column of Y).    
-%    a                            [double]    mm*1 vector, initial level of the state vector.
-%    P                            [double]    mm*mm matrix, covariance matrix of the initial state vector.
-%    kalman_tol                   [double]    scalar, tolerance parameter (rcond).
-%    riccati_tol                  [double]    scalar, tolerance parameter (riccati iteration).    
-%    presample                    [integer]   scalar, presampling if strictly positive.
-%    T                            [double]    mm*mm transition matrix of the state equation.
-%    Q                            [double]    rr*rr covariance matrix of the structural innovations.    
-%    R                            [double]    mm*rr matrix, mapping structural innovations to state variables.
-%    H                            [double]    pp*pp (or 1*1 =0 if no measurement error) covariance matrix of the measurement errors. 
-%    Z                            [integer]   pp*1 vector of indices for the observed variables.    
-%    mm                           [integer]   scalar, dimension of the state vector.
-%    pp                           [integer]   scalar, number of observed variables.
-%    rr                           [integer]   scalar, number of structural innovations.
-%
-% OUTPUTS
-%    LIK        [double]    scalar, MINUS loglikelihood
-%    lik        [double]    vector, density of observations in each period.
-%    a          [double]    mm*1 vector, estimated level of the states.
-%    P          [double]    mm*mm matrix, covariance matrix of the states.    
-%
-%
-% NOTES
-%   The vector "lik" is used to evaluate the jacobian of the likelihood.
+
+%@info:
+%! @deftypefn {Function File} {[@var{LIK},@var{likk},@var{a},@var{P} ] =} DsgeLikelihood (@var{Y}, @var{start}, @var{last}, @var{a}, @var{P}, @var{kalman_tol}, @var{riccati_tol},@var{presample},@var{T},@var{Q},@var{R},@var{H},@var{Z},@var{mm},@var{pp},@var{rr},@var{Zflag},@var{diffuse_periods})
+%! @anchor{kalman_filter}
+%! @sp 1
+%! Computes the likelihood of a stationary state space model, given initial condition for the states (mean and variance).
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item data_index
+%! Matlab's cell, 1*T cell of column vectors of indices (in the vector of observed variables).
+%! @item number_of_observations
+%! Integer scalar, effective number of observations.
+%! @item no_more_missing_observations
+%! Integer scalar, date after which there is no more missing observation (it is then possible to switch to the steady state kalman filter).
+%! @item Y
+%! Matrix (@var{pp}*T) of doubles, data.
+%! @item start
+%! Integer scalar, first period.
+%! @item last
+%! Integer scalar, last period (@var{last}-@var{first} has to be inferior to T).
+%! @item a
+%! Vector (@var{mm}*1) of doubles, initial mean of the state vector.
+%! @item P
+%! Matrix (@var{mm}*@var{mm}) of doubles, initial covariance matrix of the state vector.
+%! @item kalman_tol
+%! Double scalar, tolerance parameter (rcond, inversibility of the covariance matrix of the prediction errors).
+%! @item riccati_tol
+%! Double scalar, tolerance parameter (iteration over the Riccati equation).
+%! @item presample
+%! Integer scalar, presampling if strictly positive (number of initial iterations to be discarded when evaluating the likelihood).
+%! @item T
+%! Matrix (@var{mm}*@var{mm}) of doubles, transition matrix of the state equation.
+%! @item Q
+%! Matrix (@var{rr}*@var{rr}) of doubles, covariance matrix of the structural innovations (noise in the state equation).
+%! @item R
+%! Matrix (@var{mm}*@var{rr}) of doubles, second matrix of the state equation relating the structural innovations to the state variables.
+%! @item H
+%! Matrix (@var{pp}*@var{pp}) of doubles, covariance matrix of the measurement errors (if no measurement errors set H as a zero scalar).
+%! @item Z
+%! Matrix (@var{pp}*@var{mm}) of doubles or vector of integers, matrix relating the states to the observed variables or vector of indices (depending on the value of @var{Zflag}).
+%! @item mm
+%! Integer scalar, number of state variables.
+%! @item pp
+%! Integer scalar, number of observed variables.
+%! @item rr
+%! Integer scalar, number of structural innovations.
+%! @item Zflag
+%! Integer scalar, equal to 0 if Z is a vector of indices targeting the obseved variables in the state vector, equal to 1 if Z is a @var{pp}*@var{mm} matrix.
+%! @item diffuse_periods
+%! Integer scalar, number of diffuse filter periods in the initialization step.
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item LIK
+%! Double scalar, value of (minus) the likelihood.
+%! @item likk
+%! Column vector of doubles, values of the density of each observation.
+%! @item a
+%! Vector (@var{mm}*1) of doubles, mean of the state vector at the end of the (sub)sample.
+%! @item P
+%! Matrix (@var{mm}*@var{mm}) of doubles, covariance of the state vector at the end of the (sub)sample.
+%! @end table
+%! @sp 2
+%! @strong{This function is called by:}
+%! @sp 1
+%! @ref{DsgeLikelihood}
+%! @sp 2
+%! @strong{This function calls:}
+%! @sp 1
+%! @ref{univariate_kalman_filter_ss}
+%! @end deftypefn
+%@eod:
 
 % Copyright (C) 2004-2011 Dynare Team
-% stephane DOT adjemian AT ens DOT fr    
 %
 % This file is part of Dynare.
 %
@@ -50,6 +94,8 @@ function [LIK, lik,a,P] = univariate_kalman_filter(data_index,number_of_observat
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
+
 if nargin<20 || isempty(Zflag)% Set default value for Zflag ==> Z is a vector of indices.
     Zflag = 0;
     diffuse_periods = 0;
@@ -58,7 +104,7 @@ end
 if nargin<21
     diffuse_periods = 0;
 end
-    
+
 % Get sample size.
 smpl = last-start+1;
 
@@ -93,7 +139,7 @@ while notsteady && t<=last
         end
         if Fi>kalman_tol
             if Zflag
-                Ki =  P*z(i,:)'/Fi;
+                Ki =  (P*z(i,:)')/Fi;
             else
                 Ki = P(:,z(i))/Fi;
             end
