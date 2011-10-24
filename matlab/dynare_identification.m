@@ -79,7 +79,7 @@ if options_ident.gsa_sample_file,
     end
     pdraws0 = [lpmatx lpmat(istable,:)];
     clear lpmat lpmat0 istable;
-else
+elseif nargin==1,
     pdraws0=[];
 end
 external_sample=0;

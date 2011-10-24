@@ -40,7 +40,8 @@ if opt_gsa.load_ident_files==0,
 
 
   if opt_gsa.morris==2,
-   [pdraws, TAU, GAM] = dynare_identification(options_.options_ident,[lpmatx lpmat(istable,:)]);
+   pdraws = dynare_identification(options_.options_ident,[lpmatx lpmat(istable,:)]);
+%    [pdraws, TAU, GAM] = dynare_identification(options_.options_ident,[lpmatx lpmat(istable,:)]);
     if max(max(abs(pdraws-[lpmatx lpmat(istable,:)])))==0,
       disp(['Sample check OK ', num2str(max(max(abs(pdraws-[lpmatx lpmat(istable,:)]))))]),
       clear pdraws;
@@ -152,7 +153,8 @@ if opt_gsa.load_ident_files==0,
 else
   if opt_gsa.morris==2,
 %    [pdraws, TAU, GAM] = dynare_identification([1:npT]); %,[lpmatx lpmat(istable,:)]);
-   [pdraws, TAU, GAM] = dynare_identification(options_.options_ident);
+%    [pdraws, TAU, GAM] = dynare_identification(options_.options_ident);
+   pdraws = dynare_identification(options_.options_ident);
   end
   load([OutputDirectoryName,'/',fname_,'_main_eff'],'ac','cc','vdec','yt','mss')
 end

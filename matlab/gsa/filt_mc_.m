@@ -34,6 +34,7 @@ loadSA   = options_gsa_.load_rmse;
 pfilt    = options_gsa_.pfilt_rmse;
 alpha    = options_gsa_.alpha_rmse;
 alpha2   = options_gsa_.alpha2_rmse;
+pvalue   = options_gsa_.pvalue_corr;
 istart   = options_gsa_.istart_rmse;
 alphaPC  = 0.5;
 
@@ -96,21 +97,21 @@ if options_.opt_gsa.ppost,
 else
     if options_.opt_gsa.pprior
         fnamtmp=[fname_,'_prior'];
-        DirectoryName = CheckPath(['GSA' filesep 'prior']);
+        DirectoryName = CheckPath(['gsa' filesep 'prior']);
     else
         fnamtmp=[fname_,'_mc'];
-        DirectoryName = CheckPath(['GSA' filesep 'mc']);
+        DirectoryName = CheckPath(['gsa' filesep 'mc']);
     end
 end
 if ~loadSA,
     if exist('xparam1','var')
         set_all_parameters(xparam1);
-        steady_;
+        steady_(M_,options_,oo_);
         ys_mode=oo_.steady_state;
     end
     if exist('xparam1_mean','var')
         set_all_parameters(xparam1_mean);
-        steady_;
+        steady_(M_,options_,oo_);
         ys_mean=oo_.steady_state;
     end
     %   eval(options_.datafile)
@@ -657,7 +658,7 @@ else
                 fnam = ['rmse_mc_',deblank(vvarvecm(i,:))];
             end
         end
-        stab_map_2(x(ixx(1:nfilt0(i),i),:),alpha2,fnam, OutDir);
+        stab_map_2(x(ixx(1:nfilt0(i),i),:),alpha2,pvalue,fnam, OutDir);
         
         %     [pc,latent,explained] = pcacov(c0);
         %     %figure, bar([explained cumsum(explained)])

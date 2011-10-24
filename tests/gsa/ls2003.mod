@@ -211,6 +211,7 @@ disp('Press ENTER to continue'); pause(5);
 //alpha_rmse=1  // no Smirnov sensitivity analysis
 //);
 
+/*
 disp(' ');
 disp('RMSE ANALYSIS FOR POSTERIOR MCMC sample (ppost=1)');
 disp('Needs a call to dynare_estimation to load all MH environment');
@@ -220,5 +221,5 @@ estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2, mode_file=ls2003_
 
 dynare_sensitivity(stab=0, // no need for stability analysis since the posterior sample is surely OK
 rmse=1,ppost=1,alpha2_rmse=1,alpha_rmse=1);
-
+*/
 
