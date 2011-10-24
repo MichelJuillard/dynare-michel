@@ -1,4 +1,4 @@
-function [LIK, lik, a] = kalman_filter_ss(Y,start,last,a,T,K,iF,dF,Z,pp,Zflag)
+function [LIK, likk, a] = kalman_filter_ss(Y,start,last,a,T,K,iF,dF,Z,pp,Zflag)
 % Computes the likelihood of a stationnary state space model (steady state kalman filter).
 
 %@info:
@@ -78,7 +78,7 @@ smpl = last-start+1;
 
 % Initialize some variables.
 t    = start;              % Initialization of the time index.
-lik  = zeros(smpl,1);      % Initialization of the vector gathering the densities.
+likk = zeros(smpl,1);      % Initialization of the vector gathering the densities.
 LIK  = Inf;                % Default value of the log likelihood.
 
 while t <= last
@@ -88,15 +88,15 @@ while t <= last
         v = Y(:,t)-a(Z);
     end
     a = T*(a+K*v);
-    lik(t-start+1) = transpose(v)*iF*v;
+    likk(t-start+1) = transpose(v)*iF*v;
     t = t+1;
 end
 
 % Adding constant determinant of F (prediction error covariance matrix)
-lik = lik + log(dF);
+likk = likk + log(dF);
 
 % Add log-likelihhod constants and divide by two
-lik = .5*(lik + pp*log(2*pi));
+likk = .5*(likk + pp*log(2*pi));
 
 % Sum the observation's densities (minus the likelihood)
-LIK = sum(lik);
+LIK = sum(likk);
