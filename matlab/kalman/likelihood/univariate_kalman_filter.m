@@ -3,7 +3,7 @@ function [LIK, likk,a,P] = univariate_kalman_filter(data_index,number_of_observa
 
 %@info:
 %! @deftypefn {Function File} {[@var{LIK},@var{likk},@var{a},@var{P} ] =} DsgeLikelihood (@var{Y}, @var{start}, @var{last}, @var{a}, @var{P}, @var{kalman_tol}, @var{riccati_tol},@var{presample},@var{T},@var{Q},@var{R},@var{H},@var{Z},@var{mm},@var{pp},@var{rr},@var{Zflag},@var{diffuse_periods})
-%! @anchor{kalman_filter}
+%! @anchor{univariate_kalman_filter}
 %! @sp 1
 %! Computes the likelihood of a stationary state space model, given initial condition for the states (mean and variance).
 %! @sp 2
