@@ -5859,8 +5859,8 @@ A shortcut to setting @code{error_band_percentiles=[0.5]}. Default:
 @descriptionhead
 
 Generates forecasts for a Markov-switching SBVAR model. Output
-@code{.eps} files are contained in @code{<output_file_tag/Output/IRF>},
-while data files are contained in @code{<output_file_tag/IRF>}.
+@code{.eps} files are contained in @code{<output_file_tag/Output/Forecast>},
+while data files are contained in @code{<output_file_tag/Forecast>}.
 
 @optionshead
 
