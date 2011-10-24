@@ -34,6 +34,8 @@ function [LIK, likk, a, P] = kalman_filter(Y,start,last,a,P,kalman_tol,riccati_t
 %! Matrix (@var{mm}*@var{rr}) of doubles, second matrix of the state equation relating the structural innovations to the state variables.
 %! @item H
 %! Matrix (@var{pp}*@var{pp}) of doubles, covariance matrix of the measurement errors (if no measurement errors set H as a zero scalar).
+%! @item Z
+%! Matrix (@var{pp}*@var{mm}) of doubles or vector of integers, matrix relating the states to the observed variables or vector of indices (depending on the value of @var{Zflag}).
 %! @item mm
 %! Integer scalar, number of state variables.
 %! @item pp
