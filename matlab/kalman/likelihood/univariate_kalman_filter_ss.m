@@ -1,28 +1,61 @@
-function [LIK, lik,a] = univariate_kalman_filter_ss(Y,start,last,a,P,kalman_tol,T,H,Z,pp,Zflag)
+function [LIK,likk,a] = univariate_kalman_filter_ss(Y,start,last,a,P,kalman_tol,T,H,Z,pp,Zflag)
 % Computes the likelihood of a stationnary state space model (steady state univariate kalman filter).
-%
-% INPUTS 
-%   Y                       [double]    pp*smpl matrix of data.
-%   start                   [integer]   scalar, index of the first observation (column of Y).
-%   last                    [integer]   scalar, index of the last observation (column of Y).    
-%   a                       [double]    mm*1 vector, initial level of the state vector.
-%   P                       [double]    mm*mm matrix, covariance matrix of the initial state vector.
-%   T                       [double]    mm*mm transition matrix of the state equation.
-%   Z                       [integer]   pp*1 vector of indices for the observed variables.    
-%   pp                      [integer]   scalar, number of observed variables.
-%
-%
-% OUTPUTS 
-%    LIK        [double]    scalar, minus log likelihood.    
-%    lik        [double]    (last-start+1)*1 vector, density of each observation.
-%    a          [double]    mm*1 vector, estimate of the state vector.     
-%
-% NOTES
-%   The vector "lik" is used to evaluate the jacobian of the likelihood.
+
+%@info:
+%! @deftypefn {Function File} {[@var{LIK},@var{likk},@var{a} ] =} univariate_kalman_filter_ss (@var{Y}, @var{start}, @var{last}, @var{a}, @var{P}, @var{kalman_tol}, @var{riccati_tol},@var{presample},@var{T},@var{Q},@var{R},@var{H},@var{Z},@var{mm},@var{pp},@var{rr},@var{Zflag},@var{diffuse_periods})
+%! @anchor{univariate_kalman_filter_ss}
+%! @sp 1
+%! Computes the likelihood of a stationary state space model, given initial condition for the states (mean and variance).
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item Y
+%! Matrix (@var{pp}*T) of doubles, data.
+%! @item start
+%! Integer scalar, first period.
+%! @item last
+%! Integer scalar, last period (@var{last}-@var{first} has to be inferior to T).
+%! @item a
+%! Vector (@var{mm}*1) of doubles, initial mean of the state vector.
+%! @item P
+%! Matrix (@var{mm}*@var{mm}) of doubles, steady state covariance matrix of the state vector.
+%! @item kalman_tol
+%! Double scalar, tolerance parameter (rcond, inversibility of the covariance matrix of the prediction errors).
+%! @item T
+%! Matrix (@var{mm}*@var{mm}) of doubles, transition matrix of the state equation.
+%! @item H
+%! Matrix (@var{pp}*@var{pp}) of doubles, covariance matrix of the measurement errors (if no measurement errors set H as a zero scalar).
+%! @item Z
+%! Matrix (@var{pp}*@var{mm}) of doubles or vector of integers, matrix relating the states to the observed variables or vector of indices (depending on the value of @var{Zflag}).
+%! @item pp
+%! Integer scalar, number of observed variables.
+%! @item Zflag
+%! Integer scalar, equal to 0 if Z is a vector of indices targeting the obseved variables in the state vector, equal to 1 if Z is a @var{pp}*@var{mm} matrix.
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item LIK
+%! Double scalar, value of (minus) the likelihood.
+%! @item likk
+%! Column vector of doubles, values of the density of each observation.
+%! @item a
+%! Vector (@var{mm}*1) of doubles, mean of the state vector at the end of the (sub)sample.
+%! @end table
+%! @sp 2
+%! @strong{This function is called by:}
+%! @sp 1
+%! @ref{univariate_kalman_filter}
+%! @sp 2
+%! @strong{This function calls:}
+%! @sp 1
+%! @end deftypefn
+%@eod:
 
 % Copyright (C) 2011 Dynare Team
-% stephane DOT adjemian AT ens DOT fr 
-%    
+%
 % This file is part of Dynare.
 %
 % Dynare is free software: you can redistribute it and/or modify
@@ -36,15 +69,16 @@ function [LIK, lik,a] = univariate_kalman_filter_ss(Y,start,last,a,P,kalman_tol,
 % GNU General Public License for more details.
 %
 % You should have received a copy of the GNU General Public License
-% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.   
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
 
 % Get sample size.
 smpl = last-start+1;
 
 % Initialize some variables.
 t    = start;              % Initialization of the time index.
-lik  = zeros(smpl,1);      % Initialization of the vector gathering the densities.
+likk = zeros(smpl,1);      % Initialization of the vector gathering the densities.
 LIK  = Inf;                % Default value of the log likelihood.
 l2pi = log(2*pi);
 
@@ -62,19 +96,19 @@ while t<=last
         end
         if Fi>kalman_tol
             if Zflag
-                Ki = PP*Z(i,:)'/Fi;
+                Ki = (PP*Z(i,:))'/Fi;
             else
                 Ki = PP(:,Z(i))/Fi;
             end
             a  = a + Ki*prediction_error;
             PP = PP - (Fi*Ki)*transpose(Ki);
-            lik(s) = lik(s) + log(Fi) + prediction_error*prediction_error/Fi + l2pi;
+            likk(s) = likk(s) + log(Fi) + prediction_error*prediction_error/Fi + l2pi;
         end
     end
     a = T*a;
     t = t+1;
 end
 
-lik = .5*lik;
+likk = .5*likk;
 
-LIK = sum(lik);
+LIK = sum(likk);
