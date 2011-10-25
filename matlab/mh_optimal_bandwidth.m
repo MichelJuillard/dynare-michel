@@ -163,7 +163,7 @@ else
 end
 
 optimal_bandwidth = h;
-
+return,
 
 
 function correction = correction_for_repeated_draws(draws,n)
