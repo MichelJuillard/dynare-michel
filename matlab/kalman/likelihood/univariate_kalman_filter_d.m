@@ -1,44 +1,85 @@
-function [LIK, lik, a, Pstar, llik] = univariate_kalman_filter_d(data_index, number_of_observations, no_more_missing_observations, ...
-                                                              Y, start, last, a, Pinf, Pstar, kalman_tol, riccati_tol, presample, ...
-                                                              T,R,Q,H,Z,mm,pp,rr)
-% Computes the diffuse likelihood of a stationnary state space model (univariate approach).
-%
-% INPUTS
-%    data_index                   [cell]      1*smpl cell of column vectors of indices.
-%    number_of_observations       [integer]   scalar.
-%    no_more_missing_observations [integer]   scalar.
-%    Y                            [double]      pp*smpl matrix of (detrended) data, where pp is the number of observed variables.
-%    start                        [integer]     scalar, first observation.
-%    last                         [integer]     scalar, last observation.
-%    a                            [double]      mm*1 vector, levels of the state variables.
-%    Pinf                         [double]      mm*mm matrix used to initialize the covariance matrix of the state vector.
-%    Pstar                        [double]      mm*mm matrix used to initialize the covariance matrix of the state vector.
-%    kalman_tol                   [double]      scalar, tolerance parameter (rcond).
-%    riccati_tol                  [double]      scalar, tolerance parameter (riccati iteration).
-%    presample                    [integer]     scalar, presampling if strictly positive.    
-%    T                            [double]      mm*mm matrix, transition matrix in  the state equations.
-%    R                            [double]      mm*rr matrix relating the structural innovations to the state vector.
-%    Q                            [double]      rr*rr covariance matrix of the structural innovations.
-%    H                            [double]      pp*pp covariance matrix of the measurement errors (if H is equal to zero (scalar) there is no measurement error). 
-%    Z                            [double]      pp*mm matrix, selection matrix or pp linear independant combinations of the state vector.
-%    mm                           [integer]     scalar, number of state variables.
-%    pp                           [integer]     scalar, number of observed variables.
-%    rr                           [integer]     scalar, number of structural innovations.    
-%
-% OUTPUTS
-%    dLIK         [double]      scalar, minus loglikelihood
-%    dlik         [double]      d*1 vector, log density of each vector of observations (where d is the number of periods of the diffuse filter).
-%    a            [double]      mm*1 vector, current estimate of the state vector.
-%    Pstar        [double]      mm*mm matrix, covariance matrix of the state vector.    
-%    llik         [double]      d*pp matrix used by DsgeLikelihood_hh.
-%
-% REFERENCES
-%   See "Filtering and Smoothing of State Vector for Diffuse State Space
-%   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series
-%   Analysis, vol. 24(1), pp. 85-98).
-%
-% NOTES
-%   The vector "llik" is used to evaluate the jacobian of the likelihood.
+function [dLIK, dlikk, a, Pstar, llik] = univariate_kalman_filter_d(data_index, number_of_observations, no_more_missing_observations, Y, start, last, a, Pinf, Pstar, kalman_tol, riccati_tol, presample, T, R, Q, H, Z, mm, pp, rr)
+% Computes the likelihood of a state space model (initialization with diffuse steps, univariate approach).
+
+%@info:
+%! @deftypefn {Function File} {[@var{LIK},@var{likk},@var{a},@var{Pstar}, @var{llik} ] =} univariate_kalman_filter_d (@var{data_index}, @var{number_of_observations},@var{no_more_missing_observations}, @var{Y}, @var{start}, @var{last}, @var{a}, @var{Pinf}, @var{Pstar}, @var{kalman_tol}, @var{riccati_tol},@var{presample},@var{T},@var{R},@var{Q},@var{H},@var{Z},@var{mm},@var{pp},@var{rr})
+%! @anchor{univariate_kalman_filter_d}
+%! @sp 1
+%! Computes the likelihood of a state space model (initialization with diffuse steps, univariate approach).
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item data_index
+%! Matlab's cell, 1*T cell of column vectors of indices (in the vector of observed variables).
+%! @item number_of_observations
+%! Integer scalar, effective number of observations.
+%! @item no_more_missing_observations
+%! Integer scalar, date after which there is no more missing observation (it is then possible to switch to the steady state kalman filter).
+%! @item Y
+%! Matrix (@var{pp}*T) of doubles, data.
+%! @item start
+%! Integer scalar, first period.
+%! @item last
+%! Integer scalar, last period (@var{last}-@var{first} has to be inferior to T).
+%! @item a
+%! Vector (@var{mm}*1) of doubles, initial mean of the state vector.
+%! @item Pinf
+%! Matrix (@var{mm}*@var{mm}) of doubles, initial covariance matrix of the state vector (non stationary part).
+%! @item Pstar
+%! Matrix (@var{mm}*@var{mm}) of doubles, initial covariance matrix of the state vector (stationary part).
+%! @item kalman_tol
+%! Double scalar, tolerance parameter (rcond, inversibility of the covariance matrix of the prediction errors).
+%! @item riccati_tol
+%! Double scalar, tolerance parameter (iteration over the Riccati equation).
+%! @item presample
+%! Integer scalar, presampling if strictly positive (number of initial iterations to be discarded when evaluating the likelihood).
+%! @item T
+%! Matrix (@var{mm}*@var{mm}) of doubles, transition matrix of the state equation.
+%! @item R
+%! Matrix (@var{mm}*@var{rr}) of doubles, second matrix of the state equation relating the structural innovations to the state variables.
+%! @item Q
+%! Matrix (@var{rr}*@var{rr}) of doubles, covariance matrix of the structural innovations (noise in the state equation).
+%! @item H
+%! Matrix (@var{pp}*@var{pp}) of doubles, covariance matrix of the measurement errors (if no measurement errors set H as a zero scalar).
+%! @item Z
+%! Matrix (@var{pp}*@var{mm}) of doubles, matrix relating the states to the observed variables.
+%! @item mm
+%! Integer scalar, number of state variables.
+%! @item pp
+%! Integer scalar, number of observed variables.
+%! @item rr
+%! Integer scalar, number of structural innovations.
+%! @item Zflag
+%! Integer scalar, equal to 0 if Z is a vector of indices targeting the obseved variables in the state vector, equal to 1 if Z is a @var{pp}*@var{mm} matrix.
+%! @item diffuse_periods
+%! Integer scalar, number of diffuse filter periods in the initialization step.
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item dLIK
+%! Double scalar, value of (minus) the likelihood for the first d observations.
+%! @item likk
+%! Column vector (d*1) of doubles, values of the density of each (fist) observations.
+%! @item a
+%! Vector (@var{mm}*1) of doubles, mean of the state vector at the end of the (sub)sample.
+%! @item Pstar
+%! Matrix (@var{mm}*@var{mm}) of doubles, covariance of the state vector at the end of the subsample.
+%! @item llik
+%! Matrix of doubles (d*@var{pp}) used by @ref{DsgeLikelihood_hh}
+%! @end table
+%! @sp 2
+%! @strong{This function is called by:}
+%! @sp 1
+%! @ref{DsgeLikelihood}, @ref{DsgeLikelihood_hh}
+%! @sp 2
+%! @strong{This function calls:}
+%! @sp 1
+%! @ref{univariate_kalman_filter_ss}
+%! @end deftypefn
+%@eod:
 
 % Copyright (C) 2004-2011 Dynare Team
 %
@@ -64,7 +105,7 @@ smpl = last-start+1;
 dF   = 1;
 QQ   = R*Q*transpose(R);   % Variance of R times the vector of structural innovations.
 t    = start;              % Initialization of the time index.
-dlik = zeros(smpl,1);      % Initialization of the vector gathering the densities.
+dlikk= zeros(smpl,1);      % Initialization of the vector gathering the densities.
 dLIK = Inf;                % Default value of the log likelihood.
 oldK = Inf;
 llik = NaN(smpl,pp);
@@ -88,10 +129,10 @@ while newRank && (t<=last)
             Pstar     = Pstar + Kinf*(Kinf_Finf'*(Fstar/Finf)) - Kstar*Kinf_Finf' - Kinf_Finf*Kstar';
             Pinf      = Pinf - Kinf*Kinf_Finf';
             llik(s,d_index(i)) = log(Finf) + l2pi;
-            dlik(s) = dlik(s) + llik(s,d_index(i));
+            dlikk(s) = dlikk(s) + llik(s,d_index(i));
         elseif Fstar>kalman_tol
             llik(s,d_index(i)) = log(Fstar) + prediction_error*prediction_error/Fstar + l2pi;
-            dlik(s) = dlik(s) + llik(s,d_index(i));
+            dlikk(s) = dlikk(s) + llik(s,d_index(i));
             a = a+Kstar*(prediction_error/Fstar);
             Pstar = Pstar-Kstar*(Kstar'/Fstar);
         end
@@ -108,7 +149,7 @@ while newRank && (t<=last)
         newRank = rank(Pinf,kalman_tol);
     end
     if oldRank ~= newRank
-        disp('univariate_diffuse_kalman_filter:: T does influence the rank of Pinf!')   
+        disp('univariate_diffuse_kalman_filter:: T does influence the rank of Pinf!')
     end
     t = t+1;
 end
@@ -120,19 +161,19 @@ if (t>last)
 end
 
 % Divide by two.
-dlik = .5*dlik(1:s);
-llik = .5*llik(1:s,:);
+dlikk = .5*dlikk(1:s);
+llik  = .5*llik(1:s,:);
 
-if presample 
+if presample
     if presample>=length(dlik)
         dLIK = 0;
-        dlik = [];
+        dlikk= [];
         llik = [];
     else
-        dlik = dlik(1+presample:end);
+        dlikk= dlikk(1+presample:end);
         llik = llik(1+presample:end,:);
-        dLIK = sum(dlik);% Minus the log-likelihood (for the initial periods).
+        dLIK = sum(dlikk);% Minus the log-likelihood (for the initial periods).
     end
 else
-    dLIK = sum(dlik);
+    dLIK = sum(dlikk);
 end
