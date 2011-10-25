@@ -124,8 +124,9 @@ if whoiam
     end
     fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
 else
-    if exist('OCTAVE_VERSION')
+    if exist('OCTAVE_VERSION') || options_.console_mode,
         diary off;
+        newString = '';
     else
         h = waitbar(0,['Taking ',type,' subdraws...']);
     end
@@ -312,9 +313,15 @@ for b=fpar:B
     %   DirectoryName=TempPath;
 
 
-    if exist('OCTAVE_VERSION'),
+    if exist('OCTAVE_VERSION') || options_.console_mode,
         if (whoiam==0),
-            printf('Taking subdraws: %3.f%% done\r', b/B*100);
+            if exist('OCTAVE_VERSION'),
+                printf('Taking subdraws: %3.f%% done\r', b/B*100);
+            else
+                s0=repmat('\b',1,length(newString));
+                newString = sprintf('Taking subdraws: %3.f%% done', b/B*100);
+                fprintf([s0,'%s'],newString);
+            end
         end
     elseif ~whoiam,
         waitbar(b/B,h);
@@ -342,12 +349,14 @@ if RemoteFlag==1,
     % OutputFileName_moments];
 end
 
-if exist('OCTAVE_VERSION')
-    printf('\n');
-    diary on;
+if exist('OCTAVE_VERSION') || options_.console_mode,
+    if (whoiam==0),
+        fprintf('\n');
+        diary on;
+    end
 else
     if exist('h')
         close(h)
     end
-
+    
 end
