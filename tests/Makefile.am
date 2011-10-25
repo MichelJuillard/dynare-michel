@@ -148,7 +148,8 @@ EXTRA_DIST = \
 	ms-sbvar/archive-files/ftd_upperchol6v.m \
 	ms-sbvar/archive-files/ftd_upperchol7v.m \
 	ms-sbvar/archive-files/specification_2v.dat \
-	ms-sbvar/archive-files/specification_2v2c.dat
+	ms-sbvar/archive-files/specification_2v2c.dat \
+	recursive/data_ca1.m
 
 TARGETS =
 
