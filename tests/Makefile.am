@@ -123,6 +123,8 @@ EXTRA_DIST = \
 	external_function/extFunDeriv.m \
 	external_function/extFunNoDerivs.m \
 	external_function/extFunWithFirstAndSecondDerivs.m \
+	expectations/expectation_ss_old_steadystate.m \
+	steady_state/walsh1_old_ss_steadystate.m \
 	fs2000/fs2000a_steadystate.m \
 	fs2000/fsdat_simul.m \
 	k_order_perturbation/run_fs2000kplusplus.m \
