@@ -26,6 +26,7 @@ MODFILES = \
 	expectations/expectation.mod \
 	expectations/expectation_ss.mod \
 	expectations/expectation_ss_old.mod \
+	expectations/expectation_nested.mod \
 	steady_state/walsh1_initval.mod \
 	steady_state/walsh1_old_ss.mod \
 	steady_state/walsh1_ssm.mod \
