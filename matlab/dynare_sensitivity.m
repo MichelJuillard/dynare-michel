@@ -237,7 +237,7 @@ if options_gsa.rmse,
         else
             a=whos('-file',[OutputDirectoryName,'/',fname_,'_mc'],'logpo2');
         end
-        if exist('OCTAVE_VERSION') && ~ispc,
+        if exist('OCTAVE_VERSION'),
             aflag=0;
             for ja=1:length(a),
                 aflag=aflag+strcmp('logpo2',a(ja).name);
