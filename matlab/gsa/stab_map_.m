@@ -208,7 +208,7 @@ if fload==0,
         %             end
         %         end
         %load([fname_,'_mode'])
-        eval(['load ' options_.mode_file ';']');
+        eval(['load ' options_.mode_file '.mat;']);
         if neighborhood_width>0,
             for j=1:nshock,
                 lpmat0(:,j) = randperm(Nsam)'./(Nsam+1); %latin hypercube
@@ -237,7 +237,17 @@ if fload==0,
         end
     end
     %
-    h = waitbar(0,'Please wait...');
+    if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
+        diary off;
+        if exist('OCTAVE_VERSION'),
+            printf('Please wait ... \r')
+        else
+            newString = 'Please wait ...';
+            fprintf('%s',newString)
+        end
+    else
+        h = waitbar(0,'Please wait...');
+    end
     istable=[1:Nsam];
     jstab=0;
     iunstable=[1:Nsam];
@@ -308,9 +318,24 @@ if fload==0,
         ys_=real(dr_.ys);
         yys(:,j) = ys_;
         ys_=yys(:,1);
-        waitbar(j/Nsam,h,['MC iteration ',int2str(j),'/',int2str(Nsam)])
+        if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
+            if exist('OCTAVE_VERSION')
+                printf(['MC iteration %3.i / %3.i \r'], j,Nsam);
+            else
+                s0=repmat('\b',1,length(newString));
+                newString=sprintf('MC iteration %3.i / %3.i', j,Nsam);
+                fprintf([s0,'%s'],newString);
+            end
+        else
+            waitbar(j/Nsam,h,['MC iteration ',int2str(j),'/',int2str(Nsam)])
+        end
     end
-    close(h)
+    if (exist('OCTAVE_VERSION') || (options_.console_mode == 1)),
+        fprintf('\n'),
+        diary on,
+    else
+        close(h)
+    end
     if prepSA,
         T=T(:,:,1:jstab);
     end
@@ -360,38 +385,48 @@ if fload==0,
     bkpprior.p4=bayestopt_.p4;
     if pprior,
         if ~prepSA
-            save([OutputDirectoryName '/' fname_ '_prior'], ...
+            save([OutputDirectoryName '/' fname_ '_prior.mat'], ...
                 'bkpprior','lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
                 'egg','yys','nspred','nboth','nfwrd')
         else
-            save([OutputDirectoryName '/' fname_ '_prior'], ...
+            save([OutputDirectoryName '/' fname_ '_prior.mat'], ...
                 'bkpprior','lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
                 'egg','yys','T','nspred','nboth','nfwrd')
         end
 
     else
         if ~prepSA
-            save([OutputDirectoryName '/' fname_ '_mc'], ...
+            save([OutputDirectoryName '/' fname_ '_mc.mat'], ...
                 'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
                 'egg','yys','nspred','nboth','nfwrd')
         else
-            save([OutputDirectoryName '/' fname_ '_mc'], ...
+            save([OutputDirectoryName '/' fname_ '_mc.mat'], ...
                 'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
                 'egg','yys','T','nspred','nboth','nfwrd')
         end
     end
 else
     if pprior,
-        filetoload=[OutputDirectoryName '/' fname_ '_prior'];
+        filetoload=[OutputDirectoryName '/' fname_ '_prior.mat'];
     else
-        filetoload=[OutputDirectoryName '/' fname_ '_mc'];
+        filetoload=[OutputDirectoryName '/' fname_ '_mc.mat'];
     end
     load(filetoload,'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd')
     Nsam = size(lpmat,1);
 
 
     if prepSA & isempty(strmatch('T',who('-file', filetoload),'exact')),
-        h = waitbar(0,'Please wait...');
+        if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
+            diary off;
+            if exist('OCTAVE_VERSION'),
+                printf('Please wait ... \r')
+            else
+                newString = 'Please wait ...';
+                fprintf('%s',newString)
+            end
+        else
+            h = waitbar(0,'Please wait...');
+        end
         options_.periods=0;
         options_.nomoments=1;
         options_.irf=0;
@@ -420,9 +455,24 @@ else
             ys_=real(dr_.ys);
             yys(:,j) = ys_;
             ys_=yys(:,1);
-            waitbar(j/ntrans,h,['MC iteration ',int2str(j),'/',int2str(ntrans)])
+            if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
+                if exist('OCTAVE_VERSION')
+                    printf(['MC iteration %3.i / %3.i \r'], j,ntrans);
+                else
+                    s0=repmat('\b',1,length(newString));
+                    newString=sprintf('MC iteration %3.i / %3.i', j,ntrans);
+                    fprintf([s0,'%s'],newString);
+                end
+            else
+                waitbar(j/ntrans,h,['MC iteration ',int2str(j),'/',int2str(ntrans)])
+            end
         end
-        close(h)
+        if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
+            fprintf('\n'),
+            diary on,
+        else
+            close(h);
+        end
         save(filetoload,'T','-append')
     elseif prepSA
         load(filetoload,'T')

@@ -73,7 +73,7 @@ if iplot
   ftit=bayestopt_.name(ipar+nshock*(1-ishock));
   
 for i=1:ceil(nparplot/12),
-  figure('name',aname),
+  hh=figure('name',aname);
   for j=1+12*(i-1):min(nparplot,12*i),
     subplot(3,4,j-12*(i-1))
     if ~isempty(ibehaviour),
@@ -88,9 +88,11 @@ for i=1:ceil(nparplot/12),
 %     title([ftit{j},'. D-stat ', num2str(dproba(ipar(j)),2)],'interpreter','none')
     title([ftit{j},'. p-value ', num2str(proba(ipar(j)),2)],'interpreter','none')
   end
-  saveas(gcf,[dirname,'/',fname_,'_',aname,'_SA_',int2str(i)])
-  eval(['print -depsc2 ' dirname '/' fname_ '_' aname '_SA_' int2str(i)]);
-  eval(['print -dpdf ' dirname '/' fname_ '_' aname '_SA_' int2str(i)]);
-  if options_.nograph, close(gcf), end
+  eval(['print -depsc2 ' dirname '/' fname_ '_' aname '_SA_' int2str(i)  '.eps']);
+  if ~exist('OCTAVE_VERSION'),
+    saveas(hh,[dirname,'/',fname_,'_',aname,'_SA_',int2str(i)])
+    eval(['print -dpdf ' dirname '/' fname_ '_' aname '_SA_' int2str(i)]);
+  end
+  if options_.nograph, close(hh), end
 end
 end

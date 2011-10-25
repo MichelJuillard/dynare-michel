@@ -149,7 +149,7 @@ options_.opt_gsa = options_gsa;
 if (options_gsa.load_stab || options_gsa.load_rmse || options_gsa.load_redform) ...
         && options_gsa.pprior,
     filetoload=[OutputDirectoryName '/' fname_ '_prior.mat'];
-    if isempty(ls(filetoload)),
+    if ~exist(filetoload),
         disp([filetoload,' not found!'])
         disp(['You asked to load a non existent analysis'])
         %options_gsa.load_stab=0;

@@ -48,7 +48,7 @@ disp('Starting sensitivity analysis')
 disp('for the fit of EACH observed series ...')
 disp(' ')
 disp('Deleting old SA figures...')
-a=dir([OutDir,'/*.*']);
+a=dir([OutDir,filesep,'*.*']);
 tmp1='0';
 if options_.opt_gsa.ppost,
     tmp=['_rmse_post'];
@@ -82,11 +82,11 @@ if ~isempty(options_.mode_file),
     load(options_.mode_file,'xparam1'),
 end
 if options_.opt_gsa.ppost,
-    c=load([fname_,'_mean'],'xparam1');
+    c=load([fname_,'_mean.mat'],'xparam1');
     xparam1_mean=c.xparam1;
     clear c
-elseif ~isempty(options_.mode_file) & ~isempty(ls([fname_,'_mean.mat']))
-    c=load([fname_,'_mean'],'xparam1');
+elseif ~isempty(options_.mode_file) && exist([fname_,'_mean.mat'])==2,
+    c=load([fname_,'_mean.mat'],'xparam1');
     xparam1_mean=c.xparam1;
     clear c
 end
@@ -118,15 +118,16 @@ if ~loadSA,
     obs = dat_fil_(options_.datafile);
     %stock_gend=data_info.gend;
     %stock_data = data_info.data;
-    load([DirectoryName '/' M_.fname '_data.mat']);    filfilt = dir([DirectoryName '/' M_.fname '_filter_step_ahead*.mat']);
-    filparam = dir([DirectoryName '/' M_.fname '_param*.mat']);
+    load([DirectoryName '/' M_.fname '_data.mat']);    
+    filfilt = dir([DirectoryName filesep M_.fname '_filter_step_ahead*.mat']);
+    filparam = dir([DirectoryName filesep M_.fname '_param*.mat']);
     x=[];
     logpo2=[];
     sto_ys=[];
     for j=1:length(filparam),
         %load([DirectoryName '/' M_.fname '_param',int2str(j),'.mat']);
         if isempty(strmatch([M_.fname '_param_irf'],filparam(j).name))
-            load([DirectoryName '/' filparam(j).name]);
+            load([DirectoryName filesep filparam(j).name]);
             x=[x; stock];
             logpo2=[logpo2; stock_logpo];
             sto_ys=[sto_ys; stock_ys];
@@ -166,7 +167,7 @@ if ~loadSA,
             y0=zeros(nobs+1,nruns);
             nbb=0;
             for j=1:length(filfilt),
-                load([DirectoryName '/' M_.fname '_filter_step_ahead',num2str(j),'.mat']);
+                load([DirectoryName filesep M_.fname '_filter_step_ahead',num2str(j),'.mat']);
                 nb = size(stock,4);
                 %         y0(:,nbb+1:nbb+nb)=squeeze(stock(1,js,:,:)) + ...
                 %           kron(sto_ys(nbb+1:nbb+nb,js)',ones(size(stock,3),1));
@@ -199,25 +200,25 @@ if ~loadSA,
     disp('... done!')
     
     if options_.opt_gsa.ppost
-        save([OutDir,'/',fnamtmp], 'x', 'logpo2', 'likelihood', 'rmse_MC', 'rmse_mode','rmse_pmean')
+        save([OutDir,filesep,fnamtmp,'.mat'], 'x', 'logpo2', 'likelihood', 'rmse_MC', 'rmse_mode','rmse_pmean')
     else
         if options_.opt_gsa.lik_only
-            save([OutDir,'/',fnamtmp], 'likelihood', '-append')
+            save([OutDir,filesep,fnamtmp, '.mat'], 'likelihood', '-append')
         else
-            save([OutDir,'/',fnamtmp], 'likelihood', 'rmse_MC','-append')
+            save([OutDir,filesep,fnamtmp, '.mat'], 'likelihood', 'rmse_MC','-append')
             if exist('xparam1_mean','var')
-                save([OutDir,'/',fnamtmp], 'rmse_pmean','-append')
+                save([OutDir,filesep,fnamtmp, '.mat'], 'rmse_pmean','-append')
             end
             if exist('xparam1','var')
-                save([OutDir,'/',fnamtmp], 'rmse_mode','-append')
+                save([OutDir,filesep,fnamtmp,'.mat'], 'rmse_mode','-append')
             end
         end
     end
 else
     if options_.opt_gsa.lik_only & options_.opt_gsa.ppost==0
-        load([OutDir,'/',fnamtmp],'x','logpo2','likelihood');
+        load([OutDir,filesep,fnamtmp, '.mat'],'x','logpo2','likelihood');
     else
-        load([OutDir,'/',fnamtmp],'x','logpo2','likelihood','rmse_MC','rmse_mode','rmse_pmean');
+        load([OutDir,filesep,fnamtmp, '.mat'],'x','logpo2','likelihood','rmse_MC','rmse_mode','rmse_pmean');
     end
     lnprior=logpo2(:)-likelihood(:);
     nruns=size(x,1);
@@ -289,21 +290,27 @@ else
         hold on, cumplot(lnprior)
         h=cumplot(lnprior(ixx(nfilt0(i)+1:end,i)));
         set(h,'color','green')
-        title(vvarvecm(i,:))
+        title(vvarvecm(i,:),'interpreter','none')
         if mod(i,9)==0 | i==size(vvarvecm,1)
             if options_.opt_gsa.ppost
-                saveas(gcf,[OutDir,'/',fname_,'_rmse_post_lnprior',int2str(ifig)])
-                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_lnprior',int2str(ifig)]);
-                eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_lnprior',int2str(ifig)]);
+                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_lnprior',int2str(ifig)  '.eps']);
+                if ~exist('OCTAVE_VERSION'),
+                    saveas(gcf,[OutDir,'/',fname_,'_rmse_post_lnprior',int2str(ifig)])
+                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_lnprior',int2str(ifig)]);
+                end
             else
                 if options_.opt_gsa.pprior
-                    saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_lnprior',int2str(ifig)])
-                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_lnprior',int2str(ifig)]);
-                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_lnprior',int2str(ifig)]);
+                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_lnprior',int2str(ifig)  '.eps']);
+                    if ~exist('OCTAVE_VERSION'),
+                        saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_lnprior',int2str(ifig)])
+                        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_lnprior',int2str(ifig)]);
+                    end
                 else
-                    saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_lnprior',int2str(ifig)])
-                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_lnprior',int2str(ifig)]);
-                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_lnprior',int2str(ifig)]);
+                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_lnprior',int2str(ifig)  '.eps']);
+                    if ~exist('OCTAVE_VERSION'),
+                        saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_lnprior',int2str(ifig)])
+                        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_lnprior',int2str(ifig)]);
+                    end
                 end
             end
             close(gcf)
@@ -321,24 +328,30 @@ else
         hold on, h=cumplot(likelihood);
         h=cumplot(likelihood(ixx(nfilt0(i)+1:end,i)));
         set(h,'color','green')
-        title(vvarvecm(i,:))
+        title(vvarvecm(i,:),'interpreter','none')
         if options_.opt_gsa.ppost==0,
             set(gca,'xlim',[min( likelihood(ixx(1:nfilt0(i),i)) ) max( likelihood(ixx(1:nfilt0(i),i)) )])
         end
         if mod(i,9)==0 | i==size(vvarvecm,1)
             if options_.opt_gsa.ppost
-                saveas(gcf,[OutDir,'/',fname_,'_rmse_post_lnlik',int2str(ifig)])
-                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_lnlik',int2str(ifig)]);
-                eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_lnlik',int2str(ifig)]);
+                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_lnlik',int2str(ifig)  '.eps']);
+                if ~exist('OCTAVE_VERSION'),
+                    saveas(gcf,[OutDir,'/',fname_,'_rmse_post_lnlik',int2str(ifig)])
+                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_lnlik',int2str(ifig)]);
+                end
             else
                 if options_.opt_gsa.pprior
-                    saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_lnlik',int2str(ifig)])
-                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_lnlik',int2str(ifig)]);
-                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_lnlik',int2str(ifig)]);
+                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_lnlik',int2str(ifig)  '.eps']);
+                    if ~exist('OCTAVE_VERSION'),
+                        saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_lnlik',int2str(ifig)])
+                        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_lnlik',int2str(ifig)]);
+                    end
                 else
-                    saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_lnlik',int2str(ifig)])
-                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_lnlik',int2str(ifig)]);
-                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_lnlik',int2str(ifig)]);
+                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_lnlik',int2str(ifig)  '.eps']);
+                    if ~exist('OCTAVE_VERSION'),
+                        saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_lnlik',int2str(ifig)])
+                        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_lnlik',int2str(ifig)]);
+                    end
                 end
             end
             close(gcf)
@@ -356,24 +369,30 @@ else
         hold on, h=cumplot(logpo2);
         h=cumplot(logpo2(ixx(nfilt0(i)+1:end,i)));
         set(h,'color','green')
-        title(vvarvecm(i,:))
+        title(vvarvecm(i,:),'interpreter','none')
         if options_.opt_gsa.ppost==0,
             set(gca,'xlim',[min( logpo2(ixx(1:nfilt0(i),i)) ) max( logpo2(ixx(1:nfilt0(i),i)) )])
         end
         if mod(i,9)==0 | i==size(vvarvecm,1)
             if options_.opt_gsa.ppost
-                saveas(gcf,[OutDir,'/',fname_,'_rmse_post_lnpost',int2str(ifig)])
-                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_lnpost',int2str(ifig)]);
-                eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_lnpost',int2str(ifig)]);
+                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_lnpost',int2str(ifig)  '.eps']);
+                if ~exist('OCTAVE_VERSION'),
+                    saveas(gcf,[OutDir,'/',fname_,'_rmse_post_lnpost',int2str(ifig)])
+                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_lnpost',int2str(ifig)]);
+                end
             else
                 if options_.opt_gsa.pprior
-                    saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_lnpost',int2str(ifig)])
-                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_lnpost',int2str(ifig)]);
-                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_lnpost',int2str(ifig)]);
+                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_lnpost',int2str(ifig)  '.eps']);
+                    if ~exist('OCTAVE_VERSION'),
+                        saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_lnpost',int2str(ifig)])
+                        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_lnpost',int2str(ifig)]);
+                    end
                 else
-                    saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_lnpost',int2str(ifig)])
-                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_lnpost',int2str(ifig)]);
-                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_lnpost',int2str(ifig)]);
+                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_lnpost',int2str(ifig)  '.eps']);
+                    if ~exist('OCTAVE_VERSION'),
+                        saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_lnpost',int2str(ifig)])
+                        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_lnpost',int2str(ifig)]);
+                    end
                 end
             end
             close(gcf)
@@ -501,23 +520,33 @@ else
             title([pnam{nsnam(j)}],'interpreter','none')
         end
         %subplot(3,2,6)
-        h0=legend(str2mat('base',vvarvecm(np,:)),0);
-        set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3],'interpreter','none')
+        if exist('OCTAVE_VERSION'),
+            legend(str2mat('base',vvarvecm(np,:)),'location','eastoutside');
+        else
+            h0=legend(str2mat('base',vvarvecm(np,:)),0);
+            set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3],'interpreter','none');
+        end
         %h0=legend({'base',vnam{np}}',0);
         %set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
         if options_.opt_gsa.ppost
-            saveas(gcf,[OutDir,'/',fname_,'_rmse_post_',num2str(ix)])
-            eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_' int2str(ix)]);
-            eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_' int2str(ix)]);
+            eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_' int2str(ix) '.eps']);
+            if ~exist('OCTAVE_VERSION'),
+                saveas(gcf,[OutDir,'/',fname_,'_rmse_post_',num2str(ix)])
+                eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_' int2str(ix)]);
+            end
         else
             if options_.opt_gsa.pprior
-                saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_',num2str(ix)])
-                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_' int2str(ix)]);
-                eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_' int2str(ix)]);
+                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_' int2str(ix) '.eps']);
+                if ~exist('OCTAVE_VERSION'),
+                    saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_',num2str(ix)])
+                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_' int2str(ix)]);
+                end
             else
-                saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_',num2str(ix)])
-                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_' int2str(ix)]);
-                eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_' int2str(ix)]);
+                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_' int2str(ix)  '.eps']);
+                if ~exist('OCTAVE_VERSION'),
+                    saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_',num2str(ix)])
+                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_' int2str(ix)]);
+                end
             end
         end
     end
@@ -562,23 +591,33 @@ else
             xlabel('')
             title([pnam{nsnam(j)}],'interpreter','none')
         end
-        h0=legend(str2mat('base',vvarvecm(np,:)),0);
-        set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3],'interpreter','none')
+        if exist('OCTAVE_VERSION'),
+            legend(str2mat('base',vvarvecm(np,:)),'location','eastoutside');
+        else
+            h0=legend(str2mat('base',vvarvecm(np,:)),0);
+            set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3],'interpreter','none')
+        end
         %h0=legend({'base',vnam{np}}',0);
         %set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
         if options_.opt_gsa.ppost
-            saveas(gcf,[OutDir,'/',fname_,'_rmse_post_dens_',num2str(ix)])
-            eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_dens_' int2str(ix)]);
-            eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_dens_' int2str(ix)]);
+            eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_dens_' int2str(ix)  '.eps']);
+            if ~exist('OCTAVE_VERSION'),
+                saveas(gcf,[OutDir,'/',fname_,'_rmse_post_dens_',num2str(ix)])
+                eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_dens_' int2str(ix)]);
+            end
         else
             if options_.opt_gsa.pprior
-                saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_dens_',num2str(ix)])
-                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_dens_' int2str(ix)]);
-                eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_dens_' int2str(ix)]);
+                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_dens_' int2str(ix)  '.eps']);
+                if ~exist('OCTAVE_VERSION'),
+                    saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_dens_',num2str(ix)])
+                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_dens_' int2str(ix)]);
+                end
             else
-                saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_dens_',num2str(ix)])
-                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_dens_' int2str(ix)]);
-                eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_dens_' int2str(ix)]);
+                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_dens_' int2str(ix)  '.eps']);
+                if ~exist('OCTAVE_VERSION'),
+                    saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_dens_',num2str(ix)])
+                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_dens_' int2str(ix)]);
+                end
             end
         end
     end
