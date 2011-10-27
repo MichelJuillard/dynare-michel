@@ -45,6 +45,10 @@ if nargin<5
     nodecomposition = 0;
 end
 
+if options_.order >= 3
+    error('Theoretical moments not implemented above 2nd order')
+end
+
 endo_nbr = M_.endo_nbr;
 exo_names_orig_ord  = M_.exo_names_orig_ord;
 if exist('OCTAVE_VERSION')
