@@ -81,7 +81,7 @@ fact = norminv((1-options_.conf_sig)/2,0,1);
 
 int_width = zeros(horizon,M_.endo_nbr);
 for i=1:nvar
-    int_width(:,i) = fact*sqrt(var_yf(:,i));
+    int_width(:,i) = -fact*sqrt(var_yf(:,i));
 end
 
 yf = yf(ivar,:);
