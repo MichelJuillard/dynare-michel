@@ -39,7 +39,7 @@ function plot_identification(params,idemoments,idehess,idemodel, idelre, advance
 global M_ options_
 
 if nargin<10 || isempty(save_figure),
-    save_figure=0;
+    save_figure=1;
 end
 
 [SampleSize, nparam]=size(params);
@@ -88,9 +88,11 @@ if SampleSize == 1,
     else
         title('Sensitivity component with moments Information matrix (log-scale)')
     end
-    saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_strength_',tittxt1])
-    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_strength_' tittxt1]);
-    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_strength_' tittxt1]);
+    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_strength_' tittxt1 '.eps']);
+    if ~exist('OCTAVE_VERSION'),
+        saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_strength_',tittxt1])
+        eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_strength_' tittxt1]);
+    end
     
     if advanced,
         disp(' ')
@@ -112,14 +114,14 @@ if SampleSize == 1,
         for ip=1:nparam,
             text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
         end
-        if advanced,
-            legend('Moments','Model','LRE model','Location','Best')
-        end
         title('Sensitivity bars using derivatives (log-scale)')
         if save_figure
-            saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_sensitivity_',tittxt1])
-            eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_sensitivity_' tittxt1]);
-            eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_sensitivity_' tittxt1]);
+            eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_sensitivity_' tittxt1 '.eps']);
+            if ~exist('OCTAVE_VERSION'),
+                saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_sensitivity_',tittxt1])
+                eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_sensitivity_' tittxt1]);
+            end
+            close(gcf);
         end
         
         % identificaton patterns
@@ -159,12 +161,14 @@ if SampleSize == 1,
             end
             set(gca,'xgrid','on')
             set(gca,'ygrid','on')
-            xlabel([tittxt,' - Collinearity patterns with ', int2str(j) ,' parameter(s)'])
+            xlabel([tittxt,' - Collinearity patterns with ', int2str(j) ,' parameter(s)'],'interpreter','none')
             if save_figure
-                saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_collinearity_', tittxt1, '_', int2str(j)])
-                eval(['print -depsc ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_' tittxt1 '_' int2str(j)]);
-                eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_' tittxt1 '_' int2str(j)]);
-                if options_.nograph, close(gcf); end
+                eval(['print -depsc ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_' tittxt1 '_' int2str(j) '.eps']);
+                if ~exist('OCTAVE_VERSION'),
+                    saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_collinearity_', tittxt1, '_', int2str(j)])
+                    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_' tittxt1 '_' int2str(j)]);
+                end
+                close(gcf);
             end
         end
         disp('')
@@ -213,14 +217,20 @@ if SampleSize == 1,
         end
         if save_figure,
             figure(f1);
-            saveas(f1,[IdentifDirectoryName,'/',M_.fname,'_ident_pattern_',tittxt1,'_1'])
-            eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_1']);
-            eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_1']);
+            eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_1.eps']);
+            if ~exist('OCTAVE_VERSION'),
+                saveas(f1,[IdentifDirectoryName,'/',M_.fname,'_ident_pattern_',tittxt1,'_1'])
+                eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_1']);
+            end
+            close(f1);
             if nparam>4,
                 figure(f2),
-                saveas(f2,[IdentifDirectoryName,'/',M_.fname,'_ident_pattern_',tittxt1,'_2'])
-                eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_2']);
-                eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_2']);
+                eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_2.eps']);
+                if ~exist('OCTAVE_VERSION'),
+                    saveas(f2,[IdentifDirectoryName,'/',M_.fname,'_ident_pattern_',tittxt1,'_2'])
+                    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_2']);
+                end
+                close(f2);
             end
         end
     end
@@ -252,14 +262,16 @@ else
         legend('Moments','Model','LRE model','Location','Best')
     end
     title('MC mean of sensitivity measures')
-    saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_MC_sensitivity'])
-    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_MC_sensitivity']);
-    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_MC_sensitivity']);
-    if options_.nograph, close(gcf); end
+    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_MC_sensitivity.eps']);
+    if ~exist('OCTAVE_VERSION'),
+        saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_MC_sensitivity'])
+        eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_MC_sensitivity']);
+    end
+    close(gcf); 
     if advanced,
         disp(' ')
         disp('Press ENTER to display advanced diagnostics'), pause(5),
-        options_.nograph=1;
+%         options_.nograph=1;
         figure('Name','MC Condition Number'),
         subplot(221)
         hist(log10(idemodel.cond))
@@ -270,10 +282,12 @@ else
         subplot(223)
         hist(log10(idelre.cond))
         title('log10 of Condition number in the LRE model')
-        saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_COND'])
-        eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
-        eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
-        if options_.nograph, close(gcf); end
+        eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_COND.eps']);
+        if ~exist('OCTAVE_VERSION'),
+            saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_COND'])
+            eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
+        end
+        close(gcf);
         ncut=floor(SampleSize/10*9);
         [dum,is]=sort(idelre.cond);
         [proba, dproba] = stab_map_1(params, is(1:ncut), is(ncut+1:end), 'MC_HighestCondNumberLRE', 1, [], IdentifDirectoryName, 0.1);
@@ -334,14 +348,20 @@ else
         end
         if save_figure,
             figure(f1);
-            saveas(f1,[IdentifDirectoryName,'/',M_.fname,'_MC_dent_pattern_1'])
-            eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_1']);
-            eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_1']);
+            eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_1.eps']);
+            if ~exist('OCTAVE_VERSION'),
+                saveas(f1,[IdentifDirectoryName,'/',M_.fname,'_MC_dent_pattern_1'])
+                eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_1']);
+            end
+            close(f1);
             if nparam>4,
                 figure(f2),
-                saveas(f2,[IdentifDirectoryName,'/',M_.fname,'_MC_ident_pattern_2'])
-                eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_2']);
-                eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_2']);
+                eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_2.eps']);
+                if ~exist('OCTAVE_VERSION'),
+                    saveas(f2,[IdentifDirectoryName,'/',M_.fname,'_MC_ident_pattern_2'])
+                    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_2']);
+                end
+                close(f2);
             end
         end
     end
