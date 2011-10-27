@@ -38,7 +38,7 @@ global options_
 options_ = set_default_option(options_,'solve_algo',2);
 info = 0;
 if options_.solve_algo == 0
-    if ~exist('OCTAVE_VERSION') && ~license('test', 'optimization_toolbox')
+    if ~exist('OCTAVE_VERSION') && isempty(license('inuse','optimization_toolbox'))
         error('You can''t use solve_algo=0 since you don''t have MATLAB''s Optimization Toolbox')
     end
     options=optimset('fsolve');
