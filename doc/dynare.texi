@@ -4141,7 +4141,7 @@ Variable set by the @code{estimation} command, if it is used with
 Variable set by the @code{estimation} command, if it is used with the
 @code{filtered_vars} option. Fields are of the form:
 @example
-@code{oo_.FilteredVariables.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
+@code{oo_.FilteredVariables.@var{VARIABLE_NAME}}
 @end example
 @end defvr
 
@@ -4157,7 +4157,7 @@ Variable set by the @code{estimation} command, if it is used with the
 Variable set by the @code{estimation} command, if it is used with the
 @code{smoother} option. Fields are of the form:
 @example
-@code{oo_.SmoothedMeasurementErrors.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
+@code{oo_.SmoothedMeasurementErrors.@var{VARIABLE_NAME}}
 @end example
 @end defvr
 
@@ -4165,7 +4165,7 @@ Variable set by the @code{estimation} command, if it is used with the
 Variable set by the @code{estimation} command, if it is used with the
 @code{smoother} option. Fields are of the form:
 @example
-@code{oo_.SmoothedShocks.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
+@code{oo_.SmoothedShocks.@var{VARIABLE_NAME}}
 @end example
 @end defvr
 
@@ -4173,7 +4173,7 @@ Variable set by the @code{estimation} command, if it is used with the
 Variable set by the @code{estimation} command, if it is used with the
 @code{smoother} option. Fields are of the form:
 @example
-@code{oo_.SmoothedVariables.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
+@code{oo_.SmoothedVariables.@var{VARIABLE_NAME}}
 @end example
 @end defvr
 
