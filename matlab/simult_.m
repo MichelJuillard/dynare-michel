@@ -39,6 +39,12 @@ iter = size(ex_,1);
 y_ = zeros(size(y0,1),iter+M_.maximum_lag);
 y_(:,1) = y0;
 
+% stoch_simul sets k_order_solver=1 if order=3, but does so only locally, so we
+% have to do it here also
+if options_.order == 3
+    options_.k_order_solver = 1;
+end
+
 if ~options_.k_order_solver
     if iorder==1
         y_(:,1) = y_(:,1)-dr.ys;
