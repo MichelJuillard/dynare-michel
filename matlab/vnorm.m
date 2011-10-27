@@ -67,7 +67,11 @@ if nargin>1
     end
 end
 
-
+if isempty(dim)
+    idx = find(size(A)~=1);
+    dim = idx(1);
+end
+    
 if isempty(ntype)
     y = sqrt(sum( abs(A).^2 , dim) );
 elseif ntype==1

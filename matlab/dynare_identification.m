@@ -267,7 +267,7 @@ if iload <=0,
     if SampleSize > 1,
         disp(' ')
         disp('Monte Carlo Testing')
-        h = waitbar(0,'Monte Carlo identification checks ...');
+        h = dyn_waitbar(0,'Monte Carlo identification checks ...');
         iteration = 0;
         loop_indx = 0;
         file_index = 0;
@@ -364,7 +364,11 @@ if iload <=0,
             end
             
             if SampleSize > 1,
-                waitbar(iteration/SampleSize,h,['MC identification checks ',int2str(iteration),'/',int2str(SampleSize)])
+%                 if exist('OCTAVE_VERSION') || options_.console_mode,
+%                     console_waitbar(0,iteration/SampleSize);
+%                 else
+                    dyn_waitbar(iteration/SampleSize,h,['MC identification checks ',int2str(iteration),'/',int2str(SampleSize)])
+%                 end
             end
         end
         
@@ -372,7 +376,12 @@ if iload <=0,
     
     
     if SampleSize > 1,
-        close(h),
+        if exist('OCTAVE_VERSION') || options_.console_mode,
+            fprintf('\n');
+            diary on;
+        else
+            close(h),
+        end
         normTAU=std(TAU')';
         normLRE=std(LRE')';
         normGAM=std(GAM')';

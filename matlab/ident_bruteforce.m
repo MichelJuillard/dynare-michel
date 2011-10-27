@@ -25,7 +25,7 @@ function [pars, cosnJ] = ident_bruteforce(J,n,TeX, pnames_TeX)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licen
-global M_ 
+global M_ options_
 
 OutputDirectoryName = CheckPath('Identification');
 
@@ -41,7 +41,7 @@ end
 cosnJ=zeros(k,n);
 pars{k,n}=[];
 for ll = 1:n,
-    h = waitbar(0,['Brute force collinearity for ' int2str(ll) ' parameters.']);
+    h = dyn_waitbar(0,['Brute force collinearity for ' int2str(ll) ' parameters.']);
     for ii = 1:k
         tmp = find([1:k]~=ii);
         tmp2  = nchoosek(tmp,ll);
@@ -61,9 +61,9 @@ for ll = 1:n,
         else
             pars{ii,ll} = NaN(1,ll);
         end
-        waitbar(ii/k,h)
+        dyn_waitbar(ii/k,h)
     end
-    close(h),
+    dyn_waitbar_close(h);
     if TeX
         filename = [OutputDirectoryName '/' M_.fname '_collinearity_patterns' int2str(ll) '.TeX'];
         fidTeX = fopen(filename,'w');
