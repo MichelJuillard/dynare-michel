@@ -86,7 +86,11 @@ switch nargin
     nstatic = DynareResults.dr.nstatic;
     npred = DynareResults.dr.npred;
     iv = (1:endo_nbr)';
-    ic = [ nstatic+(1:npred) endo_nbr+(1:size(DynareResults.dr.ghx,2)-npred) ]';
+    if DynareOptions.block == 0
+        ic = [ nstatic+(1:npred) endo_nbr+(1:size(DynareResults.dr.ghx,2)-npred) ]';
+    else
+        ic = DynareResults.dr.restrict_columns;
+    end;
   case 4
     iv = DynareResults.dr.restrict_var_list;
     ic = DynareResults.dr.restrict_columns;
