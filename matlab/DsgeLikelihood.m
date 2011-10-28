@@ -481,7 +481,7 @@ singularity_flag = 0;
 if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
     if no_missing_data_flag
         if DynareOptions.block == 1
-            [err, LIK] = block_kalman_filter(T,R,Q,H,Pstar,Y,start,Z,kalman_tol,riccati_tol, Model.nz_state_var, Model.n_diag);
+            [err, LIK] = block_kalman_filter(T,R,Q,H,Pstar,Y,start,Z,kalman_tol,riccati_tol, Model.nz_state_var, Model.n_diag, Model.nobs_non_statevar);
             mexErrCheck('block_kalman_filter', err);
         else
             LIK = kalman_filter(Y,diffuse_periods+1,size(Y,2), ...
