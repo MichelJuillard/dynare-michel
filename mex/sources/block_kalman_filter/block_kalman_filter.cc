@@ -252,6 +252,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   int n   = mxGetN(pT);                                  // Number of state variables.
   lapack_int pp   = mxGetM(pY);                          // Maximum number of observed variables.
   int n_state = n - pure_obs;
+  int n_shocks = mxGetM(pQ);
 
 
 #ifdef DIRECT  
@@ -326,7 +327,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     for (int j = 0; j < pp; j++)
       {
         double res = 0.0;
-        for (int k = 0; k < pp; k++)
+        for (int k = 0; k < n_shocks; k++)
           res += R[i + k * n] * Q[j * pp + k];
         tmp1[i + j * n] = res;
       }
@@ -338,7 +339,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     for (int j = i; j < n; j++)
       {
         double res = 0.0;
-        for (int k = 0; k < pp; k++)
+        for (int k = 0; k < n_shocks; k++)
           res += tmp1[i + k * n] * R[k * n + j];
         QQ[i + j * n] = QQ[j + i * n] = res;
       }
