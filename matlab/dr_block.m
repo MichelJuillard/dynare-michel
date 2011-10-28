@@ -129,7 +129,7 @@ for i = 1:Size;
     
     block_type = M_.block_structure.block(i).Simulation_Type;
     if task ~= 1
-        if block_type == 2 || block_type == 4 || block_type == 6 
+        if block_type == 2 || block_type == 4 || block_type == 7 
             block_type = 8;
         end;
     end;
