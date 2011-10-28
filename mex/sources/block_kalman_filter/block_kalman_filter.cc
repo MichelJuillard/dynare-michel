@@ -215,8 +215,8 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
   if (nlhs > 3)
     DYN_MEX_FUNC_ERR_MSG_TXT("kalman_filter provides at most 3 output argument.");
-  if (nrhs != 12)
-    DYN_MEX_FUNC_ERR_MSG_TXT("kalman_filter requires exactly 12 input arguments.");
+  if (nrhs != 13)
+    DYN_MEX_FUNC_ERR_MSG_TXT("kalman_filter requires exactly 13 input arguments.");
 //(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol, block)
   mxArray *pT = mxDuplicateArray(prhs[0]);
   mxArray *pR = mxDuplicateArray(prhs[1]);
@@ -237,6 +237,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
   double kalman_tol = mxGetScalar(prhs[8]);
   double riccati_tol = mxGetScalar(prhs[9]);
+  int pure_obs = mxGetScalar(prhs[12]);
   
   /* Reading the sparse structure of matrix in (§A) */
   typedef struct 
@@ -245,33 +246,26 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       int indx_2;
       int indx_3;
   } t_Var;
-  /*mxArray *M_;
-  M_ = mexGetVariable("global", "M_");
-  if (M_ == NULL)
-    mexErrMsgTxt(" in main, global variable not found: M_\n");*/
 
-  //mexEvalString("drawnow;");
   /*Defining the initials values*/
   int smpl = mxGetN(pY);                                 // Sample size.          ;
-  int n   = mxGetN(pT);                                 // Number of state variables.
-  lapack_int pp   = mxGetM(pY);                                 // Maximum number of observed variables.
-  int n_state = n - pp;
+  int n   = mxGetN(pT);                                  // Number of state variables.
+  lapack_int pp   = mxGetM(pY);                          // Maximum number of observed variables.
+  int n_state = n - pure_obs;
 
 
 #ifdef DIRECT  
-  /*mxArray* nze = mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "nz_state_var"));
-  double* nz_state_var = (double*)mxGetData(nze);*/
   double* nz_state_var = (double*)mxGetData(prhs[10]);
   int *i_nz_state_var = (int*)mxMalloc(n*sizeof(int));
   for (int i = 0; i < n; i++)
-    {
-      i_nz_state_var[i] = nz_state_var[i];
-      //mexPrintf("i_nz_state_var[%d]=%d\n",i,i_nz_state_var[i]  );
-    }
-  /*mxArray* nn_diag = mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "n_diag"));
-  int n_diag = mxGetScalar(nn_diag);*/
+    i_nz_state_var[i] = nz_state_var[i];
+
   int n_diag = mxGetScalar(prhs[11]);
 #else
+  mxArray *M_;
+  M_ = mexGetVariable("global", "M_");
+  if (M_ == NULL)
+    mexErrMsgTxt(" in main, global variable not found: M_\n");
   mxArray *mxa = mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "fname"));
   int buflen = mxGetM(mxa) * mxGetN(mxa) + 1;
   char *fname;
@@ -282,8 +276,6 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     mexWarnMsgTxt("Not enough space. Filename is truncated.");
   string file_name = fname;
   file_name.append(".kfi");
-  /*mexPrintf("file_name=%s\n", file_name.c_str());
-  mexEvalString("drawnow;");*/
   
   ifstream KF_index_file;
   KF_index_file.open(file_name.c_str(), ios::in | ios::binary);
@@ -313,7 +305,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   double *tmp = mxGetPr(p_tmp);
   mxArray* p_tmp1 = mxCreateDoubleMatrix(n, pp, mxREAL);
   double *tmp1 = mxGetPr(p_tmp1);
-  int t    = 0;                                               // Initialization of the time index.
+  int t = 0;                                               // Initialization of the time index.
   mxArray* plik  = mxCreateDoubleMatrix(smpl, 1, mxREAL);
   double* lik = mxGetPr(plik);
   double Inf =  mxGetInf();                                   
@@ -430,7 +422,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             for (int i = 0; i < n; i++)
               {
                 double res = 0.0;
-                for (int j = pp; j < n; j++)
+                for (int j = pure_obs; j < n; j++)
                   res += T[i + j *n] * a[j];
                 tmp_a[i] = res;
               }
@@ -440,12 +432,12 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
            memset(tmp, 0, n * n_state * sizeof(double));
 #ifdef DIRECT
            for (int i = 0; i < n; i++)
-            for (int j = pp; j < n; j++)
+            for (int j = pure_obs; j < n; j++)
               {
-                int j1 = j - pp;
-                int j1_n_state = j1 * n_state - pp ;
+                int j1 = j - pure_obs;
+                int j1_n_state = j1 * n_state - pure_obs;
                 //if ((i < pp) || (i >= n_diag + pp) || (j1 >= n_diag))
-                  for (int k = pp; k < i_nz_state_var[i]; k++)
+                  for (int k = pure_obs; k < i_nz_state_var[i]; k++)
                     {
                       tmp[i + j1 * n ] += T[i + k * n] * P[k + j1_n_state];
                     }
@@ -454,12 +446,12 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
              for (int j = pp; j < pp + n_diag; j++)
                tmp[i + (j - pp) * n] = T[i + i * n] * P_t_t1[j - pp + (i - pp) * n_state];*/
           memset(P, 0, n * n * sizeof(double));
-          int n_n_obs = n * pp;
+          int n_n_obs = n * pure_obs;
           for (int i = 0; i < n; i++)
             for (int j = i; j < n; j++)
               {
                 //if ((i < pp) || (i >= n_diag + pp) || (j < pp) || (j >= n_diag + pp))
-                  for (int k = pp; k < i_nz_state_var[j]; k++)
+                  for (int k = pure_obs; k < i_nz_state_var[j]; k++)
                     {
                       int k_n = k * n;
                       P[i * n + j] += tmp[i + k_n - n_n_obs] * T[j + k_n];
@@ -541,7 +533,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
               }
 
           //a      = T*(a+K*v);
-          for (int i = pp; i < n; i++)
+          for (int i = pure_obs; i < n; i++)
             {
               double res = 0.0;
               for (int j = 0; j < pp; j++)
@@ -552,14 +544,14 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           for (int i = 0; i < n; i++)
             {
               double res = 0.0;
-              for (int j = pp; j < n; j++)
+              for (int j = pure_obs; j < n; j++)
                 res += T[j  * n + i] * v_n[j];
               a[i] = res;
             }
 
           //P      = T*(P-K*P(mf,:))*transpose(T)+QQ;
           for (int i = 0; i < pp; i++)
-            for (int j = pp; j < n; j++)
+            for (int j = pure_obs; j < n; j++)
               P_mf[i + j * pp] = P[mf[i] + j * n];
 #ifdef BLAS
           #pragma omp parallel for shared(K, P, K_P) num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
@@ -595,12 +587,12 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #else
           //#pragma omp parallel for shared(K, P, K_P) num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
           
-          for (int i = pp; i < n; i++)
+          for (int i = pure_obs; i < n; i++)
             {
-              unsigned int i1 = i - pp;
+              unsigned int i1 = i - pure_obs;
               for (int j = i ; j < n; j++)
                 {
-                  unsigned int j1 = j - pp;
+                  unsigned int j1 = j - pure_obs;
                   double res = 0.0;
                   int j_pp = j * pp;
                   for (int k = 0; k < pp; k++)
@@ -628,12 +620,12 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             }*/
             
           //#pragma omp parallel for shared(P, K_P, P_t_t1)
-          for (int i = pp; i < n; i++)
+          for (int i = pure_obs; i < n; i++)
             {
-              unsigned int i1 = i - pp;
+              unsigned int i1 = i - pure_obs;
               for (int j = i; j < n; j++)
                 {
-                  unsigned int j1 = j - pp;
+                  unsigned int j1 = j - pure_obs;
                   unsigned int k1 = i1 * n_state + j1;
                   P_t_t1[j1 * n_state + i1] = P_t_t1[k1] = P[i * n + j] - K_P[k1];
                 }
@@ -644,30 +636,27 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           for (int i = 0; i < n; i++)
             {
               int max_k = i_nz_state_var[i];
-              for (int j = pp; j < n; j++)
+              for (int j = pure_obs; j < n; j++)
                 {
-                  int j1 = j - pp;
-                  int j1_n_state = j1 * n_state - pp ;
+                  int j1 = j - pure_obs;
+                  int j1_n_state = j1 * n_state - pure_obs;
                   int indx_tmp = i + j1 * n ;
                   //if ((i < pp) || (i >= n_diag + pp) || (j1 >= n_diag))
                   for (int k = pp; k < max_k; k++)
                     tmp[indx_tmp] += T[i + k * n] * P_t_t1[k + j1_n_state];
                 }
             }
-          /*for (int i = pp; i < pp + n_diag; i++)
-             for (int j = pp; j < pp + n_diag; j++)
-               tmp[i + (j - pp) * n] = T[i + i * n] * P_t_t1[j - pp + (i - pp) * n_state];*/
           memset(P, 0, n * n * sizeof(double));
           
           for (int i = 0; i < n; i++)
             {
-              int n_n_obs = - n * pp ;
+              int n_n_obs = - n * pure_obs;
               for (int j = i; j < n; j++)
                 {
                   int max_k = i_nz_state_var[j];
                   int P_indx = i * n + j;
                   //if ((i < pp) || (i >= n_diag + pp) || (j < pp) || (j >= n_diag + pp))
-                  for (int k = pp; k < max_k; k++)
+                  for (int k = pure_obs; k < max_k; k++)
                     {
                       int k_n = k * n;
                       P[P_indx] += tmp[i + k_n + n_n_obs] * T[j + k_n];
@@ -675,48 +664,23 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 }
             }
 #else
-          //mexPrintf("t=%d, OK0\n",t);  
           //#pragma omp parallel for shared(T, P_t_t1, tmp, Var) num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-           //for (int i = 0; i < n; i++)
-             for (int j = 0; j < size_index_KF; j++)
-               {
-                 t_Var *s_Var = &Var[j];
-                 tmp[s_Var->indx_1 ] += T[s_Var->indx_2 ] * P_t_t1[s_Var->indx_3];
-               }
-           for (int i = pp; i < pp + n_diag; i++)
-             for (int j = pp; j < pp + n_diag; j++)
-               tmp[i + (j - pp) * n] = T[i + i * n] * P_t_t1[j - pp + (i - pp) * n_state];
-           memset(P, 0, n * n * sizeof(double));
-           //#pragma omp parallel for shared(T, tmp, P, Var_2) num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-           //for (int i = 0; i < n; i++)
-             for (int j = 0; j < size_index_KF_2; j++)
-               {
-                 t_Var *s_Var = &Var_2[j];
-                 P[s_Var->indx_1 /*+ i*/] += tmp[s_Var->indx_2 /*+ i*/] * T[s_Var->indx_3];
-               }
+          for (int j = 0; j < size_index_KF; j++)
+            {
+              t_Var *s_Var = &Var[j];
+              tmp[s_Var->indx_1 ] += T[s_Var->indx_2 ] * P_t_t1[s_Var->indx_3];
+            }
+         for (int i = pp; i < pp + n_diag; i++)
+           for (int j = pp; j < pp + n_diag; j++)
+             tmp[i + (j - pp) * n] = T[i + i * n] * P_t_t1[j - pp + (i - pp) * n_state];
+         memset(P, 0, n * n * sizeof(double));
+         //#pragma omp parallel for shared(T, tmp, P, Var_2) num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
+         for (int j = 0; j < size_index_KF_2; j++)
+           {
+             t_Var *s_Var = &Var_2[j];
+             P[s_Var->indx_1 /*+ i*/] += tmp[s_Var->indx_2 /*+ i*/] * T[s_Var->indx_3];
+           }
 #endif
-          /*#pragma omp parallel for shared(T, P_t_t1, tmp, Var) num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-          for (int i = 0; i < size_index_KF; i++)
-            {
-              t_Var *s_Var = &Var[i];
-              tmp[s_Var->indx_1] += T[s_Var->indx_2] * P_t_t1[s_Var->indx_3];
-            }
-          for (int i = pp; i < pp + n_diag; i++)
-            for (int j = pp; j < pp + n_diag; j++)
-              tmp[i + (j - pp) * n] = T[i + i * n] * P_t_t1[j - pp + (i - pp) * n_state];
-          memset(P, 0, n * n * sizeof(double));
-          #pragma omp parallel for shared(T, tmp, P, Var_2) num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-          for (int i = 0; i < size_index_KF_2; i++)
-            {
-              t_Var *s_Var = &Var_2[i];
-              P[s_Var->indx_1] += tmp[s_Var->indx_2] * T[s_Var->indx_3];
-            }
-          */
-          /*for (int i = pp; i < pp + n_diag; i++)
-            for (int j = i; j < pp + n_diag; j++)
-              P[j + i * n] = T[i + i * n] * T[j + j * n] * P_t_t1[j - pp + (i - pp) * n_state];*/
-              //P[j + i * n] = tmp[i +]
-          
           for ( int i = 0; i < n; i++)
             {
               for ( int j = i ; j < n; j++)
@@ -724,10 +688,6 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
               for ( int j = i + 1; j < n; j++)
                 P[i + j * n] = P[j + i * n];
             }
-          //mexPrintf("      OK1\n");
-          /*mexPrintf("P\n");
-          mexDisp(pP);*/
-
 #endif
           //notsteady = max(abs(K(:)-oldK)) > riccati_tol;
           double max_abs = 0.0;
@@ -747,7 +707,6 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
   if (F_singular)
     mexErrMsgTxt("The variance of the forecast error remains singular until the end of the sample\n");
-  
 
   if (t+1 < smpl)
     {
@@ -758,7 +717,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             v[i]  = Y[i + t * pp] - a[mf[i]];
           
           //a = T*(a+K*v);
-          for (int i = pp; i < n; i++)
+          for (int i = pure_obs; i < n; i++)
             {
               double res = 0.0;
               for (int j = 0; j < pp; j++)
@@ -768,7 +727,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           for (int i = 0; i < n; i++)
             {
               double res = 0.0;
-              for (int j = pp; j < n; j++)
+              for (int j = pure_obs; j < n; j++)
                 res += T[j  * n + i] * v_n[j];
               a[i] = res;
             }
@@ -778,7 +737,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             {
               double res = 0.0;
               for (int j = 0; j < pp; j++)
-                res += v[j] * iF[j  * n + i];
+                res += v[j] * iF[j * pp + i];
               v_pp[i] = res;
             }
           double res = 0.0;
@@ -810,8 +769,6 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   
   mxFree(w);
 #ifdef DIRECT
-  /*mxDestroyArray(nze);
-  mxDestroyArray(nn_diag);*/
   mxFree(i_nz_state_var);
 #else
   mxFree(Var);
