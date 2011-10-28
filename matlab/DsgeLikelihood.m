@@ -402,9 +402,9 @@ switch DynareOptions.lik_init
         kalman_algo = 1;
     end
     if isequal(H,0)
-        [err,Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(mf,np,length(mf))));
+        [err,Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(Z,np,length(Z))));
     else
-        [err,Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(mf,np,length(mf))),H);
+        [err,Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(Z,np,length(Z))),H);
     end
     if err
         disp(['DsgeLikelihood:: I am not able to solve the Riccati equation, so I switch to lik_init=1!']);
@@ -481,7 +481,7 @@ singularity_flag = 0;
 if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
     if no_missing_data_flag
         if DynareOptions.block == 1
-            [err, LIK] = block_kalman_filter(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol, M_.nz_state_var, M_.n_diag);
+            [err, LIK] = block_kalman_filter(T,R,Q,H,Pstar,Y,start,Z,kalman_tol,riccati_tol, M_.nz_state_var, M_.n_diag);
             mexErrCheck('block_kalman_filter', err);
         else
             LIK = kalman_filter(Y,diffuse_periods+1,size(Y,2), ...
