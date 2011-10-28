@@ -57,6 +57,7 @@ if options_.order > 1
 end
 
 z = repmat(dr.ys,1,M_.maximum_lead + M_.maximum_lag + 1);
+zx = repmat([oo_.exo_simul oo_.exo_det_simul],M_.maximum_lead + M_.maximum_lag + 1, 1);
 if (isfield(M_,'block_structure'))
     data = M_.block_structure.block;
     Size = length(M_.block_structure.block);
@@ -65,9 +66,9 @@ else
     Size = 1;
 end;
 if (options_.bytecode)
-    [chck, zz, data]= bytecode('dynamic','evaluate',z,[oo_.exo_simul oo_.exo_det_simul], M_.params, dr.ys, 1, data);
+    [chck, zz, data]= bytecode('dynamic','evaluate', z, zx, M_.params, dr.ys, 1, data);
 else
-    [r, data] = feval([M_.fname '_dynamic'], z', [oo_.exo_simul oo_.exo_det_simul], M_.params, dr.ys, M_.maximum_lag+1, data);
+    [r, data] = feval([M_.fname '_dynamic'], z', zx, M_.params, dr.ys, M_.maximum_lag+1, data);
     chck = 0;
 end;
 mexErrCheck('bytecode', chck);
