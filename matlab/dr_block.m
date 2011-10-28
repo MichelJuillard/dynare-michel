@@ -329,7 +329,7 @@ for i = 1:Size;
         dr.eigval = [dr.eigval ; data(i).eigval];
         if task ~= 1
             if (maximum_lag > 0)
-                 ghx = - jacob(1 , 1 : n_pred) / jacob(1 , n_pred + n_static + 1 : n_pred + n_static + n_pred + n_both);
+                 ghx = - jacob(: , 1 : n_pred) / jacob(: , n_pred + n_static + 1 : n_pred + n_static + n_pred + n_both);
             else
                  ghx = 0;
             end;
@@ -354,7 +354,7 @@ for i = 1:Size;
                 l_x_sv = dr.ghx(dr.state_var, 1:n_sv);
                 
                 selector_tm1 = M_.block_structure.block(i).tm1;
-                ghx_other = - (fx_t * l_x + (fx_tp1 * l_x * l_x_sv) + fx_tm1 * selector_tm1) / jacob(1 , n_pred + 1 : n_pred + n_static + n_pred + n_both);
+                ghx_other = - (fx_t * l_x + (fx_tp1 * l_x * l_x_sv) + fx_tm1 * selector_tm1) / jacob(: , n_pred + 1 : n_pred + n_static + n_pred + n_both);
                 dr.ghx(endo, :) = dr.ghx(endo, :) + ghx_other;
             end;
             if exo_nbr
@@ -365,10 +365,10 @@ for i = 1:Size;
                     l_u = dr.ghu(data(i).other_endogenous,:);
                     fu_complet = zeros(n, M_.exo_nbr);
                     fu_complet(:,data(i).exogenous) = fu;
-                    ghu = -(fu_complet + fx_tp1 * l_x * l_u_sv + (fx_t) * l_u ) / jacob(1 , n_pred + 1 : n_pred + n_static + n_pred + n_both);
+                    ghu = -(fu_complet + fx_tp1 * l_x * l_u_sv + (fx_t) * l_u ) / jacob(: , n_pred + 1 : n_pred + n_static + n_pred + n_both);
                     exo = dr.exo_var;
                 else
-                    ghu = - fu  / jacob(1 , n_pred + 1 : n_pred + n_static + n_pred + n_both);
+                    ghu = - fu  / jacob(: , n_pred + 1 : n_pred + n_static + n_pred + n_both);
                 end;
             else
                  if other_endo_nbr > 0
