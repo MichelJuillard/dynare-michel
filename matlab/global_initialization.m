@@ -28,9 +28,10 @@ function global_initialization()
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global oo_ M_ options_ estim_params_
+global oo_ M_ options_ estim_params_ bayestopt_
 
 estim_params_ = [];
+bayestopt_ = [];
 
 options_.console_mode = 0;
 
