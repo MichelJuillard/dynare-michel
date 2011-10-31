@@ -45,8 +45,8 @@ function [i,n,s,j] = describe_missing_data(data)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-[variable_index,observation_index] = find(~isnan(data));
-[N,T] = size(data);
+[observation_index,variable_index] = find(~isnan(data));
+[T,N] = size(data);
 
 i = cell(1,T);
 j = cell(1,N);
@@ -59,7 +59,7 @@ for obs=1:T
     if rows(tmp(:))
         i(obs) = { tmp(:) };
     else
-        i(obs) = { variable_index(:) };
+        i(obs) = { [] };
     end
 end
 
