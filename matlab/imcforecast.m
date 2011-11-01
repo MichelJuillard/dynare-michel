@@ -99,43 +99,26 @@ if estimated_model
 
     set_parameters(xparam);
 
-    n_varobs = size(options_.varobs,1);
-    rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
-    options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
-    gend = options_.nobs;
-    rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
-    % Transform the data.
-    if options_.loglinear
-        if ~options_.logdata
-            rawdata = log(rawdata);  
-        end
+    % Load and transform data.
+    transformation = [];
+    if options_.loglinear && ~options_.logdata
+        transformation = @log;
     end
-    % Test if the data set is real.
-    if ~isreal(rawdata)
-        error('There are complex values in the data! Probably  a wrong transformation')
+    xls.sheet = options_.xls_sheet;
+    xls.range = options_.xls_range;
+    
+    if ~isfield(options_,'nobs')
+        options_.nobs = [];
     end
-    % Detrend the data.
-    options_.missing_data = any(any(isnan(rawdata)));
-    if options_.prefilter == 1
-        if options_.missing_data
-            bayestopt_.mean_varobs = zeros(n_varobs,1);
-            for variable=1:n_varobs
-                rdx = find(~isnan(rawdata(:,variable)));
-                m = mean(rawdata(rdx,variable));
-                rawdata(rdx,variable) = rawdata(rdx,variable)-m;
-                bayestopt_.mean_varobs(variable) = m;
-            end
-        else
-            bayestopt_.mean_varobs = mean(rawdata,1)';
-            rawdata = rawdata-repmat(bayestopt_.mean_varobs',gend,1);
-        end
-    end
-    data = transpose(rawdata);
-    % Handle the missing observations.
-    [data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data);
-    missing_value = ~(number_of_observations == gend*n_varobs);
+    
+    dataset_ = initialize_dataset(options_.datafile,options_.varobs,options_.first_obs,options_.nobs,transformation,options_.prefilter,xls);
 
-    [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(xparam,gend,data,data_index,number_of_observations);
+    data = dataset_.data;
+    data_index = dataset_.missing.aindex;
+    gend = options_.nobs;
+    missing_value = dataset_.missing.state;
+
+    [atT,innov,measurement_error,filtered_state_vector,ys,trend_coeff] = DsgeSmoother(xparam,gend,data,data_index,missing_value);
 
     trend = repmat(ys,1,options_cond_fcst.periods+1);
     for i=1:M_.endo_nbr
