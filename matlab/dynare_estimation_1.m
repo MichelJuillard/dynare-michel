@@ -72,13 +72,6 @@ if ~isempty(estim_params_)
     set_parameters(xparam1);
 end
 
-if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
-    options_.noconstant = 1;
-else
-    options_.noconstant = 0;
-end
-
-
 % compute sample moments if needed (bvar-dsge)
 if options_.dsge_var
     if dataset_.missing.state

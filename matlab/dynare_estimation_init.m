@@ -308,3 +308,19 @@ end
 dataset_ = initialize_dataset(options_.datafile,options_.varobs,options_.first_obs,options_.nobs,transformation,options_.prefilter,xls);
 
 options_.nobs = dataset_.info.ntobs;
+
+% setting noconstant option
+if options_.diffuse_filter
+    steadystate_check_flag = 0;
+else
+    steadystate_check_flag = 1;
+end
+
+oo_.steady_state = evaluate_steady_state(oo_.steady_state,M_,options_,oo_,steadystate_check_flag);
+if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
+    options_.noconstant = 1;
+else
+    options_.noconstant = 0;
+end
+
+
