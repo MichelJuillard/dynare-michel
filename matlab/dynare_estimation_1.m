@@ -1032,7 +1032,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         number_of_plots_to_draw = 0;
         index = [];
         for i=1:n_varobs
-            if max(abs(measurement_error(10:end))) > 0.000000001
+            if max(abs(measurement_error)) > 0.000000001
                 number_of_plots_to_draw = number_of_plots_to_draw + 1;
                 index = cat(1,index,i);
             end
@@ -1099,12 +1099,12 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 fclose(fidTeX);
             end
         else
-            for plt = 1:nbplt-1
+            for plt = 1:nbplt
                 hh = figure('Name','Smoothed observation errors');
                 set(0,'CurrentFigure',hh)
                 NAMES = [];
                 if options_.TeX, TeXNAMES = []; end
-                for i=1:nstar
+                for i=1:min(nstar,number_of_plots_to_draw-(nbplt-1)*nstar)
                     k = (plt-1)*nstar+i;
                     subplot(nr,nc,i);
                     plot([1 gend],[0 0],'-r','linewidth',.5)
@@ -1150,62 +1150,6 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     fprintf(fidTeX,'\\end{figure}\n');
                     fprintf(fidTeX,'\n');
                 end
-            end
-            hh = figure('Name','Smoothed observation errors');
-            set(0,'CurrentFigure',hh)
-            NAMES = [];
-            if options_.TeX, TeXNAMES = []; end
-            for i=1:number_of_plots_to_draw-(nbplt-1)*nstar
-                k = (nbplt-1)*nstar+i;
-                if lr ~= 0
-                    subplot(lr,lc,i);
-                else
-                    subplot(nr,nc,i);
-                end
-                plot([1 gend],[0 0],'-r','linewidth',0.5)
-                hold on
-                plot(1:gend,measurement_error(index(k),:),'-k','linewidth',1)
-                hold off
-                name     = deblank(options_.varobs(index(k),:));
-                if isempty(NAMES)
-                    NAMES = name;
-                else
-                    NAMES = char(NAMES,name);
-                end
-                if ~isempty(options_.XTick)
-                    set(gca,'XTick',options_.XTick)
-                    set(gca,'XTickLabel',options_.XTickLabel)
-                end
-                if options_.TeX
-                    idx = strmatch(options_.varobs(index(k)),M_.endo_names,'exact');
-                    texname = M_.endo_names_tex(idx,:);
-                    if isempty(TeXNAMES)
-                        TeXNAMES = ['$ ' deblank(texname) ' $'];
-                    else
-                        TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
-                    end
-                end
-                title(name,'Interpreter','none');
-            end
-            eval(['print -depsc2 ' M_.fname '_SmoothedObservationErrors' int2str(nbplt) '.eps']);
-            if ~exist('OCTAVE_VERSION')
-                eval(['print -dpdf ' M_.fname '_SmoothedObservationErrors' int2str(nbplt)]);
-                saveas(hh,[M_.fname '_SmoothedObservationErrors' int2str(nbplt) '.fig']);
-            end
-            if options_.nograph, close(hh), end
-            if options_.TeX
-                fprintf(fidTeX,'\\begin{figure}[H]\n');
-                for jj = 1:size(NAMES,1);
-                    fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-                end
-                fprintf(fidTeX,'\\centering \n');
-                fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedObservedErrors%s}\n',M_.fname,int2str(nbplt));
-                fprintf(fidTeX,'\\caption{Smoothed observed errors.}');
-                fprintf(fidTeX,'\\label{Fig:SmoothedObservedErrors:%s}\n',int2str(nbplt));
-                fprintf(fidTeX,'\\end{figure}\n');
-                fprintf(fidTeX,'\n');
-                fprintf(fidTeX,'%% End of TeX file.\n');
-                fclose(fidTeX);
             end
         end
     end
