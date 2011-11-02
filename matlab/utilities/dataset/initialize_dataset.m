@@ -78,7 +78,7 @@ if dataset_.missing.state
     dataset_.missing.number_of_observations = n;
     dataset_.missing.no_more_missing_observations = s;
 else
-    dataset_.missing.aindex = num2cell(repmat(1:dataset_.info.nvobs,dataset_.info.ntobs,1),2);
+    dataset_.missing.aindex = num2cell(repmat(1:dataset_.info.nvobs,dataset_.info.ntobs,1)',1);
     dataset_.missing.vindex = [];
     dataset_.missing.number_of_observations = [];
     dataset_.missing.no_more_missing_observations = [];
