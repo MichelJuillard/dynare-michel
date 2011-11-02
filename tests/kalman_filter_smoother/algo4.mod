@@ -35,7 +35,6 @@ end;
 
 varobs w x y;
        
-//estimation(datafile=data,first_obs=1000,nobs=200,mh_replic=0,diffuse_filter);
 estimation(datafile=data,first_obs=1000,nobs=200,mh_replic=0,mode_compute=0,mode_file=algo3_mode,diffuse_filter,kalman_algo=4);
 
 //checking smoother consistency
@@ -49,11 +48,15 @@ err = zeros(M_.endo_nbr,200);
 for t=2:200;
     err(:,t) = S(t,:)'-A*S(t-1,:)'-B*E(t,:)';
 end;
-disp(max(max(abs(err))));
+if max(max(abs(err))) > 1e-10;
+   error('Test fails');
+end;
 
 d=load('data');
 dat = [d.w d.x d.y];
-disp(max(max(abs(dat(1000:1199,:)-S(:,[7:9])))));
+if max(max(abs(dat(1000:1199,:)-S(:,[7:9])))) > 1e-10;
+   error('Test fails');
+end;
 
 o1 = load('algo3_results');
 obj_endo={'SmoothedVariables'; 'FilteredVariables'; 'UpdatedVariables'};
@@ -67,7 +70,9 @@ for i=1:nobj_endo;
         var2 = eval(['oo_.' obj_endo{i} '.' M_.endo_names(j,:)]);
         err_endo(:,j) = var1-var2;
     end;
-    disp(max(max(abs(err_endo))));    
+    if max(max(abs(err_endo))) > 1e-10;
+       error('Test fails');
+    end;    
 end;
 
 
@@ -79,6 +84,8 @@ for i=1:nobj_exo;
         var2 = eval(['oo_.' obj_exo{i} '.' M_.exo_names(j,:)]);
         err_exo(:,j,i) = var1 - var2;
     end;
-    disp(max(max(abs(err_exo))));    
+    if max(max(abs(err_exo))) > 1e-10;
+       error('Test fails');
+    end;    
 end;
-disp(max(max(max(abs(err_exo)))));    
+

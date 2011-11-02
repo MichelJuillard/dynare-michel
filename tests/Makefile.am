@@ -150,7 +150,22 @@ EXTRA_DIST = \
 	ms-sbvar/archive-files/ftd_upperchol7v.m \
 	ms-sbvar/archive-files/specification_2v.dat \
 	ms-sbvar/archive-files/specification_2v2c.dat \
-	recursive/data_ca1.m
+	recursive/data_ca1.m \
+	kalman_filter_smoother/algo1.mod \
+	kalman_filter_smoother/algo2.mod \
+	kalman_filter_smoother/algo3.mod \
+	kalman_filter_smoother/algo4.mod \
+	kalman_filter_smoother/algo4a.mod \
+	kalman_filter_smoother/algo4b.mod \
+	kalman_filter_smoother/algoH1.mod \
+	kalman_filter_smoother/algoH2.mod \
+	kalman_filter_smoother/algoH3.mod \
+	kalman_filter_smoother/fs2000.mod \
+	kalman_filter_smoother/fs2000_1.mod \
+	kalman_filter_smoother/fs2000_2.mod \
+	kalman_filter_smoother/fs2000a.mod \
+        kalman_filter_smoother/gen_data.mod \
+	kalman_filter_smoother/fsdat_simul.m
 
 TARGETS =
 

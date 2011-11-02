@@ -34,7 +34,6 @@ end;
 
 varobs dw dx dy z;
        
-//estimation(datafile=data,first_obs=1000,nobs=200,mh_replic=0,kalman_algo=2);
 estimation(datafile=data,first_obs=1000,nobs=200,mh_replic=0,mode_compute=0,mode_file=algoH1_mode,kalman_algo=2,filtered_vars);
 
 //checking smoother consistency
@@ -68,7 +67,9 @@ for i=1:nobj_endo;
         var2 = eval(['oo_.' obj_endo{i} '.' M_.endo_names(j,:)]);
         err_endo(:,j) = var1-var2;
     end;
-    disp(max(max(abs(err_endo))));    
+    if max(max(abs(err_endo))) > 1e-10;
+       error('Test fails');
+    end;    
 end;
 
 
@@ -80,8 +81,11 @@ for i=1:nobj_exo;
         var2 = eval(['oo_.' obj_exo{i} '.' M_.exo_names(j,:)]);
         err_exo(:,j,i) = var1 - var2;
     end;
-    disp(max(max(abs(err_exo))));    
+    if max(max(abs(err_exo))) > 1e-10;
+       error('Test fails');
+    end;    
 end;
-disp(max(max(max(abs(err_exo)))));    
 
-disp(max(max(abs(o1.oo_.SmoothedMeasurementErrors.z - oo_.SmoothedMeasurementErrors.z)))); 
+if max(max(abs(o1.oo_.SmoothedMeasurementErrors.z - oo_.SmoothedMeasurementErrors.z))) > 1e-10;
+   error('Test fails');
+end; 

@@ -47,10 +47,14 @@ err = zeros(6,200);
 for t=2:200;
     err(:,t) = S(t,:)'-A*S(t-1,:)'-B*E(t,:)';
 end;
-disp(max(max(abs(err))));
+if max(max(abs(err))) > 1e-10;
+   error('Test fails');
+end;
 
 d=load('data');
 dat = [d.dw d.dx d.dy d.z];
 X = oo_.SmoothedMeasurementErrors;
 ME = [X.dw X.dx X.dy X.z];
-disp(max(max(abs(dat(1000:1199,:)-S(:,[2:4 1])-ME))));
+if max(max(abs(dat(1000:1199,:)-S(:,[2:4 1])-ME))) > 1e-10;
+   error('Test fails');
+end;
