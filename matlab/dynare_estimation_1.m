@@ -117,8 +117,12 @@ if isequal(options_.mode_compute,0) && isempty(options_.mode_file) && options_.m
         end
         for i=bayestopt_.smoother_saved_var_list'
             i1 = dr.order_var(bayestopt_.smoother_var_list(i));
-            eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(i1,:)) ' = atT(i,:)'';']);
-            eval(['oo_.FilteredVariables.' deblank(M_.endo_names(i1,:)) ' = squeeze(aK(1,i,:));']);
+            eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(i1,:)) ...
+                  ' = atT(i,:)'';']);
+            if options_.nk > 0
+                eval(['oo_.FilteredVariables.' deblank(M_.endo_names(i1,:)) ...
+                      ' = squeeze(aK(1,i,:));']);
+            end
             eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(i1,:)) ' = updated_variables(i,:)'';']);
         end
         for i=1:M_.exo_nbr
@@ -828,8 +832,12 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
     end
     for i=bayestopt_.smoother_saved_var_list'
         i1 = dr.order_var(bayestopt_.smoother_var_list(i));
-        eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(i1,:)) ' = atT(i,:)'';']);
-        eval(['oo_.FilteredVariables.' deblank(M_.endo_names(i1,:)) ' = squeeze(aK(1,i,:));']);
+        eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(i1,:)) ' = ' ...
+                            'atT(i,:)'';']);
+        if options_.nk > 0
+            eval(['oo_.FilteredVariables.' deblank(M_.endo_names(i1,:)) ...
+                  ' = squeeze(aK(1,i,:));']);
+        end
         eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(i1,:)) ...
               ' = updated_variables(i,:)'';']);
     end

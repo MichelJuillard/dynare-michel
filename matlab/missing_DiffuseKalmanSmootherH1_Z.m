@@ -106,12 +106,14 @@ while rank(Pinf(:,:,t+1),crit1) && t<smpl
         if rcond(Finf) < kalman_tol
             if ~all(abs(Finf(:)) < kalman_tol)
                 % The univariate diffuse kalman filter should be used.
+                alphahat = Inf;
                 return
             else
                 Fstar(:,:,t)  = ZZ*Pstar(:,:,t)*ZZ' + H(di,di);
                 if rcond(Fstar(:,:,t)) < kalman_tol
                     if ~all(abs(Fstar(:,:,t))<kalman_tol)
                         % The univariate diffuse kalman filter should be used.
+                        alphahat = Inf;
                         return
                     else
                         a(:,:,t+1) = T*a(:,:,t);
@@ -167,6 +169,7 @@ while notsteady && t<smpl
         v(di,t)      = Y(di,t) - ZZ*a(:,t);
         F = ZZ*P(:,:,t)*ZZ' + H(di,di);
         if rcond(F) < kalman_tol
+            alphahat = Inf;
             return              
         end    
         iF(di,di,t)   = inv(F);

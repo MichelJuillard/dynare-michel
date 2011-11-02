@@ -525,6 +525,11 @@ if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
                                                T,Q,R,H,Z,mm,pp,rr,Zflag,diffuse_periods);
     end
     if isinf(LIK)
+        if kalman_algo == 1
+            kalman_algo = 2;
+        else
+            kalman_algo = 4;
+        end
         singularity_flag = 1;
     else
         if DynareOptions.lik_init==3

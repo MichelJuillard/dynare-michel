@@ -165,7 +165,7 @@ if kalman_algo == 1 || kalman_algo == 3
                                                       Z,R1,Q,H,Pinf,Pstar, ...
                                                       data1,nobs,np,smpl,data_index, ...
                                                       options_.nk,kalman_tol,options_.filter_decomposition);
-    if isequal(alphahat,0)
+    if isinf(alphahat)
         if kalman_algo == 1
             kalman_algo = 2;
         elseif kalman_algo == 3
