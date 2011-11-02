@@ -145,6 +145,7 @@ ys          = [];
 trend_coeff = [];
 exit_flag   = 1;
 info        = 0;
+singularity_flag = 0;
 
 % Set flag related to analytical derivatives.
 if nargout > 9
@@ -315,27 +316,24 @@ Y   = DynareDataset.data-trend;
 kalman_algo = DynareOptions.kalman_algo;
 
 % resetting measurement errors covariance matrix for univariate filters
-no_correlation_flag = 1;
 if (kalman_algo == 2) || (kalman_algo == 4)
     if isequal(H,0)
         H = zeros(nobs,1);
+        mmm = mm;
     else
         if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
             H = diag(H);
+            mmm = mm; 
         else
-            no_correlation_flag = 0;
+            Z = [Z, eye(pp)];
+            T = blkdiag(T,zeros(pp));
+            Q = blkdiag(Q,H);
+            R = blkdiag(R,eye(pp));
+            Pstar = blkdiag(Pstar,H);
+            Pinf  = blckdiag(Pinf,zeros(pp));
+            H = zeros(nobs,1);
+            mmm   = mm+pp;
         end
-    end
-    if no_correlation_flag
-        mmm = mm;
-    else
-        Z = [Z, eye(pp)];
-        T = blkdiag(T,zeros(pp));
-        Q = blkdiag(Q,H);
-        R = blkdiag(R,eye(pp));
-        Pstar = blkdiag(Pstar,H);
-        Pinf  = blckdiag(Pinf,zeros(pp));
-        mmm   = mm+pp;
     end
 end
 
@@ -386,10 +384,33 @@ switch DynareOptions.lik_init
         if isinf(dLIK)
             % Go to univariate diffuse filter if singularity problem.
             kalman_algo = 4;
+            singularity_flag = 1;
         end
     end
     if (kalman_algo==4)
         % Univariate Diffuse Kalman Filter
+        if singularity_flag
+            if isequal(H,0)
+                H = zeros(nobs,1);
+                mmm = mm;
+            else
+                if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
+                    H = diag(H);
+                    mmm = mm; 
+                else
+                    Z = [Z, eye(pp)];
+                    T = blkdiag(T,zeros(pp));
+                    Q = blkdiag(Q,H);
+                    R = blkdiag(R,eye(pp));
+                    Pstar = blkdiag(Pstar,H);
+                    Pinf  = blckdiag(Pinf,zeros(pp));
+                    H = zeros(nobs,1);
+                    mmm   = mm+pp;
+                end
+            end
+            % no need to test again for correlation elements
+            singularity_flag = 0;
+        end
         [dLIK,tmp,a,Pstar] = univariate_kalman_filter_d(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations, ...
                                                               Y, 1, size(Y,2), ...
                                                               zeros(mmm,1), Pinf, Pstar, ...
@@ -398,7 +419,7 @@ switch DynareOptions.lik_init
         diffuse_periods = length(tmp);
     end
   case 4% Start from the solution of the Riccati equation.
-        if kalman_algo ~= 2
+    if kalman_algo ~= 2
         kalman_algo = 1;
     end
     if isequal(H,0)
@@ -476,8 +497,6 @@ end
 % 4. Likelihood evaluation
 %------------------------------------------------------------------------------
 
-singularity_flag = 0;
-
 if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
     if no_missing_data_flag
         if DynareOptions.block == 1
@@ -520,23 +539,21 @@ if ( singularity_flag || (kalman_algo==2) || (kalman_algo==4) )
     if singularity_flag
         if isequal(H,0)
             H = zeros(nobs,1);
+            mmm = mm;
         else
             if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
                 H = diag(H);
+                mmm = mm;
             else
-                no_correlation_flag = 0;
+                Z = [Z, eye(pp)];
+                T = blkdiag(T,zeros(pp));
+                Q = blkdiag(Q,H);
+                R = blkdiag(R,eye(pp));
+                Pstar = blkdiag(Pstar,H);
+                Pinf  = blckdiag(Pinf,zeros(pp));
+                H = zeros(nobs,1);
+                mmm   = mm+pp;
             end
-        end
-        if no_correlation_flag
-            mmm = mm;
-        else
-            Z = [Z, eye(pp)];
-            T = blkdiag(T,zeros(pp));
-            Q = blkdiag(Q,H);
-            R = blkdiag(R,eye(pp));
-            Pstar = blkdiag(Pstar,H);
-            Pinf  = blckdiag(Pinf,zeros(pp));
-            mmm   = mm+pp;
         end
     end
 

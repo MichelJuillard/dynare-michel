@@ -39,7 +39,7 @@ function [LIK, likk,a,P] = univariate_kalman_filter(data_index,number_of_observa
 %! @item R
 %! Matrix (@var{mm}*@var{rr}) of doubles, second matrix of the state equation relating the structural innovations to the state variables.
 %! @item H
-%! Matrix (@var{pp}*@var{pp}) of doubles, covariance matrix of the measurement errors (if no measurement errors set H as a zero scalar).
+%! Vector (@var{pp}) of doubles, diagonal of covariance matrix of the measurement errors (corelation among measurement errors is handled by a model transformation).
 %! @item Z
 %! Matrix (@var{pp}*@var{mm}) of doubles or vector of integers, matrix relating the states to the observed variables or vector of indices (depending on the value of @var{Zflag}).
 %! @item mm
@@ -132,10 +132,10 @@ while notsteady && t<=last
     for i=1:rows(z)
         if Zflag
             prediction_error = Y(d_index(i),t) - z(i,:)*a;
-            Fi = z(i,:)*P*z(i,:)' + H(d_index(i),d_index(i));
+            Fi = z(i,:)*P*z(i,:)' + H(d_index(i));
         else
             prediction_error = Y(d_index(i),t) - a(z(i));
-            Fi = P(z(i),z(i)) + H(d_index(i),d_index(i));
+            Fi = P(z(i),z(i)) + H(d_index(i));
         end
         if Fi>kalman_tol
             if Zflag

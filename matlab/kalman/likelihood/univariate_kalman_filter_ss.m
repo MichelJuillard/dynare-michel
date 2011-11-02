@@ -25,6 +25,7 @@ function [LIK,likk,a] = univariate_kalman_filter_ss(Y,start,last,a,P,kalman_tol,
 %! @item T
 %! Matrix (@var{mm}*@var{mm}) of doubles, transition matrix of the state equation.
 %! @item H
+%! Vector (@var{pp}) of doubles, diagonal of covariance matrix of the measurement errors (corelation among measurement errors is handled by a model transformation).
 %! Matrix (@var{pp}*@var{pp}) of doubles, covariance matrix of the measurement errors (if no measurement errors set H as a zero scalar).
 %! @item Z
 %! Matrix (@var{pp}*@var{mm}) of doubles or vector of integers, matrix relating the states to the observed variables or vector of indices (depending on the value of @var{Zflag}).
@@ -89,10 +90,10 @@ while t<=last
     for i=1:pp
         if Zflag
             prediction_error = Y(i,t) - Z(i,:)*a;
-            Fi = Z(i,:)*PP*Z(i,:)' + H(i,i);
+            Fi = Z(i,:)*PP*Z(i,:)' + H(i);
         else
             prediction_error = Y(i,t) - a(Z(i));
-            Fi = PP(Z(i),Z(i)) + H(i,i);
+            Fi = PP(Z(i),Z(i)) + H(i);
         end
         if Fi>kalman_tol
             if Zflag

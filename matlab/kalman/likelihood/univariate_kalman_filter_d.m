@@ -41,7 +41,7 @@ function [dLIK, dlikk, a, Pstar, llik] = univariate_kalman_filter_d(data_index, 
 %! @item Q
 %! Matrix (@var{rr}*@var{rr}) of doubles, covariance matrix of the structural innovations (noise in the state equation).
 %! @item H
-%! Matrix (@var{pp}*@var{pp}) of doubles, covariance matrix of the measurement errors (if no measurement errors set H as a zero scalar).
+%! Vector (@var{pp}) of doubles, diagonal of covariance matrix of the measurement errors (corelation among measurement errors is handled by a model transformation).
 %! @item Z
 %! Matrix (@var{pp}*@var{mm}) of doubles, matrix relating the states to the observed variables.
 %! @item mm
@@ -119,7 +119,7 @@ while newRank && (t<=last)
     for i=1:length(d_index)
         Zi = Z(d_index(i),:);
         prediction_error = Y(d_index(i),t) - Zi*a;
-        Fstar = Zi*Pstar*Zi' + H(d_index(i),d_index(i));
+        Fstar = Zi*Pstar*Zi' + H(d_index(i));
         Finf  = Zi*Pinf*Zi';
         Kstar = Pstar*Zi';
         if Finf>kalman_tol && newRank
