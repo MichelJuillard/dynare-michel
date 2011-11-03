@@ -44,7 +44,7 @@ end
 
 dyn_size_01 = size(dyn_data_01,1);
 var_size_01 = size(var_names_01,1);
-if exist(file_name_01)
+if exist([file_name_01 '.m'],'file')
     file_name_02 = [file_name_01 '.m'];
     dyn_instr_01 = file_name_01;
     eval(dyn_instr_01);
@@ -56,7 +56,7 @@ if exist(file_name_01)
         end
         dyn_data_01(:,dyn_i_01) = dyn_tmp_01;
     end
-elseif exist([file_name_01 '.mat'])
+elseif exist([file_name_01 '.mat'],'file')
     file_name_02 = [file_name_01 '.mat'];
     s = load(file_name_01);
     for dyn_i_01=1:var_size_01
@@ -67,7 +67,7 @@ elseif exist([file_name_01 '.mat'])
         end
         dyn_data_01(:,dyn_i_01) = dyn_tmp_01;
     end
-elseif exist([file_name_01 '.xls'])
+elseif exist([file_name_01 '.xls'],'file')
     file_name_02 = [file_name_01 '.xls'];
     [num,txt,raw] = xlsread(file_name_01,xls_sheet,xls_range);
     for dyn_i_01=1:var_size_01
