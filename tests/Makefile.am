@@ -102,6 +102,7 @@ MODFILES = \
 	ms-sbvar/test_upper_cholesky_nc.mod \
 	ms-sbvar/test_ms_variances.mod \
 	ms-sbvar/test_ms_variances_repeated_runs.mod \
+	kalman_filter_smoother/gen_data.mod \
 	kalman_filter_smoother/algo1.mod \
 	kalman_filter_smoother/algo2.mod \
 	kalman_filter_smoother/algo3.mod \

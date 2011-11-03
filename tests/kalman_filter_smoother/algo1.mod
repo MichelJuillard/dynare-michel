@@ -32,7 +32,7 @@ end;
 
 varobs dw dx dy z;
        
-estimation(datafile=data,first_obs=1000,nobs=200,mh_replic=0,mode_compute=0,mode_file=algo1_mode);
+estimation(datafile=data,first_obs=1000,nobs=200,mh_replic=0,filtered_vars);
 
 //checking smoother consistency
 X = oo_.SmoothedVariables;
@@ -47,7 +47,7 @@ for t=2:200;
 end;
 if max(max(abs(err))) > 1e-10;
    error('Test fails')
-endif;
+end;
 
 d=load('data');
 dat = [d.dw d.dx d.dy d.z];
