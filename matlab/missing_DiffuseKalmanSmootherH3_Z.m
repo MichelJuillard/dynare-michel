@@ -279,4 +279,4 @@ if decomp_flag
     end
 end
 
-epsilon_hat = Y - Z*alphahat;
+epsilonhat = Y - Z*alphahat;
