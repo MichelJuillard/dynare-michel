@@ -115,7 +115,7 @@ MODFILES = \
 	kalman_filter_smoother/fs2000.mod \
 	kalman_filter_smoother/fs2000_1.mod \
 	kalman_filter_smoother/fs2000_2.mod \
-	kalman_filter_smoother/fs2000a.mod 
+	kalman_filter_smoother/fs2000a.mod
 
 EXTRA_DIST = \
 	$(MODFILES) \
