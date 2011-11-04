@@ -62,7 +62,9 @@ while i<n
         end
         xh1=x;
     end
+    save gstep.mat x h1 f0
 end
 
+save gstep.mat x h1 f0
 
 

@@ -233,3 +233,4 @@ if any(isnan(hessian_mat))
 end
 hh1=h1;
 htol1=htol;
+save hess.mat hessian_mat
