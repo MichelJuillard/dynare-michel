@@ -35,4 +35,4 @@ stoch_simul(periods=2000,irf=0);
 
 plot([w x y z]);
 
-save data w x y z dw dx dy;
+save data.mat w x y z dw dx dy;
