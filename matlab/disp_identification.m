@@ -188,7 +188,7 @@ if any(idemoments.ino),
         iweak = length(find(idemoments.jweak_pair(:,j)));
         if iweak,
             [jx,jy]=find(jmap_pair==j);
-            jstore=[jstore  jx(1) jy(1)]';
+            jstore=[jstore'  jx(1) jy(1)]';
             if SampleSize > 1
                 disp(['    [',name{jx(1)},',',name{jy(1)},'] are PAIRWISE collinear (with tol = 1.e-10) for ',num2str((iweak)/SampleSize*100),'% of MC runs!' ])
             else
