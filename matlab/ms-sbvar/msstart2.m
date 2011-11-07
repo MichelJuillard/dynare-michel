@@ -389,7 +389,7 @@ if options_.ms.indxestima
    if options_.ms.contemp_reduced_form 
       xhat = A0hat(a0indx);
       Bhat=Pmat{1};
-      Fhat = Bhat*A0hat;
+      Fhat = Bhat*A0hat
       ghat = NaN;
    else
       xhat = fn_tran_a2b(A0hat,Uiconst,nvar,n0);
@@ -409,6 +409,7 @@ if options_.ms.indxestima
             Fhat(:,ixeq) = Viconst{ixeq}*(gihat + HLV*(ci-Lit*gihat));
          end
       end
+      Fhat
       Bhat = Fhat/A0hat;   % ncoef-by-nvar reduced form lagged parameters.
    end
    nn = [nvar options_.ms.nlags  imstp];
