@@ -41,6 +41,8 @@ function [ys,params1,check] = evaluate_steady_state_file(ys_init,exo_ss,params,f
 
     if steadystate_flag == 1
             % old format
+            assignin('base','tmp_00_',params);
+            evalin('base','M_.params=tmp_00_; clear(''tmp_00_'')');
             h_steadystate = str2func([fname '_steadystate']);                       
             [ys,check] = h_steadystate(ys_init, exo_ss);
             params1 = evalin('base','M_.params');
