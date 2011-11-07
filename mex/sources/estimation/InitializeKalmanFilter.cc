@@ -113,14 +113,14 @@ InitializeKalmanFilter::setPstar(Matrix &Pstar, Matrix &Pinf, const Matrix &T, c
     {
       if (e.info > 0) // The matrix is not positive definite in NormCholesky calculator
         {
-          printf(e.message.c_str());
+          puts(e.message.c_str());
           info = -1; //likelihood = penalty;
           return;
         }
       else if (e.info < 0)
         {
           printf("Caugth unhandled TS exception with Pstar matrix: ");
-          printf(e.message.c_str());
+          puts(e.message.c_str());
           info = -1; //likelihood = penalty;
           throw;
         }
