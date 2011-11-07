@@ -115,7 +115,7 @@ end
         AHess = AHess + .5*(smpl+t0-1)*(vecDPmf' * kron(iF,iF) * vecDPmf);
         if nargout > 1
         for ii = 1:k
-            DLIK(ii,1)  = DLIK(ii,1) + (smpl-t0+1)*trace( iF*DF(:,:,ii) );
+%             DLIK(ii,1)  = DLIK(ii,1) + (smpl-t0+1)*trace( iF*DF(:,:,ii) );
         end
         end
         lik(t0:smpl) = lik(t0:smpl) + log(det(F));
