@@ -442,7 +442,7 @@ if analytic_derivation
     full_Hess = 0;
     DLIK = [];
     AHess = [];
-    if nargin<7 || isempty(derivatives_info)
+    if nargin<8 || isempty(derivatives_info)
         [A,B,nou,nou,Model,DynareOptions,DynareResults] = dynare_resolve(Model,DynareOptions,DynareResults);
         if ~isempty(EstimatedParameters.var_exo)
             indexo=EstimatedParameters.var_exo(:,1);
@@ -643,7 +643,19 @@ end
 % ------------------------------------------------------------------------------
 % 5. Adds prior if necessary
 % ------------------------------------------------------------------------------
-lnprior = priordens(xparam1,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
+if analytic_derivation
+    if full_Hess,
+        [lnprior, dlnprior, d2lnprior] = priordens(xparam1,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
+        AHess = Hess + d2lnprior;
+    else
+        [lnprior, dlnprior] = priordens(xparam1,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
+    end
+    if no_DLIK==0
+        DLIK = DLIK - dlnprior';
+    end
+else
+    lnprior = priordens(xparam1,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
+end
 fval    = (likelihood-lnprior);
 
 % Update DynareOptions.kalman_algo.
