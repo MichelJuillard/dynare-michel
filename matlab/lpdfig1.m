@@ -53,9 +53,9 @@ end
 
 if nargout == 3 
     if length(s)==1
-        D2ldens(idx) =  (nu+1)./(x(idx).^2) - 3*s.*x(idx).^2./(x(idx).^4) ;
+        D2ldens(idx) =  (nu+1)./(x(idx).^2) - 3*s(idx)./(x(idx).^4) ;
     else
-        D2ldens(idx) =  (nu(idx)+1)./(x(idx).^2) - 3*s.*x(idx).^2./(x(idx).^4) ;
+        D2ldens(idx) =  (nu(idx)+1)./(x(idx).^2) - 3*s(idx)./(x(idx).^4) ;
     end
 end
 

@@ -52,8 +52,8 @@ end
 
 if nargout == 3 
     if length(a)==1
-        D2ldens(idx) = -(a-1)./(x(idx)-aa).^2 + (b-1)./(bb-x(idx)).^2 ;
+        D2ldens(idx) = -(a-1)./(x(idx)-aa).^2 - (b-1)./(bb-x(idx)).^2 ;
     else
-        D2ldens(idx) = -(a(idx)-1)./(x(idx)-aa(idx)).^2 + (b(idx)-1)./(bb(idx)-x(idx)).^2;
+        D2ldens(idx) = -(a(idx)-1)./(x(idx)-aa(idx)).^2 - (b(idx)-1)./(bb(idx)-x(idx)).^2;
     end
 end
