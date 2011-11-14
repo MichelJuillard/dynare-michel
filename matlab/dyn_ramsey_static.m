@@ -47,23 +47,23 @@ if options_.steadystate_flag
     end
     ys = oo.steady_state;
     if inst_nbr == 1
-        inst_val = csolve(nl_func,oo_.steady_state(k_inst),'',options_.solve_tolf,100);
+        inst_val = csolve(nl_func,oo.steady_state(k_inst),'',options_.solve_tolf,100);
     else
         [inst_val,info1] = dynare_solve(nl_func,ys(k_inst),0);
     end
     ys(k_inst) = inst_val;
-    [x,params,check] = evaluate_steadystate_file(ys,exo_ss,params,M.fname,options_.steadystate_flag);
+    exo_ss = [oo.exo_steady_state oo.exo_det_steady_state];
+    [x,params,check] = evaluate_steady_state_file(ys,exo_ss,params,...
+                                                 M.fname,options_.steadystate_flag);
     if size(x,1) < M.endo_nbr 
         if length(M.aux_vars) > 0
             x =  feval([M.fname '_set_auxiliary_variables'],xx,...
-                       [oo.exo_steady_state,...
-                        oo.exo_det_steady_state],...
                        M.params);
         else
             error([M.fname '_steadystate.m doesn''t match the model']);
         end
     end
-    [junk,junk,multbar] = dyn_ramsey_static_1(x(k_inst),M,options_,oo_);
+    [junk,junk,multbar] = dyn_ramsey_static_1(x(k_inst),M,options_,oo);
     steady_state = [x(1:M.orig_endo_nbr); multbar];
 else
     xx = oo.steady_state(1:M.orig_endo_nbr);
@@ -106,10 +106,11 @@ if options_.steadystate_flag
                                    M.endo_names,'exact')];
     end
     oo.steady_state(k_inst) = x;
-    [x,check] = feval([M.fname '_steadystate'],...
-                      oo.steady_state,...
-                      [oo.exo_steady_state; ...
-                       oo.exo_det_steady_state]);
+    [x,params,check] = evaluate_steady_state_file(oo.steady_state,...
+                                                  [oo.exo_steady_state; ...
+                                                  oo.exo_det_steady_state] ...
+                                                  ,M.params,M.fname,...
+                                                  options_.steadystate_flag);
 end
 
 % setting steady state of auxiliary variables
