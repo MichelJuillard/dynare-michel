@@ -120,7 +120,7 @@ if ~isempty(estim_params_)
     [xparam1,estim_params_,bayestopt_,lb,ub,M_] = set_prior(estim_params_,M_,options_);
     if any(bayestopt_.pshape > 0)
         % Plot prior densities.
-        if options_.plot_priors
+        if ~options_.nograph && options_.plot_priors
             plot_priors(bayestopt_,M_,estim_params_,options_)
         end
         % Set prior bounds
