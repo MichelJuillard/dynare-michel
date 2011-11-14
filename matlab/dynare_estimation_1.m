@@ -849,7 +849,11 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         fprintf(fidTeX,' \n');
     end
     if nbplt == 1
-        hh = figure('Name','Smoothed shocks');
+        if options_.nograph
+            hh = figure('Name','Smoothed shocks','Visible','off');
+        else
+            hh = figure('Name','Smoothed shocks');
+        end
         NAMES = [];
         if options_.TeX, TeXNAMES = []; end
         for i=1:M_.exo_nbr
@@ -885,7 +889,6 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             eval(['print -dpdf ' M_.fname '_SmoothedShocks' int2str(1)]);
             saveas(hh,[M_.fname '_SmoothedShocks' int2str(1) '.fig']);
         end
-        if options_.nograph, close(hh), end
         if options_.TeX
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:M_.exo_nbr
@@ -902,7 +905,11 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         end
     else
         for plt = 1:nbplt-1
-            hh = figure('Name','Smoothed shocks');
+            if options_.nograph
+                hh = figure('Name','Smoothed shocks','Visible','off');
+            else
+                hh = figure('Name','Smoothed shocks');
+            end
             set(0,'CurrentFigure',hh)
             NAMES = [];
             if options_.TeX, TeXNAMES = []; end
@@ -940,7 +947,6 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 eval(['print -dpdf ' M_.fname '_SmoothedShocks' int2str(plt)]);
                 saveas(hh,[M_.fname '_SmoothedShocks' int2str(plt) '.fig']);
             end
-            if options_.nograph, close(hh), end
             if options_.TeX
                 fprintf(fidTeX,'\\begin{figure}[H]\n');
                 for jj = 1:nstar
@@ -954,7 +960,11 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 fprintf(fidTeX,'\n');
             end
         end
-        hh = figure('Name','Smoothed shocks');
+        if options_.nograph
+            hh = figure('Name','Smoothed shocks','Visible','off');
+        else
+            hh = figure('Name','Smoothed shocks');
+        end
         set(0,'CurrentFigure',hh)
         NAMES = [];
         if options_.TeX, TeXNAMES = []; end
@@ -996,7 +1006,6 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             eval(['print -dpdf ' M_.fname '_SmoothedShocks' int2str(nbplt)]);
             saveas(hh,[M_.fname '_SmoothedShocks' int2str(nbplt) '.fig']);
         end
-        if options_.nograph, close(hh), end
         if options_.TeX
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:size(NAMES,1);
@@ -1047,7 +1056,11 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             fprintf(fidTeX,' \n');
         end
         if nbplt == 1
-            hh = figure('Name','Smoothed observation errors');
+            if options_.nograph
+                hh = figure('Name','Smoothed observation errors','Visible','off');
+            else
+                hh = figure('Name','Smoothed observation errors');
+            end
             set(0,'CurrentFigure',hh)
             NAMES = [];
             if options_.TeX, TeXNAMES = []; end
@@ -1083,7 +1096,6 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 eval(['print -dpdf ' M_.fname '_SmoothedObservationErrors' int2str(1)]);
                 saveas(hh,[M_.fname '_SmoothedObservationErrors' int2str(1) '.fig']);
             end
-            if options_.nograph, close(hh), end
             if options_.TeX
                 fprintf(fidTeX,'\\begin{figure}[H]\n');
                 for jj = 1:number_of_plots_to_draw
@@ -1100,7 +1112,11 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             end
         else
             for plt = 1:nbplt
-                hh = figure('Name','Smoothed observation errors');
+                if options_.nograph
+                    hh = figure('Name','Smoothed observation errors','Visible','off');
+                else
+                    hh = figure('Name','Smoothed observation errors');
+                end
                 set(0,'CurrentFigure',hh)
                 NAMES = [];
                 if options_.TeX, TeXNAMES = []; end
@@ -1137,7 +1153,6 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     eval(['print -dpdf ' M_.fname '_SmoothedObservationErrors' int2str(plt)]);
                     saveas(hh,[M_.fname '_SmoothedObservationErrors' int2str(plt) '.fig']);
                 end
-                if options_.nograph, close(hh), end
                 if options_.TeX
                     fprintf(fidTeX,'\\begin{figure}[H]\n');
                     for jj = 1:nstar
@@ -1164,7 +1179,11 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         fprintf(fidTeX,' \n');
     end
     if nbplt == 1
-        hh = figure('Name','Historical and smoothed variables');
+        if options_.nograph
+            hh = figure('Name','Historical and smoothed variables','Visible','off');
+        else
+            hh = figure('Name','Historical and smoothed variables');
+        end
         NAMES = [];
         if options_.TeX, TeXNAMES = []; end
         for i=1:n_varobs
@@ -1200,7 +1219,6 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             eval(['print -dpdf ' M_.fname '_HistoricalAndSmoothedVariables' int2str(1)]);
             saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(1) '.fig']);
         end
-        if options_.nograph, close(hh), end
         if options_.TeX
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:n_varobs
@@ -1217,7 +1235,11 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         end
     else
         for plt = 1:nbplt-1
-            hh = figure('Name','Historical and smoothed variables');
+            if options_.nograph
+                hh = figure('Name','Historical and smoothed variables','Visible','off');
+            else
+                hh = figure('Name','Historical and smoothed variables');
+            end
             set(0,'CurrentFigure',hh)
             NAMES = [];
             if options_.TeX, TeXNAMES = []; end
@@ -1255,7 +1277,6 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 eval(['print -dpdf ' M_.fname '_HistoricalAndSmoothedVariables' int2str(plt)]);
                 saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(plt) '.fig']);
             end
-            if options_.nograph, close(hh), end
             if options_.TeX
                 fprintf(fidTeX,'\\begin{figure}[H]\n');
                 for jj = 1:nstar
@@ -1269,7 +1290,11 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 fprintf(fidTeX,'\n');
             end
         end
-        hh = figure('Name','Historical and smoothed variables');
+        if options_.nograph
+            hh = figure('Name','Historical and smoothed variables','Visible','off');
+        else
+            hh = figure('Name','Historical and smoothed variables');
+        end
         set(0,'CurrentFigure',hh)
         NAMES = [];
         if options_.TeX, TeXNAMES = []; end
@@ -1311,7 +1336,6 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             eval(['print -dpdf ' M_.fname '_HistoricalAndSmoothedVariables' int2str(nbplt)]);
             saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(nbplt) '.fig']);
         end
-        if options_.nograph, close(hh), end
         if options_.TeX
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:size(NAMES,1);
