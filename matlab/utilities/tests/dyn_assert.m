@@ -3,7 +3,7 @@ function t = dyn_assert(A,B,tol)
 
 % Copyright (C) 2011 Dynare Team
 % stephane DOT adjemian AT univ DASH lemans DOT fr
-%    
+%
 % This file is part of Dynare.
 %
 % Dynare is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@ if ( (nargin<3) || isempty(tol) )
 else
     use_isequal_matlab_builtin = 0;
 end
-    
+
 [nA,mA] = size(A);
 [nB,mB] = size(B);
 
