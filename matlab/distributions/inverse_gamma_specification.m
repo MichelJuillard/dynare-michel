@@ -125,9 +125,7 @@ else
 end
 
 %@test:1
-%$ %addpath ../matlab/distributions
 %$
-%$ % Define two dates
 %$ [s0,nu0] = inverse_gamma_specification(.75,.1,1,0);
 %$ [s1,nu1] = inverse_gamma_specification(.75,.1,1,1);
 %$
