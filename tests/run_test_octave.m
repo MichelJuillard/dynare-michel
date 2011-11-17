@@ -45,11 +45,16 @@ for i=1:size(name,2)
   cd(directory);
   printf("\n***  TESTING: %s ***\n", name{i});
   try
+    old_path = path;
     save wsOct
     dynare([testfile ext])
+    clear -all
     load wsOct
+    path(old_path);
   catch
+    clear -all
     load wsOct
+    path(old_path);
     failedBase{size(failedBase,2)+1} = name{i};
     printMakeCheckOctaveErrMsg(name{i}, lasterror);
   end_try_catch
@@ -85,21 +90,29 @@ for blockFlag = 0:1
         ## This is the reference simulation path against which all
         ## other simulations will be tested
         try
+          old_path = path;
           save wsOct
           run_ls2003(blockFlag, bytecodeFlag, solve_algos(i), default_stack_solve_algo)
+          clear -all
           load wsOct
+          path(old_path);
           y_ref = oo_.endo_simul;
           save('test.mat','y_ref');
         catch
+          clear -all
           load wsOct
+          path(old_path);
           failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
           printMakeCheckOctaveErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], lasterror);
         end_try_catch
       else
         try
+          old_path = path;
           save wsOct
           run_ls2003(blockFlag, bytecodeFlag, solve_algos(i), default_stack_solve_algo)
+          clear -all
           load wsOct
+          path(old_path);
           ## Test against the reference simulation path
           load('test.mat','y_ref');
           diff = oo_.endo_simul - y_ref;
@@ -109,7 +122,9 @@ for blockFlag = 0:1
             printMakeCheckOctaveErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], differr);
           endif
         catch
+          clear -all
           load wsOct
+          path(old_path);
           failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
           printMakeCheckOctaveErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], lasterror);
         end_try_catch
@@ -118,9 +133,12 @@ for blockFlag = 0:1
     for i = 1:length(stack_solve_algos)
       num_block_tests = num_block_tests + 1;
       try
+        old_path = path;
         save wsOct
         run_ls2003(blockFlag, bytecodeFlag, default_solve_algo, stack_solve_algos(i))
+        clear -all
         load wsOct
+        path(old_path);
         ## Test against the reference simulation path
         load('test.mat','y_ref');
         diff = oo_.endo_simul - y_ref;
@@ -130,7 +148,9 @@ for blockFlag = 0:1
           printMakeCheckOctaveErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(default_solve_algo) ', ' num2str(stack_solve_algos(i)) ')'], differr);
         endif
       catch
+        clear -all
         load wsOct
+        path(old_path);
         failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
         printMakeCheckOctaveErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], lasterror);
       end_try_catch
