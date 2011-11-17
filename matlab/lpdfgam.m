@@ -1,4 +1,4 @@
-function  ldens = lpdfgam(x,a,b);
+function  [ldens,Dldens,D2ldens] = lpdfgam(x,a,b);
 % Evaluates the logged GAMMA PDF at x.
 %
 % INPUTS     
@@ -37,4 +37,22 @@ if length(a)==1
     ldens(idx) = -gammaln(a) - a*log(b) + (a-1)*log(x(idx)) - x(idx)/b ;
 else
     ldens(idx) = -gammaln(a(idx)) - a(idx).*log(b(idx)) + (a(idx)-1).*log(x(idx)) - x(idx)./b(idx) ;
+end
+
+
+
+if nargout >1 
+    if length(a)==1
+        Dldens(idx) = (a-1)./(x(idx)) - ones(length(idx),1)/b ;
+    else
+        Dldens(idx) = (a(idx)-1)./(x(idx)) - ones(length(idx),1)./b(idx) ;
+    end
+end
+
+if nargout == 3
+    if length(a)==1
+        D2ldens(idx) = -(a-1)./(x(idx)).^2;
+    else
+        D2ldens(idx) = -(a(idx)-1)./(x(idx)).^2;
+    end
 end

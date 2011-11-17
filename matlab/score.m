@@ -98,7 +98,7 @@ function [DLIK] = score(T,R,Q,H,P,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,riccat
             a = T*(a+K*v);
         end
         for ii = 1:k
-            DLIK(ii,1)  = DLIK(ii,1) + (smpl-t0+1)*trace( iF*DF(:,:,ii) );
+%             DLIK(ii,1)  = DLIK(ii,1) + (smpl-t0+1)*trace( iF*DF(:,:,ii) );
         end
         
     end    

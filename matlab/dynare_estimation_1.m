@@ -353,7 +353,7 @@ if ~options_.mh_posterior_mode_estimation && options_.cova_compute
 end
 
 if options_.mode_check == 1 && ~options_.mh_posterior_mode_estimation
-    mode_check('objective_function',xparam1,hh,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+    mode_check(objective_function,xparam1,hh,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
 end
 
 if ~options_.mh_posterior_mode_estimation

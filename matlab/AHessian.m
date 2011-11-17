@@ -1,5 +1,5 @@
-function [AHess] = AHessian(T,R,Q,H,P,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,riccati_tol)
-% function [AHess] = AHessian(T,R,Q,H,P,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,riccati_tol)
+function [AHess, DLIK, LIK] = AHessian(T,R,Q,H,P,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,riccati_tol)
+% function [AHess, DLIK, LIK] = AHessian(T,R,Q,H,P,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,riccati_tol)
 %
 % computes the asymptotic hessian matrix of the log-likelihood function of
 % a state space model (notation as in kalman_filter.m in DYNARE
@@ -28,6 +28,7 @@ function [AHess] = AHessian(T,R,Q,H,P,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,ri
 
     k = size(DT,3);                                 % number of structural parameters
     smpl = size(Y,2);                               % Sample size.
+    pp   = size(Y,1);                               % Maximum number of observed variables.
     mm   = size(T,2);                               % Number of state variables.
     a    = zeros(mm,1);                             % State vector.
     Om   = R*Q*transpose(R);                        % Variance of R times the vector of structural innovations.
@@ -36,6 +37,11 @@ function [AHess] = AHessian(T,R,Q,H,P,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,ri
     notsteady   = 1;                                % Steady state flag.
     F_singular  = 1;
 
+lik  = zeros(smpl,1);                           % Initialization of the vector gathering the densities.
+LIK  = Inf;                                     % Default value of the log likelihood.
+if nargout > 1,
+    DLIK  = zeros(k,1);                             % Initialization of the score.
+end
     AHess  = zeros(k,k);                             % Initialization of the Hessian
     Da    = zeros(mm,k);                             % State vector.
     Dv = zeros(length(mf),k);
@@ -59,17 +65,21 @@ function [AHess] = AHessian(T,R,Q,H,P,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,ri
             F_singular = 0;
             iF     = inv(F);
             K      = P(:,mf)*iF;
+            lik(t) = log(det(F))+transpose(v)*iF*v;
 
             [DK,DF,DP1] = computeDKalman(T,DT,DOm,P,DP,DH,mf,iF,K);
             
             		for ii = 1:k
                         Dv(:,ii)   = -Da(mf,ii) - DYss(mf,ii);
                         Da(:,ii)   = DT(:,:,ii)*(a+K*v) + T*(Da(:,ii)+DK(:,:,ii)*v + K*Dv(:,ii));
+                        if t>=start && nargout > 1
+                            DLIK(ii,1)  = DLIK(ii,1) + trace( iF*DF(:,:,ii) ) + 2*Dv(:,ii)'*iF*v - v'*(iF*DF(:,:,ii)*iF)*v;
+                        end
                     end
                     vecDPmf = reshape(DP(mf,mf,:),[],k);
-                    iPmf = inv(P(mf,mf));
+%                     iPmf = inv(P(mf,mf));
                     if t>=start
-                        AHess = AHess + Dv'*iPmf*Dv + .5*(vecDPmf' * kron(iPmf,iPmf) * vecDPmf);
+                        AHess = AHess + Dv'*iF*Dv + .5*(vecDPmf' * kron(iF,iF) * vecDPmf);
                     end
             a      = T*(a+K*v);                   
             P      = T*(P-K*P(mf,:))*transpose(T)+Om;
@@ -92,13 +102,23 @@ function [AHess] = AHessian(T,R,Q,H,P,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,ri
                   	for ii = 1:k
                         Dv(:,ii)   = -Da(mf,ii)-DYss(mf,ii);
                         Da(:,ii)   = DT(:,:,ii)*(a+K*v) + T*(Da(:,ii)+DK(:,:,ii)*v + K*Dv(:,ii));
+                if t>=start && nargout >1
+                   DLIK(ii,1)  = DLIK(ii,1) + trace( iF*DF(:,:,ii) ) + 2*Dv(:,ii)'*iF*v - v'*(iF*DF(:,:,ii)*iF)*v;
+                end
                     end
              if t>=start
-                AHess = AHess + Dv'*iPmf*Dv; 
+                AHess = AHess + Dv'*iF*Dv; 
              end   
             a = T*(a+K*v);
+        lik(t) = transpose(v)*iF*v;
         end
-        AHess = AHess + .5*(smpl+t0-1)*(vecDPmf' * kron(iPmf,iPmf) * vecDPmf);
+        AHess = AHess + .5*(smpl+t0-1)*(vecDPmf' * kron(iF,iF) * vecDPmf);
+        if nargout > 1
+        for ii = 1:k
+%             DLIK(ii,1)  = DLIK(ii,1) + (smpl-t0+1)*trace( iF*DF(:,:,ii) );
+        end
+        end
+        lik(t0:smpl) = lik(t0:smpl) + log(det(F));
 %         for ii = 1:k;
 %             for jj = 1:ii
 %              H(ii,jj) = trace(iPmf*(.5*DP(mf,mf,ii)*iPmf*DP(mf,mf,jj) + Dv(:,ii)*Dv(:,jj)'));
@@ -107,6 +127,13 @@ function [AHess] = AHessian(T,R,Q,H,P,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,ri
     end    
     
 AHess = -AHess;  
+if nargout > 1,
+    DLIK = DLIK/2;
+end
+% adding log-likelihhod constants
+lik = (lik + pp*log(2*pi))/2;
+
+LIK = sum(lik(start:end)); % Minus the log-likelihood.
 % end of main function    
     
 function [DK,DF,DP1] = computeDKalman(T,DT,DOm,P,DP,DH,mf,iF,K)

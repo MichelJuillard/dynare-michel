@@ -1,4 +1,4 @@
-function mode_check(func,x,fval,hessian,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
+function mode_check(fun,x,hessian,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
 
 % function mode_check(x,fval,hessian,gend,data,lb,ub)
 % Checks the maximum likelihood mode
@@ -91,7 +91,7 @@ for plt = 1:nbplt,
         end
         for i=1:length(z)
             xx(kk) = z(i);
-            [fval, exit_flag] = feval(fun,x,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
+            [fval, exit_flag] = feval(fun,xx,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
             if exit_flag
                 y(i,1) = fval;
             else

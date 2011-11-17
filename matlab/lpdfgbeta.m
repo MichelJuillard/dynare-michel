@@ -1,4 +1,4 @@
-function ldens = lpdfgbeta(x,a,b,aa,bb);
+function [ldens,Dldens,D2ldens] = lpdfgbeta(x,a,b,aa,bb);
 % Evaluates the logged BETA PDF at x. 
 %
 % INPUTS 
@@ -38,4 +38,22 @@ if length(a)==1
     ldens(idx) = -betaln(a,b) + (a-1)*log(x(idx)-aa) + (b-1)*log(bb-x(idx)) - (a+b-1)*log(bb-aa) ;
 else
     ldens(idx) = -betaln(a(idx),b(idx)) + (a(idx)-1).*log(x(idx)-aa(idx)) + (b(idx)-1).*log(bb(idx)-x(idx)) - (a(idx)+b(idx)-1).*log(bb(idx)-aa(idx));
+end
+
+
+if nargout >1 
+    if length(a)==1
+        Dldens(idx) = (a-1)./(x(idx)-aa) - (b-1)./(bb-x(idx)) ;
+    else
+        Dldens(idx) = (a(idx)-1)./(x(idx)-aa(idx)) - (b(idx)-1)./(bb(idx)-x(idx));
+    end
+end
+
+
+if nargout == 3 
+    if length(a)==1
+        D2ldens(idx) = -(a-1)./(x(idx)-aa).^2 - (b-1)./(bb-x(idx)).^2 ;
+    else
+        D2ldens(idx) = -(a(idx)-1)./(x(idx)-aa(idx)).^2 - (b(idx)-1)./(bb(idx)-x(idx)).^2;
+    end
 end
