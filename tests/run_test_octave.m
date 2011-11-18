@@ -93,13 +93,11 @@ for blockFlag = 0:1
           old_path = path;
           save wsOct
           run_ls2003(blockFlag, bytecodeFlag, solve_algos(i), default_stack_solve_algo)
-          clear -all
           load wsOct
           path(old_path);
           y_ref = oo_.endo_simul;
           save('test.mat','y_ref');
         catch
-          clear -all
           load wsOct
           path(old_path);
           failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
@@ -110,7 +108,6 @@ for blockFlag = 0:1
           old_path = path;
           save wsOct
           run_ls2003(blockFlag, bytecodeFlag, solve_algos(i), default_stack_solve_algo)
-          clear -all
           load wsOct
           path(old_path);
           ## Test against the reference simulation path
@@ -122,7 +119,6 @@ for blockFlag = 0:1
             printMakeCheckOctaveErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'], differr);
           endif
         catch
-          clear -all
           load wsOct
           path(old_path);
           failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
@@ -136,7 +132,6 @@ for blockFlag = 0:1
         old_path = path;
         save wsOct
         run_ls2003(blockFlag, bytecodeFlag, default_solve_algo, stack_solve_algos(i))
-        clear -all
         load wsOct
         path(old_path);
         ## Test against the reference simulation path
@@ -148,7 +143,6 @@ for blockFlag = 0:1
           printMakeCheckOctaveErrMsg(['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(default_solve_algo) ', ' num2str(stack_solve_algos(i)) ')'], differr);
         endif
       catch
-        clear -all
         load wsOct
         path(old_path);
         failedBlock{size(failedBlock,2)+1} = ['block_bytecode/run_ls2003.m(' num2str(blockFlag) ', ' num2str(bytecodeFlag) ', ' num2str(solve_algos(i)) ', ' num2str(default_stack_solve_algo) ')'];
