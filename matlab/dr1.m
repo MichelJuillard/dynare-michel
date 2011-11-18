@@ -307,11 +307,6 @@ else  % use original Dynare solver
         if ~exist('OCTAVE_VERSION')
             dr.eigval = eig(e,d);
         end
-        for i=1:nd
-            if abs(ss(i,i)) < 1e-6 && abs(tt(i,i)) < 1e-6
-                info(1) = 7;
-            end
-        end
         return
     end
 
