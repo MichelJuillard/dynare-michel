@@ -60,7 +60,15 @@ mjdgges(double *a, double *b, double *z, double *n, double *sdim, double *eval_r
   pei = eval_i;
   for (per = eval_r; per <= &eval_r[i_n-1]; ++per)
     {
-      *per = *par / *pb;
+      if ((fabs(*par) > 1e-6) || (fabs(*pb) > 1e-6)) 
+	*per = *par / *pb;
+      else
+	{
+	  /* the ratio is too close to 0/0;
+	     returns specific error number only if no other error */
+	  if (i_info == 0)
+	    *info = -30;
+	}
       if (*pai == 0.0 && *pb == 0.0)
         *pei = 0.0;
       else

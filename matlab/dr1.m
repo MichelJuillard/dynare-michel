@@ -290,9 +290,13 @@ else  % use original Dynare solver
     mexErrCheck('mjdgges', err);
 
     if info1
-        info(1) = 2;
-        info(2) = info1;
-        info(3) = size(e,2);
+        if info1 == -30
+            info(1) = 7;
+        else
+            info(1) = 2;
+            info(2) = info1;
+            info(3) = size(e,2);
+        end
         return
     end
 
