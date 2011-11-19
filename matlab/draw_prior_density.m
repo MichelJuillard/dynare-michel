@@ -45,8 +45,7 @@ switch pshape(indx)
     density = @(x,a,b,aa,bb) betapdf((x-aa)/(bb-aa), a, b)/(bb-aa);
     infbound = betainv(truncprior,p6(indx),p7(indx))*(p4(indx)-p3(indx))+p3(indx);
     supbound = betainv(1-truncprior,p6(indx),p7(indx))*(p4(indx)-p3(indx))+p3(indx);
-    stepsize = (supbound-infbound)/steps;
-    abscissa = infbound:stepsize:supbound;
+    abscissa = linspace(infbound,supbound,steps);
     dens = density(abscissa,p6(indx),p7(indx),p3(indx),p4(indx));
   case 2% Generalized Gamma prior
     density = @(x,a,b,c) gampdf(x-c,a,b);
@@ -61,14 +60,12 @@ switch pshape(indx)
             rethrow(lasterror)
         end
     end
-    stepsize = (supbound-infbound)/steps;
-    abscissa = infbound:stepsize:supbound;
+    abscissa = linspace(infbound,supbound,steps);
     dens = density(abscissa,p6(indx),p7(indx),p3(indx));
   case 3% Gaussian prior
     infbound = norminv(truncprior,p6(indx),p7(indx)); 
     supbound = norminv(1-truncprior,p6(indx),p7(indx));
-    stepsize = (supbound-infbound)/steps;
-    abscissa = infbound:stepsize:supbound;
+    abscissa = linspace(infbound,supbound,steps);
     dens = normpdf(abscissa,p6(indx),p7(indx));  
   case 4% Inverse-gamma of type 1 prior
     try
@@ -82,14 +79,12 @@ switch pshape(indx)
             rethrow(lasterror)
         end
     end
-    stepsize = (supbound-infbound)/steps;
-    abscissa = infbound:stepsize:supbound;
+    abscissa = linspace(infbound,supbound,steps);
     dens = exp(lpdfig1(abscissa-p3(indx),p6(indx),p7(indx)));  
   case 5% Uniform prior
     infbound = p6(indx);
     supbound = p7(indx);
-    stepsize = (supbound-infbound)/steps;
-    abscissa = infbound:stepsize:supbound;
+    abscissa = linspace(infbound,supbound,steps);
     dens = ones(1, steps) / (supbound-infbound);
   case 6% Inverse-gamma of type 2 prior
     try
@@ -103,23 +98,22 @@ switch pshape(indx)
             rethrow(lasterror)
         end
     end
-    stepsize = (supbound-infbound)/steps ;
-    abscissa = infbound:stepsize:supbound;
+    abscissa = linspace(infbound,supbound,steps);
     dens = exp(lpdfig2(abscissa-p3(indx),p6(indx),p7(indx)));
   otherwise
     error(sprintf('draw_prior_density: unknown distribution shape (index %d, type %d)', indx, pshape(indx)));
 end 
 
-k = [1:length(dens)];
 if pshape(indx) ~= 5 
     [junk,k1] = max(dens);
     if k1 == 1 || k1 == length(dens)
-        k = find(dens < 10);
+        k = find(dens > 10);
+        dens(k) = NaN;
     end
 end
-binf = abscissa(k(1));
-bsup = abscissa(k(length(k)));
-x = abscissa(k);
-f = dens(k);
+binf = abscissa(1);
+bsup = abscissa(end);
+x = abscissa;
+f = dens;
 f(find(x<bayestopt_.lb(indx)))=0;
 f(find(x>bayestopt_.ub(indx)))=0;
