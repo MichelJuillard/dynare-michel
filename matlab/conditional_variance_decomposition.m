@@ -33,6 +33,11 @@ function ConditionalVarianceDecomposition = conditional_variance_decomposition(S
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+if any(Steps <= 0)
+    error(['Conditional variance decomposition: All periods must be strictly ' ...
+           'positive'])
+end
+
 number_of_state_innovations = ...
     StateSpaceModel.number_of_state_innovations;
 transition_matrix = StateSpaceModel.transition_matrix;

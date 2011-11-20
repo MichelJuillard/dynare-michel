@@ -3027,16 +3027,16 @@ See below.
 
 @item conditional_variance_decomposition = [@var{INTEGER1} @var{INTEGER2} @dots{}]
 Computes a conditional variance decomposition for the specified
-period(s). Conditional variances are given by
+period(s). The periods must be strictly positive. Conditional variances are given by
 @math{var(y_{t+k}|t)}. For period 1, the conditional variance
 decomposition provides the decomposition of the effects of shocks upon
 impact. The results are stored in
-@var{oo_.conditional_variance_decomposition}
+@code{oo_.conditional_variance_decomposition}
 (@pxref{oo_.conditional_variance_decomposition}).
 
 @item pruning
 Discard higher order terms when iteratively computing simulations of
-the solution, as in @cite{Schaumburg and Sims (2008)}.
+the solution, as in @cite{Kim, Kim, Schaumburg and Sims (2008)}.
 
 @item partial_information
 @anchor{partial_information}
