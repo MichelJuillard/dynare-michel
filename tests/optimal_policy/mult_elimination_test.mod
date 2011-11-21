@@ -6,7 +6,7 @@
 var A de dq dR pie pie_obs pie_s R R_obs y y_obs y_s ;
 varexo e_A e_pies e_q e_ys ;
 
-parameters psi1 psi2 psi3 rho_R tau alpha rr k rho_q rho_A rho_ys rho_pies ls1_r s1 s2 s3 s4 s5;
+parameters psi1 psi2 psi3 rho_R tau alpha rr k rho_q rho_A rho_ys rho_pies;
 
 psi1 = 1.54;
 psi2 = 0.25;

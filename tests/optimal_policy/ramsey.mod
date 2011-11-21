@@ -3,7 +3,7 @@
 var y inflation r;
 varexo y_ inf_;
 
-parameters delta sigma alpha kappa gammarr gammax0 gammac0 rbar lambda1 lambda2;
+parameters delta sigma alpha kappa lambda1 lambda2;
 
 delta =  0.44;
 kappa =  0.18;
