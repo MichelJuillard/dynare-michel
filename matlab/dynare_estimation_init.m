@@ -69,7 +69,12 @@ end
 % Set options_.lik_init equal to 3 if diffuse filter is used or
 % kalman_algo refers to a diffuse filter algorithm.
 if (options_.diffuse_filter==1) || (options_.kalman_algo > 2)
-    options_.lik_init = 3;
+    if options_.lik_init == 2
+        error(['options diffuse_filter, lik_init and/or kalman_algo have ' ...
+               'contradictory settings'])
+    else
+        options_.lik_init = 3;
+    end
 end
 
 % If options_.lik_init == 1

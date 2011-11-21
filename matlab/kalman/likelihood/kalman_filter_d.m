@@ -58,6 +58,7 @@ t    = start;              % Initialization of the time index.
 dlik = zeros(smpl,1);      % Initialization of the vector gathering the densities.
 dLIK = Inf;                % Default value of the log likelihood.
 oldK = Inf;
+s    = 0;
 
 while rank(Pinf,kalman_tol) && (t<=last)
     s = t-start+1;
