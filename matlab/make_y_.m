@@ -31,8 +31,6 @@ function make_y_
 
 global M_ options_ oo_ ys0_ 
 
-options_ = set_default_option(options_,'periods',0);
-
 if isempty(oo_.steady_state)
     oo_.steady_state = zeros(M_.endo_nbr,1);
 end

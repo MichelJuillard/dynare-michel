@@ -31,8 +31,6 @@ function make_ex_
 
 global M_ options_ oo_ ex0_ ex_det0_
 
-options_ = set_default_option(options_,'periods',0);
-
 if isempty(oo_.exo_steady_state)
     oo_.exo_steady_state = zeros(M_.exo_nbr,1);
 end
