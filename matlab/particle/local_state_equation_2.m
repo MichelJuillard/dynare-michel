@@ -1,12 +1,14 @@
-function [y,y_] = local_state_iteration(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss)
+function [y,y_] = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss)
 
 %@info:
-%! @deftypefn {Function File} {@var{y}, @var{y_} =} local_state_iteration (@var{yhat},@var{epsilon}, @var{ghx}, @var{ghu}, @var{constant}, @var{ghxx}, @var{ghuu}, @var{ghxu}, @var{yhat_}, @var{ss})
-%! @anchor{particle/local_state_iteration}
+%! @deftypefn {Function File} {@var{y}, @var{y_} =} local_state_equation_2 (@var{yhat},@var{epsilon}, @var{ghx}, @var{ghu}, @var{constant}, @var{ghxx}, @var{ghuu}, @var{ghxu}, @var{yhat_}, @var{ss})
+%! @anchor{particle/local_state_equation_2}
 %! @sp 1
-%! Given an initial condition (y) and an innovation (epsilon), this routines computes the next value of the state variables if the
+%! Given the states (y) and structural innovations (epsilon), this routine computes the level of selected endogenous variables when the
 %! model is approximated by an order two taylor expansion around the deterministic steady state. Depending on the number of input/output
-%! argument the pruning algorithm advocated by C. Sims is used or not.
+%! argument the pruning algorithm advocated by C. Sims is used or not (this version should not be used if the selected endogenous variables
+%! are not the states of the model).
+%!
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
@@ -16,30 +18,30 @@ function [y,y_] = local_state_iteration(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,
 %! @item epsilon
 %! q*1 vector of doubles, structural innovations.
 %! @item ghx
-%! n*n matrix of doubles, is a subset of dr.ghx where we only consider the lines corresponding to the state variables.
+%! m*n matrix of doubles, restricted dr.ghx where we only consider the lines corresponding to a subset of endogenous variables.
 %! @item ghu
-%! n*q matrix of doubles, is a subset of dr.ghu where we only consider the lines corresponding to the state variables.
+%! m*q matrix of doubles, restricted dr.ghu where we only consider the lines corresponding to a subset of endogenous variables.
 %! @item constant
-%! n*1 vector of doubles, deterministic steady state plus second order correction for the state variables.
+%! m*1 vector of doubles, deterministic steady state plus second order correction for a subset of endogenous variables.
 %! @item ghxx
-%! n*n² matrix of doubles, subset of dr.ghxx where we only consider the lines corresponding to the state variables.
+%! m*n² matrix of doubles, restricted dr.ghxx where we only consider the lines corresponding to a subset of endogenous variables.
 %! @item ghuu
-%! n*q² matrix of doubles, subset of dr.ghuu where we only consider the lines corresponding to the state variables.
+%! m*q² matrix of doubles, restricted dr.ghuu where we only consider the lines corresponding to a subset of endogenous variables.
 %! @item ghxu
-%! n*(nq) matrix of doubles, subset of dr.ghxu where we only consider the lines corresponding to the state variables.
+%! m*(nq) matrix of doubles, subset of dr.ghxu where we only consider the lines corresponding to a subset of endogenous variables.
 %! @item yhat_
-%! n*1 vector of doubles, second initial condition for pruning version.
+%! n*1 vector of doubles, spurious states for the pruning version.
 %! @item ss
-%! n*1 vector of doubles, steady state for the union of the states and observed variables.
+%! n*1 vector of doubles, steady state for the states.
 %! @end table
 %! @sp 2
 %! @strong{Outputs}
 %! @sp 1
 %! @table @ @var
 %! @item y
-%! n*1 vector of doubles, next values for the state variables.
+%! m*1 vector of doubles, selected endogenous variables.
 %! @item y_
-%! n*1 vector of doubles, update of the latent variables needed for the pruning version (first order update).
+%! m*1 vector of doubles, update of the latent variables needed for the pruning version (first order update).
 %! @end table
 %! @sp 2
 %! @strong{Remarks}
@@ -57,8 +59,6 @@ function [y,y_] = local_state_iteration(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,
 %@eod:
 
 % Copyright (C) 2011 Dynare Team
-% stephane DOT adjemian AT univ DASH lemans DOT fr
-% frederic DOT karame AT univ DASH evry DOT fr
 %
 % This file is part of Dynare.
 %
@@ -75,20 +75,23 @@ function [y,y_] = local_state_iteration(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
+%           frederic DOT karame AT univ DASH evry DOT fr    
+
 number_of_threads = 1;
 
 if nargin==8
     pruning = 0;
     if nargout>1
-        error('local_state_iteration:: Numbers of input and output argument are inconsistent!')
+        error('local_state_equation_2:: Numbers of input and output argument are inconsistent!')
     end
 elseif nargin==10
     pruning = 1;
     if nargout~=2
-        error('local_state_iteration:: Numbers of input and output argument are inconsistent!')
+        error('local_state_equation_2:: Numbers of input and output argument are inconsistent!')
     end
 else
-    error('local_state_iteration:: Wrong number of input arguments!')
+    error('local_state_equation_2:: Wrong number of input arguments!')
 end
 
 switch pruning
@@ -111,8 +114,6 @@ switch pruning
 end
 
 %@test:1
-%$ addpath ../matlab
-%$
 %$ n = 2;
 %$ q = 3;
 %$
@@ -128,8 +129,8 @@ end
 %$ ss = ones(n,1);
 %$
 %$ % Call the tested routine.
-%$ y1 = local_state_iteration(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu);
-%$ [y2,y2_] = local_state_iteration(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss);
+%$ y1 = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu);
+%$ [y2,y2_] = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss);
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(y1,ones(n,1));
@@ -139,7 +140,6 @@ end
 %@eof:1
 
 %@test:2
-%$ addpath ../matlab
 %$ old_path = pwd;
 %$ cd([fileparts(which('dynare')) '/../tests/']);
 %$ dynare('dsge_base2');
@@ -163,8 +163,8 @@ end
 %$ ss = dr.ys(istates,:);
 %$
 %$ % Call the tested routine.
-%$ y1 = local_state_iteration(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu);
-%$ [y2,y2_] = local_state_iteration(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss);
+%$ y1 = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu);
+%$ [y2,y2_] = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss);
 %$
 %$ % Check the results.
 %$ t(1) = 1;%dyn_assert(y1,ones(n,1));
