@@ -241,6 +241,7 @@ end
 
 % Define union of observed and state variables
 if options_.block == 1
+    k1 = k1';
     [k2, i_posA, i_posB] = union(k1', M_.state_var', 'rows');
     % Set restrict_state to postion of observed + state variables in expanded state vector.
     oo_.dr.restrict_var_list  = [k1(i_posA) M_.state_var(sort(i_posB))];
