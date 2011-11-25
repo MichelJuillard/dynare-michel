@@ -1,4 +1,4 @@
-function [r, g1] = block_mfs_steadystate(y, b, y_all)
+function [r, g1] = block_mfs_steadystate(y, b, y_all, exo, params, M)
 % Wrapper around the *_static.m file, for use with dynare_solve,
 % when block_mfs option is given to steady.
 
@@ -19,10 +19,7 @@ function [r, g1] = block_mfs_steadystate(y, b, y_all)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ oo_
+y_all(M.blocksMFS{b}) = y;
 
-y_all(M_.blocksMFS{b}) = y;
-x = [oo_.exo_steady_state; oo_.exo_det_steady_state];
-
-eval(['[r,g1] = ' M_.fname '_static(b, y_all, x, M_.params);']);
+eval(['[r,g1] = ' M.fname '_static(b, y_all, exo, params);']);
 g1 = full(g1);

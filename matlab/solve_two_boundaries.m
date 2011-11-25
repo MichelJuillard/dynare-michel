@@ -1,4 +1,4 @@
-function y = solve_two_boundaries(fname, y, x, params, steady_state, y_index, nze, periods, y_kmin_l, y_kmax_l, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo)
+function y = solve_two_boundaries(fname, y, x, params, steady_state, y_index, nze, periods, y_kmin_l, y_kmax_l, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo, M, oo)
 % Computes the deterministic simulation of a block of equation containing
 % both lead and lag variables using relaxation methods 
 %
@@ -60,7 +60,6 @@ function y = solve_two_boundaries(fname, y, x, params, steady_state, y_index, nz
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global oo_ M_;
 cvg=0;
 iter=0;
 Per_u_=0;
@@ -158,7 +157,7 @@ while ~(cvg==1 || iter>maxit_),
         if(iter>0)
             if(~isreal(max_res) || isnan(max_res) || (max_resa<max_res && iter>1))
                 if(~isreal(max_res))
-                    disp(['Variable ' M_.endo_names(max_indx,:) ' (' int2str(max_indx) ') returns an undefined value']);
+                    disp(['Variable ' M.endo_names(max_indx,:) ' (' int2str(max_indx) ') returns an undefined value']);
                 end;
                 if(isnan(max_res))
                     detJ=det(g1aa);
@@ -191,12 +190,12 @@ while ~(cvg==1 || iter>maxit_),
                     else
                         fprintf('Error in simul: Convergence not achieved in block %d, after %d iterations.\n Increase "options_.maxit_" or set "cutoff=0" in model options.\n',Block_Num, iter);
                     end;
-                    oo_.deterministic_simulation.status = 0;
-                    oo_.deterministic_simulation.error = max_res;
-                    oo_.deterministic_simulation.iterations = iter;
-                    oo_.deterministic_simulation.block(Block_Num).status = 0;% Convergency failed.
-                    oo_.deterministic_simulation.block(Block_Num).error = max_res;
-                    oo_.deterministic_simulation.block(Block_Num).iterations = iter;
+                    oo.deterministic_simulation.status = 0;
+                    oo.deterministic_simulation.error = max_res;
+                    oo.deterministic_simulation.iterations = iter;
+                    oo.deterministic_simulation.block(Block_Num).status = 0;% Convergency failed.
+                    oo.deterministic_simulation.block(Block_Num).error = max_res;
+                    oo.deterministic_simulation.block(Block_Num).iterations = iter;
                     return;
                 end;
             else
@@ -314,18 +313,18 @@ while ~(cvg==1 || iter>maxit_),
 end;
 if (iter>maxit_)
     disp(['No convergence after ' num2str(iter,'%4d') ' iterations in Block ' num2str(Block_Num,'%d')]);
-    oo_.deterministic_simulation.status = 0;
-    oo_.deterministic_simulation.error = max_res;
-    oo_.deterministic_simulation.iterations = iter;
-    oo_.deterministic_simulation.block(Block_Num).status = 0;% Convergency failed.
-    oo_.deterministic_simulation.block(Block_Num).error = max_res;
-    oo_.deterministic_simulation.block(Block_Num).iterations = iter;
+    oo.deterministic_simulation.status = 0;
+    oo.deterministic_simulation.error = max_res;
+    oo.deterministic_simulation.iterations = iter;
+    oo.deterministic_simulation.block(Block_Num).status = 0;% Convergency failed.
+    oo.deterministic_simulation.block(Block_Num).error = max_res;
+    oo.deterministic_simulation.block(Block_Num).iterations = iter;
     return;
 end
-oo_.deterministic_simulation.status = 1;
-oo_.deterministic_simulation.error = max_res;
-oo_.deterministic_simulation.iterations = iter;
-oo_.deterministic_simulation.block(Block_Num).status = 1;% Convergency obtained.
-oo_.deterministic_simulation.block(Block_Num).error = max_res;
-oo_.deterministic_simulation.block(Block_Num).iterations = iter;
+oo.deterministic_simulation.status = 1;
+oo.deterministic_simulation.error = max_res;
+oo.deterministic_simulation.iterations = iter;
+oo.deterministic_simulation.block(Block_Num).status = 1;% Convergency obtained.
+oo.deterministic_simulation.block(Block_Num).error = max_res;
+oo.deterministic_simulation.block(Block_Num).iterations = iter;
 return;

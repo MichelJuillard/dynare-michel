@@ -112,7 +112,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
         end
     else
         % block or bytecode
-        [ys,check] = dynare_solve_block_or_bytecode(ys_init,exo_ss, params);
+        [ys,check] = dynare_solve_block_or_bytecode(ys_init,exo_ss, params, options, M);
     end
 
     if check
