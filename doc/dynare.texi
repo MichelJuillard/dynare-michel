@@ -358,7 +358,7 @@ If you want to give a URL, use the address of the Dynare website:
 @node Software requirements
 @section Software requirements
 
-Packaged versions of Dynare are available for Windows XP/Vista,
+Packaged versions of Dynare are available for Windows XP/Vista/Seven,
 @uref{http://www.debian.org,Debian GNU/Linux},
 @uref{http://www.ubuntu.com/,Ubuntu} and Mac OS X Leopard/Snow
 Leopard.  Dynare should work on other systems, but some compilation
