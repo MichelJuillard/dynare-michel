@@ -202,14 +202,16 @@ not_all_abs_F_bellow_crit(double* F, int size, double crit)
 
 
 double
-det(double* F, int dim)
+det(double* F, int dim, int* ipiv)
 {
   double det = 1.0;
   for (int i = 0; i < dim; i++)
-    det *= F[i * (1 + dim)];
+    if (ipiv[i] - 1 == i)
+      det *= F[i + i * dim];
+    else
+      det *= -F[i + i * dim];
   return det;
 }
-
 void
 mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
@@ -527,7 +529,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           F_singular = false;
           
           //dF     = det(F);
-          dF     = abs(det(iF, pp));
+          dF     = det(iF, pp, ipiv);
 
           //iF     = inv(F);
           //int lwork = 4/*2*/* pp;
