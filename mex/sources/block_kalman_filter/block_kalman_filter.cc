@@ -392,10 +392,11 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
       /* Modifies F in place with a LU decomposition */ 
       dgetrf(&pp, &pp, iF, &pp, ipiv, &info); 
-      if (info != 0) fprintf(stderr, "failure with error %d\n", (int) info); 
+      if (info != 0) fprintf(stderr, "dgetrf failure with error %d\n", (int) info); 
  
       /* Computes the reciprocal norm */ 
       dgecon("1", &pp, iF, &pp, &anorm, &rcond, w, iw, &info); 
+      if (info != 0) fprintf(stderr, "dgecon failure with error %d\n", (int) info); 
       
       if (rcond < kalman_tol)
         if (not_all_abs_F_bellow_crit(F, pp * pp, kalman_tol))   //~all(abs(F(:))<kalman_tol)
@@ -501,6 +502,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           //iF     = inv(F);
           //int lwork = 4/*2*/* pp;
           dgetri(&pp, iF, &pp, ipiv, w, &lw, &info);
+          if (info != 0) fprintf(stderr, "dgetri failure with error %d\n", (int) info); 
 
           //lik(t) = log(dF)+transpose(v)*iF*v;
           for (int i = 0; i < pp; i++)
