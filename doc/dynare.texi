@@ -364,13 +364,12 @@ Packaged versions of Dynare are available for Windows XP/Vista/Seven,
 Leopard.  Dynare should work on other systems, but some compilation
 steps are necessary in that case.
 
-In order to run Dynare, you need at least one of the following:
+In order to run Dynare, you need one of the following:
 
 @itemize
 
 @item
-MATLAB version 7.0 (R14) or above; note that no toolbox is needed by
-Dynare,
+MATLAB version 7.0 (R14) or above;
 
 @item
 GNU Octave version 3.0.0 or above.
@@ -378,6 +377,21 @@ GNU Octave version 3.0.0 or above.
 
 Some installation instructions for GNU Octave can be found on the
 @uref{http://www.dynare.org/DynareWiki/DynareOctave,Dynare Wiki}.
+
+The following optional extensions are also useful to benefit from extra
+features, but are in no way required:
+
+@itemize
+
+@item
+If under MATLAB: the optimization toolbox, the statistics toolbox;
+
+@item
+If under GNU Octave, the following
+@uref{http://octave.sourceforge.net/,Octave-Forge} packages: optim,
+statistics.
+
+@end itemize
 
 If you plan to use the @code{use_dll} option of the @code{model}
 command, you will need to install the necessary requirements for
