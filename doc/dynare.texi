@@ -3886,7 +3886,7 @@ scratch. Shouldn't be used together with @code{mh_recover}
 
 @item optim = (@var{fmincon options})
 Can be used to set options for @code{fmincon}, the optimizing function
-of MATLAB Optimizaiton toolbox. Use MATLAB's syntax for these
+of MATLAB Optimization toolbox. Use MATLAB's syntax for these
 options. Default:
 @code{('display','iter','LargeScale','off','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6)}
 
