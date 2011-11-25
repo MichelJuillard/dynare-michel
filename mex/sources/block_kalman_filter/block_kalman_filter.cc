@@ -304,7 +304,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   double dF = 0.0;                                            // det(F).
   mxArray* p_tmp = mxCreateDoubleMatrix(n, n_state, mxREAL);
   double *tmp = mxGetPr(p_tmp);
-  mxArray* p_tmp1 = mxCreateDoubleMatrix(n, pp, mxREAL);
+  mxArray* p_tmp1 = mxCreateDoubleMatrix(n, n_shocks, mxREAL);
   double *tmp1 = mxGetPr(p_tmp1);
   int t = 0;                                               // Initialization of the time index.
   mxArray* plik  = mxCreateDoubleMatrix(smpl, 1, mxREAL);
@@ -324,11 +324,11 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   /*compute QQ = R*Q*transpose(R)*/                        // Variance of R times the vector of structural innovations.;
   // tmp = R * Q;
   for (int i = 0; i < n; i++)
-    for (int j = 0; j < pp; j++)
+    for (int j = 0; j < n_shocks; j++)
       {
         double res = 0.0;
         for (int k = 0; k < n_shocks; k++)
-          res += R[i + k * n] * Q[j * pp + k];
+          res += R[i + k * n] * Q[j * n_shocks + k];
         tmp1[i + j * n] = res;
       }
 
@@ -514,7 +514,6 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           for (int i = 0; i < pp; i++)
             res += v_pp[i] * v[i];
 
-          /*lik[t] = log(dF) + res;*/
           lik[t] = (log(dF) + res + pp * log(2.0*pi))/2;
           if (t + 1 >= start)
             LIK += lik[t];
