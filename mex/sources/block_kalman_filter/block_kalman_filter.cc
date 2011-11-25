@@ -403,18 +403,48 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
           {
             mexPrintf("error: F singular\n");
             double LIK  = Inf;
-            if (nlhs >= 1)
+            // info = 0
+            plhs[0] = mxCreateDoubleScalar(0);
+            if (nlhs >= 2)
               {
-                plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
-                double* pind = mxGetPr(plhs[0]);
+                plhs[1] = mxCreateDoubleMatrix(1, 1, mxREAL);
+                double* pind = mxGetPr(plhs[1]);
                 pind[0] = LIK;
               }
-            if (nlhs == 2)
+
+            if (nlhs == 3)
               {
                 for (int i = t; i < smpl; i++)
                   lik[i] = Inf;
-                plhs[1] = plik;
+                plhs[2] = plik;
               }
+            else
+              mxDestroyArray(plik);
+            mxFree(w);
+#ifdef DIRECT
+            mxFree(i_nz_state_var);
+#else
+            mxFree(Var);
+            mxFree(Var_2);
+#endif
+            mxFree(tmp_a);
+            mxFree(v_pp);
+            mxFree(v_n);
+            mxFree(mf);
+            mxFree(w);
+            mxFree(iw);
+            mxFree(ipiv);
+            mxFree(oldK);
+            mxFree(P_mf);
+            mxDestroyArray(pa);
+            mxDestroyArray(p_tmp);
+            mxDestroyArray(pQQ);
+            mxDestroyArray(pv);
+            mxDestroyArray(pF);
+            mxDestroyArray(piF);
+            mxDestroyArray(p_P_t_t1);
+            mxDestroyArray(pK);
+            mxDestroyArray(p_K_P);
             return;
           }
         else
