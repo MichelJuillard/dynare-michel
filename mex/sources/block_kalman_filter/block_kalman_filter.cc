@@ -202,7 +202,7 @@ not_all_abs_F_bellow_crit(double* F, int size, double crit)
 
 
 double
-det(double* F, int dim, int* ipiv)
+det(double* F, int dim, lapack_int* ipiv)
 {
   double det = 1.0;
   for (int i = 0; i < dim; i++)
