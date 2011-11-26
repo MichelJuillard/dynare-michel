@@ -39,9 +39,9 @@ endo_nbr = M_.endo_nbr;
 lead_lag_incidence = M_.lead_lag_incidence;
 klen = max_lag + max_lead + 1;
 
-fwrd_var = find(any(lead_lag_incidence(max_lag+2:end,:),1))';
+fwrd_var = find(lead_lag_incidence(max_lag+2:end,:))';
 if max_lag > 0
-    pred_var = find(any(lead_lag_incidence(1,:),1))';
+    pred_var = find(lead_lag_incidence(1,:))';
     both_var = intersect(pred_var,fwrd_var);
     pred_var = setdiff(pred_var,both_var);
     fwrd_var = setdiff(fwrd_var,both_var);
@@ -66,11 +66,11 @@ inv_order_var(order_var) = (1:endo_nbr);
 if max_lag > 0
     kmask = [];
     if max_lead > 0 
-        kmask = [cumsum(flipud(lead_lag_incidence(max_lag+2:end,order_var)),1)] ;
+        kmask = lead_lag_incidence(max_lag+2,order_var) ;
     end
-    kmask = [kmask; flipud(cumsum(lead_lag_incidence(1,order_var),1))] ;
+    kmask = [kmask; lead_lag_incidence(1,order_var)] ;
 else
-    kmask = cumsum(flipud(lead_lag_incidence(max_lag+2:klen,order_var)),1) ;
+    kmask = lead_lag_incidence(max_lag+2,order_var) ;
 end
 
 kmask = kmask';
