@@ -34,7 +34,7 @@ if options.block && ~options.bytecode
             else
                 [ss, check] = solve_one_boundary([M.fname '_static_' int2str(b)], ss, exo, ...
                                                  params, [], M.blocksMFS{b}, n, 1, 0, b, 0, options.maxit_, ...
-                                                 options.solve_tolf, options.slowc, 0, options.solve_algo, 1, 0, 0);
+                                                 options.solve_tolf, options.slowc, 0, options.solve_algo, 1, 0, 0,M,options);
                 
             end
         end
