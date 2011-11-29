@@ -182,6 +182,7 @@ options_.ramsey_policy = 0;
 options_.timeless = 0;
 
 % estimation
+options_.initial_period = dynDate(1);
 options_.Harvey_scale_factor = 10;
 options_.MaxNumberOfBytes = 1e6;
 options_.MaximumNumberOfMegaBytes = 111;
