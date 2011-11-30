@@ -166,7 +166,8 @@ EXTRA_DIST = \
 	ms-sbvar/archive-files/specification_2v2c.dat \
 	recursive/data_ca1.m \
 	kalman_filter_smoother/fsdat_simul.m \
-	kalman_filter_smoother/fs2000a_steadystate.m
+	kalman_filter_smoother/fs2000a_steadystate.m \
+	identification/kim/kim2_steadystate.m
 
 TARGETS =
 
