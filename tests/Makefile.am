@@ -187,25 +187,25 @@ check-octave:
 	DYNARE_VERSION="$(PACKAGE_VERSION)" MODFILES="$(MODFILES)" $(OCTAVE) --norc --silent --no-history run_test_octave.m
 
 clean-local:
-	rm -f $(patsubst %.mod, %.m, $(MODS)) \
-		$(patsubst %.mod, %_static.*, $(MODS)) \
-		$(patsubst %.mod, %_objective_static.m, $(MODS)) \
-		$(patsubst %.mod, %_dynamic.*, $(MODS))
+	rm -f $(patsubst %.mod, %.m, $(MODFILES)) \
+		$(patsubst %.mod, %_static.*, $(MODFILES)) \
+		$(patsubst %.mod, %_objective_static.m, $(MODFILES)) \
+		$(patsubst %.mod, %_dynamic.*, $(MODFILES))
 
-	rm -f $(patsubst %.mod, %_results.mat, $(MODS)) \
-		$(patsubst %.mod, %_mode.mat, $(MODS)) \
-		$(patsubst %.mod, %_mh_mode.mat, $(MODS)) \
-		$(patsubst %.mod, %_mean.mat, $(MODS)) \
-		$(patsubst %.mod, %_pindx.mat, $(MODS)) \
-		$(patsubst %.mod, %_params.mat, $(MODS)) \
-		$(patsubst %.mod, %_simul, $(MODS)) \
-		$(patsubst %.mod, %.log, $(MODS))
+	rm -f $(patsubst %.mod, %_results.mat, $(MODFILES)) \
+		$(patsubst %.mod, %_mode.mat, $(MODFILES)) \
+		$(patsubst %.mod, %_mh_mode.mat, $(MODFILES)) \
+		$(patsubst %.mod, %_mean.mat, $(MODFILES)) \
+		$(patsubst %.mod, %_pindx.mat, $(MODFILES)) \
+		$(patsubst %.mod, %_params.mat, $(MODFILES)) \
+		$(patsubst %.mod, %_simul, $(MODFILES)) \
+		$(patsubst %.mod, %.log, $(MODFILES))
 
-	rm -rf $(patsubst %.mod, %, $(MODS))
+	rm -rf $(patsubst %.mod, %, $(MODFILES))
 
-	rm -f $(patsubst %.mod, %*.pdf, $(MODS)) \
-		$(patsubst %.mod, %*.eps, $(MODS)) \
-		$(patsubst %.mod, %*.fig, $(MODS))
+	rm -f $(patsubst %.mod, %*.pdf, $(MODFILES)) \
+		$(patsubst %.mod, %*.eps, $(MODFILES)) \
+		$(patsubst %.mod, %*.fig, $(MODFILES))
 
 	rm -f $(shell find -name g1.mat) \
 		$(shell find -name g2.mat) \
