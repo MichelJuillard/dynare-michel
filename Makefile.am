@@ -20,6 +20,7 @@ EXTRA_DIST = \
 	matlab \
 	ms-sbvar \
 	uncrustify.cfg \
+	NEWS \
 	license.txt \
 	dynare.el \
 	windows/dynare.nsi \
