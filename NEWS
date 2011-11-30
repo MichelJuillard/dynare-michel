@@ -1,0 +1,268 @@
+Announcement for Dynare 4.2.3 (on 2011-11-30)
+=============================================
+
+We are pleased to announce the release of Dynare 4.2.3.
+
+This is a bugfix release.
+
+The Windows package is already available for download at the official
+Dynare website <http://www.dynare.org>. The Mac and Linux packages
+should follow soon.
+
+All users are strongly encouraged to upgrade.
+
+This release is compatible with MATLAB versions ranging from 7.0 (R14)
+to 7.13 (R2011b) and with GNU Octave versions ranging from 3.0 to 3.4.
+
+Here is a non-exhaustive list of the problems identified in version 4.2.2 and
+that have been fixed in version 4.2.3:
+
+ * `steady_state_model' was broken for lags higher than 2
+
+ * `simult_.m' was not working correctly with `order=3' if `k_order_solver' had
+   not been explicitly specified
+
+ * `stoch_simul' with `order=3' and without `periods' option was reporting
+   dummy theoretical moments
+
+ * Under Octave, option `solve_algo=0' was causing crashes in `check' and
+   `stoch_simul'
+
+ * Identification module was broken
+
+ * The test for singularity in the model reporting eigenvalues close to 0/0 was
+   sometimes reporting false positives
+
+ * The `conditional_variance_decomposition' option was not working if one
+   period index was 0. Now, Dynare reports an error if the periods are not
+   strictly positive.
+
+ * Second order approximation was buggy if one variable was not present at the
+   current period
+
+
+Announcement for Dynare 4.2.2 (on 2011-10-04)
+=============================================
+
+We are pleased to announce the release of Dynare 4.2.2.
+
+This is a bugfix release.
+
+The Windows package is already available for download at the official
+Dynare website <http://www.dynare.org>. The Mac and Linux packages
+should follow soon.
+
+All users are strongly encouraged to upgrade.
+
+This release is compatible with MATLAB versions ranging from 7.0 (R14)
+to 7.13 (R2011b) and with GNU Octave versions ranging from 3.0 to 3.4.
+
+Here is a list of the problems identified in version 4.2.1 and that have
+been fixed in version 4.2.2:
+
+ * The secondary rank test following the order test of the Blanchard and
+   Kahn condition was faulty and almost never triggered
+
+ * The variance prior for BVAR “à la Sims” with only one lag was
+   inconsistent.  The solution implemented consists of adding one extra
+   observation in the presample used to compute the prior; as a
+   consequence, the numerical results for all estimations will be
+   slightly different in future releases (thanks to Marek Jarociński for
+   spotting this)
+
+ * The `conditional_forecast' command was buggy: it was always using the
+   posterior mode, whatever the value of the `parameter_set' option
+
+ * `STEADY_STATE' was not working correctly with certain types of
+   expressions (the priority of the addition and substraction operators
+   was incorrectly handled)
+
+ * With the `block' option of `model', the preprocessor was failing on
+   expressions of the form "a^b" (with no endogenous in "a" but an
+   endogenous in "b")
+
+ * Some native MATLAB statements were not correctly passed on to MATLAB
+   (e.g.  x = { 'foo' 'bar' } )
+
+ * `external_function' was crashing in some circumstances
+
+ * The lambda parameter for HP filter was restricted to integer values
+   for no good reason
+
+ * The `load_mh_file' option of `estimation' was crashing under Octave
+   for Windows (MinGW version)
+
+ * Computation of steady state was failing on model contains auxiliary
+   variables created by leads or lags larger than 2 or by of the
+   `EXPECTATION' operator
+
+ * Compilation of MEX files for MATLAB was failing with GCC 4.6
+
+
+Announcement for Dynare 4.2.1 (on 2011-05-24)
+=============================================
+
+We are pleased to announce the release of Dynare 4.2.1.
+
+Many bugs have been fixed since the previous release. The reference
+manual has also been improved: new contents has been added at various
+places, the structure has been improved, an index of functions and
+variables has been added, the PDF/HTML rendering has been improved.
+
+The Windows package is already available for download at the official
+Dynare website [1]. The Mac and Linux packages should follow soon.
+
+All users are strongly encouraged to upgrade.
+
+This release is compatible with MATLAB versions ranging from 7.0 (R14)
+to 7.12 (R2011a) and with GNU Octave versions ranging from 3.0 to 3.4.
+
+Here is a list of the main bugfixes since version 4.2.0:
+
+ * The `STEADY_STATE' operator has been fixed
+
+ * Problems with MATLAB 7.3 (R2006b) and older have been fixed
+
+ * The `partial_information' option of `stoch_simul' has been fixed
+
+ * Option `conditional_variance_decomposition' of `stoch_simul' and
+   `estimation' has been fixed
+ 
+ * Automatic detrending now works in conjunction with the `EXPECTATION'
+   operator
+
+ * Percentage signs inside strings in MATLAB statements (like disp('%
+   This is not a comment %')) now work
+
+ * Beta prior with a very small standard deviation now work even if you
+   do not have the MATLAB Statistical toolbox
+
+ * External functions can now been used in assignment of model local
+   variables
+
+ * `identification' command has been fixed
+
+ * Option `cova_compute' of `estimation' command has been fixed
+
+ * Random crashes with 3rd order approximation without `use_dll' option
+   have been eliminated
+
+[1] http://www.dynare.org
+
+
+Announcement for Dynare 4.2.0 (on 2011-02-15)
+=============================================
+
+We are pleased to announce the release of Dynare 4.2.0.
+
+This major release adds new features and fixes various bugs.
+
+The Windows package is already available for download. The Mac and Linux
+packages should follow soon.
+
+All users are strongly encouraged to upgrade.
+
+This release is compatible with MATLAB versions ranging from 6.5 (R13) to 7.11
+(R2010b) and with GNU Octave versions 3.0.x and 3.2.x (support for GNU Octave
+3.4.x is not complete and will be added in the next minor release).
+
+Here is the list of major user-visible changes:
+
+* New solution algorithms: 
+
+  - Pruning for second order simulations has been added, as described in Kim,
+    Kim, Schaumburg and Sims (2008) [1,2]
+
+  - Models under partial information can be solved, as in Pearlman, Currie and
+    Levine (1986) [3,4]
+
+  - New nonlinear solvers for faster deterministic simulations and steady state
+    computation [5]
+
+* Dynare can now use the power of multi-core computers or of a cluster of
+  computer using parallelization [6]
+
+* New features in the user interface:
+
+  - A steady state file can now be automatically generated, provided that the
+    model can be solved analytically, and that the steady state as a function
+    of the parameters is declared with the new "steady_state_model" command [7]
+
+  - For non-stationary models, Dynare is now able of automatically removing
+    trends in all the equations: the user writes the equations in
+    non-stationary form and declares the deflator of each variable. Then Dynare
+    perform a check to determine if the proposed deflators are compatible with
+    balanced growth path, and, if yes, then it computes the detrended equations
+    [8]
+
+  - It is now possible to use arbitrary functions in the model block [9]
+
+* Other minor changes to the user interface:
+
+  - New primitives allowed in model block: normpdf(), erf()
+
+  - New syntax for DSGE-VAR [10]
+
+  - Syntax of deterministic shocks has changed: after the values keyword,
+    arbitrary expressions must be enclosed within parentheses (but numeric
+    constants are still accepted as is) 
+
+* Various improvements:
+
+  - Third order simulations now work without the "USE_DLL" option:
+    installing a C++ compiler is no longer necessary for 3rd order
+
+  - The HP filter works for empirical moments (previously it was only available
+    for theoretical moments)
+
+  - "ramsey_policy" now displays the planner objective value function under
+    Ramsey policy and stores it in "oo_.planner_objective_value"
+
+  - Estimation: if the "selected_variables_only" option is present, then the
+    smoother will only be run on variables listed just after the estimation
+    command
+
+  - Estimation: in the "shocks" block, it is now possible to calibrate
+    measurement errors on endogenous variables (using the same keywords than
+    for calibrating variance/covariance matrix of exogenous shocks)
+
+  - It is possibile to choose the parameter set for shock decomposition [11]
+
+  - The diffuse filter now works under Octave
+
+  - New option "console" on the Dynare command-line: use it when running Dynare
+    from the console, it will replace graphical waitbars by text waitbars for
+    long computations
+
+  - Steady option "solve_algo=0" (uses fsolve()) now works under Octave 
+
+* For Emacs users:
+
+   - New Dynare mode for Emacs editor (contributed by Yannick Kalantzis)
+
+   - Reference manual now available in Info format (distributed with
+     Debian/Ubuntu packages)
+
+* Miscellaneous:
+
+   - Deterministic models: leads and lags of two or more on endogenous
+     variables are now substituted by auxiliary variables; exogenous variables
+     are left as is [12]
+
+[1] Kim, J., S. Kim, E. Schaumburg and C.A. Sims (2008), "Calculating and using
+    second-order accurate solutions of discrete time dynamic equilibrium
+    models", Journal of Economic Dynamics and Control, 32(11), 3397-3414
+[2] It is triggered by option "pruning" of "stoch_simul" (only 2nd order, not
+    available at 3rd order)
+[3] Pearlman J., D. Currie and P. Levine (1986), "Rational expectations models
+    with partial information", Economic Modelling, 3(2), 90-105
+[4] http://www.dynare.org/DynareWiki/PartialInformation
+[5] http://www.dynare.org/DynareWiki/FastDeterministicSimulationAndSteadyStateComputation
+[6] http://www.dynare.org/DynareWiki/ParallelDynare
+[7] See the entry for "steady_state_model" in the reference manual for more
+    details and an example
+[8] http://www.dynare.org/DynareWiki/RemovingTrends
+[9] http://www.dynare.org/DynareWiki/ExternalFunctions
+[10] http://www.dynare.org/DynareWiki/DsgeVar
+[11] http://www.dynare.org/DynareWiki/ShockDecomposition
+[12] http://www.dynare.org/DynareWiki/AuxiliaryVariables
