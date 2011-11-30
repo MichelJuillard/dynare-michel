@@ -143,6 +143,7 @@ Section "Uninstall"
  # First delete the uninstaller
  Delete $INSTDIR\uninstall.exe
  Delete $INSTDIR\README.txt
+ Delete $INSTDIR\NEWS
  Delete $INSTDIR\license.txt
  Delete $INSTDIR\mexopts-win32.bat
  Delete $INSTDIR\mexopts-win64.bat
