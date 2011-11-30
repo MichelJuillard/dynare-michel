@@ -190,6 +190,8 @@ clean-local:
 	rm -f $(patsubst %.mod, %.m, $(MODFILES)) \
 		$(patsubst %.mod, %_static.*, $(MODFILES)) \
 		$(patsubst %.mod, %_objective_static.m, $(MODFILES)) \
+		$(patsubst %.mod, %_set_auxiliary_variables.m, $(MODFILES)) \
+		$(patsubst %.mod, %_steadystate2.m, $(MODFILES)) \
 		$(patsubst %.mod, %_dynamic.*, $(MODFILES))
 
 	rm -f $(patsubst %.mod, %_results.mat, $(MODFILES)) \
