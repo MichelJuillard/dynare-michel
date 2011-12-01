@@ -466,7 +466,7 @@ A(:,k0) = jacobia_(:,nonzeros(lead_lag_incidence(M_.maximum_endo_lag+1,order_var
 % variables with the highest lead
 k1 = find(kstate(:,2) == M_.maximum_endo_lag+2);
 % Jacobian with respect to the variables with the highest lead
-fyp = jacobia_(:,kstate(k1,3)+M_.endo_nbr);
+fyp = jacobia_(:,kstate(k1,3)+nnz(M_.lead_lag_incidence(M_.maximum_endo_lag+1,:)));
 B(:,nstatic+npred-dr.nboth+1:end) = fyp;
 offset = M_.endo_nbr;
 gx1 = dr.ghx;
