@@ -513,7 +513,7 @@ dr.ghuu = A\rhs;
 
 dr.ghxx = dr.ghxx(1:M_.endo_nbr,:);
 dr.ghxu = dr.ghxu(1:M_.endo_nbr,:);
-dr.ghuu = dr.ghuu(1:M_.endo_nbr,:);
+rdr.ghuu = dr.ghuu(1:M_.endo_nbr,:);
 
 
 % dr.ghs2
@@ -536,8 +536,8 @@ E1 = [eye(npred); zeros(kp-npred,npred)];
 H = E1;
 hxx = dr.ghxx(nstatic+[1:npred],:);
 [junk,k2a,k2] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+2,order_var));
-[junk,k3a,k3] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+2,:));
-[B1, err] = sparse_hessian_times_B_kronecker_C(hessian(:,kh(k3,k3)),gu(k3a,:),options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
+k3 = nnz(M_.lead_lag_incidence(1:M_.maximum_endo_lag+1,:))+(1:dr.nsfwrd)';
+[B1, err] = sparse_hessian_times_B_kronecker_C(hessian(:,kh(k3,k3)),gu(k2a,:),options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
 mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
 RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+B1;
 
