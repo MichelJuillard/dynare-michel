@@ -55,6 +55,6 @@ end;
 
 steady;
 
-stoch_simul(order=2);
+stoch_simul(order=2,nograph);
 
 

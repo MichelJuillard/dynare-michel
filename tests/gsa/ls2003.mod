@@ -161,14 +161,14 @@ disp(' ');
 disp('Press ENTER to continue'); pause(5);
 
 // run this to generate posterior mode and Metropolis files if not yet done
-//estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2,
-//   prefilter=1,mh_jscale=0.5,mh_replic=100000, mode_compute=4, nograph, mh_drop=0.6);
+estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2,
+   prefilter=1,mh_jscale=0.5,mh_replic=100000, mode_compute=4, nograph, mh_drop=0.6);
 
 
 // run this to produce posterior samples of filtered, smoothed and irf variables, if not yet done
-//estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2,prefilter=1,mh_jscale=0.3,
-//          mh_replic=0, mode_file=ls2003_mode, mode_compute=0, nograph, load_mh_file, bayesian_irf,
-//		  filtered_vars, smoother, mh_drop=0.6);
+estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2,prefilter=1,mh_jscale=0.3,
+          mh_replic=0, mode_file=ls2003_mode, mode_compute=0, nograph, load_mh_file, bayesian_irf,
+		  filtered_vars, smoother, mh_drop=0.6);
 
 
 disp(' ');
