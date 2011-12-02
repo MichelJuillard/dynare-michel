@@ -35,7 +35,12 @@ function [s,nu] = inverse_gamma_specification(mu,sigma,type,use_fzero_flag)
 %! @ref{set_prior}
 %! @sp 2
 %! @strong{This function calls:}
-%!
+%! @sp 2
+%! @strong{Remark:}
+%! The call to the matlab's implementation of the secant method is here for testing purpose and should not be used. This routine fails
+%! more often in finding an interval for nu containing a signe change because it expands the interval on both sides and eventually 
+%! violates  the condition nu>2.
+%! 
 %! @end deftypefn
 %@eod:
 
@@ -77,16 +82,18 @@ elseif type == 1;   % Inverse Gamma 1
             nu2 = 2*nu;
             nu1 = 2;
             err  = ig1fun(nu,mu2,sigma2);
-            err1 = ig1fun(nu1,mu2,sigma2);
             err2 = ig1fun(nu2,mu2,sigma2);
-            if sign(err2) % Too short interval.
-                while nu2/nu<1000 % Shift the interval contaioning the root.
+            if err2>0         % Too short interval.
+                while nu2<500 % Shift the interval containing the root.
                     nu1  = nu2;
                     nu2  = nu2*1.01;
                     err2 = ig1fun(nu2,mu2,sigma2);
                     if err2<0
                         break
                     end
+                end
+                if err2>0
+                    error('inverse_gamma_specification:: Failed in finding an interval containing a sign change! You should check that the prior variance is not too small compared to the prior mean...');
                 end
             end
             % Sove for nu using the secant method.
@@ -126,11 +133,16 @@ end
 
 %@test:1
 %$
-%$ [s0,nu0] = inverse_gamma_specification(.75,.1,1,0);
-%$ [s1,nu1] = inverse_gamma_specification(.75,.1,1,1);
-%$
+%$ [s0,nu0] = inverse_gamma_specification(.75,.2,1,0);
+%$ [s1,nu1] = inverse_gamma_specification(.75,.2,1,1);
+%$ [s3,nu3] = inverse_gamma_specification(.75,.1,1,0);
+%$ [s4,nu4] = inverse_gamma_specification(.75,.1,1,1);
 %$ % Check the results.
 %$ t(1) = dyn_assert(s0,s1,1e-6);
 %$ t(2) = dyn_assert(nu0,nu1,1e-6);
+%$ t(3) = isnan(s4);
+%$ t(4) = isnan(nu4);
+%$ t(5) = dyn_assert(s3,16.240907971002265,1e-6);;
+%$ t(6) = dyn_assert(nu3,30.368398202624046,1e-6);;
 %$ T = all(t);
 %@eof:1
