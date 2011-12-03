@@ -62,6 +62,8 @@ function [s,nu] = inverse_gamma_specification(mu,sigma,type,use_fzero_flag)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 check_solution_flag = 1;
+s = [];
+nu = [];
 
 if nargin==3
     use_fzero_flag = 0;
@@ -83,10 +85,10 @@ elseif type == 1;   % Inverse Gamma 1
             nu1 = 2;
             err  = ig1fun(nu,mu2,sigma2);
             err2 = ig1fun(nu2,mu2,sigma2);
-            if err2>0         % Too short interval.
-                while nu2<500 % Shift the interval containing the root.
+            if err2 > 0         % Too short interval.
+                while nu2 < 1e12 % Shift the interval containing the root.
                     nu1  = nu2;
-                    nu2  = nu2*1.01;
+                    nu2  = nu2*2;
                     err2 = ig1fun(nu2,mu2,sigma2);
                     if err2<0
                         break
@@ -96,8 +98,8 @@ elseif type == 1;   % Inverse Gamma 1
                     error('inverse_gamma_specification:: Failed in finding an interval containing a sign change! You should check that the prior variance is not too small compared to the prior mean...');
                 end
             end
-            % Sove for nu using the secant method.
-            while abs(nu2-nu1) > 1e-14
+            % Solve for nu using the secant method.
+            while abs(nu2-nu1) > 1e-8
                 if err > 0
                     nu1 = nu;
                     if nu < nu2
@@ -127,8 +129,7 @@ elseif type == 1;   % Inverse Gamma 1
         s   = 2*mu2/pi;
     end
 else
-    s  = -1;
-    nu = -1;
+    error('inverse_gamma_specification: unkown type')
 end
 
 %@test:1
