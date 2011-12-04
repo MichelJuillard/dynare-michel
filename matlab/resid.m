@@ -56,6 +56,13 @@ if info(1)
     print_info(info,options_.noprint)
 end
 
+% Keep of a copy of M_.Sigma_e
+Sigma_e = M_.Sigma_e;
+
+% Set M_.Sigma_e=0 (we evaluate the *deterministic* static model)
+M_.Sigma_e = zeros(size(Sigma_e));
+
+
 % Compute the residuals
 if options_.block && ~options_.bytecode
     z = zeros(M_.endo_nbr,1);
@@ -81,6 +88,8 @@ else
               [oo_.exo_steady_state; ...
                oo_.exo_det_steady_state], M_.params);
 end
+
+M_.Sigma_e = Sigma_e;
 
 
 % Display the non-zero residuals if no return value

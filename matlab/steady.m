@@ -36,6 +36,14 @@ if options_.steadystate_flag && options_.homotopy_mode
     error('STEADY: Can''t use homotopy when providing a steady state external file');
 end
 
+
+% Keep of a copy of M_.Sigma_e
+Sigma_e = M_.Sigma_e;
+
+% Set M_.Sigma_e=0 (we compute the *deterministic* steady state)
+M_.Sigma_e = zeros(size(Sigma_e));
+
+
 switch options_.homotopy_mode
   case 1
     homotopy1(options_.homotopy_values, options_.homotopy_steps);
@@ -52,6 +60,9 @@ if info(1)
 end
 
 disp_steady_state(M_,oo_);
+
+M_.Sigma_e = Sigma_e;
+
 
 if isempty(ys0_)
     oo_.endo_simul(:,1:M_.maximum_lag) = oo_.steady_state * ones(1, M_.maximum_lag);
