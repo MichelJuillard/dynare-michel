@@ -46,8 +46,7 @@ options_.gstep = 1e-2;
 options_.scalv = 1;
 options_.debug = 0;
 options_.initval_file = 0;
-options_.Schur_vec_tol = 1e-11; % used to find nonstationary variables
-                                % in Schur decomposition of the
+options_.Schur_vec_tol = 1e-11; % used to find nonstationary variables in Schur decomposition of the
                                 % transition matrix
 options_.qz_criterium = [];
 options_.lyapunov_complex_threshold = 1e-15;
@@ -105,6 +104,31 @@ options_.nocorr = 0;
 options_.periods = 0;
 options_.noprint = 0;
 options_.SpectralDensity = 0;
+
+% Extended path options
+%
+% Set verbose mode
+options_.ep.verbosity = 1;
+% Initialization of the perfect foresight equilibrium paths
+% * init=0, previous solution is used.  
+% * init=1, a path generated with the first order reduced form is used.
+% * init=2, mix of cases 0 and 1.
+options_.ep.init = 0;
+% Maximum number of iterations for the deterministic solver.
+options_.ep.maxit = 500;
+% Number of periods for the perfect foresight model.
+options_.ep.periods = 200;
+% Default step for increasing the number of periods if needed
+options_.ep.step = 50;
+% Define last periods used to test if the solution is stable with respect to an increase in the number of periods.
+options_.ep.lp = 5;
+% Define first periods used to test if the solution is stable with respect to an increase in the number of periods.
+options_.ep.fp = 100;
+% Define the distribution for the structural innovations.
+options_.ep.innovation_distribution = 'gaussian';
+% Set flag for the seed
+options_.ep.set_dynare_seed_to_default = 1;
+
 
 % TeX output
 options_.TeX = 0;
