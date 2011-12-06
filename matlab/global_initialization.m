@@ -183,6 +183,11 @@ options_.timeless = 0;
 
 % estimation
 options_.initial_period = dynDate(1);
+options_.dataset.firstobs = options_.initial_period;
+options_.dataset.lastobs = NaN;
+options_.dataset.nobs = NaN;
+options_.dataset.xls_sheet = NaN;
+options_.dataset.xls_range = NaN;
 options_.Harvey_scale_factor = 10;
 options_.MaxNumberOfBytes = 1e6;
 options_.MaximumNumberOfMegaBytes = 111;
