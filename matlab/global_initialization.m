@@ -128,7 +128,8 @@ options_.ep.fp = 100;
 options_.ep.innovation_distribution = 'gaussian';
 % Set flag for the seed
 options_.ep.set_dynare_seed_to_default = 1;
-
+% Set algorithm for the perfect foresight solver
+options_.ep.stack_solve_algo = 4;
 
 % TeX output
 options_.TeX = 0;

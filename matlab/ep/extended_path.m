@@ -34,7 +34,7 @@ global M_ options_ oo_
     
     
 % Test if bytecode and block options are used (these options are mandatory)
-if ~( DynareOptions.bytecode && DynareOptions.block )
+if ~( options_.bytecode && options_.block )
     error('extended_path:: Options bytecode and block are mandatory!')
 end
 
@@ -48,6 +48,9 @@ options_.maxit_ = options_.ep.maxit;
 
 % Set the number of periods for the perfect foresight model
 options_.periods = options_.ep.periods;
+
+% Set the algorithm for the perfect foresight solver
+options_.stack_solve_algo = options_.ep.stack_solve_algo;
 
 % Compute the first order reduced form if needed.
 %
@@ -149,7 +152,7 @@ while (t<sample_size)
             end
         end
         % Test if periods is big enough.
-        if ~increase_periods &&  100*max(max(abs(tmp(idx,end-options_.ep.lp:end)./tmp(idx,end-options_.ep.lp-1:end-1)-1)))<.001% max(max(abs(bsxfun(@minus,tmp(idx,end-options_.ep.lp:end),oo_.steady_state(idx)))))<options_.dynatol.x
+        if ~increase_periods &&  max(max(abs(tmp(idx,end-options_.ep.lp:end)./tmp(idx,end-options_.ep.lp-1:end-1)-1)))<options_.dynatol
             break
         else
             options_.periods = options_.periods + options_.ep.step;
@@ -180,11 +183,10 @@ while (t<sample_size)
             info.time = info.time+ctime;
             if info.convergence
                 maxdiff = max(max(abs(tmp(:,2:options_.ep.fp)-tmp_old(:,2:options_.ep.fp))));
-                if maxdiff<options_.dynatol.f% && max(max(abs(bsxfun(@minus,tmp(idx,end-options_.ep.lp:end),oo_.steady_state(idx)))))<options_.dynatol.x
-                                             % max(max(abs(bsxfun(@minus,tmp(idx,end-options_.ep.lp:end),oo_.steady_state(idx)))))
-                    options_.periods = periods;
+                if maxdiff<options_.dynatol
+                    options_.periods = options_.ep.periods;
                     options_.minimal_solving_period = options_.periods;
-                    oo_.exo_simul = oo_.exo_simul(1:(periods+2),:);
+                    oo_.exo_simul = oo_.exo_simul(1:(options_.periods+2),:);
                     break
                 end
             else
@@ -204,9 +206,6 @@ while (t<sample_size)
                                 disp(['Time: ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
                             end
                         end
-                        % Use homotopy with the maximum number of periods
-                        % oo_.exo_simul = oo_.exo_simul(1:(periods+2),:);
-                        % oo_.endo_simul = endo_simul;
                         break
                     end
                 end
@@ -242,8 +241,7 @@ while (t<sample_size)
     save('simulated_paths.mat','time_series');
     % Set initial condition for the nex round.
     %initial_conditions = oo_.endo_simul(:,2);
-    oo_.endo_simul = oo_.endo_simul(:,1:periods+2);
+    oo_.endo_simul = oo_.endo_simul(:,1:options_.periods+2);
     oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end); 
     oo_.endo_simul(:,end) = oo_.steady_state;
-
 end
