@@ -173,7 +173,7 @@ end
 %   yt = yt(:,j0);
 
 if opt_gsa.morris==1,
-  %OutputDir = CheckPath('GSA/SCREEN');
+  %OutputDir = CheckPath('gsa/screen');
   if ~isempty(vdec),
   if opt_gsa.load_ident_files==0,
   SAMorris = [];

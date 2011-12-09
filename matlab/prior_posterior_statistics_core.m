@@ -100,9 +100,9 @@ if strcmpi(type,'posterior')
     DirectoryName = CheckPath('metropolis');
 elseif strcmpi(type,'gsa')
     if options_.opt_gsa.pprior
-        DirectoryName = CheckPath(['GSA',filesep,'prior']);
+        DirectoryName = CheckPath(['gsa',filesep,'prior']);
     else
-        DirectoryName = CheckPath(['GSA',filesep,'mc']);
+        DirectoryName = CheckPath(['gsa',filesep,'mc']);
     end
 elseif strcmpi(type,'prior')
     DirectoryName = CheckPath('prior');

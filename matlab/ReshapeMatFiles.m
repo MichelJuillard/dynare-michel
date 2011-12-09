@@ -51,13 +51,13 @@ else
         MhDirectoryName = [CheckPath('metropolis') filesep ];
     elseif strcmpi(type2,'gsa')
         if options_.opt_gsa.morris==1,
-            MhDirectoryName = [CheckPath('GSA\SCREEN') filesep ];
+            MhDirectoryName = [CheckPath('gsa/screen') filesep ];
         elseif options_.opt_gsa.morris==2,
-            MhDirectoryName = [CheckPath('GSA\IDENTIF') filesep ];
+            MhDirectoryName = [CheckPath('gsa/identif') filesep ];
         elseif options_.opt_gsa.pprior
-            MhDirectoryName = [CheckPath(['GSA' filesep 'prior']) filesep ];
+            MhDirectoryName = [CheckPath(['gsa' filesep 'prior']) filesep ];
         else
-            MhDirectoryName = [CheckPath(['GSA' filesep 'mc']) filesep ];
+            MhDirectoryName = [CheckPath(['gsa' filesep 'mc']) filesep ];
         end
     else
         MhDirectoryName = [CheckPath('prior') filesep ];

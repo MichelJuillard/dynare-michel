@@ -136,12 +136,12 @@ if options_gsa.morris==1 || options_gsa.morris==3,
     options_gsa.ksstat=1;
     if options_gsa.morris==3,
         options_gsa = set_default_option(options_gsa,'Nsam',256);
-        OutputDirectoryName = CheckPath('GSA/IDENTIF');
+        OutputDirectoryName = CheckPath('gsa/identif');
     else
-        OutputDirectoryName = CheckPath('GSA/SCREEN');
+        OutputDirectoryName = CheckPath('gsa/screen');
     end
 else
-    OutputDirectoryName = CheckPath('GSA');
+    OutputDirectoryName = CheckPath('gsa');
 end
 
 options_.opt_gsa = options_gsa;

@@ -86,12 +86,12 @@ if strcmpi(type,'posterior')
         B = min(1200, round(0.25*NumberOfDraws));
     end
 elseif strcmpi(type,'gsa')
-    RootDirectoryName = CheckPath('GSA');
+    RootDirectoryName = CheckPath('gsa');
     if options_.opt_gsa.pprior
-        DirectoryName = CheckPath(['GSA',filesep,'prior']);
+        DirectoryName = CheckPath(['gsa',filesep,'prior']);
         load([ RootDirectoryName filesep  M_.fname '_prior.mat'],'lpmat0','lpmat','istable')
     else
-        DirectoryName = CheckPath(['GSA',filesep,'mc']);
+        DirectoryName = CheckPath(['gsa',filesep,'mc']);
         load([ RootDirectoryName filesep  M_.fname '_mc.mat'],'lpmat0','lpmat','istable')
     end
     x=[lpmat0(istable,:) lpmat(istable,:)];

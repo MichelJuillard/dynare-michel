@@ -61,7 +61,7 @@ options_ident = set_default_option(options_ident,'advanced',0);
 options_ident = set_default_option(options_ident,'normalize_jacobians',1);
 options_ident = set_default_option(options_ident,'lik_init',1);
 if options_ident.gsa_sample_file,
-    GSAFolder = checkpath('GSA');
+    GSAFolder = checkpath('gsa');
     if options_ident.gsa_sample_file==1,
         load([GSAFolder,filesep,fname_,'_prior'],'lpmat','lpmat0','istable');
     elseif options_ident.gsa_sample_file==2,

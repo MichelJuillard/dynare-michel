@@ -87,9 +87,9 @@ if strcmpi(type,'posterior')
     MhDirectoryName = CheckPath('metropolis');
 elseif strcmpi(type,'gsa')
     if options_.opt_gsa.pprior
-        MhDirectoryName = CheckPath(['GSA' filesep 'prior']);
+        MhDirectoryName = CheckPath(['gsa' filesep 'prior']);
     else
-        MhDirectoryName = CheckPath(['GSA' filesep 'mc']);
+        MhDirectoryName = CheckPath(['gsa' filesep 'mc']);
     end
 else
     MhDirectoryName = CheckPath('prior');

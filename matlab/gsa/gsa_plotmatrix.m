@@ -21,7 +21,7 @@ function gsa_plotmatrix(type,varargin)
 
 global bayestopt_ options_ M_
 
-RootDirectoryName = CheckPath('GSA');
+RootDirectoryName = CheckPath('gsa');
 
 if options_.opt_gsa.pprior
     load([ RootDirectoryName filesep  M_.fname '_prior.mat'],'lpmat0','lpmat','istable','iunstable','iindeterm','iwrong')
