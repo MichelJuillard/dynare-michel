@@ -35,7 +35,7 @@ function r = octave_ver_less_than(verstr)
 cur_verstr = version();
 
 r = get_ver_numeric(cur_verstr) < get_ver_numeric(verstr);
-
+endfunction
 
 function x = get_ver_numeric(verstr)
 nums = sscanf(verstr, '%d.%d.%d')';
@@ -43,3 +43,4 @@ if length(nums) < 3
     nums(3) = 0;
 end
 x = nums * [1; 0.01; 0.0001 ];
+endfunction
