@@ -37,4 +37,4 @@ end;
 
 Sigma_e = [ 0.000081; (phi*0.009*0.009) 0.000081];
 
-stoch_simul(order=2,irf=0,periods=50000,simul_seed=1);
+stoch_simul(order=2,irf=0,periods=50000);

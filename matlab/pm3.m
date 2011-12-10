@@ -4,7 +4,7 @@ function pm3(n1,n2,ifil,B,tit1,tit2,tit3,tit_tex,names1,names2,name3,DirectoryNa
 % See also the comment in random_walk_metropolis_hastings.m funtion.
 
 
-% Copyright (C) 2007-2010 Dynare Team
+% Copyright (C) 2007-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -43,7 +43,11 @@ if options_.TeX
     % needs to be fixed
     varlist_TeX = [];
     for i=1:nvar
-        varlist_TeX = strvcat(varlist_TeX,M_.endo_names_tex(SelecVariables(i),:));
+        if i==1
+            varlist_TeX = M_.endo_names_tex(SelecVariables(i),:);
+        else
+            varlist_TeX = char(varlist_TeX,M_.endo_names_tex(SelecVariables(i),:));
+        end
     end
 end
 Mean = zeros(n2,nvar);
@@ -107,11 +111,11 @@ if options_.TeX
         if max(abs(Mean(:,i))) > 10^(-6)
             subplotnum = subplotnum+1;
             name = deblank(varlist(i,:));
-            NAMES = strvcat(NAMES,name);
+            NAMES = name;
             texname = deblank(varlist_TeX(i,:));
-            TEXNAMES = strvcat(TEXNAMES,['$' texname '$']);
+            TEXNAMES = ['$' texname '$'];
         end
-        if subplotnum == MaxNumberOfPlotsPerFigure | i == nvar
+        if subplotnum == MaxNumberOfPlotsPerFigure || i == nvar
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:size(TEXNAMES,1)
                 fprintf(fidTeX,['\\psfrag{%s}[1][][0.5][0]{%s}\n'],deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
@@ -143,17 +147,33 @@ localVars.tit3=tit3;
 localVars.Mean=Mean;
 % Like sequential execution!
 
-                                 % Commenting for testing!
- if isnumeric(options_.parallel) % || ceil(size(varlist,1)/MaxNumberOfPlotsPerFigure)<4,
-      fout = pm3_core(localVars,1,nvar,0);
- 
- % Parallel execution!
- else
-    globalVars = struct('M_',M_, ...
-      'options_', options_, ...
-      'oo_', oo_);
-     [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, 1, nvar, [],'pm3_core', localVars,globalVars, options_.parallel_info);
- end
+
+if ~exist('OCTAVE_VERSION')
+    % Commenting for testing!
+    if isnumeric(options_.parallel) || ceil(size(varlist,1)/MaxNumberOfPlotsPerFigure)<4,
+        fout = pm3_core(localVars,1,nvar,0);
+        
+        % Parallel execution!
+    else
+        isRemoteOctave = 0;
+        for indPC=1:length(options_.parallel),
+            isRemoteOctave = isRemoteOctave + (findstr(options_.parallel(indPC).MatlabOctavePath, 'octave'));
+        end
+        if isRemoteOctave
+            fout = pm3_core(localVars,1,nvar,0);
+        else
+            globalVars = struct('M_',M_, ...
+                'options_', options_, ...
+                'oo_', oo_);
+            [fout, nBlockPerCPU, totCPU] = masterParallel(options_.parallel, 1, nvar, [],'pm3_core', localVars,globalVars, options_.parallel_info);
+        end
+    end
+else
+    % For the time being in Octave enviroment the pm3.m is executed only in
+    % serial modality, to avoid problem with the plots.
+    
+    fout = pm3_core(localVars,1,nvar,0);
+end
 
 
 fprintf(['MH: ' tit1 ', done!\n']);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2010 Dynare Team
+ * Copyright (C) 2006-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -26,13 +26,18 @@ ModFileStructure::ModFileStructure() :
   stoch_simul_present(false),
   estimation_present(false),
   osr_present(false),
+  osr_params_present(false),
+  optim_weights_present(false),
   ramsey_policy_present(false),
+  discretionary_policy_present(false),
+  planner_objective_present(false),
   order_option(0),
   bvar_present(false),
   svar_identification_present(false),
   identification_present(false),
   partial_information(false),
   shocks_present(false),
+  histval_present(false),
   k_order_solver(false),
   calibrated_measurement_errors(false),
   dsge_prior_weight_in_estimated_params(false),
@@ -70,24 +75,24 @@ NativeStatement::writeOutput(ostream &output, const string &basename) const
 void
 OptionsList::writeOutput(ostream &output) const
 {
-  for (num_options_type::const_iterator it = num_options.begin();
+  for (num_options_t::const_iterator it = num_options.begin();
        it != num_options.end(); it++)
     output << "options_." << it->first << " = " << it->second << ";" << endl;
 
-  for (paired_num_options_type::const_iterator it = paired_num_options.begin();
+  for (paired_num_options_t::const_iterator it = paired_num_options.begin();
        it != paired_num_options.end(); it++)
     output << "options_." << it->first << " = [" << it->second.first << "; "
            << it->second.second << "];" << endl;
 
-  for (string_options_type::const_iterator it = string_options.begin();
+  for (string_options_t::const_iterator it = string_options.begin();
        it != string_options.end(); it++)
     output << "options_." << it->first << " = '" << it->second << "';" << endl;
 
-  for (symbol_list_options_type::const_iterator it = symbol_list_options.begin();
+  for (symbol_list_options_t::const_iterator it = symbol_list_options.begin();
        it != symbol_list_options.end(); it++)
     it->second.writeOutput("options_." + it->first, output);
 
-  for (vec_int_options_type::const_iterator it = vector_int_options.begin();
+  for (vec_int_options_t::const_iterator it = vector_int_options.begin();
        it != vector_int_options.end(); it++)
     {
       output << "options_." << it->first << " = ";
@@ -109,24 +114,24 @@ OptionsList::writeOutput(ostream &output, const string &option_group) const
 {
   output << option_group << " = struct();" << endl;
 
-  for (num_options_type::const_iterator it = num_options.begin();
+  for (num_options_t::const_iterator it = num_options.begin();
        it != num_options.end(); it++)
     output << option_group << "." << it->first << " = " << it->second << ";" << endl;
 
-  for (paired_num_options_type::const_iterator it = paired_num_options.begin();
+  for (paired_num_options_t::const_iterator it = paired_num_options.begin();
        it != paired_num_options.end(); it++)
     output << option_group << "." << it->first << " = [" << it->second.first << "; "
            << it->second.second << "];" << endl;
 
-  for (string_options_type::const_iterator it = string_options.begin();
+  for (string_options_t::const_iterator it = string_options.begin();
        it != string_options.end(); it++)
     output << option_group << "." << it->first << " = '" << it->second << "';" << endl;
 
-  for (symbol_list_options_type::const_iterator it = symbol_list_options.begin();
+  for (symbol_list_options_t::const_iterator it = symbol_list_options.begin();
        it != symbol_list_options.end(); it++)
     it->second.writeOutput(option_group + "." + it->first, output);
 
-  for (vec_int_options_type::const_iterator it = vector_int_options.begin();
+  for (vec_int_options_t::const_iterator it = vector_int_options.begin();
        it != vector_int_options.end(); it++)
     {
       output << option_group << "." << it->first << " = ";

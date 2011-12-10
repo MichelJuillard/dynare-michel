@@ -1,6 +1,6 @@
 function check_model()
 
-% Copyright (C) 2005-2006 Dynare Team
+% Copyright (C) 2005-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -29,7 +29,7 @@ if xlen > 1
             ' current period. Use additional endogenous variables']) ;
 end
 
-if (M_.exo_det_nbr > 0) & (M_.maximum_lag > 1 | M_.maximum_lead > 1)
+if (M_.exo_det_nbr > 0) && (M_.maximum_lag > 1 || M_.maximum_lead > 1)
     error(['Exogenous deterministic variables are currently only allowed in' ...
            ' models with leads and lags on only one period'])
 end

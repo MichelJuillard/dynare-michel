@@ -25,7 +25,7 @@ function ReshapeMatFiles(type, type2)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2007,2010 Dynare Team
+% Copyright (C) 2003-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -51,11 +51,13 @@ else
         MhDirectoryName = [CheckPath('metropolis') filesep ];
     elseif strcmpi(type2,'gsa')
         if options_.opt_gsa.morris==1,
-            MhDirectoryName = [CheckPath('GSA\SCREEN') filesep ];
+            MhDirectoryName = [CheckPath('gsa/screen') filesep ];
         elseif options_.opt_gsa.morris==2,
-            MhDirectoryName = [CheckPath('GSA\IDENTIF') filesep ];
+            MhDirectoryName = [CheckPath('gsa/identif') filesep ];
+        elseif options_.opt_gsa.pprior
+            MhDirectoryName = [CheckPath(['gsa' filesep 'prior']) filesep ];
         else
-            MhDirectoryName = [CheckPath('GSA') filesep ];
+            MhDirectoryName = [CheckPath(['gsa' filesep 'mc']) filesep ];
         end
     else
         MhDirectoryName = [CheckPath('prior') filesep ];
@@ -115,7 +117,7 @@ switch TYPEarray
             eval(['STOCK_' CAPtype ' = zeros(NumberOfPeriodsPerTYPEfiles,TYPEsize(2),TYPEsize(3),B);'])
             for f2 = 1:NumberOfTYPEfiles
                 load([MhDirectoryName M_.fname '_' type int2str(f2) '.mat']);
-                eval(['STOCK_' CAPtype '(:,:,:,idx+1:idx+size(stock_' type ',4))=stock_' ...
+                eval(['STOCK_' CAPtype '(:,:,1:+size(stock_' type ',3),idx+1:idx+size(stock_' type ',4))=stock_' ...
                       type '(jdx+1:jdx+NumberOfPeriodsPerTYPEfiles,:,:,:);'])
                 eval(['idx = idx + size(stock_' type ',4);'])
             end

@@ -2,8 +2,8 @@ function [nvar,vartan,NumberOfDecompFiles] = ...
     dsge_simulated_theoretical_variance_decomposition(SampleSize,M_,options_,oo_,type)
 % This function computes the posterior or prior distribution of the variance
 % decomposition of the observed endogenous variables.
-% 
-% INPUTS 
+%
+% INPUTS
 %   SampleSize   [integer]       scalar, number of simulations.
 %   M_           [structure]     Dynare structure describing the model.
 %   options_     [structure]     Dynare structure defining global options.
@@ -11,7 +11,7 @@ function [nvar,vartan,NumberOfDecompFiles] = ...
 %   type         [string]        'prior' or 'posterior'
 %
 %
-% OUTPUTS  
+% OUTPUTS
 %   nvar              [integer]  nvar is the number of stationary variables.
 %   vartan            [char]     array of characters (with nvar rows).
 %   CovarFileNumber   [integer]  scalar, number of prior or posterior data files (for covariance).
@@ -39,7 +39,7 @@ nodecomposition = 0;
 if strcmpi(type,'posterior')
     DrawsFiles = dir([M_.dname '/metropolis/' M_.fname '_' type '_draws*' ]);
     posterior = 1;
-elseif strcmpi(type,'prior') 
+elseif strcmpi(type,'prior')
     DrawsFiles = dir([M_.dname '/prior/draws/' type '_draws*' ]);
     CheckPath('prior/moments');
     posterior = 0;
@@ -66,7 +66,7 @@ nvar = length(ivar);
 
 % Set the size of the auto-correlation function to zero.
 nar = options_.ar;
-options_.ar = 0;    
+options_.ar = 0;
 
 
 
@@ -105,7 +105,7 @@ for file = 1:NumberOfDrawsFiles
             dr = pdraws{linee,2};
         else
             set_parameters(pdraws{linee,1});
-            [dr,info] = resol(oo_.steady_state,0);
+            [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
         end
         tmp = th_autocovariances(dr,ivar,M_,options_,nodecomposition);
         for i=1:nvar

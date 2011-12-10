@@ -15,17 +15,16 @@ function [Gamma_y,stationary_vars] = th_autocovariances(dr,ivar,M_,options_,node
 %   Gamma_y           [cell]         Matlab cell of nar+3 (second order approximation) or nar+2 (first order approximation) arrays, 
 %                                    where nar is the order of the autocorrelation function.
 %                                      Gamma_y{1}       [double]  Covariance matrix.
-%                                      Gamma_y{i}       [double]  Autocorrelation function (for i=1,...,options_.nar).
+%                                      Gamma_y{i+1}     [double]  Autocorrelation function (for i=1,...,options_.nar).
 %                                      Gamma_y{nar+2}   [double]  Variance decomposition.  
 %                                      Gamma_y{nar+3}   [double]  Expectation of the endogenous variables associated with a second 
 %                                                                 order approximation.    
-%   stationary_vars   [integer]      Vector of indices of stationary
-%                                           variables in declaration order
+%   stationary_vars   [integer]      Vector of indices of stationary variables (as a subset of 1:length(ivar))
 %
 % SPECIAL REQUIREMENTS
 %   
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -46,6 +45,10 @@ if nargin<5
     nodecomposition = 0;
 end
 
+if options_.order >= 3
+    error('Theoretical moments not implemented above 2nd order')
+end
+
 endo_nbr = M_.endo_nbr;
 exo_names_orig_ord  = M_.exo_names_orig_ord;
 if exist('OCTAVE_VERSION')
@@ -64,42 +67,57 @@ ghx = dr.ghx;
 ghu = dr.ghu;
 npred = dr.npred;
 nstatic = dr.nstatic;
-kstate = dr.kstate;
-order_var = dr.order_var;
-inv_order_var = dr.inv_order_var;
+
 nx = size(ghx,2);
-
-ikx = [nstatic+1:nstatic+npred];
-
-k0 = kstate(find(kstate(:,2) <= M_.maximum_lag+1),:);
-i0 = find(k0(:,2) == M_.maximum_lag+1);
-i00 = i0;
-n0 = length(i0);
-AS = ghx(:,i0);
-ghu1 = zeros(nx,M_.exo_nbr);
-ghu1(i0,:) = ghu(ikx,:);
-for i=M_.maximum_lag:-1:2
-    i1 = find(k0(:,2) == i);
-    n1 = size(i1,1);
-    j1 = zeros(n1,1);
-    for k1 = 1:n1
-        j1(k1) = find(k0(i00,1)==k0(i1(k1),1));
+if options_.block == 0
+    %order_var = dr.order_var;
+    inv_order_var = dr.inv_order_var;
+    kstate = dr.kstate;
+    ikx = [nstatic+1:nstatic+npred];
+    k0 = kstate(find(kstate(:,2) <= M_.maximum_lag+1),:);
+    i0 = find(k0(:,2) == M_.maximum_lag+1);
+    i00 = i0;
+    n0 = length(i0);
+    AS = ghx(:,i0);
+    ghu1 = zeros(nx,M_.exo_nbr);
+    ghu1(i0,:) = ghu(ikx,:);
+    for i=M_.maximum_lag:-1:2
+        i1 = find(k0(:,2) == i);
+        n1 = size(i1,1);
+        j1 = zeros(n1,1);
+        for k1 = 1:n1
+            j1(k1) = find(k0(i00,1)==k0(i1(k1),1));
+        end
+        AS(:,j1) = AS(:,j1)+ghx(:,i1);
+        i0 = i1;
     end
-    AS(:,j1) = AS(:,j1)+ghx(:,i1);
-    i0 = i1;
-end
+else
+    ghu1 = zeros(nx,M_.exo_nbr);
+    trend = 1:M_.endo_nbr;
+    inv_order_var = trend(M_.block_structure.variable_reordered);
+    ghu1(1:length(dr.state_var),:) = ghu(dr.state_var,:);
+    npred = npred + dr.nboth;
+end;
 b = ghu1*M_.Sigma_e*ghu1';
 
 
-ipred = nstatic+(1:npred)';
+if options_.block == 0
+    ipred = nstatic+(1:npred)';
+else
+    ipred = dr.state_var;
+end;
 % state space representation for state variables only
-[A,B] = kalman_transition_matrix(dr,ipred,1:nx,dr.transition_auxiliary_variables,M_.exo_nbr);
+[A,B] = kalman_transition_matrix(dr,ipred,1:nx,M_.exo_nbr);
 % Compute stationary variables (before HP filtering),
 % and compute 2nd order mean correction on stationary variables (in case of
 % HP filtering, this mean correction is computed *before* filtering)
-if options_.order == 2 | options_.hp_filter == 0
+if options_.order == 2 || options_.hp_filter == 0
     [vx, u] =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold);
-    iky = inv_order_var(ivar);
+    if options_.block == 0
+        iky = inv_order_var(ivar);
+    else
+        iky = ivar;
+    end;
     stationary_vars = (1:length(ivar))';
     if ~isempty(u)
         x = abs(ghx*u);
@@ -137,7 +155,7 @@ if options_.hp_filter == 0
         end
     end
     % variance decomposition
-    if ~nodecomposition && M_.exo_nbr > 1
+    if ~nodecomposition && M_.exo_nbr > 1 && size(stationary_vars, 1) > 0
         Gamma_y{nar+2} = zeros(nvar,M_.exo_nbr);
         SS(exo_names_orig_ord,exo_names_orig_ord)=M_.Sigma_e+1e-14*eye(M_.exo_nbr);
         cs = chol(SS)';

@@ -14,7 +14,7 @@ function [param,sigma] = simulated_moments_estimation(dataset,options,parallel)
 % SPECIAL REQUIREMENTS
 %  The user has to provide a file where the moment conditions are defined.
 
-% Copyright (C) 2010 Dynare Team
+% Copyright (C) 2010-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -32,7 +32,7 @@ function [param,sigma] = simulated_moments_estimation(dataset,options,parallel)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global M_ options_ oo_ estim_params_
-    
+
 % Load the dataset.
 eval(dataset.name);
 dataset.data = [];
@@ -54,15 +54,18 @@ options.estimated_parameters.list = [];
 xparam = [];
 if ~isempty(estim_params_.var_exo)
     options.estimated_variances.idx = estim_params_.var_exo(:,1);
-    options.estimated_parameters.list = strvcat(options.estimated_parameters.list,...
-                                                M_.exo_names(options.estimated_variances.idx,:));
+    options.estimated_parameters.list = char(M_.exo_names(options.estimated_variances.idx,:));
     options.estimated_parameters.nv = rows(estim_params_.var_exo);
     xparam = [xparam; estim_params_.var_exo(:,2)];
 end
 if ~isempty(estim_params_.param_vals)
     options.estimated_parameters.idx = estim_params_.param_vals(:,1);
-    options.estimated_parameters.list = strvcat(options.estimated_parameters.list,...
-                                                M_.param_names(options.estimated_parameters.idx,:));
+    if isempty(options.estimated_parameters.list)
+        options.estimated_parameters.list = char(M_.param_names(options.estimated_parameters.idx,:));
+    else
+        options.estimated_parameters.list = char(options.estimated_parameters.list,...
+                                                 M_.param_names(options.estimated_parameters.idx,:));
+    end
     options.estimated_parameters.np = rows(estim_params_.param_vals);
     xparam = [xparam; estim_params_.param_vals(:,2)];
 end
@@ -75,12 +78,12 @@ options.estimated_parameters.upper_bound = NaN(options.estimated_parameters.nb,1
 
 options.estimated_parameters.lower_bound = [];
 options.estimated_parameters.lower_bound = [options.estimated_parameters.lower_bound; ...
-                   estim_params_.var_exo(:,3); ...
-                   estim_params_.param_vals(:,3) ];
+                    estim_params_.var_exo(:,3); ...
+                    estim_params_.param_vals(:,3) ];
 options.estimated_parameters.upper_bound = [];
 options.estimated_parameters.upper_bound = [options.estimated_parameters.upper_bound; ...
-                   estim_params_.var_exo(:,4); ...
-                   estim_params_.param_vals(:,4) ];
+                    estim_params_.var_exo(:,4); ...
+                    estim_params_.param_vals(:,4) ];
 
 options.number_of_simulated_sample = 0;
 for i=1:length(parallel)
@@ -108,7 +111,7 @@ if nargin>2
     end
     if options.optimization_routine>0
         estimated_parameters_optimization_path = [NaN;xparam];
-	save('optimization_path.mat','estimated_parameters_optimization_path');
+        save('optimization_path.mat','estimated_parameters_optimization_path');
     end
     disp(' ')
     disp('Master talks to its slaves...')
@@ -209,10 +212,10 @@ if options.optimization_routine==1
     % Minimization of the objective function.
     if nargin==2
         [fval,param,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-            csminwel('smm_objective',xparam,H0,[],ct,it,2,options_.gradient_epsilon,sample_moments,weighting_matrix,options);    
+            csminwel1('smm_objective',xparam,H0,[],ct,it,2,options_.gradient_epsilon,sample_moments,weighting_matrix,options);    
     elseif nargin>2
         [fval,param,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-            csminwel('smm_objective',xparam,H0,[],ct,it,2,options_.gradient_epsilon,sample_moments,weighting_matrix,options,parallel);
+            csminwel1('smm_objective',xparam,H0,[],ct,it,2,options_.gradient_epsilon,sample_moments,weighting_matrix,options,parallel);
     end
 elseif options.optimization_routine==2
     optim_options = optimset('display','iter','MaxFunEvals',1000000,'MaxIter',6000,'TolFun',1e-4,'TolX',1e-4);
@@ -233,14 +236,14 @@ elseif options.optimization_routine==0% Compute the variance of the SMM estimato
     V = (1+1/options.number_of_simulated_sample)*G'*long_run_covariance*G;
     [param,diag(V)]
 elseif options.optimization_routine<0
-    T = -options.optimization_routine;% length of the simulated time series.		
+    T = -options.optimization_routine;% length of the simulated time series.            
     time_series = extended_path(oo_.steady_state,T,1);
-    save time_series;		
+    save time_series.mat;
 end
 
 
 function write_job(hostname, remotename, dynare_path, sample_size, number_of_moments, observed_variables_idx, variance_idx, parameters_idx, burn_in_periods, moments_file_name, number_of_simulations,threads_per_job, slave_number, job_number,nb,nv,np)
- 
+
 fid = fopen(['job' int2str(slave_number) '.m'],'w');
 
 fprintf(fid,['% Generated by ' hostname '.\n\n']);

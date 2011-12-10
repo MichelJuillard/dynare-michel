@@ -32,7 +32,7 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 %   none.
 %  
 
-% Copyright (C) 1996-2009 Dynare Team
+% Copyright (C) 1996-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -49,7 +49,14 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+lead_lag_incidence = M_.lead_lag_incidence;
+
 info = 0;
+
+<<<<<<< Updated upstream
+if M_.maximum_endo_lag == 0 && options_.order > 1
+    error(['2nd and 3rd order approximation not implemented for purely forward models'])
+end
 
 if options_.k_order_solver;
     dr = set_state_space(dr,M_);
@@ -60,7 +67,7 @@ end
 
 xlen = M_.maximum_endo_lead + M_.maximum_endo_lag + 1;
 klen = M_.maximum_endo_lag + M_.maximum_endo_lead + 1;
-iyv = M_.lead_lag_incidence';
+iyv = lead_lag_incidence';
 iyv = iyv(:);
 iyr0 = find(iyv) ;
 it_ = M_.maximum_lag + 1 ;
@@ -69,107 +76,47 @@ if M_.exo_nbr == 0
     oo_.exo_steady_state = [] ;
 end
 
-% expanding system for Optimal Linear Regulator
-if options_.ramsey_policy
-    if isfield(M_,'orig_model')
-        orig_model = M_.orig_model;
-        M_.endo_nbr = orig_model.endo_nbr;
-        M_.orig_endo_nbr = orig_model.orig_endo_nbr;
-        M_.aux_vars = orig_model.aux_vars;
-        M_.endo_names = orig_model.endo_names;
-        M_.lead_lag_incidence = orig_model.lead_lag_incidence;
-        M_.maximum_lead = orig_model.maximum_lead;
-        M_.maximum_endo_lead = orig_model.maximum_endo_lead;
-        M_.maximum_lag = orig_model.maximum_lag;
-        M_.maximum_endo_lag = orig_model.maximum_endo_lag;
-    end
+klen = M_.maximum_lag + M_.maximum_lead + 1;
+iyv = lead_lag_incidence';
+iyv = iyv(:);
+iyr0 = find(iyv) ;
+it_ = M_.maximum_lag + 1 ;
 
-    if options_.steadystate_flag
-        k_inst = [];
-        instruments = options_.instruments;
-        for i = 1:size(instruments,1)
-            k_inst = [k_inst; strmatch(options_.instruments(i,:), ...
-                                       M_.endo_names,'exact')];
-        end
-        ys = oo_.steady_state;
-        [inst_val,info1] = dynare_solve('dyn_ramsey_static_', ...
-                                oo_.steady_state(k_inst),0, ...
-                                M_,options_,oo_,it_);
-        M_.params = evalin('base','M_.params;');
-        ys(k_inst) = inst_val;
-        [x,check] = feval([M_.fname '_steadystate'],...
-                          ys,[oo_.exo_steady_state; ...
-                            oo_.exo_det_steady_state]);
-        if size(x,1) < M_.endo_nbr 
-            if length(M_.aux_vars) > 0
-                x = add_auxiliary_variables_to_steadystate(x,M_.aux_vars,...
-                                                           M_.fname,...
-                                                           oo_.exo_steady_state,...
-                                                           oo_.exo_det_steady_state,...
-                                                           M_.params);
-            else
-                error([M_.fname '_steadystate.m doesn''t match the model']);
-            end
-        end
-        oo_.steady_state = x;
-        [junk,junk,multbar] = dyn_ramsey_static_(oo_.steady_state(k_inst),M_,options_,oo_,it_);
-    else
-        [oo_.steady_state,info1] = dynare_solve('dyn_ramsey_static_', ...
-                                        oo_.steady_state,0,M_,options_,oo_,it_);
-        [junk,junk,multbar] = dyn_ramsey_static_(oo_.steady_state,M_,options_,oo_,it_);
-    end
-        
-    check1 = max(abs(feval([M_.fname '_static'],...
-                           oo_.steady_state,...
-                           [oo_.exo_steady_state; ...
-                        oo_.exo_det_steady_state], M_.params))) > options_.dynatol ;
-    if check1
-        info(1) = 20;
-        info(2) = check1'*check1;
-        return
-    end
-    
-    [jacobia_,M_] = dyn_ramsey_dynamic_(oo_.steady_state,multbar,M_,options_,oo_,it_);
-    klen = M_.maximum_lag + M_.maximum_lead + 1;
-    dr.ys = [oo_.steady_state;zeros(M_.exo_nbr,1);multbar];
-    oo_.steady_state = dr.ys;
-    
-    if options_.noprint == 0
-        disp_steady_state(M_,oo_)
-        for i=M_.orig_endo_nbr:M_.endo_nbr
-            if strmatch('mult_',M_.endo_names(i,:))
-                disp(sprintf('%s \t\t %g',M_.endo_names(i,:), ...
-                             dr.ys(i)));
-            end
-        end
-    end
+if M_.exo_nbr == 0
+    oo_.exo_steady_state = [] ;
+end
 
-else
-    klen = M_.maximum_lag + M_.maximum_lead + 1;
-    iyv = M_.lead_lag_incidence';
-    iyv = iyv(:);
-    iyr0 = find(iyv) ;
-    it_ = M_.maximum_lag + 1 ;
-    
-    if M_.exo_nbr == 0
-        oo_.exo_steady_state = [] ;
-    end
-    
-    it_ = M_.maximum_lag + 1;
-    z = repmat(dr.ys,1,klen);
+it_ = M_.maximum_lag + 1;
+z = repmat(dr.ys,1,klen);
+if ~options_.bytecode
     z = z(iyr0) ;
-    if options_.order == 1
-        [junk,jacobia_] = feval([M_.fname '_dynamic'],z,[oo_.exo_simul ...
-                            oo_.exo_det_simul], M_.params, it_);
-    elseif options_.order == 2
+end;
+x_length = M_.maximum_lag+M_.maximum_lead+1;
+exo_simul = [repmat(oo_.exo_steady_state',x_length,1) repmat(oo_.exo_det_steady_state',x_length,1)];
+it_ = M_.maximum_lag + 1;
+if options_.order == 1
+    if (options_.bytecode)
+        [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,exo_simul, ...
+                                        M_.params, dr.ys, 1);
+        jacobia_ = [loc_dr.g1 loc_dr.g1_x loc_dr.g1_xd];
+    else
+        [junk,jacobia_] = feval([M_.fname '_dynamic'],z,exo_simul, ...
+                            M_.params, dr.ys, it_);
+    end;
+elseif options_.order == 2
+    if (options_.bytecode)
+        [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,exo_simul, ...
+                            M_.params, dr.ys, 1);
+        jacobia_ = [loc_dr.g1 loc_dr.g1_x];
+    else
         [junk,jacobia_,hessian1] = feval([M_.fname '_dynamic'],z,...
-                                         [oo_.exo_simul ...
-                            oo_.exo_det_simul], M_.params, it_);
-        if options_.use_dll
-            % In USE_DLL mode, the hessian is in the 3-column sparse representation
-            hessian1 = sparse(hessian1(:,1), hessian1(:,2), hessian1(:,3), ...
-                              size(jacobia_, 1), size(jacobia_, 2)*size(jacobia_, 2));
-        end
+                                         exo_simul, ...
+                                         M_.params, dr.ys, 3);
+    end;
+    if options_.use_dll
+        % In USE_DLL mode, the hessian is in the 3-column sparse representation
+        hessian1 = sparse(hessian1(:,1), hessian1(:,2), hessian1(:,3), ...
+                          size(jacobia_, 1), size(jacobia_, 2)*size(jacobia_, 2));
     end
 end
 
@@ -177,7 +124,11 @@ if options_.debug
     save([M_.fname '_debug.mat'],'jacobia_')
 end
 
-if ~isreal(jacobia_)
+if ~all(isfinite(jacobia_(:)))
+    info(1) = 6;
+    info(2) = 1;
+    return
+elseif ~isreal(jacobia_)
     if max(max(abs(imag(jacobia_)))) < 1e-15
         jacobia_ = real(jacobia_);
     else
@@ -197,11 +148,11 @@ npred = dr.npred;
 nboth = dr.nboth;
 order_var = dr.order_var;
 nd = size(kstate,1);
-nz = nnz(M_.lead_lag_incidence);
+nz = nnz(lead_lag_incidence);
 
 sdyn = M_.endo_nbr - nstatic;
 
-[junk,cols_b,cols_j] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+1, ...
+[junk,cols_b,cols_j] = find(lead_lag_incidence(M_.maximum_endo_lag+1, ...
                                                   order_var));
 b = zeros(M_.endo_nbr,M_.endo_nbr);
 b(:,cols_b) = jacobia_(:,cols_j);
@@ -220,7 +171,7 @@ if M_.maximum_endo_lead == 0
         try
             [dr,aimcode]=dynAIMsolver1(jacobia_,M_,dr);
             if aimcode ~=1
-                info(1) = aimcode;
+                info(1) = convertAimCodeToInfo(aimcode);
                 info(2) = 1.0e+8;
                 return
             end
@@ -230,8 +181,9 @@ if M_.maximum_endo_lead == 0
         end
     else % use original Dynare solver
         [k1,junk,k2] = find(kstate(:,4));
-        dr.ghx(:,k1) = -b\jacobia_(:,k2); 
-        if M_.exo_nbr
+        dr.ghx(:,k1) = -b\jacobia_(:,k2);
+        % with simul, the Jacobian doesn't contain derivatives w.r. to shocks
+        if size(jacobia_,2) > nz
             dr.ghu = -b\jacobia_(:,nz+1:end);
         end
     end % if not use AIM or not...
@@ -245,7 +197,7 @@ if M_.maximum_endo_lead == 0
         info(2) = temp'*temp;
     end
     if options_.loglinear == 1
-        klags = find(M_.lead_lag_incidence(1,:));
+        klags = find(lead_lag_incidence(1,:));
         dr.ghx = repmat(1./dr.ys,1,size(dr.ghx,2)).*dr.ghx.* ...
                  repmat(dr.ys(klags),size(dr.ghx,1),1);
         dr.ghu = repmat(1./dr.ys,1,size(dr.ghu,2)).*dr.ghu;
@@ -272,7 +224,7 @@ if (options_.aim_solver == 1) && (task == 0)
         % reuse some of the bypassed code and tests that may be needed 
         
         if aimcode ~=1
-            info(1) = aimcode;
+            info(1) = convertAimCodeToInfo(aimcode);
             info(2) = 1.0e+8;
             return
         end
@@ -299,16 +251,12 @@ if (options_.aim_solver == 1) && (task == 0)
         error('Problem with AIM solver - Try to remove the "aim_solver" option')
     end
 else  % use original Dynare solver
-    k1 = M_.lead_lag_incidence(find([1:klen] ~= M_.maximum_endo_lag+1),:);
+    k1 = lead_lag_incidence(find([1:klen] ~= M_.maximum_endo_lag+1),:);
     a = aa(:,nonzeros(k1'));
     b(:,cols_b) = aa(:,cols_j);
     b10 = b(1:nstatic,1:nstatic);
     b11 = b(1:nstatic,nstatic+1:end);
     b2 = b(nstatic+1:end,nstatic+1:end);
-    if any(isinf(a(:)))
-        info = 1;
-        return
-    end
 
     % buildind D and E
     d = zeros(nd,nd) ;
@@ -337,11 +285,21 @@ else  % use original Dynare solver
     % 2) In  global_initialization.m, if mjdgges.m is visible exist(...)==2, 
     % this means that the DLL isn't avaiable and use_qzdiv is set to 1
     
-    [ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
+    if isempty(options_.qz_criterium)
+        error('I cannot solve the model because qz_criterium option is empty!')
+    end
+
+    [err,ss,tt,w,sdim,dr.eigval,info1] = mjdgges(e,d,options_.qz_criterium);
+    mexErrCheck('mjdgges', err);
 
     if info1
-        info(1) = 2;
-        info(2) = info1;
+        if info1 == -30
+            info(1) = 7;
+        else
+            info(1) = 2;
+            info(2) = info1;
+            info(3) = size(e,2);
+        end
         return
     end
 
@@ -360,16 +318,27 @@ else  % use original Dynare solver
     end
 
     if nba ~= nyf
-        temp = sort(abs(dr.eigval));
-        if nba > nyf
-            temp = temp(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
-            info(1) = 3;
-        elseif nba < nyf;
-            temp = temp(nd-nyf+1:nd-nba)-1-options_.qz_criterium;
-            info(1) = 4;
+        sorted_roots = sort(abs(dr.eigval));
+        if isfield(options_,'indeterminacy_continuity')
+            if options_.indeterminacy_msv == 1
+                [ss,tt,w,q] = qz(e',d');
+                [ss,tt,w,q] = reorder(ss,tt,w,q);
+                ss = ss';
+                tt = tt';
+                w  = w';
+                nba = nyf;
+            end
+        else
+            if nba > nyf
+                temp = sorted_roots(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
+                info(1) = 3;
+            elseif nba < nyf;
+                temp = sorted_roots(nd-nyf+1:nd-nba)-1-options_.qz_criterium;
+                info(1) = 4;
+            end
+            info(2) = temp'*temp;
+            return
         end
-        info(2) = temp'*temp;
-        return
     end
 
     np = nd - nyf;
@@ -379,7 +348,8 @@ else  % use original Dynare solver
     % derivatives with respect to dynamic state variables
     % forward variables
     w1 =w(1:n3,n2:nd);
-    if condest(w1) > 1e9;
+    if ~isscalar(w1) && (condest(w1) > 1e9)
+        % condest() fails on a scalar under Octave
         info(1) = 5;
         info(2) = condest(w1);
         return;
@@ -444,8 +414,8 @@ end
 
 %exogenous deterministic variables
 if M_.exo_det_nbr > 0
-    f1 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+2:end,order_var))));
-    f0 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+1,order_var))));
+    f1 = sparse(jacobia_(:,nonzeros(lead_lag_incidence(M_.maximum_endo_lag+2:end,order_var))));
+    f0 = sparse(jacobia_(:,nonzeros(lead_lag_incidence(M_.maximum_endo_lag+1,order_var))));
     fudet = sparse(jacobia_(:,nz+M_.exo_nbr+1:end));
     M1 = inv(f0+[zeros(M_.endo_nbr,nstatic) f1*gx zeros(M_.endo_nbr,nyf-nboth)]);
     M2 = M1*f1;
@@ -461,126 +431,69 @@ if options_.order == 1
 end
 
 % Second order
-%tempex = oo_.exo_simul ;
-
-%hessian = real(hessext('ff1_',[z; oo_.exo_steady_state]))' ;
-kk = flipud(cumsum(flipud(M_.lead_lag_incidence(M_.maximum_endo_lag+1:end,order_var)),1));
-if M_.maximum_endo_lag > 0
-    kk = [cumsum(M_.lead_lag_incidence(1:M_.maximum_endo_lag,order_var),1); kk];
-end
-kk = kk';
-kk = find(kk(:));
-nk = size(kk,1) + M_.exo_nbr + M_.exo_det_nbr;
-k1 = M_.lead_lag_incidence(:,order_var);
-k1 = k1';
-k1 = k1(:);
-k1 = k1(kk);
-k2 = find(k1);
-kk1(k1(k2)) = k2;
-kk1 = [kk1 length(k1)+1:length(k1)+M_.exo_nbr+M_.exo_det_nbr];
-kk = reshape([1:nk^2],nk,nk);
-kk1 = kk(kk1,kk1);
-%[junk,junk,hessian] = feval([M_.fname '_dynamic'],z, oo_.exo_steady_state);
-hessian(:,kk1(:)) = hessian1;
+k1 = nonzeros(lead_lag_incidence(:,order_var)');
+kk = [k1; length(k1)+(1:M_.exo_nbr+M_.exo_det_nbr)'];
+nk = size(kk,1);
+kk1 = reshape([1:nk^2],nk,nk);
+kk1 = kk1(kk,kk);
+hessian = hessian1(:,kk1(:));
 clear hessian1
 
-%oo_.exo_simul = tempex ;
-%clear tempex
-
-n1 = 0;
-n2 = np;
 zx = zeros(np,np);
 zu=zeros(np,M_.exo_nbr);
-for i=2:M_.maximum_endo_lag+1
-    k1 = sum(kstate(:,2) == i);
-    zx(n1+1:n1+k1,n2-k1+1:n2)=eye(k1);
-    n1 = n1+k1;
-    n2 = n2-k1;
-end
-kk = flipud(cumsum(flipud(M_.lead_lag_incidence(M_.maximum_endo_lag+1:end,order_var)),1));
+zx(1:np,:)=eye(np);
 k0 = [1:M_.endo_nbr];
 gx1 = dr.ghx;
 hu = dr.ghu(nstatic+[1:npred],:);
-zx = [zx; gx1];
-zu = [zu; dr.ghu];
-for i=1:M_.maximum_endo_lead
-    k1 = find(kk(i+1,k0) > 0);
-    zu = [zu; gx1(k1,1:npred)*hu];
-    gx1 = gx1(k1,:)*hx;
-    zx = [zx; gx1];
-    kk = kk(:,k0);
-    k0 = k1;
-end
+k0 = find(lead_lag_incidence(M_.maximum_endo_lag+1,order_var)');
+zx = [zx; gx1(k0,:)];
+zu = [zu; dr.ghu(k0,:)];
+k1 = find(lead_lag_incidence(M_.maximum_endo_lag+2,order_var)');
+zu = [zu; gx1(k1,:)*hu];
+zx = [zx; gx1(k1,:)*hx];
 zx=[zx; zeros(M_.exo_nbr,np);zeros(M_.exo_det_nbr,np)];
 zu=[zu; eye(M_.exo_nbr);zeros(M_.exo_det_nbr,M_.exo_nbr)];
 [nrzx,nczx] = size(zx);
 
-rhs = -sparse_hessian_times_B_kronecker_C(hessian,zx);
+[rhs, err] = sparse_hessian_times_B_kronecker_C(hessian,zx,options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
+mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
+rhs = -rhs;
 
 %lhs
 n = M_.endo_nbr+sum(kstate(:,2) > M_.maximum_endo_lag+1 & kstate(:,2) < M_.maximum_endo_lag+M_.maximum_endo_lead+1);
-A = zeros(n,n);
-B = zeros(n,n);
-A(1:M_.endo_nbr,1:M_.endo_nbr) = jacobia_(:,M_.lead_lag_incidence(M_.maximum_endo_lag+1,order_var));
+A = zeros(M_.endo_nbr,M_.endo_nbr);
+B = zeros(M_.endo_nbr,M_.endo_nbr);
+A(:,k0) = jacobia_(:,nonzeros(lead_lag_incidence(M_.maximum_endo_lag+1,order_var)));
 % variables with the highest lead
-k1 = find(kstate(:,2) == M_.maximum_endo_lag+M_.maximum_endo_lead+1);
-if M_.maximum_endo_lead > 1
-    k2 = find(kstate(:,2) == M_.maximum_endo_lag+M_.maximum_endo_lead);
-    [junk,junk,k3] = intersect(kstate(k1,1),kstate(k2,1));
-else
-    k2 = [1:M_.endo_nbr];
-    k3 = kstate(k1,1);
-end
+k1 = find(kstate(:,2) == M_.maximum_endo_lag+2);
 % Jacobian with respect to the variables with the highest lead
-B(1:M_.endo_nbr,end-length(k2)+k3) = jacobia_(:,kstate(k1,3)+M_.endo_nbr);
+fyp = jacobia_(:,kstate(k1,3)+nnz(M_.lead_lag_incidence(M_.maximum_endo_lag+1,:)));
+B(:,nstatic+npred-dr.nboth+1:end) = fyp;
 offset = M_.endo_nbr;
-k0 = [1:M_.endo_nbr];
 gx1 = dr.ghx;
-for i=1:M_.maximum_endo_lead-1
-    k1 = find(kstate(:,2) == M_.maximum_endo_lag+i+1);
-    [k2,junk,k3] = find(kstate(k1,3));
-    A(1:M_.endo_nbr,offset+k2) = jacobia_(:,k3+M_.endo_nbr);
-    n1 = length(k1);
-    A(offset+[1:n1],nstatic+[1:npred]) = -gx1(kstate(k1,1),1:npred);
-    gx1 = gx1*hx;
-    A(offset+[1:n1],offset+[1:n1]) = eye(n1);
-    n0 = length(k0);
-    E = eye(n0);
-    if i == 1
-        [junk,junk,k4]=intersect(kstate(k1,1),[1:M_.endo_nbr]);
-    else
-        [junk,junk,k4]=intersect(kstate(k1,1),kstate(k0,1));
-    end
-    i1 = offset-n0+n1;
-    B(offset+[1:n1],offset-n0+[1:n0]) = -E(k4,:);
-    k0 = k1;
-    offset = offset + n1;
-end
 [junk,k1,k2] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+M_.maximum_endo_lead+1,order_var));
 A(1:M_.endo_nbr,nstatic+1:nstatic+npred)=...
-    A(1:M_.endo_nbr,nstatic+[1:npred])+jacobia_(:,k2)*gx1(k1,1:npred);
+    A(1:M_.endo_nbr,nstatic+[1:npred])+fyp*gx1(k1,1:npred);
 C = hx;
 D = [rhs; zeros(n-M_.endo_nbr,size(rhs,2))];
 
 
-dr.ghxx = gensylv(2,A,B,C,D);
+[err, dr.ghxx] = gensylv(2,A,B,C,D);
+mexErrCheck('gensylv', err);
 
 %ghxu
 %rhs
 hu = dr.ghu(nstatic+1:nstatic+npred,:);
-%kk = reshape([1:np*np],np,np);
-%kk = kk(1:npred,1:npred);
-%rhs = -hessian*kron(zx,zu)-f1*dr.ghxx(end-nyf+1:end,kk(:))*kron(hx(1:npred,:),hu(1:npred,:));
+[rhs, err] = sparse_hessian_times_B_kronecker_C(hessian,zx,zu,options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
+mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
 
-rhs = sparse_hessian_times_B_kronecker_C(hessian,zx,zu);
-
-nyf1 = sum(kstate(:,2) == M_.maximum_endo_lag+2);
 hu1 = [hu;zeros(np-npred,M_.exo_nbr)];
-%B1 = [B(1:M_.endo_nbr,:);zeros(size(A,1)-M_.endo_nbr,size(B,2))];
 [nrhx,nchx] = size(hx);
 [nrhu1,nchu1] = size(hu1);
 
-B1 = B*A_times_B_kronecker_C(dr.ghxx,hx,hu1);
+[abcOut,err] = A_times_B_kronecker_C(dr.ghxx,hx,hu1,options_.threads.kronecker.A_times_B_kronecker_C);
+mexErrCheck('A_times_B_kronecker_C', err);
+B1 = B*abcOut;
 rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B1;
 
 
@@ -589,13 +502,11 @@ dr.ghxu = A\rhs;
 
 %ghuu
 %rhs
-kk = reshape([1:np*np],np,np);
-kk = kk(1:npred,1:npred);
+[rhs, err] = sparse_hessian_times_B_kronecker_C(hessian,zu,options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
+mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
 
-rhs = sparse_hessian_times_B_kronecker_C(hessian,zu);
-
-
-B1 = A_times_B_kronecker_C(B*dr.ghxx,hu1);
+[B1, err] = A_times_B_kronecker_C(B*dr.ghxx,hu1,options_.threads.kronecker.A_times_B_kronecker_C);
+mexErrCheck('A_times_B_kronecker_C', err);
 rhs = -[rhs; zeros(n-M_.endo_nbr,size(rhs,2))]-B1;
 
 %lhs
@@ -603,7 +514,7 @@ dr.ghuu = A\rhs;
 
 dr.ghxx = dr.ghxx(1:M_.endo_nbr,:);
 dr.ghxu = dr.ghxu(1:M_.endo_nbr,:);
-dr.ghuu = dr.ghuu(1:M_.endo_nbr,:);
+rdr.ghuu = dr.ghuu(1:M_.endo_nbr,:);
 
 
 % dr.ghs2
@@ -611,7 +522,8 @@ dr.ghuu = dr.ghuu(1:M_.endo_nbr,:);
 % reordering predetermined variables in diminishing lag order
 O1 = zeros(M_.endo_nbr,nstatic);
 O2 = zeros(M_.endo_nbr,M_.endo_nbr-nstatic-npred);
-LHS = jacobia_(:,M_.lead_lag_incidence(M_.maximum_endo_lag+1,order_var));
+LHS = zeros(M_.endo_nbr,M_.endo_nbr);
+LHS(:,k0) = jacobia_(:,nonzeros(lead_lag_incidence(M_.maximum_endo_lag+1,order_var)));
 RHS = zeros(M_.endo_nbr,M_.exo_nbr^2);
 kk = find(kstate(:,2) == M_.maximum_endo_lag+2);
 gu = dr.ghu; 
@@ -619,48 +531,20 @@ guu = dr.ghuu;
 Gu = [dr.ghu(nstatic+[1:npred],:); zeros(np-npred,M_.exo_nbr)];
 Guu = [dr.ghuu(nstatic+[1:npred],:); zeros(np-npred,M_.exo_nbr*M_.exo_nbr)];
 E = eye(M_.endo_nbr);
-M_.lead_lag_incidenceordered = flipud(cumsum(flipud(M_.lead_lag_incidence(M_.maximum_endo_lag+1:end,order_var)),1));
-if M_.maximum_endo_lag > 0
-    M_.lead_lag_incidenceordered = [cumsum(M_.lead_lag_incidence(1:M_.maximum_endo_lag,order_var),1); M_.lead_lag_incidenceordered];
-end
-M_.lead_lag_incidenceordered = M_.lead_lag_incidenceordered';
-M_.lead_lag_incidenceordered = M_.lead_lag_incidenceordered(:);
-k1 = find(M_.lead_lag_incidenceordered);
-M_.lead_lag_incidenceordered(k1) = [1:length(k1)]';
-M_.lead_lag_incidenceordered =reshape(M_.lead_lag_incidenceordered,M_.endo_nbr,M_.maximum_endo_lag+M_.maximum_endo_lead+1)';
 kh = reshape([1:nk^2],nk,nk);
 kp = sum(kstate(:,2) <= M_.maximum_endo_lag+1);
 E1 = [eye(npred); zeros(kp-npred,npred)];
 H = E1;
 hxx = dr.ghxx(nstatic+[1:npred],:);
-for i=1:M_.maximum_endo_lead
-    for j=i:M_.maximum_endo_lead
-        [junk,k2a,k2] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+j+1,order_var));
-        [junk,k3a,k3] = ...
-            find(M_.lead_lag_incidenceordered(M_.maximum_endo_lag+j+1,:));
-        nk3a = length(k3a);
-        B1 = sparse_hessian_times_B_kronecker_C(hessian(:,kh(k3,k3)),gu(k3a,:));
-        RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+B1;
-    end
-    % LHS
-    [junk,k2a,k2] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+i+1,order_var));
-    LHS = LHS + jacobia_(:,k2)*(E(k2a,:)+[O1(k2a,:) dr.ghx(k2a,:)*H O2(k2a,:)]);
+[junk,k2a,k2] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+2,order_var));
+k3 = nnz(M_.lead_lag_incidence(1:M_.maximum_endo_lag+1,:))+(1:dr.nsfwrd)';
+[B1, err] = sparse_hessian_times_B_kronecker_C(hessian(:,kh(k3,k3)),gu(k2a,:),options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
+mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
+RHS = RHS + jacobia_(:,k2)*guu(k2a,:)+B1;
+
+% LHS
+LHS = LHS + jacobia_(:,k2)*(E(k2a,:)+[O1(k2a,:) dr.ghx(k2a,:)*H O2(k2a,:)]);
     
-    if i == M_.maximum_endo_lead 
-        break
-    end
-    
-    kk = find(kstate(:,2) == M_.maximum_endo_lag+i+1);
-    gu = dr.ghx*Gu;
-    [nrGu,ncGu] = size(Gu);
-    G1 = A_times_B_kronecker_C(dr.ghxx,Gu);
-    G2 = A_times_B_kronecker_C(hxx,Gu);
-    guu = dr.ghx*Guu+G1;
-    Gu = hx*Gu;
-    Guu = hx*Guu;
-    Guu(end-npred+1:end,:) = Guu(end-npred+1:end,:) + G2;
-    H = E1 + hx*H;
-end
 RHS = RHS*M_.Sigma_e(:);
 dr.fuu = RHS;
 %RHS = -RHS-dr.fbias;
@@ -720,3 +604,5 @@ if M_.exo_det_nbr > 0
         
     end
 end
+=======
+>>>>>>> Stashed changes

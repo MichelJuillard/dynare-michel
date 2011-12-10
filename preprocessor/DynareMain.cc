@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2009 Dynare Team
+ * Copyright (C) 2003-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -34,7 +34,9 @@ using namespace std;
    Splitting main() in two parts was necessary because ParsingDriver.h and MacroDriver.h can't be
    included simultaneously (because of Bison limitations).
 */
-void main2(stringstream &in, string &basename, bool debug, bool clear_all, bool no_tmp_terms, bool warn_uninit
+void main2(stringstream &in, string &basename, bool debug, bool clear_all, bool no_tmp_terms, bool warn_uninit, bool console,
+           bool parallel, const string &parallel_config_file, const string &cluster_name, bool parallel_slave_open_mode,
+           bool parallel_test
 #if defined(_WIN32) || defined(__CYGWIN32__)
            , bool cygwin, bool msvc
 #endif
@@ -44,6 +46,8 @@ void
 usage()
 {
   cerr << "Dynare usage: dynare mod_file [debug] [noclearall] [savemacro[=macro_file]] [onlymacro] [nolinemacro] [notmpterms] [warn_uninit]"
+       << " [console] [parallel[=cluster_name]] [conffile=parallel_config_path_and_filename] [parallel_slave_open_mode] [parallel_test] "
+       << " [-D<variable>[=<value>]]"
 #if defined(_WIN32) || defined(__CYGWIN32__)
        << " [cygwin] [msvc]"
 #endif
@@ -68,10 +72,17 @@ main(int argc, char **argv)
   bool only_macro = false;
   bool no_line_macro = false;
   bool warn_uninit = false;
+  bool console = false;
 #if defined(_WIN32) || defined(__CYGWIN32__)
   bool cygwin = false;
   bool msvc = false;
 #endif
+  string parallel_config_file;
+  bool parallel = false;
+  string cluster_name;
+  bool parallel_slave_open_mode = false;
+  bool parallel_test = false;
+  map<string, string> defines;
 
   // Parse options
   for (int arg = 2; arg < argc; arg++)
@@ -101,12 +112,61 @@ main(int argc, char **argv)
         no_tmp_terms = true;
       else if (!strcmp(argv[arg], "warn_uninit"))
         warn_uninit = true;
+      else if (!strcmp(argv[arg], "console"))
+        console = true;
 #if defined(_WIN32) || defined(__CYGWIN32__)
       else if (!strcmp(argv[arg], "cygwin"))
         cygwin = true;
       else if (!strcmp(argv[arg], "msvc"))
         msvc = true;
 #endif
+      else if (strlen(argv[arg]) >= 8 && !strncmp(argv[arg], "conffile", 8))
+        {
+          if (strlen(argv[arg]) <= 9 || argv[arg][8] != '=')
+            {
+              cerr << "Incorrect syntax for conffile option" << endl;
+              usage();
+            }
+          parallel_config_file = string(argv[arg] + 9);
+        }
+      else if (!strcmp(argv[arg], "parallel_slave_open_mode"))
+        parallel_slave_open_mode = true;
+      else if (!strcmp(argv[arg], "parallel_test"))
+        parallel_test = true;
+      else if (strlen(argv[arg]) >= 8 && !strncmp(argv[arg], "parallel", 8))
+        {
+          parallel = true;
+          if (strlen(argv[arg]) > 8)
+            {
+              if (strlen(argv[arg]) == 9 || argv[arg][8] != '=')
+                {
+                  cerr << "Incorrect syntax for parallel option" << endl;
+                  usage();
+                }
+              cluster_name = string(argv[arg] + 9);
+            }
+        }
+      else if (strlen(argv[arg]) >= 2 && !strncmp(argv[arg], "-D", 2))
+        {
+          if (strlen(argv[arg]) == 2)
+            {
+              cerr << "Incorrect syntax for command line define: the defined variable "
+                   << "must not be separated from -D by whitespace." << endl;
+              usage();
+            }
+
+          size_t equal_index = string(argv[arg]).find('=');
+          if (equal_index != string::npos)
+            {
+              string key = string(argv[arg]).erase(equal_index).erase(0,2);
+              defines[key] = string(argv[arg]).erase(0, equal_index+1);
+            }
+          else
+            {
+              string key = string(argv[arg]).erase(0,2);
+              defines[key] = "1";
+            }
+        }
       else
         {
           cerr << "Unknown option: " << argv[arg] << endl;
@@ -127,7 +187,7 @@ main(int argc, char **argv)
   MacroDriver m;
 
   stringstream macro_output;
-  m.parse(argv[1], macro_output, debug, no_line_macro);
+  m.parse(argv[1], macro_output, debug, no_line_macro, defines);
   if (save_macro)
     {
       if (save_macro_file.empty())
@@ -146,7 +206,8 @@ main(int argc, char **argv)
     return EXIT_SUCCESS;
 
   // Do the rest
-  main2(macro_output, basename, debug, clear_all, no_tmp_terms, warn_uninit
+  main2(macro_output, basename, debug, clear_all, no_tmp_terms, warn_uninit, console,
+        parallel, parallel_config_file, cluster_name, parallel_slave_open_mode, parallel_test
 #if defined(_WIN32) || defined(__CYGWIN32__)
         , cygwin, msvc
 #endif

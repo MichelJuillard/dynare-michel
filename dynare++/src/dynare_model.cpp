@@ -1,6 +1,4 @@
-// Copyright (C) 2006, Ondra Kamenik
-
-// $Id: dynare_model.cpp 2269 2008-11-23 14:33:22Z michel $
+// Copyright (C) 2006-2011, Ondra Kamenik
 
 #include "parser/cc/parser_exception.h"
 #include "parser/cc/location.h"
@@ -196,8 +194,8 @@ void DynareModel::check_model() const
 	// either constant or assigned to a name
 	for (int i = 0; i < eqs.nformulas(); i++) {
 		int ft = eqs.formula(i);
-		const hash_set<int>& nuls = eqs.nulary_of_term(ft);
-		for (hash_set<int>::const_iterator it = nuls.begin();
+		const unordered_set<int>& nuls = eqs.nulary_of_term(ft);
+		for (unordered_set<int>::const_iterator it = nuls.begin();
 			 it != nuls.end(); ++it)
 			if (! atoms.is_constant(*it) && ! atoms.is_named_atom(*it))
 				throw DynareException(__FILE__,__LINE__,
@@ -242,11 +240,11 @@ int DynareModel::variable_shift(int t, int tshift)
 	return res;
 }
 
-void DynareModel::variable_shift_map(const hash_set<int>& a_set, int tshift,
+void DynareModel::variable_shift_map(const unordered_set<int>& a_set, int tshift,
 									 map<int,int>& s_map)
 {
 	s_map.clear();
-	for (hash_set<int>::const_iterator it = a_set.begin();
+	for (unordered_set<int>::const_iterator it = a_set.begin();
 		 it != a_set.end(); ++it) {
 		int t = *it;
 		// make shift map only for non-constants and non-parameters
@@ -265,8 +263,8 @@ void DynareModel::termspan(int t, int& mlead, int& mlag) const
 {
 	mlead = INT_MIN;
 	mlag = INT_MAX;
-	const hash_set<int>& nul_terms = eqs.nulary_of_term(t);
-	for (hash_set<int>::const_iterator ni = nul_terms.begin();
+	const unordered_set<int>& nul_terms = eqs.nulary_of_term(t);
+	for (unordered_set<int>::const_iterator ni = nul_terms.begin();
 		 ni != nul_terms.end(); ++ni) {
 		if (!atoms.is_constant(*ni) &&
 			(atoms.is_type(atoms.name(*ni), DynareDynamicAtoms::endovar) ||
@@ -282,8 +280,8 @@ void DynareModel::termspan(int t, int& mlead, int& mlag) const
 
 bool DynareModel::is_constant_term(int t) const
 {
-	const hash_set<int>& nul_terms = eqs.nulary_of_term(t);
-	for (hash_set<int>::const_iterator ni = nul_terms.begin();
+	const unordered_set<int>& nul_terms = eqs.nulary_of_term(t);
+	for (unordered_set<int>::const_iterator ni = nul_terms.begin();
 		 ni != nul_terms.end(); ++ni)
 		if (! atoms.is_constant(*ni) &&
 			! atoms.is_type(atoms.name(*ni), DynareDynamicAtoms::param))
@@ -291,7 +289,7 @@ bool DynareModel::is_constant_term(int t) const
 	return true;
 }
 
-hash_set<int> DynareModel::get_nonlinear_subterms(int t) const
+unordered_set<int> DynareModel::get_nonlinear_subterms(int t) const
 {
 	NLSelector nls(*this);
 	return eqs.getTree().select_terms(t, nls);

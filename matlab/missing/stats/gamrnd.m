@@ -13,7 +13,7 @@ function rnd = gamrnd(a,b,method)
 %  ALGORITHMS     
 %    Described in Bauwens, Lubrano and Richard (1999, page 316) and Devroye (1986, chapter 9).
 
-% Copyright (C) 2006-2009 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -48,6 +48,8 @@ if nargin==2
                               %           Lubrano and Richard, but the comparison depends on the value of a (this should be 
                               %           investigated further).
     end
+else
+    error('gamrnd:: Selection of method not yet implemented')
 end
 
 [ma,na] = size(a);

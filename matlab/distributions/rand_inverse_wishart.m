@@ -24,7 +24,7 @@ function G = rand_inverse_wishart(m, v, H_inv_upper_chol)
 %     none
 %    
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -18,12 +18,11 @@ function independent_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bou
 %
 % SPECIAL REQUIREMENTS
 %   None.
-
+%
 % PARALLEL CONTEXT
 % See the comment in random_walk_metropolis_hastings.m funtion.
 
-
-% Copyright (C) 2006-2008,2010 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -76,7 +75,7 @@ localVars.varargin=varargin;
 if isnumeric(options_.parallel),
     fout = independent_metropolis_hastings_core(localVars, fblck, nblck, 0);
     record = fout.record;
-% Parallel execution.    
+    % Parallel execution.    
 else
     % global variables for parallel routines
     globalVars = struct('M_',M_, ...
@@ -91,8 +90,11 @@ else
     if options_.steadystate_flag,
         NamFileInput(length(NamFileInput)+1,:)={'',[ModelName '_steadystate.m']};
     end
-    if (options_.load_mh_file~=0)  & any(fline>1) ,
+    if (options_.load_mh_file~=0) && any(fline>1) ,
         NamFileInput(length(NamFileInput)+1,:)={[M_.dname '/metropolis/'],[ModelName '_mh' int2str(NewFile(1)) '_blck*.mat']};
+    end
+    if exist([ModelName '_optimal_mh_scale_parameter.mat'])
+        NamFileInput(length(NamFileInput)+1,:)={'',[ModelName '_optimal_mh_scale_parameter.mat']};
     end
     
     % from where to get back results

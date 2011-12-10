@@ -12,7 +12,7 @@ function [F,G] = dynare_gradient(fcn,x,epsilon,varargin)
 %
 % OUTPUTS
 % 
-% Copyright (C) 2010 Dynare Team
+% Copyright (C) 2010-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -57,10 +57,10 @@ for i=1:m
         G(:,i) = (Fh-F)/epsilon;
     else
         [Fh,flag] = feval(fcn, x-transpose(h), varargin{:});
-	if flag
+        if flag
             G(:,i) = (F-Fh)/epsilon;
-	else
+        else
             error('-- Bad gradient --')
-	end
+        end
     end
 end

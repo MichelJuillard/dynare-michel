@@ -22,7 +22,7 @@ function [x,rc] = csolve(FUN,x,gradfun,crit,itmax,varargin)
 % http://sims.princeton.edu/yftp/optimize/mfiles/csolve.m
 
 % Copyright (C) 1993-2007 Christopher Sims
-% Copyright (C) 2007 Dynare Team
+% Copyright (C) 2007-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -66,7 +66,7 @@ af00=af0;
 itct=0;
 while ~done
     %   disp([af00-af0 crit*max(1,af0)])
-    if itct>3 & af00-af0<crit*max(1,af0) & rem(itct,2)==1
+    if itct>3 && af00-af0<crit*max(1,af0) && rem(itct,2)==1
         randomize=1;
     else
         if ~analyticg
@@ -117,14 +117,14 @@ while ~done
             lambdamin=lambda;
             xmin=x+dx;
         end
-        if ((lambda >0) & (af0-af < alpha*lambda*af0)) | ((lambda<0) & (af0-af < 0) )
+        if ((lambda >0) && (af0-af < alpha*lambda*af0)) || ((lambda<0) && (af0-af < 0) )
             if ~shrink
                 factor=factor^.6;
                 shrink=1;
             end
             if abs(lambda*(1-factor))*dxSize > .1*delta;
                 lambda = factor*lambda;
-            elseif (lambda > 0) & (factor==.6) %i.e., we've only been shrinking
+            elseif (lambda > 0) && (factor==.6) %i.e., we've only been shrinking
                 lambda=-.3;
             else %
                 subDone=1;
@@ -138,7 +138,7 @@ while ~done
                     rc=3;
                 end
             end
-        elseif (lambda >0) & (af-af0 > (1-alpha)*lambda*af0)
+        elseif (lambda >0) && (af-af0 > (1-alpha)*lambda*af0)
             if shrink
                 factor=factor^.6;
                 shrink=0;

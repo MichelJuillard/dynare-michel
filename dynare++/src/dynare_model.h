@@ -1,6 +1,4 @@
-// Copyright (C) 2005, Ondra Kamenik
-
-// $Id: dynare_model.h 1766 2008-03-31 14:33:02Z kamenik $
+// Copyright (C) 2005-2011, Ondra Kamenik
 
 #ifndef OGDYN_DYNARE_MODEL
 #define OGDYN_DYNARE_MODEL
@@ -15,10 +13,10 @@
 #include "GeneralMatrix.h"
 
 #include <map>
-#include <ext/hash_set>
+#include <boost/unordered_set.hpp>
 
 namespace ogdyn {
-	using __gnu_cxx::hash_set;
+	using boost::unordered_set;
 	using std::map;
 
 	/** This represents an interval in a string by the pair of
@@ -172,7 +170,7 @@ namespace ogdyn {
 		 * variable in the given set to its time shifted variable. The
 		 * map is passed through the reference and is cleared in the
 		 * beginning. */
-		void variable_shift_map(const hash_set<int>& a_set, int tshift,
+		void variable_shift_map(const unordered_set<int>& a_set, int tshift,
 								map<int,int>& s_map);
 		/** This returns maximum lead and minimum lag of an endogenous
 		 * or exogenous variable in the given term. If there are no
@@ -182,7 +180,7 @@ namespace ogdyn {
 		/** This function returns a set of non-linear subterms of the
 		 * given term, these are terms whose linear combination
 		 * constitutes the given term. */
-		hash_set<int> get_nonlinear_subterms(int t) const;
+		unordered_set<int> get_nonlinear_subterms(int t) const;
 		/** This method assigns already used tree index of some term
 		 * to the not-yet used atom name with the given lead/lag. In
 		 * this way, all occurrences of term t are substituted with

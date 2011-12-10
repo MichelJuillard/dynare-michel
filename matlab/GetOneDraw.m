@@ -14,7 +14,7 @@ function [xparams, logpost] = GetOneDraw(type)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2008 Dynare Team
+% Copyright (C) 2005-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -36,4 +36,5 @@ switch type
     [xparams, logpost] = metropolis_draw(0);
   case 'prior'
     xparams = prior_draw(0);
+    logpost = evaluate_posterior_kernel(xparams');
 end

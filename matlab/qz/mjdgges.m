@@ -1,5 +1,5 @@
-function [ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
-%function [ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
+function [err,ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
+%function [err,ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
 % QZ decomposition, Sims' codes are used.
 %
 % INPUTS
@@ -8,6 +8,7 @@ function [ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
 %   qz_criterium [double] scalar (1+epsilon).
 %    
 % OUTPUTS
+%   err          [double]  scalar: 1 indicates failure, 0 indicates success
 %   ss           [complex] (n*n) matrix.
 %   tt           [complex] (n*n) matrix.
 %   w            [complex] (n*n) matrix.
@@ -21,7 +22,7 @@ function [ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
 % SPECIAL REQUIREMENTS
 %   none.
 
-% Copyright (C) 1996-2009 Dynare Team
+% Copyright (C) 1996-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -38,17 +39,14 @@ function [ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% Chek number of inputs and outputs.
-if nargin>3 | nargin<2
-    error('Three or two input arguments required!')
-end
-if nargout>6
-    error('No more than six output arguments!')
+% Check number of inputs and outputs.
+if nargin>3 || nargin<2 || nargout>7 || nargout==0
+    error('MJDGGES: takes 2 or 3 input arguments and between 1 and 7 output arguments.')
 end
 % Check the first two inputs.
 [me,ne] = size(e);
 [md,nd] = size(d);
-if ( ~isreal(e) | ~isreal(d) | me~=ne | md~=nd | me~=nd)
+if ( ~isreal(e) || ~isreal(d) || me~=ne || md~=nd || me~=nd)
     % info should be negative in this case, see dgges.f.
     error('MJDGGES requires two square real matrices of the same dimension.')
 end
@@ -91,3 +89,4 @@ else
         info = 1;% Not as precise as lapack's info!
     end
 end
+err = 0;

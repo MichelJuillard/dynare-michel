@@ -51,7 +51,8 @@
 % Anderson, G.
 % "A Reliable and Computationally Efficient Algorithm for Imposing the
 % Saddle Point Property in Dynamic Models"
-% Journal of Economic Dynamics and Control, Forthcoming
+% Journal of Economic Dynamics and Control, 2010, vol. 34, issue 3,
+% pages 472-489
 
 function [b,rts,ia,nexact,nnumeric,lgroots,aimcode] = ...
                         SPAmalg(h,neq,nlag,nlead,condn,uprbnd)

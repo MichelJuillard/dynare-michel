@@ -7,7 +7,7 @@ function [co, b, yhat] = cosn(H);
 % Not the same as multiple correlation coefficient since the means are not
 % zero
 %
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -27,14 +27,7 @@ function [co, b, yhat] = cosn(H);
 y = H(:,1);
 X = H(:,2:end);
 
-% y = H(:,1);
-% X = H(:,2:end);
-
-if size(X,2)==1;
-    b=1;
-else
-    b=(X\y);
-end
+b=(X\y);
 yhat =  X*b;
 if rank(yhat),
     co = abs(y'*yhat/sqrt((y'*y)*(yhat'*yhat)));

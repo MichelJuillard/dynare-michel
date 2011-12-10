@@ -24,7 +24,8 @@
 % Anderson, G.
 % "A Reliable and Computationally Efficient Algorithm for Imposing the
 % Saddle Point Property in Dynamic Models"
-% Journal of Economic Dynamics and Control, Forthcoming
+% Journal of Economic Dynamics and Control, 2010, vol. 34, issue 3,
+% pages 472-489
 
 function [h,q,iq,nnumeric] = SPNumeric_shift(h,q,iq,qrows,qcols,neq,condn)
 
@@ -35,7 +36,7 @@ right    = qcols+1:qcols+neq;
 [Q,R,E]  = qr( h(:,right) );
 zerorows = find( abs(diag(R)) <= condn );
 
-while( any(zerorows) & iq <= qrows )
+while( any(zerorows) && iq <= qrows )
    h=sparse(h);
    Q=sparse(Q);
    h = Q'*h;

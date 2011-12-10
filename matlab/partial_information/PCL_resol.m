@@ -25,7 +25,7 @@ function [dr,info]=PCL_resol(ys,check_flag)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2010 Dynare Team
+% Copyright (C) 2001-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -53,56 +53,56 @@ info = 0;
 it_ = M_.maximum_lag + 1 ;
 
 if M_.exo_nbr == 0
-  oo_.exo_steady_state = [] ;
+    oo_.exo_steady_state = [] ;
 end
 
 % check if ys is steady state
 tempex = oo_.exo_simul;
 oo_.exo_simul = repmat(oo_.exo_steady_state',M_.maximum_lag+M_.maximum_lead+1,1);
 if M_.exo_det_nbr > 0 
-  tempexdet = oo_.exo_det_simul;
-  oo_.exo_det_simul = repmat(oo_.exo_det_steady_state',M_.maximum_lag+M_.maximum_lead+1,1);
+    tempexdet = oo_.exo_det_simul;
+    oo_.exo_det_simul = repmat(oo_.exo_det_steady_state',M_.maximum_lag+M_.maximum_lead+1,1);
 end
 dr.ys = ys;
 check1 = 0;
 % testing for steadystate file
 fh = str2func([M_.fname '_static']);
 if options_.steadystate_flag
-  [dr.ys,check1] = feval([M_.fname '_steadystate'],dr.ys,...
-			 [oo_.exo_steady_state; ...
-                      oo_.exo_det_steady_state]);
-  if size(dr.ys,1) < M_.endo_nbr 
-      if isfield(M_,'aux_vars')
-          dr.ys = add_auxiliary_variables_to_steadystate(dr.ys,M_.aux_vars,...
-                                                         M_.fname,...
-                                                         oo_.exo_steady_state,...
-                                                         oo_.exo_det_steady_state,...
-                                                         M_.params);
-      else
-          error([M_.fname '_steadystate.m doesn''t match the model']);
-      end
-  end
+    [dr.ys,check1] = feval([M_.fname '_steadystate'],dr.ys,...
+                           [oo_.exo_steady_state; ...
+                        oo_.exo_det_steady_state]);
+    if size(dr.ys,1) < M_.endo_nbr 
+        if length(M_.aux_vars) > 0
+            dr.ys = add_auxiliary_variables_to_steadystate(dr.ys,M_.aux_vars,...
+                                                           M_.fname,...
+                                                           oo_.exo_steady_state,...
+                                                           oo_.exo_det_steady_state,...
+                                                           M_.params);
+        else
+            error([M_.fname '_steadystate.m doesn''t match the model']);
+        end
+    end
 
 else
-  % testing if ys isn't a steady state or if we aren't computing Ramsey policy
-  if  options_.ramsey_policy == 0
-      if options_.linear == 0
-          % nonlinear models
-          if max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; ...
-                    oo_.exo_det_steady_state], M_.params))) > options_.dynatol
-              [dr.ys,check1] = dynare_solve(fh,dr.ys,options_.jacobian_flag,...
-                                            [oo_.exo_steady_state; ...
-		    oo_.exo_det_steady_state], M_.params);
-          end
-      else
-          % linear models
-          [fvec,jacob] = feval(fh,dr.ys,[oo_.exo_steady_state;...
-		    oo_.exo_det_steady_state], M_.params);
-          if max(abs(fvec)) > 1e-12
-              dr.ys = dr.ys-jacob\fvec;
-          end
+    % testing if ys isn't a steady state or if we aren't computing Ramsey policy
+    if  options_.ramsey_policy == 0
+        if options_.linear == 0
+            % nonlinear models
+            if max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; ...
+                                    oo_.exo_det_steady_state], M_.params))) > options_.dynatol
+                [dr.ys,check1] = dynare_solve(fh,dr.ys,options_.jacobian_flag,...
+                                              [oo_.exo_steady_state; ...
+                                    oo_.exo_det_steady_state], M_.params);
+            end
+        else
+            % linear models
+            [fvec,jacob] = feval(fh,dr.ys,[oo_.exo_steady_state;...
+                                oo_.exo_det_steady_state], M_.params);
+            if max(abs(fvec)) > 1e-12
+                dr.ys = dr.ys-jacob\fvec;
+            end
+        end
     end
-  end
 end
 % testing for problem
 if check1
@@ -125,17 +125,17 @@ if ~isreal(dr.ys)
 end
 
 dr.fbias = zeros(M_.endo_nbr,1);
-if( (options_.partial_information ==1) | (options_.ACES_solver==1))%&& (check_flag == 0)
+if( (options_.partial_information ==1) || (options_.ACES_solver==1))%&& (check_flag == 0)
     [dr,info,M_,options_,oo_] = dr1_PI(dr,check_flag,M_,options_,oo_);
 else
     [dr,info,M_,options_,oo_] = dr1(dr,check_flag,M_,options_,oo_);
 end
 if info(1)
-  return
+    return
 end
 
 if M_.exo_det_nbr > 0
-  oo_.exo_det_simul = tempexdet;
+    oo_.exo_det_simul = tempexdet;
 end
 oo_.exo_simul = tempex;
 tempex = [];

@@ -1,6 +1,6 @@
 function yf=forcst2(y0,horizon,dr,n)
 
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -25,7 +25,6 @@ exo_nbr = M_.exo_nbr;
 ykmin_ = M_.maximum_endo_lag;
 
 order = options_.order;
-seed = options_.simul_seed;
 
 k1 = [ykmin_:-1:1];
 k2 = dr.kstate(find(dr.kstate(:,2) <= ykmin_+1),[1 2]);

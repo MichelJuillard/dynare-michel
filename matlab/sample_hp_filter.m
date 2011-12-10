@@ -3,7 +3,7 @@ function [hptrend,hpcycle] = sample_hp_filter(y,s)
 % 
 % INPUTS 
 %   y                        [double]   T*n matrix of data (n is the number of variables)
-%   s                        [integer]  scalar, smoothing parameter.
+%   s                        [double]   scalar, smoothing parameter.
 % 
 % OUTPUTS 
 %   hptrend                  [double]   T*n matrix, trend component of y.
@@ -12,7 +12,7 @@ function [hptrend,hpcycle] = sample_hp_filter(y,s)
 % SPECIAL REQUIREMENTS
 %    
 
-% Copyright (C) 2010 Dynare Team
+% Copyright (C) 2010-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -28,7 +28,7 @@ function [hptrend,hpcycle] = sample_hp_filter(y,s)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-    
+
 [T,n] = size(y);
 
 if nargin<2

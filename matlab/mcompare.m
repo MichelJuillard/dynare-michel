@@ -10,7 +10,7 @@ function mcompare(s1,s2)
 %               value of the base simulation, the absolute difference is ploted
 %               instead of the relative one.
 
-% Copyright (C) 2001 Dynare Team
+% Copyright (C) 2001-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -41,7 +41,7 @@ end
 
 if options_.smpl(3) > 0
     if options_.smpl(3) == 2
-        if options_.smpl(1)<0 | options_.smpl(2)>size(x,2)-lag1(2)
+        if options_.smpl(1)<0 || options_.smpl(2)>size(x,2)-lag1(2)
             error ('Wrong sample.') ;
         end
         i = [options_.smpl(1)+lag1(1):options_.smpl(2)+lag1(1)]' ;

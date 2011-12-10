@@ -1,5 +1,4 @@
-@q $Id: journal.cweb 413 2005-08-16 14:39:55Z kamenik $ @>
-@q Copyright 2004, Ondra Kamenik @>
+@q Copyright (C) 2004-2011, Ondra Kamenik @>
 
 @ Start of {\tt journal.cpp} file.
 
@@ -7,68 +6,22 @@
 #include "journal.h"
 #include "kord_exception.h"
 
-#if !defined(__MINGW32__) && !defined(_MSC_VER)
+#if !defined(__MINGW32__)
 # include <sys/resource.h>
 # include <sys/utsname.h>
 #endif
 #include <cstdlib>
-#ifndef _MSC_VER
-# include <unistd.h>
-#endif
+#include <unistd.h>
 #include <ctime>
 
 SystemResources _sysres;
-#if defined(__MINGW32__) || defined(_MSC_VER)
+#if defined(__MINGW32__)
 @<|sysconf| Win32 implementation@>;
 #endif
 
 #if defined(__APPLE__)
 #define _SC_PHYS_PAGES 2
 #define _SC_AVPHYS_PAGES 3
-#endif
-
-#ifdef _MSC_VER
-
-struct timezone 
-{
-  int  tz_minuteswest; /* minutes W of Greenwich */
-  int  tz_dsttime;     /* type of dst correction */
-};
-
-int gettimeofday(struct timeval *tv, struct timezone *tz)
-{
-  FILETIME ft;
-  unsigned __int64 tmpres = 0;
-  static int tzflag = 0;
-
-  if (NULL != tv)
-  {
-    GetSystemTimeAsFileTime(&ft);
-
-    tmpres |= ft.dwHighDateTime;
-    tmpres <<= 32;
-    tmpres |= ft.dwLowDateTime;
-
-    tmpres /= 10;  /*convert into microseconds*/
-    /*converting file time to unix epoch*/
-    tmpres -= 11644473600000000ULL; 
-    tv->tv_sec = (long)(tmpres / 1000000UL);
-    tv->tv_usec = (long)(tmpres % 1000000UL);
-  }
-
-  if (NULL != tz)
-  {
-    if (!tzflag)
-    {
-      _tzset();
-      tzflag++;
-    }
-    tz->tz_minuteswest = _timezone / 60;
-    tz->tz_dsttime = _daylight;
-  }
-
-  return 0;
-}
 #endif
 
 @<|SystemResources| constructor code@>;
@@ -134,7 +87,7 @@ void SystemResources::getRUS(double& load_avg, long int& pg_avail,
 	gettimeofday(&now, NULL);
 	elapsed = now.tv_sec-start.tv_sec + (now.tv_usec-start.tv_usec)*1.0e-6;
 
-#if !defined(__MINGW32__) && !defined(_MSC_VER)
+#if !defined(__MINGW32__)
 	struct rusage rus;
 	getrusage(RUSAGE_SELF, &rus);
 	utime = rus.ru_utime.tv_sec+rus.ru_utime.tv_usec*1.0e-6;
@@ -148,7 +101,7 @@ void SystemResources::getRUS(double& load_avg, long int& pg_avail,
 	majflt = -1;
 #endif
 
-#if !defined(__MINGW32__) && !defined(_MSC_VER) && !defined(__CYGWIN32__)
+#if !defined(__MINGW32__) && !defined(__CYGWIN32__)
 	getloadavg(&load_avg, 1);
 #else
 	load_avg = -1.0;
@@ -255,12 +208,15 @@ JournalRecord& endrec(JournalRecord& rec)
 @<|Journal::printHeader| code@>=
 void Journal::printHeader()
 {
-	(*this)<< "This is Dynare++, Copyright (C) 2004,2005 Michel Juillard, Ondra Kamenik\n";
-	(*this)<< "Dynare++ comes with ABSOLUTELY NO WARRANTY and is distributed under\n";
-	(*this)<< "General Public License, see http://www.gnu.org/license/gpl.html\n";
-	(*this)<< "\n\n";
+	(*this)<< "This is Dynare++, Copyright (C) 2004-2011, Ondra Kamenik\n"
+	       << "Dynare++ comes with ABSOLUTELY NO WARRANTY and is distributed under\n"
+		     << "GPL: modules integ, tl, kord, sylv, src, extern and documentation\n"
+	       << "LGPL: modules parser, utils\n"
+	       << " for GPL  see http://www.gnu.org/licenses/gpl.html\n"
+	       << " for LGPL see http://www.gnu.org/licenses/lgpl.html\n"
+	       << "\n\n";
 
-#if !defined(__MINGW32__) && !defined(_MSC_VER)
+#if !defined(__MINGW32__)
 	utsname info;
 	uname(&info);
 	(*this)<< "System info: ";
@@ -300,7 +256,10 @@ Number of online processors is not implemented and returns -1, since
 Windows kernel32 |GetSystemInfo| call is too complicated.
 
 @<|sysconf| Win32 implementation@>=
-#include <Windows.h>
+#ifndef NOMINMAX
+# define NOMINMAX // Do not define "min" and "max" macros
+#endif
+#include <windows.h>
 
 #define _SC_PAGESIZE 1
 #define _SC_PHYS_PAGES 2

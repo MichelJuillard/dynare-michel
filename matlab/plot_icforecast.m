@@ -27,6 +27,11 @@ function plot_icforecast(Variables,periods)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+if exist('OCTAVE_VERSION') && octave_ver_less_than('3.4.0')
+    % The set() command on the handle returned by area() crashes in Octave 3.2
+    error('plot_conditional_forecast: you need Octave >= 3.4 (because of a bug in older versions)')
+end
+
 load conditional_forecasts;
 
 if nargin==1% Set default number of periods.

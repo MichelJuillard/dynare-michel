@@ -2,9 +2,9 @@ function myoutput=pm3_core(myinputs,fpar,nvar,whoiam, ThisMatlab)
 
 % PARALLEL CONTEXT
 % Core functionality for pm3.m function, which can be parallelized.
- 
+
 % INPUTS 
-%   See See the comment in random_walk_metropolis_hastings_core.m funtion.
+% See the comment in random_walk_metropolis_hastings_core.m funtion.
 
 % OUTPUTS
 % o myoutput  [struc]
@@ -16,7 +16,7 @@ function myoutput=pm3_core(myinputs,fpar,nvar,whoiam, ThisMatlab)
 % SPECIAL REQUIREMENTS.
 %   None.
 
-% Copyright (C) 2007-2010 Dynare Team
+% Copyright (C) 2007-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -52,8 +52,6 @@ Mean=myinputs.Mean;
 
 if whoiam
     Parallel=myinputs.Parallel;
-    MasterName=myinputs.MasterName;
-    DyMo=myinputs.DyMo;
 end
 
 
@@ -61,14 +59,14 @@ global options_ M_ oo_
 
 
 if whoiam
-      waitbarString = ['Parallel plots pm3 ...'];
-      if Parallel(ThisMatlab).Local,
+    waitbarString = ['Parallel plots pm3 ...'];
+    if Parallel(ThisMatlab).Local,
         waitbarTitle=['Local '];
-      else
-        waitbarTitle=[Parallel(ThisMatlab).PcName];
-      end        
-        fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo);   
- end
+    else
+        waitbarTitle=[Parallel(ThisMatlab).ComputerName];
+    end        
+    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));   
+end
 
 
 
@@ -85,31 +83,29 @@ end
 OutputFileName = {};
 
 for i=fpar:nvar
-    NAMES = [];
     if max(abs(Mean(:,i))) > 10^(-6)
         subplotnum = subplotnum+1;
-        set(0,'CurrentFigure',hh)
+        set(0,'CurrentFigure',hh);
         subplot(nn,nn,subplotnum);
         plot([1 n2],[0 0],'-r','linewidth',0.5);
         hold on
         for k = 1:9
-            plot(1:n2,squeeze(Distrib(k,:,i)),'-g','linewidth',0.5)
+            plot(1:n2,squeeze(Distrib(k,:,i)),'-g','linewidth',0.5);
         end
-        plot(1:n2,Mean(:,i),'-k','linewidth',1)
+        plot(1:n2,Mean(:,i),'-k','linewidth',1);
         xlim([1 n2]);
-        hold off
+        hold off;
         name = deblank(varlist(i,:));
-        NAMES = strvcat(NAMES,name);
         title(name,'Interpreter','none')
     end
     
-    if isstruct(options_.parallel)
-        if options_.parallel.Local==0
-             DirectoryName = CheckPath('Output');
+    if whoiam,
+        if Parallel(ThisMatlab).Local==0
+            DirectoryName = CheckPath('Output');
         end
     end
- 
-    if subplotnum == MaxNumberOfPlotsPerFigure | i == nvar
+    
+    if subplotnum == MaxNumberOfPlotsPerFigure || i == nvar
         eval(['print -depsc2 ' M_.dname '/Output/'  M_.fname '_' name3 '_' deblank(tit3(i,:)) '.eps' ]);
         if ~exist('OCTAVE_VERSION')
             eval(['print -dpdf ' M_.dname '/Output/' M_.fname  '_' name3 '_' deblank(tit3(i,:))]);
@@ -128,7 +124,7 @@ for i=fpar:nvar
     
     if whoiam,
         waitbarString = [ 'Variable ' int2str(i) '/' int2str(nvar) ' done.'];
-        fMessageStatus((i-fpar+1)/(nvar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab), MasterName, DyMo)
+        fMessageStatus((i-fpar+1)/(nvar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
     end
     
     

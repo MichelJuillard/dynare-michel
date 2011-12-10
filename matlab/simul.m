@@ -1,18 +1,18 @@
-function simul(dr)
-% function simul(dr)
-% computes simulations
+function simul
+% Computes deterministic simulations
 %  
 % INPUTS
-%   dr: structure of decision rules for stochastic simulations
+%   None
 %  
 % OUTPUTS
-%   ...
+%   none
+%    
 % ALGORITHM
-%   ...
+%   
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 1996-2007 Dynare Team
+% Copyright (C) 1996-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -29,10 +29,28 @@ function simul(dr)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ oo_ ys0_
+global M_ options_ oo_
+
+test_for_deep_parameters_calibration(M_);
+
+if options_.stack_solve_algo < 0 || options_.stack_solve_algo > 5
+    error('SIMUL: stack_solve_algo must be between 0 and 5')
+end
+
+if ~options_.block && ~options_.bytecode && options_.stack_solve_algo ~= 0
+    error('SIMUL: you must use stack_solve_algo=0 when not using block nor bytecode option')
+end
+
+if options_.block && ~options_.bytecode && options_.stack_solve_algo == 5
+    error('SIMUL: you can''t use stack_solve_algo = 5 without bytecode option')
+end
+
+if exist('OCTAVE_VERSION') && options_.stack_solve_algo == 2
+    error('SIMUL: you can''t use stack_solve_algo = 2 under Octave')
+end
 
 if size(M_.lead_lag_incidence,2)-nnz(M_.lead_lag_incidence(M_.maximum_endo_lag+1,:)) > 0
-    mess = ['DYNARE: error in model specification : variable ' M_.endo_names(find(M_.lead_lag_incidence(M_.maximum_lag+1,:)==0),:)] ;
+    mess = ['SIMUL: error in model specification : variable ' M_.endo_names(find(M_.lead_lag_incidence(M_.maximum_lag+1,:)==0),:)] ;
     mess = [mess ' doesn''t appear as current variable.'] ; 
     error (mess) ;
 end
@@ -51,47 +69,32 @@ if ~ options_.initval_file
     end
 end
 
-if isempty(options_.scalv) | options_.scalv == 0
+if isempty(options_.scalv) || options_.scalv == 0
     options_.scalv = oo_.steady_state ;
 end
 
 options_.scalv= 1 ;
 
-if ~options_.block && ~options_.bytecode && options_.stack_solve_algo ~= 0
-    error('SIMUL: for the moment, you must use stack_solve_algo=0 when not using block nor bytecode option')
-end
-if options_.block && ~options_.bytecode && (options_.stack_solve_algo == 0 || options_.stack_solve_algo == 5)
-    error('SIMUL: for the moment, you must use stack_solve_algo={1,2,3,4} when using block without bytecode option')
-end
-if options_.bytecode && options_.stack_solve_algo ~= 5
-    error('SIMUL: for the moment, you must use stack_solve_algo=5 with bytecode option')
-end
-
-if exist('OCTAVE_VERSION') && options_.stack_solve_algo == 2
-    error('SIMUL: stack_solve_algo=2 is not available for Octave. Choose another value.')
-end
-
 if(options_.block)
     if(options_.bytecode)
-        oo_.endo_simul=bytecode('dynamic');
+        [info, oo_.endo_simul] = bytecode('dynamic');
+        mexErrCheck('bytecode', info);
     else
         eval([M_.fname '_dynamic']);
     end;
 else
     if(options_.bytecode)
-        oo_.endo_simul=bytecode('dynamic');
+        [info, oo_.endo_simul]=bytecode('dynamic');
+        mexErrCheck('bytecode', info);
     else
-        if M_.maximum_endo_lag ==1 & M_.maximum_endo_lead <= 1
-            sim1 ;
-        else
-            simk ;
+        if M_.maximum_endo_lead == 0
+            error('SIMUL: purely backward models are not supported')
+        elseif M_.maximum_endo_lag == 1 && M_.maximum_endo_lead == 1
+        sim1 ;
+        else % For purely forward models
+            simk;
         end;
     end;
 end;
 
 dyn2vec;
-
-% 6/18/01 MJ added dyn2vec if 40 variables or less
-% 01/16/03 MJ use dyn2vec whatever the number of variables
-% 02/18/03 MJ added oo_.steady_state for calling simult
-% 05/24/03 MJ added options_ and options_.periods

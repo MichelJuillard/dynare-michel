@@ -16,7 +16,7 @@ function info = forecast(var_list,task)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2009 Dynare Team
+% Copyright (C) 2003-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -33,14 +33,11 @@ function info = forecast(var_list,task)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global options_ dr_ oo_ M_
+global options_ oo_ M_
 
 info = 0;
 
-old_options = options_;
-
 maximum_lag = M_.maximum_lag;
-
 
 endo_names = M_.endo_names;
 if isempty(var_list)
@@ -137,6 +134,3 @@ end
 if options_.nograph == 0
     forecast_graphs(var_list);
 end
-
-options_ = old_options;
-

@@ -1,4 +1,4 @@
-  function Z=disc_riccati_fast(F,D,R,H,ch)
+function Z=disc_riccati_fast(F,D,R,H,ch)
 % function Z=disc_riccati_fast(F,D,R,H,ch)
 % 
 % Solves discrete Riccati Equation: 
@@ -11,7 +11,7 @@
 % V.2 22/10/06
 % =================================================================
 
-% Copyright (C) 2006-2010 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -28,7 +28,7 @@
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if nargin == 4 | isempty( ch ) == 1 
+if nargin == 4 || isempty( ch ) == 1 
     flag_ch = 0; 
 else 
     flag_ch = 1; 
@@ -58,12 +58,12 @@ while matd > tol && count < 100
     Y1=X0'*Y0*INVPY*X0+ Y0; 
     X1=X0*INVPY*X0; 
     matd=sum( sum(abs( P1 - P0 ))); 
-%    P0=(P1+P1')/2
+    %    P0=(P1+P1')/2
     P0=P1; 
     X0=X1;
     Y0=Y1;
     count=count+1;
-%    matd;
+    %    matd;
 end 
 
 Z=(P0+P0')/2;
@@ -72,8 +72,8 @@ Z=(P0+P0')/2;
 if count==100
     matd
     error('Riccati not converged fast enough!');
-%    error.identifier='Riccati not converged!'
-%    error
+    %    error.identifier='Riccati not converged!'
+    %    error
 end
 %if count >5 
 %    disp('Riccati count= ');

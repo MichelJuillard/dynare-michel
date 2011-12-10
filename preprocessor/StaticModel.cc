@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 Dynare Team
+ * Copyright (C) 2003-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -39,162 +39,157 @@ StaticModel::StaticModel(SymbolTable &symbol_table_arg,
                          NumericalConstants &num_constants_arg,
                          ExternalFunctionsTable &external_functions_table_arg) :
   ModelTree(symbol_table_arg, num_constants_arg, external_functions_table_arg),
-  global_temporary_terms(true),
-  cutoff(1e-15),
-  mfs(0)
+  global_temporary_terms(true)
 {
 }
 
 void
-StaticModel::compileDerivative(ofstream &code_file, int eq, int symb_id, map_idx_type &map_idx) const
+StaticModel::compileDerivative(ofstream &code_file, unsigned int &instruction_number, int eq, int symb_id, map_idx_t &map_idx, temporary_terms_t temporary_terms) const
 {
-  first_derivatives_type::const_iterator it = first_derivatives.find(make_pair(eq, symbol_table.getID(eEndogenous, symb_id)));
+  first_derivatives_t::const_iterator it = first_derivatives.find(make_pair(eq, symbol_table.getID(eEndogenous, symb_id)));
   if (it != first_derivatives.end())
-    (it->second)->compile(code_file, false, temporary_terms, map_idx, false, false);
+    (it->second)->compile(code_file, instruction_number, false, temporary_terms, map_idx, false, false);
   else
     {
       FLDZ_ fldz;
-      fldz.write(code_file);
+      fldz.write(code_file, instruction_number);
     }
 }
 
 void
-StaticModel::compileChainRuleDerivative(ofstream &code_file, int eqr, int varr, int lag, map_idx_type &map_idx) const
+StaticModel::compileChainRuleDerivative(ofstream &code_file, unsigned int &instruction_number, int eqr, int varr, int lag, map_idx_t &map_idx, temporary_terms_t temporary_terms) const
 {
-  map<pair<int, pair<int, int> >, NodeID>::const_iterator it = first_chain_rule_derivatives.find(make_pair(eqr, make_pair(varr, lag)));
+  map<pair<int, pair<int, int> >, expr_t>::const_iterator it = first_chain_rule_derivatives.find(make_pair(eqr, make_pair(varr, lag)));
   if (it != first_chain_rule_derivatives.end())
-    (it->second)->compile(code_file, false, temporary_terms, map_idx, false, false);
+    (it->second)->compile(code_file, instruction_number, false, temporary_terms, map_idx, false, false);
   else
     {
       FLDZ_ fldz;
-      fldz.write(code_file);
-    }
-}
-
-void
-StaticModel::initializeVariablesAndEquations()
-{
-  for(int j = 0; j < equation_number(); j++)
-    {
-      equation_reordered.push_back(j);
-      variable_reordered.push_back(j);
+      fldz.write(code_file, instruction_number);
     }
 }
 
 void
 StaticModel::computeTemporaryTermsOrdered()
 {
-  map<NodeID, pair<int, int> > first_occurence;
-  map<NodeID, int> reference_count;
+  map<expr_t, pair<int, int> > first_occurence;
+  map<expr_t, int> reference_count;
   BinaryOpNode *eq_node;
-  first_derivatives_type::const_iterator it;
-  first_chain_rule_derivatives_type::const_iterator it_chr;
+  first_derivatives_t::const_iterator it;
+  first_chain_rule_derivatives_t::const_iterator it_chr;
   ostringstream tmp_s;
   v_temporary_terms.clear();
   map_idx.clear();
 
   unsigned int nb_blocks = getNbBlocks();
-  v_temporary_terms = vector< vector<temporary_terms_type> >(nb_blocks);
+  v_temporary_terms = vector< vector<temporary_terms_t> >(nb_blocks);
+  v_temporary_terms_local = vector< vector<temporary_terms_t> >(nb_blocks);
 
-  v_temporary_terms_inuse = vector<temporary_terms_inuse_type>(nb_blocks);
+  v_temporary_terms_inuse = vector<temporary_terms_inuse_t>(nb_blocks);
+
+  map_idx2 = vector<map_idx_t>(nb_blocks);
 
   temporary_terms.clear();
-  if (!global_temporary_terms)
-    {
-      for (unsigned int block = 0; block < nb_blocks; block++)
-        {
 
-          reference_count.clear();
-          temporary_terms.clear();
-          unsigned int block_size = getBlockSize(block);
-          unsigned int block_nb_mfs = getBlockMfs(block);
-          unsigned int block_nb_recursives = block_size - block_nb_mfs;
-          v_temporary_terms[block] = vector<temporary_terms_type>(block_size);
-          for (unsigned int i = 0; i < block_size; i++)
+  //local temporay terms
+  for (unsigned int block = 0; block < nb_blocks; block++)
+    {
+      map<expr_t, int> reference_count_local;
+      reference_count_local.clear();
+      map<expr_t, pair<int, int> > first_occurence_local;
+      first_occurence_local.clear();
+      temporary_terms_t temporary_terms_l;
+      temporary_terms_l.clear();
+
+      unsigned int block_size = getBlockSize(block);
+      unsigned int block_nb_mfs = getBlockMfs(block);
+      unsigned int block_nb_recursives = block_size - block_nb_mfs;
+      v_temporary_terms_local[block] = vector<temporary_terms_t>(block_size);
+
+      for (unsigned int i = 0; i < block_size; i++)
+        {
+          if (i < block_nb_recursives && isBlockEquationRenormalized(block, i))
+            getBlockEquationRenormalizedExpr(block, i)->computeTemporaryTerms(reference_count_local, temporary_terms_l, first_occurence_local, block, v_temporary_terms_local,  i);
+          else
             {
-              if (i < block_nb_recursives && isBlockEquationRenormalized(block, i))
-                getBlockEquationRenormalizedNodeID(block, i)->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, block, v_temporary_terms,  i);
-              else
-                {
-                  eq_node = (BinaryOpNode *) getBlockEquationNodeID(block, i);
-                  eq_node->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, block, v_temporary_terms,  i);
-                }
+              eq_node = (BinaryOpNode *) getBlockEquationExpr(block, i);
+              eq_node->computeTemporaryTerms(reference_count_local, temporary_terms_l, first_occurence_local, block, v_temporary_terms_local,  i);
             }
-          for (t_block_derivatives_equation_variable_laglead_nodeid::const_iterator it = blocks_derivatives[block].begin(); it != (blocks_derivatives[block]).end(); it++)
+        }
+      for (block_derivatives_equation_variable_laglead_nodeid_t::const_iterator it = blocks_derivatives[block].begin(); it != (blocks_derivatives[block]).end(); it++)
+        {
+          expr_t id = it->second.second;
+          id->computeTemporaryTerms(reference_count_local, temporary_terms_l, first_occurence_local, block, v_temporary_terms_local,  block_size-1);
+        }
+      set<int> temporary_terms_in_use;
+      temporary_terms_in_use.clear();
+      v_temporary_terms_inuse[block] = temporary_terms_in_use;
+      computeTemporaryTermsMapping(temporary_terms_l, map_idx2[block]);
+    }
+
+  // global temporay terms
+  for (unsigned int block = 0; block < nb_blocks; block++)
+    {
+      // Compute the temporary terms reordered
+      unsigned int block_size = getBlockSize(block);
+      unsigned int block_nb_mfs = getBlockMfs(block);
+      unsigned int block_nb_recursives = block_size - block_nb_mfs;
+      v_temporary_terms[block] = vector<temporary_terms_t>(block_size);
+      for (unsigned int i = 0; i < block_size; i++)
+        {
+          if (i < block_nb_recursives && isBlockEquationRenormalized(block, i))
+            getBlockEquationRenormalizedExpr(block, i)->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, block, v_temporary_terms,  i);
+          else
             {
-              NodeID id = it->second.second;
-              id->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, block, v_temporary_terms,  block_size-1);
+              eq_node = (BinaryOpNode *) getBlockEquationExpr(block, i);
+              eq_node->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, block, v_temporary_terms, i);
             }
-          set<int> temporary_terms_in_use;
-          temporary_terms_in_use.clear();
-          v_temporary_terms_inuse[block] = temporary_terms_in_use;
+        }
+      for (block_derivatives_equation_variable_laglead_nodeid_t::const_iterator it = blocks_derivatives[block].begin(); it != (blocks_derivatives[block]).end(); it++)
+        {
+          expr_t id = it->second.second;
+          id->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, block, v_temporary_terms, block_size-1);
         }
     }
-  else
-    {
-      for (unsigned int block = 0; block < nb_blocks; block++)
-        {
-          // Compute the temporary terms reordered
-          unsigned int block_size = getBlockSize(block);
-          unsigned int block_nb_mfs = getBlockMfs(block);
-          unsigned int block_nb_recursives = block_size - block_nb_mfs;
-          v_temporary_terms[block] = vector<temporary_terms_type>(block_size);
-          for (unsigned int i = 0; i < block_size; i++)
-            {
-              if (i < block_nb_recursives && isBlockEquationRenormalized(block, i))
-                getBlockEquationRenormalizedNodeID(block, i)->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, block, v_temporary_terms,  i);
-              else
-                {
-                  eq_node = (BinaryOpNode *) getBlockEquationNodeID(block, i);
-                  eq_node->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, block, v_temporary_terms, i);
-                }
-            }
-          for (t_block_derivatives_equation_variable_laglead_nodeid::const_iterator it = blocks_derivatives[block].begin(); it != (blocks_derivatives[block]).end(); it++)
-            {
-              NodeID id = it->second.second;
-              id->computeTemporaryTerms(reference_count, temporary_terms, first_occurence, block, v_temporary_terms, block_size-1);
-            }
 
-        }
-      for (unsigned int block = 0; block < nb_blocks; block++)
+  for (unsigned int block = 0; block < nb_blocks; block++)
+    {
+      // Collecte the temporary terms reordered
+      unsigned int block_size = getBlockSize(block);
+      unsigned int block_nb_mfs = getBlockMfs(block);
+      unsigned int block_nb_recursives = block_size - block_nb_mfs;
+      set<int> temporary_terms_in_use;
+      for (unsigned int i = 0; i < block_size; i++)
         {
-          // Collecte the temporary terms reordered
-          unsigned int block_size = getBlockSize(block);
-          unsigned int block_nb_mfs = getBlockMfs(block);
-          unsigned int block_nb_recursives = block_size - block_nb_mfs;
-          set<int> temporary_terms_in_use;
-          for (unsigned int i = 0; i < block_size; i++)
+          if (i < block_nb_recursives && isBlockEquationRenormalized(block, i))
+            getBlockEquationRenormalizedExpr(block, i)->collectTemporary_terms(temporary_terms, temporary_terms_in_use, block);
+          else
             {
-              if (i < block_nb_recursives && isBlockEquationRenormalized(block, i))
-                getBlockEquationRenormalizedNodeID(block, i)->collectTemporary_terms(temporary_terms, temporary_terms_in_use, block);
-              else
-                {
-                  eq_node = (BinaryOpNode *) getBlockEquationNodeID(block, i);
-                  eq_node->collectTemporary_terms(temporary_terms, temporary_terms_in_use, block);
-                }
+              eq_node = (BinaryOpNode *) getBlockEquationExpr(block, i);
+              eq_node->collectTemporary_terms(temporary_terms, temporary_terms_in_use, block);
             }
-          for (t_block_derivatives_equation_variable_laglead_nodeid::const_iterator it = blocks_derivatives[block].begin(); it != (blocks_derivatives[block]).end(); it++)
-            {
-              NodeID id = it->second.second;
-              id->collectTemporary_terms(temporary_terms, temporary_terms_in_use, block);
-            }
-          for (int i = 0; i < (int) getBlockSize(block); i++)
-            for (temporary_terms_type::const_iterator it = v_temporary_terms[block][i].begin();
-                 it != v_temporary_terms[block][i].end(); it++)
-              (*it)->collectTemporary_terms(temporary_terms, temporary_terms_in_use, block);
-          v_temporary_terms_inuse[block] = temporary_terms_in_use;
         }
-      computeTemporaryTermsMapping();
+      for (block_derivatives_equation_variable_laglead_nodeid_t::const_iterator it = blocks_derivatives[block].begin(); it != (blocks_derivatives[block]).end(); it++)
+        {
+          expr_t id = it->second.second;
+          id->collectTemporary_terms(temporary_terms, temporary_terms_in_use, block);
+        }
+      for (int i = 0; i < (int) getBlockSize(block); i++)
+        for (temporary_terms_t::const_iterator it = v_temporary_terms[block][i].begin();
+             it != v_temporary_terms[block][i].end(); it++)
+          (*it)->collectTemporary_terms(temporary_terms, temporary_terms_in_use, block);
+      v_temporary_terms_inuse[block] = temporary_terms_in_use;
     }
+  computeTemporaryTermsMapping(temporary_terms, map_idx);
 }
 
 void
-StaticModel::computeTemporaryTermsMapping()
+StaticModel::computeTemporaryTermsMapping(temporary_terms_t &temporary_terms, map_idx_t &map_idx)
 {
   // Add a mapping form node ID to temporary terms order
   int j = 0;
-  for (temporary_terms_type::const_iterator it = temporary_terms.begin();
-      it != temporary_terms.end(); it++)
+  for (temporary_terms_t::const_iterator it = temporary_terms.begin();
+       it != temporary_terms.end(); it++)
     map_idx[(*it)->idx] = j++;
 }
 
@@ -203,22 +198,18 @@ StaticModel::writeModelEquationsOrdered_M(const string &static_basename) const
 {
   string tmp_s, sps;
   ostringstream tmp_output, tmp1_output, global_output;
-  NodeID lhs = NULL, rhs = NULL;
+  expr_t lhs = NULL, rhs = NULL;
   BinaryOpNode *eq_node;
-  map<NodeID, int> reference_count;
-  temporary_terms_type local_temporary_terms;
+  map<expr_t, int> reference_count;
+  temporary_terms_t local_temporary_terms;
   ofstream  output;
-  int nze;
   vector<int> feedback_variables;
+  deriv_node_temp_terms_t tef_terms;
   ExprNodeOutputType local_output_type;
 
+  local_output_type = oMatlabStaticModelSparse;
   if (global_temporary_terms)
-    {
-      local_output_type = oMatlabStaticModelSparse;
-      local_temporary_terms = temporary_terms;
-    }
-  else
-    local_output_type = oMatlabDynamicModelSparseLocalTemporaryTerms;
+    local_temporary_terms = temporary_terms;
 
   //----------------------------------------------------------------------
   //For each block
@@ -227,7 +218,6 @@ StaticModel::writeModelEquationsOrdered_M(const string &static_basename) const
       //recursive_variables.clear();
       feedback_variables.clear();
       //For a block composed of a single equation determines wether we have to evaluate or to solve the equation
-      nze = derivative_endo[block].size();
       BlockSimulationType simulation_type = getBlockSimulationType(block);
       unsigned int block_size = getBlockSize(block);
       unsigned int block_mfs = getBlockMfs(block);
@@ -269,12 +259,12 @@ StaticModel::writeModelEquationsOrdered_M(const string &static_basename) const
       output << "  global options_;" << endl;
       //The Temporary terms
       if (simulation_type != EVALUATE_BACKWARD  && simulation_type != EVALUATE_FORWARD)
-        output << "  g1 = zeros(" << block_mfs << ", " << block_mfs << ");" << endl;
+        output << " g1 = spalloc("  << block_mfs << ", " << block_mfs << ", " << derivative_endo[block].size() << ");" << endl;
 
       if (v_temporary_terms_inuse[block].size())
         {
           tmp_output.str("");
-          for (temporary_terms_inuse_type::const_iterator it = v_temporary_terms_inuse[block].begin();
+          for (temporary_terms_inuse_t::const_iterator it = v_temporary_terms_inuse[block].begin();
                it != v_temporary_terms_inuse[block].end(); it++)
             tmp_output << " T" << *it;
           output << "  global" << tmp_output.str() << ";\n";
@@ -288,18 +278,21 @@ StaticModel::writeModelEquationsOrdered_M(const string &static_basename) const
         {
           if (!global_temporary_terms)
             local_temporary_terms = v_temporary_terms[block][i];
-          temporary_terms_type tt2;
+          temporary_terms_t tt2;
           tt2.clear();
           if (v_temporary_terms[block].size())
             {
               output << "  " << "% //Temporary variables" << endl;
-              for (temporary_terms_type::const_iterator it = v_temporary_terms[block][i].begin();
+              for (temporary_terms_t::const_iterator it = v_temporary_terms[block][i].begin();
                    it != v_temporary_terms[block][i].end(); it++)
                 {
+                  if (dynamic_cast<ExternalFunctionNode *>(*it) != NULL)
+                    (*it)->writeExternalFunctionOutput(output, local_output_type, tt2, tef_terms);
+
                   output << "  " <<  sps;
-                  (*it)->writeOutput(output, local_output_type, local_temporary_terms);
+                  (*it)->writeOutput(output, local_output_type, local_temporary_terms, tef_terms);
                   output << " = ";
-                  (*it)->writeOutput(output, local_output_type, tt2);
+                  (*it)->writeOutput(output, local_output_type, tt2, tef_terms);
                   // Insert current node into tt2
                   tt2.insert(*it);
                   output << ";" << endl;
@@ -310,7 +303,7 @@ StaticModel::writeModelEquationsOrdered_M(const string &static_basename) const
           int equation_ID = getBlockEquationID(block, i);
           EquationType equ_type = getBlockEquationType(block, i);
           string sModel = symbol_table.getName(symbol_table.getID(eEndogenous, variable_ID));
-          eq_node = (BinaryOpNode *) getBlockEquationNodeID(block, i);
+          eq_node = (BinaryOpNode *) getBlockEquationExpr(block, i);
           lhs = eq_node->get_arg1();
           rhs = eq_node->get_arg2();
           tmp_output.str("");
@@ -338,7 +331,7 @@ StaticModel::writeModelEquationsOrdered_M(const string &static_basename) const
                       rhs->writeOutput(output, local_output_type, local_temporary_terms);
                       output << "\n  ";
                       tmp_output.str("");
-                      eq_node = (BinaryOpNode *) getBlockEquationRenormalizedNodeID(block, i);
+                      eq_node = (BinaryOpNode *) getBlockEquationRenormalizedExpr(block, i);
                       lhs = eq_node->get_arg1();
                       rhs = eq_node->get_arg2();
                       lhs->writeOutput(output, local_output_type, local_temporary_terms);
@@ -382,13 +375,13 @@ StaticModel::writeModelEquationsOrdered_M(const string &static_basename) const
         case SOLVE_FORWARD_SIMPLE:
         case SOLVE_BACKWARD_COMPLETE:
         case SOLVE_FORWARD_COMPLETE:
-          for (t_block_derivatives_equation_variable_laglead_nodeid::const_iterator it = blocks_derivatives[block].begin(); it != (blocks_derivatives[block]).end(); it++)
+          for (block_derivatives_equation_variable_laglead_nodeid_t::const_iterator it = blocks_derivatives[block].begin(); it != (blocks_derivatives[block]).end(); it++)
             {
               unsigned int eq = it->first.first;
               unsigned int var = it->first.second;
               unsigned int eqr = getBlockEquationID(block, eq);
               unsigned int varr = getBlockVariableID(block, var);
-              NodeID id = it->second.second;
+              expr_t id = it->second.second;
               output << "    g1(" << eq+1-block_recursive << ", " << var+1-block_recursive << ") = ";
               id->writeOutput(output, local_output_type, local_temporary_terms);
               output << "; % variable=" << symbol_table.getName(symbol_table.getID(eEndogenous, varr))
@@ -400,16 +393,18 @@ StaticModel::writeModelEquationsOrdered_M(const string &static_basename) const
         default:
           break;
         }
+      output << "end" << endl;
       output.close();
     }
 }
 
 void
-StaticModel::writeModelEquationsCode(const string file_name, const string bin_basename, map_idx_type map_idx) const
+StaticModel::writeModelEquationsCode(const string file_name, const string bin_basename, map_idx_t map_idx) const
 {
 
   ostringstream tmp_output;
   ofstream code_file;
+  unsigned int instruction_number = 0;
   bool file_open = false;
 
   string main_name = file_name;
@@ -427,9 +422,8 @@ StaticModel::writeModelEquationsCode(const string file_name, const string bin_ba
   file_open = true;
 
   //Temporary variables declaration
-  FDIMT_ fdimt(temporary_terms.size());
-  fdimt.write(code_file);
-
+  FDIMST_ fdimst(temporary_terms.size());
+  fdimst.write(code_file, instruction_number);
   FBEGINBLOCK_ fbeginblock(symbol_table.endo_nbr(),
                            SOLVE_FORWARD_COMPLETE,
                            0,
@@ -440,82 +434,138 @@ StaticModel::writeModelEquationsCode(const string file_name, const string bin_ba
                            symbol_table.endo_nbr(),
                            0,
                            0,
-                           u_count_int
+                           u_count_int,
+                           symbol_table.endo_nbr()
                            );
-  fbeginblock.write(code_file);
-
+  fbeginblock.write(code_file, instruction_number);
 
   // Add a mapping form node ID to temporary terms order
   int j = 0;
-  for (temporary_terms_type::const_iterator it = temporary_terms.begin();
+  for (temporary_terms_t::const_iterator it = temporary_terms.begin();
        it != temporary_terms.end(); it++)
     map_idx[(*it)->idx] = j++;
-  compileTemporaryTerms(code_file, temporary_terms, map_idx, false, false);
+  compileTemporaryTerms(code_file, instruction_number, temporary_terms, map_idx, false, false);
 
-  compileModelEquations(code_file, temporary_terms, map_idx, false, false);
+  compileModelEquations(code_file, instruction_number, temporary_terms, map_idx, false, false);
 
   FENDEQU_ fendequ;
-  fendequ.write(code_file);
+  fendequ.write(code_file, instruction_number);
+
+  // Get the current code_file position and jump if eval = true
+  streampos pos1 = code_file.tellp();
+  FJMPIFEVAL_ fjmp_if_eval(0);
+  fjmp_if_eval.write(code_file, instruction_number);
+  int prev_instruction_number = instruction_number;
 
   vector<vector<pair<int, int> > > derivatives;
   derivatives.resize(symbol_table.endo_nbr());
   count_u = symbol_table.endo_nbr();
-  for (first_derivatives_type::const_iterator it = first_derivatives.begin();
+  for (first_derivatives_t::const_iterator it = first_derivatives.begin();
        it != first_derivatives.end(); it++)
     {
       int deriv_id = it->first.second;
       if (getTypeByDerivID(deriv_id) == eEndogenous)
         {
-          NodeID d1 = it->second;
+          expr_t d1 = it->second;
           unsigned int eq = it->first.first;
           int symb = getSymbIDByDerivID(deriv_id);
           unsigned int var = symbol_table.getTypeSpecificID(symb);
           FNUMEXPR_ fnumexpr(FirstEndoDerivative, eq, var);
-          fnumexpr.write(code_file);
+          fnumexpr.write(code_file, instruction_number);
           if (!derivatives[eq].size())
             derivatives[eq].clear();
           derivatives[eq].push_back(make_pair(var, count_u));
 
-          d1->compile(code_file, false, temporary_terms, map_idx, false, false);
+          d1->compile(code_file, instruction_number, false, temporary_terms, map_idx, false, false);
 
           FSTPSU_ fstpsu(count_u);
-          fstpsu.write(code_file);
+          fstpsu.write(code_file, instruction_number);
           count_u++;
         }
     }
   for (int i = 0; i < symbol_table.endo_nbr(); i++)
     {
       FLDR_ fldr(i);
-      fldr.write(code_file);
-      for(vector<pair<int, int> >::const_iterator it = derivatives[i].begin();
-          it != derivatives[i].end(); it++)
+      fldr.write(code_file, instruction_number);
+      if (derivatives[i].size())
         {
-          FLDSU_ fldsu(it->second);
-          fldsu.write(code_file);
-          FLDSV_ fldsv(eEndogenous, it->first);
-          fldsv.write(code_file);
-          FBINARY_ fbinary(oTimes);
-          fbinary.write(code_file);
-          if (it != derivatives[i].begin())
+          for (vector<pair<int, int> >::const_iterator it = derivatives[i].begin();
+               it != derivatives[i].end(); it++)
             {
-              FBINARY_ fbinary(oPlus);
-              fbinary.write(code_file);
+              FLDSU_ fldsu(it->second);
+              fldsu.write(code_file, instruction_number);
+              FLDSV_ fldsv(eEndogenous, it->first);
+              fldsv.write(code_file, instruction_number);
+              FBINARY_ fbinary(oTimes);
+              fbinary.write(code_file, instruction_number);
+              if (it != derivatives[i].begin())
+                {
+                  FBINARY_ fbinary(oPlus);
+                  fbinary.write(code_file, instruction_number);
+                }
             }
+          FBINARY_ fbinary(oMinus);
+          fbinary.write(code_file, instruction_number);
         }
-      FBINARY_ fbinary(oMinus);
-      fbinary.write(code_file);
       FSTPSU_ fstpsu(i);
-      fstpsu.write(code_file);
+      fstpsu.write(code_file, instruction_number);
     }
+  // Get the current code_file position and jump = true
+  streampos pos2 = code_file.tellp();
+  FJMP_ fjmp(0);
+  fjmp.write(code_file, instruction_number);
+  // Set code_file position to previous JMPIFEVAL_ and set the number of instructions to jump
+  streampos pos3 = code_file.tellp();
+  code_file.seekp(pos1);
+  FJMPIFEVAL_ fjmp_if_eval1(instruction_number - prev_instruction_number);
+  fjmp_if_eval1.write(code_file, instruction_number);
+  code_file.seekp(pos3);
+  prev_instruction_number = instruction_number;
+
+  temporary_terms_t tt2;
+  tt2.clear();
+  temporary_terms_t tt3;
+  tt3.clear();
+
+  // The Jacobian if we have to solve the block determinsitic bloc
+  for (first_derivatives_t::const_iterator it = first_derivatives.begin();
+       it != first_derivatives.end(); it++)
+    {
+      int deriv_id = it->first.second;
+      if (getTypeByDerivID(deriv_id) == eEndogenous)
+        {
+          expr_t d1 = it->second;
+          unsigned int eq = it->first.first;
+          int symb = getSymbIDByDerivID(deriv_id);
+          unsigned int var = symbol_table.getTypeSpecificID(symb);
+          FNUMEXPR_ fnumexpr(FirstEndoDerivative, eq, var);
+          fnumexpr.write(code_file, instruction_number);
+          if (!derivatives[eq].size())
+            derivatives[eq].clear();
+          derivatives[eq].push_back(make_pair(var, count_u));
+
+          d1->compile(code_file, instruction_number, false, temporary_terms, map_idx, false, false);
+          FSTPG2_ fstpg2(eq, var);
+          fstpg2.write(code_file, instruction_number);
+        }
+    }
+
+  // Set codefile position to previous JMP_ and set the number of instructions to jump
+  pos1 = code_file.tellp();
+  code_file.seekp(pos2);
+  FJMP_ fjmp1(instruction_number - prev_instruction_number);
+  fjmp1.write(code_file, instruction_number);
+  code_file.seekp(pos1);
+
   FENDBLOCK_ fendblock;
-  fendblock.write(code_file);
+  fendblock.write(code_file, instruction_number);
   FEND_ fend;
-  fend.write(code_file);
+  fend.write(code_file, instruction_number);
   code_file.close();
 }
 
 void
-StaticModel::writeModelEquationsCode_Block(const string file_name, const string bin_basename, map_idx_type map_idx) const
+StaticModel::writeModelEquationsCode_Block(const string file_name, const string bin_basename, map_idx_t map_idx, vector<map_idx_t> map_idx2) const
 {
   struct Uff_l
   {
@@ -532,11 +582,13 @@ StaticModel::writeModelEquationsCode_Block(const string file_name, const string 
   string tmp_s;
   ostringstream tmp_output;
   ofstream code_file;
-  NodeID lhs = NULL, rhs = NULL;
+  unsigned int instruction_number = 0;
+  expr_t lhs = NULL, rhs = NULL;
   BinaryOpNode *eq_node;
   Uff Uf[symbol_table.endo_nbr()];
-  map<NodeID, int> reference_count;
+  map<expr_t, int> reference_count;
   vector<int> feedback_variables;
+  deriv_node_temp_terms_t tef_terms;
   bool file_open = false;
 
   string main_name = file_name;
@@ -549,8 +601,8 @@ StaticModel::writeModelEquationsCode_Block(const string file_name, const string 
     }
   //Temporary variables declaration
 
-  FDIMT_ fdimt(temporary_terms.size());
-  fdimt.write(code_file);
+  FDIMST_ fdimst(temporary_terms.size());
+  fdimst.write(code_file, instruction_number);
 
   for (unsigned int block = 0; block < getNbBlocks(); block++)
     {
@@ -558,7 +610,7 @@ StaticModel::writeModelEquationsCode_Block(const string file_name, const string 
       if (block > 0)
         {
           FENDBLOCK_ fendblock;
-          fendblock.write(code_file);
+          fendblock.write(code_file, instruction_number);
         }
       int count_u;
       int u_count_int = 0;
@@ -584,31 +636,42 @@ StaticModel::writeModelEquationsCode_Block(const string file_name, const string 
                                symbol_table.endo_nbr(),
                                0,
                                0,
-                               u_count_int
+                               u_count_int,
+                               /*symbol_table.endo_nbr()*/ block_size
                                );
-      fbeginblock.write(code_file);
 
-      // The equations
+      fbeginblock.write(code_file, instruction_number);
+
+      // Get the current code_file position and jump if eval = true
+      streampos pos1 = code_file.tellp();
+      FJMPIFEVAL_ fjmp_if_eval(0);
+      fjmp_if_eval.write(code_file, instruction_number);
+      int prev_instruction_number = instruction_number;
+
       for (i = 0; i < (int) block_size; i++)
         {
           //The Temporary terms
-          temporary_terms_type tt2;
+          temporary_terms_t tt2;
           tt2.clear();
           if (v_temporary_terms[block].size())
             {
-              for (temporary_terms_type::const_iterator it = v_temporary_terms[block][i].begin();
+              for (temporary_terms_t::const_iterator it = v_temporary_terms[block][i].begin();
                    it != v_temporary_terms[block][i].end(); it++)
                 {
-                  FNUMEXPR_ fnumexpr(TemporaryTerm, (int)(map_idx.find((*it)->idx)->second));
-                  fnumexpr.write(code_file);
-                  (*it)->compile(code_file, false, tt2, map_idx, false, false);
-                  FSTPST_ fstpst((int)(map_idx.find((*it)->idx)->second));
-                  fstpst.write(code_file);
+                  if (dynamic_cast<ExternalFunctionNode *>(*it) != NULL)
+                    (*it)->compileExternalFunctionOutput(code_file, instruction_number, false, tt2, map_idx, false, false, tef_terms);
+
+                  FNUMEXPR_ fnumexpr(TemporaryTerm, (int) (map_idx.find((*it)->idx)->second));
+                  fnumexpr.write(code_file, instruction_number);
+                  (*it)->compile(code_file, instruction_number, false, tt2, map_idx, false, false, tef_terms);
+                  FSTPST_ fstpst((int) (map_idx.find((*it)->idx)->second));
+                  fstpst.write(code_file, instruction_number);
                   // Insert current node into tt2
                   tt2.insert(*it);
                 }
             }
 
+          // The equations
           int variable_ID, equation_ID;
           EquationType equ_type;
           switch (simulation_type)
@@ -619,23 +682,23 @@ StaticModel::writeModelEquationsCode_Block(const string file_name, const string 
               equ_type = getBlockEquationType(block, i);
               {
                 FNUMEXPR_ fnumexpr(ModelEquation, getBlockEquationID(block, i));
-                fnumexpr.write(code_file);
+                fnumexpr.write(code_file, instruction_number);
               }
               if (equ_type == E_EVALUATE)
                 {
-                  eq_node = (BinaryOpNode *) getBlockEquationNodeID(block, i);
+                  eq_node = (BinaryOpNode *) getBlockEquationExpr(block, i);
                   lhs = eq_node->get_arg1();
                   rhs = eq_node->get_arg2();
-                  rhs->compile(code_file, false, temporary_terms, map_idx, false, false);
-                  lhs->compile(code_file, true, temporary_terms, map_idx, false, false);
+                  rhs->compile(code_file, instruction_number, false, temporary_terms, map_idx, false, false);
+                  lhs->compile(code_file, instruction_number, true, temporary_terms, map_idx, false, false);
                 }
               else if (equ_type == E_EVALUATE_S)
                 {
-                  eq_node = (BinaryOpNode *) getBlockEquationRenormalizedNodeID(block, i);
+                  eq_node = (BinaryOpNode *) getBlockEquationRenormalizedExpr(block, i);
                   lhs = eq_node->get_arg1();
                   rhs = eq_node->get_arg2();
-                  rhs->compile(code_file, false, temporary_terms, map_idx, false, false);
-                  lhs->compile(code_file, true, temporary_terms, map_idx, false, false);
+                  rhs->compile(code_file, instruction_number, false, temporary_terms, map_idx, false, false);
+                  lhs->compile(code_file, instruction_number, true, temporary_terms, map_idx, false, false);
                 }
               break;
             case SOLVE_BACKWARD_COMPLETE:
@@ -650,22 +713,23 @@ StaticModel::writeModelEquationsCode_Block(const string file_name, const string 
             default:
             end:
               FNUMEXPR_ fnumexpr(ModelEquation, getBlockEquationID(block, i));
-              fnumexpr.write(code_file);
-              eq_node = (BinaryOpNode *) getBlockEquationNodeID(block, i);
+              fnumexpr.write(code_file, instruction_number);
+              eq_node = (BinaryOpNode *) getBlockEquationExpr(block, i);
               lhs = eq_node->get_arg1();
               rhs = eq_node->get_arg2();
-              lhs->compile(code_file, false, temporary_terms, map_idx, false, false);
-              rhs->compile(code_file, false, temporary_terms, map_idx, false, false);
+              lhs->compile(code_file, instruction_number, false, temporary_terms, map_idx, false, false);
+              rhs->compile(code_file, instruction_number, false, temporary_terms, map_idx, false, false);
 
               FBINARY_ fbinary(oMinus);
-              fbinary.write(code_file);
+              fbinary.write(code_file, instruction_number);
 
               FSTPR_ fstpr(i - block_recursive);
-              fstpr.write(code_file);
+              fstpr.write(code_file, instruction_number);
             }
         }
       FENDEQU_ fendequ;
-      fendequ.write(code_file);
+      fendequ.write(code_file, instruction_number);
+
       // The Jacobian if we have to solve the block
       if    (simulation_type != EVALUATE_BACKWARD
              && simulation_type != EVALUATE_FORWARD)
@@ -676,19 +740,19 @@ StaticModel::writeModelEquationsCode_Block(const string file_name, const string 
             case SOLVE_FORWARD_SIMPLE:
               {
                 FNUMEXPR_ fnumexpr(FirstEndoDerivative, 0, 0);
-                fnumexpr.write(code_file);
+                fnumexpr.write(code_file, instruction_number);
               }
-              compileDerivative(code_file, getBlockEquationID(block, 0), getBlockVariableID(block, 0), map_idx);
+              compileDerivative(code_file, instruction_number, getBlockEquationID(block, 0), getBlockVariableID(block, 0), map_idx, temporary_terms);
               {
                 FSTPG_ fstpg(0);
-                fstpg.write(code_file);
+                fstpg.write(code_file, instruction_number);
               }
               break;
 
             case SOLVE_BACKWARD_COMPLETE:
             case SOLVE_FORWARD_COMPLETE:
               count_u = feedback_variables.size();
-              for (t_block_derivatives_equation_variable_laglead_nodeid::const_iterator it = blocks_derivatives[block].begin(); it != (blocks_derivatives[block]).end(); it++)
+              for (block_derivatives_equation_variable_laglead_nodeid_t::const_iterator it = blocks_derivatives[block].begin(); it != (blocks_derivatives[block]).end(); it++)
                 {
                   unsigned int eq = it->first.first;
                   unsigned int var = it->first.second;
@@ -710,10 +774,10 @@ StaticModel::writeModelEquationsCode_Block(const string file_name, const string 
                       Uf[eqr].Ufl->u = count_u;
                       Uf[eqr].Ufl->var = varr;
                       FNUMEXPR_ fnumexpr(FirstEndoDerivative, eqr, varr);
-                      fnumexpr.write(code_file);
-                      compileChainRuleDerivative(code_file, eqr, varr, 0, map_idx);
+                      fnumexpr.write(code_file, instruction_number);
+                      compileChainRuleDerivative(code_file, instruction_number, eqr, varr, 0, map_idx, temporary_terms);
                       FSTPSU_ fstpsu(count_u);
-                      fstpsu.write(code_file);
+                      fstpsu.write(code_file, instruction_number);
                       count_u++;
                     }
                 }
@@ -722,24 +786,24 @@ StaticModel::writeModelEquationsCode_Block(const string file_name, const string 
                   if (i >= (int) block_recursive)
                     {
                       FLDR_ fldr(i-block_recursive);
-                      fldr.write(code_file);
+                      fldr.write(code_file, instruction_number);
 
                       FLDZ_ fldz;
-                      fldz.write(code_file);
+                      fldz.write(code_file, instruction_number);
 
                       v = getBlockEquationID(block, i);
                       for (Uf[v].Ufl = Uf[v].Ufl_First; Uf[v].Ufl; Uf[v].Ufl = Uf[v].Ufl->pNext)
                         {
                           FLDSU_ fldsu(Uf[v].Ufl->u);
-                          fldsu.write(code_file);
+                          fldsu.write(code_file, instruction_number);
                           FLDSV_ fldsv(eEndogenous, Uf[v].Ufl->var);
-                          fldsv.write(code_file);
+                          fldsv.write(code_file, instruction_number);
 
                           FBINARY_ fbinary(oTimes);
-                          fbinary.write(code_file);
+                          fbinary.write(code_file, instruction_number);
 
                           FCUML_ fcuml;
-                          fcuml.write(code_file);
+                          fcuml.write(code_file, instruction_number);
                         }
                       Uf[v].Ufl = Uf[v].Ufl_First;
                       while (Uf[v].Ufl)
@@ -749,10 +813,10 @@ StaticModel::writeModelEquationsCode_Block(const string file_name, const string 
                           Uf[v].Ufl = Uf[v].Ufl_First;
                         }
                       FBINARY_ fbinary(oMinus);
-                      fbinary.write(code_file);
+                      fbinary.write(code_file, instruction_number);
 
                       FSTPSU_ fstpsu(i - block_recursive);
-                      fstpsu.write(code_file);
+                      fstpsu.write(code_file, instruction_number);
 
                     }
                 }
@@ -761,17 +825,162 @@ StaticModel::writeModelEquationsCode_Block(const string file_name, const string 
               break;
             }
         }
+
+      // Get the current code_file position and jump = true
+      streampos pos2 = code_file.tellp();
+      FJMP_ fjmp(0);
+      fjmp.write(code_file, instruction_number);
+      // Set code_file position to previous JMPIFEVAL_ and set the number of instructions to jump
+      streampos pos3 = code_file.tellp();
+      code_file.seekp(pos1);
+      FJMPIFEVAL_ fjmp_if_eval1(instruction_number - prev_instruction_number);
+      fjmp_if_eval1.write(code_file, instruction_number);
+      code_file.seekp(pos3);
+      prev_instruction_number = instruction_number;
+
+      temporary_terms_t tt2;
+      tt2.clear();
+      temporary_terms_t tt3;
+      tt3.clear();
+      deriv_node_temp_terms_t tef_terms2;
+
+      for (i = 0; i < (int) block_size; i++)
+        {
+          if (v_temporary_terms_local[block].size())
+            {
+              for (temporary_terms_t::const_iterator it = v_temporary_terms_local[block][i].begin();
+                   it != v_temporary_terms_local[block][i].end(); it++)
+                {
+                  if (dynamic_cast<ExternalFunctionNode *>(*it) != NULL)
+                    (*it)->compileExternalFunctionOutput(code_file, instruction_number, false, tt3, map_idx2[block], false, false, tef_terms2);
+
+                  FNUMEXPR_ fnumexpr(TemporaryTerm, (int) (map_idx2[block].find((*it)->idx)->second));
+                  fnumexpr.write(code_file, instruction_number);
+
+                  (*it)->compile(code_file, instruction_number, false, tt3, map_idx2[block], false, false, tef_terms);
+
+                  FSTPST_ fstpst((int) (map_idx2[block].find((*it)->idx)->second));
+                  fstpst.write(code_file, instruction_number);
+                  // Insert current node into tt2
+                  tt3.insert(*it);
+                  tt2.insert(*it);
+                }
+            }
+
+          // The equations
+          int variable_ID, equation_ID;
+          EquationType equ_type;
+          switch (simulation_type)
+            {
+            evaluation_l:
+            case EVALUATE_BACKWARD:
+            case EVALUATE_FORWARD:
+              equ_type = getBlockEquationType(block, i);
+              {
+                FNUMEXPR_ fnumexpr(ModelEquation, getBlockEquationID(block, i));
+                fnumexpr.write(code_file, instruction_number);
+              }
+              if (equ_type == E_EVALUATE)
+                {
+                  eq_node = (BinaryOpNode *) getBlockEquationExpr(block, i);
+                  lhs = eq_node->get_arg1();
+                  rhs = eq_node->get_arg2();
+                  rhs->compile(code_file, instruction_number, false, tt2, map_idx2[block], false, false);
+                  lhs->compile(code_file, instruction_number, true, tt2, map_idx2[block], false, false);
+                }
+              else if (equ_type == E_EVALUATE_S)
+                {
+                  eq_node = (BinaryOpNode *) getBlockEquationRenormalizedExpr(block, i);
+                  lhs = eq_node->get_arg1();
+                  rhs = eq_node->get_arg2();
+                  rhs->compile(code_file, instruction_number, false, tt2, map_idx2[block], false, false);
+                  lhs->compile(code_file, instruction_number, true, tt2, map_idx2[block], false, false);
+                }
+              break;
+            case SOLVE_BACKWARD_COMPLETE:
+            case SOLVE_FORWARD_COMPLETE:
+              if (i < (int) block_recursive)
+                goto evaluation_l;
+              variable_ID = getBlockVariableID(block, i);
+              equation_ID = getBlockEquationID(block, i);
+              feedback_variables.push_back(variable_ID);
+              Uf[equation_ID].Ufl = NULL;
+              goto end_l;
+            default:
+            end_l:
+              FNUMEXPR_ fnumexpr(ModelEquation, getBlockEquationID(block, i));
+              fnumexpr.write(code_file, instruction_number);
+              eq_node = (BinaryOpNode *) getBlockEquationExpr(block, i);
+              lhs = eq_node->get_arg1();
+              rhs = eq_node->get_arg2();
+              lhs->compile(code_file, instruction_number, false, tt2, map_idx2[block], false, false);
+              rhs->compile(code_file, instruction_number, false, tt2, map_idx2[block], false, false);
+
+              FBINARY_ fbinary(oMinus);
+              fbinary.write(code_file, instruction_number);
+
+              FSTPR_ fstpr(i - block_recursive);
+              fstpr.write(code_file, instruction_number);
+            }
+        }
+      FENDEQU_ fendequ_l;
+      fendequ_l.write(code_file, instruction_number);
+
+      // The Jacobian if we have to solve the block determinsitic bloc
+      switch (simulation_type)
+        {
+        case SOLVE_BACKWARD_SIMPLE:
+        case SOLVE_FORWARD_SIMPLE:
+          {
+            FNUMEXPR_ fnumexpr(FirstEndoDerivative, 0, 0);
+            fnumexpr.write(code_file, instruction_number);
+          }
+          compileDerivative(code_file, instruction_number, getBlockEquationID(block, 0), getBlockVariableID(block, 0), map_idx2[block], tt2 /*temporary_terms*/);
+          {
+            FSTPG2_ fstpg2(0, 0);
+            fstpg2.write(code_file, instruction_number);
+          }
+          break;
+        case EVALUATE_BACKWARD:
+        case EVALUATE_FORWARD:
+        case SOLVE_BACKWARD_COMPLETE:
+        case SOLVE_FORWARD_COMPLETE:
+          count_u = feedback_variables.size();
+          for (block_derivatives_equation_variable_laglead_nodeid_t::const_iterator it = blocks_derivatives[block].begin(); it != (blocks_derivatives[block]).end(); it++)
+            {
+              unsigned int eq = it->first.first;
+              unsigned int var = it->first.second;
+              unsigned int eqr = getBlockEquationID(block, eq);
+              unsigned int varr = getBlockVariableID(block, var);
+              FNUMEXPR_ fnumexpr(FirstEndoDerivative, eqr, varr, 0);
+              fnumexpr.write(code_file, instruction_number);
+
+              compileChainRuleDerivative(code_file, instruction_number, eqr, varr, 0, map_idx2[block], tt2 /*temporary_terms*/);
+
+              FSTPG2_ fstpg2(eq, var);
+              fstpg2.write(code_file, instruction_number);
+            }
+          break;
+        default:
+          break;
+        }
+      // Set codefile position to previous JMP_ and set the number of instructions to jump
+      pos1 = code_file.tellp();
+      code_file.seekp(pos2);
+      FJMP_ fjmp1(instruction_number - prev_instruction_number);
+      fjmp1.write(code_file, instruction_number);
+      code_file.seekp(pos1);
     }
   FENDBLOCK_ fendblock;
-  fendblock.write(code_file);
+  fendblock.write(code_file, instruction_number);
   FEND_ fend;
-  fend.write(code_file);
+  fend.write(code_file, instruction_number);
   code_file.close();
 }
 
 void
 StaticModel::Write_Inf_To_Bin_File_Block(const string &static_basename, const string &bin_basename, const int &num,
-                                   int &u_count_int, bool &file_open) const
+                                         int &u_count_int, bool &file_open) const
 {
   int j;
   std::ofstream SaveCode;
@@ -788,7 +997,7 @@ StaticModel::Write_Inf_To_Bin_File_Block(const string &static_basename, const st
   unsigned int block_size = getBlockSize(num);
   unsigned int block_mfs = getBlockMfs(num);
   unsigned int block_recursive = block_size - block_mfs;
-  for (t_block_derivatives_equation_variable_laglead_nodeid::const_iterator it = blocks_derivatives[num].begin(); it != (blocks_derivatives[num]).end(); it++)
+  for (block_derivatives_equation_variable_laglead_nodeid_t::const_iterator it = blocks_derivatives[num].begin(); it != (blocks_derivatives[num]).end(); it++)
     {
       unsigned int eq = it->first.first;
       unsigned int var = it->first.second;
@@ -819,11 +1028,11 @@ StaticModel::Write_Inf_To_Bin_File_Block(const string &static_basename, const st
   SaveCode.close();
 }
 
-map<pair<int, pair<int, int > >, NodeID>
+map<pair<int, pair<int, int > >, expr_t>
 StaticModel::collect_first_order_derivatives_endogenous()
 {
-  map<pair<int, pair<int, int > >, NodeID> endo_derivatives;
-  for (first_derivatives_type::iterator it2 = first_derivatives.begin();
+  map<pair<int, pair<int, int > >, expr_t> endo_derivatives;
+  for (first_derivatives_t::iterator it2 = first_derivatives.begin();
        it2 != first_derivatives.end(); it2++)
     {
       if (getTypeByDerivID(it2->first.second) == eEndogenous)
@@ -838,8 +1047,10 @@ StaticModel::collect_first_order_derivatives_endogenous()
 }
 
 void
-StaticModel::computingPass(const eval_context_type &eval_context, bool no_tmp_terms, bool hessian, bool block, bool bytecode)
+StaticModel::computingPass(const eval_context_t &eval_context, bool no_tmp_terms, bool hessian, bool block, bool bytecode)
 {
+  initializeVariablesAndEquations();
+
   // Compute derivatives w.r. to all endogenous, and possibly exogenous and exogenous deterministic
   set<int> vars;
 
@@ -861,7 +1072,8 @@ StaticModel::computingPass(const eval_context_type &eval_context, bool no_tmp_te
 
   if (block)
     {
-      jacob_map contemporaneous_jacobian, static_jacobian;
+      jacob_map_t contemporaneous_jacobian, static_jacobian;
+      vector<unsigned int> n_static, n_forward, n_backward, n_mixed;
 
       // for each block contains pair<Size, Feddback_variable>
       vector<pair<int, int> > blocks;
@@ -870,18 +1082,19 @@ StaticModel::computingPass(const eval_context_type &eval_context, bool no_tmp_te
 
       computeNonSingularNormalization(contemporaneous_jacobian, cutoff, static_jacobian, dynamic_jacobian);
 
-      computePrologueAndEpilogue(static_jacobian, equation_reordered, variable_reordered, prologue, epilogue);
+      computePrologueAndEpilogue(static_jacobian, equation_reordered, variable_reordered);
 
-      map<pair<int, pair<int, int> >, NodeID> first_order_endo_derivatives = collect_first_order_derivatives_endogenous();
+      map<pair<int, pair<int, int> >, expr_t> first_order_endo_derivatives = collect_first_order_derivatives_endogenous();
 
-      equation_type_and_normalized_equation = equationTypeDetermination(equations, first_order_endo_derivatives, variable_reordered, equation_reordered, mfs);
+      equation_type_and_normalized_equation = equationTypeDetermination(first_order_endo_derivatives, variable_reordered, equation_reordered, mfs);
 
       cout << "Finding the optimal block decomposition of the model ...\n";
 
-      if (prologue+epilogue < (unsigned int) equation_number())
-        computeBlockDecompositionAndFeedbackVariablesForEachBlock(static_jacobian, dynamic_jacobian, prologue, epilogue, equation_reordered, variable_reordered, blocks, equation_type_and_normalized_equation, false, false, mfs, inv_equation_reordered, inv_variable_reordered);
+      lag_lead_vector_t equation_lag_lead, variable_lag_lead;
 
-      block_type_firstequation_size_mfs = reduceBlocksAndTypeDetermination(dynamic_jacobian, prologue, epilogue, blocks, equations, equation_type_and_normalized_equation, variable_reordered, equation_reordered);
+      computeBlockDecompositionAndFeedbackVariablesForEachBlock(static_jacobian, dynamic_jacobian, equation_reordered, variable_reordered, blocks, equation_type_and_normalized_equation, false, false, mfs, inv_equation_reordered, inv_variable_reordered, equation_lag_lead, variable_lag_lead, n_static, n_forward, n_backward, n_mixed);
+
+      block_type_firstequation_size_mfs = reduceBlocksAndTypeDetermination(dynamic_jacobian, blocks, equation_type_and_normalized_equation, variable_reordered, equation_reordered, n_static, n_forward, n_backward, n_mixed, block_col_type);
 
       printBlockDecomposition(blocks);
 
@@ -901,7 +1114,7 @@ StaticModel::computingPass(const eval_context_type &eval_context, bool no_tmp_te
         {
           computeTemporaryTerms(true);
           if (bytecode)
-            computeTemporaryTermsMapping();
+            computeTemporaryTermsMapping(temporary_terms, map_idx);
         }
     }
 }
@@ -925,105 +1138,241 @@ StaticModel::writeStaticMFile(const string &func_name) const
          << "% Status : Computes static model for Dynare" << endl
          << "%" << endl
          << "% Warning : this file is generated automatically by Dynare" << endl
-         << "%           from model file (.mod)" << endl
-         << endl
-         << "residual = zeros( " << equations.size() << ", 1);" << endl
-         << endl
-         << "%" << endl
-         << "% Model equations" << endl
-         << "%" << endl
-         << endl;
+         << "%           from model file (.mod)" << endl << endl;
 
-  writeModelLocalVariables(output, oMatlabStaticModel);
-
-  writeTemporaryTerms(temporary_terms, output, oMatlabStaticModel);
-
-  writeModelEquations(output, oMatlabStaticModel);
-
-  output << "if ~isreal(residual)" << endl
-         << "  residual = real(residual)+imag(residual).^2;" << endl
-         << "end" << endl
-         << "if nargout >= 2," << endl
-         << "  g1 = zeros(" << equations.size() << ", " << symbol_table.endo_nbr() << ");" << endl
-         << endl
-         << "%" << endl
-         << "% Jacobian matrix" << endl
-         << "%" << endl
-         << endl;
-
-  // Write Jacobian w.r. to endogenous only
-  for (first_derivatives_type::const_iterator it = first_derivatives.begin();
-       it != first_derivatives.end(); it++)
-    {
-      int eq = it->first.first;
-      int symb_id = it->first.second;
-      NodeID d1 = it->second;
-
-      output << "  g1(" << eq+1 << "," << symbol_table.getTypeSpecificID(symb_id)+1 << ")=";
-      d1->writeOutput(output, oMatlabStaticModel, temporary_terms);
-      output << ";" << endl;
-    }
-
-  output << "  if ~isreal(g1)" << endl
-         << "    g1 = real(g1)+2*imag(g1);" << endl
-         << "  end" << endl
-         << "end" << endl
-         << "if nargout >= 3," << endl
-         << "%" << endl
-         << "% Hessian matrix" << endl
-         << "%" << endl
-         << endl;
-
-  int g2ncols = symbol_table.endo_nbr() * symbol_table.endo_nbr();
-  if (second_derivatives.size())
-    {
-      output << "  v2 = zeros(" << NNZDerivatives[1] << ",3);" << endl;
-
-      // Write Hessian w.r. to endogenous only (only if 2nd order derivatives have been computed)
-      int k = 0; // Keep the line of a 2nd derivative in v2
-      for (second_derivatives_type::const_iterator it = second_derivatives.begin();
-           it != second_derivatives.end(); it++)
-        {
-          int eq = it->first.first;
-          int symb_id1 = it->first.second.first;
-          int symb_id2 = it->first.second.second;
-          NodeID d2 = it->second;
-
-          int tsid1 = symbol_table.getTypeSpecificID(symb_id1);
-          int tsid2 = symbol_table.getTypeSpecificID(symb_id2);
-
-          int col_nb = tsid1*symbol_table.endo_nbr()+tsid2;
-          int col_nb_sym = tsid2*symbol_table.endo_nbr()+tsid1;
-
-          output << "v2(" << k+1 << ",1)=" << eq + 1 << ";" << endl
-                 << "v2(" << k+1 << ",2)=" << col_nb + 1 << ";" << endl
-                 << "v2(" << k+1 << ",3)=";
-          d2->writeOutput(output, oMatlabStaticModel, temporary_terms);
-          output << ";" << endl;
-
-          k++;
-
-          // Treating symetric elements
-          if (symb_id1 != symb_id2)
-            {
-              output << "v2(" << k+1 << ",1)=" << eq + 1 << ";" << endl
-                     << "v2(" << k+1 << ",2)=" << col_nb_sym + 1 << ";" << endl
-                     << "v2(" << k+1 << ",3)=v2(" << k << ",3);" << endl;
-              k++;
-            }
-        }
-
-      output << "  g2 = sparse(v2(:,1),v2(:,2),v2(:,3)," << equations.size() << "," << g2ncols << ");" << endl;
-    }
-  else // Either hessian is all zero, or we didn't compute it
-    output << "  g2 = sparse([],[],[]," << equations.size() << "," << g2ncols << ");" << endl;
-
-  output << "end;" << endl; // Close the if nargout >= 3 statement
+  writeStaticModel(output, false);
+  output << "end" << endl;
   output.close();
 }
 
 void
-StaticModel::writeStaticFile(const string &basename, bool block, bool bytecode) const
+StaticModel::writeStaticModel(ostream &StaticOutput, bool use_dll) const
+{
+  ostringstream model_output;    // Used for storing model equations
+  ostringstream jacobian_output; // Used for storing jacobian equations
+  ostringstream hessian_output;  // Used for storing Hessian equations
+  ExprNodeOutputType output_type = (use_dll ? oCStaticModel : oMatlabStaticModel);
+
+  deriv_node_temp_terms_t tef_terms;
+  writeModelLocalVariables(model_output, output_type, tef_terms);
+
+  writeTemporaryTerms(temporary_terms, model_output, output_type, tef_terms);
+
+  writeModelEquations(model_output, output_type);
+
+  // Write Jacobian w.r. to endogenous only
+  for (first_derivatives_t::const_iterator it = first_derivatives.begin();
+       it != first_derivatives.end(); it++)
+    {
+      int eq = it->first.first;
+      int symb_id = it->first.second;
+      expr_t d1 = it->second;
+
+      jacobianHelper(jacobian_output, eq, symbol_table.getTypeSpecificID(symb_id), output_type);
+      jacobian_output << "=";
+      d1->writeOutput(jacobian_output, output_type, temporary_terms, tef_terms);
+      jacobian_output << ";" << endl;
+    }
+
+  int g2ncols = symbol_table.endo_nbr() * symbol_table.endo_nbr();
+  // Write Hessian w.r. to endogenous only (only if 2nd order derivatives have been computed)
+  int k = 0; // Keep the line of a 2nd derivative in v2
+  for (second_derivatives_t::const_iterator it = second_derivatives.begin();
+       it != second_derivatives.end(); it++)
+    {
+      int eq = it->first.first;
+      int symb_id1 = it->first.second.first;
+      int symb_id2 = it->first.second.second;
+      expr_t d2 = it->second;
+
+      int tsid1 = symbol_table.getTypeSpecificID(symb_id1);
+      int tsid2 = symbol_table.getTypeSpecificID(symb_id2);
+
+      int col_nb = tsid1*symbol_table.endo_nbr()+tsid2;
+      int col_nb_sym = tsid2*symbol_table.endo_nbr()+tsid1;
+
+      sparseHelper(2, hessian_output, k, 0, output_type);
+      hessian_output << "=" << eq + 1 << ";" << endl;
+
+      sparseHelper(2, hessian_output, k, 1, output_type);
+      hessian_output << "=" << col_nb + 1 << ";" << endl;
+
+      sparseHelper(2, hessian_output, k, 2, output_type);
+      hessian_output << "=";
+      d2->writeOutput(hessian_output, output_type, temporary_terms, tef_terms);
+      hessian_output << ";" << endl;
+
+      k++;
+
+      // Treating symetric elements
+      if (symb_id1 != symb_id2)
+        {
+          sparseHelper(2, hessian_output, k, 0, output_type);
+          hessian_output << "=" << eq + 1 << ";" << endl;
+
+          sparseHelper(2, hessian_output, k, 1, output_type);
+          hessian_output << "=" << col_nb_sym + 1 << ";" << endl;
+
+          sparseHelper(2, hessian_output, k, 2, output_type);
+          hessian_output << "=";
+          sparseHelper(2, hessian_output, k-1, 2, output_type);
+          hessian_output << ";" << endl;
+
+          k++;
+        }
+    }
+
+  if (!use_dll)
+    {
+      StaticOutput << "residual = zeros( " << equations.size() << ", 1);" << endl << endl
+                   << "%" << endl
+                   << "% Model equations" << endl
+                   << "%" << endl << endl
+                   << model_output.str()
+                   << "if ~isreal(residual)" << endl
+                   << "  residual = real(residual)+imag(residual).^2;" << endl
+                   << "end" << endl
+                   << "if nargout >= 2," << endl
+                   << "  g1 = zeros(" << equations.size() << ", " << symbol_table.endo_nbr() << ");" << endl << endl
+                   << "  %" << endl
+                   << "  % Jacobian matrix" << endl
+                   << "  %" << endl << endl
+                   << jacobian_output.str()
+                   << "  if ~isreal(g1)" << endl
+                   << "    g1 = real(g1)+imag(g1).^2;" << endl
+                   << "  end" << endl
+                   << "end" << endl
+                   << "if nargout >= 3," << endl
+                   << "  %" << endl
+                   << "  % Hessian matrix" << endl
+                   << "  %" << endl
+                   << endl;
+
+      if (second_derivatives.size())
+        StaticOutput << "  v2 = zeros(" << NNZDerivatives[1] << ",3);" << endl
+                     << hessian_output.str()
+                     << "  g2 = sparse(v2(:,1),v2(:,2),v2(:,3)," << equations.size() << "," << g2ncols << ");" << endl;
+      else
+        StaticOutput << "  g2 = sparse([],[],[]," << equations.size() << "," << g2ncols << ");" << endl;
+      StaticOutput << "end" << endl;
+    }
+  else
+    {
+      StaticOutput << "void Static(double *y, double *x, int nb_row_x, double *params, double *residual, double *g1, double *v2)" << endl
+                   << "{" << endl
+                   << "  double lhs, rhs;" << endl
+                   << endl
+                   << "  /* Residual equations */" << endl
+                   << model_output.str()
+                   << "  /* Jacobian  */" << endl
+                   << "  if (g1 == NULL)" << endl
+                   << "    return;" << endl
+                   << "  else" << endl
+                   << "    {" << endl
+                   << jacobian_output.str()
+                   << "    }" << endl;
+
+      if (second_derivatives.size())
+        StaticOutput << "  /* Hessian for endogenous and exogenous variables */" << endl
+                     << "  if (v2 == NULL)" << endl
+                     << "    return;" << endl
+                     << "  else" << endl
+                     << "    {" << endl
+                     << hessian_output.str()
+                     << "    }" << endl;
+    }
+}
+
+void
+StaticModel::writeStaticCFile(const string &func_name) const
+{
+  // Writing comments and function definition command
+  string filename = func_name + "_static.c";
+
+  ofstream output;
+  output.open(filename.c_str(), ios::out | ios::binary);
+  if (!output.is_open())
+    {
+      cerr << "ERROR: Can't open file " << filename << " for writing" << endl;
+      exit(EXIT_FAILURE);
+    }
+
+  output << "/*" << endl
+         << " * " << filename << " : Computes static model for Dynare" << endl
+         << " *" << endl
+         << " * Warning : this file is generated automatically by Dynare" << endl
+         << " *           from model file (.mod)" << endl << endl
+         << " */" << endl
+         << "#include <math.h>" << endl
+         << "#include \"mex.h\"" << endl
+         << endl
+         << "#define max(a, b) (((a) > (b)) ? (a) : (b))" << endl
+         << "#define min(a, b) (((a) > (b)) ? (b) : (a))" << endl;
+
+
+  // Write function definition if oPowerDeriv is used
+  writePowerDerivCHeader(output);
+
+  // Writing the function body
+  writeStaticModel(output, true);
+  output << "}" << endl << endl;
+
+  // Writing the gateway routine
+  output << "/* The gateway routine */" << endl
+         << "void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])" << endl
+         << "{" << endl
+         << "  double *y, *x, *params;" << endl
+         << "  double *residual, *g1, *v2;" << endl
+         << "  int nb_row_x;" << endl
+         << endl
+         << "  /* Create a pointer to the input matrix y. */" << endl
+         << "  y = mxGetPr(prhs[0]);" << endl
+         << endl
+         << "  /* Create a pointer to the input matrix x. */" << endl
+         << "  x = mxGetPr(prhs[1]);" << endl
+         << endl
+         << "  /* Create a pointer to the input matrix params. */" << endl
+         << "  params = mxGetPr(prhs[2]);" << endl
+         << endl
+         << "  /* Gets number of rows of matrix x. */" << endl
+         << "  nb_row_x = mxGetM(prhs[1]);" << endl
+         << endl
+         << "  residual = NULL;" << endl
+         << "  if (nlhs >= 1)" << endl
+         << "    {" << endl
+         << "      /* Set the output pointer to the output matrix residual. */" << endl
+         << "      plhs[0] = mxCreateDoubleMatrix(" << equations.size() << ",1, mxREAL);" << endl
+         << "      /* Create a C pointer to a copy of the output matrix residual. */" << endl
+         << "      residual = mxGetPr(plhs[0]);" << endl
+         << "    }" << endl
+         << endl
+         << "  g1 = NULL;" << endl
+         << "  if (nlhs >= 2)" << endl
+         << "    {" << endl
+         << "      /* Set the output pointer to the output matrix g1. */" << endl
+         << "      plhs[1] = mxCreateDoubleMatrix(" << equations.size() << ", " << symbol_table.endo_nbr() << ", mxREAL);" << endl
+         << "      /* Create a C pointer to a copy of the output matrix g1. */" << endl
+         << "      g1 = mxGetPr(plhs[1]);" << endl
+         << "    }" << endl
+         << endl
+         << "  v2 = NULL;" << endl
+         << "  if (nlhs >= 3)" << endl
+         << "    {" << endl
+         << "      /* Set the output pointer to the output matrix v2. */" << endl
+         << "      plhs[2] = mxCreateDoubleMatrix(" << NNZDerivatives[1] << ", " << 3
+         << ", mxREAL);" << endl
+         << "      v2 = mxGetPr(plhs[2]);" << endl
+         << "    }" << endl
+         << endl
+         << "  /* Call the C subroutines. */" << endl
+         << "  Static(y, x, nb_row_x, params, residual, g1, v2);" << endl
+         << "}" << endl << endl;
+  writePowerDeriv(output, true);
+  output.close();
+}
+
+void
+StaticModel::writeStaticFile(const string &basename, bool block, bool bytecode, bool use_dll) const
 {
   int r;
 
@@ -1040,7 +1389,7 @@ StaticModel::writeStaticFile(const string &basename, bool block, bool bytecode) 
       exit(EXIT_FAILURE);
     }
   if (block && bytecode)
-    writeModelEquationsCode_Block(basename + "_static", basename, map_idx);
+    writeModelEquationsCode_Block(basename + "_static", basename, map_idx, map_idx2);
   else if (!block && bytecode)
     writeModelEquationsCode(basename + "_static", basename, map_idx);
   else if (block && !bytecode)
@@ -1050,8 +1399,11 @@ StaticModel::writeStaticFile(const string &basename, bool block, bool bytecode) 
       chdir("..");
       writeStaticBlockMFSFile(basename);
     }
+  else if(use_dll)
+    writeStaticCFile(basename);
   else
     writeStaticMFile(basename);
+  writeAuxVarRecursiveDefinitions(basename);
 }
 
 void
@@ -1069,9 +1421,10 @@ StaticModel::writeStaticBlockMFSFile(const string &basename) const
 
   string func_name = basename + "_static";
 
-  output << "function [residual, g1, y] = " << func_name << "(nblock, y, x, params)" << endl
+  output << "function [residual, g1, y, var_index] = " << func_name << "(nblock, y, x, params)" << endl
          << "  residual = [];" << endl
          << "  g1 = [];" << endl
+         << "  var_index = [];\n" << endl
          << "  switch nblock" << endl;
 
   unsigned int nb_blocks = getNbBlocks();
@@ -1086,14 +1439,22 @@ StaticModel::writeStaticBlockMFSFile(const string &basename) const
       BlockSimulationType simulation_type = getBlockSimulationType(b);
 
       if (simulation_type == EVALUATE_BACKWARD || simulation_type == EVALUATE_FORWARD)
-        output << "      y = " << func_name << "_" << b+1 << "(y, x, params);\n";
+        {
+          output << "      y_tmp = " << func_name << "_" << b+1 << "(y, x, params);\n";
+          ostringstream tmp;
+          for (int i = 0; i < (int) getBlockSize(b); i++)
+            tmp << " " << getBlockVariableID(b, i)+1;
+          output << "      var_index = [" << tmp.str() << "];\n";
+          output << "      residual  = y(var_index) - y_tmp(var_index);\n";
+          output << "      y = y_tmp;\n";
+        }
       else
         output << "      [residual, y, g1] = " << func_name << "_" << b+1 << "(y, x, params);\n";
+
     }
   output << "  end" << endl
          << "end" << endl;
   output.close();
-
 }
 
 void
@@ -1199,14 +1560,14 @@ StaticModel::get_Derivatives(int block)
 }
 
 void
-StaticModel::computeChainRuleJacobian(t_blocks_derivatives &blocks_derivatives)
+StaticModel::computeChainRuleJacobian(blocks_derivatives_t &blocks_derivatives)
 {
-  map<int, NodeID> recursive_variables;
+  map<int, expr_t> recursive_variables;
   unsigned int nb_blocks = getNbBlocks();
-  blocks_derivatives = t_blocks_derivatives(nb_blocks);
+  blocks_derivatives = blocks_derivatives_t(nb_blocks);
   for (unsigned int block = 0; block < nb_blocks; block++)
     {
-      t_block_derivatives_equation_variable_laglead_nodeid tmp_derivatives;
+      block_derivatives_equation_variable_laglead_nodeid_t tmp_derivatives;
       recursive_variables.clear();
       BlockSimulationType simulation_type = getBlockSimulationType(block);
       int block_size = getBlockSize(block);
@@ -1214,13 +1575,13 @@ StaticModel::computeChainRuleJacobian(t_blocks_derivatives &blocks_derivatives)
       int block_nb_recursives = block_size - block_nb_mfs;
       if (simulation_type == SOLVE_TWO_BOUNDARIES_COMPLETE || simulation_type == SOLVE_TWO_BOUNDARIES_SIMPLE)
         {
-          blocks_derivatives.push_back(t_block_derivatives_equation_variable_laglead_nodeid(0));
+          blocks_derivatives.push_back(block_derivatives_equation_variable_laglead_nodeid_t(0));
           for (int i = 0; i < block_nb_recursives; i++)
             {
               if (getBlockEquationType(block, i) == E_EVALUATE_S)
-                recursive_variables[getDerivID(symbol_table.getID(eEndogenous, getBlockVariableID(block, i)), 0)] = getBlockEquationRenormalizedNodeID(block, i);
+                recursive_variables[getDerivID(symbol_table.getID(eEndogenous, getBlockVariableID(block, i)), 0)] = getBlockEquationRenormalizedExpr(block, i);
               else
-                recursive_variables[getDerivID(symbol_table.getID(eEndogenous, getBlockVariableID(block, i)), 0)] = getBlockEquationNodeID(block, i);
+                recursive_variables[getDerivID(symbol_table.getID(eEndogenous, getBlockVariableID(block, i)), 0)] = getBlockEquationExpr(block, i);
             }
           map<pair<pair<int, pair<int, int> >, pair<int, int> >, int> Derivatives = get_Derivatives(block);
           map<pair<pair<int, pair<int, int> >, pair<int, int> >, int>::const_iterator it = Derivatives.begin();
@@ -1248,16 +1609,15 @@ StaticModel::computeChainRuleJacobian(t_blocks_derivatives &blocks_derivatives)
               tmp_derivatives.push_back(make_pair(make_pair(eq, var), make_pair(lag, first_chain_rule_derivatives[make_pair(eqr, make_pair(varr, lag))])));
             }
         }
-      else if (simulation_type == SOLVE_BACKWARD_SIMPLE || simulation_type == SOLVE_FORWARD_SIMPLE
-               || simulation_type == SOLVE_BACKWARD_COMPLETE || simulation_type == SOLVE_FORWARD_COMPLETE)
+      else
         {
-          blocks_derivatives.push_back(t_block_derivatives_equation_variable_laglead_nodeid(0));
+          blocks_derivatives.push_back(block_derivatives_equation_variable_laglead_nodeid_t(0));
           for (int i = 0; i < block_nb_recursives; i++)
             {
               if (getBlockEquationType(block, i) == E_EVALUATE_S)
-                recursive_variables[getDerivID(symbol_table.getID(eEndogenous, getBlockVariableID(block, i)), 0)] = getBlockEquationRenormalizedNodeID(block, i);
+                recursive_variables[getDerivID(symbol_table.getID(eEndogenous, getBlockVariableID(block, i)), 0)] = getBlockEquationRenormalizedExpr(block, i);
               else
-                recursive_variables[getDerivID(symbol_table.getID(eEndogenous, getBlockVariableID(block, i)), 0)] = getBlockEquationNodeID(block, i);
+                recursive_variables[getDerivID(symbol_table.getID(eEndogenous, getBlockVariableID(block, i)), 0)] = getBlockEquationExpr(block, i);
             }
           for (int eq = block_nb_recursives; eq < block_size; eq++)
             {
@@ -1265,7 +1625,7 @@ StaticModel::computeChainRuleJacobian(t_blocks_derivatives &blocks_derivatives)
               for (int var = block_nb_recursives; var < block_size; var++)
                 {
                   int varr = getBlockVariableID(block, var);
-                  NodeID d1 = equations[eqr]->getChainRuleDerivative(getDerivID(symbol_table.getID(eEndogenous, varr), 0), recursive_variables);
+                  expr_t d1 = equations[eqr]->getChainRuleDerivative(getDerivID(symbol_table.getID(eEndogenous, varr), 0), recursive_variables);
                   if (d1 == Zero)
                     continue;
                   first_chain_rule_derivatives[make_pair(eqr, make_pair(varr, 0))] = d1;
@@ -1295,10 +1655,10 @@ StaticModel::collect_block_first_order_derivatives()
           variable_2_block[getBlockVariableID(block, i)] = block;
         }
     }
-  derivative_endo = vector<t_derivative>(nb_blocks);
+  derivative_endo = vector<derivative_t>(nb_blocks);
   endo_max_leadlag_block = vector<pair<int, int> >(nb_blocks, make_pair(0, 0));
   max_leadlag_block = vector<pair<int, int> >(nb_blocks, make_pair(0, 0));
-  for (first_derivatives_type::iterator it2 = first_derivatives.begin();
+  for (first_derivatives_t::iterator it2 = first_derivatives.begin();
        it2 != first_derivatives.end(); it2++)
     {
       int eq = it2->first.first;
@@ -1310,8 +1670,8 @@ StaticModel::collect_block_first_order_derivatives()
       max_leadlag_block[block_eq] = make_pair(0, 0);
       endo_max_leadlag_block[block_eq] = make_pair(0, 0);
       endo_max_leadlag_block[block_eq] = make_pair(0, 0);
-      t_derivative tmp_derivative;
-      t_lag_var lag_var;
+      derivative_t tmp_derivative;
+      lag_var_t lag_var;
       if (getTypeByDerivID(it2->first.second) == eEndogenous && block_eq == block_var)
         {
           tmp_derivative = derivative_endo[block_eq];
@@ -1324,9 +1684,9 @@ StaticModel::collect_block_first_order_derivatives()
 void
 StaticModel::writeChainRuleDerivative(ostream &output, int eqr, int varr, int lag,
                                       ExprNodeOutputType output_type,
-                                      const temporary_terms_type &temporary_terms) const
+                                      const temporary_terms_t &temporary_terms) const
 {
-  map<pair<int, pair<int, int> >, NodeID>::const_iterator it = first_chain_rule_derivatives.find(make_pair(eqr, make_pair(varr, lag)));
+  map<pair<int, pair<int, int> >, expr_t>::const_iterator it = first_chain_rule_derivatives.find(make_pair(eqr, make_pair(varr, lag)));
   if (it != first_chain_rule_derivatives.end())
     (it->second)->writeOutput(output, output_type, temporary_terms);
   else
@@ -1340,33 +1700,39 @@ StaticModel::writeLatexFile(const string &basename) const
 }
 
 void
-StaticModel::jacobianHelper(ostream &output, int eq_nb, int col_nb, ExprNodeOutputType output_type) const
-{
-  output << LEFT_ARRAY_SUBSCRIPT(output_type);
-  if (IS_MATLAB(output_type))
-    output << eq_nb + 1 << ", " << col_nb + 1;
-  else
-    output << eq_nb + col_nb * equations.size();
-  output << RIGHT_ARRAY_SUBSCRIPT(output_type);
-}
-
-void
-StaticModel::hessianHelper(ostream &output, int row_nb, int col_nb, ExprNodeOutputType output_type) const
-{
-  output << LEFT_ARRAY_SUBSCRIPT(output_type);
-  if (IS_MATLAB(output_type))
-    output << row_nb + 1 << ", " << col_nb + 1;
-  else
-    output << row_nb + col_nb * NNZDerivatives[1];
-  output << RIGHT_ARRAY_SUBSCRIPT(output_type);
-}
-
-void
 StaticModel::writeAuxVarInitval(ostream &output, ExprNodeOutputType output_type) const
 {
   for (int i = 0; i < (int) aux_equations.size(); i++)
     {
       dynamic_cast<ExprNode *>(aux_equations[i])->writeOutput(output, output_type);
+      output << ";" << endl;
+    }
+}
+
+void StaticModel::writeAuxVarRecursiveDefinitions(const string &basename) const
+{
+  string func_name = basename + "_set_auxiliary_variables";
+  string filename = func_name + ".m";
+
+  ofstream output;
+  output.open(filename.c_str(), ios::out | ios::binary);
+  if (!output.is_open())
+    {
+      cerr << "ERROR: Can't open file " << filename << " for writing" << endl;
+      exit(EXIT_FAILURE);
+    }
+
+  output << "function y = " << func_name + "(y, x, params)" << endl
+         << "%" << endl
+         << "% Status : Computes static model for Dynare" << endl
+         << "%" << endl
+         << "% Warning : this file is generated automatically by Dynare" << endl
+         << "%           from model file (.mod)" << endl
+         << endl;
+
+  for (int i = 0; i < (int) aux_equations.size(); i++)
+    {
+      dynamic_cast<ExprNode *>(aux_equations[i])->writeOutput(output, oMatlabStaticModel);
       output << ";" << endl;
     }
 }

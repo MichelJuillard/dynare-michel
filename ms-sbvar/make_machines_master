@@ -1,0 +1,334 @@
+# -*- Makefile -*- 
+# Generic makefile for dealing with various machines
+
+# MACHINE - These should be set in the calling makefile
+#USE_HOME=USE_HOME
+#USE_LAPTOP=USE_LAPTOP 
+#USE_WORK_64=USE_WORK_64
+#USE_WORK_64_OLD=USE_WORK_64_OLD
+#USE_WORK_32=USE_WORK_32
+#USE_WULF=USE_WULF
+#USE_WULF_32=USE_WULF_32
+#USE_JAKE_LAPTOP=JAKE_LAPTOP
+#USE_JAKE_WORK=JAKE_WORK
+#USE_TAO=USE_TAO
+
+# MACHINE DEPENDENT DIRECTORIES 
+
+# The following should be defined in the master makefile
+# BASE_DIR - this is the git directory and all repositories should be hung off 
+#            this directory.
+
+USE_HB=USE_HB
+ifdef USE_HB
+LIBS_DIR = 
+endif
+
+
+# HOME
+ifdef USE_HOME
+
+ICC_DIR = /opt/intel/Compiler/11.1/072/bin/intel64
+MKL_BASE_DIR = /opt/intel/Compiler/11.1/072/mkl
+MKL_LIBS_DIR = $(MKL_BASE_DIR)/lib/em64t
+
+ifdef USE_ICC
+  CC = $(ICC_DIR)/icc
+  ifdef DEBUG
+    CFLAGS := -g $(CFLAGS)
+  endif
+  #MKL_LIBS = -Wl,--start-group -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -Wl,--end-group -liomp5
+  MKL_LIBS = -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group
+endif
+ifdef USE_GCC
+  CC = gcc 
+  ifdef DEBUG
+    CFLAGS := -g $(CFLAGS)
+  endif
+  MKL_LIBS = -Wl,--start-group -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_core -Wl,--end-group -fopenmp 
+endif
+ifdef USE_G++
+  CC = g++
+  ifdef DEBUG
+    CFLAGS := -g $(CFLAGS)
+  endif
+  MKL_LIBS = -Wl,--start-group -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_core -Wl,--end-group -fopenmp 
+endif
+FC = gfortran
+
+IMSL_BASE_DIR = /opt/vni/CTT6.0
+
+GSL_INCLUDE_DIR = /usr/local/include
+GSL_LIBS_DIR = /usr/local/lib
+
+LAPACK_LIBS_DIR = $(HOME)/lapack-3.2.1/libs
+LAPACK_LIBS = -llapack_linux -lblas_linux
+
+ATLAS_LIBS_BASE = $(HOME)/atlas-3.8.3/lib-atlas
+ATLAS_LIBS = -llapack -lptf77blas -lptcblas -latlas
+
+NPSOL_DIR = $(HOME)/npsol/Linux-x86_64/optimized/lib
+
+FORTRAN_LIBS = lgfortran
+endif
+
+# LAPTOP
+ifdef USE_LAPTOP
+
+ICC_DIR = /opt/intel/composerxe-2011.1.107/bin/intel64
+MKL_BASE_DIR =/opt/intel/mkl
+MKL_LIBS_DIR = $(MKL_BASE_DIR)/lib/intel64
+
+ifdef USE_ICC
+  CC = $(ICC_DIR)/icc
+  ifdef DEBUG
+    CFLAGS := -g $(CFLAGS)
+  endif
+  MKL_LIBS = -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group
+else
+  CC = gcc 
+  ifdef DEBUG
+    CFLAGS := -g $(CFLAGS)
+  endif
+  MKL_LIBS = -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group
+endif
+FC = gfortran
+
+#IMSL_BASE_DIR = /opt/vni/CTT6.0
+
+GSL_INCLUDE_DIR = /usr/local/include
+GSL_LIBS_DIR = /usr/local/lib
+
+NPSOL_DIR = $(HOME)/npsol/npUnix/lib
+
+FORTRAN_LIBS = -lgfortran
+
+endif
+
+# WORK_64
+ifdef USE_WORK_64
+
+# intel
+#ICC_DIR = /opt/intel/bin
+#MKL_BASE_DIR = /opt/intel/mkl
+#MKL_LIBS_DIR = $(MKL_BASE_DIR)/lib/intel64
+
+
+
+ifdef USE_ICC
+  CC = $(ICC_DIR)/icc
+  ifdef DEBUG
+    CFLAGS := -g $(CFLAGS)
+  endif
+  #MKL_LIBS = -Wl,--start-group -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -Wl,--end-group -liomp5
+  MKL_LIBS = -Wl,--start-group -lmkl_intel_lp64 -lmkl_sequential -lmkl_core -Wl,--end-group
+endif
+ifdef USE_GCC
+  CC = gcc 
+  ifdef DEBUG
+    CFLAGS := -g $(CFLAGS)
+  endif
+  MKL_LIBS = -Wl,--start-group -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_core -Wl,--end-group -fopenmp 
+endif
+ifdef USE_G++
+  CC = g++
+  ifdef DEBUG
+    CFLAGS := -g $(CFLAGS)
+  endif
+  MKL_LIBS = -Wl,--start-group -lmkl_intel_lp64 -lmkl_gnu_thread -lmkl_core -Wl,--end-group -fopenmp 
+endif
+FC = gfortran
+
+LAPACK_LIBS_DIR = /usr/lib32
+LAPACK_LIBS = -llapack -lblas
+#LAPACK_LIBS = -llapack_debug -lblas_debug
+
+ATLAS_LIBS_BASE = /usr/lib32
+ATLAS_LIBS = -llapack -lptf77blas -lptcblas -latlas
+
+GSL_INCLUDE_DIR = /usr/include/gsl
+GSL_LIBS_DIR = /usr/lib
+
+#NPSOL_DIR = /home/f1dfw14/npsol/Linux-x86_64/optimized/lib/
+#NPSOL_DIR = /home/f1dfw14/npsol-5.0/lib
+
+FORTRAN_LIBS = -lgfortran
+endif
+
+# WORK_32
+ifdef USE_WORK_32
+
+ifndef CC
+  CC = gcc
+endif
+ifndef FC
+  FC = gfortran
+endif
+ifndef CFLAGS
+  CFLAGS = -g -static
+endif
+
+MKL_BASE_DIR = /opt/intel/mkl/9.1.021
+MKL_LIBS_DIR = $(MKL_BASE_DIR)/lib/32
+MKL_LIBS = -lmkl_lapack -lmkl_ia32 -lguide
+
+IMSL_BASE_DIR = /opt/vni/CTT6.0
+endif
+
+#WULF
+ifdef USE_WULF
+
+ifndef CC
+  CC = gcc
+endif
+ifndef FC
+  FC = gfortran
+endif
+ifndef CFLAGS
+  CFLAGS = -g -static
+endif
+
+MKL_BASE_DIR = /opt/intel/mkl/9.0
+MKL_LIBS_DIR = $(MKL_BASE_DIR)/lib/em64t
+MKL_LIBS = -lmkl_lapack -lmkl_em64t -lguide
+
+GSL_INCLUDE_DIR = /usr/include/gsl
+GSL_LIBS_DIR = /usr/lib
+
+IMSL_BASE_DIR = /opt/vni/CTT6.0
+
+	TZ_DIR = /mnt/nas02/public/git/TZcode/CFiles
+
+endif
+
+#WULF_32
+ifdef USE_WULF_32
+
+ifndef CC
+  CC = gcc
+endif
+ifndef FC
+  FC = gfortran
+endif
+ifndef CFLAGS
+  CFLAGS = -g -static
+endif
+
+MKL_BASE_DIR = /opt/intel/mkl/9.0
+MKL_LIBS_DIR = $(MKL_BASE_DIR)/lib/32
+MKL_LIBS = -lmkl_lapack32 -lmkl
+
+GSL_INCLUDE_DIR = /usr/local/include/gsl
+GSL_LIBS_DIR = /usr/local/lib
+
+IMSL_BASE_DIR = /opt/vni/CTT6.0
+endif
+
+# JAKE_LAPTOP
+ifdef USE_JAKE_LAPTOP
+
+CC = icc
+FC = ifort
+CFLAGS=-debug -g
+
+INCLUDE_DIR := $(INCLUDE_DIR) -I/Developer/SDKs/MacOSX10.5.sdk/usr/include/malloc
+
+TZ_DIR = $(HOME)/Work/git/TZcode/CFiles
+DW_BASE_DIR = $(HOME)/Work/git
+
+
+MKL_BASE_DIR = /opt/intel/mkl
+MKL_LIBS_DIR = $(MKL_BASE_DIR)/lib
+MKL_LIBS = -lmkl_intel_lp64 -lmkl_core -lpthread -liomp5 -lmkl_lapack95_lp64 -lmkl_intel_thread
+
+
+#LAPACK_LIBS_DIR = $(HOME)/lapack-3.2/lib4.2.4
+LAPACK_LIBS = -framework Accelerate
+#LAPACK_LIBS = -llapack_debug -lblas_debug
+
+ATLAS_LIBS_BASE = $(HOME)/atlas-3.8.3/lib-atlas
+ATLAS_LIBS = -llapack -lptf77blas -lptcblas -latlas
+
+GSL_INCLUDE_DIR = /usr/local/include/gsl
+GSL_LIBS_DIR = /usr/local/lib
+
+NPSOL_DIR = $(HOME)/npsol
+
+#FORTRAN_LIBS = /usr/local/lib/x86_64/libgfortran.a
+endif
+
+# JAKE_WORK
+ifdef USE_JAKE_WORK
+
+CC = icc
+FC = ifort
+#CFLAGS = -static
+#CFLAGS = -g -static
+#CFLAGS = -pg -g -static
+
+#CC = /opt/intel/Compiler/11.0/081/bin/intel64/icc
+#CC = icc
+#FC = gfortran
+#CFLAGS = -g -static
+
+INCLUDE_DIR := $(INCLUDE_DIR) -I/Developer/SDKs/MacOSX10.5.sdk/usr/include/malloc
+
+TZ_DIR = $(HOME)/Work/git/TZcode/CFiles
+DW_BASE_DIR = $(HOME)/Work/git
+
+MKL_BASE_DIR = /opt/intel/Compiler/current/Frameworks/mkl
+MKL_LIBS_DIR = $(MKL_BASE_DIR)/lib/em64t
+MKL_LIBS = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -lmkl_lapack -lpthread -lguide           
+
+
+LAPACK_LIBS_DIR = $(HOME)/lapack-3.2/lib4.2.4
+LAPACK_LIBS = -llapack_linux -lblas_linux
+#LAPACK_LIBS = -llapack_debug -lblas_debug
+
+ATLAS_LIBS_BASE = $(HOME)/atlas-3.8.3/lib-atlas
+ATLAS_LIBS = -llapack -lptf77blas -lptcblas -latlas
+
+GSL_INCLUDE_DIR = /usr/local/include/gsl
+GSL_LIBS_DIR = /usr/local/lib
+
+NPSOL_DIR = /home/f1dfw14/data/npsol-5.0
+
+FORTRAN_LIBS = /usr/lib/gcc/x86_64-linux-gnu/4.2.4/libgfortran.a
+endif     
+
+# TAO
+ifdef USE_TAO
+
+CC = icc
+FC = ifort
+CFLAGS = -arch x86_64 #-lifcore
+#CFLAGS = -static
+#CFLAGS=-g -debug        
+                      
+#CFLAGS = -static
+#CFLAGS=-g -debug        
+TZ_DIR = /Users/tzha/ZhaData/Git/TZcode/CFiles
+DW_BASE_DIR = /Users/tzha/ZhaData/Git
+
+INCLUDE_DIR := $(INCLUDE_DIR) -I/Developer/SDKs/MacOSX10.5.sdk/usr/include/malloc
+
+MKL_BASE_DIR = /opt/intel/Compiler/current/Frameworks/mkl
+MKL_LIBS_DIR = $(MKL_BASE_DIR)/lib/em64t
+MKL_LIBS = -lmkl_intel_lp64 -lmkl_core -lpthread -liomp5 -lmkl_lapack -lmkl_intel_thread         
+
+
+#LAPACK_LIBS_DIR = $(HOME)/lapack-3.2/lib4.2.4
+LAPACK_LIBS = -framework Accelerate
+#LAPACK_LIBS = -llapack_debug -lblas_debug
+
+ATLAS_LIBS_BASE = $(HOME)/atlas-3.8.3/lib-atlas
+ATLAS_LIBS = -llapack -lptf77blas -lptcblas -latlas
+
+GSL_INCLUDE_DIR = /usr/local/include/gsl
+GSL_LIBS_DIR = /usr/local/lib
+
+NPSOL_DIR = $(HOME)/npsol  #e.g., HOME is /Users/tzha
+
+#FORTRAN_LIBS = /usr/local/lib/libgfortran.a
+
+endif

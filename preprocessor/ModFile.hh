@@ -33,6 +33,7 @@ using namespace std;
 #include "SteadyStateModel.hh"
 #include "Statement.hh"
 #include "ExternalFunctionsTable.hh"
+#include "ConfigFile.hh"
 
 //! The abstract representation of a "mod" file
 class ModFile
@@ -50,6 +51,10 @@ public:
   DataTree expressions_tree;
   //! Dynamic model, as declared in the "model" block
   DynamicModel dynamic_model;
+  //! A copy of Dynamic model, for testing trends declared by user
+  DynamicModel trend_dynamic_model;
+  //! A model in which to create the FOC for the ramsey problem
+  DynamicModel ramsey_FOC_equations_dynamic_model;
   //! Static model, as derived from the "model" block when leads and lags have been removed
   StaticModel static_model;
   //! Static model, as declared in the "steady_state_model" block if present
@@ -69,9 +74,15 @@ public:
   //! Is the static model have to computed (no_static=false) or not (no_static=true). Option of 'model'
   bool no_static;
 
+  //! Are nonstationary variables present ?
+  bool nonstationary_variables;
+
   //! Global evaluation context
   /*! Filled using initval blocks and parameters initializations */
-  eval_context_type global_eval_context;
+  eval_context_t global_eval_context;
+
+  //! Stores the original number of equations in the model_block
+  int ramsey_policy_orig_eqn_nbr;
 
 private:
   //! List of statements
@@ -99,9 +110,11 @@ public:
   /*!
     \param basename The base name used for writing output files. Should be the name of the mod file without its extension
     \param clear_all Should a "clear all" instruction be written to output ?
+    \param console Are we in console mode ?
+    \param cygwin Should the MEX command of use_dll be adapted for Cygwin?
     \param msvc Should the MEX command of use_dll be adapted for MSVC?
   */
-  void writeOutputFiles(const string &basename, bool clear_all
+  void writeOutputFiles(const string &basename, bool clear_all, bool console, const ConfigFile &config_file
 #if defined(_WIN32) || defined(__CYGWIN32__)
                         , bool cygwin, bool msvc
 #endif

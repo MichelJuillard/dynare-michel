@@ -12,7 +12,7 @@ function z = resid(junk)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -31,33 +31,57 @@ function z = resid(junk)
 
 global M_ options_ oo_
 
+tagname = 'name';
+if nargin && ischar(junk)
+    tagname = junk;
+end
+
+
+tags  = M_.equations_tags;
+istag = 0;
+if length(tags)
+    istag = 1;
+end
+
+
 steady_state_old = oo_.steady_state;
 
-% If using a steady state file, initialize oo_.steady_state with that file
+info = 0;
 if options_.steadystate_flag
-    [ys,check] = feval([M_.fname '_steadystate'], ...
-                       oo_.steady_state, ...
-                       [oo_.exo_steady_state; ...
-                        oo_.exo_det_steady_state]);
-    if size(ys, 1) < M_.endo_nbr 
-        if length(M_.aux_vars) > 0
-            ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars, ...
-                                                        M_.fname, ...
-                                                        oo_.exo_steady_state, ...
-                                                        oo_.exo_det_steady_state, ...
-                                                        M_.params);
-        else
-            error([M_.fname '_steadystate.m doesn''t match the model']);
-        end
-    end
-    oo_.steady_state = ys;
+    [oo_.steady_state,M.params,info] = ...
+        evaluate_steady_state(oo_.steady_state,M_,options_,oo_,0);
 end
+
+if info(1)
+    print_info(info,options_.noprint)
+end
+
+% Keep of a copy of M_.Sigma_e
+Sigma_e = M_.Sigma_e;
+
+% Set M_.Sigma_e=0 (we evaluate the *deterministic* static model)
+M_.Sigma_e = zeros(size(Sigma_e));
+
 
 % Compute the residuals
 if options_.block && ~options_.bytecode
-    error('RESID: incompatibility with "block" without "bytecode" option')
-elseif options_.block && options_.bytecode
-    [z,check] = bytecode('evaluate','static');
+    z = zeros(M_.endo_nbr,1);
+    for i = 1:length(M_.blocksMFS)
+        [r, g, yy, var_indx] = feval([M_.fname '_static'],...
+                                     i,...
+                                     oo_.steady_state,...
+                                     [oo_.exo_steady_state; ...
+                            oo_.exo_det_steady_state], M_.params);
+        if isempty(M_.blocksMFS{i})
+            idx = var_indx;
+        else
+            idx = M_.blocksMFS{i};
+        end
+        z(idx) = r;
+    end
+elseif options_.bytecode
+    [check, z] = bytecode('evaluate','static');
+    mexErrCheck('bytecode', check);
 else
     z = feval([M_.fname '_static'],...
               oo_.steady_state,...
@@ -65,19 +89,34 @@ else
                oo_.exo_det_steady_state], M_.params);
 end
 
+M_.Sigma_e = Sigma_e;
+
+
 % Display the non-zero residuals if no return value
 if nargout == 0
     for i = 1:4
         disp(' ')
     end
-    
-    for i=1:length(z)
+    ind = [];
+    disp('Residuals of the static equations:')
+    disp(' ')
+    for i=1:M_.orig_endo_nbr
         if abs(z(i)) < options_.dynatol/100
             tmp = 0;
         else
             tmp = z(i);
         end
-        disp(['Residual for equation number ' int2str(i) ' is equal to ' num2str(tmp)])
+        if istag
+            tg = tags(cell2mat(tags(:,1)) == i,2:3); % all tags for equation i
+            ind = strmatch( tagname, cellstr( tg(:,1) ) );
+        end
+        if ~istag || length(ind) == 0
+            disp(['Equation number ' int2str(i) ' : ' num2str(tmp)])
+        else
+            t1 = tg( ind , 2 );
+            s = cell2mat(t1);
+            disp( ['Equation number ', int2str(i) ,' : ', num2str(tmp) ,' : ' s])
+        end
     end
     for i = 1:2
         disp(' ')

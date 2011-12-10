@@ -1,4 +1,4 @@
-dnl Copyright (C) 2009-2010 Dynare Team
+dnl Copyright (C) 2009-2011 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -31,8 +31,9 @@ MATLAB_CPPFLAGS="-I$MATLAB/extern/include"
 case ${MATLAB_ARCH} in
   glnx86 | glnxa64)
     MATLAB_DEFS="$MATLAB_DEFS -D_GNU_SOURCE -DNDEBUG"
-    MATLAB_CFLAGS="-ansi -fexceptions -fPIC -pthread -g -O2"
-    MATLAB_CXXFLAGS="-ansi -fPIC -pthread -g -O2"
+    MATLAB_CFLAGS="-fexceptions -fPIC -pthread -g -O2"
+    MATLAB_CXXFLAGS="-fPIC -pthread -g -O2"
+    MATLAB_FFLAGS="-fPIC -g -O2 -fexceptions"
     MATLAB_LDFLAGS="-shared -Wl,--version-script,$MATLAB/extern/lib/${MATLAB_ARCH}/mexFunction.map -Wl,--no-undefined -Wl,-rpath-link,$MATLAB/bin/${MATLAB_ARCH} -L$MATLAB/bin/${MATLAB_ARCH}"
     MATLAB_LIBS="-lmx -lmex -lmat -lm -lstdc++ -lmwlapack"
     # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
@@ -50,26 +51,19 @@ case ${MATLAB_ARCH} in
   win32 | win64)
     MATLAB_CFLAGS="-fexceptions -g -O2"
     MATLAB_CXXFLAGS="-g -O2"
-    case $MATLAB_VERSION in
-      6.5*|7.0|7.0.0|7.0.4)
-        LIBLOC="$MATLAB/extern/lib/${MATLAB_ARCH}/microsoft/msvc60"
-        ;;
-      7.0.1)
-        AC_MSG_ERROR([MATLAB version 7.0.1 (R14SP1) is buggy (LAPACK library missing for MSVC), and can't be used for compiling MEX files])
-        ;;
-      *)
-        LIBLOC="$MATLAB/extern/lib/${MATLAB_ARCH}/microsoft"
-        ;;
-    esac
-    MATLAB_LDFLAGS="-static-libgcc -shared \$(top_srcdir)/mex.def"
-    MATLAB_LIBS="$LIBLOC/libmex.lib $LIBLOC/libmx.lib $LIBLOC/libmwlapack.lib"
+    MATLAB_FFLAGS="-fexceptions -g -O2 -fno-underscoring"
+    AX_COMPARE_VERSION([$MATLAB_VERSION], [eq], [7.0.1], [AC_MSG_ERROR([MATLAB version 7.0.1 (R14SP1) is buggy (LAPACK library missing for MSVC), and can't be used for compiling MEX files])])
+    MATLAB_DEFS="$MATLAB_DEFS -DNDEBUG"
+    # Note that static-libstdc++ is only supported since GCC 4.5 (but generates no error on older versions)
+    MATLAB_LDFLAGS="-static-libgcc -static-libstdc++ -shared \$(top_srcdir)/mex.def -L$MATLAB/bin/${MATLAB_ARCH}"
+    MATLAB_LIBS="-lmex -lmx -lmat -lmwlapack"
     # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
-    AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} $LIBLOC/libmwblas.lib"])
+    AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} -lmwblas"])
     ax_mexopts_ok="yes"
     ;;
   maci | maci64)
-    SDKROOT='/Developer/SDKs/MacOSX10.5.sdk'
-    MACOSX_DEPLOYMENT_TARGET='10.5'
+    SDKROOT='/Developer/SDKs/MacOSX10.6.sdk'
+    MACOSX_DEPLOYMENT_TARGET='10.6'
     if test "${MATLAB_ARCH}" = "maci"; then
         ARCHS='i386'
     else
@@ -80,6 +74,7 @@ case ${MATLAB_ARCH} in
     MATLAB_LDFLAGS="-L$MATLAB/bin/${MATLAB_ARCH} -Wl,-twolevel_namespace -undefined error -arch $ARCHS -Wl,-syslibroot,$SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -bundle -Wl,-exported_symbols_list,\$(top_srcdir)/mexFunction-MacOSX.map"
     MATLAB_LIBS="-lmx -lmex -lmat -lstdc++ -lmwlapack"
     MATLAB_CXXFLAGS="-fno-common -no-cpp-precomp -fexceptions -arch $ARCHS -isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -O2"
+    MATLAB_FFLAGS="-fexceptions -fbackslash -arch $ARCHS"
     # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
     AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} -lmwblas"])
     ax_mexopts_ok="yes"
@@ -88,6 +83,11 @@ case ${MATLAB_ARCH} in
     ax_mexopts_ok="no"
     ;;
 esac
+
+# Starting from MATLAB 7.8, on 64-bit platforms, BLAS and LAPACK expect 64-bit integers, so make it the default for integers in Fortran code
+if test "${MATLAB_ARCH}" = "glnxa64" -o "${MATLAB_ARCH}" = "win64" -o "${MATLAB_ARCH}" = "maci64"; then
+  AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.8], [MATLAB_FFLAGS="$MATLAB_FFLAGS -fdefault-integer-8"])
+fi
 
 # Converts the MATLAB version number into comparable integers with only major and minor version numbers
 # For example, 7.4.2 will become 0704

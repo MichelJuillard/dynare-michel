@@ -11,6 +11,10 @@
 %     shocks   matrix of shocks
 %     start    zero period value
 %
+% Note that this file requires the dynare_simul_ DLL to be in the path.
+% This DLL is distributed with Dynare, under the mex/matlab or mex/octave
+% subdirectory.
+%
 % SEMANTICS
 %
 % The command reads a decision rule from the MAT-file having the given
@@ -62,7 +66,13 @@
 %
 %   "DSGE Models with Dynare++. A Tutorial.", Ondra Kamenik, 2005
 
+% Copyright (C) 2005-2011, Ondra Kamenik
+
 function r = dynare_simul(varargin)
+
+if exist('dynare_simul_') ~= 3
+    error('Can''t find dynare_simul_ DLL in the path. The simplest way to add it is to run Dynare once in this session.')
+end
 
 % get the file name and load data
 fname = varargin{1};
@@ -155,6 +165,10 @@ end
 seed = ceil(10000*rand(1,1));
 
 % call dynare_simul_
-command = ['r=dynare_simul_(' num2str(order-1) ',nstat,npred,nboth,nforw,' ...
+command = ['[err,r]=dynare_simul_(' num2str(order-1) ',nstat,npred,nboth,nforw,' ...
            'nexog,ystart,shocks,vcov_exo,seed,ss' derstr ');'];
 eval(command);
+
+if err
+    error('Simulation failed')
+end

@@ -1,6 +1,6 @@
 function [x,status]=bicgstab_(func,b,x,tole,kmax,varargin)
 
-% Copyright (C) 2007 Dynare Team
+% Copyright (C) 2007-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -30,7 +30,7 @@ k = 0;
 rho_1 = rh_0'*r;
 tolr = tole*norm(b);
 
-while norm(r) > tolr & k < kmax
+while norm(r) > tolr && k < kmax
     k = k+1;
     beta = (rho_1/rho_0)*(alpha/w);
     p = r+beta*(p-w*v);

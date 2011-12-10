@@ -23,7 +23,7 @@
 
 QRDecomposition::QRDecomposition(size_t rows_arg, size_t cols_arg, size_t cols2_arg) :
   rows(rows_arg), cols(cols_arg), mind(std::min(rows, cols)), cols2(cols2_arg),
-  lwork(rows*cols), lwork2(cols2), H(rows), Q2(rows), v(rows)
+  lwork(rows*cols), lwork2(cols2)
 {
   work = new double[lwork];
   work2 = new double[lwork2];

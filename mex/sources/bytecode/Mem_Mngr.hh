@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2008 Dynare Team
+ * Copyright (C) 2007-2010 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -23,7 +23,7 @@
 #include <vector>
 #include <fstream>
 #ifndef DEBUG_EX
-# include "mex.h"
+# include <dynmex.h>
 #else
 # include "mex_interface.hh"
 #endif
@@ -52,8 +52,8 @@ public:
   bool swp_f;
 private:
   v_NonZeroElem Chunk_Stack;
-  int CHUNK_SIZE, CHUNK_BLCK_SIZE, Nb_CHUNK;
-  int CHUNK_heap_pos;
+  unsigned int CHUNK_SIZE, CHUNK_BLCK_SIZE, Nb_CHUNK;
+  unsigned int CHUNK_heap_pos;
   NonZeroElem **NZE_Mem_add;
   NonZeroElem *NZE_Mem;
   vector<NonZeroElem *> NZE_Mem_Allocated;

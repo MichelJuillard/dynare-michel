@@ -15,7 +15,7 @@ function d1 = bksupk(ny,fid,jcf,icc1)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2007 Dynare Team
+% Copyright (C) 2003-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -48,7 +48,7 @@ ir = ir-ny ;
 
 i = 2 ;
 
-while i <= M_.maximum_lead | i <= options_.periods
+while i <= M_.maximum_lead || i <= options_.periods
     irf1 = selif(irf,irf<=options_.periods*ny) ;
 
     ofs = (((options_.periods-i)*ny+1)-1)*jcf*8 ;

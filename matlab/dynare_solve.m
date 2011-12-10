@@ -16,7 +16,7 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2008 Dynare Team
+% Copyright (C) 2001-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -38,10 +38,8 @@ global options_
 options_ = set_default_option(options_,'solve_algo',2);
 info = 0;
 if options_.solve_algo == 0
-    if exist('OCTAVE_VERSION') || isempty(ver('optim'))
-        % Note that fsolve() exists under Octave, but has a different syntax
-        % So we fail for the moment under Octave, until we add the corresponding code
-        error('DYNARE_SOLVE: you can''t use solve_algo=0 since you don''t have Matlab''s Optimization Toolbox')
+    if ~exist('OCTAVE_VERSION') && isempty(license('inuse','optimization_toolbox'))
+        error('You can''t use solve_algo=0 since you don''t have MATLAB''s Optimization Toolbox')
     end
     options=optimset('fsolve');
     options.MaxFunEvals = 50000;
@@ -53,7 +51,21 @@ if options_.solve_algo == 0
     else
         options.Jacobian = 'off';
     end
-    [x,fval,exitval,output] = fsolve(func,x,options,varargin{:});
+    if ~exist('OCTAVE_VERSION')
+        [x,fval,exitval,output] = fsolve(func,x,options,varargin{:});
+    else
+        % Under Octave, use a wrapper, since fsolve() does not have a 4th arg
+        func2 = str2func(func);
+        func = @(x) func2(x, varargin{:});
+        % The Octave version of fsolve does not converge when it starts from the solution
+        fvec = feval(func,x);
+        if max(abs(fvec)) >= options_.solve_tolf
+            [x,fval,exitval,output] = fsolve(func,x,options);
+        else
+            exitval = 3;
+        end;
+    end
+    
     if exitval > 0
         info = 0;
     else
@@ -79,6 +91,9 @@ elseif options_.solve_algo == 2 || options_.solve_algo == 4
         disp(['STEADY:  numerical initial values incompatible with the following' ...
               ' equations'])
         disp(i')
+        disp('Please check for example')
+        disp('   i) if all parameters occurring in these equations are defined')
+        disp('  ii) that no division by an endogenous variable initialized to 0 occurs') 
         error('exiting ...')
     end
     

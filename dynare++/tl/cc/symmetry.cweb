@@ -1,5 +1,4 @@
-@q $Id: symmetry.cweb 148 2005-04-19 15:12:26Z kamenik $ @>
-@q Copyright 2004, Ondra Kamenik @>
+@q Copyright (C) 2004-2011, Ondra Kamenik @>
 
 @ Start of {\tt symmetry.cpp} file.
 
@@ -146,7 +145,7 @@ InducedSymmetries::InducedSymmetries(const Equivalence& e, const Permutation& p,
 @<|InducedSymmetries::print| code@>=
 void InducedSymmetries::print() const
 {
-	printf("Induced symmetries: %d\n",size());
+	printf("Induced symmetries: %lu\n", (unsigned long) size());
 	for (unsigned int i = 0; i < size(); i++)
 		operator[](i).print();
 }

@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Copyright (C) 2009-2010 Dynare Team
+dnl Copyright (C) 2009-2011 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -18,7 +18,7 @@ dnl You should have received a copy of the GNU General Public License
 dnl along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 AC_PREREQ([2.61])
-AC_INIT([dynare], [4.2-unstable])
+AC_INIT([dynare], [4.3-unstable])
 AC_CONFIG_SRCDIR([configure.ac])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 
@@ -38,21 +38,23 @@ if test "x$ax_enable_matlab" = "xyes"; then
 
   CFLAGS="$MATLAB_CFLAGS"
   CXXFLAGS="$MATLAB_CXXFLAGS"
+  FFLAGS="$MATLAB_FFLAGS"
 fi
 
 case ${host_os} in
   *cygwin*)
-    # MATLAB can't use native Cygwin DLL, so using MinGW 3 shipped with Cygwin
-    CC=gcc-3
-    CXX=g++-3
-    CFLAGS="$CFLAGS -mno-cygwin"
-    CXXFLAGS="$CXXFLAGS -mno-cygwin"
+    AC_MSG_WARN([You are compiling for the Cygwin target. This means that the MEX files will])
+    AC_MSG_WARN([not run from MATLAB, because it cannot load the Cygwin DLL.])
+    AC_MSG_WARN([This is probably not what you want. Consider using a MinGW cross-compiler.])
     ;;
 esac
 
-CFLAGS="$CFLAGS -Wall"
-CXXFLAGS="$CXXFLAGS -Wall"
+CFLAGS="$CFLAGS -Wall -Wno-parentheses"
+FFLAGS="$FFLAGS -Wall"
+CXXFLAGS="$CXXFLAGS -Wall -Wno-parentheses"
 
+AC_PROG_F77([gfortran g77 f77])
+AM_CONDITIONAL([HAVE_FORT], [test "x$F77" != "x"])
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
@@ -61,7 +63,7 @@ AC_PROG_MKDIR_P
 AX_PTHREAD
 # Check for boost libraries used in estimation DLL
 AC_LANG_PUSH([C++])
-AX_BOOST_BASE([1.34])
+AX_BOOST_BASE([1.36])
 CPPFLAGS_SAVED="$CPPFLAGS"
 CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"
 AC_CHECK_HEADER([boost/random/linear_congruential.hpp], [], [AC_MSG_ERROR([Can't find Boost Random Library])])
@@ -71,9 +73,9 @@ AC_LANG_POP([C++])
 # Check for dlopen(), needed by k_order_perturbation DLL
 AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])
 AC_SUBST([LIBADD_DLOPEN])
-# Check for GSL, needed by SWZ
-AX_PATH_GSL
-AM_CONDITIONAL([HAVE_GSL], [test "x$no_gsl" = "x"])
+# Check for GSL, needed by MS-SBVAR
+AX_GSL
+AM_CONDITIONAL([HAVE_GSL], [test "x$has_gsl" = "xyes"])
 
 AM_CONDITIONAL([DO_SOMETHING], [test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes"])
 
@@ -87,31 +89,60 @@ else
   BUILD_MEX_MATLAB="no (missing MATLAB, or unknown version, or unknown architecture)"
 fi
 
-if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$no_gsl" = "x"; then
-   BUILD_SWZ_MEX_MATLAB="yes"
+if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$F77" != "x"; then
+   BUILD_KALMAN_STEADY_STATE_MATLAB="yes"
 else
-   BUILD_SWZ_MEX_MATLAB="no (missing GSL)"
+   BUILD_KALMAN_STEADY_STATE_MATLAB="no (missing Fortran Compiler for compilation of libslicot)"
 fi
+
+if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$has_gsl" = "xyes"; then
+   BUILD_MS_SBVAR_MEX_MATLAB="yes"
+else
+   BUILD_MS_SBVAR_MEX_MATLAB="no (missing GSL)"
+fi
+
+AC_ARG_ENABLE([openmp], AS_HELP_STRING([--enable-openmp], [use OpenMP for parallelization of some MEX files]), [
+  if test "x$enable_openmp" = "xyes"; then
+    CPPFLAGS="$CPPFLAGS -DUSE_OMP"
+    CFLAGS="$CFLAGS -fopenmp"
+    CXXFLAGS="$CXXFLAGS -fopenmp"
+  fi
+])
+
+AC_ARG_WITH([m2html], AS_HELP_STRING([--with-m2html=DIR], [specify installation directory of M2HTML]), [
+M2HTML=$withval
+BUILD_M2HTML=yes
+], [
+M2HTML=
+BUILD_M2HTML=no
+])
+AC_SUBST([M2HTML])
+AM_CONDITIONAL([HAVE_M2HTML], [test "x$M2HTML" != "x"])
 
 AC_MSG_NOTICE([
 
 Dynare is now configured for building the following components...
 
 Binaries (with "make"):
- MEX files for MATLAB (except SWZ):     $BUILD_MEX_MATLAB
- SWZ MEX files for MATLAB:              $BUILD_SWZ_MEX_MATLAB
+ MEX files for MATLAB (except MS-SBVAR and Kalman Steady State):     $BUILD_MEX_MATLAB
+ MS-SBVAR MEX files for MATLAB:                                      $BUILD_MS_SBVAR_MEX_MATLAB
+ Kalman Steady State MEX file for MATLAB:                            $BUILD_KALMAN_STEADY_STATE_MATLAB
+ M2HTML documentation:                                               $BUILD_M2HTML
 
 ])
 
 AC_CONFIG_FILES([Makefile
                  mjdgges/Makefile
                  kronecker/Makefile
-                 gensylv/Makefile
-                 libdynare++/Makefile
                  bytecode/Makefile
+                 libdynare++/Makefile
+                 gensylv/Makefile
                  k_order_perturbation/Makefile
                  dynare_simul_/Makefile
-                 swz/Makefile
-                 loglikelihood/Makefile])
+                 estimation/Makefile
+                 libslicot/Makefile
+                 kalman_steady_state/Makefile
+                 ms_sbvar/Makefile
+                 block_kalman_filter/Makefile])
 
 AC_OUTPUT

@@ -1,6 +1,6 @@
-function jndx = subset();
+function jndx = subset()
 
-% Copyright (C) 2006 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -55,8 +55,8 @@ else
     tt = [];
     for i = 1:length(ExcludedParamNames)
         tmp = strmatch(ExcludedParamNames{i},M_.exo_names);
-        if ~isempty(tmp) & ( strcmpi(info,'All') | strcmpi(info,'StructuralShocks') | ...
-                             strcmpi(info,'StructuralShocksWithoutCorrelations') | ...
+        if ~isempty(tmp) && ( strcmpi(info,'All') || strcmpi(info,'StructuralShocks') || ...
+                             strcmpi(info,'StructuralShocksWithoutCorrelations') || ...
                              strcmpi(info,'AllWithoutMeasurementErrors') )
             % The parameter the user wants to exclude is related to the size of the structural innovations.
             if ncx
@@ -65,9 +65,9 @@ else
                 error
             end
             tt = [tt;tmp];
-        elseif isempty(tmp) & nvn 
+        elseif isempty(tmp) && nvn 
             tmp = strmatch(ExcludedParamNames{i},options_.varobs);
-            if ~isempty(tmp) & ( strcmpi(info,'All') | strcmpi(info,'MeasurementErrors') | ...
+            if ~isempty(tmp) && ( strcmpi(info,'All') || strcmpi(info,'MeasurementErrors') || ...
                                  strcmpi(info,'MeasurementErrorsWithoutCorrelations') )
                 % The parameter the user wants to exclude is related to the size of the measurement errors variances.
                 tmp = nvx+tmp;

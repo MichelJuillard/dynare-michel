@@ -1,4 +1,4 @@
-function r = lnsrch1_wrapper_one_boundary(ya, y_index, fname, y, x, params, it_)
+function r = lnsrch1_wrapper_one_boundary(ya, y_index, fname, y, x, params, steady_state, it_)
 % wrapper for solve_one_boundary m-file when it is used with a dynamic
 % model
 %
@@ -40,4 +40,4 @@ function r = lnsrch1_wrapper_one_boundary(ya, y_index, fname, y, x, params, it_)
 
 %reshape the input arguments of the dynamic function
 y(it_, :) = ya;
-[r, y, g1, g2, g3]=feval(fname, y, x, params, it_, 0);
+[r, y, g1, g2, g3]=feval(fname, y, x, params, steady_state, it_, 0);

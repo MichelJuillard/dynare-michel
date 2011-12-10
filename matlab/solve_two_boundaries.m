@@ -1,4 +1,4 @@
-function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_kmin_l, y_kmax_l, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo)
+function y = solve_two_boundaries(fname, y, x, params, steady_state, y_index, nze, periods, y_kmin_l, y_kmax_l, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo, M, oo)
 % Computes the deterministic simulation of a block of equation containing
 % both lead and lag variables using relaxation methods 
 %
@@ -8,6 +8,7 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
 %   y                   [matrix]        All the endogenous variables of the model
 %   x                   [matrix]        All the exogenous variables of the model
 %   params              [vector]        All the parameters of the model
+%   steady_state        [vector]        steady state of the model
 %   y_index             [vector of int] The index of the endogenous variables of
 %                                       the block
 %   nze                 [integer]       number of non-zero elements in the
@@ -42,7 +43,7 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
 %   none.
 %  
 
-% Copyright (C) 1996-2009 Dynare Team
+% Copyright (C) 1996-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -59,7 +60,6 @@ function y = solve_two_boundaries(fname, y, x, params, y_index, nze, periods, y_
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global oo_ M_;
 cvg=0;
 iter=0;
 Per_u_=0;
@@ -72,8 +72,8 @@ max_resa=1e100;
 Jacobian_Size=Blck_size*(y_kmin+y_kmax_l +periods);
 g1=spalloc( Blck_size*periods, Jacobian_Size, nze*periods);
 reduced = 0;
-while ~(cvg==1 | iter>maxit_),
-    [r, y, g1, g2, g3, b]=feval(fname, y, x, params, periods, 0, y_kmin, Blck_size);
+while ~(cvg==1 || iter>maxit_),
+    [r, y, g1, g2, g3, b]=feval(fname, y, x, params, steady_state, periods, 0, y_kmin, Blck_size);
     %     fjac = zeros(Blck_size, Blck_size*(y_kmin_l+1+y_kmax_l));
     %     disp(['Blck_size=' int2str(Blck_size) ' size(y_index)=' int2str(size(y_index,2))]);
     %     dh = max(abs(y(y_kmin+1-y_kmin_l:y_kmin+1+y_kmax_l, y_index)),options_.gstep*ones(y_kmin_l+1+y_kmax_l, Blck_size))*eps^(1/3);
@@ -146,18 +146,18 @@ while ~(cvg==1 | iter>maxit_),
     %     else
     %       max_res=max(max(abs(r)));
     %     end;
-    if(~isreal(max_res) | isnan(max_res))
+    if(~isreal(max_res) || isnan(max_res))
         cvg = 0;
-    elseif(is_linear & iter>0)
+    elseif(is_linear && iter>0)
         cvg = 1;
     else
         cvg=(max_res<solve_tolf);
     end;
     if(~cvg)
         if(iter>0)
-            if(~isreal(max_res) | isnan(max_res) | (max_resa<max_res && iter>1))
+            if(~isreal(max_res) || isnan(max_res) || (max_resa<max_res && iter>1))
                 if(~isreal(max_res))
-                    disp(['Variable ' M_.endo_names(max_indx,:) ' (' int2str(max_indx) ') returns an undefined value']);
+                    disp(['Variable ' M.endo_names(max_indx,:) ' (' int2str(max_indx) ') returns an undefined value']);
                 end;
                 if(isnan(max_res))
                     detJ=det(g1aa);
@@ -190,12 +190,12 @@ while ~(cvg==1 | iter>maxit_),
                     else
                         fprintf('Error in simul: Convergence not achieved in block %d, after %d iterations.\n Increase "options_.maxit_" or set "cutoff=0" in model options.\n',Block_Num, iter);
                     end;
-                    oo_.deterministic_simulation.status = 0;
-                    oo_.deterministic_simulation.error = max_res;
-                    oo_.deterministic_simulation.iterations = iter;
-                    oo_.deterministic_simulation.block(Block_Num).status = 0;% Convergency failed.
-                    oo_.deterministic_simulation.block(Block_Num).error = max_res;
-                    oo_.deterministic_simulation.block(Block_Num).iterations = iter;
+                    oo.deterministic_simulation.status = 0;
+                    oo.deterministic_simulation.error = max_res;
+                    oo.deterministic_simulation.iterations = iter;
+                    oo.deterministic_simulation.block(Block_Num).status = 0;% Convergency failed.
+                    oo.deterministic_simulation.block(Block_Num).error = max_res;
+                    oo.deterministic_simulation.block(Block_Num).iterations = iter;
                     return;
                 end;
             else
@@ -209,16 +209,55 @@ while ~(cvg==1 | iter>maxit_),
         g1aa=g1a;
         ba=b;
         max_resa=max_res;
-        if(stack_solve_algo==1),
+        if(stack_solve_algo==0),
             dx = g1a\b- ya;
             ya = ya + lambda*dx;
             y(1+y_kmin:periods+y_kmin,y_index)=reshape(ya',length(y_index),periods)';
+        elseif(stack_solve_algo==1),
+            for t=1:periods;
+                first_elem = (t-1)*Blck_size+1;
+                last_elem = t*Blck_size;
+                next_elem = (t+1)*Blck_size;
+                Elem = first_elem:last_elem;
+                Elem_1 = last_elem+1:next_elem;
+                B1_inv = inv(g1a(Elem, Elem));
+                if (t < periods)
+                    S1 = B1_inv * g1a(Elem, Elem_1);
+                end;
+                g1a(Elem, Elem_1) = S1;
+                b(Elem) = B1_inv * b(Elem);
+                g1a(Elem, Elem) = ones(Blck_size, Blck_size);
+                if (t < periods)
+                    g1a(Elem_1, Elem_1) = g1a(Elem_1, Elem_1) - g1a(Elem_1, Elem) * S1;
+                    b(Elem_1) = b(Elem_1) - g1a(Elem_1, Elem) * b(Elem);
+                    g1a(Elem_1, Elem) = zeros(Blck_size, Blck_size);
+                end;
+            end;
+            za = b(Elem);
+            zaa = za;
+            y_Elem = (periods - 1) * Blck_size + 1:(periods) * Blck_size;
+            dx = ya;
+            dx(y_Elem) = za - ya(y_Elem);
+            ya(y_Elem) = ya(y_Elem) + lambda*dx(y_Elem);
+            for t=periods-1:-1:1;
+                first_elem = (t-1)*Blck_size+1;
+                last_elem = t*Blck_size;
+                next_elem = (t+1)*Blck_size;
+                Elem_1 = last_elem+1:next_elem;
+                Elem = first_elem:last_elem;
+                za = b(Elem) - g1a(Elem, Elem_1) * zaa;
+                zaa = za;
+                y_Elem = Blck_size * (t-1)+1:Blck_size * (t);
+                dx(y_Elem) = za - ya(y_Elem);
+                ya(y_Elem) = ya(y_Elem) + lambda*dx(y_Elem);
+                y(y_kmin + t, y_index) = ya(y_Elem);
+            end;
         elseif(stack_solve_algo==2),
             flag1=1;
             while(flag1>0)
                 [L1, U1]=luinc(g1a,luinc_tol);
                 [za,flag1] = gmres(g1a,b,Blck_size,1e-6,Blck_size*periods,L1,U1);
-                if (flag1>0 | reduced)
+                if (flag1>0 || reduced)
                     if(flag1==1)
                         disp(['Error in simul: No convergence inside GMRES after ' num2str(periods*10,'%6d') ' iterations, in block' num2str(Block_Size,'%3d')]);
                     elseif(flag1==2)
@@ -239,7 +278,7 @@ while ~(cvg==1 | iter>maxit_),
             while(flag1>0)
                 [L1, U1]=luinc(g1a,luinc_tol);
                 [za,flag1] = bicgstab(g1a,b,1e-7,Blck_size*periods,L1,U1);
-                if (flag1>0 | reduced)
+                if (flag1>0 || reduced)
                     if(flag1==1)
                         disp(['Error in simul: No convergence inside BICGSTAB after ' num2str(periods*10,'%6d') ' iterations, in block' num2str(Block_Size,'%3d')]);
                     elseif(flag1==2)
@@ -263,28 +302,29 @@ while ~(cvg==1 | iter>maxit_),
             g = (ra'*g1a)';
             f = 0.5*ra'*ra;
             p = -g1a\ra;
-            [yn,f,ra,check]=lnsrch1(ya,f,g,p,stpmax,'lnsrch1_wrapper_two_boundaries',nn,nn,  fname, y, y_index, x, params, periods, y_kmin, Blck_size);
+            [yn,f,ra,check]=lnsrch1(ya,f,g,p,stpmax, ...
+                                    'lnsrch1_wrapper_two_boundaries',nn,nn,  fname, y, y_index, x, params, steady_state, periods, y_kmin, Blck_size);
             dx = ya - yn;
             y(1+y_kmin:periods+y_kmin,y_index)=reshape(yn',length(y_index),periods)';
         end
     end
     iter=iter+1;
-    disp(['iteration: ' num2str(iter,'%d') ' error: ' num2str(max_res,'%e') ' stack_solve_algo=' num2str(stack_solve_algo)]);
+    disp(['iteration: ' num2str(iter,'%d') ' error: ' num2str(max_res,'%e')]);
 end;
 if (iter>maxit_)
     disp(['No convergence after ' num2str(iter,'%4d') ' iterations in Block ' num2str(Block_Num,'%d')]);
-    oo_.deterministic_simulation.status = 0;
-    oo_.deterministic_simulation.error = max_res;
-    oo_.deterministic_simulation.iterations = iter;
-    oo_.deterministic_simulation.block(Block_Num).status = 0;% Convergency failed.
-    oo_.deterministic_simulation.block(Block_Num).error = max_res;
-    oo_.deterministic_simulation.block(Block_Num).iterations = iter;
+    oo.deterministic_simulation.status = 0;
+    oo.deterministic_simulation.error = max_res;
+    oo.deterministic_simulation.iterations = iter;
+    oo.deterministic_simulation.block(Block_Num).status = 0;% Convergency failed.
+    oo.deterministic_simulation.block(Block_Num).error = max_res;
+    oo.deterministic_simulation.block(Block_Num).iterations = iter;
     return;
 end
-oo_.deterministic_simulation.status = 1;
-oo_.deterministic_simulation.error = max_res;
-oo_.deterministic_simulation.iterations = iter;
-oo_.deterministic_simulation.block(Block_Num).status = 1;% Convergency obtained.
-oo_.deterministic_simulation.block(Block_Num).error = max_res;
-oo_.deterministic_simulation.block(Block_Num).iterations = iter;
+oo.deterministic_simulation.status = 1;
+oo.deterministic_simulation.error = max_res;
+oo.deterministic_simulation.iterations = iter;
+oo.deterministic_simulation.block(Block_Num).status = 1;% Convergency obtained.
+oo.deterministic_simulation.block(Block_Num).error = max_res;
+oo.deterministic_simulation.block(Block_Num).iterations = iter;
 return;

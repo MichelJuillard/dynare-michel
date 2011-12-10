@@ -1,20 +1,24 @@
-function [data,rawdata]=dynare_estimation_init(var_list_, igsa)
+function [dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_, fake] = dynare_estimation_init(var_list_, dname, gsa_flag, M_, options_, oo_, estim_params_, bayestopt_)
 
-% function dynare_estimation_init(var_list_)
+% function dynare_estimation_init(var_list_, gsa_flag)
 % preforms initialization tasks before estimation or
 % global sensitivity analysis
-%  
+%
 % INPUTS
 %   var_list_:  selected endogenous variables vector
-%  
+%   dname:      alternative directory name
+%   gsa_flag:   flag for GSA operation (optional)
+%
 % OUTPUTS
 %   data:    data after required transformation
-%   rawdat:  data as in the data file
+%   rawdata:  data as in the data file
+%   xparam1:    initial value of estimated parameters as returned by
+%               set_prior()
 %
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2007 Dynare Team
+% Copyright (C) 2003-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -31,68 +35,113 @@ function [data,rawdata]=dynare_estimation_init(var_list_, igsa)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ oo_ estim_params_ 
-global bayestopt_
-
-if nargin<2 | isempty(igsa),
-    igsa=0;
+if isempty(gsa_flag)
+    gsa_flag = 0;
+else% Decide if a DSGE or DSGE-VAR has to be estimated.
+    if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
+        options_.dsge_var = 1;
+    end
+    var_list_ = check_list_of_variables(options_, M_, var_list_);
+    options_.varlist = var_list_;
 end
 
-options_.varlist = var_list_;
+% Get the indices of the observed variables in M_.endo_names.
 options_.lgyidx2varobs = zeros(size(M_.endo_names,1),1);
 for i = 1:size(M_.endo_names,1)
     tmp = strmatch(deblank(M_.endo_names(i,:)),options_.varobs,'exact');
     if ~isempty(tmp)
-        options_.lgyidx2varobs(i,1) = tmp;
+        if length(tmp)>1
+            disp(' ')
+            error(['Multiple declarations of ' deblank(M_.endo_names(i,:)) ' as an observed variable is not allowed!'])
+        end
+        options_.lgyidx2varobs(i) = tmp;
     end
 end
 
-if ~isempty(strmatch('dsge_prior_weight',M_.param_names))
-    options_.dsge_var = 1;
-end
-
-if options_.order > 1
+% Set the order of approximation to one (if needed).
+if options_.order > 1 && isempty(options_.nonlinear_filter)
+    disp('This version of Dynare cannot estimate non linearized models!')
+    disp('Set "order" equal to 1.')
+    disp(' ')
     options_.order = 1;
 end
 
+% Set options_.lik_init equal to 3 if diffuse filter is used or
+% kalman_algo refers to a diffuse filter algorithm.
+if (options_.diffuse_filter==1) || (options_.kalman_algo > 2)
+    if options_.lik_init == 2
+        error(['options diffuse_filter, lik_init and/or kalman_algo have ' ...
+               'contradictory settings'])
+    else
+        options_.lik_init = 3;
+    end
+end
+
+% If options_.lik_init == 1
+%  set by default options_.qz_criterium to 1-1e-6
+%  and check options_.qz_criterium < 1-eps if options_.lik_init == 1
+% Else set by default options_.qz_criterium to 1+1e-6
+if options_.lik_init == 1
+    if isempty(options_.qz_criterium)
+        options_.qz_criterium = 1-1e-6;
+    elseif options_.qz_criterium > 1-eps
+        error(['estimation: option qz_criterium is too large for estimating ' ...
+               'a stationary model. If your model contains unit roots, use ' ...
+               'option diffuse_filter'])
+    end
+elseif isempty(options_.qz_criterium)
+    options_.qz_criterium = 1+1e-6;
+end
+
+% If the data are prefiltered then there must not be constants in the
+% measurement equation of the DSGE model or in the DSGE-VAR model.
 if options_.prefilter == 1
     options_.noconstant = 1;
 end
 
-if options_.filtered_vars ~= 0 & options_.filter_step_ahead == 0
+% Set options related to filtered variables.
+if ~isequal(options_.filtered_vars,0) && isempty(options_.filter_step_ahead)
     options_.filter_step_ahead = 1;
 end
-if options_.filter_step_ahead ~= 0
+if ~isequal(options_.filtered_vars,0) && isequal(options_.filter_step_ahead,0)
+    options_.filter_step_ahead = 1;
+end
+if ~isequal(options_.filter_step_ahead,0)
     options_.nk = max(options_.filter_step_ahead);
-else
-    options_.nk = 0;
 end
 
-%% Add something to the parser ++>
-% The user should be able to choose another name
-% for the directory...
-M_.dname = M_.fname; 
+% Set the name of the directory where (intermediary) results will be saved.
+if isempty(dname)
+    M_.dname = M_.fname;
+else
+    M_.dname = dname;
+end
 
-pnames          = ['     ';'beta ';'gamm ';'norm ';'invg ';'unif ';'invg2'];
-n_varobs        = size(options_.varobs,1);
+% Set the number of observed variables.
+n_varobs = size(options_.varobs,1);
 
+% Set priors over the estimated parameters.
 if ~isempty(estim_params_)
-    [xparam1,estim_params_,bayestopt_,lb,ub, M_] = set_prior(estim_params_, M_, options_);
-
+    [xparam1,estim_params_,bayestopt_,lb,ub,M_] = set_prior(estim_params_,M_,options_);
     if any(bayestopt_.pshape > 0)
-        if options_.mode_compute
-            plot_priors
+        % Plot prior densities.
+        if ~options_.nograph && options_.plot_priors
+            plot_priors(bayestopt_,M_,estim_params_,options_)
         end
+        % Set prior bounds
+        bounds = prior_bounds(bayestopt_,options_);
+        bounds(:,1)=max(bounds(:,1),lb);
+        bounds(:,2)=min(bounds(:,2),ub);
     else
-        options_.mh_replic = 0;
+        % No priors are declared so Dynare will estimate the model by
+        % maximum likelihood with inequality constraints for the parameters.
+        options_.mh_replic = 0;% No metropolis.
+        bounds(:,1) = lb;
+        bounds(:,2) = ub;
     end
-
-    % set prior bounds and check initial value of the parameters
-    bounds = prior_bounds(bayestopt_);
-    bounds(:,1)=max(bounds(:,1),lb);
-    bounds(:,2)=min(bounds(:,2),ub);
-
-    if any(xparam1 < bounds(:,1)) | any(xparam1 > bounds(:,2))
+    % Test if initial values of the estimated parameters are all between
+    % the prior lower and upper bounds.
+    if any(xparam1 < bounds(:,1)) || any(xparam1 > bounds(:,2))
         find(xparam1 < bounds(:,1))
         find(xparam1 > bounds(:,2))
         error('Initial parameter values are outside parameter bounds')
@@ -101,7 +150,7 @@ if ~isempty(estim_params_)
     ub = bounds(:,2);
     bayestopt_.lb = lb;
     bayestopt_.ub = ub;
-else
+else% If estim_params_ is empty...
     xparam1 = [];
     bayestopt_.lb = [];
     bayestopt_.ub = [];
@@ -111,22 +160,20 @@ else
     bayestopt_.p2 = [];
     bayestopt_.p3 = [];
     bayestopt_.p4 = [];
+    bayestopt_.p5 = [];
+    bayestopt_.p6 = [];
+    bayestopt_.p7 = [];
     estim_params_.nvx = 0;
     estim_params_.nvn = 0;
     estim_params_.ncx = 0;
     estim_params_.ncn = 0;
     estim_params_.np = 0;
 end
-nvx = estim_params_.nvx;
-nvn = estim_params_.nvn;
-ncx = estim_params_.ncx;
-ncn = estim_params_.ncn;
-np  = estim_params_.np ;
-nx  = nvx+nvn+ncx+ncn+np;
 
-if ~isfield(options_,'trend_coeffs')
+% Is there a linear trend in the measurement equation?
+if ~isfield(options_,'trend_coeffs') % No!
     bayestopt_.with_trend = 0;
-else
+else% Yes!
     bayestopt_.with_trend = 1;
     bayestopt_.trend_coeff = {};
     trend_coeffs = options_.trend_coeffs;
@@ -140,115 +187,146 @@ else
     end
 end
 
-bayestopt_.penalty = 1e8;       % penalty 
+% Set the "size" of penalty.
+bayestopt_.penalty = 1e8;
 
-dr = set_state_space([],M_);
-nstatic = dr.nstatic;
-npred = dr.npred;
-nspred = dr.nspred;
+% Get informations about the variables of the model.
+dr = set_state_space(oo_.dr,M_);
+oo_.dr = dr;
+nstatic = dr.nstatic;          % Number of static variables.
+npred = dr.npred;              % Number of predetermined variables.
+nspred = dr.nspred;            % Number of predetermined variables in the state equation.
 
+% Test if observed variables are declared.
 if isempty(options_.varobs)
-    error('ESTIMATION: VAROBS is missing')
+    error('VAROBS is missing')
 end
 
-%% Setting resticted state space (observed + predetermined variables)
-
-k = [];
+% Setting resticted state space (observed + predetermined variables)
+var_obs_index = [];
 k1 = [];
 for i=1:n_varobs
-    k = [k strmatch(deblank(options_.varobs(i,:)),M_.endo_names(dr.order_var,:),'exact')];
-    k1 = [k1 strmatch(deblank(options_.varobs(i,:)),M_.endo_names, 'exact')];
+    var_obs_index = [var_obs_index; strmatch(deblank(options_.varobs(i,:)),M_.endo_names(dr.order_var,:),'exact')];
+    k1 = [k1; strmatch(deblank(options_.varobs(i,:)),M_.endo_names, 'exact')];
 end
-% union of observed and state variables
-k2 = union(k',[dr.nstatic+1:dr.nstatic+dr.npred]');
 
-% set restrict_state to postion of observed + state variables
-% in expanded state vector
-bayestopt_.restrict_var_list = k2;
-% set mf0 to positions of state variables in restricted state vector
-% for likelihood computation.
+% Define union of observed and state variables
+k2 = union(var_obs_index,[dr.nstatic+1:dr.nstatic+dr.npred]', 'rows');
+% Set restrict_state to postion of observed + state variables in expanded state vector.
+oo_.dr.restrict_var_list = k2;
+% set mf0 to positions of state variables in restricted state vector for likelihood computation.
 [junk,bayestopt_.mf0] = ismember([dr.nstatic+1:dr.nstatic+dr.npred]',k2);
-% set mf1 to positions of observed variables in restricted state vector
-% for likelihood computation.
-[junk,bayestopt_.mf1] = ismember(k,k2);
-% set mf2 to positions of observed variables in expanded state vector
-% for filtering and smoothing
-bayestopt_.mf2  = k;
+% Set mf1 to positions of observed variables in restricted state vector for likelihood computation.
+[junk,bayestopt_.mf1] = ismember(var_obs_index,k2);
+% Set mf2 to positions of observed variables in expanded state vector for filtering and smoothing.
+bayestopt_.mf2  = var_obs_index;
 bayestopt_.mfys = k1;
 
 [junk,ic] = intersect(k2,nstatic+(1:npred)');
-bayestopt_.restrict_columns = [ic; length(k2)+(1:nspred-npred)'];
-aux = dr.transition_auxiliary_variables;
-aux(:,2) = aux(:,2) + sum(k2 <= nstatic);
-k = find(aux(:,2) > npred);
-aux(k,2) = aux(k,2) + sum(k2 > nstatic+npred);
-bayestopt_.restrict_aux = aux;
+oo_.dr.restrict_columns = [ic; length(k2)+(1:nspred-npred)'];
 
-
-%% Initialization with unit-root variables
-if ~isempty(options_.unit_root_vars)
-    n_ur = size(options_.unit_root_vars,1);
-    i_ur = zeros(n_ur,1);
-    for i=1:n_ur
-        i1 = strmatch(deblank(options_.unit_root_vars(i,:)),M_.endo_names(dr.order_var,:),'exact');
-        if isempty(i1)
-            error('Undeclared variable in unit_root_vars statement')
-        end
-        i_ur(i) = i1;
+k3 = [];
+k3p = [];
+if options_.selected_variables_only
+    for i=1:size(var_list_,1)
+        k3 = [k3; strmatch(var_list_(i,:),M_.endo_names(dr.order_var,:), ...
+                           'exact')];
+        k3p = [k3; strmatch(var_list_(i,:),M_.endo_names, ...
+                           'exact')];
     end
-    bayestopt_.var_list_stationary = setdiff((1:M_.endo_nbr)',i_ur);
-    [junk,bayestopt_.restrict_var_list_nonstationary] = ...
-        intersect(bayestopt_.restrict_var_list,i_ur);
-    bayestopt_.restrict_var_list_stationary = ...
-        setdiff((1:length(bayestopt_.restrict_var_list))', ...
-                bayestopt_.restrict_var_list_nonstationary);
-    if M_.maximum_lag > 1
-        l1 = flipud([cumsum(M_.lead_lag_incidence(1:M_.maximum_lag-1,dr.order_var),1);ones(1,M_.endo_nbr)]);
-        l2 = l1(:,bayestopt_.restrict_var_list);
-        il2 = find(l2' > 0);
-        l2(il2) = (1:length(il2))';
-        bayestopt_.restrict_var_list_stationary = ...
-            nonzeros(l2(:,bayestopt_.restrict_var_list_stationary)); 
-        bayestopt_.restrict_var_list_nonstationary = ...
-            nonzeros(l2(:,bayestopt_.restrict_var_list_nonstationary)); 
-    end
-    options_.lik_init = 3;
-end % if ~isempty(options_.unit_root_vars)
+else
+    k3 = (1:M_.endo_nbr)';
+    k3p = (1:M_.endo_nbr)';
+end
 
-if isempty(options_.datafile),
-    if igsa,
-        data=[];
-        rawdata=[];
-        return,
+% Define union of observed and state variables
+if options_.block == 1
+    k1 = k1';
+    [k2, i_posA, i_posB] = union(k1', M_.state_var', 'rows');
+    % Set restrict_state to postion of observed + state variables in expanded state vector.
+    oo_.dr.restrict_var_list  = [k1(i_posA) M_.state_var(sort(i_posB))];
+    % set mf0 to positions of state variables in restricted state vector for likelihood computation.
+    [junk,bayestopt_.mf0] = ismember(M_.state_var',oo_.dr.restrict_var_list);
+    % Set mf1 to positions of observed variables in restricted state vector for likelihood computation.
+    [junk,bayestopt_.mf1] = ismember(k1,oo_.dr.restrict_var_list);
+    % Set mf2 to positions of observed variables in expanded state vector for filtering and smoothing.
+    bayestopt_.mf2  = var_obs_index;
+    bayestopt_.mfys = k1;
+    oo_.dr.restrict_columns = [size(i_posA,1)+(1:size(M_.state_var,2))];
+
+    [k2, i_posA, i_posB] = union(k3p, M_.state_var', 'rows');
+    bayestopt_.smoother_var_list = [k3p(i_posA); M_.state_var(sort(i_posB))'];
+    [junk,bayestopt_.smoother_saved_var_list] = intersect(k3p,bayestopt_.smoother_var_list(:));
+    [junk,ic] = intersect(bayestopt_.smoother_var_list,M_.state_var);
+    bayestopt_.smoother_restrict_columns = ic;
+    [junk,bayestopt_.smoother_mf] = ismember(k1, ...
+                                             bayestopt_.smoother_var_list);
+else
+    k2 = union(var_obs_index,[dr.nstatic+1:dr.nstatic+dr.npred]', 'rows');
+    % Set restrict_state to postion of observed + state variables in expanded state vector.
+    oo_.dr.restrict_var_list = k2;
+    % set mf0 to positions of state variables in restricted state vector for likelihood computation.
+    [junk,bayestopt_.mf0] = ismember([dr.nstatic+1:dr.nstatic+dr.npred]',k2);
+    % Set mf1 to positions of observed variables in restricted state vector for likelihood computation.
+    [junk,bayestopt_.mf1] = ismember(var_obs_index,k2);
+    % Set mf2 to positions of observed variables in expanded state vector for filtering and smoothing.
+    bayestopt_.mf2  = var_obs_index;
+    bayestopt_.mfys = k1;
+    [junk,ic] = intersect(k2,nstatic+(1:npred)');
+    oo_.dr.restrict_columns = [ic; length(k2)+(1:nspred-npred)'];
+
+    bayestopt_.smoother_var_list = union(k2,k3);
+    [junk,bayestopt_.smoother_saved_var_list] = intersect(k3,bayestopt_.smoother_var_list(:));
+    [junk,ic] = intersect(bayestopt_.smoother_var_list,nstatic+(1:npred)');
+    bayestopt_.smoother_restrict_columns = ic;
+    [junk,bayestopt_.smoother_mf] = ismember(var_obs_index, ...
+                                             bayestopt_.smoother_var_list);
+end;
+
+% Test if the data file is declared.
+if isempty(options_.datafile)
+    if gsa_flag
+        dataset_ = [];
+%         rawdata = [];
+%         data_info = [];
+        return
     else
-        error('ESTIMATION: datafile option is missing'),
+        error('datafile option is missing')
     end
 end
 
-%% If jscale isn't specified for an estimated parameter, use
-%% global option options_.jscale, set to 0.2, by default
+% If jscale isn't specified for an estimated parameter, use global option options_.jscale, set to 0.2, by default.
 k = find(isnan(bayestopt_.jscale));
 bayestopt_.jscale(k) = options_.mh_jscale;
 
-%% Read and demean data 
-rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
-
-options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
-gend = options_.nobs;
-
-rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
-if options_.loglinear == 1 & ~options_.logdata
-    rawdata = log(rawdata);
+% Load and transform data.
+transformation = [];
+if options_.loglinear && ~options_.logdata
+    transformation = @log;
 end
-if options_.prefilter == 1
-    bayestopt_.mean_varobs = mean(rawdata,1)';
-    data = transpose(rawdata-repmat(bayestopt_.mean_varobs',gend,1));
+xls.sheet = options_.xls_sheet;
+xls.range = options_.xls_range;
+
+if ~isfield(options_,'nobs')
+    options_.nobs = [];
+end
+
+dataset_ = initialize_dataset(options_.datafile,options_.varobs,options_.first_obs,options_.nobs,transformation,options_.prefilter,xls);
+
+options_.nobs = dataset_.info.ntobs;
+
+% setting noconstant option
+if options_.diffuse_filter
+    steadystate_check_flag = 0;
 else
-    data = transpose(rawdata);
+    steadystate_check_flag = 1;
 end
 
-if ~isreal(rawdata)
-    error(['There are complex values in the data. Probably  a wrong' ...
-           ' transformation'])
+oo_.steady_state = evaluate_steady_state(oo_.steady_state,M_,options_,oo_,steadystate_check_flag);
+if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
+    options_.noconstant = 1;
+else
+    options_.noconstant = 0;
 end
+
 

@@ -2,18 +2,18 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
 % This function builds a (big) prior sample.
 %
 % INPUTS
-%   drsave      [integer]    Scalar. If equal to 1, then dr structure is saved with each prior draw.     
+%   drsave      [integer]    Scalar. If equal to 1, then dr structure is saved with each prior draw.
 %   M_          [structure]  Model description.
-%   bayestopt_  [structure]  Prior distribution description.  
+%   bayestopt_  [structure]  Prior distribution description.
 %   options_    [structure]  Global options of Dynare.
-%    
+%
 % OUTPUTS:
-%   results     [structure]  Various statistics. 
+%   results     [structure]  Various statistics.
 %
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2009-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -31,7 +31,7 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % Initialization.
-prior_draw(1,bayestopt_);
+prior_draw(1);
 PriorDirectoryName = CheckPath('prior/draws');
 work = ~drsave;
 iteration = 0;
@@ -46,6 +46,9 @@ count_steadystate_file_exit = 0;
 count_dll_problem = 0;
 count_complex_jacobian = 0;
 count_complex_steadystate = 0;
+count_nan_steadystate = 0;
+count_nan_params = 0;
+count_complex_params = 0;
 count_unknown_problem = 0;
 NumberOfSimulations = options_.prior_mc;
 NumberOfParameters = length(bayestopt_.p1);
@@ -77,8 +80,8 @@ while iteration < NumberOfSimulations
     loop_indx = loop_indx+1;
     params = prior_draw();
     set_all_parameters(params);
-    [dr,INFO] = resol(oo_.steady_state,work);
-    switch INFO(1)  
+    [dr,INFO,M_,options_,oo_] = resol(work,M_,options_,oo_);
+    switch INFO(1)
       case 0
         file_line_number = file_line_number + 1 ;
         iteration = iteration + 1;
@@ -106,6 +109,12 @@ while iteration < NumberOfSimulations
         count_complex_jacobian = count_complex_jacobian + 1 ;
       case 21
         count_complex_steadystate = count_complex_steadystate + 1 ;
+      case 22
+        count_nan_steadystate = count_nan_steadystate + 1 ;
+      case 23
+        count_complex_params = count_complex_params + 1 ;
+      case 24
+        count_nan_params = count_nan_params + 1 ;
       otherwise
         count_unknown_problem = count_unknown_problem + 1 ;
     end

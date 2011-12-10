@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 Dynare Team
+ * Copyright (C) 2003-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -21,6 +21,8 @@
 #include <fstream>
 #include <iostream>
 #include <cassert>
+#include <sstream>
+#include <cmath>
 
 #include "ParsingDriver.hh"
 #include "Statement.hh"
@@ -165,6 +167,48 @@ ParsingDriver::declare_parameter(string *name, string *tex_name)
 }
 
 void
+ParsingDriver::declare_optimal_policy_discount_factor_parameter(expr_t exprnode)
+{
+  string *optimalParName_declare = new string("optimal_policy_discount_factor");
+  string *optimalParName_init = new string("optimal_policy_discount_factor");
+  if (mod_file->symbol_table.exists(*optimalParName_declare))
+    error("Symbol optimal_policy_discount_factor is needed by Dynare when using an ramsey_policy or a discretionary_policy statement");
+  declare_parameter(optimalParName_declare, NULL);
+  init_param(optimalParName_init, exprnode);
+}
+
+void
+ParsingDriver::begin_trend()
+{
+  set_current_data_tree(&mod_file->dynamic_model);
+}
+
+void
+ParsingDriver::declare_trend_var(string *name, string *tex_name)
+{
+  declare_symbol(name, eTrend, tex_name);
+  declared_trend_vars.push_back(mod_file->symbol_table.getID(*name));
+  delete name;
+  if (tex_name != NULL)
+    delete tex_name;
+}
+
+void
+ParsingDriver::end_trend_var(expr_t growth_factor)
+{
+  try
+    {
+      dynamic_model->addTrendVariables(declared_trend_vars, growth_factor);
+    }
+  catch (DataTree::TrendException &e)
+    {
+      error("Trend variable " + e.name + " was declared twice.");
+    }
+  declared_trend_vars.clear();
+  reset_data_tree();
+}
+
+void
 ParsingDriver::add_predetermined_variable(string *name)
 {
   try
@@ -191,27 +235,35 @@ ParsingDriver::add_equation_tags(string *key, string *value)
   delete value;
 }
 
-NodeID
-ParsingDriver::add_constant(string *constant)
+expr_t
+ParsingDriver::add_non_negative_constant(string *constant)
 {
-  NodeID id = data_tree->AddNumConstant(*constant);
+  expr_t id;
+  try
+    {
+      id = data_tree->AddNonNegativeConstant(*constant);
+    }
+  catch (NumericalConstants::InvalidFloatingPointNumberException &e)
+    {
+      error("Invalid floating point number: " + *constant);
+    }
   delete constant;
   return id;
 }
 
-NodeID
+expr_t
 ParsingDriver::add_nan_constant()
 {
   return data_tree->NaN;
 }
 
-NodeID
+expr_t
 ParsingDriver::add_inf_constant()
 {
   return data_tree->Infinity;
 }
 
-NodeID
+expr_t
 ParsingDriver::add_model_variable(string *name)
 {
   check_symbol_existence(*name);
@@ -220,7 +272,7 @@ ParsingDriver::add_model_variable(string *name)
   return add_model_variable(symb_id, 0);
 }
 
-NodeID
+expr_t
 ParsingDriver::add_model_variable(int symb_id, int lag)
 {
   assert(symb_id >= 0);
@@ -235,11 +287,14 @@ ParsingDriver::add_model_variable(int symb_id, int lag)
   if (type == eModelLocalVariable && lag != 0)
     error("Model local variable " + mod_file->symbol_table.getName(symb_id) + " cannot be given a lead or a lag.");
 
+  if (dynamic_cast<StaticModel *>(model_tree) != NULL && lag != 0)
+    error("Leads and lags on variables are forbidden in 'planner_objective'.");
+
   // It makes sense to allow a lead/lag on parameters: during steady state calibration, endogenous and parameters can be swapped
   return model_tree->AddVariable(symb_id, lag);
 }
 
-NodeID
+expr_t
 ParsingDriver::add_expression_variable(string *name)
 {
   // If symbol doesn't exist, then declare it as a mod file local variable
@@ -251,16 +306,45 @@ ParsingDriver::add_expression_variable(string *name)
     error("Variable " + *name + " not allowed outside model declaration. Its scope is only inside model.");
 
   int symb_id = mod_file->symbol_table.getID(*name);
-  NodeID id = data_tree->AddVariable(symb_id);
+  expr_t id = data_tree->AddVariable(symb_id);
 
   delete name;
   return id;
 }
 
 void
+ParsingDriver::declare_nonstationary_var(string *name, string *tex_name)
+{
+  if (tex_name != NULL)
+    declare_endogenous(new string(*name), new string(*tex_name));
+  else
+    declare_endogenous(new string(*name), tex_name);
+  declared_nonstationary_vars.push_back(mod_file->symbol_table.getID(*name));
+  mod_file->nonstationary_variables = true;
+  delete name;
+  if (tex_name != NULL)
+    delete tex_name;
+}
+
+void
+ParsingDriver::end_nonstationary_var(expr_t deflator)
+{
+  try
+    {
+      dynamic_model->addNonstationaryVariables(declared_nonstationary_vars, deflator);
+    }
+  catch (DataTree::TrendException &e)
+    {
+      error("Variable " + e.name + " was listed more than once as following a trend.");
+    }
+  declared_nonstationary_vars.clear();
+  reset_data_tree();
+}
+
+void
 ParsingDriver::periods(string *periods)
 {
-  warning("periods: this command is now deprecated and may be removed in a future version of Dynare. Please of the \"periods\" option of \"simul\" command instead.");
+  warning("periods: this command is now deprecated and may be removed in a future version of Dynare. Please use the \"periods\" option of the \"simul\" command instead.");
 
   int periods_val = atoi(periods->c_str());
   mod_file->addStatement(new PeriodsStatement(periods_val));
@@ -286,7 +370,7 @@ ParsingDriver::dsample(string *arg1, string *arg2)
 }
 
 void
-ParsingDriver::init_param(string *name, NodeID rhs)
+ParsingDriver::init_param(string *name, expr_t rhs)
 {
   check_symbol_existence(*name);
   int symb_id = mod_file->symbol_table.getID(*name);
@@ -299,7 +383,7 @@ ParsingDriver::init_param(string *name, NodeID rhs)
 }
 
 void
-ParsingDriver::init_val(string *name, NodeID rhs)
+ParsingDriver::init_val(string *name, expr_t rhs)
 {
   check_symbol_existence(*name);
   int symb_id = mod_file->symbol_table.getID(*name);
@@ -323,7 +407,7 @@ ParsingDriver::initval_file(string *filename)
 }
 
 void
-ParsingDriver::hist_val(string *name, string *lag, NodeID rhs)
+ParsingDriver::hist_val(string *name, string *lag, expr_t rhs)
 {
   check_symbol_existence(*name);
   int symb_id = mod_file->symbol_table.getID(*name);
@@ -332,10 +416,17 @@ ParsingDriver::hist_val(string *name, string *lag, NodeID rhs)
   if (type != eEndogenous
       && type != eExogenous
       && type != eExogenousDet)
-    error("hist_val: " + *name + " should be an endogenous or exogenous variable");
+    error("histval: " + *name + " should be an endogenous or exogenous variable");
 
   int ilag = atoi(lag->c_str());
   pair<int, int> key(symb_id, ilag);
+
+  if (mod_file->dynamic_model.minLagForSymbol(symb_id) > ilag - 1)
+    {
+      ostringstream s;
+      s << ilag-1;
+      error("histval: variable " + *name + " does not appear in the model with the lag " + s.str() + " (see the reference manual for the timing convention in 'histval')");
+    }
 
   if (hist_values.find(key) != hist_values.end())
     error("hist_val: (" + *name + ", " + *lag + ") declared twice");
@@ -347,7 +438,7 @@ ParsingDriver::hist_val(string *name, string *lag, NodeID rhs)
 }
 
 void
-ParsingDriver::homotopy_val(string *name, NodeID val1, NodeID val2)
+ParsingDriver::homotopy_val(string *name, expr_t val1, expr_t val2)
 {
   check_symbol_existence(*name);
   int symb_id = mod_file->symbol_table.getID(*name);
@@ -382,7 +473,6 @@ ParsingDriver::block()
 {
   mod_file->block = true;
 }
-
 
 void
 ParsingDriver::no_static()
@@ -477,7 +567,7 @@ ParsingDriver::add_det_shock(string *var, bool conditional_forecast)
   if (conditional_forecast)
     {
       if (type != eEndogenous)
-        error("conditional_forecast_paths: shocks can only be applied to exogenous variables");
+        error("conditional_forecast_paths: shocks can only be applied to endogenous variables");
     }
   else
     {
@@ -510,7 +600,7 @@ ParsingDriver::add_det_shock(string *var, bool conditional_forecast)
 }
 
 void
-ParsingDriver::add_stderr_shock(string *var, NodeID value)
+ParsingDriver::add_stderr_shock(string *var, expr_t value)
 {
   check_symbol_existence(*var);
   int symb_id = mod_file->symbol_table.getID(*var);
@@ -529,7 +619,7 @@ ParsingDriver::add_stderr_shock(string *var, NodeID value)
 }
 
 void
-ParsingDriver::add_var_shock(string *var, NodeID value)
+ParsingDriver::add_var_shock(string *var, expr_t value)
 {
   check_symbol_existence(*var);
   int symb_id = mod_file->symbol_table.getID(*var);
@@ -548,7 +638,7 @@ ParsingDriver::add_var_shock(string *var, NodeID value)
 }
 
 void
-ParsingDriver::add_covar_shock(string *var1, string *var2, NodeID value)
+ParsingDriver::add_covar_shock(string *var1, string *var2, expr_t value)
 {
   check_symbol_existence(*var1);
   check_symbol_existence(*var2);
@@ -577,7 +667,7 @@ ParsingDriver::add_covar_shock(string *var1, string *var2, NodeID value)
 }
 
 void
-ParsingDriver::add_correl_shock(string *var1, string *var2, NodeID value)
+ParsingDriver::add_correl_shock(string *var1, string *var2, expr_t value)
 {
   check_symbol_existence(*var1);
   check_symbol_existence(*var2);
@@ -626,29 +716,52 @@ ParsingDriver::add_period(string *p1)
 }
 
 void
-ParsingDriver::add_value(NodeID value)
+ParsingDriver::add_value(expr_t value)
 {
   det_shocks_values.push_back(value);
 }
 
 void
-ParsingDriver::add_value(string *p1)
+ParsingDriver::add_value(string *v)
 {
-  det_shocks_values.push_back(add_constant(p1));
+  expr_t id;
+  try
+    {
+      if (v->at(0) == '-')
+        id = data_tree->AddUMinus(data_tree->AddNonNegativeConstant(v->substr(1, string::npos)));
+      else
+        id = data_tree->AddNonNegativeConstant(*v);
+    }
+  catch (NumericalConstants::InvalidFloatingPointNumberException &e)
+    {
+      error("Invalid floating point number: " + *v);
+    }
+
+  delete v;
+  det_shocks_values.push_back(id);
+}
+
+void
+ParsingDriver::begin_svar_identification()
+{
+  svar_upper_cholesky = false;
+  svar_lower_cholesky = false;
+  svar_constants_exclusion = false;
 }
 
 void
 ParsingDriver::end_svar_identification()
 {
-  mod_file->addStatement(new SvarIdentificationStatement(svar_ident_exclusion_values,
+  mod_file->addStatement(new SvarIdentificationStatement(svar_ident_restrictions,
                                                          svar_upper_cholesky,
                                                          svar_lower_cholesky,
+							 svar_constants_exclusion,
                                                          mod_file->symbol_table));
-  svar_upper_cholesky = false;
-  svar_lower_cholesky = false;
   svar_restriction_symbols.clear();
   svar_equation_restrictions.clear();
-  svar_ident_exclusion_values.clear();
+  svar_ident_restrictions.clear();
+  svar_Qi_restriction_nbr.clear();
+  svar_Ri_restriction_nbr.clear();
 }
 
 void
@@ -656,14 +769,28 @@ ParsingDriver::combine_lag_and_restriction(string *lag)
 {
   int current_lag = atoi(lag->c_str());
 
-  for (SvarIdentificationStatement::svar_identification_exclusion_type::const_iterator it = svar_ident_exclusion_values.begin();
-       it != svar_ident_exclusion_values.end(); it++)
-    if (it->first.first == current_lag)
+  for (SvarIdentificationStatement::svar_identification_restrictions_t::const_iterator it = svar_ident_restrictions.begin();
+       it != svar_ident_restrictions.end(); it++)
+    if (it->lag == current_lag)
       error("lag " + *lag + " used more than once.");
 
   for (map<int, vector<int> >::const_iterator it = svar_equation_restrictions.begin();
        it != svar_equation_restrictions.end(); it++)
-    svar_ident_exclusion_values[make_pair(current_lag, it->first)] = it->second;
+    for (vector<int>::const_iterator it1 = it->second.begin();
+	 it1 != it->second.end(); it1++)
+      {
+	SvarIdentificationStatement::svar_identification_restriction new_restriction;
+	new_restriction.equation = it->first;
+	if (current_lag > 0)
+	  new_restriction.restriction_nbr = ++svar_Ri_restriction_nbr[it->first];
+	else
+	  new_restriction.restriction_nbr = ++svar_Qi_restriction_nbr[it->first];
+	new_restriction.lag = current_lag;
+	new_restriction.variable = *it1;
+	new_restriction.value = data_tree->One;
+	svar_ident_restrictions.push_back(new_restriction);
+      } 
+  //    svar_ident_exclusion_values[make_pair(current_lag, it->first)] = it->second;
 
   svar_upper_cholesky = false;
   svar_lower_cholesky = false;
@@ -702,18 +829,130 @@ ParsingDriver::add_in_svar_restriction_symbols(string *tmp_var)
   delete tmp_var;
 }
 
+void 
+ParsingDriver::add_restriction_equation_nbr(string *eq_nbr)
+{
+  svar_equation_nbr = atoi(eq_nbr->c_str());
+  svar_left_handside = true;
+  // reinitialize restriction type that must be set from the first restriction element
+  svar_restriction_type = ParsingDriver::NOT_SET;
+}
+
+void
+ParsingDriver::add_restriction_equal()
+{
+  if (svar_left_handside)
+    svar_left_handside = false;
+  else
+    error("svar_identification: there are more than one EQUAL sign in a restriction equation");
+}
+
+void
+ParsingDriver::add_positive_restriction_element(expr_t value, string *variable, string *lag)
+{
+  // if the expression is not on the left handside, change its sign
+  if (!svar_left_handside)
+    value = add_uminus(value);
+  
+  add_restriction_element(value, variable, lag);
+}
+
+void
+ParsingDriver::add_positive_restriction_element(string *variable, string *lag)
+{
+  expr_t value(data_tree->One); 
+
+  // if the expression is not on the left handside, change its sign
+  if (!svar_left_handside)
+    value = add_uminus(value);
+
+  add_restriction_element(value, variable, lag);
+}
+
+void
+ParsingDriver::add_negative_restriction_element(expr_t value, string *variable, string *lag)
+{
+  // if the expression is on the left handside, change its sign
+  if (svar_left_handside)
+    value = add_uminus(value);
+
+  add_restriction_element(value, variable, lag);
+}
+
+void
+ParsingDriver::add_negative_restriction_element(string *variable, string *lag)
+{
+  expr_t value(data_tree->One); 
+
+  // if the expression is on the left handside, change its sign
+  if (svar_left_handside)
+    value = add_uminus(value);
+
+  add_restriction_element(value, variable, lag);
+}
+
+void
+ParsingDriver::add_restriction_element(expr_t value, string *variable, string *lag)
+{
+  check_symbol_existence(*variable);
+  int symb_id = mod_file->symbol_table.getID(*variable);
+
+  int current_lag = atoi(lag->c_str());
+  if (svar_restriction_type == ParsingDriver::NOT_SET)
+    {
+      if (current_lag == 0)
+	{
+	  svar_restriction_type = ParsingDriver::Qi_TYPE;
+	  ++svar_Qi_restriction_nbr[svar_equation_nbr];
+	}
+      else
+	{
+	  svar_restriction_type = ParsingDriver::Ri_TYPE;
+	  ++svar_Ri_restriction_nbr[svar_equation_nbr];
+	}
+    }
+  else
+    {
+      if ((svar_restriction_type == Qi_TYPE && current_lag > 0)
+	  || (svar_restriction_type == Ri_TYPE && current_lag == 0))
+	error("SVAR_IDENTIFICATION: a single restrictions must affect either Qi or Ri, but not both");
+    }
+  SvarIdentificationStatement::svar_identification_restriction new_restriction;
+  new_restriction.equation = svar_equation_nbr;
+  if (current_lag > 0)
+    new_restriction.restriction_nbr = svar_Ri_restriction_nbr[svar_equation_nbr];
+  else
+    new_restriction.restriction_nbr = svar_Qi_restriction_nbr[svar_equation_nbr];
+  new_restriction.lag = current_lag;
+  new_restriction.variable = symb_id;
+  new_restriction.value = value;
+
+  svar_ident_restrictions.push_back(new_restriction);
+}
+
+void
+ParsingDriver::check_restriction_expression_constant(expr_t value)
+{
+  if (value->eval(eval_context_t()) != 0)
+    error("SVAR_INDENTIFICATION restrictions must be homogenous");
+}
+
 void
 ParsingDriver::add_upper_cholesky()
 {
   svar_upper_cholesky = true;
-  svar_lower_cholesky = false;
 }
 
 void
 ParsingDriver::add_lower_cholesky()
 {
-  svar_upper_cholesky = false;
   svar_lower_cholesky = true;
+}
+
+void
+ParsingDriver::add_constants_exclusion()
+{
+  svar_constants_exclusion = true;
 }
 
 void
@@ -740,13 +979,27 @@ ParsingDriver::end_of_row()
 }
 
 void
-ParsingDriver::add_to_row_const(string *s)
+ParsingDriver::add_to_row_const(string *v)
 {
-  sigmae_row.push_back(add_constant(s));
+  expr_t id;
+  try
+    {
+      if (v->at(0) == '-')
+        id = data_tree->AddUMinus(data_tree->AddNonNegativeConstant(v->substr(1, string::npos)));
+      else
+        id = data_tree->AddNonNegativeConstant(*v);
+    }
+  catch (NumericalConstants::InvalidFloatingPointNumberException &e)
+    {
+      error("Invalid floating point number: " + *v);
+    }
+
+  delete v;
+  sigmae_row.push_back(id);
 }
 
 void
-ParsingDriver::add_to_row(NodeID v)
+ParsingDriver::add_to_row(expr_t v)
 {
   sigmae_row.push_back(v);
 }
@@ -809,6 +1062,15 @@ ParsingDriver::option_symbol_list(const string &name_option)
   if (options_list.symbol_list_options.find(name_option)
       != options_list.symbol_list_options.end())
     error("option " + name_option + " declared twice");
+
+  if (name_option.compare("irf_shocks")==0)
+    {
+      vector<string> shocks = symbol_list.get_symbols();
+      for (vector<string>::const_iterator it = shocks.begin();
+           it != shocks.end(); it++)
+        if (mod_file->symbol_table.getType(*it) != eExogenous)
+          error("Variables passed to irf_shocks must be exogenous. Caused by: " + *it);
+    }
 
   options_list.symbol_list_options[name_option] = symbol_list;
   symbol_list.clear();
@@ -917,7 +1179,8 @@ ParsingDriver::estimated_params_bounds()
 void
 ParsingDriver::set_unit_root_vars()
 {
-  mod_file->addStatement(new UnitRootVarsStatement(symbol_list));
+  mod_file->addStatement(new UnitRootVarsStatement());
+  warning("'unit_root_vars' is now obsolete; use option 'diffuse_filter' of 'estimation' instead");
   symbol_list.clear();
 }
 
@@ -990,7 +1253,7 @@ ParsingDriver::set_trends()
 }
 
 void
-ParsingDriver::set_trend_element(string *arg1, NodeID arg2)
+ParsingDriver::set_trend_element(string *arg1, expr_t arg2)
 {
   check_symbol_existence(*arg1);
   if (trend_elements.find(*arg1) != trend_elements.end())
@@ -1000,7 +1263,7 @@ ParsingDriver::set_trend_element(string *arg1, NodeID arg2)
 }
 
 void
-ParsingDriver::set_optim_weights(string *name, NodeID value)
+ParsingDriver::set_optim_weights(string *name, expr_t value)
 {
   check_symbol_existence(*name);
   if (mod_file->symbol_table.getType(*name) != eEndogenous)
@@ -1012,7 +1275,7 @@ ParsingDriver::set_optim_weights(string *name, NodeID value)
 }
 
 void
-ParsingDriver::set_optim_weights(string *name1, string *name2, NodeID value)
+ParsingDriver::set_optim_weights(string *name1, string *name2, expr_t value)
 {
   check_symbol_existence(*name1);
   if (mod_file->symbol_table.getType(*name1) != eEndogenous)
@@ -1057,85 +1320,6 @@ ParsingDriver::run_osr()
 }
 
 void
-ParsingDriver::set_calib_var(string *name, string *weight, NodeID expression)
-{
-  check_symbol_existence(*name);
-  if (mod_file->symbol_table.getType(*name) != eEndogenous
-      && mod_file->symbol_table.getType(*name) != eExogenous)
-    error("calib_var: " + *name + " isn't an endogenous or exogenous variable");
-
-  if (calib_var.find(*name) != calib_var.end())
-    error("calib_var: " + *name + " declared twice");
-
-  calib_var[*name] = make_pair(*weight, expression);
-
-  delete name;
-  delete weight;
-}
-
-void
-ParsingDriver::set_calib_covar(string *name1, string *name2,
-                               string *weight, NodeID expression)
-{
-  check_symbol_existence(*name1);
-  check_symbol_existence(*name2);
-  if (mod_file->symbol_table.getType(*name1) != mod_file->symbol_table.getType(*name2))
-    error("calib_var: " + *name1 + " and " + *name2 + "dont't have the same type");
-  if (mod_file->symbol_table.getType(*name1) != eEndogenous
-      && mod_file->symbol_table.getType(*name1) != eExogenous)
-    error("calib_var: " + *name1 + " and " + *name2 + "aren't endogenous or exogenous variables");
-
-  pair<string, string> covar_key(*name1, *name2);
-
-  if (calib_covar.find(covar_key) != calib_covar.end())
-    error("calib_var: pair of variables (" + *name1 + ", " + *name2
-          + ") declared twice");
-
-  calib_covar[covar_key] = make_pair(*weight, expression);
-
-  delete name1;
-  delete name2;
-  delete weight;
-}
-
-void
-ParsingDriver::set_calib_ac(string *name, string *ar,
-                            string *weight, NodeID expression)
-{
-  check_symbol_existence(*name);
-  if (mod_file->symbol_table.getType(*name) != eEndogenous)
-    error("calib_var: " + *name + "isn't an endogenous variable");
-
-  int iar = atoi(ar->c_str());
-  pair<string, int> ac_key(*name, iar);
-
-  if (calib_ac.find(ac_key) != calib_ac.end())
-    error("calib_var: autocorr " + *name + "(" + *ar + ") declared twice");
-
-  calib_ac[ac_key] = make_pair(*weight, expression);
-
-  delete name;
-  delete ar;
-  delete weight;
-}
-
-void
-ParsingDriver::run_calib_var()
-{
-  mod_file->addStatement(new CalibVarStatement(calib_var, calib_covar, calib_ac,
-                                               mod_file->symbol_table));
-  calib_var.clear();
-  calib_covar.clear();
-  calib_ac.clear();
-}
-
-void
-ParsingDriver::run_calib(int covar)
-{
-  mod_file->addStatement(new CalibStatement(covar));
-}
-
-void
 ParsingDriver::run_dynatype(string *filename)
 {
   mod_file->addStatement(new DynaTypeStatement(symbol_list, *filename));
@@ -1175,7 +1359,7 @@ ParsingDriver::run_identification()
 void
 ParsingDriver::add_mc_filename(string *filename, string *prior)
 {
-  for (ModelComparisonStatement::filename_list_type::iterator it = filename_list.begin();
+  for (ModelComparisonStatement::filename_list_t::iterator it = filename_list.begin();
        it != filename_list.end(); it++)
     if ((*it).first == *filename)
       error("model_comparison: filename " + *filename + " declared twice");
@@ -1199,10 +1383,10 @@ ParsingDriver::begin_planner_objective()
 }
 
 void
-ParsingDriver::end_planner_objective(NodeID expr)
+ParsingDriver::end_planner_objective(expr_t expr)
 {
   // Add equation corresponding to expression
-  NodeID eq = model_tree->AddEqual(expr, model_tree->Zero);
+  expr_t eq = model_tree->AddEqual(expr, model_tree->Zero);
   model_tree->addEquation(eq);
 
   mod_file->addStatement(new PlannerObjectiveStatement(dynamic_cast<StaticModel *>(model_tree)));
@@ -1213,7 +1397,19 @@ ParsingDriver::end_planner_objective(NodeID expr)
 void
 ParsingDriver::ramsey_policy()
 {
+  if (!mod_file->symbol_table.exists("optimal_policy_discount_factor"))
+    declare_optimal_policy_discount_factor_parameter(data_tree->One);
   mod_file->addStatement(new RamseyPolicyStatement(symbol_list, options_list));
+  symbol_list.clear();
+  options_list.clear();
+}
+
+void
+ParsingDriver::discretionary_policy()
+{
+  if (!mod_file->symbol_table.exists("optimal_policy_discount_factor"))
+    declare_optimal_policy_discount_factor_parameter(data_tree->One);
+  mod_file->addStatement(new DiscretionaryPolicyStatement(symbol_list, options_list));
   symbol_list.clear();
   options_list.clear();
 }
@@ -1254,17 +1450,60 @@ ParsingDriver::sbvar()
 }
 
 void
-ParsingDriver::ms_sbvar()
+ParsingDriver::ms_estimation()
 {
-  mod_file->addStatement(new MS_SBVARStatement(options_list));
+  mod_file->addStatement(new MSSBVAREstimationStatement(options_list));
+  options_list.clear();
+}
+
+void
+ParsingDriver::ms_simulation()
+{
+  mod_file->addStatement(new MSSBVARSimulationStatement(options_list));
+  options_list.clear();
+}
+
+void
+ParsingDriver::ms_compute_mdd()
+{
+  mod_file->addStatement(new MSSBVARComputeMDDStatement(options_list));
+  options_list.clear();
+}
+
+void
+ParsingDriver::ms_compute_probabilities()
+{
+  mod_file->addStatement(new MSSBVARComputeProbabilitiesStatement(options_list));
+  options_list.clear();
+}
+
+void
+ParsingDriver::ms_irf()
+{
+  mod_file->addStatement(new MSSBVARIrfStatement(symbol_list,options_list));
+  symbol_list.clear();
+  options_list.clear();
+}
+
+void
+ParsingDriver::ms_forecast()
+{
+  mod_file->addStatement(new MSSBVARForecastStatement(options_list));
+  options_list.clear();
+}
+
+void
+ParsingDriver::ms_variance_decomposition()
+{
+  mod_file->addStatement(new MSSBVARVarianceDecompositionStatement(options_list));
   options_list.clear();
 }
 
 void
 ParsingDriver::svar()
 {
-  OptionsList::num_options_type::const_iterator it0, it1, it2;
-  OptionsList::vec_int_options_type::const_iterator itv;
+  OptionsList::num_options_t::const_iterator it0, it1, it2;
+  OptionsList::vec_int_options_t::const_iterator itv;
 
   it0 = options_list.string_options.find("ms.coefficients");
   it1 = options_list.string_options.find("ms.variances");
@@ -1280,7 +1519,7 @@ ParsingDriver::svar()
           && it2 != options_list.string_options.end())
       || (it0 != options_list.string_options.end()
           && it2 != options_list.string_options.end()))
-    error("You may only pass one 'coefficients', 'variances', or 'constants' option.");
+    error("You may only pass one of 'coefficients', 'variances', or 'constants'.");
 
   it0 = options_list.num_options.find("ms.chain");
   if (it0 == options_list.num_options.end())
@@ -1301,7 +1540,7 @@ ParsingDriver::svar()
 void
 ParsingDriver::markov_switching()
 {
-  OptionsList::num_options_type::const_iterator it0, it1;
+  OptionsList::num_options_t::const_iterator it0, it1;
 
   it0 = options_list.num_options.find("ms.chain");
   if (it0 == options_list.num_options.end())
@@ -1376,22 +1615,22 @@ ParsingDriver::conditional_forecast_paths()
   det_shocks.clear();
 }
 
-NodeID
-ParsingDriver::add_model_equal(NodeID arg1, NodeID arg2)
+expr_t
+ParsingDriver::add_model_equal(expr_t arg1, expr_t arg2)
 {
-  NodeID id = model_tree->AddEqual(arg1, arg2);
+  expr_t id = model_tree->AddEqual(arg1, arg2);
   model_tree->addEquation(id);
   return id;
 }
 
-NodeID
-ParsingDriver::add_model_equal_with_zero_rhs(NodeID arg)
+expr_t
+ParsingDriver::add_model_equal_with_zero_rhs(expr_t arg)
 {
   return add_model_equal(arg, model_tree->Zero);
 }
 
 void
-ParsingDriver::declare_and_init_model_local_variable(string *name, NodeID rhs)
+ParsingDriver::declare_and_init_model_local_variable(string *name, expr_t rhs)
 {
   int symb_id;
   try
@@ -1445,237 +1684,239 @@ ParsingDriver::change_type(SymbolType new_type, vector<string *> *var_list)
   delete var_list;
 }
 
-NodeID
-ParsingDriver::add_plus(NodeID arg1, NodeID arg2)
+expr_t
+ParsingDriver::add_plus(expr_t arg1, expr_t arg2)
 {
   return data_tree->AddPlus(arg1, arg2);
 }
 
-NodeID
-ParsingDriver::add_minus(NodeID arg1, NodeID arg2)
+expr_t
+ParsingDriver::add_minus(expr_t arg1, expr_t arg2)
 {
   return data_tree->AddMinus(arg1, arg2);
 }
 
-NodeID
-ParsingDriver::add_uminus(NodeID arg1)
+expr_t
+ParsingDriver::add_uminus(expr_t arg1)
 {
   return data_tree->AddUMinus(arg1);
 }
 
-NodeID
-ParsingDriver::add_times(NodeID arg1, NodeID arg2)
+expr_t
+ParsingDriver::add_times(expr_t arg1, expr_t arg2)
 {
   return data_tree->AddTimes(arg1, arg2);
 }
 
-NodeID
-ParsingDriver::add_divide(NodeID arg1, NodeID arg2)
+expr_t
+ParsingDriver::add_divide(expr_t arg1, expr_t arg2)
 {
   return data_tree->AddDivide(arg1, arg2);
 }
 
-NodeID
-ParsingDriver::add_less(NodeID arg1, NodeID arg2)
+expr_t
+ParsingDriver::add_less(expr_t arg1, expr_t arg2)
 {
   return data_tree->AddLess(arg1, arg2);
 }
 
-NodeID
-ParsingDriver::add_greater(NodeID arg1, NodeID arg2)
+expr_t
+ParsingDriver::add_greater(expr_t arg1, expr_t arg2)
 {
   return data_tree->AddGreater(arg1, arg2);
 }
 
-NodeID
-ParsingDriver::add_less_equal(NodeID arg1, NodeID arg2)
+expr_t
+ParsingDriver::add_less_equal(expr_t arg1, expr_t arg2)
 {
   return data_tree->AddLessEqual(arg1, arg2);
 }
 
-NodeID
-ParsingDriver::add_greater_equal(NodeID arg1, NodeID arg2)
+expr_t
+ParsingDriver::add_greater_equal(expr_t arg1, expr_t arg2)
 {
   return data_tree->AddGreaterEqual(arg1, arg2);
 }
 
-NodeID
-ParsingDriver::add_equal_equal(NodeID arg1, NodeID arg2)
+expr_t
+ParsingDriver::add_equal_equal(expr_t arg1, expr_t arg2)
 {
   return data_tree->AddEqualEqual(arg1, arg2);
 }
 
-NodeID
-ParsingDriver::add_different(NodeID arg1, NodeID arg2)
+expr_t
+ParsingDriver::add_different(expr_t arg1, expr_t arg2)
 {
   return data_tree->AddDifferent(arg1, arg2);
 }
 
-NodeID
-ParsingDriver::add_power(NodeID arg1, NodeID arg2)
+expr_t
+ParsingDriver::add_power(expr_t arg1, expr_t arg2)
 {
   return data_tree->AddPower(arg1, arg2);
 }
 
-NodeID
-ParsingDriver::add_expectation(string *arg1, NodeID arg2)
+expr_t
+ParsingDriver::add_expectation(string *arg1, expr_t arg2)
 {
-  NodeID expectationNode;
-  if ("varobs"==*arg1 || "full"==*arg1)
-    if (dynamic_cast<VariableNode *>(arg2) == NULL)
-      error("EXPECTATION(" + *arg1  + ")(X) can only be used when X is a single variable.");
-    else
-      if (mod_file->symbol_table.getType(dynamic_cast<VariableNode *>(arg2)->get_symb_id()) != eEndogenous)
-        error(mod_file->symbol_table.getName(dynamic_cast<VariableNode *>(arg2)->get_symb_id()) + " is not endogenous.");
-      else
-        expectationNode = data_tree->AddExpectation(arg1, arg2);
-  else
-    expectationNode = data_tree->AddExpectation(atoi(arg1->c_str()), arg2);
-
+  expr_t expectationNode;
+  expectationNode = data_tree->AddExpectation(atoi(arg1->c_str()), arg2);
   delete arg1;
   return expectationNode;
 }
 
-NodeID
-ParsingDriver::add_exp(NodeID arg1)
+expr_t
+ParsingDriver::add_exp(expr_t arg1)
 {
   return data_tree->AddExp(arg1);
 }
 
-NodeID
-ParsingDriver::add_log(NodeID arg1)
+expr_t
+ParsingDriver::add_log(expr_t arg1)
 {
   return data_tree->AddLog(arg1);
 }
 
-NodeID
-ParsingDriver::add_log10(NodeID arg1)
+expr_t
+ParsingDriver::add_log10(expr_t arg1)
 {
   return data_tree->AddLog10(arg1);
 }
 
-NodeID
-ParsingDriver::add_cos(NodeID arg1)
+expr_t
+ParsingDriver::add_cos(expr_t arg1)
 {
   return data_tree->AddCos(arg1);
 }
 
-NodeID
-ParsingDriver::add_sin(NodeID arg1)
+expr_t
+ParsingDriver::add_sin(expr_t arg1)
 {
   return data_tree->AddSin(arg1);
 }
 
-NodeID
-ParsingDriver::add_tan(NodeID arg1)
+expr_t
+ParsingDriver::add_tan(expr_t arg1)
 {
   return data_tree->AddTan(arg1);
 }
 
-NodeID
-ParsingDriver::add_acos(NodeID arg1)
+expr_t
+ParsingDriver::add_acos(expr_t arg1)
 {
   return data_tree->AddAcos(arg1);
 }
 
-NodeID
-ParsingDriver::add_asin(NodeID arg1)
+expr_t
+ParsingDriver::add_asin(expr_t arg1)
 {
   return data_tree->AddAsin(arg1);
 }
 
-NodeID
-ParsingDriver::add_atan(NodeID arg1)
+expr_t
+ParsingDriver::add_atan(expr_t arg1)
 {
   return data_tree->AddAtan(arg1);
 }
 
-NodeID
-ParsingDriver::add_cosh(NodeID arg1)
+expr_t
+ParsingDriver::add_cosh(expr_t arg1)
 {
   return data_tree->AddCosh(arg1);
 }
 
-NodeID
-ParsingDriver::add_sinh(NodeID arg1)
+expr_t
+ParsingDriver::add_sinh(expr_t arg1)
 {
   return data_tree->AddSinh(arg1);
 }
 
-NodeID
-ParsingDriver::add_tanh(NodeID arg1)
+expr_t
+ParsingDriver::add_tanh(expr_t arg1)
 {
   return data_tree->AddTanh(arg1);
 }
 
-NodeID
-ParsingDriver::add_acosh(NodeID arg1)
+expr_t
+ParsingDriver::add_acosh(expr_t arg1)
 {
   return data_tree->AddAcosh(arg1);
 }
 
-NodeID
-ParsingDriver::add_asinh(NodeID arg1)
+expr_t
+ParsingDriver::add_asinh(expr_t arg1)
 {
   return data_tree->AddAsinh(arg1);
 }
 
-NodeID
-ParsingDriver::add_atanh(NodeID arg1)
+expr_t
+ParsingDriver::add_atanh(expr_t arg1)
 {
   return data_tree->AddAtanh(arg1);
 }
 
-NodeID
-ParsingDriver::add_sqrt(NodeID arg1)
+expr_t
+ParsingDriver::add_sqrt(expr_t arg1)
 {
   return data_tree->AddSqrt(arg1);
 }
 
-NodeID
-ParsingDriver::add_max(NodeID arg1, NodeID arg2)
+expr_t
+ParsingDriver::add_abs(expr_t arg1)
+{
+  return data_tree->AddAbs(arg1);
+}
+
+expr_t
+ParsingDriver::add_sign(expr_t arg1)
+{
+  return data_tree->AddSign(arg1);
+}
+
+expr_t
+ParsingDriver::add_max(expr_t arg1, expr_t arg2)
 {
   return data_tree->AddMax(arg1, arg2);
 }
 
-NodeID
-ParsingDriver::add_min(NodeID arg1, NodeID arg2)
+expr_t
+ParsingDriver::add_min(expr_t arg1, expr_t arg2)
 {
   return data_tree->AddMin(arg1, arg2);
 }
 
-NodeID
-ParsingDriver::add_normcdf(NodeID arg1, NodeID arg2, NodeID arg3)
+expr_t
+ParsingDriver::add_normcdf(expr_t arg1, expr_t arg2, expr_t arg3)
 {
   return data_tree->AddNormcdf(arg1, arg2, arg3);
 }
 
-NodeID
-ParsingDriver::add_normcdf(NodeID arg)
+expr_t
+ParsingDriver::add_normcdf(expr_t arg)
 {
   return add_normcdf(arg, data_tree->Zero, data_tree->One);
 }
 
-NodeID
-ParsingDriver::add_normpdf(NodeID arg1, NodeID arg2, NodeID arg3)
+expr_t
+ParsingDriver::add_normpdf(expr_t arg1, expr_t arg2, expr_t arg3)
 {
   return data_tree->AddNormpdf(arg1, arg2, arg3);
 }
 
-NodeID
-ParsingDriver::add_normpdf(NodeID arg)
+expr_t
+ParsingDriver::add_normpdf(expr_t arg)
 {
   return add_normpdf(arg, data_tree->Zero, data_tree->One);
 }
 
-NodeID
-ParsingDriver::add_erf(NodeID arg1)
+expr_t
+ParsingDriver::add_erf(expr_t arg1)
 {
   return data_tree->AddErf(arg1);
 }
 
-NodeID
-ParsingDriver::add_steady_state(NodeID arg1)
+expr_t
+ParsingDriver::add_steady_state(expr_t arg1)
 {
   return data_tree->AddSteadyState(arg1);
 }
@@ -1729,12 +1970,12 @@ ParsingDriver::external_function()
   if (current_external_function_id == eExtFunNotSet)
     error("The 'name' option must be passed to external_function().");
 
-  if (current_external_function_options.secondDerivSymbID >= 0 &&
-      current_external_function_options.firstDerivSymbID  == eExtFunNotSet)
+  if (current_external_function_options.secondDerivSymbID >= 0
+      && current_external_function_options.firstDerivSymbID  == eExtFunNotSet)
     error("If the second derivative is provided to the external_function command, the first derivative must also be provided.");
 
-  if (current_external_function_options.secondDerivSymbID == eExtFunSetButNoNameProvided &&
-      current_external_function_options.firstDerivSymbID  != eExtFunSetButNoNameProvided)
+  if (current_external_function_options.secondDerivSymbID == eExtFunSetButNoNameProvided
+      && current_external_function_options.firstDerivSymbID  != eExtFunSetButNoNameProvided)
     error("If the second derivative is provided in the top-level function, the first derivative must also be provided in that function.");
 
   mod_file->external_functions_table.addExternalFunction(current_external_function_id, current_external_function_options, true);
@@ -1744,63 +1985,74 @@ ParsingDriver::external_function()
 void
 ParsingDriver::push_external_function_arg_vector_onto_stack()
 {
-  vector<NodeID> emptyvec;
+  vector<expr_t> emptyvec;
   stack_external_function_args.push(emptyvec);
 }
 
 void
-ParsingDriver::add_external_function_arg(NodeID arg)
+ParsingDriver::add_external_function_arg(expr_t arg)
 {
   stack_external_function_args.top().push_back(arg);
 }
 
-NodeID
+expr_t
 ParsingDriver::add_model_var_or_external_function(string *function_name, bool in_model_block)
 {
-  NodeID nid;
+  expr_t nid;
   if (mod_file->symbol_table.exists(*function_name))
     {
       if (mod_file->symbol_table.getType(*function_name) != eExternalFunction)
         {
           if (!in_model_block)
             {
-              if ((int)stack_external_function_args.top().size() > 0)
-                error("A variable cannot take arguments.");
+              if (stack_external_function_args.top().size() > 0)
+                error(string("Symbol ") + *function_name + string(" cannot take arguments."));
               else
                 return add_expression_variable(function_name);
             }
           else
             { // e.g. model_var(lag) => ADD MODEL VARIABLE WITH LEAD (NumConstNode)/LAG (UnaryOpNode)
-              if ((int)stack_external_function_args.top().size() != 1)
-                error("A model variable is being treated as if it were a function (i.e., has received more than one argument).");
+              if (stack_external_function_args.top().size() != 1)
+                error(string("Symbol ") + *function_name + string(" is being treated as if it were a function (i.e., has received more than one argument)."));
 
               NumConstNode *numNode = dynamic_cast<NumConstNode *>(stack_external_function_args.top().front());
               UnaryOpNode *unaryNode = dynamic_cast<UnaryOpNode *>(stack_external_function_args.top().front());
 
               if (numNode == NULL && unaryNode == NULL)
-                error("A model variable is being treated as if it were a function (i.e., takes an argument that is not an integer).");
+                error(string("Symbol ") + *function_name + string(" is being treated as if it were a function (i.e., takes an argument that is not an integer)."));
 
-              eval_context_type ectmp;
-              int model_var_arg;
-              double model_var_arg_dbl;
+              eval_context_t ectmp;
+              double model_var_arg;
               if (unaryNode == NULL)
                 {
-                  model_var_arg = (int)numNode->eval(ectmp);
-                  model_var_arg_dbl = numNode->eval(ectmp);
+                  try
+                    {
+                      model_var_arg = numNode->eval(ectmp);
+                    }
+                  catch (ExprNode::EvalException &e)
+                    {
+                      error(string("Symbol ") + *function_name + string(" is being treated as if it were a function (i.e., takes an argument that is not an integer)."));
+                    }
                 }
               else
                 if (unaryNode->get_op_code() != oUminus)
-                  error("A model variable is being treated as if it were a function (i.e., takes an argument that is not an integer).");
+                  error(string("Symbol ") + *function_name + string(" is being treated as if it were a function (i.e., takes an argument that is not an integer)."));
                 else
                   {
-                    model_var_arg = (int)unaryNode->eval(ectmp);
-                    model_var_arg_dbl = unaryNode->eval(ectmp);
+                    try
+                      {
+                        model_var_arg = unaryNode->eval(ectmp);
+                      }
+                    catch (ExprNode::EvalException &e)
+                      {
+                        error(string("Symbol ") + *function_name + string(" is being treated as if it were a function (i.e., takes an argument that is not an integer)."));
+                      }
                   }
 
-              if ((double) model_var_arg != model_var_arg_dbl) //make 100% sure int cast didn't lose info
-                error("A model variable is being treated as if it were a function (i.e., takes an argument that is not an integer).");
+              if (model_var_arg != floor(model_var_arg))
+                error(string("Symbol ") + *function_name + string(" is being treated as if it were a function (i.e., takes an argument that is not an integer)."));
 
-              nid = add_model_variable(mod_file->symbol_table.getID(*function_name), model_var_arg);
+              nid = add_model_variable(mod_file->symbol_table.getID(*function_name), (int) model_var_arg);
               stack_external_function_args.pop();
               delete function_name;
               return nid;
@@ -1814,11 +2066,11 @@ ParsingDriver::add_model_var_or_external_function(string *function_name, bool in
 
           if (in_model_block)
             if (mod_file->external_functions_table.getNargs(symb_id) == eExtFunNotSet)
-              error("Before using " + *function_name +
-                    "() in the model block, you must first declare it via the external_function() statement");
-            else if ((int)(stack_external_function_args.top().size()) != mod_file->external_functions_table.getNargs(symb_id))
-              error("The number of arguments passed to " + *function_name +
-                    "() does not match those of a previous call or declaration of this function.");
+              error("Before using " + *function_name
+                    +"() in the model block, you must first declare it via the external_function() statement");
+            else if ((int) (stack_external_function_args.top().size()) != mod_file->external_functions_table.getNargs(symb_id))
+              error("The number of arguments passed to " + *function_name
+                    +"() does not match those of a previous call or declaration of this function.");
         }
     }
   else
@@ -1865,7 +2117,7 @@ ParsingDriver::begin_steady_state_model()
 }
 
 void
-ParsingDriver::add_steady_state_model_equal(string *varname, NodeID expr)
+ParsingDriver::add_steady_state_model_equal(string *varname, expr_t expr)
 {
   int id;
   try
@@ -1885,4 +2137,33 @@ ParsingDriver::add_steady_state_model_equal(string *varname, NodeID expr)
   mod_file->steady_state_model.addDefinition(id, expr);
 
   delete varname;
+}
+
+void
+ParsingDriver::add_steady_state_model_equal_multiple(expr_t expr)
+{
+  const vector<string> &symbs = symbol_list.get_symbols();
+  vector<int> ids;
+
+  for (size_t i = 0; i < symbs.size(); i++)
+    {
+      int id;
+      try
+        {
+          id = mod_file->symbol_table.getID(symbs[i]);
+        }
+      catch (SymbolTable::UnknownSymbolNameException &e)
+        {
+          // Unknown symbol, declare it as a ModFileLocalVariable
+          id = mod_file->symbol_table.addSymbol(symbs[i], eModFileLocalVariable);
+        }
+      SymbolType type = mod_file->symbol_table.getType(id);
+      if (type != eEndogenous && type != eModFileLocalVariable && type != eParameter)
+        error(symbs[i] + " has incorrect type");
+      ids.push_back(id);
+    }
+
+  mod_file->steady_state_model.addMultipleDefinitions(ids, expr);
+
+  symbol_list.clear();
 }

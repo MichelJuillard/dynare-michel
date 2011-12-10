@@ -14,7 +14,7 @@ function CutSample(M_, options_, estim_params_)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2009 Dynare Team
+% Copyright (C) 2005-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -60,7 +60,7 @@ if (TotalNumberOfMhFiles-1)-(FirstMhFile+1)+1 > 0
                         record.MhDraws(end,3) ];
 elseif TotalNumberOfMhFiles == 1
     record.KeepedDraws.Distribution = [];
-elseif TotalNumberOfMhFiles == 2 & FirstMhFile > 1
+elseif TotalNumberOfMhFiles == 2 && FirstMhFile > 1
     record.KeepedDraws.Distribution = [MAX_nruns-FirstLine+1 ; record.MhDraws(end,3)];  
 end
 save([DirectoryName '/' M_.fname '_mh_history.mat'],'record');

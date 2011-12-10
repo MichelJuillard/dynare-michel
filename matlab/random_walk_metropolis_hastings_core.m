@@ -3,8 +3,8 @@ function myoutput = random_walk_metropolis_hastings_core(myinputs,fblck,nblck,wh
 % This function contain the most computationally intensive portion of code in
 % random_walk_metropolis_hastings (the 'for xxx = fblck:nblck' loop). The branches in 'for'
 % cycle and are completely independent than suitable to be executed in parallel way.
-% 
-% INPUTS 
+%
+% INPUTS
 %   o myimput            [struc]     The mandatory variables for local/remote
 %                                    parallel computing obtained from random_walk_metropolis_hastings.m
 %                                    function.
@@ -26,8 +26,8 @@ function myoutput = random_walk_metropolis_hastings_core(myinputs,fblck,nblck,wh
 %                               NewFile;
 %                               OutputFileName
 %
-% ALGORITHM 
-%   Portion of Metropolis-Hastings.       
+% ALGORITHM
+%   Portion of Metropolis-Hastings.
 %
 % SPECIAL REQUIREMENTS.
 %   None.
@@ -47,7 +47,7 @@ function myoutput = random_walk_metropolis_hastings_core(myinputs,fblck,nblck,wh
 % parallel functions and also for management funtions.
 
 
-% Copyright (C) 2006-2008,2010 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -88,15 +88,16 @@ nruns=myinputs.nruns;
 NewFile=myinputs.NewFile;
 MAX_nruns=myinputs.MAX_nruns;
 d=myinputs.d;
-InitSizeArray=myinputs.InitSizeArray;                    
+InitSizeArray=myinputs.InitSizeArray;
 record=myinputs.record;
 varargin=myinputs.varargin;
 
 % Necessary only for remote computing!
 if whoiam
- Parallel=myinputs.Parallel;
- MasterName=myinputs.MasterName;
- DyMo=myinputs.DyMo;
+    Parallel=myinputs.Parallel;
+    % initialize persistent variables in priordens()
+    priordens(xparam1,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7, ...
+        bayestopt_.p3,bayestopt_.p4,1);
 end
 
 % (re)Set the penalty
@@ -115,17 +116,36 @@ end
 %%%%
 %%%% NOW i run the (nblck-fblck+1) metropolis-hastings chains
 %%%%
-jscale = diag(bayestopt_.jscale);
+
+
+if any(isnan(bayestopt_.jscale))
+    if exist([ModelName '_optimal_mh_scale_parameter.mat'])% This file is created by mode_compute=6.
+        load([ModelName '_optimal_mh_scale_parameter'])
+        proposal_covariance_Cholesky_decomposition = d*Scale;
+    else
+        error('mh:: Something is wrong. I can''t figure out the value of the scale parameter.')
+    end
+else
+    proposal_covariance_Cholesky_decomposition = d*diag(bayestopt_.jscale);
+end
+
 
 jloop=0;
 
+JSUM = 0;
 for b = fblck:nblck,
     jloop=jloop+1;
-    randn('state',record.Seeds(b).Normal);
-    rand('state',record.Seeds(b).Unifor);
-    if (options_.load_mh_file~=0)  & (fline(b)>1) & OpenOldFile(b)
+    try  % Trap in the case matlab slave is called from an octave master.
+        randn('state',record.Seeds(b).Normal);
+        rand('state',record.Seeds(b).Unifor);
+    catch
+        JSUM  = JSUM + sum(100*clock);
+        randn('state',JSUM);
+        rand('state',JSUM);
+    end
+    if (options_.load_mh_file~=0) && (fline(b)>1) && OpenOldFile(b)
         load(['./' MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) ...
-              '_blck' int2str(b) '.mat'])
+            '_blck' int2str(b) '.mat'])
         x2 = [x2;zeros(InitSizeArray(b)-fline(b)+1,npar)];
         logpo2 = [logpo2;zeros(InitSizeArray(b)-fline(b)+1,1)];
         OpenOldFile(b) = 0;
@@ -136,30 +156,37 @@ for b = fblck:nblck,
     if exist('OCTAVE_VERSION') || options_.console_mode
         diary off
         disp(' ')
-    elseif whoiam
-        %       keyboard;
-        waitbarString = ['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...'];
-        %       waitbarTitle=['Metropolis-Hastings ',options_.parallel(ThisMatlab).PcName];
+        newString='';
+        if whoiam
+            waitbarString = ['Wait... MH (' int2str(b) '/' int2str(options_.mh_nblck) ')...'];
+        end
+    else,
+        if whoiam
+            waitbarString = ['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...'];
+        else
+            hh = waitbar(0,['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...']);
+            set(hh,'Name','Metropolis-Hastings');
+        end
+        
+    end
+    if whoiam
         if options_.parallel(ThisMatlab).Local,
             waitbarTitle=['Local '];
         else
-            waitbarTitle=[options_.parallel(ThisMatlab).PcName];
-        end        
-        fMessageStatus(0,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab), MasterName, DyMo);
-    else,
-        hh = waitbar(0,['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...']);
-        set(hh,'Name','Metropolis-Hastings');
-        
+            waitbarTitle=[options_.parallel(ThisMatlab).ComputerName];
+        end
+        prc0=(b-fblck)/(nblck-fblck+1)*(exist('OCTAVE_VERSION') || options_.console_mode);
+        fMessageStatus(prc0,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab));
     end
     isux = 0;
     jsux = 0;
     irun = fline(b);
     j = 1;
     while j <= nruns(b)
-        par = feval(ProposalFun, ix2(b,:), d * jscale, n);
-        if all( par(:) > mh_bounds(:,1) ) & all( par(:) < mh_bounds(:,2) )
+        par = feval(ProposalFun, ix2(b,:), proposal_covariance_Cholesky_decomposition, n);
+        if all( par(:) > mh_bounds(:,1) ) && all( par(:) < mh_bounds(:,2) )
             try
-                logpost = - feval(TargetFun, par(:),varargin{:});               
+                logpost = - feval(TargetFun, par(:),varargin{:});
             catch
                 logpost = -inf;
             end
@@ -169,11 +196,11 @@ for b = fblck:nblck,
         if (logpost > -inf) && (log(rand) < logpost-ilogpo2(b))
             x2(irun,:) = par;
             ix2(b,:) = par;
-            logpo2(irun) = logpost; 
+            logpo2(irun) = logpost;
             ilogpo2(b) = logpost;
             isux = isux + 1;
             jsux = jsux + 1;
-        else    
+        else
             x2(irun,:) = ix2(b,:);
             logpo2(irun) = ilogpo2(b);
         end
@@ -181,27 +208,36 @@ for b = fblck:nblck,
         if exist('OCTAVE_VERSION') || options_.console_mode
             if mod(j, 10) == 0
                 if exist('OCTAVE_VERSION')
-                    printf('MH: Computing Metropolis-Hastings (chain %d/%d): %3.f%% done, acception rate: %3.f%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
+                    if (whoiam==0)
+                        printf('MH: Computing Metropolis-Hastings (chain %d/%d): %3.f%% done, acception rate: %3.f%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
+                    end
                 else
-                    fprintf('   MH: Computing Metropolis-Hastings (chain %d/%d): %3.f \b%% done, acceptance rate: %3.f \b%%\r', b, nblck, 100 * prtfrc, 100 * isux / j);
+                    s0=repmat('\b',1,length(newString));
+                    newString=sprintf('MH: Computing Metropolis-Hastings (chain %d/%d): %3.f%% done, acceptance rate: %3.f%%', b, nblck, 100 * prtfrc, 100 * isux / j);
+                    fprintf([s0,'%s'],newString);
                 end
             end
-            if mod(j,50)==0 & whoiam  
+            if mod(j,50)==0 && whoiam
                 %             keyboard;
-                waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) '), ' sprintf('accept. %3.f%%%%', 100 * isux/j)];
-                fMessageStatus(prtfrc,whoiam,waitbarString, '', options_.parallel(ThisMatlab), MasterName, DyMo)
+                if (strcmp([options_.parallel(ThisMatlab).MatlabOctavePath], 'octave'))
+                    waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) '), ' sprintf('accept. %3.f%%',100 * isux / j)];
+                    fMessageStatus(prtfrc,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab));
+                else
+                    waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) '), ' sprintf('accept. %3.f%%', 100 * isux/j)];
+                    fMessageStatus((b-fblck)/(nblck-fblck+1)+prtfrc/(nblck-fblck+1),whoiam,waitbarString, '', options_.parallel(ThisMatlab));
+                end
             end
         else
-            if mod(j, 3)==0 & ~whoiam
+            if mod(j, 3)==0 && ~whoiam
                 waitbar(prtfrc,hh,[ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)]);
-            elseif mod(j,50)==0 & whoiam,  
+            elseif mod(j,50)==0 && whoiam,
                 %             keyboard;
                 waitbarString = [ '(' int2str(b) '/' int2str(options_.mh_nblck) ') ' sprintf('%f done, acceptation rate %f',prtfrc,isux/j)];
-                fMessageStatus(prtfrc,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab), MasterName, DyMo)
+                fMessageStatus(prtfrc,whoiam,waitbarString, waitbarTitle, options_.parallel(ThisMatlab));
             end
         end
         
-        if (irun == InitSizeArray(b)) | (j == nruns(b)) % Now I save the simulations
+        if (irun == InitSizeArray(b)) || (j == nruns(b)) % Now I save the simulations
             save([MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'],'x2','logpo2');
             fidlog = fopen([MhDirectoryName '/metropolis.log'],'a');
             fprintf(fidlog,['\n']);
@@ -214,7 +250,7 @@ for b = fblck:nblck,
                 fprintf(fidlog,['    params:' int2str(i) ': ' num2str(mean(x2(:,i))) '\n']);
             end
             fprintf(fidlog,['    log2po:' num2str(mean(logpo2)) '\n']);
-            fprintf(fidlog,['  Minimum value.........:\n']);;
+            fprintf(fidlog,['  Minimum value.........:\n']);
             for i=1:length(x2(1,:))
                 fprintf(fidlog,['    params:' int2str(i) ': ' num2str(min(x2(:,i))) '\n']);
             end
@@ -245,10 +281,14 @@ for b = fblck:nblck,
         irun = irun + 1;
     end% End of the simulations for one mh-block.
     record.AcceptationRates(b) = isux/j;
-    if exist('OCTAVE_VERSION') || options_.console_mode
-        printf('\n');
+    if exist('OCTAVE_VERSION') || options_.console_mode || whoiam
+        if exist('OCTAVE_VERSION')
+            printf('\n');
+        else
+            fprintf('\n');
+        end
         diary on;
-    elseif ~whoiam
+    else %if ~whoiam
         close(hh);
     end
     record.Seeds(b).Normal = randn('state');

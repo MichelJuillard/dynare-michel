@@ -87,9 +87,9 @@ Coming back to our basic example, we would write:\\
 alpha, beta\_pdf, 0.35, 0.02; \\ 
 beta, beta\_pdf, 0.99, 0.002; \\
 delta, beta\_pdf, 0.025, 0.003;\\
-psi, gamma\_pdf, 1.75, 0.02;\\
+psi, gamma\_pdf, 1.75, 0.1;\\
 rho, beta\_pdf, 0.95, 0.05;\\
-epsilon, gamma\_pdf, 10, 0.003;\\
+epsilon, gamma\_pdf, 10, 0.5;\\
 stderr e, inv\_gamma\_pdf, 0.01, inf;\\
 end;}\\
 
@@ -139,7 +139,7 @@ Finally, coming back to our example, we could choose a standard option:\\
 \\
 \texttt{estimation(datafile=simuldataRBC,nobs=200,first\_obs=500,\\
 mh\_replic=2000,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.8,\\
-mode\_compute=6); }\\
+mode\_compute=4); }\\
 
 This ends our description of the .mod file.
 
@@ -166,30 +166,27 @@ varobs y;\\
 \\
 initval;\\
   k = 9;\\
-  c = 0.7;\\
+  c = 0.76;\\
   l = 0.3;\\
-  w = 2.0;\\
-  r = 0;\\
+  w = 2.07;\\
+  r = 0.03;\\
   z = 0; \\
   e = 0;\\
 end;\\
-\\
-steady;\\
-check;\\
 \\
 estimated\_params;\\
 alpha, beta\_pdf, 0.35, 0.02; \\ 
 beta, beta\_pdf, 0.99, 0.002; \\
 delta, beta\_pdf, 0.025, 0.003;\\
-psi, gamma\_pdf, 1.75, 0.02;\\
+psi, gamma\_pdf, 1.75, 0.1;\\
 rho, beta\_pdf, 0.95, 0.05;\\
-epsilon, gamma\_pdf, 10, 0.003;\\
+epsilon, gamma\_pdf, 10, 0.5;\\
 stderr e, inv\_gamma\_pdf, 0.01, inf;\\
 end;\\
 \\
 estimation(datafile=simuldataRBC,nobs=200,first\_obs=500,\\
 mh\_replic=2000,mh\_nblocks=2,mh\_drop=0.45,mh\_jscale=0.8,\\
-mode\_compute=6); }
+mode\_compute=4); }
 \\
 
 

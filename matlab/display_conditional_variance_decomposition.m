@@ -16,7 +16,7 @@ function oo_ = display_conditional_variance_decomposition(Steps, SubsetOfVariabl
 % [1] The covariance matrix of the state innovations needs to be diagonal.
 % [2] In this version, absence of measurement errors is assumed...
 
-% Copyright (C) 2010 Dynare Team
+% Copyright (C) 2010-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -42,10 +42,11 @@ StateSpaceModel.sigma_e_is_diagonal = M_.sigma_e_is_diagonal;
 iv = (1:endo_nbr)';
 ic = dr.nstatic+(1:dr.npred)';
 
-[StateSpaceModel.transition_matrix,StateSpaceModel.impulse_matrix] = kalman_transition_matrix(dr,iv,ic,[],exo_nbr);
+[StateSpaceModel.transition_matrix,StateSpaceModel.impulse_matrix] = kalman_transition_matrix(dr,iv,ic,exo_nbr);
 StateSpaceModel.state_innovations_covariance_matrix = M_.Sigma_e;
+StateSpaceModel.order_var = dr.order_var;
 
-conditional_decomposition_array = conditional_variance_decomposition(StateSpaceModel,Steps,dr.inv_order_var(SubsetOfVariables ));
+conditional_decomposition_array = conditional_variance_decomposition(StateSpaceModel,Steps,SubsetOfVariables );
 
 if options_.noprint == 0
     disp(' ')
@@ -58,14 +59,13 @@ for i=1:length(Steps)
     disp(['Period ' int2str(Steps(i)) ':'])
     
     for j=1:exo_nbr
-        vardec_i(:,j) = dyn_diag_vech(conditional_decomposition_array(:, ...
-                                                          i,j));
+        vardec_i(:,j) = 100*conditional_decomposition_array(:, ...
+                                                          i,j);
     end
-    vardec_i = 100*vardec_i./repmat(sum(vardec_i,2),1,exo_nbr);
     if options_.noprint == 0
         headers = M_.exo_names;
         headers(M_.exo_names_orig_ord,:) = headers;
-        headers = strvcat(' ',headers);
+        headers = char(' ',headers);
         lh = size(deblank(M_.endo_names(SubsetOfVariables,:)),2)+2;
         dyntable('',headers,...
                  deblank(M_.endo_names(SubsetOfVariables,:)),...

@@ -59,7 +59,7 @@ function [PostMod,PostVar,Scale,PostMean] = ...
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2006-2008 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -109,13 +109,13 @@ catch
 end
 while j<=MaxNumberOfTuningSimulations
     proposal = iScale*dd*randn(npar,1) + ix2;
-    if all(proposal > mh_bounds(:,1)) & all(proposal < mh_bounds(:,2))
+    if all(proposal > mh_bounds(:,1)) && all(proposal < mh_bounds(:,2))
         logpo2 = - feval(ObjFun,proposal,varargin{:});
     else
         logpo2 = -inf;
     end
     % I move if the proposal is enough likely...
-    if logpo2 > -inf & log(rand) < logpo2 - ilogpo2
+    if logpo2 > -inf && log(rand) < logpo2 - ilogpo2
         ix2 = proposal; 
         if logpo2 > mlogpo2
             ModePar = proposal;
@@ -173,13 +173,13 @@ isux = 0;
 ilogpo2 = - feval(ObjFun,ix2,varargin{:});
 while j<= NumberOfIterations
     proposal = iScale*dd*randn(npar,1) + ix2;
-    if all(proposal > mh_bounds(:,1)) & all(proposal < mh_bounds(:,2))
+    if all(proposal > mh_bounds(:,1)) && all(proposal < mh_bounds(:,2))
         logpo2 = - feval(ObjFun,proposal,varargin{:});
     else
         logpo2 = -inf;
     end
     % I move if the proposal is enough likely...
-    if logpo2 > -inf & log(rand) < logpo2 - ilogpo2
+    if logpo2 > -inf && log(rand) < logpo2 - ilogpo2
         ix2 = proposal;
         if logpo2 > mlogpo2
             ModePar = proposal;
@@ -232,13 +232,13 @@ if strcmpi(info,'LastCall')
     dd = transpose(chol(CovJump));
     while j<=MaxNumberOfTuningSimulations
         proposal = iScale*dd*randn(npar,1) + ix2;
-        if all(proposal > mh_bounds(:,1)) & all(proposal < mh_bounds(:,2))
+        if all(proposal > mh_bounds(:,1)) && all(proposal < mh_bounds(:,2))
             logpo2 = - feval(ObjFun,proposal,varargin{:});
         else
             logpo2 = -inf;
         end
         % I move if the proposal is enough likely...
-        if logpo2 > -inf & log(rand) < logpo2 - ilogpo2
+        if logpo2 > -inf && log(rand) < logpo2 - ilogpo2
             ix2 = proposal;
             if logpo2 > mlogpo2
                 ModePar = proposal;
@@ -297,7 +297,7 @@ if strcmpi(info,'LastCall')
         test = 0;
         while j<=MaxNumberOfClimbingSimulations
             proposal = iScale*dd*randn(npar,1) + ModePar;
-            if all(proposal > mh_bounds(:,1)) & all(proposal < mh_bounds(:,2))
+            if all(proposal > mh_bounds(:,1)) && all(proposal < mh_bounds(:,2))
                 logpo2 = - feval(ObjFun,proposal,varargin{:});
             else
                 logpo2 = -inf;

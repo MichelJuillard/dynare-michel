@@ -18,7 +18,7 @@ function draw = rand_multivariate_student(Mean,Sigma_upper_chol,df)
 % NOTE See Zellner (appendix B.2, 1971) for a definition.     
 %    
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

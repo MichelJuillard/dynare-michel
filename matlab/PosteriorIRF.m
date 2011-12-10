@@ -16,7 +16,7 @@ function PosteriorIRF(type)
 % functions associated with it(the _core1 and _core2).
 % See also the comments random_walk_metropolis_hastings.m funtion.
 
-% Copyright (C) 2006-2008,2010 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -34,9 +34,9 @@ function PosteriorIRF(type)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 
-global options_ estim_params_ oo_ M_ bayestopt_
+global options_ estim_params_ oo_ M_ bayestopt_ dataset_
 % Set the number of periods
-if isempty(options_.irf) | ~options_.irf 
+if isempty(options_.irf) || ~options_.irf 
     options_.irf = 40;
 end
 % Set varlist if necessary
@@ -64,8 +64,8 @@ np   = estim_params_.np ;
 npar = nvx+nvn+ncx+ncn+np;
 offset = npar-np; clear('nvx','nvn','ncx','ncn','np');
 
-nvobs = size(options_.varobs,1);
-gend = options_.nobs;
+nvobs = dataset_.info.nvobs;
+gend = dataset_.info.ntobs;
 MaxNumberOfPlotPerFigure = 9;
 nn = sqrt(MaxNumberOfPlotPerFigure);
 MAX_nirfs_dsge = ceil(options_.MaxNumberOfBytes/(options_.irf*nvar*M_.exo_nbr)/8);
@@ -80,16 +80,27 @@ DirectoryName = CheckPath('Output');
 if strcmpi(type,'posterior')
     MhDirectoryName = CheckPath('metropolis');
 elseif strcmpi(type,'gsa')
-    MhDirectoryName = CheckPath('GSA');
+    if options_.opt_gsa.pprior
+        MhDirectoryName = CheckPath(['GSA' filesep 'prior']);
+    else
+        MhDirectoryName = CheckPath(['GSA' filesep 'mc']);
+    end
 else
     MhDirectoryName = CheckPath('prior');
 end
+delete([MhDirectoryName filesep M_.fname '_IRF_DSGEs*.mat']);
+delete([MhDirectoryName filesep M_.fname '_IRF_BVARDSGEs*.mat']);
 if strcmpi(type,'posterior')
     load([ MhDirectoryName filesep  M_.fname '_mh_history.mat'])
     TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
     NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
 elseif strcmpi(type,'gsa')
-    load([ MhDirectoryName filesep  M_.fname '_prior.mat'],'lpmat0','lpmat','istable')
+    RootDirectoryName = CheckPath('gsa');
+    if options_.opt_gsa.pprior
+        load([ RootDirectoryName filesep  M_.fname '_prior.mat'],'lpmat0','lpmat','istable')
+    else
+        load([ RootDirectoryName filesep  M_.fname '_mc.mat'],'lpmat0','lpmat','istable')
+    end
     x=[lpmat0(istable,:) lpmat(istable,:)];
     clear lpmat istable
     NumberOfDraws=size(x,1);
@@ -98,7 +109,7 @@ else% type = 'prior'
     NumberOfDraws = 500;
 end
 if ~strcmpi(type,'gsa')
-  B = min([round(.5*NumberOfDraws),500]); options_.B = B;
+    B = min([round(.5*NumberOfDraws),500]); options_.B = B;
 end
 try 
     delete([MhDirectoryName filesep M_.fname '_irf_dsge*.mat'])
@@ -191,17 +202,22 @@ localVars.MAX_nruns=MAX_nruns;
 localVars.NumberOfIRFfiles_dsge=NumberOfIRFfiles_dsge;
 localVars.NumberOfIRFfiles_dsgevar=NumberOfIRFfiles_dsgevar;
 localVars.ifil2=ifil2;
+localVars.MhDirectoryName=MhDirectoryName;
 
 % Like sequential execution!
-if isnumeric(options_.parallel),% | isunix, % For the moment exclude unix platform from parallel implementation.
+if isnumeric(options_.parallel),
     [fout] = PosteriorIRF_core1(localVars,1,B,0);
 else
-   % Parallel execution!
+    % Parallel execution!
     [nCPU, totCPU, nBlockPerCPU] = distributeJobs(options_.parallel, 1, B);
     for j=1:totCPU-1,
         nfiles = ceil(nBlockPerCPU(j)/MAX_nirfs_dsge);
         NumberOfIRFfiles_dsge(j+1) =NumberOfIRFfiles_dsge(j)+nfiles;
-        nfiles = ceil(nBlockPerCPU(j)/MAX_nirfs_dsgevar);
+        if MAX_nirfs_dsgevar,
+            nfiles = ceil(nBlockPerCPU(j)/MAX_nirfs_dsgevar);
+        else
+            nfiles=0;
+        end
         NumberOfIRFfiles_dsgevar(j+1) =NumberOfIRFfiles_dsgevar(j)+nfiles;
         nfiles = ceil(nBlockPerCPU(j)/MAX_nruns);
         ifil2(j+1) =ifil2(j)+nfiles;
@@ -211,10 +227,11 @@ else
     localVars.ifil2=ifil2;
     
     globalVars = struct('M_',M_, ...
-      'options_', options_, ...
-      'bayestopt_', bayestopt_, ...
-      'estim_params_', estim_params_, ...
-      'oo_', oo_);
+                        'options_', options_, ...
+                        'bayestopt_', bayestopt_, ...
+                        'estim_params_', estim_params_, ...
+                        'oo_', oo_, ...
+                        'dataset_',dataset_);
     
     % which files have to be copied to run remotely
     NamFileInput(1,:) = {'',[M_.fname '_static.m']};
@@ -222,23 +239,23 @@ else
     if options_.steadystate_flag,
         NamFileInput(length(NamFileInput)+1,:)={'',[M_.fname '_steadystate.m']};
     end
-   [fout] = masterParallel(options_.parallel, 1, B,NamFileInput,'PosteriorIRF_core1', localVars, globalVars, options_.parallel_info);
+    [fout] = masterParallel(options_.parallel, 1, B,NamFileInput,'PosteriorIRF_core1', localVars, globalVars, options_.parallel_info);
     
 end
 
 % END first parallel section!
 
 if nosaddle
-   disp(['PosteriorIRF :: Percentage of discarded posterior draws = ' num2str(nosaddle/(B+nosaddle))]) 
+    disp(['PosteriorIRF :: Percentage of discarded posterior draws = ' num2str(nosaddle/(B+nosaddle))]) 
 end
 
-ReshapeMatFiles('irf_dsge')
+ReshapeMatFiles('irf_dsge',type)
 if MAX_nirfs_dsgevar
     ReshapeMatFiles('irf_bvardsge')
 end
 
 if strcmpi(type,'gsa')
-  return
+    return
 end
 
 IRF_DSGEs = dir([MhDirectoryName filesep M_.fname '_IRF_DSGEs*.mat']);
@@ -254,10 +271,13 @@ DistribIRF = zeros(options_.irf,9,nvar,M_.exo_nbr);
 HPDIRF = zeros(options_.irf,2,nvar,M_.exo_nbr);
 
 if options_.TeX
-  varlist_TeX = [];
-  for i=1:nvar
-    varlist_TeX = strvcat(varlist_TeX,M_.endo_names_tex(IndxVariables(i),:));
-  end
+    for i=1:nvar
+        if i==1
+            varlist_TeX = M_.endo_names_tex(IndxVariables(i),:);
+        else
+            varlist_TeX = char(varlist_TeX,M_.endo_names_tex(IndxVariables(i),:));
+        end
+    end
 end
 
 fprintf('MH: Posterior (dsge) IRFs...\n');
@@ -265,32 +285,32 @@ tit(M_.exo_names_orig_ord,:) = M_.exo_names;
 kdx = 0;
 
 for file = 1:NumberOfIRFfiles_dsge
-  load([MhDirectoryName filesep M_.fname '_IRF_DSGEs' int2str(file) '.mat']);
-  for i = 1:M_.exo_nbr
-    for j = 1:nvar
-        for k = 1:size(STOCK_IRF_DSGE,1)
-            kk = k+kdx;
-            [MeanIRF(kk,j,i),MedianIRF(kk,j,i),VarIRF(kk,j,i),HPDIRF(kk,:,j,i),...
-             DistribIRF(kk,:,j,i)] = posterior_moments(squeeze(STOCK_IRF_DSGE(k,j,i,:)),0,options_.mh_conf_sig);
+    load([MhDirectoryName filesep M_.fname '_IRF_DSGEs' int2str(file) '.mat']);
+    for i = 1:M_.exo_nbr
+        for j = 1:nvar
+            for k = 1:size(STOCK_IRF_DSGE,1)
+                kk = k+kdx;
+                [MeanIRF(kk,j,i),MedianIRF(kk,j,i),VarIRF(kk,j,i),HPDIRF(kk,:,j,i),...
+                 DistribIRF(kk,:,j,i)] = posterior_moments(squeeze(STOCK_IRF_DSGE(k,j,i,:)),0,options_.mh_conf_sig);
+            end
         end
     end
-  end
-  kdx = kdx + size(STOCK_IRF_DSGE,1);
+    kdx = kdx + size(STOCK_IRF_DSGE,1);
 
 end
 
 clear STOCK_IRF_DSGE;
 
 for i = 1:M_.exo_nbr
-  for j = 1:nvar
-    name = [deblank(M_.endo_names(IndxVariables(j),:)) '_' deblank(tit(i,:))];
-    eval(['oo_.PosteriorIRF.dsge.Mean.' name ' = MeanIRF(:,j,i);']);
-    eval(['oo_.PosteriorIRF.dsge.Median.' name ' = MedianIRF(:,j,i);']);
-    eval(['oo_.PosteriorIRF.dsge.Var.' name ' = VarIRF(:,j,i);']);
-    eval(['oo_.PosteriorIRF.dsge.Distribution.' name ' = DistribIRF(:,:,j,i);']);
-    eval(['oo_.PosteriorIRF.dsge.HPDinf.' name ' = HPDIRF(:,1,j,i);']);
-    eval(['oo_.PosteriorIRF.dsge.HPDsup.' name ' = HPDIRF(:,2,j,i);']);
-  end
+    for j = 1:nvar
+        name = [deblank(M_.endo_names(IndxVariables(j),:)) '_' deblank(tit(i,:))];
+        eval(['oo_.PosteriorIRF.dsge.Mean.' name ' = MeanIRF(:,j,i);']);
+        eval(['oo_.PosteriorIRF.dsge.Median.' name ' = MedianIRF(:,j,i);']);
+        eval(['oo_.PosteriorIRF.dsge.Var.' name ' = VarIRF(:,j,i);']);
+        eval(['oo_.PosteriorIRF.dsge.Distribution.' name ' = DistribIRF(:,:,j,i);']);
+        eval(['oo_.PosteriorIRF.dsge.HPDinf.' name ' = HPDIRF(:,1,j,i);']);
+        eval(['oo_.PosteriorIRF.dsge.HPDsup.' name ' = HPDIRF(:,2,j,i);']);
+    end
 end
 
 
@@ -331,7 +351,7 @@ if MAX_nirfs_dsgevar
     end
 end
 %%
-%% 	Finally I build the plots.
+%%      Finally I build the plots.
 %%
 
 
@@ -343,11 +363,11 @@ end
 % Save the local variables.
 localVars=[];
 
- Check=options_.TeX
- if (Check)
-   localVars.varlist_TeX=varlist_TeX;
- end
- 
+Check=options_.TeX;
+if (Check)
+    localVars.varlist_TeX=varlist_TeX;
+end
+
 
 localVars.nvar=nvar;
 localVars.MeanIRF=MeanIRF;
@@ -355,69 +375,83 @@ localVars.tit=tit;
 localVars.nn=nn;
 localVars.MAX_nirfs_dsgevar=MAX_nirfs_dsgevar;
 localVars.HPDIRF=HPDIRF;
-localVars.HPDIRFdsgevar=HPDIRFdsgevar;
-localVars.MeanIRFdsgevar = MeanIRFdsgevar;
 localVars.varlist=varlist;
 localVars.MaxNumberOfPlotPerFigure=MaxNumberOfPlotPerFigure;
+if options_.dsge_var
+    localVars.HPDIRFdsgevar=HPDIRFdsgevar;
+    localVars.MeanIRFdsgevar = MeanIRFdsgevar;
+end    
 
 %%% The files .TeX are genereted in sequential way always!
 
 if options_.TeX
-  fidTeX = fopen([DirectoryName filesep M_.fname '_BayesianIRF.TeX'],'w');
-  fprintf(fidTeX,'%% TeX eps-loader file generated by PosteriorIRF.m (Dynare).\n');
-  fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
-  fprintf(fidTeX,' \n');
-  titTeX(M_.exo_names_orig_ord,:) = M_.exo_names_tex;
-  
-  for i=1:M_.exo_nbr
+    fidTeX = fopen([DirectoryName filesep M_.fname '_BayesianIRF.TeX'],'w');
+    fprintf(fidTeX,'%% TeX eps-loader file generated by PosteriorIRF.m (Dynare).\n');
+    fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
+    fprintf(fidTeX,' \n');
+    titTeX(M_.exo_names_orig_ord,:) = M_.exo_names_tex;
+    
+    for i=1:M_.exo_nbr
         NAMES = [];
         TEXNAMES = [];
-  
+        
         for j=1:nvar
-          if max(abs(MeanIRF(:,j,i))) > 10^(-6)  
-            
-            name = deblank(varlist(j,:));
-            NAMES = strvcat(NAMES,name);
-            
-            texname = deblank(varlist_TeX(j,:));
-            TEXNAMES = strvcat(TEXNAMES,['$' texname '$']);
-          end
-          
-         end
-            fprintf(fidTeX,'\\begin{figure}[H]\n');
-            for jj = 1:size(TEXNAMES,1)
-                fprintf(fidTeX,['\\psfrag{%s}[1][][0.5][0]{%s}\n'],deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
+            if max(abs(MeanIRF(:,j,i))) > 10^(-6)  
+                
+                name = deblank(varlist(j,:));
+                texname = deblank(varlist_TeX(j,:));
+
+                if j==1
+                    NAMES = name;
+                    TEXNAMES = ['$' texname '$'];
+                else
+                    NAMES = char(NAMES,name);
+                    TEXNAMES = char(TEXNAMES,['$' texname '$']);
+                end
             end
-            fprintf(fidTeX,'\\centering \n');
-            fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Bayesian_IRF_%s}\n',M_.fname,deblank(tit(i,:)));
-            if options_.relative_irf
-                fprintf(fidTeX,['\\caption{Bayesian relative IRF.}']);
-            else
-                fprintf(fidTeX,'\\caption{Bayesian IRF.}');
-            end
-            fprintf(fidTeX,'\\label{Fig:BayesianIRF:%s}\n',deblank(tit(i,:)));
-            fprintf(fidTeX,'\\end{figure}\n');
-            fprintf(fidTeX,' \n');
-  end
-  
-  fprintf(fidTeX,'%% End of TeX file.\n');
-  fclose(fidTeX);
-  
+            
+        end
+        fprintf(fidTeX,'\\begin{figure}[H]\n');
+        for jj = 1:size(TEXNAMES,1)
+            fprintf(fidTeX,['\\psfrag{%s}[1][][0.5][0]{%s}\n'],deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
+        end
+        fprintf(fidTeX,'\\centering \n');
+        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Bayesian_IRF_%s}\n',M_.fname,deblank(tit(i,:)));
+        if options_.relative_irf
+            fprintf(fidTeX,['\\caption{Bayesian relative IRF.}']);
+        else
+            fprintf(fidTeX,'\\caption{Bayesian IRF.}');
+        end
+        fprintf(fidTeX,'\\label{Fig:BayesianIRF:%s}\n',deblank(tit(i,:)));
+        fprintf(fidTeX,'\\end{figure}\n');
+        fprintf(fidTeX,' \n');
+    end
+    
+    fprintf(fidTeX,'%% End of TeX file.\n');
+    fclose(fidTeX);
+    
 end
 
 % The others file format are generated in parallel by PosteriorIRF_core2!
 
 
-                                % Comment for testing!
+% Comment for testing!
 if ~exist('OCTAVE_VERSION')
-    if isnumeric(options_.parallel) % || (M_.exo_nbr*ceil(size(varlist,1)/MaxNumberOfPlotPerFigure))<8,% | isunix, % for the moment exclude unix platform from parallel implementation
+    if isnumeric(options_.parallel)  || (M_.exo_nbr*ceil(size(varlist,1)/MaxNumberOfPlotPerFigure))<8,
         [fout] = PosteriorIRF_core2(localVars,1,M_.exo_nbr,0);
     else
-        globalVars = struct('M_',M_, ...
-                            'options_', options_);
-        
-        [fout] = masterParallel(options_.parallel, 1, M_.exo_nbr,NamFileInput,'PosteriorIRF_core2', localVars, globalVars, options_.parallel_info);
-        
+        isRemoteOctave = 0;
+        for indPC=1:length(options_.parallel),
+            isRemoteOctave = isRemoteOctave + (findstr(options_.parallel(indPC).MatlabOctavePath, 'octave'));
+        end
+        if isRemoteOctave
+            [fout] = PosteriorIRF_core2(localVars,1,M_.exo_nbr,0);
+        else
+            globalVars = struct('M_',M_, ...
+                'options_', options_);
+            
+            [fout] = masterParallel(options_.parallel, 1, M_.exo_nbr,NamFileInput,'PosteriorIRF_core2', localVars, globalVars, options_.parallel_info);
+        end
     end
 end
 % END parallel code!

@@ -1,4 +1,4 @@
-dnl Copyright (C) 2009 Dynare Team
+dnl Copyright (C) 2009-2010 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -20,8 +20,8 @@ AC_DEFUN([AX_PROG_LN_S],
 AC_REQUIRE([AC_CANONICAL_HOST])
 AC_REQUIRE([AC_PROG_LN_S])
 case ${host_os} in
-  *cygwin*)
-    LN_S="cp -p" # Cygwin symbolic links are not understood by MATLAB
+  *cygwin*|*mingw32*)
+    LN_S="cp -p" # Symbolic links are not understood by MATLAB under Windows
     ;;
 esac
 ])

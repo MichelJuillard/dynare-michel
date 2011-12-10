@@ -1,4 +1,4 @@
-function ldens = lpdfig2(x,s,nu)
+function [ldens,Dldens,D2ldens] = lpdfig2(x,s,nu)
 % Evaluates the logged INVERSE-GAMMA-2 PDF at x.
 %
 % X ~ IG2(s,nu) if X = inv(Z) where Z ~ G(nu/2,2/s) (Gamma distribution) 
@@ -41,4 +41,20 @@ if length(s)==1
     ldens(idx) = -gammaln(.5*nu) - (.5*nu)*(log(2)-log(s)) - .5*(nu+2)*log(x(idx)) -.5*s./x(idx);
 else
     ldens(idx) = -gammaln(.5*nu(idx)) - (.5*nu(idx)).*(log(2)-log(s(idx))) - .5*(nu(idx)+2).*log(x(idx)) -.5*s(idx)./x(idx);
+end
+
+if nargout >1 
+    if length(s)==1
+        Dldens(idx) = - .5*(nu+2)./(x(idx)) + .5*s./x(idx).^2;
+    else
+        Dldens(idx) = - .5*(nu(idx)+2)./(x(idx)) + .5*s(idx)./x(idx).^2;
+    end
+end
+
+if nargout == 3 
+    if length(s)==1
+        D2ldens(idx) = .5*(nu+2)./(x(idx)).^2 - s./x(idx).^3;
+    else
+        D2ldens(idx) = .5*(nu(idx)+2)./(x(idx)).^2 - s(idx)./x(idx).^3;
+    end
 end

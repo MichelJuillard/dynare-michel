@@ -55,10 +55,6 @@ var e_a; stderr 0.014;
 var e_m; stderr 0.005;
 end;
 
-unit_root_vars P_obs Y_obs;
-
-steady;
-
 check;
 
 estimated_params;
@@ -66,7 +62,8 @@ alp, beta_pdf, 0.356, 0.02;
 bet, beta_pdf, 0.993, 0.002;
 gam, normal_pdf, 0.0085, 0.003;
 mst, normal_pdf, 1.0002, 0.007;
-rho, beta_pdf, 0.129, 0.223;
+//rho, beta_pdf, 0.129, 0.223;
+rho, beta_pdf, 0.129, 0.1;
 psi, beta_pdf, 0.65, 0.05;
 del, beta_pdf, 0.01, 0.005;
 stderr e_a, inv_gamma_pdf, 0.035449, inf;
@@ -81,7 +78,7 @@ Y_obs (gam);
 end;
 
 estimation(order=1,datafile=fsdat_simul,nobs=192,loglinear,mh_replic=2000,
-           mode_compute=4,mh_nblocks=2,mh_drop=0.45,mh_jscale=0.65);
+           mode_compute=4,mh_nblocks=2,mh_drop=0.45,mh_jscale=0.65,diffuse_filter);
 
 //stoch_simul(order=1, periods=200);
 //datatomfile('fsdat_simul2', char('gy_obs', 'gp_obs', 'Y_obs', 'P_obs'));

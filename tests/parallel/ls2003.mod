@@ -61,37 +61,9 @@ stderr e_ys,inv_gamma_pdf,1.2533,0.6551;
 stderr e_pies,inv_gamma_pdf,1.88,0.9827;
 end;
 
-// common syntax for win and unix, for local parallel runs (assuming quad-core):
-// all empty fields, except Local and NumCPU
-options_.parallel=struct('Local', 1, 'PcName','','NumCPU', [0:3], 'user','','passwd','','RemoteDrive', '', 'RemoteFolder','');
 
+estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_replic=0);
+estimation(datafile=data_ca1,first_obs=8,nobs=79,mode_compute=0, mode_file=ls2003_mode, mh_nblocks=4, prefilter=1, mh_jscale=0.5, mh_replic=2000);
+estimation(datafile=data_ca1,first_obs=8,nobs=79,mode_compute=0, mode_file=ls2003_mode, mh_nblocks=4,prefilter=1,mh_jscale=0.5,mh_replic=2000,bayesian_irf,load_mh_file,smoother,forecast=12, filtered_vars, filter_step_ahead=[1 2 3 4]) y y_s R pie dq pie_s de A y_obs pie_obs R_obs;
 
-// windows syntax for remote runs (Local=0):
-// win passwd has to be typed explicitly!
-// RemoteDrive has to be yped explicitly!
-// for user, ALSO the group has to be specified, like ISIS\rattoma, i.e. user rattoma in group ISIS
-// PcName is the name of the computed in the windows network, i.e. the output of hostname, or the full IP adress
-//options_.parallel=struct('Local', 0, 'PcName','iazz9000','NumCPU', [4:6], 'user','ISIS\rattoma','passwd','****', 'RemoteDrive', 'C', 'RemoteFolder','dynare_calcs\Remote');
-
-// example to use several remote PC's to build a grid on windows:
-//options_.parallel=struct('Local', 0, 'PcName','iazz9000','NumCPU', [0:3], 'user','ISIS\azziniv','passwd','****', 'RemoteDrive', 'C', 'RemoteFolder','dynare_calcs\Remote');
-//options_.parallel(2)=struct('Local', 0, 'PcName','paperino','NumCPU', [0:3], 'user','ISIS\azziniv','passwd','****', 'RemoteDrive', 'D', 'RemoteFolder','dynare_calcs\Remote');
-//options_.parallel(3)=struct('Local', 0, 'PcName','didietro','NumCPU', [0:3], 'user','','passwd','','RemoteDrive', ppp(1), 'RemoteFolder',ppp(4:end));
-//options_.parallel(4)=struct('Local', 0, 'PcName','uasalap29','NumCPU', [0:1], 'user','ISIS\rattoma','passwd','****', 'RemoteDrive', 'C', 'RemoteFolder','dynare_calcs\Remote');
-//options_.parallel(5)=struct('Local', 0, 'PcName','brigitta','NumCPU', [0:3], 'user','ISIS\azziniv','passwd','****', 'RemoteDrive', 'C', 'RemoteFolder','dynare_calcs\Remote');
-
-// unix syntax for remote runs (Local=0):
-// no passwd and RemoteDrive needed!
-// PcName: full IP address or address
-//options_.parallel=struct('Local', 0, 'PcName','paperino.jrc.it','NumCPU', [0:3], 'user','rattoma','passwd','', 'RemoteDrive', '', 'RemoteFolder','/home/rattoma/Remote');
-
-// example to combine local and remote runs (on unix):
-//options_.parallel=struct('Local', 1, 'PcName','','NumCPU', [0:3], 'user','','passwd','','RemoteDrive', '', 'RemoteFolder','');
-//options_.parallel(2)=struct('Local', 0, 'PcName','paperino.jrc.it','NumCPU', [0:3], 'user','rattoma','passwd','', 'RemoteDrive', '', 'RemoteFolder','/home/rattoma/Remote');
-
-// example to combine local and remote runs (on win):
-//options_.parallel=struct('Local', 1, 'PcName','','NumCPU', [0:3], 'user','','passwd','','RemoteDrive', '', 'RemoteFolder','');
-//options_.parallel(2)=struct('Local', 0, 'PcName','uasalap29','NumCPU', [0:1], 'user','ISIS\rattoma','passwd','****', 'RemoteDrive', 'C', 'RemoteFolder','dynare_calcs\Remote');
-
-estimation(datafile=data_ca1,first_obs=8,nobs=79,mode_compute=0, mode_file=ls2003_mode, mh_nblocks=4,prefilter=1,mh_jscale=0.5,mh_replic=2000);//, load_mh_file);
 

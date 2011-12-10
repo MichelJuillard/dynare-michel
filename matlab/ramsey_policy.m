@@ -1,6 +1,6 @@
 function info = ramsey_policy(var_list)
 
-% Copyright (C) 2007-2008, 2010 Dynare Team
+% Copyright (C) 2007-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -19,11 +19,22 @@ function info = ramsey_policy(var_list)
 
 global options_ oo_ M_
 
-oldoptions = options_;
 options_.ramsey_policy = 1;
+oldoptions = options_;
 options_.order = 1;
 info = stoch_simul(var_list);
 
-oo_ = evaluate_planner_objective(oo_.dr,M_,oo_,options_);
+if options_.noprint == 0
+    disp_steady_state(M_,oo_)
+    for i=M_.orig_endo_nbr:M_.endo_nbr
+        if strmatch('mult_',M_.endo_names(i,:))
+            disp(sprintf('%s \t\t %g',M_.endo_names(i,:), ...
+                         oo_.dr.ys(i)));
+        end
+    end
+end
+
+
+oo_.planner_objective_value = evaluate_planner_objective(M_,oo_,options_);
 
 options_ = oldoptions;

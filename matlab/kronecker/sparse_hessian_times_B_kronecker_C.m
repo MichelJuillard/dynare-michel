@@ -1,22 +1,52 @@
-function D = sparse_hessian_times_B_kronecker_C(A,B,C)
-%function D = sparse_hessian_times_B_kronecker_C(A,B,C)
-% Computes A * kron(B,C) where A is a sparse matrix.
-%
-% INPUTS
-%   A  [double] mA*nA matrix.
-%   B  [double] mB*nB matrix.
-%   C  [double] mC*nC matrix.
-%  
-% OUTPUTS
-%   D  [double] mA*(nC*nB) or mA*(nB*nB) matrix.
-%  
-% ALGORITHM
-%   none.    
-%
-% SPECIAL REQUIREMENTS
-%   none.
+function [D, err] = sparse_hessian_times_B_kronecker_C(varargin)
 
-% Copyright (C) 1996-2008 Dynare Team
+%@info:
+%! @deftypefn {Function File} {[@var{D}, @var{err}] =} sparse_hessian_times_B_kronecker_C (@var{A},@var{B},@var{C},@var{fake})
+%! @anchor{kronecker/sparse_hessian_times_B_kronecker_C}
+%! @sp 1
+%! Computes A*kron(B,C) where A is hessian matrix in sparse format.
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item A
+%! mA*nA matrix of doubles.
+%! @item B
+%! mB*nB matrix of doubles.
+%! @item C
+%! mC*nC matrix of doubles.
+%! @item fake
+%! Anything you want, just a fake parameter (because the mex version admits a last argument specifying the number of threads to be used in parallel mode).
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item D
+%! mA*(nC*nB) or mA*(nB*nB) matrix of doubles.
+%! @item err
+%! Integer scalar equal to zero (if all goes well).
+%! @end table
+%! @sp 2
+%! @strong{Remarks}
+%! @sp 1
+%! [1] This routine is called by Dynare if and only the mex version is not compiled (also used for testing purposes).
+%! @sp 1
+%! [2] This routine can be called with three or four arguments. In the first case A*kron(B,B) is computed.
+%! @sp 2
+%! @strong{This function is called by:}
+%! @sp 1
+%! @ref{dr1}
+%! @sp 2
+%! @strong{This function calls:}
+%! @sp 1
+%! @ref{kronecker/A_times_B_kronecker_C}
+%!
+%! @end deftypefn
+%@eod:
+
+% Copyright (C) 1996-2011 Dynare Team
+% stephane DOT adjemian AT univ DASH lemans DOT fr
 %
 % This file is part of Dynare.
 %
@@ -33,11 +63,17 @@ function D = sparse_hessian_times_B_kronecker_C(A,B,C)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+A = varargin{1};
+B = varargin{2};
+C = varargin{3};
+fake = varargin{nargin};
+
 switch nargin
+  case 4
+    [D, fake] = A_times_B_kronecker_C(A,B,C,fake);
   case 3
-    D = A_times_B_kronecker_C(A,B,C);
-  case 2
-    D = A_times_B_kronecker_C(A,B,B);
+    [D, fake] = A_times_B_kronecker_C(A,B,C);
   otherwise
     error('Two or Three input arguments required!')
 end
+err = 0;

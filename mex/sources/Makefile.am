@@ -1,17 +1,19 @@
 SUBDIRS = estimation
 
 EXTRA_DIST = \
-	build_matlab.m \
-	build_matlab_multithread.m \
 	dynblas.h \
 	dynlapack.h \
 	dynmex.h \
 	mjdgges \
 	kronecker \
 	bytecode \
+	qzcomplex \
 	k_order_perturbation \
-	threads \
-	kalman
+	ordschur \
+	libslicot \
+	kalman_steady_state \
+	ms-sbvar \
+	block_kalman_filter
 
 clean-local:
 	rm -rf `find mex/sources -name *.o`

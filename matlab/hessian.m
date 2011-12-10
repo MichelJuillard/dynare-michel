@@ -1,5 +1,5 @@
 function hessian_mat = hessian(func,x,gstep,varargin)
-% function hessian_mat = hessian(func,x,varargin)
+% function hessian_mat = hessian(func,x,gstep,varargin)
 % Computes second order partial derivatives
 %
 % INPUTS
@@ -18,7 +18,7 @@ function hessian_mat = hessian(func,x,gstep,varargin)
 %    none
 %  
 
-% Copyright (C) 2001-2007 Dynare Team
+% Copyright (C) 2001-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -35,7 +35,9 @@ function hessian_mat = hessian(func,x,gstep,varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-func = str2func(func);
+if ~isa(func, 'function_handle') 
+    func = str2func(func);
+end
 n=size(x,1);
 h1=max(abs(x),sqrt(gstep)*ones(n,1))*eps^(1/6);
 h_1=h1;

@@ -15,7 +15,7 @@ function forcst_unc(y0,var_list)
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2006-2009 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -71,7 +71,7 @@ for i=1:replic
     params = rndprior(bayestopt_);
     set_parameters(params);
     % solve the model
-    [dr,info] = resol(oo_.steady_state,0);
+    [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
     % discard problematic cases
     if info
         continue
@@ -90,7 +90,7 @@ end
 
 oo_.forecast.accept_rate = (replic-m1)/replic;
 
-if options_.noprint == 0 & m1 < replic
+if options_.noprint == 0 && m1 < replic
     disp(' ')
     disp(' ')
     disp('FORECASTING WITH PARAMETER UNCERTAINTY:')
@@ -123,7 +123,7 @@ end
 
 % compute shock uncertainty around forecast with mean prior
 set_parameters(bayestopt_.p1);
-[dr,info] = resol(oo_.steady_state,0);
+[dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 [yf3,yf3_intv] = forcst(dr,y0,periods,var_list);
 yf3_1 = yf3'-[zeros(maximum_lag,n); yf3_intv];
 yf3_2 = yf3'+[zeros(maximum_lag,n); yf3_intv];
@@ -147,7 +147,7 @@ dynare_graph_close;
 
 % saving results
 save_results(yf_mean,'oo_.forecast.mean.',var_list);
-save_results(yf1(:,:,k1(1)),'oo_.forecast.HPDinf.',var_list); 
-save_results(yf1(:,:,k1(2)),'oo_.forecast.HPDsup.',var_list);  
+save_results(yf1(:,:,k1(1)),'oo_.forecast.HPDinf.',var_list);
+save_results(yf1(:,:,k1(2)),'oo_.forecast.HPDsup.',var_list);
 save_results(yf2(:,:,k2(1)),'oo_.forecast.HPDTotalinf.',var_list);
 save_results(yf2(:,:,k2(2)),'oo_.forecast.HPDTotalsup.',var_list);

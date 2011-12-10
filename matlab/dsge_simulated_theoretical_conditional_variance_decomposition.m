@@ -2,8 +2,8 @@ function [nvar,vartan,NumberOfConditionalDecompFiles] = ...
     dsge_simulated_theoretical_conditional_variance_decomposition(SampleSize,Steps,M_,options_,oo_,type)
 % This function computes the posterior or prior distribution of the conditional variance
 % decomposition of the endogenous variables (or a subset of the endogenous variables).
-% 
-% INPUTS 
+%
+% INPUTS
 %   SampleSize   [integer]       scalar, number of simulations.
 %   M_           [structure]     Dynare structure describing the model.
 %   options_     [structure]     Dynare structure defining global options.
@@ -11,12 +11,12 @@ function [nvar,vartan,NumberOfConditionalDecompFiles] = ...
 %   type         [string]        'prior' or 'posterior'
 %
 %
-% OUTPUTS  
+% OUTPUTS
 %   nvar                             [integer]  nvar is the number of stationary variables.
 %   vartan                           [char]     array of characters (with nvar rows).
 %   NumberOfConditionalDecompFiles   [integer]  scalar, number of prior or posterior data files (for covariance).
 
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2009-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -67,14 +67,14 @@ nar = options_.ar;
 options_.ar = 0;
 
 NumberOfDrawsFiles = rows(DrawsFiles);
-NumberOfSavedElementsPerSimulation = nvar*(nvar+1)/2*M_.exo_nbr*length(Steps);
+NumberOfSavedElementsPerSimulation = nvar*M_.exo_nbr*length(Steps);
 MaXNumberOfConditionalDecompLines = ceil(options_.MaxNumberOfBytes/NumberOfSavedElementsPerSimulation/8);
 
 if SampleSize<=MaXNumberOfConditionalDecompLines
-    Conditional_decomposition_array = zeros(nvar*(nvar+1)/2,length(Steps),M_.exo_nbr,SampleSize);
+    Conditional_decomposition_array = zeros(nvar,length(Steps),M_.exo_nbr,SampleSize);
     NumberOfConditionalDecompFiles = 1;
 else
-    Conditional_decomposition_array = zeros(nvar*(nvar+1)/2,length(Steps),M_.exo_nbr,MaXNumberOfConditionalDecompLines);
+    Conditional_decomposition_array = zeros(nvar,length(Steps),M_.exo_nbr,MaXNumberOfConditionalDecompLines);
     NumberOfLinesInTheLastConditionalDecompFile = mod(SampleSize,MaXNumberOfConditionalDecompLines);
     NumberOfConditionalDecompFiles = ceil(SampleSize/MaXNumberOfConditionalDecompLines);
 end
@@ -103,7 +103,7 @@ for file = 1:NumberOfDrawsFiles
             dr = pdraws{linee,2};
         else
             set_parameters(pdraws{linee,1});
-            [dr,info] = resol(oo_.steady_state,0);
+            [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
         end
         if first_call
             endo_nbr = M_.endo_nbr;
@@ -111,17 +111,14 @@ for file = 1:NumberOfDrawsFiles
             npred = dr.npred;
             iv = (1:endo_nbr)';
             ic = [ nstatic+(1:npred) endo_nbr+(1:size(dr.ghx,2)-npred) ]';
-            aux = dr.transition_auxiliary_variables;
-            k = find(aux(:,2) > npred);
-            aux(:,2) = aux(:,2) + nstatic;
-            aux(k,2) = aux(k,2) + dr.nfwrd;
-            StateSpaceModel.number_of_state_equations = M_.endo_nbr+rows(aux);
+            StateSpaceModel.number_of_state_equations = M_.endo_nbr;
             StateSpaceModel.number_of_state_innovations = M_.exo_nbr;
             StateSpaceModel.sigma_e_is_diagonal = M_.sigma_e_is_diagonal;
+            StateSpaceModel.order_var = dr.order_var;
             first_call = 0;
             clear('endo_nbr','nstatic','npred','k');
         end
-        [StateSpaceModel.transition_matrix,StateSpaceModel.impulse_matrix] = kalman_transition_matrix(dr,iv,ic,aux,M_.exo_nbr);
+        [StateSpaceModel.transition_matrix,StateSpaceModel.impulse_matrix] = kalman_transition_matrix(dr,iv,ic,M_.exo_nbr);
         StateSpaceModel.state_innovations_covariance_matrix = M_.Sigma_e;
         clear('dr');
         Conditional_decomposition_array(:,:,:,linea) = conditional_variance_decomposition(StateSpaceModel, Steps, ivar);
@@ -136,10 +133,10 @@ for file = 1:NumberOfDrawsFiles
                      'Conditional_decomposition_array');
             end
             if (ConditionalDecompFileNumber==NumberOfConditionalDecompFiles-1)% Prepare last round.
-                Conditional_decomposition_array = zeros(nvar*(nvar+1)/2, length(Steps),M_.exo_nbr,NumberOfLinesInTheLastConditionalDecompFile) ;
+                Conditional_decomposition_array = zeros(nvar, length(Steps),M_.exo_nbr,NumberOfLinesInTheLastConditionalDecompFile) ;
                 NumberOfConditionalDecompLines = NumberOfLinesInTheLastConditionalDecompFile;
             elseif ConditionalDecompFileNumber<NumberOfConditionalDecompFiles-1
-                Conditional_decomposition_array = zeros(nvar*(nvar+1)/2,length(Steps),M_.exo_nbr,MaXNumberOfConditionalDecompLines);
+                Conditional_decomposition_array = zeros(nvar,length(Steps),M_.exo_nbr,MaXNumberOfConditionalDecompLines);
             else
                 clear('Conditional_decomposition_array');
             end

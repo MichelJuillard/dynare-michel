@@ -8,7 +8,7 @@
  * and MATLAB_VERSION (for version 7.4, define it to 0x0704).
  *
  *
- * Copyright (C) 2009-2010 Dynare Team
+ * Copyright (C) 2009-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -32,9 +32,9 @@
 /* Starting from version 7.8, MATLAB BLAS expects ptrdiff_t arguments for integers */
 #if defined(MATLAB_MEX_FILE) && MATLAB_VERSION >= 0x0708
 # ifdef __cplusplus
-#  include <cstdlib>
+#  include <cstddef>
 # else
-#  include <stdlib.h>
+#  include <stddef.h>
 # endif
 typedef ptrdiff_t blas_int;
 #else
@@ -81,6 +81,11 @@ extern "C" {
              CONST_BLDOU a, CONST_BLINT lda, CONST_BLDOU x, CONST_BLINT incx,
              CONST_BLDOU beta, BLDOU y, CONST_BLINT incy);
 
+#define dsymv FORTRAN_WRAPPER(dsymv)
+  void dsymv(BLCHAR uplo, CONST_BLINT m, CONST_BLDOU alpha, CONST_BLDOU a,
+             CONST_BLINT lda, CONST_BLDOU b, CONST_BLINT ldb, CONST_BLDOU beta,
+             BLDOU c, CONST_BLINT ldc);
+
 #define dtrsv FORTRAN_WRAPPER(dtrsv)
   void dtrsv(BLCHAR uplo, BLCHAR trans, BLCHAR diag, CONST_BLINT n,
              CONST_BLDOU a, CONST_BLINT lda, BLDOU x, CONST_BLINT incx);
@@ -123,6 +128,16 @@ extern "C" {
 #define dsyr FORTRAN_WRAPPER(dsyr)
   void dsyr(BLCHAR uplo, CONST_BLINT n, CONST_BLDOU alpha, CONST_BLDOU x,
             CONST_BLINT incx, BLDOU a, CONST_BLINT lda);
+
+#define dtrmm FORTRAN_WRAPPER(dtrmm)
+  void dtrmm(BLCHAR side, BLCHAR uplo, BLCHAR transa, BLCHAR diag, CONST_BLINT m,
+             CONST_BLINT n, CONST_BLDOU alpha, CONST_BLDOU a, CONST_BLINT lda,
+             BLDOU b, CONST_BLINT ldb);
+
+#define strmm FORTRAN_WRAPPER(strmm)
+  void strmm(BLCHAR side, BLCHAR uplo, BLCHAR transa, BLCHAR diag, CONST_BLINT m,
+             CONST_BLINT n, CONST_BLFLT alpha, CONST_BLFLT a, CONST_BLINT lda,
+             BLFLT b, CONST_BLINT ldb);
 
 #ifdef __cplusplus
 } /* extern "C" */

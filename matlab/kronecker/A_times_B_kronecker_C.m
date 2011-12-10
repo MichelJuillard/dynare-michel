@@ -1,22 +1,50 @@
-function D = A_times_B_kronecker_C(A,B,C)
-%function D = A_times_B_kronecker_C(A,B,C)
-% Computes A * kron(B,C). 
-%
-% INPUTS
-%   A  [double] mA*nA matrix.
-%   B  [double] mB*nB matrix.
-%   C  [double] mC*nC matrix.
-%  
-% OUTPUTS
-%   D  [double] mA*(nC*nB) or mA*(nB*nB) matrix.
-%  
-% ALGORITHM
-%   none.    
-%
-% SPECIAL REQUIREMENTS
-%   none.
+function [D, err] = A_times_B_kronecker_C(A,B,C,fake)
 
-% Copyright (C) 1996-2008 Dynare Team
+%@info:
+%! @deftypefn {Function File} {[@var{D}, @var{err}] =} A_times_B_kronecker_C (@var{A},@var{B},@var{C},@var{fake})
+%! @anchor{kronecker/A_times_B_kronecker_C}
+%! @sp 1
+%! Computes A*kron(B,C).
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item A
+%! mA*nA matrix of doubles.
+%! @item B
+%! mB*nB matrix of doubles.
+%! @item C
+%! mC*nC matrix of doubles.
+%! @item fake
+%! Anything you want, just a fake parameter (because the mex version admits a last argument specifying the number of threads to be used in parallel mode).
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item D
+%! mA*(nC*nB) or mA*(nB*nB) matrix of doubles.
+%! @item err
+%! Integer scalar equal to zero (if all goes well).
+%! @end table
+%! @sp 2
+%! @strong{Remarks}
+%! @sp 1
+%! [1] This routine is called by Dynare if and only the mex version is not compiled (also used for testing purposes).
+%! @sp 1
+%! [2] This routine can be called with three or four arguments. In the first case A*kron(B,B) is computed.
+%! @sp 2
+%! @strong{This function is called by:}
+%! @sp 1
+%! @ref{kronecker/sparse_hessian_times_B_kronecker_C}, @ref{dr1}, @ref{simult_}
+%! @sp 2
+%! @strong{This function calls:}
+%!
+%! @end deftypefn
+%@eod:
+
+% Copyright (C) 1996-2011 Dynare Team
+% stephane DOT adjemian AT univ DASH lemans DOT fr
 %
 % This file is part of Dynare.
 %
@@ -34,16 +62,15 @@ function D = A_times_B_kronecker_C(A,B,C)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % Chek number of inputs and outputs.
-if nargin>3 | nargin<2
-    error('Two or Three input arguments required!')
+if nargin>4 || nargin<3
+    error('A_times_B_kronecker_C takes 3 or 4 input arguments and provides 2 output arguments.')
 end
-if nargout>1
-    error('Too many output arguments!')
-end
+
+
 % Get & check dimensions. Initialization of the output matrix.
 [mA,nA] = size(A);
 [mB,nB] = size(B);
-if nargin == 3
+if nargin == 4
     [mC,nC] = size(C);
     if mB*mC ~= nA
         error('Input dimension error!')
@@ -59,12 +86,12 @@ else
 end
 % Computational part.
 if loop
-    if nargin == 3
-        k1 = 1; 
+    if nargin == 4
+        k1 = 1;
         for i1=1:nB
             for i2=1:nC
                 D(:,k1) = A * kron(B(:,i1),C(:,i2));
-                k1 = k1 + 1; 
+                k1 = k1 + 1;
             end
         end
     else
@@ -72,14 +99,15 @@ if loop
         for i1=1:nB
             for i2=1:nB
                 D(:,k1) = A * kron(B(:,i1),B(:,i2));
-                k1 = k1 + 1; 
+                k1 = k1 + 1;
             end
         end
     end
 else
-    if nargin == 3
+    if nargin == 4
         D = A * kron(B,C);
     else
         D = A * kron(B,B);
     end
 end
+err = 0;

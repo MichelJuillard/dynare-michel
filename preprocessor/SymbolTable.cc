@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 Dynare Team
+ * Copyright (C) 2003-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -24,12 +24,13 @@
 
 #include "SymbolTable.hh"
 
-AuxVarInfo::AuxVarInfo(int symb_id_arg, aux_var_t type_arg, int orig_symb_id_arg, int orig_lead_lag_arg, string expectation_information_set_name_arg) :
+AuxVarInfo::AuxVarInfo(int symb_id_arg, aux_var_t type_arg, int orig_symb_id_arg, int orig_lead_lag_arg,
+                       int equation_number_for_multiplier_arg) :
   symb_id(symb_id_arg),
   type(type_arg),
   orig_symb_id(orig_symb_id_arg),
   orig_lead_lag(orig_lead_lag_arg),
-  expectation_information_set_name(expectation_information_set_name_arg)
+  equation_number_for_multiplier(equation_number_for_multiplier_arg)
 {
 }
 
@@ -169,8 +170,8 @@ SymbolTable::writeOutput(ostream &output) const throw (NotYetFrozenException)
       output << "M_.exo_names_tex = '" << getTeXName(exo_ids[0]) << "';" << endl;
       for (int id = 1; id < exo_nbr(); id++)
         {
-          output << "M_.exo_names = strvcat(M_.exo_names, '" << getName(exo_ids[id]) << "');" << endl
-                 << "M_.exo_names_tex = strvcat(M_.exo_names_tex, '" << getTeXName(exo_ids[id]) << "');" << endl;
+          output << "M_.exo_names = char(M_.exo_names, '" << getName(exo_ids[id]) << "');" << endl
+                 << "M_.exo_names_tex = char(M_.exo_names_tex, '" << getTeXName(exo_ids[id]) << "');" << endl;
         }
     }
   if (exo_det_nbr() > 0)
@@ -179,8 +180,8 @@ SymbolTable::writeOutput(ostream &output) const throw (NotYetFrozenException)
       output << "M_.exo_det_names_tex = '" << getTeXName(exo_det_ids[0]) << "';" << endl;
       for (int id = 1; id < exo_det_nbr(); id++)
         {
-          output << "M_.exo_det_names = strvcat(M_.exo_det_names, '" << getName(exo_det_ids[id]) << "');" << endl
-                 << "M_.exo_det_names_tex = strvcat(M_.exo_det_names_tex, '" << getTeXName(exo_det_ids[id]) << "');" << endl;
+          output << "M_.exo_det_names = char(M_.exo_det_names, '" << getName(exo_det_ids[id]) << "');" << endl
+                 << "M_.exo_det_names_tex = char(M_.exo_det_names_tex, '" << getTeXName(exo_det_ids[id]) << "');" << endl;
         }
     }
   if (endo_nbr() > 0)
@@ -189,8 +190,8 @@ SymbolTable::writeOutput(ostream &output) const throw (NotYetFrozenException)
       output << "M_.endo_names_tex = '" << getTeXName(endo_ids[0]) << "';" << endl;
       for (int id = 1; id < endo_nbr(); id++)
         {
-          output << "M_.endo_names = strvcat(M_.endo_names, '" << getName(endo_ids[id]) << "');" << endl
-                 << "M_.endo_names_tex = strvcat(M_.endo_names_tex, '" << getTeXName(endo_ids[id]) << "');" << endl;
+          output << "M_.endo_names = char(M_.endo_names, '" << getName(endo_ids[id]) << "');" << endl
+                 << "M_.endo_names_tex = char(M_.endo_names_tex, '" << getTeXName(endo_ids[id]) << "');" << endl;
         }
     }
   if (param_nbr() > 0)
@@ -199,8 +200,8 @@ SymbolTable::writeOutput(ostream &output) const throw (NotYetFrozenException)
       output << "M_.param_names_tex = '" << getTeXName(param_ids[0]) << "';" << endl;
       for (int id = 1; id < param_nbr(); id++)
         {
-          output << "M_.param_names = strvcat(M_.param_names, '" << getName(param_ids[id]) << "');" << endl
-                 << "M_.param_names_tex = strvcat(M_.param_names_tex, '" << getTeXName(param_ids[id]) << "');" << endl;
+          output << "M_.param_names = char(M_.param_names, '" << getName(param_ids[id]) << "');" << endl
+                 << "M_.param_names_tex = char(M_.param_names_tex, '" << getTeXName(param_ids[id]) << "');" << endl;
 
           if (getName(param_ids[id]) == "dsge_prior_weight")
             output << "options_.dsge_var = 1;" << endl;
@@ -227,13 +228,13 @@ SymbolTable::writeOutput(ostream &output) const throw (NotYetFrozenException)
           case avExoLead:
           case avExpectation:
             break;
-          case avExpectationRIS:
-            output << "M_.aux_vars(" << i+1 << ").expectation_information_set_name = '" << aux_vars[i].get_expectation_information_set_name() << "';" << endl;
-            break;
           case avEndoLag:
           case avExoLag:
             output << "M_.aux_vars(" << i+1 << ").orig_index = " << getTypeSpecificID(aux_vars[i].get_orig_symb_id())+1 << ";" << endl
                    << "M_.aux_vars(" << i+1 << ").orig_lead_lag = " << aux_vars[i].get_orig_lead_lag() << ";" << endl;
+            break;
+          case avMultiplier:
+            output << "M_.aux_vars(" << i+1 << ").eq_nbr = '" << aux_vars[i].get_equation_number_for_multiplier() << "';" << endl;
             break;
           }
       }
@@ -252,7 +253,10 @@ SymbolTable::writeOutput(ostream &output) const throw (NotYetFrozenException)
       output << "options_.varobs = [];" << endl;
       for (vector<int>::const_iterator it = varobs.begin();
            it != varobs.end(); it++)
-        output << "options_.varobs = strvcat(options_.varobs, '" << getName(*it) << "');" << endl;
+        if (it == varobs.begin())
+          output << "options_.varobs = '" << getName(*it) << "';" << endl;
+        else
+          output << "options_.varobs = char(options_.varobs, '" << getName(*it) << "');" << endl;
 
       output << "options_.varobs_id = [ ";
       for (vector<int>::const_iterator it = varobs.begin();
@@ -282,7 +286,7 @@ SymbolTable::addLeadAuxiliaryVarInternal(bool endo, int index) throw (FrozenExce
       exit(EXIT_FAILURE);
     }
 
-  aux_vars.push_back(AuxVarInfo(symb_id, (endo ? avEndoLead : avExoLead), 0, 0, ""));
+  aux_vars.push_back(AuxVarInfo(symb_id, (endo ? avEndoLead : avExoLead), 0, 0, 0));
 
   return symb_id;
 }
@@ -308,7 +312,7 @@ SymbolTable::addLagAuxiliaryVarInternal(bool endo, int orig_symb_id, int orig_le
       exit(EXIT_FAILURE);
     }
 
-  aux_vars.push_back(AuxVarInfo(symb_id, (endo ? avEndoLag : avExoLag), orig_symb_id, orig_lead_lag, ""));
+  aux_vars.push_back(AuxVarInfo(symb_id, (endo ? avEndoLag : avExoLag), orig_symb_id, orig_lead_lag, 0));
 
   return symb_id;
 }
@@ -338,16 +342,13 @@ SymbolTable::addExoLagAuxiliaryVar(int orig_symb_id, int orig_lead_lag) throw (F
 }
 
 int
-SymbolTable::addExpectationAuxiliaryVar(int information_set, int index, const string &information_set_name) throw (FrozenException)
+SymbolTable::addExpectationAuxiliaryVar(int information_set, int index) throw (FrozenException)
 {
   ostringstream varname;
   int symb_id;
 
-  if (information_set_name.empty())
-    varname << "AUX_EXPECT_" << (information_set < 0 ? "LAG" : "LEAD") << "_"
-            << abs(information_set) << "_" << index;
-  else
-    varname << "AUX_EXPECT_" << information_set_name << "_" << index;
+  varname << "AUX_EXPECT_" << (information_set < 0 ? "LAG" : "LEAD") << "_"
+          << abs(information_set) << "_" << index;
 
   try
     {
@@ -359,9 +360,40 @@ SymbolTable::addExpectationAuxiliaryVar(int information_set, int index, const st
       exit(EXIT_FAILURE);
     }
 
-  aux_vars.push_back(AuxVarInfo(symb_id, (information_set_name.empty() ? avExpectation : avExpectationRIS), 0, 0, information_set_name));
+  aux_vars.push_back(AuxVarInfo(symb_id, avExpectation, 0, 0, 0));
 
   return symb_id;
+}
+
+int
+SymbolTable::addMultiplierAuxiliaryVar(int index) throw (FrozenException)
+{
+  ostringstream varname;
+  int symb_id;
+  varname << "MULT_" << index+1;
+
+  try
+    {
+      symb_id = addSymbol(varname.str(), eEndogenous);
+    }
+  catch (AlreadyDeclaredException &e)
+    {
+      cerr << "ERROR: you should rename your variable called " << varname.str() << ", this name is internally used by Dynare" << endl;
+      exit(EXIT_FAILURE);
+    }
+
+  aux_vars.push_back(AuxVarInfo(symb_id, avMultiplier, 0, 0, index));
+  return symb_id;
+}
+
+int
+SymbolTable::searchAuxiliaryVars(int orig_symb_id, int orig_lead_lag) const throw (SearchFailedException)
+{
+  for (size_t i = 0; i < aux_vars.size(); i++)
+    if ((aux_vars[i].get_type() == avEndoLag || aux_vars[i].get_type() == avExoLag)
+        && aux_vars[i].get_orig_symb_id() == orig_symb_id && aux_vars[i].get_orig_lead_lag() == orig_lead_lag)
+      return aux_vars[i].get_symb_id();
+  throw SearchFailedException(orig_symb_id, orig_lead_lag);
 }
 
 void
@@ -420,4 +452,15 @@ SymbolTable::getObservedVariableIndex(int symb_id) const
   vector<int>::const_iterator it = find(varobs.begin(), varobs.end(), symb_id);
   assert(it != varobs.end());
   return (int) (it - varobs.begin());
+}
+
+vector <int>
+SymbolTable::getTrendVarIds() const
+{
+  vector <int> trendVars;
+  for (symbol_table_type::const_iterator it = symbol_table.begin();
+       it != symbol_table.end(); it++)
+    if (getType(it->second) == eTrend)
+      trendVars.push_back(it->second);
+  return trendVars;
 }

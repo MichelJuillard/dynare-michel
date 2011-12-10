@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 Dynare Team
+ * Copyright (C) 2003-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -103,6 +103,18 @@ public:
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
+class DiscretionaryPolicyStatement : public Statement
+{
+private:
+  const SymbolList symbol_list;
+  const OptionsList options_list;
+public:
+  DiscretionaryPolicyStatement(const SymbolList &symbol_list_arg,
+			       const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
 class RplotStatement : public Statement
 {
 private:
@@ -116,10 +128,8 @@ public:
 
 class UnitRootVarsStatement : public Statement
 {
-private:
-  const SymbolList symbol_list;
 public:
-  UnitRootVarsStatement(const SymbolList &symbol_list_arg);
+  UnitRootVarsStatement(void);
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
@@ -169,12 +179,12 @@ public:
 class ObservationTrendsStatement : public Statement
 {
 public:
-  typedef map<string, NodeID> trend_elements_type;
+  typedef map<string, expr_t> trend_elements_t;
 private:
-  const trend_elements_type trend_elements;
+  const trend_elements_t trend_elements;
   const SymbolTable &symbol_table;
 public:
-  ObservationTrendsStatement(const trend_elements_type &trend_elements_arg,
+  ObservationTrendsStatement(const trend_elements_t &trend_elements_arg,
                              const SymbolTable &symbol_table_arg);
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
@@ -185,6 +195,7 @@ private:
   const SymbolList symbol_list;
 public:
   OsrParamsStatement(const SymbolList &symbol_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
@@ -225,12 +236,12 @@ public:
 class ModelComparisonStatement : public Statement
 {
 public:
-  typedef vector<pair<string, string> > filename_list_type;
+  typedef vector<pair<string, string> > filename_list_t;
 private:
-  filename_list_type filename_list;
+  filename_list_t filename_list;
   OptionsList options_list;
 public:
-  ModelComparisonStatement(const filename_list_type &filename_list_arg,
+  ModelComparisonStatement(const filename_list_t &filename_list_arg,
                            const OptionsList &options_list_arg);
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
@@ -241,7 +252,7 @@ class EstimationParams
 public:
   int type;
   string name, name2, prior;
-  NodeID init_val, low_bound, up_bound, mean, std, p3, p4, jscale;
+  expr_t init_val, low_bound, up_bound, mean, std, p3, p4, jscale;
 
   void
   init(const DataTree &datatree)
@@ -298,47 +309,17 @@ public:
 class OptimWeightsStatement : public Statement
 {
 public:
-  typedef map<string, NodeID> var_weights_type;
-  typedef map<pair<string, string>, NodeID> covar_weights_type;
+  typedef map<string, expr_t> var_weights_t;
+  typedef map<pair<string, string>, expr_t> covar_weights_t;
 private:
-  const var_weights_type var_weights;
-  const covar_weights_type covar_weights;
+  const var_weights_t var_weights;
+  const covar_weights_t covar_weights;
   const SymbolTable &symbol_table;
 public:
-  OptimWeightsStatement(const var_weights_type &var_weights_arg,
-                        const covar_weights_type &covar_weights_arg,
+  OptimWeightsStatement(const var_weights_t &var_weights_arg,
+                        const covar_weights_t &covar_weights_arg,
                         const SymbolTable &symbol_table_arg);
-  virtual void writeOutput(ostream &output, const string &basename) const;
-};
-
-class CalibStatement : public Statement
-{
-private:
-  const int covar;
-public:
-  CalibStatement(int covar_arg);
-  virtual void writeOutput(ostream &output, const string &basename) const;
-};
-
-class CalibVarStatement : public Statement
-{
-public:
-  //! Maps a variable to a pair (weight, expression)
-  typedef map<string, pair<string, NodeID> > calib_var_type;
-  //! Maps a pair of variables to a pair (weight, expression)
-  typedef map<pair<string, string>, pair<string, NodeID> > calib_covar_type;
-  //! Maps a pair (variable, autocorr) to a pair (weight, expression)
-  typedef map<pair<string, int>, pair<string, NodeID> > calib_ac_type;
-private:
-  const calib_var_type calib_var;
-  const calib_covar_type calib_covar;
-  const calib_ac_type calib_ac;
-  const SymbolTable &symbol_table;
-public:
-  CalibVarStatement(const calib_var_type &calib_var_arg,
-                    const calib_covar_type &calib_covar_arg,
-                    const calib_ac_type &calib_ac_arg,
-                    const SymbolTable &symbol_table_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
@@ -359,6 +340,8 @@ public:
   /*! \todo allow for the possibility of disabling temporary terms */
   virtual void computingPass();
   virtual void writeOutput(ostream &output, const string &basename) const;
+  //! Return the Planner Objective
+  StaticModel *getPlannerObjective() const;
 };
 
 class BVARDensityStatement : public Statement
@@ -393,12 +376,74 @@ public:
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
-class MS_SBVARStatement : public Statement
+class MSSBVAREstimationStatement : public Statement
 {
 private:
   const OptionsList options_list;
 public:
-  MS_SBVARStatement(const OptionsList &options_list_arg);
+  MSSBVAREstimationStatement(const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
+class MSSBVARSimulationStatement : public Statement
+{
+private:
+  const OptionsList options_list;
+public:
+  MSSBVARSimulationStatement(const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
+class MSSBVARComputeMDDStatement : public Statement
+{
+private:
+  const OptionsList options_list;
+public:
+  MSSBVARComputeMDDStatement(const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
+class MSSBVARComputeProbabilitiesStatement : public Statement
+{
+private:
+  const OptionsList options_list;
+public:
+  MSSBVARComputeProbabilitiesStatement(const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
+class MSSBVARIrfStatement : public Statement
+{
+private:
+  const SymbolList symbol_list;
+  const OptionsList options_list;
+public:
+  MSSBVARIrfStatement(const SymbolList &symbol_list_arg,
+		      const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
+class MSSBVARForecastStatement : public Statement
+{
+private:
+  const OptionsList options_list;
+public:
+  MSSBVARForecastStatement(const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
+class MSSBVARVarianceDecompositionStatement : public Statement
+{
+private:
+  const OptionsList options_list;
+public:
+  MSSBVARVarianceDecompositionStatement(const OptionsList &options_list_arg);
   virtual void checkPass(ModFileStructure &mod_file_struct);
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
@@ -406,7 +451,7 @@ public:
 class IdentificationStatement : public Statement
 {
 private:
-  const OptionsList options_list;
+  OptionsList options_list;
 public:
   IdentificationStatement(const OptionsList &options_list_arg);
   virtual void checkPass(ModFileStructure &mod_file_struct);
@@ -465,17 +510,29 @@ public:
 class SvarIdentificationStatement : public Statement
 {
 public:
-  typedef map<pair<int, int>, vector<int> > svar_identification_exclusion_type;
+  //  typedef map<pair<int, int>, vector<int> > svar_identification_exclusion_t;
+  struct svar_identification_restriction
+  {
+    int equation;
+    int restriction_nbr;
+    int lag;
+    int variable;
+    expr_t value;
+  };    
+
+  typedef vector< svar_identification_restriction > svar_identification_restrictions_t;
 private:
-  const svar_identification_exclusion_type exclusion;
+  const svar_identification_restrictions_t restrictions;
   const bool upper_cholesky_present;
   const bool lower_cholesky_present;
+  const bool constants_exclusion_present;
   const SymbolTable &symbol_table;
   int getMaxLag() const;
 public:
-  SvarIdentificationStatement(const svar_identification_exclusion_type &exclusion_arg,
+  SvarIdentificationStatement(const svar_identification_restrictions_t &restrictions_arg,
                               const bool &upper_cholesky_present_arg,
                               const bool &lower_cholesky_present_arg,
+			      const bool &constants_exclusion_present_arg,
                               const SymbolTable &symbol_table_arg);
   virtual void checkPass(ModFileStructure &mod_file_struct);
   virtual void writeOutput(ostream &output, const string &basename) const;

@@ -21,7 +21,7 @@ function [post_mean, post_median, post_var, hpd_interval, post_deciles, density]
 %                                                   kernel_density_estimate.m.
 %
 
-% Copyright (C) 2005-2008 Dynare Team
+% Copyright (C) 2005-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -70,9 +70,13 @@ post_deciles = xx([round(0.1*number_of_draws) ...
 density = [];
 if info
     number_of_grid_points = 2^9;      % 2^9 = 512 !... Must be a power of two.
-    bandwidth = 0;                    % Rule of thumb optimal bandwidth parameter.
-    kernel_function = 'gaussian';     % Gaussian kernel for Fast Fourrier Transform approximaton.  
-    optimal_bandwidth = mh_optimal_bandwidth(xx,number_of_draws,bandwidth,kernel_function);
-    [density(:,1),density(:,2)] = kernel_density_estimate(xx,number_of_grid_points,...
-                                                      number_of_draws,optimal_bandwidth,kernel_function);
+    if post_var > 1e-12
+        bandwidth = 0;                    % Rule of thumb optimal bandwidth parameter.
+        kernel_function = 'gaussian';     % Gaussian kernel for Fast Fourrier Transform approximaton.  
+        optimal_bandwidth = mh_optimal_bandwidth(xx,number_of_draws,bandwidth,kernel_function);
+        [density(:,1),density(:,2)] = kernel_density_estimate(xx,number_of_grid_points,...
+                                                          number_of_draws,optimal_bandwidth,kernel_function);
+    else
+        density = NaN(number_of_grid_points,2);
+    end
 end

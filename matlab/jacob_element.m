@@ -3,7 +3,7 @@ function d=jacob_element(func,element,args)
 % returns an entry of the finite differences approximation to the jacobian of func
 %
 % INPUTS
-%    func       [function handle]  associated with the function
+%    func       [function name]    string with name of the function
 %    element    [int]              the index showing the element within the jacobian that should be returned
 %    args       [cell array]       arguments provided to func
 %
@@ -13,7 +13,7 @@ function d=jacob_element(func,element,args)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2010 Dynare Team
+% Copyright (C) 2010-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -30,14 +30,17 @@ function d=jacob_element(func,element,args)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+func = str2func(func);
+
 h=10e-6;
 pargs=args;
 margs=args;
-for i=1:size(args,2)
+% length(args) is used instead of size(args, 2) to avoid to transpose column vectors
+for i=1:length(args)
     if i==element
         pargs{i} = pargs{i} + h;
         margs{i} = margs{i} - h;
     end
 end
 d=(func(pargs{:})...
-  -func(margs{:}))/(2*h);
+   -func(margs{:}))/(2*h);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2009 Dynare Team
+ * Copyright (C) 2007-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -25,57 +25,19 @@
 #include <cmath>
 #include <map>
 #include <ctime>
+
+#ifdef OCTAVE_MEX_FILE
+# define CHAR_LENGTH 1
+#else
+# define CHAR_LENGTH 2
+#endif
+
 #include "Mem_Mngr.hh"
+#include "ErrorHandling.hh"
 #define NEW_ALLOC
 #define MARKOVITZ
 
 using namespace std;
-
-#ifdef _MSC_VER
-# include <limits>
-
-extern unsigned long _nan[2];
-extern double NAN;
-
-inline bool
-isnan(double value)
-{
-  return _isnan(value);
-}
-
-inline bool
-isinf(double value)
-{
-  return (std::numeric_limits<double>::has_infinity
-          && value == std::numeric_limits<double>::infinity());
-}
-
-template<typename T>
-inline T
-asinh(T x)
-{
-  return log(x+sqrt(x*x+1));
-}
-
-template<typename T>
-inline T
-acosh(T x)
-{
-  if (!(x >= 1.0))
-    return sqrt(-1.0);
-  return log(x+sqrt(x*x-1.0));
-}
-
-template<typename T>
-inline T
-atanh(T x)
-{
-  if (!(x > -1.0 && x < 1.0))
-    return sqrt(-1.0);
-  return log((1.0+x)/(1.0-x))/2.0;
-}
-
-#endif
 
 struct t_save_op_s
 {
@@ -96,22 +58,30 @@ const double very_big = 1e24;
 const int alt_symbolic_count_max = 1;
 const double mem_increasing_factor = 1.1;
 
-class SparseMatrix
+class SparseMatrix : public ErrorMsg
 {
 public:
   SparseMatrix();
-  int simulate_NG1(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, bool cvg, int &iter, int minimal_solving_periods, int Block_number);
-  bool simulate_NG(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter, bool steady_state, int Block_number);
+  void Simulate_Newton_Two_Boundaries(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, bool cvg, int &iter, int minimal_solving_periods, int stack_solve_algo, unsigned int endo_name_length, char *P_endo_names) /*throw(ErrorHandlingException)*/;
+  void Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter, bool steady_state, int stack_solve_algo, int solve_algo);
   void Direct_Simulate(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, int iter);
   void fixe_u(double **u, int u_count_int, int max_lag_plus_max_lead_plus_1);
-  void Read_SparseMatrix(string file_name, const int Size, int periods, int y_kmin, int y_kmax, bool steady_state, bool two_boundaries);
+  void Read_SparseMatrix(string file_name, const int Size, int periods, int y_kmin, int y_kmax, bool steady_state, bool two_boundaries, int stack_solve_algo, int solve_algo);
   void Read_file(string file_name, int periods, int u_size1, int y_size, int y_kmin, int y_kmax, int &nb_endo, int &u_count, int &u_count_init, double *u);
   double g0, gp0, glambda2, try_at_iteration;
+
 private:
-  void Init(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM);
-  void ShortInit(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM);
-  void Simple_Init(int it_, int y_kmin, int y_kmax, int Size, std::map<std::pair<std::pair<int, int>, int>, int> &IM);
-  void End(int Size);
+  void Init_GE(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM);
+  void Init_Matlab_Sparse(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM, mxArray *A_m, mxArray *b_m, mxArray *x0_m);
+  void Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>, int> &IM, mxArray *A_m, mxArray *b_m, bool &zero_solution, mxArray *x0_m);
+  void Simple_Init(int it_, int y_kmin, int y_kmax, int Size, std::map<std::pair<std::pair<int, int>, int>, int> &IM, bool &zero_solution);
+  void End_GE(int Size);
+  void Solve_ByteCode_Symbolic_Sparse_GaussianElimination(int Size, bool symbolic, int Block_number);
+  void Solve_ByteCode_Sparse_GaussianElimination(int Size, int blck, bool steady_state, int it_);
+  void Solve_Matlab_Relaxation(mxArray *A_m, mxArray *b_m, unsigned int Size, double slowc_l, bool is_two_boundaries, int  it_);
+  void Solve_Matlab_LU_UMFPack(mxArray *A_m, mxArray *b_m, int Size, double slowc_l, bool is_two_boundaries, int it_);
+  void Solve_Matlab_GMRES(mxArray *A_m, mxArray *b_m, int Size, double slowc, int block, bool is_two_boundaries, int it_, bool steady_state, mxArray *x0_m);
+  void Solve_Matlab_BiCGStab(mxArray *A_m, mxArray *b_m, int Size, double slowc, int block, bool is_two_boundaries, int it_, mxArray *x0_m, bool steady_state);
   bool compare(int *save_op, int *save_opa, int *save_opaa, int beg_t, int periods, long int nop4,  int Size
 #ifdef PROFILER
                , long int *ndiv, long int *nsub
@@ -140,6 +110,14 @@ private:
 #endif
                );
   double simple_bksub(int it_, int Size, double slowc_l);
+  mxArray *Sparse_transpose(mxArray *A_m);
+  mxArray *Sparse_mult_SAT_SB(mxArray *A_m, mxArray *B_m);
+  mxArray *Sparse_mult_SAT_B(mxArray *A_m, mxArray *B_m);
+  mxArray *mult_SAT_B(mxArray *A_m, mxArray *B_m);
+  mxArray *Sparse_substract_SA_SB(mxArray *A_m, mxArray *B_m);
+  mxArray *Sparse_substract_A_SB(mxArray *A_m, mxArray *B_m);
+  mxArray *substract_A_B(mxArray *A_m, mxArray *B_m);
+
   stack<double> Stack;
   int nb_prologue_table_u, nb_first_table_u, nb_middle_table_u, nb_last_table_u;
   int nb_prologue_table_y, nb_first_table_y, nb_middle_table_y, nb_last_table_y;
@@ -155,7 +133,7 @@ private:
   map<pair<int, int>, NonZeroElem *> Mapped_Array;
   int *NbNZRow, *NbNZCol;
   NonZeroElem **FNZE_R, **FNZE_C;
-  int nb_endo, u_count_init;
+  int u_count_init;
 
   int *pivot, *pivotk, *pivot_save;
   double *pivotv, *pivotva;
@@ -171,11 +149,14 @@ private:
   long int nop_all, nop1, nop2;
   map<pair<pair<int, int>, int>, int> IM_i;
 protected:
+  vector<double> residual;
   int u_count_alloc, u_count_alloc_save;
-  double *u, *y, *ya;
-  double res1, res2, max_res, max_res_idx;
+  vector<double *> jac;
+  double *jcb;
+  double res1, res2, max_res;
+  int max_res_idx;
   double slowc, slowc_save, prev_slowc_save, markowitz_c;
-  int y_kmin, y_kmax, y_size, periods, y_decal;
+  int y_decal;
   int  *index_vara, *index_equa;
   int u_count, tbreak_g;
   int iter;
@@ -184,6 +165,7 @@ protected:
   int restart;
   bool error_not_printed;
   double g_lambda1, g_lambda2, gp_0;
+  double lu_inc_tol;
 };
 
 #endif

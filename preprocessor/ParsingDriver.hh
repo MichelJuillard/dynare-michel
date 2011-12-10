@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 Dynare Team
+ * Copyright (C) 2003-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -68,6 +68,9 @@ public:
   //! The filename being parsed
   /*! The bison parser locations (begin and end) contain a pointer to that string */
   string filename;
+
+  //! Increment the location counter given a token
+  void location_increment(Dynare::parser::location_type *yylloc, const char *yytext);
 };
 
 //! Drives the scanning and parsing of the .mod file, and constructs its abstract representation
@@ -104,69 +107,85 @@ private:
   //! Stores options lists
   OptionsList options_list;
   //! Temporary storage for trend elements
-  ObservationTrendsStatement::trend_elements_type trend_elements;
+  ObservationTrendsStatement::trend_elements_t trend_elements;
   //! Temporary storage for filename list of ModelComparison
-  ModelComparisonStatement::filename_list_type filename_list;
+  ModelComparisonStatement::filename_list_t filename_list;
   //! Temporary storage for list of EstimationParams (from estimated_params* statements)
   vector<EstimationParams> estim_params_list;
   //! Temporary storage of variances from optim_weights
-  OptimWeightsStatement::var_weights_type var_weights;
+  OptimWeightsStatement::var_weights_t var_weights;
   //! Temporary storage of covariances from optim_weights
-  OptimWeightsStatement::covar_weights_type covar_weights;
-  //! Temporary storage of variances from calib_var
-  CalibVarStatement::calib_var_type calib_var;
-  //! Temporary storage of covariances from calib_var
-  CalibVarStatement::calib_covar_type calib_covar;
-  //! Temporary storage of autocorrelations from calib_var
-  CalibVarStatement::calib_ac_type calib_ac;
+  OptimWeightsStatement::covar_weights_t covar_weights;
   //! Temporary storage for deterministic shocks
-  ShocksStatement::det_shocks_type det_shocks;
+  ShocksStatement::det_shocks_t det_shocks;
   //! Temporary storage for periods of deterministic shocks
   vector<pair<int, int> > det_shocks_periods;
   //! Temporary storage for values of deterministic shocks
-  vector<NodeID> det_shocks_values;
+  vector<expr_t> det_shocks_values;
   //! Temporary storage for variances of shocks
-  ShocksStatement::var_and_std_shocks_type var_shocks;
+  ShocksStatement::var_and_std_shocks_t var_shocks;
   //! Temporary storage for standard errors of shocks
-  ShocksStatement::var_and_std_shocks_type std_shocks;
+  ShocksStatement::var_and_std_shocks_t std_shocks;
   //! Temporary storage for covariances of shocks
-  ShocksStatement::covar_and_corr_shocks_type covar_shocks;
+  ShocksStatement::covar_and_corr_shocks_t covar_shocks;
   //! Temporary storage for correlations of shocks
-  ShocksStatement::covar_and_corr_shocks_type corr_shocks;
+  ShocksStatement::covar_and_corr_shocks_t corr_shocks;
   //! Temporary storage for Sigma_e rows
-  SigmaeStatement::row_type sigmae_row;
+  SigmaeStatement::row_t sigmae_row;
   //! Temporary storage for Sigma_e matrix
-  SigmaeStatement::matrix_type sigmae_matrix;
+  SigmaeStatement::matrix_t sigmae_matrix;
   //! Temporary storage for initval/endval blocks
-  InitOrEndValStatement::init_values_type init_values;
+  InitOrEndValStatement::init_values_t init_values;
   //! Temporary storage for histval blocks
-  HistValStatement::hist_values_type hist_values;
+  HistValStatement::hist_values_t hist_values;
   //! Temporary storage for homotopy_setup blocks
-  HomotopyStatement::homotopy_values_type homotopy_values;
+  HomotopyStatement::homotopy_values_t homotopy_values;
   //! Temporary storage for svar_identification blocks
-  SvarIdentificationStatement::svar_identification_exclusion_type svar_ident_exclusion_values;
-  //! Temporary storage for mapping the equation number to the restrictions within an svar_identification bock
+  SvarIdentificationStatement::svar_identification_restrictions_t svar_ident_restrictions;
+  //! Temporary storage for mapping the equation number to the restrictions within an svar_identification block
   map<int, vector<int> > svar_equation_restrictions;
-  //! Temporary storage for restrictions in an equation within an svar_identification bock
+  //! Temporary storage for restrictions in an equation within an svar_identification block
   vector<int> svar_restriction_symbols;
-  //! Temporary storage for upper cholesky within an svar_identification bock
+  //! Temporary storage for constants exculsion within an svar_identification 
+  bool svar_constants_exclusion;
+  //! Temporary storage for upper cholesky within an svar_identification block
   bool svar_upper_cholesky;
-  //! Temporary storage for lower cholesky within an svar_identification bock
+  //! Temporary storage for lower cholesky within an svar_identification block
   bool svar_lower_cholesky;
+  //! Temporary storage for equation number for a restriction within an svar_identification block
+  int svar_equation_nbr;
+  //! Temporary storage for left/right handside of a restriction equation within an svar_identificaton block
+  bool svar_left_handside;
+  //! Temporary storage for current restriction number in svar_identification block
+  map<int,int> svar_Qi_restriction_nbr;
+  map<int,int> svar_Ri_restriction_nbr;
+  //! Temporary storage for restriction type
+  enum SvarRestrictionType
+    {
+      NOT_SET,
+      Qi_TYPE,
+      Ri_TYPE
+    };
+  SvarRestrictionType svar_restriction_type;
 
   //! Temporary storage for argument list of external function
-  stack<vector<NodeID> >  stack_external_function_args;
+  stack<vector<expr_t> >  stack_external_function_args;
   //! Temporary storage for the symb_id associated with the "name" symbol of the current external_function statement
   int current_external_function_id;
   //! Temporary storage for option list provided to external_function()
   ExternalFunctionsTable::external_function_options current_external_function_options;
+  //! Temporary storage for declaring trend variables
+  vector<int> declared_trend_vars;
+  //! Temporary storage for declaring nonstationary variables
+  vector<int> declared_nonstationary_vars;
   //! reset the values for temporary storage
   void reset_current_external_function_options();
   //! Adds a model lagged variable to ModelTree and VariableTable
-  NodeID add_model_variable(int symb_id, int lag);
+  expr_t add_model_variable(int symb_id, int lag);
 
   //! The mod file representation constructed by this ParsingDriver
   ModFile *mod_file;
+
 public:
   //! Starts parsing, and constructs the MOD file representation
   /*! The returned pointer should be deleted after use */
@@ -182,9 +201,9 @@ public:
   EstimationParams estim_params;
 
   //! Error handler with explicit location
-  void error(const Dynare::parser::location_type &l, const string &m);
+  void error(const Dynare::parser::location_type &l, const string &m) __attribute__ ((noreturn));
   //! Error handler using saved location
-  void error(const string &m);
+  void error(const string &m) __attribute__ ((noreturn));
   //! Warning handler using saved location
   void warning(const string &m);
 
@@ -212,24 +231,26 @@ public:
   void declare_exogenous_det(string *name, string *tex_name = NULL);
   //! Declares a parameter
   void declare_parameter(string *name, string *tex_name = NULL);
+  //! Declares declare_optimal_policy_discount_factor as a parameter and initializes it to exprnode
+  void declare_optimal_policy_discount_factor_parameter(expr_t exprnode);
   //! Adds a predetermined_variable
   void add_predetermined_variable(string *name);
   //! Declares and initializes a local parameter
-  void declare_and_init_model_local_variable(string *name, NodeID rhs);
+  void declare_and_init_model_local_variable(string *name, expr_t rhs);
   //! Changes type of a symbol
   void change_type(SymbolType new_type, vector<string *> *var_list);
   //! Adds a list of tags for the current equation
   void add_equation_tags(string *key, string *value);
-  //! Adds a constant to DataTree
-  NodeID add_constant(string *constant);
+  //! Adds a non-negative constant to DataTree
+  expr_t add_non_negative_constant(string *constant);
   //! Adds a NaN constant to DataTree
-  NodeID add_nan_constant();
+  expr_t add_nan_constant();
   //! Adds an Inf constant to DataTree
-  NodeID add_inf_constant();
+  expr_t add_inf_constant();
   //! Adds a model variable to ModelTree and VariableTable
-  NodeID add_model_variable(string *name);
+  expr_t add_model_variable(string *name);
   //! Adds an Expression's variable
-  NodeID add_expression_variable(string *name);
+  expr_t add_expression_variable(string *name);
   //! Adds a "periods" statement
   void periods(string *periods);
   //! Adds a "dsample" statement
@@ -237,14 +258,14 @@ public:
   //! Adds a "dsample" statement
   void dsample(string *arg1, string *arg2);
   //! Writes parameter intitialisation expression
-  void init_param(string *name, NodeID rhs);
+  void init_param(string *name, expr_t rhs);
   //! Writes an initval block
-  void init_val(string *name, NodeID rhs);
+  void init_val(string *name, expr_t rhs);
   //! Writes an histval block
-  void hist_val(string *name, string *lag, NodeID rhs);
+  void hist_val(string *name, string *lag, expr_t rhs);
   //! Adds an entry in a homotopy_setup block
   /*! Second argument "val1" can be NULL if no initial value provided */
-  void homotopy_val(string *name, NodeID val1, NodeID val2);
+  void homotopy_val(string *name, expr_t val1, expr_t val2);
   //! Writes end of an initval block
   void end_initval();
   //! Writes end of an endval block
@@ -262,29 +283,30 @@ public:
   //! Adds a deterministic chock or a path element inside a conditional_forecast_paths block
   void add_det_shock(string *var, bool conditional_forecast);
   //! Adds a std error chock
-  void add_stderr_shock(string *var, NodeID value);
+  void add_stderr_shock(string *var, expr_t value);
   //! Adds a variance chock
-  void add_var_shock(string *var, NodeID value);
+  void add_var_shock(string *var, expr_t value);
   //! Adds a covariance chock
-  void add_covar_shock(string *var1, string *var2, NodeID value);
+  void add_covar_shock(string *var1, string *var2, expr_t value);
   //! Adds a correlated chock
-  void add_correl_shock(string *var1, string *var2, NodeID value);
+  void add_correl_shock(string *var1, string *var2, expr_t value);
   //! Adds a shock period range
   void add_period(string *p1, string *p2);
   //! Adds a shock period
   void add_period(string *p1);
   //! Adds a deterministic shock value
-  void add_value(NodeID value);
+  void add_value(expr_t value);
   //! Adds a deterministic shock value
-  void add_value(string *p1);
+  /*! \param v a string containing a (possibly negative) numeric constant */
+  void add_value(string *v);
   //! Writes a Sigma_e block
   void do_sigma_e();
   //! Ends row of Sigma_e block
   void end_of_row();
   //! Adds a constant element to current row of Sigma_e
-  void add_to_row_const(string *s);
+  void add_to_row_const(string *v);
   //! Adds an expression element to current row of Sigma_e
-  void add_to_row(NodeID v);
+  void add_to_row(expr_t v);
   //! Write a steady command
   void steady();
   //! Sets an option to a numerical value
@@ -342,6 +364,7 @@ public:
   //! Add a new observed variable
   void add_varobs(string *name);
   //! Svar_Identification Statement
+  void begin_svar_identification();
   void end_svar_identification();
   //! Svar_Identification Statement: match list of restrictions and equation number with lag
   void combine_lag_and_restriction(string *lag);
@@ -349,6 +372,24 @@ public:
   void add_restriction_in_equation(string *equation);
   //! Svar_Identification Statement: add list of restriction symbol ids
   void add_in_svar_restriction_symbols(string *name);
+  //! Svar_Identification Statement: add exclusions of constants
+  void add_constants_exclusion();
+  //! Svar_Identification Statement: add equation number for following restriction equations
+  void add_restriction_equation_nbr(string *eq_nbr);
+  //! Svar_Identification Statement: record presence of equal sign
+  void add_restriction_equal();
+  //! Svar_Idenditification Statement: add coefficient of a linear restriction (positive value) 
+  void add_positive_restriction_element(expr_t value, string *variable, string *lag);
+  //! Svar_Idenditification Statement: add unit coefficient of a linear restriction 
+  void add_positive_restriction_element(string *variable, string *lag);
+  //! Svar_Idenditification Statement: add coefficient of a linear restriction (negative value) 
+  void add_negative_restriction_element(expr_t value, string *variable, string *lag);
+  //! Svar_Idenditification Statement: add negative unit coefficient of a linear restriction
+  void add_negative_restriction_element(string *variable, string *lag);
+  //! Svar_Idenditification Statement: add restriction element
+  void add_restriction_element(expr_t value, string *variable, string *lag);
+  //! Svar_Identification Statement: check that restriction is homogenous
+  void check_restriction_expression_constant(expr_t value);
   //! Svar_Identification Statement: restriction of form upper cholesky
   void add_upper_cholesky();
   //! Svar_Identification Statement: restriction of form lower cholesky
@@ -356,18 +397,13 @@ public:
   //! Forecast Statement
   void forecast();
   void set_trends();
-  void set_trend_element(string *arg1, NodeID arg2);
+  void set_trend_element(string *arg1, expr_t arg2);
   void set_unit_root_vars();
   void optim_weights();
-  void set_optim_weights(string *name, NodeID value);
-  void set_optim_weights(string *name1, string *name2, NodeID value);
+  void set_optim_weights(string *name, expr_t value);
+  void set_optim_weights(string *name1, string *name2, expr_t value);
   void set_osr_params();
   void run_osr();
-  void run_calib_var();
-  void set_calib_var(string *name, string *weight, NodeID expression);
-  void set_calib_covar(string *name1, string *name2, string *weight, NodeID expression);
-  void set_calib_ac(string *name, string *ar, string *weight, NodeID expression);
-  void run_calib(int covar);
   void run_dynasave(string *filename);
   void run_dynatype(string *filename);
   void run_load_params_and_steady_state(string *filename);
@@ -378,9 +414,11 @@ public:
   //! Begin a planner_objective statement
   void begin_planner_objective();
   //! End a planner objective statement
-  void end_planner_objective(NodeID expr);
-  //! ramsey policy statement
+  void end_planner_objective(expr_t expr);
+  //! Ramsey policy statement
   void ramsey_policy();
+  //! Discretionary policy statement
+  void discretionary_policy();
   //! Adds a write_latex_dynamic_model statement
   void write_latex_dynamic_model();
   //! Adds a write_latex_static_model statement
@@ -391,8 +429,20 @@ public:
   void bvar_forecast(string *nlags);
   //! SBVAR statement
   void sbvar();
-  //! MS_SBVAR statement
-  void ms_sbvar();
+  //! Markov Switching Statement: Estimation
+  void ms_estimation();
+  //! Markov Switching Statement: Simulation
+  void ms_simulation();
+  //! Markov Switching Statement: MDD
+  void ms_compute_mdd();
+  //! Markov Switching Statement: Probabilities
+  void ms_compute_probabilities();
+  //! Markov Switching Statement: IRF
+  void ms_irf();
+  //! Markov Switching Statement: Forecast
+  void ms_forecast();
+  //! Markov Switching Statement: Variance Decomposition
+  void ms_variance_decomposition();
   //! Svar statement
   void svar();
   //! MarkovSwitching statement
@@ -406,89 +456,93 @@ public:
   //! Plot conditional forecast statement
   void plot_conditional_forecast(string *periods = NULL);
   //! Writes token "arg1=arg2" to model tree
-  NodeID add_model_equal(NodeID arg1, NodeID arg2);
+  expr_t add_model_equal(expr_t arg1, expr_t arg2);
   //! Writes token "arg=0" to model tree
-  NodeID add_model_equal_with_zero_rhs(NodeID arg);
+  expr_t add_model_equal_with_zero_rhs(expr_t arg);
   //! Writes token "arg1+arg2" to model tree
-  NodeID add_plus(NodeID arg1, NodeID arg2);
+  expr_t add_plus(expr_t arg1, expr_t arg2);
   //! Writes token "arg1-arg2" to model tree
-  NodeID add_minus(NodeID arg1,  NodeID arg2);
+  expr_t add_minus(expr_t arg1,  expr_t arg2);
   //! Writes token "-arg1" to model tree
-  NodeID add_uminus(NodeID arg1);
+  expr_t add_uminus(expr_t arg1);
   //! Writes token "arg1*arg2" to model tree
-  NodeID add_times(NodeID arg1,  NodeID arg2);
+  expr_t add_times(expr_t arg1,  expr_t arg2);
   //! Writes token "arg1/arg2" to model tree
-  NodeID add_divide(NodeID arg1,  NodeID arg2);
+  expr_t add_divide(expr_t arg1,  expr_t arg2);
   //! Writes token "arg1<arg2" to model tree
-  NodeID add_less(NodeID arg1, NodeID arg2);
-  //! Writes token "arg1>arg2" to model treeNodeID
-  NodeID add_greater(NodeID arg1, NodeID arg2);
-  //! Writes token "arg1<=arg2" to model treeNodeID
-  NodeID add_less_equal(NodeID arg1, NodeID arg2);
-  //! Writes token "arg1>=arg2" to model treeNodeID
-  NodeID add_greater_equal(NodeID arg1, NodeID arg2);
-  //! Writes token "arg1==arg2" to model treeNodeIDNodeID
-  NodeID add_equal_equal(NodeID arg1, NodeID arg2);
-  //! Writes token "arg1!=arg2" to model treeNodeIDNodeID
-  NodeID add_different(NodeID arg1, NodeID arg2);
+  expr_t add_less(expr_t arg1, expr_t arg2);
+  //! Writes token "arg1>arg2" to model treeexpr_t
+  expr_t add_greater(expr_t arg1, expr_t arg2);
+  //! Writes token "arg1<=arg2" to model treeexpr_t
+  expr_t add_less_equal(expr_t arg1, expr_t arg2);
+  //! Writes token "arg1>=arg2" to model treeexpr_t
+  expr_t add_greater_equal(expr_t arg1, expr_t arg2);
+  //! Writes token "arg1==arg2" to model treeexpr_texpr_t
+  expr_t add_equal_equal(expr_t arg1, expr_t arg2);
+  //! Writes token "arg1!=arg2" to model treeexpr_texpr_t
+  expr_t add_different(expr_t arg1, expr_t arg2);
   //! Writes token "arg1^arg2" to model tree
-  NodeID add_power(NodeID arg1,  NodeID arg2);
+  expr_t add_power(expr_t arg1,  expr_t arg2);
   //! Writes token "E(arg1)(arg2)" to model tree
-  NodeID add_expectation(string *arg1,  NodeID arg2);
+  expr_t add_expectation(string *arg1,  expr_t arg2);
   //! Writes token "exp(arg1)" to model tree
-  NodeID add_exp(NodeID arg1);
+  expr_t add_exp(expr_t arg1);
   //! Writes token "log(arg1)" to model tree
-  NodeID add_log(NodeID arg1);
+  expr_t add_log(expr_t arg1);
   //! Writes token "log10(arg1)" to model tree
-  NodeID add_log10(NodeID arg1);
+  expr_t add_log10(expr_t arg1);
   //! Writes token "cos(arg1)" to model tree
-  NodeID add_cos(NodeID arg1);
+  expr_t add_cos(expr_t arg1);
   //! Writes token "sin(arg1)" to model tree
-  NodeID add_sin(NodeID arg1);
+  expr_t add_sin(expr_t arg1);
   //! Writes token "tan(arg1)" to model tree
-  NodeID add_tan(NodeID arg1);
+  expr_t add_tan(expr_t arg1);
   //! Writes token "acos(arg1)" to model tree
-  NodeID add_acos(NodeID arg1);
+  expr_t add_acos(expr_t arg1);
   //! Writes token "asin(arg1)" to model tree
-  NodeID add_asin(NodeID arg1);
+  expr_t add_asin(expr_t arg1);
   //! Writes token "atan(arg1)" to model tree
-  NodeID add_atan(NodeID arg1);
+  expr_t add_atan(expr_t arg1);
   //! Writes token "cosh(arg1)" to model tree
-  NodeID add_cosh(NodeID arg1);
+  expr_t add_cosh(expr_t arg1);
   //! Writes token "sinh(arg1)" to model tree
-  NodeID add_sinh(NodeID arg1);
+  expr_t add_sinh(expr_t arg1);
   //! Writes token "tanh(arg1)" to model tree
-  NodeID add_tanh(NodeID arg1);
+  expr_t add_tanh(expr_t arg1);
   //! Writes token "acosh(arg1)" to model tree
-  NodeID add_acosh(NodeID arg1);
+  expr_t add_acosh(expr_t arg1);
   //! Writes token "asin(arg1)" to model tree
-  NodeID add_asinh(NodeID arg1);
+  expr_t add_asinh(expr_t arg1);
   //! Writes token "atanh(arg1)" to model tree
-  NodeID add_atanh(NodeID arg1);
+  expr_t add_atanh(expr_t arg1);
   //! Writes token "sqrt(arg1)" to model tree
-  NodeID add_sqrt(NodeID arg1);
+  expr_t add_sqrt(expr_t arg1);
+  //! Writes token "abs(arg1)" to model tree
+  expr_t add_abs(expr_t arg1);
+  //! Writes token "sign(arg1)" to model tree
+  expr_t add_sign(expr_t arg1);
   //! Writes token "max(arg1,arg2)" to model tree
-  NodeID add_max(NodeID arg1, NodeID arg2);
+  expr_t add_max(expr_t arg1, expr_t arg2);
   //! Writes token "min(arg1,arg2)" to model tree
-  NodeID add_min(NodeID arg1, NodeID arg2);
+  expr_t add_min(expr_t arg1, expr_t arg2);
   //! Writes token "normcdf(arg1,arg2,arg3)" to model tree
-  NodeID add_normcdf(NodeID arg1, NodeID arg2, NodeID arg3);
+  expr_t add_normcdf(expr_t arg1, expr_t arg2, expr_t arg3);
   //! Writes token "normcdf(arg,0,1)" to model tree
-  NodeID add_normcdf(NodeID arg);
+  expr_t add_normcdf(expr_t arg);
   //! Writes token "normpdf(arg1,arg2,arg3)" to model tree
-  NodeID add_normpdf(NodeID arg1, NodeID arg2, NodeID arg3);
+  expr_t add_normpdf(expr_t arg1, expr_t arg2, expr_t arg3);
   //! Writes token "normpdf(arg,0,1)" to model tree
-  NodeID add_normpdf(NodeID arg);
+  expr_t add_normpdf(expr_t arg);
   //! Writes token "erf(arg)" to model tree
-  NodeID add_erf(NodeID arg);
+  expr_t add_erf(expr_t arg);
   //! Writes token "steadyState(arg1)" to model tree
-  NodeID add_steady_state(NodeID arg1);
+  expr_t add_steady_state(expr_t arg1);
   //! Pushes empty vector onto stack when a symbol is encountered (mod_var or ext_fun)
   void push_external_function_arg_vector_onto_stack();
   //! Adds an external function argument
-  void add_external_function_arg(NodeID arg);
+  void add_external_function_arg(expr_t arg);
   //! Adds an external function call node
-  NodeID add_model_var_or_external_function(string *function_name, bool in_model_block);
+  expr_t add_model_var_or_external_function(string *function_name, bool in_model_block);
   //! Adds a native statement
   void add_native(const string &s);
   //! Adds a native statement, first removing the set of characters passed in token (and everything after)
@@ -498,7 +552,19 @@ public:
   //! Begin a steady_state_model block
   void begin_steady_state_model();
   //! Add an assignment equation in steady_state_model block
-  void add_steady_state_model_equal(string *varname, NodeID expr);
+  void add_steady_state_model_equal(string *varname, expr_t expr);
+  //! Add a multiple assignment equation in steady_state_model block
+  void add_steady_state_model_equal_multiple(expr_t expr);
+  //! Switches datatree
+  void begin_trend();
+  //! Declares a trend variable with its growth factor
+  void declare_trend_var(string *name, string *tex_name = NULL);
+  //! Ends declaration of trend variable
+  void end_trend_var(expr_t growth_factor);
+  //! Declares a nonstationary variable with its deflator
+  void declare_nonstationary_var(string *name, string *tex_name = NULL);
+  //! Ends declaration of nonstationary variable
+  void end_nonstationary_var(expr_t deflator);
 };
 
 #endif // ! PARSING_DRIVER_HH

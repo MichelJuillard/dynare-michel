@@ -10,7 +10,7 @@ function print_info(info,noprint)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2009 Dynare Team
+% Copyright (C) 2005-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -33,8 +33,9 @@ if ~noprint
         error(['The model doesn''t determine the current variables' ...
                ' uniquely'])
       case 2
-        error(['MJDGGES returns the following error code: ' ...
-               int2str(info(2))])
+        error(['The generalized Schur (QZ) decomposition failed. ' ...
+               'For more information, see the documentation for Lapack function dgges: info=' ...
+               int2str(info(2)) ', n=' int2str(info(3))])
       case 3
         error(['Blanchard Kahn conditions are not satisfied: no stable' ...
                ' equilibrium'])
@@ -45,19 +46,66 @@ if ~noprint
         error(['Blanchard Kahn conditions are not satisfied:' ...
                ' indeterminacy due to rank failure'])
       case 6
-        error('The jacobian matrix evaluated at the steady state is complex')
+        error(['The Jacobian matrix evaluated at the steady state contains elements ' ...
+               'that are not real or are infinite'])
+      case 7
+        error(['One of the eigenvalues is close to 0/0 (the absolute ' ...
+               'value of numerator and denominator is smaller than 1e-6)'])
       case 19
-        error('The steadystate file did not compute the steady state (inconsistent deep parameters).')
+        error('The steadystate file did not compute the steady state')
       case 20
         error(['Impossible to find the steady state. Either the model' ...
                ' doesn''t have a unique steady state of the guess values' ...
                ' are too far from the solution'])
       case 21
-        error('The steady state is complex.')
+        error('The steady state is complex')
+      case 22
+        error('The steady state contains NaN or Inf')
+      case 23
+        error('Some updated params are complex')
+      case 24
+        error('Some updated params contain NaN or Inf')
       case 30 
         error('Variance can''t be computed')
+      case 41
+        error('one (many) parameter(s) do(es) not satisfy the lower bound');
+      case 42
+        error('one (many) parameter(s) do(es) not satisfy the upper bound');
+      case 43
+        error('Covariance matrix of shocks is not positive definite')
+      case 44 %DsgeLikelihood_hh / DsgeLikelihood
+        error('');
       case 51
         error('You are estimating a DSGE-VAR model, but the value of the dsge prior weight is too low!')
+      case 52 %DsgeVarLikelihood
+        error('');
+      case 61 %Discretionary policy
+        error(['Discretionary policy: maximum number of iterations has ' ...
+               'been reached. Procedure failed. ']);
+      case 62
+        error(['Discretionary policy: some eigenvalues greater than ' ...
+               'options_.qz_criterium. Model potentially unstable.']);
+      case 63
+        error(['Discretionary policy: NaN elements are present in the ' ...
+               'solution. Procedure failed.']);
+        
+        % Aim Code Conversions by convertAimCodeToInfo.m
+      case 102
+        error('Aim: roots not correctly computed by real_schur');
+      case 103
+        error('Aim: too many big roots');
+      case 135
+        error('Aim: too many big roots, and q(:,right) is singular');
+      case 104
+        error('Aim: too few big roots');
+      case 145
+        error('Aim: too few big roots, and q(:,right) is singular');
+      case 105
+        error('Aim: q(:,right) is singular');
+      case 161
+        error('Aim: too many exact shiftrights');
+      case 162
+        error('Aim: too many numeric shiftrights');
       otherwise
         error('This case shouldn''t happen. Contact the authors of Dynare')
     end

@@ -1,7 +1,5 @@
 %{
-/* Copyright 2006, Ondra Kamenik */
-
-/* $Id: formula.y 1749 2008-03-28 11:59:29Z kamenik $ */
+/* Copyright (C) 2006-2011, Ondra Kamenik */
 
 #include <cstdio>
 
@@ -9,14 +7,14 @@
 #include "formula_parser.h" 
 #include "formula_tab.hh"
 
-	int fmla_error(char*);
+	void fmla_error(const char*);
 	int fmla_lex(void);
 	extern int fmla_lineno;
 	extern ogp::FormulaParser* fparser;
 	extern YYLTYPE fmla_lloc;
 
-	static void print_token_value (FILE *, int, YYSTYPE);
-#define YYPRINT(file, type, value) print_token_value (file, type, value)
+  //  static void print_token_value (FILE *, int, YYSTYPE);
+  //  #define YYPRINT(file, type, value) print_token_value (file, type, value)
 
 %}
 
@@ -77,13 +75,15 @@
 
 %%
 
-int fmla_error(char* s)
+void fmla_error(const char* s)
 {
 	fparser->error(s);
 }
 
+/*
 static void print_token_value(FILE* file, int type, YYSTYPE value)
 {
 	if (type == NAME)
 		fprintf(file, "%s", value.string);
 }
+*/

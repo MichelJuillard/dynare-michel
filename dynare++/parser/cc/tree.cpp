@@ -1,6 +1,4 @@
-// Copyright (C) 2005, Ondra Kamenik
-
-// $Id: tree.cpp 1762 2008-03-31 14:28:54Z kamenik $ 
+// Copyright (C) 2005-2011, Ondra Kamenik
 
 #include "utils/cc/exception.h"
 
@@ -376,14 +374,14 @@ void OperationTree::register_derivative(int t, int v, int tder)
 	derivatives[t].insert(_Tderivmap::value_type(v, tder));
 }
 
-hash_set<int> OperationTree::select_terms(int t, const opselector& sel) const
+unordered_set<int> OperationTree::select_terms(int t, const opselector& sel) const
 {
-	hash_set<int> subterms;
+	unordered_set<int> subterms;
 	select_terms(t, sel, subterms);
 	return subterms;
 }
 
-void OperationTree::select_terms(int t, const opselector& sel, hash_set<int>& subterms) const
+void OperationTree::select_terms(int t, const opselector& sel, unordered_set<int>& subterms) const
 {
 	const Operation& op = terms[t];
 
@@ -398,14 +396,14 @@ void OperationTree::select_terms(int t, const opselector& sel, hash_set<int>& su
 		}
 }
 
-hash_set<int> OperationTree::select_terms_inv(int t, const opselector& sel) const
+unordered_set<int> OperationTree::select_terms_inv(int t, const opselector& sel) const
 {
-	hash_set<int> subterms;
+	unordered_set<int> subterms;
 	select_terms_inv(t, sel, subterms);
 	return subterms;
 }
 
-bool OperationTree::select_terms_inv(int t, const opselector& sel, hash_set<int>& subterms) const
+bool OperationTree::select_terms_inv(int t, const opselector& sel, unordered_set<int>& subterms) const
 {
 	const Operation& op = terms[t];
 
@@ -452,7 +450,7 @@ void OperationTree::print_operation(int t) const
 
 void OperationTree::update_nul_incidence_after_nularify(int t)
 {
-	hash_set<int> updated;
+	unordered_set<int> updated;
 	for (int tnode = num_constants; tnode < (int)terms.size(); tnode++) {
 		const Operation& op = terms[tnode];
 		if (op.nary() == 2) {

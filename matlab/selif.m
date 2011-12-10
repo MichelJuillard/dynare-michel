@@ -1,6 +1,6 @@
 function x = selif(a,b)
 
-% Copyright (C) 2001 Dynare Team
+% Copyright (C) 2001-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

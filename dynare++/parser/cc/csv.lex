@@ -1,4 +1,6 @@
 %{
+// Copyright (C) 2007-2011, Ondra Kamenik
+
 #include "location.h"
 #include "csv_tab.hh"
 
@@ -9,7 +11,6 @@
 
 %option nounput
 %option noyy_top_state
-%option stack
 %option yylineno
 %option prefix="csv_"
 %option never-interactive

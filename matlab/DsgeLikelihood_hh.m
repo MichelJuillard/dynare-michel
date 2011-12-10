@@ -1,27 +1,28 @@
-function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
-% function [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
-% Evaluates the posterior kernel of a dsge model. 
-% 
-% INPUTS 
+function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood_hh(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
+% function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood_hh(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
+% Evaluates the posterior kernel of a dsge model.
+%
+% INPUTS
 %   xparam1                        [double]   vector of model parameters.
 %   gend                           [integer]  scalar specifying the number of observations.
 %   data                           [double]   matrix of data
 %   data_index                     [cell]     cell of column vectors
 %   number_of_observations         [integer]
-%   no_more_missing_observations   [integer] 
-% OUTPUTS 
+%   no_more_missing_observations   [integer]
+% OUTPUTS
 %   fval        :     value of the posterior kernel at xparam1.
+%   llik        :     probabilities at each time point
 %   cost_flag   :     zero if the function returns a penalty, one otherwise.
 %   ys          :     steady state of original endogenous variables
 %   trend_coeff :
 %   info        :     vector of informations about the penalty:
 %                     41: one (many) parameter(s) do(es) not satisfied the lower bound
 %                     42: one (many) parameter(s) do(es) not satisfied the upper bound
-%               
+%
 % SPECIAL REQUIREMENTS
 %
 
-% Copyright (C) 2004-2009 Dynare Team
+% Copyright (C) 2004-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -38,292 +39,408 @@ function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,gend
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  global bayestopt_ estim_params_ options_ trend_coeff_ M_ oo_
-  fval		= [];
-  ys		= [];
-  trend_coeff	= [];
-  cost_flag  	= 1;
-  nobs 		= size(options_.varobs,1);
-  llik=NaN;
-  %------------------------------------------------------------------------------
-  % 1. Get the structural parameters & define penalties
-  %------------------------------------------------------------------------------
-  if options_.mode_compute ~= 1 & any(xparam1 < bayestopt_.lb)
-      k = find(xparam1 < bayestopt_.lb);
-      fval = bayestopt_.penalty+sum((bayestopt_.lb(k)-xparam1(k)).^2);
-      cost_flag = 0;
-      info = 41;
-      return;
-  end
-  if options_.mode_compute ~= 1 & any(xparam1 > bayestopt_.ub)
-      k = find(xparam1 > bayestopt_.ub);
-      fval = bayestopt_.penalty+sum((xparam1(k)-bayestopt_.ub(k)).^2);
-      cost_flag = 0;
-      info = 42;
-      return;
-  end
-  Q = M_.Sigma_e;
-  H = M_.H;
-  for i=1:estim_params_.nvx
-    k =estim_params_.var_exo(i,1);
+
+% Declaration of the penalty as a persistent variable.
+persistent penalty
+
+% Initialization of the persistent variable.
+if ~nargin || isempty(penalty)
+    penalty = 1e8;
+    if ~nargin, return, end
+end
+if nargin==1
+    penalty = xparam1;
+    return
+end
+
+% Initialization of the returned variables and others...
+fval        = [];
+ys          = [];
+trend_coeff = [];
+cost_flag   = 1;
+llik=NaN;
+info        = 0;
+singularity_flag = 0;
+
+if DynareOptions.block == 1
+    error('DsgeLikelihood_hh:: This routine (called if mode_compute==5) is not compatible with the block option!')
+end
+
+%------------------------------------------------------------------------------
+% 1. Get the structural parameters & define penalties
+%------------------------------------------------------------------------------
+
+% Return, with endogenous penalty, if some parameters are smaller than the lower bound of the prior domain.
+if ~isequal(DynareOptions.mode_compute,1) && any(xparam1<BayesInfo.lb)
+    k = find(xparam1<BayesInfo.lb);
+    fval = penalty+sum((BayesInfo.lb(k)-xparam1(k)).^2);
+    exit_flag = 0;
+    info = 41;
+    return
+end
+
+% Return, with endogenous penalty, if some parameters are greater than the upper bound of the prior domain.
+if ~isequal(DynareOptions.mode_compute,1) && any(xparam1>BayesInfo.ub)
+    k = find(xparam1>BayesInfo.ub);
+    fval = penalty+sum((xparam1(k)-BayesInfo.ub(k)).^2);
+    exit_flag = 0;
+    info = 42;
+    return
+end
+
+% Get the diagonal elements of the covariance matrices for the structural innovations (Q) and the measurement error (H).
+Q = Model.Sigma_e;
+H = Model.H;
+for i=1:EstimatedParameters.nvx
+    k =EstimatedParameters.var_exo(i,1);
     Q(k,k) = xparam1(i)*xparam1(i);
-  end
-  offset = estim_params_.nvx;
-  if estim_params_.nvn
-    for i=1:estim_params_.nvn
-      k = estim_params_.var_endo(i,1);
-      H(k,k) = xparam1(i+offset)*xparam1(i+offset);
+end
+offset = EstimatedParameters.nvx;
+if EstimatedParameters.nvn
+    for i=1:EstimatedParameters.nvn
+        k = EstimatedParameters.var_endo(i,1);
+        H(k,k) = xparam1(i+offset)*xparam1(i+offset);
     end
-    offset = offset+estim_params_.nvn;
-  end
-  if estim_params_.ncx
-    for i=1:estim_params_.ncx
-      k1 =estim_params_.corrx(i,1);
-      k2 =estim_params_.corrx(i,2);
-      Q(k1,k2) = xparam1(i+offset)*sqrt(Q(k1,k1)*Q(k2,k2));
-      Q(k2,k1) = Q(k1,k2);
+    offset = offset+EstimatedParameters.nvn;
+else
+    H = zeros(DynareDataset.info.nvobs);
+end
+
+% Get the off-diagonal elements of the covariance matrix for the structural innovations. Test if Q is positive definite.
+if EstimatedParameters.ncx
+    for i=1:EstimatedParameters.ncx
+        k1 =EstimatedParameters.corrx(i,1);
+        k2 =EstimatedParameters.corrx(i,2);
+        Q(k1,k2) = xparam1(i+offset)*sqrt(Q(k1,k1)*Q(k2,k2));
+        Q(k2,k1) = Q(k1,k2);
     end
+    % Try to compute the cholesky decomposition of Q (possible iff Q is positive definite)
     [CholQ,testQ] = chol(Q);
-    if testQ 	%% The variance-covariance matrix of the structural innovations is not definite positive.
-		%% We have to compute the eigenvalues of this matrix in order to build the penalty.
-		a = diag(eig(Q));
-		k = find(a < 0);
-		if k > 0
-		  fval = bayestopt_.penalty+sum(-a(k));
-		  cost_flag = 0;
-		  info = 43;
-		  return
-		end
+    if testQ
+        % The variance-covariance matrix of the structural innovations is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty.
+        a = diag(eig(Q));
+        k = find(a < 0);
+        if k > 0
+            fval = BayesInfo.penalty+sum(-a(k));
+            exit_flag = 0;
+            info = 43;
+            return
+        end
     end
-    offset = offset+estim_params_.ncx;
-  end
-  if estim_params_.ncn 
-    for i=1:estim_params_.ncn
-      k1 = options_.lgyidx2varobs(estim_params_.corrn(i,1));
-      k2 = options_.lgyidx2varobs(estim_params_.corrn(i,2));
-      H(k1,k2) = xparam1(i+offset)*sqrt(H(k1,k1)*H(k2,k2));
-      H(k2,k1) = H(k1,k2);
+    offset = offset+EstimatedParameters.ncx;
+end
+
+% Get the off-diagonal elements of the covariance matrix for the measurement errors. Test if H is positive definite.
+if EstimatedParameters.ncn
+    for i=1:EstimatedParameters.ncn
+        k1 = DynareOptions.lgyidx2varobs(EstimatedParameters.corrn(i,1));
+        k2 = DynareOptions.lgyidx2varobs(EstimatedParameters.corrn(i,2));
+        H(k1,k2) = xparam1(i+offset)*sqrt(H(k1,k1)*H(k2,k2));
+        H(k2,k1) = H(k1,k2);
     end
+    % Try to compute the cholesky decomposition of H (possible iff H is positive definite)
     [CholH,testH] = chol(H);
     if testH
-      a = diag(eig(H));
-      k = find(a < 0);
-      if k > 0
-	fval = bayestopt_.penalty+sum(-a(k));
-	cost_flag = 0;
-	info = 44;
-	return
-      end
+        % The variance-covariance matrix of the structural innovations is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty.
+        a = diag(eig(H));
+        k = find(a < 0);
+        if k > 0
+            fval = BayesInfo.penalty+sum(-a(k));
+            exit_flag = 0;
+            info = 44;
+            return
+        end
     end
-    offset = offset+estim_params_.ncn;
-  end
-  if estim_params_.np > 0
-      M_.params(estim_params_.param_vals(:,1)) = xparam1(offset+1:end);
-  end
-  M_.Sigma_e = Q;
-  M_.H = H;
-  %------------------------------------------------------------------------------
-  % 2. call model setup & reduction program
-  %------------------------------------------------------------------------------
-  [T,R,SteadyState,info] = dynare_resolve(bayestopt_.restrict_var_list,...
-					  bayestopt_.restrict_columns,...
-					  bayestopt_.restrict_aux);
-  if info(1) == 1 || info(1) == 2 || info(1) == 5
-      fval = bayestopt_.penalty+1;
-      cost_flag = 0;
-      return
-  elseif info(1) == 3 || info(1) == 4 || info(1)==6 ||info(1) == 19 || info(1) == 20 || info(1) == 21
-      fval = bayestopt_.penalty+info(2);
-      cost_flag = 0;
-      return
-  end
-  bayestopt_.mf = bayestopt_.mf1;
-  if options_.noconstant
-      constant = zeros(nobs,1);  
-  else    
-      if options_.loglinear
-          constant = log(SteadyState(bayestopt_.mfys));
-      else
-          constant = SteadyState(bayestopt_.mfys);
-      end
-  end
-  if bayestopt_.with_trend
-    trend_coeff = zeros(nobs,1);
-    t = options_.trend_coeffs;
+    offset = offset+EstimatedParameters.ncn;
+end
+
+% Update estimated structural parameters in Mode.params.
+if EstimatedParameters.np > 0
+    Model.params(EstimatedParameters.param_vals(:,1)) = xparam1(offset+1:end);
+end
+
+% Update Model.Sigma_e and Model.H.
+Model.Sigma_e = Q;
+Model.H = H;
+
+%------------------------------------------------------------------------------
+% 2. call model setup & reduction program
+%------------------------------------------------------------------------------
+
+% Linearize the model around the deterministic sdteadystate and extract the matrices of the state equation (T and R).
+[T,R,SteadyState,info,Model,DynareOptions,DynareResults] = dynare_resolve(Model,DynareOptions,DynareResults,'restrict');
+
+% Return, with endogenous penalty when possible, if dynare_resolve issues an error code (defined in resol).
+if info(1) == 1 || info(1) == 2 || info(1) == 5 || info(1) == 22 || info(1) == 24
+    fval = penalty+1;
+    info = info(1);
+    exit_flag = 0;
+    return
+elseif info(1) == 3 || info(1) == 4 || info(1)==6 ||info(1) == 19 || info(1) == 20 || info(1) == 21  || info(1) == 23
+    fval = penalty+info(2);
+    info = info(1);
+    exit_flag = 0;
+    return
+end
+
+% Define a vector of indices for the observed variables. Is this really usefull?...
+BayesInfo.mf = BayesInfo.mf1;
+
+% Define the constant vector of the measurement equation.
+if DynareOptions.noconstant
+    constant = zeros(DynareDataset.info.nvobs,1);
+else
+    if DynareOptions.loglinear
+        constant = log(SteadyState(BayesInfo.mfys));
+    else
+        constant = SteadyState(BayesInfo.mfys);
+    end
+end
+
+% Define the deterministic linear trend of the measurement equation.
+if BayesInfo.with_trend
+    trend_coeff = zeros(DynareDataset.info.nvobs,1);
+    t = DynareOptions.trend_coeffs;
     for i=1:length(t)
-      if ~isempty(t{i})
-	trend_coeff(i) = evalin('base',t{i});
-      end
+        if ~isempty(t{i})
+            trend_coeff(i) = evalin('base',t{i});
+        end
     end
-    trend = repmat(constant,1,gend)+trend_coeff*[1:gend];
-  else
-    trend = repmat(constant,1,gend);
-  end
-  start = options_.presample+1;
-  np    = size(T,1);
-  mf    = bayestopt_.mf;
-  no_missing_data_flag = (number_of_observations==gend*nobs);
-  %------------------------------------------------------------------------------
-  % 3. Initial condition of the Kalman filter
-  %------------------------------------------------------------------------------
-  kalman_algo = options_.kalman_algo;
-  if options_.lik_init == 1		% Kalman filter
-      if kalman_algo ~= 2
-          kalman_algo = 1;
-      end
-      Pstar = lyapunov_symm(T,R*Q*R',options_.qz_criterium,options_.lyapunov_complex_threshold);
-      Pinf	= [];
-  elseif options_.lik_init == 2	% Old Diffuse Kalman filter
-      if kalman_algo ~= 2
-          kalman_algo = 1;
-      end
-      Pstar = options_.Harvey_scale_factor*eye(np);
-      Pinf = [];
-  elseif options_.lik_init == 3	% Diffuse Kalman filter
-      if kalman_algo ~= 4
-          kalman_algo = 3;
-      end
-      [QT,ST] = schur(T);
-      e1 = abs(ordeig(ST)) > 2-options_.qz_criterium;
-      [QT,ST] = ordschur(QT,ST,e1);
-      k = find(abs(ordeig(ST)) > 2-options_.qz_criterium);
-      nk = length(k);
-      nk1 = nk+1;
-      Pinf = zeros(np,np);
-      Pinf(1:nk,1:nk) = eye(nk);
-      Pstar = zeros(np,np);
-      B = QT'*R*Q*R'*QT;
-      for i=np:-1:nk+2
-          if ST(i,i-1) == 0
-              if i == np
-                  c = zeros(np-nk,1);
-              else
-                  c = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i,i+1:end)')+...
-                      ST(i,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i);
-              end
-              q = eye(i-nk)-ST(nk1:i,nk1:i)*ST(i,i);
-              Pstar(nk1:i,i) = q\(B(nk1:i,i)+c);
-              Pstar(i,nk1:i-1) = Pstar(nk1:i-1,i)';
-          else
-              if i == np
-                  c = zeros(np-nk,1);
-                  c1 = zeros(np-nk,1);
-              else
-                  c = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i,i+1:end)')+...
-                      ST(i,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i)+...
-                      ST(i,i-1)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i-1);
-                  c1 = ST(nk1:i,:)*(Pstar(:,i+1:end)*ST(i-1,i+1:end)')+...
-                       ST(i-1,i-1)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i-1)+...
-                       ST(i-1,i)*ST(nk1:i,i+1:end)*Pstar(i+1:end,i);
-              end
-              q = [eye(i-nk)-ST(nk1:i,nk1:i)*ST(i,i) -ST(nk1:i,nk1:i)*ST(i,i-1);...
-                   -ST(nk1:i,nk1:i)*ST(i-1,i) eye(i-nk)-ST(nk1:i,nk1:i)*ST(i-1,i-1)];
-              z =  q\[B(nk1:i,i)+c;B(nk1:i,i-1)+c1];
-              Pstar(nk1:i,i) = z(1:(i-nk));
-              Pstar(nk1:i,i-1) = z(i-nk+1:end);
-              Pstar(i,nk1:i-1) = Pstar(nk1:i-1,i)';
-              Pstar(i-1,nk1:i-2) = Pstar(nk1:i-2,i-1)';
-              i = i - 1;
-          end
-      end
-      if i == nk+2
-          c = ST(nk+1,:)*(Pstar(:,nk+2:end)*ST(nk1,nk+2:end)')+ST(nk1,nk1)*ST(nk1,nk+2:end)*Pstar(nk+2:end,nk1);
-          Pstar(nk1,nk1)=(B(nk1,nk1)+c)/(1-ST(nk1,nk1)*ST(nk1,nk1));
-      end
-      Z = QT(mf,:);
-      R1 = QT'*R;
-      [QQ,RR,EE] = qr(Z*ST(:,1:nk),0);
-      k = find(abs(diag([RR; zeros(nk-size(Z,1),size(RR,2))])) < 1e-8);
-      if length(k) > 0
-          k1 = EE(:,k);
-	  dd =ones(nk,1);
-	  dd(k1) = zeros(length(k1),1);
-	  Pinf(1:nk,1:nk) = diag(dd);
-      end
-  end
-  if kalman_algo == 2
-  end
-  kalman_tol = options_.kalman_tol;
-  riccati_tol = options_.riccati_tol;
-  mf = bayestopt_.mf1;
-  Y   = data-trend;
-  %------------------------------------------------------------------------------
-  % 4. Likelihood evaluation
-  %------------------------------------------------------------------------------
-  if (kalman_algo==1)% Multivariate Kalman Filter
-      if no_missing_data_flag
-          [LIK, lik] = kalman_filter(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol); 
-      else
-          [LIK, lik] = ...
-              missing_observations_kalman_filter(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol, ...
-                                                 data_index,number_of_observations,no_more_missing_observations);
-      end
-      if isinf(LIK)
-          kalman_algo = 2;
-      end
-  end
-  if (kalman_algo==2)% Univariate Kalman Filter
-      no_correlation_flag = 1;
-      if length(H)==1 & H == 0
-          H = zeros(nobs,1);
-      else
-          if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
-              H = diag(H);
-          else
-              no_correlation_flag = 0;
-          end
-      end
-      if no_correlation_flag
-          [LIK, lik] = univariate_kalman_filter(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
-      else
-          [LIK, lik] = univariate_kalman_filter_corr(T,R,Q,H,Pstar,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations);
-      end
-  end
-  if (kalman_algo==3)% Multivariate Diffuse Kalman Filter
-      if no_missing_data_flag
-          [LIK, lik] = diffuse_kalman_filter(ST,R1,Q,H,Pinf,Pstar,Y,start,Z,kalman_tol, ...
-                                      riccati_tol);
-      else
-          [LIK, lik] = missing_observations_diffuse_kalman_filter(ST,R1,Q,H,Pinf, ...
-                                                           Pstar,Y,start,Z,kalman_tol,riccati_tol,...
-                                                           data_index,number_of_observations,...
-                                                           no_more_missing_observations);
-      end
-      if isinf(LIK)
-          kalman_algo = 4;
-      end
-  end
-  if (kalman_algo==4)% Univariate Diffuse Kalman Filter
-      no_correlation_flag = 1;
-      if length(H)==1 & H == 0
-          H = zeros(nobs,1);
-      else
-          if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
-              H = diag(H);
-          else
-              no_correlation_flag = 0;
-          end
-      end
-      if no_correlation_flag
-          [LIK, lik] = univariate_diffuse_kalman_filter(ST,R1,Q,H,Pinf,Pstar,Y, ...
-                                                 start,Z,kalman_tol,riccati_tol,data_index,...
-                                                 number_of_observations,no_more_missing_observations);
-      else
-          [LIK, lik] = univariate_diffuse_kalman_filter_corr(ST,R1,Q,H,Pinf,Pstar, ...
-                                                      Y,start,Z,kalman_tol,riccati_tol,...
-                                                      data_index,number_of_observations,...
-                                                      no_more_missing_observations);
-      end
-  end
-  if imag(LIK) ~= 0
-      likelihood = bayestopt_.penalty;
-  else
-      likelihood = LIK;
-  end
-  % ------------------------------------------------------------------------------
-  % Adds prior if necessary
-  % ------------------------------------------------------------------------------
-  lnprior = priordens(xparam1,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7,bayestopt_.p3,bayestopt_.p4);
-  fval    = (likelihood-lnprior);
-  options_.kalman_algo = kalman_algo;
-  llik=[-lnprior; lik(start:end)];
+    trend = repmat(constant,1,DynareDataset.info.ntobs)+trend_coeff*[1:DynareDataset.info.ntobs];
+else
+    trend = repmat(constant,1,DynareDataset.info.ntobs);
+end
+
+% Get needed informations for kalman filter routines.
+start = DynareOptions.presample+1;
+Z = BayesInfo.mf; % old mf
+no_missing_data_flag = ~DynareDataset.missing.state;
+mm = length(T); % old np
+pp = DynareDataset.info.nvobs;
+rr = length(Q);
+kalman_tol = DynareOptions.kalman_tol;
+riccati_tol = DynareOptions.riccati_tol;
+Y   = DynareDataset.data-trend;
+
+%------------------------------------------------------------------------------
+% 3. Initial condition of the Kalman filter
+%------------------------------------------------------------------------------
+kalman_algo = DynareOptions.kalman_algo;
+
+% resetting measurement errors covariance matrix for univariate filters
+if (kalman_algo == 2) || (kalman_algo == 4)
+    if isequal(H,0)
+        H = zeros(nobs,1);
+        mmm = mm;
+    else
+        if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
+            H = diag(H);
+            mmm = mm; 
+        else
+            Z = [Z, eye(pp)];
+            T = blkdiag(T,zeros(pp));
+            Q = blkdiag(Q,H);
+            R = blkdiag(R,eye(pp));
+            Pstar = blkdiag(Pstar,H);
+            Pinf  = blckdiag(Pinf,zeros(pp));
+            H = zeros(nobs,1);
+            mmm   = mm+pp;
+        end
+    end
+end
+
+
+diffuse_periods = 0;
+switch DynareOptions.lik_init
+  case 1% Standard initialization with the steady state of the state equation.
+    if kalman_algo~=2
+        % Use standard kalman filter except if the univariate filter is explicitely choosen.
+        kalman_algo = 1;
+    end
+    Pstar = lyapunov_symm(T,R*Q*R',DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
+    Pinf  = [];
+    a     = zeros(mm,1);
+    Zflag = 0;
+  case 2% Initialization with large numbers on the diagonal of the covariance matrix if the states (for non stationary models).
+    if kalman_algo ~= 2
+        % Use standard kalman filter except if the univariate filter is explicitely choosen.
+        kalman_algo = 1;
+    end
+    Pstar = DynareOptions.Harvey_scale_factor*eye(mm);
+    Pinf  = [];
+    a     = zeros(mm,1);
+    Zflag = 0;
+  case 3% Diffuse Kalman filter (Durbin and Koopman)
+    if kalman_algo ~= 4
+        % Use standard kalman filter except if the univariate filter is explicitely choosen.
+        kalman_algo = 3;
+    end
+    [Z,T,R,QT,Pstar,Pinf] = schur_statespace_transformation(Z,T,R,Q,DynareOptions.qz_criterium);
+    Zflag = 1;
+    % Run diffuse kalman filter on first periods.
+    if (kalman_algo==3)
+        % Multivariate Diffuse Kalman Filter
+        if no_missing_data_flag
+            [dLIK,dlik,a,Pstar] = kalman_filter_d(Y, 1, size(Y,2), ...
+                                                       zeros(mm,1), Pinf, Pstar, ...
+                                                       kalman_tol, riccati_tol, DynareOptions.presample, ...
+                                                       T,R,Q,H,Z,mm,pp,rr);
+        else
+            [dLIK,dlik,a,Pstar] = missing_observations_kalman_filter_d(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations, ...
+                                                              Y, 1, size(Y,2), ...
+                                                              zeros(mm,1), Pinf, Pstar, ...
+                                                              kalman_tol, riccati_tol, DynareOptions.presample, ...
+                                                              T,R,Q,H,Z,mm,pp,rr);
+        end
+        diffuse_periods = length(dlik);
+        if isinf(dLIK)
+            % Go to univariate diffuse filter if singularity problem.
+            kalman_algo = 4;
+            singularity_flag = 1;
+        end
+    end
+    if (kalman_algo==4)
+        % Univariate Diffuse Kalman Filter
+        if singularity_flag
+            if isequal(H,0)
+                H = zeros(nobs,1);
+                mmm = mm;
+            else
+                if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
+                    H = diag(H);
+                    mmm = mm; 
+                else
+                    Z = [Z, eye(pp)];
+                    T = blkdiag(T,zeros(pp));
+                    Q = blkdiag(Q,H);
+                    R = blkdiag(R,eye(pp));
+                    Pstar = blkdiag(Pstar,H);
+                    Pinf  = blckdiag(Pinf,zeros(pp));
+                    H = zeros(nobs,1);
+                    mmm   = mm+pp;
+                end
+            end
+            % no need to test again for correlation elements
+            singularity_flag = 0;
+        end
+        [dLIK,dlik,a,Pstar] = univariate_kalman_filter_d(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations, ...
+                                                              Y, 1, size(Y,2), ...
+                                                              zeros(mmm,1), Pinf, Pstar, ...
+                                                              kalman_tol, riccati_tol, DynareOptions.presample, ...
+                                                              T,R,Q,H,Z,mmm,pp,rr);
+        diffuse_periods = length(dlik);
+    end
+  case 4% Start from the solution of the Riccati equation.
+    if kalman_algo ~= 2
+        kalman_algo = 1;
+    end
+    if isequal(H,0)
+        [err,Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(Z,np,length(Z))));
+    else
+        [err,Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(Z,np,length(Z))),H);
+    end
+    if err
+        disp(['DsgeLikelihood:: I am not able to solve the Riccati equation, so I switch to lik_init=1!']);
+        DynareOptions.lik_init = 1;
+        Pstar = lyapunov_symm(T,R*Q*R',DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
+    end
+    Pinf  = [];
+  otherwise
+    error('DsgeLikelihood:: Unknown initialization approach for the Kalman filter!')
+end
+
+%------------------------------------------------------------------------------
+% 4. Likelihood evaluation
+%------------------------------------------------------------------------------
+
+if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
+    if no_missing_data_flag
+        [LIK,lik] = kalman_filter(Y,diffuse_periods+1,size(Y,2), ...
+                            a,Pstar, ...
+                            kalman_tol, riccati_tol, ...
+                            DynareOptions.presample, ...
+                            T,Q,R,H,Z,mm,pp,rr,Zflag,diffuse_periods);
+    else
+        [LIK,lik] = missing_observations_kalman_filter(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations,Y,diffuse_periods+1,size(Y,2), ...
+                                               a, Pstar, ...
+                                               kalman_tol, DynareOptions.riccati_tol, ...
+                                               DynareOptions.presample, ...
+                                               T,Q,R,H,Z,mm,pp,rr,Zflag,diffuse_periods);
+    end
+    if isinf(LIK)
+        if kalman_algo == 1
+            kalman_algo = 2;
+        else
+            kalman_algo = 4;
+        end
+        singularity_flag = 1;
+    else
+        if DynareOptions.lik_init==3
+            LIK = LIK + dLIK;
+            lik = [dlik; lik];
+        end
+    end
+end
+
+if ( singularity_flag || (kalman_algo==2) || (kalman_algo==4) )
+    % Univariate Kalman Filter
+    % resetting measurement error covariance matrix when necessary                                                           % 
+    if singularity_flag
+        if isequal(H,0)
+            H = zeros(nobs,1);
+            mmm = mm;
+        else
+            if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
+                H = diag(H);
+                mmm = mm;
+            else
+                Z = [Z, eye(pp)];
+                T = blkdiag(T,zeros(pp));
+                Q = blkdiag(Q,H);
+                R = blkdiag(R,eye(pp));
+                Pstar = blkdiag(Pstar,H);
+                Pinf  = blckdiag(Pinf,zeros(pp));
+                H = zeros(nobs,1);
+                mmm   = mm+pp;
+            end
+        end
+    end
+
+    [LIK,lik] = univariate_kalman_filter(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations,Y,diffuse_periods+1,size(Y,2), ...
+                                       a,Pstar, ...
+                                       DynareOptions.kalman_tol, ...
+                                       DynareOptions.riccati_tol, ...
+                                       DynareOptions.presample, ...
+                                       T,Q,R,H,Z,mmm,pp,rr,diffuse_periods);
+    if DynareOptions.lik_init==3
+        LIK = LIK+dLIK;
+        lik = [dlik; lik];
+    end
+end
+
+if isnan(LIK)
+    info = 45;
+    exit_flag = 0;
+    return
+end
+if imag(LIK)~=0
+    likelihood = penalty;
+else
+    likelihood = LIK;
+end
+
+% ------------------------------------------------------------------------------
+% 5. Adds prior if necessary
+% ------------------------------------------------------------------------------
+lnprior = priordens(xparam1,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
+fval    = (likelihood-lnprior);
+
+% Update DynareOptions.kalman_algo.
+DynareOptions.kalman_algo = kalman_algo;
+
+% Update the penalty.
+penalty = fval;
+
+% Add the prior density at the top of the vector for the density of each observation.
+lik=lik(start:end,:);
+llik=[-lnprior; lik(:)];

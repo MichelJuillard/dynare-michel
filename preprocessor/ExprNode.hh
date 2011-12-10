@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2010 Dynare Team
+ * Copyright (C) 2007-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -35,7 +35,7 @@ class DataTree;
 class VariableNode;
 class BinaryOpNode;
 
-typedef class ExprNode *NodeID;
+typedef class ExprNode *expr_t;
 
 struct Model_Block;
 
@@ -43,35 +43,36 @@ struct ExprNodeLess;
 
 //! Type for set of temporary terms
 /*! They are ordered by index number thanks to ExprNodeLess */
-typedef set<NodeID, ExprNodeLess> temporary_terms_type;
+typedef set<expr_t, ExprNodeLess> temporary_terms_t;
 
 //! set of temporary terms used in a block
-typedef set<int> temporary_terms_inuse_type;
+typedef set<int> temporary_terms_inuse_t;
 
-typedef map<int, int> map_idx_type;
+typedef map<int, int> map_idx_t;
 
 //! Type for evaluation contexts
 /*! The key is a symbol id. Lags are assumed to be null */
-typedef map<int, double> eval_context_type;
+typedef map<int, double> eval_context_t;
 
 //! Type for tracking first/second derivative functions that have already been written as temporary terms
-typedef map<pair<int, vector<NodeID> >, int> deriv_node_temp_terms_type;
+typedef map<pair<int, vector<expr_t> >, int> deriv_node_temp_terms_t;
 
 //! Possible types of output when writing ExprNode(s)
 enum ExprNodeOutputType
   {
-    oMatlabStaticModel,                           //!< Matlab code, static model declarations
-    oMatlabDynamicModel,                          //!< Matlab code, dynamic model declarations
-    oMatlabStaticModelSparse,                     //!< Matlab code, static block decomposed mode declaration
-    oMatlabDynamicModelSparse,                    //!< Matlab code, dynamic block decomposed mode declaration
-    oCDynamicModel,                               //!< C code, dynamic model declarations
+    oMatlabStaticModel,                           //!< Matlab code, static model
+    oMatlabDynamicModel,                          //!< Matlab code, dynamic model
+    oMatlabStaticModelSparse,                     //!< Matlab code, static block decomposed model
+    oMatlabDynamicModelSparse,                    //!< Matlab code, dynamic block decomposed model
+    oCDynamicModel,                               //!< C code, dynamic model
+    oCStaticModel,                                //!< C code, static model
     oMatlabOutsideModel,                          //!< Matlab code, outside model block (for example in initval)
-    oLatexStaticModel,                            //!< LaTeX code, static model declarations
-    oLatexDynamicModel,                           //!< LaTeX code, dynamic model declarations
-    oLatexDynamicSteadyStateOperator,             //!< LaTeX code, dynamic model steady state declarations
-    oMatlabDynamicSteadyStateOperator,            //!< Matlab code, dynamic model steady state declarations
-    oMatlabDynamicModelSparseSteadyStateOperator, //!< Matlab code, dynamic block decomposed model steady state declarations
-    oMatlabDynamicModelSparseLocalTemporaryTerms, //!< Matlab code, dynamic block decomposed model local temporary_terms
+    oLatexStaticModel,                            //!< LaTeX code, static model
+    oLatexDynamicModel,                           //!< LaTeX code, dynamic model
+    oLatexDynamicSteadyStateOperator,             //!< LaTeX code, dynamic model, inside a steady state operator
+    oMatlabDynamicSteadyStateOperator,            //!< Matlab code, dynamic model, inside a steady state operator
+    oMatlabDynamicSparseSteadyStateOperator,      //!< Matlab code, dynamic block decomposed model, inside a steady state operator
+    oCDynamicSteadyStateOperator,                 //!< C code, dynamic model, inside a steady state operator
     oSteadyStateFile                              //!< Matlab code, in the generated steady state file
   };
 
@@ -80,12 +81,11 @@ enum ExprNodeOutputType
                                 || (output_type) == oMatlabOutsideModel \
                                 || (output_type) == oMatlabStaticModelSparse \
                                 || (output_type) == oMatlabDynamicModelSparse \
-                                || (output_type) == oMatlabDynamicModelSparseLocalTemporaryTerms \
                                 || (output_type) == oMatlabDynamicSteadyStateOperator \
-                                || (output_type) == oMatlabDynamicModelSparseSteadyStateOperator \
+                                || (output_type) == oMatlabDynamicSparseSteadyStateOperator \
                                 || (output_type) == oSteadyStateFile)
 
-#define IS_C(output_type) ((output_type) == oCDynamicModel)
+#define IS_C(output_type) ((output_type) == oCDynamicModel || (output_type) == oCStaticModel || (output_type) == oCDynamicSteadyStateOperator)
 
 #define IS_LATEX(output_type) ((output_type) == oLatexStaticModel       \
                                || (output_type) == oLatexDynamicModel   \
@@ -125,7 +125,7 @@ class ExprNode
 private:
   //! Computes derivative w.r. to a derivation ID (but doesn't store it in derivatives map)
   /*! You shoud use getDerivative() to get the benefit of symbolic a priori and of caching */
-  virtual NodeID computeDerivative(int deriv_id) = 0;
+  virtual expr_t computeDerivative(int deriv_id) = 0;
 
 protected:
   //! Reference to the enclosing DataTree
@@ -141,11 +141,11 @@ protected:
   set<int> non_null_derivatives;
 
   //! Used for caching of first order derivatives (when non-null)
-  map<int, NodeID> derivatives;
+  map<int, expr_t> derivatives;
 
   //! Cost of computing current node
   /*! Nodes included in temporary_terms are considered having a null cost */
-  virtual int cost(const temporary_terms_type &temporary_terms, bool is_matlab) const;
+  virtual int cost(const temporary_terms_t &temporary_terms, bool is_matlab) const;
 
 public:
   ExprNode(DataTree &datatree_arg);
@@ -157,22 +157,22 @@ public:
   //! Returns derivative w.r. to derivation ID
   /*! Uses a symbolic a priori to pre-detect null derivatives, and caches the result for other derivatives (to avoid computing it several times)
     For an equal node, returns the derivative of lhs minus rhs */
-  NodeID getDerivative(int deriv_id);
+  expr_t getDerivative(int deriv_id);
 
   //! Computes derivatives by applying the chain rule for some variables
   /*!
     \param deriv_id The derivation ID with respect to which we are derivating
     \param recursive_variables Contains the derivation ID for which chain rules must be applied. Keys are derivation IDs, values are equations of the form x=f(y) where x is the key variable and x doesn't appear in y
   */
-  virtual NodeID getChainRuleDerivative(int deriv_id, const map<int, NodeID> &recursive_variables) = 0;
+  virtual expr_t getChainRuleDerivative(int deriv_id, const map<int, expr_t> &recursive_variables) = 0;
 
   //! Returns precedence of node
   /*! Equals 100 for constants, variables, unary ops, and temporary terms */
-  virtual int precedence(ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;
+  virtual int precedence(ExprNodeOutputType output_t, const temporary_terms_t &temporary_terms) const;
 
   //! Fills temporary_terms set, using reference counts
   /*! A node will be marked as a temporary term if it is referenced at least two times (i.e. has at least two parents), and has a computing cost (multiplied by reference count) greater to datatree.min_cost */
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms, bool is_matlab) const;
+  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count, temporary_terms_t &temporary_terms, bool is_matlab) const;
 
   //! Writes output of node, using a Txxx notation for nodes in temporary_terms, and specifiying the set of already written external functions
   /*!
@@ -181,7 +181,7 @@ public:
     \param[in] temporary_terms the nodes that are marked as temporary terms
     \param[in,out] tef_terms the set of already written external function nodes
   */
-  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, deriv_node_temp_terms_type &tef_terms) const = 0;
+  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms, deriv_node_temp_terms_t &tef_terms) const = 0;
 
   //! Writes output of node (with no temporary terms and with "outside model" output type)
   void writeOutput(ostream &output) const;
@@ -190,12 +190,17 @@ public:
   void writeOutput(ostream &output, ExprNodeOutputType output_type) const;
 
   //! Writes output of node, using a Txxx notation for nodes in temporary_terms
-  void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;
+  void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms) const;
 
   //! Writes the output for an external function, ensuring that the external function is called as few times as possible using temporary terms
   virtual void writeExternalFunctionOutput(ostream &output, ExprNodeOutputType output_type,
-                                           const temporary_terms_type &temporary_terms,
-                                           deriv_node_temp_terms_type &tef_terms) const;
+                                           const temporary_terms_t &temporary_terms,
+                                           deriv_node_temp_terms_t &tef_terms) const;
+
+  virtual void compileExternalFunctionOutput(ostream &CompileCode, unsigned int &instruction_number,
+                                             bool lhs_rhs, const temporary_terms_t &temporary_terms,
+                                             const map_idx_t &map_idx, bool dynamic, bool steady_dynamic,
+                                             deriv_node_temp_terms_t &tef_terms) const;
 
   //! Computes the set of all variables of a given symbol type in the expression
   /*!
@@ -229,12 +234,12 @@ public:
   */
   virtual void collectModelLocalVariables(set<int> &result) const;
 
-  virtual void collectTemporary_terms(const temporary_terms_type &temporary_terms, temporary_terms_inuse_type &temporary_terms_inuse, int Curr_Block) const = 0;
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count,
-                                     temporary_terms_type &temporary_terms,
-                                     map<NodeID, pair<int, int> > &first_occurence,
+  virtual void collectTemporary_terms(const temporary_terms_t &temporary_terms, temporary_terms_inuse_t &temporary_terms_inuse, int Curr_Block) const = 0;
+  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count,
+                                     temporary_terms_t &temporary_terms,
+                                     map<expr_t, pair<int, int> > &first_occurence,
                                      int Curr_block,
-                                     vector< vector<temporary_terms_type> > &v_temporary_terms,
+                                     vector< vector<temporary_terms_t> > &v_temporary_terms,
                                      int equation) const;
 
   class EvalException
@@ -242,16 +247,22 @@ public:
   {
   };
 
-  virtual double eval(const eval_context_type &eval_context) const throw (EvalException) = 0;
-  virtual void compile(ostream &CompileCode, bool lhs_rhs, const temporary_terms_type &temporary_terms, const map_idx_type &map_idx, bool dynamic, bool steady_dynamic) const = 0;
+  class EvalExternalFunctionException : public EvalException
+
+  {
+  };
+
+  virtual double eval(const eval_context_t &eval_context) const throw (EvalException, EvalExternalFunctionException) = 0;
+  virtual void compile(ostream &CompileCode, unsigned int &instruction_number, bool lhs_rhs, const temporary_terms_t &temporary_terms, const map_idx_t &map_idx, bool dynamic, bool steady_dynamic, deriv_node_temp_terms_t &tef_terms) const = 0;
+  void compile(ostream &CompileCode, unsigned int &instruction_number, bool lhs_rhs, const temporary_terms_t &temporary_terms, const map_idx_t &map_idx, bool dynamic, bool steady_dynamic) const;
   //! Creates a static version of this node
   /*!
     This method duplicates the current node by creating a similar node from which all leads/lags have been stripped,
     adds the result in the static_datatree argument (and not in the original datatree), and returns it.
   */
-  virtual NodeID toStatic(DataTree &static_datatree) const = 0;
+  virtual expr_t toStatic(DataTree &static_datatree) const = 0;
   //! Try to normalize an equation linear in its endogenous variable
-  virtual pair<int, NodeID> normalizeEquation(int symb_id_endo, vector<pair<int, pair<NodeID, NodeID> > > &List_of_Op_RHS) const = 0;
+  virtual pair<int, expr_t> normalizeEquation(int symb_id_endo, vector<pair<int, pair<expr_t, expr_t> > > &List_of_Op_RHS) const = 0;
 
   //! Returns the maximum lead of endogenous in this expression
   /*! Always returns a non-negative value */
@@ -261,13 +272,21 @@ public:
   /*! Always returns a non-negative value */
   virtual int maxExoLead() const = 0;
 
+  //! Returns the maximum lag of endogenous in this expression
+  /*! Always returns a non-negative value */
+  virtual int maxEndoLag() const = 0;
+
+  //! Returns the maximum lag of exogenous in this expression
+  /*! Always returns a non-negative value */
+  virtual int maxExoLag() const = 0;
+
   //! Returns a new expression where all the leads/lags have been shifted backwards by the same amount
   /*!
     Only acts on endogenous, exogenous, exogenous det
     \param[in] n The number of lags by which to shift
     \return The same expression except that leads/lags have been shifted backwards
   */
-  virtual NodeID decreaseLeadsLags(int n) const = 0;
+  virtual expr_t decreaseLeadsLags(int n) const = 0;
 
   //! Type for the substitution map used in the process of creating auxiliary vars for leads >= 2
   typedef map<const ExprNode *, const VariableNode *> subst_table_t;
@@ -303,27 +322,27 @@ public:
 
     \return A new equivalent expression where sub-expressions with max endo lead >= 2 have been replaced by auxiliary variables
   */
-  virtual NodeID substituteEndoLeadGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const = 0;
+  virtual expr_t substituteEndoLeadGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool deterministic_model) const = 0;
 
   //! Constructs a new expression where endo variables with max endo lag >= 2 have been replaced by auxiliary variables
   /*!
     \param[in,out] subst_table Map used to store expressions that have already be substituted and their corresponding variable, in order to avoid creating two auxiliary variables for the same sub-expr.
     \param[out] neweqs Equations to be added to the model to match the creation of auxiliary variables.
   */
-  virtual NodeID substituteEndoLagGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const = 0;
+  virtual expr_t substituteEndoLagGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const = 0;
 
   //! Constructs a new expression where exogenous variables with a lead have been replaced by auxiliary variables
   /*!
     \param[in,out] subst_table Map used to store expressions that have already be substituted and their corresponding variable, in order to avoid creating two auxiliary variables for the same sub-expr.
     \param[out] neweqs Equations to be added to the model to match the creation of auxiliary variables.
   */
-  virtual NodeID substituteExoLead(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const = 0;
+  virtual expr_t substituteExoLead(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool deterministic_model) const = 0;
   //! Constructs a new expression where exogenous variables with a lag have been replaced by auxiliary variables
   /*!
     \param[in,out] subst_table Map used to store expressions that have already be substituted and their corresponding variable, in order to avoid creating two auxiliary variables for the same sub-expr.
     \param[out] neweqs Equations to be added to the model to match the creation of auxiliary variables.
   */
-  virtual NodeID substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const = 0;
+  virtual expr_t substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const = 0;
 
   //! Constructs a new expression where the expectation operator has been replaced by auxiliary variables
   /*!
@@ -331,31 +350,47 @@ public:
     \param[out] neweqs Equations to be added to the model to match the creation of auxiliary variables.
     \param[in] partial_information_model Are we substituting in a partial information model?
   */
-  virtual NodeID substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const = 0;
+  virtual expr_t substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const = 0;
 
-  virtual NodeID decreaseLeadsLagsPredeterminedVariables() const = 0;
+  virtual expr_t decreaseLeadsLagsPredeterminedVariables() const = 0;
 
   //! Return true if the nodeID is a numerical constant equal to value and false otherwise
   /*!
     \param[in] value of the numerical constante
     \param[out] the boolean equal to true if NodeId is a constant equal to value
-    */
+  */
   virtual bool isNumConstNodeEqualTo(double value) const = 0;
 
   //! Return true if the nodeID is a variable withe a type equal to type_arg, a specific variable id aqual to varfiable_id and a lag equal to lag_arg and false otherwise
   /*!
     \param[in] the type (type_arg), specifique variable id (variable_id and the lag (lag_arg)
     \param[out] the boolean equal to true if NodeId is the variable
-    */
+  */
   virtual bool isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const = 0;
 
+  //! Replaces the Trend var with datatree.One
+  virtual expr_t replaceTrendVar() const = 0;
+
+  //! Constructs a new expression where the variable indicated by symb_id has been detrended
+  /*!
+    \param[in] symb_id indicating the variable to be detrended
+    \param[in] expr_t indicating the trend
+    \param[out] expr_t the new binary op pointing to a detrended variable
+  */
+  virtual expr_t detrend(int symb_id, expr_t trend) const = 0;
+
+  //! Add ExprNodes to the provided datatree
+  virtual expr_t cloneDynamic(DataTree &dynamic_datatree) const = 0;
+
+  //! Move a trend variable with lag/lead to time t by dividing/multiplying by its growth factor
+  virtual expr_t removeTrendLeadLag(map<int, expr_t> trend_symbols_map) const = 0;
 };
 
 //! Object used to compare two nodes (using their indexes)
 struct ExprNodeLess
 {
   bool
-  operator()(NodeID arg1, NodeID arg2) const
+  operator()(expr_t arg1, expr_t arg2) const
   {
     return arg1->idx < arg2->idx;
   }
@@ -368,7 +403,7 @@ class NumConstNode : public ExprNode
 private:
   //! Id from numerical constants table
   const int id;
-  virtual NodeID computeDerivative(int deriv_id);
+  virtual expr_t computeDerivative(int deriv_id);
 public:
   NumConstNode(DataTree &datatree_arg, int id_arg);
   int
@@ -377,107 +412,130 @@ public:
     return id;
   };
   virtual void prepareForDerivation();
-  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, deriv_node_temp_terms_type &tef_terms) const;
+  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms, deriv_node_temp_terms_t &tef_terms) const;
   virtual void collectVariables(SymbolType type_arg, set<pair<int, int> > &result) const;
-  virtual void collectTemporary_terms(const temporary_terms_type &temporary_terms, temporary_terms_inuse_type &temporary_terms_inuse, int Curr_Block) const;
-  virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
-  virtual void compile(ostream &CompileCode, bool lhs_rhs, const temporary_terms_type &temporary_terms, const map_idx_type &map_idx, bool dynamic, bool steady_dynamic) const;
-  virtual NodeID toStatic(DataTree &static_datatree) const;
-  virtual pair<int, NodeID> normalizeEquation(int symb_id_endo, vector<pair<int, pair<NodeID, NodeID> > >  &List_of_Op_RHS) const;
-  virtual NodeID getChainRuleDerivative(int deriv_id, const map<int, NodeID> &recursive_variables);
+  virtual void collectTemporary_terms(const temporary_terms_t &temporary_terms, temporary_terms_inuse_t &temporary_terms_inuse, int Curr_Block) const;
+  virtual double eval(const eval_context_t &eval_context) const throw (EvalException, EvalExternalFunctionException);
+  virtual void compile(ostream &CompileCode, unsigned int &instruction_number, bool lhs_rhs, const temporary_terms_t &temporary_terms, const map_idx_t &map_idx, bool dynamic, bool steady_dynamic, deriv_node_temp_terms_t &tef_terms) const;
+  virtual expr_t toStatic(DataTree &static_datatree) const;
+  virtual pair<int, expr_t> normalizeEquation(int symb_id_endo, vector<pair<int, pair<expr_t, expr_t> > >  &List_of_Op_RHS) const;
+  virtual expr_t getChainRuleDerivative(int deriv_id, const map<int, expr_t> &recursive_variables);
   virtual int maxEndoLead() const;
   virtual int maxExoLead() const;
-  virtual NodeID decreaseLeadsLags(int n) const;
-  virtual NodeID substituteEndoLeadGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteEndoLagGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExoLead(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
-  virtual NodeID decreaseLeadsLagsPredeterminedVariables() const;
+  virtual int maxEndoLag() const;
+  virtual int maxExoLag() const;
+  virtual expr_t decreaseLeadsLags(int n) const;
+  virtual expr_t substituteEndoLeadGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool deterministic_model) const;
+  virtual expr_t substituteEndoLagGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
+  virtual expr_t substituteExoLead(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool deterministic_model) const;
+  virtual expr_t substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
+  virtual expr_t substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
+  virtual expr_t decreaseLeadsLagsPredeterminedVariables() const;
   virtual bool isNumConstNodeEqualTo(double value) const;
   virtual bool isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const;
+  virtual expr_t replaceTrendVar() const;
+  virtual expr_t detrend(int symb_id, expr_t trend) const;
+  virtual expr_t cloneDynamic(DataTree &dynamic_datatree) const;
+  virtual expr_t removeTrendLeadLag(map<int, expr_t> trend_symbols_map) const;
 };
 
 //! Symbol or variable node
 class VariableNode : public ExprNode
 {
+  friend class UnaryOpNode;
 private:
   //! Id from the symbol table
   const int symb_id;
   const SymbolType type;
+  //! A positive value is a lead, a negative is a lag
   const int lag;
-  virtual NodeID computeDerivative(int deriv_id);
+  virtual expr_t computeDerivative(int deriv_id);
 public:
   VariableNode(DataTree &datatree_arg, int symb_id_arg, int lag_arg);
   virtual void prepareForDerivation();
-  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, deriv_node_temp_terms_type &tef_terms) const;
+  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms, deriv_node_temp_terms_t &tef_terms) const;
   virtual void collectVariables(SymbolType type_arg, set<pair<int, int> > &result) const;
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count,
-                                     temporary_terms_type &temporary_terms,
-                                     map<NodeID, pair<int, int> > &first_occurence,
+  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count,
+                                     temporary_terms_t &temporary_terms,
+                                     map<expr_t, pair<int, int> > &first_occurence,
                                      int Curr_block,
-                                     vector< vector<temporary_terms_type> > &v_temporary_terms,
+                                     vector< vector<temporary_terms_t> > &v_temporary_terms,
                                      int equation) const;
-  virtual void collectTemporary_terms(const temporary_terms_type &temporary_terms, temporary_terms_inuse_type &temporary_terms_inuse, int Curr_Block) const;
-  virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
-  virtual void compile(ostream &CompileCode, bool lhs_rhs, const temporary_terms_type &temporary_terms, const map_idx_type &map_idx, bool dynamic, bool steady_dynamic) const;
-  virtual NodeID toStatic(DataTree &static_datatree) const;
+  virtual void collectTemporary_terms(const temporary_terms_t &temporary_terms, temporary_terms_inuse_t &temporary_terms_inuse, int Curr_Block) const;
+  virtual double eval(const eval_context_t &eval_context) const throw (EvalException, EvalExternalFunctionException);
+  virtual void compile(ostream &CompileCode, unsigned int &instruction_number, bool lhs_rhs, const temporary_terms_t &temporary_terms, const map_idx_t &map_idx, bool dynamic, bool steady_dynamic, deriv_node_temp_terms_t &tef_terms) const;
+  virtual expr_t toStatic(DataTree &static_datatree) const;
+  SymbolType
+  get_type() const
+  {
+    return type;
+  };
   int
   get_symb_id() const
   {
     return symb_id;
   };
   int get_lag() const { return lag; };
-  virtual pair<int, NodeID> normalizeEquation(int symb_id_endo, vector<pair<int, pair<NodeID, NodeID> > >  &List_of_Op_RHS) const;
-  virtual NodeID getChainRuleDerivative(int deriv_id, const map<int, NodeID> &recursive_variables);
+  virtual pair<int, expr_t> normalizeEquation(int symb_id_endo, vector<pair<int, pair<expr_t, expr_t> > >  &List_of_Op_RHS) const;
+  virtual expr_t getChainRuleDerivative(int deriv_id, const map<int, expr_t> &recursive_variables);
   virtual int maxEndoLead() const;
   virtual int maxExoLead() const;
-  virtual NodeID decreaseLeadsLags(int n) const;
-  virtual NodeID substituteEndoLeadGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteEndoLagGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExoLead(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
-  virtual NodeID decreaseLeadsLagsPredeterminedVariables() const;
+  virtual int maxEndoLag() const;
+  virtual int maxExoLag() const;
+  virtual expr_t decreaseLeadsLags(int n) const;
+  virtual expr_t substituteEndoLeadGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool deterministic_model) const;
+  virtual expr_t substituteEndoLagGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
+  virtual expr_t substituteExoLead(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool deterministic_model) const;
+  virtual expr_t substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
+  virtual expr_t substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
+  virtual expr_t decreaseLeadsLagsPredeterminedVariables() const;
   virtual bool isNumConstNodeEqualTo(double value) const;
   virtual bool isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const;
+  virtual expr_t replaceTrendVar() const;
+  virtual expr_t detrend(int symb_id, expr_t trend) const;
+  virtual expr_t cloneDynamic(DataTree &dynamic_datatree) const;
+  virtual expr_t removeTrendLeadLag(map<int, expr_t> trend_symbols_map) const;
 };
 
 //! Unary operator node
 class UnaryOpNode : public ExprNode
 {
 private:
-  const NodeID arg;
+  const expr_t arg;
   //! Stores the information set. Only used for expectation operator
   const int expectation_information_set;
-  //! Stores the information set name. Only used for expectation operator
-  const string expectation_information_set_name;
+  //! Only used for oSteadyStateParamDeriv and oSteadyStateParam2ndDeriv
+  const int param1_symb_id, param2_symb_id;
   const UnaryOpcode op_code;
-  virtual NodeID computeDerivative(int deriv_id);
-  virtual int cost(const temporary_terms_type &temporary_terms, bool is_matlab) const;
+  virtual expr_t computeDerivative(int deriv_id);
+  virtual int cost(const temporary_terms_t &temporary_terms, bool is_matlab) const;
   //! Returns the derivative of this node if darg is the derivative of the argument
-  NodeID composeDerivatives(NodeID darg);
+  expr_t composeDerivatives(expr_t darg, int deriv_id);
 public:
-  UnaryOpNode(DataTree &datatree_arg, UnaryOpcode op_code_arg, const NodeID arg_arg, const int expectation_information_set_arg, const string &expectation_information_set_name_arg);
+  UnaryOpNode(DataTree &datatree_arg, UnaryOpcode op_code_arg, const expr_t arg_arg, int expectation_information_set_arg, int param1_symb_id_arg, int param2_symb_id_arg);
   virtual void prepareForDerivation();
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms, bool is_matlab) const;
-  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, deriv_node_temp_terms_type &tef_terms) const;
+  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count, temporary_terms_t &temporary_terms, bool is_matlab) const;
+  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms, deriv_node_temp_terms_t &tef_terms) const;
   virtual void writeExternalFunctionOutput(ostream &output, ExprNodeOutputType output_type,
-                                           const temporary_terms_type &temporary_terms,
-                                           deriv_node_temp_terms_type &tef_terms) const;
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count,
-                                     temporary_terms_type &temporary_terms,
-                                     map<NodeID, pair<int, int> > &first_occurence,
+                                           const temporary_terms_t &temporary_terms,
+                                           deriv_node_temp_terms_t &tef_terms) const;
+  virtual void compileExternalFunctionOutput(ostream &CompileCode, unsigned int &instruction_number,
+                                             bool lhs_rhs, const temporary_terms_t &temporary_terms,
+                                             const map_idx_t &map_idx, bool dynamic, bool steady_dynamic,
+                                             deriv_node_temp_terms_t &tef_terms) const;
+  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count,
+                                     temporary_terms_t &temporary_terms,
+                                     map<expr_t, pair<int, int> > &first_occurence,
                                      int Curr_block,
-                                     vector< vector<temporary_terms_type> > &v_temporary_terms,
+                                     vector< vector<temporary_terms_t> > &v_temporary_terms,
                                      int equation) const;
   virtual void collectVariables(SymbolType type_arg, set<pair<int, int> > &result) const;
-  virtual void collectTemporary_terms(const temporary_terms_type &temporary_terms, temporary_terms_inuse_type &temporary_terms_inuse, int Curr_Block) const;
-  static double eval_opcode(UnaryOpcode op_code, double v) throw (EvalException);
-  virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
-  virtual void compile(ostream &CompileCode, bool lhs_rhs, const temporary_terms_type &temporary_terms, const map_idx_type &map_idx, bool dynamic, bool steady_dynamic) const;
+  virtual void collectTemporary_terms(const temporary_terms_t &temporary_terms, temporary_terms_inuse_t &temporary_terms_inuse, int Curr_Block) const;
+  static double eval_opcode(UnaryOpcode op_code, double v) throw (EvalException, EvalExternalFunctionException);
+  virtual double eval(const eval_context_t &eval_context) const throw (EvalException, EvalExternalFunctionException);
+  virtual void compile(ostream &CompileCode, unsigned int &instruction_number, bool lhs_rhs, const temporary_terms_t &temporary_terms, const map_idx_t &map_idx, bool dynamic, bool steady_dynamic, deriv_node_temp_terms_t &tef_terms) const;
   //! Returns operand
-  NodeID
+  expr_t
   get_arg() const
   {
     return (arg);
@@ -488,64 +546,77 @@ public:
   {
     return (op_code);
   };
-  virtual NodeID toStatic(DataTree &static_datatree) const;
-  virtual pair<int, NodeID> normalizeEquation(int symb_id_endo, vector<pair<int, pair<NodeID, NodeID> > >  &List_of_Op_RHS) const;
-  virtual NodeID getChainRuleDerivative(int deriv_id, const map<int, NodeID> &recursive_variables);
+  virtual expr_t toStatic(DataTree &static_datatree) const;
+  virtual pair<int, expr_t> normalizeEquation(int symb_id_endo, vector<pair<int, pair<expr_t, expr_t> > >  &List_of_Op_RHS) const;
+  virtual expr_t getChainRuleDerivative(int deriv_id, const map<int, expr_t> &recursive_variables);
   virtual int maxEndoLead() const;
   virtual int maxExoLead() const;
-  virtual NodeID decreaseLeadsLags(int n) const;
-  virtual NodeID substituteEndoLeadGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
+  virtual int maxEndoLag() const;
+  virtual int maxExoLag() const;
+  virtual expr_t decreaseLeadsLags(int n) const;
+  virtual expr_t substituteEndoLeadGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool deterministic_model) const;
   //! Creates another UnaryOpNode with the same opcode, but with a possibly different datatree and argument
-  NodeID buildSimilarUnaryOpNode(NodeID alt_arg, DataTree &alt_datatree) const;
-  virtual NodeID substituteEndoLagGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExoLead(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
-  virtual NodeID decreaseLeadsLagsPredeterminedVariables() const;
+  expr_t buildSimilarUnaryOpNode(expr_t alt_arg, DataTree &alt_datatree) const;
+  virtual expr_t substituteEndoLagGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
+  virtual expr_t substituteExoLead(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool deterministic_model) const;
+  virtual expr_t substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
+  virtual expr_t substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
+  virtual expr_t decreaseLeadsLagsPredeterminedVariables() const;
   virtual bool isNumConstNodeEqualTo(double value) const;
   virtual bool isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const;
+  virtual expr_t replaceTrendVar() const;
+  virtual expr_t detrend(int symb_id, expr_t trend) const;
+  virtual expr_t cloneDynamic(DataTree &dynamic_datatree) const;
+  virtual expr_t removeTrendLeadLag(map<int, expr_t> trend_symbols_map) const;
 };
 
 //! Binary operator node
 class BinaryOpNode : public ExprNode
 {
 private:
-  const NodeID arg1, arg2;
+  const expr_t arg1, arg2;
   const BinaryOpcode op_code;
-  virtual NodeID computeDerivative(int deriv_id);
-  virtual int cost(const temporary_terms_type &temporary_terms, bool is_matlab) const;
+  virtual expr_t computeDerivative(int deriv_id);
+  virtual int cost(const temporary_terms_t &temporary_terms, bool is_matlab) const;
   //! Returns the derivative of this node if darg1 and darg2 are the derivatives of the arguments
-  NodeID composeDerivatives(NodeID darg1, NodeID darg2);
+  expr_t composeDerivatives(expr_t darg1, expr_t darg2);
+  const int powerDerivOrder;
 public:
-  BinaryOpNode(DataTree &datatree_arg, const NodeID arg1_arg,
-               BinaryOpcode op_code_arg, const NodeID arg2_arg);
+  BinaryOpNode(DataTree &datatree_arg, const expr_t arg1_arg,
+               BinaryOpcode op_code_arg, const expr_t arg2_arg);
+  BinaryOpNode(DataTree &datatree_arg, const expr_t arg1_arg,
+               BinaryOpcode op_code_arg, const expr_t arg2_arg, int powerDerivOrder);
   virtual void prepareForDerivation();
-  virtual int precedence(ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms, bool is_matlab) const;
-  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, deriv_node_temp_terms_type &tef_terms) const;
+  virtual int precedence(ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms) const;
+  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count, temporary_terms_t &temporary_terms, bool is_matlab) const;
+  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms, deriv_node_temp_terms_t &tef_terms) const;
   virtual void writeExternalFunctionOutput(ostream &output, ExprNodeOutputType output_type,
-                                           const temporary_terms_type &temporary_terms,
-                                           deriv_node_temp_terms_type &tef_terms) const;
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count,
-                                     temporary_terms_type &temporary_terms,
-                                     map<NodeID, pair<int, int> > &first_occurence,
+                                           const temporary_terms_t &temporary_terms,
+                                           deriv_node_temp_terms_t &tef_terms) const;
+  virtual void compileExternalFunctionOutput(ostream &CompileCode, unsigned int &instruction_number,
+                                             bool lhs_rhs, const temporary_terms_t &temporary_terms,
+                                             const map_idx_t &map_idx, bool dynamic, bool steady_dynamic,
+                                             deriv_node_temp_terms_t &tef_terms) const;
+  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count,
+                                     temporary_terms_t &temporary_terms,
+                                     map<expr_t, pair<int, int> > &first_occurence,
                                      int Curr_block,
-                                     vector< vector<temporary_terms_type> > &v_temporary_terms,
+                                     vector< vector<temporary_terms_t> > &v_temporary_terms,
                                      int equation) const;
   virtual void collectVariables(SymbolType type_arg, set<pair<int, int> > &result) const;
-  virtual void collectTemporary_terms(const temporary_terms_type &temporary_terms, temporary_terms_inuse_type &temporary_terms_inuse, int Curr_Block) const;
-  static double eval_opcode(double v1, BinaryOpcode op_code, double v2) throw (EvalException);
-  virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
-  virtual void compile(ostream &CompileCode, bool lhs_rhs, const temporary_terms_type &temporary_terms, const map_idx_type &map_idx, bool dynamic, bool steady_dynamic) const;
-  virtual NodeID Compute_RHS(NodeID arg1, NodeID arg2, int op, int op_type) const;
+  virtual void collectTemporary_terms(const temporary_terms_t &temporary_terms, temporary_terms_inuse_t &temporary_terms_inuse, int Curr_Block) const;
+  static double eval_opcode(double v1, BinaryOpcode op_code, double v2, int derivOrder) throw (EvalException, EvalExternalFunctionException);
+  virtual double eval(const eval_context_t &eval_context) const throw (EvalException, EvalExternalFunctionException);
+  virtual void compile(ostream &CompileCode, unsigned int &instruction_number, bool lhs_rhs, const temporary_terms_t &temporary_terms, const map_idx_t &map_idx, bool dynamic, bool steady_dynamic, deriv_node_temp_terms_t &tef_terms) const;
+  virtual expr_t Compute_RHS(expr_t arg1, expr_t arg2, int op, int op_type) const;
   //! Returns first operand
-  NodeID
+  expr_t
   get_arg1() const
   {
     return (arg1);
   };
   //! Returns second operand
-  NodeID
+  expr_t
   get_arg2() const
   {
     return (arg2);
@@ -556,22 +627,39 @@ public:
   {
     return (op_code);
   };
-  virtual NodeID toStatic(DataTree &static_datatree) const;
-  virtual pair<int, NodeID> normalizeEquation(int symb_id_endo, vector<pair<int, pair<NodeID, NodeID> > >  &List_of_Op_RHS) const;
-  virtual NodeID getChainRuleDerivative(int deriv_id, const map<int, NodeID> &recursive_variables);
+  int
+  get_power_deriv_order() const
+  {
+    return powerDerivOrder;
+  }
+  virtual expr_t toStatic(DataTree &static_datatree) const;
+  virtual pair<int, expr_t> normalizeEquation(int symb_id_endo, vector<pair<int, pair<expr_t, expr_t> > >  &List_of_Op_RHS) const;
+  virtual expr_t getChainRuleDerivative(int deriv_id, const map<int, expr_t> &recursive_variables);
   virtual int maxEndoLead() const;
   virtual int maxExoLead() const;
-  virtual NodeID decreaseLeadsLags(int n) const;
-  virtual NodeID substituteEndoLeadGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
+  virtual int maxEndoLag() const;
+  virtual int maxExoLag() const;
+  virtual expr_t decreaseLeadsLags(int n) const;
+  virtual expr_t substituteEndoLeadGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool deterministic_model) const;
   //! Creates another BinaryOpNode with the same opcode, but with a possibly different datatree and arguments
-  NodeID buildSimilarBinaryOpNode(NodeID alt_arg1, NodeID alt_arg2, DataTree &alt_datatree) const;
-  virtual NodeID substituteEndoLagGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExoLead(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
-  virtual NodeID decreaseLeadsLagsPredeterminedVariables() const;
+  expr_t buildSimilarBinaryOpNode(expr_t alt_arg1, expr_t alt_arg2, DataTree &alt_datatree) const;
+  virtual expr_t substituteEndoLagGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
+  virtual expr_t substituteExoLead(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool deterministic_model) const;
+  virtual expr_t substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
+  virtual expr_t substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
+  virtual expr_t decreaseLeadsLagsPredeterminedVariables() const;
   virtual bool isNumConstNodeEqualTo(double value) const;
   virtual bool isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const;
+  virtual expr_t replaceTrendVar() const;
+  virtual expr_t detrend(int symb_id, expr_t trend) const;
+  virtual expr_t cloneDynamic(DataTree &dynamic_datatree) const;
+  virtual expr_t removeTrendLeadLag(map<int, expr_t> trend_symbols_map) const;
+  //! Function to write out the oPowerNode in expr_t terms as opposed to writing out the function itself
+  expr_t unpackPowerDeriv() const;
+  //! Returns MULT_i*(lhs-rhs) = 0, creating multiplier MULT_i
+  expr_t addMultipliersToConstraints(int i);
+  //! Returns the non-zero hand-side of an equation (that must have a hand side equal to zero)
+  expr_t getNonZeroPartofEquation() const;
 };
 
 //! Trinary operator node
@@ -579,127 +667,161 @@ class TrinaryOpNode : public ExprNode
 {
   friend class ModelTree;
 private:
-  const NodeID arg1, arg2, arg3;
+  const expr_t arg1, arg2, arg3;
   const TrinaryOpcode op_code;
-  virtual NodeID computeDerivative(int deriv_id);
-  virtual int cost(const temporary_terms_type &temporary_terms, bool is_matlab) const;
+  virtual expr_t computeDerivative(int deriv_id);
+  virtual int cost(const temporary_terms_t &temporary_terms, bool is_matlab) const;
   //! Returns the derivative of this node if darg1, darg2 and darg3 are the derivatives of the arguments
-  NodeID composeDerivatives(NodeID darg1, NodeID darg2, NodeID darg3);
+  expr_t composeDerivatives(expr_t darg1, expr_t darg2, expr_t darg3);
 public:
-  TrinaryOpNode(DataTree &datatree_arg, const NodeID arg1_arg,
-                TrinaryOpcode op_code_arg, const NodeID arg2_arg, const NodeID arg3_arg);
+  TrinaryOpNode(DataTree &datatree_arg, const expr_t arg1_arg,
+                TrinaryOpcode op_code_arg, const expr_t arg2_arg, const expr_t arg3_arg);
   virtual void prepareForDerivation();
-  virtual int precedence(ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms) const;
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms, bool is_matlab) const;
-  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, deriv_node_temp_terms_type &tef_terms) const;
+  virtual int precedence(ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms) const;
+  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count, temporary_terms_t &temporary_terms, bool is_matlab) const;
+  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms, deriv_node_temp_terms_t &tef_terms) const;
   virtual void writeExternalFunctionOutput(ostream &output, ExprNodeOutputType output_type,
-                                           const temporary_terms_type &temporary_terms,
-                                           deriv_node_temp_terms_type &tef_terms) const;
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count,
-                                     temporary_terms_type &temporary_terms,
-                                     map<NodeID, pair<int, int> > &first_occurence,
+                                           const temporary_terms_t &temporary_terms,
+                                           deriv_node_temp_terms_t &tef_terms) const;
+  virtual void compileExternalFunctionOutput(ostream &CompileCode, unsigned int &instruction_number,
+                                             bool lhs_rhs, const temporary_terms_t &temporary_terms,
+                                             const map_idx_t &map_idx, bool dynamic, bool steady_dynamic,
+                                             deriv_node_temp_terms_t &tef_terms) const;
+  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count,
+                                     temporary_terms_t &temporary_terms,
+                                     map<expr_t, pair<int, int> > &first_occurence,
                                      int Curr_block,
-                                     vector< vector<temporary_terms_type> > &v_temporary_terms,
+                                     vector< vector<temporary_terms_t> > &v_temporary_terms,
                                      int equation) const;
   virtual void collectVariables(SymbolType type_arg, set<pair<int, int> > &result) const;
-  virtual void collectTemporary_terms(const temporary_terms_type &temporary_terms, temporary_terms_inuse_type &temporary_terms_inuse, int Curr_Block) const;
-  static double eval_opcode(double v1, TrinaryOpcode op_code, double v2, double v3) throw (EvalException);
-  virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
-  virtual void compile(ostream &CompileCode, bool lhs_rhs, const temporary_terms_type &temporary_terms, const map_idx_type &map_idx, bool dynamic, bool steady_dynamic) const;
-  virtual NodeID toStatic(DataTree &static_datatree) const;
-  virtual pair<int, NodeID> normalizeEquation(int symb_id_endo, vector<pair<int, pair<NodeID, NodeID> > >  &List_of_Op_RHS) const;
-  virtual NodeID getChainRuleDerivative(int deriv_id, const map<int, NodeID> &recursive_variables);
+  virtual void collectTemporary_terms(const temporary_terms_t &temporary_terms, temporary_terms_inuse_t &temporary_terms_inuse, int Curr_Block) const;
+  static double eval_opcode(double v1, TrinaryOpcode op_code, double v2, double v3) throw (EvalException, EvalExternalFunctionException);
+  virtual double eval(const eval_context_t &eval_context) const throw (EvalException, EvalExternalFunctionException);
+  virtual void compile(ostream &CompileCode, unsigned int &instruction_number, bool lhs_rhs, const temporary_terms_t &temporary_terms, const map_idx_t &map_idx, bool dynamic, bool steady_dynamic, deriv_node_temp_terms_t &tef_terms) const;
+  virtual expr_t toStatic(DataTree &static_datatree) const;
+  virtual pair<int, expr_t> normalizeEquation(int symb_id_endo, vector<pair<int, pair<expr_t, expr_t> > >  &List_of_Op_RHS) const;
+  virtual expr_t getChainRuleDerivative(int deriv_id, const map<int, expr_t> &recursive_variables);
   virtual int maxEndoLead() const;
   virtual int maxExoLead() const;
-  virtual NodeID decreaseLeadsLags(int n) const;
-  virtual NodeID substituteEndoLeadGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
+  virtual int maxEndoLag() const;
+  virtual int maxExoLag() const;
+  virtual expr_t decreaseLeadsLags(int n) const;
+  virtual expr_t substituteEndoLeadGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool deterministic_model) const;
   //! Creates another TrinaryOpNode with the same opcode, but with a possibly different datatree and arguments
-  NodeID buildSimilarTrinaryOpNode(NodeID alt_arg1, NodeID alt_arg2, NodeID alt_arg3, DataTree &alt_datatree) const;
-  virtual NodeID substituteEndoLagGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExoLead(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
-  virtual NodeID decreaseLeadsLagsPredeterminedVariables() const;
+  expr_t buildSimilarTrinaryOpNode(expr_t alt_arg1, expr_t alt_arg2, expr_t alt_arg3, DataTree &alt_datatree) const;
+  virtual expr_t substituteEndoLagGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
+  virtual expr_t substituteExoLead(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool deterministic_model) const;
+  virtual expr_t substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
+  virtual expr_t substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
+  virtual expr_t decreaseLeadsLagsPredeterminedVariables() const;
   virtual bool isNumConstNodeEqualTo(double value) const;
   virtual bool isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const;
+  virtual expr_t replaceTrendVar() const;
+  virtual expr_t detrend(int symb_id, expr_t trend) const;
+  virtual expr_t cloneDynamic(DataTree &dynamic_datatree) const;
+  virtual expr_t removeTrendLeadLag(map<int, expr_t> trend_symbols_map) const;
 };
 
 //! External function node
 class ExternalFunctionNode : public ExprNode
 {
 private:
-  virtual NodeID computeDerivative(int deriv_id);
-  virtual NodeID composeDerivatives(const vector<NodeID> &dargs);
+  virtual expr_t computeDerivative(int deriv_id);
+  virtual expr_t composeDerivatives(const vector<expr_t> &dargs);
 protected:
   //! Thrown when trying to access an unknown entry in external_function_node_map
   class UnknownFunctionNameAndArgs
   {
   };
   const int symb_id;
-  const vector<NodeID> arguments;
+  const vector<expr_t> arguments;
   //! Returns true if the given external function has been written as a temporary term
-  bool alreadyWrittenAsTefTerm(int the_symb_id, deriv_node_temp_terms_type &tef_terms) const;
+  bool alreadyWrittenAsTefTerm(int the_symb_id, deriv_node_temp_terms_t &tef_terms) const;
   //! Returns the index in the tef_terms map of this external function
-  int getIndxInTefTerms(int the_symb_id, deriv_node_temp_terms_type &tef_terms) const throw (UnknownFunctionNameAndArgs);
+  int getIndxInTefTerms(int the_symb_id, deriv_node_temp_terms_t &tef_terms) const throw (UnknownFunctionNameAndArgs);
   //! Helper function to write output arguments of any given external function
-  void writeExternalFunctionArguments(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, deriv_node_temp_terms_type &tef_terms) const;
+  void writeExternalFunctionArguments(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms, deriv_node_temp_terms_t &tef_terms) const;
 public:
   ExternalFunctionNode(DataTree &datatree_arg, int symb_id_arg,
-                      const vector<NodeID> &arguments_arg);
+                       const vector<expr_t> &arguments_arg);
   virtual void prepareForDerivation();
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms, bool is_matlab) const;
-  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, deriv_node_temp_terms_type &tef_terms) const;
+  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count, temporary_terms_t &temporary_terms, bool is_matlab) const;
+  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms, deriv_node_temp_terms_t &tef_terms) const;
   virtual void writeExternalFunctionOutput(ostream &output, ExprNodeOutputType output_type,
-                                           const temporary_terms_type &temporary_terms,
-                                           deriv_node_temp_terms_type &tef_terms) const;
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count,
-                                     temporary_terms_type &temporary_terms,
-                                     map<NodeID, pair<int, int> > &first_occurence,
+                                           const temporary_terms_t &temporary_terms,
+                                           deriv_node_temp_terms_t &tef_terms) const;
+  virtual void compileExternalFunctionOutput(ostream &CompileCode, unsigned int &instruction_number,
+                                             bool lhs_rhs, const temporary_terms_t &temporary_terms,
+                                             const map_idx_t &map_idx, bool dynamic, bool steady_dynamic,
+                                             deriv_node_temp_terms_t &tef_terms) const;
+  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count,
+                                     temporary_terms_t &temporary_terms,
+                                     map<expr_t, pair<int, int> > &first_occurence,
                                      int Curr_block,
-                                     vector< vector<temporary_terms_type> > &v_temporary_terms,
+                                     vector< vector<temporary_terms_t> > &v_temporary_terms,
                                      int equation) const;
   virtual void collectVariables(SymbolType type_arg, set<pair<int, int> > &result) const;
-  virtual void collectTemporary_terms(const temporary_terms_type &temporary_terms, temporary_terms_inuse_type &temporary_terms_inuse, int Curr_Block) const;
-  virtual double eval(const eval_context_type &eval_context) const throw (EvalException);
-  virtual void compile(ostream &CompileCode, bool lhs_rhs, const temporary_terms_type &temporary_terms, const map_idx_type &map_idx, bool dynamic, bool steady_dynamic) const;
-  virtual NodeID toStatic(DataTree &static_datatree) const;
-  virtual pair<int, NodeID> normalizeEquation(int symb_id_endo, vector<pair<int, pair<NodeID, NodeID> > >  &List_of_Op_RHS) const;
-  virtual NodeID getChainRuleDerivative(int deriv_id, const map<int, NodeID> &recursive_variables);
+  virtual void collectTemporary_terms(const temporary_terms_t &temporary_terms, temporary_terms_inuse_t &temporary_terms_inuse, int Curr_Block) const;
+  virtual double eval(const eval_context_t &eval_context) const throw (EvalException, EvalExternalFunctionException);
+  unsigned int compileExternalFunctionArguments(ostream &CompileCode, unsigned int &instruction_number,
+                                                bool lhs_rhs, const temporary_terms_t &temporary_terms,
+                                                const map_idx_t &map_idx, bool dynamic, bool steady_dynamic,
+                                                deriv_node_temp_terms_t &tef_terms) const;
+
+  virtual void compile(ostream &CompileCode, unsigned int &instruction_number, bool lhs_rhs, const temporary_terms_t &temporary_terms, const map_idx_t &map_idx, bool dynamic, bool steady_dynamic, deriv_node_temp_terms_t &tef_terms) const;
+  virtual expr_t toStatic(DataTree &static_datatree) const;
+  virtual pair<int, expr_t> normalizeEquation(int symb_id_endo, vector<pair<int, pair<expr_t, expr_t> > >  &List_of_Op_RHS) const;
+  virtual expr_t getChainRuleDerivative(int deriv_id, const map<int, expr_t> &recursive_variables);
   virtual int maxEndoLead() const;
   virtual int maxExoLead() const;
-  virtual NodeID decreaseLeadsLags(int n) const;
-  virtual NodeID substituteEndoLeadGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteEndoLagGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExoLead(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
-  virtual NodeID substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
-  virtual NodeID buildSimilarExternalFunctionNode(vector<NodeID> &alt_args, DataTree &alt_datatree) const;
-  virtual NodeID decreaseLeadsLagsPredeterminedVariables() const;
+  virtual int maxEndoLag() const;
+  virtual int maxExoLag() const;
+  virtual expr_t decreaseLeadsLags(int n) const;
+  virtual expr_t substituteEndoLeadGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool deterministic_model) const;
+  virtual expr_t substituteEndoLagGreaterThanTwo(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
+  virtual expr_t substituteExoLead(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool deterministic_model) const;
+  virtual expr_t substituteExoLag(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs) const;
+  virtual expr_t substituteExpectation(subst_table_t &subst_table, vector<BinaryOpNode *> &neweqs, bool partial_information_model) const;
+  virtual expr_t buildSimilarExternalFunctionNode(vector<expr_t> &alt_args, DataTree &alt_datatree) const;
+  virtual expr_t decreaseLeadsLagsPredeterminedVariables() const;
   virtual bool isNumConstNodeEqualTo(double value) const;
   virtual bool isVariableNodeEqualTo(SymbolType type_arg, int variable_id, int lag_arg) const;
+  virtual void writePrhs(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms, deriv_node_temp_terms_t &tef_terms, const string &ending) const;
+  virtual expr_t replaceTrendVar() const;
+  virtual expr_t detrend(int symb_id, expr_t trend) const;
+  virtual expr_t cloneDynamic(DataTree &dynamic_datatree) const;
+  virtual expr_t removeTrendLeadLag(map<int, expr_t> trend_symbols_map) const;
 };
 
 class FirstDerivExternalFunctionNode : public ExternalFunctionNode
 {
 private:
   const int inputIndex;
-  virtual NodeID composeDerivatives(const vector<NodeID> &dargs);
+  virtual expr_t composeDerivatives(const vector<expr_t> &dargs);
 public:
   FirstDerivExternalFunctionNode(DataTree &datatree_arg,
                                  int top_level_symb_id_arg,
-                                 const vector<NodeID> &arguments_arg,
+                                 const vector<expr_t> &arguments_arg,
                                  int inputIndex_arg);
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms, bool is_matlab) const;
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count,
-                                     temporary_terms_type &temporary_terms,
-                                     map<NodeID, pair<int, int> > &first_occurence,
+  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count, temporary_terms_t &temporary_terms, bool is_matlab) const;
+  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count,
+                                     temporary_terms_t &temporary_terms,
+                                     map<expr_t, pair<int, int> > &first_occurence,
                                      int Curr_block,
-                                     vector< vector<temporary_terms_type> > &v_temporary_terms,
+                                     vector< vector<temporary_terms_t> > &v_temporary_terms,
                                      int equation) const;
-  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, deriv_node_temp_terms_type &tef_terms) const;
+  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms, deriv_node_temp_terms_t &tef_terms) const;
+  virtual void compile(ostream &CompileCode, unsigned int &instruction_number,
+                       bool lhs_rhs, const temporary_terms_t &temporary_terms,
+                       const map_idx_t &map_idx, bool dynamic, bool steady_dynamic,
+                       deriv_node_temp_terms_t &tef_terms) const;
   virtual void writeExternalFunctionOutput(ostream &output, ExprNodeOutputType output_type,
-                                           const temporary_terms_type &temporary_terms,
-                                           deriv_node_temp_terms_type &tef_terms) const;
+                                           const temporary_terms_t &temporary_terms,
+                                           deriv_node_temp_terms_t &tef_terms) const;
+  virtual void compileExternalFunctionOutput(ostream &CompileCode, unsigned int &instruction_number,
+                                             bool lhs_rhs, const temporary_terms_t &temporary_terms,
+                                             const map_idx_t &map_idx, bool dynamic, bool steady_dynamic,
+                                             deriv_node_temp_terms_t &tef_terms) const;
 };
 
 class SecondDerivExternalFunctionNode : public ExternalFunctionNode
@@ -707,24 +829,24 @@ class SecondDerivExternalFunctionNode : public ExternalFunctionNode
 private:
   const int inputIndex1;
   const int inputIndex2;
-  virtual NodeID computeDerivative(int deriv_id);
+  virtual expr_t computeDerivative(int deriv_id);
 public:
   SecondDerivExternalFunctionNode(DataTree &datatree_arg,
                                   int top_level_symb_id_arg,
-                                  const vector<NodeID> &arguments_arg,
+                                  const vector<expr_t> &arguments_arg,
                                   int inputIndex1_arg,
                                   int inputIndex2_arg);
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count, temporary_terms_type &temporary_terms, bool is_matlab) const;
-  virtual void computeTemporaryTerms(map<NodeID, int> &reference_count,
-                                     temporary_terms_type &temporary_terms,
-                                     map<NodeID, pair<int, int> > &first_occurence,
+  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count, temporary_terms_t &temporary_terms, bool is_matlab) const;
+  virtual void computeTemporaryTerms(map<expr_t, int> &reference_count,
+                                     temporary_terms_t &temporary_terms,
+                                     map<expr_t, pair<int, int> > &first_occurence,
                                      int Curr_block,
-                                     vector< vector<temporary_terms_type> > &v_temporary_terms,
+                                     vector< vector<temporary_terms_t> > &v_temporary_terms,
                                      int equation) const;
-  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_type &temporary_terms, deriv_node_temp_terms_type &tef_terms) const;
+  virtual void writeOutput(ostream &output, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms, deriv_node_temp_terms_t &tef_terms) const;
   virtual void writeExternalFunctionOutput(ostream &output, ExprNodeOutputType output_type,
-                                           const temporary_terms_type &temporary_terms,
-                                           deriv_node_temp_terms_type &tef_terms) const;
+                                           const temporary_terms_t &temporary_terms,
+                                           deriv_node_temp_terms_t &tef_terms) const;
 };
 
 #endif

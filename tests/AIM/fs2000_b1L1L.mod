@@ -74,9 +74,7 @@ var e_a; stderr 0.014;
 var e_m; stderr 0.005;
 end;
 
-unit_root_vars P_obs Y_obs;
-
-steady;
+steady(nocheck);
  
 stoch_simul(order=1,irf=0);
  

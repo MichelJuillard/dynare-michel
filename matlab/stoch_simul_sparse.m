@@ -1,7 +1,7 @@
 function info=stoch_simul_sparse(var_list)
 % This file is a modified version of stoch_simul.m: common parts should be factorized!
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -38,13 +38,13 @@ end
 
 check_model;
 
-[oo_.dr, info] = resol(oo_.steady_state,0);
+[oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 
 if info(1)
     options_ = options_old;
     print_info(info, options_.noprint);
     return
-end  
+end
 
 oo_dr_kstate = [];
 oo_dr_nstatic = 0;
@@ -66,7 +66,7 @@ if ~options_.noprint
     disp(['  Number of static variables:  ' int2str(oo_dr_nstatic)])
     my_title='MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS';
     labels = deblank(M_.exo_names);
-    headers = strvcat('Variables',labels);
+    headers = char('Variables',labels);
     lh = size(labels,2)+2;
     dyntable(my_title,headers,labels,M_.Sigma_e,lh,10,6);
     disp(' ')
@@ -74,7 +74,7 @@ if ~options_.noprint
 end
 
 if options_.periods == 0 && options_.nomoments == 0
-    disp_th_moments(oo_.dr,var_list); 
+    disp_th_moments(oo_.dr,var_list);
 elseif options_.periods ~= 0
     if options_.periods < options_.drop
         disp(['STOCH_SIMUL error: The horizon of simulation is shorter' ...
@@ -91,7 +91,7 @@ end
 
 
 
-if options_.irf 
+if options_.irf
     if size(var_list,1) == 0
         var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
         if TeX
@@ -111,7 +111,11 @@ if options_.irf
         else
             ivar(i) = i_tmp;
             if TeX
-                var_listTeX = strvcat(var_listTeX,deblank(M_.endo_names_tex(i_tmp,:)));
+                if isempty(var_listTeX)
+                    var_listTeX = deblank(M_.endo_names_tex(i_tmp,:));
+                else
+                    var_listTeX = char(var_listTeX,deblank(M_.endo_names_tex(i_tmp,:)));
+                end
             end
         end
     end
@@ -122,19 +126,19 @@ if options_.irf
         fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
         fprintf(fidTeX,' \n');
     end
-    olditer = iter_;% Est-ce vraiment utile ? Il y a la même ligne dans irf... 
     SS(M_.exo_names_orig_ord,M_.exo_names_orig_ord)=M_.Sigma_e+1e-14*eye(M_.exo_nbr);
     cs = transpose(chol(SS));
     tit(M_.exo_names_orig_ord,:) = M_.exo_names;
     if TeX
         titTeX(M_.exo_names_orig_ord,:) = M_.exo_names_tex;
     end
-    for i=1:M_.exo_nbr
+    irf_shocks_indx = getIrfShocksIndx();
+    for i=irf_shocks_indx
         if SS(i,i) > 1e-13
             y=irf(oo_.dr,cs(M_.exo_names_orig_ord,i), options_.irf, options_.drop, ...
                   options_.replic, options_.order);
             if options_.relative_irf
-                y = 100*y/cs(i,i); 
+                y = 100*y/cs(i,i);
             end
             irfs   = [];
             mylist = [];
@@ -145,12 +149,20 @@ if options_.irf
                 assignin('base',[deblank(M_.endo_names(ivar(j),:)) '_' deblank(M_.exo_names(i,:))],...
                          y(ivar(j),:)');
                 eval(['oo_.irfs.' deblank(M_.endo_names(ivar(j),:)) '_' ...
-                      deblank(M_.exo_names(i,:)) ' = y(ivar(j),:);']); 
+                      deblank(M_.exo_names(i,:)) ' = y(ivar(j),:);']);
                 if max(y(ivar(j),:)) - min(y(ivar(j),:)) > 1e-10
                     irfs  = cat(1,irfs,y(ivar(j),:));
-                    mylist = strvcat(mylist,deblank(var_list(j,:)));
+                    if isempty(mylist)
+                        mylist = deblank(var_list(j,:));
+                    else
+                        mylist = char(mylist,deblank(var_list(j,:)));
+                    end
                     if TeX
-                        mylistTeX = strvcat(mylistTeX,deblank(var_listTeX(j,:)));
+                        if isempty(mylistTeX)
+                            mylistTeX = deblank(var_listTeX(j,:));
+                        else
+                            mylistTeX = char(mylistTeX,deblank(var_listTeX(j,:)));
+                        end
                     end
                 end
             end
@@ -237,7 +249,7 @@ if options_.irf
                         %                                       close(hh);
                     end
                     hh = figure('Name',['Orthogonalized shock to ' tit(i,:) ' figure ' int2str(nbplt) '.']);
-                    m = 0; 
+                    m = 0;
                     for plt = 1:number_of_plots_to_draw-(nbplt-1)*nstar;
                         m = m+1;
                         subplot(lr,lc,m);
@@ -275,7 +287,6 @@ if options_.irf
                 end
             end
         end
-        iter_ = olditer;
         if TeX
             fprintf(fidTeX,' \n');
             fprintf(fidTeX,'%% End Of TeX file. \n');

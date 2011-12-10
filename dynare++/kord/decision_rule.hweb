@@ -631,13 +631,7 @@ damp by one half.
 		if (fnorm <= flastnorm)
 			urelax_found = true;
 		else
-#ifndef _MSC_VER
 			urelax *= std::min(0.5, flastnorm/fnorm);
-#else
-	/* MSVC doesn't define std::min() (should be in <algorithm>),
-	   but instead has a macro in <windows.h> */
-			urelax *= min(0.5, flastnorm/fnorm);
-#endif
 	}
 
 
@@ -702,11 +696,12 @@ class SimResults {
 protected:@;
 	int num_y;
 	int num_per;
+	int num_burn;
 	vector<TwoDMatrix*> data;
 	vector<ExplicitShockRealization*> shocks;
 public:@;
-	SimResults(int ny, int nper)
-		: num_y(ny), num_per(nper)@+ {}
+	SimResults(int ny, int nper, int nburn = 0)
+		: num_y(ny), num_per(nper), num_burn(nburn)@+ {}
 	virtual ~SimResults();
 	void simulate(int num_sim, const DecisionRule& dr, const Vector& start,
 				  const TwoDMatrix& vcov, Journal& journal);
@@ -714,6 +709,8 @@ public:@;
 				  const TwoDMatrix& vcov);
 	int getNumPer() const
 		{@+ return num_per;@+}
+	int getNumBurn() const
+		{@+ return num_burn;@+}
 	int getNumSets() const
 		{@+ return (int)data.size();@+}
 	const TwoDMatrix& getData(int i) const
@@ -734,8 +731,8 @@ protected:@;
 	Vector mean;
 	TwoDMatrix vcov;
 public:@;
-	SimResultsStats(int ny, int nper)
-		: SimResults(ny, nper), mean(ny), vcov(ny,ny)@+ {}
+	SimResultsStats(int ny, int nper, int nburn = 0)
+		: SimResults(ny, nper, nburn), mean(ny), vcov(ny,ny)@+ {}
 	void simulate(int num_sim, const DecisionRule& dr, const Vector& start,
 				  const TwoDMatrix& vcov, Journal& journal);
 	void writeMat4(FILE* fd, const char* lname) const;
@@ -754,8 +751,8 @@ protected:@;
 	TwoDMatrix mean;
 	TwoDMatrix variance;
 public:@;
-	SimResultsDynamicStats(int ny, int nper)
-		: SimResults(ny, nper), mean(ny,nper), variance(ny,nper)@+ {}
+	SimResultsDynamicStats(int ny, int nper, int nburn = 0)
+		: SimResults(ny, nper, nburn), mean(ny,nper), variance(ny,nper)@+ {}
 	void simulate(int num_sim, const DecisionRule& dr, const Vector& start,
 				  const TwoDMatrix& vcov, Journal& journal);
 	void writeMat4(FILE* fd, const char* lname) const; 
@@ -784,12 +781,11 @@ protected:@;
 	TwoDMatrix variances;
 public:@;
 	SimResultsIRF(const SimResults& cntl, int ny, int nper, int i, double impulse)
-		: SimResults(ny, nper), control(cntl),
+		: SimResults(ny, nper, 0), control(cntl),
 		  ishock(i), imp(impulse),
 		  means(ny, nper), variances(ny, nper)@+ {}
-	void simulate(const DecisionRule& dr, const Vector& start,
-				 Journal& journal);
-	void simulate(const DecisionRule& dr, const Vector& start);
+	void simulate(const DecisionRule& dr, Journal& journal);
+	void simulate(const DecisionRule& dr);
 	void writeMat4(FILE* fd, const char* lname) const;
 protected:@;
 	void calcMeans();
@@ -810,13 +806,14 @@ protected:@;
 	Vector mean;
 	TwoDMatrix vcov;
 	int num_per;
+	int num_burn;
 	NormalConj nc;
 	int incomplete_simulations;
 	int thrown_periods;
 public:@;
-	RTSimResultsStats(int ny, int nper)
+	RTSimResultsStats(int ny, int nper, int nburn = 0)
 		: mean(ny), vcov(ny, ny),
-		  num_per(nper), nc(ny),
+		  num_per(nper), num_burn(nburn), nc(ny),
 		  incomplete_simulations(0), thrown_periods(0)@+ {}
 	void simulate(int num_sim, const DecisionRule& dr, const Vector& start,
 				  const TwoDMatrix& vcov, Journal& journal);
@@ -885,7 +882,6 @@ class SimulationIRFWorker : public THREAD {
 	const DecisionRule& dr;
 	DecisionRule::emethod em;
 	int np;
-	const Vector& st;
 	int idata;
 	int ishock;
 	double imp;	
@@ -893,9 +889,8 @@ public:@;
 	SimulationIRFWorker(SimResultsIRF& sim_res,
 						const DecisionRule& dec_rule,
 						DecisionRule::emethod emet, int num_per,
-						const Vector& start, int id,
-						int ishck, double impulse)
-		: res(sim_res), dr(dec_rule), em(emet), np(num_per), st(start),
+						int id, int ishck, double impulse)
+		: res(sim_res), dr(dec_rule), em(emet), np(num_per),
 		  idata(id), ishock(ishck), imp(impulse)@+ {}
 	void operator()();
 };
@@ -957,12 +952,16 @@ class ExplicitShockRealization : virtual public ShockRealization {
 public:@;
 	ExplicitShockRealization(const TwoDMatrix& sh)
 		: shocks(sh)@+ {}
+	ExplicitShockRealization(const ConstTwoDMatrix& sh)
+		: shocks(sh)@+ {}
 	ExplicitShockRealization(const ExplicitShockRealization& sr)
 		: shocks(sr.shocks)@+ {}
 	ExplicitShockRealization(ShockRealization& sr, int num_per);
 	void get(int n, Vector& out);
 	int numShocks() const
 		{@+ return shocks.nrows();@+}
+	const TwoDMatrix& getShocks()
+		{@+ return shocks;@+}
 	void addToShock(int ishock, int iper, double val);
 	void print() const
 		{@+ shocks.print();@+}

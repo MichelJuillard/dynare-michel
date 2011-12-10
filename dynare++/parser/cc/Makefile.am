@@ -29,7 +29,7 @@ libparser_a_SOURCES = \
 	tree.h \
 	$(GENERATED_FILES)
 
-libparser_a_CPPFLAGS = -I../..
+libparser_a_CPPFLAGS = -I../.. $(BOOST_CPPFLAGS)
 
 BUILT_SOURCES = $(GENERATED_FILES)
 

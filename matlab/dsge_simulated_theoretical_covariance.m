@@ -1,8 +1,8 @@
 function [nvar,vartan,CovarFileNumber] = dsge_simulated_theoretical_covariance(SampleSize,M_,options_,oo_,type)
 % This function computes the posterior or prior distribution of the endogenous
-% variables second order moments. 
-% 
-% INPUTS 
+% variables second order moments.
+%
+% INPUTS
 %   SampleSize   [integer]       scalar, number of simulations.
 %   M_           [structure]     Dynare structure describing the model.
 %   options_     [structure]     Dynare structure defining global options.
@@ -10,7 +10,7 @@ function [nvar,vartan,CovarFileNumber] = dsge_simulated_theoretical_covariance(S
 %   type         [string]        'prior' or 'posterior'
 %
 %
-% OUTPUTS  
+% OUTPUTS
 %   nvar              [integer]  nvar is the number of stationary variables.
 %   vartan            [char]     array of characters (with nvar rows).
 %   CovarFileNumber   [integer]  scalar, number of prior or posterior data files (for covariance).
@@ -98,7 +98,7 @@ for file = 1:NumberOfDrawsFiles
             dr = pdraws{linee,2};
         else
             set_parameters(pdraws{linee,1});
-            [dr,info] = resol(oo_.steady_state,0);
+            [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
         end
         tmp = th_autocovariances(dr,ivar,M_,options_,nodecomposition);
         for i=1:nvar

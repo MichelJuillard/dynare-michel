@@ -12,10 +12,11 @@
 %         ...... Kronecker power of C of order 'order'
 %       D .....  rectangular (n, m^order) matrix.
 %
-% X = gensylv(order, A, B, C, D)
-%       returns X as the solution, doesn't perform any checks
+% [err, X] = gensylv(order, A, B, C, D)
+%       returns err a scalar where 1 indicates failure, 0 indicates success
+%       and X as the solution, doesn't perform any checks
 %
-% [X, par] = gensylv(order, A, B, C, D)
+% [err, X, par] = gensylv(order, A, B, C, D)
 %       solves the system, and performs checks. 'par' is struct
 %       containing information about solution and error norms
 %       returned by the check. This is a list of the struct
@@ -52,7 +53,7 @@
 % $Header: /var/lib/cvs/dynare_cpp/sylv/matlab/gensylv.m,v 1.1.1.1 2004/06/04 13:01:13 kamenik Exp $
 % Tag $Name:  $
 
-function [X, varargout] = gensylv(order, A, B, C, D)
+function [err, X, varargout] = gensylv(order, A, B, C, D)
 
 % in Windows, ensure that aa_gensylv.dll is loaded, this prevents
 % clearing the function and a successive Matlab crash
@@ -63,12 +64,13 @@ if strcmp('PCWIN', computer)
 end
 
 % launch aa_gensylv
-if nargout == 1
+if nargout == 2
   X = aa_gensylv(order, A, B, C, D);
-elseif nargout == 2
+elseif nargout == 3
   [X, par] = aa_gensylv(order, A, B, C, D);
   varargout(1) = {par};
 else
-  error('Must have 1 or 2 output arguments.');
+  error('Must have 2 or 3 output arguments.');
 end
+err = 0;
   

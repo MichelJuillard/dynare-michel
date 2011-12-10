@@ -1,17 +1,17 @@
 function innovation_paths = reversed_extended_path(controlled_variable_names, control_innovation_names, dataset)
 % Inversion of the extended path simulation approach. This routine computes the innovations needed to
 % reproduce the time path of a subset of endogenous variables. The initial condition is teh deterministic
-% steady state.   
-%    
-% INPUTS    
-%  o controlled_variable_names        [string]    n*1 matlab's cell. 
-%  o control_innovation_names         [string]    n*1 matlab's cell.  
+% steady state.
+%
+% INPUTS
+%  o controlled_variable_names        [string]    n*1 matlab's cell.
+%  o control_innovation_names         [string]    n*1 matlab's cell.
 %  o dataset                          [structure]
 % OUTPUTS
 %  o innovations                      [double]  n*T matrix.
-%    
+%
 % ALGORITHM
-%  
+%
 % SPECIAL REQUIREMENTS
 
 % Copyright (C) 2010 Dynare Team.
@@ -31,7 +31,7 @@ function innovation_paths = reversed_extended_path(controlled_variable_names, co
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ oo_ options_   
+global M_ oo_ options_
 
 %% Initialization
 
@@ -48,14 +48,15 @@ steady_;
 
 %  Compute the first order perturbation reduced form.
 old_options_order = options_.order; options_.order = 1;
-[oo_.dr,info]  = resol(oo_.steady_state,0);
+[dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
+oo_.dr = dr;
 options_.order = old_options_order;
 
 % Set various options.
 options_.periods = 100;
 
 % Set-up oo_.exo_simul.
-make_ex_; 
+make_ex_;
 
 % Set-up oo_.endo_simul.
 make_y_;
@@ -98,13 +99,13 @@ for t=1:T
     total_variation = y_target-transpose(oo_.endo_simul(t+M_.maximum_lag,iy));
     for i=1:100
         [t,i]
-        y = transpose(oo_.endo_simul(t+M_.maximum_lag,iy)) + (i/100)*y_target 
+        y = transpose(oo_.endo_simul(t+M_.maximum_lag,iy)) + (i/100)*y_target
         [tmp,fval,exitflag] = fsolve('ep_residuals', x0, options, y, ix, iy, oo_.steady_state, oo_.dr, M_.maximum_lag, M_.endo_nbr);
     end
     if exitflag==1
         innovation_paths(:,t) = tmp;
     end
     % Update endo_simul.
-    oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end); 
+    oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end);
     oo_.endo_simul(:,end) = oo_.steady_state;
 end

@@ -1,6 +1,6 @@
 function ftest (s1,s2)
 
-% Copyright (C) 2001-2008 Dynare Team
+% Copyright (C) 2001-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -41,7 +41,7 @@ lag1 = fread(fid,4,'int') ;
 nvx = fread(fid,[n1,n3],'int') ;
 x = fread(fid,[n1,n2],'float64') ;
 fclose(fid) ;
-nvx = setstr(nvx) ;
+nvx = char(nvx) ;
 
 fid=fopen(file2,'r') ;
 n1 = fread(fid,1,'int') ;
@@ -51,7 +51,7 @@ lag2 = fread(fid,4,'int') ;
 nvy = fread(fid,[n1,n3],'int') ;
 y = fread(fid,[n1,n2],'float64') ;
 fclose(fid) ;
-nvy = setstr(nvy) ;
+nvy = char(nvy) ;
 
 if size(x,1) ~= size(y,1)
     error ('FTEST: The two files don''t have the same number of variables.');

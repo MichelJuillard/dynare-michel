@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2010 Dynare Team
+ * Copyright (C) 2009-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -24,7 +24,6 @@
 ///////////////////////////////////////////////////////////
 
 #include "LogPriorDensity.hh"
-
 LogPriorDensity::~LogPriorDensity()
 {
 };
@@ -38,11 +37,11 @@ double
 LogPriorDensity::compute(const Vector &ep)
 {
   assert(estParsDesc.estParams.size() == ep.getSize());
-
+  double logPriorDensity = 0;
   for (size_t i = 0; i <  ep.getSize(); ++i)
     {
-      logPriorDensity += ((*(estParsDesc.estParams[i]).prior)).pdf(ep(i));
-      if (std::isinf(abs(logPriorDensity)))
+      logPriorDensity += log(((*(estParsDesc.estParams[i]).prior)).pdf(ep(i)));
+      if (std::isinf(fabs(logPriorDensity)))
         return logPriorDensity;
     }
   return logPriorDensity;

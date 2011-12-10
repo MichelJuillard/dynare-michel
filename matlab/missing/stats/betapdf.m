@@ -8,9 +8,10 @@ function pdf = betapdf (x, a, b)
 % Adapted for Matlab (R) from GNU Octave 3.0.1
 % Original file: statistics/distributions/betapdf.m
 % Original author: KH <Kurt.Hornik@wu-wien.ac.at>
+% Modified by Michel Juillard <michel.juillard@mjui.fr> for large values of a and b
 
 % Copyright (C) 1995, 1996, 1997, 2005, 2006, 2007 Kurt Hornik
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -50,10 +51,10 @@ k = find ((x > 0) & (x < 1) & (a > 0) & (b > 0));
 if (any (k))
     if (isscalar(a) && isscalar(b))
         pdf(k) = exp ((a - 1) .* log (x(k)) ...
-                      + (b - 1) .* log (1 - x(k))) ./ beta (a, b);
+                      + (b - 1) .* log (1 - x(k))-gammaln(a)-gammaln(b)+gammaln(a+b));
     else
         pdf(k) = exp ((a(k) - 1) .* log (x(k)) ...
-                      + (b(k) - 1) .* log (1 - x(k))) ./ beta (a(k), b(k));
+                      + (b(k) - 1) .* log (1 - x(k))-gammaln(a(k))-gammaln(b(k))+gammaln(a(k)+b(k)));
     end
 end
 

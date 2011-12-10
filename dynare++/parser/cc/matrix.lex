@@ -1,9 +1,11 @@
 %{
+// Copyright (C) 2006-2011, Ondra Kamenik
+
 #include "location.h"
 #include "matrix_tab.hh"
 
 	extern YYLTYPE matrix_lloc;
-	extern void matrix_error(char*);
+	extern void matrix_error(const char*);
 
 #define YY_USER_ACTION SET_LLOC(matrix_);
 %}

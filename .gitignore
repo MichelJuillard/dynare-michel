@@ -9,6 +9,7 @@
 *.a
 *.fig
 \#*\#
+TAGS
 
 # Build system rules
 .deps
@@ -40,7 +41,20 @@ ylwrap
 *.bbl
 *.blg
 *.lof
-/doc/manual-html/
+/doc/dynare.html
+/doc/dynare.info
+/doc/dynare.cp
+/doc/dynare.fn
+/doc/dynare.fns
+/doc/dynare.vrs
+/doc/dynare.ky
+/doc/dynare.pg
+/doc/dynare.tp
+/doc/dynare.vr
+/doc/texinfo.tex
+/doc/version.texi
+/doc/mdate-sh
+/doc/stamp-vti
 !/doc/guide.bbl
 !/doc/macroprocessor/new-design.pdf
 !/doc/macroprocessor/old-design.pdf
@@ -57,6 +71,16 @@ ylwrap
 !/doc/userguide/P_SchorfMod.pdf
 !/doc/userguide/P_ModStruct2.pdf
 !/doc/userguide/P_ShockModel2.pdf
+!/doc/parallel/AvenueParadigm.pdf
+!/doc/parallel/iVaNo_*.pdf
+!/doc/parallel/netbook_*.pdf
+!/doc/parallel/quest_*.pdf
+!/doc/parallel/RWMH_quest1_*.pdf
+!/doc/parallel/waitbars*.pdf
+doc/m2html
+doc/internals/*.html
+doc/internals/ltxpng
+mex/build/matlab/run_m2html.m
 
 # Preprocessor
 /preprocessor/dynare_m
@@ -83,6 +107,7 @@ ylwrap
 # DLL rules
 *.mex
 *.dll
+*.oct
 *.mexglx
 *.mexa64
 *.mexw32
@@ -147,14 +172,11 @@ ylwrap
 /mex/sources/estimation/libmat/tests/test-repmat
 /mex/sources/estimation/libmat/tests/test-repmat.exe
 
-# Misc
-!/matlab/swz/c-code/Makefile
-!/mex/sources/kalman/cc/Makefile
-!/mex/sources/kalman/matlab/Makefile
-!/mex/sources/kalman/qt/f90/Makefile
-!/mex/sources/kalman/qt/test/Makefile
-!/mex/sources/kalman/sylv/cc/Makefile
-!/mex/sources/kalman/testing/Makefile
-
 # MacOS stuff
 .DS_Store
+
+# MS-Sbvar
+/ms-sbvar/*.prn
+/ms-sbvar/*.dat
+/ms-sbvar/sbvar_commandline
+/ms-sbvar/sbvar_init_file

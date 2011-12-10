@@ -1,4 +1,4 @@
-function prior_posterior_statistics(type,Y,gend,data_index,missing_value)
+function prior_posterior_statistics(type,dataset)
 
 % function PosteriorFilterSmootherAndForecast(Y,gend, type)
 % Computes posterior filter smoother and forecasts
@@ -7,10 +7,7 @@ function prior_posterior_statistics(type,Y,gend,data_index,missing_value)
 %    type:         posterior
 %                  prior
 %                  gsa
-%    Y:            data
-%    gend:         number of observations
-%    data_index    [cell]      1*smpl cell of column vectors of indices.
-%    missing_value 1 if missing values, 0 otherwise
+%    dataset:      data structure
 %
 % OUTPUTS
 %    none
@@ -22,7 +19,7 @@ function prior_posterior_statistics(type,Y,gend,data_index,missing_value)
 % See the comments random_walk_metropolis_hastings.m funtion.
 
 
-% Copyright (C) 2005-2010 Dynare Team
+% Copyright (C) 2005-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -42,6 +39,12 @@ function prior_posterior_statistics(type,Y,gend,data_index,missing_value)
 global options_ estim_params_ oo_ M_ bayestopt_
 
 localVars=[];
+
+Y = dataset.data;
+gend = dataset.info.ntobs;
+data_index = dataset.missing.aindex;
+missing_value = dataset.missing.state;
+bayestopt_.mean_varobs = dataset.descriptive.mean';
 
 nvx  = estim_params_.nvx;
 nvn  = estim_params_.nvn;
@@ -65,23 +68,44 @@ if horizon
 end
 maxlag = M_.maximum_endo_lag;
 %%
-DirectoryName = CheckPath('metropolis');
-load([ DirectoryName '/'  M_.fname '_mh_history'])
-FirstMhFile = record.KeepedDraws.FirstMhFile;
-FirstLine = record.KeepedDraws.FirstLine;
-TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); LastMhFile = TotalNumberOfMhFiles;
-TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
-NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
-clear record;
-if ~isempty(options_.subdraws)
-    B = options_.subdraws;
-    if B > NumberOfDraws
-        B = NumberOfDraws;
+if strcmpi(type,'posterior')
+    DirectoryName = CheckPath('metropolis');
+    load([ DirectoryName '/'  M_.fname '_mh_history'])
+    FirstMhFile = record.KeepedDraws.FirstMhFile;
+    FirstLine = record.KeepedDraws.FirstLine;
+    TotalNumberOfMhFiles = sum(record.MhDraws(:,2)); LastMhFile = TotalNumberOfMhFiles;
+    TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
+    NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
+    clear record;
+    if ~isempty(options_.subdraws)
+        B = options_.subdraws;
+        if B > NumberOfDraws
+            B = NumberOfDraws;
+        end
+    else
+        B = min(1200, round(0.25*NumberOfDraws));
     end
-else
-    B = min(1200, round(0.25*NumberOfDraws));
+elseif strcmpi(type,'gsa')
+    RootDirectoryName = CheckPath('gsa');
+    if options_.opt_gsa.pprior
+        DirectoryName = CheckPath(['gsa',filesep,'prior']);
+        load([ RootDirectoryName filesep  M_.fname '_prior.mat'],'lpmat0','lpmat','istable')
+    else
+        DirectoryName = CheckPath(['gsa',filesep,'mc']);
+        load([ RootDirectoryName filesep  M_.fname '_mc.mat'],'lpmat0','lpmat','istable')
+    end
+    x=[lpmat0(istable,:) lpmat(istable,:)];
+    clear lpmat istable
+    NumberOfDraws=size(x,1);
+    B=NumberOfDraws; 
+elseif strcmpi(type,'prior')
+    DirectoryName = CheckPath('prior');
+    if ~isempty(options_.subdraws)
+        B = options_.subdraws;
+    else
+        B = 1200;
+    end
 end
-
 %%
 MAX_nruns = min(B,ceil(MaxNumberOfBytes/(npar+2)/8));
 MAX_nsmoo = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*gend)/8));
@@ -89,12 +113,12 @@ MAX_ninno = min(B,ceil(MaxNumberOfBytes/(exo_nbr*gend)/8));
 MAX_nerro = min(B,ceil(MaxNumberOfBytes/(size(options_.varobs,1)*gend)/8));
 if naK
     MAX_naK   = min(B,ceil(MaxNumberOfBytes/(size(options_.varobs,1)* ...
-        length(options_.filter_step_ahead)*gend)/8));
+                                             length(options_.filter_step_ahead)*gend)/8));
 end
 if horizon
     MAX_nforc1 = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*(horizon+maxlag))/8));
     MAX_nforc2 = min(B,ceil(MaxNumberOfBytes/((endo_nbr)*(horizon+maxlag))/ ...
-        8));
+                            8));
     IdObs    = bayestopt_.mfys;
     
 end
@@ -130,7 +154,7 @@ end
 
 if options_.filter_step_ahead
     stock_filter_step_ahead = zeros(naK,endo_nbr,gend+ ...
-        options_.filter_step_ahead(end),MAX_naK);
+                                    options_.filter_step_ahead(end),MAX_naK);
     run_smoother = 1;
 end
 if options_.forecast
@@ -176,7 +200,7 @@ end
 localVars.MAX_nruns=MAX_nruns;
 localVars.MAX_momentsno = MAX_momentsno;
 localVars.ifil=ifil;
-
+localVars.DirectoryName = DirectoryName;
 
 if strcmpi(type,'posterior'),
     b=0;
@@ -184,19 +208,19 @@ if strcmpi(type,'posterior'),
         b = b + 1;
         [x(b,:), logpost(b,1)] = GetOneDraw(type);
     end
+    localVars.logpost=logpost;
 end
 
 if ~strcmpi(type,'prior'),
     localVars.x=x;
-    localVars.logpost=logpost;
 end
 
 b=0;
 
 % Like sequential execution!
-if isnumeric(options_.parallel),% | isunix, % For the moment exclude unix platform from parallel implementation!
+if isnumeric(options_.parallel),
     [fout] = prior_posterior_statistics_core(localVars,1,B,0);
-% Parallel execution!
+    % Parallel execution!
 else
     [nCPU, totCPU, nBlockPerCPU] = distributeJobs(options_.parallel, 1, B);
     for j=1:totCPU-1,
@@ -214,15 +238,15 @@ else
         ifil(6,j+1) =ifil(6,j)+nfiles;
         nfiles = ceil(nBlockPerCPU(j)/MAX_nforc2);
         ifil(7,j+1) =ifil(7,j)+nfiles;
-%       nfiles = ceil(nBlockPerCPU(j)/MAX_momentsno);
-%       ifil(8,j+1) =ifil(8,j)+nfiles;
+        %       nfiles = ceil(nBlockPerCPU(j)/MAX_momentsno);
+        %       ifil(8,j+1) =ifil(8,j)+nfiles;
     end
     localVars.ifil = ifil;
     globalVars = struct('M_',M_, ...
-        'options_', options_, ...
-        'bayestopt_', bayestopt_, ...
-        'estim_params_', estim_params_, ...
-        'oo_', oo_);
+                        'options_', options_, ...
+                        'bayestopt_', bayestopt_, ...
+                        'estim_params_', estim_params_, ...
+                        'oo_', oo_);
     
     % which files have to be copied to run remotely
     NamFileInput(1,:) = {'',[M_.fname '_static.m']};
@@ -236,36 +260,29 @@ end
 ifil = fout(end).ifil;
 
 
-
-if exist('OCTAVE_VERSION')
-    printf('\n');
-    diary on;
-else
-    if exist('h')
-        close(h)
-    end
-    
-end
-
 stock_gend=gend;
 stock_data=Y;
 save([DirectoryName '/' M_.fname '_data.mat'],'stock_gend','stock_data');
 
+if strcmpi(type,'gsa')
+    return
+end
+
 if ~isnumeric(options_.parallel),
     leaveSlaveOpen = options_.parallel_info.leaveSlaveOpen;
     if options_.parallel_info.leaveSlaveOpen == 0,
-     % Commenting for testing!
-     % options_.parallel_info.leaveSlaveOpen = 1; % Force locally to leave open remote matlab sessions (repeated pm3 calls)
+        % Commenting for testing!!!
+        % options_.parallel_info.leaveSlaveOpen = 1; % Force locally to leave open remote matlab sessions (repeated pm3 calls)
     end
 end
 
 if options_.smoother
     pm3(endo_nbr,gend,ifil(1),B,'Smoothed variables',...
         '',M_.endo_names(1:M_.orig_endo_nbr, :),'tit_tex',M_.endo_names,...
-        varlist,'SmoothedVariables',[M_.dname '/metropolis'],'_smooth');
+        varlist,'SmoothedVariables',DirectoryName,'_smooth');
     pm3(exo_nbr,gend,ifil(2),B,'Smoothed shocks',...
         '',M_.exo_names,'tit_tex',M_.exo_names,...
-        M_.exo_names,'SmoothedShocks',[M_.dname '/metropolis'],'_inno');
+        M_.exo_names,'SmoothedShocks',DirectoryName,'_inno');
     if nvn
         % needs to  be fixed
         %        pm3(endo_nbr,gend,ifil(3),B,'Smoothed measurement errors',...
@@ -277,26 +294,26 @@ end
 if options_.filtered_vars
     pm3(endo_nbr,gend,ifil(1),B,'Updated Variables',...
         '',varlist,'tit_tex',M_.endo_names,...
-        varlist,'UpdatedVariables',[M_.dname '/metropolis'], ...
+        varlist,'UpdatedVariables',DirectoryName, ...
         '_update');
     pm3(endo_nbr,gend+1,ifil(4),B,'One step ahead forecast',...
         '',varlist,'tit_tex',M_.endo_names,...
-        varlist,'FilteredVariables',[M_.dname '/metropolis'],'_filter_step_ahead');
+        varlist,'FilteredVariables',DirectoryName,'_filter_step_ahead');
 end
 
 if options_.forecast
     pm3(endo_nbr,horizon+maxlag,ifil(6),B,'Forecasted variables (mean)',...
         '',varlist,'tit_tex',M_.endo_names,...
-        varlist,'MeanForecast',[M_.dname '/metropolis'],'_forc_mean');
+        varlist,'MeanForecast',DirectoryName,'_forc_mean');
     pm3(endo_nbr,horizon+maxlag,ifil(6),B,'Forecasted variables (point)',...
         '',varlist,'tit_tex',M_.endo_names,...
-        varlist,'PointForecast',[M_.dname '/metropolis'],'_forc_point');
+        varlist,'PointForecast',DirectoryName,'_forc_point');
 end
 
 
 if ~isnumeric(options_.parallel),
     options_.parallel_info.leaveSlaveOpen = leaveSlaveOpen;
     if leaveSlaveOpen == 0,
-        closeSlave(options_.parallel),
+        closeSlave(options_.parallel,options_.parallel_info.RemoteTmpFolder),
     end
 end

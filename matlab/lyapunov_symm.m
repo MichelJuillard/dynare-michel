@@ -22,7 +22,7 @@ function [x,u] = lyapunov_symm(a,b,qz_criterium,lyapunov_complex_threshold,metho
 % SPECIAL REQUIREMENTS
 %   None
 
-% Copyright (C) 2006-2009 Dynare Team
+% Copyright (C) 2006-2010 Dynare Team
 %
 % This file is part of Dynare.
 %

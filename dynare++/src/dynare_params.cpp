@@ -1,5 +1,4 @@
-// $Id: dynare_params.cpp 2348 2009-03-24 11:55:16Z kamenik $
-//Copyright 2004, Ondra Kamenik
+// Copyright (C) 2004-2011, Ondra Kamenik
 
 #include "dynare_params.h"
 
@@ -14,9 +13,10 @@ const char* help_str =
 "    --version            print version and return\n"
 "\n"
 "options:\n"
-"    --per <num>          number of periods simulated [100]\n"
+"    --per <num>          number of periods simulated after burnt [100]\n"
+"    --burn <num>         number of periods burnt [0]\n"
 "    --sim <num>          number of simulations [80]\n"
-"    --rtper <num>        number of RT periods simulated [0]\n"
+"    --rtper <num>        number of RT periods simulated after burnt [0]\n"
 "    --rtsim <num>        number of RT simulations [0]\n"
 "    --condper <num>      number of periods in cond. simulations [0]\n"
 "    --condsim <num>      number of conditional simulations [0]\n"
@@ -38,7 +38,7 @@ const char* help_str =
 "    --check-scale <num>  scaling of checked points [2.0]\n"
 "    --no-irfs            shuts down IRF simulations [do IRFs]\n"
 "    --irfs               performs IRF simulations [do IRFs]\n"
-"    --qz-criterium <num> treshold for stable eigenvalues [1.000001]\n"
+"    --qz-criterium <num> threshold for stable eigenvalues [1.000001]\n"
 "\n\n";
 
 // returns the pointer to the first character after the last slash or
@@ -46,7 +46,7 @@ const char* help_str =
 const char* dyn_basename(const char* str);
 
 DynareParams::DynareParams(int argc, char** argv)
-	: modname(NULL), num_per(100), num_sim(80), 
+	: modname(NULL), num_per(100), num_burn(0), num_sim(80), 
 	  num_rtper(0), num_rtsim(0),
 	  num_condper(0), num_condsim(0),
 	  num_threads(2), num_steps(0),
@@ -71,6 +71,7 @@ DynareParams::DynareParams(int argc, char** argv)
 	struct option const opts [] = {
 		{"periods", required_argument, NULL, opt_per},
 		{"per", required_argument, NULL, opt_per},
+		{"burn", required_argument, NULL, opt_burn},
 		{"simulations", required_argument, NULL, opt_sim},
 		{"sim", required_argument, NULL, opt_sim},
 		{"rtperiods", required_argument, NULL, opt_rtper},
@@ -107,6 +108,10 @@ DynareParams::DynareParams(int argc, char** argv)
 		switch (ret) {
 		case opt_per:
 			if (1 != sscanf(optarg, "%d", &num_per))
+				fprintf(stderr, "Couldn't parse integer %s, ignored\n", optarg);
+			break;
+		case opt_burn:
+			if (1 != sscanf(optarg, "%d", &num_burn))
 				fprintf(stderr, "Couldn't parse integer %s, ignored\n", optarg);
 			break;
 		case opt_sim:

@@ -16,7 +16,7 @@ function oo_ = PlotPosteriorDistributions(estim_params_, M_, options_, bayestopt
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2008 Dynare Team
+% Copyright (C) 2005-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -69,16 +69,17 @@ for i=1:npar
             hfig = figure('Name',figurename);
         end
     end
+    [nam,texnam] = get_the_name(i,TeX,M_,estim_params_,options_);
     if subplotnum == 1
+        NAMES = nam;
         if TeX
-            TeXNAMES = [];
+            TeXNAMES = texnam;
         end
-        NAMES = [];
-    end
-    [nam,texnam] = get_the_name(i,TeX);
-    NAMES = strvcat(NAMES,nam);
-    if TeX
-        TeXNAMES = strvcat(TeXNAMES,texnam);
+    else
+        NAMES = char(NAMES,nam);
+        if TeX
+            TeXNAMES = char(TeXNAMES,texnam);
+        end
     end
     [x2,f2,abscissa,dens,binf2,bsup2] = draw_prior_density(i,bayestopt_);
     top2 = max(f2); 
@@ -88,7 +89,7 @@ for i=1:npar
         eval(['f1 = oo_.posterior_density.shocks_std.' name '(:,2);'])
         eval(['oo_.prior_density.shocks_std.' name '(:,1) = x2;'])
         eval(['oo_.prior_density.shocks_std.' name '(:,2) = f2;'])
-        if options_.posterior_mode_estimation
+        if ~options_.mh_posterior_mode_estimation
             eval(['pmod = oo_.posterior_mode.shocks_std.' name ';'])
         end
     elseif i <= nvx+nvn
@@ -97,7 +98,7 @@ for i=1:npar
         eval(['f1 = oo_.posterior_density.measurement_errors_std.' name '(:,2);'])    
         eval(['oo_.prior_density.mearsurement_errors_std.' name '(:,1) = x2;'])
         eval(['oo_.prior_density.measurement_errors_std.' name '(:,2) = f2;'])
-        if options_.posterior_mode_estimation
+        if ~options_.mh_posterior_mode_estimation
             eval(['pmod = oo_.posterior_mode.measurement_errors_std.' name ';'])
         end     
     elseif i <= nvx+nvn+ncx
@@ -109,7 +110,7 @@ for i=1:npar
         eval(['f1 = oo_.posterior_density.shocks_corr.' name '(:,2);'])    
         eval(['oo_.prior_density.shocks_corr.' name '(:,1) = x2;'])
         eval(['oo_.prior_density.shocks_corr.' name '(:,2) = f2;'])
-        if options_.posterior_mode_estimation
+        if ~options_.mh_posterior_mode_estimation
             eval(['pmod = oo_.posterior_mode.shocks_corr.' name ';'])  
         end
     elseif i <= nvx+nvn+ncx+ncn
@@ -121,7 +122,7 @@ for i=1:npar
         eval(['f1 = oo_.posterior_density.measurement_errors_corr.' name '(:,2);'])
         eval(['oo_.prior_density.mearsurement_errors_corr.' name '(:,1) = x2;'])
         eval(['oo_.prior_density.measurement_errors_corr.' name '(:,2) = f2;'])
-        if options_.posterior_mode_estimation
+        if ~options_.mh_posterior_mode_estimation
             eval(['pmod = oo_.posterior_mode.measurement_errors_corr.' name ';'])
         end
     else
@@ -131,7 +132,7 @@ for i=1:npar
         eval(['f1 = oo_.posterior_density.parameters.' name '(:,2);'])
         eval(['oo_.prior_density.parameters.' name '(:,1) = x2;'])
         eval(['oo_.prior_density.parameters.' name '(:,2) = f2;'])
-        if options_.posterior_mode_estimation
+        if ~options_.mh_posterior_mode_estimation
             eval(['pmod = oo_.posterior_mode.parameters.' name ';'])
         end
     end
@@ -146,7 +147,7 @@ for i=1:npar
     set(hh,'color',[0.7 0.7 0.7]);
     hold on;
     plot(x1,f1,'-k','linewidth',2);
-    if options_.posterior_mode_estimation
+    if ~options_.mh_posterior_mode_estimation
         plot( [pmod pmod], [0.0 1.1*top0], '--g', 'linewidth', 2);
     end
     box on;
@@ -154,7 +155,7 @@ for i=1:npar
     title(nam,'Interpreter','none');
     hold off;
     drawnow
-    if subplotnum == MaxNumberOfPlotPerFigure | i == npar;
+    if subplotnum == MaxNumberOfPlotPerFigure || i == npar;
         eval(['print -depsc2 ' OutputDirectoryName '/' M_.fname '_PriorsAndPosteriors' int2str(figunumber) '.eps']);
         if ~exist('OCTAVE_VERSION')
             eval(['print -dpdf ' OutputDirectoryName '/' M_.fname '_PriorsAndPosteriors' int2str(figunumber)]);

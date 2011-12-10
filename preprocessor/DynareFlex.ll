@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 Dynare Team
+ * Copyright (C) 2003-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -53,7 +53,7 @@ string eofbuff;
 
 %option case-insensitive noyywrap nounput batch debug never-interactive
 
- /* NB: if new start conditions are defined, add them in the line for [\n]+ and <<EOF>>*/
+ /* NB: if new start conditions are defined, add them in the line for <<EOF>> */
 %x COMMENT
 %x DYNARE_STATEMENT
 %x DYNARE_BLOCK
@@ -65,7 +65,7 @@ string eofbuff;
 
 %{
 // Increments location counter for every token read
-#define YY_USER_ACTION yylloc->columns(yyleng);
+#define YY_USER_ACTION location_increment(yylloc, yytext);
 %}
 %%
  /* Code put at the beginning of yylex() */
@@ -87,8 +87,8 @@ string eofbuff;
                 }
 
  /* spaces, tabs and carriage returns are ignored */
-<*>[ \t\r\f]+  { yylloc->step(); }
-<INITIAL,DYNARE_STATEMENT,DYNARE_BLOCK,COMMENT,LINE1,LINE2,LINE3>[\n]+       { yylloc->lines(yyleng); yylloc->step(); }
+<INITIAL,DYNARE_STATEMENT,DYNARE_BLOCK,COMMENT,LINE1,LINE2,LINE3>[ \t\r\f]+  { yylloc->step(); }
+<INITIAL,DYNARE_STATEMENT,DYNARE_BLOCK,COMMENT,LINE1,LINE2,LINE3>[\n]+       { yylloc->step(); }
 
  /* Comments */
 <INITIAL,DYNARE_STATEMENT,DYNARE_BLOCK>["%"].*
@@ -102,6 +102,7 @@ string eofbuff;
 <INITIAL>var {BEGIN DYNARE_STATEMENT; return token::VAR;}
 <INITIAL>varexo {BEGIN DYNARE_STATEMENT; return token::VAREXO;}
 <INITIAL>varexo_det {BEGIN DYNARE_STATEMENT; return token::VAREXO_DET;}
+<INITIAL>trend_var {BEGIN DYNARE_STATEMENT; return token::TREND_VAR;}
 <INITIAL>predetermined_variables {BEGIN DYNARE_STATEMENT; return token::PREDETERMINED_VARIABLES;}
 <INITIAL>parameters {BEGIN DYNARE_STATEMENT; return token::PARAMETERS;}
 <INITIAL>periods 	{BEGIN DYNARE_STATEMENT; return token::PERIODS;}
@@ -127,9 +128,9 @@ string eofbuff;
 <INITIAL>stoch_simul {BEGIN DYNARE_STATEMENT; return token::STOCH_SIMUL;}
 <INITIAL>dsample {BEGIN DYNARE_STATEMENT; return token::DSAMPLE;}
 <INITIAL>Sigma_e {BEGIN DYNARE_STATEMENT; sigma_e = 1; return token::SIGMA_E;}
-<INITIAL>calib {BEGIN DYNARE_STATEMENT; return token::CALIB;}
 <INITIAL>planner_objective {BEGIN DYNARE_STATEMENT; return token::PLANNER_OBJECTIVE;}
 <INITIAL>ramsey_policy {BEGIN DYNARE_STATEMENT; return token::RAMSEY_POLICY;}
+<INITIAL>discretionary_policy {BEGIN DYNARE_STATEMENT; return token::DISCRETIONARY_POLICY;}
 <INITIAL>identification {BEGIN DYNARE_STATEMENT; return token::IDENTIFICATION;}
 
 <INITIAL>bvar_density {BEGIN DYNARE_STATEMENT; return token::BVAR_DENSITY; }
@@ -139,7 +140,13 @@ string eofbuff;
 <INITIAL>forecast {BEGIN DYNARE_STATEMENT; return token::FORECAST;}
 <INITIAL>shock_decomposition {BEGIN DYNARE_STATEMENT; return token::SHOCK_DECOMPOSITION;}
 <INITIAL>sbvar {BEGIN DYNARE_STATEMENT; return token::SBVAR;}
-<INITIAL>ms_sbvar {BEGIN DYNARE_STATEMENT; return token::MS_SBVAR;}
+<INITIAL>ms_estimation {BEGIN DYNARE_STATEMENT; return token::MS_ESTIMATION;}
+<INITIAL>ms_simulation {BEGIN DYNARE_STATEMENT; return token::MS_SIMULATION;}
+<INITIAL>ms_compute_mdd {BEGIN DYNARE_STATEMENT; return token::MS_COMPUTE_MDD;}
+<INITIAL>ms_compute_probabilities {BEGIN DYNARE_STATEMENT; return token::MS_COMPUTE_PROBABILITIES;}
+<INITIAL>ms_forecast {BEGIN DYNARE_STATEMENT; return token::MS_FORECAST;}
+<INITIAL>ms_irf {BEGIN DYNARE_STATEMENT; return token::MS_IRF;}
+<INITIAL>ms_variance_decomposition {BEGIN DYNARE_STATEMENT; return token::MS_VARIANCE_DECOMPOSITION;}
 <INITIAL>conditional_forecast {BEGIN DYNARE_STATEMENT; return token::CONDITIONAL_FORECAST;}
 <INITIAL>plot_conditional_forecast {BEGIN DYNARE_STATEMENT; return token::PLOT_CONDITIONAL_FORECAST;}
 
@@ -170,12 +177,15 @@ string eofbuff;
 <INITIAL>estimated_params_bounds 	{BEGIN DYNARE_BLOCK; return token::ESTIMATED_PARAMS_BOUNDS;}
 <INITIAL>observation_trends {BEGIN DYNARE_BLOCK; return token::OBSERVATION_TRENDS;}
 <INITIAL>optim_weights {BEGIN DYNARE_BLOCK; return token::OPTIM_WEIGHTS;}
-<INITIAL>calib_var 	{BEGIN DYNARE_BLOCK; return token::CALIB_VAR;}
 <INITIAL>homotopy_setup {BEGIN DYNARE_BLOCK; return token::HOMOTOPY_SETUP;}
 <INITIAL>conditional_forecast_paths {BEGIN DYNARE_BLOCK; return token::CONDITIONAL_FORECAST_PATHS;}
 <INITIAL>svar_identification {BEGIN DYNARE_BLOCK; return token::SVAR_IDENTIFICATION;}
+
+ /* For the semicolon after an "end" keyword */
+<INITIAL>; {return Dynare::parser::token_type (yytext[0]);}
+
  /* End of a Dynare block */
-<DYNARE_BLOCK>end[ \t\n]*; 	{BEGIN INITIAL; return token::END;}
+<DYNARE_BLOCK>end 	{BEGIN INITIAL; return token::END;}
 
  /* Inside  of a Dynare statement */
 <DYNARE_STATEMENT>datafile 		{return token::DATAFILE;}
@@ -240,12 +250,13 @@ string eofbuff;
 <DYNARE_STATEMENT>second_deriv_provided {return token::SECOND_DERIV_PROVIDED;}
 
 <DYNARE_STATEMENT>freq {return token::FREQ;}
+<DYNARE_STATEMENT>monthly {return token::MONTHLY; }
+<DYNARE_STATEMENT>quarterly {return token::QUARTERLY; }
 <DYNARE_STATEMENT>initial_year {return token::INITIAL_YEAR;}
 <DYNARE_STATEMENT>initial_subperiod {return token::INITIAL_SUBPERIOD;}
 <DYNARE_STATEMENT>final_year {return token::FINAL_YEAR;}
 <DYNARE_STATEMENT>final_subperiod {return token::FINAL_SUBPERIOD;}
 <DYNARE_STATEMENT>vlist {return token::VLIST;}
-<DYNARE_STATEMENT>varlist {return token::VARLIST;}
 <DYNARE_STATEMENT>vlistlog {return token::VLISTLOG;}
 <DYNARE_STATEMENT>vlistper {return token::VLISTPER;}
 <DYNARE_STATEMENT>restriction_fname {return token::RESTRICTION_FNAME;}
@@ -253,7 +264,7 @@ string eofbuff;
 <DYNARE_STATEMENT>cross_restrictions {return token::CROSS_RESTRICTIONS;}
 <DYNARE_STATEMENT>contemp_reduced_form {return token::CONTEMP_REDUCED_FORM;}
 <DYNARE_STATEMENT>real_pseudo_forecast {return token::REAL_PSEUDO_FORECAST;}
-<DYNARE_STATEMENT>bayesian_prior {return token::BAYESIAN_PRIOR;}
+<DYNARE_STATEMENT>no_bayesian_prior {return token::NO_BAYESIAN_PRIOR;}
 <DYNARE_STATEMENT>dummy_obs {return token::DUMMY_OBS;}
 <DYNARE_STATEMENT>nstates {return token::NSTATES;}
 <DYNARE_STATEMENT>indxscalesstates {return token::INDXSCALESSTATES;}
@@ -265,8 +276,10 @@ string eofbuff;
   yylval->string_val = new string(yytext);
   return token::BETA;
 }
-<DYNARE_STATEMENT>gsig2_lmd {return token::GSIG2_LMD;}
 <DYNARE_STATEMENT>gsig2_lmdm {return token::GSIG2_LMDM;}
+<DYNARE_STATEMENT>specification {return token::SPECIFICATION;}
+<DYNARE_STATEMENT>sims_zha {return token::SIMS_ZHA;}
+<DYNARE_STATEMENT>none {return token::NONE;}
 <DYNARE_STATEMENT>q_diag {return token::Q_DIAG;}
 <DYNARE_STATEMENT>flat_prior {return token::FLAT_PRIOR;}
 <DYNARE_STATEMENT>ncsk {return token::NCSK;}
@@ -308,22 +321,46 @@ string eofbuff;
   return token::CNUM;
 }
 <DYNARE_STATEMENT>banact {return token::BANACT;}
+
 <DYNARE_STATEMENT>output_file_tag {return token::OUTPUT_FILE_TAG;}
-<DYNARE_STATEMENT>create_initialization_file {return token::CREATE_INITIALIZATION_FILE;}
-<DYNARE_STATEMENT>estimate_msmodel {return token::ESTIMATE_MSMODEL;}
-<DYNARE_STATEMENT>compute_mdd {return token::COMPUTE_MDD;}
-<DYNARE_STATEMENT>compute_probabilities {return token::COMPUTE_PROBABILITIES;}
-<DYNARE_STATEMENT>print_draws {return token::PRINT_DRAWS;}
-<DYNARE_STATEMENT>n_draws {return token::N_DRAWS;}
+<DYNARE_STATEMENT>file_tag {return token::FILE_TAG;};
+<DYNARE_STATEMENT>no_create_init {return token::NO_CREATE_INIT;};
+<DYNARE_STATEMENT>simulation_file_tag {return token::SIMULATION_FILE_TAG;};
+<DYNARE_STATEMENT>horizon {return token::HORIZON;}
+<DYNARE_STATEMENT>no_error_bands {return token::NO_ERROR_BANDS;}
+<DYNARE_STATEMENT>error_band_percentiles {return token::ERROR_BAND_PERCENTILES;}
+<DYNARE_STATEMENT>shock_draws {return token::SHOCK_DRAWS;}
+<DYNARE_STATEMENT>shocks_per_parameter {return token::SHOCKS_PER_PARAMETER;}
 <DYNARE_STATEMENT>thinning_factor {return token::THINNING_FACTOR;}
-<DYNARE_STATEMENT>markov_file {return token::MARKOV_FILE;}
-<DYNARE_STATEMENT>mhm_file {return token::MHM_FILE;}
+<DYNARE_STATEMENT>free_parameters {return token::FREE_PARAMETERS;}
+<DYNARE_STATEMENT>median {return token::MEDIAN;}
+<DYNARE_STATEMENT>data_obs_nbr {return token::DATA_OBS_NBR;}
+<DYNARE_STATEMENT>filtered_probabilities {return token::FILTERED_PROBABILITIES;}
+<DYNARE_STATEMENT>real_time_smoothed {return token::REAL_TIME_SMOOTHED;}
+<DYNARE_STATEMENT>proposal_type {return token::PROPOSAL_TYPE;}
+<DYNARE_STATEMENT>proposal_lower_bound {return token::PROPOSAL_LOWER_BOUND;}
+<DYNARE_STATEMENT>proposal_upper_bound {return token::PROPOSAL_UPPER_BOUND;}
 <DYNARE_STATEMENT>proposal_draws {return token::PROPOSAL_DRAWS;}
-<DYNARE_STATEMENT>draws_nbr_burn_in_1 {return token::DRAWS_NBR_BURN_IN_1;}
-<DYNARE_STATEMENT>draws_nbr_burn_in_2 {return token::DRAWS_NBR_BURN_IN_2;}
-<DYNARE_STATEMENT>draws_nbr_mean_var_estimate {return token::DRAWS_NBR_MEAN_VAR_ESTIMATE;}
-<DYNARE_STATEMENT>draws_nbr_modified_harmonic_mean {return token::DRAWS_NBR_MODIFIED_HARMONIC_MEAN;}
-<DYNARE_STATEMENT>dirichlet_scale {return token::DIRICHLET_SCALE;}
+<DYNARE_STATEMENT>use_mean_center {return token::USE_MEAN_CENTER;}
+<DYNARE_STATEMENT>adaptive_mh_draws {return token::ADAPTIVE_MH_DRAWS;}
+<DYNARE_STATEMENT>coefficients_prior_hyperparameters {return token::COEFFICIENTS_PRIOR_HYPERPARAMETERS;}
+<DYNARE_STATEMENT>convergence_starting_value {return token::CONVERGENCE_STARTING_VALUE;}
+<DYNARE_STATEMENT>convergence_ending_value {return token::CONVERGENCE_ENDING_VALUE;}
+<DYNARE_STATEMENT>convergence_increment_value {return token::CONVERGENCE_INCREMENT_VALUE;}
+<DYNARE_STATEMENT>max_iterations_starting_value {return token::MAX_ITERATIONS_STARTING_VALUE;}
+<DYNARE_STATEMENT>max_iterations_increment_value {return token::MAX_ITERATIONS_INCREMENT_VALUE;}
+<DYNARE_STATEMENT>max_block_iterations {return token::MAX_BLOCK_ITERATIONS;}
+<DYNARE_STATEMENT>max_repeated_optimization_runs {return token::MAX_REPEATED_OPTIMIZATION_RUNS;}
+<DYNARE_STATEMENT>maxit {return token::MAXIT;}
+<DYNARE_STATEMENT>function_convergence_criterion {return token::FUNCTION_CONVERGENCE_CRITERION;}
+<DYNARE_STATEMENT>parameter_convergence_criterion {return token::PARAMETER_CONVERGENCE_CRITERION;}
+<DYNARE_STATEMENT>number_of_large_perturbations {return token::NUMBER_OF_LARGE_PERTURBATIONS;}
+<DYNARE_STATEMENT>number_of_small_perturbations {return token::NUMBER_OF_SMALL_PERTURBATIONS;}
+<DYNARE_STATEMENT>number_of_posterior_draws_after_perturbation {return token::NUMBER_OF_POSTERIOR_DRAWS_AFTER_PERTURBATION;}
+<DYNARE_STATEMENT>max_number_of_stages {return token::MAX_NUMBER_OF_STAGES;}
+<DYNARE_STATEMENT>random_function_convergence_criterion {return token::RANDOM_FUNCTION_CONVERGENCE_CRITERION;}
+<DYNARE_STATEMENT>random_parameter_convergence_criterion {return token::RANDOM_PARAMETER_CONVERGENCE_CRITERION;}
+
 <DYNARE_STATEMENT>instruments {return token::INSTRUMENTS;}
 
  /* These four (var, varexo, varexo_det, parameters) are for change_type */
@@ -344,6 +381,7 @@ string eofbuff;
 
 <DYNARE_STATEMENT>homotopy_mode {return token::HOMOTOPY_MODE; }
 <DYNARE_STATEMENT>homotopy_steps {return token::HOMOTOPY_STEPS; }
+<DYNARE_STATEMENT>nocheck {return token::NOCHECK; }
 
 <DYNARE_STATEMENT>controlled_varexo {return token::CONTROLLED_VAREXO; }
 <DYNARE_STATEMENT>parameter_set {return token::PARAMETER_SET; }
@@ -356,7 +394,10 @@ string eofbuff;
 <DYNARE_STATEMENT>filter_covariance {return token::FILTER_COVARIANCE; }
 <DYNARE_STATEMENT>filter_decomposition {return token::FILTER_DECOMPOSITION; }
 <DYNARE_STATEMENT>selected_variables_only {return token::SELECTED_VARIABLES_ONLY; }
-<DYNARE_STATEMENT>pruning {return token::PRUNING; };
+<DYNARE_STATEMENT>pruning {return token::PRUNING; }
+<DYNARE_STATEMENT>deflator {return token::DEFLATOR;}
+<DYNARE_STATEMENT>growth_factor {return token::GROWTH_FACTOR;}
+<DYNARE_STATEMENT>cova_compute {return token::COVA_COMPUTE;}
 
 <DYNARE_STATEMENT>[\$][^$]*[\$] {
   strtok(yytext+1, "$");
@@ -385,6 +426,8 @@ string eofbuff;
 <DYNARE_BLOCK># {return Dynare::parser::token_type (yytext[0]);}
 
 <DYNARE_BLOCK>autocorr {return token::AUTOCORR;}
+<DYNARE_BLOCK>restrictions {return token::RESTRICTIONS;}
+<DYNARE_BLOCK>restriction {return token::RESTRICTION;}
 
  /* Inside Dynare statement */
 <DYNARE_STATEMENT>solve_algo {return token::SOLVE_ALGO;}
@@ -397,6 +440,7 @@ string eofbuff;
 <DYNARE_STATEMENT>ar {return token::AR;}
 <DYNARE_STATEMENT>nofunctions {return token::NOFUNCTIONS;}
 <DYNARE_STATEMENT>irf {return token::IRF;}
+<DYNARE_STATEMENT>irf_shocks {return token::IRF_SHOCKS;}
 <DYNARE_STATEMENT>hp_filter {return token::HP_FILTER;}
 <DYNARE_STATEMENT>hp_ngrid {return token::HP_NGRID;}
 <DYNARE_STATEMENT>simul_seed {return token::SIMUL_SEED;}
@@ -407,19 +451,20 @@ string eofbuff;
 <DYNARE_STATEMENT>mh_recover {return token::MH_RECOVER;}
 <DYNARE_STATEMENT>planner_discount {return token::PLANNER_DISCOUNT;}
 <DYNARE_STATEMENT>labels {return token::LABELS;}
+<DYNARE_STATEMENT>calibration {return token::CALIBRATION;}
 
 <DYNARE_BLOCK>equation {return token::EQUATION;}
 <DYNARE_BLOCK>exclusion {return token::EXCLUSION;}
 <DYNARE_BLOCK>lag {return token::LAG;}
-<DYNARE_BLOCK>upper_cholesky {return token::UPPER_CHOLESKY;}
-<DYNARE_BLOCK>lower_cholesky {return token::LOWER_CHOLESKY;}
+<DYNARE_BLOCK>coeff {return token::COEFF;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>upper_cholesky {return token::UPPER_CHOLESKY;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>lower_cholesky {return token::LOWER_CHOLESKY;}
 <DYNARE_STATEMENT>chain {return token::CHAIN;}
 <DYNARE_STATEMENT>state {return token::STATE;}
 <DYNARE_STATEMENT>number_of_states {return token::NUMBER_OF_STATES;}
 <DYNARE_STATEMENT>duration {return token::DURATION;}
 <DYNARE_STATEMENT>coefficients {return token::COEFFICIENTS;}
 <DYNARE_STATEMENT>variances {return token::VARIANCES;}
-<DYNARE_STATEMENT>constants {return token::CONSTANTS;}
 <DYNARE_STATEMENT>equations {return token::EQUATIONS;}
 
 <DYNARE_STATEMENT>[\.] {return Dynare::parser::token_type (yytext[0]);}
@@ -473,6 +518,8 @@ string eofbuff;
 <DYNARE_STATEMENT,DYNARE_BLOCK>sqrt {return token::SQRT;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>max {return token::MAX;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>min {return token::MIN;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>abs {return token::ABS;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>sign {return token::SIGN;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>normcdf {return token::NORMCDF;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>normpdf {return token::NORMPDF;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>erf {return token::ERF;}
@@ -482,6 +529,7 @@ string eofbuff;
 <DYNARE_STATEMENT,DYNARE_BLOCK>full {return token::FULL;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>nan {return token::NAN_CONSTANT;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>inf {return token::INF_CONSTANT;}
+<DYNARE_STATEMENT,DYNARE_BLOCK>constants {return token::CONSTANTS;}
 
  /* options for GSA module by Marco Ratto */
 <DYNARE_STATEMENT>identification {return token::IDENTIFICATION;}
@@ -492,7 +540,6 @@ string eofbuff;
 <DYNARE_STATEMENT>prior_range {return token::PRIOR_RANGE;}
 <DYNARE_STATEMENT>ppost {return token::PPOST;}
 <DYNARE_STATEMENT>ilptau {return token::ILPTAU;}
-<DYNARE_STATEMENT>glue {return token::GLUE;}
 <DYNARE_STATEMENT>morris_nliv {return token::MORRIS_NLIV;}
 <DYNARE_STATEMENT>morris_ntra {return token::MORRIS_NTRA;}
 <DYNARE_STATEMENT>Nsam {return token::NSAM;}
@@ -515,14 +562,18 @@ string eofbuff;
 <DYNARE_STATEMENT>istart_rmse {return token::ISTART_RMSE;}
 <DYNARE_STATEMENT>alpha_rmse {return token::ALPHA_RMSE;}
 <DYNARE_STATEMENT>alpha2_rmse {return token::ALPHA2_RMSE;}
-<DYNARE_STATEMENT>trans_ident {return token::TRANS_IDENT;}
 <DYNARE_STATEMENT>load_ident_files {return token::LOAD_IDENT_FILES;}
 <DYNARE_STATEMENT>useautocorr {return token::USEAUTOCORR;}
+<DYNARE_STATEMENT>neighborhood_width {return token::NEIGHBORHOOD_WIDTH;}
+<DYNARE_STATEMENT>pvalue_ks {return token::PVALUE_KS;}
+<DYNARE_STATEMENT>pvalue_corr {return token::PVALUE_CORR;}
  /* end of GSA options */
 
  /* For identification() statement */
 <DYNARE_STATEMENT>prior_mc {return token::PRIOR_MC;}
-
+<DYNARE_STATEMENT>advanced {return token::ADVANCED;}
+<DYNARE_STATEMENT>max_dim_cova_group {return token::MAX_DIM_COVA_GROUP;}
+<DYNARE_STATEMENT>gsa_sample_file {return token::GSA_SAMPLE_FILE;}
 
 <DYNARE_STATEMENT,DYNARE_BLOCK>[A-Za-z_][A-Za-z0-9_]* {
   yylval->string_val = new string(yytext);
@@ -574,7 +625,10 @@ string eofbuff;
 
  /* Add the native statement */
 <NATIVE>{
-  [^/%*\n\.]*                 |
+  [^/%*\n\.\'\"]*             |
+  \'                          |
+  \'[^\'\n]*\'                |
+  \"[^\"\n]*\"                |
   \.{1,2}                     |
   "*"                         |
   "/"                         { yymore(); eofbuff = string(yytext); }
@@ -614,6 +668,16 @@ string eofbuff;
 DynareFlex::DynareFlex(istream* in, ostream* out)
   : DynareFlexLexer(in, out)
 {
+}
+
+void
+DynareFlex::location_increment(Dynare::parser::location_type *yylloc, const char *yytext)
+{
+  while (*yytext != 0)
+    if (*yytext++ == '\n')
+      yylloc->lines(1);
+    else
+      yylloc->columns(1);
 }
 
 /* This implementation of DynareFlexLexer::yylex() is required to fill the

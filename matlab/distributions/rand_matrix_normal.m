@@ -20,7 +20,7 @@ function B = rand_matrix_normal(n, p, M, Omega_lower_chol, Sigma_lower_chol)
 % SPECIAL REQUIREMENTS
 %    Same notations than: http://en.wikipedia.org/wiki/Matrix_normal_distribution
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

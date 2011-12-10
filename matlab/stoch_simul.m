@@ -1,6 +1,6 @@
 function info=stoch_simul(var_list)
 
-% Copyright (C) 2001-2010 Dynare Team
+% Copyright (C) 2001-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -19,6 +19,10 @@ function info=stoch_simul(var_list)
 
 global M_ options_ oo_ it_
 
+test_for_deep_parameters_calibration(M_);
+
+dr = oo_.dr;
+
 options_old = options_;
 if options_.linear
     options_.order = 1;
@@ -27,6 +31,10 @@ if options_.order == 1
     options_.replic = 1;
 elseif options_.order == 3
     options_.k_order_solver = 1;
+end
+
+if isempty(options_.qz_criterium)
+    options_.qz_criterium = 1+1e-6;
 end
 
 if options_.partial_information == 1 || options_.ACES_solver == 1
@@ -58,15 +66,22 @@ oo_.dr=set_state_space(dr,M_);
 
 if PI_PCL_solver
     [oo_.dr, info] = PCL_resol(oo_.steady_state,0);
+elseif options_.discretionary_policy
+    if ~options_.linear
+        error(['discretionary_policy solves only linear_quadratic ' ...
+               'problems']);
+    end
+    [oo_.dr,ys,info] = discretionary_policy_1(oo_,options_.instruments);
 else
-    [oo_.dr, info] = resol(oo_.dr,oo_.steady_state,0);
+    [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
+    oo_.dr = dr;
 end
 
 if info(1)
     options_ = options_old;
     print_info(info, options_.noprint);
     return
-end  
+end
 
 if ~options_.noprint
     disp(' ')
@@ -74,14 +89,19 @@ if ~options_.noprint
     disp(' ')
     disp(['  Number of variables:         ' int2str(M_.endo_nbr)])
     disp(['  Number of stochastic shocks: ' int2str(M_.exo_nbr)])
-    disp(['  Number of state variables:   ' ...
-          int2str(length(find(oo_.dr.kstate(:,2) <= M_.maximum_lag+1)))])
-    disp(['  Number of jumpers:           ' ...
-          int2str(length(find(oo_.dr.kstate(:,2) == M_.maximum_lag+2)))])
+    if (options_.block)
+        disp(['  Number of state variables:   ' int2str(oo_.dr.npred+oo_.dr.nboth)])
+        disp(['  Number of jumpers:           ' int2str(oo_.dr.nfwrd+oo_.dr.nboth)])
+    else
+        disp(['  Number of state variables:   ' ...
+              int2str(length(find(oo_.dr.kstate(:,2) <= M_.maximum_lag+1)))])
+        disp(['  Number of jumpers:           ' ...
+              int2str(length(find(oo_.dr.kstate(:,2) == M_.maximum_lag+2)))])
+    end;
     disp(['  Number of static variables:  ' int2str(oo_.dr.nstatic)])
     my_title='MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS';
     labels = deblank(M_.exo_names);
-    headers = strvcat('Variables',labels);
+    headers = char('Variables',labels);
     lh = size(labels,2)+2;
     dyntable(my_title,headers,labels,M_.Sigma_e,lh,10,6);
     if options_.partial_information
@@ -90,15 +110,15 @@ if ~options_.noprint
         disp(' ')
 
         if isfield(options_,'varobs')&& ~isempty(options_.varobs)
-          PCL_varobs=options_.varobs;
-          disp('OBSERVED VARIABLES')
+            PCL_varobs=options_.varobs;
+            disp('OBSERVED VARIABLES')
         else
-          PCL_varobs=M_.endo_names;
-          disp(' VAROBS LIST NOT SPECIFIED')
-          disp(' ASSUMED OBSERVED VARIABLES')
+            PCL_varobs=M_.endo_names;
+            disp(' VAROBS LIST NOT SPECIFIED')
+            disp(' ASSUMED OBSERVED VARIABLES')
         end
         for i=1:size(PCL_varobs,1)
-          disp(['    ' PCL_varobs(i,:)])
+            disp(['    ' PCL_varobs(i,:)])
         end
     end
     disp(' ')
@@ -108,13 +128,13 @@ if ~options_.noprint
 end
 
 if options_.periods > 0 && ~PI_PCL_solver
-    if options_.periods < options_.drop
+    if options_.periods <= options_.drop
         disp(['STOCH_SIMUL error: The horizon of simulation is shorter' ...
               ' than the number of observations to be DROPed'])
         options_ =options_old;
         return
     end
-    oo_.endo_simul = simult(repmat(oo_.dr.ys,1,M_.maximum_lag),oo_.dr);
+    oo_.endo_simul = simult(oo_.dr.ys,oo_.dr);
     dyn2vec;
 end
 
@@ -122,14 +142,17 @@ if options_.nomoments == 0
     if PI_PCL_solver
         PCL_Part_info_moments (0, PCL_varobs, oo_.dr, i_var);
     elseif options_.periods == 0
-        disp_th_moments(oo_.dr,var_list); 
+        % There is no code for theoretical moments at 3rd order
+        if options_.order <= 2
+            disp_th_moments(oo_.dr,var_list);
+        end
     else
         disp_moments(oo_.endo_simul,var_list);
     end
 end
 
 
-if options_.irf 
+if options_.irf
     var_listTeX = M_.endo_names_tex(i_var,:);
 
     if TeX
@@ -138,14 +161,14 @@ if options_.irf
         fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
         fprintf(fidTeX,' \n');
     end
-    olditer = iter_;% Est-ce vraiment utile ? Il y a la même ligne dans irf... 
     SS(M_.exo_names_orig_ord,M_.exo_names_orig_ord)=M_.Sigma_e+1e-14*eye(M_.exo_nbr);
     cs = transpose(chol(SS));
     tit(M_.exo_names_orig_ord,:) = M_.exo_names;
     if TeX
         titTeX(M_.exo_names_orig_ord,:) = M_.exo_names_tex;
     end
-    for i=1:M_.exo_nbr
+    irf_shocks_indx = getIrfShocksIndx();
+    for i=irf_shocks_indx
         if SS(i,i) > 1e-13
             if PI_PCL_solver
                 y=PCL_Part_info_irf (0, PCL_varobs, i_var, M_, oo_.dr, options_.irf, i);
@@ -154,7 +177,7 @@ if options_.irf
                       options_.replic, options_.order);
             end
             if options_.relative_irf
-                y = 100*y/cs(i,i); 
+                y = 100*y/cs(i,i);
             end
             irfs   = [];
             mylist = [];
@@ -165,12 +188,20 @@ if options_.irf
                 assignin('base',[deblank(M_.endo_names(i_var(j),:)) '_' deblank(M_.exo_names(i,:))],...
                          y(i_var(j),:)');
                 eval(['oo_.irfs.' deblank(M_.endo_names(i_var(j),:)) '_' ...
-                      deblank(M_.exo_names(i,:)) ' = y(i_var(j),:);']); 
+                      deblank(M_.exo_names(i,:)) ' = y(i_var(j),:);']);
                 if max(y(i_var(j),:)) - min(y(i_var(j),:)) > 1e-10
                     irfs  = cat(1,irfs,y(i_var(j),:));
-                    mylist = strvcat(mylist,deblank(var_list(j,:)));
+                    if isempty(mylist)
+                        mylist = deblank(var_list(j,:));
+                    else
+                        mylist = char(mylist,deblank(var_list(j,:)));
+                    end
                     if TeX
-                        mylistTeX = strvcat(mylistTeX,deblank(var_listTeX(j,:)));
+                        if isempty(mylistTeX)
+                            mylistTeX = deblank(var_listTeX(j,:));
+                        else
+                            mylistTeX = char(mylistTeX,deblank(var_listTeX(j,:)));
+                        end
                     end
                 end
             end
@@ -257,7 +288,7 @@ if options_.irf
                         %                                       close(hh);
                     end
                     hh = figure('Name',['Orthogonalized shock to ' tit(i,:) ' figure ' int2str(nbplt) '.']);
-                    m = 0; 
+                    m = 0;
                     for plt = 1:number_of_plots_to_draw-(nbplt-1)*nstar;
                         m = m+1;
                         subplot(lr,lc,m);
@@ -295,12 +326,11 @@ if options_.irf
                 end
             end
         end
-        iter_ = olditer;
-        if TeX
-            fprintf(fidTeX,' \n');
-            fprintf(fidTeX,'%% End Of TeX file. \n');
-            fclose(fidTeX);
-        end
+    end
+    if TeX
+        fprintf(fidTeX,' \n');
+        fprintf(fidTeX,'%% End Of TeX file. \n');
+        fclose(fidTeX);
     end
 end
 
@@ -311,4 +341,4 @@ end
 
 options_ = options_old;
 % temporary fix waiting for local options
-options_.partial_information = 0; 
+options_.partial_information = 0;

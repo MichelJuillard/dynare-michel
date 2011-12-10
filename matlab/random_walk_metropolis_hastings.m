@@ -1,5 +1,5 @@
-function random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin)
-%function random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin)
+function record=random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin)
+%function record=random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin)
 % Random walk Metropolis-Hastings algorithm. 
 % 
 % INPUTS 
@@ -11,14 +11,14 @@ function random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bou
 %   o varargin              list of argument following mh_bounds
 %  
 % OUTPUTS 
-%   None  
+%   o record     [struct]   structure describing the iterations
 %
 % ALGORITHM 
 %   Metropolis-Hastings.       
 %
 % SPECIAL REQUIREMENTS
 %   None.
-
+%
 % PARALLEL CONTEXT
 % The most computationally intensive part of this function may be executed
 % in parallel. The code sutable to be executed in
@@ -34,8 +34,7 @@ function random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bou
 % Then the comments write here can be used for all the other pairs of
 % parallel functions and also for management funtions.
 
-
-% Copyright (C) 2006-2008,2010 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -62,6 +61,19 @@ global M_ options_ bayestopt_ estim_params_ oo_
 InitSizeArray = min([repmat(MAX_nruns,nblck,1) fline+nruns-1],[],2);
 
 load([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
+
+
+% Only for test parallel results!!!
+
+% To check the equivalence between parallel and serial computation!
+% First run in serial mode, and then comment the follow line.
+%   save('recordSerial.mat','-struct', 'record');
+
+% For parllel runs after serial runs with the abobe line active.
+%   TempRecord=load('recordSerial.mat');
+%   record.Seeds=TempRecord.Seeds;
+
+
 
 % Snapshot of the current state of computing. It necessary for the parallel
 % execution (i.e. to execute in a corretct way portion of code remotely or
@@ -95,7 +107,7 @@ if isnumeric(options_.parallel) || (nblck-fblck)==0,
     fout = random_walk_metropolis_hastings_core(localVars, fblck, nblck, 0);
     record = fout.record;
 
-% Parallel in Local or remote machine.   
+    % Parallel in Local or remote machine.   
 else 
     % Global variables for parallel routines.
     globalVars = struct('M_',M_, ...
@@ -110,8 +122,11 @@ else
     if options_.steadystate_flag,
         NamFileInput(length(NamFileInput)+1,:)={'',[ModelName '_steadystate.m']};
     end
-    if (options_.load_mh_file~=0)  & any(fline>1) ,
+    if (options_.load_mh_file~=0)  && any(fline>1) ,
         NamFileInput(length(NamFileInput)+1,:)={[M_.dname '/metropolis/'],[ModelName '_mh' int2str(NewFile(1)) '_blck*.mat']};
+    end
+    if exist([ModelName '_optimal_mh_scale_parameter.mat'])
+        NamFileInput(length(NamFileInput)+1,:)={'',[ModelName '_optimal_mh_scale_parameter.mat']};
     end
     
     % from where to get back results

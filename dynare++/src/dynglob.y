@@ -1,18 +1,20 @@
 %{
+// Copyright (C) 2006-2011, Ondra Kamenik
+
 #include "parser/cc/location.h"
 #include "dynare_model.h"
 #include "dynglob_tab.hh"
 
 #include <stdio.h>
 
-	int dynglob_error(char*);
+	void dynglob_error(const char*);
 	int dynglob_lex(void);
 	extern int dynglob_lineno;
 	extern ogdyn::DynareParser* dynare_parser;
 	int symblist_flag;
 
-	static void print_token_value1 (FILE *, int, YYSTYPE);
-#define YYPRINT(file, type, value) print_token_value1 (file, type, value)
+  //	static void print_token_value1 (FILE *, int, YYSTYPE);
+  //#define YYPRINT(file, type, value) print_token_value1 (file, type, value)
 
 %}
 
@@ -105,11 +107,12 @@ planner_discount : PLANNERDISCOUNT NAME SEMICOLON {
 
 %%
 
-int dynglob_error(char* mes)
+void dynglob_error(const char* mes)
 {
 	dynare_parser->error(mes);
 }
 
+/*
 static void print_token_value1(FILE* file, int type, YYSTYPE value)
 {
 	if (type == NAME)
@@ -117,3 +120,4 @@ static void print_token_value1(FILE* file, int type, YYSTYPE value)
 	if (type == CHARACTER)
 		fprintf(file, "%c", value.character);
 }
+*/

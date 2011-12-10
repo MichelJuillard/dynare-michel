@@ -1,35 +1,38 @@
-function  [LIK, lik] = missing_observations_kalman_filter(T,R,Q,H,P,Y,start,mf,kalman_tol,riccati_tol,data_index,number_of_observations,no_more_missing_observations)
+function  [LIK, lik, a, P] = missing_observations_kalman_filter(data_index,number_of_observations,no_more_missing_observations,Y,start,last,a,P,kalman_tol,riccati_tol,presample,T,Q,R,H,Z,mm,pp,rr,Zflag,diffuse_periods)
 % Computes the likelihood of a state space model in the case with missing observations.
 %
 % INPUTS
-%    T                            [double]    mm*mm transition matrix of the state equation.
-%    R                            [double]    mm*rr matrix, mapping structural innovations to state variables.
-%    Q                            [double]    rr*rr covariance matrix of the structural innovations.
-%    H                            [double]    pp*pp (or 1*1 =0 if no measurement error) covariance matrix of the measurement errors.    
-%    P                            [double]    mm*mm variance-covariance matrix of the initial state vector.
-%    Y                            [double]    pp*smpl matrix of detrended data, where pp is the maximum number of observed variables
-%    trend                        [double]    pp*smpl matrix
-%    start                        [integer]   scalar, likelihood evaluation starts at 'start'.
-%    mf                           [integer]   pp*1 vector of indices.
-%    kalman_tol                   [double]    scalar, tolerance parameter (rcond).
-%    riccati_tol                  [double]    scalar, tolerance parameter (riccati iteration).
 %    data_index                   [cell]      1*smpl cell of column vectors of indices.
 %    number_of_observations       [integer]   scalar.
-%    no_more_missing_observations [integer]   scalar.    
+%    no_more_missing_observations [integer]   scalar.
+%    Y                            [double]    pp*smpl matrix of data.    
+%    start                        [integer]   scalar, index of the first observation.
+%    last                         [integer]   scalar, index of the last observation.
+%    a                            [double]    pp*1 vector, initial level of the state vector.
+%    P                            [double]    pp*pp matrix, covariance matrix of the initial state vector.
+%    kalman_tol                   [double]    scalar, tolerance parameter (rcond).
+%    riccati_tol                  [double]    scalar, tolerance parameter (riccati iteration).    
+%    presample                    [integer]   scalar, presampling if strictly positive.
+%    T                            [double]    mm*mm transition matrix of the state equation.
+%    Q                            [double]    rr*rr covariance matrix of the structural innovations.    
+%    R                            [double]    mm*rr matrix, mapping structural innovations to state variables.
+%    H                            [double]    pp*pp (or 1*1 =0 if no measurement error) covariance matrix of the measurement errors. 
+%    Z                            [integer]   pp*1 vector of indices for the observed variables.    
+%    mm                           [integer]   scalar, dimension of the state vector.
+%    pp                           [integer]   scalar, number of observed variables.
+%    rr                           [integer]   scalar, number of structural innovations.    
 %    
-% OUTPUTS
-%    LIK        [double]    scalar, likelihood
+% OUTPUTS 
+%    LIK        [double]    scalar, MINUS loglikelihood
 %    lik        [double]    vector, density of observations in each period.
+%    a          [double]    mm*1 vector, estimated level of the states.
+%    P          [double]    mm*mm matrix, covariance matrix of the states.        
 %        
-% REFERENCES
-%   See "Filtering and Smoothing of State Vector for Diffuse State Space
-%   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
-%   Analysis, vol. 24(1), pp. 85-98). 
 %
 % NOTES
 %   The vector "lik" is used to evaluate the jacobian of the likelihood.   
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -46,34 +49,53 @@ function  [LIK, lik] = missing_observations_kalman_filter(T,R,Q,H,P,Y,start,mf,k
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-smpl = size(Y,2);                               % Sample size.
-mm   = size(T,2);                               % Number of state variables.
-pp   = size(Y,1);                               % Maximum number of observed variables.
-a    = zeros(mm,1);                             % State vector.       
-dF   = 1;                                       % det(F).
-QQ   = R*Q*transpose(R);                        % Variance of R times the vector of structural innovations. 
-t    = 0;                                       % Initialization of the time index.
-lik  = zeros(smpl,1);                         % Initialization of the vector gathering the densities.
-LIK  = Inf;                                     % Default value of the log likelihood.
-oldK = Inf;
-notsteady   = 1;                                % Steady state flag.
-F_singular  = 1;
+% Set defaults
+if nargin<20
+    Zflag = 0;
+    diffuse_periods = 0;
+end
 
-while notsteady & t<smpl 
-    t  = t+1;
+if nargin<21
+    diffuse_periods = 0;
+end
+
+if isempty(Zflag)
+    Zflag = 0;
+end
+
+if isempty(diffuse_periods)
+    diffuse_periods = 0;
+end
+
+% Get sample size.
+smpl = last-start+1;
+
+% Initialize some variables.
+dF   = 1;
+QQ   = R*Q*transpose(R);   % Variance of R times the vector of structural innovations.
+t    = start;              % Initialization of the time index.
+lik  = zeros(smpl,1);      % Initialization of the vector gathering the densities.
+LIK  = Inf;                % Default value of the log likelihood.
+oldK = Inf;
+notsteady   = 1;
+F_singular  = 1;
+    
+while notsteady & t<=last
+    s  = t-start+1;
     d_index = data_index{t};
     if isempty(d_index)
         a = T*a;
         P = T*P*transpose(T)+QQ;
     else
-        MF = mf(d_index);                 % Set the selection for observed variables. 
-        v  = Y(d_index,t)-a(MF);
-        if ~isscalar(H)                         % => Errors in the measurement equation.
-            F = P(MF,MF) + H(d_index,d_index); 
-        else% => 
-            % case 1. No errors in the measurement (H=0) and more than one variable is observed in this state space model. 
-            % case 2. Errors in the measurement equation, but only one variable is observed in this state-space model.
-            F = P(MF,MF)+H;
+        % Compute the prediction error and its variance
+        if Zflag
+            z = Z(d_index,:);
+            v = Y(d_index,t)-z*a;
+            F = z*P*z' + H(d_index,d_index);
+        else
+            z = Z(d_index);
+            v = Y(d_index,t) - a(z);
+            F = P(z,z) + H(d_index,d_index);
         end
         if rcond(F) < kalman_tol
             if ~all(abs(F(:))<kalman_tol)
@@ -86,33 +108,40 @@ while notsteady & t<smpl
             F_singular = 0;
             dF     = det(F);
             iF     = inv(F);
-            lik(t) = log(dF) + transpose(v)*iF*v + length(d_index)*log(2*pi);
-            K      = P(:,MF)*iF;
-            a      = T*(a+K*v);
-            P      = T*(P-K*P(MF,:))*transpose(T)+QQ;
-            if t>no_more_missing_observations
+            lik(s) = log(dF) + transpose(v)*iF*v + length(d_index)*log(2*pi);
+            if Zflag
+                K = P*z'*iF;
+                P = T*(P-K*z*P)*transpose(T)+QQ;
+            else
+                K = P(:,z)*iF;
+                P = T*(P-K*P(z,:))*transpose(T)+QQ;
+            end
+            a = T*(a+K*v);
+            if t>=no_more_missing_observations
                 notsteady = max(abs(K(:)-oldK))>riccati_tol;
                 oldK = K(:);
             end
         end
     end
+    t = t+1;
 end
 
 if F_singular
     error('The variance of the forecast error remains singular until the end of the sample')
 end
 
-if t < smpl
-    t0 = t+1;
-    while t < smpl
-        t = t+1;
-        v = Y(:,t)-a(mf);
-        a = T*(a+K*v);
-        lik(t) = v'*iF*v;
-    end
-    lik(t0:smpl) = lik(t0:smpl) + log(dF) + pp*log(2*pi);
+% Divide by two.
+lik(1:s) = .5*lik(1:s);
+
+% Call steady state Kalman filter if needed.
+if t<last
+    [tmp, lik(s+1:end)] = kalman_filter_ss(Y,t,last,a,T,K,iF,dF,Z,pp,Zflag);
 end
 
-lik = lik/2;
-
-LIK    = sum(lik(start:end));
+% Compute minus the log-likelihood.
+if presample
+    if presample>=diffuse_periods
+        lik = lik(1+(presample-diffuse_periods):end);
+    end
+end
+LIK = sum(lik);

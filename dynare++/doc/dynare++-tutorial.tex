@@ -10,37 +10,25 @@
 
 \author{Ondra Kamen\'\i k}
 
-\date{Jan 2009 (describes v. 1.3.7)}
+\date{February 2011}
 \maketitle
 
 \tableofcontents
 
-\section{Installation}
+\section{Setup}
 
-Dynare++ installation procedure is pretty straightforward. Take the
-following steps:
+The Dynare++ setup procedure is pretty straightforward as Dynare++ is included in the Dynare installation 
+packages which can be downloaded from \url{http://www.dynare.org}. Take the following steps:
 \begin{enumerate}
-\item Grab Dynare++ package from Dynare site either for Windows or for
-  Linux according to your operating system.\footnote{If unsure,
-  download the one for Windows.}
-\item Unzip or untar the package to a directory of your choice.
-\item Set operating system path to point to {\tt
-  dynare++-*.*}\footnote{Stars stand for a version number.}
-  subdirectory of the directory you have chosen. In Windows, this step
-  ensures that libraries distributed along Dynare++ are on the
-  path. This step is not really necessary in Linux.
-\item If you have Matlab and want to run custom simulations (see
-  \ref{custom}), then set the Matlab path to the path from the
-  previous step.
+\item Add the {\tt dynare++} subdirectory of the root Dynare installation directory to the your
+operating system path. This ensures that your OS will find the {\tt dynare++} executable.
+\item If you have MATLAB and want to run custom simulations (see \ref{custom}),
+  then you need to add to your MATLAB path the {\tt dynare++} subdirectory of
+  the root Dynare installation directory, and also directory containing the
+  \texttt{dynare\_simul\_} MEX file (note the trailing underscore). The easiest
+  way to add the latter is to run Dynare once in your MATLAB session (even
+  without giving it any MOD file).
 \end{enumerate}
-
-Dynare++ uninstall procedure is even more simple. Just remove the directory {\tt
-  dynare++-*.*}.
-
-If you want (or need) to compile Dynare++ from sources, grab Dynare++
-source package and do your best.\footnote{Feel free to contact me if
-setting up the sources takes more time than solving your model by
-hand.}
 
 \section{Sample Session}
 
@@ -962,8 +950,17 @@ The options are as follows:
 exits.
 
 \item[\desc{\tt --per \it num}] This sets a number of simulated
-periods to {\it num}. This number is used when calculating
-unconditional mean and covariance and for IRFs. Default is 100.
+periods to {\it num} in addition to the burn-in periods. This number
+is used when calculating unconditional mean and covariance and for
+IRFs. Default is 100.
+
+\item[\desc{\tt --burn \it num}] This sets a number of initial periods
+which should be ignored from the statistics. The burn-in periods are
+used to eliminate the influence of the starting point when
+calculating ergodic distributions or/and impulse response
+functions. The number of simulated period given by {\tt --per \it
+  num} option does not include the number of burn-in
+periods. Default is 0.
 
 \item[\desc{\tt --sim \it num}] This sets a number of stochastic
 simulations. This number is used when calculating unconditional mean
@@ -974,8 +971,10 @@ or {\tt +-Inf}, then it is thrown away and is not considered for the
 mean nor the variance. The same is valid for IRF. Default is 80.
 
 \item[\desc{\tt --rtsim \it num}] This sets a number of stochastic
-simulations whose statistics are calculated in the real-time. See
-\ref{rt_simul} for more details. Default is 0, no simulations.
+simulations whose statistics are calculated in the real-time. This
+number excludes the burn-in periods set by {\tt --burn \it num}
+option. See \ref{rt_simul} for more details. Default is 0, no
+simulations.
 
 \item[\desc{\tt --rtper \it num}] This sets a number of simulated
 periods per one simulation with real-time statistics to {\it num}. See

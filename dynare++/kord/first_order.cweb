@@ -295,11 +295,7 @@ void FirstOrder::journalEigs()
 			}
 			JournalRecord jr(journal);
 			double mod = sqrt(alphar[i]*alphar[i]+alphai[i]*alphai[i]);
-#ifndef _MSC_VER
 			mod = mod/round(100000*std::abs(beta[i]))*100000;
-#else // MSVC doesn't respect C99 standard and doesn't define round(); use floor(x+0.5) instead
-			mod = mod/floor(100000*std::abs(beta[i])+0.5)*100000;
-#endif
 			jr << i << "\t(" << alphar[i] << "," << alphai[i] << ") / " << beta[i]
 			   << "  \t" << mod << endrec; 
 		}

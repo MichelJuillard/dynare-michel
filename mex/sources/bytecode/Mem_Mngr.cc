@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2009 Dynare Team
+ * Copyright (C) 2007-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -27,7 +27,7 @@ Mem_Mngr::Mem_Mngr()
 void
 Mem_Mngr::Print_heap()
 {
-  int i;
+  unsigned int i;
   mexPrintf("i   :");
   for (i = 0; i < CHUNK_SIZE; i++)
     mexPrintf("%3d ", i);
@@ -61,7 +61,7 @@ Mem_Mngr::init_CHUNK_BLCK_SIZE(int u_count)
 NonZeroElem *
 Mem_Mngr::mxMalloc_NZE()
 {
-  long int i;
+  long unsigned int i;
   if (!Chunk_Stack.empty())           /*An unused block of memory available inside the heap*/
     {
       NonZeroElem *p1 = Chunk_Stack.back();
@@ -84,7 +84,10 @@ Mem_Mngr::mxMalloc_NZE()
           mexPrintf("Not enough memory available\n");
           mexEvalString("drawnow;");
         }
-      NZE_Mem_add = (NonZeroElem **) mxRealloc(NZE_Mem_add, CHUNK_SIZE*sizeof(NonZeroElem *));   /*We have to redefine the size of pointer on the memory*/
+      if (NZE_Mem_add)
+        NZE_Mem_add = (NonZeroElem **) mxRealloc(NZE_Mem_add, CHUNK_SIZE*sizeof(NonZeroElem *));                                                                                                     /*We have to redefine the size of pointer on the memory*/
+      else
+        NZE_Mem_add = (NonZeroElem **) mxMalloc(CHUNK_SIZE*sizeof(NonZeroElem *));                                                                                       /*We have to define the size of pointer on the memory*/
       if (!NZE_Mem_add)
         {
           mexPrintf("Not enough memory available\n");
@@ -92,7 +95,7 @@ Mem_Mngr::mxMalloc_NZE()
         }
       for (i = CHUNK_heap_pos; i < CHUNK_SIZE; i++)
         {
-          NZE_Mem_add[i] = (NonZeroElem *)(NZE_Mem+(i-CHUNK_heap_pos));
+          NZE_Mem_add[i] = (NonZeroElem *) (NZE_Mem+(i-CHUNK_heap_pos));
         }
       i = CHUNK_heap_pos++;
       return (NZE_Mem_add[i]);
@@ -102,11 +105,11 @@ Mem_Mngr::mxMalloc_NZE()
 void
 Mem_Mngr::mxFree_NZE(void *pos)
 {
-  int i;
+  unsigned int i;
   size_t gap;
   for (i = 0; i < Nb_CHUNK; i++)
     {
-      gap = ((size_t)(pos)-(size_t)(NZE_Mem_add[i*CHUNK_BLCK_SIZE]))/sizeof(NonZeroElem);
+      gap = ((size_t) (pos)-(size_t) (NZE_Mem_add[i*CHUNK_BLCK_SIZE]))/sizeof(NonZeroElem);
       if ((gap < CHUNK_BLCK_SIZE) && (gap >= 0))
         break;
     }
@@ -121,6 +124,7 @@ Mem_Mngr::Free_All()
       mxFree(NZE_Mem_Allocated.back());
       NZE_Mem_Allocated.pop_back();
     }
-  mxFree(NZE_Mem_add);
+  if (NZE_Mem_add)
+    mxFree(NZE_Mem_add);
   init_Mem();
 }

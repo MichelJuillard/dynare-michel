@@ -1,15 +1,16 @@
-function E = gensylv(fake,A,B,C,D)
-%function E = gensylv(fake,A,B,C,D)
+function [err, E] = gensylv(kron_prod,A,B,C0,D)
+%function [err, E] = gensylv(fake,A,B,C,D)
 % Solves a Sylvester equation.
 %
 % INPUTS
-%   fake     Unused argument (for compatibility with the mex file)
+%   kron_prod     
 %   A
 %   B
 %   C
 %   D
 %    
 % OUTPUTS
+%   err      [double] scalar: 1 indicates failure, 0 indicates success
 %   E
 %    
 % ALGORITHM
@@ -18,7 +19,7 @@ function E = gensylv(fake,A,B,C,D)
 % SPECIAL REQUIREMENTS
 %   none.  
 
-% Copyright (C) 1996-2008 Dynare Team
+% Copyright (C) 1996-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -34,7 +35,11 @@ function E = gensylv(fake,A,B,C,D)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+C = C0;
+for i=1:(kron_prod-1);
+    C  = kron(C0,C); 
+end;
 
-C  = kron(C,C); 
 x0 = sylvester3(A,B,C,D);
 E  = sylvester3a(x0,A,B,C,D);
+err = 0;

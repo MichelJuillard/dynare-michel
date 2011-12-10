@@ -12,7 +12,7 @@ function PosteriorOddsTable = model_comparison(ModelNames,ModelPriors,oo,options
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2007-2008 Dynare Team
+% Copyright (C) 2007-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -66,7 +66,7 @@ for i=1:NumberOfModels
     if i==iname
         mstruct.oo_ = oo;
     else
-        if strcmpi(ModelNames{i}(end-3:end),'.mod') | strcmpi(ModelNames{i}(end-3:end),'.dyn')
+        if strcmpi(ModelNames{i}(end-3:end),'.mod') || strcmpi(ModelNames{i}(end-3:end),'.dyn')
             mstruct = load([ModelNames{i}(1:end-4) '_results.mat' ],'oo_');
         else
             mstruct = load([ModelNames{i} '_results.mat' ],'oo_');
@@ -94,15 +94,15 @@ elmpd = exp(lmpd-maxval);
 
 % Now I display the posterior probabilities.
 title = 'Model Comparison'; 
-headers = strvcat('Model',ShortModelNames{:});
+headers = char('Model',ShortModelNames{:});
 if prior_flag
-    labels = strvcat('Priors','Log Marginal Density','Bayes Ratio', ...
-                     'Posterior Model Probability');
+    labels = char('Priors','Log Marginal Density','Bayes Ratio', ...
+                  'Posterior Model Probability');
     values = [ModelPriors';MarginalLogDensity';exp(lmpd-lmpd(1))'; ...
               elmpd'/sum(elmpd)];
 else
-    labels = strvcat('Priors','Log Marginal Density','Bayes Ratio','Posterior Odds Ratio', ...
-                     'Posterior Model Probability');
+    labels = char('Priors','Log Marginal Density','Bayes Ratio','Posterior Odds Ratio', ...
+                  'Posterior Model Probability');
     values = [ModelPriors';MarginalLogDensity'; exp(MarginalLogDensity-MarginalLogDensity(1))'; ...
               exp(lmpd-lmpd(1))'; elmpd'/sum(elmpd)];
 end

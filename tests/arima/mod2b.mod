@@ -29,5 +29,4 @@ end;
 
 varobs x y;
 
-unit_root_vars x y;
-estimation(datafile=data2,nobs=100,mh_replic=0,lik_init=2);
+estimation(datafile=data2,nobs=100,mh_replic=0,diffuse_filter);

@@ -24,7 +24,7 @@ function optimal_bandwidth = mh_optimal_bandwidth(data,number_of_draws,bandwidth
 %   [1] M. Skold and G.O. Roberts [2003], "Density estimation for the Metropolis-Hastings algorithm". 
 %   [2] Silverman [1986], "Density estimation for statistics and data analysis". 
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -91,7 +91,7 @@ end
 
 
 %% Get the Skold and Roberts' correction.
-if bandwidth==0 | bandwidth==-1
+if bandwidth==0 || bandwidth==-1
     correction = correction_for_repeated_draws(data,number_of_draws);
 else
     correction = 0;
@@ -103,9 +103,9 @@ if bandwidth == 0;  % Rule of thumb bandwidth parameter (Silverman [1986].
     h = 2*sigma*(sqrt(pi)*mu02/(12*(mu21^2)*number_of_draws))^(1/5);
     h = h*correction^(1/5);
 elseif bandwidth == -1; % Sheather and Jones [1991] plug-in estimation of the optimal bandwidth parameter. 
-    if strcmp(kernel_function,'uniform')      | ... 
-            strcmp(kernel_function,'triangle')     | ... 
-            strcmp(kernel_function,'epanechnikov') | ... 
+    if strcmp(kernel_function,'uniform')      || ... 
+            strcmp(kernel_function,'triangle')     || ... 
+            strcmp(kernel_function,'epanechnikov') || ... 
             strcmp(kernel_function,'quartic')
         error(['I can''t compute the optimal bandwidth with this kernel...' ...
                'Try the gaussian, triweight or cosinus kernels.']);
@@ -126,9 +126,9 @@ elseif bandwidth == -1; % Sheather and Jones [1991] plug-in estimation of the op
     h     = (correction*mu02/(number_of_draws*Ihat2*mu21^2))^(1/5); % equation (22) in Skold and Roberts [2003]. 
 elseif bandwidth == -2;     % Bump killing... I compute local bandwith parameters in order to remove 
                             % spurious bumps introduced by long rejecting periods.   
-    if strcmp(kernel_function,'uniform')      | ... 
-            strcmp(kernel_function,'triangle')     | ... 
-            strcmp(kernel_function,'epanechnikov') | ... 
+    if strcmp(kernel_function,'uniform')      || ... 
+            strcmp(kernel_function,'triangle')     || ... 
+            strcmp(kernel_function,'epanechnikov') || ... 
             strcmp(kernel_function,'quartic')
         error(['I can''t compute the optimal bandwidth with this kernel...' ...
                'Try the gaussian, triweight or cosinus kernels.']);
@@ -136,7 +136,7 @@ elseif bandwidth == -2;     % Bump killing... I compute local bandwith parameter
     T = zeros(n,1);
     for i=1:n
         j = i;
-        while j<= n & (data(j,1)-data(i,1))<2*eps;
+        while j<= n && (data(j,1)-data(i,1))<2*eps;
             j = j+1;
         end     
         T(i) = (j-i);
@@ -163,7 +163,7 @@ else
 end
 
 optimal_bandwidth = h;
-
+return,
 
 
 function correction = correction_for_repeated_draws(draws,n)

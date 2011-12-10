@@ -26,7 +26,7 @@ void SylvException::printMessage() const
 	char mes[1500];
 	mes[0] = '\0';
 	printMessage(mes, 1499);
-	printf(mes);
+	puts(mes);
 }
 
 int SylvException::printMessage(char* str, int maxlen) const

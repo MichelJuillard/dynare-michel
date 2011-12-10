@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2009 Dynare Team
+ * Copyright (C) 2003-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -26,7 +26,7 @@ using namespace std;
 #include <vector>
 #include <map>
 
-//! Handles numerical constants
+//! Handles non-negative numerical constants
 class NumericalConstants
 {
 private:
@@ -37,8 +37,15 @@ private:
   //! Map matching constants to their id
   map<string, int> numConstantsIndex;
 public:
-  //! Adds a constant and returns its ID
-  int AddConstant(const string &iConst);
+  class InvalidFloatingPointNumberException
+  {
+  public:
+    const string fp;
+    InvalidFloatingPointNumberException(const string &fp_arg) : fp(fp_arg) {}
+  };
+
+  //! Adds a non-negative constant (possibly Inf or NaN) and returns its ID
+  int AddNonNegativeConstant(const string &iConst) throw (InvalidFloatingPointNumberException);
   //! Get a constant in string form
   string get(int ID) const;
   //! Get a constant in double form

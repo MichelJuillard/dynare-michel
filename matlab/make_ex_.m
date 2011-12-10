@@ -12,7 +12,7 @@ function make_ex_
 % SPECIAL REQUIREMENTS
 %  
 
-% Copyright (C) 1996-2009 Dynare Team
+% Copyright (C) 1996-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -31,12 +31,10 @@ function make_ex_
 
 global M_ options_ oo_ ex0_ ex_det0_
 
-options_ = set_default_option(options_,'periods',0);
-
 if isempty(oo_.exo_steady_state)
     oo_.exo_steady_state = zeros(M_.exo_nbr,1);
 end
-if M_.exo_det_nbr > 1 & isempty(oo_.exo_det_steady_state)
+if M_.exo_det_nbr > 1 && isempty(oo_.exo_det_steady_state)
     oo_.exo_det_steady_state = zeros(M_.exo_det_nbr,1);
 end
 if isempty(oo_.exo_simul)

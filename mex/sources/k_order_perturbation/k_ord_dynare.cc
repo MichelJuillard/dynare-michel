@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 Dynare Team
+ * Copyright (C) 2008-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -21,13 +21,15 @@
 
 #include <vector>
 #include "first_order.h"
-#include "k_ord_dynare.hh"
-#include "dynamic_dll.hh"
+#include "dynamic_abstract_class.hh"
 
 #include <cmath>
 #include <sstream>
 
 #include "memory_file.h"
+
+#include <iostream>
+#include <fstream>
 
 /**************************************************************************************/
 /*       Dynare DynamicModel class                                                                 */
@@ -38,13 +40,13 @@ KordpDynare::KordpDynare(const vector<string> &endo, int num_endo,
                          Vector &ysteady, TwoDMatrix &vcov, Vector &inParams, int nstat,
                          int npred, int nforw, int nboth, const int jcols, const Vector &nnzd,
                          const int nsteps, int norder,
-                         Journal &jr, DynamicModelDLL &dynamicDLL, double sstol,
+                         Journal &jr, DynamicModelAC *dynamicModelFile_arg, double sstol,
                          const vector<int> &var_order, const TwoDMatrix &llincidence, double criterium) throw (TLException) :
   nStat(nstat), nBoth(nboth), nPred(npred), nForw(nforw), nExog(nexog), nPar(npar),
   nYs(npred + nboth), nYss(nboth + nforw), nY(num_endo), nJcols(jcols), NNZD(nnzd), nSteps(nsteps),
   nOrder(norder), journal(jr), ySteady(ysteady), params(inParams), vCov(vcov),
   md(1), dnl(*this, endo), denl(*this, exo), dsnl(*this, dnl, denl), ss_tol(sstol), varOrder(var_order),
-  ll_Incidence(llincidence), qz_criterium(criterium), dynamicDLL(dynamicDLL)
+  ll_Incidence(llincidence), qz_criterium(criterium), dynamicModelFile(dynamicModelFile_arg)
 {
   ReorderDynareJacobianIndices();
 
@@ -113,7 +115,7 @@ KordpDynare::calcDerivativesAtSteady() throw (DynareException)
   Vector llxSteady(nJcols-nExog);
   LLxSteady(ySteady, llxSteady);
 
-  dynamicDLL.eval(llxSteady, xx, &params, out, &g1, g2p, g3p);
+  dynamicModelFile->eval(llxSteady, xx, params, ySteady, out, &g1, g2p, g3p);
 
   populateDerivativesContainer(g1, 1, JacobianIndices);
 
@@ -167,8 +169,8 @@ KordpDynare::populateDerivativesContainer(const TwoDMatrix &g, int ord, const ve
         {
           int j = (int) g.get(i, 0)-1; // hessian indices start with 1
           int i1 = (int) g.get(i, 1) -1;
-          int s0 = (int) floor(((double) i1)/((double) nJcols));
-          int s1 = i1- (nJcols*s0);
+          int s0 = i1 / nJcols;
+          int s1 = i1 % nJcols;
           if (s0 < nJcols1)
             s[0] = revOrder[s0];
           else
@@ -195,10 +197,10 @@ KordpDynare::populateDerivativesContainer(const TwoDMatrix &g, int ord, const ve
         {
           int j = (int) g.get(i, 0)-1;
           int i1 = (int) g.get(i, 1) -1;
-          int s0 = (int) floor(((double) i1)/((double) nJcols2));
-          int i2 = i1 - nJcols2*s0;
-          int s1 = (int) floor(((double) i2)/((double) nJcols));
-          int s2 = i2 - nJcols*s1;
+          int s0 = i1 / nJcols2;
+          int i2 = i1 % nJcols2;
+          int s1 = i2 / nJcols;
+          int s2 = i2 % nJcols;
           if (s0 < nJcols1)
             s[0] = revOrder[s0];
           else
@@ -211,27 +213,9 @@ KordpDynare::populateDerivativesContainer(const TwoDMatrix &g, int ord, const ve
             s[2] = revOrder[s2];
           else
             s[2] = s2;
-	  // reordering symmetry indices in increasing order
-	  if (s[0] > s[1])
-	    {
-	      int temp = s[0];
-	      s[0] = s[1];
-	      s[1] = temp;
-	    }
-	  if (s[1] > s[2])
-	    {
-	      int temp = s[1];
-	      s[1] = s[2];
-	      s[2] = temp;
-	    }
-	  if (s[0] > s[1])
-	    {
-	      int temp = s[0];
-	      s[0] = s[1];
-	      s[1] = temp;
-	    }
-	  double x = g.get(i, 2);
-	  mdTi->insert(s, j, x);
+          double x = g.get(i, 2);
+          if (s.isSorted())
+            mdTi->insert(s, j, x);
         }
     }
 

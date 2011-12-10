@@ -11,7 +11,7 @@ function [mhname,info] = get_name_of_the_last_mh_file(M_)
 %                          file. Otherwise info is equal to zero (a likely reason for this is 
 %                          that the mcmc simulations were not completed).      
 
-% Copyright (C) 2008-2009 Dynare Team
+% Copyright (C) 2008-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -41,9 +41,11 @@ predicted_mhname = [ MhDirectoryName  '/' M_.fname '_mh' int2str(mh_number) '_bl
 
 AllMhFiles = dir([MhDirectoryName  '/' M_.fname '_mh*_blck*' ]);
 idx = 1;
+latest_date = 0;
 for i=2:size(AllMhFiles)
-    if AllMhFiles(i).datenum>AllMhFiles(i-1).datenum
+    if AllMhFiles(i).datenum > latest_date
         idx = i;
+        latest_date = AllMhFiles(i).datenum;
     end
 end
 mhname = [ MhDirectoryName  '/'  AllMhFiles(idx).name];

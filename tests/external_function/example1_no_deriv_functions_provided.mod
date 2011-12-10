@@ -14,6 +14,8 @@ theta = 2.95;
 
 phi   = 0.1;
 
+external_function(nargs=2, name=extFunNoDerivs);
+
 model;
 c*theta*h^(1+psi)=(1-alpha)*y;
 k = beta*(((exp(b)*c)/(exp(b(+1))*c(+1)))

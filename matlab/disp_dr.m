@@ -7,7 +7,7 @@ function disp_dr(dr,order,var_list)
 %    var_list [char array]:  list of endogenous variables for which the
 %                            decision rules should be printed
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -24,14 +24,18 @@ function disp_dr(dr,order,var_list)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_
+global M_ options_
 
 nx =size(dr.ghx,2);
 nu =size(dr.ghu,2);
-k = find(dr.kstate(:,2) <= M_.maximum_lag+1);
-klag = dr.kstate(k,[1 2]);
-
-k1 = dr.order_var;
+if options_.block
+    k = dr.npred + dr.nboth;
+    k1 = 1:M_.endo_nbr;
+else
+    k = find(dr.kstate(:,2) <= M_.maximum_lag+1);
+    klag = dr.kstate(k,[1 2]);
+    k1 = dr.order_var;
+end;
 
 if size(var_list,1) == 0
     var_list = M_.endo_names(1:M_.orig_endo_nbr, :);
@@ -98,7 +102,11 @@ end
 %
 for k=1:nx
     flag = 0;
-    str1 = subst_auxvar(k1(klag(k,1)),klag(k,2)-M_.maximum_lag-2);
+    if options_.block
+        str1 = subst_auxvar(dr.state_var(k),-1);
+    else
+        str1 = subst_auxvar(k1(klag(k,1)),klag(k,2)-M_.maximum_lag-2);
+    end;
     str = sprintf('%-20s',str1);
     for i=1:nvar
         x = dr.ghx(ivar(i),k);
@@ -228,6 +236,13 @@ for i = 1:length(M_.aux_vars)
             orig_name = deblank(M_.endo_names(M_.aux_vars(i).orig_index, :));
           case 3
             orig_name = deblank(M_.exo_names(M_.aux_vars(i).orig_index, :));
+          case 4
+            str = sprintf('EXPECTATION(%d)(...)', aux_lead_lag);
+            return
+          case 6
+            str = sprintf('%s(%d)', ...
+                          deblank(M_.endo_names(M_.aux_vars(i).endo_index, :)),aux_lead_lag);
+            return
           otherwise
             error(sprintf('Invalid auxiliary type: %s', M_.endo_names(aux_index, :)))
         end

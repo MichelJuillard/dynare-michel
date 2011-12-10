@@ -436,9 +436,6 @@ plotting of IRFÕs.
 Generalized Schur decomposition used for solving 1st order problems (default = 1.000001).
 \item replic = INTEGER: number of simulated series used to compute the IRFs (default = 1 if order = 1, and 50 
 otherwise).
-\item simul\_seed = INTEGER or DOUBLE or (EXPRESSION): specifies a seed for the random number generator so as to obtain the 
-same random sample at each run of the program. Otherwise a different sample is used for each run (default: seed 
-not specified). If you linearized to a second order, Dynare will actually undertake Monte Carlo simulations to generate moments of your variables. Because of the simulation, results are bound to be slightly different each time you run your program, except if you fix the seed for the random number generator. \textsf{\textbf{TIP!}} If you do decide to fix the seed, you should at least try to run your program without using \texttt{simul\_seed}, just to check the robustness of your results.
 \end{itemize}
 
 Going back to our good old example, suppose we were interested in printing all the various measures of moments of our variables, want to see impulse response functions for all variables, are basically happy with all default options and want to carry out simulations over a good number of periods. We would then end our .mod file with the following command:\\

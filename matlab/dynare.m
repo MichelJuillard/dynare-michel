@@ -16,7 +16,7 @@ function dynare(fname, varargin)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2008 Dynare Team
+% Copyright (C) 2001-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -40,19 +40,7 @@ if strcmpi(fname,'help')
     disp('USAGE: dynare FILENAME[.mod,.dyn] [OPTIONS]')
     disp(' ')
     disp('dynare executes instruction included in FILENAME.mod.')
-    disp(' ')
-    disp('OPTIONS:')
-    disp(' o noclearall:  By default, dynare  will issue a clear all command to Matlab or Octave,')
-    disp('                thereby deleting all workspace variables; this options instructs dynare') 
-    disp('                not to clear the workspace.')
-    disp(' o debug:       Instructs the preprocessor to write some debugging informations about the') 
-    disp('                scanning and parsing of the .mod file.')
-    disp(' o notmpterms:  Do not include temporary terms in the generated static and dynamic files')
-    disp(' o savemacro[=MACROFILE]: Instructs dynare  to save the intermediary file which is obtained')
-    disp('                after macro-processing.')
-    disp('                By default, saved output will go in FILENAME-macroexp.mod (where FILENAME is')
-    disp('                taken from the mod file), but you can specify another filename.')
-    disp(' ')
+    disp('See the reference manual for the available options.')
     return
 end
 
@@ -63,8 +51,8 @@ if exist('OCTAVE_VERSION')
         warning('This version of Dynare has only been tested on Octave 3.0.0 and above. Since your Octave version is older than that, Dynare may fail to run, or give unexpected results. Consider upgrading your Octave installation.');
     end
 else
-    if matlab_ver_less_than('6.5')
-        warning('This version of Dynare has only been tested on Matlab 6.5 and above. Since your Matlab version is older than that, Dynare may fail to run, or give unexpected results. Consider upgrading your Matlab installation (or switch to Octave).');
+    if matlab_ver_less_than('7.0')
+        warning('This version of Dynare has only been tested on MATLAB 7.0 (R14) and above. Since your MATLAB version is older than that, Dynare may fail to run, or give unexpected results. Consider upgrading your MATLAB installation, or switch to Octave.');
     end
 end
 

@@ -47,5 +47,5 @@ end;
 steady;
 check;
 
-stoch_simul(periods=500,irf=0,simul_seed=3);
+stoch_simul(periods=500,irf=0);
 datatomfile('datarabanal_hybrid',[]);

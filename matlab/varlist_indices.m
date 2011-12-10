@@ -13,7 +13,7 @@ function [i_var,nvar] = varlist_indices(sublist,list)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2010 Dynare Team
+% Copyright (C) 2010-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -37,7 +37,7 @@ else
     check = [];
     i_var = [];
     for i = 1:rows(sublist)
-        tmp = strmatch(sublist(i,:), list, 'exact');
+        tmp = strmatch(deblank(sublist(i,:)), list, 'exact');
         if isempty(tmp)
             check = [ check; 0 ];
         else
@@ -50,7 +50,10 @@ end
 nvar = length(i_var);
 
 if ~all(check)
-    k =find(check);
-    error(strcat(sublist(k,:),' hasn''t been declared'))
+    k = find(~check);
+    tempstring = 'The following symbols are not endogenous variables: ';
+    for ii = 1:length(k)
+        tempstring = [ tempstring, deblank(sublist(k(ii),:)), ' ' ];
+    end
+    error(tempstring)
 end
-

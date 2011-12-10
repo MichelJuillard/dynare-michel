@@ -133,7 +133,7 @@ void SylvParams::setArrayNames(int& num, const char** names) const
 #if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
 mxArray* SylvParams::DoubleParamItem::createMatlabArray() const
 {
-    return mxCreateScalarDouble(value);
+    return mxCreateDoubleScalar(value);
 }
 
 mxArray* SylvParams::IntParamItem::createMatlabArray() const

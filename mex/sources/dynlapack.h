@@ -8,7 +8,7 @@
  * and MATLAB_VERSION (for version 7.4, define it to 0x0704).
  *
  *
- * Copyright (C) 2009-2010 Dynare Team
+ * Copyright (C) 2009-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -32,9 +32,9 @@
 /* Starting from version 7.8, MATLAB LAPACK expects ptrdiff_t arguments for integers */
 #if defined(MATLAB_MEX_FILE) && MATLAB_VERSION >= 0x0708
 # ifdef __cplusplus
-#  include <cstdlib>
+#  include <cstddef>
 # else
-#  include <stdlib.h>
+#  include <stddef.h>
 # endif
 typedef ptrdiff_t lapack_int;
 #else
@@ -103,6 +103,10 @@ extern "C" {
 #define dpotrf FORTRAN_WRAPPER(dpotrf)
   void dpotrf(LACHAR uplo, CONST_LAINT n, LADOU a, CONST_LAINT lda,
               LAINT info);
+
+#define dppsv FORTRAN_WRAPPER(dppsv)
+  void dppsv(LACHAR uplo, CONST_LAINT n, CONST_LAINT m, LADOU a, LADOU b, CONST_LAINT ldb,
+             LAINT info);
 
 #define dpotri FORTRAN_WRAPPER(dpotri)
   void dpotri(LACHAR uplo, CONST_LAINT n, LADOU a, CONST_LAINT lda,
@@ -230,6 +234,10 @@ extern "C" {
 #define dgeqp3 FORTRAN_WRAPPER(dgeqp3)
   void dgeqp3(CONST_LAINT m, CONST_LAINT n, LADOU a, CONST_LAINT lda, LAINT jpvt, LADOU tau,
               LADOU work, CONST_LAINT lwork, LAINT info);
+
+#define dlange FORTRAN_WRAPPER(dlange)
+  double dlange(LACHAR norm, CONST_LAINT m, CONST_LAINT n, CONST_LADOU a, CONST_LAINT lda,
+                LADOU work);
 
 #ifdef __cplusplus
 } /* extern "C" */

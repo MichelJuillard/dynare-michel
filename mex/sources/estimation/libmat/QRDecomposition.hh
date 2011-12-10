@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Dynare Team
+ * Copyright (C) 2010-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -33,15 +33,13 @@ private:
   const size_t cols2;
   lapack_int lwork, lwork2;
   double *work, *work2, *tau;
-  Matrix H, Q2;
-  Vector v;
 public:
   /*!
     \todo Replace heuristic choice for workspace size by a query to determine the optimal size
     \param[in] rows_arg Number of rows of the matrix to decompose
     \param[in] cols_arg Number of columns of the matrix to decompose
     \param[in] cols2_arg Number of columns of the matrix to be multiplied by Q
-   */
+  */
   QRDecomposition(size_t rows_arg, size_t cols_arg, size_t cols2_arg);
   virtual ~QRDecomposition();
   //! Performs the QR decomposition of a matrix, and left-multiplies another matrix by Q

@@ -3,7 +3,7 @@
 var y inflation r;
 varexo y_ inf_;
 
-parameters delta sigma alpha kappa gammarr gammax0 gammac0 rbar lambda1 lambda2;
+parameters delta sigma alpha kappa lambda1 lambda2;
 
 delta =  0.44;
 kappa =  0.18;
@@ -25,5 +25,7 @@ stderr 0.4;
 end;
 
 planner_objective inflation^2 + lambda1*y^2 + lambda2*r^2;
+
+write_latex_dynamic_model;
 
 ramsey_policy(planner_discount=0.95, order = 1);

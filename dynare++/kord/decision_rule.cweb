@@ -112,7 +112,7 @@ void SimResults::simulate(int num_sim, const DecisionRule& dr, const Vector& sta
 {
 	JournalRecordPair paa(journal);
 	paa << "Performing " << num_sim << " stochastic simulations for "
-		<< num_per << " periods" << endrec;
+		<< num_per << " periods burning " << num_burn << " initial periods"  << endrec;
 	simulate(num_sim, dr, start, vcov);
 	int thrown = num_sim - data.size();
 	if (thrown > 0) {
@@ -138,31 +138,34 @@ void SimResults::simulate(int num_sim, const DecisionRule& dr, const Vector& sta
 		rsrs.push_back(sr);
 		THREAD* worker = new
 			SimulationWorker(*this, dr, DecisionRule::horner,
-							 num_per, start, rsrs.back());
+							 num_per+num_burn, start, rsrs.back());
 		gr.insert(worker);
 	}
 	gr.run();
 }
 
-@ This adds the data with the realized shocks. If the data is not
-finite, the both data and shocks are thrown away.
+@ This adds the data with the realized shocks. It takes only periods
+which are not to be burnt. If the data is not finite, the both data
+and shocks are thrown away.
 
 @<|SimResults::addDataSet| code@>=
 bool SimResults::addDataSet(TwoDMatrix* d, ExplicitShockRealization* sr)
 {
 	KORD_RAISE_IF(d->nrows() != num_y,
 				  "Incompatible number of rows for SimResults::addDataSets");
-	KORD_RAISE_IF(d->ncols() != num_per,
+	KORD_RAISE_IF(d->ncols() != num_per+num_burn,
 				  "Incompatible number of cols for SimResults::addDataSets");
+	bool ret = false;
 	if (d->isFinite()) {
-		data.push_back(d);
-		shocks.push_back(sr);
-		return true;
-	} else {
-		delete d;
-		delete sr;
-		return false;
+		data.push_back(new TwoDMatrix((const TwoDMatrix&)(*d),num_burn,num_per));
+		shocks.push_back(new ExplicitShockRealization(
+								ConstTwoDMatrix(sr->getShocks(),num_burn,num_per)));
+		ret = true;
 	}
+
+	delete d;
+	delete sr;
+	return ret;
 }
 
 @ 
@@ -341,13 +344,12 @@ void SimResultsDynamicStats::calcVariance()
 
 @ 
 @<|SimResultsIRF::simulate| code1@>=
-void SimResultsIRF::simulate(const DecisionRule& dr, const Vector& start,
-							 Journal& journal)
+void SimResultsIRF::simulate(const DecisionRule& dr, Journal& journal)
 {
 	JournalRecordPair paa(journal);
 	paa << "Performing " << control.getNumSets() << " IRF simulations for "
 		<< num_per << " periods; shock=" << ishock << ", impulse=" << imp << endrec;
-	simulate(dr, start);
+	simulate(dr);
 	int thrown = control.getNumSets() - data.size();
 	if (thrown > 0) {
 		JournalRecord rec(journal);
@@ -360,13 +362,13 @@ void SimResultsIRF::simulate(const DecisionRule& dr, const Vector& start,
 
 @ 
 @<|SimResultsIRF::simulate| code2@>=
-void SimResultsIRF::simulate(const DecisionRule& dr, const Vector& start)
+void SimResultsIRF::simulate(const DecisionRule& dr)
 {
 	THREAD_GROUP gr;
 	for (int idata = 0; idata < control.getNumSets(); idata++) {
 		THREAD* worker = new
 			SimulationIRFWorker(*this, dr, DecisionRule::horner,
-								num_per, start, idata, ishock, imp);
+								num_per, idata, ishock, imp);
 		gr.insert(worker);
 	}
 	gr.run();
@@ -489,8 +491,8 @@ IRFResults::IRFResults(const DynamicModel& mod, const DecisionRule& dr,
 	}
 
 	for (unsigned int ii = 0; ii < irf_list_ind.size(); ii++) {
-		irf_res[2*ii]->simulate(dr, model.getSteady(), journal);
-		irf_res[2*ii+1]->simulate(dr, model.getSteady(), journal);
+		irf_res[2*ii]->simulate(dr, journal);
+		irf_res[2*ii+1]->simulate(dr, journal);
 	}
 }
 
@@ -538,6 +540,8 @@ void SimulationIRFWorker::operator()()
 	ExplicitShockRealization* esr =
 	    new ExplicitShockRealization(res.control.getShocks(idata));
 	esr->addToShock(ishock, 0, imp);
+	const TwoDMatrix& data = res.control.getData(idata);
+	ConstVector st(data, res.control.getNumBurn());
 	TwoDMatrix* m = dr.simulate(em, np, st, *esr);
 	m->add(-1.0, res.control.getData(idata));
 	{
@@ -585,16 +589,18 @@ void RTSimulationWorker::operator()()
 	dy.add(-1.0, ysteady_pred);
 	sr.get(ip, u);
 	dr.eval(em, y, dyu);
-	nc.update(y);
+    if (ip >= res.num_burn)
+		nc.update(y);
 
 @
 @<simulate other real-time periods@>=
-while (y.isFinite() && ip < res.num_per) {
+while (y.isFinite() && ip < res.num_burn + res.num_per) {
 	ip++;
 	dy = ypred;
 	sr.get(ip, u);
 	dr.eval(em, y, dyu);
-	nc.update(y);
+    if (ip >= res.num_burn)
+	    nc.update(y);
 }
 
 @ This calculates factorization $FF^T=V$ in the Cholesky way. It does
@@ -683,11 +689,7 @@ void GenShockRealization::get(int n, Vector& out)
 	Vector r(numShocks());
 	RandomShockRealization::get(n, r);
 	for (int j = 0; j < numShocks(); j++)
-#ifndef _MSC_VER
 		if (! isfinite(out[j]))
-#else
-		if (!_finite(out[j]))
-#endif
 			out[j] = r[j];
 }
 

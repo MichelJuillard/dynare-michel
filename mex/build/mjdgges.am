@@ -1,5 +1,3 @@
-vpath %.c $(top_srcdir)/../../sources/mjdgges
-
 noinst_PROGRAMS = mjdgges
 
-nodist_mjdgges_SOURCES = mjdgges.c
+nodist_mjdgges_SOURCES = $(top_srcdir)/../../sources/mjdgges/mjdgges.c

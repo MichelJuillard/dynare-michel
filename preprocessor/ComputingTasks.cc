@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 Dynare Team
+ * Copyright (C) 2003-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -54,7 +54,7 @@ void
 CheckStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
-  output << "check;\n";
+  output << "check(M_,options_,oo_);\n";
 }
 
 void
@@ -96,7 +96,7 @@ void
 SimulStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
-  output << "simul(oo_.dr);\n";
+  output << "simul();\n";
 }
 
 StochSimulStatement::StochSimulStatement(const SymbolList &symbol_list_arg,
@@ -112,7 +112,7 @@ StochSimulStatement::checkPass(ModFileStructure &mod_file_struct)
   mod_file_struct.stoch_simul_present = true;
 
   // Fill in option_order of mod_file_struct
-  OptionsList::num_options_type::const_iterator it = options_list.num_options.find("order");
+  OptionsList::num_options_t::const_iterator it = options_list.num_options.find("order");
   if (it != options_list.num_options.end())
     mod_file_struct.order_option = max(mod_file_struct.order_option, atoi(it->second.c_str()));
 
@@ -133,6 +133,15 @@ StochSimulStatement::checkPass(ModFileStructure &mod_file_struct)
       && mod_file_struct.k_order_solver)
     {
       cerr << "ERROR: in 'stoch_simul', you cannot use option 'pruning' with 'k_order_solver' option or with 3rd order approximation" << endl;
+      exit(EXIT_FAILURE);
+    }
+
+  // Workaround for ticket #157
+  it = options_list.num_options.find("periods");
+  if (it != options_list.num_options.end() && atoi(it->second.c_str()) > 0
+      && mod_file_struct.histval_present)
+    {
+      cerr << "ERROR: the 'periods' option of 'stoch_simul' is not compatible with a 'histval' block" << endl;
       exit(EXIT_FAILURE);
     }
 }
@@ -175,7 +184,7 @@ RamseyPolicyStatement::checkPass(ModFileStructure &mod_file_struct)
   /* Fill in option_order of mod_file_struct
      Since ramsey policy needs one further order of derivation (for example, for 1st order
      approximation, it needs 2nd derivatives), we add 1 to the order declared by user */
-  OptionsList::num_options_type::const_iterator it = options_list.num_options.find("order");
+  OptionsList::num_options_t::const_iterator it = options_list.num_options.find("order");
   if (it != options_list.num_options.end())
     {
       int order = atoi(it->second.c_str());
@@ -207,6 +216,53 @@ RamseyPolicyStatement::writeOutput(ostream &output, const string &basename) cons
   output << "ramsey_policy(var_list_);\n";
 }
 
+DiscretionaryPolicyStatement::DiscretionaryPolicyStatement(const SymbolList &symbol_list_arg,
+							   const OptionsList &options_list_arg) :
+  symbol_list(symbol_list_arg),
+  options_list(options_list_arg)
+{
+}
+
+void
+DiscretionaryPolicyStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.discretionary_policy_present = true;
+
+  /* Fill in option_order of mod_file_struct
+     Since discretionary policy needs one further order of derivation (for example, for 1st order
+     approximation, it needs 2nd derivatives), we add 1 to the order declared by user */
+  OptionsList::num_options_t::const_iterator it = options_list.num_options.find("order");
+  if (it != options_list.num_options.end())
+    {
+      int order = atoi(it->second.c_str());
+      if (order > 1)
+        {
+          cerr << "ERROR: discretionary_policy: order > 1 is not yet implemented" << endl;
+          exit(EXIT_FAILURE);
+        }
+      mod_file_struct.order_option = max(mod_file_struct.order_option, order + 1);
+    }
+
+  // Fill in mod_file_struct.partial_information
+  it = options_list.num_options.find("partial_information");
+  if (it != options_list.num_options.end() && it->second == "1")
+    mod_file_struct.partial_information = true;
+
+  // Option k_order_solver (implicit when order >= 3)
+  it = options_list.num_options.find("k_order_solver");
+  if ((it != options_list.num_options.end() && it->second == "1")
+      || mod_file_struct.order_option >= 3)
+    mod_file_struct.k_order_solver = true;
+}
+
+void
+DiscretionaryPolicyStatement::writeOutput(ostream &output, const string &basename) const
+{
+  options_list.writeOutput(output);
+  symbol_list.writeOutput("var_list_", output);
+  output << "discretionary_policy(var_list_);\n";
+}
+
 EstimationStatement::EstimationStatement(const SymbolList &symbol_list_arg,
                                          const OptionsList &options_list_arg,
                                          const SymbolTable &symbol_table_arg) :
@@ -222,7 +278,7 @@ EstimationStatement::checkPass(ModFileStructure &mod_file_struct)
   mod_file_struct.estimation_present = true;
 
   // Fill in option_order of mod_file_struct
-  OptionsList::num_options_type::const_iterator it = options_list.num_options.find("order");
+  OptionsList::num_options_t::const_iterator it = options_list.num_options.find("order");
   if (it != options_list.num_options.end())
     mod_file_struct.order_option = max(mod_file_struct.order_option, atoi(it->second.c_str()));
 
@@ -231,13 +287,20 @@ EstimationStatement::checkPass(ModFileStructure &mod_file_struct)
   if (it != options_list.num_options.end() && it->second == "1")
     mod_file_struct.partial_information = true;
 
-  // Fill in mod_file_struct.dsge_var_calibrated
   it = options_list.num_options.find("dsge_var");
   if (it != options_list.num_options.end())
-    mod_file_struct.dsge_var_calibrated = it->second;
+    // Ensure that irf_shocks & dsge_var have not both been passed
+    if (options_list.symbol_list_options.find("irf_shocks") != options_list.symbol_list_options.end())
+      {
+        cerr << "The irf_shocks and dsge_var options may not both be passed to estimation." << endl;
+        exit(EXIT_FAILURE);
+      }
+    else
+      // Fill in mod_file_struct.dsge_var_calibrated
+      mod_file_struct.dsge_var_calibrated = it->second;
 
   // Fill in mod_file_struct.dsge_var_estimated
-  OptionsList::string_options_type::const_iterator it_str = options_list.string_options.find("dsge_var");
+  OptionsList::string_options_t::const_iterator it_str = options_list.string_options.find("dsge_var");
   if (it_str != options_list.string_options.end())
     mod_file_struct.dsge_var_estimated = true;
 
@@ -248,16 +311,16 @@ EstimationStatement::checkPass(ModFileStructure &mod_file_struct)
 
   it = options_list.num_options.find("dsge_varlag");
   if (it != options_list.num_options.end())
-    if (mod_file_struct.dsge_var_calibrated.empty() &&
-        !mod_file_struct.dsge_var_estimated)
+    if (mod_file_struct.dsge_var_calibrated.empty()
+        && !mod_file_struct.dsge_var_estimated)
       {
         cerr << "ERROR: The estimation statement requires a dsge_var option to be passed "
              << "if the dsge_varlag option is passed." << endl;
         exit(EXIT_FAILURE);
       }
 
-  if (!mod_file_struct.dsge_var_calibrated.empty() &&
-      mod_file_struct.dsge_var_estimated)
+  if (!mod_file_struct.dsge_var_calibrated.empty()
+      && mod_file_struct.dsge_var_estimated)
     {
       cerr << "ERROR: An estimation statement cannot take more than one dsge_var option." << endl;
       exit(EXIT_FAILURE);
@@ -280,7 +343,7 @@ DynareSensitivityStatement::DynareSensitivityStatement(const OptionsList &option
 void
 DynareSensitivityStatement::checkPass(ModFileStructure &mod_file_struct)
 {
-  OptionsList::num_options_type::const_iterator it = options_list.num_options.find("identification");
+  OptionsList::num_options_t::const_iterator it = options_list.num_options.find("identification");
   if (it != options_list.num_options.end()
       && it->second == "1")
     mod_file_struct.identification_present = true;
@@ -308,15 +371,15 @@ RplotStatement::writeOutput(ostream &output, const string &basename) const
   output << "rplot(var_list_);\n";
 }
 
-UnitRootVarsStatement::UnitRootVarsStatement(const SymbolList &symbol_list_arg) :
-  symbol_list(symbol_list_arg)
+UnitRootVarsStatement::UnitRootVarsStatement(void)
 {
 }
 
 void
 UnitRootVarsStatement::writeOutput(ostream &output, const string &basename) const
 {
-  symbol_list.writeOutput("options_.unit_root_vars", output);
+  output << "options_.diffuse_filter = 1;" << endl
+	 << "options_.steadystate.nocheck = 1;" << endl;
 }
 
 PeriodsStatement::PeriodsStatement(int periods_arg) : periods(periods_arg)
@@ -362,12 +425,20 @@ EstimatedParamsStatement::checkPass(ModFileStructure &mod_file_struct)
       if (it->name == "dsge_prior_weight")
         mod_file_struct.dsge_prior_weight_in_estimated_params = true;
 
+      // Handle case of degenerate beta prior
       if (it->prior == "1") //BETA_PDF is associated with "1" in DynareBison.yy
-        if (dynamic_cast<NumConstNode *>(it->mean)->isNumConstNodeEqualTo(0.5) &&
-            dynamic_cast<NumConstNode *>(it->std)->isNumConstNodeEqualTo(0.5))
+        try
           {
-            cerr << "ERROR: The prior density is not defined for the beta distribution when the mean = standard deviation = 0.5." << endl;
-            exit(EXIT_FAILURE);
+            if (it->mean->eval(eval_context_t()) == 0.5
+                && it->std->eval(eval_context_t()) == 0.5)
+              {
+                cerr << "ERROR: The prior density is not defined for the beta distribution when the mean = standard deviation = 0.5." << endl;
+                exit(EXIT_FAILURE);
+              }
+          }
+        catch (ExprNode::EvalException &e)
+          {
+            // We don't have enough information to compute the numerical value, skip the test
           }
     }
 }
@@ -578,7 +649,7 @@ EstimatedParamsBoundsStatement::writeOutput(ostream &output, const string &basen
     }
 }
 
-ObservationTrendsStatement::ObservationTrendsStatement(const trend_elements_type &trend_elements_arg,
+ObservationTrendsStatement::ObservationTrendsStatement(const trend_elements_t &trend_elements_arg,
                                                        const SymbolTable &symbol_table_arg) :
   trend_elements(trend_elements_arg),
   symbol_table(symbol_table_arg)
@@ -590,7 +661,7 @@ ObservationTrendsStatement::writeOutput(ostream &output, const string &basename)
 {
   output << "options_.trend_coeff_ = {};" << endl;
 
-  trend_elements_type::const_iterator it;
+  trend_elements_t::const_iterator it;
 
   for (it = trend_elements.begin(); it != trend_elements.end(); it++)
     {
@@ -607,134 +678,15 @@ ObservationTrendsStatement::writeOutput(ostream &output, const string &basename)
     }
 }
 
-CalibVarStatement::CalibVarStatement(const calib_var_type &calib_var_arg,
-                                     const calib_covar_type &calib_covar_arg,
-                                     const calib_ac_type &calib_ac_arg,
-                                     const SymbolTable &symbol_table_arg) :
-  calib_var(calib_var_arg),
-  calib_covar(calib_covar_arg),
-  calib_ac(calib_ac_arg),
-  symbol_table(symbol_table_arg)
-{
-}
-
-void
-CalibVarStatement::writeOutput(ostream &output, const string &basename) const
-{
-
-  output << "%" << endl
-         << "% CALIB_VAR" << endl
-         << "%" << endl;
-
-  for (int i = 1; i < 4; i++)
-    {
-      output << "calib_var_index{" << i << "} = [];\n";
-      output << "calib_targets{" << i << "} = [];\n";
-      output << "calib_weights{" << i << "}=[];\n";
-    }
-
-  // Print calibration variances
-  for (calib_var_type::const_iterator it = calib_var.begin();
-       it != calib_var.end(); it++)
-    {
-      const string &name = it->first;
-      const string &weight = it->second.first;
-      const NodeID expression = it->second.second;
-
-      int id = symbol_table.getTypeSpecificID(name) + 1;
-      if (symbol_table.getType(name) == eEndogenous)
-        {
-          output << "calib_var_index{1} = [calib_var_index{1};" <<  id << "," << id << "];\n";
-          output << "calib_weights{1} = [calib_weights{1}; " << weight << "];\n";
-          output << "calib_targets{1} =[calib_targets{1}; ";
-          expression->writeOutput(output);
-          output << "];\n";
-        }
-      else if (symbol_table.getType(name) == eExogenous)
-        {
-          output << "calib_var_index{3} = [calib_var_index{3};" <<  id << "," << id << "];\n";
-          output << "calib_weights{3} = [calib_weights{3}; " << weight << "];\n";
-          output << "calib_targets{3} =[calib_targets{3}; ";
-          expression->writeOutput(output);
-          output << "];\n";
-        }
-    }
-
-  // Print calibration covariances
-  for (calib_covar_type::const_iterator it = calib_covar.begin();
-       it != calib_covar.end(); it++)
-    {
-      const string &name1 = it->first.first;
-      const string &name2 = it->first.second;
-      const string &weight = it->second.first;
-      const NodeID expression = it->second.second;
-
-      int id1 = symbol_table.getTypeSpecificID(name1) + 1;
-      int id2 = symbol_table.getTypeSpecificID(name2) + 1;
-      if (symbol_table.getType(name1) == eEndogenous)
-        {
-          output << "calib_var_index{1} = [calib_var_index{1};" <<  id1 << "," << id2 << "];\n";
-          output << "calib_weights{1} = [calib_weights{1}; " << weight << "];\n";
-          output << "calib_targets{1} =[calib_targets{1}; ";
-          expression->writeOutput(output);
-          output << "];\n";
-        }
-      else if (symbol_table.getType(name1) == eExogenous)
-        {
-          output << "calib_var_index{3} = [calib_var_index{3};" <<  id1 << "," << id2 << "];\n";
-          output << "calib_weights{3} = [calib_weights{3}; " << weight << "];\n";
-          output << "calib_targets{3} =[calib_targets{3}; ";
-          expression->writeOutput(output);
-          output << "];\n";
-        }
-    }
-
-  // Print calibration autocorrelations
-  int max_iar = 3;
-
-  for (calib_ac_type::const_iterator it = calib_ac.begin();
-       it != calib_ac.end(); it++)
-    {
-      const string &name = it->first.first;
-      int iar = it->first.second + 3;
-      const string &weight = it->second.first;
-      const NodeID expression = it->second.second;
-
-      int id = symbol_table.getTypeSpecificID(name) + 1;
-
-      if (iar > max_iar)
-        {
-          // Create new variables
-          for (int i = max_iar + 1; i <= iar; i++)
-            {
-              output << "calib_var_index{" << i << "} = [];\n";
-              output << "calib_targets{" << i << "} = [];\n";
-              output << "calib_weights{" << i << "}=[];\n";
-            }
-          max_iar = iar;
-        }
-
-      output << "calib_var_index{" << iar << "} = [calib_var_index{" << iar << "};" <<  id << "];\n";
-      output << "calib_weights{" << iar << "} = [calib_weights{" << iar << "}; " << weight << "];\n";
-      output << "calib_targets{" << iar << "} =[calib_targets{" << iar << "}; ";
-      expression->writeOutput(output);
-      output << "];\n";
-    }
-}
-
-CalibStatement::CalibStatement(int covar_arg) : covar(covar_arg)
-{
-}
-
-void
-CalibStatement::writeOutput(ostream &output, const string &basename) const
-{
-  output << "M_.Sigma_e=calib(calib_var_index,calib_targets,calib_weights," << covar << ",Sigma_e_);\n";
-}
-
 OsrParamsStatement::OsrParamsStatement(const SymbolList &symbol_list_arg) :
   symbol_list(symbol_list_arg)
 {
+}
+
+void
+OsrParamsStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.osr_params_present = true;
 }
 
 void
@@ -756,7 +708,7 @@ OsrStatement::checkPass(ModFileStructure &mod_file_struct)
   mod_file_struct.osr_present = true;
 
   // Fill in option_order of mod_file_struct
-  OptionsList::num_options_type::const_iterator it = options_list.num_options.find("order");
+  OptionsList::num_options_t::const_iterator it = options_list.num_options.find("order");
   if (it != options_list.num_options.end())
     mod_file_struct.order_option = max(mod_file_struct.order_option, atoi(it->second.c_str()));
 
@@ -780,13 +732,19 @@ OsrStatement::writeOutput(ostream &output, const string &basename) const
   output << "osr(var_list_,osr_params_,obj_var_,optim_weights_);\n";
 }
 
-OptimWeightsStatement::OptimWeightsStatement(const var_weights_type &var_weights_arg,
-                                             const covar_weights_type &covar_weights_arg,
+OptimWeightsStatement::OptimWeightsStatement(const var_weights_t &var_weights_arg,
+                                             const covar_weights_t &covar_weights_arg,
                                              const SymbolTable &symbol_table_arg) :
   var_weights(var_weights_arg),
   covar_weights(covar_weights_arg),
   symbol_table(symbol_table_arg)
 {
+}
+
+void
+OptimWeightsStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.optim_weights_present = true;
 }
 
 void
@@ -798,11 +756,11 @@ OptimWeightsStatement::writeOutput(ostream &output, const string &basename) cons
          << "optim_weights_ = sparse(M_.endo_nbr,M_.endo_nbr);" << endl
          << "obj_var_ = [];" << endl << endl;
 
-  for (var_weights_type::const_iterator it = var_weights.begin();
+  for (var_weights_t::const_iterator it = var_weights.begin();
        it != var_weights.end(); it++)
     {
       const string &name = it->first;
-      const NodeID value = it->second;
+      const expr_t value = it->second;
       int id = symbol_table.getTypeSpecificID(name) + 1;
       output <<  "optim_weights_(" << id << "," << id << ") = ";
       value->writeOutput(output);
@@ -810,18 +768,18 @@ OptimWeightsStatement::writeOutput(ostream &output, const string &basename) cons
       output << "obj_var_ = [obj_var_; " << id << "];\n";
     }
 
-  for (covar_weights_type::const_iterator it = covar_weights.begin();
+  for (covar_weights_t::const_iterator it = covar_weights.begin();
        it != covar_weights.end(); it++)
     {
       const string &name1 = it->first.first;
       const string &name2 = it->first.second;
-      const NodeID value = it->second;
+      const expr_t value = it->second;
       int id1 = symbol_table.getTypeSpecificID(name1) + 1;
       int id2 = symbol_table.getTypeSpecificID(name2) + 1;
       output <<  "optim_weights_(" << id1 << "," << id2 << ") = ";
       value->writeOutput(output);
       output << ";" << endl;
-      output << "obj_var_ = [obj_var_; " << id1 << " " << id2 << "];\n";
+      output << "obj_var_ = [obj_var_; " << id1 << "; " << id2 << "];\n";
     }
 }
 
@@ -855,7 +813,7 @@ DynaTypeStatement::writeOutput(ostream &output, const string &basename) const
          << "',var_list_);" << endl;
 }
 
-ModelComparisonStatement::ModelComparisonStatement(const filename_list_type &filename_list_arg,
+ModelComparisonStatement::ModelComparisonStatement(const filename_list_t &filename_list_arg,
                                                    const OptionsList &options_list_arg) :
   filename_list(filename_list_arg),
   options_list(options_list_arg)
@@ -870,7 +828,7 @@ ModelComparisonStatement::writeOutput(ostream &output, const string &basename) c
   output << "ModelNames_ = {};" << endl;
   output << "ModelPriors_ = [];" << endl;
 
-  for (filename_list_type::const_iterator it = filename_list.begin();
+  for (filename_list_t::const_iterator it = filename_list.begin();
        it != filename_list.end(); it++)
     {
       output << "ModelNames_ = { ModelNames_{:} '" << (*it).first << "'};" << endl;
@@ -893,18 +851,25 @@ void
 PlannerObjectiveStatement::checkPass(ModFileStructure &mod_file_struct)
 {
   assert(model_tree->equation_number() == 1);
+  mod_file_struct.planner_objective_present = true;
+}
+
+StaticModel *
+PlannerObjectiveStatement::getPlannerObjective() const
+{
+  return model_tree;
 }
 
 void
 PlannerObjectiveStatement::computingPass()
 {
-  model_tree->computingPass(eval_context_type(), false, true, false, false);
+  model_tree->computingPass(eval_context_t(), false, true, false, false);
 }
 
 void
 PlannerObjectiveStatement::writeOutput(ostream &output, const string &basename) const
 {
-  model_tree->writeStaticFile(basename + "_objective", false, false);
+  model_tree->writeStaticFile(basename + "_objective", false, false, false);
 }
 
 BVARDensityStatement::BVARDensityStatement(int maxnlags_arg, const OptionsList &options_list_arg) :
@@ -960,30 +925,171 @@ void
 SBVARStatement::writeOutput(ostream &output, const string &basename) const
 {
   options_list.writeOutput(output);
-  output << "swz_sbvar(0,M_,options_);" << endl;
+  output << "sbvar(M_,options_);" << endl;
 }
 
-MS_SBVARStatement::MS_SBVARStatement(const OptionsList &options_list_arg) :
+MSSBVAREstimationStatement::MSSBVAREstimationStatement(const OptionsList &options_list_arg) :
   options_list(options_list_arg)
 {
 }
 
 void
-MS_SBVARStatement::checkPass(ModFileStructure &mod_file_struct)
+MSSBVAREstimationStatement::checkPass(ModFileStructure &mod_file_struct)
 {
   mod_file_struct.bvar_present = true;
 }
 
 void
-MS_SBVARStatement::writeOutput(ostream &output, const string &basename) const
+MSSBVAREstimationStatement::writeOutput(ostream &output, const string &basename) const
 {
+  output << "options_ = initialize_ms_sbvar_options(M_, options_);" << endl;
   options_list.writeOutput(output);
-  output << "swz_sbvar(1,M_,options_);" << endl;
+  output << "[options_, oo_] = ms_estimation(M_, options_, oo_);" << endl;
 }
 
-IdentificationStatement::IdentificationStatement(const OptionsList &options_list_arg) :
+MSSBVARSimulationStatement::MSSBVARSimulationStatement(const OptionsList &options_list_arg) :
   options_list(options_list_arg)
 {
+}
+
+void
+MSSBVARSimulationStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.bvar_present = true;
+}
+
+void
+MSSBVARSimulationStatement::writeOutput(ostream &output, const string &basename) const
+{
+  output << "options_ = initialize_ms_sbvar_options(M_, options_);" << endl;
+  options_list.writeOutput(output);
+
+  // Redeclare drop option if necessary
+  OptionsList::num_options_t::const_iterator mh_replic_it = options_list.num_options.find("ms.mh_replic");
+  OptionsList::num_options_t::const_iterator thinning_factor_it = options_list.num_options.find("ms.thinning_factor");
+  OptionsList::num_options_t::const_iterator drop_it = options_list.num_options.find("ms.drop");
+  if (mh_replic_it != options_list.num_options.end() || thinning_factor_it != options_list.num_options.end())
+    if (drop_it == options_list.num_options.end())
+      output << "options_.ms.drop = 0.1*options_.ms.mh_replic*options_.ms.thinning_factor;" << endl;
+
+  output << "[options_, oo_] = ms_simulation(M_, options_, oo_);" << endl;
+}
+
+MSSBVARComputeMDDStatement::MSSBVARComputeMDDStatement(const OptionsList &options_list_arg) :
+  options_list(options_list_arg)
+{
+}
+
+void
+MSSBVARComputeMDDStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.bvar_present = true;
+}
+
+void
+MSSBVARComputeMDDStatement::writeOutput(ostream &output, const string &basename) const
+{
+  output << "options_ = initialize_ms_sbvar_options(M_, options_);" << endl;
+  options_list.writeOutput(output);
+  output << "[options_, oo_] = ms_compute_mdd(M_, options_, oo_);" << endl;
+}
+
+MSSBVARComputeProbabilitiesStatement::MSSBVARComputeProbabilitiesStatement(const OptionsList &options_list_arg) :
+  options_list(options_list_arg)
+{
+}
+
+void
+MSSBVARComputeProbabilitiesStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.bvar_present = true;
+
+  if (options_list.num_options.find("ms.real_time_smoothed_probabilities") != options_list.num_options.end())
+    if (options_list.num_options.find("ms.filtered_probabilities") != options_list.num_options.end())
+      {
+        cerr << "ERROR: You may only pass one of real_time_smoothed "
+             << "and filtered_probabilities to ms_compute_probabilities." << endl;
+        exit(EXIT_FAILURE);
+      }
+}
+
+void
+MSSBVARComputeProbabilitiesStatement::writeOutput(ostream &output, const string &basename) const
+{
+  output << "options_ = initialize_ms_sbvar_options(M_, options_);" << endl;
+  options_list.writeOutput(output);
+  output << "[options_, oo_] = ms_compute_probabilities(M_, options_, oo_);" << endl;
+}
+
+MSSBVARIrfStatement::MSSBVARIrfStatement(const SymbolList &symbol_list_arg,
+					 const OptionsList &options_list_arg) :
+  symbol_list(symbol_list_arg),
+  options_list(options_list_arg)
+{
+}
+
+void
+MSSBVARIrfStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.bvar_present = true;
+}
+
+void
+MSSBVARIrfStatement::writeOutput(ostream &output, const string &basename) const
+{
+  output << "options_ = initialize_ms_sbvar_options(M_, options_);" << endl;
+  symbol_list.writeOutput("var_list_", output);
+  options_list.writeOutput(output);
+  output << "[options_, oo_] = ms_irf(var_list_,M_, options_, oo_);" << endl;
+}
+
+MSSBVARForecastStatement::MSSBVARForecastStatement(const OptionsList &options_list_arg) :
+  options_list(options_list_arg)
+{
+}
+
+void
+MSSBVARForecastStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.bvar_present = true;
+}
+
+void
+MSSBVARForecastStatement::writeOutput(ostream &output, const string &basename) const
+{
+  output << "options_ = initialize_ms_sbvar_options(M_, options_);" << endl;
+  options_list.writeOutput(output);
+  output << "[options_, oo_] = ms_forecast(M_, options_, oo_);" << endl;
+}
+
+MSSBVARVarianceDecompositionStatement::MSSBVARVarianceDecompositionStatement(const OptionsList &options_list_arg) :
+  options_list(options_list_arg)
+{
+}
+
+void
+MSSBVARVarianceDecompositionStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.bvar_present = true;
+}
+
+void
+MSSBVARVarianceDecompositionStatement::writeOutput(ostream &output, const string &basename) const
+{
+  output << "options_ = initialize_ms_sbvar_options(M_, options_);" << endl;
+  options_list.writeOutput(output);
+  output << "[options_, oo_] = ms_variance_decomposition(M_, options_, oo_);" << endl;
+}
+
+IdentificationStatement::IdentificationStatement(const OptionsList &options_list_arg)
+{
+  options_list = options_list_arg;
+  if (options_list.num_options.find("max_dim_cova_group") != options_list.num_options.end())
+    if (atoi(options_list.num_options["max_dim_cova_group"].c_str()) == 0)
+      {
+        cerr << "ERROR: The max_dim_cova_group option to identification only accepts integers > 0." << endl;
+        exit(EXIT_FAILURE);
+      }
 }
 
 void
@@ -1064,13 +1170,15 @@ PlotConditionalForecastStatement::writeOutput(ostream &output, const string &bas
     output << "plot_icforecast(var_list_, " << periods << ");" << endl;
 }
 
-SvarIdentificationStatement::SvarIdentificationStatement(const svar_identification_exclusion_type &exclusion_arg,
+SvarIdentificationStatement::SvarIdentificationStatement(const svar_identification_restrictions_t &restrictions_arg,
                                                          const bool &upper_cholesky_present_arg,
                                                          const bool &lower_cholesky_present_arg,
+                                                         const bool &constants_exclusion_present_arg,
                                                          const SymbolTable &symbol_table_arg) :
-  exclusion(exclusion_arg),
+  restrictions(restrictions_arg),
   upper_cholesky_present(upper_cholesky_present_arg),
   lower_cholesky_present(lower_cholesky_present_arg),
+  constants_exclusion_present(constants_exclusion_present_arg),
   symbol_table(symbol_table_arg)
 {
 }
@@ -1079,9 +1187,9 @@ int
 SvarIdentificationStatement::getMaxLag() const
 {
   int max_lag = 0;
-  for (svar_identification_exclusion_type::const_iterator it = exclusion.begin(); it != exclusion.end(); it++)
-    if (it->first.first > max_lag)
-      max_lag = it->first.first;
+  for (svar_identification_restrictions_t::const_iterator it = restrictions.begin(); it != restrictions.end(); it++)
+    if (it->lag > max_lag)
+      max_lag = it->lag;
 
   return max_lag;
 }
@@ -1094,6 +1202,13 @@ SvarIdentificationStatement::checkPass(ModFileStructure &mod_file_struct)
   else
     {
       cerr << "ERROR: You may only have one svar_identification block in your .mod file." << endl;
+      exit(EXIT_FAILURE);
+    }
+
+  if (upper_cholesky_present && lower_cholesky_present)
+    {
+      cerr << "ERROR: Within the svar_identification statement, you may only have one of "
+           << "upper_cholesky and lower_cholesky." << endl;
       exit(EXIT_FAILURE);
     }
 }
@@ -1117,66 +1232,97 @@ SvarIdentificationStatement::writeOutput(ostream &output, const string &basename
   if (lower_cholesky_present)
     output << "options_.ms.lower_cholesky=1;" << endl;
 
+  if (constants_exclusion_present)
+    output << "options_.ms.constants_exclusion=1;" << endl;
+
   if (!upper_cholesky_present && !lower_cholesky_present)
     {
       int n = symbol_table.endo_nbr();
-//       int m = symbol_table.exo_nbr();
       int m = 1; // this is the constant, not the shocks
       int r = getMaxLag();
       int k = r*n+m;
 
       if (k < 1)
-	{
-	  cerr << "ERROR: lag = " << r
-	       << ", number of endogenous variables = " << n
-	       << ", number of exogenous variables = " << m
-	       << ". If this is not a logical error in the specification"
-	       << " of the .mod file, please report it to the Dynare Team." << endl;
-	  exit(EXIT_FAILURE);
-	}
+        {
+          cerr << "ERROR: lag = " << r
+               << ", number of endogenous variables = " << n
+               << ", number of exogenous variables = " << m
+               << ". If this is not a logical error in the specification"
+               << " of the .mod file, please report it to the Dynare Team." << endl;
+          exit(EXIT_FAILURE);
+        }
       if (n < 1)
         {
           cerr << "ERROR: Number of endogenous variables = " << n << "< 1. If this is not a logical "
                << "error in the specification of the .mod file, please report it to the Dynare Team." << endl;
           exit(EXIT_FAILURE);
         }
-      output << "options_.ms.Qi = zeros(" << n << ", " << n << ", " << n << ");" << endl;
-      output << "options_.ms.Ri = zeros(" << k << ", " << k << ", " << n << ");" << endl;
+      output << "options_.ms.Qi = cell(" << n << ",1);" << endl;
+      output << "options_.ms.Ri = cell(" << n << ",1);" << endl;
 
-      for (svar_identification_exclusion_type::const_iterator it = exclusion.begin(); it != exclusion.end(); it++)
+      // vector<int> rows(n);
+      // fill(rows.begin(),rows.end(),1);
+
+      for (svar_identification_restrictions_t::const_iterator it = restrictions.begin(); it != restrictions.end(); it++)
         {
-          for (unsigned int h = 0; h < it->second.size(); h++)
-            {
-              int j = it->second.at(h) + 1;
-              int i = it->first.second;
-              if (j < 1 || j > n || (int) h+1 > n || i < 1)
-                {
-                  cerr << "SvarIdentificationStatement::writeOutput() Should not arrive here (2). Please report this to the Dynare Team." << endl;
-                  exit(EXIT_FAILURE);
-                }
-              if (i > n)
-                {
-                  cerr << "ERROR: equation number " << i << " is greater than the number of endogenous variables, " << n << "." << endl;
-                  exit(EXIT_FAILURE);
-                }
+	  if (it->lag == 0)
+	    {
+	      output << "options_.ms.Qi{" << it->equation << "}(" << it->restriction_nbr << ", " << it->variable + 1 << ") = ";
+	      it->value->writeOutput(output);
+	      output << ";" << endl;
+	    }
+	  else if (it->lag > 0)
+	    {
+	      int col = (it->lag-1)*n+it->variable+1;
+	      if (col > k)
+                     {
+                       cerr << "ERROR: lag =" << it->lag << ", num endog vars = " << n << "current endog var index = " << it->variable << ". Index "
+                            << "out of bounds. If the above does not represent a logical error, please report this to the Dyanre Team." << endl;
+                     }
+	      output << "options_.ms.Ri{" << it->equation << "}(" << it->restriction_nbr << ", " << col << ") = ";
+	      it->value->writeOutput(output);
+	      output << ";" << endl;
+	    }
+	  else
+	    {
+	      cerr << "SvarIdentificationStatement::writeOutput() Should not arrive here (3). Please report this to the Dynare Team." << endl;
+	      exit(EXIT_FAILURE);
+	    }
+ 
+          // for (unsigned int h = 0; h < it->second.size(); h++)
+          //   {
+          //     int j = it->second.at(h) + 1;
+          //     int i = it->first.second;
+	  //     int lag = it->first.first;
+          //     if (j < 1 || j > n || (int) h+1 > n || i < 1)
+          //       {
+          //         cerr << "SvarIdentificationStatement::writeOutput() Should not arrive here (2). Please report this to the Dynare Team." << endl;
+          //         exit(EXIT_FAILURE);
+          //       }
+          //     if (i > n)
+          //       {
+          //         cerr << "ERROR: equation number " << i << " is greater than the number of endogenous variables, " << n << "." << endl;
+          //         exit(EXIT_FAILURE);
+          //       }
 
-              if (it->first.first == 0)
-                output << "options_.ms.Qi(" << h+1 << ", " << j << ", "<< i << ") = 1;" << endl;
-              else if (it->first.first > 0)
-                {
-                  if ((it->first.first-1)*n+j > k)
-                    {
-                      cerr << "ERROR: lag =" << it->first.first << ", num endog vars = " << n << "current endog var index = " << j << ". Index "
-                           << "out of bounds. If the above does not represent a logical error, please report this to the Dyanre Team." << endl;
-                    }
-                  output << "options_.ms.Ri(" << h+1 << ", " << (it->first.first-1)*n+j << ", "<< i << ") = 1;" << endl;
-                }
-              else
-                {
-                  cerr << "SvarIdentificationStatement::writeOutput() Should not arrive here (3). Please report this to the Dynare Team." << endl;
-                  exit(EXIT_FAILURE);
-                }
-            }
+          //     if (lag == 0)
+          //       output << "options_.ms.Qi{" << i << "}(" << h+1 << ", " << j << ") = 1;" << endl;
+          //     else if (lag > 0)
+          //       {
+          //         if ((lag-1)*n+j > k)
+          //           {
+          //             cerr << "ERROR: lag =" << lag << ", num endog vars = " << n << "current endog var index = " << j << ". Index "
+          //                  << "out of bounds. If the above does not represent a logical error, please report this to the Dyanre Team." << endl;
+          //           }
+          //         output << "options_.ms.Ri{" << i << "}(" << rows[i-1] << ", " << (lag-1)*n+j << ") = 1;" << endl;
+	  // 	  rows[i-1]++;
+          //       }
+          //     else
+          //       {
+          //         cerr << "SvarIdentificationStatement::writeOutput() Should not arrive here (3). Please report this to the Dynare Team." << endl;
+          //         exit(EXIT_FAILURE);
+          //       }
+          //   }
         }
     }
 }
@@ -1189,7 +1335,7 @@ MarkovSwitchingStatement::MarkovSwitchingStatement(const OptionsList &options_li
 void
 MarkovSwitchingStatement::writeOutput(ostream &output, const string &basename) const
 {
-  OptionsList::num_options_type::const_iterator itChain, itState, itNOS, itDuration;
+  OptionsList::num_options_t::const_iterator itChain, itState, itNOS, itDuration;
 
   itChain = options_list.num_options.find("ms.chain");
   if (itChain == options_list.num_options.end())
@@ -1229,8 +1375,8 @@ SvarStatement::SvarStatement(const OptionsList &options_list_arg) :
 void
 SvarStatement::writeOutput(ostream &output, const string &basename) const
 {
-  OptionsList::num_options_type::const_iterator it0, it1, it2;
-  OptionsList::vec_int_options_type::const_iterator itv;
+  OptionsList::num_options_t::const_iterator it0, it1, it2;
+  OptionsList::vec_int_options_t::const_iterator itv;
 
   it0 = options_list.num_options.find("ms.chain");
   if (it0 != options_list.num_options.end())

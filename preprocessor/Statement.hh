@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2010 Dynare Team
+ * Copyright (C) 2006-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -44,8 +44,16 @@ public:
   bool estimation_present;
   //! Whether an osr statement is present
   bool osr_present;
+  //! Whether an osr params statement is present
+  bool osr_params_present;
+  //! Whether an optim weight statement is present
+  bool optim_weights_present;
   //! Whether a ramsey_policy statement is present
   bool ramsey_policy_present;
+  //! Whether a discretionary_objective statement is present
+  bool discretionary_policy_present;
+  //! Whether a planner_objective statement is present
+  bool planner_objective_present;
   //! The value of the "order" option of stoch_simul, estimation, osr, ramsey_policy
   //! Derivation order
   /*! First initialized to zero. If user sets order option somewhere in the MOD file, it will be equal to the maximum of order options. Otherwise will default to 2 */
@@ -61,6 +69,9 @@ public:
   //! Whether a shocks or mshocks block is present
   /*! Used for the workaround for trac ticket #35 */
   bool shocks_present;
+  //! Whether a histval bloc is present
+  /*! Used for the workaround for trac ticket #157 */
+  bool histval_present;
   //! Whether the "k_order_solver" option is used (explictly, or implicitly if order >= 3)
   bool k_order_solver;
   //! Whether there is a calibrated measurement error
@@ -104,16 +115,16 @@ public:
 class OptionsList
 {
 public:
-  typedef map<string, string> num_options_type;
-  typedef map<string, pair<string, string> > paired_num_options_type;
-  typedef map<string, string> string_options_type;
-  typedef map<string, SymbolList> symbol_list_options_type;
-  typedef map<string, vector<int> > vec_int_options_type;
-  num_options_type num_options;
-  paired_num_options_type paired_num_options;
-  string_options_type string_options;
-  symbol_list_options_type symbol_list_options;
-  vec_int_options_type vector_int_options;
+  typedef map<string, string> num_options_t;
+  typedef map<string, pair<string, string> > paired_num_options_t;
+  typedef map<string, string> string_options_t;
+  typedef map<string, SymbolList> symbol_list_options_t;
+  typedef map<string, vector<int> > vec_int_options_t;
+  num_options_t num_options;
+  paired_num_options_t paired_num_options;
+  string_options_t string_options;
+  symbol_list_options_t symbol_list_options;
+  vec_int_options_t vector_int_options;
   void writeOutput(ostream &output) const;
   void writeOutput(ostream &output, const string &option_group) const;
   void clear();

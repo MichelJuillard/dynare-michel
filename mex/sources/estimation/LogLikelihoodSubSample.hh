@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2010 Dynare Team
+ * Copyright (C) 2009-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -30,7 +30,8 @@
 #include "KalmanFilter.hh"
 #include "VDVEigDecomposition.hh"
 
-class LogLikelihoodSubSample {
+class LogLikelihoodSubSample
+{
 
 public:
   LogLikelihoodSubSample(const std::string &dynamicDllFile, EstimatedParametersDescription &estiParDesc, size_t n_endo, size_t n_exo,
@@ -43,13 +44,14 @@ public:
   virtual ~LogLikelihoodSubSample();
 
 private:
-  double penalty;
+  double startPenalty, penalty;
   double logLikelihood;
   EstimatedParametersDescription &estiParDesc;
   KalmanFilter kalmanFilter;
   VDVEigDecomposition eigQ;
   VDVEigDecomposition eigH;
   int &info;
+
   // methods
   void updateParams(const Vector &estParams, Vector &deepParams,
                     Matrix &Q, Matrix &H, size_t period);

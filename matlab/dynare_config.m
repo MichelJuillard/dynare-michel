@@ -1,4 +1,4 @@
-function dynareroot = dynare_config(path_to_dynare)
+function dynareroot = dynare_config(path_to_dynare,verbose)
 %function dynareroot = dynare_config(path_to_dynare)
 % This function tests the existence of valid mex files (for qz
 % decomposition, solution to sylvester equation and kronecker
@@ -8,14 +8,14 @@ function dynareroot = dynare_config(path_to_dynare)
 %
 % INPUTS
 %   none
-%             
+%
 % OUTPUTS
 %   none
-%        
+%
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -32,17 +32,32 @@ function dynareroot = dynare_config(path_to_dynare)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if nargin
+if nargin && ~isempty(path_to_dynare)
     addpath(path_to_dynare);
 end
 dynareroot = strrep(which('dynare'),'dynare.m','');
 
+if ~nargin || nargin==1
+    verbose = 1;
+end
+
+
 addpath([dynareroot '/distributions/'])
 addpath([dynareroot '/kalman/'])
 addpath([dynareroot '/kalman/likelihood'])
-addpath([dynareroot '/kalman/smoother'])
 addpath([dynareroot '/AIM/'])
 addpath([dynareroot '/partial_information/'])
+addpath([dynareroot '/ms-sbvar/'])
+addpath([dynareroot '/ms-sbvar/cstz/'])
+addpath([dynareroot '/ms-sbvar/identification/'])
+addpath([dynareroot '/parallel/'])
+addpath([dynareroot '/particle/'])
+addpath([dynareroot '/gsa/'])
+addpath([dynareroot '/ep/'])
+addpath([dynareroot '/utilities/doc/'])
+addpath([dynareroot '/utilities/tests/'])
+addpath([dynareroot '/utilities/dataset/'])
+addpath([dynareroot '/utilities/general/'])
 
 % For functions that exist only under some Octave versions
 % or some MATLAB versions, and for which we provide some replacement functions
@@ -52,7 +67,7 @@ if ~exist('OCTAVE_VERSION')
     addpath([dynareroot '/missing/rows_columns'])
     % Replacement for vec() (inexistent under MATLAB)
     addpath([dynareroot '/missing/vec'])
-    if isempty(ver('stats'))
+    if isempty(license('inuse','statistics_toolbox'))
         % Replacements for functions of the stats toolbox
         addpath([dynareroot '/missing/stats/'])
     end
@@ -69,17 +84,23 @@ if exist('OCTAVE_VERSION') && octave_ver_less_than('3.2.0')
     addpath([dynareroot '/missing/bicgstab'])
 end
 
-% orschur() is missing in Octave; we don't have a real replacement;
-% the one we provide just exits with an error message
-if exist('OCTAVE_VERSION')
-    addpath([dynareroot '/missing/ordschur'])
-end
-
-% bsxfun is missing in old versions of matlab (octave?)
+% bsxfun is missing in old versions of MATLAB (and exists in Octave)
 if ~exist('OCTAVE_VERSION') && matlab_ver_less_than('7.4')
     addpath([dynareroot '/missing/bsxfun'])
 end
 
+% nanmean is in Octave Forge Statistics package and in MATLAB Statistics
+% toolbox
+if exist('OCTAVE_VERSION')
+    [desc,flag] = pkg('describe', 'statistics');
+    if ~isequal(flag{1,1}, 'Loaded')
+        addpath([dynareroot '/missing/nanmean'])
+    end
+else
+    if isempty(license('inuse','statistics_toolbox'))
+        addpath([dynareroot '/missing/nanmean'])
+    end
+end
 
 % Add path to MEX files
 if exist('OCTAVE_VERSION')
@@ -88,12 +109,12 @@ else
     % Add win32 specific paths for Dynare Windows package
     if strcmp(computer, 'PCWIN')
         if matlab_ver_less_than('7.5')
-            mexpath = [dynareroot '../mex/matlab/win32-6.5-7.4'];
+            mexpath = [dynareroot '../mex/matlab/win32-7.0-7.4'];
             if exist(mexpath, 'dir')
                 addpath(mexpath)
             end
         else
-            mexpath = [dynareroot '../mex/matlab/win32-7.5-7.10'];
+            mexpath = [dynareroot '../mex/matlab/win32-7.5-7.13'];
             if exist(mexpath, 'dir')
                 addpath(mexpath)
             end
@@ -118,10 +139,31 @@ else
                 addpath(mexpath)
             end
         else
-            mexpath = [dynareroot '../mex/matlab/win64-7.8-7.10'];
+            mexpath = [dynareroot '../mex/matlab/win64-7.8-7.13'];
             if exist(mexpath, 'dir')
                 addpath(mexpath)
             end
+        end
+    end
+
+    if strcmp(computer, 'MACI')
+        if matlab_ver_less_than('7.5')
+            mexpath = [dynareroot '../mex/matlab/osx32-7.4'];
+            if exist(mexpath, 'dir')
+                addpath(mexpath)
+            end
+        else
+            mexpath = [dynareroot '../mex/matlab/osx32-7.5-7.13'];
+            if exist(mexpath, 'dir')
+                addpath(mexpath)
+            end
+        end
+    end
+
+    if strcmp(computer, 'MACI64')
+        mexpath = [dynareroot '../mex/matlab/osx64'];
+        if exist(mexpath, 'dir')
+            addpath(mexpath)
         end
     end
 
@@ -148,16 +190,6 @@ number_of_mex_files = size(mex_status,1);
 %% added dynare_v4/matlab with the subfolders. Matlab has to ignore these
 %% subfolders if valid mex files exist.
 matlab_path = path;
-test = strfind(matlab_path,[dynareroot 'threads/single']);
-if length(test)
-    rmpath([dynareroot 'threads/single']);
-    matlab_path = path;
-end
-test = strfind(matlab_path,[dynareroot 'threads/multi']);
-if length(test)
-    rmpath([dynareroot 'threads/multi']);
-    matlab_path = path;
-end
 for i=1:number_of_mex_files
     test = strfind(matlab_path,[dynareroot mex_status{i,2}]);
     action = length(test);
@@ -166,19 +198,12 @@ for i=1:number_of_mex_files
         matlab_path = path;
     end
 end
-%% Test if multithread mex files are available.
-if exist('isopenmp')==3
-    addpath([dynareroot '/threads/multi/'])
-    number_of_threads = set_dynare_threads();
-    multithread_flag  = number_of_threads-1;
-else
-    addpath([dynareroot '/threads/single/'])
-    multithread_flag = 0;
-end
 %% Test if valid mex files are available, if a mex file is not available
 %% a matlab version of the routine is included in the path.
-disp(' ')
-disp('Configuring Dynare ...')
+if verbose
+    disp(' ')
+    disp('Configuring Dynare ...')
+end
 
 for i=1:number_of_mex_files
     test = (exist(mex_status{i,1},'file') == 3);
@@ -186,27 +211,22 @@ for i=1:number_of_mex_files
         addpath([dynareroot mex_status{i,2}]);
         message = '[m]   ';
     else
-        if multithread_flag && ( strcmpi(mex_status(i,1),'sparse_hessian_times_B_kronecker_C') || ...
-                                 strcmpi(mex_status(i,1),'A_times_B_kronecker_C') )
-            message = [ '[mex][multithread version, ' int2str(multithread_flag+1) ' threads are used] ' ]; 
-        else
-            message = '[mex] ';
-        end
+        message = '[mex] ';
     end
-    disp([ message mex_status{i,3} '.' ])
+    if verbose
+        disp([ message mex_status{i,3} '.' ])
+    end
 end
 
 % Test if bytecode DLL is present
 if exist('bytecode', 'file') == 3
-    if ~multithread_flag
-        message = '[mex] ';
-    else
-        message = [ '[mex][multithread version, ' int2str(multithread_flag+1) ' threads are used] ' ];
-    end
+    message = '[mex] ';
 else
     message = '[no]  ';
 end
-disp([ message 'Bytecode evaluation.' ])
+if verbose
+    disp([ message 'Bytecode evaluation.' ])
+end
 
 % Test if k-order perturbation DLL is present
 if exist('k_order_perturbation', 'file') == 3
@@ -214,7 +234,9 @@ if exist('k_order_perturbation', 'file') == 3
 else
     message = '[no]  ';
 end
-disp([ message 'k-order perturbation solver.' ])
+if verbose
+    disp([ message 'k-order perturbation solver.' ])
+end
 
 % Test if dynare_simul_ DLL is present
 if exist('dynare_simul_', 'file') == 3
@@ -222,6 +244,7 @@ if exist('dynare_simul_', 'file') == 3
 else
     message = '[no]  ';
 end
-disp([ message 'k-order solution simulation.' ])
-
-disp(' ')
+if verbose
+    disp([ message 'k-order solution simulation.' ])
+    disp(' ')
+end

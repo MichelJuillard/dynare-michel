@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 Dynare Team
+ * Copyright (C) 2003-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -24,7 +24,7 @@
 #include "NumericalInitialization.hh"
 
 InitParamStatement::InitParamStatement(int symb_id_arg,
-                                       const NodeID param_value_arg,
+                                       const expr_t param_value_arg,
                                        const SymbolTable &symbol_table_arg) :
   symb_id(symb_id_arg),
   param_value(param_value_arg),
@@ -50,7 +50,7 @@ InitParamStatement::writeOutput(ostream &output, const string &basename) const
 }
 
 void
-InitParamStatement::fillEvalContext(eval_context_type &eval_context) const
+InitParamStatement::fillEvalContext(eval_context_t &eval_context) const
 {
   try
     {
@@ -62,7 +62,7 @@ InitParamStatement::fillEvalContext(eval_context_type &eval_context) const
     }
 }
 
-InitOrEndValStatement::InitOrEndValStatement(const init_values_type &init_values_arg,
+InitOrEndValStatement::InitOrEndValStatement(const init_values_t &init_values_arg,
                                              const SymbolTable &symbol_table_arg) :
   init_values(init_values_arg),
   symbol_table(symbol_table_arg)
@@ -70,9 +70,9 @@ InitOrEndValStatement::InitOrEndValStatement(const init_values_type &init_values
 }
 
 void
-InitOrEndValStatement::fillEvalContext(eval_context_type &eval_context) const
+InitOrEndValStatement::fillEvalContext(eval_context_t &eval_context) const
 {
-  for (init_values_type::const_iterator it = init_values.begin();
+  for (init_values_t::const_iterator it = init_values.begin();
        it != init_values.end(); it++)
     {
       try
@@ -89,11 +89,11 @@ InitOrEndValStatement::fillEvalContext(eval_context_type &eval_context) const
 void
 InitOrEndValStatement::writeInitValues(ostream &output) const
 {
-  for (init_values_type::const_iterator it = init_values.begin();
+  for (init_values_t::const_iterator it = init_values.begin();
        it != init_values.end(); it++)
     {
       const int symb_id = it->first;
-      const NodeID expression = it->second;
+      const expr_t expression = it->second;
 
       SymbolType type = symbol_table.getType(symb_id);
       int tsid = symbol_table.getTypeSpecificID(symb_id) + 1;
@@ -111,7 +111,7 @@ InitOrEndValStatement::writeInitValues(ostream &output) const
     }
 }
 
-InitValStatement::InitValStatement(const init_values_type &init_values_arg,
+InitValStatement::InitValStatement(const init_values_t &init_values_arg,
                                    const SymbolTable &symbol_table_arg) :
   InitOrEndValStatement(init_values_arg, symbol_table_arg)
 {
@@ -141,7 +141,7 @@ InitValStatement::writeOutputPostInit(ostream &output) const
          <<"end;" << endl;
 }
 
-EndValStatement::EndValStatement(const init_values_type &init_values_arg,
+EndValStatement::EndValStatement(const init_values_t &init_values_arg,
                                  const SymbolTable &symbol_table_arg) :
   InitOrEndValStatement(init_values_arg, symbol_table_arg)
 {
@@ -170,7 +170,7 @@ EndValStatement::writeOutput(ostream &output, const string &basename) const
   writeInitValues(output);
 }
 
-HistValStatement::HistValStatement(const hist_values_type &hist_values_arg,
+HistValStatement::HistValStatement(const hist_values_t &hist_values_arg,
                                    const SymbolTable &symbol_table_arg) :
   hist_values(hist_values_arg),
   symbol_table(symbol_table_arg)
@@ -178,20 +178,50 @@ HistValStatement::HistValStatement(const hist_values_type &hist_values_arg,
 }
 
 void
+HistValStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.histval_present = true;
+}
+
+void
 HistValStatement::writeOutput(ostream &output, const string &basename) const
 {
   output << "%" << endl
          << "% HISTVAL instructions" << endl
-         << "%" << endl;
+         << "%" << endl
+         << "oo_.endo_simul = zeros(M_.endo_nbr,M_.maximum_lag);" << endl;
 
-  for (hist_values_type::const_iterator it = hist_values.begin();
+  for (hist_values_t::const_iterator it = hist_values.begin();
        it != hist_values.end(); it++)
     {
-      const int &symb_id = it->first.first;
-      const int &lag = it->first.second;
-      const NodeID expression = it->second;
+      int symb_id = it->first.first;
+      int lag = it->first.second;
+      const expr_t expression = it->second;
 
       SymbolType type = symbol_table.getType(symb_id);
+
+      // For a lag greater than 1 on endo, or for any exo, lookup for auxiliary variable
+      if ((type == eEndogenous && lag < 0) || type == eExogenous)
+        {
+          try
+            {
+              // This function call must remain the 1st statement in this block
+              symb_id = symbol_table.searchAuxiliaryVars(symb_id, lag);
+              lag = 0;
+              type = eEndogenous;
+            }
+          catch (SymbolTable::SearchFailedException &e)
+            {
+              if (type == eEndogenous)
+                {
+                  cerr << "HISTVAL: internal error of Dynare, please contact the developers";
+                  exit(EXIT_FAILURE);
+                }
+              // We don't fail for exogenous, because they are not replaced by
+              // auxiliary variables in deterministic mode.
+            }
+        }
+
       int tsid = symbol_table.getTypeSpecificID(symb_id) + 1;
 
       if (type == eEndogenous)
@@ -221,7 +251,7 @@ InitvalFileStatement::writeOutput(ostream &output, const string &basename) const
          << "initvalf('" << filename << "');" << endl;
 }
 
-HomotopyStatement::HomotopyStatement(const homotopy_values_type &homotopy_values_arg,
+HomotopyStatement::HomotopyStatement(const homotopy_values_t &homotopy_values_arg,
                                      const SymbolTable &symbol_table_arg) :
   homotopy_values(homotopy_values_arg),
   symbol_table(symbol_table_arg)
@@ -236,12 +266,12 @@ HomotopyStatement::writeOutput(ostream &output, const string &basename) const
          << "%" << endl
          << "options_.homotopy_values = [];" << endl;
 
-  for (homotopy_values_type::const_iterator it = homotopy_values.begin();
+  for (homotopy_values_t::const_iterator it = homotopy_values.begin();
        it != homotopy_values.end(); it++)
     {
       const int &symb_id = it->first;
-      const NodeID expression1 = it->second.first;
-      const NodeID expression2 = it->second.second;
+      const expr_t expression1 = it->second.first;
+      const expr_t expression2 = it->second.second;
 
       const SymbolType type = symbol_table.getType(symb_id);
       const int tsid = symbol_table.getTypeSpecificID(symb_id) + 1;
@@ -332,7 +362,7 @@ LoadParamsAndSteadyStateStatement::writeOutput(ostream &output, const string &ba
 }
 
 void
-LoadParamsAndSteadyStateStatement::fillEvalContext(eval_context_type &eval_context) const
+LoadParamsAndSteadyStateStatement::fillEvalContext(eval_context_t &eval_context) const
 {
   for (map<int, string>::const_iterator it = content.begin();
        it != content.end(); it++)

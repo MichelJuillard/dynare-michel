@@ -17,7 +17,7 @@ function [yf,int_width]=forcst(dr,y0,horizon,var_list)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2009 Dynare Team
+% Copyright (C) 2003-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -43,7 +43,7 @@ npred = dr.npred;
 nc = size(dr.ghx,2);
 endo_nbr = M_.endo_nbr;
 inv_order_var = dr.inv_order_var;
-[A,B] = kalman_transition_matrix(dr,nstatic+(1:npred),1:nc,dr.transition_auxiliary_variables,M_.exo_nbr);
+[A,B] = kalman_transition_matrix(dr,nstatic+(1:npred),1:nc,M_.exo_nbr);
 
 if size(var_list,1) == 0
     var_list = M_.endo_names(1:M_.orig_endo_nbr,:);
@@ -81,7 +81,7 @@ fact = norminv((1-options_.conf_sig)/2,0,1);
 
 int_width = zeros(horizon,M_.endo_nbr);
 for i=1:nvar
-    int_width(:,i) = fact*sqrt(var_yf(:,i));
+    int_width(:,i) = -fact*sqrt(var_yf(:,i));
 end
 
 yf = yf(ivar,:);

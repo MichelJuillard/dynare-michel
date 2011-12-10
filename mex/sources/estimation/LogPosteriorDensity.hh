@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2010 Dynare Team
+ * Copyright (C) 2009-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -34,12 +34,12 @@
  * Class that calculates Log Posterior Density using kalman, based on Dynare
  * DsgeLikelihood.m
  */
-class LogPosteriorDensity {
+class LogPosteriorDensity
+{
 
 private:
   LogPriorDensity logPriorDensity;
   LogLikelihoodMain logLikelihoodMain;
-  double logPosteriorDensity;
 
 public:
   virtual ~LogPosteriorDensity();
@@ -51,7 +51,6 @@ public:
   double compute(Matrix &steadyState, const Vector &estParams, Vector &deepParams,
                  const MatrixConstView &data, Matrix &Q, Matrix &H, size_t presampleStart, int &info);
   Vector&getLikVector();
-  double getLogPosteriorDensity();
 
 };
 

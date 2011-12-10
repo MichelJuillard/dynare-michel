@@ -1,6 +1,6 @@
 function y=dy_date(year,period)
 
-% Copyright (C) 2005 Dynare Team
+% Copyright (C) 2005-2009 Dynare Team
 %
 % This file is part of Dynare.
 %

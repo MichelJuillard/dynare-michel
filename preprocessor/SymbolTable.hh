@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 Dynare Team
+ * Copyright (C) 2003-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -33,12 +33,13 @@ using namespace std;
 //! Types of auxiliary variables
 enum aux_var_t
   {
-    avEndoLead = 0,      //!< Substitute for endo leads >= 2
-    avEndoLag = 1,       //!< Substitute for endo lags >= 2
-    avExoLead = 2,       //!< Substitute for exo leads >= 2
-    avExoLag = 3,        //!< Substitute for exo lags >= 2
-    avExpectation = 4,   //!< Substitute for Expectation Operator
-    avExpectationRIS = 5 //!< Substitute for Expectation Operator Conditional on Restricted Information Set
+    avEndoLead = 0,       //!< Substitute for endo leads >= 2
+    avEndoLag = 1,        //!< Substitute for endo lags >= 2
+    avExoLead = 2,        //!< Substitute for exo leads >= 2
+    avExoLag = 3,         //!< Substitute for exo lags >= 2
+    avExpectation = 4,    //!< Substitute for Expectation Operator
+    // Type 5 now unused
+    avMultiplier = 6      //!< Multipliers for FOC of Ramsey Problem
   };
 
 //! Information on some auxiliary variables
@@ -47,16 +48,16 @@ class AuxVarInfo
 private:
   int symb_id; //!< Symbol ID of the auxiliary variable
   aux_var_t type; //!< Its type
-  int orig_symb_id; //!< Symbol ID of the endo of the original model represented by this aux var. Not used for avEndoLead
-  int orig_lead_lag; //!< Lead/lag of the endo of the original model represented by this aux var. Not used for avEndoLead
-  string expectation_information_set_name; //!< Stores 'full' or 'varobs' for avExpectationRIS. Not used otherwise.
+  int orig_symb_id; //!< Symbol ID of the endo of the original model represented by this aux var. Only used for avEndoLag and avExoLag.
+  int orig_lead_lag; //!< Lead/lag of the endo of the original model represented by this aux var. Only used for avEndoLag and avExoLag.
+  int equation_number_for_multiplier; //!< Stores the original constraint equation number associated with this aux var. Only used for avMultiplier.
 public:
-  AuxVarInfo(int symb_id_arg, aux_var_t type_arg, int orig_symb_id, int orig_lead_lag, string expectation_information_set_name_arg);
+  AuxVarInfo(int symb_id_arg, aux_var_t type_arg, int orig_symb_id, int orig_lead_lag, int equation_number_for_multiplier_arg);
   int get_symb_id() const { return symb_id; };
   aux_var_t get_type() const { return type; };
   int get_orig_symb_id() const { return orig_symb_id; };
   int get_orig_lead_lag() const { return orig_lead_lag; };
-  string get_expectation_information_set_name() const { return expectation_information_set_name; };
+  int get_equation_number_for_multiplier() const { return equation_number_for_multiplier; };
 };
 
 //! Stores the symbol table
@@ -161,6 +162,16 @@ public:
   class NotYetFrozenException
   {
   };
+  //! Thrown when searchAuxiliaryVars() failed
+  class SearchFailedException
+  {
+  public:
+    int orig_symb_id, orig_lead_lag;
+    SearchFailedException(int orig_symb_id_arg, int orig_lead_lag_arg) : orig_symb_id(orig_symb_id_arg),
+                                                                         orig_lead_lag(orig_lead_lag_arg)
+    {
+    }
+  };
 
 private:
   //! Factorized code for adding aux lag variables
@@ -203,7 +214,22 @@ public:
     \param[in] index Used to construct the variable name
     \return the symbol ID of the new symbol
   */
-  int addExpectationAuxiliaryVar(int information_set, int index, const string &information_set_name) throw (FrozenException);
+  int addExpectationAuxiliaryVar(int information_set, int index) throw (FrozenException);
+  //! Adds an auxiliary variable for the multiplier for the FOCs of the Ramsey Problem
+  /*!
+    \param[in] index Used to construct the variable name
+    \return the symbol ID of the new symbol
+  */
+  int addMultiplierAuxiliaryVar(int index) throw (FrozenException);
+  //! Searches auxiliary variables which are substitutes for a given symbol_id and lead/lag
+  /*!
+    The search is only performed among auxiliary variables of endo/exo lag.
+    \return the symbol ID of the auxiliary variable
+    Throws an exception if match not found.
+  */
+  int searchAuxiliaryVars(int orig_symb_id, int orig_lead_lag) const throw (SearchFailedException);
+  //! Returns the number of auxiliary variables
+  int AuxVarsSize() const { return aux_vars.size(); };
   //! Tests if symbol already exists
   inline bool exists(const string &name) const;
   //! Get symbol name (by ID)
@@ -254,6 +280,7 @@ public:
   bool isObservedVariable(int symb_id) const;
   //! Return the index of a given observed variable in the vector of all observed variables
   int getObservedVariableIndex(int symb_id) const;
+  vector <int> getTrendVarIds() const;
 };
 
 inline bool

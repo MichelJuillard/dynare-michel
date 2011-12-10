@@ -1,6 +1,27 @@
-function [McoH, McoJ, McoGP, PcoH, PcoJ, PcoGP, condH, condJ, condGP, eH, eJ, eGP, ind01, ind02, indnoH, indnoJ] = identification_checks(H,JJ, gp, bayestopt_)
+function [condJ, ind0, indnoJ, ixnoJ, McoJ, PcoJ, jweak, jweak_pair] = identification_checks(JJ, hess_flag)
+% function [condJ, ind0, indnoJ, ixnoJ, McoJ, PcoJ, jweak, jweak_pair] = identification_checks(JJ, hess_flag)
+% checks for identification
+%
+% INPUTS
+%    o JJ               [matrix] [output x nparams] IF hess_flag==0
+%                                 derivatives of output w.r.t. parameters and shocks
+%    o JJ               [matrix] [nparams x nparams] IF hess_flag==1
+%                                 information matrix
+%    
+% OUTPUTS
+%    o cond             condition number of JJ
+%    o ind0             [array] binary indicator for non-zero columns of H
+%    o indnoJ           [matrix] index of non-identified params 
+%    o ixnoJ            number of rows in indnoJ
+%    o Mco              [array] multicollinearity coefficients
+%    o Pco              [matrix] pairwise correlations 
+%    o jweak            [binary array] gives 1 if the  parameter has Mco=1(with tolerance 1.e-10)
+%    o jweak_pair       [binary matrix] gives 1 if a couple parameters has Pco=1(with tolerance 1.e-10)
+%    
+% SPECIAL REQUIREMENTS
+%    None
 
-% Copyright (C) 2008 Dynare Team
+% Copyright (C) 2008-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -20,159 +41,91 @@ function [McoH, McoJ, McoGP, PcoH, PcoJ, PcoGP, condH, condJ, condGP, eH, eJ, eG
 % My suggestion is to have the following steps for identification check in
 % dynare:
 
-% 1. check rank of H at theta
-npar = size(H,2);
-npar0 = size(gp,2);
-indnoH = {};
-indnoJ = {};
-indnoLRE = {};
-ind1 = find(vnorm(H)~=0);
-H1 = H(:,ind1);
-covH = H1'*H1;
-sdH = sqrt(diag(covH));
-sdH = sdH*sdH';
-[e1,e2] = eig( (H1'*H1)./sdH );
-eH = zeros(npar,npar);
-% eH(ind1,:) = e1;
-eH(ind1,length(find(vnorm(H)==0))+1:end) = e1;
-eH(find(vnorm(H)==0),1:length(find(vnorm(H)==0)))=eye(length(find(vnorm(H)==0)));
-condH = cond(H1);
-% condH = cond(H1'*H1);
+% 1. check rank of JJ at theta
+npar = size(JJ,2);
+indnoJ = zeros(1,npar);
 
-ind2 = find(vnorm(JJ)~=0);
-JJ1 = JJ(:,ind2);
-covJJ = JJ1'*JJ1;
-sdJJ = sqrt(diag(covJJ));
-sdJJ = sdJJ*sdJJ';
-[ee1,ee2] = eig( (JJ1'*JJ1)./sdJJ );
-% eJ = NaN(npar,length(ind2));
-eJ = zeros(npar,npar);
-eJ(ind2,length(find(vnorm(JJ)==0))+1:end) = ee1;
-eJ(find(vnorm(JJ)==0),1:length(find(vnorm(JJ)==0)))=eye(length(find(vnorm(JJ)==0)));
-% condJ = cond(JJ1'*JJ1);
-condJ = cond(JJ1);
+ind1 = find(vnorm(JJ)>=eps); % take non-zero columns
+JJ1 = JJ(:,ind1);
+[eu,ee2,ee1] = svd( JJ1, 0 );
+condJ= cond(JJ1);
+rankJ = rank(JJ./norm(JJ),1.e-10);
+rankJJ = rankJ;
+% if hess_flag==0,
+%     rankJJ = rank(JJ'*JJ);
+% end   
 
-ind3 = find(vnorm(gp)~=0);
-gp1 = gp(:,ind3);
-covgp = gp1'*gp1;
-sdgp = sqrt(diag(covgp));
-sdgp = sdgp*sdgp';
-[ex1,ex2] = eig( (gp1'*gp1)./sdgp );
-% eJ = NaN(npar,length(ind2));
-eGP = zeros(npar0,npar0);
-eGP(ind3,length(find(vnorm(gp)==0))+1:end) = ex1;
-eGP(find(vnorm(gp)==0),1:length(find(vnorm(gp)==0)))=eye(length(find(vnorm(gp)==0)));
-% condJ = cond(JJ1'*JJ1);
-condGP = cond(gp1);
+ind0 = zeros(1,npar);
+ind0(ind1) = 1;
 
-if rank(H)<npar
-    ixno = 0;
-    %         - find out which parameters are involved,
-    % using something like the vnorm and the eigenvalue decomposition of H;
-    %   disp('Some parameters are NOT identified in the model: H rank deficient')
-    %   disp(' ')
-    if length(ind1)<npar,
-        ixno = ixno + 1;
-        indnoH(ixno) = {find(~ismember([1:npar],ind1))};
-        %     disp('Not identified params')
-        %     disp(bayestopt_.name(indnoH{1}))
-        %     disp(' ')
+if hess_flag==0,
+    % find near linear dependence problems:
+    McoJ = NaN(npar,1);
+    for ii = 1:size(JJ1,2);
+        McoJ(ind1(ii),:) = cosn([JJ1(:,ii),JJ1(:,find([1:1:size(JJ1,2)]~=ii))]);
     end
-    e0 = find(abs(diag(e2))<eps);
-    for j=1:length(e0),
-        ixno = ixno + 1;
-        indnoH(ixno) = {ind1(find(e1(:,e0(j))))};
-        %     disp('Perfectly collinear parameters')
-        %     disp(bayestopt_.name(indnoH{ixno}))
-        %     disp(' ')
-    end
-else % rank(H)==length(theta), go to 2
-     % 2. check rank of J
-     %   disp('All parameters are identified at theta in the model (rank of H)')
-     %   disp(' ')
+else
+    deltaJ = sqrt(diag(JJ(ind1,ind1)));
+    tildaJ = JJ(ind1,ind1)./((deltaJ)*(deltaJ'));
+    McoJ(ind1,1)=(1-1./diag(inv(tildaJ)));
+    rhoM=sqrt(1-McoJ);
+%     PcoJ=inv(tildaJ);
+    PcoJ=NaN(npar,npar);
+    PcoJ(ind1,ind1)=inv(JJ(ind1,ind1));
+    sd=sqrt(diag(PcoJ));
+    PcoJ = abs(PcoJ./((sd)*(sd')));
 end
 
-if rank(JJ)<npar
-    ixno = 0;
+
+ixnoJ = 0;
+if rankJ<npar || rankJJ<npar || min(1-McoJ)<1.e-10
     %         - find out which parameters are involved
     %   disp('Some parameters are NOT identified by the moments included in J')
     %   disp(' ')
-    if length(ind2)<npar,
-        ixno = ixno + 1;
-        indnoJ(ixno) = {find(~ismember([1:npar],ind2))};
+    if length(ind1)<npar,
+        % parameters with zero column in JJ
+        ixnoJ = ixnoJ + 1;
+        indnoJ(ixnoJ,:) = (~ismember([1:npar],ind1));
     end
-    ee0 = find(abs(diag(ee2))<eps);
+    ee0 = [rankJJ+1:length(ind1)];
     for j=1:length(ee0),
-        ixno = ixno + 1;
-        indnoJ(ixno) = {ind2(find(ee1(:,ee0(j))))};
-        %     disp('Perfectly collinear parameters in moments J')
-        %     disp(bayestopt_.name(indnoJ{ixno}))
-        %     disp(' ')
+        % linearely dependent parameters in JJ
+        ixnoJ = ixnoJ + 1;
+        indnoJ(ixnoJ,ind1) = (abs(ee1(:,ee0(j))) > 1.e-3)';
     end
 else  %rank(J)==length(theta) =>
-      %   disp('All parameters are identified at theta by the moments included in J')
+      %         disp('All parameters are identified at theta by the moments included in J')
 end
-
-
-% rank(H1)==size(H1,2)
-% rank(JJ1)==size(JJ1,2)
-
-% to find near linear dependence problems  I use
-
-McoH = NaN(npar,1);
-McoJ = NaN(npar,1);
-McoGP = NaN(npar0,1);
-for ii = 1:size(H1,2);
-    McoH(ind1(ii),:) = [cosn([H1(:,ii),H1(:,find([1:1:size(H1,2)]~=ii))])];
-end
-for ii = 1:size(JJ1,2);
-    McoJ(ind2(ii),:) = [cosn([JJ1(:,ii),JJ1(:,find([1:1:size(JJ1,2)]~=ii))])];
-end
-for ii = 1:size(gp1,2);
-  McoGP(ind3(ii),:) = [cosn([gp1(:,ii),gp1(:,find([1:1:size(gp1,2)]~=ii))])];
-end
-
-% format long  % some are nearly 1
-% McoJ
-
 
 % here there is no exact linear dependence, but there are several
 %     near-dependencies, mostly due to strong pairwise colliniearities, which can
 %     be checked using
 
-PcoH = NaN(npar,npar);
+jweak=zeros(1,npar);
+jweak_pair=zeros(npar,npar);
+
+if hess_flag==0,
 PcoJ = NaN(npar,npar);
-PcoGP = NaN(npar0,npar0);
-for ii = 1:size(H1,2);
-    PcoH(ind1(ii),ind1(ii)) = 1;
-    for jj = ii+1:size(H1,2);
-        PcoH(ind1(ii),ind1(jj)) = [cosn([H1(:,ii),H1(:,jj)])];
-        PcoH(ind1(jj),ind1(ii)) = PcoH(ind1(ii),ind1(jj));
-    end
-end
 
 for ii = 1:size(JJ1,2);
-    PcoJ(ind2(ii),ind2(ii)) = 1;
+    PcoJ(ind1(ii),ind1(ii)) = 1;
     for jj = ii+1:size(JJ1,2);
-        PcoJ(ind2(ii),ind2(jj)) = [cosn([JJ1(:,ii),JJ1(:,jj)])];
-        PcoJ(ind2(jj),ind2(ii)) = PcoJ(ind2(ii),ind2(jj));
+        PcoJ(ind1(ii),ind1(jj)) = cosn([JJ1(:,ii),JJ1(:,jj)]);
+        PcoJ(ind1(jj),ind1(ii)) = PcoJ(ind1(ii),ind1(jj));
     end
 end
 
-for ii = 1:size(gp1,2);
-    PcoGP(ind3(ii),ind3(ii)) = 1;
-    for jj = ii+1:size(gp1,2);
-        PcoGP(ind3(ii),ind3(jj)) = [cosn([gp1(:,ii),gp1(:,jj)])];
-        PcoGP(ind3(jj),ind3(ii)) = PcoGP(ind3(ii),ind3(jj));
+for j=1:npar,
+    if McoJ(j)>(1-1.e-10), 
+        jweak(j)=1;
+        [ipair, jpair] = find(PcoJ(j,j+1:end)>(1-1.e-10));
+        for jx=1:length(jpair),
+            jweak_pair(j, jpair(jx)+j)=1;
+            jweak_pair(jpair(jx)+j, j)=1;
+        end
     end
 end
+end
 
-
-ind01 = zeros(npar,1);
-ind02 = zeros(npar,1);
-ind01(ind1) = 1;
-ind02(ind2) = 1;
-
-
-
+jweak_pair=dyn_vech(jweak_pair)';
 

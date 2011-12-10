@@ -1,7 +1,7 @@
 function tau = thet2tau(params, indx, indexo, flagmoments,mf,nlags,useautocorr)
 
 %
-% Copyright (C) 2010 Dynare Team
+% Copyright (C) 2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -28,7 +28,7 @@ end
 if nargin<4,
     flagmoments=0;
 end
-if nargin<7 | isempty(useautocorr),
+if nargin<7 || isempty(useautocorr),
     useautocorr=0;
 end
 
@@ -36,8 +36,7 @@ M_.params(indx) = params(length(indexo)+1:end);
 if ~isempty(indexo)
     M_.Sigma_e(indexo,indexo) = diag(params(1:length(indexo)).^2);
 end
-% [A(oo_.dr.order_var,oo_.dr.order_var),B(oo_.dr.order_var,:)]=dynare_resolve;
-[A,B]=dynare_resolve;
+[A,B,tele,tubbies,M_,options_,oo_] = dynare_resolve(M_,options_,oo_);
 if flagmoments==0,
     tau = [oo_.dr.ys(oo_.dr.order_var); A(:); dyn_vech(B*M_.Sigma_e*B')];
 else

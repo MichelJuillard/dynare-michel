@@ -1,3 +1,5 @@
+// Copyright (C) 2004-2011, Ondra Kamenik
+
 #include "dynare3.h"
 #include "dynare_exception.h"
 #include "dynare_params.h"
@@ -17,7 +19,7 @@ int main(int argc, char** argv)
 		return 0;
 	}
 	if (params.version) {
-		printf("Dynare++ v. %s. Copyright (C) 2004,2005,2006 Ondra Kamenik\n",
+		printf("Dynare++ v. %s. Copyright (C) 2004-2011, Ondra Kamenik\n",
 			   DYNVERSION);
 		printf("Dynare++ comes with ABSOLUTELY NO WARRANTY and is distributed under\n");
 		printf("GPL: modules integ, tl, kord, sylv, src, extern and documentation\n");
@@ -128,7 +130,7 @@ int main(int argc, char** argv)
 
 		// simulate conditional
 		if (params.num_condper > 0 && params.num_condsim > 0) {
-			SimResultsDynamicStats rescond(dynare.numeq(), params.num_condper);
+			SimResultsDynamicStats rescond(dynare.numeq(), params.num_condper, 0);
 			ConstVector det_ss(app.getSS(),0);
 			rescond.simulate(params.num_condsim, app.getFoldDecisionRule(), det_ss, dynare.getVcov(), journal);
 			rescond.writeMat4(matfd, params.prefix);
@@ -138,7 +140,7 @@ int main(int argc, char** argv)
 		//const DecisionRule& dr = app.getUnfoldDecisionRule();
 		const DecisionRule& dr = app.getFoldDecisionRule();
 		if (params.num_per > 0 && params.num_sim > 0) {
-			SimResultsStats res(dynare.numeq(), params.num_per);
+			SimResultsStats res(dynare.numeq(), params.num_per, params.num_burn);
 			res.simulate(params.num_sim, dr, dynare.getSteady(), dynare.getVcov(), journal);
 			res.writeMat4(matfd, params.prefix);
 			
@@ -151,7 +153,7 @@ int main(int argc, char** argv)
 
 		// simulate with real-time statistics
 		if (params.num_rtper > 0 && params.num_rtsim > 0) {
-			RTSimResultsStats rtres(dynare.numeq(), params.num_rtper);
+			RTSimResultsStats rtres(dynare.numeq(), params.num_rtper, params.num_burn);
 			rtres.simulate(params.num_rtsim, dr, dynare.getSteady(), dynare.getVcov(), journal);
 			rtres.writeMat4(matfd, params.prefix);
 		}

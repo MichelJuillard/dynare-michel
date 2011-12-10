@@ -23,7 +23,7 @@ comp_nbr = size(z,2)-1;
 
 gend = size(z,3);
 freq = initial_date.freq;
-initial_period = initial_date.period + initial_date.sub_period/freq;
+initial_period = initial_date.period + initial_date.subperiod/freq;
 x = initial_period-1/freq:(1/freq):initial_period+(gend-1)/freq;
 
 nvar = length(i_var);
@@ -69,7 +69,7 @@ for j=1:nvar
     hold on;
     y1 = 0;
     height = 1/comp_nbr;
-    labels = strvcat(shock_names,'Initial values');
+    labels = char(shock_names,'Initial values');
     
     for j=1:comp_nbr
         fill([0 0 0.2 0.2],[y1 y1+0.7*height y1+0.7*height y1],j);

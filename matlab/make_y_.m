@@ -12,7 +12,7 @@ function make_y_
 %   none
 %  
 
-% Copyright (C) 1996-2007 Dynare Team
+% Copyright (C) 1996-2009 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -30,8 +30,6 @@ function make_y_
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global M_ options_ oo_ ys0_ 
-
-options_ = set_default_option(options_,'periods',0);
 
 if isempty(oo_.steady_state)
     oo_.steady_state = zeros(M_.endo_nbr,1);

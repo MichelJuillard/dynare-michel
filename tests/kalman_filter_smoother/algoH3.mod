@@ -38,7 +38,6 @@ end;
 varobs w x y;
        
 estimation(datafile=data,first_obs=1000,nobs=200,mh_replic=0,diffuse_filter);
-//estimation(datafile=data,first_obs=1000,nobs=200,mh_replic=0,mode_compute=0,mode_file=algo3_mode,diffuse_filter);
 
 stoch_simul(irf=0);
 
@@ -53,10 +52,14 @@ err = zeros(M_.endo_nbr,200);
 for t=2:200;
     err(:,t) = S(t,:)'-A*S(t-1,:)'-B*E(t,:)';
 end;
-disp(max(max(abs(err))));
+if max(max(abs(err))) > 1e-10;
+   error('Test fails');
+end;
 
 d=load('data');
 dat = [d.w d.x d.y];
 X = oo_.SmoothedMeasurementErrors;
 ME = [X.w X.x X.y];
-disp(max(max(abs(dat(1000:1199,:)-S(:,[7:9])-ME))));
+if max(max(abs(dat(1000:1199,:)-S(:,[7:9])-ME))) > 1E-10;
+   error('Test fails');
+end;

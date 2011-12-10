@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 Dynare Team
+ * Copyright (C) 2003-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -31,31 +31,31 @@ DataTree::DataTree(SymbolTable &symbol_table_arg,
   external_functions_table(external_functions_table_arg),
   node_counter(0)
 {
-  Zero = AddNumConstant("0");
-  One = AddNumConstant("1");
-  Two = AddNumConstant("2");
+  Zero = AddNonNegativeConstant("0");
+  One = AddNonNegativeConstant("1");
+  Two = AddNonNegativeConstant("2");
 
   MinusOne = AddUMinus(One);
 
-  NaN = AddNumConstant("NaN");
-  Infinity = AddNumConstant("Inf");
+  NaN = AddNonNegativeConstant("NaN");
+  Infinity = AddNonNegativeConstant("Inf");
   MinusInfinity = AddUMinus(Infinity);
 
-  Pi = AddNumConstant("3.141592653589793");
+  Pi = AddNonNegativeConstant("3.141592653589793");
 }
 
 DataTree::~DataTree()
 {
-  for (node_list_type::iterator it = node_list.begin(); it != node_list.end(); it++)
+  for (node_list_t::iterator it = node_list.begin(); it != node_list.end(); it++)
     delete *it;
 }
 
-NodeID
-DataTree::AddNumConstant(const string &value)
+expr_t
+DataTree::AddNonNegativeConstant(const string &value) throw (NumericalConstants::InvalidFloatingPointNumberException)
 {
-  int id = num_constants.AddConstant(value);
+  int id = num_constants.AddNonNegativeConstant(value);
 
-  num_const_node_map_type::iterator it = num_const_node_map.find(id);
+  num_const_node_map_t::iterator it = num_const_node_map.find(id);
   if (it != num_const_node_map.end())
     return it->second;
   else
@@ -65,7 +65,7 @@ DataTree::AddNumConstant(const string &value)
 VariableNode *
 DataTree::AddVariableInternal(int symb_id, int lag)
 {
-  variable_node_map_type::iterator it = variable_node_map.find(make_pair(symb_id, lag));
+  variable_node_map_t::iterator it = variable_node_map.find(make_pair(symb_id, lag));
   if (it != variable_node_map.end())
     return it->second;
   else
@@ -79,8 +79,8 @@ DataTree::AddVariable(int symb_id, int lag)
   return AddVariableInternal(symb_id, lag);
 }
 
-NodeID
-DataTree::AddPlus(NodeID iArg1, NodeID iArg2)
+expr_t
+DataTree::AddPlus(expr_t iArg1, expr_t iArg2)
 {
   if (iArg1 != Zero && iArg2 != Zero)
     {
@@ -93,7 +93,7 @@ DataTree::AddPlus(NodeID iArg1, NodeID iArg2)
       // Nodes iArg1 and iArg2 are sorted by index
       if (iArg1->idx > iArg2->idx)
         {
-          NodeID tmp = iArg1;
+          expr_t tmp = iArg1;
           iArg1 = iArg2;
           iArg2 = tmp;
         }
@@ -107,8 +107,8 @@ DataTree::AddPlus(NodeID iArg1, NodeID iArg2)
     return Zero;
 }
 
-NodeID
-DataTree::AddMinus(NodeID iArg1, NodeID iArg2)
+expr_t
+DataTree::AddMinus(expr_t iArg1, expr_t iArg2)
 {
   if (iArg2 == Zero)
     return iArg1;
@@ -122,8 +122,8 @@ DataTree::AddMinus(NodeID iArg1, NodeID iArg2)
   return AddBinaryOp(iArg1, oMinus, iArg2);
 }
 
-NodeID
-DataTree::AddUMinus(NodeID iArg1)
+expr_t
+DataTree::AddUMinus(expr_t iArg1)
 {
   if (iArg1 != Zero)
     {
@@ -138,8 +138,8 @@ DataTree::AddUMinus(NodeID iArg1)
     return Zero;
 }
 
-NodeID
-DataTree::AddTimes(NodeID iArg1, NodeID iArg2)
+expr_t
+DataTree::AddTimes(expr_t iArg1, expr_t iArg2)
 {
   if (iArg1 == MinusOne)
     return AddUMinus(iArg2);
@@ -151,7 +151,7 @@ DataTree::AddTimes(NodeID iArg1, NodeID iArg2)
       // Nodes iArg1 and iArg2 are sorted by index
       if (iArg1->idx > iArg2->idx)
         {
-          NodeID tmp = iArg1;
+          expr_t tmp = iArg1;
           iArg1 = iArg2;
           iArg2 = tmp;
         }
@@ -167,8 +167,8 @@ DataTree::AddTimes(NodeID iArg1, NodeID iArg2)
     return Zero;
 }
 
-NodeID
-DataTree::AddDivide(NodeID iArg1, NodeID iArg2)
+expr_t
+DataTree::AddDivide(expr_t iArg1, expr_t iArg2)
 {
   if (iArg2 == One)
     return iArg1;
@@ -189,47 +189,49 @@ DataTree::AddDivide(NodeID iArg1, NodeID iArg2)
   return AddBinaryOp(iArg1, oDivide, iArg2);
 }
 
-NodeID
-DataTree::AddLess(NodeID iArg1, NodeID iArg2)
+expr_t
+DataTree::AddLess(expr_t iArg1, expr_t iArg2)
 {
   return AddBinaryOp(iArg1, oLess, iArg2);
 }
 
-NodeID
-DataTree::AddGreater(NodeID iArg1, NodeID iArg2)
+expr_t
+DataTree::AddGreater(expr_t iArg1, expr_t iArg2)
 {
   return AddBinaryOp(iArg1, oGreater, iArg2);
 }
 
-NodeID
-DataTree::AddLessEqual(NodeID iArg1, NodeID iArg2)
+expr_t
+DataTree::AddLessEqual(expr_t iArg1, expr_t iArg2)
 {
   return AddBinaryOp(iArg1, oLessEqual, iArg2);
 }
 
-NodeID
-DataTree::AddGreaterEqual(NodeID iArg1, NodeID iArg2)
+expr_t
+DataTree::AddGreaterEqual(expr_t iArg1, expr_t iArg2)
 {
   return AddBinaryOp(iArg1, oGreaterEqual, iArg2);
 }
 
-NodeID
-DataTree::AddEqualEqual(NodeID iArg1, NodeID iArg2)
+expr_t
+DataTree::AddEqualEqual(expr_t iArg1, expr_t iArg2)
 {
   return AddBinaryOp(iArg1, oEqualEqual, iArg2);
 }
 
-NodeID
-DataTree::AddDifferent(NodeID iArg1, NodeID iArg2)
+expr_t
+DataTree::AddDifferent(expr_t iArg1, expr_t iArg2)
 {
   return AddBinaryOp(iArg1, oDifferent, iArg2);
 }
 
-NodeID
-DataTree::AddPower(NodeID iArg1, NodeID iArg2)
+expr_t
+DataTree::AddPower(expr_t iArg1, expr_t iArg2)
 {
-  if (iArg1 != Zero && iArg2 != Zero && iArg2 != One)
+  if (iArg1 != Zero && iArg2 != Zero && iArg1 != One && iArg2 != One)
     return AddBinaryOp(iArg1, oPower, iArg2);
+  else if (iArg1 == One)
+    return One;
   else if (iArg2 == One)
     return iArg1;
   else if (iArg2 == Zero)
@@ -238,8 +240,15 @@ DataTree::AddPower(NodeID iArg1, NodeID iArg2)
     return Zero;
 }
 
-NodeID
-DataTree::AddExp(NodeID iArg1)
+expr_t
+DataTree::AddPowerDeriv(expr_t iArg1, expr_t iArg2, int powerDerivOrder)
+{
+  assert(powerDerivOrder > 0);
+  return AddBinaryOp(iArg1, oPowerDeriv, iArg2, powerDerivOrder);
+}
+
+expr_t
+DataTree::AddExp(expr_t iArg1)
 {
   if (iArg1 != Zero)
     return AddUnaryOp(oExp, iArg1);
@@ -247,8 +256,8 @@ DataTree::AddExp(NodeID iArg1)
     return One;
 }
 
-NodeID
-DataTree::AddLog(NodeID iArg1)
+expr_t
+DataTree::AddLog(expr_t iArg1)
 {
   if (iArg1 != Zero && iArg1 != One)
     return AddUnaryOp(oLog, iArg1);
@@ -261,8 +270,8 @@ DataTree::AddLog(NodeID iArg1)
     }
 }
 
-NodeID
-DataTree::AddLog10(NodeID iArg1)
+expr_t
+DataTree::AddLog10(expr_t iArg1)
 {
   if (iArg1 != Zero && iArg1 != One)
     return AddUnaryOp(oLog10, iArg1);
@@ -275,8 +284,8 @@ DataTree::AddLog10(NodeID iArg1)
     }
 }
 
-NodeID
-DataTree::AddCos(NodeID iArg1)
+expr_t
+DataTree::AddCos(expr_t iArg1)
 {
   if (iArg1 != Zero)
     return AddUnaryOp(oCos, iArg1);
@@ -284,8 +293,8 @@ DataTree::AddCos(NodeID iArg1)
     return One;
 }
 
-NodeID
-DataTree::AddSin(NodeID iArg1)
+expr_t
+DataTree::AddSin(expr_t iArg1)
 {
   if (iArg1 != Zero)
     return AddUnaryOp(oSin, iArg1);
@@ -293,8 +302,8 @@ DataTree::AddSin(NodeID iArg1)
     return Zero;
 }
 
-NodeID
-DataTree::AddTan(NodeID iArg1)
+expr_t
+DataTree::AddTan(expr_t iArg1)
 {
   if (iArg1 != Zero)
     return AddUnaryOp(oTan, iArg1);
@@ -302,8 +311,8 @@ DataTree::AddTan(NodeID iArg1)
     return Zero;
 }
 
-NodeID
-DataTree::AddAcos(NodeID iArg1)
+expr_t
+DataTree::AddAcos(expr_t iArg1)
 {
   if (iArg1 != One)
     return AddUnaryOp(oAcos, iArg1);
@@ -311,8 +320,8 @@ DataTree::AddAcos(NodeID iArg1)
     return Zero;
 }
 
-NodeID
-DataTree::AddAsin(NodeID iArg1)
+expr_t
+DataTree::AddAsin(expr_t iArg1)
 {
   if (iArg1 != Zero)
     return AddUnaryOp(oAsin, iArg1);
@@ -320,8 +329,8 @@ DataTree::AddAsin(NodeID iArg1)
     return Zero;
 }
 
-NodeID
-DataTree::AddAtan(NodeID iArg1)
+expr_t
+DataTree::AddAtan(expr_t iArg1)
 {
   if (iArg1 != Zero)
     return AddUnaryOp(oAtan, iArg1);
@@ -329,8 +338,8 @@ DataTree::AddAtan(NodeID iArg1)
     return Zero;
 }
 
-NodeID
-DataTree::AddCosh(NodeID iArg1)
+expr_t
+DataTree::AddCosh(expr_t iArg1)
 {
   if (iArg1 != Zero)
     return AddUnaryOp(oCosh, iArg1);
@@ -338,8 +347,8 @@ DataTree::AddCosh(NodeID iArg1)
     return One;
 }
 
-NodeID
-DataTree::AddSinh(NodeID iArg1)
+expr_t
+DataTree::AddSinh(expr_t iArg1)
 {
   if (iArg1 != Zero)
     return AddUnaryOp(oSinh, iArg1);
@@ -347,8 +356,8 @@ DataTree::AddSinh(NodeID iArg1)
     return Zero;
 }
 
-NodeID
-DataTree::AddTanh(NodeID iArg1)
+expr_t
+DataTree::AddTanh(expr_t iArg1)
 {
   if (iArg1 != Zero)
     return AddUnaryOp(oTanh, iArg1);
@@ -356,8 +365,8 @@ DataTree::AddTanh(NodeID iArg1)
     return Zero;
 }
 
-NodeID
-DataTree::AddAcosh(NodeID iArg1)
+expr_t
+DataTree::AddAcosh(expr_t iArg1)
 {
   if (iArg1 != One)
     return AddUnaryOp(oAcosh, iArg1);
@@ -365,8 +374,8 @@ DataTree::AddAcosh(NodeID iArg1)
     return Zero;
 }
 
-NodeID
-DataTree::AddAsinh(NodeID iArg1)
+expr_t
+DataTree::AddAsinh(expr_t iArg1)
 {
   if (iArg1 != Zero)
     return AddUnaryOp(oAsinh, iArg1);
@@ -374,8 +383,8 @@ DataTree::AddAsinh(NodeID iArg1)
     return Zero;
 }
 
-NodeID
-DataTree::AddAtanh(NodeID iArg1)
+expr_t
+DataTree::AddAtanh(expr_t iArg1)
 {
   if (iArg1 != Zero)
     return AddUnaryOp(oAtanh, iArg1);
@@ -383,8 +392,8 @@ DataTree::AddAtanh(NodeID iArg1)
     return Zero;
 }
 
-NodeID
-DataTree::AddSqrt(NodeID iArg1)
+expr_t
+DataTree::AddSqrt(expr_t iArg1)
 {
   if (iArg1 != Zero)
     return AddUnaryOp(oSqrt, iArg1);
@@ -392,8 +401,30 @@ DataTree::AddSqrt(NodeID iArg1)
     return Zero;
 }
 
-NodeID
-DataTree::AddErf(NodeID iArg1)
+expr_t
+DataTree::AddAbs(expr_t iArg1)
+{
+  if (iArg1 == Zero)
+    return Zero;
+  if (iArg1 == One)
+    return One;
+  else
+    return AddUnaryOp(oAbs, iArg1);
+}
+
+expr_t
+DataTree::AddSign(expr_t iArg1)
+{
+  if (iArg1 == Zero)
+    return Zero;
+  if (iArg1 == One)
+    return One;
+  else
+    return AddUnaryOp(oSign, iArg1);
+}
+
+expr_t
+DataTree::AddErf(expr_t iArg1)
 {
   if (iArg1 != Zero)
     return AddUnaryOp(oErf, iArg1);
@@ -401,102 +432,108 @@ DataTree::AddErf(NodeID iArg1)
     return Zero;
 }
 
-NodeID
-DataTree::AddMax(NodeID iArg1, NodeID iArg2)
+expr_t
+DataTree::AddMax(expr_t iArg1, expr_t iArg2)
 {
   return AddBinaryOp(iArg1, oMax, iArg2);
 }
 
-NodeID
-DataTree::AddMin(NodeID iArg1, NodeID iArg2)
+expr_t
+DataTree::AddMin(expr_t iArg1, expr_t iArg2)
 {
   return AddBinaryOp(iArg1, oMin, iArg2);
 }
 
-NodeID
-DataTree::AddNormcdf(NodeID iArg1, NodeID iArg2, NodeID iArg3)
+expr_t
+DataTree::AddNormcdf(expr_t iArg1, expr_t iArg2, expr_t iArg3)
 {
   return AddTrinaryOp(iArg1, oNormcdf, iArg2, iArg3);
 }
 
-NodeID
-DataTree::AddNormpdf(NodeID iArg1, NodeID iArg2, NodeID iArg3)
+expr_t
+DataTree::AddNormpdf(expr_t iArg1, expr_t iArg2, expr_t iArg3)
 {
   return AddTrinaryOp(iArg1, oNormpdf, iArg2, iArg3);
 }
 
-NodeID
-DataTree::AddSteadyState(NodeID iArg1)
+expr_t
+DataTree::AddSteadyState(expr_t iArg1)
 {
   return AddUnaryOp(oSteadyState, iArg1);
 }
 
-NodeID
-DataTree::AddExpectation(int iArg1, NodeID iArg2)
+expr_t
+DataTree::AddSteadyStateParamDeriv(expr_t iArg1, int param_symb_id)
+{
+  return AddUnaryOp(oSteadyStateParamDeriv, iArg1, 0, param_symb_id);
+}
+
+expr_t
+DataTree::AddSteadyStateParam2ndDeriv(expr_t iArg1, int param1_symb_id, int param2_symb_id)
+{
+  return AddUnaryOp(oSteadyStateParam2ndDeriv, iArg1, 0, param1_symb_id, param2_symb_id);
+}
+
+expr_t
+DataTree::AddExpectation(int iArg1, expr_t iArg2)
 {
   return AddUnaryOp(oExpectation, iArg2, iArg1);
 }
 
-NodeID
-DataTree::AddExpectation(string *iArg1, NodeID iArg2)
-{
-  return AddUnaryOp(oExpectation, iArg2, 0, *iArg1);
-}
-
-NodeID
-DataTree::AddEqual(NodeID iArg1, NodeID iArg2)
+expr_t
+DataTree::AddEqual(expr_t iArg1, expr_t iArg2)
 {
   return AddBinaryOp(iArg1, oEqual, iArg2);
 }
 
 void
-DataTree::AddLocalVariable(int symb_id, NodeID value) throw (LocalVariableException)
+DataTree::AddLocalVariable(int symb_id, expr_t value) throw (LocalVariableException)
 {
   assert(symbol_table.getType(symb_id) == eModelLocalVariable);
 
   // Throw an exception if symbol already declared
-  map<int, NodeID>::iterator it = local_variables_table.find(symb_id);
+  map<int, expr_t>::iterator it = local_variables_table.find(symb_id);
   if (it != local_variables_table.end())
     throw LocalVariableException(symbol_table.getName(symb_id));
 
   local_variables_table[symb_id] = value;
 }
 
-NodeID
-DataTree::AddExternalFunction(int symb_id, const vector<NodeID> &arguments)
+expr_t
+DataTree::AddExternalFunction(int symb_id, const vector<expr_t> &arguments)
 {
   assert(symbol_table.getType(symb_id) == eExternalFunction);
 
-  external_function_node_map_type::iterator it = external_function_node_map.find(make_pair(arguments, symb_id));
+  external_function_node_map_t::iterator it = external_function_node_map.find(make_pair(arguments, symb_id));
   if (it != external_function_node_map.end())
     return it->second;
 
   return new ExternalFunctionNode(*this, symb_id, arguments);
 }
 
-NodeID
-DataTree::AddFirstDerivExternalFunctionNode(int top_level_symb_id, const vector<NodeID> &arguments, int input_index)
+expr_t
+DataTree::AddFirstDerivExternalFunctionNode(int top_level_symb_id, const vector<expr_t> &arguments, int input_index)
 {
   assert(symbol_table.getType(top_level_symb_id) == eExternalFunction);
 
-  first_deriv_external_function_node_map_type::iterator it =
-    first_deriv_external_function_node_map.find(make_pair(make_pair(arguments, input_index),
-                                                          top_level_symb_id));
+  first_deriv_external_function_node_map_t::iterator it
+    = first_deriv_external_function_node_map.find(make_pair(make_pair(arguments, input_index),
+                                                            top_level_symb_id));
   if (it != first_deriv_external_function_node_map.end())
     return it->second;
 
   return new FirstDerivExternalFunctionNode(*this, top_level_symb_id, arguments, input_index);
 }
 
-NodeID
-DataTree::AddSecondDerivExternalFunctionNode(int top_level_symb_id, const vector<NodeID> &arguments, int input_index1, int input_index2)
+expr_t
+DataTree::AddSecondDerivExternalFunctionNode(int top_level_symb_id, const vector<expr_t> &arguments, int input_index1, int input_index2)
 {
   assert(symbol_table.getType(top_level_symb_id) == eExternalFunction);
 
-  second_deriv_external_function_node_map_type::iterator it =
-    second_deriv_external_function_node_map.find(make_pair(make_pair(arguments,
-                                                                     make_pair(input_index1, input_index2)),
-                                                           top_level_symb_id));
+  second_deriv_external_function_node_map_t::iterator it
+    = second_deriv_external_function_node_map.find(make_pair(make_pair(arguments,
+                                                                       make_pair(input_index1, input_index2)),
+                                                             top_level_symb_id));
   if (it != second_deriv_external_function_node_map.end())
     return it->second;
 
@@ -506,7 +543,7 @@ DataTree::AddSecondDerivExternalFunctionNode(int top_level_symb_id, const vector
 bool
 DataTree::isSymbolUsed(int symb_id) const
 {
-  for (variable_node_map_type::const_iterator it = variable_node_map.begin();
+  for (variable_node_map_t::const_iterator it = variable_node_map.begin();
        it != variable_node_map.end(); it++)
     if (it->first.first == symb_id)
       return true;
@@ -523,6 +560,29 @@ DataTree::getDerivID(int symb_id, int lag) const throw (UnknownDerivIDException)
   throw UnknownDerivIDException();
 }
 
+SymbolType
+DataTree::getTypeByDerivID(int deriv_id) const throw (UnknownDerivIDException)
+{
+  throw UnknownDerivIDException();
+}
+
+int
+DataTree::getLagByDerivID(int deriv_id) const throw (UnknownDerivIDException)
+{
+  throw UnknownDerivIDException();
+}
+
+int
+DataTree::getSymbIDByDerivID(int deriv_id) const throw (UnknownDerivIDException)
+{
+  throw UnknownDerivIDException();
+}
+
+void
+DataTree::addAllParamDerivId(set<int> &deriv_id_set)
+{
+}
+
 int
 DataTree::getDynJacobianCol(int deriv_id) const throw (UnknownDerivIDException)
 {
@@ -532,9 +592,9 @@ DataTree::getDynJacobianCol(int deriv_id) const throw (UnknownDerivIDException)
 bool
 DataTree::isUnaryOpUsed(UnaryOpcode opcode) const
 {
-  for (unary_op_node_map_type::const_iterator it = unary_op_node_map.begin();
+  for (unary_op_node_map_t::const_iterator it = unary_op_node_map.begin();
        it != unary_op_node_map.end(); it++)
-    if (it->first.second == opcode)
+    if (it->first.first.second == opcode)
       return true;
 
   return false;
@@ -543,7 +603,7 @@ DataTree::isUnaryOpUsed(UnaryOpcode opcode) const
 bool
 DataTree::isBinaryOpUsed(BinaryOpcode opcode) const
 {
-  for (binary_op_node_map_type::const_iterator it = binary_op_node_map.begin();
+  for (binary_op_node_map_t::const_iterator it = binary_op_node_map.begin();
        it != binary_op_node_map.end(); it++)
     if (it->first.second == opcode)
       return true;
@@ -554,7 +614,7 @@ DataTree::isBinaryOpUsed(BinaryOpcode opcode) const
 bool
 DataTree::isTrinaryOpUsed(TrinaryOpcode opcode) const
 {
-  for (trinary_op_node_map_type::const_iterator it = trinary_op_node_map.begin();
+  for (trinary_op_node_map_t::const_iterator it = trinary_op_node_map.begin();
        it != trinary_op_node_map.end(); it++)
     if (it->first.second == opcode)
       return true;
@@ -565,7 +625,7 @@ DataTree::isTrinaryOpUsed(TrinaryOpcode opcode) const
 bool
 DataTree::isExternalFunctionUsed(int symb_id) const
 {
-  for (external_function_node_map_type::const_iterator it = external_function_node_map.begin();
+  for (external_function_node_map_t::const_iterator it = external_function_node_map.begin();
        it != external_function_node_map.end(); it++)
     if (it->first.second == symb_id)
       return true;
@@ -576,7 +636,7 @@ DataTree::isExternalFunctionUsed(int symb_id) const
 bool
 DataTree::isFirstDerivExternalFunctionUsed(int symb_id) const
 {
-  for (first_deriv_external_function_node_map_type::const_iterator it = first_deriv_external_function_node_map.begin();
+  for (first_deriv_external_function_node_map_t::const_iterator it = first_deriv_external_function_node_map.begin();
        it != first_deriv_external_function_node_map.end(); it++)
     if (it->first.second == symb_id)
       return true;
@@ -587,10 +647,53 @@ DataTree::isFirstDerivExternalFunctionUsed(int symb_id) const
 bool
 DataTree::isSecondDerivExternalFunctionUsed(int symb_id) const
 {
-  for (second_deriv_external_function_node_map_type::const_iterator it = second_deriv_external_function_node_map.begin();
+  for (second_deriv_external_function_node_map_t::const_iterator it = second_deriv_external_function_node_map.begin();
        it != second_deriv_external_function_node_map.end(); it++)
     if (it->first.second == symb_id)
       return true;
 
   return false;
+}
+
+int
+DataTree::minLagForSymbol(int symb_id) const
+{
+  int r = 0;
+  for (variable_node_map_t::const_iterator it = variable_node_map.begin();
+       it != variable_node_map.end(); ++it)
+    if (it->first.first == symb_id && it->first.second < r)
+      r = it->first.second;
+  return r;
+}
+
+void
+DataTree::writePowerDerivCHeader(ostream &output) const
+{
+  if (isBinaryOpUsed(oPowerDeriv))
+    output << "double getPowerDeriv(double, double, int);" << endl;
+}
+
+void
+DataTree::writePowerDeriv(ostream &output, bool use_dll) const
+{
+  if (use_dll && isBinaryOpUsed(oPowerDeriv))
+    output << "/*" << endl
+           << " * The k-th derivative of x^p" << endl
+           << " */" << endl
+           << "double getPowerDeriv(double x, double p, int k)" << endl
+           << "{" << endl
+           << "#ifdef _MSC_VER" << endl
+           << "# define nearbyint(x) (fabs((x)-floor(x)) < fabs((x)-ceil(x)) ? floor(x) : ceil(x))" << endl
+           << "#endif" << endl
+           << "  if ( fabs(x) < " << NEAR_ZERO << " && p > 0 && k >= p && fabs(p-nearbyint(p)) < " << NEAR_ZERO << " )" << endl
+           << "    return 0.0;" << endl
+           << "  else" << endl
+           << "    {" << endl
+           << "      int i = 0;" << endl
+           << "      double dxp = pow(x, p-k);" << endl
+           << "      for (; i<k; i++)" << endl
+           << "        dxp *= p--;" << endl
+           << "      return dxp;" << endl
+           << "    }" << endl
+           << "}" << endl;
 }

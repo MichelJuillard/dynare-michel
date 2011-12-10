@@ -3,7 +3,7 @@
  */
 
 /*
- * Copyright (C) 2010 Dynare Team
+ * Copyright (C) 2010-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -141,11 +141,11 @@ main(int argc, char **argv)
     {
       dr.compute(jacobian, g_y, g_u);
     }
-  catch(GeneralizedSchurDecomposition::GSDException &e)
+  catch (GeneralizedSchurDecomposition::GSDException &e)
     {
       std::cerr << e << std::endl;
     }
-  catch(DecisionRules::BlanchardKahnException &e)
+  catch (DecisionRules::BlanchardKahnException &e)
     {
       std::cerr << e << std::endl;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010 Dynare Team
+ * Copyright (C) 2010-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -70,7 +70,7 @@ DecisionRules::DecisionRules(size_t n_arg, size_t p_arg,
             back_inserter(zeta_dynamic));
 
   // Compute beta_back and pi_back
-  for(size_t i = 0; i < n_back_mixed; i++)
+  for (size_t i = 0; i < n_back_mixed; i++)
     if (find(zeta_mixed.begin(), zeta_mixed.end(), zeta_back_mixed[i])
         == zeta_mixed.end())
       pi_back.push_back(i);
@@ -78,20 +78,12 @@ DecisionRules::DecisionRules(size_t n_arg, size_t p_arg,
       beta_back.push_back(i);
 
   // Compute beta_fwrd and pi_fwrd
-  for(size_t i = 0; i < n_fwrd_mixed; i++)
+  for (size_t i = 0; i < n_fwrd_mixed; i++)
     if (find(zeta_mixed.begin(), zeta_mixed.end(), zeta_fwrd_mixed[i])
         == zeta_mixed.end())
       pi_fwrd.push_back(i);
     else
       beta_fwrd.push_back(i);
-
-  // Construct the fixed part of D and E
-  D.setAll(0.0);
-  for (size_t i = 0; i < n_mixed; i++)
-    D(n - n_static + i, beta_back[i]) = 1.0;
-  E.setAll(0.0);
-  for (size_t i = 0; i < n_mixed; i++)
-    E(n - n_static + i, n_back_mixed + beta_fwrd[i]) = 1.0;
 }
 
 void
@@ -103,19 +95,25 @@ DecisionRules::compute(const Matrix &jacobian, Matrix &g_y, Matrix &g_u) throw (
   assert(g_u.getRows() == n && g_u.getCols() == p);
 
   // Construct S, perform QR decomposition and get A = Q*jacobian
-  for(size_t i = 0; i < n_static; i++)
+  for (size_t i = 0; i < n_static; i++)
     mat::col_copy(jacobian, n_back_mixed+zeta_static[i], S, i);
 
   A = MatrixConstView(jacobian, 0, 0, n, n_back_mixed + n + n_fwrd_mixed);
   QR.computeAndLeftMultByQ(S, "T", A);
 
   // Construct matrix D
+  D.setAll(0.0);
+  for (size_t i = 0; i < n_mixed; i++)
+    D(n - n_static + i, beta_back[i]) = 1.0;
   for (size_t j = 0; j < n_back_mixed; j++)
     mat::col_copy(A, n_back_mixed + zeta_back_mixed[j], n_static, n - n_static,
                   D, j, 0);
   MatrixView(D, 0, n_back_mixed, n - n_static, n_fwrd_mixed) = MatrixView(A, n_static, n_back_mixed + n, n - n_static, n_fwrd_mixed);
 
   // Construct matrix E
+  E.setAll(0.0);
+  for (size_t i = 0; i < n_mixed; i++)
+    E(n - n_static + i, n_back_mixed + beta_fwrd[i]) = 1.0;
   MatrixView(E, 0, 0, n - n_static, n_back_mixed) = MatrixView(A, n_static, 0, n - n_static, n_back_mixed);
   for (size_t j = 0; j < n_fwrd; j++)
     mat::col_copy(A, n_back_mixed + zeta_fwrd_mixed[pi_fwrd[j]], n_static, n - n_static,

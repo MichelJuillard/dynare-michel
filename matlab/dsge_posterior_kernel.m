@@ -21,7 +21,7 @@ function [fval,cost_flag,ys,trend_coeff,info] = dsge_posterior_kernel(xparam1,ge
 % SPECIAL REQUIREMENTS
 %
 
-% Copyright (C) 2004-2008 Dynare Team
+% Copyright (C) 2004-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -47,14 +47,14 @@ nobs            = size(options_.varobs,1);
 %------------------------------------------------------------------------------
 % 1. Get the structural parameters & define penalties
 %------------------------------------------------------------------------------
-if options_.mode_compute ~= 1 & any(xparam1 < bayestopt_.lb)
+if ~isequal(options_.mode_compute,1) && any(xparam1 < bayestopt_.lb)
     k = find(xparam1 < bayestopt_.lb);
     fval = bayestopt_.penalty+sum((bayestopt_.lb(k)-xparam1(k)).^2);
     cost_flag = 0;
     info = 41;
     return;
 end
-if options_.mode_compute ~= 1 & any(xparam1 > bayestopt_.ub)
+if ~isequal(options_.mode_compute,1) && any(xparam1 > bayestopt_.ub)
     k = find(xparam1 > bayestopt_.ub);
     fval = bayestopt_.penalty+sum((xparam1(k)-bayestopt_.ub(k)).^2);
     cost_flag = 0;
@@ -124,14 +124,12 @@ M_.H = H;
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program
 %------------------------------------------------------------------------------
-[T,R,SteadyState,info] = dynare_resolve(bayestopt_.restrict_var_list,...
-                                        bayestopt_.restrict_columns,...
-                                        bayestopt_.restrict_aux);
-if info(1) == 1 | info(1) == 2 | info(1) == 5
+[T,R,SteadyState,info,M_,options_,oo_] = dynare_resolve(M_,options_,oo_);
+if info(1) == 1 || info(1) == 2 || info(1) == 5
     fval = bayestopt_.penalty+1;
     cost_flag = 0;
     return
-elseif info(1) == 3 | info(1) == 4 | info(1) == 20
+elseif info(1) == 3 || info(1) == 4 || info(1) == 20
     fval = bayestopt_.penalty+info(2);%^2; % penalty power raised in DR1.m and resol already. GP July'08
     cost_flag = 0;
     return

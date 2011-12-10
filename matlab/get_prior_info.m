@@ -1,4 +1,4 @@
-function get_prior_info(info)
+function get_prior_info(info,plt_flag)
 % Computes various prior statistics.
 %  
 % INPUTS
@@ -30,12 +30,25 @@ global options_ M_ estim_params_ oo_
 
 if ~nargin
     info = 0;
+    plt_flag = 0;
+end
+
+if nargin==1
+    plt_flag = 1;
+end
+
+changed_qz_criterium_flag  = 0;
+if isempty(options_.qz_criterium)
+    options_.qz_criterium = 1+1e-9;
+    changed_qz_criterium_flag  = 1;
 end
 
 M_.dname = M_.fname;
 
 [xparam1,estim_params_,bayestopt_,lb,ub,M_] = set_prior(estim_params_,M_,options_);
-plot_priors(bayestopt_,M_,options_);
+if plt_flag
+    plot_priors(bayestopt_,M_,options_);
+end
 
 PriorNames = { 'Beta' , 'Gamma' , 'Gaussian' , 'Inverted Gamma' , 'Uniform' , 'Inverted Gamma -- 2' };
 
@@ -50,10 +63,10 @@ if size(M_.param_names,1)==size(M_.param_names_tex,1)% All the parameters have a
     % Column 7: the upper bound of the interval containing 80% of the prior mass.
     prior_trunc_backup = options_.prior_trunc ;
     options_.prior_trunc = (1-options_.prior_interval)/2 ;
-    PriorIntervals = prior_bounds(bayestopt_) ;
+    PriorIntervals = prior_bounds(bayestopt_,options_) ;
     options_.prior_trunc = prior_trunc_backup ;
     for i=1:size(bayestopt_.name,1)
-        [tmp,TexName] = get_the_name(i,1);
+        [tmp,TexName] = get_the_name(i,1,M_,estim_params_,options_);
         PriorShape = PriorNames{ bayestopt_.pshape(i) };
         PriorMean = bayestopt_.p1(i);
         PriorStandardDeviation = bayestopt_.p2(i);
@@ -144,7 +157,7 @@ if info==2% Prior optimization.
     disp('------------------')
     disp(' ')
     for i = 1:length(xparams)
-        disp(['deep parameter ' int2str(i) ': ' get_the_name(i,0) '.'])
+        disp(['deep parameter ' int2str(i) ': ' get_the_name(i,0,M_,estim_params_,options_) '.'])
         disp(['  Initial condition ....... ' num2str(xinit(i)) '.'])
         disp(['  Prior mode .............. ' num2str(bayestopt_.p5(i)) '.'])
         disp(['  Optimized prior mode .... ' num2str(xparams(i)) '.'])
@@ -155,6 +168,11 @@ end
 if info==3% Prior simulations (2nd order moments).
     oo_ = compute_moments_varendo('prior',options_,M_,oo_);
 end 
+
+if changed_qz_criterium_flag
+    options_.qz_criterium = [];
+end
+
 
 
 function format_string = build_format_string(bayestopt,i)

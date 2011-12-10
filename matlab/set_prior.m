@@ -18,7 +18,7 @@ function [xparam1, estim_params_, bayestopt_, lb, ub, M_]=set_prior(estim_params
 % SPECIAL REQUIREMENTS
 %    None
 
-% Copyright (C) 2003-2010 Dynare Team
+% Copyright (C) 2003-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -55,7 +55,7 @@ bayestopt_.p1 = []; % prior mean
 bayestopt_.p2 = []; % prior standard deviation
 bayestopt_.p3 = []; % lower bound
 bayestopt_.p4 = []; % upper bound
-bayestopt_.p5 = []; % prior mode
+bayestopt_.p5 = zeros(nvx+nvn+ncx+ncn+np,1); % prior mode
 bayestopt_.p6 = []; % first hyper-parameter (\alpha for the BETA and GAMMA distributions, s for the INVERSE GAMMAs, expectation for the GAUSSIAN distribution, lower bound for the UNIFORM distribution).
 bayestopt_.p7 = []; % second hyper-parameter (\beta for the BETA and GAMMA distributions, \nu for the INVERSE GAMMAs, standard deviation for the GAUSSIAN distribution, upper bound for the UNIFORM distribution).
 
@@ -74,12 +74,16 @@ if nvx
     bayestopt_.name = cellstr(M_.exo_names(estim_params_.var_exo(:,1),:));
 end
 if nvn
-    if M_.H == 0
+    if isequal(M_.H,0)
         nvarobs = size(options_.varobs,1);
         M_.H = zeros(nvarobs,nvarobs);
     end
     for i=1:nvn
-        estim_params_.var_endo(i,1) = strmatch(deblank(M_.endo_names(estim_params_.var_endo(i,1),:)),deblank(options_.varobs),'exact');
+        obsi_ = strmatch(deblank(M_.endo_names(estim_params_.var_endo(i,1),:)),deblank(options_.varobs),'exact');
+        if isempty(obsi_)
+            error(['The variable ' deblank(M_.endo_names(estim_params_.var_endo(i,1),:)) ' has to be declared as observable since you assume a measurement error on it.'])
+        end
+        estim_params_.var_endo(i,1) = obsi_;
     end
     xparam1 = [xparam1; estim_params_.var_endo(:,2)];
     ub = [ub; estim_params_.var_endo(:,4)]; 
@@ -90,7 +94,11 @@ if nvn
     bayestopt_.p3 = [ bayestopt_.p3; estim_params_.var_endo(:,8)];
     bayestopt_.p4 = [ bayestopt_.p4; estim_params_.var_endo(:,9)];
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.var_endo(:,10)];
-    bayestopt_.name = cellstr(strvcat(char(bayestopt_.name), M_.endo_names(estim_params_.var_endo(:,1),:)));
+    if isempty(bayestopt_.name)
+        bayestopt_.name = cellstr(char(options_.varobs(estim_params_.var_endo(:,1),:)));
+    else
+        bayestopt_.name = cellstr(char(char(bayestopt_.name), options_.varobs(estim_params_.var_endo(:,1),:)));
+    end
 end
 if ncx
     xparam1 = [xparam1; estim_params_.corrx(:,3)];
@@ -102,11 +110,16 @@ if ncx
     bayestopt_.p3 = [ bayestopt_.p3; estim_params_.corrx(:,9)];
     bayestopt_.p4 = [ bayestopt_.p4; estim_params_.corrx(:,10)];
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.corrx(:,11)];
-    bayestopt_.name = cellstr(strvcat(char(bayestopt_.name), char(strcat(cellstr(M_.exo_names(estim_params_.corrx(:,1),:)), ...
-                                                      ',' , cellstr(M_.exo_names(estim_params_.corrx(:,2),:))))));
+    if isempty(bayestopt_.name)
+        bayestopt_.name = cellstr(char(char(strcat(cellstr(M_.exo_names(estim_params_.corrx(:,1),:)), ...
+                                                   ',' , cellstr(M_.exo_names(estim_params_.corrx(:,2),:))))));
+    else
+        bayestopt_.name = cellstr(char(char(bayestopt_.name), char(strcat(cellstr(M_.exo_names(estim_params_.corrx(:,1),:)), ...
+                                                          ',' , cellstr(M_.exo_names(estim_params_.corrx(:,2),:))))));
+    end
 end
 if ncn
-    if M_.H == 0
+    if isequal(M_.H,0)
         nvarobs = size(options_.varobs,1);
         M_.H = zeros(nvarobs,nvarobs);
     end
@@ -119,8 +132,13 @@ if ncn
     bayestopt_.p3 = [ bayestopt_.p3; estim_params_.corrn(:,9)];
     bayestopt_.p4 = [ bayestopt_.p4; estim_params_.corrn(:,10)];
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.corrn(:,11)];
-    bayestopt_.name = cellstr(strvcat(char(bayestopt_.name), char(strcat(cellstr(M_.endo_names(estim_params_.corrn(:,1),:)),...
-                                                      ',' ,  cellstr(M_.endo_names(estim_params_.corrn(:,2),:))))));
+    if isempty(bayestopt_.name)
+        bayestopt_.name = cellstr(char(char(strcat(cellstr(M_.endo_names(estim_params_.corrn(:,1),:)),...
+                                                   ',' ,  cellstr(M_.endo_names(estim_params_.corrn(:,2),:))))));
+    else
+        bayestopt_.name = cellstr(char(char(bayestopt_.name), char(strcat(cellstr(M_.endo_names(estim_params_.corrn(:,1),:)),...
+                                                          ',' ,  cellstr(M_.endo_names(estim_params_.corrn(:,2),:))))));
+    end
 end
 if np
     xparam1 = [xparam1; estim_params_.param_vals(:,2)];
@@ -132,7 +150,11 @@ if np
     bayestopt_.p3 = [ bayestopt_.p3; estim_params_.param_vals(:,8)];
     bayestopt_.p4 = [ bayestopt_.p4; estim_params_.param_vals(:,9)];
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.param_vals(:,10)];
-    bayestopt_.name = cellstr(strvcat(char(bayestopt_.name),M_.param_names(estim_params_.param_vals(:,1),:)));
+    if isempty(bayestopt_.name)
+        bayestopt_.name = cellstr(char(M_.param_names(estim_params_.param_vals(:,1),:)));
+    else
+        bayestopt_.name = cellstr(char(char(bayestopt_.name),M_.param_names(estim_params_.param_vals(:,1),:)));
+    end
 end
 
 bayestopt_.ub = ub;
@@ -148,6 +170,9 @@ bayestopt_.p3(k(k1)) = zeros(length(k1),1);
 k1 = find(isnan(bayestopt_.p4(k)));
 bayestopt_.p4(k(k1)) = ones(length(k1),1);
 for i=1:length(k)
+    if (bayestopt_.p1(k(i))<bayestopt_.p3(k(i))) || (bayestopt_.p1(k(i))>bayestopt_.p4(k(i)))
+        error(['The prior mean of ' bayestopt_.name{k(i)} ' has to be between the lower (' num2str(bayestopt_.p3(k(i))) ') and upper (' num2str(bayestopt_.p4(k(i))) ') bounds of the beta prior density!']);
+    end
     mu = (bayestopt_.p1(k(i))-bayestopt_.p3(k(i)))/(bayestopt_.p4(k(i))-bayestopt_.p3(k(i)));
     stdd = bayestopt_.p2(k(i))/(bayestopt_.p4(k(i))-bayestopt_.p3(k(i)));
     bayestopt_.p6(k(i)) = (1-mu)*mu^2/stdd^2 - mu ;
@@ -156,7 +181,7 @@ for i=1:length(k)
     if length(m)==1
         bayestopt_.p5(k(i)) = m;
     else
-        disp(['Prior distribution for parameter ' int2str(k(i))  ' has two modes!'])
+        disp(['Prior distribution for parameter ' bayestopt_.name{k(i)}  ' has two modes!'])
         bayestopt_.p5(k(i)) = bayestopt_.p1(k(i)) ; 
     end
 end
@@ -168,6 +193,9 @@ k2 = find(isnan(bayestopt_.p4(k)));
 bayestopt_.p3(k(k1)) = zeros(length(k1),1);
 bayestopt_.p4(k(k2)) = Inf(length(k2),1);
 for i=1:length(k)
+    if isinf(bayestopt_.p2(k(i)))
+        error(['Infinite prior standard deviation for parameter ' bayestopt_.name{k(i)}  ' is not allowed (Gamma prior)!'])
+    end
     mu = bayestopt_.p1(k(i))-bayestopt_.p3(k(i));
     bayestopt_.p7(k(i)) = bayestopt_.p2(k(i))^2/mu ;
     bayestopt_.p6(k(i)) = mu/bayestopt_.p7(k(i)) ;  
@@ -194,7 +222,7 @@ bayestopt_.p3(k(k1)) = zeros(length(k1),1);
 bayestopt_.p4(k(k2)) = Inf(length(k2),1);
 for i=1:length(k)
     [bayestopt_.p6(k(i)),bayestopt_.p7(k(i))] = ...
-        inverse_gamma_specification(bayestopt_.p1(k(i))-bayestopt_.p3(k(i)),bayestopt_.p2(k(i)),1) ;
+        inverse_gamma_specification(bayestopt_.p1(k(i))-bayestopt_.p3(k(i)),bayestopt_.p2(k(i)),1,0) ;
     bayestopt_.p5(k(i)) = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) ], 4) ;
 end  
 
@@ -216,12 +244,23 @@ bayestopt_.p3(k(k1)) = zeros(length(k1),1);
 bayestopt_.p4(k(k2)) = Inf(length(k2),1);
 for i=1:length(k)
     [bayestopt_.p6(k(i)),bayestopt_.p7(k(i))] = ...
-        inverse_gamma_specification(bayestopt_.p1(k(i))-bayestopt_.p3(k(i)),bayestopt_.p2(k(i)),2);
+        inverse_gamma_specification(bayestopt_.p1(k(i))-bayestopt_.p3(k(i)),bayestopt_.p2(k(i)),2,0);
     bayestopt_.p5(k(i)) = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) ], 6) ;
 end
 
 k = find(isnan(xparam1));
-xparam1(k) = bayestopt_.p1(k);
+if ~isempty(k)
+    xparam1(k) = bayestopt_.p1(k);
+end
+
+if options_.initialize_estimated_parameters_with_the_prior_mode
+    xparam1 = bayestopt_.p5;
+    k = find(isnan(xparam1));% Because the uniform density do not have a mode!
+    if ~isempty(k)
+        xparam1(k) = bayestopt_.p1(k);
+    end
+    xparam1 = transpose(xparam1);
+end 
 
 % I create subfolder M_.dname/prior if needed.
 CheckPath('prior');
@@ -233,23 +272,17 @@ if exist([ M_.dname '/prior/definition.mat'])
     if length(bayestopt_.p1)==length(old.bayestopt_.p1)
         if any(bayestopt_.p1-old.bayestopt_.p1)
             prior_has_changed = 1;
-        end
-        if any(bayestopt_.p2-old.bayestopt_.p2)
+        elseif any(bayestopt_.p2-old.bayestopt_.p2)
             prior_has_changed = 1;
-        end
-        if any(bayestopt_.p3-old.bayestopt_.p3)
+        elseif any(bayestopt_.p3-old.bayestopt_.p3)
             prior_has_changed = 1;
-        end
-        if any(bayestopt_.p4-old.bayestopt_.p4)
+        elseif any(bayestopt_.p4-old.bayestopt_.p4)
             prior_has_changed = 1;
-        end
-        if any(bayestopt_.p5-old.bayestopt_.p5)
+        elseif any(bayestopt_.p5-old.bayestopt_.p5(:))
             prior_has_changed = 1;
-        end
-        if any(bayestopt_.p6-old.bayestopt_.p6)
+        elseif any(bayestopt_.p6-old.bayestopt_.p6)
             prior_has_changed = 1;
-        end
-        if any(bayestopt_.p7-old.bayestopt_.p7)
+        elseif any(bayestopt_.p7-old.bayestopt_.p7)
             prior_has_changed = 1;
         end
     else
@@ -266,3 +299,6 @@ end
 % initialize persistent variables in priordens()
 priordens(xparam1,bayestopt_.pshape,bayestopt_.p6,bayestopt_.p7, ...
           bayestopt_.p3,bayestopt_.p4,1);
+
+% Put bayestopt_ in matlab's workspace
+assignin('base','bayestopt_',bayestopt_);

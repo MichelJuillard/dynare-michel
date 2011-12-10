@@ -15,7 +15,7 @@ function [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2007 Dynare Team
+% Copyright (C) 2005-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -94,7 +94,7 @@ while check_coverage
         marginal(linee,:) = [p, lpost_mode-log(tmp/((TotalNumberOfMhDraws-TODROP)*nblck))];
         warning(warning_old_state);
     end
-    if abs((marginal(9,2)-marginal(1,2))/marginal(9,2)) > 0.01 | isinf(marginal(1,2))
+    if abs((marginal(9,2)-marginal(1,2))/marginal(9,2)) > 0.01 || isinf(marginal(1,2))
         if increase == 1
             disp('MH: The support of the weighting density function is not large enough...')
             disp('MH: I increase the variance of this distribution.')

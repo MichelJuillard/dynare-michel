@@ -28,6 +28,8 @@ fff = [ 1 delta 4 ; ...       /* COMMENT
      1     0 4 ; ...     // comment */
          phi 9 4 ]        % comment
 
+disp(' %% This is not a comment %% ')
+
 model;
 c*theta*h^(1+psi)=(1-alpha)*y;
 k = beta*(((exp(b)*c)/(exp(b(+1))*c(+1)))

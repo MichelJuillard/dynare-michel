@@ -1,7 +1,5 @@
 %{
-/* Copyright 2006, Ondra Kamenik */
-
-/* $Id: assign.y 1748 2008-03-28 11:52:07Z kamenik $ */
+/* Copyright (C) 2006-2011, Ondra Kamenik */
 
 #include "location.h"
 #include "atom_assignings.h"
@@ -9,7 +7,7 @@
 
 #include <stdio.h>
 
-	int asgn_error(char*);
+	void asgn_error(const char*);
 	int asgn_lex(void);
 	extern int asgn_lineno;
 	extern ogp::AtomAssignings* aparser;
@@ -48,7 +46,7 @@ space : space BLANK | BLANK;
 
 %%
 
-int asgn_error(char* mes)
+void asgn_error(const char* mes)
 {
 	aparser->error(mes);
 }

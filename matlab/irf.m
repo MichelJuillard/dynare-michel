@@ -17,7 +17,7 @@ function y = irf(dr, e1, long, drop, replic, iorder)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2008 Dynare Team
+% Copyright (C) 2003-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -37,7 +37,11 @@ function y = irf(dr, e1, long, drop, replic, iorder)
 global M_ oo_ options_
 
 
-temps = repmat(dr.ys,1,M_.maximum_lag);
+if M_.maximum_lag >= 1
+    temps = repmat(dr.ys,1,M_.maximum_lag);
+else
+    temps = zeros(M_.endo_nbr, 1); % Dummy values for purely forward models
+end
 y       = 0;
 
 if iorder == 1
@@ -54,7 +58,6 @@ else
     ex2 = ex1;
     chol_S = chol(M_.Sigma_e(i_exo_var,i_exo_var));
     for j = 1: replic
-        randn('seed',j);
         ex1(:,i_exo_var) = randn(long+drop,nxs)*chol_S;
         ex2 = ex1;
         ex2(drop+1,:) = ex2(drop+1,:)+e1';   

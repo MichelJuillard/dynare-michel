@@ -34,8 +34,7 @@ end;
 
 varobs dw dx dy z;
        
-//estimation(datafile=data,first_obs=1000,nobs=200,mh_replic=0);
-estimation(datafile=data,first_obs=1000,nobs=200,mh_replic=0,mode_compute=0,mode_file=algoH1_mode);
+estimation(datafile=data,first_obs=1000,nobs=200,mh_replic=0,filtered_vars);
 
 //checking smoother consistency
 X = oo_.SmoothedVariables;
@@ -48,10 +47,14 @@ err = zeros(6,200);
 for t=2:200;
     err(:,t) = S(t,:)'-A*S(t-1,:)'-B*E(t,:)';
 end;
-disp(max(max(abs(err))));
+if max(max(abs(err))) > 1e-10;
+   error('Test fails');
+end;
 
 d=load('data');
 dat = [d.dw d.dx d.dy d.z];
 X = oo_.SmoothedMeasurementErrors;
 ME = [X.dw X.dx X.dy X.z];
-disp(max(max(abs(dat(1000:1199,:)-S(:,[2:4 1])-ME))));
+if max(max(abs(dat(1000:1199,:)-S(:,[2:4 1])-ME))) > 1e-10;
+   error('Test fails');
+end;

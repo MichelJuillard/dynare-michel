@@ -1,0 +1,6 @@
+[submodule "ms-sbvar/utilities_dw"]
+	path = ms-sbvar/utilities_dw
+	url = http://www.dynare.org/git/frbatlanta/utilities_dw.git
+[submodule "ms-sbvar/switch_dw"]
+	path = ms-sbvar/switch_dw
+	url = http://www.dynare.org/git/frbatlanta/switch_dw.git

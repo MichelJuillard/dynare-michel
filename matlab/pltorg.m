@@ -1,6 +1,6 @@
 function [nbplt,nr,nc,lr,lc,nstar] = pltorg(number)
 
-% Copyright (C) 2004-2005 Dynare Team
+% Copyright (C) 2004-2008 Dynare Team
 %
 % This file is part of Dynare.
 %

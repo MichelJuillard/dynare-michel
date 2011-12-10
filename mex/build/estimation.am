@@ -1,0 +1,68 @@
+noinst_PROGRAMS = logposterior logMHMCMCposterior
+
+# We use shared flags so that automake does not compile things two times
+CPPFLAGS += -I$(top_srcdir)/../../sources/estimation/libmat -I$(top_srcdir)/../../sources/estimation/utils $(BOOST_CPPFLAGS)
+LDFLAGS += $(BOOST_LDFLAGS)
+LDADD = $(LIBADD_DLOPEN)
+
+TOPDIR = $(top_srcdir)/../../sources/estimation
+
+MAT_SRCS = \
+	$(TOPDIR)/libmat/Matrix.hh \
+	$(TOPDIR)/libmat/Matrix.cc \
+	$(TOPDIR)/libmat/Vector.hh \
+	$(TOPDIR)/libmat/Vector.cc \
+	$(TOPDIR)/libmat/BlasBindings.hh \
+	$(TOPDIR)/libmat/DiscLyapFast.hh \
+	$(TOPDIR)/libmat/GeneralizedSchurDecomposition.cc \
+	$(TOPDIR)/libmat/GeneralizedSchurDecomposition.hh \
+	$(TOPDIR)/libmat/LapackBindings.hh \
+	$(TOPDIR)/libmat/LUSolver.cc \
+	$(TOPDIR)/libmat/LUSolver.hh \
+	$(TOPDIR)/libmat/QRDecomposition.cc \
+	$(TOPDIR)/libmat/QRDecomposition.hh \
+	$(TOPDIR)/libmat/VDVEigDecomposition.cc \
+	$(TOPDIR)/libmat/VDVEigDecomposition.hh
+
+COMMON_SRCS = \
+	$(MAT_SRCS) \
+	$(TOPDIR)/DecisionRules.cc \
+	$(TOPDIR)/DecisionRules.hh \
+	$(TOPDIR)/DetrendData.cc \
+	$(TOPDIR)/DetrendData.hh \
+	$(TOPDIR)/EstimatedParameter.cc \
+	$(TOPDIR)/EstimatedParameter.hh \
+	$(TOPDIR)/EstimatedParametersDescription.cc \
+	$(TOPDIR)/EstimatedParametersDescription.hh \
+	$(TOPDIR)/EstimationSubsample.cc \
+	$(TOPDIR)/EstimationSubsample.hh \
+	$(TOPDIR)/InitializeKalmanFilter.cc \
+	$(TOPDIR)/InitializeKalmanFilter.hh \
+	$(TOPDIR)/KalmanFilter.cc \
+	$(TOPDIR)/KalmanFilter.hh \
+	$(TOPDIR)/LogLikelihoodSubSample.cc \
+	$(TOPDIR)/LogLikelihoodSubSample.hh \
+	$(TOPDIR)/LogLikelihoodMain.hh \
+	$(TOPDIR)/LogLikelihoodMain.cc \
+	$(TOPDIR)/LogPosteriorDensity.cc \
+	$(TOPDIR)/LogPosteriorDensity.hh \
+	$(TOPDIR)/LogPriorDensity.cc \
+	$(TOPDIR)/LogPriorDensity.hh \
+	$(TOPDIR)/ModelSolution.cc \
+	$(TOPDIR)/ModelSolution.hh \
+	$(TOPDIR)/Prior.cc \
+	$(TOPDIR)/Prior.hh \
+	$(TOPDIR)/utils/dynamic_dll.cc \
+	$(TOPDIR)/utils/dynamic_dll.hh
+
+nodist_logposterior_SOURCES = \
+	$(COMMON_SRCS) \
+	$(TOPDIR)/logposterior.cc
+
+nodist_logMHMCMCposterior_SOURCES = \
+	$(COMMON_SRCS) \
+	$(TOPDIR)/Proposal.cc \
+	$(TOPDIR)/Proposal.hh \
+	$(TOPDIR)/RandomWalkMetropolisHastings.cc \
+	$(TOPDIR)/RandomWalkMetropolisHastings.hh \
+	$(TOPDIR)/logMHMCMCposterior.cc

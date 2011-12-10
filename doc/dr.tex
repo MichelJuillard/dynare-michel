@@ -4,186 +4,450 @@
 \usepackage{amsmath}
 \usepackage{hyperref}
 \hypersetup{breaklinks=true,pagecolor=white,colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\usepackage{natbib}
+
+\usepackage{fullpage}
 
 \begin{document}
 
-\author{S\'ebastien Villemot}
-\title{Computation of first-order decision rules}
-\date{December 2009}
+\author{S\'ebastien Villemot\thanks{Paris School of Economics and
+    CEPREMAP. E-mail:
+    \href{mailto:sebastien.villemot@ens.fr}{\texttt{sebastien.villemot@ens.fr}}.}}
+
+\title{Solving rational expectations models at first order: \\
+  what Dynare does\thanks{Copyright \copyright~2009,~2011 S\'ebastien
+    Villemot. Permission is granted to copy, distribute and/or modify
+    this document under the terms of the GNU Free Documentation
+    License, Version 1.3 or any later version published by the Free
+    Software Foundation; with no Invariant Sections, no Front-Cover
+    Texts, and no Back-Cover Texts. A copy of the license can be found
+    at: \url{http://www.gnu.org/licenses/fdl.txt}
+    \newline
+    The author acknowledges funding through the Seventh Framework Programme
+    for Research (FP7) of the European Commission's Socio-economic Sciences and
+    Humanities (SSH) Program under grant agreement SSH-CT-2009-225149.}
+}
+
+\date{First version: December 2009 \hspace{1cm} This version: April 2011}
 \maketitle
 
-This page documents the computation of first-order decision rules, as it is done in Dynare\footnote{More specifically in \texttt{matlab/dr1.m} file, although the notations do not match.}.
+\begin{abstract}
+  This paper describes in detail the algorithm implemented in Dynare for
+  computing the first order approximated solution of a nonlinear rational
+  expectations model. The core of the algorithm is a generalized Schur
+  decomposition (also known as the QZ decomposition), as advocated by several
+  authors in the litterature. The contribution of the present paper is to focus
+  on implementation details that make the algorithm more generic and more
+  efficient, especially for large models.
 
-\section{Variable types and indices}
+  \medskip
+  \noindent
+  \textit{JEL classification:} C63; C68
 
-There are $n$ endogenous variables, and the model has at most only one lead and one lag on endogenous variables, and no lead/lag on exogenous variables\footnote{Leads and lags of 2 or more on endogenous variables, and all leads and lags on exogenous variables are removed by creating auxiliary variables, see the documentation of \texttt{stoch\_simul} in the Dynare reference manual.}. All variables are required to appear at least at one period (it is not required that all variables appear at current period, but a weaker condition is required, see assumption (\ref{eq:identification})). A partition of these variables can be constructed:
+  \medskip
+  \noindent
+  \textit{Keywords:} Dynare; Numerical methods; Perturbation; Rational
+  expectations
+
+\end{abstract}
+
+\section{Introduction}
+
+Perturbation techniques are widely used for solving and estimating rational
+expectation models and Dynare\footnote{Dynare is a free software platform for
+  handling a wide class of economic models. See \url{http://www.dynare.org} and
+  \citet{adjemian/al:2011} for more details.} offers a popular, user-friendly
+access to these techniques. The purpose of the present paper is to describe in
+detail the algorithm implemented in Dynare for computing the first order
+approximated solution of nonlinear rational expectations models.\footnote{This
+  algorithm is available using the \texttt{stoch\_simul} command of Dynare. The
+  original implementation of this algorithm was done by Michel Juillard, using
+  MATLAB, and is available in the \texttt{matlab/dr1.m} file which is
+  distributed with Dynare. Another implementation was done by the author, in
+  C++, in the \texttt{DecisionRules} class, in the
+  \texttt{mex/sources/estimation} directory of the source tree. The notations
+  used in the present paper are closer to the C++ implementation than to the
+  MATLAB implementation.}
+
+This algorithm is based on a generalized Schur decomposition---also known as
+the QZ decomposition---and is therefore essentially a variation on the
+methods presented by \citet{klein:2000}, \citet{sims:2001} and
+\citet{uhlig:1999}.
+
+The contribution of this paper is to present some implementation details that
+make the algorithm more generic and more efficient for large models. In
+particular I describe the algorithm for removing the leads and lags of more
+than one in a nonlinear model. I also describe a way of reducing the size of
+the Schur decomposition problem by dealing separately with endogenous variables
+that appear only at the current date (called \emph{static} endogenous variables
+in the following).
+
+It should be noted that Dynare is able to go further than first order and can
+deliver second and third order approximation of the solution of rational
+expectations models. These higher order solutions can be computed recursively
+using the first order solution as a starting point. For algorithmic details on
+this issue, the interested reader can refer to
+\citet{collard/juillard:2001:compecon} or \citet{schmitt-grohe/uribe:2004}.
+
+The rest of this paper is organized as follows. Section \ref{sec:model}
+presents the class of models to be solved and defines a typology of the
+endogenous variables. Section \ref{sec:first-order} defines the solution
+to the model and characterizes its first order approximation. Sections
+\ref{sec:g-y} and \ref{sec:g-u} describe the algorithm used to recover this
+first order approximation.
+
+\section{The problem to be solved}
+\label{sec:model}
+
+\subsection{The model}
+
+In the following, we consider a dynamic nonlinear rational expectations model
+composed of several variables (endogenous and exogenous) and several
+equations. In compact form, the model is written as:
+\begin{equation}
+  \label{eq:model}
+  \mathbb{E}_t f(y^+_{t+1}, y_t, y^-_{t-1}, u_t) = 0
+\end{equation}
+where $y_t$ is the vector of endogenous variables, $y^+_{t+1}$
+(resp. $y^-_{t-1}$) is the subset of variables of $y_t$ that appear with a lead
+(resp. a lag), and $u_t$ is the vector of exogenous variables. For obvious
+identification reasons, the model must contain as many equations as there are
+endogenous variables; let $n$ be this number.
+
+For the timing of variables, the convention used here is the same as in Dynare:
+a variable decided at date $t$ should have a time subscript of $t$. For
+example, in a typical RBC model, the capital stock used to produce date $t$
+output is actually decided at date $t-1$, so it will be written as $k_{t-1}$
+using this convention. Thus accordingly, the law of motion of capital will be
+$k_t = (1-\delta)k_{t-1} + i_t$. Another way of expressing this timing
+convention is that stock variables should use the ``end-of-period'' convention.
+
+The vector of exogenous variables $u_t$ (of dimension $p$) follows a Markov
+process:
+\begin{equation*}
+  u_t = P(u_{t-1}, \varepsilon_t)
+\end{equation*}
+where the $\varepsilon_t$ are independent and identically distributed
+innovations with zero mean and variance-covariance matrix $\Sigma$.
+
+Note that the stochastic process adopted here for exogenous variables is more
+generic than the one allowed in Dynare (which only accepts a white noise for
+stochastic variables, \textit{i.e.} $u_t = \varepsilon_t$).
+
+\subsection{Typology of variables}
+
+All endogenous variables are required to appear at least at one period. However
+it is not required that all endogenous variables appear at the current period
+(a weaker condition is actually sufficient, see assumption
+(\ref{eq:identification}) below).
+
+We define four types of endogenous variables:
 \begin{description}
-\item[Static variables]: those that appear only at the current period. Their number is $n^s \leq n$, and their indices $\zeta^s_j, j=1\ldots n^s$
-\item[Purely forward variables]: those that appear only at future period, possibly at current period, but not at previous period. Their number is $n^{++} \leq n$, and their indices $\zeta^{++}_j, j=1\ldots n^{++}$
-\item[Purely backward variables]: those that appear only at previous period, possibly at current period, but not at future period.  Their number is $n^{--} \leq n$, and their indices $\zeta^{--}_j, j=1\ldots n^{--}$
-\item[Mixed variables]: those that appear both at future and previous period, and possibly at current period.  Their number is $n^m \leq n$, and their indices $\zeta^m_j, j=1\ldots n^m$
+\item[Static endogenous variables:] those that appear only at the current
+  period. Their number is $n^s \leq n$, and their indices in the $y_t$ vector
+  are $\zeta^s_j, j=1\ldots n^s$
+\item[Purely forward endogenous variables:] those that appear only at the
+  future period, possibly at the current period, but not at the previous
+  period. Their number is $n^{++} \leq n$, and their indices $\zeta^{++}_j,
+  j=1\ldots n^{++}$
+\item[Purely backward endogenous variables:] those that appear only at the
+  previous period, possibly at the current period, but not at the future
+  period.  Their number is $n^{--} \leq n$, and their indices $\zeta^{--}_j,
+  j=1\ldots n^{--}$
+\item[Mixed endogenous variables:] those that appear both at the future and the
+  previous period, and possibly at the current period.  Their number is $n^m
+  \leq n$, and their indices $\zeta^m_j, j=1\ldots n^m$
 \end{description}
 
-These four types of variables form a partition of the endogenous variables, and we therefore have:
+These four types of variables form a partition of the endogenous variables, and
+we therefore have:
 \begin{equation*}
   n^m + n^{++} + n^{--} + n^s = n
 \end{equation*}
 
 We also define:
 \begin{description}
-\item[Forward variables]: the union of mixed and purely forward variables. Their number is $n^+ = n^{++} + n^m$, and their indices $\zeta^+_j, j=1\ldots n^+$. 
-\item[Backward variables]: the union of mixed and purely backward variables. Their number is $n^- = n^{--} + n^m$, and their indices $\zeta^-_j, j=1\ldots n^-$
-\item[Dynamic variables]: all the variables except static variables. Their number is $n^d = n - n^s$, and their indices $\zeta^d_j, j=1\ldots n^d$
+\item[Forward endogenous variables:] the union of mixed and purely forward
+  endogenous variables. Their number is $n^+ = n^{++} + n^m$, and their indices
+  $\zeta^+_j, j=1\ldots n^+$.
+\item[Backward endogenous variables:] the union of mixed and purely backward
+  endogenous variables. Their number is $n^- = n^{--} + n^m$, and their indices
+  $\zeta^-_j, j=1\ldots n^-$
+\item[Dynamic endogenous variables:] all the variables except static endogenous
+  variables. Their number is $n^d = n - n^s$, and their indices $\zeta^d_j,
+  j=1\ldots n^d$
 \end{description}
 
-The seven indices are such that $1 \leq \zeta^k_1 < \zeta^k_2 < \ldots < \zeta^k_{n^k} \leq n$, where $k \in \{ s, +, ++, -, --, m, d \}$.
+The seven indices are such that $1 \leq \zeta^k_1 < \zeta^k_2 < \ldots <
+\zeta^k_{n^k} \leq n$, where $k \in \{ s, +, ++, -, --, m, d \}$.
 
-We denote by $y_t = (y_{1,t}, \ldots, y_{n,t})'$ the vector of endogenous variables at date $t$. We denote by $y^k_t = (y_{\zeta^k_1, t}, \ldots, y_{\zeta^k_{n^k}, t})'$ the subvector of endogenous variables, where $k \in \{ s, +, ++, -, --, m, d \}$.
+We denote by $y_t = (y_{1,t}, \ldots, y_{n,t})'$ the vector of endogenous
+variables at date $t$. We denote by $y^k_t = (y_{\zeta^k_1, t}, \ldots,
+y_{\zeta^k_{n^k}, t})'$ a subvector of endogenous variables, where $k \in \{
+s, +, ++, -, --, m, d \}$.
 
-Finally, we denote $\beta^+_j, j=1\ldots n^m$ the indices of mixed variables inside the $\zeta^+_j$ sequence, \textit{i.e.} $\beta^+_j$ is such that $\zeta^+_{\beta^+_j}$ is a mixed variable. We similarly define $\beta^-_j$ for mixed variables inside the $\zeta^-_j$ sequence. We similarly define $\pi^+_j$ (resp. $\pi^-_j$) for purely forward (resp. purely backward) variables insize $\zeta^+_j$ (resp $\zeta^-_j$).
+We denote by $\beta^+_j, j=1\ldots n^m$ the indices of mixed endogenous
+variables inside the $\zeta^+_j$ sequence, \textit{i.e.} $\beta^+_j$ is such
+that $\zeta^+_{\beta^+_j}$ is a mixed endogenous variable. We similarly define
+$\beta^-_j$ for mixed endogenous variables inside the $\zeta^-_j$ sequence. We
+similarly define $\pi^+_j$ (resp. $\pi^-_j$) for purely forward (resp. purely
+backward) endogenous variables inside $\zeta^+_j$ (resp $\zeta^-_j$).
 
-\section{Model setup}
+Finally, the vector of \emph{state variables} is formed by the union of
+backward endogenous variables at the previous period and of exogenous variables
+at the current period, and is therefore of size $n^-+p$.
 
-The model is written as:
+\subsection{Removing extra leads and lags}
+
+The form given in equation (\ref{eq:model}) makes the assumption that
+endogenous variables appear with at most one lead and one lag, and
+that exogenous variables appear only at the current period. This
+assumption does not imply any loss of generality, since it is easy to
+transform a nonlinear model with many leads and lags into an
+equivalent model of the form given in (\ref{eq:model}), as is detailed
+below.\footnote{The algorithm described in the present section is
+  implemented in the Dynare preprocessor, since version 4.1. Auxiliary
+  variables are created automatically and will show up at several
+  places in Dynare output; see \citet{adjemian/al:2011} for the names
+  of these variables.}
+
+For every variable $x_t$ in the original model whose maximum lag is $x_{t-d-k}$
+with $k>0$ (and $d=1$ if $x$ is an endogenous variable or $d=0$ if it is an
+exogenous variable), the transformation is the following:
+\begin{itemize}
+\item introduce $k$ new endogenous variables $z^j_t$, for
+  $j\in\{1,\ldots,k\}$;
+\item add $k$ new equations to the model:
+  \begin{equation*}
+    \left\{\begin{array}{ll}
+        z^1_t = x_{t-d} & \\
+        z^j_t = z^{j-1}_{t-1} & \text{for } j\in\{2, \ldots,k\}
+      \end{array}\right.;
+  \end{equation*}
+\item replace all occurrences of $x_{t-d-j}$ (with $j>0$) in the original model
+  by $z^j_{t-1}$ in the transformed model.
+\end{itemize}
+
+The transformation for variables with a lead is a bit more elaborate because
+one has to handle the fact that there is an expectation operator in front of
+all equations. The algorithm is as follows:
+\begin{itemize}
+\item decompose every equation of the original model in the following form:
+  \begin{equation*}
+    A + \sum_{i\in I} B_i \, \mathbb{E}_t C_i = 0
+  \end{equation*}
+  where $A$ and the $B_i$ are (possibly nonlinear) expressions containing only
+  current or lagged variables, and the $C_i$ are (possibly nonlinear)
+  expressions which may contain leads; this decomposition is not unique, but
+  one should aim at making the $C_i$ terms as simple as possible;
+\item for every $C_i$ where there is a lead of 2 or more on an endogenous
+  variable, or a lead on an exogenous variable:
+  \begin{itemize}
+  \item let $k$ be the minimal number of periods so that $C_i^{(-k)}$ has at
+    most one lead on endogenous variables and no lead on exogenous variables
+    (where $C_i^{(-k)}$ stands for the transformation of $C_i$ where all
+    variables have been lagged by $k$ periods);
+  \item introduce $k$ new endogenous variables $z^j_t$, for
+    $j\in\{1,\ldots,k\}$;
+  \item add $k$ new equations to the model:
+    \begin{equation*}
+      \left\{\begin{array}{ll}
+          z^1_t = \mathbb{E}_tC_i^{(-k)} & \\
+          z^j_t = \mathbb{E}_tz^{j-1}_{t+1} & \text{for } j\in\{2, \ldots,k\}
+        \end{array}\right.;
+    \end{equation*}
+  \item replace all occurrences of $\mathbb{E}_t C_i$ in the original model
+    by $\mathbb{E}_tz^k_{t+1}$ in the transformed model.
+  \end{itemize}
+\end{itemize}
+It is straightforward to see that this transformed model is under the form
+given in (\ref{eq:model}). And by the law of iterated expectations, it is
+equivalent to the original one.
+
+\section{The solution and its first order approximation}
+\label{sec:first-order}
+
+We first define the deterministic steady state of the model as the vector
+$(\bar{y}, \bar{u}, \bar{\varepsilon})$ satisfying:
 \begin{equation*}
-  \mathbb{E}_t f(y^+_{t+1}, y_t, y^-_{t-1}, u_t) = 0
+  \bar{\varepsilon} = 0
 \end{equation*}
-
-Exogenous variables $u_t$ of dimension $p$ follow an autoregressive process:
 \begin{equation*}
-  u_t = P(u_{t-1}, \sigma \varepsilon_t)
-\end{equation*}
-where $\varepsilon_t$ is i.i.d. with zero mean and variance-covariance matrix $\Sigma$, and $\sigma \geq 0$ is a stochastic scale factor ($\sigma=0$ means a deterministic model).
-
-The deterministic steady state $\bar{u}$, $\bar{y}$ satisfies:
-\begin{equation*}
-  \bar{u} = P(\bar{u}, 0)
+  \bar{u} = P(\bar{u}, \bar{\varepsilon})
 \end{equation*}
 \begin{equation*}
   f(\bar{y}^+, \bar{y}, \bar{y}^-, \bar{u}) = 0
 \end{equation*}
-
-The solution function $g$ is such that:
+Finding the deterministic steady state involves the resolution of a
+multivariate nonlinear system.\footnote{Dynare offers efficient ways of
+  performing this task, but this is out of the scope of the present paper.}
+Then, finding the rational expectation solution of the model means finding the
+policy functions (also known as decision rules), which give current endogenous
+variables as a function of state variables:
 \begin{equation*}
-  y_t = g(y^-_{t-1}, u_t, \sigma)
+  y_t = g(y^-_{t-1}, u_t)
 \end{equation*}
-In particular, $\bar{y} = g(\bar{y}^-, \bar{u}, 0)$.
+Note that, by definition of the deterministic steady state, we have $\bar{y} =
+g(\bar{y}^-, \bar{u})$.
 
-\section{First order approximation}
-
-The function $g$ satisfies:
+The function $g$ is characterized by the following functional equation:
 \begin{equation}
   \label{eq:g-definition}
-  \mathbb{E}_t f\left[g^+(g^-(y^-_{t-1}, u_t,\sigma), u_{t+1}, \sigma), g(y^-_{t-1}, u_t, \sigma), y^-_{t-1}, u_t\right] = 0
+  \mathbb{E}_t f\left[g^+(g^-(y^-_{t-1}, u_t), u_{t+1}), g(y^-_{t-1}, u_t), y^-_{t-1}, u_t\right] = 0
 \end{equation}
-where $g^+$ (resp. $g^-$) is the restriction of $g$ to forward (resp. backward) variables.
+where $g^+$ (resp. $g^-$) is the restriction of $g$ to forward (resp. backward)
+endogenous variables.
 
-Let:
+In the general case, this functional equation cannot be solved exactly, and one
+has to resort to numerical techniques to get an approximated solution. The
+remainder of this paper describes the first order perturbation technique
+implemented in Dynare. Let:
 \begin{equation*}
   f_{y^+} = \frac{\partial f}{\partial y^+_{t+1}}, \; f_{y^0} = \frac{\partial f}{\partial y_t}, \;  f_{y^-} = \frac{\partial f}{\partial y^-_{t-1}}, \;
   f_u   = \frac{\partial f}{\partial u_t}
 \end{equation*}
 \begin{equation*}
   g_y = \frac{\partial g}{\partial y^-_{t-1}},\;
-  g_u = \frac{\partial g}{\partial u_t}, \:
-  P_u = \frac{\partial P}{\partial u_t}
+  g_u = \frac{\partial g}{\partial u_t}
 \end{equation*}
-where the derivatives are taken at $\bar{y}$ and $\bar{u}$.
+\begin{equation*}
+  P_u = \frac{\partial P}{\partial u_{t-1}}, \:
+  P_\varepsilon = \frac{\partial P}{\partial \varepsilon_t}
+\end{equation*}
+where the derivatives are taken at $\bar{y}$, $\bar{u}$ and
+$\bar{\varepsilon}$.
 
-A first order approximation of (\ref{eq:g-definition}) around $\bar{y}$ and $\bar{u}$ gives:
+The first order approximation of the policy function is therefore:
+\begin{equation*}
+  \hat{g}(y^-_{t-1}, u_t) = \bar{y} + g_y \hat{y}^-_{t-1} + g_u \hat{u}_t
+\end{equation*}
+where $\hat{y}^-_{t-1} = y^-_{t-1} - \bar{y}^-$, $\hat{u}_t = u_t - \bar{u}$,
+and $g_y$ and $g_u$ are unknowns at this stage.
+
+A first order approximation of (\ref{eq:g-definition}) around $\bar{y}$ and
+$\bar{u}$ gives:
 \begin{multline*}
-  f(\bar{y}^+, \bar{y}, \bar{y}^-, \bar{u}) + f_{y^+} [g^+_y(g^-_y \hat{y}^-_{t-1} + g^-_u \hat{u}_t) + g^+_u \mathbb{E}_t [P_u \hat{u}_t + \sigma \varepsilon_{t+1}] ] \\ + f_{y^0} (g_y \hat{y}^-_{t-1} + g_u \hat{u}_t) + f_{y^-}\hat{y}^-_{t-1} + f_u \hat{u}_t = 0
+  f(\bar{y}^+, \bar{y}, \bar{y}^-, \bar{u}) + f_{y^+} [g^+_y(g^-_y
+  \hat{y}^-_{t-1} + g^-_u \hat{u}_t) + g^+_u \mathbb{E}_t [P_u \hat{u}_t +
+  P_\varepsilon \varepsilon_{t+1}] ] \\ + f_{y^0} (g_y \hat{y}^-_{t-1} + g_u \hat{u}_t) + f_{y^-}\hat{y}^-_{t-1} + f_u \hat{u}_t = 0
 \end{multline*}
-where $g^+_y$, $g^-_y$, $g^-_u$, $g^+_u$ are the derivatives of the restrictions of $g$ with obvious notations.
-
-Computing the expectancy term, taking into account the property of the deterministic steady state, and reorganizing the terms, we obtain:
+where $g^+_y$, $g^-_y$, $g^-_u$, $g^+_u$ are the derivatives of the
+restrictions of $g$ with obvious notation. Computing the expectancy term,
+taking into account the property of the deterministic steady state, and
+reorganizing the terms, we obtain:
 \begin{equation}
   \label{eq:first-order}
   (f_{y^+} g^+_y g^-_y + f_{y^0}  g_y + f_{y^-}) \hat{y}^-_{t-1} + (f_{y^+} g^+_yg^-_u+ f_{y^+}g^+_u P_u + f_y g_u + f_u) \hat{u}_t = 0
 \end{equation}
 
-\section{Recovering $g_y$}
+In the next sections, we exploit this equation in order to recover the unknown
+coefficients $g_u$ and $g_y$.
 
-Taking into account the term multiplying $\hat{y}^-_{t-1}$, equation (\ref{eq:first-order}) imposes:
+\section{Recovering $g_y$}
+\label{sec:g-y}
+
+Taking into account the term multiplying $\hat{y}^-_{t-1}$, equation
+(\ref{eq:first-order}) imposes:
 \begin{equation*}
   f_{y^+} g^+_y g^-_y + f_{y^0}  g_y + f_{y^-} = 0
 \end{equation*}
-
 This amounts to:
 \begin{equation}
   \label{eq:gy}
   f_{y^+} \hat{y}^+_{t+1} + f_{y^0} \hat{y}_t + f_{y^-} \hat{y}^-_{t-1} = 0
 \end{equation}
 
-Let $S$ be the $n\times n^s$ submatrix of $f_{y^0}$ where only the columns for static variables are kept, \textit{i.e.} $S_{i,j} = f_{y^0, i, \zeta^s_j}$. A QR decomposition gives $S = QR$ where $Q$ is an $n\times n$ orthogonal matrix, and $R$ an $n\times n^s$ upper triangular matrix.
+Let $S$ be the $n\times n^s$ submatrix of $f_{y^0}$ where only the columns for
+static endogenous variables are kept, \textit{i.e.} $S_{i,j} = f_{y^0, i,
+  \zeta^s_j}$. A QR decomposition\footnote{See \citet[section
+  5.2]{golub/van-loan:1996}.} gives $S = QR$ where $Q$ is an $n\times n$
+orthogonal matrix and $R$ an $n\times n^s$ upper triangular matrix.
 
 For the model to be identified, we assume that:
 \begin{equation}
   \label{eq:identification}
-  \mathop{rank}(R) = n^s
+  \mathop{rank}(R) = n^s.
 \end{equation}
-
-Equation (\ref{eq:gy}) can be rewritten as:
+Thus, equation (\ref{eq:gy}) can be rewritten as:
 \begin{equation}
   \label{eq:gy-qr}
   A^+ \hat{y}^+_{t+1} + A^0 \hat{y}_t + A^- \hat{y}^-_{t-1} = 0
 \end{equation}
-where $A^+ = Q'f_{y^+}$, $A^0 = Q'f_{y^0}$ and $A^- = Q'f_{y^-}$. By construction, columns of static variables in $A^0$ are zero in their lower part: $\forall i > n^s,\forall j\leq n^s, \: A^0_{i,\zeta^s_j} = 0$.
+where $A^+ = Q'f_{y^+}$, $A^0 = Q'f_{y^0}$ and $A^- = Q'f_{y^-}$. By
+construction, columns of static endogenous variables in $A^0$ are zero in their
+lower part: $\forall i > n^s,\forall j\leq n^s, \: A^0_{i,\zeta^s_j} = 0$.
 
-\subsection{Non-static variables}
+\subsection{Non-static endogenous variables}
 
 Taking only the $n^d$ lower rows of system (\ref{eq:gy-qr}), we get:
 \begin{equation}
   \label{eq:gy-no-static}
   \tilde{A}^+ \hat{y}^+_{t+1} + \tilde{A}^{0+} \hat{y}^+_t + \tilde{A}^{0-} \hat{y}^-_t + \tilde{A}^- \hat{y}^-_{t-1} = 0
 \end{equation}
-where $\tilde{A}^+$ (resp. $\tilde{A}^-$) contains the last $n^d$ rows of $A^+$ (resp. $A^-$). Matrices $\tilde{A}^{0+}$ and $\tilde{A}^{0-}$ can be defined in two ways, depending on where we deal with mixed variables:
+where $\tilde{A}^+$ (resp. $\tilde{A}^-$) contains the last $n^d$ rows of $A^+$
+(resp. $A^-$). Matrices $\tilde{A}^{0+}$ and $\tilde{A}^{0-}$ can be defined in
+two ways, depending on where we deal with mixed endogenous variables:
 
 \begin{itemize}
-\item $\tilde{A}^{0+}$ is a submatrix of $A^0$ where only the last $n^d$ rows and the columns for forward variables are kept ($\tilde{A}^{0+}_{i,j} = A^0_{n^s+i, \zeta^+_j}$), and $\tilde{A}^{0-}$ is such that purely backward columns are taken from $A^0$ ($\tilde{A}^{0-}_{i,\pi^-_j} = A^0_{n^s+i,\zeta^{--}_j}$), and the rest is zero
-\item $\tilde{A}^{0-}$ is a submatrix of $A^0$ where only the last $n^d$ rows and the columns for backward variables are kept ($\tilde{A}^{0-}_{i,j} = A^0_{n^s+i, \zeta^-_j}$), and $\tilde{A}^{0+}$ is such that purely forward columns are taken from $A^0$ ($\tilde{A}^{0+}_{i,\pi^+_j} = A^0_{n^s+i,\zeta^{++}_j}$), and the rest is zero
+\item $\tilde{A}^{0+}$ is a submatrix of $A^0$ where only the last $n^d$ rows
+  and the columns for forward endogenous variables are kept
+  ($\tilde{A}^{0+}_{i,j} = A^0_{n^s+i, \zeta^+_j}$), and $\tilde{A}^{0-}$ is
+  such that purely backward columns are taken from $A^0$
+  ($\tilde{A}^{0-}_{i,\pi^-_j} = A^0_{n^s+i,\zeta^{--}_j}$), and the rest is
+  zero;
+\item $\tilde{A}^{0-}$ is a submatrix of $A^0$ where only the last $n^d$ rows
+  and the columns for backward endogenous variables are kept
+  ($\tilde{A}^{0-}_{i,j} = A^0_{n^s+i, \zeta^-_j}$), and $\tilde{A}^{0+}$ is
+  such that purely forward columns are taken from $A^0$
+  ($\tilde{A}^{0+}_{i,\pi^+_j} = A^0_{n^s+i,\zeta^{++}_j}$), and the rest is
+  zero.
 \end{itemize}
-
-Note that in equation (\ref{eq:gy-no-static}), static variables no longer appear.
+Note that in equation (\ref{eq:gy-no-static}), static endogenous variables no
+longer appear.
 
 The structural state space representation of (\ref{eq:gy-no-static}) is:
 
 \begin{equation*}
-\underbrace{
+  \underbrace{
+    \left(
+      \begin{matrix}
+        \tilde{A}^{0-} & \tilde{A}^+ \\
+        I^- & 0
+      \end{matrix}
+    \right)
+  }_D
   \left(
     \begin{matrix}
-      \tilde{A}^{0-} & \tilde{A}^+ \\
-      I^- & 0
+      \hat{y}^-_t \\
+      \hat{y}^+_{t+1}
     \end{matrix}
   \right)
-}_D
-\left(
-  \begin{matrix}
-    \hat{y}^-_t \\
-    \hat{y}^+_{t+1}
-  \end{matrix}
-\right)
-=
-\underbrace{
+  =
+  \underbrace{
+    \left(
+      \begin{matrix}
+        -\tilde{A}^- & -\tilde{A}^{0+} \\
+        0 & I^+
+      \end{matrix}
+    \right)
+  }_E
   \left(
     \begin{matrix}
-      -\tilde{A}^- & -\tilde{A}^{0+} \\
-      0 & I^+
+      \hat{y}^-_{t-1} \\
+      \hat{y}^+_t
     \end{matrix}
   \right)
-}_E
-\left(
-  \begin{matrix}
-    \hat{y}^-_{t-1} \\
-    \hat{y}^+_t
-  \end{matrix}
-\right)
 \end{equation*}
-where $I^-$ is an $n^m \times n^-$ selection matrix for mixed variables, such that $I^-_{i,\beta^-_i}=1$, and zero otherwise. Similarly, $I^+$ is an $n^m \times n^+$ matrix, such that $I^+_{i,\beta^+_i}=1$, and zero otherwise. Therefore, $D$ and $E$ are square matrices of size $n^{++}+n^{--}+2n^m$.
+where $I^-$ is an $n^m \times n^-$ selection matrix for mixed endogenous
+variables, such that $I^-_{i,\beta^-_i}=1$, and zero otherwise. Similarly,
+$I^+$ is an $n^m \times n^+$ matrix, such that $I^+_{i,\beta^+_i}=1$, and zero
+otherwise. Therefore, $D$ and $E$ are square matrices of size
+$n^{++}+n^{--}+2n^m$.
 
-Using the fact that $\hat{y}^+_{t+1} = g^+_y \hat{y}^-_t$, This can be rewritten as:
+Using the fact that $\hat{y}^+_{t+1} = g^+_y \hat{y}^-_t$, this can be
+rewritten as:
 \begin{equation}
-\label{eq:state-space}
+  \label{eq:state-space}
   D
   \left(
     \begin{matrix}
@@ -204,13 +468,26 @@ Using the fact that $\hat{y}^+_{t+1} = g^+_y \hat{y}^-_t$, This can be rewritten
 \end{equation}
 where $I_{n^-}$ is the identity matrix of size $n^-$.
 
-A generalized Schur decomposition of the pencil $(D,E)$ is performed:
+A generalized Schur decomposition (also known as the QZ decomposition) of the
+pencil $(D,E)$ is performed:\footnote{See \citet[section
+  7.7]{golub/van-loan:1996} for theoretical and practical details on this
+  decomposition.}
 \begin{equation*}
-  D = QTZ, \; E=QSZ
+  \left\{\begin{array}{rcl}
+      D & = & QTZ \\
+      E & = & QSZ
+    \end{array}
+  \right.
 \end{equation*}
-where $T$ is upper triangular, $S$ quasi upper triangular, and $Q,Z$ are orthogonal matrices. The decomposition is done is such a way that stable generalized eigenvalues (modulus less than 1) are in the upper left corner of $T$ and $S$.
+where $T$ is upper triangular, $S$ quasi upper triangular, and $Q$ and $Z$ are
+orthogonal matrices. The decomposition is done is such a way that stable
+generalized eigenvalues (modulus less than 1) are in the upper left corner of
+$T$ and $S$.
 
-Matrices $T$ and $S$ are block decomposed so that the upper left block of both matrices is square and contains generalized eigenvalues of modulus less than 1, and lower right block is square and contains generalized eigenvalues of modulus strictly greater than 1.
+Matrices $T$ and $S$ are block decomposed so that the upper left block of both
+matrices is square and contains generalized eigenvalues of modulus less than 1,
+and the lower right block is square and contains generalized eigenvalues of
+modulus strictly greater than 1.
 
 Equation (\ref{eq:state-space}) can be rewritten as:
 \begin{equation}
@@ -255,7 +532,9 @@ Equation (\ref{eq:state-space}) can be rewritten as:
   \right)
   \hat{y}^-_{t-1}
 \end{equation}
-where $T_{11}$ and $S_{11}$ are square and contain stable generalized eigenvalues, while $T_{22}$ and $S_{22}$ are square and contain explosive generalized eigenvalues.
+where $T_{11}$ and $S_{11}$ are square and contain stable generalized
+eigenvalues, while $T_{22}$ and $S_{22}$ are square and contain explosive
+generalized eigenvalues.
 
 To exclude explosive trajectories, we impose:
 \begin{equation}
@@ -285,9 +564,13 @@ which implies:
   g^+_y = -(Z_{22})^{-1} Z_{21}
 \end{equation*}
 
-Note that $Z_{22}$ is square if the Blanchard-Kahn order condition is verified (as many explosive eigenvalues as forward or mixed variables), and its non-singularity is the Blanchard-Kahn rank condition.
+Note that the squareness of $Z_{22}$ is the \citet{blanchard/kahn:1980}
+\emph{order} condition (\textit{i.e.} the requirement to have as many explosive
+eigenvalues as forward or mixed endogenous variables), and the non-singularity
+of $Z_{22}$ is the \citet{blanchard/kahn:1980} \emph{rank} condition.
 
-Using equation (\ref{eq:non-explosive}) and the fact that $\hat{y}^-_t = g^-_y \hat{y}^-_{t-1}$, equation (\ref{eq:state-space-qz}) implies:
+Using equation (\ref{eq:non-explosive}) and the fact that $\hat{y}^-_t = g^-_y
+\hat{y}^-_{t-1}$, equation (\ref{eq:state-space-qz}) implies:
 \begin{equation*}
   \left(
     \begin{matrix}
@@ -316,44 +599,64 @@ Using equation (\ref{eq:non-explosive}) and the fact that $\hat{y}^-_t = g^-_y \
     \end{matrix}
   \right)
 \end{equation*}
-
-Then, using the fact that solving equation (\ref{eq:non-explosive}) for $X$ gives $X = (Z'_{11})^{-1}$, the upper part of this system gives the solution for $g^-_y$:
+Then, using the fact that solving equation (\ref{eq:non-explosive}) for $X$
+gives $X = (Z'_{11})^{-1}$, the upper part of this system gives the solution
+for $g^-_y$:
 \begin{equation*}
   g^-_y = X^{-1} T_{11}^{-1}S_{11}X = Z'_{11}T_{11}^{-1}S_{11}(Z'_{11})^{-1}
 \end{equation*}
 
-\subsection{Static variables}
+Note that mixed variables appear in both $g^+$ and $g^-$: the corresponding
+lines will be equal across the two matrices by construction.
+
+\subsection{Static endogenous variables}
 
 The $n^s$ upper lines of equation (\ref{eq:gy-qr}) can be written as:
-\begin{equation*}
+\begin{equation}
+  \label{eq:static-part}
   \breve{A}^+ \hat{y}^+_{t+1} + \breve{A}^{0d} \hat{y}^d_t + \breve{A}^{0s} \hat{y}^{s}_t + \breve{A}^- \hat{y}^-_{t-1} = 0
-\end{equation*}
-where $\breve{A}^+$ (resp. $\breve{A}^-$) contains the first $n^s$ rows of $A^+$ (resp. $A^-$). Matrix $\breve{A}^{0s}$ (resp. $\breve{A}^{0d}$) contains the first $n^s$ rows and only the static (resp. non-static) columns of $A^0$. Recall that $\breve{A}^{0s}$ is a square upper triangular matrix by construction, and it is invertible because of assumption (\ref{eq:identification}).
+\end{equation}
+where $\breve{A}^+$ (resp. $\breve{A}^-$) contains the first $n^s$ rows of
+$A^+$ (resp. $A^-$). Matrix $\breve{A}^{0s}$ (resp. $\breve{A}^{0d}$) contains
+the first $n^s$ rows and only the static (resp. non-static) columns of
+$A^0$. Recall that $\breve{A}^{0s}$ is a square upper triangular matrix by
+construction, and it is invertible because of assumption
+(\ref{eq:identification}).
 
-This can be rewritten as:
+Equation (\ref{eq:static-part}) can be rewritten as:
 \begin{equation*}
   \breve{A}^+ g^+_y g^-_y \hat{y}^-_{t-1} + \breve{A}^{0d} g^d_y \hat{y}^-_{t-1} + \breve{A}^{0s} \hat{y}^{s}_t + \breve{A}^- \hat{y}^-_{t-1} = 0
 \end{equation*}
-where $g^d_y$, the restriction of $g_y$ to non-static variables, is obtained by combining $g^+_y$ and $g^-_y$.
-
-We therefore have:
+where $g^d_y$, the restriction of $g_y$ to non-static endogenous variables, is
+obtained by combining $g^+_y$ and $g^-_y$. We therefore have:
 \begin{equation*}
   g^s_y = -\left[\breve{A}^{0s}\right]^{-1} \left(\breve{A}^+ g^+_y g^-_y + \breve{A}^{0d} g^d_y + \breve{A}^-\right)
 \end{equation*}
 
 \section{Recovering $g_u$}
+\label{sec:g-u}
 
 Equation (\ref{eq:first-order}) restricted to $\hat{u}_t$ imposes:
 \begin{equation*}
-  f_{y^+} g^+_yg^-_u+ f_{y^+}g^+_u P_u + f_y g_u + f_u = 0
+  f_{y^+} g^+_yg^-_u+ f_{y^+}g^+_u P_u + f_y g_u + f_u = 0,
 \end{equation*}
-
-It can be rewritten as:
+and be rewritten as:
 \begin{equation*}
-  (f_{y^+} g^+_y J^- + f_y) g_u+ f_{y^+}J^+ g_u P_u + f_u = 0
+  (f_{y^+} g^+_y J^- + f_y) g_u + f_{y^+}J^+ g_u P_u + f_u = 0
 \end{equation*}
-where $J^-$ (resp $J^+$) is an $n^-\times n$ matrix (resp. $n^+\times n$ matrix) selecting only the backward (resp. forward) endogenous variables.
+where $J^-$ (resp $J^+$) is an $n^-\times n$ matrix (resp. $n^+\times n$
+matrix) selecting only the backward (resp. forward) endogenous variables.  In
+the particular case solved by Dynare, where $P_u = 0$, the solution to this
+equation is:
+\begin{equation*}
+  g_u = -(f_{y^+} g^+_y J^- + f_y)^{-1} f_u
+\end{equation*}
+In the general case, this equation is a specialized Sylvester equation, which
+can be solved using the algorithm proposed by
+\citet{kamenik:2003}\footnote{This paper is distributed with Dynare, in the
+  \texttt{sylvester.pdf} file under the documentation directory.}.
 
-This equation in $g_u$ is a specialized Sylvester equation, which can be solved using the algorithm proposed by Ondra Kamenik\footnote{See \texttt{sylvester.pdf}, included in Dynare distribution.}.
+\bibliographystyle{ecta}
+\bibliography{dr}
 
 \end{document}

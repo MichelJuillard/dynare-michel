@@ -16,7 +16,7 @@ function [ ix2, ilogpo2, ModelName, MhDirectoryName, fblck, fline, npar, nblck, 
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2006-2008 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -35,6 +35,19 @@ function [ ix2, ilogpo2, ModelName, MhDirectoryName, fblck, fline, npar, nblck, 
 
 global M_ options_ bayestopt_
 
+ix2 = [];
+ilogpo2 = [];
+ModelName = []; 
+MhDirectoryName = [];
+fblck = [];
+fline = [];
+npar = [];
+nblck = [];
+nruns = [];
+NewFile = [];
+MAX_nruns = [];
+d = [];
+
 ModelName = M_.fname;
 
 if ~isempty(M_.bvar)
@@ -51,7 +64,7 @@ npar  = length(xparam1);
 MAX_nruns = ceil(options_.MaxNumberOfBytes/(npar+2)/8);
 d = chol(vv);
 
-if ~options_.load_mh_file & ~options_.mh_recover
+if ~options_.load_mh_file && ~options_.mh_recover
     %% Here we start a new metropolis-hastings, previous draws are not
     %% considered.
     if nblck > 1
@@ -90,9 +103,9 @@ if ~options_.load_mh_file & ~options_.mh_recover
             validate    = 0;
             init_iter   = 0;
             trial = 1;
-            while validate == 0 & trial <= 10
+            while validate == 0 && trial <= 10
                 candidate = rand_multivariate_normal( transpose(xparam1), d * options_.mh_init_scale, npar);
-                if all(candidate(:) > mh_bounds(:,1)) & all(candidate(:) < mh_bounds(:,2)) 
+                if all(candidate(:) > mh_bounds(:,1)) && all(candidate(:) < mh_bounds(:,2)) 
                     ix2(j,:) = candidate;
                     ilogpo2(j) = - feval(TargetFun,ix2(j,:)',varargin{:});
                     if ilogpo2(j) <= - bayestopt_.penalty+1e-6
@@ -108,7 +121,7 @@ if ~options_.load_mh_file & ~options_.mh_recover
                     end
                 end
                 init_iter = init_iter + 1;
-                if init_iter > 100 & validate == 0
+                if init_iter > 100 && validate == 0
                     disp(['MH: I couldn''t get a valid initial value in 100 trials.'])
                     disp(['MH: You should Reduce mh_init_scale...'])
                     disp(sprintf('MH: Parameter mh_init_scale is equal to %f.',options_.mh_init_scale))
@@ -116,7 +129,7 @@ if ~options_.load_mh_file & ~options_.mh_recover
                     trial = trial+1;
                 end
             end
-            if trial > 10 & ~validate
+            if trial > 10 && ~validate
                 disp(['MH: I''m unable to find a starting value for block ' int2str(j)])
                 return
             end
@@ -127,7 +140,7 @@ if ~options_.load_mh_file & ~options_.mh_recover
     else% Case 2: one chain (we start from the posterior mode)
         fprintf(fidlog,['  Initial values of the parameters:\n']);
         candidate = transpose(xparam1);
-        if all(candidate' > mh_bounds(:,1)) & all(candidate' < mh_bounds(:,2)) 
+        if all(candidate' > mh_bounds(:,1)) && all(candidate' < mh_bounds(:,2)) 
             ix2 = candidate;
             ilogpo2 = - feval(TargetFun,ix2',varargin{:});
             disp('MH: Initialization at the posterior mode.')
@@ -197,11 +210,11 @@ if ~options_.load_mh_file & ~options_.mh_recover
     end,
     fprintf(fidlog,' \n');
     fclose(fidlog);
-elseif options_.load_mh_file & ~options_.mh_recover
+elseif options_.load_mh_file && ~options_.mh_recover
     %% Here we consider previous mh files (previous mh did not crash).
     disp('MH: I''m loading past metropolis-hastings simulations...')
     file = dir([ MhDirectoryName '/'  ModelName '_mh_history.mat' ]);
-    files = dir([ MhDirectoryName '/' ModelName '_mh*.mat']);
+    files = dir([ MhDirectoryName filesep ModelName '_mh*.mat']);
     if ~length(files)
         disp('MH:: FAILURE! there is no MH file to load here!')
         return

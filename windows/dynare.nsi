@@ -2,8 +2,6 @@
 # Uses "NullSoft Scriptable Installer System", aka NSIS (see http://nsis.sourceforge.net)
 # NSIS can be run from both Windows and Linux (see "nsis" package in Debian)
 
-# NOTE: if you want to build from Debian, you'll need to replace /usr/share/nsis/Plugins/System.dll by the System.dll included in the windows distribution of NSIS (see http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=319999)
-
 # How to build the installer:
 # - build: the preprocessor, the MEX binaries (for MATLAB and for Octave), and the documentation (PDF files + HTML manual)
 # - run "makensis dynare.nsi" to create the installer
@@ -39,14 +37,6 @@ InstallDir "c:\dynare\${VERSION}"
 !define REGLOC "Software\Microsoft\Windows\CurrentVersion\Uninstall\Dynare ${VERSION}"
 !define SMLOC "$SMPROGRAMS\Dynare ${VERSION}"
 
-# Strip preprocessor, dynare++ and 32-bit DLL binaries
-# (64-bit DLL are compiled with MSVC and therefore are small)
-!system 'strip ../matlab/dynare_m.exe'
-!system 'strip ../dynare++/src/dynare++.exe'
-!system 'strip ../mex/octave/*.mex'
-!system 'strip ../mex/matlab/win32-6.5-7.4/*'
-!system 'strip ../mex/matlab/win32-7.5-7.10/*'
-
 !macro DETERMINE_CONTEXT
  # Determine if we are admin or not
  # This will change the start menu directory and the registry root key (HKLM or HKLU)
@@ -62,7 +52,7 @@ Section "Dynare core (preprocessor and M-files)"
  SectionIn RO
 !insertmacro DETERMINE_CONTEXT
  SetOutPath $INSTDIR
- File README.txt mexopts.bat ..\license.txt
+ File README.txt ..\NEWS mexopts-win32.bat mexopts-win64.bat ..\license.txt ..\dynare.el
 
  SetOutPath $INSTDIR\matlab
  File /r ..\matlab\*.m
@@ -85,14 +75,14 @@ SectionEnd
 
 SectionGroup "MEX files for MATLAB"
 
-Section "MEX files for MATLAB 32-bit, version 6.5 to 7.4 (R13 to R2007a)"
- SetOutPath $INSTDIR\mex\matlab\win32-6.5-7.4
- File ..\mex\matlab\win32-6.5-7.4\*.dll
+Section "MEX files for MATLAB 32-bit, version 7.0 to 7.4 (R14 to R2007a)"
+ SetOutPath $INSTDIR\mex\matlab\win32-7.0-7.4
+ File ..\mex\matlab\win32-7.0-7.4\*.dll
 SectionEnd
 
-Section "MEX files for MATLAB 32-bit, version 7.5 to 7.10 (R2007b to R2010a)"
- SetOutPath $INSTDIR\mex\matlab\win32-7.5-7.10
- File ..\mex\matlab\win32-7.5-7.10\*.mexw32
+Section "MEX files for MATLAB 32-bit, version 7.5 to 7.13 (R2007b to R2011b)"
+ SetOutPath $INSTDIR\mex\matlab\win32-7.5-7.13
+ File ..\mex\matlab\win32-7.5-7.13\*.mexw32
 SectionEnd
 
 # Currently we don't have that version of MATLAB
@@ -111,31 +101,29 @@ Section "MEX files for MATLAB 64-bit, version 7.5 to 7.7 (R2007b to R2008b)"
  File ..\mex\matlab\win64-7.5-7.7\*.mexw64
 SectionEnd
 
-Section "MEX files for MATLAB 64-bit, version 7.8 to 7.10 (R2009a to R2010a)"
- SetOutPath $INSTDIR\mex\matlab\win64-7.8-7.10
- File ..\mex\matlab\win64-7.8-7.10\*.mexw64
+Section "MEX files for MATLAB 64-bit, version 7.8 to 7.13 (R2009a to R2011b)"
+ SetOutPath $INSTDIR\mex\matlab\win64-7.8-7.13
+ File ..\mex\matlab\win64-7.8-7.13\*.mexw64
 SectionEnd
 
 SectionGroupEnd
 
 Section "MEX files for Octave 3.2.4 (MinGW build)"
  SetOutPath $INSTDIR\mex\octave
- File ..\mex\octave\*.mex
+ File ..\mex\octave\*.mex ..\mex\octave\*.oct
 SectionEnd
 
 Section "Dynare++ (standalone executable)"
  SetOutPath $INSTDIR\dynare++
- File ..\dynare++\src\dynare++.exe
- # The list of DLLs given here is used when building with Octave/MinGW build 3.2.4 (disabling POSIX threads)
- File ..\dynare++\src\atlas.dll ..\dynare++\src\blas.dll ..\dynare++\src\cblas.dll ..\dynare++\src\lapack.dll ..\dynare++\src\libgcc_s_dw2-1.dll ..\dynare++\src\libgfortran-3.dll
+ File ..\dynare++\src\dynare++.exe ..\dynare++\extern\matlab\dynare_simul.m
 SectionEnd
 
 Section "Documentation and examples (Dynare and Dynare++)"
  SetOutPath $INSTDIR\doc
- File ..\doc\manual.pdf ..\doc\guide.pdf ..\doc\userguide\UserGuide.pdf ..\doc\bvar-a-la-sims.pdf ..\doc\dr.pdf ..\doc\macroprocessor\macroprocessor.pdf ..\doc\preprocessor\preprocessor.pdf
+ File ..\doc\dynare.pdf ..\doc\guide.pdf ..\doc\userguide\UserGuide.pdf ..\doc\bvar-a-la-sims.pdf ..\doc\dr.pdf ..\doc\macroprocessor\macroprocessor.pdf ..\doc\preprocessor\preprocessor.pdf ..\doc\parallel\parallel.pdf ..\doc\gsa\gsa.pdf
 
- SetOutPath $INSTDIR\doc\manual-html
- File ..\doc\manual-html\*.html
+ SetOutPath $INSTDIR\doc\dynare.html
+ File ..\doc\dynare.html\*.html ..\doc\dynare.html\*.png
 
  SetOutPath $INSTDIR\doc\dynare++
  File ..\dynare++\doc\dynare++-tutorial.pdf ..\dynare++\doc\dynare++-ramsey.pdf ..\dynare++\sylv\sylvester.pdf ..\dynare++\tl\cc\tl.pdf ..\dynare++\integ\cc\integ.pdf ..\dynare++\kord\kord.pdf
@@ -155,8 +143,11 @@ Section "Uninstall"
  # First delete the uninstaller
  Delete $INSTDIR\uninstall.exe
  Delete $INSTDIR\README.txt
+ Delete $INSTDIR\NEWS
  Delete $INSTDIR\license.txt
- Delete $INSTDIR\mexopts.bat
+ Delete $INSTDIR\mexopts-win32.bat
+ Delete $INSTDIR\mexopts-win64.bat
+ Delete $INSTDIR\dynare.el
  Rmdir /r $INSTDIR\matlab
  Rmdir /r $INSTDIR\mex
  Rmdir /r $INSTDIR\dynare++

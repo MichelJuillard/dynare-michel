@@ -1,4 +1,5 @@
-function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, periods, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo, forward_backward, is_dynamic, verbose)
+function [y, info] = solve_one_boundary(fname, y, x, params, steady_state, ...
+                                        y_index_eq, nze, periods, is_linear, Block_Num, y_kmin, maxit_, solve_tolf, lambda, cutoff, stack_solve_algo, forward_backward, is_dynamic, verbose, M, options, oo)
 % Computes the deterministic simulation of a block of equation containing
 % lead or lag variables 
 %
@@ -8,6 +9,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
 %   y                   [matrix]        All the endogenous variables of the model
 %   x                   [matrix]        All the exogenous variables of the model
 %   params              [vector]        All the parameters of the model
+%   steady_state        [vector]        steady state of the model
 %   y_index_eq          [vector of int] The index of the endogenous variables of
 %                                       the block
 %   nze                 [integer]       number of non-zero elements in the
@@ -38,9 +40,13 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
 %                                           field remains unchanged
 %   verbose            [integer]        (0) iterations are not printed
 %                                       (1) iterations are printed
-%
-% OUTPUTS
+%   indirect_call      [integer]        (0) direct call to the fname
+%                                       (1) indirect call via the
+%                                       local_fname wrapper
+% OUTPUTS                                    
 %   y                  [matrix]         All endogenous variables of the model      
+%   info               [integer]        >=0 no error
+%                                       <0 error
 %  
 % ALGORITHM
 %   Newton with LU or GMRES or BicGstab for dynamic block
@@ -49,7 +55,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
 %   none.
 %  
 
-% Copyright (C) 1996-2009 Dynare Team
+% Copyright (C) 1996-2011 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -67,7 +73,6 @@ function [y, info] = solve_one_boundary(fname, y, x, params, y_index_eq, nze, pe
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 
-global oo_ M_ options_;
 Blck_size=size(y_index_eq,2);
 g2 = [];
 g3 = [];
@@ -84,16 +89,17 @@ else
     start = periods+y_kmin;
     finish = y_kmin+1;
 end
-lambda=1;
+%lambda=1;
 for it_=start:incr:finish
     cvg=0;
     iter=0;
     g1=spalloc( Blck_size, Blck_size, nze);
-    while ~(cvg==1 | iter>maxit_),
+    while ~(cvg==1 || iter>maxit_),
         if(is_dynamic)
-            [r, y, g1, g2, g3] = feval(fname, y, x, params, it_, 0);
+            [r, y, g1, g2, g3] = feval(fname, y, x, params, steady_state, ...
+                                       it_, 0);
         else
-            [r, y, g1, g2, g3] = feval(fname, y, x, params, 0);
+            [r, y, g1] = feval(fname, y, x, params);
         end;
         if(~isreal(r))
             max_res=(-(max(max(abs(r))))^2)^0.5;
@@ -138,22 +144,22 @@ for it_=start:incr:finish
         if(verbose==1)
             disp(['iteration : ' int2str(iter+1) ' => ' num2str(max_res) ' time = ' int2str(it_)]);
             if(is_dynamic)
-                disp([M_.endo_names(y_index_eq,:) num2str([y(it_,y_index_eq)' r g1])]);
+                disp([M.endo_names(y_index_eq,:) num2str([y(it_,y_index_eq)' r g1])]);
             else
-                disp([M_.endo_names(y_index_eq,:) num2str([y(y_index_eq) r g1])]);
+                disp([M.endo_names(y_index_eq,:) num2str([y(y_index_eq) r g1])]);
             end;
         end;
-        if(~isreal(max_res) | isnan(max_res))
+        if(~isreal(max_res) || isnan(max_res))
             cvg = 0;
-        elseif(is_linear & iter>0)
+        elseif(is_linear && iter>0)
             cvg = 1;
         else
             cvg=(max_res<solve_tolf);
         end;
         if(~cvg)
             if(iter>0)
-                if(~isreal(max_res) | isnan(max_res) | (max_resa<max_res && iter>1))
-                    if(isnan(max_res)| (max_resa<max_res && iter>0))
+                if(~isreal(max_res) || isnan(max_res) || (max_resa<max_res && iter>1))
+                    if(isnan(max_res) || (max_resa<max_res && iter>0))
                         detJ=det(g1a);
                         if(abs(detJ)<1e-7)
                             max_factor=max(max(abs(g1a)));
@@ -214,11 +220,12 @@ for it_=start:incr:finish
             end;
             ya_save=ya;
             g1a=g1;
-            if(~is_dynamic & options_.solve_algo == 0)
-                if exist('OCTAVE_VERSION') || isempty(ver('optim'))
-                    % Note that fsolve() exists under Octave, but has a different syntax
-                    % So we fail for the moment under Octave, until we add the corresponding code
-                    error('DYNARE_SOLVE: you can''t use solve_algo=0 since you don''t have Matlab''s Optimization Toolbox')
+            if(~is_dynamic && options.solve_algo == 0)
+                if (verbose == 1)
+                    disp('steady: fsolve');
+                end
+                if ~exist('OCTAVE_VERSION') && ~license('test', 'optimization_toolbox')
+                    error('SOLVE_ONE_BOUNDARY: you can''t use solve_algo=0 since you don''t have MATLAB''s Optimization Toolbox')
                 end
                 options=optimset('fsolve');
                 options.MaxFunEvals = 50000;
@@ -226,14 +233,32 @@ for it_=start:incr:finish
                 options.TolFun=1e-8;
                 options.Display = 'iter';
                 options.Jacobian = 'on';
-                [yn,fval,exitval,output] = fsolve(@local_fname, y(y_index_eq), options, x, params, y, y_index_eq, fname, 0);
+                if ~exist('OCTAVE_VERSION')
+                    [yn,fval,exitval,output] = fsolve(@local_fname, y(y_index_eq), ...
+                                                      options, x, params, steady_state, y, y_index_eq, fname, 0);
+                else
+                    % Under Octave, use a wrapper, since fsolve() does not have a 4th arg
+                    func = @(z) local_fname(z, x, params, steady_state, y, y_index_eq, fname, 0);
+                    % The Octave version of fsolve does not converge when it starts from the solution
+                    fvec = feval(func,y(y_index_eq));
+                    if max(abs(fvec)) >= options.solve_tolf
+                        [yn,fval,exitval,output] = fsolve(func,y(y_index_eq),options);
+                    else
+                        yn = y(y_index_eq);
+                        exitval = 3;
+                    end;
+                end
+                    
                 y(y_index_eq) = yn;
                 if exitval > 0
                     info = 0;
                 else
                     info = -Block_Num*10;
                 end
-            elseif((~is_dynamic & options_.solve_algo==2) || (is_dynamic & stack_solve_algo==4))
+            elseif((~is_dynamic && options.solve_algo==2) || (is_dynamic && stack_solve_algo==4))
+                if (verbose == 1 && ~is_dynamic)
+                    disp('steady: LU + lnsrch1');
+                end
                 lambda=1;
                 stpmx = 100 ;
                 if (is_dynamic)
@@ -246,21 +271,33 @@ for it_=start:incr:finish
                 f = 0.5*r'*r;
                 p = -g1\r ;
                 if (is_dynamic)
-                    [ya,f,r,check]=lnsrch1(y(it_,:),f,g,p,stpmax,'lnsrch1_wrapper_one_boundary',nn,  y_index_eq, y_index_eq, fname, y, x, params, it_);
+                    [ya,f,r,check]=lnsrch1(y(it_,:)',f,g,p,stpmax, ...
+                                           'lnsrch1_wrapper_one_boundary',nn, ...
+                                           y_index_eq, y_index_eq, fname, y, x, params, steady_state, it_);
+                    dx = ya' - y(it_, :);
                 else
-                    [ya,f,r,check]=lnsrch1(y,f,g,p,stpmax,fname,nn,y_index_eq,x, params, 0);
+                    [ya,f,r,check]=lnsrch1(y,f,g,p,stpmax,fname,nn,y_index_eq,x, ...
+                                           params, steady_state,0);
+                    dx = ya - y(y_index_eq);
                 end;
-                dx = ya - y(y_index_eq);
+                
                 if(is_dynamic)
                     y(it_,:) = ya';
                 else
                     y = ya';
                 end;
-            elseif(~is_dynamic & options_.solve_algo==3)
-                [yn,info] = csolve(@local_fname, y(y_index_eq),@local_fname,1e-6,500, x, params, y, y_index_eq, fname, 1);
+            elseif(~is_dynamic && options.solve_algo==3)
+                if (verbose == 1)
+                    disp('steady: csolve');
+                end
+                [yn,info] = csolve(@local_fname, y(y_index_eq),@ ...
+                                   local_fname,1e-6,500, x, params, steady_state, y, y_index_eq, fname, 1);
                 dx = ya - yn;
                 y(y_index_eq) = yn;
-            elseif((stack_solve_algo==1 & is_dynamic) | (~is_dynamic & options_.solve_algo==1)),
+            elseif((stack_solve_algo==1 && is_dynamic) || (stack_solve_algo==0 && is_dynamic) || (~is_dynamic && (options.solve_algo==1 || options.solve_algo==6))),
+                if (verbose == 1 && ~is_dynamic)
+                    disp('steady: Sparse LU ');
+                end
                 dx =  g1\r;
                 ya = ya - lambda*dx;
                 if(is_dynamic)
@@ -268,12 +305,18 @@ for it_=start:incr:finish
                 else
                     y(y_index_eq) = ya;
                 end;
-            elseif(stack_solve_algo==2 & is_dynamic),
+            elseif((stack_solve_algo==2 && is_dynamic) || (options.solve_algo==7 && ~is_dynamic)),
                 flag1=1;
+                if exist('OCTAVE_VERSION')
+                    error('SOLVE_ONE_BOUNDARY: you can''t use solve_algo=7 since GMRES is not implemented in Octave')
+                end
+                if (verbose == 1 && ~is_dynamic)
+                    disp('steady: GMRES ');
+                end
                 while(flag1>0)
                     [L1, U1]=luinc(g1,luinc_tol);
                     [dx,flag1] = gmres(g1,-r,Blck_size,1e-6,Blck_size,L1,U1);
-                    if (flag1>0 | reduced)
+                    if (flag1>0 || reduced)
                         if(flag1==1)
                             disp(['Error in simul: No convergence inside GMRES after ' num2str(iter,'%6d') ' iterations, in block' num2str(Block_Num,'%3d')]);
                         elseif(flag1==2)
@@ -292,12 +335,32 @@ for it_=start:incr:finish
                         end;
                     end;
                 end;
-            elseif(stack_solve_algo==3 & is_dynamic),
+            elseif((stack_solve_algo==3 && is_dynamic) || (options.solve_algo==8 && ~is_dynamic)),
                 flag1=1;
+                if (verbose == 1 && ~is_dynamic)
+                    disp('steady: BiCGStab');
+                end
                 while(flag1>0)
                     [L1, U1]=luinc(g1,luinc_tol);
-                    [dx,flag1] = bicgstab(g1,-r,1e-7,Blck_size,L1,U1);
-                    if (flag1>0 | reduced)
+                    phat = ya - U1 \ (L1 \ r);
+                    if(is_dynamic)
+                        y(it_,y_index_eq) = phat;
+                    else
+                        y(y_index_eq) = phat;
+                    end;
+                    if(is_dynamic)
+                        [r, y, g1, g2, g3] = feval(fname, y, x, params, ...
+                                                   steady_state, it_, 0);
+                    else
+                        [r, y, g1] = feval(fname, y, x, params);
+                    end;
+                    if max(abs(r)) >= options.solve_tolf
+                        [dx,flag1] = bicgstab(g1,-r,1e-7,Blck_size,L1,U1);
+                    else
+                        flag1 = 0;
+                        dx = phat - ya;
+                    end;
+                    if (flag1>0 || reduced)
                         if(flag1==1)
                             disp(['Error in simul: No convergence inside BICGSTAB after ' num2str(iter,'%6d') ' iterations, in block' num2str(Block_Num,'%3d')]);
                         elseif(flag1==2)
@@ -321,7 +384,7 @@ for it_=start:incr:finish
                 if(is_dynamic)
                     disp(['options_.stack_solve_algo = ' num2str(stack_solve_algo) ' not implemented']);
                 else
-                    disp(['options_.solve_algo = ' num2str(options_.solve_algo) ' not implemented']);
+                    disp(['options_.solve_algo = ' num2str(options.solve_algo) ' not implemented']);
                 end;
                 info = -Block_Num*10;
                 return;
@@ -348,20 +411,22 @@ for it_=start:incr:finish
         return;
     end
 end
-info = 1;
 if(is_dynamic)
+    info = 1;
     oo_.deterministic_simulation.status = 1;
     oo_.deterministic_simulation.error = max_res;
     oo_.deterministic_simulation.iterations = iter;
     oo_.deterministic_simulation.block(Block_Num).status = 1;
     oo_.deterministic_simulation.block(Block_Num).error = max_res;
     oo_.deterministic_simulation.block(Block_Num).iterations = iter;
+else
+    info = 0;
 end;
 return;
 
-function [err, G]=local_fname(yl, x, params, y, y_index_eq, fname, is_csolve)
+function [err, G]=local_fname(yl, x, params, steady_state, y, y_index_eq, fname, is_csolve)
 y(y_index_eq) = yl;
-[err, y, G] = feval(fname, y, x, params, 0);
+[err, y, G] = feval(fname, y, x, params, steady_state, 0);
 if(is_csolve)
     G = full(G);
 end;

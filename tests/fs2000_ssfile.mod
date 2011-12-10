@@ -53,8 +53,9 @@ steady_state_model;
   d  = l - mst + 1;
   y  = k^alp*n^(1-alp)*gst^alp;
   R  = mst/bet;
-  W  = l/n;
-  e = 1;
+
+  // Test function returning several arguments
+  [W, e] = fs2000_ssfile_aux(l, n);
   
   gp_obs = m/dA;
   gy_obs = dA;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2009 Dynare Team
+ * Copyright (C) 2008-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -168,8 +168,8 @@ main(int argc, char *argv[])
 #endif
   if ((nEndo != nendo) || (nExog != nexo))    //(nPar != npar)
     {
-      mexErrMsgTxt("Incorrect number of input parameters.\n");
-      //return;
+      mexPrintf("Incorrect number of input parameters.\n");
+      return;
     }
 
 #ifdef DEBUG
@@ -271,7 +271,7 @@ main(int argc, char *argv[])
 
       // get latest ysteady
       double *dYsteady = (dynare.getSteady().base());
-      ySteady = (Vector *)(&dynare.getSteady());
+      ySteady = (Vector *) (&dynare.getSteady());
     }
   catch (const KordException &e)
     {

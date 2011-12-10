@@ -20,7 +20,7 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,bad_cond_flag,varargin)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -116,8 +116,9 @@ for its = 1:maxit
             p = e*[-r(1:end-n,1:end-n)\fvec(1:end-n);zeros(n,1)];
         end     
     elseif bad_cond_flag && cond(fjac) > 1/sqrt(eps)
-        fjac2=fjac'*fjac;
-        p=-(fjac2+sqrt(nn*eps)*max(sum(abs(fjac2)))*eye(nn))\(fjac'*fvec);
+        fjac
+        fjac2=fjac'*fjac
+        p=-(fjac2+1e6*sqrt(nn*eps)*max(sum(abs(fjac2)))*eye(nn))\(fjac'*fvec);
     else
         p = -fjac\fvec ;
     end

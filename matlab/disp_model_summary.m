@@ -7,7 +7,7 @@ function disp_model_summary(M,dr)
 %   M         [matlab structure] Definition of the model.           
 %   dr        [matlab structure] Decision rules
 %
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -36,7 +36,7 @@ disp(['  Number of jumpers:           ' ...
 disp(['  Number of static variables:  ' int2str(dr.nstatic)])
 my_title='MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS';
 labels = deblank(M.exo_names);
-headers = strvcat('Variables',labels);
+headers = char('Variables',labels);
 lh = size(labels,2)+2;
 dyntable(my_title,headers,labels,M.Sigma_e,lh,10,6);
 

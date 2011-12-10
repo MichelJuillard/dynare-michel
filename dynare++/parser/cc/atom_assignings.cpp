@@ -132,9 +132,13 @@ void AtomAssignings::apply_subst(const AtomSubstitutions::Toldnamemap& mm)
 	for (AtomSubstitutions::Toldnamemap::const_iterator it = mm.begin();
 		 it != mm.end(); ++it) {
 		const char* oldname = (*it).first;
-		int told = atoms.index(oldname);
 		const AtomSubstitutions::Tshiftnameset& sset = (*it).second;
-		if (told >= 0 && ! sset.empty()) {
+		if (! sset.empty()) {
+			int told = atoms.index(oldname);
+			if (told < 0 && ! atoms.get_name_storage().query(oldname))
+				atoms.register_name(oldname);
+			if (told == -1)
+				told = expr.add_nulary(oldname);
 			// at least one substitution here, so make an expression
 			expr.add_formula(told);
 			// say that this expression is not assigned to any atom

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2010 Dynare Team
+ * Copyright (C) 2003-2011 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -71,7 +71,7 @@ class ParsingDriver;
 %union
 {
   string *string_val;
-  NodeID node_val;
+  expr_t node_val;
   SymbolType symbol_type_val;
   vector<string *> *vector_string_val;
   vector<int> *vector_int_val;
@@ -93,27 +93,27 @@ class ParsingDriver;
 %token BVAR_PRIOR_DECAY BVAR_PRIOR_FLAT BVAR_PRIOR_LAMBDA
 %token BVAR_PRIOR_MU BVAR_PRIOR_OMEGA BVAR_PRIOR_TAU BVAR_PRIOR_TRAIN
 %token BVAR_REPLIC BYTECODE
-%token CALIB CALIB_VAR CHANGE_TYPE CHECK CONDITIONAL_FORECAST CONDITIONAL_FORECAST_PATHS CONF_SIG CONSTANT CONTROLLED_VAREXO CORR COVAR CUTOFF
-%token DATAFILE DR_ALGO DROP DSAMPLE DYNASAVE DYNATYPE
+%token CHANGE_TYPE CHECK CONDITIONAL_FORECAST CONDITIONAL_FORECAST_PATHS CONF_SIG CONSTANT CONTROLLED_VAREXO CORR COVAR CUTOFF
+%token DATAFILE DR_ALGO DROP DSAMPLE DYNASAVE DYNATYPE CALIBRATION
 %token END ENDVAL EQUAL ESTIMATION ESTIMATED_PARAMS ESTIMATED_PARAMS_BOUNDS ESTIMATED_PARAMS_INIT
 %token FILENAME FILTER_STEP_AHEAD FILTERED_VARS FIRST_OBS
 %token <string_val> FLOAT_NUMBER
 %token FORECAST K_ORDER_SOLVER INSTRUMENTS
-%token GAMMA_PDF GRAPH CONDITIONAL_VARIANCE_DECOMPOSITION
+%token GAMMA_PDF GRAPH CONDITIONAL_VARIANCE_DECOMPOSITION NOCHECK
 %token HISTVAL HOMOTOPY_SETUP HOMOTOPY_MODE HOMOTOPY_STEPS HP_FILTER HP_NGRID
 %token IDENTIFICATION INF_CONSTANT INITVAL INITVAL_FILE
 %token <string_val> INT_NUMBER
-%token INV_GAMMA_PDF INV_GAMMA1_PDF INV_GAMMA2_PDF IRF
+%token INV_GAMMA_PDF INV_GAMMA1_PDF INV_GAMMA2_PDF IRF IRF_SHOCKS
 %token KALMAN_ALGO KALMAN_TOL
 %token LABELS LAPLACE LIK_ALGO LIK_INIT LINEAR LOAD_IDENT_FILES LOAD_MH_FILE LOAD_PARAMS_AND_STEADY_STATE LOGLINEAR
-%token MARKOWITZ MARGINAL_DENSITY MAX
+%token MARKOWITZ MARGINAL_DENSITY MAX MAXIT
 %token MFS MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MH_RECOVER MIN MINIMAL_SOLVING_PERIODS
-%token MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MODEL_INFO MSHOCKS
+%token MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MODEL_INFO MSHOCKS ABS SIGN
 %token MODIFIEDHARMONICMEAN MOMENTS_VARENDO DIFFUSE_FILTER
 %token <string_val> NAME
 %token NAN_CONSTANT NO_STATIC NOBS NOCONSTANT NOCORR NODIAGNOSTIC NOFUNCTIONS
 %token NOGRAPH NOMOMENTS NOPRINT NORMAL_PDF
-%token OBSERVATION_TRENDS OPTIM OPTIM_WEIGHTS ORDER OSR OSR_PARAMS
+%token OBSERVATION_TRENDS OPTIM OPTIM_WEIGHTS ORDER OSR OSR_PARAMS MAX_DIM_COVA_GROUP ADVANCED
 %token PARAMETERS PARAMETER_SET PARTIAL_INFORMATION PERIODS PLANNER_OBJECTIVE PLOT_CONDITIONAL_FORECAST PLOT_PRIORS PREFILTER PRESAMPLE
 %token PRINT PRIOR_MC PRIOR_TRUNC PRIOR_MODE PRIOR_MEAN POSTERIOR_MODE POSTERIOR_MEAN POSTERIOR_MEDIAN PRUNING
 %token <string_val> QUOTED_STRING
@@ -121,9 +121,9 @@ class ParsingDriver;
 %token RELATIVE_IRF REPLIC RPLOT SAVE_PARAMS_AND_STEADY_STATE
 %token SHOCKS SHOCK_DECOMPOSITION SIGMA_E SIMUL SIMUL_ALGO SIMUL_SEED SMOOTHER STACK_SOLVE_ALGO STEADY_STATE_MODEL SOLVE_ALGO
 %token STDERR STEADY STOCH_SIMUL
-%token TEX RAMSEY_POLICY PLANNER_DISCOUNT
+%token TEX RAMSEY_POLICY PLANNER_DISCOUNT DISCRETIONARY_POLICY
 %token <string_val> TEX_NAME
-%token UNIFORM_PDF UNIT_ROOT_VARS USE_DLL USEAUTOCORR
+%token UNIFORM_PDF UNIT_ROOT_VARS USE_DLL USEAUTOCORR GSA_SAMPLE_FILE
 %token VALUES VAR VAREXO VAREXO_DET VAROBS PREDETERMINED_VARIABLES
 %token WRITE_LATEX_DYNAMIC_MODEL WRITE_LATEX_STATIC_MODEL
 %token XLS_SHEET XLS_RANGE
@@ -137,37 +137,46 @@ class ParsingDriver;
 %token EXP LOG LN LOG10 SIN COS TAN ASIN ACOS ATAN SINH COSH TANH ERF
 %token ASINH ACOSH ATANH SQRT NORMCDF NORMPDF STEADY_STATE EXPECTATION
 /* GSA analysis */
-%token DYNARE_SENSITIVITY MORRIS STAB REDFORM PPRIOR PRIOR_RANGE PPOST ILPTAU GLUE MORRIS_NLIV
+%token DYNARE_SENSITIVITY MORRIS STAB REDFORM PPRIOR PRIOR_RANGE PPOST ILPTAU MORRIS_NLIV
 %token MORRIS_NTRA NSAM LOAD_REDFORM LOAD_RMSE LOAD_STAB ALPHA2_STAB KSSTAT LOGTRANS_REDFORM THRESHOLD_REDFORM
 %token KSSTAT_REDFORM ALPHA2_REDFORM NAMENDO NAMLAGENDO NAMEXO RMSE LIK_ONLY VAR_RMSE PFILT_RMSE ISTART_RMSE
-%token ALPHA_RMSE ALPHA2_RMSE TRANS_IDENT
+%token ALPHA_RMSE ALPHA2_RMSE
 /* end of GSA analysis*/
-%token FREQ INITIAL_YEAR INITIAL_SUBPERIOD FINAL_YEAR FINAL_SUBPERIOD DATA VLIST VARLIST LOG_VAR PERCENT_VAR
+%token FREQ INITIAL_YEAR INITIAL_SUBPERIOD FINAL_YEAR FINAL_SUBPERIOD DATA VLIST LOG_VAR PERCENT_VAR
 %token VLISTLOG VLISTPER
-%token RESTRICTION_FNAME NLAGS CROSS_RESTRICTIONS CONTEMP_REDUCED_FORM REAL_PSEUDO_FORECAST BAYESIAN_PRIOR
-%token DUMMY_OBS NSTATES INDXSCALESSTATES
+%token RESTRICTION RESTRICTIONS RESTRICTION_FNAME CROSS_RESTRICTIONS NLAGS CONTEMP_REDUCED_FORM REAL_PSEUDO_FORECAST 
+%token NONE DUMMY_OBS NSTATES INDXSCALESSTATES NO_BAYESIAN_PRIOR SPECIFICATION SIMS_ZHA
 %token <string_val> ALPHA BETA ABAND NINV CMS NCMS CNUM
-%token GSIG2_LMD GSIG2_LMDM Q_DIAG FLAT_PRIOR NCSK NSTD
+%token GSIG2_LMDM Q_DIAG FLAT_PRIOR NCSK NSTD
 %token INDXPARR INDXOVR INDXAP APBAND INDXIMF IMFBAND INDXFORE FOREBAND INDXGFOREHAT INDXGIMFHAT
 %token INDXESTIMA INDXGDLS EQ_MS FILTER_COVARIANCE FILTER_DECOMPOSITION
-%token EQ_CMS TLINDX TLNUMBER BANACT CREATE_INITIALIZATION_FILE ESTIMATE_MSMODEL
-%token COMPUTE_MDD COMPUTE_PROBABILITIES PRINT_DRAWS N_DRAWS THINNING_FACTOR PROPOSAL_DRAWS MARKOV_FILE
-%token MHM_FILE OUTPUT_FILE_TAG DRAWS_NBR_BURN_IN_1 DRAWS_NBR_BURN_IN_2 DRAWS_NBR_MEAN_VAR_ESTIMATE
-%token DRAWS_NBR_MODIFIED_HARMONIC_MEAN DIRICHLET_SCALE
-%token SBVAR MS_SBVAR
-%token SVAR_IDENTIFICATION EQUATION EXCLUSION LAG UPPER_CHOLESKY LOWER_CHOLESKY
+%token EQ_CMS TLINDX TLNUMBER BANACT
+%token OUTPUT_FILE_TAG DRAWS_NBR_BURN_IN_1 DRAWS_NBR_BURN_IN_2 HORIZON
+%token SBVAR TREND_VAR DEFLATOR GROWTH_FACTOR MS_IRF MS_VARIANCE_DECOMPOSITION
+%token MS_ESTIMATION MS_SIMULATION MS_COMPUTE_MDD MS_COMPUTE_PROBABILITIES MS_FORECAST
+%token SVAR_IDENTIFICATION EQUATION EXCLUSION LAG UPPER_CHOLESKY LOWER_CHOLESKY MONTHLY QUARTERLY
 %token MARKOV_SWITCHING CHAIN STATE DURATION NUMBER_OF_STATES
-%token SVAR COEFFICIENTS VARIANCES CONSTANTS EQUATIONS
+%token SVAR COEFF COEFFICIENTS VARIANCES CONSTANTS EQUATIONS
 %token EXTERNAL_FUNCTION EXT_FUNC_NAME EXT_FUNC_NARGS FIRST_DERIV_PROVIDED SECOND_DERIV_PROVIDED
-%token SELECTED_VARIABLES_ONLY
+%token SELECTED_VARIABLES_ONLY COVA_COMPUTE SIMULATION_FILE_TAG FILE_TAG
+%token NO_ERROR_BANDS ERROR_BAND_PERCENTILES SHOCKS_PER_PARAMETER NO_CREATE_INIT
+%token SHOCK_DRAWS FREE_PARAMETERS MEDIAN DATA_OBS_NBR NEIGHBORHOOD_WIDTH PVALUE_KS PVALUE_CORR
+%token FILTERED_PROBABILITIES REAL_TIME_SMOOTHED
+%token PROPOSAL_TYPE PROPOSAL_UPPER_BOUND PROPOSAL_LOWER_BOUND PROPOSAL_DRAWS USE_MEAN_CENTER
+%token ADAPTIVE_MH_DRAWS THINNING_FACTOR COEFFICIENTS_PRIOR_HYPERPARAMETERS
+%token CONVERGENCE_STARTING_VALUE CONVERGENCE_ENDING_VALUE CONVERGENCE_INCREMENT_VALUE
+%token MAX_ITERATIONS_STARTING_VALUE MAX_ITERATIONS_INCREMENT_VALUE MAX_BLOCK_ITERATIONS
+%token MAX_REPEATED_OPTIMIZATION_RUNS FUNCTION_CONVERGENCE_CRITERION
+%token PARAMETER_CONVERGENCE_CRITERION NUMBER_OF_LARGE_PERTURBATIONS NUMBER_OF_SMALL_PERTURBATIONS
+%token NUMBER_OF_POSTERIOR_DRAWS_AFTER_PERTURBATION MAX_NUMBER_OF_STAGES
+%token RANDOM_FUNCTION_CONVERGENCE_CRITERION RANDOM_PARAMETER_CONVERGENCE_CRITERION
 
 %type <node_val> expression expression_or_empty
 %type <node_val> equation hand_side
-%type <string_val> signed_float signed_integer prior
-%type <string_val> filename symbol expectation_input
-%type <string_val> value value1
+%type <string_val> non_negative_number signed_number signed_integer
+%type <string_val> filename symbol
 %type <string_val> vec_value_1 vec_value
-%type <string_val> calib_arg2 range number
+%type <string_val> range prior
 %type <symbol_type_val> change_type_arg
 %type <vector_string_val> change_type_var_list
 %type <vector_int_val> vec_int_elem vec_int_1 vec_int vec_int_number
@@ -212,18 +221,16 @@ statement : parameters
           | optim_weights
           | osr_params
           | osr
-          | calib_var
-          | calib
           | dynatype
           | dynasave
           | model_comparison
           | model_info
           | planner_objective
           | ramsey_policy
+          | discretionary_policy
           | bvar_density
           | bvar_forecast
           | sbvar
-          | ms_sbvar
           | dynare_sensitivity
           | homotopy_setup
           | forecast
@@ -241,6 +248,14 @@ statement : parameters
           | svar
           | external_function
           | steady_state_model
+          | trend_var
+          | ms_estimation
+          | ms_simulation
+          | ms_compute_mdd
+          | ms_compute_probabilities
+          | ms_forecast
+          | ms_irf
+          | ms_variance_decomposition
           ;
 
 dsample : DSAMPLE INT_NUMBER ';'
@@ -251,7 +266,42 @@ dsample : DSAMPLE INT_NUMBER ';'
 
 rplot : RPLOT symbol_list ';' { driver.rplot(); };
 
-var : VAR var_list ';';
+trend_var : TREND_VAR '(' GROWTH_FACTOR EQUAL { driver.begin_trend(); } hand_side ')' trend_var_list ';'
+            { driver.end_trend_var($6); }
+          ;
+
+trend_var_list : trend_var_list symbol
+                 { driver.declare_trend_var($2); }
+               | trend_var_list COMMA symbol
+                 { driver.declare_trend_var($3); }
+               | symbol
+                 { driver.declare_trend_var($1); }
+               | trend_var_list symbol TEX_NAME
+                 { driver.declare_trend_var($2, $3); }
+               | trend_var_list COMMA symbol TEX_NAME
+                 { driver.declare_trend_var($3, $4); }
+               | symbol TEX_NAME
+                 { driver.declare_trend_var($1, $2); }
+               ;
+
+var : VAR var_list ';'
+    | VAR '(' DEFLATOR EQUAL { driver.begin_trend(); } hand_side ')' nonstationary_var_list ';'
+      { driver.end_nonstationary_var($6); }
+    ;
+
+nonstationary_var_list : nonstationary_var_list symbol
+                         { driver.declare_nonstationary_var($2); }
+                       | nonstationary_var_list COMMA symbol
+                         { driver.declare_nonstationary_var($3); }
+                       | symbol
+                         { driver.declare_nonstationary_var($1); }
+                       | nonstationary_var_list symbol TEX_NAME
+                         { driver.declare_nonstationary_var($2, $3); }
+                       | nonstationary_var_list COMMA symbol TEX_NAME
+                         { driver.declare_nonstationary_var($3, $4); }
+                       | symbol TEX_NAME
+                         { driver.declare_nonstationary_var($1, $2); }
+                       ;
 
 varexo : VAREXO varexo_list ';';
 
@@ -359,10 +409,8 @@ expression : '(' expression ')'
              { $$ = $2;}
            | symbol
              { $$ = driver.add_expression_variable($1); }
-           | FLOAT_NUMBER
-             { $$ = driver.add_constant($1); }
-           | INT_NUMBER
-             { $$ = driver.add_constant($1); }
+           | non_negative_number
+             { $$ = driver.add_non_negative_constant($1); }
            | expression PLUS expression
              { $$ = driver.add_plus($1, $3); }
            | expression MINUS expression
@@ -411,6 +459,10 @@ expression : '(' expression ')'
              { $$ = driver.add_atan($3); }
            | SQRT '(' expression ')'
              { $$ = driver.add_sqrt($3); }
+           | ABS '(' expression ')'
+             { $$ = driver.add_abs($3); }
+           | SIGN '(' expression ')'
+             { $$ = driver.add_sign($3); }
            | MAX '(' expression COMMA expression ')'
              { $$ = driver.add_max($3, $5); }
            | MIN '(' expression COMMA expression ')'
@@ -443,14 +495,14 @@ expression_or_empty : {$$ = driver.add_nan_constant();}
                     | expression
 	            ;
 
-initval : INITVAL ';' initval_list END
+initval : INITVAL ';' initval_list END ';'
           { driver.end_initval(); }
 
 initval_file : INITVAL_FILE '(' FILENAME EQUAL filename ')' ';'
                { driver.initval_file($5); }
              ;
 
-endval : ENDVAL ';' initval_list END { driver.end_endval(); };
+endval : ENDVAL ';' initval_list END ';' { driver.end_endval(); };
 
 initval_list : initval_list initval_elem
              | initval_elem
@@ -458,7 +510,7 @@ initval_list : initval_list initval_elem
 
 initval_elem : symbol EQUAL expression ';' { driver.init_val($1, $3); };
 
-histval : HISTVAL ';' histval_list END { driver.end_histval(); };
+histval : HISTVAL ';' histval_list END ';' { driver.end_histval(); };
 
 histval_list : histval_list histval_elem
              | histval_elem
@@ -480,9 +532,9 @@ model_options_list : model_options_list COMMA model_options
                    ;
 
 model : MODEL ';' { driver.begin_model(); }
-        equation_list END { driver.reset_data_tree(); }
+        equation_list END ';' { driver.reset_data_tree(); }
       | MODEL '(' model_options_list ')' ';' { driver.begin_model(); }
-        equation_list END { driver.reset_data_tree(); }
+        equation_list END ';' { driver.reset_data_tree(); }
       ;
 
 equation_list : equation_list equation
@@ -513,10 +565,8 @@ hand_side : '(' hand_side ')'
             { $$ = $2;}
           | symbol
             { $$ = driver.add_model_variable($1); }
-          | FLOAT_NUMBER
-            { $$ = driver.add_constant($1); }
-          | INT_NUMBER
-            { $$ = driver.add_constant($1); }
+          | non_negative_number
+            { $$ = driver.add_non_negative_constant($1); }
           | hand_side PLUS hand_side
             { $$ = driver.add_plus($1, $3); }
           | hand_side MINUS hand_side
@@ -539,7 +589,7 @@ hand_side : '(' hand_side ')'
             { $$ = driver.add_different($1, $3); }
           | hand_side POWER hand_side
             { $$ = driver.add_power($1, $3); }
-          | EXPECTATION '(' expectation_input ')''(' hand_side ')'
+          | EXPECTATION '(' signed_integer ')''(' hand_side ')'
 	    { $$ = driver.add_expectation($3, $6); }
           | MINUS hand_side %prec UMINUS
             { $$ = driver.add_uminus($2); }
@@ -567,6 +617,10 @@ hand_side : '(' hand_side ')'
             { $$ = driver.add_atan($3); }
           | SQRT '(' hand_side ')'
             { $$ = driver.add_sqrt($3); }
+          | ABS '(' hand_side ')'
+            { $$ = driver.add_abs($3); }
+          | SIGN '(' hand_side ')'
+            { $$ = driver.add_sign($3); }
           | MAX '(' hand_side COMMA hand_side ')'
             { $$ = driver.add_max($3, $5); }
           | MIN '(' hand_side COMMA hand_side ')'
@@ -593,15 +647,10 @@ comma_hand_side : hand_side
                   { driver.add_external_function_arg($3); }
                 ;
 
-expectation_input : signed_integer
-                  | VAROBS { string *varobs = new string("varobs"); $$ = varobs; }
-                  | FULL { string *full = new string("full"); $$ = full; }
-                  ;
-
 pound_expression: '#' symbol EQUAL hand_side ';'
                   { driver.declare_and_init_model_local_variable($2, $4); };
 
-shocks : SHOCKS ';' shock_list END { driver.end_shocks(); };
+shocks : SHOCKS ';' shock_list END ';' { driver.end_shocks(); };
 
 shock_list : shock_list shock_elem
            | shock_elem
@@ -622,24 +671,28 @@ det_shock_elem : VAR symbol ';' PERIODS period_list ';' VALUES value_list ';'
                  { driver.add_det_shock($2, false); }
                ;
 
-svar_identification : SVAR_IDENTIFICATION ';' svar_identification_list END
+svar_identification : SVAR_IDENTIFICATION {driver.begin_svar_identification();} ';' svar_identification_list END ';'
                       { driver.end_svar_identification(); }
                     ;
 
-svar_identification_list : svar_exclusion_list
+svar_identification_list : svar_identification_list svar_identification_elem
+                         | svar_identification_elem
+                         ;
+
+svar_identification_elem : EXCLUSION LAG INT_NUMBER ';' svar_equation_list
+                           { driver.combine_lag_and_restriction($3); }
+                         | EXCLUSION CONSTANTS ';'
+                           { driver.add_constants_exclusion(); }
+                         | RESTRICTION EQUATION INT_NUMBER COMMA
+			 { driver.add_restriction_equation_nbr($3);}
+                           restriction_expression EQUAL 
+                                {driver.add_restriction_equal();} 
+                           restriction_expression ';'
                          | UPPER_CHOLESKY ';'
                            { driver.add_upper_cholesky(); }
                          | LOWER_CHOLESKY ';'
                            { driver.add_lower_cholesky(); }
                          ;
-
-svar_exclusion_list : svar_exclusion_list svar_exclusion_elem
-                    | svar_exclusion_elem
-                    ;
-
-svar_exclusion_elem : EXCLUSION LAG INT_NUMBER ';' svar_equation_list
-                      { driver.combine_lag_and_restriction($3); }
-                    ;
 
 svar_equation_list : svar_equation_list EQUATION INT_NUMBER COMMA svar_var_list ';'
                      { driver.add_restriction_in_equation($3); }
@@ -652,6 +705,24 @@ svar_var_list : svar_var_list COMMA symbol
               | symbol
                 { driver.add_in_svar_restriction_symbols($1); }
               ;
+
+restriction_expression : expression {driver.check_restriction_expression_constant($1);}
+                       | restriction_expression_1
+                       ;
+
+restriction_expression_1 : restriction_elem_expression
+                         | restriction_expression_1 restriction_elem_expression
+                         ;   
+
+restriction_elem_expression : COEFF '(' symbol COMMA INT_NUMBER ')'
+                                 { driver.add_positive_restriction_element($3,$5);}
+                            | PLUS COEFF '(' symbol COMMA INT_NUMBER ')'
+		                 { driver.add_positive_restriction_element($4,$6);}
+                            | MINUS COEFF '(' symbol COMMA INT_NUMBER ')'
+		                 { driver.add_negative_restriction_element($4,$6);}
+                            | expression TIMES COEFF '(' symbol COMMA INT_NUMBER ')'
+                                 { driver.add_positive_restriction_element($1,$5,$7);}
+                            ;
 
 markov_switching : MARKOV_SWITCHING '(' ms_options_list ')' ';'
                    { driver.markov_switching(); }
@@ -677,12 +748,11 @@ svar_options_list : svar_options_list COMMA svar_options
 
 svar_options : o_coefficients
              | o_variances
-             | o_constants
              | o_equations
              | o_chain
              ;
 
-mshocks : MSHOCKS ';' mshock_list END { driver.end_mshocks(); };
+mshocks : MSHOCKS ';' mshock_list END ';' { driver.end_mshocks(); };
 
 mshock_list : mshock_list det_shock_elem
             | det_shock_elem
@@ -702,17 +772,21 @@ period_list : period_list COMMA INT_NUMBER
               { driver.add_period($1); }
             ;
 
-
 sigma_e : SIGMA_E EQUAL '[' triangular_matrix ']' ';' { driver.do_sigma_e(); };
 
-value_list
- 	:  value_list COMMA expression
-    {driver.add_value($3);}
-  |  value_list number
-    {driver.add_value($2);}
-	| expression
-    {driver.add_value($1);}
-	;
+value_list : value_list COMMA '(' expression ')'
+             { driver.add_value($4); }
+           | value_list '(' expression ')'
+             { driver.add_value($3); }
+           | '(' expression ')'
+             { driver.add_value($2); }
+           | value_list COMMA signed_number
+             { driver.add_value($3); }
+           | value_list signed_number
+             { driver.add_value($2); }
+           | signed_number
+             { driver.add_value($1); }
+           ;
 
 triangular_matrix : triangular_matrix ';' triangular_row
                     { driver.end_of_row(); }
@@ -722,21 +796,15 @@ triangular_matrix : triangular_matrix ';' triangular_row
 
 triangular_row : triangular_row COMMA '(' expression ')'
                  { driver.add_to_row($4); }
-               | triangular_row COMMA FLOAT_NUMBER
-                 { driver.add_to_row_const($3); }
-               | triangular_row COMMA INT_NUMBER
+               | triangular_row COMMA signed_number
                  { driver.add_to_row_const($3); }
                | triangular_row '(' expression ')'
                  { driver.add_to_row($3); }
-               | triangular_row FLOAT_NUMBER
-                 { driver.add_to_row_const($2); }
-               | triangular_row INT_NUMBER
+               | triangular_row signed_number
                  { driver.add_to_row_const($2); }
                | '(' expression ')'
                  { driver.add_to_row($2); }
-               | FLOAT_NUMBER
-                 { driver.add_to_row_const($1); }
-               | INT_NUMBER
+               | signed_number
                  { driver.add_to_row_const($1); }
                ;
 
@@ -754,6 +822,8 @@ steady_options : o_solve_algo
                | o_homotopy_mode
                | o_homotopy_steps
                | o_markowitz
+               | o_maxit
+               | o_nocheck
                ;
 
 check : CHECK ';'
@@ -787,6 +857,7 @@ simul_options : o_periods
               | o_stack_solve_algo
               | o_markowitz
               | o_minimal_solving_periods
+              | o_maxit
               ;
 
 external_function : EXTERNAL_FUNCTION '(' external_function_options_list ')' ';'
@@ -830,6 +901,7 @@ stoch_simul_options : o_dr_algo
                     | o_nomoments
                     | o_nograph
                     | o_irf
+                    | o_irf_shocks
                     | o_relative_irf
                     | o_hp_filter
                     | o_hp_ngrid
@@ -885,19 +957,20 @@ signed_integer : PLUS INT_NUMBER
                | MINUS INT_NUMBER
                 { $2->insert(0, "-"); $$ = $2; }
                | INT_NUMBER
-                { $$ = $1; }
                ;
 
-signed_float : PLUS FLOAT_NUMBER
-               { $$ = $2; }
-             | MINUS FLOAT_NUMBER
-               { $2->insert(0, "-"); $$ = $2; }
-             | FLOAT_NUMBER
-               { $$ = $1; }
-             | signed_integer
-             ;
+non_negative_number : INT_NUMBER
+                    | FLOAT_NUMBER
+                    ;
 
-estimated_params : ESTIMATED_PARAMS ';' estimated_list END { driver.estimated_params(); };
+signed_number : PLUS non_negative_number
+               { $$ = $2; }
+              | MINUS non_negative_number
+               { $2->insert(0, "-"); $$ = $2; }
+              | non_negative_number
+              ;
+
+estimated_params : ESTIMATED_PARAMS ';' estimated_list END ';' { driver.estimated_params(); };
 
 estimated_list : estimated_list estimated_elem
                  { driver.add_estimated_params_element(); }
@@ -993,7 +1066,7 @@ estimated_elem3 : expression_or_empty COMMA expression_or_empty
                   }
                 ;
 
-estimated_params_init : ESTIMATED_PARAMS_INIT ';' estimated_init_list END
+estimated_params_init : ESTIMATED_PARAMS_INIT ';' estimated_init_list END ';'
                         { driver.estimated_params_init(); };
 
 estimated_init_list : estimated_init_list estimated_init_elem
@@ -1027,7 +1100,7 @@ estimated_init_elem : STDERR symbol COMMA expression ';'
                       }
                     ;
 
-estimated_params_bounds : ESTIMATED_PARAMS_BOUNDS ';' estimated_bounds_list END
+estimated_params_bounds : ESTIMATED_PARAMS_BOUNDS ';' estimated_bounds_list END ';'
                           { driver.estimated_params_bounds(); };
 
 estimated_bounds_list : estimated_bounds_list estimated_bounds_elem
@@ -1079,19 +1152,6 @@ prior : BETA_PDF
       | INV_GAMMA2_PDF
         { $$ = new string("6"); }
       ;
-
-value : { $$ = new string("NaN"); }
-      | value1
-      ;
-
-value1 : INT_NUMBER
-       | FLOAT_NUMBER
-       | symbol
-       | MINUS INT_NUMBER
-         { $2->insert(0, "-"); $$ = $2; }
-       | MINUS FLOAT_NUMBER
-         { $2->insert(0, "-"); $$ = $2; }
-       ;
 
 estimation : ESTIMATION ';'
              { driver.run_estimation(); }
@@ -1157,11 +1217,13 @@ estimation_options : o_datafile
                    | o_filter_decomposition
                    | o_selected_variables_only
                    | o_conditional_variance_decomposition
+                   | o_cova_compute
+                   | o_irf_shocks
                    ;
 
 list_optim_option : QUOTED_STRING COMMA QUOTED_STRING
                     { driver.optim_options_string($1, $3); }
-                  | QUOTED_STRING COMMA value
+                  | QUOTED_STRING COMMA signed_number
                     { driver.optim_options_num($1, $3); }
                   ;
 
@@ -1179,7 +1241,7 @@ varobs_list : varobs_list symbol
               { driver.add_varobs($1); }
             ;
 
-observation_trends : OBSERVATION_TRENDS ';' trend_list END { driver.set_trends(); };
+observation_trends : OBSERVATION_TRENDS ';' trend_list END ';' { driver.set_trends(); };
 
 trend_list : trend_list trend_element
            | trend_element
@@ -1189,7 +1251,7 @@ trend_element :  symbol '(' expression ')' ';' { driver.set_trend_element($1, $3
 
 unit_root_vars : UNIT_ROOT_VARS symbol_list ';' { driver.set_unit_root_vars(); };
 
-optim_weights : OPTIM_WEIGHTS ';' optim_weights_list END { driver.optim_weights(); };
+optim_weights : OPTIM_WEIGHTS ';' optim_weights_list END ';' { driver.optim_weights(); };
 
 optim_weights_list : optim_weights_list symbol expression ';'
                      { driver.set_optim_weights($2, $3); }
@@ -1212,33 +1274,6 @@ osr : OSR ';'
     | OSR '(' stoch_simul_options_list ')' symbol_list ';'
       {driver.run_osr(); }
     ;
-
-calib_var : CALIB_VAR ';' calib_var_list END { driver.run_calib_var(); };
-
-calib_var_list : calib_var_list calib_arg1
-               | calib_arg1
-               ;
-
-calib_arg1 : symbol calib_arg2 EQUAL expression ';'
-             { driver.set_calib_var($1, $2, $4); }
-           | symbol COMMA symbol calib_arg2 EQUAL expression ';'
-             { driver.set_calib_covar($1, $3, $4, $6); }
-           | AUTOCORR symbol '(' INT_NUMBER ')' calib_arg2 EQUAL expression ';'
-             { driver.set_calib_ac($2, $4, $6, $8); }
-           ;
-
-calib_arg2 : { $$ = new string("1"); }
-           | '(' INT_NUMBER ')'
-             { $$ = $2; }
-           | '(' FLOAT_NUMBER ')'
-             { $$ = $2; }
-           ;
-
-calib : CALIB ';'
-        { driver.run_calib(0); }
-      | CALIB '(' COVAR ')' ';'
-        { driver.run_calib(1); }
-      ;
 
 dynatype : DYNATYPE '(' filename ')' ';'
            { driver.run_dynatype($3); }
@@ -1274,6 +1309,14 @@ identification_option : o_ar
                       | o_useautocorr
                       | o_load_ident_files
                       | o_prior_mc
+                      | o_advanced
+                      | o_max_dim_cova_group
+                      | o_gsa_prior_range
+                      | o_periods
+                      | o_replic
+                      | o_gsa_sample_file
+                      | o_parameter_set
+                      | o_lik_init
                       ;
 
 model_comparison : MODEL_COMPARISON mc_filename_list ';'
@@ -1283,22 +1326,20 @@ model_comparison : MODEL_COMPARISON mc_filename_list ';'
                  ;
 
 filename : symbol
-           { $$ = $1; }
          | QUOTED_STRING
-           { $$ = $1; }
          ;
 
 mc_filename_list : filename
                    { driver.add_mc_filename($1); }
-                 | filename '(' value ')'
+                 | filename '(' non_negative_number ')'
                    { driver.add_mc_filename($1, $3); }
                  | mc_filename_list filename
                    { driver.add_mc_filename($2); }
-                 | mc_filename_list filename '(' value ')'
+                 | mc_filename_list filename '(' non_negative_number ')'
                    { driver.add_mc_filename($2, $4); }
                  | mc_filename_list COMMA filename
                    { driver.add_mc_filename($3); }
-                 | mc_filename_list COMMA filename '(' value ')'
+                 | mc_filename_list COMMA filename '(' non_negative_number ')'
                    { driver.add_mc_filename($3, $5); }
                  ;
 
@@ -1314,6 +1355,16 @@ ramsey_policy : RAMSEY_POLICY ';'
               | RAMSEY_POLICY '(' ramsey_policy_options_list ')' symbol_list ';'
                 { driver.ramsey_policy(); }
               ;
+
+discretionary_policy : DISCRETIONARY_POLICY ';'
+                       { driver.discretionary_policy(); }
+                     | DISCRETIONARY_POLICY '(' ramsey_policy_options_list ')' ';'
+                       { driver.discretionary_policy(); }
+                     | DISCRETIONARY_POLICY symbol_list ';'
+                       { driver.discretionary_policy(); }
+                     | DISCRETIONARY_POLICY '(' ramsey_policy_options_list ')' symbol_list ';'
+                       { driver.discretionary_policy(); }
+                     ;
 
 ramsey_policy_options_list : ramsey_policy_options_list COMMA ramsey_policy_options
                            | ramsey_policy_options
@@ -1399,19 +1450,17 @@ sbvar_option : o_datafile
              | o_vlist
              | o_vlistlog
              | o_vlistper
-             | o_varlist
              | o_restriction_fname
              | o_nlags
              | o_cross_restrictions
              | o_contemp_reduced_form
              | o_real_pseudo_forecast
-             | o_bayesian_prior
+             | o_no_bayesian_prior
              | o_dummy_obs
              | o_nstates
              | o_indxscalesstates
              | o_alpha
              | o_beta
-             | o_gsig2_lmd
              | o_gsig2_lmdm
              | o_q_diag
              | o_flat_prior
@@ -1438,6 +1487,7 @@ sbvar_option : o_datafile
              | o_tlnumber
              | o_cnum
              | o_forecast
+             | o_coefficients_prior_hyperparameters;
              ;
 
 sbvar_options_list : sbvar_option COMMA sbvar_options_list
@@ -1450,83 +1500,180 @@ sbvar : SBVAR ';'
         { driver.sbvar(); }
       ;
 
-ms_sbvar_option : o_datafile
-                | o_freq
-                | o_initial_year
-                | o_initial_subperiod
-                | o_final_year
-                | o_final_subperiod
-                | o_data
-                | o_vlist
-                | o_vlistlog
-                | o_vlistper
-                | o_varlist
-                | o_restriction_fname
-                | o_nlags
-                | o_cross_restrictions
-                | o_contemp_reduced_form
-                | o_real_pseudo_forecast
-                | o_bayesian_prior
-                | o_dummy_obs
-                | o_nstates
-                | o_indxscalesstates
-                | o_alpha
-                | o_beta
-                | o_gsig2_lmd
-                | o_gsig2_lmdm
-                | o_q_diag
-                | o_flat_prior
-                | o_ncsk
-                | o_nstd
-                | o_ninv
-                | o_indxparr
-                | o_indxovr
-                | o_aband
-                | o_indxap
-                | o_apband
-                | o_indximf
-                | o_indxfore
-                | o_foreband
-                | o_indxgforhat
-                | o_indxgimfhat
-                | o_indxestima
-                | o_indxgdls
-                | o_eq_ms
-                | o_cms
-                | o_ncms
-                | o_eq_cms
-                | o_tlindx
-                | o_tlnumber
-                | o_cnum
-                | o_forecast
-                | o_output_file_tag
-                | o_create_initialization_file
-                | o_estimate_msmodel
-                | o_compute_mdd
-                | o_compute_probabilities
-                | o_print_draws
-                | o_n_draws
-                | o_thinning_factor
-                | o_markov_file
-                | o_mhm_file
-                | o_proposal_draws
-                | o_draws_nbr_burn_in_1
-                | o_draws_nbr_burn_in_2
-                | o_draws_nbr_mean_var_estimate
-                | o_draws_nbr_modified_harmonic_mean
-                | o_dirichlet_scale
-                ;
+ms_variance_decomposition_option : o_output_file_tag
+                                 | o_file_tag
+                                 | o_simulation_file_tag
+                                 | o_filtered_probabilities
+                                 | o_no_error_bands
+                                 | o_error_band_percentiles
+                                 | o_shock_draws
+                                 | o_shocks_per_parameter
+                                 | o_thinning_factor
+                                 | o_free_parameters
+                                 | o_median
+                                 ;
 
-ms_sbvar_options_list : ms_sbvar_option COMMA ms_sbvar_options_list
-                      | ms_sbvar_option
+ms_variance_decomposition_options_list : ms_variance_decomposition_option COMMA ms_variance_decomposition_options_list
+                                       | ms_variance_decomposition_option
+                                       ;
+
+ms_variance_decomposition : MS_VARIANCE_DECOMPOSITION ';'
+                            { driver.ms_variance_decomposition(); }
+                          | MS_VARIANCE_DECOMPOSITION '(' ms_variance_decomposition_options_list ')' ';'
+                            { driver.ms_variance_decomposition(); }
+                          ;
+
+ms_forecast_option : o_output_file_tag
+                   | o_file_tag
+                   | o_simulation_file_tag
+                   | o_data_obs_nbr
+                   | o_no_error_bands
+                   | o_error_band_percentiles
+                   | o_shock_draws
+                   | o_shocks_per_parameter
+                   | o_thinning_factor
+                   | o_free_parameters
+                   | o_median
+                   ;
+
+ms_forecast_options_list : ms_forecast_option COMMA ms_forecast_options_list
+                         | ms_forecast_option
+                         ;
+
+ms_forecast : MS_FORECAST ';'
+              { driver.ms_forecast(); }
+            | MS_FORECAST '(' ms_forecast_options_list ')' ';'
+              { driver.ms_forecast(); }
+            ;
+
+ms_irf_option : o_output_file_tag
+              | o_file_tag
+              | o_simulation_file_tag
+              | o_horizon
+              | o_filtered_probabilities
+              | o_no_error_bands
+              | o_error_band_percentiles
+              | o_shock_draws
+              | o_shocks_per_parameter
+              | o_thinning_factor
+              | o_free_parameters
+              | o_median
+              ;
+
+ms_irf_options_list : ms_irf_option COMMA ms_irf_options_list
+                    | ms_irf_option
+                    ;
+
+ms_irf : MS_IRF ';'
+         { driver.ms_irf(); }
+       | MS_IRF '(' ms_irf_options_list ')' ';'
+         { driver.ms_irf(); }
+       | MS_IRF symbol_list ';'
+         { driver.ms_irf(); }
+       | MS_IRF '(' ms_irf_options_list ')' symbol_list ';'
+         { driver.ms_irf(); }
+       ;
+
+ms_compute_probabilities_option : o_output_file_tag
+                                | o_file_tag
+                                | o_filtered_probabilities
+                                | o_real_time_smoothed
+                                ;
+
+ms_compute_probabilities_options_list : ms_compute_probabilities_option COMMA ms_compute_probabilities_options_list
+                                      | ms_compute_probabilities_option
+                                      ;
+
+ms_compute_probabilities : MS_COMPUTE_PROBABILITIES ';'
+                           { driver.ms_compute_probabilities(); }
+                         | MS_COMPUTE_PROBABILITIES '(' ms_compute_probabilities_options_list ')' ';'
+                           { driver.ms_compute_probabilities(); }
+                         ;
+
+ms_compute_mdd_option : o_output_file_tag
+                      | o_file_tag
+                      | o_simulation_file_tag
+                      | o_proposal_type
+                      | o_proposal_lower_bound
+                      | o_proposal_upper_bound
+                      | o_proposal_draws
+                      | o_use_mean_center
                       ;
 
-ms_sbvar : MS_SBVAR ';'
-           { driver.ms_sbvar(); }
-         | MS_SBVAR '(' ms_sbvar_options_list ')' ';'
-           { driver.ms_sbvar(); }
-         ;
+ms_compute_mdd_options_list : ms_compute_mdd_option COMMA ms_compute_mdd_options_list
+                            | ms_compute_mdd_option
+                            ;
 
+ms_compute_mdd : MS_COMPUTE_MDD ';'
+                 { driver.ms_compute_mdd(); }
+               | MS_COMPUTE_MDD '(' ms_compute_mdd_options_list ')' ';'
+                 { driver.ms_compute_mdd(); }
+               ;
+
+ms_simulation_option : o_output_file_tag
+                     | o_file_tag
+                     | o_ms_mh_replic
+                     | o_ms_drop
+                     | o_thinning_factor
+                     | o_adaptive_mh_draws
+                     ;
+
+ms_simulation_options_list : ms_simulation_option COMMA ms_simulation_options_list
+                           | ms_simulation_option
+                           ;
+
+ms_simulation : MS_SIMULATION ';'
+                { driver.ms_simulation(); }
+              | MS_SIMULATION '(' ms_simulation_options_list ')' ';'
+                { driver.ms_simulation(); }
+              ;
+
+ms_estimation_option : o_coefficients_prior_hyperparameters
+                     | o_freq
+                     | o_initial_year
+                     | o_initial_subperiod
+                     | o_final_year
+                     | o_final_subperiod
+                     | o_datafile
+                     | o_xls_sheet
+                     | o_xls_range
+                     | o_nlags
+                     | o_cross_restrictions
+                     | o_contemp_reduced_form
+                     | o_no_bayesian_prior
+                     | o_alpha
+                     | o_beta
+                     | o_gsig2_lmdm
+                     | o_specification
+                     | o_output_file_tag
+                     | o_file_tag
+                     | o_no_create_init
+                     | o_convergence_starting_value
+                     | o_convergence_ending_value
+                     | o_convergence_increment_value
+                     | o_max_iterations_starting_value
+                     | o_max_iterations_increment_value
+                     | o_max_block_iterations
+                     | o_max_repeated_optimization_runs
+                     | o_function_convergence_criterion
+                     | o_parameter_convergence_criterion
+                     | o_number_of_large_perturbations
+                     | o_number_of_small_perturbations
+                     | o_number_of_posterior_draws_after_perturbation
+                     | o_max_number_of_stages
+                     | o_random_function_convergence_criterion
+                     | o_random_parameter_convergence_criterion
+                     ;
+
+ms_estimation_options_list : ms_estimation_option COMMA ms_estimation_options_list
+                           | ms_estimation_option
+                           ;
+
+ms_estimation : MS_ESTIMATION ';'
+                { driver.ms_estimation(); }
+              | MS_ESTIMATION '(' ms_estimation_options_list ')' ';'
+                { driver.ms_estimation(); }
+              ;
 
 dynare_sensitivity : DYNARE_SENSITIVITY ';'
                      { driver.dynare_sensitivity(); }
@@ -1546,7 +1693,6 @@ dynare_sensitivity_option : o_gsa_identification
                           | o_gsa_prior_range
                           | o_gsa_ppost
                           | o_gsa_ilptau
-                          | o_gsa_glue
                           | o_gsa_morris_nliv
                           | o_gsa_morris_ntra
                           | o_gsa_nsam
@@ -1569,6 +1715,9 @@ dynare_sensitivity_option : o_gsa_identification
                           | o_gsa_namexo
                           | o_gsa_namlagendo
                           | o_gsa_var_rmse
+                          | o_gsa_neighborhood_width
+                          | o_gsa_pvalue_ks
+                          | o_gsa_pvalue_corr
                           | o_datafile
                           | o_nobs
                           | o_first_obs
@@ -1578,7 +1727,6 @@ dynare_sensitivity_option : o_gsa_identification
                           | o_conf_sig
                           | o_loglinear
                           | o_mode_file
-                          | o_gsa_trans_ident
                           | o_load_ident_files
                           | o_useautocorr
                           | o_ar
@@ -1588,12 +1736,12 @@ shock_decomposition_options_list : shock_decomposition_option COMMA shock_decomp
                                  | shock_decomposition_option
                                  ;
 
-shock_decomposition_option : o_parameters
+shock_decomposition_option : o_parameter_set
                            | o_shocks
                            | o_labels
                            ;
 
-homotopy_setup: HOMOTOPY_SETUP ';' homotopy_list END
+homotopy_setup: HOMOTOPY_SETUP ';' homotopy_list END ';'
                { driver.end_homotopy();};
 
 homotopy_list : homotopy_item
@@ -1621,11 +1769,6 @@ forecast_option: o_periods
           | o_nograph
           ;
 
-
-number : INT_NUMBER
-       | FLOAT_NUMBER
-       ;
-
 conditional_forecast : CONDITIONAL_FORECAST '(' conditional_forecast_options ')' ';'
                        { driver.conditional_forecast(); }
                      ;
@@ -1647,7 +1790,7 @@ plot_conditional_forecast : PLOT_CONDITIONAL_FORECAST symbol_list ';'
                             { driver.plot_conditional_forecast($5); }
                           ;
 
-conditional_forecast_paths : CONDITIONAL_FORECAST_PATHS ';' conditional_forecast_paths_shock_list END
+conditional_forecast_paths : CONDITIONAL_FORECAST_PATHS ';' conditional_forecast_paths_shock_list END ';'
                              { driver.conditional_forecast_paths(); }
                            ;
 
@@ -1660,7 +1803,7 @@ conditional_forecast_paths_shock_elem : VAR symbol ';' PERIODS period_list ';' V
                                       ;
 
 steady_state_model : STEADY_STATE_MODEL ';' { driver.begin_steady_state_model(); }
-                     steady_state_equation_list END { driver.reset_data_tree(); }
+                     steady_state_equation_list END ';' { driver.reset_data_tree(); }
                    ;
 
 steady_state_equation_list : steady_state_equation_list steady_state_equation
@@ -1669,6 +1812,8 @@ steady_state_equation_list : steady_state_equation_list steady_state_equation
 
 steady_state_equation : symbol EQUAL expression ';'
                         { driver.add_steady_state_model_equal($1, $3); }
+                      | '[' symbol_list ']' EQUAL expression ';'
+                        { driver.add_steady_state_model_equal_multiple($5); }
                       ;
 
 o_dr_algo : DR_ALGO EQUAL INT_NUMBER {
@@ -1694,16 +1839,18 @@ o_nocorr : NOCORR { driver.option_num("nocorr", "1"); };
 o_nofunctions : NOFUNCTIONS { driver.option_num("nofunctions", "1"); };
 o_nomoments : NOMOMENTS { driver.option_num("nomoments", "1"); };
 o_irf : IRF EQUAL INT_NUMBER { driver.option_num("irf", $3); };
-o_hp_filter : HP_FILTER EQUAL INT_NUMBER { driver.option_num("hp_filter", $3); };
+o_irf_shocks : IRF_SHOCKS EQUAL '(' symbol_list ')' { driver.option_symbol_list("irf_shocks"); };
+o_hp_filter : HP_FILTER EQUAL non_negative_number { driver.option_num("hp_filter", $3); };
 o_hp_ngrid : HP_NGRID EQUAL INT_NUMBER { driver.option_num("hp_ngrid", $3); };
 o_periods : PERIODS EQUAL INT_NUMBER { driver.option_num("periods", $3); };
-o_cutoff : CUTOFF EQUAL number { driver.cutoff($3); }
-o_markowitz : MARKOWITZ EQUAL number { driver.option_num("markowitz", $3); };
-o_minimal_solving_periods : MINIMAL_SOLVING_PERIODS EQUAL number { driver.option_num("minimal_solving_periods", $3); };
+o_maxit : MAXIT EQUAL INT_NUMBER { driver.option_num("maxit_", $3); };
+o_cutoff : CUTOFF EQUAL non_negative_number { driver.cutoff($3); };
+o_markowitz : MARKOWITZ EQUAL non_negative_number { driver.option_num("markowitz", $3); };
+o_minimal_solving_periods : MINIMAL_SOLVING_PERIODS EQUAL non_negative_number { driver.option_num("minimal_solving_periods", $3); };
 o_mfs : MFS EQUAL INT_NUMBER { driver.mfs($3); };
 o_simul : SIMUL; // Do nothing, only here for backward compatibility
-o_simul_seed : SIMUL_SEED EQUAL INT_NUMBER { driver.option_num("simul_seed", $3); } ;
-o_qz_criterium : QZ_CRITERIUM EQUAL number { driver.option_num("qz_criterium", $3); };
+o_simul_seed : SIMUL_SEED EQUAL INT_NUMBER { driver.error("'simul_seed' option is no longer supported; use 'set_dynare_seed' command instead"); } ;
+o_qz_criterium : QZ_CRITERIUM EQUAL non_negative_number { driver.option_num("qz_criterium", $3); };
 o_datafile : DATAFILE EQUAL filename { driver.option_str("datafile", $3); };
 o_nobs : NOBS EQUAL vec_int
          { driver.option_vec_int("nobs", $3); }
@@ -1725,24 +1872,24 @@ o_nograph : NOGRAPH
           | GRAPH
             { driver.option_num("nograph", "0"); }
           ;
-o_conf_sig : CONF_SIG EQUAL number { driver.option_num("conf_sig", $3); };
+o_conf_sig : CONF_SIG EQUAL non_negative_number { driver.option_num("conf_sig", $3); };
 o_mh_replic : MH_REPLIC EQUAL INT_NUMBER { driver.option_num("mh_replic", $3); };
-o_mh_drop : MH_DROP EQUAL number { driver.option_num("mh_drop", $3); };
-o_mh_jscale : MH_JSCALE EQUAL number { driver.option_num("mh_jscale", $3); };
+o_mh_drop : MH_DROP EQUAL non_negative_number { driver.option_num("mh_drop", $3); };
+o_mh_jscale : MH_JSCALE EQUAL non_negative_number { driver.option_num("mh_jscale", $3); };
 o_optim : OPTIM  EQUAL '(' optim_options ')';
-o_mh_init_scale : MH_INIT_SCALE EQUAL number { driver.option_num("mh_init_scale", $3); };
+o_mh_init_scale : MH_INIT_SCALE EQUAL non_negative_number { driver.option_num("mh_init_scale", $3); };
 o_mode_file : MODE_FILE EQUAL filename { driver.option_str("mode_file", $3); };
 o_mode_compute : MODE_COMPUTE EQUAL INT_NUMBER { driver.option_num("mode_compute", $3); };
                | MODE_COMPUTE EQUAL symbol { driver.option_str("mode_compute", $3); };
 o_mode_check : MODE_CHECK { driver.option_num("mode_check", "1"); };
-o_prior_trunc : PRIOR_TRUNC EQUAL number { driver.option_num("prior_trunc", $3); };
+o_prior_trunc : PRIOR_TRUNC EQUAL non_negative_number { driver.option_num("prior_trunc", $3); };
 o_mh_mode : MH_MODE EQUAL INT_NUMBER { driver.option_num("mh_mode", $3); };
 o_mh_nblocks : MH_NBLOCKS EQUAL INT_NUMBER { driver.option_num("mh_nblck", $3); };
 o_load_mh_file : LOAD_MH_FILE { driver.option_num("load_mh_file", "1"); };
 o_loglinear : LOGLINEAR { driver.option_num("loglinear", "1"); };
 o_nodiagnostic : NODIAGNOSTIC { driver.option_num("nodiagnostic", "1"); };
 o_bayesian_irf : BAYESIAN_IRF { driver.option_num("bayesian_irf", "1"); };
-o_dsge_var : DSGE_VAR EQUAL number
+o_dsge_var : DSGE_VAR EQUAL non_negative_number
              { driver.option_num("dsge_var", $3); }
            | DSGE_VAR EQUAL INF_CONSTANT
              { driver.option_num("dsge_var", "Inf"); }
@@ -1757,7 +1904,7 @@ o_moments_varendo : MOMENTS_VARENDO { driver.option_num("moments_varendo", "1");
 o_filtered_vars : FILTERED_VARS { driver.option_num("filtered_vars", "1"); };
 o_relative_irf : RELATIVE_IRF { driver.option_num("relative_irf", "1"); };
 o_kalman_algo : KALMAN_ALGO EQUAL INT_NUMBER { driver.option_num("kalman_algo", $3); };
-o_kalman_tol : KALMAN_TOL EQUAL INT_NUMBER { driver.option_num("kalman_tol", $3); };
+o_kalman_tol : KALMAN_TOL EQUAL non_negative_number { driver.option_num("kalman_tol", $3); };
 o_marginal_density : MARGINAL_DENSITY EQUAL LAPLACE
                      { driver.option_str("mc_marginal_density", "laplace"); }
                    | MARGINAL_DENSITY EQUAL MODIFIEDHARMONICMEAN
@@ -1772,16 +1919,16 @@ o_constant : CONSTANT { driver.option_num("noconstant", "0"); };
 o_noconstant : NOCONSTANT { driver.option_num("noconstant", "1"); };
 o_mh_recover : MH_RECOVER { driver.option_num("mh_recover", "1"); };
 o_diffuse_filter: DIFFUSE_FILTER {driver.option_num("diffuse_filter", "1"); };
-o_plot_priors: PLOT_PRIORS {driver.option_num("plot_priors", "1"); };
+o_plot_priors: PLOT_PRIORS EQUAL INT_NUMBER {driver.option_num("plot_priors", $3); };
 o_aim_solver: AIM_SOLVER {driver.option_num("aim_solver", "1"); };
 o_partial_information : PARTIAL_INFORMATION {driver.option_num("partial_information", "1"); };
 
-o_planner_discount : PLANNER_DISCOUNT EQUAL number { driver.option_num("planner_discount",$3); };
+o_planner_discount : PLANNER_DISCOUNT EQUAL expression { driver.declare_optimal_policy_discount_factor_parameter($3); };
 
-o_bvar_prior_tau : BVAR_PRIOR_TAU EQUAL signed_float { driver.option_num("bvar_prior_tau", $3); };
-o_bvar_prior_decay : BVAR_PRIOR_DECAY EQUAL number { driver.option_num("bvar_prior_decay", $3); };
-o_bvar_prior_lambda : BVAR_PRIOR_LAMBDA EQUAL signed_float { driver.option_num("bvar_prior_lambda", $3); };
-o_bvar_prior_mu : BVAR_PRIOR_MU EQUAL number { driver.option_num("bvar_prior_mu", $3); };
+o_bvar_prior_tau : BVAR_PRIOR_TAU EQUAL signed_number { driver.option_num("bvar_prior_tau", $3); };
+o_bvar_prior_decay : BVAR_PRIOR_DECAY EQUAL non_negative_number { driver.option_num("bvar_prior_decay", $3); };
+o_bvar_prior_lambda : BVAR_PRIOR_LAMBDA EQUAL signed_number { driver.option_num("bvar_prior_lambda", $3); };
+o_bvar_prior_mu : BVAR_PRIOR_MU EQUAL non_negative_number { driver.option_num("bvar_prior_mu", $3); };
 o_bvar_prior_omega : BVAR_PRIOR_OMEGA EQUAL INT_NUMBER { driver.option_num("bvar_prior_omega", $3); };
 o_bvar_prior_flat : BVAR_PRIOR_FLAT { driver.option_num("bvar_prior_flat", "1"); };
 o_bvar_prior_train : BVAR_PRIOR_TRAIN EQUAL INT_NUMBER { driver.option_num("bvar_prior_train", $3); };
@@ -1795,37 +1942,45 @@ o_gsa_pprior : PPRIOR  EQUAL INT_NUMBER { driver.option_num("pprior", $3); };
 o_gsa_prior_range : PRIOR_RANGE  EQUAL INT_NUMBER { driver.option_num("prior_range", $3); };
 o_gsa_ppost : PPOST  EQUAL INT_NUMBER { driver.option_num("ppost", $3); };
 o_gsa_ilptau : ILPTAU EQUAL INT_NUMBER { driver.option_num("ilptau", $3); };
-o_gsa_glue : GLUE EQUAL INT_NUMBER { driver.option_num("glue", $3); };
 o_gsa_morris_nliv : MORRIS_NLIV EQUAL INT_NUMBER { driver.option_num("morris_nliv", $3); };
 o_gsa_morris_ntra : MORRIS_NTRA EQUAL INT_NUMBER { driver.option_num("morris_ntra", $3); };
 o_gsa_nsam : NSAM EQUAL INT_NUMBER { driver.option_num("Nsam", $3); }; /* not in doc ??*/
 o_gsa_load_redform : LOAD_REDFORM EQUAL INT_NUMBER { driver.option_num("load_redform", $3); };
 o_gsa_load_rmse : LOAD_RMSE EQUAL INT_NUMBER { driver.option_num("load_rmse", $3); };
 o_gsa_load_stab : LOAD_STAB EQUAL INT_NUMBER { driver.option_num("load_stab", $3); };
-o_gsa_alpha2_stab : ALPHA2_STAB EQUAL number { driver.option_num("alpha2_stab", $3); };
-o_gsa_ksstat : KSSTAT EQUAL number { driver.option_num("ksstat", $3); };
+o_gsa_alpha2_stab : ALPHA2_STAB EQUAL non_negative_number { driver.option_num("alpha2_stab", $3); };
+o_gsa_ksstat : KSSTAT EQUAL non_negative_number { driver.option_num("ksstat", $3); };
 o_gsa_logtrans_redform : LOGTRANS_REDFORM EQUAL INT_NUMBER { driver.option_num("logtrans_redform", $3); };
 o_gsa_threshold_redform : THRESHOLD_REDFORM EQUAL vec_value { driver.option_num("threshold_redform",$3); };
-o_gsa_ksstat_redform : KSSTAT_REDFORM EQUAL number { driver.option_num("ksstat_redfrom", $3); };
-o_gsa_alpha2_redform : ALPHA2_REDFORM EQUAL number { driver.option_num("alpha2_redform", $3); };
+o_gsa_ksstat_redform : KSSTAT_REDFORM EQUAL non_negative_number { driver.option_num("ksstat_redform", $3); };
+o_gsa_alpha2_redform : ALPHA2_REDFORM EQUAL non_negative_number { driver.option_num("alpha2_redform", $3); };
 o_gsa_namendo : NAMENDO EQUAL '(' symbol_list_ext ')' { driver.option_symbol_list("namendo"); };
 o_gsa_namlagendo : NAMLAGENDO EQUAL '(' symbol_list_ext ')' { driver.option_symbol_list("namlagendo"); };
 o_gsa_namexo : NAMEXO EQUAL '(' symbol_list_ext ')' { driver.option_symbol_list("namexo"); };
 o_gsa_rmse : RMSE EQUAL INT_NUMBER { driver.option_num("rmse", $3); };
 o_gsa_lik_only : LIK_ONLY EQUAL INT_NUMBER { driver.option_num("lik_only", $3); };
 o_gsa_var_rmse : VAR_RMSE EQUAL '(' symbol_list_ext ')' { driver.option_symbol_list("var_rmse"); };
-o_gsa_pfilt_rmse : PFILT_RMSE EQUAL number { driver.option_num("pfilt_rmse", $3); };
+o_gsa_pfilt_rmse : PFILT_RMSE EQUAL non_negative_number { driver.option_num("pfilt_rmse", $3); };
 o_gsa_istart_rmse : ISTART_RMSE EQUAL INT_NUMBER { driver.option_num("istart_rmse", $3); };
-o_gsa_alpha_rmse : ALPHA_RMSE EQUAL number { driver.option_num("alpha_rmse", $3); };
-o_gsa_alpha2_rmse : ALPHA2_RMSE EQUAL number { driver.option_num("alpha2_rmse", $3); };
-o_gsa_trans_ident : TRANS_IDENT EQUAL INT_NUMBER { driver.option_num("trans_ident", $3); };
-
+o_gsa_alpha_rmse : ALPHA_RMSE EQUAL non_negative_number { driver.option_num("alpha_rmse", $3); };
+o_gsa_alpha2_rmse : ALPHA2_RMSE EQUAL non_negative_number { driver.option_num("alpha2_rmse", $3); };
+o_gsa_sample_file : GSA_SAMPLE_FILE EQUAL INT_NUMBER
+                    { driver.option_num("gsa_sample_file", $3); }
+                  | GSA_SAMPLE_FILE EQUAL filename
+                    { driver.option_str("gsa_sample_file", $3); }
+                  ;
+o_gsa_neighborhood_width : NEIGHBORHOOD_WIDTH EQUAL non_negative_number { driver.option_num("neighborhood_width", $3); };
+o_gsa_pvalue_ks : PVALUE_KS EQUAL  non_negative_number { driver.option_num("pvalue_ks", $3); };
+o_gsa_pvalue_corr : PVALUE_CORR EQUAL  non_negative_number { driver.option_num("pvalue_corr", $3); };
 o_load_ident_files : LOAD_IDENT_FILES EQUAL INT_NUMBER { driver.option_num("load_ident_files", $3); }
 o_useautocorr : USEAUTOCORR EQUAL INT_NUMBER { driver.option_num("useautocorr", $3); }
 o_prior_mc : PRIOR_MC EQUAL INT_NUMBER { driver.option_num("prior_mc", $3); }
+o_advanced : ADVANCED EQUAL signed_integer { driver.option_num("advanced", $3); }
+o_max_dim_cova_group : MAX_DIM_COVA_GROUP EQUAL INT_NUMBER { driver.option_num("max_dim_cova_group", $3); }
 
 o_homotopy_mode : HOMOTOPY_MODE EQUAL INT_NUMBER {driver.option_num("homotopy_mode",$3); };
 o_homotopy_steps : HOMOTOPY_STEPS EQUAL INT_NUMBER {driver.option_num("homotopy_steps",$3); };
+o_nocheck : NOCHECK {driver.option_num("steadystate.nocheck","1"); };
 
 o_controlled_varexo : CONTROLLED_VAREXO EQUAL '(' symbol_list ')' { driver.option_symbol_list("controlled_varexo"); };
 o_parameter_set : PARAMETER_SET EQUAL PRIOR_MODE
@@ -1838,36 +1993,61 @@ o_parameter_set : PARAMETER_SET EQUAL PRIOR_MODE
                   { driver.option_str("parameter_set", "posterior_mode"); }
                 | PARAMETER_SET EQUAL POSTERIOR_MEDIAN
                   { driver.option_str("parameter_set", "posterior_median"); }
+                | PARAMETER_SET EQUAL CALIBRATION
+                  { driver.option_str("parameter_set", "calibration"); }
                 ;
-
-o_parameters : PARAMETERS EQUAL symbol {driver.option_str("parameters",$3);};
 o_shocks : SHOCKS EQUAL '(' list_of_symbol_lists ')' { driver.option_symbol_list("shocks"); };
 o_labels : LABELS EQUAL '(' symbol_list ')' { driver.option_symbol_list("labels"); };
-
-o_freq : FREQ EQUAL INT_NUMBER {driver.option_num("ms.freq",$3); };
+o_ms_drop : DROP EQUAL INT_NUMBER { driver.option_num("ms.drop", $3); };
+o_ms_mh_replic : MH_REPLIC EQUAL INT_NUMBER { driver.option_num("ms.mh_replic", $3); };
+o_freq : FREQ EQUAL INT_NUMBER
+         { driver.option_num("ms.freq",$3); }
+       | FREQ EQUAL MONTHLY
+         { driver.option_num("ms.freq","12"); }
+       | FREQ EQUAL QUARTERLY
+         { driver.option_num("ms.freq","4"); }
+       ;
 o_initial_year : INITIAL_YEAR EQUAL INT_NUMBER {driver.option_num("ms.initial_year",$3); };
 o_initial_subperiod : INITIAL_SUBPERIOD EQUAL INT_NUMBER {driver.option_num("ms.initial_subperiod",$3); };
 o_final_year : FINAL_YEAR EQUAL INT_NUMBER {driver.option_num("ms.final_year",$3); };
 o_final_subperiod : FINAL_SUBPERIOD EQUAL INT_NUMBER {driver.option_num("ms.final_subperiod",$3); };
 o_data : DATA EQUAL filename { driver.option_str("ms.data", $3); };
 o_vlist : VLIST EQUAL INT_NUMBER {driver.option_num("ms.vlist",$3); };
-o_vlistlog : VLISTLOG EQUAL INT_NUMBER {driver.option_num("ms.vlistlog",$3); };
+o_vlistlog : VLISTLOG EQUAL '(' symbol_list ')' {driver.option_symbol_list("ms.vlistlog"); };
 o_vlistper : VLISTPER EQUAL INT_NUMBER {driver.option_num("ms.vlistper",$3); };
-o_varlist : VARLIST EQUAL '(' symbol_list ')' {driver.option_symbol_list("ms.varlist"); };
-o_restriction_fname : RESTRICTION_FNAME EQUAL NAME {driver.option_str("ms.restriction_fname",$3); };
+o_restriction_fname : RESTRICTION_FNAME EQUAL NAME
+                      {
+                        driver.warning("restriction_fname is now deprecated, and may be removed in a future version of Dynare. Use svar_identification instead.");
+                        driver.option_str("ms.restriction_fname",$3);
+                      }
+                    | RESTRICTION_FNAME EQUAL UPPER_CHOLESKY
+                      {
+                        driver.warning("restriction_fname is now deprecated, and may be removed in a future version of Dynare. Use svar_identification instead.");
+                        driver.option_str("ms.restriction_fname","upper_cholesky");
+                      }
+                    | RESTRICTION_FNAME EQUAL LOWER_CHOLESKY
+                      {
+                        driver.warning("restriction_fname is now deprecated, and may be removed in a future version of Dynare. Use svar_identification instead.");
+                        driver.option_str("ms.restriction_fname","lower_cholesky");
+                      }
+                    ;
 o_nlags : NLAGS EQUAL INT_NUMBER {driver.option_num("ms.nlags",$3); };
-o_cross_restrictions : CROSS_RESTRICTIONS EQUAL INT_NUMBER {driver.option_num("ms.cross_restrictions",$3); };
-o_contemp_reduced_form : CONTEMP_REDUCED_FORM EQUAL INT_NUMBER {driver.option_num("ms.contemp_reduced_form",$3); };
+o_cross_restrictions : CROSS_RESTRICTIONS {driver.option_num("ms.cross_restrictions","1"); };
+o_contemp_reduced_form : CONTEMP_REDUCED_FORM {driver.option_num("ms.contemp_reduced_form","1"); };
 o_real_pseudo_forecast : REAL_PSEUDO_FORECAST EQUAL INT_NUMBER {driver.option_num("ms.real_pseudo_forecast",$3); };
-o_bayesian_prior : BAYESIAN_PRIOR EQUAL INT_NUMBER {driver.option_num("ms.bayesian_prior",$3); };
+o_no_bayesian_prior : NO_BAYESIAN_PRIOR {driver.option_num("ms.bayesian_prior","0"); };
 o_dummy_obs : DUMMY_OBS EQUAL INT_NUMBER {driver.option_num("ms.dummy_obs",$3); };
 o_nstates : NSTATES EQUAL INT_NUMBER {driver.option_num("ms.nstates",$3); };
 o_indxscalesstates : INDXSCALESSTATES EQUAL INT_NUMBER {driver.option_num("ms.indxscalesstates",$3); };
-o_alpha : ALPHA EQUAL number {driver.option_num("ms.alpha",$3); };
-o_beta : BETA EQUAL number {driver.option_num("ms.beta",$3); };
-o_gsig2_lmd : GSIG2_LMD EQUAL INT_NUMBER {driver.option_num("ms.gsig2_lmd",$3); };
+o_alpha : ALPHA EQUAL non_negative_number {driver.option_num("ms.alpha",$3); };
+o_beta : BETA EQUAL non_negative_number {driver.option_num("ms.beta",$3); };
 o_gsig2_lmdm : GSIG2_LMDM EQUAL INT_NUMBER {driver.option_num("ms.gsig2_lmdm",$3); };
-o_q_diag : Q_DIAG EQUAL number {driver.option_num("ms.q_diag",$3); };
+o_specification : SPECIFICATION EQUAL SIMS_ZHA
+                  {driver.option_num("ms.specification","1"); }
+                | SPECIFICATION EQUAL NONE
+                  {driver.option_num("ms.specification","0"); }
+                ;
+o_q_diag : Q_DIAG EQUAL non_negative_number {driver.option_num("ms.q_diag",$3); };
 o_flat_prior : FLAT_PRIOR EQUAL INT_NUMBER {driver.option_num("ms.flat_prior",$3); };
 o_ncsk : NCSK EQUAL INT_NUMBER {driver.option_num("ms.ncsk",$3); };
 o_nstd : NSTD EQUAL INT_NUMBER {driver.option_num("ms.nstd",$3); };
@@ -1891,28 +2071,11 @@ o_eq_cms : EQ_CMS EQUAL INT_NUMBER {driver.option_num("ms.eq_cms",$3); };
 o_tlindx : TLINDX EQUAL INT_NUMBER {driver.option_num("ms.tlindx",$3); };
 o_tlnumber : TLNUMBER EQUAL INT_NUMBER {driver.option_num("ms.tlnumber",$3); };
 o_cnum : CNUM EQUAL INT_NUMBER {driver.option_num("ms.cnum",$3); };
-o_output_file_tag : OUTPUT_FILE_TAG EQUAL '(' symbol_list ')' {driver.option_symbol_list("ms.output_file_tag"); };
-o_create_initialization_file : CREATE_INITIALIZATION_FILE EQUAL INT_NUMBER {driver.option_num("ms.create_initialization_file",$3); };
-o_estimate_msmodel : ESTIMATE_MSMODEL EQUAL INT_NUMBER {driver.option_num("ms.estimate_msmodel",$3); };
-o_compute_mdd : COMPUTE_MDD EQUAL INT_NUMBER {driver.option_num("ms.compute_mdd",$3); };
-o_compute_probabilities : COMPUTE_PROBABILITIES EQUAL INT_NUMBER {driver.option_num("ms.compute_probabilities",$3); };
-o_print_draws : PRINT_DRAWS EQUAL INT_NUMBER {driver.option_num("ms.print_draws",$3); };
-o_n_draws : N_DRAWS EQUAL INT_NUMBER {driver.option_num("ms.n_draws",$3); };
-o_thinning_factor : THINNING_FACTOR EQUAL INT_NUMBER {driver.option_num("ms.thinning_factor",$3); };
-o_markov_file : MARKOV_FILE EQUAL NAME {driver.option_str("ms.markov_file",$3); };
-o_mhm_file: MHM_FILE EQUAL NAME {driver.option_str("ms.mhm_file",$3); };
-o_proposal_draws : PROPOSAL_DRAWS EQUAL INT_NUMBER {driver.option_num("ms.proposal_draws",$3); };
-o_draws_nbr_burn_in_1 : DRAWS_NBR_BURN_IN_1 EQUAL INT_NUMBER {driver.option_num("ms.draws_nbr_burn_in_1",$3); };
-o_draws_nbr_burn_in_2 : DRAWS_NBR_BURN_IN_2 EQUAL INT_NUMBER {driver.option_num("ms.draws_nbr_burn_in_2",$3); };
-o_draws_nbr_mean_var_estimate : DRAWS_NBR_MEAN_VAR_ESTIMATE EQUAL INT_NUMBER {driver.option_num("ms.draws_nbr_mean_var_estimate",$3); };
-o_draws_nbr_modified_harmonic_mean : DRAWS_NBR_MODIFIED_HARMONIC_MEAN EQUAL INT_NUMBER {driver.option_num("ms.draws_nbr_modified_harmonic_mean",$3); };
-o_dirichlet_scale : DIRICHLET_SCALE EQUAL INT_NUMBER {driver.option_num("ms.dirichlet_scale",$3); };
 o_k_order_solver : K_ORDER_SOLVER {driver.option_num("k_order_solver","1"); };
 o_pruning : PRUNING { driver.option_num("pruning", "1"); };
-
 o_chain : CHAIN EQUAL INT_NUMBER { driver.option_num("ms.chain",$3); };
 o_state : STATE EQUAL INT_NUMBER { driver.option_num("ms.state",$3); };
-o_duration : DURATION EQUAL number
+o_duration : DURATION EQUAL non_negative_number
              { driver.option_num("ms.duration",$3); }
            | DURATION EQUAL INF_CONSTANT
              { driver.option_num("ms.duration","Inf"); }
@@ -1920,7 +2083,6 @@ o_duration : DURATION EQUAL number
 o_number_of_states : NUMBER_OF_STATES EQUAL INT_NUMBER { driver.option_num("ms.number_of_states",$3); };
 o_coefficients : COEFFICIENTS { driver.option_str("ms.coefficients","svar_coefficients"); };
 o_variances : VARIANCES { driver.option_str("ms.variances","svar_variances"); };
-o_constants : CONSTANTS { driver.option_str("ms.constants","svar_constants"); };
 o_equations : EQUATIONS EQUAL vec_int
               { driver.option_vec_int("ms.equations",$3); }
             | EQUATIONS EQUAL vec_int_number
@@ -1950,6 +2112,62 @@ o_filter_decomposition : FILTER_DECOMPOSITION
 o_selected_variables_only : SELECTED_VARIABLES_ONLY
                            { driver.option_num("selected_variables_only","1");}
                           ;
+o_cova_compute : COVA_COMPUTE EQUAL INT_NUMBER
+                 { driver.option_num("cova_compute",$3);}
+               ;
+o_output_file_tag : OUTPUT_FILE_TAG EQUAL filename {driver.option_str("ms.output_file_tag", $3); };
+o_file_tag : FILE_TAG EQUAL filename { driver.option_str("ms.file_tag", $3); };
+o_no_create_init : NO_CREATE_INIT { driver.option_str("ms.create_init", "0"); };
+o_simulation_file_tag : SIMULATION_FILE_TAG EQUAL filename { driver.option_str("ms.simulation_file_tag", $3); };
+o_coefficients_prior_hyperparameters : COEFFICIENTS_PRIOR_HYPERPARAMETERS EQUAL vec_value
+                                       { driver.option_num("ms.coefficients_prior_hyperparameters",$3); };
+o_convergence_starting_value : CONVERGENCE_STARTING_VALUE EQUAL non_negative_number
+                               { driver.option_num("ms.convergence_starting_value",$3); };
+o_convergence_ending_value : CONVERGENCE_ENDING_VALUE EQUAL non_negative_number
+                             { driver.option_num("ms.convergence_ending_value",$3); };
+o_convergence_increment_value : CONVERGENCE_INCREMENT_VALUE EQUAL non_negative_number
+                                { driver.option_num("ms.convergence_increment_value",$3); };
+o_max_iterations_starting_value : MAX_ITERATIONS_STARTING_VALUE EQUAL INT_NUMBER
+                                  { driver.option_num("ms.max_iterations_starting_value",$3); };
+o_max_iterations_increment_value : MAX_ITERATIONS_INCREMENT_VALUE EQUAL non_negative_number
+                                   { driver.option_num("ms.max_iterations_increment_value",$3); };
+o_max_block_iterations : MAX_BLOCK_ITERATIONS EQUAL INT_NUMBER
+                         { driver.option_num("ms.max_block_iterations",$3); };
+o_max_repeated_optimization_runs : MAX_REPEATED_OPTIMIZATION_RUNS EQUAL INT_NUMBER
+                                   { driver.option_num("ms.max_repeated_optimization_runs",$3); };
+o_function_convergence_criterion : FUNCTION_CONVERGENCE_CRITERION EQUAL non_negative_number
+                                   { driver.option_num("ms.function_convergence_criterion",$3); };
+o_parameter_convergence_criterion : PARAMETER_CONVERGENCE_CRITERION EQUAL non_negative_number
+                                    { driver.option_num("ms.parameter_convergence_criterion",$3); };
+o_number_of_large_perturbations : NUMBER_OF_LARGE_PERTURBATIONS EQUAL INT_NUMBER
+                                  { driver.option_num("ms.number_of_large_perturbations",$3); };
+o_number_of_small_perturbations : NUMBER_OF_SMALL_PERTURBATIONS EQUAL INT_NUMBER
+                                  { driver.option_num("ms.number_of_small_perturbations",$3); };
+o_number_of_posterior_draws_after_perturbation : NUMBER_OF_POSTERIOR_DRAWS_AFTER_PERTURBATION EQUAL INT_NUMBER
+                                                 { driver.option_num("ms.number_of_posterior_draws_after_perturbation",$3); };
+o_max_number_of_stages : MAX_NUMBER_OF_STAGES EQUAL INT_NUMBER
+                         { driver.option_num("ms.max_number_of_stages",$3); };
+o_random_function_convergence_criterion : RANDOM_FUNCTION_CONVERGENCE_CRITERION EQUAL non_negative_number
+                                          { driver.option_num("ms.random_function_convergence_criterion",$3); };
+o_random_parameter_convergence_criterion : RANDOM_PARAMETER_CONVERGENCE_CRITERION EQUAL non_negative_number
+                                           { driver.option_num("ms.random_parameter_convergence_criterion",$3); };
+o_thinning_factor : THINNING_FACTOR EQUAL INT_NUMBER { driver.option_num("ms.thinning_factor",$3); };
+o_adaptive_mh_draws : ADAPTIVE_MH_DRAWS EQUAL INT_NUMBER { driver.option_num("ms.adaptive_mh_draws",$3); };
+o_proposal_draws : PROPOSAL_DRAWS EQUAL INT_NUMBER { driver.option_num("ms.proposal_draws",$3); };
+o_use_mean_center : USE_MEAN_CENTER { driver.option_num("ms.use_mean_center","1"); };
+o_proposal_type : PROPOSAL_TYPE EQUAL INT_NUMBER { driver.option_num("ms.proposal_type",$3); }
+o_proposal_lower_bound : PROPOSAL_LOWER_BOUND EQUAL signed_number { driver.option_num("ms.proposal_lower_bound",$3); }
+o_proposal_upper_bound : PROPOSAL_UPPER_BOUND EQUAL signed_number { driver.option_num("ms.proposal_upper_bound",$3); }
+o_horizon : HORIZON EQUAL INT_NUMBER { driver.option_num("ms.horizon",$3); };
+o_filtered_probabilities : FILTERED_PROBABILITIES { driver.option_num("ms.filtered_probabilities","1"); };
+o_real_time_smoothed : REAL_TIME_SMOOTHED { driver.option_num("ms.real_time_smoothed_probabilities","1"); };
+o_no_error_bands : NO_ERROR_BANDS { driver.option_num("ms.error_bands","0"); };
+o_error_band_percentiles : ERROR_BAND_PERCENTILES EQUAL vec_value { driver.option_num("ms.percentiles",$3); };
+o_shock_draws : SHOCK_DRAWS EQUAL INT_NUMBER { driver.option_num("ms.shock_draws",$3); };
+o_shocks_per_parameter : SHOCKS_PER_PARAMETER EQUAL INT_NUMBER { driver.option_num("ms.shocks_per_parameter",$3); };
+o_free_parameters : FREE_PARAMETERS EQUAL vec_value { driver.option_num("ms.free_parameters",$3); };
+o_median : MEDIAN { driver.option_num("ms.median","1"); };
+o_data_obs_nbr : DATA_OBS_NBR EQUAL INT_NUMBER { driver.option_num("ms.forecast_data_obs",$3); };
 
 range : symbol ':' symbol
         {
@@ -2000,9 +2218,9 @@ vec_int : vec_int_1 ']'
           { $$ = $1; }
         ;
 
-vec_value_1 : '[' value1
+vec_value_1 : '[' signed_number
             { $2->insert(0, "["); $$ = $2;}
-          | vec_value_1 value1
+          | vec_value_1 signed_number
             {
               $1->append(" ");
               $1->append(*$2);
