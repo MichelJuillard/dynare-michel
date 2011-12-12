@@ -17,7 +17,7 @@ psi     = -0.500;
 delta   =  0.020;
 rho     =  0.950;
 effstar =  1.000;
-sigma2  =  0.001;
+sigma2  =  0.0001;
 
 external_function(name=mean_preserving_spread);
 
@@ -49,4 +49,7 @@ end;
 
 steady;
 
-ts = extended_path([],100);
+options_.ep.verbosity = 0;
+options_.console_mode = 1;
+
+ts = extended_path([],1000);
