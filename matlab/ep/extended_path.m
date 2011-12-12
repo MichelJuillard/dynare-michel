@@ -32,7 +32,7 @@ function time_series = extended_path(initial_conditions,sample_size)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 global M_ options_ oo_
     
-debug = 1;
+debug = 0;
 verbosity = options_.ep.verbosity+debug;
 
 % Test if bytecode and block options are used (these options are mandatory)
@@ -104,8 +104,35 @@ if options_.ep.set_dynare_seed_to_default
     set_dynare_seed('default');
 end
 
+graphic_waitbar_flag = ~( options_.console_mode || exist('OCTAVE_VERSION') );
+
+% Set waitbar (graphic mode)
+if graphic_waitbar_flag
+    hh = waitbar(0,['Please wait. Extended Path simulations...']);
+    set(hh,'Name','EP simulations');
+else
+    for i=1:2, disp(' '), end
+    if ~exist('OCTAVE_VERSION')
+       back = [];
+    end
+end
+    
+
 % Main loop.
 while (t<sample_size)
+    if ~mod(t,10)
+        if graphic_waitbar_flag
+            waitbar(t/sample_size);
+        else
+            if exist('OCTAVE_VERSION')
+                printf('Please wait. Extended Path simulations... %3.f%%\r done', 100*t/sample_size);
+            else
+                str = sprintf('Please wait. Extended Path simulations... %3.f%% done.', 100*t/sample_size);
+                fprintf([back '%s'],str);
+                back=repmat('\b',1,length(str));
+            end
+        end
+    end
     % Set period index.
     t = t+1;
     shocks = oo_.ep.shocks(t,:);
@@ -246,4 +273,12 @@ while (t<sample_size)
     oo_.endo_simul = oo_.endo_simul(:,1:options_.periods+2);
     oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end); 
     oo_.endo_simul(:,end) = oo_.steady_state;
+end
+
+if graphic_waitbar_flag
+    close(hh);
+else
+    if ~exist('OCTAVE_VERSION')
+        fprintf(back);
+    end
 end
