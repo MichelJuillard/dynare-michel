@@ -18,6 +18,7 @@
  */
 
 #include <string.h>
+#include <math.h>
 
 #include <dynmex.h>
 #include <dynlapack.h>
