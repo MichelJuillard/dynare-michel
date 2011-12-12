@@ -32,7 +32,9 @@ function time_series = extended_path(initial_conditions,sample_size)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 global M_ options_ oo_
     
-    
+debug = 1;
+verbosity = options_.ep.verbosity+debug;
+
 % Test if bytecode and block options are used (these options are mandatory)
 if ~( options_.bytecode && options_.block )
     error('extended_path:: Options bytecode and block are mandatory!')
@@ -128,7 +130,7 @@ while (t<sample_size)
             info.convergence = ~flag;
             info.time = ctime;
         end
-        if options_.ep.verbosity
+        if verbosity
             if info.convergence
                 if t<10
                     disp(['Time:    ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
@@ -158,7 +160,7 @@ while (t<sample_size)
             options_.periods = options_.periods + options_.ep.step;
             options_.minimal_solving_period = options_.periods;
             increase_periods = increase_periods + 1;
-            if options_.ep.verbosity
+            if verbosity
                 if t<10
                     disp(['Time:    ' int2str(t)  '. I increase the number of periods to ' int2str(options_.periods) '.'])
                 elseif t<100
@@ -195,7 +197,7 @@ while (t<sample_size)
                     continue
                 else
                     if increase_periods==10;
-                        if options_.ep.verbosity
+                        if verbosity
                             if t<10
                                 disp(['Time:    ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
                             elseif t<100
@@ -222,7 +224,7 @@ while (t<sample_size)
         else
             info.convergence = 1;
             oo_.endo_simul = tmp;
-            if options_.ep.verbosity && info.convergence
+            if verbosity && info.convergence
                 disp('Homotopy:: Convergence of the perfect foresight model solver!')
             end
         end

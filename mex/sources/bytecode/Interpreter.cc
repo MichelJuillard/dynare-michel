@@ -1719,7 +1719,7 @@ Interpreter::evaluate_a_block(const int size, const int type, string bin_basenam
 }
 
 int
-Interpreter::simulate_a_block(const int size, const int type, string file_name, string bin_basename, bool Gaussian_Elimination, bool steady_state, int block_num,
+Interpreter::simulate_a_block(const int size, const int type, string file_name, string bin_basename, bool Gaussian_Elimination, bool steady_state, bool print_it, int block_num,
                               const bool is_linear, const int symbol_table_endo_nbr, const int Block_List_Max_Lag, const int Block_List_Max_Lead, const int u_count_int)
 {
   it_code_type begining;
@@ -1980,7 +1980,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   if (cvg)
                     continue;
                   int prev_iter = iter;
-                  Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, stack_solve_algo, solve_algo);
+                  Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, print_it, cvg, iter, true, stack_solve_algo, solve_algo);
                   iter++;
                   if (iter > prev_iter)
                     {
@@ -2025,7 +2025,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 }
               else
                 cvg = false;
-              Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, stack_solve_algo, solve_algo);
+              Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, print_it, cvg, iter, true, stack_solve_algo, solve_algo);
               if (!result)
                 {
                   mexPrintf(" in Solve Forward complete, convergence not achieved in block %d\n", Block_Count+1);
@@ -2077,7 +2077,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                       if (cvg)
                         continue;
                       int prev_iter = iter;
-                      Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, stack_solve_algo, solve_algo);
+                      Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, print_it, cvg, iter, false, stack_solve_algo, solve_algo);
                       iter++;
                       if (iter > prev_iter)
                         {
@@ -2124,7 +2124,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                     }
                   else
                     cvg = false;
-                  Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, stack_solve_algo, solve_algo);
+                  Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, print_it, cvg, iter, false, stack_solve_algo, solve_algo);
                 }
             }
         }
@@ -2182,7 +2182,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                   if (cvg)
                     continue;
                   int prev_iter = iter;
-                  Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, stack_solve_algo, solve_algo);
+                  Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, print_it, cvg, iter, true, stack_solve_algo, solve_algo);
                   iter++;
                   if (iter > prev_iter)
                     {
@@ -2226,7 +2226,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 }
               else
                 cvg = false;
-              Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, false, cvg, iter, true, stack_solve_algo, solve_algo);
+              Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, 0, 0, 0, size, print_it, cvg, iter, true, stack_solve_algo, solve_algo);
               if (!result)
                 {
                   mexPrintf(" in Solve Backward complete, convergence not achieved in block %d\n", Block_Count+1);
@@ -2278,7 +2278,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                       if (cvg)
                         continue;
                       int prev_iter = iter;
-                      Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, stack_solve_algo, solve_algo);
+                      Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, print_it, cvg, iter, false, stack_solve_algo, solve_algo);
                       iter++;
                       if (iter > prev_iter)
                         {
@@ -2321,7 +2321,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                     }
                   else
                     cvg = false;
-                  Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, false, cvg, iter, false, stack_solve_algo, solve_algo);
+                  Simulate_Newton_One_Boundary(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, print_it, cvg, iter, false, stack_solve_algo, solve_algo);
                 }
             }
         }
@@ -2398,7 +2398,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 cvg = (max_res < solve_tolf);
               u_count = u_count_saved;
               int prev_iter = iter;
-              Simulate_Newton_Two_Boundaries(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods, stack_solve_algo, endo_name_length, P_endo_names);
+              Simulate_Newton_Two_Boundaries(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, print_it, cvg, iter, minimal_solving_periods, stack_solve_algo, endo_name_length, P_endo_names);
               iter++;
               if (iter > prev_iter)
                 {
@@ -2440,7 +2440,7 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
                 }
             }
           cvg = false;
-          Simulate_Newton_Two_Boundaries(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, true, cvg, iter, minimal_solving_periods, stack_solve_algo, endo_name_length, P_endo_names);
+          Simulate_Newton_Two_Boundaries(Block_Count, symbol_table_endo_nbr, it_, y_kmin, y_kmax, size, periods, print_it, cvg, iter, minimal_solving_periods, stack_solve_algo, endo_name_length, P_endo_names);
         }
       mxFree(r);
       mxFree(y_save);
@@ -2499,7 +2499,7 @@ Interpreter::print_a_block(const int size, const int type, string bin_basename, 
 }
 
 bool
-Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_state, bool evaluate, int block, int &nb_blocks)
+Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_state, bool evaluate, int block, int &nb_blocks, bool print_it)
 {
   bool result = true;
 
@@ -2587,10 +2587,10 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
             else
               {
 #ifdef DEBUG
-                mexPrintf("endo in block=%d, type=%d, steady_state=%d, Block_Count=%d, fb->get_is_linear()=%d, fb->get_endo_nbr()=%d, fb->get_Max_Lag()=%d, fb->get_Max_Lead()=%d, fb->get_u_count_int()=%d\n",
-                          fb->get_size(), fb->get_type(), steady_state, Block_Count, fb->get_is_linear(), fb->get_endo_nbr(), fb->get_Max_Lag(), fb->get_Max_Lead(), fb->get_u_count_int());
+                mexPrintf("endo in block=%d, type=%d, steady_state=%d, print_it=%d, Block_Count=%d, fb->get_is_linear()=%d, fb->get_endo_nbr()=%d, fb->get_Max_Lag()=%d, fb->get_Max_Lead()=%d, fb->get_u_count_int()=%d\n",
+                          fb->get_size(), fb->get_type(), steady_state, print_it, Block_Count, fb->get_is_linear(), fb->get_endo_nbr(), fb->get_Max_Lag(), fb->get_Max_Lead(), fb->get_u_count_int());
 #endif
-                result = simulate_a_block(fb->get_size(), fb->get_type(), file_name, bin_basename, true, steady_state, Block_Count,
+                result = simulate_a_block(fb->get_size(), fb->get_type(), file_name, bin_basename, true, steady_state, print_it,Block_Count,
                                           fb->get_is_linear(), fb->get_endo_nbr(), fb->get_Max_Lag(), fb->get_Max_Lead(), fb->get_u_count_int());
                 if (result == ERROR_ON_EXIT)
                   return ERROR_ON_EXIT;

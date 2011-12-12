@@ -56,7 +56,7 @@ protected:
   void compute_block_time(int Per_u_, bool evaluate, int block_num, int size, bool steady_state);
   void evaluate_a_block(const int size, const int type, string bin_basename, bool steady_state, int block_num,
                         const bool is_linear = false, const int symbol_table_endo_nbr = 0, const int Block_List_Max_Lag = 0, const int Block_List_Max_Lead = 0, const int u_count_int = 0, int block = -1);
-  int simulate_a_block(const int size, const int type, string file_name, string bin_basename, bool Gaussian_Elimination, bool steady_state, int block_num,
+  int simulate_a_block(const int size, const int type, string file_name, string bin_basename, bool Gaussian_Elimination, bool steady_state, bool print_it, int block_num,
                        const bool is_linear = false, const int symbol_table_endo_nbr = 0, const int Block_List_Max_Lag = 0, const int Block_List_Max_Lead = 0, const int u_count_int = 0);
   void print_a_block(const int size, const int type, string bin_basename, bool steady_state, int block_num,
                      const bool is_linear, const int symbol_table_endo_nbr, const int Block_List_Max_Lag,
@@ -82,7 +82,7 @@ public:
               int nb_row_xd_arg, int periods_arg, int y_kmin_arg, int y_kmax_arg, int maxit_arg_, double solve_tolf_arg, int size_o_direction_arg,
               double slowc_arg, int y_decal_arg, double markowitz_c_arg, string &filename_arg, int minimal_solving_periods_arg, int stack_solve_algo_arg, int solve_algo_arg,
               bool global_temporary_terms_arg, bool print_arg, bool print_error_arg, mxArray *GlobalTemporaryTerms_arg);
-  bool compute_blocks(string file_name, string bin_basename, bool steady_state, bool evaluate, int block, int &nb_blocks);
+  bool compute_blocks(string file_name, string bin_basename, bool steady_state, bool evaluate, int block, int &nb_blocks, bool print_it);
   inline mxArray *
   get_jacob(int block_num)
   {
