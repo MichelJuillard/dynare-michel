@@ -88,6 +88,11 @@ covariance_matrix = M_.Sigma_e(positive_var_indx,positive_var_indx);
 number_of_structural_innovations = length(covariance_matrix); 
 covariance_matrix_upper_cholesky = chol(covariance_matrix); 
 
+% Set seed.
+if options_.ep.set_dynare_seed_to_default
+    set_dynare_seed('default');
+end
+
 % Simulate shocks.
 switch options_.ep.innovation_distribution
   case 'gaussian'
@@ -98,11 +103,6 @@ end
     
 % Initializes some variables.
 t  = 0;
-
-% Set seed.
-if options_.ep.set_dynare_seed_to_default
-    set_dynare_seed('default');
-end
 
 graphic_waitbar_flag = ~( options_.console_mode || exist('OCTAVE_VERSION') );
 
@@ -116,7 +116,7 @@ else
        back = [];
     end
 end
-    
+
 
 % Main loop.
 while (t<sample_size)
