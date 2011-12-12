@@ -104,9 +104,10 @@ end
 % Initializes some variables.
 t  = 0;
 
+
+% Set waitbar (graphic or text  mode)
 graphic_waitbar_flag = ~( options_.console_mode || exist('OCTAVE_VERSION') );
 
-% Set waitbar (graphic mode)
 if graphic_waitbar_flag
     hh = waitbar(0,['Please wait. Extended Path simulations...']);
     set(hh,'Name','EP simulations');
