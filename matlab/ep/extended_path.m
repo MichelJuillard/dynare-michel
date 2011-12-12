@@ -152,7 +152,7 @@ while (t<sample_size)
             end
         end
         % Test if periods is big enough.
-        if ~increase_periods &&  max(max(abs(tmp(idx,end-options_.ep.lp:end)./tmp(idx,end-options_.ep.lp-1:end-1)-1)))<options_.dynatol
+        if ~increase_periods &&  max(max(abs(tmp(idx,end-options_.ep.lp:end)./tmp(idx,end-options_.ep.lp-1:end-1)-1)))<options_.dynatol.x
             break
         else
             options_.periods = options_.periods + options_.ep.step;
@@ -183,7 +183,7 @@ while (t<sample_size)
             info.time = info.time+ctime;
             if info.convergence
                 maxdiff = max(max(abs(tmp(:,2:options_.ep.fp)-tmp_old(:,2:options_.ep.fp))));
-                if maxdiff<options_.dynatol
+                if maxdiff<options_.dynatol.x
                     options_.periods = options_.ep.periods;
                     options_.minimal_solving_period = options_.periods;
                     oo_.exo_simul = oo_.exo_simul(1:(options_.periods+2),:);

@@ -302,7 +302,8 @@ main(int nrhs, const char *prhs[])
   else
     {
       solve_algo = stack_solve_algo;
-      solve_tolf = *(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "dynatol"))));
+      mxArray *dynatol = mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "dynatol"));
+      solve_tolf= *mxGetPr((mxGetFieldByNumber(dynatol, 0, mxGetFieldNumber(dynatol, "f"))));
     }
 
   mxArray *mxa = mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "fname"));

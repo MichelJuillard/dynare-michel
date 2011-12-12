@@ -318,7 +318,7 @@ for iter = 1:options_.maxit_
     if options_.timing
         disp (['        Back substitution               : ' num2str(hbacsup)]) ;
     end
-    if err < options_.dynatol
+    if err < options_.dynatol.f
         h1 = etime(clock,h1) ;
         fprintf ('\n') ;
         disp (['        Total time of simulation        : ' num2str(h1)]) ;

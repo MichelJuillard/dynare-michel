@@ -64,7 +64,7 @@ if homotopy_1
                 weight = weight-step_length;
                 step_length=step_length/10;
                 weight = weight+step_length;
-                if 10*step_length<options_.dynatol
+                if 10*step_length<options_.dynatol.x
                     homotopy_1 = 0;
                     homotopy_2 = 0;
                     break
@@ -153,7 +153,7 @@ if homotopy_2
                     disp('I am reducing the step length!')
                 end
                 step_length=step_length/10;
-                if 10*step_length<options_.dynatol
+                if 10*step_length<options_.dynatol.x
                     homotopy_1 = 0;
                     homotopy_2 = 0;
                     break

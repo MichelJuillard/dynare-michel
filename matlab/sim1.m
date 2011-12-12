@@ -102,7 +102,7 @@ for iter = 1:options_.maxit_
     disp([num2str(iter) ' -     err = ' num2str(err)]) ;
     disp(['     Time of iteration       :' num2str(etime(clock,h2))]) ;
     
-    if err < options_.dynatol
+    if err < options_.dynatol.f
         stop = 1 ;
         fprintf('\n') ;
         disp([' Total time of simulation        :' num2str(etime(clock,h1))]) ;
