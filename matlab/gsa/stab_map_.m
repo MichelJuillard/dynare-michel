@@ -237,17 +237,7 @@ if fload==0,
         end
     end
     %
-    if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
-        diary off;
-        if exist('OCTAVE_VERSION'),
-            printf('Please wait ... \r')
-        else
-            newString = 'Please wait ...';
-            fprintf('%s',newString)
-        end
-    else
-        h = waitbar(0,'Please wait...');
-    end
+    h = dyn_waitbar(0,'Please wait...');
     istable=[1:Nsam];
     jstab=0;
     iunstable=[1:Nsam];
@@ -318,24 +308,9 @@ if fload==0,
         ys_=real(dr_.ys);
         yys(:,j) = ys_;
         ys_=yys(:,1);
-        if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
-            if exist('OCTAVE_VERSION')
-                printf(['MC iteration %3.i / %3.i \r'], j,Nsam);
-            else
-                s0=repmat('\b',1,length(newString));
-                newString=sprintf('MC iteration %3.i / %3.i', j,Nsam);
-                fprintf([s0,'%s'],newString);
-            end
-        else
-            waitbar(j/Nsam,h,['MC iteration ',int2str(j),'/',int2str(Nsam)])
-        end
+        dyn_waitbar(j/Nsam,h,['MC iteration ',int2str(j),'/',int2str(Nsam)])
     end
-    if (exist('OCTAVE_VERSION') || (options_.console_mode == 1)),
-        fprintf('\n'),
-        diary on,
-    else
-        close(h)
-    end
+    dyn_waitbar_close(h);
     if prepSA,
         T=T(:,:,1:jstab);
     end
@@ -416,17 +391,7 @@ else
 
 
     if prepSA & isempty(strmatch('T',who('-file', filetoload),'exact')),
-        if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
-            diary off;
-            if exist('OCTAVE_VERSION'),
-                printf('Please wait ... \r')
-            else
-                newString = 'Please wait ...';
-                fprintf('%s',newString)
-            end
-        else
-            h = waitbar(0,'Please wait...');
-        end
+        h = dyn_waitbar(0,'Please wait...');
         options_.periods=0;
         options_.nomoments=1;
         options_.irf=0;
@@ -455,24 +420,9 @@ else
             ys_=real(dr_.ys);
             yys(:,j) = ys_;
             ys_=yys(:,1);
-            if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
-                if exist('OCTAVE_VERSION')
-                    printf(['MC iteration %3.i / %3.i \r'], j,ntrans);
-                else
-                    s0=repmat('\b',1,length(newString));
-                    newString=sprintf('MC iteration %3.i / %3.i', j,ntrans);
-                    fprintf([s0,'%s'],newString);
-                end
-            else
-                waitbar(j/ntrans,h,['MC iteration ',int2str(j),'/',int2str(ntrans)])
-            end
+            dyn_waitbar(j/ntrans,h,['MC iteration ',int2str(j),'/',int2str(ntrans)])
         end
-        if exist('OCTAVE_VERSION') || (options_.console_mode == 1),
-            fprintf('\n'),
-            diary on,
-        else
-            close(h);
-        end
+        dyn_waitbar_close(h);
         save(filetoload,'T','-append')
     elseif prepSA
         load(filetoload,'T')

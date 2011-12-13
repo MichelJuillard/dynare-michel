@@ -29,3 +29,7 @@ if exist('OCTAVE_VERSION') || options_.console_mode,
 else
     close(h),
 end
+
+clear dyn_waitbar;
+
+

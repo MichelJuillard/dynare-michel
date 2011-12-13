@@ -59,13 +59,8 @@ global options_ M_ oo_
 
 
 if whoiam
-    waitbarString = ['Parallel plots pm3 ...'];
-    if Parallel(ThisMatlab).Local,
-        waitbarTitle=['Local '];
-    else
-        waitbarTitle=[Parallel(ThisMatlab).ComputerName];
-    end        
-    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));   
+    prct0={0,whoiam,Parallel(ThisMatlab)};
+    h = dyn_waitbar(prct0,'Parallel plots pm3 ...');
 end
 
 
@@ -123,12 +118,15 @@ for i=fpar:nvar
     end
     
     if whoiam,
-        waitbarString = [ 'Variable ' int2str(i) '/' int2str(nvar) ' done.'];
-        fMessageStatus((i-fpar+1)/(nvar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
+%         waitbarString = [ 'Variable ' int2str(i) '/' int2str(nvar) ' done.'];
+%         fMessageStatus((i-fpar+1)/(nvar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
+        dyn_waitbar((i-fpar+1)/(nvar-fpar+1),h);
     end
     
     
 end
 
-
+if whoiam,
+    dyn_waitbar_close(h);
+end
 myoutput.OutputFileName=OutputFileName;
