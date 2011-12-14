@@ -132,27 +132,25 @@ while notsteady && t<=last
     for i=1:rows(z)
         if Zflag
             prediction_error = Y(d_index(i),t) - z(i,:)*a;
-            Fi = z(i,:)*P*z(i,:)' + H(d_index(i));
+            PZ = P*z(i,:)';
+            Fi = z(i,:)*PZ + H(d_index(i));
         else
             prediction_error = Y(d_index(i),t) - a(z(i));
-            Fi = P(z(i),z(i)) + H(d_index(i));
+            PZ = P(:,z(i));
+            Fi = PZ(z(i)) + H(d_index(i));
         end
         if Fi>kalman_tol
-            if Zflag
-                Ki =  (P*z(i,:)')/Fi;
-            else
-                Ki = P(:,z(i))/Fi;
-            end
+            Ki =  PZ/Fi;
             if t>no_more_missing_observations
                 K(:,i) = Ki;
             end
             a = a + Ki*prediction_error;
-            P = P - (Fi*Ki)*Ki';
+            P = P - PZ*Ki';
             lik(s) = lik(s) + log(Fi) + prediction_error*prediction_error/Fi + l2pi;
         end
     end
     a = T*a;
-    P = T*P*transpose(T) + QQ;
+    P = T*P*T' + QQ;
     if t>=no_more_missing_observations
         notsteady = max(abs(K(:)-oldK))>riccati_tol;
         oldK = K(:);
