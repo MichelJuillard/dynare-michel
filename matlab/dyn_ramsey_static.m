@@ -53,28 +53,19 @@ if options_.steadystate_flag
     end
     ys(k_inst) = inst_val;
     exo_ss = [oo.exo_steady_state oo.exo_det_steady_state];
-    [x,params,check] = evaluate_steady_state_file(ys,exo_ss,params,...
+    [xx,params,check] = evaluate_steady_state_file(ys,exo_ss,params,...
                                                  M.fname,options_.steadystate_flag);
-    if size(x,1) < M.endo_nbr 
-        if length(M.aux_vars) > 0
-            x =  feval([M.fname '_set_auxiliary_variables'],xx,...
-                       M.params);
-        else
-            error([M.fname '_steadystate.m doesn''t match the model']);
-        end
-    end
-    [junk,junk,multbar] = dyn_ramsey_static_1(x(k_inst),M,options_,oo);
-    steady_state = [x(1:M.orig_endo_nbr); multbar];
 else
-    xx = oo.steady_state(1:M.orig_endo_nbr);
+    n_var = M.orig_endo_nbr+min(find([M.aux_vars.type] == 6)) - 1;
+    xx = oo.steady_state(1:n_var);
     [xx,info1] = dynare_solve(nl_func,xx,0);
-    [junk,junk,multbar] = nl_func(xx);
-    steady_state = [xx; multbar];
+    steady_state = nl_func(xx);
 end
+steady_state = nl_func(xx);
 
 
 
-function [resids, rJ,mult] = dyn_ramsey_static_1(x,M,options_,oo)
+function [resids,rJ,steady_state] = dyn_ramsey_static_1(x,M,options_,oo)
 resids = [];
 rJ = [];
 mult = [];
@@ -114,13 +105,18 @@ if options_.steadystate_flag
 end
 
 % setting steady state of auxiliary variables
-xx = zeros(endo_nbr,1);
-xx(1:orig_endo_nbr) = x(1:orig_endo_nbr);
-
-x = feval([M.fname '_set_auxiliary_variables'],xx,...
-          [oo.exo_steady_state,...
-           oo.exo_det_steady_state],...
-          M.params);
+% that depends on original endogenous variables
+if any([M.aux_vars.type] ~= 6)
+    needs_set_auxiliary_variables = 1;
+    fh = str2func([M.fname '_set_auxiliary_variables']);
+    s_a_v_func = @(z) fh(z,... 
+                         [oo.exo_steady_state,...
+                        oo.exo_det_steady_state],...
+                         M.params);
+    x = s_a_v_func(x);
+else
+    needs_set_auxiliary_variables = 0;
+end
 
 % value and Jacobian of objective function
 ex = zeros(1,M.exo_nbr);
@@ -128,13 +124,19 @@ ex = zeros(1,M.exo_nbr);
 Uy = Uy';
 Uyy = reshape(Uyy,endo_nbr,endo_nbr);
 
-% set multipliers to 0 to compute residuals
-[f,fJ] = feval([fname '_static'],x,[oo.exo_simul oo.exo_det_simul], ...
+% set multipliers and auxiliary variables that
+% depends on multipliers to 0 to compute residuals
+xx = [x; zeros(M.endo_nbr - M.orig_eq_nbr,1)];
+[res,fJ] = feval([fname '_static'],xx,[oo.exo_simul oo.exo_det_simul], ...
                M.params);
 
-aux_eq = [1:orig_endo_nbr orig_endo_nbr+orig_eq_nbr+1:size(fJ,1)];
-A = fJ(aux_eq,orig_endo_nbr+1:end);
-y = f(aux_eq);
+% index of multipliers and corresponding equations
+% the auxiliary variables before the Lagrange multipliers are treated
+% as ordinary endogenous variables
+n_var = M.orig_endo_nbr + min(find([M.aux_vars.type] == 6)) - 1;
+aux_eq = [1:n_var orig_endo_nbr+orig_eq_nbr+1:size(fJ,1)];
+A = fJ(aux_eq,n_var+1:end);
+y = res(aux_eq);
 mult = -A\y;
 
 resids1 = y+A*mult;
@@ -147,6 +149,7 @@ end
 if options_.steadystate_flag
     resids = r1;
 else
-    resids = [f(i_mult); r1];
+    resids = [res; r1];
 end
 rJ = [];
+steady_state = [x(1:n_var); mult];
