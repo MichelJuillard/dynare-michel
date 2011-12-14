@@ -1,7 +1,7 @@
 function prior_posterior_statistics(type,dataset)
 
-% function PosteriorFilterSmootherAndForecast(Y,gend, type)
-% Computes posterior filter smoother and forecasts
+% function prior_posterior_statistics(type,dataset)
+% Computes Monte Carlo filter smoother and forecasts
 %
 % INPUTS
 %    type:         posterior
