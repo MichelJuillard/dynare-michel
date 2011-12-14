@@ -77,8 +77,8 @@ if strcmpi(type,'posterior')
     TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
     NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
     clear record;
-    if ~isempty(options_.subdraws)
-        B = options_.subdraws;
+    if ~isempty(options_.sub_draws)
+        B = options_.sub_draws;
         if B > NumberOfDraws
             B = NumberOfDraws;
         end
