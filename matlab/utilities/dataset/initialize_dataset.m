@@ -81,7 +81,7 @@ else
     dataset_.missing.aindex = num2cell(repmat(1:dataset_.info.nvobs,dataset_.info.ntobs,1)',1);
     dataset_.missing.vindex = [];
     dataset_.missing.number_of_observations = [];
-    dataset_.missing.no_more_missing_observations = [];
+    dataset_.missing.no_more_missing_observations = 1;
 end
 
 % Compute the empirical mean of the observed variables..
