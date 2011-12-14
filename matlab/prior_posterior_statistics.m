@@ -215,8 +215,6 @@ if ~strcmpi(type,'prior'),
     localVars.x=x;
 end
 
-b=0;
-
 % Like sequential execution!
 if isnumeric(options_.parallel),
     [fout] = prior_posterior_statistics_core(localVars,1,B,0);
