@@ -38,22 +38,24 @@ function [residuals,check1,jacob] = evaluate_static_model(ys,exo_ss,params,M,opt
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
     check1 = 0;
-    fh_static = str2func([M.fname '_static']);
     if options.bytecode
         [check1, residuals] = bytecode('evaluate','static',ys,...
                                        exo_ss, params, ys, 1);
         mexErrCheck('bytecode', check1);
-    elseif options.block
-        residuals = zeros(M.endo_nbr,1);
-        mfs = M.blocksMFS;
-        for b = 1:size(mfs,1)
-            mfsb = mfs{b};
-            % blocks that can be directly evaluated (mfsb is empty)
-            % have zero residuals by construction
-            if ~isempty(mfsb)
-                residuals(mfsb) = feval(fh_static,b,ys,exo_ss,params);
-            end
-        end
     else
-        residuals = feval(fh_static,ys,exo_ss,params);
+        fh_static = str2func([M.fname '_static']);
+        if options.block
+            residuals = zeros(M.endo_nbr,1);
+            mfs = M.blocksMFS;
+            for b = 1:size(mfs,1)
+                mfsb = mfs{b};
+                % blocks that can be directly evaluated (mfsb is empty)
+                % have zero residuals by construction
+                if ~isempty(mfsb)
+                    residuals(mfsb) = feval(fh_static,b,ys,exo_ss,params);
+                end
+            end
+        else
+            residuals = feval(fh_static,ys,exo_ss,params);
+        end
     end
