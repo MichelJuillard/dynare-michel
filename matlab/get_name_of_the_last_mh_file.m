@@ -31,7 +31,7 @@ function [mhname,info] = get_name_of_the_last_mh_file(M_)
 mhname = [];
 info = 1;
 
-MhDirectoryName = CheckPath('metropolis');
+MhDirectoryName = CheckPath('metropolis',M_.dname);
 
 load([ MhDirectoryName '/' M_.fname '_mh_history.mat']) ;
 mh_number = record.LastFileNumber ;

@@ -76,17 +76,17 @@ else
     MAX_nirfs_dsgevar = 0;
 end
 
-DirectoryName = CheckPath('Output');
+DirectoryName = CheckPath('Output',M_.dname);
 if strcmpi(type,'posterior')
-    MhDirectoryName = CheckPath('metropolis');
+    MhDirectoryName = CheckPath('metropolis',M_.dname);
 elseif strcmpi(type,'gsa')
     if options_.opt_gsa.pprior
-        MhDirectoryName = CheckPath(['GSA' filesep 'prior']);
+        MhDirectoryName = CheckPath(['GSA' filesep 'prior'],M_.dname);
     else
-        MhDirectoryName = CheckPath(['GSA' filesep 'mc']);
+        MhDirectoryName = CheckPath(['GSA' filesep 'mc'],M_.dname);
     end
 else
-    MhDirectoryName = CheckPath('prior');
+    MhDirectoryName = CheckPath('prior',M_.dname);
 end
 delete([MhDirectoryName filesep M_.fname '_IRF_DSGEs*.mat']);
 delete([MhDirectoryName filesep M_.fname '_IRF_BVARDSGEs*.mat']);
@@ -95,7 +95,7 @@ if strcmpi(type,'posterior')
     TotalNumberOfMhDraws = sum(record.MhDraws(:,1));
     NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
 elseif strcmpi(type,'gsa')
-    RootDirectoryName = CheckPath('gsa');
+    RootDirectoryName = CheckPath('gsa',M_.dname);
     if options_.opt_gsa.pprior
         load([ RootDirectoryName filesep  M_.fname '_prior.mat'],'lpmat0','lpmat','istable')
     else

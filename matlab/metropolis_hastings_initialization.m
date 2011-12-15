@@ -56,7 +56,7 @@ end
 
 bayestopt_.penalty = 1e8;
 
-MhDirectoryName = CheckPath('metropolis');
+MhDirectoryName = CheckPath('metropolis',M_.dname);
 
 nblck = options_.mh_nblck;
 nruns = ones(nblck,1)*options_.mh_replic;

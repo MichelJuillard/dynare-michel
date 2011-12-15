@@ -96,7 +96,7 @@ for i=fpar:nvar
     
     if whoiam,
         if Parallel(ThisMatlab).Local==0
-            DirectoryName = CheckPath('Output');
+            DirectoryName = CheckPath('Output',M_.dname);
         end
     end
     

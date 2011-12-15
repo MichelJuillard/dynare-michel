@@ -42,7 +42,7 @@ n = estim_params_.np + ...
     estim_params_.nvx;
 nblck = options_.mh_nblck;
 
-MhDirectoryName = CheckPath('metropolis');
+MhDirectoryName = CheckPath('metropolis',M_.dname);
 load([ MhDirectoryName '/'  M_.fname '_mh_history.mat'])
 
 FirstMhFile = record.KeepedDraws.FirstMhFile;

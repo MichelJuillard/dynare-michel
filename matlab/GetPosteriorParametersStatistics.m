@@ -45,8 +45,8 @@ ncn     = estim_params_.ncn;
 np      = estim_params_.np ;
 nx      = nvx+nvn+ncx+ncn+np;
 
-DirectoryName = CheckPath('metropolis');
-OutputDirectoryName = CheckPath('Output');
+DirectoryName = CheckPath('metropolis',M_.dname);
+OutputDirectoryName = CheckPath('Output',M_.dname);
 
 load([ DirectoryName '/'  M_.fname '_mh_history'])
 FirstMhFile = record.KeepedDraws.FirstMhFile;

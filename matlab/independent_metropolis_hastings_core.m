@@ -71,7 +71,7 @@ end
 % (re)Set the penalty.
 bayestopt_.penalty = Inf;
 
-MhDirectoryName = CheckPath('metropolis');
+MhDirectoryName = CheckPath('metropolis',M_.dname);
 
 OpenOldFile = ones(nblck,1);
 if strcmpi(ProposalFun,'rand_multivariate_normal')

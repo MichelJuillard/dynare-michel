@@ -68,7 +68,7 @@ switch type
   otherwise
     disp(['This feature is not yet implemented!'])
 end
-CheckPath('prior/moments');
+CheckPath('prior/moments',M_.dname);
 pdfinfo = dir([ M_.dname '/prior/' generic_prior_data_file_name '*']);
 if isempty(pdfinfo)
     info = 4;

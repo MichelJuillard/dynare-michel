@@ -263,7 +263,7 @@ if options_.initialize_estimated_parameters_with_the_prior_mode
 end 
 
 % I create subfolder M_.dname/prior if needed.
-CheckPath('prior');
+CheckPath('prior',M_.dname);
 
 % I save the prior definition if the prior has changed.
 if exist([ M_.dname '/prior/definition.mat'])

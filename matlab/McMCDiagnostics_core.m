@@ -56,7 +56,7 @@ if whoiam
     Parallel=myinputs.Parallel;
 end
 if ~exist('MhDirectoryName'),
-    MhDirectoryName = CheckPath('metropolis');
+    MhDirectoryName = CheckPath('metropolis',M_.dname);
 end
 
 ALPHA = 0.2;                                % increase too much with the number of simulations.

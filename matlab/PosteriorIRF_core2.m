@@ -69,7 +69,7 @@ end
 
 % To save the figures where the function is computed!
 
-DirectoryName = CheckPath('Output');
+DirectoryName = CheckPath('Output',M_.dname);
 
 RemoteFlag = 0;
 if whoiam,

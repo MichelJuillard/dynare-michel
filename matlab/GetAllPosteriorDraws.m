@@ -39,7 +39,7 @@ nblck = options_.mh_nblck;
 
 iline = FirstLine;
 linee = 1;
-DirectoryName = CheckPath('metropolis');
+DirectoryName = CheckPath('metropolis',M_.dname);
 
 if nblck>1 && nargin<6
     Draws = zeros(NumberOfDraws*nblck,1);

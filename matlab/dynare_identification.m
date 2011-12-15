@@ -158,7 +158,7 @@ if ~(exist('sylvester3mr','file')==2),
     addpath([dynareroot 'gensylv'])
 end
 
-IdentifDirectoryName = CheckPath('identification');
+IdentifDirectoryName = CheckPath('identification',M_.dname);
 if prior_exist,
 
     indx = [];

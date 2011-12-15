@@ -136,12 +136,12 @@ if options_gsa.morris==1 || options_gsa.morris==3,
     options_gsa.ksstat=1;
     if options_gsa.morris==3,
         options_gsa = set_default_option(options_gsa,'Nsam',256);
-        OutputDirectoryName = CheckPath('gsa/identif');
+        OutputDirectoryName = CheckPath('gsa/identif',M_.dname);
     else
-        OutputDirectoryName = CheckPath('gsa/screen');
+        OutputDirectoryName = CheckPath('gsa/screen',M_.dname);
     end
 else
-    OutputDirectoryName = CheckPath('gsa');
+    OutputDirectoryName = CheckPath('gsa',M_.dname);
 end
 
 options_.opt_gsa = options_gsa;
@@ -281,7 +281,7 @@ if options_gsa.glue,
     dr_ = oo_.dr;
     if options_gsa.ppost
         load([OutputDirectoryName,'/',fname_,'_post']);
-        DirectoryName = CheckPath('metropolis');
+        DirectoryName = CheckPath('metropolis',M_.dname);
     else
         if options_gsa.pprior
             load([OutputDirectoryName,'/',fname_,'_prior']);

@@ -45,22 +45,22 @@ function ReshapeMatFiles(type, type2)
 global M_ options_
 
 if nargin==1, 
-    MhDirectoryName = [ CheckPath('metropolis') filesep ];
+    MhDirectoryName = [ CheckPath('metropolis',M_.dname) filesep ];
 else
     if strcmpi(type2,'posterior')
-        MhDirectoryName = [CheckPath('metropolis') filesep ];
+        MhDirectoryName = [CheckPath('metropolis',M_.dname) filesep ];
     elseif strcmpi(type2,'gsa')
         if options_.opt_gsa.morris==1,
-            MhDirectoryName = [CheckPath('gsa/screen') filesep ];
+            MhDirectoryName = [CheckPath('gsa/screen',M_.dname) filesep ];
         elseif options_.opt_gsa.morris==2,
-            MhDirectoryName = [CheckPath('gsa/identif') filesep ];
+            MhDirectoryName = [CheckPath('gsa/identif',M_.dname) filesep ];
         elseif options_.opt_gsa.pprior
-            MhDirectoryName = [CheckPath(['gsa' filesep 'prior']) filesep ];
+            MhDirectoryName = [CheckPath(['gsa' filesep 'prior'],M_.dname) filesep ];
         else
-            MhDirectoryName = [CheckPath(['gsa' filesep 'mc']) filesep ];
+            MhDirectoryName = [CheckPath(['gsa' filesep 'mc'],M_.dname) filesep ];
         end
     else
-        MhDirectoryName = [CheckPath('prior') filesep ];
+        MhDirectoryName = [CheckPath('prior',M_.dname) filesep ];
     end  
 end
 switch type

@@ -32,7 +32,7 @@ function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
 
 % Initialization.
 prior_draw(1);
-PriorDirectoryName = CheckPath('prior/draws');
+PriorDirectoryName = CheckPath('prior/draws',M_.dname);
 work = ~drsave;
 iteration = 0;
 loop_indx = 0;

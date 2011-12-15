@@ -69,7 +69,7 @@ end
 maxlag = M_.maximum_endo_lag;
 %%
 if strcmpi(type,'posterior')
-    DirectoryName = CheckPath('metropolis');
+    DirectoryName = CheckPath('metropolis',M_.dname);
     load([ DirectoryName '/'  M_.fname '_mh_history'])
     FirstMhFile = record.KeepedDraws.FirstMhFile;
     FirstLine = record.KeepedDraws.FirstLine;
@@ -86,12 +86,12 @@ if strcmpi(type,'posterior')
         B = min(1200, round(0.25*NumberOfDraws));
     end
 elseif strcmpi(type,'gsa')
-    RootDirectoryName = CheckPath('gsa');
+    RootDirectoryName = CheckPath('gsa',M_.dname);
     if options_.opt_gsa.pprior
-        DirectoryName = CheckPath(['gsa',filesep,'prior']);
+        DirectoryName = CheckPath(['gsa',filesep,'prior'],M_.dname);
         load([ RootDirectoryName filesep  M_.fname '_prior.mat'],'lpmat0','lpmat','istable')
     else
-        DirectoryName = CheckPath(['gsa',filesep,'mc']);
+        DirectoryName = CheckPath(['gsa',filesep,'mc'],M_.dname);
         load([ RootDirectoryName filesep  M_.fname '_mc.mat'],'lpmat0','lpmat','istable')
     end
     x=[lpmat0(istable,:) lpmat(istable,:)];
@@ -99,7 +99,7 @@ elseif strcmpi(type,'gsa')
     NumberOfDraws=size(x,1);
     B=NumberOfDraws; 
 elseif strcmpi(type,'prior')
-    DirectoryName = CheckPath('prior');
+    DirectoryName = CheckPath('prior',M_.dname);
     if ~isempty(options_.subdraws)
         B = options_.subdraws;
     else

@@ -39,7 +39,7 @@ if init
     ncn  = estim_params_.ncn;
     np   = estim_params_.np ;
     npar = nvx+nvn+ncx+ncn+np;
-    MhDirectoryName = CheckPath('metropolis');
+    MhDirectoryName = CheckPath('metropolis',M_.dname);
     fname = [ MhDirectoryName '/' M_.fname];
     load([ fname '_mh_history']);
     FirstMhFile = record.KeepedDraws.FirstMhFile;

@@ -567,7 +567,7 @@ elseif ~any(bayestopt_.pshape > 0) && options_.mh_posterior_mode_estimation
 end
 
 
-OutputDirectoryName = CheckPath('Output');
+OutputDirectoryName = CheckPath('Output',M_.dname);
 
 if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior mode) Latex output
     if np

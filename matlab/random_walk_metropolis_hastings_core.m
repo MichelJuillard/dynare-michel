@@ -103,7 +103,7 @@ end
 % (re)Set the penalty
 bayestopt_.penalty = Inf;
 
-MhDirectoryName = CheckPath('metropolis');
+MhDirectoryName = CheckPath('metropolis',M_.dname);
 
 options_.lik_algo = 1;
 OpenOldFile = ones(nblck,1);

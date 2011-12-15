@@ -97,15 +97,15 @@ end
 
 % DirectoryName = myinputs.DirectoryName;
 if strcmpi(type,'posterior')
-    DirectoryName = CheckPath('metropolis');
+    DirectoryName = CheckPath('metropolis',M_.dname);
 elseif strcmpi(type,'gsa')
     if options_.opt_gsa.pprior
-        DirectoryName = CheckPath(['gsa',filesep,'prior']);
+        DirectoryName = CheckPath(['gsa',filesep,'prior'],M_.dname);
     else
-        DirectoryName = CheckPath(['gsa',filesep,'mc']);
+        DirectoryName = CheckPath(['gsa',filesep,'mc'],M_.dname);
     end
 elseif strcmpi(type,'prior')
-    DirectoryName = CheckPath('prior');
+    DirectoryName = CheckPath('prior',M_.dname);
 end
 
 RemoteFlag = 0;
