@@ -101,6 +101,25 @@ switch options_.ep.innovation_distribution
     error(['extended_path:: ' options_.ep.innovation_distribution ' distribution for the structural innovations is not (yet) implemented!'])
 end
     
+% Set future shocks (Stochastic Extended Path approach)
+if options_.ep.stochastic
+    [r,w] = gauss_hermite_weights_and_nodes(options_.ep.number_of_nodes);
+    switch options_.ep.stochastic
+      case 1
+        rr = cell(1);
+        ww = cell(1);
+        for i=1:size(M_.Sigma_e,1)
+            rr = {r};
+            ww = {w};
+        end
+        rrr = cartesian_product_of_sets(rr{:});
+        www = cartesian_product_of_sets(ww{:});
+        www = prod(www,2);
+      otherwise
+        error(['Order ' int2str(options_.ep.stochastic) ' Stochastic Extended Path method is not implemented!'])
+    end
+end
+
 % Initializes some variables.
 t  = 0;
 
