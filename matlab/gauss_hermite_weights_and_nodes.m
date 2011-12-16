@@ -57,3 +57,18 @@ JacobiEigenVector = JacobiEigenVectors(1,:);
 JacobiEigenVector = transpose(JacobiEigenVector(idx));
 weights = JacobiEigenVector.^2;
 nodes = sqrt(2)*nodes;
+
+%@test:1
+%$ n = 5;
+%$ [nodes,weights] = gauss_hermite_weights_and_nodes(n);
+%$
+%$ sum_of_weights = sum(weights);
+%$
+%$ % Expected nodes (taken from Judd (1998, table 7.4).
+%$ enodes = [-2.020182870; -0.9585724646; 0; 0.9585724646;   2.020182870]; 
+%$
+%$ % Check the results.
+%$ t(1) = dyn_assert(1.0,sum_of_weights,1e-12);
+%$ t(2) = dyn_assert(enodes,nodes/sqrt(2),1e-8);
+%$ T = all(t);
+%@eof:1
