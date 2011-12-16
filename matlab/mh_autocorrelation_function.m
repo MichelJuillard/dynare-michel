@@ -47,7 +47,7 @@ if isempty(column)
 end
 
 % Get informations about the posterior draws:
-DirectoryName = CheckPath('metropolis');
+DirectoryName = CheckPath('metropolis',M_.dname);
 try
     load([DirectoryName '/' M_.fname '_mh_history.mat']); 
 catch

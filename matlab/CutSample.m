@@ -33,7 +33,7 @@ function CutSample(M_, options_, estim_params_)
 
 npar = estim_params_.np+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+estim_params_.nvx;
 
-DirectoryName = CheckPath('metropolis');
+DirectoryName = CheckPath('metropolis',M_.dname);
 file = dir([ DirectoryName ,filesep,  M_.fname '_mh_history.mat']);
 files = dir([ DirectoryName ,filesep, M_.fname '_mh*.mat' ]);
 if ~length(files)

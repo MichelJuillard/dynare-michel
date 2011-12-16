@@ -216,7 +216,7 @@ main(int nrhs, const char *prhs[])
   double *yd = NULL, *xd = NULL;
   int count_array_argument = 0;
   bool global_temporary_terms = false;
-  bool print = false, print_error = true;
+  bool print = false, print_error = true, print_it = false;
   double *steady_yd = NULL, *steady_xd = NULL;
   
   try
@@ -286,6 +286,10 @@ main(int nrhs, const char *prhs[])
           nb_row_xd = row_x;
         }
     }
+  mxArray *ep = mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "ep"));
+  int verbose= int(*mxGetPr((mxGetFieldByNumber(ep, 0, mxGetFieldNumber(ep, "verbosity")))));
+  if (verbose)
+    print_it = true;
   int maxit_ = int (floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "maxit_"))))));
   double slowc = double (*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "slowc")))));
   double markowitz_c = double (*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "markowitz")))));
@@ -298,11 +302,11 @@ main(int nrhs, const char *prhs[])
       solve_algo = int (*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "solve_algo")))));
       solve_tolf = *(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "solve_tolf"))));
     }
-
   else
     {
       solve_algo = stack_solve_algo;
-      solve_tolf = *(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "dynatol"))));
+      mxArray *dynatol = mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "dynatol"));
+      solve_tolf= *mxGetPr((mxGetFieldByNumber(dynatol, 0, mxGetFieldNumber(dynatol, "f"))));
     }
 
   mxArray *mxa = mxGetFieldByNumber(M_, 0, mxGetFieldNumber(M_, "fname"));
@@ -343,7 +347,7 @@ main(int nrhs, const char *prhs[])
 
   try
     {
-      result = interprete.compute_blocks(f, f, steady_state, evaluate, block, nb_blocks);
+      result = interprete.compute_blocks(f, f, steady_state, evaluate, block, nb_blocks,print_it);
     }
   catch (GeneralExceptionHandling &feh)
     {
@@ -351,7 +355,7 @@ main(int nrhs, const char *prhs[])
     }
 
   clock_t t1 = clock();
-  if (!steady_state && !evaluate && no_error)
+  if (!steady_state && !evaluate && no_error && print)
     mexPrintf("Simulation Time=%f milliseconds\n", 1000.0*(double (t1)-double (t0))/double (CLOCKS_PER_SEC));
 #ifndef DEBUG_EX
   bool dont_store_a_structure = false;

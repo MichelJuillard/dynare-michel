@@ -322,7 +322,14 @@ else
     steadystate_check_flag = 1;
 end
 
-oo_.steady_state = evaluate_steady_state(oo_.steady_state,M_,options_,oo_,steadystate_check_flag);
+M = M_;
+nvx = estim_params_.nvx;
+ncx = estim_params_.ncx;
+nvn = estim_params_.nvn;
+ncn = estim_params_.ncn;
+M.params(estim_params_.param_vals(:,1)) = xparam1(nvx+ncx+nvn+ncn+1:end);
+
+oo_.steady_state = evaluate_steady_state(oo_.steady_state,M,options_,oo_,steadystate_check_flag);
 if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
     options_.noconstant = 1;
 else

@@ -567,7 +567,7 @@ elseif ~any(bayestopt_.pshape > 0) && options_.mh_posterior_mode_estimation
 end
 
 
-OutputDirectoryName = CheckPath('Output');
+OutputDirectoryName = CheckPath('Output',M_.dname);
 
 if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior mode) Latex output
     if np
@@ -1354,7 +1354,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
 end
 
 if options_.forecast > 0 && options_.mh_replic == 0 && ~options_.load_mh_file
-    forecast(var_list_,'smoother');
+    dyn_forecast(var_list_,'smoother');
 end
 
 if np > 0

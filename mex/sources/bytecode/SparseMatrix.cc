@@ -3097,8 +3097,11 @@ SparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int it_, int 
   mxArray *b_m = NULL, *A_m = NULL, *x0_m = NULL;
   if (iter > 0)
     {
-      mexPrintf("Sim : %f ms\n", (1000.0*(double (clock())-double (time00)))/double (CLOCKS_PER_SEC));
-      mexEvalString("drawnow;");
+      if (print_it)
+        {
+          mexPrintf("Sim : %f ms\n", (1000.0*(double (clock())-double (time00)))/double (CLOCKS_PER_SEC));
+          mexEvalString("drawnow;");
+        }
       time00 = clock();
     }
   if (isnan(res1) || isinf(res1) || (res2 > 12*g0 && iter > 0))

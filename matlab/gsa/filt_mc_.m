@@ -93,14 +93,14 @@ end
 
 if options_.opt_gsa.ppost,
     fnamtmp=[fname_,'_post'];
-    DirectoryName = CheckPath('metropolis');
+    DirectoryName = CheckPath('metropolis',M_.dname);
 else
     if options_.opt_gsa.pprior
         fnamtmp=[fname_,'_prior'];
-        DirectoryName = CheckPath(['gsa' filesep 'prior']);
+        DirectoryName = CheckPath(['gsa' filesep 'prior'],M_.dname);
     else
         fnamtmp=[fname_,'_mc'];
-        DirectoryName = CheckPath(['gsa' filesep 'mc']);
+        DirectoryName = CheckPath(['gsa' filesep 'mc'],M_.dname);
     end
 end
 if ~loadSA,

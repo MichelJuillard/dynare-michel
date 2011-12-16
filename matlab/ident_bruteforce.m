@@ -27,7 +27,7 @@ function [pars, cosnJ] = ident_bruteforce(J,n,TeX, pnames_TeX)
 % along with Dynare.  If not, see <http://www.gnu.org/licen
 global M_ options_
 
-OutputDirectoryName = CheckPath('Identification');
+OutputDirectoryName = CheckPath('Identification',M_.dname);
 
 k = size(J,2); % number of parameters
 

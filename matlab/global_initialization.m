@@ -38,7 +38,8 @@ options_.console_mode = 0;
 options_.terminal_condition = 0;
 options_.rplottype = 0;
 options_.smpl = 0;
-options_.dynatol = 0.00001;
+options_.dynatol.f = 1e-5;
+options_.dynatol.x = 1e-5; 
 options_.maxit_ = 10;
 options_.slowc = 1;
 options_.timing = 0;
@@ -130,6 +131,11 @@ options_.ep.innovation_distribution = 'gaussian';
 options_.ep.set_dynare_seed_to_default = 1;
 % Set algorithm for the perfect foresight solver
 options_.ep.stack_solve_algo = 4;
+% Set method
+options_.ep.stochastic = 0;
+% Set number of nodes for future shocks
+options_.ep.number_of_nodes = 5;
+
 
 % TeX output
 options_.TeX = 0;
@@ -180,6 +186,7 @@ options_.Harvey_scale_factor = 10;
 options_.MaxNumberOfBytes = 1e6;
 options_.MaximumNumberOfMegaBytes = 111;
 options_.PosteriorSampleSize = 1000;
+options_.analytic_derivation = 0;
 options_.bayesian_irf = 0;
 options_.bayesian_th_moments = 0;
 options_.diffuse_filter = 0;
@@ -217,7 +224,7 @@ options_.presample = 0;
 options_.prior_trunc = 1e-10;
 options_.smoother = 0;
 options_.student_degrees_of_freedom = 3;
-options_.subdraws = [];
+options_.sub_draws = [];
 options_.use_mh_covariance_matrix = 0;
 options_.gradient_method = 2;
 options_.gradient_epsilon = 1e-6;

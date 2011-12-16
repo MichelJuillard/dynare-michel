@@ -32,7 +32,9 @@ function time_series = extended_path(initial_conditions,sample_size)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 global M_ options_ oo_
     
-    
+debug = 0;
+verbosity = options_.ep.verbosity+debug;
+
 % Test if bytecode and block options are used (these options are mandatory)
 if ~( options_.bytecode && options_.block )
     error('extended_path:: Options bytecode and block are mandatory!')
@@ -86,6 +88,11 @@ covariance_matrix = M_.Sigma_e(positive_var_indx,positive_var_indx);
 number_of_structural_innovations = length(covariance_matrix); 
 covariance_matrix_upper_cholesky = chol(covariance_matrix); 
 
+% Set seed.
+if options_.ep.set_dynare_seed_to_default
+    set_dynare_seed('default');
+end
+
 % Simulate shocks.
 switch options_.ep.innovation_distribution
   case 'gaussian'
@@ -94,16 +101,58 @@ switch options_.ep.innovation_distribution
     error(['extended_path:: ' options_.ep.innovation_distribution ' distribution for the structural innovations is not (yet) implemented!'])
 end
     
+% Set future shocks (Stochastic Extended Path approach)
+if options_.ep.stochastic
+    [r,w] = gauss_hermite_weights_and_nodes(options_.ep.number_of_nodes);
+    switch options_.ep.stochastic
+      case 1
+        rr = cell(1);
+        ww = cell(1);
+        for i=1:size(M_.Sigma_e,1)
+            rr = {r};
+            ww = {w};
+        end
+        rrr = cartesian_product_of_sets(rr{:});
+        www = cartesian_product_of_sets(ww{:});
+        www = prod(www,2);
+      otherwise
+        error(['Order ' int2str(options_.ep.stochastic) ' Stochastic Extended Path method is not implemented!'])
+    end
+end
+
 % Initializes some variables.
 t  = 0;
 
-% Set seed.
-if options_.ep.set_dynare_seed_to_default
-    set_dynare_seed('default');
+
+% Set waitbar (graphic or text  mode)
+graphic_waitbar_flag = ~( options_.console_mode || exist('OCTAVE_VERSION') );
+
+if graphic_waitbar_flag
+    hh = waitbar(0,['Please wait. Extended Path simulations...']);
+    set(hh,'Name','EP simulations');
+else
+    for i=1:2, disp(' '), end
+    if ~exist('OCTAVE_VERSION')
+       back = [];
+    end
 end
+
 
 % Main loop.
 while (t<sample_size)
+    if ~mod(t,10)
+        if graphic_waitbar_flag
+            waitbar(t/sample_size);
+        else
+            if exist('OCTAVE_VERSION')
+                printf('Please wait. Extended Path simulations... %3.f%%\r done', 100*t/sample_size);
+            else
+                str = sprintf('Please wait. Extended Path simulations... %3.f%% done.', 100*t/sample_size);
+                fprintf([back '%s'],str);
+                back=repmat('\b',1,length(str));
+            end
+        end
+    end
     % Set period index.
     t = t+1;
     shocks = oo_.ep.shocks(t,:);
@@ -128,7 +177,7 @@ while (t<sample_size)
             info.convergence = ~flag;
             info.time = ctime;
         end
-        if options_.ep.verbosity
+        if verbosity
             if info.convergence
                 if t<10
                     disp(['Time:    ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
@@ -152,13 +201,13 @@ while (t<sample_size)
             end
         end
         % Test if periods is big enough.
-        if ~increase_periods &&  max(max(abs(tmp(idx,end-options_.ep.lp:end)./tmp(idx,end-options_.ep.lp-1:end-1)-1)))<options_.dynatol
+        if ~increase_periods &&  max(max(abs(tmp(idx,end-options_.ep.lp:end)./tmp(idx,end-options_.ep.lp-1:end-1)-1)))<options_.dynatol.x
             break
         else
             options_.periods = options_.periods + options_.ep.step;
             options_.minimal_solving_period = options_.periods;
             increase_periods = increase_periods + 1;
-            if options_.ep.verbosity
+            if verbosity
                 if t<10
                     disp(['Time:    ' int2str(t)  '. I increase the number of periods to ' int2str(options_.periods) '.'])
                 elseif t<100
@@ -183,7 +232,7 @@ while (t<sample_size)
             info.time = info.time+ctime;
             if info.convergence
                 maxdiff = max(max(abs(tmp(:,2:options_.ep.fp)-tmp_old(:,2:options_.ep.fp))));
-                if maxdiff<options_.dynatol
+                if maxdiff<options_.dynatol.x
                     options_.periods = options_.ep.periods;
                     options_.minimal_solving_period = options_.periods;
                     oo_.exo_simul = oo_.exo_simul(1:(options_.periods+2),:);
@@ -195,7 +244,7 @@ while (t<sample_size)
                     continue
                 else
                     if increase_periods==10;
-                        if options_.ep.verbosity
+                        if verbosity
                             if t<10
                                 disp(['Time:    ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
                             elseif t<100
@@ -222,7 +271,7 @@ while (t<sample_size)
         else
             info.convergence = 1;
             oo_.endo_simul = tmp;
-            if options_.ep.verbosity && info.convergence
+            if verbosity && info.convergence
                 disp('Homotopy:: Convergence of the perfect foresight model solver!')
             end
         end
@@ -244,4 +293,12 @@ while (t<sample_size)
     oo_.endo_simul = oo_.endo_simul(:,1:options_.periods+2);
     oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end); 
     oo_.endo_simul(:,end) = oo_.steady_state;
+end
+
+if graphic_waitbar_flag
+    close(hh);
+else
+    if ~exist('OCTAVE_VERSION')
+        fprintf(back);
+    end
 end

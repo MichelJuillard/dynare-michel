@@ -90,19 +90,17 @@ while t<=last
     for i=1:pp
         if Zflag
             prediction_error = Y(i,t) - Z(i,:)*a;
-            Fi = Z(i,:)*PP*Z(i,:)' + H(i);
+            PPZ = PP*Z(i,:)';
+            Fi = Z(i,:)*PPZ + H(i);
         else
             prediction_error = Y(i,t) - a(Z(i));
-            Fi = PP(Z(i),Z(i)) + H(i);
+            PPZ = PP(:,Z(i));
+            Fi = PPZ(Z(i)) + H(i);
         end
         if Fi>kalman_tol
-            if Zflag
-                Ki = (PP*Z(i,:))'/Fi;
-            else
-                Ki = PP(:,Z(i))/Fi;
-            end
+            Ki = PPZ/Fi;
             a  = a + Ki*prediction_error;
-            PP = PP - (Fi*Ki)*transpose(Ki);
+            PP = PP - PPZ*Ki';
             likk(s) = likk(s) + log(Fi) + prediction_error*prediction_error/Fi + l2pi;
         end
     end

@@ -7,7 +7,7 @@ end;
 fprintf(fid,'%d\n',options_.maxit_);
 fprintf(fid,'%6.20f\n',options_.slowc);
 fprintf(fid,'%6.20f\n',options_.markowitz);
-fprintf(fid,'%6.20f\n',options_.dynatol);
+fprintf(fid,'%6.20f\n',options_.dynatol.f);
 fprintf(fid,'%d\n',options_.minimal_solving_periods);
 fclose(fid);
 

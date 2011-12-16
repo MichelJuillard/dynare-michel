@@ -97,41 +97,28 @@ end
 
 % DirectoryName = myinputs.DirectoryName;
 if strcmpi(type,'posterior')
-    DirectoryName = CheckPath('metropolis');
+    DirectoryName = CheckPath('metropolis',M_.dname);
 elseif strcmpi(type,'gsa')
     if options_.opt_gsa.pprior
-        DirectoryName = CheckPath(['gsa',filesep,'prior']);
+        DirectoryName = CheckPath(['gsa',filesep,'prior'],M_.dname);
     else
-        DirectoryName = CheckPath(['gsa',filesep,'mc']);
+        DirectoryName = CheckPath(['gsa',filesep,'mc'],M_.dname);
     end
 elseif strcmpi(type,'prior')
-    DirectoryName = CheckPath('prior');
+    DirectoryName = CheckPath('prior',M_.dname);
 end
 
 RemoteFlag = 0;
 if whoiam
-    for j=1:length(Parallel),
-        if Parallel(j).Local==0,
-            RemoteFlag = 1;
-        end
+    if Parallel(ThisMatlab).Local==0,
+        RemoteFlag =1;
     end
     ifil=ifil(:,whoiam);
-    waitbarString = ['Please wait... ',type,' subdraws (' int2str(fpar) 'of' int2str(B) ')...'];
-    if Parallel(ThisMatlab).Local,
-        waitbarTitle=['Local '];
-    else
-        waitbarTitle=[Parallel(ThisMatlab).ComputerName];
-    end
-    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
+    prct0={0,whoiam,Parallel(ThisMatlab)};
 else
-    if exist('OCTAVE_VERSION') || options_.console_mode,
-        diary off;
-        newString = '';
-    else
-        h = waitbar(0,['Taking ',type,' subdraws...']);
-    end
-
+    prct0=0;
 end
+h = dyn_waitbar(prct0,['Taking ',type,' subdraws...']);
 
 if RemoteFlag==1,
     OutputFileName_smooth = {};
@@ -313,27 +300,8 @@ for b=fpar:B
     %   DirectoryName=TempPath;
 
 
-    if exist('OCTAVE_VERSION') || options_.console_mode,
-        if (whoiam==0),
-            if exist('OCTAVE_VERSION'),
-                printf('Taking subdraws: %3.f%% done\r', b/B*100);
-            else
-                s0=repmat('\b',1,length(newString));
-                newString = sprintf('Taking subdraws: %3.f%% done', b/B*100);
-                fprintf([s0,'%s'],newString);
-            end
-        end
-    elseif ~whoiam,
-        waitbar(b/B,h);
-    end
+    dyn_waitbar((b-fpar+1)/(B-fpar+1),h);
 
-    if  whoiam,
-        if ~exist('OCTAVE_VERSION')
-            fprintf('Done! \n');
-        end
-        waitbarString = [ 'Subdraw ' int2str(b) '/' int2str(B) ' done.'];
-        fMessageStatus((b-fpar+1)/(B-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
-    end
 end
 
 myoutput.ifil=ifil;
@@ -349,14 +317,5 @@ if RemoteFlag==1,
     % OutputFileName_moments];
 end
 
-if exist('OCTAVE_VERSION') || options_.console_mode,
-    if (whoiam==0),
-        fprintf('\n');
-        diary on;
-    end
-else
-    if exist('h')
-        close(h)
-    end
-    
-end
+dyn_waitbar_close(h);
+

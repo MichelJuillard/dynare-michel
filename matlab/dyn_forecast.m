@@ -1,5 +1,5 @@
-function info = forecast(var_list,task)
-% function forecast(var_list,task)
+function info = dyn_forecast(var_list,task)
+% function dyn_forecast(var_list,task)
 %   computes mean forecast for a given value of the parameters
 %   computes also confidence band for the forecast    
 %

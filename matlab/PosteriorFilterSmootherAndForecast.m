@@ -55,8 +55,8 @@ i_last_obs = gend+(1-M_.maximum_endo_lag:0);
 horizon = options_.forecast;
 maxlag = M_.maximum_endo_lag;
 %%
-CheckPath('Plots/');
-DirectoryName = CheckPath('metropolis');
+CheckPath('Plots/',M_.dname);
+DirectoryName = CheckPath('metropolis',M_.dname);
 load([ DirectoryName '/'  M_.fname '_mh_history.mat'])
 FirstMhFile = record.KeepedDraws.FirstMhFile;
 FirstLine = record.KeepedDraws.FirstLine;

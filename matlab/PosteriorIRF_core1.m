@@ -84,52 +84,43 @@ end
 
 % MhDirectoryName = myinputs.MhDirectoryName;
 if strcmpi(type,'posterior')
-    MhDirectoryName = CheckPath('metropolis');
+    MhDirectoryName = CheckPath('metropolis',M_.dname);
 elseif strcmpi(type,'gsa')
     if options_.opt_gsa.pprior
-        MhDirectoryName = CheckPath(['gsa' filesep 'prior']);
+        MhDirectoryName = CheckPath(['gsa' filesep 'prior'],M_.dname);
     else
-        MhDirectoryName = CheckPath(['gsa' filesep 'mc']);
+        MhDirectoryName = CheckPath(['gsa' filesep 'mc'],M_.dname);
     end
 else
-    MhDirectoryName = CheckPath('prior');
+    MhDirectoryName = CheckPath('prior',M_.dname);
 end
 
 RemoteFlag = 0;
 
 if whoiam
-    waitbarString = ['Please wait... Bayesian (posterior) IRFs computing. (' int2str(fpar) 'of' int2str(npar) ')...'];
-    if Parallel(ThisMatlab).Local,
-        waitbarTitle=['Local '];
-    else
-        waitbarTitle=[Parallel(ThisMatlab).ComputerName];
+    if Parallel(ThisMatlab).Local==0,
         RemoteFlag =1;
     end
-    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
+    prct0={0,whoiam,Parallel(ThisMatlab)};
 else
-    if exist('OCTAVE_VERSION')
-        diary off;
-        printf('\n')
-    else
-        if strcmpi(type,'posterior')
-            h = waitbar(0,'Bayesian (posterior) IRFs...');
-            set(h,'Name','Bayesian (posterior) IRFs.');
-        elseif strcmpi(type,'gsa')
-            h = waitbar(0,'GSA (prior) IRFs...');
-        else
-            h = waitbar(0,'Bayesian (prior) IRFs...');
-        end
-    end
-
+    prct0=0;
 end
+if strcmpi(type,'posterior')
+    h = dyn_waitbar(prct0,'Bayesian (posterior) IRFs...');
+elseif strcmpi(type,'gsa')
+    h = dyn_waitbar(prct0,'GSA (prior) IRFs...');
+else
+    h = dyn_waitbar(prct0,'Bayesian (prior) IRFs...');
+end
+
 
 OutputFileName_bvardsge = {};
 OutputFileName_dsge = {};
 OutputFileName_param = {};
 
 
-fpar0=fpar;
 fpar = fpar-1;
+fpar0=fpar;
 
 if whoiam
     ifil2=ifil2(whoiam);
@@ -279,32 +270,28 @@ while fpar<npar
         ifil2 = ifil2 + 1;
         irun2 = 0;
     end
-    if exist('OCTAVE_VERSION'),
-        if (whoiam==0),
-            printf(['Posterior IRF  %3.f%% done\r'],(fpar/npar*100));
-        end
-    elseif ~whoiam,
-        waitbar(fpar/npar,h);
-    end
-    if whoiam,
-        if ~exist('OCTAVE_VERSION')
-            fprintf('Done! \n');
-        end
-        waitbarString = [ 'Subdraw ' int2str(fpar) '/' int2str(npar) ' done.'];
-        fMessageStatus((fpar-fpar0)/(npar-fpar0),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
-    end
+%     if exist('OCTAVE_VERSION'),
+%         if (whoiam==0),
+%             printf(['Posterior IRF  %3.f%% done\r'],(fpar/npar*100));
+%         end
+%     elseif ~whoiam,
+%         waitbar(fpar/npar,h);
+%     end
+%     if whoiam,
+%         if ~exist('OCTAVE_VERSION')
+%             fprintf('Done! \n');
+%         end
+%         waitbarString = [ 'Subdraw ' int2str(fpar) '/' int2str(npar) ' done.'];
+%         fMessageStatus((fpar-fpar0)/(npar-fpar0),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
+%     end
+    dyn_waitbar((fpar-fpar0)/(npar-fpar0),h);
 end
+
+dyn_waitbar_close(h);
 
 if whoiam==0
     if nosaddle
         disp(['PosteriorIRF :: Percentage of discarded posterior draws = ' num2str(nosaddle/(npar+nosaddle))])
-    end
-    if exist('h')
-        close(h);
-    end
-    if exist('OCTAVE_VERSION')
-        printf('\n');
-        diary on;
     end
 end
 

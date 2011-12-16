@@ -1,6 +1,6 @@
 function s=get_moments_size(options)
-% function PosteriorFilterSmootherAndForecast(Y,gend, type)
-% Computes posterior filter smoother and forecasts
+% function s=get_moments_size(options)
+% Computes size of moments for a given model and options
 %
 % INPUTS
 %    options: structure of Dynare options

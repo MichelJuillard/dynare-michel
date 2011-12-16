@@ -69,18 +69,15 @@ end
 
 % To save the figures where the function is computed!
 
-DirectoryName = CheckPath('Output');
+DirectoryName = CheckPath('Output',M_.dname);
 
 RemoteFlag = 0;
 if whoiam,
-    waitbarString = ['Please wait... PosteriorIRF Plots (exog. shocks ' int2str(fpar) 'of' int2str(npar) ')...'];
-    if Parallel(ThisMatlab).Local,
-        waitbarTitle=['Local '];
-    else
-        waitbarTitle=[Parallel(ThisMatlab).ComputerName];
-        RemoteFlag = 1;
+    if Parallel(ThisMatlab).Local==0,
+        RemoteFlag =1;
     end
-    fMessageStatus(0,whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
+    prct0={0,whoiam,Parallel(ThisMatlab)};
+    dyn_waitbar(prct0,'PosteriorIRF Plots ...');
 end
 
 OutputFileName={};
@@ -162,7 +159,8 @@ for i=fpar:npar,
     if whoiam,
         fprintf('Done! \n');
         waitbarString = [ 'Exog. shocks ' int2str(i) '/' int2str(npar) ' done.'];
-        fMessageStatus((i-fpar+1)/(npar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
+%         fMessageStatus((i-fpar+1)/(npar-fpar+1),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
+        dyn_waitbar((i-fpar+1)/(npar-fpar+1),[],waitbarString);
     end
 end% loop over exo_var  
 

@@ -63,7 +63,7 @@ switch nargin
 end
 
 % Get informations about the mcmc:
-MhDirectoryName = CheckPath('metropolis');
+MhDirectoryName = CheckPath('metropolis',M_.dname);
 fname = [ MhDirectoryName '/' M_.fname];
 load([ fname '_mh_history.mat']);
 FirstMhFile = record.KeepedDraws.FirstMhFile;

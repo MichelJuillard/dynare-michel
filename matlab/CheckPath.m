@@ -1,8 +1,9 @@
-function DirectoryName = CheckPath(type)
+function DirectoryName = CheckPath(type,dname)
 % Creates the subfolder "./M_.dname/type" if it does not exist yet.
 %
 % INPUTS
-%    type  [string]    Name of the subfolder. 
+%    type   [string]    Name of the subfolder. 
+%    dname  [string]    Name of the directory
 %
 % OUTPUTS
 %    none.
@@ -27,14 +28,12 @@ function DirectoryName = CheckPath(type)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_
+DirectoryName = [ dname '/' type ];
 
-DirectoryName = [ M_.dname '/' type ];
-
-if ~isdir(M_.dname)
+if ~isdir(dname)
     % Make sure there isn't a file with the same name, see trac ticket #47
-    delete(M_.dname)
-    mkdir('.', M_.dname);
+    delete(dname)
+    mkdir('.', dname);
 end
 
 if ~isdir(DirectoryName)

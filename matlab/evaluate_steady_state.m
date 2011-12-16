@@ -74,7 +74,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
                 info(2) = check; % to be improved
                 return;
             end
-            if max(abs(residuals)) > options.dynatol
+            if max(abs(residuals)) > options.dynatol.f
             info(1) = 19;
             info(2) = residuals'*residuals;
             return

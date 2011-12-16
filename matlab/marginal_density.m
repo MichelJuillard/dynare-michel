@@ -36,7 +36,7 @@ function [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_)
 npar = estim_params_.np+estim_params_.nvn+estim_params_.ncx+estim_params_.ncn+estim_params_.nvx;
 nblck = options_.mh_nblck;
 
-MhDirectoryName = CheckPath('metropolis');
+MhDirectoryName = CheckPath('metropolis',M_.dname);
 load([ MhDirectoryName '/'  M_.fname '_mh_history.mat'])
 
 FirstMhFile = record.KeepedDraws.FirstMhFile;

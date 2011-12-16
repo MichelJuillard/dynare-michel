@@ -159,7 +159,7 @@ for iter = 1:options_.maxit_
         last_line = iter;
         break
     end
-    if err < options_.dynatol
+    if err < options_.dynatol.f
         stop = 1;
         info.time  = etime(clock,h1);
         info.error = err;
