@@ -72,3 +72,37 @@ nodes = sqrt(2)*nodes;
 %$ t(2) = dyn_assert(enodes,nodes/sqrt(2),1e-8);
 %$ T = all(t);
 %@eof:1
+
+%@test:2
+%$ n = 9;
+%$ [nodes,weights] = gauss_hermite_weights_and_nodes(n);
+%$
+%$ sum_of_weights = sum(weights);
+%$ expectation = sum(weights.*nodes); 
+%$ variance = sum(weights.*(nodes.^2));
+%$
+%$ % Check the results.
+%$ t(1) = dyn_assert(1.0,sum_of_weights,1e-12);
+%$ t(2) = dyn_assert(1.0,variance,1e-12);
+%$ t(3) = dyn_assert(0.0,expectation,1e-12);
+%$ T = all(t);
+%@eof:2
+
+%@test:3
+%$ n = 9;
+%$ [nodes,weights] = gauss_hermite_weights_and_nodes(n);
+%$
+%$ NODES = cartesian_product_of_sets(nodes,nodes);
+%$ WEIGHTS = cartesian_product_of_sets(weights,weights);
+%$ WEIGHTS = prod(WEIGHTS,2);
+%$
+%$ sum_of_weights = sum(WEIGHTS);
+%$ expectation = transpose(WEIGHTS)*NODES;
+%$ variance = transpose(WEIGHTS)*NODES.^2;
+%$
+%$ % Check the results.
+%$ t(1) = dyn_assert(1.0,sum_of_weights,1e-12);
+%$ t(2) = dyn_assert(ones(1,2),variance,1e-12);
+%$ t(3) = dyn_assert(zeros(1,2),expectation,1e-12);
+%$ T = all(t);
+%@eof:3
