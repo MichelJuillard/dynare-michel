@@ -52,7 +52,7 @@ if use_isequal_matlab_builtin
 else
     t = 1;
     if ~(isstruct(B) || iscell(B))
-        if abs(A(:)-B(:))>tol
+        if max(abs(A(:)-B(:)))>tol
             t = 0;
         end
     else
