@@ -66,35 +66,42 @@ if options_.k_order_solver;
     return;
 end
 
-if options_.ramsey_policy
-    % expanding system for Optimal Linear Regulator
-    [jacobia_,dr,info,M_,oo_] = dyn_ramsey_linearized_foc(dr,M_,options_,oo_);
-else
-    klen = M_.maximum_lag + M_.maximum_lead + 1;
-    iyv = M_.lead_lag_incidence';
-    iyv = iyv(:);
-    iyr0 = find(iyv) ;
-    it_ = M_.maximum_lag + 1 ;
-    
-    if M_.exo_nbr == 0
-        oo_.exo_steady_state = [] ;
-    end
-    
-    it_ = M_.maximum_lag + 1;
-    z = repmat(dr.ys,1,klen);
-    z = z(iyr0) ;
-    if options_.order == 1
-        [junk,jacobia_] = feval([M_.fname '_dynamic'],z,[oo_.exo_simul ...
-                            oo_.exo_det_simul], M_.params, dr.ys, it_);
-    elseif options_.order == 2
-        [junk,jacobia_,hessian1] = feval([M_.fname '_dynamic'],z,...
-                                         [oo_.exo_simul ...
-                            oo_.exo_det_simul], M_.params, dr.ys, it_);
-        if options_.use_dll
-            % In USE_DLL mode, the hessian is in the 3-column sparse representation
-            hessian1 = sparse(hessian1(:,1), hessian1(:,2), hessian1(:,3), ...
-                              size(jacobia_, 1), size(jacobia_, 2)*size(jacobia_, 2));
-        end
+klen = M_.maximum_lag + M_.maximum_lead + 1;
+exo_simul = [repmat(oo_.exo_steady_state',klen,1) repmat(oo_.exo_det_steady_state',klen,1)];
+iyv = M_.lead_lag_incidence';
+iyv = iyv(:);
+iyr0 = find(iyv) ;
+it_ = M_.maximum_lag + 1 ;
+
+if M_.exo_nbr == 0
+    oo_.exo_steady_state = [] ;
+end
+
+it_ = M_.maximum_lag + 1;
+z = repmat(dr.ys,1,klen);
+if options_.order == 1
+    if (options_.bytecode)
+        [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,exo_simul, ...
+                                        M_.params, dr.ys, 1);
+        jacobia_ = [loc_dr.g1 loc_dr.g1_x loc_dr.g1_xd];
+    else
+        [junk,jacobia_] = feval([M_.fname '_dynamic'],z(iyr0),exo_simul, ...
+                            M_.params, dr.ys, it_);
+    end;
+elseif options_.order == 2
+    if (options_.bytecode)
+        [chck, junk, loc_dr] = bytecode('dynamic','evaluate', z,exo_simul, ...
+                            M_.params, dr.ys, 1);
+        jacobia_ = [loc_dr.g1 loc_dr.g1_x];
+    else
+        [junk,jacobia_,hessian1] = feval([M_.fname '_dynamic'],z(iyr0),...
+                                         exo_simul, ...
+                                         M_.params, dr.ys, 3);
+    end;
+    if options_.use_dll
+        % In USE_DLL mode, the hessian is in the 3-column sparse representation
+        hessian1 = sparse(hessian1(:,1), hessian1(:,2), hessian1(:,3), ...
+                          size(jacobia_, 1), size(jacobia_, 2)*size(jacobia_, 2));
     end
 end
 
@@ -119,6 +126,7 @@ nstatic = dr.nstatic;
 nfwrd = dr.nfwrd;
 npred = dr.npred;
 nboth = dr.nboth;
+nfwrds = nfwrd+nboth;
 order_var = dr.order_var;
 nd = size(kstate,1);
 nz = nnz(M_.lead_lag_incidence);
@@ -135,10 +143,9 @@ if M_.maximum_endo_lead == 0
     % If required, use AIM solver if not check only
     if options_.order == 1
         [k1,junk,k2] = find(kstate(:,4));
-        temp = -b\jacobia_(:,[k2 nz+1:end]);
-        dr.ghx = temp(:,1:npred);
+        dr.ghx(:,k1) = -b\jacobia_(:,k2); 
         if M_.exo_nbr
-            dr.ghu = temp(:,npred+1:end);
+            dr.ghu =  -b\jacobia_(:,nz+1:end); 
         end
         dr.eigval = eig(transition_matrix(dr));
         dr.rank = 0;
@@ -154,16 +161,16 @@ if M_.maximum_endo_lead == 0
                'backward models'])
     end
 elseif M_.maximum_endo_lag == 0
-    % purely forward model
-    dr.ghx = [];
-    dr.ghu = -b\jacobia_(:,nz+1:end);
+% purely forward model
+dr.ghx = [];
+dr.ghu = -b\jacobia_(:,nz+1:end);
 elseif options_.risky_steadystate
     [dr,info] = dyn_risky_steadystate_solver(oo_.steady_state,M_,dr, ...
                                              options_,oo_);
 else
     % If required, use AIM solver if not check only
     if (options_.aim_solver == 1) && (task == 0)
-        [dr,info] = AIM_first_order_solver(jacobia_,M_,dr,sdim);
+        [dr,info] = AIM_first_order_solver(jacobia_,M_,dr,options_.qz_criterium);
 
     else  % use original Dynare solver
         [dr,info] = dyn_first_order_solver(jacobia_,b,M_,dr,options_,task);
@@ -187,12 +194,12 @@ else
         f1 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+2:end,order_var))));
         f0 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+1,order_var))));
         fudet = sparse(jacobia_(:,nz+M_.exo_nbr+1:end));
-        M1 = inv(f0+[zeros(M_.endo_nbr,nstatic) f1*gx zeros(M_.endo_nbr,nyf-nboth)]);
+        M1 = inv(f0+[zeros(M_.endo_nbr,nstatic) f1*dr.gx zeros(M_.endo_nbr,nfwrds-nboth)]);
         M2 = M1*f1;
         dr.ghud = cell(M_.exo_det_length,1);
         dr.ghud{1} = -M1*fudet;
         for i = 2:M_.exo_det_length
-            dr.ghud{i} = -M2*dr.ghud{i-1}(end-nyf+1:end,:);
+            dr.ghud{i} = -M2*dr.ghud{i-1}(end-nfwrds+1:end,:);
         end
     end
 

@@ -130,6 +130,7 @@ function [dr,info] = dyn_first_order_solver(jacobia,b,M_,dr,options,task)
 
     k1 = find(kstate(n4:nd,2) == M_.maximum_endo_lag+1);
     k2 = find(kstate(1:n3,2) == M_.maximum_endo_lag+2);
+    dr.gx = gx;
     dr.ghx = [hx(k1,:); gx(k2(nboth+1:end),:)];
 
     %lead variables actually present in the model

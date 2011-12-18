@@ -40,12 +40,12 @@ end
 
 exe =zeros(M_.exo_nbr,1);
 
-dr = set_state_space(oo_.dr,M_);
+oo_.dr = set_state_space(oo_.dr,M_);
 
 
 np = size(i_params,1);
 t0 = M_.params(i_params);
-inv_order_var = dr.inv_order_var;
+inv_order_var = oo_.dr.inv_order_var;
 
 H0 = 1e-4*eye(np);
 crit = 1e-7;
