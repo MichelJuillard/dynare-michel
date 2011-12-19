@@ -1,4 +1,4 @@
-function [dr,info,M_,options_,oo_] = stochastic_solvers(dr,task,M_,options_,oo_)
+function [dr,info,oo_] = stochastic_solvers(dr,task,M_,options_,oo_)
 % function [dr,info,M_,options_,oo_] = stochastic_solvers(dr,task,M_,options_,oo_)
 % computes the reduced form solution of a rational expectation model (first or second order
 % approximation of the stochastic model around the deterministic steady state). 
@@ -21,9 +21,7 @@ function [dr,info,M_,options_,oo_] = stochastic_solvers(dr,task,M_,options_,oo_)
 %                                         indeterminacy.
 %                                 info=5: BK rank condition not satisfied.
 %                                 info=6: The jacobian matrix evaluated at the steady state is complex.        
-%   M_         [matlab structure]            
-%   options_   [matlab structure]
-%   oo_        [matlab structure]
+%   oo_        [matlab structure] Results
 %  
 % ALGORITHM
 %   ...
@@ -140,7 +138,6 @@ b(:,cols_b) = jacobia_(:,cols_j);
 
 if M_.maximum_endo_lead == 0
     % backward models: simplified code exist only at order == 1
-    % If required, use AIM solver if not check only
     if options_.order == 1
         [k1,junk,k2] = find(kstate(:,4));
         dr.ghx(:,k1) = -b\jacobia_(:,k2); 
@@ -161,9 +158,9 @@ if M_.maximum_endo_lead == 0
                'backward models'])
     end
 elseif M_.maximum_endo_lag == 0
-% purely forward model
-dr.ghx = [];
-dr.ghu = -b\jacobia_(:,nz+1:end);
+    % purely forward model
+    dr.ghx = [];
+    dr.ghu = -b\jacobia_(:,nz+1:end);
 elseif options_.risky_steadystate
     [dr,info] = dyn_risky_steadystate_solver(oo_.steady_state,M_,dr, ...
                                              options_,oo_);

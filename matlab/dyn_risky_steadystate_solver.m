@@ -1,5 +1,85 @@
 function [dr,info] = dyn_risky_steadystate_solver(ys0,M, ...
                                                   dr,options,oo)
+
+%@info:
+%! @deftypefn {Function File} {[@var{dr},@var{info}] =} dyn_risky_steadystate_solver (@var{ys0},@var{M},@var{dr},@var{options},@var{oo})
+%! @anchor{dyn_risky_steadystate_solver}
+%! @sp 1
+%! Computes the second order risky steady state and first and second order reduced form of the DSGE model.
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item ys0
+%! Vector containing a guess value for the risky steady state
+%! @item M
+%! Matlab's structure describing the model (initialized by @code{dynare}).
+%! @item dr
+%! Matlab's structure describing the reduced form solution of the model.
+%! @item options
+%! Matlab's structure describing the options (initialized by @code{dynare}).
+%! @item oo
+%! Matlab's structure gathering the results (initialized by @code{dynare}).
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item dr
+%! Matlab's structure describing the reduced form solution of the model.
+%! @item info
+%! Integer scalar, error code.
+%! @sp 1
+%! @table @ @code
+%! @item info==0
+%! No error.
+%! @item info==1
+%! The model doesn't determine the current variables uniquely.
+%! @item info==2
+%! MJDGGES returned an error code.
+%! @item info==3
+%! Blanchard & Kahn conditions are not satisfied: no stable equilibrium.
+%! @item info==4
+%! Blanchard & Kahn conditions are not satisfied: indeterminacy.
+%! @item info==5
+%! Blanchard & Kahn conditions are not satisfied: indeterminacy due to rank failure.
+%! @item info==6
+%! The jacobian evaluated at the deterministic steady state is complex.
+%! @item info==19
+%! The steadystate routine thrown an exception (inconsistent deep parameters).
+%! @item info==20
+%! Cannot find the steady state, info(2) contains the sum of square residuals (of the static equations).
+%! @item info==21
+%! The steady state is complex, info(2) contains the sum of square of imaginary parts of the steady state.
+%! @item info==22
+%! The steady has NaNs.
+%! @item info==23
+%! M_.params has been updated in the steadystate routine and has complex valued scalars.
+%! @item info==24
+%! M_.params has been updated in the steadystate routine and has some NaNs.
+%! @item info==30
+%! Ergodic variance can't be computed.
+%! @end table
+%! @end deftypefn
+%@eod:
+
+% Copyright (C) 2001-2011 Dynare Team
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
     
     info = 0;
     lead_lag_incidence = M.lead_lag_incidence;

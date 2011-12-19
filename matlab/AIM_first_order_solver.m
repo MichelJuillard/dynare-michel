@@ -1,4 +1,88 @@
-function [dr,info]=AIM_first_order_solver(jacobia,M,dr,qz_criterium,nd)
+function [dr,info]=AIM_first_order_solver(jacobia,M,dr,qz_criterium)
+
+%@info:
+%! @deftypefn {Function File} {[@var{dr},@var{info}] =} AIM_first_order_solver (@var{jacobia},@var{M},@var{dr},@var{qz_criterium})
+%! @anchor{AIM_first_order_solver}
+%! @sp 1
+%! Computes the first order reduced form of the DSGE model using AIM.
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item jacobia
+%! Matrix containing the Jacobian of the model
+%! @item M
+%! Matlab's structure describing the model (initialized by @code{dynare}).
+%! @item dr
+%! Matlab's structure describing the reduced form solution of the model.
+%! @item qz_criterium
+%! Double containing the criterium to separate explosive from stable eigenvalues
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item dr
+%! Matlab's structure describing the reduced form solution of the model.
+%! @item info
+%! Integer scalar, error code.
+%! @sp 1
+%! @table @ @code
+%! @item info==0
+%! No error.
+      case 102
+        error('Aim: roots not correctly computed by real_schur');
+      case 103
+        error('Aim: too many big roots');
+      case 135
+        error('Aim: too many big roots, and q(:,right) is singular');
+      case 104
+        error('Aim: too few big roots');
+      case 145
+        error('Aim: too few big roots, and q(:,right) is singular');
+      case 105
+        error('Aim: q(:,right) is singular');
+      case 161
+        error('Aim: too many exact shiftrights');
+      case 162
+        error('Aim: too many numeric shiftrights');
+
+%! @item info==102
+%! roots not correctly computed by real_schur
+%! @item info==103
+%! Blanchard & Kahn conditions are not satisfied: no stable equilibrium.
+%! @item info==104
+%! Blanchard & Kahn conditions are not satisfied: indeterminacy.
+%! @item info==135
+%! too many explosive roots and q(:,right) is singular
+%! @item info==145
+%! too few big roots, and q(:,right) is singular
+%! @item info==105
+%! q(:,right) is singular
+%! @item info==161
+%! too many exact siftrights
+%! @item info==162
+%! too many numeric shiftrights
+%! @end table
+%! @end deftypefn
+%@eod:
+
+% Copyright (C) 2001-2011 Dynare Team
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
     
     info = 0;
     

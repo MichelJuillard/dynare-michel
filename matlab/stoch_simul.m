@@ -73,8 +73,7 @@ elseif options_.discretionary_policy
     end
     [oo_.dr,ys,info] = discretionary_policy_1(oo_,options_.instruments);
 else
-    [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
-    oo_.dr = dr;
+    [oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 end
 
 if info(1)

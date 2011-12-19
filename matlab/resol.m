@@ -114,11 +114,7 @@ end
 if options.block
     [dr,info,M,options,oo] = dr_block(dr,check_flag,M,options,oo);
 else
-    dr.fbias = zeros(M.endo_nbr,1);
-    [dr,info,M,options,oo] = stochastic_solvers(dr,check_flag,M,options,oo);
+    [dr,info,oo] = stochastic_solvers(dr,check_flag,M,options,oo);
 end
 
-if info(1)
-    return
-end
 
