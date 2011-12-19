@@ -106,3 +106,18 @@ nodes = sqrt(2)*nodes;
 %$ t(3) = dyn_assert(zeros(1,2),expectation,1e-12);
 %$ T = all(t);
 %@eof:3
+
+%@test:4
+%$ n = 9; sigma = .1;
+%$ [nodes,weights] = gauss_hermite_weights_and_nodes(n);
+%$
+%$ sum_of_weights = sum(weights);
+%$ expectation = sum(weights.*nodes*.1); 
+%$ variance = sum(weights.*((nodes*.1).^2));
+%$
+%$ % Check the results.
+%$ t(1) = dyn_assert(1.0,sum_of_weights,1e-12);
+%$ t(2) = dyn_assert(.01,variance,1e-12);
+%$ t(3) = dyn_assert(0.0,expectation,1e-12);
+%$ T = all(t);
+%@eof:4
