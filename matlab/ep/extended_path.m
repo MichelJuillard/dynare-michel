@@ -79,7 +79,7 @@ make_ex_;
 make_y_;
 
 % Initialize the output array.
-time_series = NaN(M_.endo_nbr,sample_size+1);
+time_series = zeros(M_.endo_nbr,sample_size);
 
 % Set the covariance matrix of the structural innovations.
 variances = diag(M_.Sigma_e); 
@@ -106,18 +106,28 @@ if options_.ep.stochastic
     [r,w] = gauss_hermite_weights_and_nodes(options_.ep.number_of_nodes);
     switch options_.ep.stochastic
       case 1
-        rr = cell(1);
-        ww = cell(1);
-        for i=1:size(M_.Sigma_e,1)
-            rr = {r};
-            ww = {w};
+        if M_.exo_nbr>1
+            rr = cell(1);
+            ww = cell(1);
+            for i=1:size(M_.Sigma_e,1)
+                rr = {r};
+                ww = {w};
+            end
+            rrr = cartesian_product_of_sets(rr{:});
+            www = cartesian_product_of_sets(ww{:});
+        else
+            rrr = r;
+            www = w;
         end
-        rrr = cartesian_product_of_sets(rr{:});
-        www = cartesian_product_of_sets(ww{:});
         www = prod(www,2);
+        nnn = length(www);    
       otherwise
         error(['Order ' int2str(options_.ep.stochastic) ' Stochastic Extended Path method is not implemented!'])
     end
+else
+    rrr = zeros(1,number_of_structural_innovations);
+    www = 1;
+    nnn = 1;
 end
 
 % Initializes some variables.
@@ -158,140 +168,137 @@ while (t<sample_size)
     shocks = oo_.ep.shocks(t,:);
     % Put it in oo_.exo_simul (second line).
     oo_.exo_simul(2,positive_var_indx) = shocks;
-    if options_.ep.init && t==1% Compute first order solution.
-        initial_path = simult_(initial_conditions,oo_.dr,oo_.exo_simul(2:end,:),1);
-        if options_.ep.init==1
-            oo_.endo_simul(:,1:end-1) = initial_path(:,1:end-1);% Last column is the steady state.
-        elseif options_.ep.init==2
-            oo_.endo_simul(:,1:end-1) = initial_path(:,1:end-1)*lambda+oo_.endo_simul(:,1:end-1)*(1-lambda);
-        end
-    end
-    % Solve a perfect foresight model (using bytecoded version).
-    increase_periods = 0;
-    endo_simul = oo_.endo_simul;
-    while 1
-        if ~increase_periods
-            t0 = tic;
-            [flag,tmp] = bytecode('dynamic'); 
-            ctime = toc(t0);
-            info.convergence = ~flag;
-            info.time = ctime;
-        end
-        if verbosity
-            if info.convergence
-                if t<10
-                    disp(['Time:    ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
-                elseif t<100
-                    disp(['Time:   ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
-                elseif t<1000
-                    disp(['Time:  ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
-                else
-                    disp(['Time: ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
-                end
-            else
-                if t<10
-                    disp(['Time:    ' int2str(t)  '. No convergence of the perfect foresight model solver!'])
-                elseif t<100
-                    disp(['Time:   ' int2str(t)  '. No convergence of the perfect foresight model solver!'])
-                elseif t<1000
-                    disp(['Time:  ' int2str(t)  '. No convergence of the perfect foresight model solver!'])
-                else
-                    disp(['Time: ' int2str(t)  '. No convergence of the perfect foresight model solver!'])
-                end
+    for s = 1:nnn
+        oo_.exo_simul(3,positive_var_indx) = rrr(s,:)*covariance_matrix_upper_cholesky;
+        if options_.ep.init && s==1% Compute first order solution. t==1 && 
+            initial_path = simult_(initial_conditions,oo_.dr,oo_.exo_simul(2:end,:),1);
+            if options_.ep.init==1
+                oo_.endo_simul(:,1:end-1) = initial_path(:,1:end-1);% Last column is the steady state.
+            elseif options_.ep.init==2
+                oo_.endo_simul(:,1:end-1) = initial_path(:,1:end-1)*lambda+oo_.endo_simul(:,1:end-1)*(1-lambda);
             end
         end
-        % Test if periods is big enough.
-        if ~increase_periods &&  max(max(abs(tmp(idx,end-options_.ep.lp:end)./tmp(idx,end-options_.ep.lp-1:end-1)-1)))<options_.dynatol.x
-            break
-        else
-            options_.periods = options_.periods + options_.ep.step;
-            options_.minimal_solving_period = options_.periods;
-            increase_periods = increase_periods + 1;
-            if verbosity
-                if t<10
-                    disp(['Time:    ' int2str(t)  '. I increase the number of periods to ' int2str(options_.periods) '.'])
-                elseif t<100
-                    disp(['Time:   ' int2str(t) '. I increase the number of periods to ' int2str(options_.periods) '.'])
-                elseif t<1000
-                    disp(['Time:  ' int2str(t)  '. I increase the number of periods to ' int2str(options_.periods) '.'])
-                else
-                    disp(['Time: ' int2str(t)  '. I increase the number of periods to ' int2str(options_.periods) '.'])
-                end
-            end
-            if info.convergence
-                oo_.endo_simul = [ tmp , repmat(oo_.steady_state,1,options_.ep.step) ];
-                oo_.exo_simul  = [ oo_.exo_simul ; zeros(options_.ep.step,size(shocks,2)) ];
-                tmp_old = tmp;
-            else
-                oo_.endo_simul = [ oo_.endo_simul , repmat(oo_.steady_state,1,options_.ep.step) ];
-                oo_.exo_simul  = [ oo_.exo_simul ; zeros(options_.ep.step,size(shocks,2)) ];
-            end
-            t0 = tic;
-            [flag,tmp] = bytecode('dynamic');
-            ctime = toc(t0);
-            info.time = info.time+ctime;
-            if info.convergence
-                maxdiff = max(max(abs(tmp(:,2:options_.ep.fp)-tmp_old(:,2:options_.ep.fp))));
-                if maxdiff<options_.dynatol.x
-                    options_.periods = options_.ep.periods;
-                    options_.minimal_solving_period = options_.periods;
-                    oo_.exo_simul = oo_.exo_simul(1:(options_.periods+2),:);
-                    break
-                end
-            else
+        % Solve a perfect foresight model (using bytecoded version).
+        increase_periods = 0;
+        endo_simul = oo_.endo_simul;
+        while 1
+            if ~increase_periods
+                t0 = tic;
+                [flag,tmp] = bytecode('dynamic'); 
+                ctime = toc(t0);
                 info.convergence = ~flag;
+                info.time = ctime;
+            end
+            if verbosity
                 if info.convergence
-                    continue
+                    if t<10
+                        disp(['Time:    ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
+                    elseif t<100
+                        disp(['Time:   ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
+                    elseif t<1000
+                        disp(['Time:  ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
+                    else
+                        disp(['Time: ' int2str(t)  '. Convergence of the perfect foresight model solver!'])
+                    end
                 else
-                    if increase_periods==10;
-                        if verbosity
-                            if t<10
-                                disp(['Time:    ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
-                            elseif t<100
-                                disp(['Time:   ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
-                            elseif t<1000
-                                disp(['Time:  ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
-                            else
-                                disp(['Time: ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
-                            end
-                        end
+                    if t<10
+                        disp(['Time:    ' int2str(t)  '. No convergence of the perfect foresight model solver!'])
+                    elseif t<100
+                        disp(['Time:   ' int2str(t)  '. No convergence of the perfect foresight model solver!'])
+                    elseif t<1000
+                        disp(['Time:  ' int2str(t)  '. No convergence of the perfect foresight model solver!'])
+                    else
+                        disp(['Time: ' int2str(t)  '. No convergence of the perfect foresight model solver!'])
+                    end
+                end
+            end
+            % Test if periods is big enough.
+            if ~increase_periods &&  max(max(abs(tmp(idx,end-options_.ep.lp:end)./tmp(idx,end-options_.ep.lp-1:end-1)-1)))<options_.dynatol.x
+                break
+            else
+                options_.periods = options_.periods + options_.ep.step;
+                options_.minimal_solving_period = options_.periods;
+                increase_periods = increase_periods + 1;
+                if verbosity
+                    if t<10
+                        disp(['Time:    ' int2str(t)  '. I increase the number of periods to ' int2str(options_.periods) '.'])
+                    elseif t<100
+                        disp(['Time:   ' int2str(t) '. I increase the number of periods to ' int2str(options_.periods) '.'])
+                    elseif t<1000
+                        disp(['Time:  ' int2str(t)  '. I increase the number of periods to ' int2str(options_.periods) '.'])
+                    else
+                        disp(['Time: ' int2str(t)  '. I increase the number of periods to ' int2str(options_.periods) '.'])
+                    end
+                end
+                if info.convergence
+                    oo_.endo_simul = [ tmp , repmat(oo_.steady_state,1,options_.ep.step) ];
+                    oo_.exo_simul  = [ oo_.exo_simul ; zeros(options_.ep.step,size(shocks,2)) ];
+                    tmp_old = tmp;
+                else
+                    oo_.endo_simul = [ oo_.endo_simul , repmat(oo_.steady_state,1,options_.ep.step) ];
+                    oo_.exo_simul  = [ oo_.exo_simul ; zeros(options_.ep.step,size(shocks,2)) ];
+                end
+                t0 = tic;
+                [flag,tmp] = bytecode('dynamic');
+                ctime = toc(t0);
+                info.time = info.time+ctime;
+                if info.convergence
+                    maxdiff = max(max(abs(tmp(:,2:options_.ep.fp)-tmp_old(:,2:options_.ep.fp))));
+                    if maxdiff<options_.dynatol.x
+                        options_.periods = options_.ep.periods;
+                        options_.minimal_solving_period = options_.periods;
+                        oo_.exo_simul = oo_.exo_simul(1:(options_.periods+2),:);
                         break
+                    end
+                else
+                    info.convergence = ~flag;
+                    if info.convergence
+                        continue
+                    else
+                        if increase_periods==10;
+                            if verbosity
+                                if t<10
+                                    disp(['Time:    ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
+                                elseif t<100
+                                    disp(['Time:   ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
+                                elseif t<1000
+                                    disp(['Time:  ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
+                                else
+                                    disp(['Time: ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
+                                end
+                            end
+                            break
+                        end
                     end
                 end
             end
         end
-    end
-    if ~info.convergence% If the previous step was unsuccesfull, use an homotopic approach
-        [INFO,tmp] = homotopic_steps(.5,.01,t);
-        % Cumulate time.
-        info.time = ctime+INFO.time;
-        if (~isstruct(INFO) && isnan(INFO)) || ~INFO.convergence
-            disp('Homotopy:: No convergence of the perfect foresight model solver!')
-            error('I am not able to simulate this model!');
-        else
-            info.convergence = 1;
-            oo_.endo_simul = tmp;
-            if verbosity && info.convergence
-                disp('Homotopy:: Convergence of the perfect foresight model solver!')
+        if ~info.convergence% If the previous step was unsuccesfull, use an homotopic approach
+            [INFO,tmp] = homotopic_steps(.5,.01,t);
+            % Cumulate time.
+            info.time = ctime+INFO.time;
+            if (~isstruct(INFO) && isnan(INFO)) || ~INFO.convergence
+                disp('Homotopy:: No convergence of the perfect foresight model solver!')
+                error('I am not able to simulate this model!');
+            else
+                info.convergence = 1;
+                oo_.endo_simul = tmp;
+                if verbosity && info.convergence
+                    disp('Homotopy:: Convergence of the perfect foresight model solver!')
+                end
             end
+        else
+            oo_.endo_simul = tmp;
         end
-    else
-        oo_.endo_simul = tmp;
+        % Save results of the perfect foresight model solver.
+        time_series(:,t) = time_series(:,t)+ www(s)*oo_.endo_simul(:,2);
+        %save('simulated_paths.mat','time_series');
+        % Set initial condition for the nex round.
+        %initial_conditions = oo_.endo_simul(:,2);
     end
-    if nargin==6
-        zlb_periods = find(oo_.endo_simul(zlb_idx,:)<=1+1e-12);
-        zlb_number_of_periods = length(zlb_periods);
-        if zlb_number_of_periods
-            count_zlb = [count_zlb ; [t, zlb_number_of_periods, zlb_periods(1) , zlb_periods(end)] ];
-        end
-    end 
-    % Save results of the perfect foresight model solver.
-    time_series(:,t) = oo_.endo_simul(:,2);
-    save('simulated_paths.mat','time_series');
-    % Set initial condition for the nex round.
-    %initial_conditions = oo_.endo_simul(:,2);
-    oo_.endo_simul = oo_.endo_simul(:,1:options_.periods+2);
-    oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end); 
+    %oo_.endo_simul = oo_.endo_simul(:,1:options_.periods+M_.maximum_endo_lag+M_.maximum_endo_lead);
+    oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end);
+    oo_.endo_simul(:,1) = time_series(:,t);
     oo_.endo_simul(:,end) = oo_.steady_state;
 end
 
@@ -302,3 +309,5 @@ else
         fprintf(back);
     end
 end
+
+oo_.endo_simul = oo_.steady_state;
