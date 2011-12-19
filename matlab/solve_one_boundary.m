@@ -224,8 +224,11 @@ for it_=start:incr:finish
                 if (verbose == 1)
                     disp('steady: fsolve');
                 end
-                if ~exist('OCTAVE_VERSION') && ~license('test', 'optimization_toolbox')
-                    error('SOLVE_ONE_BOUNDARY: you can''t use solve_algo=0 since you don''t have MATLAB''s Optimization Toolbox')
+                if ~exist('OCTAVE_VERSION')
+                    [has_optimization_toolbox junk] = license('checkout','optimization_toolbox');
+                    if ~has_optimization_toolbox
+                        error('SOLVE_ONE_BOUNDARY: you can''t use solve_algo=0 since you don''t have MATLAB''s Optimization Toolbox')
+                    end
                 end
                 options=optimset('fsolve');
                 options.MaxFunEvals = 50000;
