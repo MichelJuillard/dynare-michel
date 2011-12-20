@@ -90,13 +90,8 @@ CovJump = VarCov;
 ModePar = xparam1;
 
 %% [1] I tune the scale parameter.
-if exist('OCTAVE_VERSION') || options_.console_mode
-    diary off;
-    disp(' ');
-else
-    hh = waitbar(0,'Tuning of the scale parameter...');
-    set(hh,'Name','Tuning of the scale parameter.')
-end
+hh = dyn_waitbar(0,'Tuning of the scale parameter...');
+set(hh,'Name','Tuning of the scale parameter.');
 j = 1; jj  = 1;
 isux = 0; jsux = 0; test = 0;
 ix2 = ModePar;% initial condition!
@@ -126,16 +121,8 @@ while j<=MaxNumberOfTuningSimulations
         jsux = jsux + 1;
     end% ... otherwise I don't move.
     prtfrc = j/MaxNumberOfTuningSimulations;
-    if exist('OCTAVE_VERSION') || options_.console_mode
-        if mod(j, 10)==0
-            if exist('OCTAVE_VERSION')
-                printf('Tuning of the scale parameter (%f%% done):: Acceptance rates: %f [%f]\r',prtfrc*100,isux/j,jsux/jj);
-            else
-                fprintf('   Tuning of the scale parameter (%f \b%% done):: Acceptance rates: %f [%f]\r',prtfrc*100,isux/j,jsux/jj);
-            end
-        end
-    else
-        waitbar(prtfrc,hh,sprintf('Acceptance rates: %f [%f]',isux/j,jsux/jj));
+    if mod(j, 10)==0
+        dyn_waitbar(prtfrc,hh,sprintf('Acceptance rates: %f [%f]',isux/j,jsux/jj));
     end
     if  j/500 == round(j/500)
         test1 = jsux/jj;
@@ -156,18 +143,11 @@ while j<=MaxNumberOfTuningSimulations
     j = j+1;
     jj = jj + 1;
 end
-if exist('OCTAVE_VERSION') || options_.console_mode
-    diary on;
-else
-    close(hh);
-end
+
+dyn_waitbar_close(hh);
 %% [2] One block metropolis, I update the covariance matrix of the jumping distribution
-if exist('OCTAVE_VERSION') || options_.console_mode
-    diary off;
-else
-    hh = waitbar(0,'Metropolis-Hastings...');
-    set(hh,'Name','Estimation of the posterior covariance...')
-end
+hh = dyn_waitbar(0,'Metropolis-Hastings...');
+set(hh,'Name','Estimation of the posterior covariance...'),
 j = 1;
 isux = 0;
 ilogpo2 = - feval(ObjFun,ix2,varargin{:});
@@ -190,16 +170,8 @@ while j<= NumberOfIterations
         jsux = jsux + 1;
     end% ... otherwise I don't move.    
     prtfrc = j/NumberOfIterations;
-    if exist('OCTAVE_VERSION') || options_.console_mode
-        if mod(j, 10)==0
-            if exist('OCTAVE_VERSION')
-                printf('Estimation of the posterior covariance (%f%% done):: Acceptance rates: %f\r',prtfrc,isux/j);
-            else
-                fprintf('   Estimation of the posterior covariance (%f \b%% done):: Acceptance rates: %f     \r',prtfrc*100,isux/j);
-            end
-        end
-    else
-        waitbar(prtfrc,hh,sprintf('Acceptance rate: %f',isux/j));
+    if mod(j, 10)==0
+        dyn_waitbar(prtfrc,hh,sprintf('Acceptance rate: %f',isux/j));
     end
     % I update the covariance matrix and the mean:
     oldMeanPar = MeanPar;
@@ -208,23 +180,15 @@ while j<= NumberOfIterations
               (1/j)*(ix2*ix2' - CovJump - oldMeanPar*oldMeanPar');
     j = j+1;
 end
-if exist('OCTAVE_VERSION') || options_.console_mode
-    diary on;
-else
-    close(hh);
-end
+dyn_waitbar_close(hh);
 PostVar = CovJump;
 PostMean = MeanPar;
 %% [3 & 4] I tune the scale parameter (with the new covariance matrix) if
 %% this is the last call to the routine, and I climb the hill (without
 %% updating the covariance matrix)...
 if strcmpi(info,'LastCall')
-    if exist('OCTAVE_VERSION') || options_.console_mode
-        diary off;
-    else
-        hh = waitbar(0,'Tuning of the scale parameter...');
-        set(hh,'Name','Tuning of the scale parameter.')
-    end
+    hh = dyn_waitbar(0,'Tuning of the scale parameter...');
+    set(hh,'Name','Tuning of the scale parameter.'),
     j = 1; jj  = 1;
     isux = 0; jsux = 0;
     test = 0;
@@ -249,16 +213,8 @@ if strcmpi(info,'LastCall')
             jsux = jsux + 1;
         end% ... otherwise I don't move.
         prtfrc = j/MaxNumberOfTuningSimulations;
-        if exist('OCTAVE_VERSION') || options_.console_mode
-            if mod(j, 10)==0
-                if exist('OCTAVE_VERSION')
-                    printf('Tuning of the scale parameter (%f%% done):: Acceptance rates: %f [%f]\r',prtfrc*100,isux/j,jsux/jj);
-                else
-                    fprintf('   Tuning of the scale parameter (%f \b%% done):: Acceptance rates: %f [%f]            \r',prtfrc*100,isux/j,jsux/jj);
-                end
-            end
-        else
-            waitbar(prtfrc,hh,sprintf('Acceptance rates: %f [%f]',isux/j,jsux/jj));
+        if mod(j, 10)==0
+            dyn_waitbar(prtfrc,hh,sprintf('Acceptance rates: %f [%f]',isux/j,jsux/jj));
         end
         if j/1000 == round(j/1000) 
             test1 = jsux/jj;  
@@ -275,23 +231,16 @@ if strcmpi(info,'LastCall')
         j = j+1;
         jj = jj + 1;
     end
-    if exist('OCTAVE_VERSION') || options_.console_mode
-        diary on;
-    else
-        close(hh);
-    end
+    dyn_waitbar_close(hh);
     Scale = iScale;
     %%
     %% Now I climb the hill
     %%
     climb = 1;
     if climb
-        if exist('OCTAVE_VERSION') || options_.console_mode
-            diary off;
-        else
-            hh = waitbar(0,' ');
-            set(hh,'Name','Now I am climbing the hill...')
-        end
+        hh = dyn_waitbar(0,' ');
+        set(hh,'Name','Now I am climbing the hill...'),
+        disp('Now I am climbing the hill...'),
         j = 1; jj  = 1;
         jsux = 0;
         test = 0;
@@ -308,16 +257,8 @@ if strcmpi(info,'LastCall')
                 jsux = jsux + 1;
             end% otherwise I don't move...
             prtfrc = j/MaxNumberOfClimbingSimulations;
-            if exist('OCTAVE_VERSION') || options_.console_mode
-                if mod(j, 10)==0
-                    if exist('OCTAVE_VERSION')
-                        printf('Now I am climbing the hill (%f%% done):: %f Jumps / MaxStepSize %f\r',prtfrc*100,jsux,sqrt(max(diag(iScale*CovJump))));
-                    else
-                        fprintf('   Now I am climbing the hill (%f \b%% done):: %f Jumps / MaxStepSize %f                   \r',prtfrc*100,jsux,sqrt(max(diag(iScale*CovJump))));
-                    end
-                end
-            else
-                waitbar(prtfrc,hh,sprintf('%f Jumps / MaxStepSize %f',jsux,sqrt(max(diag(iScale*CovJump)))));
+            if mod(j, 10)==0
+                dyn_waitbar(prtfrc,hh,sprintf('%f Jumps / MaxStepSize %f',jsux,sqrt(max(diag(iScale*CovJump)))));
             end
             if  j/200 == round(j/200)
                 if jsux<=1
@@ -338,11 +279,7 @@ if strcmpi(info,'LastCall')
             j = j+1;
             jj = jj + 1;
         end
-        if exist('OCTAVE_VERSION') || options_.console_mode
-            diary on;
-        else
-            close(hh);
-        end
+        dyn_waitbar_close(hh);
     end%climb
 else
     Scale = iScale;

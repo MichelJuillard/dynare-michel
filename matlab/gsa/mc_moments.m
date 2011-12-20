@@ -3,7 +3,7 @@ global options_ M_
 
   [nr1, nc1, nsam] = size(mm);
   disp('Computing theoretical moments ...')
-  h = waitbar(0,'Theoretical moments ...');
+  h = dyn_waitbar(0,'Theoretical moments ...');
   
   for j=1:nsam,
     dr.ghx = mm(:, [1:(nc1-M_.exo_nbr)],j);
@@ -18,8 +18,8 @@ global options_ M_
     dum=[dum, autocorr{i}];
     end
     ac(:,:,j)=dum;
-    waitbar(j/nsam,h)
+    dyn_waitbar(j/nsam,h)
   end
-  close(h)
+  dyn_waitbar_close(h)
   disp(' ')
   disp('... done !')
