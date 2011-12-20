@@ -1,4 +1,4 @@
-function [dr,info,oo_] = stochastic_solvers(dr,task,M_,options_,oo_)
+function [dr,info] = stochastic_solvers(dr,task,M_,options_,oo_)
 % function [dr,info,M_,options_,oo_] = stochastic_solvers(dr,task,M_,options_,oo_)
 % computes the reduced form solution of a rational expectation model (first or second order
 % approximation of the stochastic model around the deterministic steady state). 
@@ -21,7 +21,6 @@ function [dr,info,oo_] = stochastic_solvers(dr,task,M_,options_,oo_)
 %                                         indeterminacy.
 %                                 info=5: BK rank condition not satisfied.
 %                                 info=6: The jacobian matrix evaluated at the steady state is complex.        
-%   oo_        [matlab structure] Results
 %  
 % ALGORITHM
 %   ...
@@ -170,7 +169,7 @@ else
         [dr,info] = AIM_first_order_solver(jacobia_,M_,dr,options_.qz_criterium);
 
     else  % use original Dynare solver
-        [dr,info] = dyn_first_order_solver(jacobia_,b,M_,dr,options_,task);
+        [dr,info] = dyn_first_order_solver(jacobia_,M_,dr,options_,task);
         if info
             return;
         end
@@ -207,4 +206,3 @@ else
                                      options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
     end
 end
-oo.dr = dr;

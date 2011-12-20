@@ -1,6 +1,54 @@
-function dr = dyn_second_order_solver(jacobia,hessian1,dr,M_,threads_ABC,threads_BC)
+function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_BC)
 
+%@info:
+%! @deftypefn {Function File} {@var{dr} =} dyn_second_order_solver (@var{jacobia},@var{hessian},@var{dr},@var{M_},@var{threads_ABC},@var{threads_BC})
+%! @anchor{dyn_first_order_solver}
+%! @sp 1
+%! Computes the first order reduced form of the DSGE model
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item jacobia
+%! Matrix containing the Jacobian of the model
+%! @item hessian
+%! Matrix containing the second order derivatives of the model
+%! @item dr
+%! Matlab's structure describing the reduced form solution of the model.
+%! @item M_
+%! Matlab's structure describing the model (initialized by @code{dynare}).
+%! @item threads_ABC
+%! Integer controlling number of threads in A_times_B_kronecker_C
+%! @item threads_BC
+%! Integer controlling number of threads in sparse_hessian_times_B_kronecker_C
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item dr
+%! Matlab's structure describing the reduced form solution of the model.
+%! @end table
+%! @end deftypefn
+%@eod:
 
+% Copyright (C) 2001-2011 Dynare Team
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+    
     dr.ghxx = [];
     dr.ghuu = [];
     dr.ghxu = [];
@@ -29,8 +77,8 @@ function dr = dyn_second_order_solver(jacobia,hessian1,dr,M_,threads_ABC,threads
     nk = size(kk,1);
     kk1 = reshape([1:nk^2],nk,nk);
     kk1 = kk1(kk,kk);
-    hessian = hessian1(:,kk1(:));
-    clear hessian1
+    % reordering second order derivatives
+    hessian = hessian(:,kk1(:));
 
     zx = zeros(np,np);
     zu=zeros(np,M_.exo_nbr);

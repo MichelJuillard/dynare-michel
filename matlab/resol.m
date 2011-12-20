@@ -114,7 +114,8 @@ end
 if options.block
     [dr,info,M,options,oo] = dr_block(dr,check_flag,M,options,oo);
 else
-    [dr,info,oo] = stochastic_solvers(dr,check_flag,M,options,oo);
+    [dr,info] = stochastic_solvers(dr,check_flag,M,options,oo);
+    oo.dr = dr;
 end
 
 
