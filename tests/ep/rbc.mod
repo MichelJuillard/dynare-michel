@@ -1,4 +1,4 @@
-var Capital, Output, Labour, Consumption, Efficiency, efficiency;
+var Capital, Output, Labour, Consumption, Efficiency, efficiency, ExpectedTerm;
 
 varexo EfficiencyInnovation;
 
@@ -11,9 +11,9 @@ parameters beta, theta, tau, alpha, psi, delta, rho, effstar, sigma2;
 
 beta    =  0.990;
 theta   =  0.357;
-tau     =  2.000;
+tau     =  30.000;
 alpha   =  0.450;
-psi     = -0.500;
+psi     =  -5.000;
 delta   =  0.020;
 rho     =  0.950;
 effstar =  1.000;
@@ -39,7 +39,10 @@ model(block,bytecode);
   ((1-theta)/theta)*(Consumption/(1-Labour)) - (1-alpha)*(Output/Labour)^(1-psi);
 
   // Eq. n°6:
-  (((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption - beta*((((Consumption(1)^theta)*((1-Labour(1))^(1-theta)))^(1-tau))/Consumption(1))*(alpha*((Output(1)/Capital)^(1-psi))+1-delta);
+  (((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption - ExpectedTerm(1);
+
+  // Eq. n°7:
+  ExpectedTerm = beta*((((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption)*(alpha*((Output/Capital(-1))^(1-psi))+1-delta);
 
 end;
 
@@ -50,6 +53,7 @@ end;
 steady;
 
 options_.ep.verbosity = 0;
-options_.console_mode = 1;
+options_.ep.stochastic = 0;
+options_.console_mode = 0;
 
 ts = extended_path([],1000);

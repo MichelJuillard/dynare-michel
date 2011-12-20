@@ -44,3 +44,5 @@ ys(1)=SteadyStateCapital;
 ys(3)=SteadyStateLabour;
 ys(5)=M_.params(8);
 ys(6)=0;
+ys(7)=M_.params(1)*((((SteadyStateConsumption^M_.params(2))*((1-SteadyStateLabour)^(1-M_.params(2))))^(1-M_.params(3)))/SteadyStateConsumption)* ...
+      (M_.params(4)*((SteadyStateOutput/SteadyStateCapital)^(1-M_.params(5)))+1-M_.params(6));
