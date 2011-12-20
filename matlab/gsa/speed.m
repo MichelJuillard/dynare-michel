@@ -25,7 +25,7 @@ nrun=size(B,3);
 iff=zeros(nvar,nshock,nrun);
 tadj=iff;
 disp('Computing speed of adjustement ...')
-h = waitbar(0,'Speed of adjustement...');
+h = dyn_waitbar(0,'Speed of adjustement...');
 
 for i=1:nrun,
   irf=zeros(nvar,nshock);
@@ -45,8 +45,8 @@ for i=1:nrun,
     tt=(irf>0.5).*t;
     tadj(:,:,i)=((tt-tadj(:,:,i))==tt).*tt+tadj(:,:,i);
   end
-  waitbar(i/nrun,h)
+  dyn_waitbar(i/nrun,h)
 end
 disp(' ')
 disp('.. done !')
-close(h)
+dyn_waitbar_close(h)
