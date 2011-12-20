@@ -30,23 +30,6 @@ function [dr,info]=AIM_first_order_solver(jacobia,M,dr,qz_criterium)
 %! @table @ @code
 %! @item info==0
 %! No error.
-      case 102
-        error('Aim: roots not correctly computed by real_schur');
-      case 103
-        error('Aim: too many big roots');
-      case 135
-        error('Aim: too many big roots, and q(:,right) is singular');
-      case 104
-        error('Aim: too few big roots');
-      case 145
-        error('Aim: too few big roots, and q(:,right) is singular');
-      case 105
-        error('Aim: q(:,right) is singular');
-      case 161
-        error('Aim: too many exact shiftrights');
-      case 162
-        error('Aim: too many numeric shiftrights');
-
 %! @item info==102
 %! roots not correctly computed by real_schur
 %! @item info==103
@@ -63,6 +46,7 @@ function [dr,info]=AIM_first_order_solver(jacobia,M,dr,qz_criterium)
 %! too many exact siftrights
 %! @item info==162
 %! too many numeric shiftrights
+%! @end table
 %! @end table
 %! @end deftypefn
 %@eod:

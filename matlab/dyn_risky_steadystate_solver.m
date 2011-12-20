@@ -57,8 +57,7 @@ function [dr,info] = dyn_risky_steadystate_solver(ys0,M, ...
 %! M_.params has been updated in the steadystate routine and has complex valued scalars.
 %! @item info==24
 %! M_.params has been updated in the steadystate routine and has some NaNs.
-%! @item info==30
-%! Ergodic variance can't be computed.
+%! @end table
 %! @end table
 %! @end deftypefn
 %@eod:

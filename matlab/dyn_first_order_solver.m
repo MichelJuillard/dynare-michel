@@ -43,6 +43,7 @@ function [dr,info] = dyn_first_order_solver(jacobia,M_,dr,options,task)
 %! @item info==7
 %! One of the generalized eigenvalues is close to 0/0     
 %! @end table
+%! @end table
 %! @end deftypefn
 %@eod:
 
