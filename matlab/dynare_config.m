@@ -37,6 +37,9 @@ if nargin && ~isempty(path_to_dynare)
 end
 dynareroot = strrep(which('dynare'),'dynare.m','');
 
+origin = pwd();
+cd([dynareroot '/..'])
+
 if ~nargin || nargin==1
     verbose = 1;
 end
@@ -258,3 +261,5 @@ if verbose
     disp([ message 'Quasi Monte-Carlo sequence (Sobol).' ])
     disp(' ')
 end
+
+cd(origin);
