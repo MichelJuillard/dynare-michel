@@ -13,7 +13,8 @@ EXTRA_DIST = \
 	libslicot \
 	kalman_steady_state \
 	ms-sbvar \
-	block_kalman_filter
+	block_kalman_filter \
+	sobol
 
 clean-local:
 	rm -rf `find mex/sources -name *.o`

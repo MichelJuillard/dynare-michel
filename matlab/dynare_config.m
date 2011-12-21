@@ -246,5 +246,15 @@ else
 end
 if verbose
     disp([ message 'k-order solution simulation.' ])
+end
+
+% Test if qmc_sequence DLL is present
+if exist('qmc_sequence', 'file') == 3
+    message = '[mex] ';
+else
+    message = '[no]  ';
+end
+if verbose
+    disp([ message 'Quasi Monte-Carlo sequence (Sobol).' ])
     disp(' ')
 end
