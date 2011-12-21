@@ -3803,7 +3803,7 @@ algorithm. For the time being, @code{mh_replic} should be larger than
 
 @item sub_draws = @var{INTEGER}
 @anchor{sub_draws} number of draws from the Metropolis iterations that
-are used to compute posterior distirbution of various objects (smoothed
+are used to compute posterior distribution of various objects (smoothed
 variable, smoothed shocks, forecast, moments, IRF). @code{sub_draws} should be smaller than
 the total number of Metropolis draws available. Default:
 @code{min(1200,0.25*Total number of draws)}
