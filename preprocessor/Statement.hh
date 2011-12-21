@@ -86,6 +86,20 @@ public:
   bool dsge_var_estimated;
   //! Whether there is a bayesian_irf option passed to the estimation statement
   bool bayesian_irf_present;
+  //! Whether there is a data statement present
+  bool estimation_data_statement_present;
+  //! Whether there is a prior statement present
+  bool prior_statement_present;
+  //! Whether there is a std prior statement present
+  bool std_prior_statement_present;
+  //! Whether there is a corr prior statement present
+  bool corr_prior_statement_present;
+  //! Whether there is a options statement present
+  bool options_statement_present;
+  //! Whether there is a std options statement present
+  bool std_options_statement_present;
+  //! Whether there is a corr options statement present
+  bool corr_options_statement_present;
 };
 
 class Statement
@@ -118,11 +132,13 @@ public:
   typedef map<string, string> num_options_t;
   typedef map<string, pair<string, string> > paired_num_options_t;
   typedef map<string, string> string_options_t;
+  typedef map<string, string> date_options_t;
   typedef map<string, SymbolList> symbol_list_options_t;
   typedef map<string, vector<int> > vec_int_options_t;
   num_options_t num_options;
   paired_num_options_t paired_num_options;
   string_options_t string_options;
+  date_options_t date_options;
   symbol_list_options_t symbol_list_options;
   vec_int_options_t vector_int_options;
   void writeOutput(ostream &output) const;

@@ -1954,6 +1954,12 @@ of the simulation is period @code{0}, then period @code{-1}, and so on.
 If your lagged variables are linked by identities, be careful to
 satisfy these identities when you set historical initial values.
 
+Variables not initialized in the @code{histval} block are assumed to
+have a value of zero at period 0 and before. Note that this behavior
+differs from the case where there is no @code{histval} block, where all
+variables are initialized at their steady state value at period 0 and
+before.
+
 @examplehead
 
 @example
@@ -3803,7 +3809,7 @@ algorithm. For the time being, @code{mh_replic} should be larger than
 
 @item sub_draws = @var{INTEGER}
 @anchor{sub_draws} number of draws from the Metropolis iterations that
-are used to compute posterior distirbution of various objects (smoothed
+are used to compute posterior distribution of various objects (smoothed
 variable, smoothed shocks, forecast, moments, IRF). @code{sub_draws} should be smaller than
 the total number of Metropolis draws available. Default:
 @code{min(1200,0.25*Total number of draws)}

@@ -47,6 +47,15 @@ ParsingDriver::check_symbol_existence(const string &name)
 }
 
 void
+ParsingDriver::check_symbol_is_parameter(string *name)
+{
+  check_symbol_existence(*name);
+  int symb_id = mod_file->symbol_table.getID(*name);
+  if (mod_file->symbol_table.getType(symb_id) != eParameter)
+    error(*name + " is not a parameter");
+}
+
+void
 ParsingDriver::set_current_data_tree(DataTree *data_tree_arg)
 {
   data_tree = data_tree_arg;
@@ -164,6 +173,16 @@ ParsingDriver::declare_parameter(string *name, string *tex_name)
   delete name;
   if (tex_name != NULL)
     delete tex_name;
+}
+
+void
+ParsingDriver::declare_statement_local_variable(string *name)
+{
+  if (mod_file->symbol_table.exists(*name))
+    error("Symbol " + *name + " cannot be assigned within a statement " +
+          "while being assigned elsewhere in the modfile");
+  declare_symbol(name, eStatementDeclaredVariable, NULL);
+  delete name;
 }
 
 void
@@ -372,13 +391,9 @@ ParsingDriver::dsample(string *arg1, string *arg2)
 void
 ParsingDriver::init_param(string *name, expr_t rhs)
 {
-  check_symbol_existence(*name);
+  check_symbol_is_parameter(name);
   int symb_id = mod_file->symbol_table.getID(*name);
-  if (mod_file->symbol_table.getType(symb_id) != eParameter)
-    error(*name + " is not a parameter");
-
   mod_file->addStatement(new InitParamStatement(symb_id, rhs, mod_file->symbol_table));
-
   delete name;
 }
 
@@ -1057,6 +1072,23 @@ ParsingDriver::option_str(const string &name_option, const string &opt)
 }
 
 void
+ParsingDriver::option_date(const string &name_option, string *opt)
+{
+  option_date(name_option, *opt);
+  delete opt;
+}
+
+void
+ParsingDriver::option_date(const string &name_option, const string &opt)
+{
+  if (options_list.date_options.find(name_option)
+      != options_list.date_options.end())
+    error("option " + name_option + " declared twice");
+
+  options_list.date_options[name_option] = opt;
+}
+
+void
 ParsingDriver::option_symbol_list(const string &name_option)
 {
   if (options_list.symbol_list_options.find(name_option)
@@ -1182,6 +1214,172 @@ ParsingDriver::set_unit_root_vars()
   mod_file->addStatement(new UnitRootVarsStatement());
   warning("'unit_root_vars' is now obsolete; use option 'diffuse_filter' of 'estimation' instead");
   symbol_list.clear();
+}
+
+void
+ParsingDriver::set_time(string *arg)
+{
+  string arg1 = *arg;
+  for (size_t i=0; i<arg1.length(); i++)
+    arg1[i]= toupper(arg1[i]);
+  option_date("initial_period", arg1);
+  mod_file->addStatement(new SetTimeStatement(options_list));
+  options_list.clear();
+}
+
+void
+ParsingDriver::estimation_data()
+{
+  mod_file->addStatement(new EstimationDataStatement(options_list));
+  options_list.clear();
+}
+
+void
+ParsingDriver::copy_subsamples(string *to_parameter, string *from_parameter)
+{
+  check_symbol_is_parameter(to_parameter);
+  check_symbol_is_parameter(from_parameter);
+  if (subsample_declarations.find(*to_parameter) != subsample_declarations.end())
+    error("Parameter " + *to_parameter + " has more than one subsample statement." +
+          "You may only have one subsample statement per parameter.");
+  if (subsample_declarations.find(*from_parameter) == subsample_declarations.end())
+    error("Parameter " + *from_parameter + " does not have an associated subsample statement.");
+  subsample_declarations[*to_parameter] = subsample_declarations[*from_parameter];
+  delete to_parameter;
+  delete from_parameter;
+}
+
+void
+ParsingDriver::set_subsamples(string *name)
+{
+  check_symbol_is_parameter(name);
+  if (subsample_declarations.find(*name) != subsample_declarations.end())
+    error("Parameter " + *name + " has more than one subsample statement." +
+          "You may only have one subsample statement per parameter.");
+  subsample_declarations[*name] = subsample_declaration_map;
+  subsample_declaration_map.clear();
+  delete name;
+}
+
+void
+ParsingDriver::check_symbol_is_statement_variable(string *name)
+{
+  check_symbol_existence(*name);
+  int symb_id = mod_file->symbol_table.getID(*name);
+  if (mod_file->symbol_table.getType(symb_id) != eStatementDeclaredVariable)
+    error(*name + " is not a variable assigned in a statement");
+}
+
+void
+ParsingDriver::set_subsample_name_equal_to_date_range(string *name, string *date1, string *date2)
+{
+  check_symbol_is_statement_variable(name);
+  if (subsample_declaration_map.find(*name) != subsample_declaration_map.end())
+    error("Symbol " + *name + " may only be assigned once in a SUBSAMPLE statement");
+  subsample_declaration_map[*name] = make_pair(*date1, *date2);
+  delete name;
+  delete date1;
+  delete date2;
+}
+
+void
+ParsingDriver::add_subsample_range(string *parameter, string *subsample_name)
+{
+  check_symbol_is_parameter(parameter);
+  check_symbol_is_statement_variable(subsample_name);
+  subsample_declarations_t::const_iterator it = subsample_declarations.find(*parameter);
+  if (it == subsample_declarations.end())
+    error("A subsample statement has not been issued for " + *parameter);
+  subsample_declaration_map_t tmp_map = it->second;
+  if (tmp_map.find(*subsample_name) == tmp_map.end())
+    error("The subsample name " + *subsample_name + " was not previously declared in a subsample statement.");
+  option_date("date1", tmp_map[*subsample_name].first);
+  option_date("date2", tmp_map[*subsample_name].second);
+  delete parameter;
+  delete subsample_name;
+}
+
+void
+ParsingDriver::set_prior(string *name)
+{
+  check_symbol_is_parameter(name);
+  mod_file->addStatement(new PriorStatement(*name, prior_variance, options_list));
+  options_list.clear();
+  prior_variance = NULL;
+  delete name;
+}
+
+void
+ParsingDriver::add_expression_to_prior_statement(expr_t variance)
+{
+  prior_variance = variance;
+}
+
+void
+ParsingDriver::set_options(string *name)
+{
+  check_symbol_is_parameter(name);
+  mod_file->addStatement(new OptionsStatement(*name, options_list));
+  options_list.clear();
+  delete name;
+}
+
+void
+ParsingDriver::check_symbol_is_endogenous_or_exogenous(string *name)
+{
+  check_symbol_existence(*name);
+  int symb_id = mod_file->symbol_table.getID(*name);
+  switch(mod_file->symbol_table.getType(symb_id))
+    {
+    case eEndogenous:
+    case eExogenous:
+    case eExogenousDet:
+      break;
+    default:
+      error(*name + " is neither endogenous or exogenous.");
+    }
+}
+
+void
+ParsingDriver::set_std_prior(string *name)
+{
+  check_symbol_is_endogenous_or_exogenous(name);
+  mod_file->addStatement(new StdPriorStatement(*name, prior_variance, options_list, mod_file->symbol_table));
+  options_list.clear();
+  prior_variance = NULL;
+  delete name;
+}
+
+void
+ParsingDriver::set_std_options(string *name)
+{
+  check_symbol_is_endogenous_or_exogenous(name);
+  //  mod_file->addStatement(new StdOptionsStatement(*name, options_list, mod_file->symbol_table));
+  options_list.clear();
+  delete name;
+}
+
+void
+ParsingDriver::set_corr_prior(string *name1, string *name2)
+{
+  check_symbol_is_endogenous_or_exogenous(name1);
+  check_symbol_is_endogenous_or_exogenous(name2);
+  mod_file->addStatement(new CorrPriorStatement(*name1, *name2, prior_variance, options_list, mod_file->symbol_table));
+  options_list.clear();
+  prior_variance = NULL;
+  delete name1;
+  delete name2;
+}
+
+void
+ParsingDriver::set_corr_options(string *name1, string *name2)
+{
+  check_symbol_is_endogenous_or_exogenous(name1);
+  check_symbol_is_endogenous_or_exogenous(name2);
+  //  mod_file->addStatement(new CorrOptionsStatement(*name1, *name2, options_list, mod_file->symbol_table));
+  options_list.clear();
+  delete name1;
+  delete name2;
 }
 
 void
@@ -1540,7 +1738,7 @@ ParsingDriver::svar()
 void
 ParsingDriver::markov_switching()
 {
-  OptionsList::num_options_t::const_iterator it0, it1;
+  OptionsList::num_options_t::const_iterator it0;
 
   it0 = options_list.num_options.find("ms.chain");
   if (it0 == options_list.num_options.end())
@@ -1548,31 +1746,15 @@ ParsingDriver::markov_switching()
   else if (atoi(it0->second.c_str()) <= 0)
     error("The value passed to the chain option must be greater than zero.");
 
-  it0 = options_list.num_options.find("ms.state");
-  it1 = options_list.num_options.find("ms.number_of_states");
-  if ((it0 == options_list.num_options.end())
-      && (it1 == options_list.num_options.end()))
-    error("Either a state option or a number_of_states option must be passed to the markov_switching statement.");
+  it0 = options_list.num_options.find("ms.number_of_regimes");
+  if (it0 == options_list.num_options.end())
+    error("A number_of_regimes option must be passed to the markov_switching statement.");
+  else if (atoi(it0->second.c_str()) <= 0)
+    error("The value passed to the number_of_regimes option must be greater than zero.");
 
-  if ((it0 != options_list.num_options.end())
-      && (it1 != options_list.num_options.end()))
-    error("You cannot pass both a state option and a number_of_states option to the markov_switching statement.");
-
-  if (it0 != options_list.num_options.end())
-    if (atoi(it0->second.c_str()) <= 0)
-      error("The value passed to the state option must be greater than zero.");
-
-  if (it1 != options_list.num_options.end())
-    if (atoi(it1->second.c_str()) <= 0)
-      error("The value passed to the number_of_states option must be greater than zero.");
-
-  string infStr("Inf");
   it0 = options_list.num_options.find("ms.duration");
   if (it0 == options_list.num_options.end())
     error("A duration option must be passed to the markov_switching statement.");
-  else if (infStr.compare(it0->second) != 0)
-    if (atof(it0->second.c_str()) <= 0.0)
-      error("The value passed to the duration option must be greater than zero.");
 
   mod_file->addStatement(new MarkovSwitchingStatement(options_list));
   options_list.clear();

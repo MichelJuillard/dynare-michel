@@ -82,7 +82,12 @@ elseif options_.periods ~= 0
         options_ =options_old;
         return
     end
-    oo_.endo_simul = simult(repmat(oo_.dr.ys,1,M_.maximum_lag),oo_.dr);
+    if size(oo_.endo_simul,2) < maximum_lag
+        y0 = oo_.dr.ys;
+    else
+        y0 = oo_.endo_simul(:,1);
+    end
+    oo_.endo_simul = simult(y0,oo_.dr);
     dyn2vec;
     if options_.nomoments == 0
         disp_moments(oo_.endo_simul,var_list);

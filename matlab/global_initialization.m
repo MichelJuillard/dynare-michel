@@ -28,7 +28,7 @@ function global_initialization()
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global oo_ M_ options_ estim_params_ bayestopt_
+global oo_ M_ options_ estim_params_ bayestopt_ estimation_info
 
 estim_params_ = [];
 bayestopt_ = [];
@@ -182,6 +182,35 @@ options_.ramsey_policy = 0;
 options_.timeless = 0;
 
 % estimation
+estimation_info.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
+                               'mode', {}, 'stdev', {}, 'date1', {}, ...
+                               'date2', {}, 'shift', {}, 'variance', {});
+estimation_info.structural_innovation.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
+                                                  'mode', {}, 'stdev', {}, 'date1', {}, ...
+                                                  'date2', {}, 'shift', {}, 'variance', {});
+estimation_info.structural_innovation_corr.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
+                                                  'mode', {}, 'stdev', {}, 'date1', {}, ...
+                                                  'date2', {}, 'shift', {}, 'variance', {});
+estimation_info.measurement_error.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
+                                                 'mode', {}, 'stdev', {}, 'date1', {}, ...
+                                                 'date2', {}, 'shift', {}, 'variance', {});
+estimation_info.measurement_error_corr.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
+                                                  'mode', {}, 'stdev', {}, 'date1', {}, ...
+                                                  'date2', {}, 'shift', {}, 'variance', {});
+estimation_info.measurement_error.prior_index = {};
+estimation_info.structural_innovation.prior_index = {};
+estimation_info.measurement_error_corr.prior_index = {};
+estimation_info.structural_innovation_corr.prior_index = {};
+estimation_info.measurement_error.options_index = {};
+estimation_info.structural_innovation.options_index = {};
+estimation_info.measurement_error_corr.options_index = {};
+estimation_info.structural_innovation_corr.options_index = {};
+options_.initial_period = dynDate(1);
+options_.dataset.firstobs = options_.initial_period;
+options_.dataset.lastobs = NaN;
+options_.dataset.nobs = NaN;
+options_.dataset.xls_sheet = NaN;
+options_.dataset.xls_range = NaN;
 options_.Harvey_scale_factor = 10;
 options_.MaxNumberOfBytes = 1e6;
 options_.MaximumNumberOfMegaBytes = 111;

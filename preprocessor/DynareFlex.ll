@@ -108,6 +108,8 @@ string eofbuff;
 <INITIAL>periods 	{BEGIN DYNARE_STATEMENT; return token::PERIODS;}
 <INITIAL>model_info {BEGIN DYNARE_STATEMENT; return token::MODEL_INFO;}
 <INITIAL>estimation {BEGIN DYNARE_STATEMENT; return token::ESTIMATION;}
+<INITIAL>set_time {BEGIN DYNARE_STATEMENT; return token::SET_TIME;}
+<INITIAL>data {BEGIN DYNARE_STATEMENT; return token::DATA;}
 <INITIAL>varobs 	{BEGIN DYNARE_STATEMENT; return token::VAROBS;}
 <INITIAL>unit_root_vars	{BEGIN DYNARE_STATEMENT; return token::UNIT_ROOT_VARS;}
 <INITIAL>rplot	 	{BEGIN DYNARE_STATEMENT; return token::RPLOT;}
@@ -187,10 +189,29 @@ string eofbuff;
  /* End of a Dynare block */
 <DYNARE_BLOCK>end 	{BEGIN INITIAL; return token::END;}
 
+<DYNARE_STATEMENT>subsamples {return token::SUBSAMPLES;}
+<DYNARE_STATEMENT>options {return token::OPTIONS;}
+<DYNARE_STATEMENT>prior {return token::PRIOR;}
+<INITIAL>std {BEGIN DYNARE_STATEMENT; return token::STD;}
+<INITIAL>corr {BEGIN DYNARE_STATEMENT; return token::CORR;}
+
  /* Inside  of a Dynare statement */
+<DYNARE_STATEMENT>file                  {return token::FILE;}
 <DYNARE_STATEMENT>datafile 		{return token::DATAFILE;}
 <DYNARE_STATEMENT>nobs 			{return token::NOBS;}
+<DYNARE_STATEMENT>last_obs 		{return token::LAST_OBS;}
 <DYNARE_STATEMENT>first_obs 		{return token::FIRST_OBS;}
+<DYNARE_STATEMENT>mean                  {return token::MEAN;}
+<DYNARE_STATEMENT>stdev                 {return token::STDEV;}
+<DYNARE_STATEMENT>domain                {return token::DOMAINN;}
+<DYNARE_STATEMENT>variance              {return token::VARIANCE;}
+<DYNARE_STATEMENT>mode                  {return token::MODE;}
+<DYNARE_STATEMENT>interval              {return token::INTERVAL;}
+<DYNARE_STATEMENT>shape                 {return token::SHAPE;}
+<DYNARE_STATEMENT>shift                 {return token::SHIFT;}
+<DYNARE_STATEMENT>bounds                {return token::BOUNDS;}
+<DYNARE_STATEMENT>init                  {return token::INIT;}
+<DYNARE_STATEMENT>jscale                {return token::JSCALE;}
 <DYNARE_STATEMENT>prefilter 		{return token::PREFILTER;}
 <DYNARE_STATEMENT>presample 		{return token::PRESAMPLE;}
 <DYNARE_STATEMENT>lik_algo  		{return token::LIK_ALGO;}
@@ -249,7 +270,6 @@ string eofbuff;
 <DYNARE_STATEMENT>nargs {return token::EXT_FUNC_NARGS;}
 <DYNARE_STATEMENT>first_deriv_provided {return token::FIRST_DERIV_PROVIDED;}
 <DYNARE_STATEMENT>second_deriv_provided {return token::SECOND_DERIV_PROVIDED;}
-
 <DYNARE_STATEMENT>freq {return token::FREQ;}
 <DYNARE_STATEMENT>monthly {return token::MONTHLY; }
 <DYNARE_STATEMENT>quarterly {return token::QUARTERLY; }
@@ -276,6 +296,30 @@ string eofbuff;
 <DYNARE_STATEMENT>beta {
   yylval->string_val = new string(yytext);
   return token::BETA;
+}
+<DYNARE_STATEMENT>gamma {
+  yylval->string_val = new string(yytext);
+  return token::GAMMA;
+}
+<DYNARE_STATEMENT>inv_gamma {
+  yylval->string_val = new string(yytext);
+  return token::INV_GAMMA;
+}
+<DYNARE_STATEMENT>inv_gamma1 {
+  yylval->string_val = new string(yytext);
+  return token::INV_GAMMA1;
+}
+<DYNARE_STATEMENT>inv_gamma2 {
+  yylval->string_val = new string(yytext);
+  return token::INV_GAMMA2;
+}
+<DYNARE_STATEMENT>normal {
+  yylval->string_val = new string(yytext);
+  return token::NORMAL;
+}
+<DYNARE_STATEMENT>uniform {
+  yylval->string_val = new string(yytext);
+  return token::UNIFORM;
 }
 <DYNARE_STATEMENT>gsig2_lmdm {return token::GSIG2_LMDM;}
 <DYNARE_STATEMENT>specification {return token::SPECIFICATION;}
@@ -427,7 +471,6 @@ string eofbuff;
 <DYNARE_BLOCK># {return Dynare::parser::token_type (yytext[0]);}
 
 <DYNARE_BLOCK>autocorr {return token::AUTOCORR;}
-<DYNARE_BLOCK>restrictions {return token::RESTRICTIONS;}
 <DYNARE_BLOCK>restriction {return token::RESTRICTION;}
 
  /* Inside Dynare statement */
@@ -461,8 +504,7 @@ string eofbuff;
 <DYNARE_STATEMENT,DYNARE_BLOCK>upper_cholesky {return token::UPPER_CHOLESKY;}
 <DYNARE_STATEMENT,DYNARE_BLOCK>lower_cholesky {return token::LOWER_CHOLESKY;}
 <DYNARE_STATEMENT>chain {return token::CHAIN;}
-<DYNARE_STATEMENT>state {return token::STATE;}
-<DYNARE_STATEMENT>number_of_states {return token::NUMBER_OF_STATES;}
+<DYNARE_STATEMENT>number_of_regimes {return token::NUMBER_OF_REGIMES;}
 <DYNARE_STATEMENT>duration {return token::DURATION;}
 <DYNARE_STATEMENT>coefficients {return token::COEFFICIENTS;}
 <DYNARE_STATEMENT>variances {return token::VARIANCES;}
@@ -589,6 +631,11 @@ string eofbuff;
 <DYNARE_STATEMENT,DYNARE_BLOCK>[0-9]+ {
   yylval->string_val = new string(yytext);
   return token::INT_NUMBER;
+}
+
+<DYNARE_STATEMENT,DYNARE_BLOCK>([1-2][0-9]{3}[Mm](([1-9])|(1[0-2])))|([1-2][0-9]{3}[Qq][1-4])|([1-2][0-9]{3}[Ww](([1-9]{1})|([1-5][0-9]))) {
+  yylval->string_val = new string(yytext);
+  return token::DATE_NUMBER;
 }
 
 <DYNARE_STATEMENT,DYNARE_BLOCK>\'[^\']+\' {

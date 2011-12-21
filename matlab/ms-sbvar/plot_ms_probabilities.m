@@ -31,7 +31,7 @@ function plot_ms_probabilities(computed_probabilities, options_)
   [T,num_grand_regimes] = size(computed_probabilities);
   num_chains = length(options_.ms.ms_chain);
   for i=1:num_chains
-    chains(i).num_regimes = length(options_.ms.ms_chain(i).state);
+    chains(i).num_regimes = length(options_.ms.ms_chain(i).regime);
     chains(i).probabilities = zeros([T,chains(i).num_regimes]);
   end
   

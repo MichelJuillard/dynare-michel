@@ -135,15 +135,6 @@ StochSimulStatement::checkPass(ModFileStructure &mod_file_struct)
       cerr << "ERROR: in 'stoch_simul', you cannot use option 'pruning' with 'k_order_solver' option or with 3rd order approximation" << endl;
       exit(EXIT_FAILURE);
     }
-
-  // Workaround for ticket #157
-  it = options_list.num_options.find("periods");
-  if (it != options_list.num_options.end() && atoi(it->second.c_str()) > 0
-      && mod_file_struct.histval_present)
-    {
-      cerr << "ERROR: the 'periods' option of 'stoch_simul' is not compatible with a 'histval' block" << endl;
-      exit(EXIT_FAILURE);
-    }
 }
 
 void
@@ -325,6 +316,30 @@ EstimationStatement::checkPass(ModFileStructure &mod_file_struct)
       cerr << "ERROR: An estimation statement cannot take more than one dsge_var option." << endl;
       exit(EXIT_FAILURE);
     }
+
+  if (options_list.string_options.find("datafile") == options_list.string_options.end() &&
+      !mod_file_struct.estimation_data_statement_present)
+    {
+      cerr << "ERROR: The estimation statement requires a data file to be supplied "
+           << "either from the data statement or from the deprecated option datafile." << endl;
+      exit(EXIT_FAILURE);
+    }
+
+  if (options_list.string_options.find("datafile") != options_list.string_options.end())
+    cerr << "WARNING: The datafile option of estimation has been deprecated. "
+         << "Use the data command instead." << endl;
+
+  if (options_list.string_options.find("xls_sheet") != options_list.string_options.end())
+    cerr << "WARNING: The xls_sheet option of estimation has been deprecated. "
+         << "Use the data command instead." << endl;
+
+  if (options_list.string_options.find("xls_range") != options_list.string_options.end())
+    cerr << "WARNING: The xls_range option of estimation has been deprecated. "
+         << "Use the data command instead." << endl;
+
+  if (options_list.num_options.find("first_obs") != options_list.num_options.end())
+    cerr << "WARNING: The first_obs option of estimation has been deprecated. "
+         << "Use the data command instead." << endl;
 }
 
 void
@@ -1335,7 +1350,9 @@ MarkovSwitchingStatement::MarkovSwitchingStatement(const OptionsList &options_li
 void
 MarkovSwitchingStatement::writeOutput(ostream &output, const string &basename) const
 {
-  OptionsList::num_options_t::const_iterator itChain, itState, itNOS, itDuration;
+  bool isDurationAVec = true;
+  string infStr("Inf");
+  OptionsList::num_options_t::const_iterator itChain, itNOR, itDuration;
 
   itChain = options_list.num_options.find("ms.chain");
   if (itChain == options_list.num_options.end())
@@ -1350,16 +1367,20 @@ MarkovSwitchingStatement::writeOutput(ostream &output, const string &basename) c
       cerr << "MarkovSwitchingStatement::writeOutput() Should not arrive here (2). Please report this to the Dynare Team." << endl;
       exit(EXIT_FAILURE);
     }
+  else if (atof(itDuration->second.c_str()) || infStr.compare(itDuration->second) == 0)
+    isDurationAVec = false;
+  output << "options_.ms.duration = " << itDuration->second << ";" << endl;
 
-  itState = options_list.num_options.find("ms.state");
-  itNOS = options_list.num_options.find("ms.number_of_states");
-  if (itState != options_list.num_options.end()
-      && itNOS == options_list.num_options.end())
-    output << "options_.ms.ms_chain(" << itChain->second << ").state(" << itState->second << ").duration = " << itDuration->second << ";" << endl;
-  else if (itState == options_list.num_options.end()
-           && itNOS != options_list.num_options.end())
-    for (int i = 0; i < atoi(itNOS->second.c_str()); i++)
-      output << "options_.ms.ms_chain(" << itChain->second << ").state(" << i+1 << ").duration = " << itDuration->second << ";" << endl;
+  itNOR = options_list.num_options.find("ms.number_of_regimes");
+  if (itNOR != options_list.num_options.end())
+    for (int i = 0; i < atoi(itNOR->second.c_str()); i++)
+      {
+        output << "options_.ms.ms_chain(" << itChain->second << ").regime("
+               << i+1 << ").duration = options_.ms.duration";
+        if (isDurationAVec)
+          output << "(" << i+1 << ")";
+        output << ";" << endl;
+      }
   else
     {
       cerr << "MarkovSwitchingStatement::writeOutput() Should not arrive here (3). Please report this to the Dynare Team." << endl;
@@ -1430,4 +1451,417 @@ SvarStatement::writeOutput(ostream &output, const string &basename) const
     }
   else
     output << "'ALL';" << endl;
+}
+
+SetTimeStatement::SetTimeStatement(const OptionsList &options_list_arg) :
+  options_list(options_list_arg)
+{
+}
+
+void
+SetTimeStatement::writeOutput(ostream &output, const string &basename) const
+{
+  options_list.writeOutput(output);
+}
+
+EstimationDataStatement::EstimationDataStatement(const OptionsList &options_list_arg) :
+  options_list(options_list_arg)
+{
+}
+
+void
+EstimationDataStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.estimation_data_statement_present = true;
+
+  OptionsList::num_options_t::const_iterator it = options_list.num_options.find("nobs");
+  if (it != options_list.num_options.end())
+    if (atoi(it->second.c_str()) <= 0)
+      {
+        cerr << "ERROR: The nobs option of the data statement only accepts positive integers." << endl;
+        exit(EXIT_FAILURE);
+      }
+
+  if (options_list.string_options.find("file") == options_list.string_options.end())
+    {
+      cerr << "ERROR: The file option must be passed to the data statement." << endl;
+      exit(EXIT_FAILURE);
+    }
+}
+
+void
+EstimationDataStatement::writeOutput(ostream &output, const string &basename) const
+{
+  options_list.writeOutput(output, "options_.dataset");
+  if (options_list.date_options.find("first_obs") == options_list.date_options.end())
+    output << "options_.dataset.firstobs = options_.initial_period;" << endl;
+}
+
+BasicPriorStatement::~BasicPriorStatement()
+{
+}
+
+BasicPriorStatement::BasicPriorStatement(const string &name_arg,
+                                         const expr_t &variance_arg,
+                                         const OptionsList &options_list_arg) :
+  name(name_arg),
+  variance(variance_arg),
+  options_list(options_list_arg),
+  first_statement_encountered(false)
+{
+}
+
+void
+BasicPriorStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  if (options_list.num_options.find("shape") == options_list.num_options.end())
+    {
+      cerr << "ERROR: You must pass the shape option to the prior statement." << endl;
+      exit(EXIT_FAILURE);
+    }
+  if (options_list.num_options.find("date1") != options_list.num_options.end() ||
+      options_list.num_options.find("date2") != options_list.num_options.end())
+    if (options_list.num_options.find("date1") == options_list.num_options.end() ||
+        options_list.num_options.find("date2") == options_list.num_options.end())
+      {
+        cerr << "ERROR: PriorStatement::checkPass(1). Should not arrive here. "
+             << "Please inform Dynare Team." << endl;
+        exit(EXIT_FAILURE);
+      }
+}
+
+void
+BasicPriorStatement::get_base_name(const SymbolType symb_type, string &lhs_field) const
+{
+  if (symb_type == eExogenous || symb_type == eExogenousDet)
+    lhs_field = "structural_innovation";
+  else
+    lhs_field = "measurement_error";
+}
+
+void
+BasicPriorStatement::writePriorIndex(ostream &output, const string &lhs_field) const
+{
+  if (first_statement_encountered)
+    output << "prior_indx = 1;" << endl;
+  else
+    output << "prior_indx = size(estimation_info" << lhs_field << "_index, 2) + 1;" << endl;
+}
+
+void
+BasicPriorStatement::writeVarianceOption(ostream &output, const string &lhs_field) const
+{
+  if (variance)
+    {
+      output << "estimation_info" << lhs_field << "(prior_indx).variance = ";
+      variance->writeOutput(output);
+      output << ";" << endl;
+    }
+}
+
+void
+BasicPriorStatement::writeOutputHelper(ostream &output, const string &field, const string &lhs_field) const
+{
+
+  OptionsList::num_options_t::const_iterator itn = options_list.num_options.find(field);
+  if (itn != options_list.num_options.end())
+    output << "estimation_info" << lhs_field << "(prior_indx)." << field
+           << " = " << itn->second << ";" << endl;
+
+  OptionsList::date_options_t::const_iterator itd = options_list.date_options.find(field);
+  if (itd != options_list.date_options.end())
+    output << "estimation_info" << lhs_field << "(prior_indx)." << field
+           << " = '" << itd->second << "';" << endl;
+}
+
+PriorStatement::PriorStatement(const string &name_arg,
+                               const expr_t &variance_arg,
+                               const OptionsList &options_list_arg) :
+  BasicPriorStatement(name_arg, variance_arg, options_list_arg)
+{
+}
+
+void
+PriorStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  BasicPriorStatement::checkPass(mod_file_struct);
+  if (!mod_file_struct.prior_statement_present)
+    first_statement_encountered = true;
+  mod_file_struct.prior_statement_present = true;
+}
+
+void
+PriorStatement::writeOutput(ostream &output, const string &basename) const
+{
+  string lhs_field = ".prior";
+
+  BasicPriorStatement::writePriorIndex(output, lhs_field);
+  output << "estimation_info" << lhs_field << "_index(prior_indx) = {'" << name << "'};" << endl
+         << "estimation_info" << lhs_field <<"(prior_indx).name = '" << name << "';" << endl;
+
+  writeOutputHelper(output, "mean", lhs_field);
+  writeOutputHelper(output, "mode", lhs_field);
+  writeOutputHelper(output, "stdev", lhs_field);
+  writeOutputHelper(output, "shape", lhs_field);
+  writeOutputHelper(output, "shift", lhs_field);
+  writeOutputHelper(output, "date1", lhs_field);
+  writeOutputHelper(output, "date2", lhs_field);
+  writeOutputHelper(output, "domain", lhs_field);
+  writeOutputHelper(output, "interval", lhs_field);
+  BasicPriorStatement::writeVarianceOption(output, lhs_field);
+}
+
+StdPriorStatement::StdPriorStatement(const string &name_arg,
+                                     const expr_t &variance_arg,
+                                     const OptionsList &options_list_arg,
+                                     const SymbolTable &symbol_table_arg ) :
+  BasicPriorStatement(name_arg, variance_arg, options_list_arg),
+  symbol_table(symbol_table_arg)
+{
+}
+
+void
+StdPriorStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  BasicPriorStatement::checkPass(mod_file_struct);
+  if (!mod_file_struct.std_prior_statement_present)
+    first_statement_encountered = true;
+  mod_file_struct.std_prior_statement_present = true;
+}
+
+void
+StdPriorStatement::writeOutput(ostream &output, const string &basename) const
+{
+  string lhs_field;
+  get_base_name(symbol_table.getType(name), lhs_field);
+  lhs_field = "." + lhs_field + ".prior";
+
+  BasicPriorStatement::writePriorIndex(output, lhs_field);
+  output << "estimation_info" << lhs_field << "_index(prior_indx) = {'" << name << "'};" << endl;
+  output << "estimation_info" << lhs_field << "(prior_indx).name = '" << name << "';" << endl;
+
+  writeOutputHelper(output, "mean", lhs_field);
+  writeOutputHelper(output, "mode", lhs_field);
+  writeOutputHelper(output, "stdev", lhs_field);
+  writeOutputHelper(output, "shape", lhs_field);
+  writeOutputHelper(output, "shift", lhs_field);
+  writeOutputHelper(output, "domain", lhs_field);
+  writeOutputHelper(output, "interval", lhs_field);
+  BasicPriorStatement::writeVarianceOption(output, lhs_field);
+}
+
+CorrPriorStatement::CorrPriorStatement(const string &name_arg1, const string &name_arg2,
+                                       const expr_t &variance_arg,
+                                       const OptionsList &options_list_arg,
+                                       const SymbolTable &symbol_table_arg ) :
+  BasicPriorStatement(name_arg1, variance_arg, options_list_arg),
+  name1(name_arg2),
+  symbol_table(symbol_table_arg)
+{
+}
+
+void
+CorrPriorStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  BasicPriorStatement::checkPass(mod_file_struct);
+  if (symbol_table.getType(name) != symbol_table.getType(name1))
+    {
+      cerr << "ERROR: In the corr(A,B).prior statement, A and B must be of the same type. "
+           << "In your case, " << name << " and " << name1 << " are of different "
+           << "types." << endl;
+      exit(EXIT_FAILURE);
+    }
+  if (!mod_file_struct.corr_prior_statement_present)
+    first_statement_encountered = true;
+  mod_file_struct.corr_prior_statement_present = true;
+}
+
+void
+CorrPriorStatement::writeOutput(ostream &output, const string &basename) const
+{
+  string lhs_field;
+  get_base_name(symbol_table.getType(name), lhs_field);
+  lhs_field = "." + lhs_field + "_corr.prior";
+
+  BasicPriorStatement::writePriorIndex(output, lhs_field);
+  output << "estimation_info" << lhs_field << "_index(prior_indx) = {'" << name << "_" << name1 << "'};" << endl;
+  output << "estimation_info" << lhs_field << "(prior_indx).name1 = '" << name << "';" << endl;
+  output << "estimation_info" << lhs_field << "(prior_indx).name2 = '" << name1 << "';" << endl;
+
+  writeOutputHelper(output, "mean", lhs_field);
+  writeOutputHelper(output, "mode", lhs_field);
+  writeOutputHelper(output, "stdev", lhs_field);
+  writeOutputHelper(output, "shape", lhs_field);
+  writeOutputHelper(output, "shift", lhs_field);
+  writeOutputHelper(output, "domain", lhs_field);
+  writeOutputHelper(output, "interval", lhs_field);
+  BasicPriorStatement::writeVarianceOption(output, lhs_field);
+}
+
+BasicOptionsStatement::~BasicOptionsStatement()
+{
+}
+
+BasicOptionsStatement::BasicOptionsStatement(const string &name_arg,
+                                         const OptionsList &options_list_arg) :
+  name(name_arg),
+  options_list(options_list_arg),
+  first_statement_encountered(false)
+{
+}
+
+void
+BasicOptionsStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  if (options_list.num_options.find("date1") != options_list.num_options.end() ||
+      options_list.num_options.find("date2") != options_list.num_options.end())
+    if (options_list.num_options.find("date1") == options_list.num_options.end() ||
+        options_list.num_options.find("date2") == options_list.num_options.end())
+      {
+        cerr << "ERROR: OptionsStatement::checkPass(1). Should not arrive here. "
+             << "Please inform Dynare Team." << endl;
+        exit(EXIT_FAILURE);
+      }
+}
+
+void
+BasicOptionsStatement::writeOptionsIndex(ostream &output, const string &lhs_field) const
+{
+  if (first_statement_encountered)
+    output << "options_indx = 1;" << endl;
+  else
+    output << "options_indx = size(estimation_info" << lhs_field << "_index, 2) + 1;" << endl;
+}
+
+void
+BasicOptionsStatement::get_base_name(const SymbolType symb_type, string &lhs_field) const
+{
+  if (symb_type == eExogenous || symb_type == eExogenousDet)
+    lhs_field = "structural_innovation";
+  else
+    lhs_field = "measurement_error";
+}
+
+void
+BasicOptionsStatement::writeOutputHelper(ostream &output, const string &field, const string &lhs_field) const
+{
+  OptionsList::num_options_t::const_iterator itn = options_list.num_options.find(field);
+  if (itn != options_list.num_options.end())
+    output << "estimation_info" << lhs_field << "(options_indx)." << field
+           << " = " << itn->second << ";" << endl;
+
+  OptionsList::date_options_t::const_iterator itd = options_list.date_options.find(field);
+  if (itd != options_list.date_options.end())
+    output << "estimation_info" << lhs_field << "(options_indx)." << field
+           << " = '" << itd->second << "';" << endl;
+}
+
+OptionsStatement::OptionsStatement(const string &name_arg,
+                                   const OptionsList &options_list_arg) :
+  BasicOptionsStatement(name_arg, options_list_arg)
+{
+}
+
+void
+OptionsStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  BasicOptionsStatement::checkPass(mod_file_struct);
+  if (!mod_file_struct.options_statement_present)
+    first_statement_encountered = true;
+  mod_file_struct.options_statement_present = true;
+}
+
+void
+OptionsStatement::writeOutput(ostream &output, const string &basename) const
+{
+  string lhs_field = ".options";
+
+  BasicOptionsStatement::writeOptionsIndex(output, lhs_field);
+  output << "estimation_info" << lhs_field <<"_index(options_indx) = {'" << name << "'};" << endl
+         << "estimation_info" << lhs_field << "(options_indx).name = '" << name << "';" << endl;
+
+  writeOutputHelper(output, "init", lhs_field);
+  writeOutputHelper(output, "bounds", lhs_field);
+  writeOutputHelper(output, "jscale", lhs_field);
+  writeOutputHelper(output, "date1", lhs_field);
+  writeOutputHelper(output, "date2", lhs_field);
+}
+
+StdOptionsStatement::StdOptionsStatement(const string &name_arg,
+                                         const OptionsList &options_list_arg,
+                                         const SymbolTable &symbol_table_arg ) :
+  BasicOptionsStatement(name_arg, options_list_arg),
+  symbol_table(symbol_table_arg)
+{
+}
+
+void
+StdOptionsStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  BasicOptionsStatement::checkPass(mod_file_struct);
+  if (!mod_file_struct.std_options_statement_present)
+    first_statement_encountered = true;
+  mod_file_struct.std_options_statement_present = true;
+}
+
+void
+StdOptionsStatement::writeOutput(ostream &output, const string &basename) const
+{
+  string lhs_field;
+  get_base_name(symbol_table.getType(name), lhs_field);
+  lhs_field = "." + lhs_field + ".options";
+
+  BasicOptionsStatement::writeOptionsIndex(output, lhs_field);
+  output << "estimation_info" << lhs_field << "_index(options_indx) = {'" << name << "'};" << endl;
+  output << "estimation_info" << lhs_field << "(options_indx).name = '" << name << "';" << endl;
+
+  writeOutputHelper(output, "init", lhs_field);
+  writeOutputHelper(output, "bounds", lhs_field);
+  writeOutputHelper(output, "jscale", lhs_field);
+  writeOutputHelper(output, "date1", lhs_field);
+  writeOutputHelper(output, "date2", lhs_field);
+}
+
+CorrOptionsStatement::CorrOptionsStatement(const string &name_arg1, const string &name_arg2,
+                                           const OptionsList &options_list_arg,
+                                           const SymbolTable &symbol_table_arg ) :
+  BasicOptionsStatement(name_arg1, options_list_arg),
+  name1(name_arg2),
+  symbol_table(symbol_table_arg)
+{
+}
+
+void
+CorrOptionsStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  if (symbol_table.getType(name) != symbol_table.getType(name1))
+    {
+      cerr << "ERROR: In the corr(A,B).options statement, A and B must be of the same type. "
+           << "In your case, " << name << " and " << name1 << " are of different "
+           << "types." << endl;
+      exit(EXIT_FAILURE);
+    }
+  if (!mod_file_struct.corr_options_statement_present)
+    first_statement_encountered = true;
+  mod_file_struct.corr_prior_statement_present = true;
+}
+
+void
+CorrOptionsStatement::writeOutput(ostream &output, const string &basename) const
+{
+  string lhs_field;
+  get_base_name(symbol_table.getType(name), lhs_field);
+  lhs_field = "." + lhs_field + "_corr.options";
+
+  BasicOptionsStatement::writeOptionsIndex(output, lhs_field);
+  output << "estimation_info" << lhs_field << "_index(options_indx) = {'" << name << "_" << name1 << "'};" << endl;
+  lhs_field += ".";
+  output << "estimation_info" << lhs_field << "(options_indx).name1 = '" << name << "';" << endl;
+  output << "estimation_info" << lhs_field << "(options_indx).name2 = '" << name1 << "';" << endl;
+
+  writeOutputHelper(output, "init", lhs_field);
+  writeOutputHelper(output, "bounds", lhs_field);
+  writeOutputHelper(output, "jscale", lhs_field);
+  writeOutputHelper(output, "date1", lhs_field);
+  writeOutputHelper(output, "date2", lhs_field);
 }

@@ -52,7 +52,7 @@ function ms_write_markov_file(fname, options)
         %//=====================================================//
         fprintf(fh,'//== Number of states for state_variable[%d] ==//\n', ...
                 i_chain);
-        n_states = length(options.ms.ms_chain(i_chain).state);
+        n_states = length(options.ms.ms_chain(i_chain).regime);
         fprintf(fh,'%d\n\n',n_states);
 
         %//== 03/15/06: DW TVBVAR code reads the data below and overwrite the prior data read somewhere else if any.
@@ -64,7 +64,7 @@ function ms_write_markov_file(fname, options)
           i_chain);
         Alpha = ones(n_states,n_states);
         for i_state = 1:n_states
-            p = 1-1/options.ms.ms_chain(i_chain).state(i_state).duration;
+            p = 1-1/options.ms.ms_chain(i_chain).regime(i_state).duration;
             Alpha(i_state,i_state) = p*(n_states-1)/(1-p);
             fprintf(fh,'%22.16f',Alpha(i_state,:));
             fprintf(fh,'\n');
