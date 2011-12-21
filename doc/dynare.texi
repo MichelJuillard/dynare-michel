@@ -1954,6 +1954,12 @@ of the simulation is period @code{0}, then period @code{-1}, and so on.
 If your lagged variables are linked by identities, be careful to
 satisfy these identities when you set historical initial values.
 
+Variables not initialized in the @code{histval} block are assumed to
+have a value of zero at period 0 and before. Note that this behavior
+differs from the case where there is no @code{histval} block, where all
+variables are initialized at their steady state value at period 0 and
+before.
+
 @examplehead
 
 @example
