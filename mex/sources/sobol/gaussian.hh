@@ -130,9 +130,11 @@ template<typename T> void icdfm( const int n, T *U)
 template<typename T> void icdfmSigma( const int d, const int n, T *U, const double *LowerCholSigma)
 { 
   double one = 1.0;
+  blas_int dd(d);
+  blas_int nn(n);
   icdfm(n*d, U);
   double tmp[n*d];
-  dgemm("N","N",(blas_int*)d,(blas_int*)n,(blas_int*)d,&one,LowerCholSigma,(blas_int*)d,U,(blas_int*)d,&one,tmp,(blas_int*)d);
+  dgemm("N","N",&dd,&nn,&dd,&one,LowerCholSigma,&dd,U,&dd,&one,tmp,&dd);
   memcpy(U,tmp,d*n*sizeof(double));
   return;
 }
