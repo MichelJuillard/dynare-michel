@@ -1,9 +1,9 @@
-/*  Quasi Monte Carlo sequences (à la Sobol).
+/* Quasi Monte Carlo sequences (à la Sobol).
 ** 
-**  Original files downloaded from http://people.sc.fsu.edu/~burkardt/cpp_src/sobol/ (version 17-Feb-2009 09:46)
+** Original files downloaded from http://people.sc.fsu.edu/~burkardt/cpp_src/sobol/ (version 17-Feb-2009 09:46)
 **
-**  Copyright (C)  2009 John Burkardt
-**  Copiright (C)  2010 Dynare Team
+** Copyright (C)  2009 John Burkardt
+** Copiright (C)  2010-2011 Dynare Team
 **
 ** This file is part of Dynare.
 **
@@ -19,6 +19,8 @@
 **
 ** You should have received a copy of the GNU General Public License
 ** along with Dynare.  If not, see <http://www.gnu.org/licenses/>.  
+**
+** AUTHOR(S): stephane DOT adjemian AT univ DASH lemans DOT fr
 */
 
 #include <cstdlib>
@@ -67,7 +69,7 @@ template<typename T> int bit_hi1(T n)
 **  Original files downloaded from http://people.sc.fsu.edu/~burkardt/cpp_src/sobol/ (version 17-Feb-2009 09:46)
 **
 **  Copyright (C)  2009 John Burkardt
-**  Copiright (C)  2010 Dynare Team
+**  Copiright (C)  2010-2011 Dynare Team
 **
 **
 **    Input, int or long long, the integer to be measured.
@@ -119,7 +121,7 @@ template<typename T> int bit_lo0 ( T n )
 **  Original files downloaded from http://people.sc.fsu.edu/~burkardt/cpp_src/sobol/ (version 17-Feb-2009 09:46)
 **
 **  Copyright (C)  2009 John Burkardt
-**  Copyright (C)  2010 Dynare Team
+**  Copyright (C)  2010-2011 Dynare Team
 **
 **  INPUTS
 **
@@ -151,7 +153,7 @@ template<typename T>  T ixor ( T i, T j )
 **  Original files downloaded from http://people.sc.fsu.edu/~burkardt/cpp_src/sobol/ (version 17-Feb-2009 09:46)
 **
 **  Copyright (C)  2009 John Burkardt
-**  Copiright (C)  2010 Dynare Team
+**  Copiright (C)  2010-2011 Dynare Team
 **
 **
 **  INPUTS  I, J, two integer to be exclusive OR-ed.
@@ -200,7 +202,7 @@ template<typename T1, typename T2> void next_sobol ( int dim_num, T1 *seed, T2 *
 **  Original files downloaded from http://people.sc.fsu.edu/~burkardt/cpp_src/sobol/ (version 17-Feb-2009 09:46)
 **
 **  Copyright (C)  2009 John Burkardt
-**  Copyright (C)  2010 Dynare Team
+**  Copyright (C)  2010-2011 Dynare Team
 **
 **  Reference:
 **
