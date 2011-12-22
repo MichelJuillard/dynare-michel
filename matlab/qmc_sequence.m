@@ -82,3 +82,52 @@
 %$
 %$ T = all(t);
 %@eof:1
+
+%@test:2
+%$ t = ones(3,1);
+%$
+%$ d = 2;
+%$ n = 100;
+%$ s = int64(0);
+%$
+%$ [draws1, S] = qmc_sequence(d,s,0,n);
+%$ [draws2, Q] = qmc_sequence(d,S,0,n);
+%$ [draws3, P] = qmc_sequence(d,s,0,2*n);
+%$
+%$ t(1) = dyn_assert(s,int64(0));
+%$ t(2) = dyn_assert(P,Q);
+%$ t(3) = dyn_assert([draws1,draws2],draws3);
+%$ T = all(t);
+%@eof:2
+
+%@test:3
+%$ t = ones(3,1);
+%$
+%$ d = 2;
+%$ n = 100;
+%$ s = int64(0);
+%$
+%$ [draws1, S] = qmc_sequence(d,s,0,n,[0 , 2; -1, 2]);
+%$ [draws2, Q] = qmc_sequence(d,s,0,n);
+%$ 
+%$ draws3 = draws2;
+%$ draws3(1,:) = 2*draws2(1,:);
+%$ draws3(2,:) = 3*draws2(2,:)-1;
+%$ t(1) = dyn_assert(S,Q);
+%$ t(2) = dyn_assert(draws1,draws3);
+%$ T = all(t);
+%@eof:3
+
+%@test:4
+%$ t = ones(3,1);
+%$
+%$ d = 2;
+%$ n = 100;
+%$ s = int64(0);
+%$
+%$ [draws, S] = qmc_sequence(d,s,2,n,.1);
+%$ draws 
+%$ t(1) = 1;
+%$ t(2) = 1;
+%$ T = all(t);
+%@eof:4
