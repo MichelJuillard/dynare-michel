@@ -52,19 +52,18 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   */
   if ( !( (nrhs==5) | (nrhs==4) | (nrhs==3) )  )
     {
-      mexErrMsgTxt("Five, four or three input arguments are required!");
+      DYN_MEX_FUNC_ERR_MSG_TXT("qmc_sequence:: Five, four or three input arguments are required!");
     }
-  if ( !(nlhs == 2) )
+  if ( !( (nlhs==2) | (nlhs==3) ) )
     {
-      mexErrMsgTxt("The number of output arguments has to be two");
+      DYN_MEX_FUNC_ERR_MSG_TXT("qmc_sequence:: The number of output arguments has to be two!");
     }
   /*
   ** Test the first input argument and assign it to dimension.
   */
   if (  !( mxIsNumeric(prhs[0]) ) )
     {
-      mexPrintf("\t First input (dimension) has to be a positive integer. \n");
-      mexErrMsgTxt("\t Fatal error.");
+      DYN_MEX_FUNC_ERR_MSG_TXT("qmc_sequence:: First input (dimension) has to be a positive integer!");
     }
   int dimension = ( int ) mxGetScalar(prhs[0]);
   /*
@@ -72,8 +71,7 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   */
   if ( !( mxIsNumeric(prhs[1]) && mxIsClass(prhs[1],"int64") ) )
     {
-      mexPrintf("\t Second input (seed) has to be an integer [int64]. \n");
-      mexErrMsgTxt("\t Fatal error.");
+      DYN_MEX_FUNC_ERR_MSG_TXT("qmc_sequence:: Second input (seed) has to be an integer [int64]!");
     }
   int64_T seed = ( int64_T ) mxGetScalar( prhs[1] );
   /*
@@ -91,27 +89,21 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     }
   if (error_flag_3==1)
     {
-      mexPrintf("\t Third input (type of QMC sequence) has to be an integer equal to 0, 1 or 2: \n");
-      mexPrintf("\t   0 ==> Points uniformly distributed in an hypercube. \n");
-      mexPrintf("\t   1 ==> Points normally distributed in R^n. \n");
-      mexPrintf("\t   2 ==> Points uniformly distributed on an hypershere. \n");
-      mexErrMsgTxt("\t Fatal error.");
+      DYN_MEX_FUNC_ERR_MSG_TXT("qmc_sequence:: Third input (type of QMC sequence) has to be an integer equal to 0, 1 or 2!");
     }
   /*
   ** Test dimension>=2 when type==2
   */
   if ( (type==2) && (dimension<2) )
     {
-      mexPrintf("\t First input (dimension) has to be greater than 1 for a uniform QMC on an hypershere.\n");
-      mexErrMsgTxt("\t Fatal error.");
+      DYN_MEX_FUNC_ERR_MSG_TXT("qmc_sequence:: First input (dimension) has to be greater than 1 for a uniform QMC on an hypershere!");
     }
   /*
   ** Test the optional fourth input argument and assign it to sequence_size.
   */
   if  ( ( nrhs>3 )  &&  !mxIsNumeric(prhs[3])  ) 
     {
-      mexPrintf("\t Fourth input (qmc sequence size) has to be a positive integer. \n");
-      mexErrMsgTxt("\t Fatal error.");
+      DYN_MEX_FUNC_ERR_MSG_TXT("qmc_sequence:: Fourth input (qmc sequence size) has to be a positive integer!");
     }
   int sequence_size;
   if ( nrhs>3)
@@ -127,23 +119,19 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   */
   if  (  ( nrhs>4 )  &&  (type==0) && ( !( mxGetN(prhs[4])==2) )  )// Sequence of uniformly distributed numbers in an hypercube.
     {
-      mexPrintf("\t The fifth input argument must be an array with two columns. \n");
-      mexErrMsgTxt("\t Fatal error.");
+      DYN_MEX_FUNC_ERR_MSG_TXT("qmc_sequence:: The fifth input argument must be an array with two columns!");
     }
   if  ( (nrhs>4)   &&  (type==0) &&  ( !( (int)mxGetM(prhs[4])==dimension) ) )
     {
-      mexPrintf("\t The fourth input argument must be an array with a number of lines equal to dimension (first input argument). \n");
-      mexErrMsgTxt("\t Fatal error.");
+      DYN_MEX_FUNC_ERR_MSG_TXT("qmc_sequence:: The fourth input argument must be an array with a number of lines equal to dimension (first input argument)!");
     }
   if  ( ( nrhs>4 )  &&  (type==1) && ( !( ((int)mxGetN(prhs[4])==dimension) && ((int)mxGetM(prhs[4])==dimension) ) ) )// Sequence of normally distributed numbers.
     {
-      mexPrintf("\t The fifth input argument must be a squared matrix (whose dimension is given by the first input argument). \n");
-      mexErrMsgTxt("\t Fatal error.");
+      DYN_MEX_FUNC_ERR_MSG_TXT("qmc_sequence:: The fifth input argument must be a squared matrix (whose dimension is given by the first input argument)!");
     }
   if  ( ( nrhs>4 )  &&  (type==2) && ( !( (mxGetN(prhs[4])==1) && (mxGetM(prhs[4])==1) ) ) )// Sequence of uniformly distributed numbers on an hypershere.
     {
-      mexPrintf("\t The fifth input argument must be a positive scalar. \n");
-      mexErrMsgTxt("\t Fatal error.");
+      DYN_MEX_FUNC_ERR_MSG_TXT("qmc_sequence:: The fifth input argument must be a positive scalar!");
     }
   double *lower_bounds, *upper_bounds;
   int unit_hypercube_flag = 1;
@@ -203,6 +191,7 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         {
           expand_unit_hypercube( dimension, sequence_size, qmc_draws, lower_bounds, upper_bounds);
         }
+      plhs[2] = mxCreateDoubleScalar(0);
       return;
     }
   if (type==1)// Normal QMC sequance in R^n.
@@ -224,6 +213,7 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         {
           icdfmSigma(dimension,sequence_size, qmc_draws, cholcov);
         }
+      plhs[2] = mxCreateDoubleScalar(0);
       return;
     }
   if (type==2)// Uniform QMC sequence on an hypershere.
@@ -245,6 +235,7 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         {
           usphereRadius(dimension, sequence_size, radius, qmc_draws);
         }
+      plhs[2] = mxCreateDoubleScalar(0);
       return;
     }
 }
