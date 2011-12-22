@@ -1,8 +1,8 @@
-/*  Generates gaussian random deviates from uniform random deviates.
+/* Generates gaussian random deviates from uniform random deviates.
 ** 
-**  Pseudo code of the algorithm is given at http://home.online.no/~pjacklam/notes/invnorm  
+** Pseudo code of the algorithm is given at http://home.online.no/~pjacklam/notes/invnorm  
 **
-**  Copiright (C)  2010 Dynare Team
+** Copyright (C)  2010 Dynare Team
 **
 ** This file is part of Dynare.
 **
