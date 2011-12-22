@@ -25,6 +25,7 @@ sigma2  =  0.001;
 @#if extended_path_version
     rho = 0.800;
 @#endif
+
 external_function(name=mean_preserving_spread);
 
 model(block,bytecode,cutoff=0);
@@ -56,8 +57,6 @@ model(block,bytecode,cutoff=0);
 end;
 
 
-
-
 @#if extended_path_version
 
     shocks;
@@ -71,10 +70,20 @@ end;
     options_.ep.stochastic = 0;
     options_.console_mode = 0;
 
-    ts = extended_path([],100);
+    ts = extended_path([],1000);
+    
+    options_.ep.stochastic = 1;
+    sts = extended_path([],1000);
 
+    figure(1)
     plot(ts(2,:)-ts(4,:));
 
+    figure(2)
+    plot(sts(2,:)-sts(4,:));
+
+    figure(3)
+    plot(sts(2,:)-ts(2,:))
+    
 @#else
 
     shocks;
