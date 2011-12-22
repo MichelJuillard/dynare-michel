@@ -1,5 +1,5 @@
 %@info:
-%! @deftypefn {Mex File} {[@var{a}, @var{s}] =} qmc_sequence (@var{d}, @var{s}, @var{t}, @var{n}, @var{lu})
+%! @deftypefn {Mex File} {[@var{a}, @var{s}, @var{info}] =} qmc_sequence (@var{d}, @var{s}, @var{t}, @var{n}, @var{lu})
 %! @anchor{qmc_sequence}
 %! @sp 1
 %! Computes quasi Monte-Carlo sequence (Sobol numbers).
@@ -10,7 +10,7 @@
 %! @item d
 %! Integer scalar, dimension.
 %! @item s
-%! Integer scalar (int32 or int64), seed.
+%! Integer scalar (int64), seed.
 %! @item t
 %! Integer scalar, sequence type:
 %!  @sp 1
@@ -43,7 +43,9 @@
 %! @item a
 %! @var{n}x@var{d} matrix of doubles, the Sobol sequence.
 %! @item s
-%! Integer scalar, current value of the seed.
+%! Integer scalar (int64), current value of the seed.
+%! @item info
+%! Integer scalar, equal to 1 if mex routine fails, 0 otherwise.
 %! @end table
 %! @sp 2
 %! @strong{This function is called by:}
