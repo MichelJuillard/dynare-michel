@@ -112,6 +112,14 @@ template<typename T> T icdf( const T uniform )
       tmp_ = tmp*sqrt(2*M_PI)*exp(.5*gaussian*gaussian);
       gaussian = gaussian - tmp_/(1+.5*gaussian*tmp_);
     }
+  if ( uniform==0)
+    {
+      gaussian = -INFINITY;
+    }
+  if ( uniform==1)
+    {
+      gaussian = INFINITY;
+    }
  return(gaussian);
 }
 
