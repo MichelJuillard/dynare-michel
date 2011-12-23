@@ -31,7 +31,7 @@
 %!  @item @var{d}x2 array of doubles
 %!  Lower and upper bounds of the hypercube (default is 0-1 in all dimensions). @var{t} must be equal to zero.
 %!  @item @var{d}x@var{d} array of doubles
-%!  Covariance matrix of the Gaussian variates (default is the identity matrix). @var{t} must be equal to one.
+%!  Lower cholesky of the covariance matrix of the Gaussian variates (default is the identity matrix). @var{t} must be equal to one.
 %!  @item scalar double
 %!  Radius of the hypershere (default is one). @var{t} must be equal to two.
 %!  @end table
@@ -101,7 +101,6 @@
 %@eof:2
 
 %@test:3
-%$ t = ones(3,1);
 %$
 %$ d = 2;
 %$ n = 100;
@@ -119,7 +118,6 @@
 %@eof:3
 
 %@test:4
-%$ t = ones(3,1);
 %$
 %$ d = 2;
 %$ n = 100;
@@ -127,7 +125,7 @@
 %$ radius = pi;
 %$
 %$ [draws, S] = qmc_sequence(d,s,2,n,radius);
-%$ 
+%$
 %$ t(1) = dyn_assert(sqrt(draws(:,3)'*draws(:,3)),radius,1e-14);
 %$ t(2) = dyn_assert(sqrt(draws(:,5)'*draws(:,5)),radius,1e-14);
 %$ t(3) = dyn_assert(sqrt(draws(:,7)'*draws(:,7)),radius,1e-14);
@@ -139,3 +137,26 @@
 %$ t(9) = dyn_assert(sqrt(draws(:,29)'*draws(:,29)),radius,1e-14);
 %$ T = all(t);
 %@eof:4
+
+%@test:5
+%$
+%$ d = 2;
+%$ n = 100000;
+%$ b = 100;
+%$ s = int64(5);
+%$
+%$ covariance = [.4 -.1; -.1 .2];
+%$ chol_covariance = transpose(chol(covariance));
+%$
+%$ draws = [];
+%$
+%$ for i=1:b
+%$     [tmp, s] = qmc_sequence(d,s,1,n,chol_covariance);
+%$     draws = [draws, tmp];
+%$ end
+%$
+%$ COVARIANCE = draws*draws'/(b*n);
+%$
+%$ t(1) = dyn_assert(covariance,COVARIANCE,1e-6);
+%$ T = all(t);
+%@eof:5
