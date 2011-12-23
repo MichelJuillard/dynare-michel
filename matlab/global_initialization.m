@@ -131,11 +131,14 @@ options_.ep.innovation_distribution = 'gaussian';
 options_.ep.set_dynare_seed_to_default = 1;
 % Set algorithm for the perfect foresight solver
 options_.ep.stack_solve_algo = 4;
-% Set method
-options_.ep.stochastic = 0;
-% Set number of nodes for future shocks
-options_.ep.number_of_nodes = 5;
-
+% Stochastic extended path related options.
+options_.ep.stochastic.status = 0;
+options_.ep.stochastic.method = 'tensor';
+options_.ep.stochastic.order = 1;
+options_.ep.stochastic.nodes = 5;
+options_.ep.stochastic.pruned.status = 0;
+options_.ep.stochastic.pruned.relative = 1e-5;
+options_.ep.stochastic.pruned.level = 1e-5;
 
 % TeX output
 options_.TeX = 0;
