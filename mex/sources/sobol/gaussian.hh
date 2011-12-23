@@ -138,11 +138,12 @@ template<typename T> void icdfm( const int n, T *U)
 template<typename T> void icdfmSigma( const int d, const int n, T *U, const double *LowerCholSigma)
 { 
   double one = 1.0;
+  double zero = 0.0;
   blas_int dd(d);
   blas_int nn(n);
   icdfm(n*d, U);
   double tmp[n*d];
-  dgemm("N","N",&dd,&nn,&dd,&one,LowerCholSigma,&dd,U,&dd,&one,tmp,&dd);
+  dgemm("N","N",&dd,&nn,&dd,&one,LowerCholSigma,&dd,U,&dd,&zero,tmp,&dd);
   memcpy(U,tmp,d*n*sizeof(double));
   return;
 }
