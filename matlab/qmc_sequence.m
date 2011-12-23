@@ -124,10 +124,18 @@
 %$ d = 2;
 %$ n = 100;
 %$ s = int64(0);
+%$ radius = pi;
 %$
-%$ [draws, S] = qmc_sequence(d,s,2,n,.1);
-%$ draws 
-%$ t(1) = 1;
-%$ t(2) = 1;
+%$ [draws, S] = qmc_sequence(d,s,2,n,radius);
+%$ 
+%$ t(1) = dyn_assert(sqrt(draws(:,3)'*draws(:,3)),radius,1e-14);
+%$ t(2) = dyn_assert(sqrt(draws(:,5)'*draws(:,5)),radius,1e-14);
+%$ t(3) = dyn_assert(sqrt(draws(:,7)'*draws(:,7)),radius,1e-14);
+%$ t(4) = dyn_assert(sqrt(draws(:,11)'*draws(:,11)),radius,1e-14);
+%$ t(5) = dyn_assert(sqrt(draws(:,13)'*draws(:,13)),radius,1e-14);
+%$ t(6) = dyn_assert(sqrt(draws(:,17)'*draws(:,17)),radius,1e-14);
+%$ t(7) = dyn_assert(sqrt(draws(:,19)'*draws(:,19)),radius,1e-14);
+%$ t(8) = dyn_assert(sqrt(draws(:,23)'*draws(:,23)),radius,1e-14);
+%$ t(9) = dyn_assert(sqrt(draws(:,29)'*draws(:,29)),radius,1e-14);
 %$ T = all(t);
 %@eof:4
