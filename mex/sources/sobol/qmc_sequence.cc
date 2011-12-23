@@ -153,7 +153,7 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       cholcov = (double *) mxCalloc(dimension*dimension,sizeof(double));
       double *tmp;
       tmp = (double *) mxCalloc(dimension*dimension,sizeof(double));
-      memcpy(tmp,mxGetPr(prhs[4]),dimension*2*sizeof(double));
+      memcpy(tmp,mxGetPr(prhs[4]),dimension*dimension*sizeof(double));
       cholcov = &tmp[0];
       identity_covariance_matrix = 0;
     }
@@ -163,7 +163,7 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     {
       double *tmp;
       tmp = (double *) mxCalloc(1,sizeof(double));
-      memcpy(tmp,mxGetPr(prhs[4]),dimension*2*sizeof(double));
+      memcpy(tmp,mxGetPr(prhs[4]),sizeof(double));
       radius = tmp[0];
       unit_radius = 0;
     }
