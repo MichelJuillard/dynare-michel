@@ -17,7 +17,6 @@ LIBS += $(shell $(MKOCTFILE) -p BLAS_LIBS)
 LIBS += $(shell $(MKOCTFILE) -p FFTW_LIBS)
 LIBS += $(shell $(MKOCTFILE) -p LIBS)
 LIBS += $(shell $(MKOCTFILE) -p FLIBS)
-LIBS += $(shell $(MKOCTFILE) -p CXXLIBS) # Only used for Octave/MinGW
 
 all-local:
 	$(MKDIR_P) $(top_srcdir)/../../octave
