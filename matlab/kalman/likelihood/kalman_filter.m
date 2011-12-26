@@ -2,7 +2,7 @@ function [LIK, likk, a, P] = kalman_filter(Y,start,last,a,P,kalman_tol,riccati_t
 % Computes the likelihood of a stationnary state space model.
 
 %@info:
-%! @deftypefn {Function File} {[@var{LIK},@var{likk},@var{a},@var{P} ] =} DsgeLikelihood (@var{Y}, @var{start}, @var{last}, @var{a}, @var{P}, @var{kalman_tol}, @var{riccati_tol},@var{presample},@var{T},@var{Q},@var{R},@var{H},@var{Z},@var{mm},@var{pp},@var{rr},@var{Zflag},@var{diffuse_periods})
+%! @deftypefn {Function File} {[@var{LIK},@var{likk},@var{a},@var{P} ] =} kalman_filter (@var{Y}, @var{start}, @var{last}, @var{a}, @var{P}, @var{kalman_tol}, @var{riccati_tol},@var{presample},@var{T},@var{Q},@var{R},@var{H},@var{Z},@var{mm},@var{pp},@var{rr},@var{Zflag},@var{diffuse_periods})
 %! @anchor{kalman_filter}
 %! @sp 1
 %! Computes the likelihood of a stationary state space model, given initial condition for the states (mean and variance).
@@ -63,7 +63,7 @@ function [LIK, likk, a, P] = kalman_filter(Y,start,last,a,P,kalman_tol,riccati_t
 %! @sp 2
 %! @strong{This function is called by:}
 %! @sp 1
-%! @ref{DsgeLikelihood}
+%! @ref{dsge_likelihood}
 %! @sp 2
 %! @strong{This function calls:}
 %! @sp 1

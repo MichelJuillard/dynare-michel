@@ -41,7 +41,7 @@ function [A,B,ys,info,Model,DynareOptions,DynareResults] = dynare_resolve(Model,
 %! @sp 2
 %! @strong{This function is called by:}
 %! @sp 1
-%! @ref{DsgeLikelihood}, @ref{DsgeLikelihood_hh}, @ref{DsgeVarLikelihood}, @ref{dsge_posterior_kernel}, @ref{DsgeSmoother}, @ref{dynare_sensitivity}, @ref{gsa/thet2tau}, @ref{gsa/stab_map}, @ref{identification_analysis}, @ref{imcforecast}, @ref{thet2tau}
+%! @ref{dsge_likelihood}, @ref{DsgeLikelihood_hh}, @ref{DsgeVarLikelihood}, @ref{dsge_posterior_kernel}, @ref{DsgeSmoother}, @ref{dynare_sensitivity}, @ref{gsa/thet2tau}, @ref{gsa/stab_map}, @ref{identification_analysis}, @ref{imcforecast}, @ref{thet2tau}
 %! @sp 2
 %! @strong{This function calls:}
 %! @sp 1

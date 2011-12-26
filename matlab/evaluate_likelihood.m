@@ -85,6 +85,6 @@ end
 pshape_original   = bayestopt_.pshape;
 bayestopt_.pshape = Inf(size(bayestopt_.pshape));
 
-llik = -DsgeLikelihood(parameters,dataset,options_,M_,estim_params_,bayestopt_,oo_);
+llik = -dsge_likelihood(parameters,dataset,options_,M_,estim_params_,bayestopt_,oo_);
 
 bayestopt_.pshape = pshape_original;

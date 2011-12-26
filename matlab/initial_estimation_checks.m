@@ -41,7 +41,7 @@ end
 if DynareOptions.dsge_var
     [fval,cost_flag,info] = DsgeVarLikelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
 else
-    [fval,cost_flag,ys,trend_coeff,info] = DsgeLikelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
+    [fval,cost_flag,ys,trend_coeff,info] = dsge_likelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
 end
 
 if info(1) > 0

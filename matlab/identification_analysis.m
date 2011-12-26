@@ -135,7 +135,7 @@ if info(1)==0,
             data_info.data=oo_.endo_simul(options_.varobs_id,100+1:end);
             %                         datax=data;
             derivatives_info.no_DLIK=1;
-            [fval,cost_flag,ys,trend_coeff,info,M_,options_,bayestopt_,oo_,DLIK,AHess] = DsgeLikelihood(params',data_info,options_,M_,estim_params_,bayestopt_,oo_,derivatives_info);
+            [fval,cost_flag,ys,trend_coeff,info,M_,options_,bayestopt_,oo_,DLIK,AHess] = dsge_likelihood(params',data_info,options_,M_,estim_params_,bayestopt_,oo_,derivatives_info);
 %                 fval = DsgeLikelihood(xparam1,data_info,options_,M_,estim_params_,bayestopt_,oo_);
             AHess=-AHess;
             ide_hess.AHess= AHess;

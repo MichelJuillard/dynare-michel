@@ -69,7 +69,7 @@ function [LIK, likk,a,P] = univariate_kalman_filter(data_index,number_of_observa
 %! @sp 2
 %! @strong{This function is called by:}
 %! @sp 1
-%! @ref{DsgeLikelihood}
+%! @ref{dsge_likelihood}
 %! @sp 2
 %! @strong{This function calls:}
 %! @sp 1

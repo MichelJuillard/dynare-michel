@@ -2,7 +2,7 @@ function [LIK, likk, a] = kalman_filter_ss(Y,start,last,a,T,K,iF,dF,Z,pp,Zflag)
 % Computes the likelihood of a stationnary state space model (steady state kalman filter).
 
 %@info:
-%! @deftypefn {Function File} {[@var{LIK},@var{likk},@var{a},@var{P} ] =} DsgeLikelihood (@var{Y}, @var{start}, @var{last}, @var{a}, @var{P}, @var{kalman_tol}, @var{riccati_tol},@var{presample},@var{T},@var{Q},@var{R},@var{H},@var{Z},@var{mm},@var{pp},@var{rr},@var{Zflag},@var{diffuse_periods})
+%! @deftypefn {Function File} {[@var{LIK},@var{likk},@var{a},@var{P} ] =} kalman_filter_ss (@var{Y}, @var{start}, @var{last}, @var{a}, @var{P}, @var{kalman_tol}, @var{riccati_tol},@var{presample},@var{T},@var{Q},@var{R},@var{H},@var{Z},@var{mm},@var{pp},@var{rr},@var{Zflag},@var{diffuse_periods})
 %! @anchor{kalman_filter}
 %! @sp 1
 %! Computes the likelihood of a stationary state space model, given initial condition for the states (mean), the steady state kalman gain and the steady state inveverted covariance matrix of the prediction errors.
