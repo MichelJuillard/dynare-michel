@@ -135,10 +135,6 @@ if options_.ep.stochastic.status
             % Nothing to be done!
         end
         nnn = length(www);
-      case 'monomial'
-        error('extended_path:: Monomial integration rules are not yet implemented!')
-      case 'sparse'
-        error('extended_path:: Integration rules on sparse grids are not yet implemented!')
       otherwise
         error('extended_path:: Unknown stochastic_method option!')
     end
