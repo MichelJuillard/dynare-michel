@@ -67,12 +67,12 @@ end;
     
     options_.maxit_ = 100;
     options_.ep.verbosity = 0;
-    options_.ep.stochastic = 0;
+    options_.ep.stochastic.status = 0;
     options_.console_mode = 0;
 
     ts = extended_path([],1000);
     
-    options_.ep.stochastic = 1;
+    options_.ep.stochastic.status = 1;
     sts = extended_path([],1000);
 
     figure(1)
