@@ -186,7 +186,6 @@ while (t<sample_size)
         for u=1:options_.ep.stochastic.order
             oo_.exo_simul(2+u,positive_var_indx) = rrr(s,(((u-1)*M_.exo_nbr)+1):(u*M_.exo_nbr))*covariance_matrix_upper_cholesky;
         end
-        oo_.exo_simul(2:5,:)
         if options_.ep.init% Compute first order solution... 
             initial_path = simult_(initial_conditions,oo_.dr,oo_.exo_simul(2:end,:),1);
             if options_.ep.init==1
