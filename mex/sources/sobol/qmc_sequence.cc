@@ -22,6 +22,7 @@
 **/
 
 #include <string.h>
+#include <stdint.h>
 #include <dynmex.h>
 
 #include "sobol.hh"
