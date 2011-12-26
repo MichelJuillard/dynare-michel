@@ -33,6 +33,7 @@ function time_series = extended_path(initial_conditions,sample_size)
 global M_ options_ oo_
     
 debug = 0;
+options_.verbosity = options_.ep.verbosity;
 verbosity = options_.ep.verbosity+debug;
 
 % Test if bytecode and block options are used (these options are mandatory)

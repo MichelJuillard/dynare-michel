@@ -35,6 +35,8 @@ bayestopt_ = [];
 
 options_.console_mode = 0;
 
+options_.verbosity = 1;
+
 options_.terminal_condition = 0;
 options_.rplottype = 0;
 options_.smpl = 0;
@@ -109,7 +111,7 @@ options_.SpectralDensity = 0;
 % Extended path options
 %
 % Set verbose mode
-options_.ep.verbosity = 1;
+options_.ep.verbosity = 0;
 % Initialization of the perfect foresight equilibrium paths
 % * init=0, previous solution is used.  
 % * init=1, a path generated with the first order reduced form is used.
