@@ -45,7 +45,8 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   **
   ** OUTPUTS:
   ** plhs[0]    [double]     sequence_size*dimension array, the Sobol sequence.
-  ** plhs[1]    [integer]    scalar, seed. 
+  ** plhs[1]    [integer]    scalar, seed.
+  ** plhs[2]    [integer]    zero in case of success, one in case of error
   ** 
   */
   /*
@@ -55,9 +56,9 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     {
       DYN_MEX_FUNC_ERR_MSG_TXT("qmc_sequence:: Five, four or three input arguments are required!");
     }
-  if ( !( (nlhs==2) | (nlhs==3) ) )
+  if (nlhs == 0)
     {
-      DYN_MEX_FUNC_ERR_MSG_TXT("qmc_sequence:: The number of output arguments has to be two!");
+      DYN_MEX_FUNC_ERR_MSG_TXT("qmc_sequence:: At least one output argument is required!");
     }
   /*
   ** Test the first input argument and assign it to dimension.
@@ -174,69 +175,38 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   double *qmc_draws;
   plhs[0] = mxCreateDoubleMatrix(dimension,sequence_size,mxREAL);
   qmc_draws = mxGetPr(plhs[0]);
-  int64_T *seed_out;
-  plhs[1] = mxCreateNumericMatrix(1, 1, mxINT64_CLASS, mxREAL);
-  seed_out = (int64_T *) mxGetData(plhs[1]);
-  if (type==0)// Uniform QMC sequence in an hypercube.
+  int64_T seed_out;
+
+  if (sequence_size==1)
     {
-      if (sequence_size==1)
-        {
-          next_sobol ( dimension, &seed, qmc_draws );
-          *seed_out = seed;
-        }
-      else
-        {
-          *seed_out = sobol_block( dimension, sequence_size, seed, qmc_draws);
-        }
-      if (unit_hypercube_flag==0)
-        {
-          expand_unit_hypercube( dimension, sequence_size, qmc_draws, lower_bounds, upper_bounds);
-        }
-      plhs[2] = mxCreateDoubleScalar(0);
-      return;
+      next_sobol ( dimension, &seed, qmc_draws );
+      seed_out = seed;
     }
-  if (type==1)// Normal QMC sequance in R^n.
+  else
+    seed_out = sobol_block( dimension, sequence_size, seed, qmc_draws);
+
+  if (type==0 && unit_hypercube_flag==0)// Uniform QMC sequence in an hypercube.
+    expand_unit_hypercube( dimension, sequence_size, qmc_draws, lower_bounds, upper_bounds);
+  else if (type==1)// Normal QMC sequance in R^n.
     {
-      if (sequence_size==1)
-        {
-          next_sobol ( dimension, &seed, qmc_draws );
-          *seed_out = seed;
-        }
-      else
-        {
-          *seed_out = sobol_block( dimension, sequence_size, seed, qmc_draws);
-        }
       if (identity_covariance_matrix==1)
-        {
-          icdfm(dimension*sequence_size, qmc_draws);
-        }
+        icdfm(dimension*sequence_size, qmc_draws);
       else
-        {
-          icdfmSigma(dimension,sequence_size, qmc_draws, cholcov);
-        }
-      plhs[2] = mxCreateDoubleScalar(0);
-      return;
+        icdfmSigma(dimension,sequence_size, qmc_draws, cholcov);
     }
-  if (type==2)// Uniform QMC sequence on an hypershere.
+  else if (type==2)// Uniform QMC sequence on an hypershere.
     {
-      if (sequence_size==1)
-        {
-          next_sobol ( dimension, &seed, qmc_draws );
-          *seed_out = seed;
-        }
-      else
-        {
-          *seed_out = sobol_block( dimension, sequence_size, seed, qmc_draws);
-        }
       if (unit_radius==1)
-        {
-          usphere(dimension, sequence_size, qmc_draws);
-        }
+        usphere(dimension, sequence_size, qmc_draws);
       else
-        {
-          usphereRadius(dimension, sequence_size, radius, qmc_draws);
-        }
-      plhs[2] = mxCreateDoubleScalar(0);
-      return;
+        usphereRadius(dimension, sequence_size, radius, qmc_draws);
     }
+  
+  if (nlhs >= 2)
+    {
+      plhs[1] = mxCreateNumericMatrix(1, 1, mxINT64_CLASS, mxREAL);
+      *((int64_T *) mxGetData(plhs[1])) = seed_out;
+    }
+  if (nlhs >= 3)
+    plhs[2] = mxCreateDoubleScalar(0);
 }
