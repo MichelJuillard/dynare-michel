@@ -28,8 +28,7 @@ function x0 = stab_map_(OutputDirectoryName)
 % 3) Bivariate plots of significant correlation patterns
 %  ( abs(corrcoef) > alpha2) under the stable and unacceptable subsets
 %
-% USES lptauSEQ,
-%      stab_map_1, stab_map_2
+% USES qmc_sequence, stab_map_1, stab_map_2
 %
 % Part of the Sensitivity Analysis Toolbox for DYNARE
 %
@@ -118,7 +117,7 @@ if fload==0,
         Nsam=size(lpmat,1);
     else
         if np<52 & ilptau>0,
-            [lpmat] = lptauSEQ(Nsam,np); % lptau
+            [lpmat] = qmc_sequence(np, int64(0), 0, Nsam)';
             if np>30 | ilptau==2, % scrambled lptau
                 for j=1:np,
                     lpmat(:,j)=lpmat(randperm(Nsam),j);
