@@ -111,36 +111,75 @@ options_.SpectralDensity = 0;
 % Extended path options
 %
 % Set verbose mode
-options_.ep.verbosity = 0;
+ep.verbosity = 0;
 % Initialization of the perfect foresight equilibrium paths
 % * init=0, previous solution is used.  
 % * init=1, a path generated with the first order reduced form is used.
 % * init=2, mix of cases 0 and 1.
-options_.ep.init = 0;
+ep.init = 0;
 % Maximum number of iterations for the deterministic solver.
-options_.ep.maxit = 500;
+ep.maxit = 500;
 % Number of periods for the perfect foresight model.
-options_.ep.periods = 200;
+ep.periods = 200;
 % Default step for increasing the number of periods if needed
-options_.ep.step = 50;
+ep.step = 50;
 % Define last periods used to test if the solution is stable with respect to an increase in the number of periods.
-options_.ep.lp = 5;
+ep.lp = 5;
 % Define first periods used to test if the solution is stable with respect to an increase in the number of periods.
-options_.ep.fp = 100;
+ep.fp = 100;
 % Define the distribution for the structural innovations.
-options_.ep.innovation_distribution = 'gaussian';
+ep.innovation_distribution = 'gaussian';
 % Set flag for the seed
-options_.ep.set_dynare_seed_to_default = 1;
+ep.set_dynare_seed_to_default = 1;
 % Set algorithm for the perfect foresight solver
-options_.ep.stack_solve_algo = 4;
+ep.stack_solve_algo = 4;
 % Stochastic extended path related options.
-options_.ep.stochastic.status = 0;
-options_.ep.stochastic.method = 'tensor';
-options_.ep.stochastic.order = 1;
-options_.ep.stochastic.nodes = 5;
-options_.ep.stochastic.pruned.status = 0;
-options_.ep.stochastic.pruned.relative = 1e-5;
-options_.ep.stochastic.pruned.level = 1e-5;
+ep.stochastic.status = 0;
+ep.stochastic.method = 'tensor';
+ep.stochastic.order = 1;
+ep.stochastic.nodes = 5;
+ep.stochastic.pruned.status = 0;
+ep.stochastic.pruned.relative = 1e-5;
+ep.stochastic.pruned.level = 1e-5;
+% Copy ep structure in options_ global structure
+options_.ep = ep;
+
+
+% Particle filter
+%
+% Default is that we do not use the non linear kalman filter 
+particle.status = 0;
+% How do we initialize the states?
+particle.initialization = 1;
+particle_filter.initial_state_prior_std = .0001;
+% Set the default order of approximation of the model (perturbation). 
+particle_filter.perturbation = 2;
+% Set the default number of particles.
+particle_filter.number_of_particles = 500;
+% Set the default approximation order (Smolyak)
+particle_filter.smolyak_accuracy = 3;
+% By default we don't use pruning
+particle_filter.pruning = 0;
+% Set default algorithm
+particle_filter.algorithm = 'sequential_importance_particle_filter';
+% Set the Gaussian approximation method 
+particle_filter.approximation_method = 'unscented';
+% Set unscented parameters alpha, beta and kappa for gaussian approximation
+particle_filter.unscented.alpha = 1 ;
+particle_filter.unscented.beta = 2 ;
+particle_filter.unscented.kappa = 1 ;
+% Configuration of resampling in case of particles
+particle_filter.resampling = 'systematic' ;
+% Choice of the resampling method 
+particle_filter.resampling_method = 'traditional' ;
+% Configuration of the mixture filters 
+particle_filter.mixture_method = 'particles' ;
+% Size of the different mixtures
+particle_filter.mixture_state_variables = 5 ;
+particle_filter.mixture_structural_shocks = 1 ;
+particle_filter.mixture_measurement_shocks = 1 ;
+% Copy ep structure in options_ global structure
+options_.particle = particle;
 
 % TeX output
 options_.TeX = 0;
