@@ -332,10 +332,10 @@ ReducedForm.mf1 = mf1;
 
 % Set initial condition.
 switch DynareOptions.particle.initialization
-  case 1% Initial state vector variance is the ergodic variance associated to the first order Taylor-approximation of the model. 
+  case 1% Initial state vector covariance is the ergodic variance associated to the first order Taylor-approximation of the model. 
     StateVectorMean = ReducedForm.constant(mf0);
     StateVectorVariance = lyapunov_symm(ReducedForm.ghx(mf0,:),ReducedForm.ghu(mf0,:)*ReducedForm.Q*ReducedForm.ghu(mf0,:)',1e-12,1e-12);
-  case 2% Initial state vector variance is a monte-carlo based estimate of the ergodic variance (consistent with a k-order Taylor-approximation of the model).
+  case 2% Initial state vector covariance is a monte-carlo based estimate of the ergodic variance (consistent with a k-order Taylor-approximation of the model).
     StateVectorMean = ReducedForm.constant(mf0);
     old_DynareOptionsperiods = DynareOptions.periods;
     DynareOptions.periods = 5000;
@@ -344,7 +344,7 @@ switch DynareOptions.particle.initialization
     StateVectorVariance = cov(y_');
     DynareOptions.periods = old_DynareOptionsperiods;
     clear('old_DynareOptionsperiods','y_');
-  case 3
+  case 3% Initial state vector covariance is a diagonal matrix.
     StateVectorMean = ReducedForm.constant(mf0);
     StateVectorVariance = DynareOptions.particle.initial_state_prior_std*eye(number_of_state_variables);
   otherwise
