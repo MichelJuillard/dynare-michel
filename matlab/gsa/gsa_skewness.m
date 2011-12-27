@@ -1,4 +1,4 @@
-function s=skewness(y),
+function s=gsa_skewness(y),
 
 % y=stand_(y);
 % s=mean(y.^3);
