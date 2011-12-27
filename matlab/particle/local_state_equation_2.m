@@ -152,7 +152,7 @@ end
 %$ n = dr.npred;
 %$ q = size(dr.ghu,2);
 %$ yhat = zeros(n,1);
-%$ epsilon = zeros(q,1);
+%$ epsilon = zeros(q,1); 
 %$ ghx = dr.ghx(istates,:);
 %$ ghu = dr.ghu(istates,:);
 %$ constant = dr.ys(istates,:)+dr.ghs2(istates,:);
@@ -162,13 +162,20 @@ end
 %$ yhat_ = zeros(n,1);
 %$ ss = dr.ys(istates,:);
 %$
+%$ t = ones(2,1);
+%$
 %$ % Call the tested routine.
-%$ y1 = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu);
-%$ [y2,y2_] = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss);
+%$ try
+%$     y1 = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu);
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$ try
+%$     [y2,y2_] = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss);
+%$ catch
+%$     t(2) = 0;
+%$ end
 %$
 %$ % Check the results.
-%$ t(1) = 1;%dyn_assert(y1,ones(n,1));
-%$ t(2) = 1;%dyn_assert(y2,ones(n,1));
-%$ t(3) = 1;%dyn_assert(y2_,ones(n,1));
 %$ T = all(t);
 %@eof:2
