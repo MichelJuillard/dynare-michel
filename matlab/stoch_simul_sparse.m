@@ -82,10 +82,10 @@ elseif options_.periods ~= 0
         options_ =options_old;
         return
     end
-    if size(oo_.endo_simul,2) < maximum_lag
+    if isempty(M_.endo_histval)
         y0 = oo_.dr.ys;
     else
-        y0 = oo_.endo_simul(:,1);
+        y0 = M_.endo_histval;
     end
     oo_.endo_simul = simult(y0,oo_.dr);
     dyn2vec;

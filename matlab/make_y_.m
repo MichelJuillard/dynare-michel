@@ -35,13 +35,16 @@ if isempty(oo_.steady_state)
     oo_.steady_state = zeros(M_.endo_nbr,1);
 end
 
-if isempty(oo_.endo_simul)
+if isempty(M_.endo_histval)
     if isempty(ys0_)
         oo_.endo_simul = [oo_.steady_state*ones(1,M_.maximum_lag+options_.periods+M_.maximum_lead)];
     else
         oo_.endo_simul = [ys0_*ones(1,M_.maximum_lag) oo_.steady_state*ones(1,options_.periods+M_.maximum_lead)];
     end
-elseif size(oo_.endo_simul,2) < M_.maximum_lag+M_.maximum_lead+options_.periods
-        oo_.endo_simul = [oo_.endo_simul ...
-                          oo_.steady_state*ones(1,M_.maximum_lag+options_.periods+M_.maximum_lead-size(oo_.endo_simul,2),1)];
+else
+    if ~isempty(ys0_)
+        error('histval and endval cannot be used simultaneously')
+    end
+    oo_.endo_simul = [M_.endo_histval ...
+                      oo_.steady_state*ones(1,options_.periods+M_.maximum_lead)];
 end

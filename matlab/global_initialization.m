@@ -332,6 +332,7 @@ oo_.exo_det_steady_state = [];
 oo_.exo_det_simul = [];
 
 M_.params = [];
+M_.endo_histval = [];
 
 % BVAR
 M_.bvar = [];
