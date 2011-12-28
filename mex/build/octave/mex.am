@@ -14,6 +14,7 @@ LDFLAGS += $(shell $(MKOCTFILE) -p LDFLAGS)
 
 LIBS += $(shell $(MKOCTFILE) -p OCTAVE_LIBS)
 LIBS += $(shell $(MKOCTFILE) -p BLAS_LIBS)
+LIBS += $(shell $(MKOCTFILE) -p LAPACK_LIBS)
 LIBS += $(shell $(MKOCTFILE) -p FFTW_LIBS)
 LIBS += $(shell $(MKOCTFILE) -p LIBS)
 LIBS += $(shell $(MKOCTFILE) -p FLIBS)
