@@ -62,13 +62,3 @@ end
 disp_steady_state(M_,oo_);
 
 M_.Sigma_e = Sigma_e;
-
-
-if isempty(ys0_)
-    oo_.endo_simul(:,1:M_.maximum_lag) = oo_.steady_state * ones(1, M_.maximum_lag);
-    %%% Unless I'm wrong, this is (should be?) done in make_y_.m
-% $$$   else
-% $$$     options_ =set_default_option(options_,'periods',1);
-% $$$     oo_.endo_simul(:,M_.maximum_lag+1:M_.maximum_lag+options_.periods+ ...
-% $$$                    M_.maximum_lead) = oo_.steady_state * ones(1,options_.periods+M_.maximum_lead);
-end
