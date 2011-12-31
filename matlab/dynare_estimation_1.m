@@ -32,7 +32,7 @@ function dynare_estimation_1(var_list_,dname)
 global M_ options_ oo_ estim_params_ bayestopt_ dataset_
 
 if ~options_.dsge_var
-    objective_function = str2func('DsgeLikelihood');
+    objective_function = str2func('dsge_likelihood');
 else
     objective_function = str2func('DsgeVarLikelihood');
 end
@@ -248,7 +248,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                 fval = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 options_.mh_jscale = Scale;
                 mouvement = max(max(abs(PostVar-OldPostVar)));
-                fval = DsgeLikelihood(xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+                fval = dsge_likelihood(xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
                 disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
                 OldMode = fval;

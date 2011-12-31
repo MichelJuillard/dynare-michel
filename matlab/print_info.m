@@ -73,7 +73,7 @@ if ~noprint
         error('one (many) parameter(s) do(es) not satisfy the upper bound');
       case 43
         error('Covariance matrix of shocks is not positive definite')
-      case 44 %DsgeLikelihood_hh / DsgeLikelihood
+      case 44 %DsgeLikelihood_hh / dsge_likelihood
         error('');
       case 51
         error('You are estimating a DSGE-VAR model, but the value of the dsge prior weight is too low!')

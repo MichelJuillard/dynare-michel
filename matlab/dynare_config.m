@@ -37,6 +37,9 @@ if nargin && ~isempty(path_to_dynare)
 end
 dynareroot = strrep(which('dynare'),'dynare.m','');
 
+origin = pwd();
+cd([dynareroot '/..'])
+
 if ~nargin || nargin==1
     verbose = 1;
 end
@@ -67,7 +70,8 @@ if ~exist('OCTAVE_VERSION')
     addpath([dynareroot '/missing/rows_columns'])
     % Replacement for vec() (inexistent under MATLAB)
     addpath([dynareroot '/missing/vec'])
-    if isempty(license('inuse','statistics_toolbox'))
+    [has_statistics_toolbox junk] = license('checkout','statistics_toolbox');
+    if ~has_statistics_toolbox
         % Replacements for functions of the stats toolbox
         addpath([dynareroot '/missing/stats/'])
     end
@@ -97,7 +101,8 @@ if exist('OCTAVE_VERSION')
         addpath([dynareroot '/missing/nanmean'])
     end
 else
-    if isempty(license('inuse','statistics_toolbox'))
+    [has_statistics_toolbox junk] = license('checkout','statistics_toolbox');
+    if ~has_statistics_toolbox
         addpath([dynareroot '/missing/nanmean'])
     end
 end
@@ -246,5 +251,17 @@ else
 end
 if verbose
     disp([ message 'k-order solution simulation.' ])
+end
+
+% Test if qmc_sequence DLL is present
+if exist('qmc_sequence', 'file') == 3
+    message = '[mex] ';
+else
+    message = '[no]  ';
+end
+if verbose
+    disp([ message 'Quasi Monte-Carlo sequence (Sobol).' ])
     disp(' ')
 end
+
+cd(origin);

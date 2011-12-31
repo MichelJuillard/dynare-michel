@@ -73,7 +73,7 @@ function [dLIK, dlikk, a, Pstar, llik] = univariate_kalman_filter_d(data_index, 
 %! @sp 2
 %! @strong{This function is called by:}
 %! @sp 1
-%! @ref{DsgeLikelihood}, @ref{DsgeLikelihood_hh}
+%! @ref{dsge_likelihood}, @ref{DsgeLikelihood_hh}
 %! @sp 2
 %! @strong{This function calls:}
 %! @sp 1

@@ -3,10 +3,10 @@ function [yy, xdir, isig, lam]=log_trans_(y0,xdir0)
 if nargin==1,
   xdir0='';
 end
-f=inline('skewness(log(y+lam))','lam','y');
+f=inline('gsa_skewness(log(y+lam))','lam','y');
 isig=1;
 if ~(max(y0)<0 | min(y0)>0)
-  if skewness(y0)<0,
+  if gsa_skewness(y0)<0,
     isig=-1;
     y0=-y0;
   end

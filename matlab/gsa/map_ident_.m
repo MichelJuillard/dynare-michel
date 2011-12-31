@@ -127,7 +127,7 @@ if opt_gsa.load_ident_files==0,
   % ino=find(~ismember([1:nr],io));
   % T2=A(ino,1:nr,:);
   R=A(:,nr+1:nc,:);
-%   [tadj, iff] = speed(A(1:nr,1:nr,:),R,io,0.5);
+%   [tadj, iff] = gsa_speed(A(1:nr,1:nr,:),R,io,0.5);
 %   [tadj, j0, ir_tadj, ic_tadj] = teff(tadj,Nsam,istable);
 %   [iff, j0, ir_if, ic_if] = teff(iff,Nsam,istable);
 

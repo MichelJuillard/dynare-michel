@@ -1,9 +1,9 @@
-function y_=simult(ys, dr)
-% function y_=simult(ys, dr)
+function y_=simult(y0, dr)
+% function y_=simult(y0, dr)
 % Recursive Monte Carlo simulations
 %
 % INPUTS
-%    ys:    vector of variables in steady state
+%    y0:    vector of variables in initial period of the simulation
 %    dr:    structure of decisions rules for stochastic simulations
 %
 % OUTPUTS
@@ -54,7 +54,7 @@ for i=1:replic
     if ~isempty(M_.Sigma_e)
         oo_.exo_simul(:,i_exo_var) = randn(options_.periods,nxs)*chol_S;
     end
-    y_ = simult_(ys,dr,oo_.exo_simul,order);
+    y_ = simult_(y0,dr,oo_.exo_simul,order);
     % elimninating initial value
     y_ = y_(:,2:end);
     if replic > 1

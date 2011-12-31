@@ -251,7 +251,8 @@ class EstimationParams
 {
 public:
   int type;
-  string name, name2, prior;
+  string name, name2;
+  PriorDistributions prior;
   expr_t init_val, low_bound, up_bound, mean, std, p3, p4, jscale;
 
   void
@@ -260,7 +261,7 @@ public:
     type = 0;
     name = "";
     name2 = "";
-    prior = "NaN";
+    prior = eNoShape;
     init_val = datatree.NaN;
     low_bound = datatree.MinusInfinity;
     up_bound = datatree.Infinity;
@@ -542,8 +543,10 @@ class MarkovSwitchingStatement : public Statement
 {
 private:
   const OptionsList options_list;
+  map <pair<int, int >, double > restriction_map;
 public:
   MarkovSwitchingStatement(const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 
@@ -553,6 +556,135 @@ private:
   const OptionsList options_list;
 public:
   SvarStatement(const OptionsList &options_list_arg);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
+class SetTimeStatement : public Statement
+{
+private:
+  const OptionsList options_list;
+public:
+  SetTimeStatement(const OptionsList &options_list_arg);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
+class EstimationDataStatement : public Statement
+{
+private:
+  const OptionsList options_list;
+public:
+  EstimationDataStatement(const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
+class BasicPriorStatement : public Statement
+{
+public:
+  virtual ~BasicPriorStatement();
+protected:
+  const string name;
+  const PriorDistributions prior_shape;
+  const expr_t variance;
+  const OptionsList options_list;
+  bool first_statement_encountered;
+  BasicPriorStatement(const string &name_arg,
+                      const PriorDistributions &prior_shape_arg,
+                      const expr_t &variance_arg,
+                      const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
+  void get_base_name(const SymbolType symb_type, string &lhs_field) const;
+  void writePriorIndex(ostream &output, const string &lhs_field) const;
+  void writeVarianceOption(ostream &output, const string &lhs_field) const;
+  void writeOutputHelper(ostream &output, const string &field, const string &lhs_field) const;
+  void writeShape(ostream &output, const string &lhs_field) const;
+};
+
+class PriorStatement : public BasicPriorStatement
+{
+public:
+  PriorStatement(const string &name_arg,
+                 const PriorDistributions &prior_shape_arg,
+                 const expr_t &variance_arg,
+                 const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
+class StdPriorStatement : public BasicPriorStatement
+{
+private:
+  const SymbolTable symbol_table;
+public:
+  StdPriorStatement(const string &name_arg,
+                    const PriorDistributions &prior_shape_arg,
+                    const expr_t &variance_arg,
+                    const OptionsList &options_list_arg,
+                    const SymbolTable &symbol_table_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
+class CorrPriorStatement : public BasicPriorStatement
+{
+private:
+  const string name1;
+  const SymbolTable symbol_table;
+public:
+  CorrPriorStatement(const string &name_arg1,
+                     const string &name_arg2,
+                     const PriorDistributions &prior_shape_arg,
+                     const expr_t &variance_arg,
+                     const OptionsList &options_list_arg,
+                     const SymbolTable &symbol_table_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
+class BasicOptionsStatement : public Statement
+{
+public:
+  virtual ~BasicOptionsStatement();
+protected:
+  const string name;
+  const OptionsList options_list;
+  bool first_statement_encountered;
+  BasicOptionsStatement(const string &name_arg,
+                         const OptionsList &options_list_arg);
+  void get_base_name(const SymbolType symb_type, string &lhs_field) const;
+  virtual void checkPass(ModFileStructure &mod_file_struct);
+  void writeOptionsIndex(ostream &output, const string &lhs_field) const;
+  void writeOutputHelper(ostream &output, const string &field, const string &lhs_field) const;
+};
+
+class OptionsStatement : public BasicOptionsStatement
+{
+public:
+  OptionsStatement(const string &name_arg, const OptionsList &options_list_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
+class StdOptionsStatement : public BasicOptionsStatement
+{
+private:
+  const SymbolTable symbol_table;
+public:
+  StdOptionsStatement(const string &name_arg, const OptionsList &options_list_arg,
+                    const SymbolTable &symbol_table_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
+  virtual void writeOutput(ostream &output, const string &basename) const;
+};
+
+class CorrOptionsStatement : public BasicOptionsStatement
+{
+private:
+  const string name1;
+  const SymbolTable symbol_table;
+public:
+  CorrOptionsStatement(const string &name_arg1, const string &name_arg2,
+                 const OptionsList &options_list_arg, const SymbolTable &symbol_table_arg);
+  virtual void checkPass(ModFileStructure &mod_file_struct);
   virtual void writeOutput(ostream &output, const string &basename) const;
 };
 

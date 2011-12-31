@@ -71,6 +71,7 @@ end
 failedBlock = {};
 num_block_tests = 0;
 cd([top_test_dir '/block_bytecode']);
+[has_optimization_toolbox junk] = license('checkout','optimization_toolbox');
 for blockFlag = 0:1
     for bytecodeFlag = 0:1
         default_solve_algo = 2;
@@ -85,7 +86,7 @@ for blockFlag = 0:1
             solve_algos = 1:8;
             stack_solve_algos = 0:5;
         end
-        if license('test', 'optimization_toolbox')
+        if has_optimization_toolbox
             solve_algos = [ solve_algos 0 ];
         end
 

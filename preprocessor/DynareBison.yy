@@ -33,6 +33,7 @@ using namespace std;
 class ParsingDriver;
 
 #include "ExprNode.hh"
+#include "CodeInterpreter.hh"
 
 /* Little hack: we redefine the macro which computes the locations, because
    we need to access the location from within the parsing driver for error
@@ -75,6 +76,7 @@ class ParsingDriver;
   SymbolType symbol_type_val;
   vector<string *> *vector_string_val;
   vector<int> *vector_int_val;
+  PriorDistributions prior_distributions_val;
 };
 
 %{
@@ -94,17 +96,18 @@ class ParsingDriver;
 %token BVAR_PRIOR_MU BVAR_PRIOR_OMEGA BVAR_PRIOR_TAU BVAR_PRIOR_TRAIN
 %token BVAR_REPLIC BYTECODE
 %token CHANGE_TYPE CHECK CONDITIONAL_FORECAST CONDITIONAL_FORECAST_PATHS CONF_SIG CONSTANT CONTROLLED_VAREXO CORR COVAR CUTOFF
-%token DATAFILE DR_ALGO DROP DSAMPLE DYNASAVE DYNATYPE CALIBRATION
+%token DATAFILE FILE DR_ALGO DROP DSAMPLE DYNASAVE DYNATYPE CALIBRATION
 %token END ENDVAL EQUAL ESTIMATION ESTIMATED_PARAMS ESTIMATED_PARAMS_BOUNDS ESTIMATED_PARAMS_INIT
-%token FILENAME FILTER_STEP_AHEAD FILTERED_VARS FIRST_OBS
+%token FILENAME FILTER_STEP_AHEAD FILTERED_VARS FIRST_OBS LAST_OBS SET_TIME
 %token <string_val> FLOAT_NUMBER
-%token FORECAST K_ORDER_SOLVER INSTRUMENTS
-%token GAMMA_PDF GRAPH CONDITIONAL_VARIANCE_DECOMPOSITION NOCHECK
+%token FORECAST K_ORDER_SOLVER INSTRUMENTS PRIOR SHIFT MEAN STDEV VARIANCE MODE INTERVAL SHAPE DOMAINN
+%token GAMMA_PDF GRAPH CONDITIONAL_VARIANCE_DECOMPOSITION NOCHECK STD
 %token HISTVAL HOMOTOPY_SETUP HOMOTOPY_MODE HOMOTOPY_STEPS HP_FILTER HP_NGRID
-%token IDENTIFICATION INF_CONSTANT INITVAL INITVAL_FILE
+%token IDENTIFICATION INF_CONSTANT INITVAL INITVAL_FILE BOUNDS JSCALE INIT
 %token <string_val> INT_NUMBER
+%token <string_val> DATE_NUMBER
 %token INV_GAMMA_PDF INV_GAMMA1_PDF INV_GAMMA2_PDF IRF IRF_SHOCKS
-%token KALMAN_ALGO KALMAN_TOL
+%token KALMAN_ALGO KALMAN_TOL SUBSAMPLES OPTIONS
 %token LABELS LAPLACE LIK_ALGO LIK_INIT LINEAR LOAD_IDENT_FILES LOAD_MH_FILE LOAD_PARAMS_AND_STEADY_STATE LOGLINEAR
 %token MARKOWITZ MARGINAL_DENSITY MAX MAXIT
 %token MFS MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MH_RECOVER MIN MINIMAL_SOLVING_PERIODS
@@ -144,18 +147,18 @@ class ParsingDriver;
 /* end of GSA analysis*/
 %token FREQ INITIAL_YEAR INITIAL_SUBPERIOD FINAL_YEAR FINAL_SUBPERIOD DATA VLIST LOG_VAR PERCENT_VAR
 %token VLISTLOG VLISTPER
-%token RESTRICTION RESTRICTIONS RESTRICTION_FNAME CROSS_RESTRICTIONS NLAGS CONTEMP_REDUCED_FORM REAL_PSEUDO_FORECAST 
+%token RESTRICTION RESTRICTION_FNAME CROSS_RESTRICTIONS NLAGS CONTEMP_REDUCED_FORM REAL_PSEUDO_FORECAST
 %token NONE DUMMY_OBS NSTATES INDXSCALESSTATES NO_BAYESIAN_PRIOR SPECIFICATION SIMS_ZHA
-%token <string_val> ALPHA BETA ABAND NINV CMS NCMS CNUM
+%token <string_val> ALPHA BETA ABAND NINV CMS NCMS CNUM GAMMA INV_GAMMA INV_GAMMA1 INV_GAMMA2 NORMAL UNIFORM
 %token GSIG2_LMDM Q_DIAG FLAT_PRIOR NCSK NSTD
 %token INDXPARR INDXOVR INDXAP APBAND INDXIMF IMFBAND INDXFORE FOREBAND INDXGFOREHAT INDXGIMFHAT
 %token INDXESTIMA INDXGDLS EQ_MS FILTER_COVARIANCE FILTER_DECOMPOSITION
-%token EQ_CMS TLINDX TLNUMBER BANACT
+%token EQ_CMS TLINDX TLNUMBER BANACT RESTRICTIONS
 %token OUTPUT_FILE_TAG DRAWS_NBR_BURN_IN_1 DRAWS_NBR_BURN_IN_2 HORIZON
 %token SBVAR TREND_VAR DEFLATOR GROWTH_FACTOR MS_IRF MS_VARIANCE_DECOMPOSITION
 %token MS_ESTIMATION MS_SIMULATION MS_COMPUTE_MDD MS_COMPUTE_PROBABILITIES MS_FORECAST
 %token SVAR_IDENTIFICATION EQUATION EXCLUSION LAG UPPER_CHOLESKY LOWER_CHOLESKY MONTHLY QUARTERLY
-%token MARKOV_SWITCHING CHAIN STATE DURATION NUMBER_OF_STATES
+%token MARKOV_SWITCHING CHAIN DURATION NUMBER_OF_REGIMES
 %token SVAR COEFF COEFFICIENTS VARIANCES CONSTANTS EQUATIONS
 %token EXTERNAL_FUNCTION EXT_FUNC_NAME EXT_FUNC_NARGS FIRST_DERIV_PROVIDED SECOND_DERIV_PROVIDED
 %token SELECTED_VARIABLES_ONLY COVA_COMPUTE SIMULATION_FILE_TAG FILE_TAG
@@ -173,14 +176,14 @@ class ParsingDriver;
 
 %type <node_val> expression expression_or_empty
 %type <node_val> equation hand_side
-%type <string_val> non_negative_number signed_number signed_integer
-%type <string_val> filename symbol
-%type <string_val> vec_value_1 vec_value
-%type <string_val> range prior
+%type <string_val> non_negative_number signed_number signed_integer date_number
+%type <string_val> filename symbol vec_of_vec_value vec_value_list
+%type <string_val> vec_value_1 vec_value signed_inf signed_number_w_inf
+%type <string_val> range vec_value_w_inf vec_value_1_w_inf
 %type <symbol_type_val> change_type_arg
 %type <vector_string_val> change_type_var_list
 %type <vector_int_val> vec_int_elem vec_int_1 vec_int vec_int_number
-
+%type <prior_distributions_val> prior_pdf prior_distribution
 %%
 
 %start statement_list;
@@ -213,6 +216,12 @@ statement : parameters
           | estimated_params
           | estimated_params_bounds
           | estimated_params_init
+          | set_time
+          | data
+          | prior
+          | subsamples
+          | subsamples_eq
+          | options
           | varobs
           | observation_trends
           | unit_root_vars
@@ -733,9 +742,9 @@ ms_options_list : ms_options_list COMMA ms_options
                 ;
 
 ms_options : o_chain
-           | o_state
            | o_duration
-           | o_number_of_states
+           | o_restrictions
+           | o_number_of_regimes
            ;
 
 svar : SVAR '(' svar_options_list ')' ';'
@@ -963,12 +972,28 @@ non_negative_number : INT_NUMBER
                     | FLOAT_NUMBER
                     ;
 
+date_number : DATE_NUMBER
+            | INT_NUMBER
+            ;
+
 signed_number : PLUS non_negative_number
                { $$ = $2; }
               | MINUS non_negative_number
                { $2->insert(0, "-"); $$ = $2; }
               | non_negative_number
               ;
+
+signed_inf : PLUS INF_CONSTANT
+             { $$ = new string ("Inf"); }
+           | MINUS INF_CONSTANT
+             { $$ = new string ("-Inf"); }
+           | INF_CONSTANT
+             { $$ = new string ("Inf"); }
+           ;
+
+signed_number_w_inf : signed_inf
+                    | signed_number
+                    ;
 
 estimated_params : ESTIMATED_PARAMS ';' estimated_list END ';' { driver.estimated_params(); };
 
@@ -1007,24 +1032,21 @@ estimated_elem1 : STDERR symbol
                   }
                 ;
 
-estimated_elem2 : prior COMMA estimated_elem3
+estimated_elem2 : prior_pdf COMMA estimated_elem3
                   {
-                    driver.estim_params.prior = *$1;
-                    delete $1;
+                    driver.estim_params.prior = $1;
                   }
-                | expression_or_empty COMMA prior COMMA estimated_elem3
+                | expression_or_empty COMMA prior_pdf COMMA estimated_elem3
                   {
                     driver.estim_params.init_val = $1;
-                    driver.estim_params.prior = *$3;
-                    delete $3;
+                    driver.estim_params.prior = $3;
                   }
-                | expression_or_empty COMMA expression_or_empty COMMA expression_or_empty COMMA prior COMMA estimated_elem3
+                | expression_or_empty COMMA expression_or_empty COMMA expression_or_empty COMMA prior_pdf COMMA estimated_elem3
                   {
                     driver.estim_params.init_val = $1;
                     driver.estim_params.low_bound = $3;
                     driver.estim_params.up_bound = $5;
-                    driver.estim_params.prior = *$7;
-                    delete $7;
+                    driver.estim_params.prior = $7;
                   }
                 | expression
                   {
@@ -1137,21 +1159,118 @@ estimated_bounds_elem : STDERR symbol COMMA expression COMMA expression ';'
                         }
                       ;
 
-prior : BETA_PDF
-        { $$ = new string("1"); }
-      | GAMMA_PDF
-        { $$ = new string("2"); }
-      | NORMAL_PDF
-        { $$ = new string("3"); }
-      | INV_GAMMA_PDF
-        { $$ = new string("4"); }
-      | INV_GAMMA1_PDF
-        { $$ = new string("4"); }
-      | UNIFORM_PDF
-        { $$ = new string("5"); }
-      | INV_GAMMA2_PDF
-        { $$ = new string("6"); }
+prior_distribution : BETA
+                     { $$ = eBeta; }
+                   | GAMMA
+                     { $$ = eGamma; }
+                   | NORMAL
+                     { $$ = eNormal; }
+                   | INV_GAMMA
+                     { $$ = eInvGamma; }
+                   | INV_GAMMA1
+                     { $$ = eInvGamma1; }
+                   | UNIFORM
+                     { $$ = eUniform; }
+                   | INV_GAMMA2
+                     { $$ = eInvGamma2; }
+                   ;
+
+prior_pdf : BETA_PDF
+            { $$ = eBeta; }
+          | GAMMA_PDF
+            { $$ = eGamma; }
+          | NORMAL_PDF
+            { $$ = eNormal; }
+          | INV_GAMMA_PDF
+            { $$ = eInvGamma; }
+          | INV_GAMMA1_PDF
+            { $$ = eInvGamma1; }
+          | UNIFORM_PDF
+            { $$ = eUniform; }
+          | INV_GAMMA2_PDF
+            { $$ = eInvGamma2; }
+          ;
+
+set_time : SET_TIME '(' date_number ')' ';'
+           { driver.set_time($3); }
+         ;
+
+data : DATA '(' data_options_list ')'';'
+       { driver.estimation_data(); }
+     ;
+
+data_options_list : data_options_list COMMA data_options
+                  | data_options
+                  ;
+
+data_options : o_file
+             | o_new_estimation_data_first_obs
+             | o_last_obs
+             | o_new_estimation_data_nobs
+             | o_xls_sheet
+             | o_xls_range
+             ;
+
+subsamples : symbol '.' SUBSAMPLES '(' subsamples_name_list ')' ';'
+             { driver.set_subsamples($1); }
+           ;
+
+subsamples_eq : symbol '.' SUBSAMPLES EQUAL symbol '.' SUBSAMPLES ';'
+                { driver.copy_subsamples($1, $5); }
+              ;
+
+subsamples_name_list : subsamples_name_list COMMA o_subsample_name
+                     | o_subsample_name
+                     ;
+
+prior : symbol '.' PRIOR { driver.set_prior_variance(); driver.prior_shape = eNoShape; } '(' prior_options_list ')' ';'
+        { driver.set_prior($1); }
+      | symbol '.' symbol '.' PRIOR { driver.set_prior_variance(); driver.prior_shape = eNoShape; } '(' prior_options_list ')' ';'
+        {
+          driver.add_subsample_range(new string (*$1), $3);
+          driver.set_prior($1);
+        }
+      | STD '(' symbol ')' '.' PRIOR { driver.set_prior_variance(); driver.prior_shape = eNoShape; } '(' prior_options_list ')' ';'
+        { driver.set_std_prior($3); }
+      | CORR '(' symbol COMMA symbol')' '.' PRIOR { driver.set_prior_variance(); driver.prior_shape = eNoShape; } '(' prior_options_list ')' ';'
+        { driver.set_corr_prior($3, $5); }
       ;
+
+prior_options_list : prior_options_list COMMA prior_options
+                   | prior_options
+                   ;
+
+prior_options : o_shift
+              | o_mean
+              | o_stdev
+              | o_variance
+              | o_mode
+              | o_interval
+              | o_shape
+              | o_domain
+              ;
+
+options : symbol '.' OPTIONS '(' options_options_list ')' ';'
+          { driver.set_options($1); }
+        | symbol '.' symbol '.' OPTIONS '(' options_options_list ')' ';'
+          {
+            driver.add_subsample_range(new string (*$1), $3);
+            driver.set_options($1);
+          }
+        | STD '(' symbol ')' '.' OPTIONS '(' options_options_list ')' ';'
+          { driver.set_std_options($3); }
+        | CORR '(' symbol COMMA symbol')' '.' OPTIONS '(' options_options_list ')' ';'
+          { driver.set_corr_options($3, $5); }
+        ;
+
+options_options_list : options_options_list COMMA options_options
+                     | options_options
+                     ;
+
+options_options : o_jscale
+                | o_init
+                | o_bounds
+                ;
 
 estimation : ESTIMATION ';'
              { driver.run_estimation(); }
@@ -1852,6 +1971,7 @@ o_mfs : MFS EQUAL INT_NUMBER { driver.mfs($3); };
 o_simul : SIMUL; // Do nothing, only here for backward compatibility
 o_simul_seed : SIMUL_SEED EQUAL INT_NUMBER { driver.error("'simul_seed' option is no longer supported; use 'set_dynare_seed' command instead"); } ;
 o_qz_criterium : QZ_CRITERIUM EQUAL non_negative_number { driver.option_num("qz_criterium", $3); };
+o_file : FILE EQUAL filename { driver.option_str("file", $3); };
 o_datafile : DATAFILE EQUAL filename { driver.option_str("datafile", $3); };
 o_nobs : NOBS EQUAL vec_int
          { driver.option_vec_int("nobs", $3); }
@@ -1864,6 +1984,24 @@ o_conditional_variance_decomposition : CONDITIONAL_VARIANCE_DECOMPOSITION EQUAL 
                                        { driver.option_vec_int("conditional_variance_decomposition", $3); }
                                      ;
 o_first_obs : FIRST_OBS EQUAL INT_NUMBER { driver.option_num("first_obs", $3); };
+o_new_estimation_data_first_obs : FIRST_OBS EQUAL date_number
+                                  { driver.option_date("first_obs", $3); }
+                                ;
+o_last_obs : LAST_OBS EQUAL date_number
+             { driver.option_date("last_obs", $3); }
+           ;
+o_shift : SHIFT EQUAL signed_number { driver.option_num("shift", $3); };
+o_shape : SHAPE EQUAL prior_distribution { driver.prior_shape = $3; };
+o_mode : MODE EQUAL signed_number { driver.option_num("mode", $3); };
+o_mean : MEAN EQUAL signed_number { driver.option_num("mean", $3); };
+o_stdev : STDEV EQUAL non_negative_number { driver.option_num("stdev", $3); };
+o_jscale : JSCALE EQUAL non_negative_number { driver.option_num("jscale", $3); };
+o_init : INIT EQUAL signed_number { driver.option_num("init", $3); };
+o_bounds : BOUNDS EQUAL vec_value_w_inf { driver.option_num("bounds", $3); };
+o_domain : DOMAINN EQUAL vec_value { driver.option_num("domain", $3); };
+o_interval : INTERVAL EQUAL vec_value { driver.option_num("interval", $3); };
+o_variance : VARIANCE EQUAL expression { driver.set_prior_variance($3); }
+o_new_estimation_data_nobs : NOBS EQUAL INT_NUMBER { driver.option_num("nobs", $3); };
 o_prefilter : PREFILTER EQUAL INT_NUMBER { driver.option_num("prefilter", $3); };
 o_presample : PRESAMPLE EQUAL INT_NUMBER { driver.option_num("presample", $3); };
 o_lik_algo : LIK_ALGO EQUAL INT_NUMBER { driver.option_num("lik_algo", $3); };
@@ -1873,6 +2011,12 @@ o_nograph : NOGRAPH
           | GRAPH
             { driver.option_num("nograph", "0"); }
           ;
+o_subsample_name : symbol EQUAL date_number ':' date_number
+                   {
+                     driver.declare_statement_local_variable(new string (*$1));
+                     driver.set_subsample_name_equal_to_date_range($1, $3, $5);
+                   }
+                 ;
 o_conf_sig : CONF_SIG EQUAL non_negative_number { driver.option_num("conf_sig", $3); };
 o_mh_replic : MH_REPLIC EQUAL INT_NUMBER { driver.option_num("mh_replic", $3); };
 o_mh_drop : MH_DROP EQUAL non_negative_number { driver.option_num("mh_drop", $3); };
@@ -2075,13 +2219,15 @@ o_cnum : CNUM EQUAL INT_NUMBER {driver.option_num("ms.cnum",$3); };
 o_k_order_solver : K_ORDER_SOLVER {driver.option_num("k_order_solver","1"); };
 o_pruning : PRUNING { driver.option_num("pruning", "1"); };
 o_chain : CHAIN EQUAL INT_NUMBER { driver.option_num("ms.chain",$3); };
-o_state : STATE EQUAL INT_NUMBER { driver.option_num("ms.state",$3); };
+o_restrictions : RESTRICTIONS EQUAL vec_of_vec_value
+                 { driver.option_num("ms.restrictions",$3); }
+               ;
 o_duration : DURATION EQUAL non_negative_number
              { driver.option_num("ms.duration",$3); }
-           | DURATION EQUAL INF_CONSTANT
-             { driver.option_num("ms.duration","Inf"); }
+           | DURATION EQUAL vec_value_w_inf
+             { driver.option_num("ms.duration",$3); }
            ;
-o_number_of_states : NUMBER_OF_STATES EQUAL INT_NUMBER { driver.option_num("ms.number_of_states",$3); };
+o_number_of_regimes : NUMBER_OF_REGIMES EQUAL INT_NUMBER { driver.option_num("ms.number_of_regimes",$3); };
 o_coefficients : COEFFICIENTS { driver.option_str("ms.coefficients","svar_coefficients"); };
 o_variances : VARIANCES { driver.option_str("ms.variances","svar_variances"); };
 o_equations : EQUATIONS EQUAL vec_int
@@ -2219,18 +2365,54 @@ vec_int : vec_int_1 ']'
           { $$ = $1; }
         ;
 
-vec_value_1 : '[' signed_number
-            { $2->insert(0, "["); $$ = $2;}
-          | vec_value_1 signed_number
-            {
-              $1->append(" ");
-              $1->append(*$2);
-              delete $2;
-              $$ = $1;
-            }
+vec_value_1 : '[' signed_number { $2->insert(0,"["); $$ = $2; }
+            | '[' COMMA signed_number { $3->insert(0,"["); $$ = $3; }
+            | vec_value_1 signed_number
+              {
+                $1->append(" ");
+                $1->append(*$2);
+                delete $2;
+                $$ = $1;
+              }
+            | vec_value_1 COMMA signed_number
+              {
+                $1->append(" ");
+                $1->append(*$3);
+                delete $3;
+                $$ = $1;
+              }
+            ;
+
+vec_value : vec_value_1 ']' { $1->append("]"); $$ = $1; }
+          | vec_value_1 COMMA ']' { $1->append("]"); $$ = $1; }
           ;
 
-vec_value : vec_value_1 ']' { $1->append("]"); $$ = $1; };
+vec_value_list : vec_value_list COMMA vec_value
+                 {
+                   $1->append(",");
+                   $1->append(*$3);
+                   delete $3;
+                   $$ = $1;
+                 }
+               | vec_value
+                 { $$ = $1; }
+               ;
+
+vec_of_vec_value : '[' vec_value_list ']' { $$ = $2; }
+                 | vec_value  { $$ = $1; };
+
+vec_value_1_w_inf : '[' signed_number_w_inf
+                    { $2->insert(0, "["); $$ = $2;}
+                  | vec_value_1_w_inf signed_number_w_inf
+                    {
+                      $1->append(" ");
+                      $1->append(*$2);
+                      delete $2;
+                      $$ = $1;
+                    }
+                  ;
+
+vec_value_w_inf : vec_value_1_w_inf ']' { $1->append("]"); $$ = $1; };
 
 symbol : NAME
        | ALPHA
@@ -2240,6 +2422,12 @@ symbol : NAME
        | CMS
        | NCMS
        | CNUM
+       | GAMMA
+       | INV_GAMMA
+       | INV_GAMMA1
+       | INV_GAMMA2
+       | NORMAL
+       | UNIFORM
        ;
 %%
 

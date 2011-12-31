@@ -1,4 +1,4 @@
-function dynTest(fun)
+function dynTest(fun,dynare_path)
 
 %@info:
 %! @deftypefn {Function File} dynTest (@var{fun})
@@ -50,25 +50,32 @@ function dynTest(fun)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if isempty(strfind(fun,'@')) & (~isempty(strfind(fun,'/')) || ~isempty(strfind(fun,'\')) )
-    [pathstr1, name, ext] = fileparts(fun);
-    addpath(pathstr1);
-    rm_path = 1;
-else
-    rm_path = 0;
+original_directory = pwd();
+
+cd([dynare_path filesep '..' filesep 'tests']);    
+
+[pathstr1, name1, ext1] = fileparts(fun);
+
+mex_flag = 0;
+if exist(name1)==3
+    mex_flag = 1;
 end
 
-[pathstr2, name, ext] = fileparts(which(fun));
+class_flag = 0;
+if ~isempty(strfind(fun,'@')) || ~isempty(strfind(which(name1),'@'))
+    class_flag = 1;
+end
 
-if ~( isempty(pathstr2) || isempty(name) || isempty(ext) ) && strcmp(ext(2:end),'m')
-    check = mtest(name,pathstr2);
-    if check
-        disp(['Succesfull test(s) for ' fun ' routine!'])
+check = mtest(name1,pathstr1);
+
+if check
+    if mex_flag
+        disp(['Succesfull test(s) for ' name1 ' mex file!'])
+    elseif class_flag
+        disp(['Succesfull test(s) for ' name1 ' method!'])
+    else
+        disp(['Succesfull test(s) for ' name1 ' routine!'])
     end
-else
-    disp([fun  'is not a known matlab/octave routine!'])
 end
 
-if rm_path
-    rmpath(pathstr1)
-end
+cd(original_directory);

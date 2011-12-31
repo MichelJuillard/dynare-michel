@@ -81,6 +81,15 @@ private:
   //! Checks that a given symbol exists, and stops with an error message if it doesn't
   void check_symbol_existence(const string &name);
 
+  //! Checks that a given symbol exists and is a parameter, and stops with an error message if it isn't
+  void check_symbol_is_parameter(string *name);
+
+  //! Checks that a given symbol was assigned within a Statement
+  void check_symbol_is_statement_variable(string *name);
+
+  //! Checks that a given symbol exists and is a endogenous or exogenous, and stops with an error message if it isn't
+  void check_symbol_is_endogenous_or_exogenous(string *name);
+
   //! Helper to add a symbol declaration
   void declare_symbol(const string *name, SymbolType type, const string *tex_name);
 
@@ -178,6 +187,14 @@ private:
   vector<int> declared_trend_vars;
   //! Temporary storage for declaring nonstationary variables
   vector<int> declared_nonstationary_vars;
+  //! Temporary storage for a variance declared in the prior statement
+  expr_t prior_variance;
+  //! Temporary storage for declaring subsamples: map<statement_local_var, <date1, date2 >
+  typedef map<string, pair<string, string> > subsample_declaration_map_t;
+  subsample_declaration_map_t subsample_declaration_map;
+  //! Temporary storage for subsample statement: map<parameter, subsample_declaration_map >
+  typedef map<string, subsample_declaration_map_t > subsample_declarations_t;
+  subsample_declarations_t subsample_declarations;
   //! reset the values for temporary storage
   void reset_current_external_function_options();
   //! Adds a model lagged variable to ModelTree and VariableTable
@@ -199,6 +216,9 @@ public:
 
   //! Estimation parameters
   EstimationParams estim_params;
+
+  //! Temporary storage for the prior shape
+  PriorDistributions prior_shape;
 
   //! Error handler with explicit location
   void error(const Dynare::parser::location_type &l, const string &m) __attribute__ ((noreturn));
@@ -231,6 +251,16 @@ public:
   void declare_exogenous_det(string *name, string *tex_name = NULL);
   //! Declares a parameter
   void declare_parameter(string *name, string *tex_name = NULL);
+  //! Declares a statement local variable
+  void declare_statement_local_variable(string *name);
+  //! Completes a subsample statement
+  void set_subsamples(string *name);
+  //! Declares a subsample, assigning the value to name
+  void set_subsample_name_equal_to_date_range(string *name, string *date1, string *date2);
+  //! Adds a subsample range to the list of options for the prior statement
+  void add_subsample_range(string *parameter, string *subsample_name);
+  //! Copies the set of subsamples from_parameter to_parameter
+  void copy_subsamples(string *to_parameter, string *from_parameter);
   //! Declares declare_optimal_policy_discount_factor as a parameter and initializes it to exprnode
   void declare_optimal_policy_discount_factor_parameter(expr_t exprnode);
   //! Adds a predetermined_variable
@@ -319,6 +349,10 @@ public:
   void option_str(const string &name_option, string *opt);
   //! Sets an option to a string value
   void option_str(const string &name_option, const string &opt);
+  //! Sets an option to a date value
+  void option_date(const string &name_option, string *opt);
+  //! Sets an option to a date value
+  void option_date(const string &name_option, const string &opt);
   //! Sets an option to a list of symbols (used in conjunction with add_in_symbol_list())
   void option_symbol_list(const string &name_option);
   //! Sets an option to a vector of integers
@@ -351,6 +385,24 @@ public:
   void external_function_option(const string &name_option, const string &opt);
   //! Add a line in an estimated params block
   void add_estimated_params_element();
+  //! Sets the frequency of the data
+  void set_time(string *arg);
+  //! Estimation Data
+  void estimation_data();
+  //! Sets the prior for a parameter
+  void set_prior(string *arg);
+  //! Adds the variance option to its temporary holding place
+  void set_prior_variance(expr_t variance=NULL);
+  //! Sets the options for a parameter
+  void set_options(string *arg);
+  //! Sets the prior for estimated std dev
+  void set_std_prior(string *arg);
+  //! Sets the options for estimated std dev
+  void set_std_options(string *arg);
+  //! Sets the prior for estimated correlation
+  void set_corr_prior(string *arg1, string *arg2);
+ //! Sets the options for estimated correlation
+  void set_corr_options(string *arg1, string *arg2);
   //! Runs estimation process
   void run_estimation();
   //! Runs dynare_sensitivy()

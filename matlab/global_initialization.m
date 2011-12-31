@@ -28,12 +28,14 @@ function global_initialization()
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global oo_ M_ options_ estim_params_ bayestopt_
+global oo_ M_ options_ estim_params_ bayestopt_ estimation_info
 
 estim_params_ = [];
 bayestopt_ = [];
 
 options_.console_mode = 0;
+
+options_.verbosity = 1;
 
 options_.terminal_condition = 0;
 options_.rplottype = 0;
@@ -54,7 +56,6 @@ options_.lyapunov_complex_threshold = 1e-15;
 options_.solve_tolf = eps^(1/3);
 options_.solve_tolx = eps^(2/3);
 options_.solve_maxit = 500;
-options_.deterministic_simulation_initialization = 0;
 
 % Default number of threads for parallelized mex files.  
 options_.threads.kronecker.A_times_B_kronecker_C = 1;
@@ -109,33 +110,75 @@ options_.SpectralDensity = 0;
 % Extended path options
 %
 % Set verbose mode
-options_.ep.verbosity = 1;
+ep.verbosity = 0;
 % Initialization of the perfect foresight equilibrium paths
 % * init=0, previous solution is used.  
 % * init=1, a path generated with the first order reduced form is used.
 % * init=2, mix of cases 0 and 1.
-options_.ep.init = 0;
+ep.init = 0;
 % Maximum number of iterations for the deterministic solver.
-options_.ep.maxit = 500;
+ep.maxit = 500;
 % Number of periods for the perfect foresight model.
-options_.ep.periods = 200;
+ep.periods = 200;
 % Default step for increasing the number of periods if needed
-options_.ep.step = 50;
+ep.step = 50;
 % Define last periods used to test if the solution is stable with respect to an increase in the number of periods.
-options_.ep.lp = 5;
+ep.lp = 5;
 % Define first periods used to test if the solution is stable with respect to an increase in the number of periods.
-options_.ep.fp = 100;
+ep.fp = 100;
 % Define the distribution for the structural innovations.
-options_.ep.innovation_distribution = 'gaussian';
+ep.innovation_distribution = 'gaussian';
 % Set flag for the seed
-options_.ep.set_dynare_seed_to_default = 1;
+ep.set_dynare_seed_to_default = 1;
 % Set algorithm for the perfect foresight solver
-options_.ep.stack_solve_algo = 4;
-% Set method
-options_.ep.stochastic = 0;
-% Set number of nodes for future shocks
-options_.ep.number_of_nodes = 5;
+ep.stack_solve_algo = 4;
+% Stochastic extended path related options.
+ep.stochastic.status = 0;
+ep.stochastic.method = 'tensor';
+ep.stochastic.order = 1;
+ep.stochastic.nodes = 5;
+ep.stochastic.pruned.status = 0;
+ep.stochastic.pruned.relative = 1e-5;
+ep.stochastic.pruned.level = 1e-5;
+% Copy ep structure in options_ global structure
+options_.ep = ep;
 
+
+% Particle filter
+%
+% Default is that we do not use the non linear kalman filter 
+particle.status = 0;
+% How do we initialize the states?
+particle.initialization = 1;
+particle_filter.initial_state_prior_std = .0001;
+% Set the default order of approximation of the model (perturbation). 
+particle_filter.perturbation = 2;
+% Set the default number of particles.
+particle_filter.number_of_particles = 500;
+% Set the default approximation order (Smolyak)
+particle_filter.smolyak_accuracy = 3;
+% By default we don't use pruning
+particle_filter.pruning = 0;
+% Set default algorithm
+particle_filter.algorithm = 'sequential_importance_particle_filter';
+% Set the Gaussian approximation method 
+particle_filter.approximation_method = 'unscented';
+% Set unscented parameters alpha, beta and kappa for gaussian approximation
+particle_filter.unscented.alpha = 1 ;
+particle_filter.unscented.beta = 2 ;
+particle_filter.unscented.kappa = 1 ;
+% Configuration of resampling in case of particles
+particle_filter.resampling = 'systematic' ;
+% Choice of the resampling method 
+particle_filter.resampling_method = 'traditional' ;
+% Configuration of the mixture filters 
+particle_filter.mixture_method = 'particles' ;
+% Size of the different mixtures
+particle_filter.mixture_state_variables = 5 ;
+particle_filter.mixture_structural_shocks = 1 ;
+particle_filter.mixture_measurement_shocks = 1 ;
+% Copy ep structure in options_ global structure
+options_.particle = particle;
 
 % TeX output
 options_.TeX = 0;
@@ -182,6 +225,35 @@ options_.ramsey_policy = 0;
 options_.timeless = 0;
 
 % estimation
+estimation_info.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
+                               'mode', {}, 'stdev', {}, 'date1', {}, ...
+                               'date2', {}, 'shift', {}, 'variance', {});
+estimation_info.structural_innovation.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
+                                                  'mode', {}, 'stdev', {}, 'date1', {}, ...
+                                                  'date2', {}, 'shift', {}, 'variance', {});
+estimation_info.structural_innovation_corr.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
+                                                  'mode', {}, 'stdev', {}, 'date1', {}, ...
+                                                  'date2', {}, 'shift', {}, 'variance', {});
+estimation_info.measurement_error.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
+                                                 'mode', {}, 'stdev', {}, 'date1', {}, ...
+                                                 'date2', {}, 'shift', {}, 'variance', {});
+estimation_info.measurement_error_corr.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
+                                                  'mode', {}, 'stdev', {}, 'date1', {}, ...
+                                                  'date2', {}, 'shift', {}, 'variance', {});
+estimation_info.measurement_error.prior_index = {};
+estimation_info.structural_innovation.prior_index = {};
+estimation_info.measurement_error_corr.prior_index = {};
+estimation_info.structural_innovation_corr.prior_index = {};
+estimation_info.measurement_error.options_index = {};
+estimation_info.structural_innovation.options_index = {};
+estimation_info.measurement_error_corr.options_index = {};
+estimation_info.structural_innovation_corr.options_index = {};
+options_.initial_period = dynDate(1);
+options_.dataset.firstobs = options_.initial_period;
+options_.dataset.lastobs = NaN;
+options_.dataset.nobs = NaN;
+options_.dataset.xls_sheet = NaN;
+options_.dataset.xls_range = NaN;
 options_.Harvey_scale_factor = 10;
 options_.MaxNumberOfBytes = 1e6;
 options_.MaximumNumberOfMegaBytes = 111;
@@ -260,6 +332,7 @@ oo_.exo_det_steady_state = [];
 oo_.exo_det_simul = [];
 
 M_.params = [];
+M_.endo_histval = [];
 
 % BVAR
 M_.bvar = [];

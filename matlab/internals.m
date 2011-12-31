@@ -79,10 +79,10 @@ more off
 
 if strcmpi(flag,'--test')
     if nargin>1
-        dynare_config([],0);
+        dynare_path = dynare_config([],0);
         number_of_matlab_routines = length(varargin);
         for i=1:number_of_matlab_routines
-            dynTest(varargin{i});
+            dynTest(varargin{i},dynare_path);
         end
     else
         disp('You have to specify at least one matlab routine after --test flag!')

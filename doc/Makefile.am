@@ -4,7 +4,9 @@ info_TEXINFOS = dynare.texi
 
 if HAVE_TEXI2HTML
 if HAVE_LATEX2HTML
-html-local: dynare.texi
+html-local: dynare.html
+
+dynare.html: dynare.texi
 	rm -rf dynare.html
 	mkdir -p dynare.html
 	cd dynare.html && $(TEXI2HTML) --l2h --split section --prefix index ../dynare.texi

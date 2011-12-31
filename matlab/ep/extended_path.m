@@ -33,6 +33,7 @@ function time_series = extended_path(initial_conditions,sample_size)
 global M_ options_ oo_
     
 debug = 0;
+options_.verbosity = options_.ep.verbosity;
 verbosity = options_.ep.verbosity+debug;
 
 % Test if bytecode and block options are used (these options are mandatory)
@@ -102,16 +103,14 @@ switch options_.ep.innovation_distribution
 end
     
 % Set future shocks (Stochastic Extended Path approach)
-if options_.ep.stochastic
-    [r,w] = gauss_hermite_weights_and_nodes(options_.ep.number_of_nodes);
-    switch options_.ep.stochastic
-      case 1
-        if M_.exo_nbr>1
-            rr = cell(1);
-            ww = cell(1);
-            for i=1:size(M_.Sigma_e,1)
-                rr = {r};
-                ww = {w};
+if options_.ep.stochastic.status
+    switch options_.ep.stochastic.method
+      case 'tensor'
+        [r,w] = gauss_hermite_weights_and_nodes(options_.ep.stochastic.nodes);
+        if options_.ep.stochastic.order*M_.exo_nbr>1
+            for i=1:options_.ep.stochastic.order*M_.exo_nbr
+                rr(i) = {r};
+                ww(i) = {w};
             end
             rrr = cartesian_product_of_sets(rr{:});
             www = cartesian_product_of_sets(ww{:});
@@ -120,9 +119,25 @@ if options_.ep.stochastic
             www = w;
         end
         www = prod(www,2);
-        nnn = length(www);    
+        number_of_nodes = length(www);
+        relative_weights = www/max(www);
+        switch options_.ep.stochastic.pruned.status
+          case 1
+            jdx = find(relative_weights>options_.ep.stochastic.pruned.relative);
+            www = www(jdx);
+            www = www/sum(www);
+            rrr = rrr(jdx,:);
+          case 2
+            jdx = find(weights>options_.ep.stochastic.pruned.level);
+            www = www(jdx);
+            www = www/sum(www);
+            rrr = rrr(jdx,:);
+          otherwise
+            % Nothing to be done!
+        end
+        nnn = length(www);
       otherwise
-        error(['Order ' int2str(options_.ep.stochastic) ' Stochastic Extended Path method is not implemented!'])
+        error('extended_path:: Unknown stochastic_method option!')
     end
 else
     rrr = zeros(1,number_of_structural_innovations);
@@ -132,7 +147,6 @@ end
 
 % Initializes some variables.
 t  = 0;
-
 
 % Set waitbar (graphic or text  mode)
 graphic_waitbar_flag = ~( options_.console_mode || exist('OCTAVE_VERSION') );
@@ -169,8 +183,10 @@ while (t<sample_size)
     % Put it in oo_.exo_simul (second line).
     oo_.exo_simul(2,positive_var_indx) = shocks;
     for s = 1:nnn
-        oo_.exo_simul(3,positive_var_indx) = rrr(s,:)*covariance_matrix_upper_cholesky;
-        if options_.ep.init && s==1% Compute first order solution. t==1 && 
+        for u=1:options_.ep.stochastic.order
+            oo_.exo_simul(2+u,positive_var_indx) = rrr(s,(((u-1)*M_.exo_nbr)+1):(u*M_.exo_nbr))*covariance_matrix_upper_cholesky;
+        end
+        if options_.ep.init% Compute first order solution... 
             initial_path = simult_(initial_conditions,oo_.dr,oo_.exo_simul(2:end,:),1);
             if options_.ep.init==1
                 oo_.endo_simul(:,1:end-1) = initial_path(:,1:end-1);% Last column is the steady state.

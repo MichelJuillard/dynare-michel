@@ -286,8 +286,7 @@ main(int nrhs, const char *prhs[])
           nb_row_xd = row_x;
         }
     }
-  mxArray *ep = mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "ep"));
-  int verbose= int(*mxGetPr((mxGetFieldByNumber(ep, 0, mxGetFieldNumber(ep, "verbosity")))));
+  int verbose= int(*mxGetPr((mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "verbosity")))));
   if (verbose)
     print_it = true;
   int maxit_ = int (floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, mxGetFieldNumber(options_, "maxit_"))))));

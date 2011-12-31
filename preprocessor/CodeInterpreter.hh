@@ -140,14 +140,15 @@ enum BlockSimulationType
 /*! Warning: do not to change existing values for 0 to 4: the values matter for homotopy_setup command */
 enum SymbolType
   {
-    eEndogenous = 0,               //!< Endogenous
-    eExogenous = 1,                //!< Exogenous
-    eExogenousDet = 2,             //!< Exogenous deterministic
-    eParameter = 4,                //!< Parameter
-    eModelLocalVariable = 10,      //!< Local variable whose scope is model (pound expression)
-    eModFileLocalVariable = 11,    //!< Local variable whose scope is mod file (model excluded)
-    eExternalFunction = 12,        //!< External (user-defined) function
-    eTrend = 13                    //!< Trend variable
+    eEndogenous = 0,                //!< Endogenous
+    eExogenous = 1,                 //!< Exogenous
+    eExogenousDet = 2,              //!< Exogenous deterministic
+    eParameter = 4,                 //!< Parameter
+    eModelLocalVariable = 10,       //!< Local variable whose scope is model (pound expression)
+    eModFileLocalVariable = 11,     //!< Local variable whose scope is mod file (model excluded)
+    eExternalFunction = 12,         //!< External (user-defined) function
+    eTrend = 13,                    //!< Trend variable
+    eStatementDeclaredVariable = 14 //!< Local variable assigned within a Statement (see subsample statement for example)
   };
 
 enum ExpressionType
@@ -232,6 +233,18 @@ enum external_function_type
   ExternalFunctionNumericalSecondDerivative,
   ExternalFunctionSecondDerivative
 };
+
+enum PriorDistributions
+  {
+    eNoShape = 0,
+    eBeta = 1,
+    eGamma = 2,
+    eNormal = 3,
+    eInvGamma = 4,
+    eInvGamma1 = 4,
+    eUniform = 5,
+    eInvGamma2 = 6
+  };
 
 struct Block_contain_type
 {

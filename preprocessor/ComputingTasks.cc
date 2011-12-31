@@ -27,6 +27,11 @@ using namespace std;
 #include "ComputingTasks.hh"
 #include "Statement.hh"
 
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/tokenizer.hpp>
+
 SteadyStatement::SteadyStatement(const OptionsList &options_list_arg) :
   options_list(options_list_arg)
 {
@@ -133,15 +138,6 @@ StochSimulStatement::checkPass(ModFileStructure &mod_file_struct)
       && mod_file_struct.k_order_solver)
     {
       cerr << "ERROR: in 'stoch_simul', you cannot use option 'pruning' with 'k_order_solver' option or with 3rd order approximation" << endl;
-      exit(EXIT_FAILURE);
-    }
-
-  // Workaround for ticket #157
-  it = options_list.num_options.find("periods");
-  if (it != options_list.num_options.end() && atoi(it->second.c_str()) > 0
-      && mod_file_struct.histval_present)
-    {
-      cerr << "ERROR: the 'periods' option of 'stoch_simul' is not compatible with a 'histval' block" << endl;
       exit(EXIT_FAILURE);
     }
 }
@@ -325,6 +321,30 @@ EstimationStatement::checkPass(ModFileStructure &mod_file_struct)
       cerr << "ERROR: An estimation statement cannot take more than one dsge_var option." << endl;
       exit(EXIT_FAILURE);
     }
+
+  if (options_list.string_options.find("datafile") == options_list.string_options.end() &&
+      !mod_file_struct.estimation_data_statement_present)
+    {
+      cerr << "ERROR: The estimation statement requires a data file to be supplied "
+           << "either from the data statement or from the deprecated option datafile." << endl;
+      exit(EXIT_FAILURE);
+    }
+
+  if (options_list.string_options.find("datafile") != options_list.string_options.end())
+    cerr << "WARNING: The datafile option of estimation has been deprecated. "
+         << "Use the data command instead." << endl;
+
+  if (options_list.string_options.find("xls_sheet") != options_list.string_options.end())
+    cerr << "WARNING: The xls_sheet option of estimation has been deprecated. "
+         << "Use the data command instead." << endl;
+
+  if (options_list.string_options.find("xls_range") != options_list.string_options.end())
+    cerr << "WARNING: The xls_range option of estimation has been deprecated. "
+         << "Use the data command instead." << endl;
+
+  if (options_list.num_options.find("first_obs") != options_list.num_options.end())
+    cerr << "WARNING: The first_obs option of estimation has been deprecated. "
+         << "Use the data command instead." << endl;
 }
 
 void
@@ -426,7 +446,7 @@ EstimatedParamsStatement::checkPass(ModFileStructure &mod_file_struct)
         mod_file_struct.dsge_prior_weight_in_estimated_params = true;
 
       // Handle case of degenerate beta prior
-      if (it->prior == "1") //BETA_PDF is associated with "1" in DynareBison.yy
+      if (it->prior == eBeta)
         try
           {
             if (it->mean->eval(eval_context_t()) == 0.5
@@ -1330,41 +1350,195 @@ SvarIdentificationStatement::writeOutput(ostream &output, const string &basename
 MarkovSwitchingStatement::MarkovSwitchingStatement(const OptionsList &options_list_arg) :
   options_list(options_list_arg)
 {
+  OptionsList::num_options_t::const_iterator it_num = options_list.num_options.find("ms.restrictions");
+  if (it_num != options_list.num_options.end())
+    {
+      using namespace boost;
+      OptionsList::num_options_t::const_iterator it_num_regimes =
+        options_list.num_options.find("ms.number_of_regimes");
+      if (it_num_regimes ==  options_list.num_options.end())
+        {
+          cerr << "ERROR: should not arrive here: MarkovSwitchingStatement constructor" << endl;
+          exit(EXIT_FAILURE);
+        }
+      int num_regimes = lexical_cast< int >(it_num_regimes->second);
+
+      vector<string> tokenizedRestrictions;
+      split(tokenizedRestrictions, it_num->second, is_any_of("["), token_compress_on);
+      for (vector<string>::iterator it = tokenizedRestrictions.begin();
+            it != tokenizedRestrictions.end(); it++ )
+        if (it->size() > 0)
+          {
+            vector<string> restriction;
+            split(restriction, *it, is_any_of("], "));
+            for (vector<string>::iterator it1 = restriction.begin();
+                 it1 != restriction.end(); )
+              if (it1->empty())
+                restriction.erase(it1);
+              else
+                it1++;
+
+            if (restriction.size() != 3)
+              {
+                cerr << "ERROR: restrictions in the subsample statement must be specified in the form "
+                     << "[current_period_regime, next_period_regime, transition_probability]" << endl;
+                exit(EXIT_FAILURE);
+              }
+
+            try
+              {
+                int from_regime = lexical_cast< int >(restriction[0]);
+                int to_regime = lexical_cast< int >(restriction[1]);
+                if (from_regime > num_regimes || to_regime > num_regimes)
+                  {
+                    cerr << "ERROR: the regimes specified in the restrictions option must be "
+                         << "<= the number of regimes specified in the number_of_regimes option" << endl;
+                    exit(EXIT_FAILURE);
+                  }
+
+                if (restriction_map.find(make_pair(from_regime, to_regime)) !=
+                    restriction_map.end())
+                  {
+                    cerr << "ERROR: two restrictions were given for: " << from_regime << ", "
+                         << to_regime << endl;
+                    exit(EXIT_FAILURE);
+                  }
+
+                double transition_probability = lexical_cast< double >(restriction[2]);
+                if (transition_probability > 1.0)
+                  {
+                    cerr << "ERROR: the transition probability, " << transition_probability
+                         << " must be less than 1" << endl;
+                    exit(EXIT_FAILURE);
+                  }
+                restriction_map[make_pair(from_regime, to_regime)] = transition_probability;
+              }
+            catch (const bad_lexical_cast &)
+              {
+                cerr << "ERROR: The first two arguments for a restriction must be integers "
+                     << "specifying the regime and the last must be a double specifying the "
+                     << "transition probability. You wrote [" << *it << endl;
+                exit(EXIT_FAILURE);
+              }
+          }
+    }
+}
+
+void
+MarkovSwitchingStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  OptionsList::num_options_t::const_iterator it_num = options_list.num_options.find("ms.restrictions");
+  if (it_num != options_list.num_options.end())
+    {
+      using namespace boost;
+      OptionsList::num_options_t::const_iterator it_num_regimes =
+        options_list.num_options.find("ms.number_of_regimes");
+      int num_regimes = lexical_cast< int >(it_num_regimes->second);
+      vector<double> col_trans_prob_sum (num_regimes, 0);
+      vector<double> row_trans_prob_sum (num_regimes, 0);
+      vector<bool> all_restrictions_in_row (num_regimes, true);
+      vector<bool> all_restrictions_in_col (num_regimes, true);
+      for (int row=0; row<num_regimes; row++)
+        for (int col=0; col<num_regimes; col++)
+          if (restriction_map.find(make_pair(row+1, col+1)) != restriction_map.end())
+            {
+              row_trans_prob_sum[row] += restriction_map[make_pair(row+1, col+1)];
+              col_trans_prob_sum[col] += restriction_map[make_pair(row+1, col+1)];
+            }
+          else
+            {
+              all_restrictions_in_row[row] = false;
+              all_restrictions_in_col[col] = false;
+            }
+
+      for (int i=0; i<num_regimes; i++)
+        {
+          if (all_restrictions_in_row[i])
+          {
+            if (row_trans_prob_sum[i] != 1.0)
+              {
+                cerr << "ERROR: When all transitions probabilities are specified for a certain "
+                     << "regime, they must sum to 1" << endl;
+                exit(EXIT_FAILURE);
+              }
+          }
+        else
+          if (row_trans_prob_sum[i] >= 1.0)
+            {
+              cerr << "ERROR: When transition probabilites are not specified for every regime, "
+                   << "their sum must be < 1" << endl;
+              exit(EXIT_FAILURE);
+            }
+
+        if (all_restrictions_in_col[i])
+          {
+            if (col_trans_prob_sum[i] != 1.0)
+              {
+                cerr << "ERROR: When all transitions probabilities are specified for a certain "
+                     << "regime, they must sum to 1" << endl;
+                exit(EXIT_FAILURE);
+              }
+          }
+        else
+          if (col_trans_prob_sum[i] >= 1.0)
+            {
+              cerr << "ERROR: When transition probabilites are not specified for every regime, "
+                   << "their sum must be < 1" << endl;
+              exit(EXIT_FAILURE);
+            }
+        }
+    }
 }
 
 void
 MarkovSwitchingStatement::writeOutput(ostream &output, const string &basename) const
 {
-  OptionsList::num_options_t::const_iterator itChain, itState, itNOS, itDuration;
+  bool isDurationAVec = true;
+  string infStr("Inf");
+  OptionsList::num_options_t::const_iterator itChain, itNOR, itDuration;
+  map<pair<int, int>, double >::const_iterator itR;
 
   itChain = options_list.num_options.find("ms.chain");
   if (itChain == options_list.num_options.end())
     {
-      cerr << "MarkovSwitchingStatement::writeOutput() Should not arrive here (1). Please report this to the Dynare Team." << endl;
+      cerr << "MarkovSwitchingStatement::writeOutput() Should not arrive here (1). "
+           << "Please report this to the Dynare Team." << endl;
       exit(EXIT_FAILURE);
     }
 
   itDuration = options_list.num_options.find("ms.duration");
   if (itDuration == options_list.num_options.end())
     {
-      cerr << "MarkovSwitchingStatement::writeOutput() Should not arrive here (2). Please report this to the Dynare Team." << endl;
+      cerr << "MarkovSwitchingStatement::writeOutput() Should not arrive here (2). "
+           << "Please report this to the Dynare Team." << endl;
+      exit(EXIT_FAILURE);
+    }
+  else if (atof(itDuration->second.c_str()) || infStr.compare(itDuration->second) == 0)
+    isDurationAVec = false;
+  output << "options_.ms.duration = " << itDuration->second << ";" << endl;
+
+  itNOR = options_list.num_options.find("ms.number_of_regimes");
+  if (itNOR != options_list.num_options.end())
+    for (int i = 0; i < atoi(itNOR->second.c_str()); i++)
+      {
+        output << "options_.ms.ms_chain(" << itChain->second << ").regime("
+               << i+1 << ").duration = options_.ms.duration";
+        if (isDurationAVec)
+          output << "(" << i+1 << ")";
+        output << ";" << endl;
+      }
+  else
+    {
+      cerr << "MarkovSwitchingStatement::writeOutput() Should not arrive here (3). "
+           << "Please report this to the Dynare Team." << endl;
       exit(EXIT_FAILURE);
     }
 
-  itState = options_list.num_options.find("ms.state");
-  itNOS = options_list.num_options.find("ms.number_of_states");
-  if (itState != options_list.num_options.end()
-      && itNOS == options_list.num_options.end())
-    output << "options_.ms.ms_chain(" << itChain->second << ").state(" << itState->second << ").duration = " << itDuration->second << ";" << endl;
-  else if (itState == options_list.num_options.end()
-           && itNOS != options_list.num_options.end())
-    for (int i = 0; i < atoi(itNOS->second.c_str()); i++)
-      output << "options_.ms.ms_chain(" << itChain->second << ").state(" << i+1 << ").duration = " << itDuration->second << ";" << endl;
-  else
-    {
-      cerr << "MarkovSwitchingStatement::writeOutput() Should not arrive here (3). Please report this to the Dynare Team." << endl;
-      exit(EXIT_FAILURE);
-    }
+  int restrictions_index = 0;
+  for (itR=restriction_map.begin(); itR != restriction_map.end(); itR++)
+    output << "options_.ms.ms_chain(" << itChain->second << ").restrictions("
+           << ++restrictions_index << ") = {[" << itR->first.first << ", "
+           << itR->first.second << ", " << itR->second << "]};" << endl;
 }
 
 SvarStatement::SvarStatement(const OptionsList &options_list_arg) :
@@ -1430,4 +1604,430 @@ SvarStatement::writeOutput(ostream &output, const string &basename) const
     }
   else
     output << "'ALL';" << endl;
+}
+
+SetTimeStatement::SetTimeStatement(const OptionsList &options_list_arg) :
+  options_list(options_list_arg)
+{
+}
+
+void
+SetTimeStatement::writeOutput(ostream &output, const string &basename) const
+{
+  options_list.writeOutput(output);
+}
+
+EstimationDataStatement::EstimationDataStatement(const OptionsList &options_list_arg) :
+  options_list(options_list_arg)
+{
+}
+
+void
+EstimationDataStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  mod_file_struct.estimation_data_statement_present = true;
+
+  OptionsList::num_options_t::const_iterator it = options_list.num_options.find("nobs");
+  if (it != options_list.num_options.end())
+    if (atoi(it->second.c_str()) <= 0)
+      {
+        cerr << "ERROR: The nobs option of the data statement only accepts positive integers." << endl;
+        exit(EXIT_FAILURE);
+      }
+
+  if (options_list.string_options.find("file") == options_list.string_options.end())
+    {
+      cerr << "ERROR: The file option must be passed to the data statement." << endl;
+      exit(EXIT_FAILURE);
+    }
+}
+
+void
+EstimationDataStatement::writeOutput(ostream &output, const string &basename) const
+{
+  options_list.writeOutput(output, "options_.dataset");
+  if (options_list.date_options.find("first_obs") == options_list.date_options.end())
+    output << "options_.dataset.firstobs = options_.initial_period;" << endl;
+}
+
+BasicPriorStatement::~BasicPriorStatement()
+{
+}
+
+BasicPriorStatement::BasicPriorStatement(const string &name_arg,
+                                         const PriorDistributions &prior_shape_arg,
+                                         const expr_t &variance_arg,
+                                         const OptionsList &options_list_arg) :
+  name(name_arg),
+  prior_shape(prior_shape_arg),
+  variance(variance_arg),
+  options_list(options_list_arg),
+  first_statement_encountered(false)
+{
+}
+
+void
+BasicPriorStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  if (prior_shape == eNoShape)
+    {
+      cerr << "ERROR: You must pass the shape option to the prior statement." << endl;
+      exit(EXIT_FAILURE);
+    }
+  if (options_list.num_options.find("date1") != options_list.num_options.end() ||
+      options_list.num_options.find("date2") != options_list.num_options.end())
+    if (options_list.num_options.find("date1") == options_list.num_options.end() ||
+        options_list.num_options.find("date2") == options_list.num_options.end())
+      {
+        cerr << "ERROR: PriorStatement::checkPass(1). Should not arrive here. "
+             << "Please inform Dynare Team." << endl;
+        exit(EXIT_FAILURE);
+      }
+}
+
+void
+BasicPriorStatement::get_base_name(const SymbolType symb_type, string &lhs_field) const
+{
+  if (symb_type == eExogenous || symb_type == eExogenousDet)
+    lhs_field = "structural_innovation";
+  else
+    lhs_field = "measurement_error";
+}
+
+void
+BasicPriorStatement::writePriorIndex(ostream &output, const string &lhs_field) const
+{
+  if (first_statement_encountered)
+    output << "prior_indx = 1;" << endl;
+  else
+    output << "prior_indx = size(estimation_info" << lhs_field << "_index, 2) + 1;" << endl;
+}
+
+void
+BasicPriorStatement::writeVarianceOption(ostream &output, const string &lhs_field) const
+{
+  if (variance)
+    {
+      output << "estimation_info" << lhs_field << "(prior_indx).variance = ";
+      variance->writeOutput(output);
+      output << ";" << endl;
+    }
+}
+
+void
+BasicPriorStatement::writeOutputHelper(ostream &output, const string &field, const string &lhs_field) const
+{
+  OptionsList::num_options_t::const_iterator itn = options_list.num_options.find(field);
+  if (itn != options_list.num_options.end())
+    output << "estimation_info" << lhs_field << "(prior_indx)." << field
+           << " = " << itn->second << ";" << endl;
+
+  OptionsList::date_options_t::const_iterator itd = options_list.date_options.find(field);
+  if (itd != options_list.date_options.end())
+    output << "estimation_info" << lhs_field << "(prior_indx)." << field
+           << " = '" << itd->second << "';" << endl;
+}
+
+void
+BasicPriorStatement::writeShape(ostream &output, const string &lhs_field) const
+{
+  assert(prior_shape != eNoShape);
+  output << "estimation_info" << lhs_field << "(prior_indx).shape = " << prior_shape << ";" << endl;
+}
+
+PriorStatement::PriorStatement(const string &name_arg,
+                               const PriorDistributions &prior_shape_arg,
+                               const expr_t &variance_arg,
+                               const OptionsList &options_list_arg) :
+  BasicPriorStatement(name_arg, prior_shape_arg, variance_arg, options_list_arg)
+{
+}
+
+void
+PriorStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  BasicPriorStatement::checkPass(mod_file_struct);
+  if (!mod_file_struct.prior_statement_present)
+    first_statement_encountered = true;
+  mod_file_struct.prior_statement_present = true;
+}
+
+void
+PriorStatement::writeOutput(ostream &output, const string &basename) const
+{
+  string lhs_field = ".prior";
+
+  writePriorIndex(output, lhs_field);
+  output << "estimation_info" << lhs_field << "_index(prior_indx) = {'" << name << "'};" << endl
+         << "estimation_info" << lhs_field <<"(prior_indx).name = '" << name << "';" << endl;
+  writeShape(output, lhs_field);
+  writeOutputHelper(output, "mean", lhs_field);
+  writeOutputHelper(output, "mode", lhs_field);
+  writeOutputHelper(output, "stdev", lhs_field);
+  writeOutputHelper(output, "shape", lhs_field);
+  writeOutputHelper(output, "shift", lhs_field);
+  writeOutputHelper(output, "date1", lhs_field);
+  writeOutputHelper(output, "date2", lhs_field);
+  writeOutputHelper(output, "domain", lhs_field);
+  writeOutputHelper(output, "interval", lhs_field);
+  writeVarianceOption(output, lhs_field);
+}
+
+StdPriorStatement::StdPriorStatement(const string &name_arg,
+                                     const PriorDistributions &prior_shape_arg,
+                                     const expr_t &variance_arg,
+                                     const OptionsList &options_list_arg,
+                                     const SymbolTable &symbol_table_arg ) :
+  BasicPriorStatement(name_arg, prior_shape_arg, variance_arg, options_list_arg),
+  symbol_table(symbol_table_arg)
+{
+}
+
+void
+StdPriorStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  BasicPriorStatement::checkPass(mod_file_struct);
+  if (!mod_file_struct.std_prior_statement_present)
+    first_statement_encountered = true;
+  mod_file_struct.std_prior_statement_present = true;
+}
+
+void
+StdPriorStatement::writeOutput(ostream &output, const string &basename) const
+{
+  string lhs_field;
+  get_base_name(symbol_table.getType(name), lhs_field);
+  lhs_field = "." + lhs_field + ".prior";
+
+  writePriorIndex(output, lhs_field);
+  output << "estimation_info" << lhs_field << "_index(prior_indx) = {'" << name << "'};" << endl;
+  output << "estimation_info" << lhs_field << "(prior_indx).name = '" << name << "';" << endl;
+
+  writeShape(output, lhs_field);
+  writeOutputHelper(output, "mean", lhs_field);
+  writeOutputHelper(output, "mode", lhs_field);
+  writeOutputHelper(output, "stdev", lhs_field);
+  writeOutputHelper(output, "shape", lhs_field);
+  writeOutputHelper(output, "shift", lhs_field);
+  writeOutputHelper(output, "domain", lhs_field);
+  writeOutputHelper(output, "interval", lhs_field);
+  writeVarianceOption(output, lhs_field);
+}
+
+CorrPriorStatement::CorrPriorStatement(const string &name_arg1, const string &name_arg2,
+                                       const PriorDistributions &prior_shape_arg,
+                                       const expr_t &variance_arg,
+                                       const OptionsList &options_list_arg,
+                                       const SymbolTable &symbol_table_arg ) :
+  BasicPriorStatement(name_arg1, prior_shape_arg, variance_arg, options_list_arg),
+  name1(name_arg2),
+  symbol_table(symbol_table_arg)
+{
+}
+
+void
+CorrPriorStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  BasicPriorStatement::checkPass(mod_file_struct);
+  if (symbol_table.getType(name) != symbol_table.getType(name1))
+    {
+      cerr << "ERROR: In the corr(A,B).prior statement, A and B must be of the same type. "
+           << "In your case, " << name << " and " << name1 << " are of different "
+           << "types." << endl;
+      exit(EXIT_FAILURE);
+    }
+  if (!mod_file_struct.corr_prior_statement_present)
+    first_statement_encountered = true;
+  mod_file_struct.corr_prior_statement_present = true;
+}
+
+void
+CorrPriorStatement::writeOutput(ostream &output, const string &basename) const
+{
+  string lhs_field;
+  get_base_name(symbol_table.getType(name), lhs_field);
+  lhs_field = "." + lhs_field + "_corr.prior";
+
+  writePriorIndex(output, lhs_field);
+  output << "estimation_info" << lhs_field << "_index(prior_indx) = {'" << name << "_" << name1 << "'};" << endl;
+  output << "estimation_info" << lhs_field << "(prior_indx).name1 = '" << name << "';" << endl;
+  output << "estimation_info" << lhs_field << "(prior_indx).name2 = '" << name1 << "';" << endl;
+
+  writeShape(output, lhs_field);
+  writeOutputHelper(output, "mean", lhs_field);
+  writeOutputHelper(output, "mode", lhs_field);
+  writeOutputHelper(output, "stdev", lhs_field);
+  writeOutputHelper(output, "shape", lhs_field);
+  writeOutputHelper(output, "shift", lhs_field);
+  writeOutputHelper(output, "domain", lhs_field);
+  writeOutputHelper(output, "interval", lhs_field);
+  writeVarianceOption(output, lhs_field);
+}
+
+BasicOptionsStatement::~BasicOptionsStatement()
+{
+}
+
+BasicOptionsStatement::BasicOptionsStatement(const string &name_arg,
+                                         const OptionsList &options_list_arg) :
+  name(name_arg),
+  options_list(options_list_arg),
+  first_statement_encountered(false)
+{
+}
+
+void
+BasicOptionsStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  if (options_list.num_options.find("date1") != options_list.num_options.end() ||
+      options_list.num_options.find("date2") != options_list.num_options.end())
+    if (options_list.num_options.find("date1") == options_list.num_options.end() ||
+        options_list.num_options.find("date2") == options_list.num_options.end())
+      {
+        cerr << "ERROR: OptionsStatement::checkPass(1). Should not arrive here. "
+             << "Please inform Dynare Team." << endl;
+        exit(EXIT_FAILURE);
+      }
+}
+
+void
+BasicOptionsStatement::writeOptionsIndex(ostream &output, const string &lhs_field) const
+{
+  if (first_statement_encountered)
+    output << "options_indx = 1;" << endl;
+  else
+    output << "options_indx = size(estimation_info" << lhs_field << "_index, 2) + 1;" << endl;
+}
+
+void
+BasicOptionsStatement::get_base_name(const SymbolType symb_type, string &lhs_field) const
+{
+  if (symb_type == eExogenous || symb_type == eExogenousDet)
+    lhs_field = "structural_innovation";
+  else
+    lhs_field = "measurement_error";
+}
+
+void
+BasicOptionsStatement::writeOutputHelper(ostream &output, const string &field, const string &lhs_field) const
+{
+  OptionsList::num_options_t::const_iterator itn = options_list.num_options.find(field);
+  if (itn != options_list.num_options.end())
+    output << "estimation_info" << lhs_field << "(options_indx)." << field
+           << " = " << itn->second << ";" << endl;
+
+  OptionsList::date_options_t::const_iterator itd = options_list.date_options.find(field);
+  if (itd != options_list.date_options.end())
+    output << "estimation_info" << lhs_field << "(options_indx)." << field
+           << " = '" << itd->second << "';" << endl;
+}
+
+OptionsStatement::OptionsStatement(const string &name_arg,
+                                   const OptionsList &options_list_arg) :
+  BasicOptionsStatement(name_arg, options_list_arg)
+{
+}
+
+void
+OptionsStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  BasicOptionsStatement::checkPass(mod_file_struct);
+  if (!mod_file_struct.options_statement_present)
+    first_statement_encountered = true;
+  mod_file_struct.options_statement_present = true;
+}
+
+void
+OptionsStatement::writeOutput(ostream &output, const string &basename) const
+{
+  string lhs_field = ".options";
+
+  writeOptionsIndex(output, lhs_field);
+  output << "estimation_info" << lhs_field <<"_index(options_indx) = {'" << name << "'};" << endl
+         << "estimation_info" << lhs_field << "(options_indx).name = '" << name << "';" << endl;
+
+  writeOutputHelper(output, "init", lhs_field);
+  writeOutputHelper(output, "bounds", lhs_field);
+  writeOutputHelper(output, "jscale", lhs_field);
+  writeOutputHelper(output, "date1", lhs_field);
+  writeOutputHelper(output, "date2", lhs_field);
+}
+
+StdOptionsStatement::StdOptionsStatement(const string &name_arg,
+                                         const OptionsList &options_list_arg,
+                                         const SymbolTable &symbol_table_arg ) :
+  BasicOptionsStatement(name_arg, options_list_arg),
+  symbol_table(symbol_table_arg)
+{
+}
+
+void
+StdOptionsStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  BasicOptionsStatement::checkPass(mod_file_struct);
+  if (!mod_file_struct.std_options_statement_present)
+    first_statement_encountered = true;
+  mod_file_struct.std_options_statement_present = true;
+}
+
+void
+StdOptionsStatement::writeOutput(ostream &output, const string &basename) const
+{
+  string lhs_field;
+  get_base_name(symbol_table.getType(name), lhs_field);
+  lhs_field = "." + lhs_field + ".options";
+
+  writeOptionsIndex(output, lhs_field);
+  output << "estimation_info" << lhs_field << "_index(options_indx) = {'" << name << "'};" << endl;
+  output << "estimation_info" << lhs_field << "(options_indx).name = '" << name << "';" << endl;
+
+  writeOutputHelper(output, "init", lhs_field);
+  writeOutputHelper(output, "bounds", lhs_field);
+  writeOutputHelper(output, "jscale", lhs_field);
+  writeOutputHelper(output, "date1", lhs_field);
+  writeOutputHelper(output, "date2", lhs_field);
+}
+
+CorrOptionsStatement::CorrOptionsStatement(const string &name_arg1, const string &name_arg2,
+                                           const OptionsList &options_list_arg,
+                                           const SymbolTable &symbol_table_arg ) :
+  BasicOptionsStatement(name_arg1, options_list_arg),
+  name1(name_arg2),
+  symbol_table(symbol_table_arg)
+{
+}
+
+void
+CorrOptionsStatement::checkPass(ModFileStructure &mod_file_struct)
+{
+  if (symbol_table.getType(name) != symbol_table.getType(name1))
+    {
+      cerr << "ERROR: In the corr(A,B).options statement, A and B must be of the same type. "
+           << "In your case, " << name << " and " << name1 << " are of different "
+           << "types." << endl;
+      exit(EXIT_FAILURE);
+    }
+  if (!mod_file_struct.corr_options_statement_present)
+    first_statement_encountered = true;
+  mod_file_struct.corr_prior_statement_present = true;
+}
+
+void
+CorrOptionsStatement::writeOutput(ostream &output, const string &basename) const
+{
+  string lhs_field;
+  get_base_name(symbol_table.getType(name), lhs_field);
+  lhs_field = "." + lhs_field + "_corr.options";
+
+  writeOptionsIndex(output, lhs_field);
+  output << "estimation_info" << lhs_field << "_index(options_indx) = {'" << name << "_" << name1 << "'};" << endl;
+  lhs_field += ".";
+  output << "estimation_info" << lhs_field << "(options_indx).name1 = '" << name << "';" << endl;
+  output << "estimation_info" << lhs_field << "(options_indx).name2 = '" << name1 << "';" << endl;
+
+  writeOutputHelper(output, "init", lhs_field);
+  writeOutputHelper(output, "bounds", lhs_field);
+  writeOutputHelper(output, "jscale", lhs_field);
+  writeOutputHelper(output, "date1", lhs_field);
+  writeOutputHelper(output, "date2", lhs_field);
 }

@@ -1,0 +1,5 @@
+vpath %.cc $(top_srcdir)/../../sources/sobol
+
+noinst_PROGRAMS = qmc_sequence
+
+nodist_qmc_sequence_SOURCES = qmc_sequence.cc

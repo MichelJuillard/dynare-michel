@@ -1,9 +1,9 @@
-function [fval,exit_flag,ys,trend_coeff,info,Model,DynareOptions,BayesInfo,DynareResults,DLIK,AHess] = DsgeLikelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults,derivatives_info)
+function [fval,exit_flag,ys,trend_coeff,info,Model,DynareOptions,BayesInfo,DynareResults,DLIK,AHess] = dsge_likelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults,derivatives_info)
 % Evaluates the posterior kernel of a dsge model.
 
 %@info:
-%! @deftypefn {Function File} {[@var{fval},@var{exit_flag},@var{ys},@var{trend_coeff},@var{info},@var{Model},@var{DynareOptions},@var{BayesInfo},@var{DynareResults},@var{DLIK},@var{AHess}] =} DsgeLikelihood (@var{xparam1},@var{DynareDataset},@var{DynareOptions},@var{Model},@var{EstimatedParameters},@var{BayesInfo},@var{DynareResults},@var{derivatives_flag})
-%! @anchor{DsgeLikelihood}
+%! @deftypefn {Function File} {[@var{fval},@var{exit_flag},@var{ys},@var{trend_coeff},@var{info},@var{Model},@var{DynareOptions},@var{BayesInfo},@var{DynareResults},@var{DLIK},@var{AHess}] =} dsge_likelihood (@var{xparam1},@var{DynareDataset},@var{DynareOptions},@var{Model},@var{EstimatedParameters},@var{BayesInfo},@var{DynareResults},@var{derivatives_flag})
+%! @anchor{dsge_likelihood}
 %! @sp 1
 %! Evaluates the posterior kernel of a dsge model.
 %! @sp 2
@@ -229,7 +229,7 @@ if EstimatedParameters.ncn
     % Try to compute the cholesky decomposition of H (possible iff H is positive definite)
     [CholH,testH] = chol(H);
     if testH
-        % The variance-covariance matrix of the structural innovations is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty.
+        % The variance-covariance matrix of the measurement errors is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty.
         a = diag(eig(H));
         k = find(a < 0);
         if k > 0
@@ -428,13 +428,13 @@ switch DynareOptions.lik_init
         [err,Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(Z,np,length(Z))),H);
     end
     if err
-        disp(['DsgeLikelihood:: I am not able to solve the Riccati equation, so I switch to lik_init=1!']);
+        disp(['dsge_likelihood:: I am not able to solve the Riccati equation, so I switch to lik_init=1!']);
         DynareOptions.lik_init = 1;
         Pstar = lyapunov_symm(T,R*Q*R',DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
     end
     Pinf  = [];
   otherwise
-    error('DsgeLikelihood:: Unknown initialization approach for the Kalman filter!')
+    error('dsge_likelihood:: Unknown initialization approach for the Kalman filter!')
 end
 
 if analytic_derivation
