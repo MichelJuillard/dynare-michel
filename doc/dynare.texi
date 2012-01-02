@@ -6222,7 +6222,7 @@ end;
 @deffnx {Macro directive} @@#endif
 Conditional inclusion of some part of the @file{.mod} file.
 The lines between @code{@@#if} and the next @code{@@#else} or
-@code{@@#end} is executed only if the condition evaluates to a
+@code{@@#endif} is executed only if the condition evaluates to a
 non-null integer. The @code{@@#else} branch is optional and, if
 present, is only evaluated if the condition evaluates to @code{0}.
 
