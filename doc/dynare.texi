@@ -6075,8 +6075,8 @@ line. The main directives are:
 @item
 @code{@@#define}, for defining a macro-processor variable,
 @item
-@code{@@#if}, @code{@@#then}, @code{@@#else}, @code{@@#endif} for
-conditional statements,
+@code{@@#if}, @code{@@#else}, @code{@@#endif} for conditional
+statements,
 @item
 @code{@@#for}, @code{@@#endfor} for constructing loops.
 @end itemize
