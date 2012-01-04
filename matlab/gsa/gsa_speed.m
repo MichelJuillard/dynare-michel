@@ -1,5 +1,5 @@
-function [tadj, iff] = speed(A,B,mf,p),
-% [tadj, iff] = speed(A,B,mf,p),
+function [tadj, iff] = gsa_speed(A,B,mf,p),
+% [tadj, iff] = gsa_speed(A,B,mf,p),
 %
 % Part of the Sensitivity Analysis Toolbox for DYNARE
 %

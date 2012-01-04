@@ -49,4 +49,7 @@ a(-1) = 0.3;
 u(-1) = 0.1;
 end;
 
-stoch_simul(nograph);
+stoch_simul(nograph, periods = 200);
+
+forecast;
+

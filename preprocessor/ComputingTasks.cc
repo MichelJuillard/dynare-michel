@@ -446,7 +446,7 @@ EstimatedParamsStatement::checkPass(ModFileStructure &mod_file_struct)
         mod_file_struct.dsge_prior_weight_in_estimated_params = true;
 
       // Handle case of degenerate beta prior
-      if (it->prior == "1") //BETA_PDF is associated with "1" in DynareBison.yy
+      if (it->prior == eBeta)
         try
           {
             if (it->mean->eval(eval_context_t()) == 0.5
@@ -1358,7 +1358,7 @@ MarkovSwitchingStatement::MarkovSwitchingStatement(const OptionsList &options_li
         options_list.num_options.find("ms.number_of_regimes");
       if (it_num_regimes ==  options_list.num_options.end())
         {
-          cerr << "ERROR: should not arrive here: MarkovSwitchingStatement::checkPass" << endl;
+          cerr << "ERROR: should not arrive here: MarkovSwitchingStatement constructor" << endl;
           exit(EXIT_FAILURE);
         }
       int num_regimes = lexical_cast< int >(it_num_regimes->second);
@@ -1655,9 +1655,11 @@ BasicPriorStatement::~BasicPriorStatement()
 }
 
 BasicPriorStatement::BasicPriorStatement(const string &name_arg,
+                                         const PriorDistributions &prior_shape_arg,
                                          const expr_t &variance_arg,
                                          const OptionsList &options_list_arg) :
   name(name_arg),
+  prior_shape(prior_shape_arg),
   variance(variance_arg),
   options_list(options_list_arg),
   first_statement_encountered(false)
@@ -1667,11 +1669,12 @@ BasicPriorStatement::BasicPriorStatement(const string &name_arg,
 void
 BasicPriorStatement::checkPass(ModFileStructure &mod_file_struct)
 {
-  if (options_list.num_options.find("shape") == options_list.num_options.end())
+  if (prior_shape == eNoShape)
     {
       cerr << "ERROR: You must pass the shape option to the prior statement." << endl;
       exit(EXIT_FAILURE);
     }
+
   if (options_list.num_options.find("date1") != options_list.num_options.end() ||
       options_list.num_options.find("date2") != options_list.num_options.end())
     if (options_list.num_options.find("date1") == options_list.num_options.end() ||
@@ -1681,6 +1684,19 @@ BasicPriorStatement::checkPass(ModFileStructure &mod_file_struct)
              << "Please inform Dynare Team." << endl;
         exit(EXIT_FAILURE);
       }
+
+  OptionsList::num_options_t::const_iterator it_num = options_list.num_options.find("domain");
+  if (it_num != options_list.num_options.end())
+    {
+      using namespace boost;
+      vector<string> tokenizedDomain;
+      split(tokenizedDomain, it_num->second, is_any_of("[ ]"), token_compress_on);
+      if (tokenizedDomain.size() != 4)
+        {
+          cerr << "ERROR: You must pass exactly two values to the domain option." << endl;
+          exit(EXIT_FAILURE);
+        }
+    }
 }
 
 void
@@ -1715,7 +1731,6 @@ BasicPriorStatement::writeVarianceOption(ostream &output, const string &lhs_fiel
 void
 BasicPriorStatement::writeOutputHelper(ostream &output, const string &field, const string &lhs_field) const
 {
-
   OptionsList::num_options_t::const_iterator itn = options_list.num_options.find(field);
   if (itn != options_list.num_options.end())
     output << "estimation_info" << lhs_field << "(prior_indx)." << field
@@ -1727,10 +1742,18 @@ BasicPriorStatement::writeOutputHelper(ostream &output, const string &field, con
            << " = '" << itd->second << "';" << endl;
 }
 
+void
+BasicPriorStatement::writeShape(ostream &output, const string &lhs_field) const
+{
+  assert(prior_shape != eNoShape);
+  output << "estimation_info" << lhs_field << "(prior_indx).shape = " << prior_shape << ";" << endl;
+}
+
 PriorStatement::PriorStatement(const string &name_arg,
+                               const PriorDistributions &prior_shape_arg,
                                const expr_t &variance_arg,
                                const OptionsList &options_list_arg) :
-  BasicPriorStatement(name_arg, variance_arg, options_list_arg)
+  BasicPriorStatement(name_arg, prior_shape_arg, variance_arg, options_list_arg)
 {
 }
 
@@ -1748,10 +1771,10 @@ PriorStatement::writeOutput(ostream &output, const string &basename) const
 {
   string lhs_field = ".prior";
 
-  BasicPriorStatement::writePriorIndex(output, lhs_field);
+  writePriorIndex(output, lhs_field);
   output << "estimation_info" << lhs_field << "_index(prior_indx) = {'" << name << "'};" << endl
          << "estimation_info" << lhs_field <<"(prior_indx).name = '" << name << "';" << endl;
-
+  writeShape(output, lhs_field);
   writeOutputHelper(output, "mean", lhs_field);
   writeOutputHelper(output, "mode", lhs_field);
   writeOutputHelper(output, "stdev", lhs_field);
@@ -1761,14 +1784,15 @@ PriorStatement::writeOutput(ostream &output, const string &basename) const
   writeOutputHelper(output, "date2", lhs_field);
   writeOutputHelper(output, "domain", lhs_field);
   writeOutputHelper(output, "interval", lhs_field);
-  BasicPriorStatement::writeVarianceOption(output, lhs_field);
+  writeVarianceOption(output, lhs_field);
 }
 
 StdPriorStatement::StdPriorStatement(const string &name_arg,
+                                     const PriorDistributions &prior_shape_arg,
                                      const expr_t &variance_arg,
                                      const OptionsList &options_list_arg,
                                      const SymbolTable &symbol_table_arg ) :
-  BasicPriorStatement(name_arg, variance_arg, options_list_arg),
+  BasicPriorStatement(name_arg, prior_shape_arg, variance_arg, options_list_arg),
   symbol_table(symbol_table_arg)
 {
 }
@@ -1789,10 +1813,11 @@ StdPriorStatement::writeOutput(ostream &output, const string &basename) const
   get_base_name(symbol_table.getType(name), lhs_field);
   lhs_field = "." + lhs_field + ".prior";
 
-  BasicPriorStatement::writePriorIndex(output, lhs_field);
+  writePriorIndex(output, lhs_field);
   output << "estimation_info" << lhs_field << "_index(prior_indx) = {'" << name << "'};" << endl;
   output << "estimation_info" << lhs_field << "(prior_indx).name = '" << name << "';" << endl;
 
+  writeShape(output, lhs_field);
   writeOutputHelper(output, "mean", lhs_field);
   writeOutputHelper(output, "mode", lhs_field);
   writeOutputHelper(output, "stdev", lhs_field);
@@ -1800,14 +1825,15 @@ StdPriorStatement::writeOutput(ostream &output, const string &basename) const
   writeOutputHelper(output, "shift", lhs_field);
   writeOutputHelper(output, "domain", lhs_field);
   writeOutputHelper(output, "interval", lhs_field);
-  BasicPriorStatement::writeVarianceOption(output, lhs_field);
+  writeVarianceOption(output, lhs_field);
 }
 
 CorrPriorStatement::CorrPriorStatement(const string &name_arg1, const string &name_arg2,
+                                       const PriorDistributions &prior_shape_arg,
                                        const expr_t &variance_arg,
                                        const OptionsList &options_list_arg,
                                        const SymbolTable &symbol_table_arg ) :
-  BasicPriorStatement(name_arg1, variance_arg, options_list_arg),
+  BasicPriorStatement(name_arg1, prior_shape_arg, variance_arg, options_list_arg),
   name1(name_arg2),
   symbol_table(symbol_table_arg)
 {
@@ -1836,11 +1862,12 @@ CorrPriorStatement::writeOutput(ostream &output, const string &basename) const
   get_base_name(symbol_table.getType(name), lhs_field);
   lhs_field = "." + lhs_field + "_corr.prior";
 
-  BasicPriorStatement::writePriorIndex(output, lhs_field);
+  writePriorIndex(output, lhs_field);
   output << "estimation_info" << lhs_field << "_index(prior_indx) = {'" << name << "_" << name1 << "'};" << endl;
   output << "estimation_info" << lhs_field << "(prior_indx).name1 = '" << name << "';" << endl;
   output << "estimation_info" << lhs_field << "(prior_indx).name2 = '" << name1 << "';" << endl;
 
+  writeShape(output, lhs_field);
   writeOutputHelper(output, "mean", lhs_field);
   writeOutputHelper(output, "mode", lhs_field);
   writeOutputHelper(output, "stdev", lhs_field);
@@ -1848,7 +1875,7 @@ CorrPriorStatement::writeOutput(ostream &output, const string &basename) const
   writeOutputHelper(output, "shift", lhs_field);
   writeOutputHelper(output, "domain", lhs_field);
   writeOutputHelper(output, "interval", lhs_field);
-  BasicPriorStatement::writeVarianceOption(output, lhs_field);
+  writeVarianceOption(output, lhs_field);
 }
 
 BasicOptionsStatement::~BasicOptionsStatement()
@@ -1929,7 +1956,7 @@ OptionsStatement::writeOutput(ostream &output, const string &basename) const
 {
   string lhs_field = ".options";
 
-  BasicOptionsStatement::writeOptionsIndex(output, lhs_field);
+  writeOptionsIndex(output, lhs_field);
   output << "estimation_info" << lhs_field <<"_index(options_indx) = {'" << name << "'};" << endl
          << "estimation_info" << lhs_field << "(options_indx).name = '" << name << "';" << endl;
 
@@ -1964,7 +1991,7 @@ StdOptionsStatement::writeOutput(ostream &output, const string &basename) const
   get_base_name(symbol_table.getType(name), lhs_field);
   lhs_field = "." + lhs_field + ".options";
 
-  BasicOptionsStatement::writeOptionsIndex(output, lhs_field);
+  writeOptionsIndex(output, lhs_field);
   output << "estimation_info" << lhs_field << "_index(options_indx) = {'" << name << "'};" << endl;
   output << "estimation_info" << lhs_field << "(options_indx).name = '" << name << "';" << endl;
 
@@ -2006,7 +2033,7 @@ CorrOptionsStatement::writeOutput(ostream &output, const string &basename) const
   get_base_name(symbol_table.getType(name), lhs_field);
   lhs_field = "." + lhs_field + "_corr.options";
 
-  BasicOptionsStatement::writeOptionsIndex(output, lhs_field);
+  writeOptionsIndex(output, lhs_field);
   output << "estimation_info" << lhs_field << "_index(options_indx) = {'" << name << "_" << name1 << "'};" << endl;
   lhs_field += ".";
   output << "estimation_info" << lhs_field << "(options_indx).name1 = '" << name << "';" << endl;

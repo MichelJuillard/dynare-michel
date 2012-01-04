@@ -56,7 +56,6 @@ options_.lyapunov_complex_threshold = 1e-15;
 options_.solve_tolf = eps^(1/3);
 options_.solve_tolx = eps^(2/3);
 options_.solve_maxit = 500;
-options_.deterministic_simulation_initialization = 0;
 
 % Default number of threads for parallelized mex files.  
 options_.threads.kronecker.A_times_B_kronecker_C = 1;
@@ -333,6 +332,7 @@ oo_.exo_det_steady_state = [];
 oo_.exo_det_simul = [];
 
 M_.params = [];
+M_.endo_histval = [];
 
 % BVAR
 M_.bvar = [];

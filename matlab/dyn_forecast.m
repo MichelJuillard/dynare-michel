@@ -61,10 +61,10 @@ switch task
     if horizon == 0
         horizon = 5;
     end
-    if size(oo_.endo_simul,2) < maximum_lag
+    if isempty(M_.endo_histval)
         y0 = repmat(oo_.steady_state,1,maximum_lag);
     else
-        y0 = oo_.endo_simul(:,1:maximum_lag);
+        y0 = M_.endo_histval;
     end
   case 'smoother'
     horizon = options_.forecast;

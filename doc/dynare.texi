@@ -6075,7 +6075,7 @@ line. The main directives are:
 @item
 @code{@@#define}, for defining a macro-processor variable,
 @item
-@code{@@#if}, @code{@@#then}, @code{@@#else}, @code{@@#endif} for
+@code{@@#if}, @code{@@#ifdef}, @code{@@#else}, @code{@@#endif} for
 conditional statements,
 @item
 @code{@@#for}, @code{@@#endfor} for constructing loops.
@@ -6218,13 +6218,15 @@ end;
 @end deffn
 
 @deffn {Macro directive} @@#if @var{MACRO_EXPRESSION}
+@deffnx {Macro directive} @@#ifdef @var{MACRO_VARIABLE}
 @deffnx {Macro directive} @@#else
 @deffnx {Macro directive} @@#endif
 Conditional inclusion of some part of the @file{.mod} file.
-The lines between @code{@@#if} and the next @code{@@#else} or
-@code{@@#end} is executed only if the condition evaluates to a
-non-null integer. The @code{@@#else} branch is optional and, if
-present, is only evaluated if the condition evaluates to @code{0}.
+The lines between @code{@@#if} or @code{@@#ifdef} and the next
+@code{@@#else} or @code{@@#endif} is executed only if the condition
+evaluates to a non-null integer. The @code{@@#else} branch is optional
+and, if present, is only evaluated if the condition evaluates to
+@code{0}.
 
 @examplehead
 
@@ -6234,6 +6236,23 @@ Choose between two alternative monetary policy rules using a macro-variable:
 ...
 model;
 @@#if linear_mon_pol
+  i = w*i(-1) + (1-w)*i_ss + w2*(pie-piestar);
+@@#else
+  i = i(-1)^w * i_ss^(1-w) * (pie/piestar)^w2;
+@@#endif
+...
+end;
+@end example
+
+@examplehead
+
+Choose between two alternative monetary policy rules using a
+macro-variable. As @code{linear_mon_pol} was not previously defined in
+this example, the second equation will be chosen:
+
+@example
+model;
+@@#ifdef linear_mon_pol
   i = w*i(-1) + (1-w)*i_ss + w2*(pie-piestar);
 @@#else
   i = i(-1)^w * i_ss^(1-w) * (pie/piestar)^w2;

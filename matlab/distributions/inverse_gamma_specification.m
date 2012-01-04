@@ -99,7 +99,7 @@ elseif type == 1;   % Inverse Gamma 1
                 end
             end
             % Solve for nu using the secant method.
-            while abs(nu2-nu1) > 1e-8
+            while abs(nu2/nu1-1) > 1e-14
                 if err > 0
                     nu1 = nu;
                     if nu < nu2
@@ -117,10 +117,10 @@ elseif type == 1;   % Inverse Gamma 1
         end
         s = (sigma2+mu2)*(nu-2);
         if check_solution_flag
-            if abs(mu-sqrt(s/2)*gamma((nu-1)/2)/gamma(nu/2))>1e-9
+            if abs(log(mu)-log(sqrt(s/2))-gammaln((nu-1)/2)+gammaln(nu/2))>1e-7
                 error('inverse_gamma_specification:: Failed in solving for the hyperparameters!');
             end
-            if abs(sigma-sqrt(s/(nu-2)-mu^2))>1e-9
+            if abs(sigma-sqrt(s/(nu-2)-mu^2))>1e-7
                 error('inverse_gamma_specification:: Failed in solving for the hyperparameters!');
             end
         end

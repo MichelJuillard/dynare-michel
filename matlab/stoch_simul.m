@@ -130,13 +130,10 @@ if options_.periods > 0 && ~PI_PCL_solver
         options_ =options_old;
         return
     end
-    % Note that the first column of oo_.endo_simul is preserved by the following
-    % call to simult; this is important because stoch_simul can be followed by
-    % forecast (see ticket #157)
-    if size(oo_.endo_simul,2) == 0
+    if isempty(M_.endo_histval)
         y0 = oo_.dr.ys;
     else
-        y0 = oo_.endo_simul(:,1);
+        y0 = M_.endo_histval;
     end
     oo_.endo_simul = simult(y0,oo_.dr);
     dyn2vec;
