@@ -1,4 +1,4 @@
-function [dr,info,options_,oo_] = dr1(dr,task,M_,options_,oo_)
+function [dr,info] = dr1(dr,task,M_,options_,oo_)
 % function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 % computes the reduced form solution of a rational expectation model (first or second order
 % approximation of the stochastic model around the deterministic steady state). 
@@ -21,8 +21,6 @@ function [dr,info,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 %                                         indeterminacy.
 %                                 info=5: BK rank condition not satisfied.
 %                                 info=6: The jacobian matrix evaluated at the steady state is complex.        
-%   options_   [matlab structure]
-%   oo_        [matlab structure]
 %  
 % ALGORITHM
 %   ...
@@ -70,19 +68,11 @@ iyv = iyv(:);
 iyr0 = find(iyv) ;
 it_ = M_.maximum_lag + 1 ;
 
-if M_.exo_nbr == 0
-    oo_.exo_steady_state = [] ;
-end
-
 klen = M_.maximum_lag + M_.maximum_lead + 1;
 iyv = lead_lag_incidence';
 iyv = iyv(:);
 iyr0 = find(iyv) ;
 it_ = M_.maximum_lag + 1 ;
-
-if M_.exo_nbr == 0
-    oo_.exo_steady_state = [] ;
-end
 
 it_ = M_.maximum_lag + 1;
 z = repmat(dr.ys,1,klen);
