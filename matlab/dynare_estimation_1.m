@@ -140,6 +140,8 @@ end
 
 %% Estimation of the posterior mode or likelihood mode
 if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
+    % initializing persistent variable 'penalty' in dsge_likelihood()
+    dsge_likelihood();
     switch options_.mode_compute
       case 1
         optim_options = optimset('display','iter','LargeScale','off', ...
