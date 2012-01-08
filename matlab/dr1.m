@@ -1,4 +1,4 @@
-function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
+function [dr,info,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 % function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 % computes the reduced form solution of a rational expectation model (first or second order
 % approximation of the stochastic model around the deterministic steady state). 
@@ -7,7 +7,6 @@ function [dr,info,M_,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 %   dr         [matlab structure] Decision rules for stochastic simulations.
 %   task       [integer]          if task = 0 then dr1 computes decision rules.
 %                                 if task = 1 then dr1 computes eigenvalues.
-%   M_         [matlab structure] Definition of the model.           
 %   options_   [matlab structure] Global options.
 %   oo_        [matlab structure] Results 
 %    
