@@ -146,6 +146,21 @@ trend_coeff = [];
 exit_flag   = 1;
 info        = 0;
 singularity_flag = 0;
+DLIK        = [];
+AHess       = [];
+
+if DynareOptions.estimation_dll
+    [fval,exit_flag,ys,trend_coeff,info,params,H,Q] ...
+        = logposterior(xparam1,DynareDataset, DynareOptions,Model, ...
+                          EstimatedParameters,BayesInfo,DynareResults);
+    Model.params = params;
+    if ~isequal(Model.H,0)
+        Model.H = H;
+    end
+    Model.Sigma_e = Q;
+    DynareResults.dr.ys = ys;
+    return
+end
 
 % Set flag related to analytical derivatives.
 if nargout > 9
