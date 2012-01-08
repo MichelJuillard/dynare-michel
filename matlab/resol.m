@@ -117,7 +117,4 @@ else
     [dr,info] = dr1(dr,check_flag,M,options,oo);
 end
 
-if info(1)
-    return
-end
 
