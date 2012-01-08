@@ -7,6 +7,7 @@ function [dr,info,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 %   dr         [matlab structure] Decision rules for stochastic simulations.
 %   task       [integer]          if task = 0 then dr1 computes decision rules.
 %                                 if task = 1 then dr1 computes eigenvalues.
+%   M_         [matlab structure] Definition of the model.           
 %   options_   [matlab structure] Global options.
 %   oo_        [matlab structure] Results 
 %    
@@ -20,7 +21,6 @@ function [dr,info,options_,oo_] = dr1(dr,task,M_,options_,oo_)
 %                                         indeterminacy.
 %                                 info=5: BK rank condition not satisfied.
 %                                 info=6: The jacobian matrix evaluated at the steady state is complex.        
-%   M_         [matlab structure]            
 %   options_   [matlab structure]
 %   oo_        [matlab structure]
 %  
