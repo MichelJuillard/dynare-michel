@@ -114,7 +114,7 @@ end
 if options.block
     [dr,info,M,options,oo] = dr_block(dr,check_flag,M,options,oo);
 else
-    [dr,info,M,options,oo] = dr1(dr,check_flag,M,options,oo);
+    [dr,info,options,oo] = dr1(dr,check_flag,M,options,oo);
 end
 
 if info(1)
