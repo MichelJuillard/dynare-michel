@@ -209,7 +209,7 @@ if EstimatedParameters.ncx
         a = diag(eig(Q));
         k = find(a < 0);
         if k > 0
-            fval = BayesInfo.penalty+sum(-a(k));
+            fval = penalty+sum(-a(k));
             exit_flag = 0;
             info = 43;
             return
@@ -233,7 +233,7 @@ if EstimatedParameters.ncn
         a = diag(eig(H));
         k = find(a < 0);
         if k > 0
-            fval = BayesInfo.penalty+sum(-a(k));
+            fval = penalty+sum(-a(k));
             exit_flag = 0;
             info = 44;
             return
