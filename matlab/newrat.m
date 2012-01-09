@@ -55,8 +55,6 @@ htol0=htol_base;
 gibbstol=length(BayesInfo.pshape)/50; %25;
 
 func_hh = str2func([func2str(func0),'_hh']);
-% initialize persistent variable 'penalty' in func_hh()
-func_hh();
 fval0=feval(func0,x,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
 fval=fval0;
 
