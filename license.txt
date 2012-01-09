@@ -1,9 +1,10 @@
 Format: http://dep.debian.net/deps/dep5/
 Upstream-Name: Dynare
-Upstream-Contact: Dynare Team, whose members in 2011 are:
+Upstream-Contact: Dynare Team, whose members in 2012 are:
  Stéphane Adjemian <stephane.adjemian@ens.fr>
  Houtan Bastani <houtan.bastani@ens.fr>
  Michel Juillard <michel.juillard@mjui.fr>
+ Frédéric Karamé <frederic.karame@univ-evry.fr>
  Junior Maih <junior.maih@gmail.com>
  Ferhat Mihoubi <fmihoubi@univ-evry.fr>
  George Perendia <george@perendia.orangehome.co.uk>
@@ -12,7 +13,7 @@ Upstream-Contact: Dynare Team, whose members in 2011 are:
 Source: http://www.dynare.org
 
 Files: *
-Copyright: 1996-2011 Dynare Team
+Copyright: 1996-2012 Dynare Team
 License: GPL-3+
  Dynare is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
