@@ -15,7 +15,7 @@ function dynareroot = dynare_config(path_to_dynare,verbose)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2011 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -70,8 +70,7 @@ if ~exist('OCTAVE_VERSION')
     addpath([dynareroot '/missing/rows_columns'])
     % Replacement for vec() (inexistent under MATLAB)
     addpath([dynareroot '/missing/vec'])
-    [has_statistics_toolbox junk] = license('checkout','statistics_toolbox');
-    if ~has_statistics_toolbox
+    if ~user_has_matlab_license('statistics_toolbox')
         % Replacements for functions of the stats toolbox
         addpath([dynareroot '/missing/stats/'])
     end
@@ -101,8 +100,7 @@ if exist('OCTAVE_VERSION')
         addpath([dynareroot '/missing/nanmean'])
     end
 else
-    [has_statistics_toolbox junk] = license('checkout','statistics_toolbox');
-    if ~has_statistics_toolbox
+    if ~user_has_matlab_license('statistics_toolbox')
         addpath([dynareroot '/missing/nanmean'])
     end
 end

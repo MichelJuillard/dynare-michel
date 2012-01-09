@@ -16,7 +16,7 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2011 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -39,8 +39,7 @@ options_ = set_default_option(options_,'solve_algo',2);
 info = 0;
 if options_.solve_algo == 0
     if ~exist('OCTAVE_VERSION')
-        [has_optimization_toolbox junk] = license('checkout','optimization_toolbox');
-        if ~has_optimization_toolbox
+        if ~user_has_matlab_license('optimization_toolbox')
             error('You can''t use solve_algo=0 since you don''t have MATLAB''s Optimization Toolbox')
         end
     end

@@ -1,4 +1,4 @@
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -71,7 +71,7 @@ end
 failedBlock = {};
 num_block_tests = 0;
 cd([top_test_dir '/block_bytecode']);
-[has_optimization_toolbox junk] = license('checkout','optimization_toolbox');
+has_optimization_toolbox = user_has_matlab_license('optimization_toolbox');
 for blockFlag = 0:1
     for bytecodeFlag = 0:1
         default_solve_algo = 2;
