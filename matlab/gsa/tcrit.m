@@ -1,19 +1,15 @@
 function t_crit = tcrit(n,pval0)
-
 % function t_crit = tcrit(n,pval0)
 %
 % given the p-value pval0, the function givese the 
 % critical value t_crit of the t-distribution with n degress of freedom 
 %
-% Part of the Sensitivity Analysis Toolbox for DYNARE
-%
 % Written by Marco Ratto
 % Joint Research Centre, The European Commission,
 % (http://eemc.jrc.ec.europa.eu/),
 % marco.ratto@jrc.it 
-%
 
-% Copyright (C) 2011-2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
