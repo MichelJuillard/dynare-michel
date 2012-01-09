@@ -127,17 +127,21 @@ function [fval,exit_flag,ys,trend_coeff,info,Model,DynareOptions,BayesInfo,Dynar
 % AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT FR
 
 % Declaration of the penalty as a persistent variable.
-persistent penalty
 
-% Initialization of the persistent variable.
-if ~nargin || isempty(penalty)
-    penalty = 1e8;
-    if ~nargin, return, end
-end
-if nargin==1
-    penalty = xparam1;
-    return
-end
+% Persistent variable 'penalty' is used to compute an endogenous penalty to
+% the value 'fval' when various conditions are encountered. These conditions
+% set also 'exit_flag' equal to 0 instead of 1.  It is only when
+% dsge_likelihood() is called by an optimizer called by
+% dynare_estimation_1() that 'exit_flag' is ignored and penalized 'fval' is
+% actually used.  
+% In that case, 'penalty' is properly initialized, at the very end of the
+% present function, by a call to dsge_likelihood() made in
+% initial_estimation_checks(). If a condition triggers exit_flag ==
+% 0, initial_estimation_checks() triggers an error.
+% In summary, an initial call to the present function, without triggering
+% any condition, guarantees that 'penalty' is properly initialized when needed.
+
+persistent penalty
 
 % Initialization of the returned variables and others...
 fval        = [];
