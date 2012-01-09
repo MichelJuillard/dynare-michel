@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2011 Dynare Team
+ * Copyright (C) 2010-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -624,7 +624,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
 }
 
 int
-logMCMCposterior(const VectorConstView &estParams, const MatrixConstView &data, const std::string &mexext,
+logMCMCposterior(const VectorConstView &estParams, const MatrixConstView &data,
                  const size_t fblock, const size_t nBlocks, const VectorConstView &nMHruns, const MatrixConstView &D)
 {
   // Retrieve pointers to global variables
@@ -638,7 +638,8 @@ logMCMCposterior(const VectorConstView &estParams, const MatrixConstView &data, 
   std::string resultsFileStem(fName);
   std::string dynamicDllFile(fName);
   mxFree(fName);
-  dynamicDllFile += "_dynamic." + mexext;
+  dynamicDllFile += "_dynamic";
+  dynamicDllFile += MEXEXT;
 
   size_t n_endo = (size_t) *mxGetPr(mxGetField(M_, 0, "endo_nbr"));
   size_t n_exo = (size_t) *mxGetPr(mxGetField(M_, 0, "exo_nbr"));
@@ -745,8 +746,8 @@ void
 mexFunction(int nlhs, mxArray *plhs[],
             int nrhs, const mxArray *prhs[])
 {
-  if (nrhs != 7)
-    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: exactly seven arguments are required.");
+  if (nrhs != 6)
+    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: exactly six arguments are required.");
   if (nlhs != 2)
     DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: exactly two return arguments are required.");
 
@@ -762,23 +763,16 @@ mexFunction(int nlhs, mxArray *plhs[],
 
   MatrixConstView data(mxGetPr(prhs[1]), mxGetM(prhs[1]), mxGetN(prhs[1]), mxGetM(prhs[1]));
 
-  if (!mxIsChar(prhs[2]))
-    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: Third argument must be a character string");
-
-  char *mexext_mx = mxArrayToString(prhs[2]);
-  std::string mexext(mexext_mx);
-  mxFree(mexext_mx);
-
-  size_t fblock = (size_t) mxGetScalar(prhs[3]);
-  size_t nBlocks = (size_t) mxGetScalar(prhs[4]);
-  VectorConstView nMHruns(mxGetPr(prhs[5]), mxGetM(prhs[5]), 1);
+  size_t fblock = (size_t) mxGetScalar(prhs[2]);
+  size_t nBlocks = (size_t) mxGetScalar(prhs[3]);
+  VectorConstView nMHruns(mxGetPr(prhs[4]), mxGetM(prhs[4]), 1);
   assert(nMHruns.getSize() == nBlocks);
 
-  MatrixConstView D(mxGetPr(prhs[6]), mxGetM(prhs[6]), mxGetN(prhs[6]), mxGetM(prhs[6]));
+  MatrixConstView D(mxGetPr(prhs[5]), mxGetM(prhs[5]), mxGetN(prhs[5]), mxGetM(prhs[5]));
   //calculate MHMCMC draws and get get last line run in the last MH block sub-array
   try
     {
-      int lastMHblockArrayLine = logMCMCposterior(estParams, data, mexext, fblock, nBlocks, nMHruns, D);
+      int lastMHblockArrayLine = logMCMCposterior(estParams, data, fblock, nBlocks, nMHruns, D);
       plhs[1] = mxCreateDoubleMatrix(1, 1, mxREAL);
       *mxGetPr(plhs[1]) = (double) lastMHblockArrayLine;
     }

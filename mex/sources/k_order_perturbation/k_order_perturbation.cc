@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 Dynare Team
+ * Copyright (C) 2008-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -24,7 +24,6 @@
   1) dr
   2) M_
   3) options
-  4) string containing the MEX extension (with a dot at the beginning)
 
   Outputs:
   - if order == 1: only g_1
@@ -69,8 +68,8 @@ extern "C" {
   mexFunction(int nlhs, mxArray *plhs[],
               int nrhs, const mxArray *prhs[])
   {
-    if (nrhs != 4 || nlhs < 2)
-      DYN_MEX_FUNC_ERR_MSG_TXT("Must have exactly 4 input parameters and take at least 2 output parameters.");
+    if (nrhs != 3 || nlhs < 2)
+      DYN_MEX_FUNC_ERR_MSG_TXT("Must have exactly 3 input parameters and take at least 2 output parameters.");
 
     const mxArray *dr = prhs[0];
     const mxArray *M_ = prhs[1];
@@ -82,8 +81,6 @@ extern "C" {
       DYN_MEX_FUNC_ERR_MSG_TXT("Input must be of type char.");
 
     string fName = mxArrayToString(mFname);
-    const mxArray *mexExt = prhs[3];
-    string dfExt = mxArrayToString(mexExt); // Dynamic file extension, e.g. ".dll" or ".mexw32"
 
     int kOrder;
     mxArray *mxFldp = mxGetField(options_, 0, "order");
@@ -208,7 +205,7 @@ extern "C" {
 
         DynamicModelAC *dynamicModelFile;
         if (use_dll == 1)
-          dynamicModelFile = new DynamicModelDLL(fName, dfExt);
+          dynamicModelFile = new DynamicModelDLL(fName);
         else
           dynamicModelFile = new DynamicModelMFile(fName);
 

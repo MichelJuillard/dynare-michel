@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2011 Dynare Team
+ * Copyright (C) 2010-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -101,8 +101,7 @@ fillEstParamsInfo(const mxArray *estim_params_info, EstimatedParameter::pType ty
 }
 
 double
-logposterior(const VectorConstView &estParams, const MatrixConstView &data,
-             const std::string &mexext)
+logposterior(const VectorConstView &estParams, const MatrixConstView &data)
 {
   // Retrieve pointers to global variables
   const mxArray *M_ = mexGetVariablePtr("global", "M_");
@@ -114,7 +113,8 @@ logposterior(const VectorConstView &estParams, const MatrixConstView &data,
   char *fName = mxArrayToString(mxGetField(M_, 0, "fname"));
   std::string dynamicDllFile(fName);
   mxFree(fName);
-  dynamicDllFile += "_dynamic." + mexext;
+  dynamicDllFile += "_dynamic";
+  dynamicDllFile += MEXEXT;
 
   size_t n_endo = (size_t) *mxGetPr(mxGetField(M_, 0, "endo_nbr"));
   size_t n_exo = (size_t) *mxGetPr(mxGetField(M_, 0, "exo_nbr"));
@@ -211,8 +211,8 @@ void
 mexFunction(int nlhs, mxArray *plhs[],
             int nrhs, const mxArray *prhs[])
 {
-  if (nrhs != 3 || nlhs != 2)
-    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: exactly three input arguments and two output arguments are required.");
+  if (nrhs != 2 || nlhs != 2)
+    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: exactly two input arguments and two output arguments are required.");
 
   // Check and retrieve the arguments
 
@@ -225,19 +225,11 @@ mexFunction(int nlhs, mxArray *plhs[],
     DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: Second argument must be a matrix of double-precision numbers");
 
   MatrixConstView data(mxGetPr(prhs[1]), mxGetM(prhs[1]), mxGetN(prhs[1]), mxGetM(prhs[1]));
-
-  if (!mxIsChar(prhs[2]))
-    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: Third argument must be a character string");
-
-  char *mexext_mx = mxArrayToString(prhs[2]);
-  std::string
-    mexext(mexext_mx);
-  mxFree(mexext_mx);
-
+  
   // Compute and return the value
   try
     {
-      double lik = logposterior(estParams, data, mexext);
+      double lik = logposterior(estParams, data);
       plhs[1] = mxCreateDoubleMatrix(1, 1, mxREAL);
       *mxGetPr(plhs[1]) = lik;
     }
