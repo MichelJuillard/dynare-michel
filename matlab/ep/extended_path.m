@@ -149,33 +149,13 @@ end
 t  = 0;
 
 % Set waitbar (graphic or text  mode)
-graphic_waitbar_flag = ~( options_.console_mode || exist('OCTAVE_VERSION') );
-
-if graphic_waitbar_flag
-    hh = waitbar(0,['Please wait. Extended Path simulations...']);
-    set(hh,'Name','EP simulations');
-else
-    for i=1:2, disp(' '), end
-    if ~exist('OCTAVE_VERSION')
-       back = [];
-    end
-end
-
+hh = dyn_waitbar(0,'Please wait. Extended Path simulations...');
+set(hh,'Name','EP simulations.');
 
 % Main loop.
 while (t<sample_size)
     if ~mod(t,10)
-        if graphic_waitbar_flag
-            waitbar(t/sample_size);
-        else
-            if exist('OCTAVE_VERSION')
-                printf('Please wait. Extended Path simulations... %3.f%%\r done', 100*t/sample_size);
-            else
-                str = sprintf('Please wait. Extended Path simulations... %3.f%% done.', 100*t/sample_size);
-                fprintf([back '%s'],str);
-                back=repmat('\b',1,length(str));
-            end
-        end
+        dyn_waitbar(t/sample_size,hh,'Please wait. Extended Path simulations...');
     end
     % Set period index.
     t = t+1;
@@ -318,12 +298,6 @@ while (t<sample_size)
     oo_.endo_simul(:,end) = oo_.steady_state;
 end
 
-if graphic_waitbar_flag
-    close(hh);
-else
-    if ~exist('OCTAVE_VERSION')
-        fprintf(back);
-    end
-end
+dyn_waitbar_close(hh);
 
 oo_.endo_simul = oo_.steady_state;
