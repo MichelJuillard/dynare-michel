@@ -155,7 +155,7 @@ set(hh,'Name','EP simulations.');
 % Main loop.
 while (t<sample_size)
     if ~mod(t,10)
-        dyn_waitbar(t/sample_size,hh,'Please wait. Extended Path simulations...');
+        dyn_waitbar(t/sample_size,hh);
     end
     % Set period index.
     t = t+1;
