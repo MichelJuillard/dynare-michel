@@ -32,3 +32,7 @@ corr(y,c).prior(shape=beta,mean=0.3,variance=0.1^2,mode=33);
 corr(b,c).prior(shape=beta,mean=0.3,variance=0.1^2);
 corr(e,u).prior(shape=beta,mean=0.3,variance=0.1^2);
 alpha.options(init=1);
+rho.options(init=1);
+beta.options(init=0.2);
+std(u).options(init=3);
+corr(y,c).options(init=.02);
