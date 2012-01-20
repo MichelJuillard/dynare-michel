@@ -85,8 +85,9 @@ time_series = zeros(M_.endo_nbr,sample_size);
 % Set the covariance matrix of the structural innovations.
 variances = diag(M_.Sigma_e); 
 positive_var_indx = find(variances>0); 
-covariance_matrix = M_.Sigma_e(positive_var_indx,positive_var_indx); 
-number_of_structural_innovations = length(covariance_matrix); 
+effective_number_of_shocks = length(positive_var_indx);
+stdd = sqrt(variances(positive_var_indx));
+covariance_matrix = M_.Sigma_e(positive_var_indx,positive_var_indx);  
 covariance_matrix_upper_cholesky = chol(covariance_matrix); 
 
 % Set seed.
@@ -97,7 +98,7 @@ end
 % Simulate shocks.
 switch options_.ep.innovation_distribution
   case 'gaussian'
-      oo_.ep.shocks = randn(sample_size,number_of_structural_innovations)*covariance_matrix_upper_cholesky; 
+      oo_.ep.shocks = randn(sample_size,effective_number_of_shocks)*covariance_matrix_upper_cholesky; 
   otherwise
     error(['extended_path:: ' options_.ep.innovation_distribution ' distribution for the structural innovations is not (yet) implemented!'])
 end
@@ -106,11 +107,16 @@ end
 if options_.ep.stochastic.status
     switch options_.ep.stochastic.method
       case 'tensor'
-        [r,w] = gauss_hermite_weights_and_nodes(options_.ep.stochastic.nodes);
+        switch options_.ep.stochastic.ortpol
+          case 'hermite'
+            [r,w] = gauss_hermite_weights_and_nodes(options_.ep.stochastic.nodes);
+          otherwise
+            error('extended_path:: Unknown orthogonal polynomial option!')
+        end
         if options_.ep.stochastic.order*M_.exo_nbr>1
             for i=1:options_.ep.stochastic.order*M_.exo_nbr
-                rr(i) = {r};
-                ww(i) = {w};
+                rr(k) = {r};
+                ww(k) = {w};
             end
             rrr = cartesian_product_of_sets(rr{:});
             www = cartesian_product_of_sets(ww{:});
@@ -140,7 +146,7 @@ if options_.ep.stochastic.status
         error('extended_path:: Unknown stochastic_method option!')
     end
 else
-    rrr = zeros(1,number_of_structural_innovations);
+    rrr = zeros(1,effective_number_of_shocks);
     www = 1;
     nnn = 1;
 end
@@ -163,8 +169,17 @@ while (t<sample_size)
     % Put it in oo_.exo_simul (second line).
     oo_.exo_simul(2,positive_var_indx) = shocks;
     for s = 1:nnn
-        for u=1:options_.ep.stochastic.order
-            oo_.exo_simul(2+u,positive_var_indx) = rrr(s,(((u-1)*M_.exo_nbr)+1):(u*M_.exo_nbr))*covariance_matrix_upper_cholesky;
+        switch options_.ep.stochastic.ortpol
+          case 'hermite'
+            for u=1:options_.ep.stochastic.order
+                oo_.exo_simul(2+u,positive_var_indx) = rrr(s,(((u-1)*effective_number_of_shocks)+1):(u*effective_number_of_shocks))*covariance_matrix_upper_cholesky;
+            end
+          otherwise
+            error('extended_path:: Unknown orthogonal polynomial option!')
+        end
+        if options_.ep.stochastic.order && options_.ep.stochastic.scramble
+            oo_.exo_simul(2+options_.ep.stochastic.order+1:2+options_.ep.stochastic.order+options_.ep.stochastic.scramble,positive_var_indx) = ...
+                randn(options_.ep.stochastic.scramble,effective_number_of_shocks)*covariance_matrix_upper_cholesky;
         end
         if options_.ep.init% Compute first order solution... 
             initial_path = simult_(initial_conditions,oo_.dr,oo_.exo_simul(2:end,:),1);

@@ -135,6 +135,8 @@ ep.stack_solve_algo = 4;
 % Stochastic extended path related options.
 ep.stochastic.status = 0;
 ep.stochastic.method = 'tensor';
+ep.stochastic.ortpol = 'hermite';
+ep.stochastic.scramble = 0;
 ep.stochastic.order = 1;
 ep.stochastic.nodes = 5;
 ep.stochastic.pruned.status = 0;
