@@ -3988,6 +3988,7 @@ and graphics that can be later directly included in LaTeX files (not
 yet implemented)
 
 @item kalman_algo = @var{INTEGER}
+@anchor{kalman_algo}
 @dots{}
 
 @item kalman_tol = @var{DOUBLE}
@@ -5263,6 +5264,9 @@ Critical value for correlation @math{\rho}: plot couples of parmaters with
 @item mode_file = @var{FILENAME}
 @xref{mode_file}.
 
+@item kalman_algo = @var{INTEGER}
+@xref{kalman_algo}.
+
 @end table
 @customhead{Identification Analysis Options}
 @table @code
@@ -5356,6 +5360,9 @@ Specify the parameter set to use. Default: @code{prior_mean}
 
 @item lik_init = @var{INTEGER}
 @xref{lik_init}.
+
+@item kalman_algo = @var{INTEGER}
+@xref{kalman_algo}.
 
 @end table
 
