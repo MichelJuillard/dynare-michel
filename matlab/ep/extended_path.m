@@ -32,6 +32,7 @@ function time_series = extended_path(initial_conditions,sample_size)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 global M_ options_ oo_
     
+memory = 0;
 debug = 0;
 options_.verbosity = options_.ep.verbosity;
 verbosity = options_.ep.verbosity+debug;
@@ -157,6 +158,11 @@ t  = 0;
 % Set waitbar (graphic or text  mode)
 hh = dyn_waitbar(0,'Please wait. Extended Path simulations...');
 set(hh,'Name','EP simulations.');
+
+if memory
+    mArray1 = zeros(M_.endo_nbr,100,nnn,sample_size);
+    mArray2 = zeros(M_.exo_nbr,100,nnn,sample_size);
+end
 
 % Main loop.
 while (t<sample_size)
@@ -302,6 +308,10 @@ while (t<sample_size)
             oo_.endo_simul = tmp;
         end
         % Save results of the perfect foresight model solver.
+        if memory
+            mArray1(:,:,s,t) = oo_.endo_simul(:,1:100);
+            mArrat2(:,:,s,t) = transpose(oo_.exo_simul(1:100,:));            
+        end
         time_series(:,t) = time_series(:,t)+ www(s)*oo_.endo_simul(:,2);
         %save('simulated_paths.mat','time_series');
         % Set initial condition for the nex round.
@@ -316,3 +326,7 @@ end
 dyn_waitbar_close(hh);
 
 oo_.endo_simul = oo_.steady_state;
+
+if memory
+    save([M_.fname '_memory'],'mArray1','mArray2','www');
+end
