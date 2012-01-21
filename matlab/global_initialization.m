@@ -109,6 +109,10 @@ options_.SpectralDensity = 0;
 
 % Extended path options
 %
+% Set debug flag
+ep.debug = 0;
+% Set memory flag
+ep.memory = 0;
 % Set verbose mode
 ep.verbosity = 0;
 % Initialization of the perfect foresight equilibrium paths
