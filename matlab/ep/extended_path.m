@@ -70,7 +70,8 @@ end
 options_.minimal_solving_period = options_.ep.periods;
 
 % Get indices of variables with non zero steady state
-idx = find(abs(oo_.steady_state)>0);
+idx = find(abs(oo_.steady_state)>1e-6);
+indx = find(abs(oo_.steady_state)<=1e-6);
 
 % Initialize the exogenous variables.
 make_ex_;
@@ -228,7 +229,16 @@ while (t<sample_size)
                 end
             end
             % Test if periods is big enough.
-            if ~increase_periods &&  max(max(abs(tmp(idx,end-options_.ep.lp:end)./tmp(idx,end-options_.ep.lp-1:end-1)-1)))<options_.dynatol.x
+            delta = 0;
+            if ~isempty(idx)
+                delta = max(max(abs(tmp(idx,end-options_.ep.lp:end)./tmp(idx, ...
+                                                                  end-options_.ep.lp-1:end-1)-1)));
+            end;
+            if ~isempty(indx)
+                delta = max(delta,max(max(abs(tmp(indx,end-options_.ep.lp: ...
+                                                  end)-tmp(indx,end-options_.ep.lp-1:end-1)))));
+            end
+            if ~increase_periods &&  delta < options_.dynatol.x
                 break
             else
                 options_.periods = options_.periods + options_.ep.step;
