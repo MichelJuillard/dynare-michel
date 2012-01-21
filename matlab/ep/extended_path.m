@@ -116,8 +116,8 @@ if options_.ep.stochastic.status
         end
         if options_.ep.stochastic.order*M_.exo_nbr>1
             for i=1:options_.ep.stochastic.order*M_.exo_nbr
-                rr(k) = {r};
-                ww(k) = {w};
+                rr(i) = {r};
+                ww(i) = {w};
             end
             rrr = cartesian_product_of_sets(rr{:});
             www = cartesian_product_of_sets(ww{:});
