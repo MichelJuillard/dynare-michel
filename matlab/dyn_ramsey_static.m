@@ -61,7 +61,7 @@ else
     [xx,info1] = dynare_solve(nl_func,xx,0);
     steady_state = nl_func(xx);
 end
-steady_state = nl_func(xx);
+[junk,junk,steady_state] = nl_func(xx);
 
 
 
@@ -86,14 +86,14 @@ max_lag = M.maximum_lag;
 i_endo = [1:endo_nbr]';
 % indices of endogenous variable except instruments
 % i_inst = M.instruments;
-% lead_lag incidence matrix for endogenous variables
+% lead_lag incidence matrix
 i_lag = M.lead_lag_incidence;
 
 if options_.steadystate_flag
     k_inst = [];
     instruments = options_.instruments;
     for i = 1:size(instruments,1)
-        k_inst = [k_inst; strmatch(options_.instruments(i,:), ...
+        k_inst = [k_inst; strmatch(instruments(i,:), ...
                                    M.endo_names,'exact')];
     end
     oo.steady_state(k_inst) = x;
@@ -134,7 +134,7 @@ xx = [x; zeros(M.endo_nbr - M.orig_eq_nbr,1)];
 % the auxiliary variables before the Lagrange multipliers are treated
 % as ordinary endogenous variables
 n_var = M.orig_endo_nbr + min(find([M.aux_vars.type] == 6)) - 1;
-aux_eq = [1:n_var orig_endo_nbr+orig_eq_nbr+1:size(fJ,1)];
+aux_eq = [1:n_var, orig_endo_nbr+orig_eq_nbr+1:size(fJ,1)];
 A = fJ(aux_eq,n_var+1:end);
 y = res(aux_eq);
 mult = -A\y;
@@ -149,7 +149,7 @@ end
 if options_.steadystate_flag
     resids = r1;
 else
-    resids = [res; r1];
+    resids = [resids1; r1];
 end
 rJ = [];
 steady_state = [x(1:n_var); mult];
