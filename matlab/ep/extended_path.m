@@ -326,5 +326,5 @@ dyn_waitbar_close(hh);
 oo_.endo_simul = oo_.steady_state;
 
 if options_.ep.memory
-    save([M_.fname '_options_.ep.memory'],'mArray1','mArray2','www');
+    save([M_.fname '_memory'],'mArray1','mArray2','www');
 end
