@@ -359,6 +359,7 @@ end
 
 diffuse_periods = 0;
 correlated_errors_have_been_checked = 0;
+singular_diffuse_filter = 0;
 switch DynareOptions.lik_init
   case 1% Standard initialization with the steady state of the state equation.
     if kalman_algo~=2
@@ -407,17 +408,17 @@ switch DynareOptions.lik_init
         diffuse_periods = length(tmp);
         if isinf(dLIK)
             % Go to univariate diffuse filter if singularity problem.
-            kalman_algo = 4;
+            singular_diffuse_filter = 1;
         end
     end
-    if (kalman_algo==4)
+    if singular_diffuse_filter || (kalman_algo==4)
         % Univariate Diffuse Kalman Filter
         if isequal(H,0)
-            H = zeros(nobs,1);
+            H1 = zeros(nobs,1);
             mmm = mm;
         else
             if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
-                H = diag(H);
+                H1 = diag(H);
                 mmm = mm; 
             else
                 Z = [Z, eye(pp)];
@@ -426,7 +427,7 @@ switch DynareOptions.lik_init
                 R = blkdiag(R,eye(pp));
                 Pstar = blkdiag(Pstar,H);
                 Pinf  = blckdiag(Pinf,zeros(pp));
-                H = zeros(nobs,1);
+                H1 = zeros(nobs,1);
                 mmm   = mm+pp;
             end
         end
@@ -439,7 +440,7 @@ switch DynareOptions.lik_init
                                                         Y, 1, size(Y,2), ...
                                                         zeros(mmm,1), Pinf, Pstar, ...
                                                         kalman_tol, riccati_tol, DynareOptions.presample, ...
-                                                        T,R,Q,H,Z,mmm,pp,rr);
+                                                        T,R,Q,H1,Z,mmm,pp,rr);
         diffuse_periods = length(tmp);
     end
   case 4% Start from the solution of the Riccati equation.
