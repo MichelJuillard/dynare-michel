@@ -254,6 +254,7 @@ end
 
 
 diffuse_periods = 0;
+correlated_errors_have_been_checked = 0;
 switch DynareOptions.lik_init
   case 1% Standard initialization with the steady state of the state equation.
     if kalman_algo~=2
@@ -274,10 +275,14 @@ switch DynareOptions.lik_init
     a     = zeros(mm,1);
     Zflag = 0;
   case 3% Diffuse Kalman filter (Durbin and Koopman)
-    if kalman_algo ~= 4
         % Use standard kalman filter except if the univariate filter is explicitely choosen.
+    if kalman_algo == 0
         kalman_algo = 3;
+    elseif ~((kalman_algo == 3) || (kalman_algo == 4)) 
+        error(['diffuse filter: options_.kalman_algo can only be equal ' ...
+               'to 0 (default), 3 or 4'])
     end
+
     [Z,T,R,QT,Pstar,Pinf] = schur_statespace_transformation(Z,T,R,Q,DynareOptions.qz_criterium);
     Zflag = 1;
     % Run diffuse kalman filter on first periods.
@@ -285,9 +290,9 @@ switch DynareOptions.lik_init
         % Multivariate Diffuse Kalman Filter
         if no_missing_data_flag
             [dLIK,dlik,a,Pstar] = kalman_filter_d(Y, 1, size(Y,2), ...
-                                                       zeros(mm,1), Pinf, Pstar, ...
-                                                       kalman_tol, riccati_tol, DynareOptions.presample, ...
-                                                       T,R,Q,H,Z,mm,pp,rr);
+                                                  zeros(mm,1), Pinf, Pstar, ...
+                                                  kalman_tol, riccati_tol, DynareOptions.presample, ...
+                                                  T,R,Q,H,Z,mm,pp,rr);
         else
             [dLIK,dlik,a,Pstar] = missing_observations_kalman_filter_d(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations, ...
                                                               Y, 1, size(Y,2), ...
@@ -304,28 +309,27 @@ switch DynareOptions.lik_init
     end
     if (kalman_algo==4)
         % Univariate Diffuse Kalman Filter
-        if singularity_flag
-            if isequal(H,0)
-                H = zeros(nobs,1);
-                mmm = mm;
+        if isequal(H,0)
+            H = zeros(nobs,1);
+            mmm = mm;
+        else
+            if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
+                H = diag(H);
+                mmm = mm; 
             else
-                if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
-                    H = diag(H);
-                    mmm = mm; 
-                else
-                    Z = [Z, eye(pp)];
-                    T = blkdiag(T,zeros(pp));
-                    Q = blkdiag(Q,H);
-                    R = blkdiag(R,eye(pp));
-                    Pstar = blkdiag(Pstar,H);
-                    Pinf  = blckdiag(Pinf,zeros(pp));
-                    H = zeros(nobs,1);
-                    mmm   = mm+pp;
-                end
+                Z = [Z, eye(pp)];
+                T = blkdiag(T,zeros(pp));
+                Q = blkdiag(Q,H);
+                R = blkdiag(R,eye(pp));
+                Pstar = blkdiag(Pstar,H);
+                Pinf  = blckdiag(Pinf,zeros(pp));
+                H = zeros(nobs,1);
+                mmm   = mm+pp;
             end
-            % no need to test again for correlation elements
-            singularity_flag = 0;
         end
+        % no need to test again for correlation elements
+        correlated_errors_have_been_checked = 1;
+        
         [dLIK,dlik,a,Pstar] = univariate_kalman_filter_d(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations, ...
                                                               Y, 1, size(Y,2), ...
                                                               zeros(mmm,1), Pinf, Pstar, ...
@@ -385,10 +389,10 @@ if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
     end
 end
 
-if ( singularity_flag || (kalman_algo==2) || (kalman_algo==4) )
+if (kalman_algo==2) || (kalman_algo==4)
     % Univariate Kalman Filter
     % resetting measurement error covariance matrix when necessary                                                           % 
-    if singularity_flag
+    if ~correlated_errors_have_been_checked
         if isequal(H,0)
             H = zeros(nobs,1);
             mmm = mm;
