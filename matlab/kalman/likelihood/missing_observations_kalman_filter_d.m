@@ -125,14 +125,4 @@ end
 
 dlik = .5*dlik(1:s);
 
-if presample 
-    if presample>=length(dlik)
-        dLIK = 0;
-        dlik = [];
-    else
-        dlik = dlik(1+presample:end);
-        dLIK = sum(dlik);% Minus the log-likelihood (for the initial periods).
-    end
-else
-    dLIK = sum(dlik);
-end
+dLIK = sum(dlik(1+presample:end));
