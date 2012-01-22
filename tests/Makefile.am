@@ -10,6 +10,7 @@ MODFILES = \
 	t_sgu_ex1.mod \
 	osr_example.mod \
 	optimal_policy/ramsey.mod \
+	optimal_policy/nk_ramsey.mod \
 	optimal_policy/mult_elimination_test.mod \
 	discretionary_policy/dennis_1.mod \
 	ramst_initval_file.mod \
@@ -119,7 +120,8 @@ MODFILES = \
 	second_order/burnside_1.mod \
 	second_order/ds1.mod \
 	second_order/ds2.mod \
-	ep/rbc.mod
+	ep/rbc.mod \
+	ep/linear.mod
 
 EXTRA_DIST = \
 	$(MODFILES) \
