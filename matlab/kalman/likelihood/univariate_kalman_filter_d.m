@@ -165,7 +165,7 @@ dlikk = .5*dlikk(1:s);
 llik  = .5*llik(1:s,:);
 
 if presample
-    if presample>=length(dlik)
+    if presample>=length(dlikk)
         dLIK = 0;
         dlikk= [];
         llik = [];
