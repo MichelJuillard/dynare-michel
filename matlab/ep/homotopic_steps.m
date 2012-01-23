@@ -30,12 +30,11 @@ disp(' ')
 if homotopy_1
     while weight<1
         iter = iter+1;
-        oo_.exo_simul(2,:) = weight*exxo_simul(2,:);
+        oo_.exo_simul = weight*exxo_simul;
         t0 = tic;
         [flag,tmp] = bytecode('dynamic');
         TeaTime = toc(t0);
         ctime = ctime+TeaTime;
-        %old_weight = weight;
         info.convergence = ~flag;
         if verbose
             if ~info.convergence
@@ -80,7 +79,6 @@ if homotopy_1
                 break
             end
             weight = weight+step_length;
-            %step_length = initial_step_length;
         end
         if iter>max_iter
             info = NaN;
@@ -88,7 +86,7 @@ if homotopy_1
         end
     end
     if weight<1 && homotopy_1
-        oo_.exo_simul(2,:) = exxo_simul(2,:);
+        oo_.exo_simul = exxo_simul;
         t0 = tic; 
         [flag,tmp] = bytecode('dynamic');
         TeaTime = toc(t0);
