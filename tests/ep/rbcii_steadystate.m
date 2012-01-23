@@ -38,12 +38,11 @@ SteadyStateCapital=SteadyStateLabour/Labour_per_unit_of_Capital;
 SteadyStateOutput=Output_per_unit_of_Capital*SteadyStateCapital;
 
 % Fill returned argument ys with steady state values.
-ys(2)=SteadyStateOutput;
-ys(4)=SteadyStateConsumption;
+ys = zeros(9,1);
 ys(1)=SteadyStateCapital;
+ys(2)=SteadyStateOutput;
 ys(3)=SteadyStateLabour;
+ys(4)=SteadyStateConsumption;
 ys(5)=M_.params(8);
-ys(6)=0;
 ys(7)=M_.params(1)*((((SteadyStateConsumption^M_.params(2))*((1-SteadyStateLabour)^(1-M_.params(2))))^(1-M_.params(3)))/SteadyStateConsumption)* ...
       (M_.params(4)*((SteadyStateOutput/SteadyStateCapital)^(1-M_.params(5)))+1-M_.params(6));
-ys(8)=0;

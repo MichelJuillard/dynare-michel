@@ -1,6 +1,6 @@
-@#define extended_path_version = 1
+@#define extended_path_version = 0
 
-var Capital, Output, Labour, Consumption, Efficiency, efficiency, ExpectedTerm, LagrangeMultiplier;
+var Capital, Output, Labour, Consumption, Efficiency, efficiency, ExpectedTerm, LM, LagrangeMultiplier;
 
 varexo EfficiencyInnovation;
 
@@ -50,8 +50,11 @@ model(block,bytecode,cutoff=0);
 
   // Eq. n°7:
   (Capital==(1-delta)*Capital(-1))*(Output-Consumption) + (1-(Capital==(1-delta)*Capital(-1)))*LagrangeMultiplier = 0;
-  
+
   // Eq. n°8:
+  (LM<0)*(LM+LagrangeMultiplier) + (1-(LM<0))*(LM-LagrangeMultiplier) = 0;
+  
+  // Eq. n°9:
   ExpectedTerm = beta*(((((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption)*(alpha*((Output/Capital(-1))^(1-psi))+(1-delta))-(1-delta)*LagrangeMultiplier);
 
 end;
