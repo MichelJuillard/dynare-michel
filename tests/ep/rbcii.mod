@@ -98,10 +98,16 @@ end;
     steady;
     
     options_.maxit_ = 100;
+    options_.stack_solve_algo = 4;
     
     simul(periods=4000);
 
     n = 100;
+
+    figure('Name','(rbcii) Investment.');
     plot(Output(1:n)-Consumption(1:n),'-b','linewidth',2)
+
+    figure('Name','(rbcii) Lagrange multiplier associated to the positivity constraint on investment.');
+    plot(LagrangeMultiplier(1:n),'-b','linewidth',2)
     
 @#endif
