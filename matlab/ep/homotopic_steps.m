@@ -50,7 +50,7 @@ if homotopy_1
                 end
                 initial_weight = initial_weight/1.1;
                 weight = initial_weight;
-                if weight<1/4
+                if weight<1e-12
                     homotopy_1 = 0;
                     homotopy_2 = 1;
                     break
