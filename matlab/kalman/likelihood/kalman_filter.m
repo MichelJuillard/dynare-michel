@@ -170,7 +170,7 @@ end
 
 % Compute minus the log-likelihood.
 if presample > diffuse_periods
-    LIK = sum(likk(1+presample-diffuse_periods:end);
+    LIK = sum(likk(1+presample-diffuse_periods:end));
 else
     LIK = sum(likk);
 end

@@ -111,4 +111,4 @@ end
 dlik = dlik(1:s);
 dlik = .5*(dlik + pp*log(2*pi));
 
-dLIK = sum(dlik(1+presample:end);
+dLIK = sum(dlik(1+presample:end));
