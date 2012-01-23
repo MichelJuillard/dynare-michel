@@ -230,15 +230,13 @@ while (t<sample_size)
             end
             % Test if periods is big enough.
             delta = 0;
-            if ~isempty(idx)
-                delta = max(max(abs(tmp(idx,end-options_.ep.lp:end)./tmp(idx, ...
-                                                                  end-options_.ep.lp-1:end-1)-1)));
-            end;
-            if ~isempty(indx)
-                delta = max(delta,max(max(abs(tmp(indx,end-options_.ep.lp: ...
-                                                  end)-tmp(indx,end-options_.ep.lp-1:end-1)))));
+            if length(tmp)>1 && ~isempty(idx)
+                delta = max(max(abs(tmp(idx,end-options_.ep.lp:end)./tmp(idx,end-options_.ep.lp-1:end-1)-1)));
             end
-            if ~increase_periods &&  delta < options_.dynatol.x
+            if length(tmp)>1 && ~isempty(indx)
+                delta = max(delta,max(max(abs(tmp(indx,end-options_.ep.lp:end)-tmp(indx,end-options_.ep.lp-1:end-1)))));
+            end
+            if ~increase_periods &&  delta<options_.dynatol.x
                 break
             else
                 options_.periods = options_.periods + options_.ep.step;
