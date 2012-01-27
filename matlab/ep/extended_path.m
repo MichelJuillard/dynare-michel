@@ -1,17 +1,17 @@
 function time_series = extended_path(initial_conditions,sample_size)
 % Stochastic simulation of a non linear DSGE model using the Extended Path method (Fair and Taylor 1983). A time
-% series of size T  is obtained by solving T perfect foresight models. 
-%    
+% series of size T  is obtained by solving T perfect foresight models.
+%
 % INPUTS
 %  o initial_conditions     [double]    m*nlags array, where m is the number of endogenous variables in the model and
 %                                       nlags is the maximum number of lags.
 %  o sample_size            [integer]   scalar, size of the sample to be simulated.
-%   
+%
 % OUTPUTS
 %  o time_series            [double]    m*sample_size array, the simulations.
-%    
+%
 % ALGORITHM
-%  
+%
 % SPECIAL REQUIREMENTS
 
 % Copyright (C) 2009, 2010, 2011 Dynare Team
@@ -58,16 +58,14 @@ options_.stack_solve_algo = options_.ep.stack_solve_algo;
 %
 % REMARK. It is assumed that the user did run the same mod file with stoch_simul(order=1) and save
 % all the globals in a mat file called linear_reduced_form.mat;
+
 if options_.ep.init
-    lrf = load('linear_reduced_form','oo_');
-    oo_.dr = lrf.oo_.dr; clear('lrf');
-    if options_.ep.init==2
-        lambda = .8;
-    end
+    options_.order = 1;
+    [dr,Info,M_,options_,oo_] = resol(1,M_,options_,oo_);
 end
 
 % Do not use a minimal number of perdiods for the perfect foresight solver (with bytecode and blocks)
-options_.minimal_solving_period = options_.ep.periods;
+options_.minimal_solving_period = 100;%options_.ep.periods;
 
 % Get indices of variables with non zero steady state
 idx = find(abs(oo_.steady_state)>1e-6);
@@ -83,12 +81,12 @@ make_y_;
 time_series = zeros(M_.endo_nbr,sample_size);
 
 % Set the covariance matrix of the structural innovations.
-variances = diag(M_.Sigma_e); 
-positive_var_indx = find(variances>0); 
+variances = diag(M_.Sigma_e);
+positive_var_indx = find(variances>0);
 effective_number_of_shocks = length(positive_var_indx);
 stdd = sqrt(variances(positive_var_indx));
-covariance_matrix = M_.Sigma_e(positive_var_indx,positive_var_indx);  
-covariance_matrix_upper_cholesky = chol(covariance_matrix); 
+covariance_matrix = M_.Sigma_e(positive_var_indx,positive_var_indx);
+covariance_matrix_upper_cholesky = chol(covariance_matrix);
 
 % Set seed.
 if options_.ep.set_dynare_seed_to_default
@@ -98,11 +96,11 @@ end
 % Simulate shocks.
 switch options_.ep.innovation_distribution
   case 'gaussian'
-      oo_.ep.shocks = randn(sample_size,effective_number_of_shocks)*covariance_matrix_upper_cholesky; 
+      oo_.ep.shocks = randn(sample_size,effective_number_of_shocks)*covariance_matrix_upper_cholesky;
   otherwise
     error(['extended_path:: ' options_.ep.innovation_distribution ' distribution for the structural innovations is not (yet) implemented!'])
 end
-    
+
 % Set future shocks (Stochastic Extended Path approach)
 if options_.ep.stochastic.status
     switch options_.ep.stochastic.method
@@ -186,13 +184,12 @@ while (t<sample_size)
             oo_.exo_simul(2+options_.ep.stochastic.order+1:2+options_.ep.stochastic.order+options_.ep.stochastic.scramble,positive_var_indx) = ...
                 randn(options_.ep.stochastic.scramble,effective_number_of_shocks)*covariance_matrix_upper_cholesky;
         end
-        if options_.ep.init% Compute first order solution... 
-            initial_path = simult_(initial_conditions,oo_.dr,oo_.exo_simul(2:end,:),1);
-            if options_.ep.init==1
-                oo_.endo_simul(:,1:end-1) = initial_path(:,1:end-1);% Last column is the steady state.
-            elseif options_.ep.init==2
-                oo_.endo_simul(:,1:end-1) = initial_path(:,1:end-1)*lambda+oo_.endo_simul(:,1:end-1)*(1-lambda);
-            end
+        if options_.ep.init% Compute first order solution (Perturbation)...
+            ex = zeros(size(oo_.endo_simul,2),size(oo_.exo_simul,2));
+            ex(1:size(oo_.exo_simul,1),:) = oo_.exo_simul;
+            oo_.exo_simul = ex;
+            initial_path = simult_(initial_conditions,dr,oo_.exo_simul(2:end,:),1);
+            oo_.endo_simul(:,1:end-1) = initial_path(:,1:end-1)*options_.ep.init+oo_.endo_simul(:,1:end-1)*(1-options_.ep.init);
         end
         % Solve a perfect foresight model (using bytecoded version).
         increase_periods = 0;
@@ -200,10 +197,8 @@ while (t<sample_size)
         while 1
             if ~increase_periods
                 t0 = tic;
-                [flag,tmp] = bytecode('dynamic'); 
-                ctime = toc(t0);
+                [flag,tmp] = bytecode('dynamic');
                 info.convergence = ~flag;
-                info.time = ctime;
             end
             if verbosity
                 if info.convergence
@@ -240,7 +235,7 @@ while (t<sample_size)
                 break
             else
                 options_.periods = options_.periods + options_.ep.step;
-                options_.minimal_solving_period = options_.periods;
+                %options_.minimal_solving_period = 100;%options_.periods;
                 increase_periods = increase_periods + 1;
                 if verbosity
                     if t<10
@@ -263,13 +258,11 @@ while (t<sample_size)
                 end
                 t0 = tic;
                 [flag,tmp] = bytecode('dynamic');
-                ctime = toc(t0);
-                info.time = info.time+ctime;
                 if info.convergence
                     maxdiff = max(max(abs(tmp(:,2:options_.ep.fp)-tmp_old(:,2:options_.ep.fp))));
                     if maxdiff<options_.dynatol.x
                         options_.periods = options_.ep.periods;
-                        options_.minimal_solving_period = options_.periods;
+                        %options_.minimal_solving_period = 100;%options_.periods;
                         oo_.exo_simul = oo_.exo_simul(1:(options_.periods+2),:);
                         break
                     end
@@ -297,12 +290,19 @@ while (t<sample_size)
             end
         end
         if ~info.convergence% If the previous step was unsuccesfull, use an homotopic approach
-            [INFO,tmp] = homotopic_steps(.5,.01,t);
-            % Cumulate time.
-            info.time = ctime+INFO.time;
+            [INFO,tmp] = homotopic_steps(.5,.01);
             if (~isstruct(INFO) && isnan(INFO)) || ~INFO.convergence
-                disp('Homotopy:: No convergence of the perfect foresight model solver!')
-                error('I am not able to simulate this model!');
+                [INFO,tmp] = homotopic_steps(0,.01);
+                if ~INFO.convergence
+                    disp('Homotopy:: No convergence of the perfect foresight model solver!')
+                    error('I am not able to simulate this model!');
+                else
+                    info.convergence = 1;
+                    oo_.endo_simul = tmp;
+                    if verbosity && info.convergence
+                        disp('Homotopy:: Convergence of the perfect foresight model solver!')
+                    end
+                end
             else
                 info.convergence = 1;
                 oo_.endo_simul = tmp;
@@ -316,14 +316,10 @@ while (t<sample_size)
         % Save results of the perfect foresight model solver.
         if options_.ep.memory
             mArray1(:,:,s,t) = oo_.endo_simul(:,1:100);
-            mArrat2(:,:,s,t) = transpose(oo_.exo_simul(1:100,:));            
+            mArrat2(:,:,s,t) = transpose(oo_.exo_simul(1:100,:));
         end
         time_series(:,t) = time_series(:,t)+ www(s)*oo_.endo_simul(:,2);
-        %save('simulated_paths.mat','time_series');
-        % Set initial condition for the nex round.
-        %initial_conditions = oo_.endo_simul(:,2);
     end
-    %oo_.endo_simul = oo_.endo_simul(:,1:options_.periods+M_.maximum_endo_lag+M_.maximum_endo_lead);
     oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end);
     oo_.endo_simul(:,1) = time_series(:,t);
     oo_.endo_simul(:,end) = oo_.steady_state;
