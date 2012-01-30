@@ -75,6 +75,8 @@ if ~noprint
         error('Covariance matrix of shocks is not positive definite')
       case 44 %DsgeLikelihood_hh / dsge_likelihood
         error('The covariance matrix of the measurement errors is not positive definite.');
+      case 45 %DsgeLikelihood_hh / dsge_likelihood
+        error('Likelihood is not a number (NaN) or a complex number');
       case 51
         error('You are estimating a DSGE-VAR model, but the value of the dsge prior weight is too low!')
       case 52 %DsgeVarLikelihood
