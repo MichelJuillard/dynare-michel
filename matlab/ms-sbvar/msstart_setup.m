@@ -90,8 +90,7 @@ qmEnd=options_.ms.final_subperiod;
 if options_.forecast<1
    error('To be safe, the number of forecast years should be at least 1')
 end
-ystr=num2str(yrEnd);
-forelabel = [ ystr(3:4) ':' num2str(qmEnd) ' Forecast'];
+forelabel = [num2str(yrEnd) ':' num2str(qmEnd) ' Forecast'];
 
 nSample=(yrEnd-yrStart)*options_.ms.freq + (qmEnd-qmStart+1);
 if qmEnd==options_.ms.freq
