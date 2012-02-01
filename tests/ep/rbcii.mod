@@ -49,11 +49,11 @@ model(block,bytecode,cutoff=0);
   (((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption - LagrangeMultiplier  - ExpectedTerm(1);
 
   // Eq. n°7:
-  (Capital==(1-delta)*Capital(-1))*(Output-Consumption) + (1-(Capital==(1-delta)*Capital(-1)))*LagrangeMultiplier = 0;
+  (Capital==(1-delta)*Capital(-1))*(Output-Consumption) + (1-(Capital==(1-delta)*Capital(-1)))*LM = 0;
 
   // Eq. n°8:
   (LM<0)*(LM+LagrangeMultiplier) + (1-(LM<0))*(LM-LagrangeMultiplier) = 0;
-  
+
   // Eq. n°9:
   ExpectedTerm = beta*(((((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption)*(alpha*((Output/Capital(-1))^(1-psi))+(1-delta))-(1-delta)*LagrangeMultiplier);
 
@@ -67,14 +67,14 @@ end;
     end;
 
     steady;
-    
+
     options_.maxit_ = 100;
     options_.ep.verbosity = 0;
     options_.ep.stochastic.status = 0;
     options_.console_mode = 0;
 
     ts = extended_path([],1000);
-    
+
     options_.ep.stochastic.status = 1;
     sts = extended_path([],1000);
 
@@ -86,7 +86,7 @@ end;
 
     figure(3)
     plot(sts(2,:)-ts(2,:))
-    
+
 @#else
 
     shocks;
@@ -96,10 +96,10 @@ end;
     end;
 
     steady;
-    
+
     options_.maxit_ = 100;
     options_.stack_solve_algo = 4;
-    
+
     simul(periods=4000);
 
     n = 100;
@@ -109,5 +109,5 @@ end;
 
     figure('Name','(rbcii) Lagrange multiplier associated to the positivity constraint on investment.');
     plot(LagrangeMultiplier(1:n),'-b','linewidth',2)
-    
+
 @#endif
