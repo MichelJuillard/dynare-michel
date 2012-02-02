@@ -36,6 +36,6 @@ ts = extended_path([],1000);
 options_.ep.stochastic.status = 1;
 sts = extended_path([],1000);
 
-if max(max(abs(ts-sts))) > 1e-14
+if max(max(abs(ts-sts))) > 1e-12
    error('extended path algorithm fails in ./tests/ep/linear.mod')
 end
