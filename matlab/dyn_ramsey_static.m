@@ -56,7 +56,7 @@ if options_.steadystate_flag
     [xx,params,check] = evaluate_steady_state_file(ys,exo_ss,params,...
                                                  M.fname,options_.steadystate_flag);
 else
-    n_var = M.orig_endo_nbr+min(find([M.aux_vars.type] == 6)) - 1;
+    n_var = M.orig_endo_nbr;
     xx = oo.steady_state(1:n_var);
     [xx,info1] = dynare_solve(nl_func,xx,0);
     steady_state = nl_func(xx);
@@ -71,13 +71,17 @@ rJ = [];
 mult = [];
 
 % recovering usefull fields
+params = M.params;
 endo_nbr = M.endo_nbr;
+endo_names = M.endo_names;
 exo_nbr = M.exo_nbr;
 orig_endo_nbr = M.orig_endo_nbr;
+aux_vars_type = [M.aux_vars.type];
+orig_endo_aux_nbr = orig_endo_nbr + min(find(aux_vars_type == 6)) - 1; 
 orig_eq_nbr = M.orig_eq_nbr;
-inst_nbr = orig_endo_nbr - orig_eq_nbr;
+inst_nbr = orig_endo_aux_nbr - orig_eq_nbr;
 % indices of Lagrange multipliers
-i_mult = [orig_endo_nbr+(1:orig_eq_nbr)]';
+i_mult = [orig_endo_aux_nbr+(1:orig_eq_nbr)]';
 fname = M.fname;
 max_lead = M.maximum_lead;
 max_lag = M.maximum_lag;
@@ -94,16 +98,18 @@ if options_.steadystate_flag
     instruments = options_.instruments;
     for i = 1:size(instruments,1)
         k_inst = [k_inst; strmatch(instruments(i,:), ...
-                                   M.endo_names,'exact')];
+                                   endo_names,'exact')];
     end
     oo.steady_state(k_inst) = x;
     [x,params,check] = evaluate_steady_state_file(oo.steady_state,...
                                                   [oo.exo_steady_state; ...
                                                   oo.exo_det_steady_state] ...
-                                                  ,M.params,M.fname,...
+                                                  ,params,fname,...
                                                   options_.steadystate_flag);
 end
 
+xx = zeros(endo_nbr,1);
+xx(1:length(x)) = x;
 % setting steady state of auxiliary variables
 % that depends on original endogenous variables
 if any([M.aux_vars.type] ~= 6)
@@ -112,44 +118,43 @@ if any([M.aux_vars.type] ~= 6)
     s_a_v_func = @(z) fh(z,... 
                          [oo.exo_steady_state,...
                         oo.exo_det_steady_state],...
-                         M.params);
-    x = s_a_v_func(x);
+                         params);
+    xx = s_a_v_func(xx);
 else
     needs_set_auxiliary_variables = 0;
 end
 
 % value and Jacobian of objective function
 ex = zeros(1,M.exo_nbr);
-[U,Uy,Uyy] = feval([fname '_objective_static'],x,ex, M.params);
+[U,Uy,Uyy] = feval([fname '_objective_static'],x,ex, params);
 Uy = Uy';
 Uyy = reshape(Uyy,endo_nbr,endo_nbr);
 
 % set multipliers and auxiliary variables that
 % depends on multipliers to 0 to compute residuals
-xx = [x; zeros(M.endo_nbr - M.orig_eq_nbr,1)];
 [res,fJ] = feval([fname '_static'],xx,[oo.exo_simul oo.exo_det_simul], ...
                M.params);
 
 % index of multipliers and corresponding equations
 % the auxiliary variables before the Lagrange multipliers are treated
 % as ordinary endogenous variables
-n_var = M.orig_endo_nbr + min(find([M.aux_vars.type] == 6)) - 1;
-aux_eq = [1:n_var, orig_endo_nbr+orig_eq_nbr+1:size(fJ,1)];
-A = fJ(aux_eq,n_var+1:end);
+aux_eq = [1:orig_endo_aux_nbr, orig_endo_aux_nbr+orig_eq_nbr+1:size(fJ,1)];
+A = fJ(aux_eq,orig_endo_aux_nbr+1:end);
 y = res(aux_eq);
-mult = -A\y;
+aux_vars = -A\y;
 
-resids1 = y+A*mult;
+resids1 = y+A*aux_vars;
 if inst_nbr == 1
     r1 = sqrt(resids1'*resids1);
 else
     [q,r,e] = qr([A y]');
-    r1 = r(end,(orig_endo_nbr-inst_nbr+1:end))';
+    k = size(A,1)+(1-inst_nbr:0);
+    r1 = r(end,k)';
 end
 if options_.steadystate_flag
     resids = r1;
 else
-    resids = [resids1; r1];
+    resids = [res(orig_endo_nbr+(1:orig_endo_nbr-inst_nbr)); r1];
 end
 rJ = [];
-steady_state = [x(1:n_var); mult];
+steady_state = [xx(1:orig_endo_aux_nbr); aux_vars];
