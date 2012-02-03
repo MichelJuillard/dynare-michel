@@ -35,40 +35,35 @@ global M_ options_ oo_
 options_.verbosity = options_.ep.verbosity;
 verbosity = options_.ep.verbosity+options_.ep.debug;
 
-% Test if bytecode and block options are used (these options are mandatory)
-if ~( options_.bytecode && options_.block )
-    pfm.lead_lag_incidence = M_.lead_lag_incidence;
-    pfm.ny = M_.endo_nbr;
-    pfm.max_lag = M_.maximum_endo_lag;
-    pfm.nyp = nnz(pfm.lead_lag_incidence(1,:));
-    pfm.iyp = find(pfm.lead_lag_incidence(1,:)>0);
-    pfm.ny0 = nnz(pfm.lead_lag_incidence(2,:));
-    pfm.iy0 = find(pfm.lead_lag_incidence(2,:)>0);
-    pfm.nyf = nnz(pfm.lead_lag_incidence(3,:));
-    pfm.iyf = find(pfm.lead_lag_incidence(3,:)>0);
-    pfm.nd = pfm.nyp+pfm.ny0+pfm.nyf;
-    pfm.nrc = pfm.nyf+1;
-    pfm.isp = [1:pfm.nyp];
-    pfm.is = [pfm.nyp+1:pfm.ny+pfm.nyp];
-    pfm.isf = pfm.iyf+pfm.nyp;
-    pfm.isf1 = [pfm.nyp+pfm.ny+1:pfm.nyf+pfm.nyp+pfm.ny+1];
-    pfm.iz = [1:pfm.ny+pfm.nyp+pfm.nyf];
-    pfm.periods = options_.ep.periods;
-    pfm.steady_state = oo_.steady_state;
-    pfm.params = M_.params;
-    pfm.i_cols_1 = nonzeros(pfm.lead_lag_incidence(2:3,:)');
-    pfm.i_cols_A1 = find(pfm.lead_lag_incidence(2:3,:)');
-    pfm.i_cols_T = nonzeros(pfm.lead_lag_incidence(1:2,:)');
-    pfm.i_cols_j = 1:pfm.nd;
-    pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
-    pfm.dynamic_model = str2func([M_.fname,'_dynamic']);
-    pfm.verbose = options_.ep.verbosity;
-    pfm.maxit_ = options_.maxit_;
-    pfm.tolerance = options_.dynatol.f;
-    use_solve_perfect_foresight_models_routine = 1;
-else
-    use_solve_perfect_foresight_models_routine = 0;
-end
+% Prepare a structure needed by the matlab implementation of the perfect foresight model solver
+pfm.lead_lag_incidence = M_.lead_lag_incidence;
+pfm.ny = M_.endo_nbr;
+pfm.max_lag = M_.maximum_endo_lag;
+pfm.nyp = nnz(pfm.lead_lag_incidence(1,:));
+pfm.iyp = find(pfm.lead_lag_incidence(1,:)>0);
+pfm.ny0 = nnz(pfm.lead_lag_incidence(2,:));
+pfm.iy0 = find(pfm.lead_lag_incidence(2,:)>0);
+pfm.nyf = nnz(pfm.lead_lag_incidence(3,:));
+pfm.iyf = find(pfm.lead_lag_incidence(3,:)>0);
+pfm.nd = pfm.nyp+pfm.ny0+pfm.nyf;
+pfm.nrc = pfm.nyf+1;
+pfm.isp = [1:pfm.nyp];
+pfm.is = [pfm.nyp+1:pfm.ny+pfm.nyp];
+pfm.isf = pfm.iyf+pfm.nyp;
+pfm.isf1 = [pfm.nyp+pfm.ny+1:pfm.nyf+pfm.nyp+pfm.ny+1];
+pfm.iz = [1:pfm.ny+pfm.nyp+pfm.nyf];
+pfm.periods = options_.ep.periods;
+pfm.steady_state = oo_.steady_state;
+pfm.params = M_.params;
+pfm.i_cols_1 = nonzeros(pfm.lead_lag_incidence(2:3,:)');
+pfm.i_cols_A1 = find(pfm.lead_lag_incidence(2:3,:)');
+pfm.i_cols_T = nonzeros(pfm.lead_lag_incidence(1:2,:)');
+pfm.i_cols_j = 1:pfm.nd;
+pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
+pfm.dynamic_model = str2func([M_.fname,'_dynamic']);
+pfm.verbose = options_.ep.verbosity;
+pfm.maxit_ = options_.maxit_;
+pfm.tolerance = options_.dynatol.f;
 
 % Set default initial conditions.
 if isempty(initial_conditions)
@@ -80,10 +75,8 @@ options_.maxit_ = options_.ep.maxit;
 
 % Set the number of periods for the perfect foresight model
 options_.periods = options_.ep.periods;
-if use_solve_perfect_foresight_models_routine
-    pfm.periods = options_.ep.periods;
-    pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
-end
+pfm.periods = options_.ep.periods;
+pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
 
 % Set the algorithm for the perfect foresight solver
 options_.stack_solve_algo = options_.ep.stack_solve_algo;
@@ -226,10 +219,9 @@ while (t<sample_size)
         endo_simul = oo_.endo_simul;
         while 1
             if ~increase_periods
-                if use_solve_perfect_foresight_models_routine
+                [flag,tmp] = bytecode('dynamic');
+                if flag
                     [flag,tmp] = solve_perfect_foresight_model(oo_.endo_simul,oo_.exo_simul,pfm);
-                else
-                    [flag,tmp] = bytecode('dynamic');
                 end
                 info.convergence = ~flag;
             end
@@ -266,10 +258,8 @@ while (t<sample_size)
             else
                 % Increase the number of periods.
                 options_.periods = options_.periods + options_.ep.step;
-                if use_solve_perfect_foresight_models_routine
-                    pfm.periods = options_.periods;
-                    pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
-                end
+                pfm.periods = options_.periods;
+                pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
                 % Increment the counter.
                 increase_periods = increase_periods + 1;
                 if verbosity
@@ -300,10 +290,9 @@ while (t<sample_size)
                     oo_.exo_simul  = [ oo_.exo_simul ; zeros(options_.ep.step,size(shocks,2)) ];
                 end
                 % Solve the perfect foresight model with an increased number of periods.
-                if use_solve_perfect_foresight_models_routine
+                [flag,tmp] = bytecode('dynamic');
+                if flag
                     [flag,tmp] = solve_perfect_foresight_model(oo_.endo_simul,oo_.exo_simul,pfm);
-                else
-                    [flag,tmp] = bytecode('dynamic');
                 end
                 info.convergence = ~flag;
                 if info.convergence
@@ -316,10 +305,8 @@ while (t<sample_size)
                         % If the maximum deviation is close enough to zero, reset the number
                         % of periods to ep.periods
                         options_.periods = options_.ep.periods;
-                        if use_solve_perfect_foresight_models_routine
-                            pfm.periods = options_.periods;
-                            pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
-                        end
+                        pfm.periods = options_.periods;
+                        pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
                         % Cut oo_.exo_simul and oo_.endo_simul consistently with the resetted
                         % number of periods and exit from the while loop.
                         oo_.exo_simul = oo_.exo_simul(1:(options_.periods+2),:);
