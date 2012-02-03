@@ -129,7 +129,7 @@ ep.step = 50;
 % Define last periods used to test if the solution is stable with respect to an increase in the number of periods.
 ep.lp = 5;
 % Define first periods used to test if the solution is stable with respect to an increase in the number of periods.
-ep.fp = 100;
+ep.fp = 2;
 % Define the distribution for the structural innovations.
 ep.innovation_distribution = 'gaussian';
 % Set flag for the seed
