@@ -251,8 +251,10 @@ while (t<sample_size)
             % Test if periods is big enough. The variable delta measures the maximum absolute variation during
             % the last periods of the simulated path. This variation has to be close to zero (because the
             % economy is assumed to be in the steady state at the end of the simulated path).
-            delta = max(max(abs(tmp(:,end-options_.ep.lp:end)-tmp(:,end-options_.ep.lp-1:end-1))));
-            if ~increase_periods &&  delta<options_.dynatol.x
+            if info.convergence
+                delta = max(max(abs(tmp(:,end-options_.ep.lp:end)-tmp(:,end-options_.ep.lp-1:end-1))));
+            end
+            if info.convergence && ~increase_periods &&  delta<options_.dynatol.x
                 % Exit from the while loop (the number of periods is big enough).
                 break
             else
