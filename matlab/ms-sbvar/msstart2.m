@@ -176,8 +176,11 @@ if (options_.ms.freq==12)
 elseif (options_.ms.freq==4)
    nStart=(yrStart-options_.ms.initial_year )*4+qmStart-options_.ms.initial_subperiod ;  % positive number of months at the start
    nEnd=(yrEnd-options_.ms.final_year )*4+qmEnd-options_.ms.final_subperiod ;     % negative number of months towards end
+elseif (options_.ms.freq==1)
+   nStart=(yrStart-options_.ms.initial_year )*1+qmStart-options_.ms.initial_subperiod ;  % positive number of months at the start
+   nEnd=(yrEnd-options_.ms.final_year )*1+qmEnd-options_.ms.final_subperiod ;     % negative number of months towards end
 else
-   error('Error: this code is only good for monthly/quarterly data!!!')
+   error('Error: this code is only good for monthly/quarterly/yearly data!!!')
    return
 end
 %
