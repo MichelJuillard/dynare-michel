@@ -349,9 +349,9 @@ while (t<sample_size)
             end
         end% while
         if ~info.convergence% If exited from the while loop without achieving convergence, use an homotopic approach
-            [INFO,tmp] = homotopic_steps(.5,.01);
+            [INFO,tmp] = homotopic_steps(.5,.01,pfm);
             if (~isstruct(INFO) && isnan(INFO)) || ~INFO.convergence
-                [INFO,tmp] = homotopic_steps(0,.01);
+                [INFO,tmp] = homotopic_steps(0,.01,pfm);
                 if ~INFO.convergence
                     disp('Homotopy:: No convergence of the perfect foresight model solver!')
                     error('I am not able to simulate this model!');

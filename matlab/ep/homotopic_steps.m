@@ -1,5 +1,8 @@
-function [info,tmp] = homotopic_steps(initial_weight,step_length)
+function [info,tmp] = homotopic_steps(initial_weight,step_length,pfm)
 global oo_ options_ M_
+
+%Set bytecode flag
+bytecode_flag = options_.ep.use_bytecode;
 
 % Set increase and decrease factors.
 increase_factor = 5.0;
@@ -53,7 +56,14 @@ for d=1:stochastic_extended_path_depth
         if d>1
             oo_.exo_simul(1:idx(d-1),:) = exxo_simul(1:idx(d-1),:);
         end
-        [flag,tmp] = bytecode('dynamic');
+        if bytecode_flag
+            [flag,tmp] = bytecode('dynamic');
+        else
+            flag = 1;
+        end
+        if flag
+            [flag,tmp] = solve_perfect_foresight_model(oo_.endo_simul,oo_.exo_simul,pfm);
+        end
         info.convergence = ~flag;% Equal to one if the perfect foresight solver converged for the current value of weight.
         if verbose
             if info.convergence
@@ -117,7 +127,14 @@ for d=1:stochastic_extended_path_depth
     end
     if weight<1
         oo_.exo_simul = exxo_simul;
-        [flag,tmp] = bytecode('dynamic');
+        if bytecode_flag
+            [flag,tmp] = bytecode('dynamic');
+        else
+            flag = 1;
+        end
+        if flag
+            [flag,tmp] = solve_perfect_foresight_model(oo_.endo_simul,oo_.exo_simul,pfm);
+        end
         info.convergence = ~flag;
         if info.convergence
             oo_.endo_simul = tmp;
