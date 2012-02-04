@@ -126,6 +126,8 @@ ep.maxit = 500;
 ep.periods = 200;
 % Default step for increasing the number of periods if needed
 ep.step = 50;
+% Set check_stability flag
+ep.check_stability = 1;
 % Define last periods used to test if the solution is stable with respect to an increase in the number of periods.
 ep.lp = 5;
 % Define first periods used to test if the solution is stable with respect to an increase in the number of periods.

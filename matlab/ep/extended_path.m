@@ -81,6 +81,10 @@ pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
 % Set the algorithm for the perfect foresight solver
 options_.stack_solve_algo = options_.ep.stack_solve_algo;
 
+% Set check_stability flag
+do_not_check_stability_flag = ~options_.ep.check_stability;
+
+
 % Compute the first order reduced form if needed.
 %
 % REMARK. It is assumed that the user did run the same mod file with stoch_simul(order=1) and save
@@ -248,84 +252,90 @@ while (t<sample_size)
                     end
                 end
             end
-            % Test if periods is big enough.
-            % Increase the number of periods.
-            options_.periods = options_.periods + options_.ep.step;
-            pfm.periods = options_.periods;
-            pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
-            % Increment the counter.
-            increase_periods = increase_periods + 1;
-            if verbosity
-                if t<10
-                    disp(['Time:    ' int2str(t)  '. I increase the number of periods to ' int2str(options_.periods) '.'])
-                elseif t<100
-                    disp(['Time:   ' int2str(t) '. I increase the number of periods to ' int2str(options_.periods) '.'])
-                elseif t<1000
-                    disp(['Time:  ' int2str(t)  '. I increase the number of periods to ' int2str(options_.periods) '.'])
-                else
-                    disp(['Time: ' int2str(t)  '. I increase the number of periods to ' int2str(options_.periods) '.'])
-                end
-            end
-            if info.convergence
-                % If the previous call to the perfect foresight model solver exited
-                % announcing that the routine converged, adapt the size of oo_.endo_simul
-                % and oo_.exo_simul.
-                oo_.endo_simul = [ tmp , repmat(oo_.steady_state,1,options_.ep.step) ];
-                oo_.exo_simul  = [ oo_.exo_simul ; zeros(options_.ep.step,size(shocks,2)) ];
-                tmp_old = tmp;
+            if do_not_check_stability_flag
+                % Exit from the while loop.
+                oo_.endo_simul = tmp;
+                break
             else
-                % If the previous call to the perfect foresight model solver exited
-                % announcing that the routine did not converge, then tmp=1... Maybe
-                % should change that, because in some circonstances it may usefull
-                % to know where the routine did stop, even if convergence was not
-                % achieved.
-                oo_.endo_simul = [ oo_.endo_simul , repmat(oo_.steady_state,1,options_.ep.step) ];
-                oo_.exo_simul  = [ oo_.exo_simul ; zeros(options_.ep.step,size(shocks,2)) ];
-            end
-            % Solve the perfect foresight model with an increased number of periods.
-            [flag,tmp] = bytecode('dynamic');
-            if flag
-                [flag,tmp] = solve_perfect_foresight_model(oo_.endo_simul,oo_.exo_simul,pfm);
-            end
-            info.convergence = ~flag;
-            if info.convergence
-                % If the solver achieved convergence, check that simulated paths did not
-                % change during the first periods.
-                % Compute the maximum deviation between old path and new path over the
-                % first periods
-                delta = max(max(abs(tmp(:,2:options_.ep.fp)-tmp_old(:,2:options_.ep.fp))));
-                if delta<options_.dynatol.x
-                    % If the maximum deviation is close enough to zero, reset the number
-                    % of periods to ep.periods
-                    options_.periods = options_.ep.periods;
-                    pfm.periods = options_.periods;
-                    pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
-                    % Cut oo_.exo_simul and oo_.endo_simul consistently with the resetted
-                    % number of periods and exit from the while loop.
-                    oo_.exo_simul = oo_.exo_simul(1:(options_.periods+2),:);
-                    oo_.endo_simul = oo_.endo_simul(:,1:(options_.periods+2));
-                    break
-                end
-            else
-                % The solver did not converge... Try to solve the model again with a bigger
-                % number of periods, except if the number of periods has been increased more
-                % than 10 times.
-                if increase_periods==10;
-                    if verbosity
-                        if t<10
-                            disp(['Time:    ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
-                        elseif t<100
-                            disp(['Time:   ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
-                        elseif t<1000
-                            disp(['Time:  ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
-                        else
-                            disp(['Time: ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
-                        end
+                % Test if periods is big enough.
+                % Increase the number of periods.
+                options_.periods = options_.periods + options_.ep.step;
+                pfm.periods = options_.periods;
+                pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
+                % Increment the counter.
+                increase_periods = increase_periods + 1;
+                if verbosity
+                    if t<10
+                        disp(['Time:    ' int2str(t)  '. I increase the number of periods to ' int2str(options_.periods) '.'])
+                    elseif t<100
+                        disp(['Time:   ' int2str(t) '. I increase the number of periods to ' int2str(options_.periods) '.'])
+                    elseif t<1000
+                        disp(['Time:  ' int2str(t)  '. I increase the number of periods to ' int2str(options_.periods) '.'])
+                    else
+                        disp(['Time: ' int2str(t)  '. I increase the number of periods to ' int2str(options_.periods) '.'])
                     end
-                    % Exit from the while loop.
-                    break
                 end
-            end% if info.convergence
+                if info.convergence
+                    % If the previous call to the perfect foresight model solver exited
+                    % announcing that the routine converged, adapt the size of oo_.endo_simul
+                    % and oo_.exo_simul.
+                    oo_.endo_simul = [ tmp , repmat(oo_.steady_state,1,options_.ep.step) ];
+                    oo_.exo_simul  = [ oo_.exo_simul ; zeros(options_.ep.step,size(shocks,2)) ];
+                    tmp_old = tmp;
+                else
+                    % If the previous call to the perfect foresight model solver exited
+                    % announcing that the routine did not converge, then tmp=1... Maybe
+                    % should change that, because in some circonstances it may usefull
+                    % to know where the routine did stop, even if convergence was not
+                    % achieved.
+                    oo_.endo_simul = [ oo_.endo_simul , repmat(oo_.steady_state,1,options_.ep.step) ];
+                    oo_.exo_simul  = [ oo_.exo_simul ; zeros(options_.ep.step,size(shocks,2)) ];
+                end
+                % Solve the perfect foresight model with an increased number of periods.
+                [flag,tmp] = bytecode('dynamic');
+                if flag
+                    [flag,tmp] = solve_perfect_foresight_model(oo_.endo_simul,oo_.exo_simul,pfm);
+                end
+                info.convergence = ~flag;
+                if info.convergence
+                    % If the solver achieved convergence, check that simulated paths did not
+                    % change during the first periods.
+                    % Compute the maximum deviation between old path and new path over the
+                    % first periods
+                    delta = max(max(abs(tmp(:,2:options_.ep.fp)-tmp_old(:,2:options_.ep.fp))));
+                    if delta<options_.dynatol.x
+                        % If the maximum deviation is close enough to zero, reset the number
+                        % of periods to ep.periods
+                        options_.periods = options_.ep.periods;
+                        pfm.periods = options_.periods;
+                        pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
+                        % Cut oo_.exo_simul and oo_.endo_simul consistently with the resetted
+                        % number of periods and exit from the while loop.
+                        oo_.exo_simul = oo_.exo_simul(1:(options_.periods+2),:);
+                        oo_.endo_simul = oo_.endo_simul(:,1:(options_.periods+2));
+                        break
+                    end
+                else
+                    % The solver did not converge... Try to solve the model again with a bigger
+                    % number of periods, except if the number of periods has been increased more
+                    % than 10 times.
+                    if increase_periods==10;
+                        if verbosity
+                            if t<10
+                                disp(['Time:    ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
+                            elseif t<100
+                                disp(['Time:   ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
+                            elseif t<1000
+                                disp(['Time:  ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
+                            else
+                                disp(['Time: ' int2str(t)  '. Even with ' int2str(options_.periods) ', I am not able to solve the perfect foresight model. Use homotopy instead...'])
+                            end
+                        end
+                        % Exit from the while loop.
+                        break
+                    end
+                end% if info.convergence
+            end
         end% while
         if ~info.convergence% If exited from the while loop without achieving convergence, use an homotopic approach
             [INFO,tmp] = homotopic_steps(.5,.01);
