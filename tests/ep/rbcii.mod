@@ -1,6 +1,6 @@
-@#define extended_path_version = 0
+@#define extended_path_version = 1
 
-var Capital, Output, Labour, Consumption, Efficiency, efficiency, ExpectedTerm, LM, LagrangeMultiplier;
+var Capital, Output, Labour, Consumption, Investment, Efficiency, efficiency, ExpectedTerm;
 
 varexo EfficiencyInnovation;
 
@@ -28,7 +28,7 @@ sigma2  =  0.001;
 
 external_function(name=mean_preserving_spread);
 
-model(block,bytecode,cutoff=0);
+model(use_dll);
 
   // Eq. n°1:
   efficiency = rho*efficiency(-1) + EfficiencyInnovation;
@@ -40,22 +40,19 @@ model(block,bytecode,cutoff=0);
   Output = Efficiency*(alpha*(Capital(-1)^psi)+(1-alpha)*(Labour^psi))^(1/psi);
 
   // Eq. n°4:
-  Capital = max(Output-Consumption + (1-delta)*Capital(-1),(1-delta)*Capital(-1));
+  Capital = max(Output-Consumption,0) + (1-delta)*Capital(-1);
 
   // Eq. n°5:
   ((1-theta)/theta)*(Consumption/(1-Labour)) - (1-alpha)*(Output/Labour)^(1-psi);
 
   // Eq. n°6:
-  (((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption - LagrangeMultiplier  - ExpectedTerm(1);
+  ExpectedTerm = beta*((((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption)*(alpha*((Output/Capital(-1))^(1-psi))+1-delta);
 
   // Eq. n°7:
-  (Capital==(1-delta)*Capital(-1))*(Output-Consumption) + (1-(Capital==(1-delta)*Capital(-1)))*LM = 0;
+  Investment = Capital - (1-delta)*Capital(-1);
 
-  // Eq. n°8:
-  (LM<0)*(LM+LagrangeMultiplier) + (1-(LM<0))*(LM-LagrangeMultiplier) = 0;
-
-  // Eq. n°9:
-  ExpectedTerm = beta*(((((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption)*(alpha*((Output/Capital(-1))^(1-psi))+(1-delta))-(1-delta)*LagrangeMultiplier);
+  // Eq. n°8: (Euler equation, to be skipped if investment is on its lower bound)
+  (Investment>0)*((((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption - ExpectedTerm(1)) + (1-(Investment>0))*(Output-Consumption);
 
 end;
 
@@ -98,7 +95,6 @@ end;
     steady;
 
     options_.maxit_ = 100;
-    options_.stack_solve_algo = 4;
 
     simul(periods=4000);
 

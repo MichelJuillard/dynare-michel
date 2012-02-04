@@ -11,8 +11,8 @@ sigma = -0.06;
 gamma1 = 1.5;
 gamma2 = 0.5;
 
-model(block,bytecode,cutoff=0);
-y  = delta * y(-1)  + (1-delta)*y(+1)+sigma *(r - pie(+1)) + e_y; 
+model(use_dll);
+y  = delta * y(-1)  + (1-delta)*y(+1)+sigma *(r - pie(+1)) + e_y;
 pie  =   alpha * pie(-1) + (1-alpha) * pie(+1) + kappa*y + e_pie;
 r = gamma1*pie+gamma2*y;
 end;
