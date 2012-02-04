@@ -115,6 +115,8 @@ ep.debug = 0;
 ep.memory = 0;
 % Set verbose mode
 ep.verbosity = 0;
+% Set bytecode flag
+ep.use_bytecode = 1;
 % Initialization of the perfect foresight equilibrium paths
 % * init=0, previous solution is used.  
 % * init=1, a path generated with the first order reduced form is used.

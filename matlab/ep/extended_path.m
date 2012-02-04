@@ -120,6 +120,9 @@ if options_.ep.set_dynare_seed_to_default
     set_dynare_seed('default');
 end
 
+% Set bytecode flag
+bytecode_flag = options_.ep.use_bytecode;
+
 % Simulate shocks.
 switch options_.ep.innovation_distribution
   case 'gaussian'
@@ -223,7 +226,11 @@ while (t<sample_size)
         endo_simul = oo_.endo_simul;
         while 1
             if ~increase_periods
-                [flag,tmp] = bytecode('dynamic');
+                if bytecode_flag
+                    [flag,tmp] = bytecode('dynamic');
+                else
+                    flag = 1;
+                end
                 if flag
                     [flag,tmp] = solve_perfect_foresight_model(oo_.endo_simul,oo_.exo_simul,pfm);
                 end
@@ -292,7 +299,11 @@ while (t<sample_size)
                     oo_.exo_simul  = [ oo_.exo_simul ; zeros(options_.ep.step,size(shocks,2)) ];
                 end
                 % Solve the perfect foresight model with an increased number of periods.
-                [flag,tmp] = bytecode('dynamic');
+                if bytecode_flag
+                    [flag,tmp] = bytecode('dynamic');
+                else
+                    flag = 1;
+                end
                 if flag
                     [flag,tmp] = solve_perfect_foresight_model(oo_.endo_simul,oo_.exo_simul,pfm);
                 end
