@@ -88,6 +88,7 @@ nshock = nshock + estim_params_.nvn;
 nshock = nshock + estim_params_.ncx;
 nshock = nshock + estim_params_.ncn;
 lpmat0=[];
+xparam1=[];
 
 pshape = bayestopt_.pshape(nshock+1:end);
 p1 = bayestopt_.p1(nshock+1:end);
@@ -396,6 +397,9 @@ else
     end
     load(filetoload,'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd')
     Nsam = size(lpmat,1);
+    if pprior==0,
+        eval(['load ' options_.mode_file '.mat;']);
+    end
 
 
     if prepSA & isempty(strmatch('T',who('-file', filetoload),'exact')),
@@ -531,18 +535,18 @@ if length(iunstable)>0 & length(iunstable)<Nsam,
     c0=corrcoef(lpmat(istable,:));
     c00=tril(c0,-1);
 
-    stab_map_2(lpmat(istable,:),alpha2, pvalue_corr, asname, OutputDirectoryName);
+    stab_map_2(lpmat(istable,:),alpha2, pvalue_corr, asname, OutputDirectoryName,xparam1);
     if length(iunstable)>10,
-        stab_map_2(lpmat(iunstable,:),alpha2, pvalue_corr, auname, OutputDirectoryName);
+        stab_map_2(lpmat(iunstable,:),alpha2, pvalue_corr, auname, OutputDirectoryName,xparam1);
     end
     if length(iindeterm)>10,
-        stab_map_2(lpmat(iindeterm,:),alpha2, pvalue_corr, aindname, OutputDirectoryName);
+        stab_map_2(lpmat(iindeterm,:),alpha2, pvalue_corr, aindname, OutputDirectoryName,xparam1);
     end
     if length(ixun)>10,
-        stab_map_2(lpmat(ixun,:),alpha2, pvalue_corr, aunstname, OutputDirectoryName);
+        stab_map_2(lpmat(ixun,:),alpha2, pvalue_corr, aunstname, OutputDirectoryName,xparam1);
     end
     if length(iwrong)>10,
-        stab_map_2(lpmat(iwrong,:),alpha2, pvalue_corr, awrongname, OutputDirectoryName);
+        stab_map_2(lpmat(iwrong,:),alpha2, pvalue_corr, awrongname, OutputDirectoryName,xparam1);
     end
 
     x0=0.5.*(bayestopt_.ub(1:nshock)-bayestopt_.lb(1:nshock))+bayestopt_.lb(1:nshock);

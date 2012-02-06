@@ -1,4 +1,4 @@
-function stab_map_2(x,alpha2, pvalue, fnam, dirname)
+function stab_map_2(x,alpha2, pvalue, fnam, dirname,xparam1)
 % function stab_map_2(x, alpha2, pvalue, fnam, dirname)
 %
 % Written by Marco Ratto
@@ -38,6 +38,9 @@ end
 if nargin<5,
   dirname='';
 end
+if nargin<6,
+  xparam1=[];
+end
 
 ys_ = oo_.dr.ys;
 dr_ = oo_.dr;
@@ -55,6 +58,9 @@ ifig=0;
 j2=0;
 if ishock==0
   npar=estim_params_.np;
+  if ~isempty(xparam1),
+      xparam1=xparam1(nshock+1:end);
+  end
 else
   npar=estim_params_.np+nshock;
 end
@@ -77,6 +83,9 @@ for j=1:npar,
       %plot(stock_par(ixx(nfilt+1:end,i),j),stock_par(ixx(nfilt+1:end,i),i2(jx)),'.k')
       %hold on, 
       plot(x(:,j),x(:,i2(jx)),'.')
+      if ~isempty(xparam1)
+          hold on, plot(xparam1(j),xparam1(i2(jx)),'ro')
+      end
       %             xlabel(deblank(estim_params_.param_names(j,:)),'interpreter','none'), 
       %             ylabel(deblank(estim_params_.param_names(i2(jx),:)),'interpreter','none'), 
       if ishock,
