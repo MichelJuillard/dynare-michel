@@ -171,6 +171,17 @@ estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2,
 //          mh_replic=0, mode_file=ls2003_mode, mode_compute=0, nograph, load_mh_file, bayesian_irf,
 //		  filtered_vars, smoother, mh_drop=0.6);
 
+disp(' ');
+disp('WE DO STABILITY MAPPING AGAIN, EXPLORING AROUND THE MODE BY A WIDTH +- 0.2 times the mode');
+disp('THEN WE DO RMSE analysis in this neighborhood');
+disp('Typical for ML estimation, also feasible for posterior mode');
+disp(' ');
+disp('Press ENTER to continue'); pause(5);
+
+dynare_sensitivity(pprior=0,Nsam=2048,alpha2_stab=0.4,neighborhood_width=0.2,
+mode_file=ls2003_mode,  // specifies the mode file where the mode and Hessian are stored
+datafile=data_ca1,first_obs=8,nobs=79,prefilter=1,
+rmse=1, alpha2_rmse=1, alpha_rmse=1);
 
 disp(' ');
 disp('WE DO STABILITY MAPPING AGAIN, BUT FOR MULTIVARIATE SAMPLE AT THE POSTERIOR MODE (or ML) and Hessian (pprior=0 & ppost=0)');
@@ -212,15 +223,13 @@ disp('Press ENTER to continue'); pause(5);
 //alpha_rmse=1  // no Smirnov sensitivity analysis
 //);
 
-/*
 disp(' ');
 disp('RMSE ANALYSIS FOR POSTERIOR MCMC sample (ppost=1)');
 disp('Needs a call to dynare_estimation to load all MH environment');
 disp('Press ENTER to continue'); pause(5);
-estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2, mode_file=ls2003_mode, load_mh_file,
-  prefilter=1,mh_jscale=0.5,mh_replic=0, mode_compute=0, nograph, mh_drop=0.6);
+//estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2, mode_file=ls2003_mode, load_mh_file,
+//  prefilter=1,mh_jscale=0.5,mh_replic=0, mode_compute=0, nograph, mh_drop=0.6);
 
 dynare_sensitivity(stab=0, // no need for stability analysis since the posterior sample is surely OK
 rmse=1,ppost=1,alpha2_rmse=1,alpha_rmse=1);
-*/
 
