@@ -5294,6 +5294,9 @@ for identification analysis. Default: @code{0}
 @item ar = @var{INTEGER}
 Maximum number of lags for moments in identification analysis. Default: @code{1}
 
+@item lik_init = @var{INTEGER}
+@xref{lik_init}.
+
 @end table
 
 @end deffn
