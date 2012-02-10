@@ -42,32 +42,44 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
         h2 = clock;
         i_rows = 1:pfm.ny;
         i_cols = find(pfm.lead_lag_incidence');
+        i_cols_p = i_cols(1:pfm.nyp);
+        i_cols_s = i_cols(pfm.nyp+1:pfm.nyp+pfm.ny);
+        i_cols_f = bsxfun(@plus,i_cols(pfm.nyp+pfm.ny+1:pfm.nyp+pfm.ny+pfm.nyf),pfm.ny*(0:nnodes-1));
         i_cols_A = i_cols;
         for it = 2:(pfm.periods+1)
-            i_cols
             if it == 2
                 y = Y(i_cols);
                 expectations = zeros(pfm.nyf,1);
-                tt = pfm.ny+pfm.ny;
                 for n=1:nnodes
-                    expectations = expectations+weights(n)*Y(tt+(n-1)*pfm.ny+pfm.iyf);
+                    expectations = expectations+weights(n)*Y(i_cols_f(:,n));
                 end
                 y(it*pfm.ny+pfm.iyf) = expectations;
                 [d1,jacobian] = model_dynamic(y,exo_simul,pfm.params,pfm.steady_state,it);
                 A(i_rows,pfm.i_cols_A1) = jacobian(:,pfm.i_cols_1);
+                i_rows = i_rows + pfm.ny;
+                i_cols_p = bsxfun(@plus,i_cols_p,repmat(pfm.ny,1,nnodes));
+                i_cols_s = bsxfun(@plus,i_cols_s,pfm.ny*(1:nnodes));
+                i_cols_f = bsxfun(@plus,i_cols_f,pfm.ny*nnodes);
             elseif it == pfm.periods+1
                 A(i_rows,i_cols_A(pfm.i_cols_T)) = jacobian(:,pfm.i_cols_T);
             else
                 for n=1:nnodes
                     innovations(3,:) = nodes(n,:);
+                    i_cols = [i_cols_p(:,n); i_cols_s(:,n); i_cols_f(:,n)];
                     [d1,jacobian] = model_dynamic(Y(i_cols),innovations,pfm.params,pfm.steady_state,it);
                     A(i_rows,i_cols_A) = jacobian(:,pfm.i_cols_j);
                 end
-                return
+                i_cols_s = i_cols_s + pfm.ny*nnodes;
+                i_cols_f = i_cols_f + pfm.ny*nnodes;
+                if it == 3
+                    i_cols_p = bsxfun(@plus,i_cols_p,pfm.ny*(1:nnodes));
+                else
+                    i_cols_p = i_cols_p + pfm.ny*nnodes;
+                end
             end
             res(i_rows) = d1;
-            i_rows = i_rows + pfm.ny;
-            i_cols = i_cols + pfm.ny;
+            %i_rows = i_rows + pfm.ny;
+            %i_cols = i_cols + pfm.ny;
             if it > 2
                 i_cols_A = i_cols_A + pfm.ny;
             end
