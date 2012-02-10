@@ -59,6 +59,7 @@ while i<n
         if gg(i)*(hh(i)*gg(i))/2 > htol
             [f0 x fc retcode] = csminit(func0,x,f0,gg,0,diag(hh),DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
             ig(i)=1;
+            fprintf(['Done for param %s = %8.4f\n'],BayesInfo.name{i},x(i))
         end
         xh1=x;
     end
@@ -66,5 +67,4 @@ while i<n
 end
 
 save gstep.mat x h1 f0
-
 
