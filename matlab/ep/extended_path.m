@@ -182,7 +182,10 @@ while (t<sample_size)
                 flag = 1;
             end
             if flag
-                [flag,tmp] = solve_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1);
+                [flag,tmp] = solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,...
+                                                                  pfm1, ...
+                                                                  options_.ep.nnodes,...
+                                                                  options_.ep.order);
             end
             info_convergence = ~flag;
         end
