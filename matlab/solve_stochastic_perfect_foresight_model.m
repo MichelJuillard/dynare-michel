@@ -72,7 +72,7 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
         for i=1:order
             for j=1:nnodes
                 i_upd(i1:i2) = n1:n2;
-                n1 = n2+(i+2)*ny;
+                n1 = n2+(i+2)*ny+1;
                 n2 = n2+ny*(periods+2);
                 i1 = i2+1;
                 i2 = i1+n2-n1;
@@ -89,6 +89,9 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
         i_cols_s = i_cols(nyp+1:nyp+ny);
         i_cols_f = i_cols(nyp+ny+1:nyp+ny+nyf);
         i_cols_A = i_cols;
+        i_cols_Ap = i_cols_p;
+        i_cols_As = i_cols_s;
+        i_cols_Af = i_cols_f;
         for i = 1:periods
             if i <= order+1
                 i_w_p = 1;
@@ -96,13 +99,13 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
                 if i == 1
                     i_cols_A = i_cols_A1;
                 elseif i == 2
-                    i_cols_A = [ i_cols_p;
-                                 i_cols_s;
-                                 i_cols_f + nnodes*ny];
+                    i_cols_A = [ i_cols_Ap;
+                                 i_cols_As;
+                                 i_cols_Af + (nnodes-1)*ny];
                 else
-                    i_cols_A = [ i_cols_p + sum(nnodes^(1:i-3))*ny;
-                                 i_cols_s + sum(nnodes^(1:i-2))*ny;
-                                 i_cols_f + sum(nnodes^(1:i))*ny];
+                    i_cols_A = [ i_cols_Ap + sum(nnodes^(0:i-3))*ny;
+                                 i_cols_As + (sum(nnodes^(0:i-2))-1)*ny;
+                                 i_cols_Af + (sum(nnodes^(0:i))-2)*ny];
                 end
                 for j = 1:nnodes^(i-1)
                     if i <= order
