@@ -42,105 +42,16 @@ if TeX
     fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
     fprintf(fidTeX,' \n');
 end
-if nbplt == 1
-    h1 = figure('Name',figurename);
+for plt = 1:nbplt,
+    hplt = dyn_figure(options_,'Name',figurename);
     if TeX
         TeXNAMES = [];
         NAMES    = [];
     end
-    for i=1:npar
-        [x,f,abscissa,dens,binf,bsup] = draw_prior_density(i,bayestopt_);
-        [nam,texnam] = get_the_name(i,TeX,M_,estim_params_,options_);
-        if TeX
-            if i==1
-                TeXNAMES = texnam;
-                NAMES = nam;
-            else
-                TeXNAMES = char(TeXNAMES,texnam);
-                NAMES = char(NAMES,nam);
-            end
-        end
-        subplot(nr,nc,i)
-        hh = plot(x,f,'-k','linewidth',2);
-        set(hh,'color',[0.7 0.7 0.7]);
-        box on
-        title(nam,'Interpreter','none')
-        drawnow
-    end
-    eval(['print -depsc2 ' M_.fname '_Priors' int2str(1) '.eps']);
-    if ~exist('OCTAVE_VERSION')
-        eval(['print -dpdf ' M_.fname '_Priors' int2str(1)]);
-        saveas(h1,[M_.fname '_Priors' int2str(1) '.fig']);
-    end
-    if options_.nograph, close(h1), end
-    if TeX
-        fprintf(fidTeX,'\\begin{figure}[H]\n');
-        for jj = 1:npar
-            fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-        end
-        fprintf(fidTeX,'\\centering\n');
-        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Priors%s}\n',M_.fname,int2str(1));
-        fprintf(fidTeX,'\\caption{Priors.}');
-        fprintf(fidTeX,'\\label{Fig:Priors:%s}\n',int2str(1));
-        fprintf(fidTeX,'\\end{figure}\n');
-        fprintf(fidTeX,' \n');
-        fprintf(fidTeX,'%% End of TeX file.\n');
-        fclose(fidTeX);
-    end
-else
-    for plt = 1:nbplt-1
-        hplt = figure('Name',figurename);
-        if TeX
-            TeXNAMES = [];
-            NAMES    = [];
-        end
-        for index=1:nstar
-            names = [];
-            i = (plt-1)*nstar + index;
-            [nam,texnam] = get_the_name(i,TeX,M_,estim_params_,options_);
-            [x,f,abscissa,dens,binf,bsup] = draw_prior_density(i,bayestopt_);
-            if TeX
-                if index==1
-                    TeXNAMES = texnam;
-                    NAMES = nam;
-                else
-                    TeXNAMES = char(TeXNAMES,texnam);
-                    NAMES = char(NAMES,nam);
-                end
-            end
-            subplot(nr,nc,index)
-            hh = plot(x,f,'-k','linewidth',2);
-            set(hh,'color',[0.7 0.7 0.7]);
-            box on
-            title(nam,'Interpreter','none')
-            drawnow
-        end  % index=1:nstar
-        eval(['print -depsc2 ' M_.fname '_Priors' int2str(plt) '.eps']);
-        if ~exist('OCTAVE_VERSION')
-            eval(['print -dpdf ' M_.fname '_Priors' int2str(plt)]);
-            saveas(hplt,[M_.fname '_Priors' int2str(plt) '.fig']);
-        end
-        if options_.nograph, close(hplt), end
-        if TeX
-            fprintf(fidTeX,'\\begin{figure}[H]\n');
-            for jj = 1:nstar
-                fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-            end
-            fprintf(fidTeX,'\\centering\n');
-            fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Priors%s}\n',M_.fname,int2str(plt));
-            fprintf(fidTeX,'\\caption{Priors.}');
-            fprintf(fidTeX,'\\label{Fig:Priors:%s}\n',int2str(plt));
-            fprintf(fidTeX,'\\end{figure}\n');
-            fprintf(fidTeX,' \n');
-        end
-    end % plt = 1:nbplt-1
-    hplt = figure('Name',figurename);
-    if TeX
-        TeXNAMES = [];
-        NAMES    = [];
-    end
-    for index=1:npar-(nbplt-1)*nstar
-        i = (nbplt-1)*nstar +  index;
+    nstar0 = min(nstar,npar-(plt-1)*nstar);
+    for index=1:nstar0
+        names = [];
+        i = (plt-1)*nstar + index;
         [x,f,abscissa,dens,binf,bsup] = draw_prior_density(i,bayestopt_);
         [nam,texnam] = get_the_name(i,TeX,M_,estim_params_,options_);
         if TeX
@@ -152,35 +63,28 @@ else
                 NAMES = char(NAMES,nam);
             end
         end
-        if lr
-            subplot(lc,lr,index);
-        else
-            subplot(nr,nc,index);
-        end
+        subplot(nr,nc,index)
         hh = plot(x,f,'-k','linewidth',2);
         set(hh,'color',[0.7 0.7 0.7]);
         box on
         title(nam,'Interpreter','none')
         drawnow
-    end  % index=1:npar-(nbplt-1)*nstar
-    eval(['print -depsc2 ' M_.fname '_Priors' int2str(nbplt) '.eps']);
-    if ~exist('OCTAVE_VERSION')
-        eval(['print -dpdf ' M_.fname '_Priors' int2str(nbplt)]);
-        saveas(hplt,[M_.fname '_Priors' int2str(nbplt) '.fig']);
     end
-    if options_.nograph, close(hplt), end
+    dyn_saveas(hplt,[M_.fname '_Priors' int2str(plt)],options_);
     if TeX
         fprintf(fidTeX,'\\begin{figure}[H]\n');
-        for jj = 1:npar-(nbplt-1)*nstar
+        for jj = 1:nstar0,
             fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
         end
         fprintf(fidTeX,'\\centering\n');
-        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Priors%s}\n',M_.fname,int2str(nbplt));
+        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_Priors%s}\n',M_.fname,int2str(plt));
         fprintf(fidTeX,'\\caption{Priors.}');
-        fprintf(fidTeX,'\\label{Fig:Priors:%s}\n',int2str(nbplt));
+        fprintf(fidTeX,'\\label{Fig:Priors:%s}\n',int2str(plt));
         fprintf(fidTeX,'\\end{figure}\n');
-        fprintf(fidTeX,' \n');
-        fprintf(fidTeX,'%% End of TeX file.\n');
-        fclose(fidTeX);
     end
+end
+if TeX
+    fprintf(fidTeX,' \n');
+    fprintf(fidTeX,'%% End of TeX file.\n');
+    fclose(fidTeX);
 end
