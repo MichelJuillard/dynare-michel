@@ -650,7 +650,7 @@ for i = 1:Size;
         end
     end;
     if task ~=1
-        if (maximum_lag > 0 && n_pred > 0)
+        if (maximum_lag > 0 && (n_pred > 0 || n_both > 0))
             sorted_col_dr_ghx = M_.block_structure.block(i).sorted_col_dr_ghx;
             dr.ghx(endo, sorted_col_dr_ghx) = dr.ghx(endo, sorted_col_dr_ghx) + ghx;
             data(i).ghx = ghx;
