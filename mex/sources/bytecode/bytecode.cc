@@ -205,7 +205,7 @@ main(int nrhs, const char *prhs[])
 #endif
   //ErrorHandlingException error_handling;
   unsigned int i, row_y = 0, col_y = 0, row_x = 0, col_x = 0, nb_row_xd = 0;
-  unsigned int steady_row_y, steady_col_y, steady_row_x, steady_col_x, steady_nb_row_xd;
+  unsigned int steady_row_y, steady_col_y;
   int y_kmin = 0, y_kmax = 0, y_decal = 0;
   unsigned int periods = 1;
   double *direction;
@@ -265,12 +265,9 @@ main(int nrhs, const char *prhs[])
         {
           steady_yd = mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "steady_state")));
           steady_row_y = mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "steady_state")));
-          steady_col_y = mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "steady_state")));;  
+          steady_col_y = mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "steady_state")));;
         }
       steady_xd = mxGetPr(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "exo_steady_state")));
-      steady_row_x = mxGetM(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "exo_steady_state")));
-      steady_col_x = mxGetN(mxGetFieldByNumber(oo_, 0, mxGetFieldNumber(oo_, "exo_steady_state")));
-      steady_nb_row_xd = steady_row_x;
     }
   else
     {
@@ -342,11 +339,11 @@ main(int nrhs, const char *prhs[])
   mxFree(fname);
   int nb_blocks = 0;
   double *pind;
-  bool result = true, no_error = true;
+  bool no_error = true;
 
   try
     {
-      result = interprete.compute_blocks(f, f, steady_state, evaluate, block, nb_blocks,print_it);
+      interprete.compute_blocks(f, f, steady_state, evaluate, block, nb_blocks,print_it);
     }
   catch (GeneralExceptionHandling &feh)
     {

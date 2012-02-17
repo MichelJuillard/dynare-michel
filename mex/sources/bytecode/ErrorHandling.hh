@@ -358,9 +358,6 @@ public:
     bool go_on = true;
     double ll;
     ExpressionType equation_type = TemporaryTerm;
-    unsigned int equation_num;
-    unsigned int dvar1, dvar2, dvar3;
-    int lag1, lag2, lag3;
     size_t found;
     double *jacob = NULL, *jacob_other_endo = NULL, *jacob_exo = NULL, *jacob_exo_det = NULL;
     external_function_type function_type = ExternalFunctionWithoutDerivative;
@@ -385,107 +382,48 @@ public:
               {
               case TemporaryTerm:
                 equation_type = TemporaryTerm;
-                equation_num = ((FNUMEXPR_ *) it_code->second)->get_equation();
                 break;
               case ModelEquation:
                 equation_type = ModelEquation;
-                equation_num = ((FNUMEXPR_ *) it_code->second)->get_equation();
                 break;
               case FirstEndoDerivative:
                 equation_type = FirstEndoDerivative;
-                equation_num = ((FNUMEXPR_ *) it_code->second)->get_equation();
-                dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
-                lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
                 break;
               case FirstOtherEndoDerivative:
                 equation_type = FirstOtherEndoDerivative;
-                equation_num = ((FNUMEXPR_ *) it_code->second)->get_equation();
-                dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
-                lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
                 break;
               case FirstExoDerivative:
                 equation_type = FirstExoDerivative;
-                equation_num = ((FNUMEXPR_ *) it_code->second)->get_equation();
-                dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
-                lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
                 break;
               case FirstExodetDerivative:
                 equation_type = FirstExodetDerivative;
-                equation_num = ((FNUMEXPR_ *) it_code->second)->get_equation();
-                dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
-                lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
                 break;
               case FirstParamDerivative:
                 equation_type = FirstParamDerivative;
-                equation_num = ((FNUMEXPR_ *) it_code->second)->get_equation();
-                dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
                 break;
               case SecondEndoDerivative:
                 equation_type = SecondEndoDerivative;
-                equation_num = ((FNUMEXPR_ *) it_code->second)->get_equation();
-                dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
-                lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
-                dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
-                lag2 = ((FNUMEXPR_ *) it_code->second)->get_lag2();
                 break;
               case SecondExoDerivative:
                 equation_type = SecondExoDerivative;
-                equation_num = ((FNUMEXPR_ *) it_code->second)->get_equation();
-                dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
-                lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
-                dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
-                lag2 = ((FNUMEXPR_ *) it_code->second)->get_lag2();
                 break;
               case SecondExodetDerivative:
                 equation_type = SecondExodetDerivative;
-                equation_num = ((FNUMEXPR_ *) it_code->second)->get_equation();
-                dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
-                lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
-                dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
-                lag2 = ((FNUMEXPR_ *) it_code->second)->get_lag2();
                 break;
               case SecondParamDerivative:
                 equation_type = SecondExodetDerivative;
-                equation_num = ((FNUMEXPR_ *) it_code->second)->get_equation();
-                dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
-                dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
                 break;
               case ThirdEndoDerivative:
                 equation_type = ThirdEndoDerivative;
-                equation_num = ((FNUMEXPR_ *) it_code->second)->get_equation();
-                dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
-                lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
-                dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
-                lag2 = ((FNUMEXPR_ *) it_code->second)->get_lag2();
-                dvar3 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
-                lag3 = ((FNUMEXPR_ *) it_code->second)->get_lag3();
                 break;
               case ThirdExoDerivative:
                 equation_type = ThirdExoDerivative;
-                equation_num = ((FNUMEXPR_ *) it_code->second)->get_equation();
-                dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
-                lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
-                dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
-                lag2 = ((FNUMEXPR_ *) it_code->second)->get_lag2();
-                dvar3 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
-                lag3 = ((FNUMEXPR_ *) it_code->second)->get_lag3();
                 break;
               case ThirdExodetDerivative:
                 equation_type = ThirdExodetDerivative;
-                equation_num = ((FNUMEXPR_ *) it_code->second)->get_equation();
-                dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
-                lag1 = ((FNUMEXPR_ *) it_code->second)->get_lag1();
-                dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
-                lag2 = ((FNUMEXPR_ *) it_code->second)->get_lag2();
-                dvar3 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
-                lag3 = ((FNUMEXPR_ *) it_code->second)->get_lag3();
                 break;
               case ThirdParamDerivative:
                 equation_type = ThirdExodetDerivative;
-                equation_num = ((FNUMEXPR_ *) it_code->second)->get_equation();
-                dvar1 = ((FNUMEXPR_ *) it_code->second)->get_dvariable1();
-                dvar2 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
-                dvar3 = ((FNUMEXPR_ *) it_code->second)->get_dvariable2();
                 break;
               default:
                 ostringstream tmp;

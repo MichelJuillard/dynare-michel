@@ -104,12 +104,12 @@ private:
   void CheckIt(int y_size, int y_kmin, int y_kmax, int Size, int periods, int iter);
   void Check_the_Solution(int periods, int y_kmin, int y_kmax, int Size, double *u, int *pivot, int *b);
   int complete(int beg_t, int Size, int periods, int *b);
-  double bksub(int tbreak, int last_period, int Size, double slowc_l
+  void bksub(int tbreak, int last_period, int Size, double slowc_l
 #ifdef PROFILER
                , long int *nmul
 #endif
                );
-  double simple_bksub(int it_, int Size, double slowc_l);
+  void simple_bksub(int it_, int Size, double slowc_l);
   mxArray *Sparse_transpose(mxArray *A_m);
   mxArray *Sparse_mult_SAT_SB(mxArray *A_m, mxArray *B_m);
   mxArray *Sparse_mult_SAT_B(mxArray *A_m, mxArray *B_m);

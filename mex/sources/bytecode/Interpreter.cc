@@ -1725,7 +1725,6 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
   it_code_type begining;
   int i;
   bool cvg;
-  int giter;
   bool result = true;
   double *y_save;
   res1 = 0;
@@ -2348,7 +2347,6 @@ Interpreter::simulate_a_block(const int size, const int type, string file_name, 
       r = (double *) mxMalloc(size*sizeof(double));
       y_save = (double *) mxMalloc(y_size*sizeof(double)*(periods+y_kmax+y_kmin));
       begining = it_code;
-      giter = 0;
       iter = 0;
       if (!is_linear)
         {

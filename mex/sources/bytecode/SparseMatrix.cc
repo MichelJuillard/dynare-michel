@@ -894,10 +894,8 @@ SparseMatrix::compare(int *save_op, int *save_opa, int *save_opaa, int beg_t, in
   long int i, j, nop = nop4/2, t, k;
   double r = 0.0;
   bool OK = true;
-  clock_t t001;
   t_save_op_s *save_op_s, *save_opa_s, *save_opaa_s;
   int *diff1, *diff2;
-  t001 = clock();
   diff1 = (int *) mxMalloc(nop*sizeof(int));
   diff2 = (int *) mxMalloc(nop*sizeof(int));
   int max_save_ops_first = -1;
@@ -1141,7 +1139,6 @@ SparseMatrix::complete(int beg_t, int Size, int periods, int *b)
     }
   max_var = (periods+y_kmin)*y_size;
   min_var = y_kmin*y_size;
-  int k1 = 0;
   for (t = periods+y_kmin-1; t >= beg_t+y_kmin; t--)
     {
       j = 0;
@@ -1165,7 +1162,6 @@ SparseMatrix::complete(int beg_t, int Size, int periods, int *b)
               break;
             case IFSTP:
               k = save_code[i+1]+ti*diff[j];
-              k1 = k;
               err = yy - y[k];
               y[k] += slowc*(err);
               break;
@@ -1178,7 +1174,7 @@ SparseMatrix::complete(int beg_t, int Size, int periods, int *b)
   return (beg_t);
 }
 
-double
+void
 SparseMatrix::bksub(int tbreak, int last_period, int Size, double slowc_l)
 {
   NonZeroElem *first;
@@ -1214,10 +1210,9 @@ SparseMatrix::bksub(int tbreak, int last_period, int Size, double slowc_l)
           y[eq] += slowc_l*yy;
         }
     }
-  return res1;
 }
 
-double
+void
 SparseMatrix::simple_bksub(int it_, int Size, double slowc_l)
 {
   int i, k;
@@ -1242,7 +1237,6 @@ SparseMatrix::simple_bksub(int it_, int Size, double slowc_l)
       direction[eq+it_*y_size] = yy;
       y[eq+it_*y_size] += slowc_l*yy;
     }
-  return res1;
 }
 
 void
@@ -1797,7 +1791,6 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray *A_m, mxArray *b_m, unsigned int S
     A3_j[++A3_var] = A3_nze;
   mxArray *d1 = NULL;
   vector<pair<mxArray *, mxArray *> > triangular_form;
-  int last_t = 0;
   double sumc = 0, C_sumc = 1000;
   mxArray *B1_inv = NULL;
   mxArray *B1_inv_t = NULL;
@@ -1815,7 +1808,6 @@ SparseMatrix::Solve_Matlab_Relaxation(mxArray *A_m, mxArray *b_m, unsigned int S
           sumc = 0;
           for (unsigned int i = 0; i < B_inv_nze; i++)
             sumc += fabs(B_inv_d[i]);
-          last_t = t;
         }
       B1_inv_t = Sparse_transpose(B1_inv);
       mxArray *S1 = Sparse_mult_SAT_SB(B1_inv_t, C1);
@@ -2252,7 +2244,6 @@ SparseMatrix::Solve_ByteCode_Sparse_GaussianElimination(int Size, int blck, bool
             }
         }
       double markovitz = 0, markovitz_max = -9e70;
-      int NR_max = 0;
       if (!one)
         {
           for (int j = 0; j < l; j++)
@@ -2277,7 +2268,6 @@ SparseMatrix::Solve_ByteCode_Sparse_GaussianElimination(int Size, int blck, bool
                   pivj = pivj_v[j];   //Line number
                   pivk = pivk_v[j];   //positi
                   markovitz_max = markovitz;
-                  NR_max = NR[j];
                 }
             }
         }
@@ -2305,7 +2295,6 @@ SparseMatrix::Solve_ByteCode_Sparse_GaussianElimination(int Size, int blck, bool
                   pivj = pivj_v[j];   //Line number
                   pivk = pivk_v[j];   //positi
                   markovitz_max = markovitz;
-                  NR_max = NR[j];
                 }
             }
         }
@@ -2411,11 +2400,11 @@ SparseMatrix::Solve_ByteCode_Sparse_GaussianElimination(int Size, int blck, bool
           u[b[row]] -= u[b[pivj]]*first_elem;
         }
     }
-  double slowc_lbx = slowc, res1bx;
+  double slowc_lbx = slowc;
   for (int i = 0; i < y_size; i++)
     ya[i+it_*y_size] = y[i+it_*y_size];
   slowc_save = slowc;
-  res1bx = simple_bksub(it_, Size, slowc_lbx);
+  simple_bksub(it_, Size, slowc_lbx);
   End_GE(Size);
   mxFree(piv_v);
   mxFree(pivj_v);
@@ -2901,11 +2890,11 @@ SparseMatrix::Solve_ByteCode_Symbolic_Sparse_GaussianElimination(int Size, bool 
     }
 
   /*The backward substitution*/
-  double slowc_lbx = slowc, res1bx;
+  double slowc_lbx = slowc;
   for (int i = 0; i < y_size*(periods+y_kmin); i++)
     ya[i] = y[i];
   slowc_save = slowc;
-  res1bx = bksub(tbreak, last_period, Size, slowc_lbx);
+  bksub(tbreak, last_period, Size, slowc_lbx);
   End_GE(Size);
 }
 
