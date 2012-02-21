@@ -114,8 +114,8 @@ fillEstParamsInfo(const mxArray *estim_params_info, EstimatedParameter::pType ty
 
 int
 sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
-           Matrix &steadyState, Vector &estParams, Vector &deepParams, const MatrixConstView &data,
-           Matrix &Q, Matrix &H, size_t presampleStart, int &info, const VectorConstView &nruns,
+           VectorView &steadyState, VectorConstView &estParams, VectorView &deepParams, const MatrixConstView &data,
+           MatrixView &Q, Matrix &H, size_t presampleStart, int &info, const VectorConstView &nruns,
            size_t fblock, size_t nBlocks, Proposal pdd, EstimatedParametersDescription &epd,
            const std::string &resultsFileStem, size_t console_mode, size_t load_mh_file)
 {
@@ -539,26 +539,26 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
           mhFName = ssFName.str();
           fidlog = fopen(mhFName.c_str(), "a");
           fprintf(fidlog, "\n");
-          fprintf(fidlog, "%% Mh%dBlck%d ( %s %s )\n", (int) NewFileVw(b-1), b, __DATE__, __TIME__);
+          fprintf(fidlog, "%% Mh%dBlck%lu ( %s %s )\n", (int) NewFileVw(b-1), b, __DATE__, __TIME__);
           fprintf(fidlog, " \n");
-          fprintf(fidlog, "  Number of simulations.: %d \n", currInitSizeArray); // (length(logpo2)) ');
+          fprintf(fidlog, "  Number of simulations.: %lu \n", currInitSizeArray); // (length(logpo2)) ');
           fprintf(fidlog, "  Acceptation rate......: %f \n", jsux);
           fprintf(fidlog, "  Posterior mean........:\n");
           for (size_t i = 0; i < npar; ++i)
             {
               VectorView mhpdColVw = mat::get_col(mhParamDraws, i);
-              fprintf(fidlog, "    params: %d : %f \n", i+1, vec::meanSumMinMax(dsum, dmin, dmax, mhpdColVw));
+              fprintf(fidlog, "    params: %lu : %f \n", i+1, vec::meanSumMinMax(dsum, dmin, dmax, mhpdColVw));
               MinMax(i, iMin) = dmin;
               MinMax(i, iMax) = dmax;
             } // end
           fprintf(fidlog, "    log2po: %f \n", vec::meanSumMinMax(dsum, dmin, dmax, mhLogPostDens));
           fprintf(fidlog, "  Minimum value.........:\n");;
           for (size_t i = 0; i < npar; ++i)
-            fprintf(fidlog, "    params: %d : %f \n", i+1, MinMax(i, iMin));
+            fprintf(fidlog, "    params: %lu : %f \n", i+1, MinMax(i, iMin));
           fprintf(fidlog, "    log2po: %f \n", dmin);
           fprintf(fidlog, "  Maximum value.........:\n");
           for (size_t i = 0; i < npar; ++i)
-            fprintf(fidlog, "    params: %d : %f \n", i+1, MinMax(i, iMax));
+            fprintf(fidlog, "    params: %lu : %f \n", i+1, MinMax(i, iMax));
           fprintf(fidlog, "    log2po: %f \n", dmax);
           fprintf(fidlog, " \n");
           fclose(fidlog);
@@ -624,12 +624,12 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
 }
 
 int
-logMCMCposterior(const VectorConstView &estParams, const MatrixConstView &data,
-                 const size_t fblock, const size_t nBlocks, const VectorConstView &nMHruns, const MatrixConstView &D)
+logMCMCposterior(VectorConstView &estParams, const MatrixConstView &data,
+                 const size_t fblock, const size_t nBlocks, const VectorConstView &nMHruns, const MatrixConstView &D,
+		 VectorView &steadyState, VectorView &deepParams, MatrixView &Q, Matrix &H)
 {
   // Retrieve pointers to global variables
   const mxArray *M_ = mexGetVariablePtr("global", "M_");
-  const mxArray *oo_ = mexGetVariablePtr("global", "oo_");
   const mxArray *options_ = mexGetVariablePtr("global", "options_");
   const mxArray *estim_params_ = mexGetVariablePtr("global", "estim_params_");
 
@@ -643,7 +643,7 @@ logMCMCposterior(const VectorConstView &estParams, const MatrixConstView &data,
 
   size_t n_endo = (size_t) *mxGetPr(mxGetField(M_, 0, "endo_nbr"));
   size_t n_exo = (size_t) *mxGetPr(mxGetField(M_, 0, "exo_nbr"));
-  size_t n_param = (size_t) *mxGetPr(mxGetField(M_, 0, "param_nbr"));
+
   size_t n_estParams = estParams.getSize();
 
   std::vector<size_t> zeta_fwrd, zeta_back, zeta_mixed, zeta_static;
@@ -702,26 +702,8 @@ logMCMCposterior(const VectorConstView &estParams, const MatrixConstView &data,
   LogPosteriorDensity lpd(dynamicDllFile, epd, n_endo, n_exo, zeta_fwrd, zeta_back, zeta_mixed, zeta_static,
                           qz_criterium, varobs, riccati_tol, lyapunov_tol, info);
 
-  // Construct arguments of compute() method
-  Matrix steadyState(n_endo, 1);
-  mat::get_col(steadyState, 0) = VectorConstView(mxGetPr(mxGetField(oo_, 0, "steady_state")), n_endo, 1);
-
-  Vector estParams2(n_estParams);
-  estParams2 = estParams;
-  Vector deepParams(n_param);
-  deepParams = VectorConstView(mxGetPr(mxGetField(M_, 0, "params")), n_param, 1);
-  Matrix Q(n_exo);
-  Q = MatrixConstView(mxGetPr(mxGetField(M_, 0, "Sigma_e")), n_exo, n_exo, n_exo);
-
-  Matrix H(n_varobs);
-  const mxArray *H_mx = mxGetField(M_, 0, "H");
-  if (mxGetM(H_mx) == 1 && mxGetN(H_mx) == 1 && *mxGetPr(H_mx) == 0)
-    H.setAll(0.0);
-  else
-    H = MatrixConstView(mxGetPr(mxGetField(M_, 0, "H")), n_varobs, n_varobs, n_varobs);
-
   // Construct MHMCMC Sampler
-  RandomWalkMetropolisHastings rwmh(estParams2.getSize());
+  RandomWalkMetropolisHastings rwmh(estParams.getSize());
   // Construct GaussianPrior drawDistribution m=0, sd=1
   GaussianPrior drawGaussDist01(0.0, 1.0, -INFINITY, INFINITY, 0.0, 1.0);
   // get Jscale = diag(bayestopt_.jscale);
@@ -731,7 +713,7 @@ logMCMCposterior(const VectorConstView &estParams, const MatrixConstView &data,
   Proposal pdd(vJscale, D);
 
   //sample MHMCMC draws and get get last line run in the last MH block sub-array
-  int lastMHblockArrayLine = sampleMHMC(lpd, rwmh, steadyState, estParams2, deepParams, data, Q, H, presample, info,
+  int lastMHblockArrayLine = sampleMHMC(lpd, rwmh, steadyState, estParams, deepParams, data, Q, H, presample, info,
                                         nMHruns, fblock, nBlocks, pdd, epd, resultsFileStem, console_mode, load_mh_file);
 
   // Cleanups
@@ -746,8 +728,8 @@ void
 mexFunction(int nlhs, mxArray *plhs[],
             int nrhs, const mxArray *prhs[])
 {
-  if (nrhs != 6)
-    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: exactly six arguments are required.");
+  if (nrhs != 10)
+    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: exactly 11 arguments are required.");
   if (nlhs != 2)
     DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: exactly two return arguments are required.");
 
@@ -761,18 +743,42 @@ mexFunction(int nlhs, mxArray *plhs[],
   if (!mxIsDouble(prhs[1]))
     DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: Second argument must be a matrix of double-precision numbers");
 
-  MatrixConstView data(mxGetPr(prhs[1]), mxGetM(prhs[1]), mxGetN(prhs[1]), mxGetM(prhs[1]));
-
   size_t fblock = (size_t) mxGetScalar(prhs[2]);
   size_t nBlocks = (size_t) mxGetScalar(prhs[3]);
   VectorConstView nMHruns(mxGetPr(prhs[4]), mxGetM(prhs[4]), 1);
+  MatrixConstView D(mxGetPr(prhs[5]), mxGetM(prhs[5]), mxGetN(prhs[5]), mxGetM(prhs[5]));
+  const mxArray *dataset = prhs[6];
+  const mxArray *options_ = prhs[7];
+  const mxArray *M_ = prhs[8];
+  const mxArray *bayestopt_ = prhs[9];
+  const mxArray *oo_ = prhs[10];
+
   assert(nMHruns.getSize() == nBlocks);
 
-  MatrixConstView D(mxGetPr(prhs[5]), mxGetM(prhs[5]), mxGetN(prhs[5]), mxGetM(prhs[5]));
+  mxArray *dataset_data = mxGetField(dataset,0,"data");
+  MatrixConstView data(mxGetPr(dataset_data), mxGetM(dataset_data), mxGetN(dataset_data), mxGetM(dataset_data));
+
+  int endo_nbr = *(int*)mxGetPr(mxGetField(M_, 0, "endo_nbr"));
+  int exo_nbr = *(int*)mxGetPr(mxGetField(M_, 0, "exo_nbr"));
+  int param_nbr = *(int*)mxGetPr(mxGetField(M_, 0, "param_nbr"));
+  int varobs_nbr = mxGetN(mxGetField(options_, 0, "varobs"));
+
+  VectorView steadyState(mxGetPr(mxGetField(oo_,0,"steady_state")),endo_nbr, 1);
+  VectorView deepParams(mxGetPr(mxGetField(M_, 0, "params")),param_nbr,1);
+
+  MatrixView Q(mxGetPr(mxGetField(M_, 0, "Sigma_e")), exo_nbr, exo_nbr, exo_nbr);
+
+  Matrix H(varobs_nbr,varobs_nbr);
+  const mxArray *H_mx = mxGetField(M_, 0, "H");
+  if (mxGetM(H_mx) == 1 && mxGetN(H_mx) == 1 && *mxGetPr(H_mx) == 0)
+    H.setAll(0.0);
+  else
+    H = MatrixConstView(mxGetPr(H_mx), varobs_nbr, varobs_nbr, varobs_nbr);
+
   //calculate MHMCMC draws and get get last line run in the last MH block sub-array
   try
     {
-      int lastMHblockArrayLine = logMCMCposterior(estParams, data, fblock, nBlocks, nMHruns, D);
+      int lastMHblockArrayLine = logMCMCposterior(estParams, data, fblock, nBlocks, nMHruns, D, steadyState, deepParams, Q, H);
       plhs[1] = mxCreateDoubleMatrix(1, 1, mxREAL);
       *mxGetPr(plhs[1]) = (double) lastMHblockArrayLine;
     }

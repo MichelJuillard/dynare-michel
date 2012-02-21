@@ -48,12 +48,30 @@ public:
                          const std::vector<size_t> &zeta_varobs_back_mixed_arg,
                          double qz_criterium_arg, double lyapunov_tol_arg, int &info);
   virtual ~InitializeKalmanFilter();
-  // initialise all KF matrices
-  void initialize(VectorView &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Q, Matrix &RQRt,
-                  Matrix &T, Matrix &Pstar, Matrix &Pinf, double &penalty, const MatrixConstView &dataView, MatrixView &detrendedDataView, int &info);
   // initialise parameter dependent KF matrices only but not Ps
-  void initialize(VectorView &steadyState, const Vector &deepParams, Matrix &R, const Matrix &Q, Matrix &RQRt,
-                  Matrix &T, double &penalty, const MatrixConstView &dataView, MatrixView &detrendedDataView, int &info);
+  template <class VEC>
+  void initialize(VEC &steadyState, const VectorView &deepParams, Matrix &R,
+				     const MatrixView &Q, Matrix &RQRt, Matrix &T,
+				     double &penalty, const MatrixConstView &dataView,
+				     MatrixView &detrendedDataView, int &info)
+  {
+    modelSolution.compute(steadyState, deepParams, g_x, g_u);
+    detrendData.detrend(steadyState, dataView, detrendedDataView);
+
+    setT(T, info);
+    setRQR(R, Q, RQRt, info);
+  }
+
+  // initialise all KF matrices
+  template <class VEC>
+  void initialize(VEC &steadyState, const VectorView &deepParams, Matrix &R,
+				     const MatrixView &Q, Matrix &RQRt, Matrix &T, Matrix &Pstar, Matrix &Pinf,
+				     double &penalty, const MatrixConstView &dataView,
+				     MatrixView &detrendedDataView, int &info)
+  {
+    initialize(steadyState, deepParams, R, Q, RQRt, T, penalty, dataView, detrendedDataView, info);
+    setPstar(Pstar, Pinf, T, RQRt, info);
+  }
 
 private:
   const double lyapunov_tol;
@@ -68,7 +86,7 @@ private:
   Matrix g_u;
   Matrix Rt, RQ;
   void setT(Matrix &T, int &info);
-  void setRQR(Matrix &R, const Matrix &Q, Matrix &RQRt, int &info);
+  void setRQR(Matrix &R, const MatrixView &Q, Matrix &RQRt, int &info);
   void setPstar(Matrix &Pstar, Matrix &Pinf, const Matrix &T, const Matrix &RQRt, int &info);
 
 };

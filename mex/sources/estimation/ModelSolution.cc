@@ -51,41 +51,4 @@ ModelSolution::ModelSolution(const std::string &dynamicDllFile,  size_t n_endo_a
             back_inserter(zeta_back_mixed));
 }
 
-void
-ModelSolution::compute(VectorView &steadyState, const Vector &deepParams, Matrix &ghx, Matrix &ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
-{
-  // compute Steady State
-  ComputeSteadyState(steadyState, deepParams);
-
-  // then get jacobian and
-
-  ComputeModelSolution(steadyState, deepParams, ghx, ghu);
-
-}
-
-void
-ModelSolution::ComputeModelSolution(VectorView &steadyState, const Vector &deepParams, Matrix &ghx, Matrix &ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
-{
-  // set extended Steady State
-
-  for (size_t i = 0; i < zeta_back_mixed.size(); i++)
-    llXsteadyState(i) = steadyState(zeta_back_mixed[i]);
-
-  for (size_t i = 0; i < n_endo; i++)
-    llXsteadyState(zeta_back_mixed.size() + i) = steadyState(i);
-
-  for (size_t i = 0; i < zeta_fwrd_mixed.size(); i++)
-    llXsteadyState(zeta_back_mixed.size() + n_endo + i) = steadyState(zeta_fwrd_mixed[i]);
-
-  //get jacobian
-  dynamicDLLp.eval(llXsteadyState, Mx, deepParams, steadyState, residual, &jacobian, NULL, NULL);
-
-  //compute rules
-  decisionRules.compute(jacobian, ghx, ghu);
-}
-void
-ModelSolution::ComputeSteadyState(VectorView &steadyState, const Vector &deepParams)
-{
-  // does nothig for time being.
-}
 

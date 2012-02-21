@@ -63,6 +63,5 @@ nodist_logMHMCMCposterior_SOURCES = \
 	$(COMMON_SRCS) \
 	$(TOPDIR)/Proposal.cc \
 	$(TOPDIR)/Proposal.hh \
-	$(TOPDIR)/RandomWalkMetropolisHastings.cc \
 	$(TOPDIR)/RandomWalkMetropolisHastings.hh \
 	$(TOPDIR)/logMHMCMCposterior.cc

@@ -33,20 +33,6 @@ LogPriorDensity::LogPriorDensity(EstimatedParametersDescription &estParsDesc_arg
 {
 };
 
-double
-LogPriorDensity::compute(const Vector &ep)
-{
-  assert(estParsDesc.estParams.size() == ep.getSize());
-  double logPriorDensity = 0;
-  for (size_t i = 0; i <  ep.getSize(); ++i)
-    {
-      logPriorDensity += log(((*(estParsDesc.estParams[i]).prior)).pdf(ep(i)));
-      if (std::isinf(fabs(logPriorDensity)))
-        return logPriorDensity;
-    }
-  return logPriorDensity;
-};
-
 /**
  * Return random number for prior fromits distribution
  */

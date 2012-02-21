@@ -54,10 +54,36 @@ public:
                double qz_criterium_arg, const std::vector<size_t> &varobs_arg,
                double riccati_tol_arg, double lyapunov_tol_arg, int &info);
 
-  double compute(const MatrixConstView &dataView, VectorView &steadyState,
-                 const Matrix &Q, const Matrix &H, const Vector &deepParams,
+  template <class VEC>
+  double compute(const MatrixConstView &dataView, VEC &steadyState,
+                 const MatrixView &Q, const Matrix &H, const VectorView &deepParams,
                  VectorView &vll, MatrixView &detrendedDataView, size_t start, size_t period,
-                 double &penalty, int &info);
+                 double &penalty, int &info)
+  {
+    double lik = INFINITY;
+    try
+      {
+	if (period == 0) // initialise all KF matrices
+	  initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T, Pstar, Pinf,
+				      penalty, dataView, detrendedDataView, info);
+	else             // initialise parameter dependent KF matrices only but not Ps
+	  initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T,
+				      penalty, dataView, detrendedDataView, info);
+
+	lik = filter(detrendedDataView, H, vll, start, info);
+      }
+    catch (const DecisionRules::BlanchardKahnException &bke)
+      {
+	info = 22;
+	return penalty;
+      }
+
+    if (info != 0)
+      return penalty;
+    else
+      return lik;
+
+  };
 
 private:
   const std::vector<size_t> zeta_varobs_back_mixed;

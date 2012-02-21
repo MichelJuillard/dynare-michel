@@ -42,7 +42,17 @@ public:
                 const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
                 const std::vector<size_t> &zeta_static_arg, double qz_criterium);
   virtual ~ModelSolution() {};
-  void compute(VectorView &steadyState, const Vector &deepParams,      Matrix &ghx, Matrix &ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException);
+  template <class VEC>
+  void compute(VEC &steadyState, const VectorView &deepParams,      Matrix &ghx, Matrix &ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
+  {
+    // compute Steady State
+    ComputeSteadyState(steadyState, deepParams);
+
+    // then get jacobian and
+
+    ComputeModelSolution(steadyState, deepParams, ghx, ghu);
+
+  }
 
 private:
   const size_t n_endo;
@@ -56,8 +66,34 @@ private:
   DynamicModelDLL dynamicDLLp;
   Vector llXsteadyState;
   //Matrix jacobian;
-  void ComputeModelSolution(VectorView &steadyState, const Vector &deepParams,         Matrix &ghx, Matrix &ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException);
-  void ComputeSteadyState(VectorView &steadyState, const Vector &deepParams);
+  template <class VEC>
+  void ComputeModelSolution(VEC &steadyState, const VectorView &deepParams,         
+			    Matrix &ghx, Matrix &ghu) 
+    throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
+  {
+    // set extended Steady State
+
+    for (size_t i = 0; i < zeta_back_mixed.size(); i++)
+      llXsteadyState(i) = steadyState(zeta_back_mixed[i]);
+
+    for (size_t i = 0; i < n_endo; i++)
+      llXsteadyState(zeta_back_mixed.size() + i) = steadyState(i);
+
+    for (size_t i = 0; i < zeta_fwrd_mixed.size(); i++)
+      llXsteadyState(zeta_back_mixed.size() + n_endo + i) = steadyState(zeta_fwrd_mixed[i]);
+
+    //get jacobian
+    dynamicDLLp.eval(llXsteadyState, Mx, deepParams, steadyState, residual, &jacobian, NULL, NULL);
+
+    //compute rules
+    decisionRules.compute(jacobian, ghx, ghu);
+  }
+  template <class VEC>
+  void ComputeSteadyState(VEC &steadyState, const VectorView &deepParams)
+  {
+    // does nothig for time being.
+  }
+
 
 };
 

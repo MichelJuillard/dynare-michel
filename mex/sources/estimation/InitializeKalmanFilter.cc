@@ -55,31 +55,6 @@ InitializeKalmanFilter::InitializeKalmanFilter(const std::string &dynamicDllFile
                              zeta_back_mixed[i]) - zeta_varobs_back_mixed.begin());
 
 }
-// initialise parameter dependent KF matrices only but not Ps
-void
-InitializeKalmanFilter::initialize(VectorView &steadyState, const Vector &deepParams, Matrix &R,
-                                   const Matrix &Q, Matrix &RQRt, Matrix &T,
-                                   double &penalty, const MatrixConstView &dataView,
-                                   MatrixView &detrendedDataView, int &info)
-{
-  modelSolution.compute(steadyState, deepParams, g_x, g_u);
-  detrendData.detrend(steadyState, dataView, detrendedDataView);
-
-  setT(T, info);
-  setRQR(R, Q, RQRt, info);
-}
-
-// initialise all KF matrices
-void
-InitializeKalmanFilter::initialize(VectorView &steadyState, const Vector &deepParams, Matrix &R,
-                                   const Matrix &Q, Matrix &RQRt, Matrix &T, Matrix &Pstar, Matrix &Pinf,
-                                   double &penalty, const MatrixConstView &dataView,
-                                   MatrixView &detrendedDataView, int &info)
-{
-  initialize(steadyState, deepParams, R, Q, RQRt, T, penalty, dataView, detrendedDataView, info);
-  setPstar(Pstar, Pinf, T, RQRt, info);
-}
-
 void
 InitializeKalmanFilter::setT(Matrix &T, int &info)
 {
@@ -89,7 +64,7 @@ InitializeKalmanFilter::setT(Matrix &T, int &info)
 }
 
 void
-InitializeKalmanFilter::setRQR(Matrix &R, const Matrix &Q, Matrix &RQRt, int &info)
+InitializeKalmanFilter::setRQR(Matrix &R, const MatrixView &Q, Matrix &RQRt, int &info)
 {
   mat::assignByVectors(R, mat::nullVec, mat::nullVec, g_u, zeta_varobs_back_mixed, mat::nullVec);
 

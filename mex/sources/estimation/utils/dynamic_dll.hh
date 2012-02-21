@@ -59,4 +59,11 @@ public:
   //! evaluate Dynamic model DLL
   void eval(const Vector &y, const Matrix &x, const Vector &params, VectorView &ySteady,
             Vector &residual, Matrix *g1, Matrix *g2, Matrix *g3) throw (TSException);
+  template<class VEC>
+  void eval(const Vector &y, const Matrix &x, const VectorView &modParams, VEC &ySteady,
+                      Vector &residual, Matrix *g1, Matrix *g2, Matrix *g3) throw (TSException)
+  {
+    Dynamic(y.getData(), x.getData(), 1, modParams.getData(), ySteady.getData(), 0, residual.getData(),
+	    g1 == NULL ? NULL : g1->getData(), g2 == NULL ? NULL : g2->getData(), g3 == NULL ? NULL : g3->getData());
+  };
 };

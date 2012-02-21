@@ -21,6 +21,7 @@
 #include <vector>
 #include <algorithm>
 #include <functional>
+#include <sstream>
 
 #include "Vector.hh"
 #include "Matrix.hh"
@@ -39,11 +40,10 @@ public:
 };
 
 void
-fillEstParamsInfo(const mxArray *estim_params_info, EstimatedParameter::pType type,
+fillEstParamsInfo(const mxArray *bayestopt_, const mxArray *estim_params_info, EstimatedParameter::pType type,
                   std::vector<EstimatedParameter> &estParamsInfo)
 {
   // execute once only
-  static const mxArray *bayestopt_ = mexGetVariablePtr("global", "bayestopt_");
   static const mxArray *bayestopt_ubp = mxGetField(bayestopt_, 0, "ub"); // upper bound
   static const mxArray *bayestopt_lbp = mxGetField(bayestopt_, 0, "lb"); // lower bound
   static const mxArray *bayestopt_p1p = mxGetField(bayestopt_, 0, "p1"); // prior mean
@@ -100,15 +100,13 @@ fillEstParamsInfo(const mxArray *estim_params_info, EstimatedParameter::pType ty
     }
 }
 
+template <class VEC1, class VEC2>
 double
-logposterior(const VectorConstView &estParams, const MatrixConstView &data)
+logposterior(VEC1 &estParams, const MatrixConstView &data,
+             const mxArray *options_, const mxArray *M_, const mxArray *estim_params_,
+	     const mxArray *bayestopt_, const mxArray *oo_, VEC2 &steadyState, double *trend_coeff,
+	     int &info, VectorView &deepParams, Matrix &H, MatrixView &Q)
 {
-  // Retrieve pointers to global variables
-  const mxArray *M_ = mexGetVariablePtr("global", "M_");
-  const mxArray *oo_ = mexGetVariablePtr("global", "oo_");
-  const mxArray *options_ = mexGetVariablePtr("global", "options_");
-  const mxArray *estim_params_ = mexGetVariablePtr("global", "estim_params_");
-
   // Construct arguments of constructor of LogLikelihoodMain
   char *fName = mxArrayToString(mxGetField(M_, 0, "fname"));
   std::string dynamicDllFile(fName);
@@ -150,6 +148,7 @@ logposterior(const VectorConstView &estParams, const MatrixConstView &data)
     throw LogposteriorMexErrMsgTxtException("options_.varobs_id must be a row vector");
 
   size_t n_varobs = mxGetN(varobs_mx);
+  // substract 1.0 from obsverved variables index
   std::transform(mxGetPr(varobs_mx), mxGetPr(varobs_mx) + n_varobs, back_inserter(varobs),
                  std::bind2nd(std::minus<size_t>(), 1));
 
@@ -160,44 +159,27 @@ logposterior(const VectorConstView &estParams, const MatrixConstView &data)
   estSubsamples.push_back(EstimationSubsample(0, data.getCols() - 1));
 
   std::vector<EstimatedParameter> estParamsInfo;
-  fillEstParamsInfo(mxGetField(estim_params_, 0, "var_exo"), EstimatedParameter::shock_SD,
+  fillEstParamsInfo(bayestopt_, mxGetField(estim_params_, 0, "var_exo"), EstimatedParameter::shock_SD,
                     estParamsInfo);
-  fillEstParamsInfo(mxGetField(estim_params_, 0, "var_endo"), EstimatedParameter::measureErr_SD,
+  fillEstParamsInfo(bayestopt_, mxGetField(estim_params_, 0, "var_endo"), EstimatedParameter::measureErr_SD,
                     estParamsInfo);
-  fillEstParamsInfo(mxGetField(estim_params_, 0, "corrx"), EstimatedParameter::shock_Corr,
+  fillEstParamsInfo(bayestopt_, mxGetField(estim_params_, 0, "corrx"), EstimatedParameter::shock_Corr,
                     estParamsInfo);
-  fillEstParamsInfo(mxGetField(estim_params_, 0, "corrn"), EstimatedParameter::measureErr_Corr,
+  fillEstParamsInfo(bayestopt_, mxGetField(estim_params_, 0, "corrn"), EstimatedParameter::measureErr_Corr,
                     estParamsInfo);
-  fillEstParamsInfo(mxGetField(estim_params_, 0, "param_vals"), EstimatedParameter::deepPar,
+  fillEstParamsInfo(bayestopt_, mxGetField(estim_params_, 0, "param_vals"), EstimatedParameter::deepPar,
                     estParamsInfo);
 
   EstimatedParametersDescription epd(estSubsamples, estParamsInfo);
 
   // Allocate LogPosteriorDensity object
-  int info;
   LogPosteriorDensity lpd(dynamicDllFile, epd, n_endo, n_exo, zeta_fwrd, zeta_back, zeta_mixed, zeta_static,
                           qz_criterium, varobs, riccati_tol, lyapunov_tol, info);
 
   // Construct arguments of compute() method
-  Matrix steadyState(n_endo, 1);
-  mat::get_col(steadyState, 0) = VectorConstView(mxGetPr(mxGetField(oo_, 0, "steady_state")), n_endo, 1);
-
-  Vector estParams2(n_estParams);
-  estParams2 = estParams;
-  Vector deepParams(n_param);
-  deepParams = VectorConstView(mxGetPr(mxGetField(M_, 0, "params")), n_param, 1);
-  Matrix Q(n_exo);
-  Q = MatrixConstView(mxGetPr(mxGetField(M_, 0, "Sigma_e")), n_exo, n_exo, n_exo);
-
-  Matrix H(n_varobs);
-  const mxArray *H_mx = mxGetField(M_, 0, "H");
-  if (mxGetM(H_mx) == 1 && mxGetN(H_mx) == 1 && *mxGetPr(H_mx) == 0)
-    H.setAll(0.0);
-  else
-    H = MatrixConstView(mxGetPr(mxGetField(M_, 0, "H")), n_varobs, n_varobs, n_varobs);
 
   // Compute the posterior
-  double logPD = lpd.compute(steadyState, estParams2, deepParams, data, Q, H, presample, info);
+  double logPD = lpd.compute(steadyState, estParams, deepParams, data, Q, H, presample, info);
 
   // Cleanups
   for (std::vector<EstimatedParameter>::iterator it = estParamsInfo.begin();
@@ -211,31 +193,80 @@ void
 mexFunction(int nlhs, mxArray *plhs[],
             int nrhs, const mxArray *prhs[])
 {
-  if (nrhs != 2 || nlhs != 2)
-    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: exactly two input arguments and two output arguments are required.");
+  if (nrhs != 7 )
+    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: exactly 7 input arguments are required.");
 
-  // Check and retrieve the arguments
+  if (nlhs > 9 )
+    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior returns 8 output arguments at the most.");
+
+  // Check and retrieve the RHS arguments
 
   if (!mxIsDouble(prhs[0]) || mxGetN(prhs[0]) != 1)
     DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: First argument must be a column vector of double-precision numbers");
 
   VectorConstView estParams(mxGetPr(prhs[0]), mxGetM(prhs[0]), 1);
 
-  if (!mxIsDouble(prhs[1]))
-    DYN_MEX_FUNC_ERR_MSG_TXT("logposterior: Second argument must be a matrix of double-precision numbers");
+  for (int i = 1; i < 7; ++i)
+    if (!mxIsStruct(prhs[i]))
+      {
+	std::stringstream msg;
+	msg << "logposterior: argument " << i+1 << " must be a Matlab structure";
+	DYN_MEX_FUNC_ERR_MSG_TXT(msg.str().c_str());
+      }
 
-  MatrixConstView data(mxGetPr(prhs[1]), mxGetM(prhs[1]), mxGetN(prhs[1]), mxGetM(prhs[1]));
-  
+  const mxArray *dataset = prhs[1];
+  const mxArray *options_ = prhs[2];
+  const mxArray *M_ = prhs[3];
+  const mxArray *estim_params_ = prhs[4];
+  const mxArray *bayestopt_ = prhs[5];
+  const mxArray *oo_ = prhs[6];
+
+  mxArray *dataset_data = mxGetField(dataset,0,"data");
+  MatrixConstView data(mxGetPr(dataset_data), mxGetM(dataset_data), mxGetN(dataset_data), mxGetM(dataset_data));
+
+  // Creaete LHS arguments
+
+  size_t endo_nbr = (size_t) *mxGetPr(mxGetField(M_, 0, "endo_nbr"));
+  size_t exo_nbr = (size_t) *mxGetPr(mxGetField(M_, 0, "exo_nbr"));
+  size_t param_nbr = (size_t) *mxGetPr(mxGetField(M_, 0, "param_nbr"));
+  size_t varobs_nbr = mxGetM(mxGetField(options_, 0, "varobs"));
+  plhs[0] = mxCreateDoubleMatrix(1, 1, mxREAL);
+  plhs[1] = mxCreateDoubleMatrix(1, 1, mxREAL);
+  plhs[2] = mxCreateDoubleMatrix(endo_nbr, 1, mxREAL);
+  plhs[3] = mxCreateDoubleMatrix(varobs_nbr, 1, mxREAL);
+  plhs[4] = mxCreateDoubleMatrix(1, 1, mxREAL);
+  plhs[5] = mxCreateDoubleMatrix(param_nbr, 1, mxREAL);
+  plhs[6] = mxCreateDoubleMatrix(varobs_nbr, varobs_nbr, mxREAL);
+  plhs[7] = mxCreateDoubleMatrix(exo_nbr, exo_nbr, mxREAL);
+  double *lik = mxGetPr(plhs[0]);
+  double *exit_flag = mxGetPr(plhs[1]);
+
+  VectorView steadyState(mxGetPr(mxGetField(oo_,0,"steady_state")),endo_nbr, 1);
+  VectorView deepParams(mxGetPr(mxGetField(M_, 0, "params")),param_nbr,1);
+
+  MatrixView Q(mxGetPr(mxGetField(M_, 0, "Sigma_e")), exo_nbr, exo_nbr, exo_nbr);
+
+  Matrix H(varobs_nbr,varobs_nbr);
+  const mxArray *H_mx = mxGetField(M_, 0, "H");
+  if (mxGetM(H_mx) == 1 && mxGetN(H_mx) == 1 && *mxGetPr(H_mx) == 0)
+    H.setAll(0.0);
+  else
+    H = MatrixConstView(mxGetPr(H_mx), varobs_nbr, varobs_nbr, varobs_nbr);
+
+  double *trend_coeff  = mxGetPr(plhs[3]);
+  double *info_mx  = mxGetPr(plhs[4]);
+
   // Compute and return the value
   try
     {
-      double lik = logposterior(estParams, data);
-      plhs[1] = mxCreateDoubleMatrix(1, 1, mxREAL);
-      *mxGetPr(plhs[1]) = lik;
+      int info;
+      *lik = logposterior(estParams, data, options_, M_, estim_params_, bayestopt_, oo_,
+				steadyState, trend_coeff, info, deepParams, H, Q);
+      *info_mx = info;
+      *exit_flag = info;
     }
   catch (LogposteriorMexErrMsgTxtException e)
     {
       DYN_MEX_FUNC_ERR_MSG_TXT(e.getErrMsg());
     }
-  plhs[0] = mxCreateDoubleScalar(0);
 }

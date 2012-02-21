@@ -44,23 +44,4 @@ LogLikelihoodMain::~LogLikelihoodMain()
 
 }
 
-double
-LogLikelihoodMain::compute(Matrix &steadyState, const Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H, size_t start, int &info)
-{
-  double logLikelihood = 0;
-  for (size_t i = 0; i < estSubsamples.size(); ++i)
-    {
-      VectorView vSteadyState = mat::get_col(steadyState, i);
-
-      MatrixConstView dataView(data, 0, estSubsamples[i].startPeriod,
-                               data.getRows(), estSubsamples[i].endPeriod-estSubsamples[i].startPeriod+1);
-      MatrixView detrendedDataView(detrendedData, 0, estSubsamples[i].startPeriod,
-                                   data.getRows(), estSubsamples[i].endPeriod-estSubsamples[i].startPeriod+1);
-
-      VectorView vllView(vll, estSubsamples[i].startPeriod, estSubsamples[i].endPeriod-estSubsamples[i].startPeriod+1);
-      logLikelihood += logLikelihoodSubSample.compute(vSteadyState, dataView, estParams, deepParams,
-                                                      Q, H, vllView, detrendedDataView, info, start, i);
-    }
-  return logLikelihood;
-};
 
