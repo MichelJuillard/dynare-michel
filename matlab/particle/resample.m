@@ -1,12 +1,11 @@
-function indx = resample(weights,method) 
+function indx = resample(weights,method)
 % Resamples particles.
-    
+
 %@info:
 %! @deftypefn {Function File} {@var{indx} =} resample (@var{weights}, @var{method})
 %! @anchor{particle/resample}
 %! @sp 1
 %! Resamples particles.
-%!
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
@@ -25,10 +24,13 @@ function indx = resample(weights,method)
 %! @end table
 %! @sp 2
 %! @strong{This function is called by:}
+%! @sp 1
 %! @ref{particle/sequantial_importance_particle_filter}
 %! @sp 2
 %! @strong{This function calls:}
+%! @sp 1
 %! @ref{residual_resampling}, @ref{traditional_resampling}
+%! @sp 2
 %! @end deftypefn
 %@eod:
 
@@ -50,13 +52,13 @@ function indx = resample(weights,method)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % AUTHOR(S) frederic DOT karame AT univ DASH evry DOT fr
-%           stephane DOT adjemian AT univ DASH lemans DOT fr    
+%           stephane DOT adjemian AT univ DASH lemans DOT fr
 
 switch method
   case 'residual'
     indx = residual_resampling(weights);
   case 'traditional'
     indx = traditional_resampling(weights);
-  otherwise 
+  otherwise
     error('particle::resample: Unknown method!')
 end
