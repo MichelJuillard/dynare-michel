@@ -1,20 +1,17 @@
 function indx = residual_resampling(weights)
+% Resamples particles.
 
 %@info:
-%! @deftypefn {Function File} {@var{indx} =} resample (@var{weights},@var{noise})
-%! @anchor{particle/traditional_resampling}
+%! @deftypefn {Function File} {@var{indx} =} residual_resampling (@var{weights})
+%! @anchor{particle/residual_resampling}
 %! @sp 1
-%! Resamples particles (Resampling à la Kitagawa or stratified resampling).
-%!
+%! Resamples particles.
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
 %! @table @ @var
 %! @item weights
 %! n*1 vector of doubles, particles' weights.
-%! @item noise
-%! n*1 vector of doubles sampled from a [0,1] uniform distribution (stratified resampling) or scalar double
-%! sampled from a [0,1] uniform distribution (Kitagawa resampling).
 %! @end table
 %! @sp 2
 %! @strong{Outputs}
@@ -25,14 +22,15 @@ function indx = residual_resampling(weights)
 %! @end table
 %! @sp 2
 %! @strong{This function is called by:}
+%! @sp 1
 %! @ref{particle/resample}
 %! @sp 2
 %! @strong{This function calls:}
-%! 
+%! @sp 2
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -50,7 +48,7 @@ function indx = residual_resampling(weights)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % AUTHOR(S) frederic DOT karame AT univ DASH evry DOT fr
-%           stephane DOT adjemian AT univ DASH lemans DOT fr    
+%           stephane DOT adjemian AT univ DASH lemans DOT fr
 
 % What is the number of particles?
 number_of_particles = length(weights);
@@ -90,3 +88,35 @@ for i=1:number_of_particles
   end
   k = k + iWEIGHTS(i);
 end
+
+%@test:1
+%$ % Define the weights
+%$ weights = randn(2000,1).^2;
+%$ weights = weights/sum(weights);
+%$ % Initialize t.
+%$ t = ones(1,1);
+%$
+%$ try
+%$     indx1 = residual_resampling(weights);
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ T = all(t);
+%@eof:1
+
+%@test:2
+%$ % Define the weights
+%$ weights = exp(randn(2000,1));
+%$ weights = weights/sum(weights);
+%$ % Initialize t.
+%$ t = ones(1,1);
+%$
+%$ try
+%$     indx1 = residual_resampling(weights);
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ T = all(t);
+%@eof:2
