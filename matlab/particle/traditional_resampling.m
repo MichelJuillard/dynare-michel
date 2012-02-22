@@ -1,12 +1,11 @@
 function indx = traditional_resampling(weights,noise)
 % Resamples particles.
-    
+
 %@info:
-%! @deftypefn {Function File} {@var{indx} =} resample (@var{weights},@var{noise})
+%! @deftypefn {Function File} {@var{indx} =} traditional_resampling (@var{weights},@var{noise})
 %! @anchor{particle/traditional_resampling}
 %! @sp 1
 %! Resamples particles (Resampling à la Kitagawa or stratified resampling).
-%!
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
@@ -26,14 +25,15 @@ function indx = traditional_resampling(weights,noise)
 %! @end table
 %! @sp 2
 %! @strong{This function is called by:}
+%! @sp 1
 %! @ref{particle/resample}
 %! @sp 2
 %! @strong{This function calls:}
-%! 
+%! @sp 2
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -51,8 +51,8 @@ function indx = traditional_resampling(weights,noise)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % AUTHOR(S) frederic DOT karame AT univ DASH evry DOT fr
-%           stephane DOT adjemian AT univ DASH lemans DOT fr    
-    
+%           stephane DOT adjemian AT univ DASH lemans DOT fr
+
 % What is the number of particles?
 number_of_particles = length(weights);
 
@@ -71,10 +71,10 @@ end
 
 % Get the empirical  CDF.
 c = cumsum(weights);
-    
+
 % Draw a starting point.
 randvec = (transpose(1:number_of_particles)-1+noise(:))/number_of_particles ;
-    
+
 % Start at the bottom of the CDF
 if kitagawa_resampling
     j = 1;
@@ -112,7 +112,7 @@ end
 %$ catch
 %$     t(2) = 0;
 %$ end
-%$ 
+%$
 %$ T = all(t);
 %@eof:1
 
@@ -145,14 +145,14 @@ end
 %$ number_of_particles = 20000;
 %$
 %$ show_plot = 0;
-%$ show_time = 0;
+%$ show_time = 1;
 %$
 %$ % Define the weights
 %$ weights = randn(number_of_particles,1).^2;
 %$ weights = weights/sum(weights);
 %$
 %$ % Compute the empirical CDF
-%$ c = cumsum(weights); 
+%$ c = cumsum(weights);
 %$
 %$ % Stratified resampling.
 %$ noise  = rand(number_of_particles,1);
@@ -162,7 +162,7 @@ end
 %$     tic
 %$ end
 %$
-%$ indx1  = traditional_resampling(weights,noise); 
+%$ indx1  = traditional_resampling(weights,noise);
 %$
 %$ if show_time
 %$     toc
@@ -170,7 +170,7 @@ end
 %$ end
 %$
 %$ indx1_ = zeros(number_of_particles,1);
-%$ randvec = (transpose(1:number_of_particles)-1+noise)/number_of_particles; 
+%$ randvec = (transpose(1:number_of_particles)-1+noise)/number_of_particles;
 %$ for i=1:number_of_particles
 %$     j = 1;
 %$     while (randvec(i)>c(j))
@@ -198,8 +198,8 @@ end
 %$     tic
 %$ end
 %$
-%$ indx2_ = zeros(number_of_particles,1); 
-%$ randvec = (transpose(1:number_of_particles)-1+noise)/number_of_particles; 
+%$ indx2_ = zeros(number_of_particles,1);
+%$ randvec = (transpose(1:number_of_particles)-1+noise)/number_of_particles;
 %$ j = 1;
 %$ for i=1:number_of_particles
 %$     while (randvec(i)>c(j))
