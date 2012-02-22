@@ -212,6 +212,10 @@ end
 %$     toc
 %$ end
 %$
+%$ % REMARK
+%$ % Note that the alternative code used in this test is sensibly faster than the code proposed
+%$ % in the routine for the resampling scheme à la Kitagawa...
+%$ 
 %$ if show_plot
 %$     plot(randvec,c,'-r'), hold on, plot([randvec(1),randvec(end)],[c(1),c(end)],'-k'), hold off, axis tight, box on
 %$ end
