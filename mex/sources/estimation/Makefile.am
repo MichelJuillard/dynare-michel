@@ -37,7 +37,6 @@ EXTRA_DIST = \
 	Prior.hh \
 	Proposal.cc \
 	Proposal.hh \
-	RandomWalkMetropolisHastings.cc \
 	RandomWalkMetropolisHastings.hh \
 	utils/dynamic_dll.cc \
 	utils/dynamic_dll.hh \
