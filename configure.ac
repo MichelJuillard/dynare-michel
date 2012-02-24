@@ -155,6 +155,15 @@ AC_CHECK_PROG([CWEAVE], [cweave], [cweave])
 AM_CONDITIONAL([HAVE_CWEAVE], [test "x$CWEAVE" != "x"])
 
 AC_PROG_F77
+AC_F77_LIBRARY_LDFLAGS
+# Hack to get static linking of libgfortran on MinGW
+# (-static-libgfortran doesn't act on gcc/g++)
+case ${host_os} in
+  *mingw32*)
+    FLIBS=`echo $FLIBS | sed 's/-lgfortran/-Wl,-Bstatic -lgfortran -Wl,-Bdynamic/'`
+    ;;
+esac
+
 if test "x$F77" != "x"; then
    AX_BLAS
    AX_LAPACK
