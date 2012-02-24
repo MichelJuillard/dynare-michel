@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Copyright (C) 2009-2011 Dynare Team
+dnl Copyright (C) 2009-2012 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -30,7 +30,7 @@ case ${host_os} in
   *mingw32*)
     # On mingw32, we don't want dynamic libgcc
     # Note that static-libstdc++ is only supported since GCC 4.5 (but generates no error on older versions)
-    LDFLAGS="$LDFLAGS -static-libgcc -static-libstdc++"
+    LDFLAGS="$LDFLAGS -static-libgcc -static-libstdc++ -static-libgfortran"
     have_windows="yes"
     ;;
   *cygwin*)
