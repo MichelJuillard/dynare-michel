@@ -129,8 +129,8 @@ end
 %$ ss = ones(n,1);
 %$
 %$ % Call the tested routine.
-%$ y1 = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu);
-%$ [y2,y2_] = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss);
+%$ y1 = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu);
+%$ [y2,y2_] = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss);
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(y1,ones(n,1));
@@ -166,12 +166,12 @@ end
 %$
 %$ % Call the tested routine.
 %$ try
-%$     y1 = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu);
+%$     y1 = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu);
 %$ catch
 %$     t(1) = 0;
 %$ end
 %$ try
-%$     [y2,y2_] = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss);
+%$     [y2,y2_] = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss);
 %$ catch
 %$     t(2) = 0;
 %$ end
