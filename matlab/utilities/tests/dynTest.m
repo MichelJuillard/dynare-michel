@@ -52,9 +52,11 @@ function dynTest(fun,dynare_path)
 
 original_directory = pwd();
 
-cd([dynare_path filesep '..' filesep 'tests']);    
-
 [pathstr1, name1, ext1] = fileparts(fun);
+
+pathstr1 = [original_directory filesep pathstr1];
+
+cd([dynare_path filesep '..' filesep 'tests']);
 
 mex_flag = 0;
 if exist(name1)==3
