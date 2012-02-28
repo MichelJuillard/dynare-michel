@@ -1,0 +1,5 @@
+vpath %.cc $(top_srcdir)/../../sources/local_state_space_iterations
+
+noinst_PROGRAMS = local_state_space_iteration_2
+
+nodist_local_state_space_iteration_2_SOURCES = local_state_space_iteration_2.cc

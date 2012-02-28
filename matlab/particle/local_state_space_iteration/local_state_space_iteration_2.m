@@ -1,8 +1,8 @@
-function [y,y_] = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss)
+function [y,y_] = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss)
 
 %@info:
 %! @deftypefn {Function File} {@var{y}, @var{y_} =} local_state_equation_2 (@var{yhat},@var{epsilon}, @var{ghx}, @var{ghu}, @var{constant}, @var{ghxx}, @var{ghuu}, @var{ghxu}, @var{yhat_}, @var{ss})
-%! @anchor{particle/local_state_equation_2}
+%! @anchor{particle/local_state_space_iteration_2}
 %! @sp 1
 %! Given the states (y) and structural innovations (epsilon), this routine computes the level of selected endogenous variables when the
 %! model is approximated by an order two taylor expansion around the deterministic steady state. Depending on the number of input/output
@@ -76,22 +76,22 @@ function [y,y_] = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-%           frederic DOT karame AT univ DASH evry DOT fr    
+%           frederic DOT karame AT univ DASH evry DOT fr
 
 number_of_threads = 1;
 
 if nargin==8
     pruning = 0;
     if nargout>1
-        error('local_state_equation_2:: Numbers of input and output argument are inconsistent!')
+        error('local_state_space_iteration_2:: Numbers of input and output argument are inconsistent!')
     end
 elseif nargin==10
     pruning = 1;
     if nargout~=2
-        error('local_state_equation_2:: Numbers of input and output argument are inconsistent!')
+        error('local_state_space_iteration_2:: Numbers of input and output argument are inconsistent!')
     end
 else
-    error('local_state_equation_2:: Wrong number of input arguments!')
+    error('local_state_space_iteration_2:: Wrong number of input arguments!')
 end
 
 switch pruning
@@ -152,7 +152,7 @@ end
 %$ n = dr.npred;
 %$ q = size(dr.ghu,2);
 %$ yhat = zeros(n,1);
-%$ epsilon = zeros(q,1); 
+%$ epsilon = zeros(q,1);
 %$ ghx = dr.ghx(istates,:);
 %$ ghu = dr.ghu(istates,:);
 %$ constant = dr.ys(istates,:)+dr.ghs2(istates,:);
