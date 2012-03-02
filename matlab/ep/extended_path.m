@@ -105,6 +105,9 @@ periods = options_.ep.periods;
 pfm.periods = options_.ep.periods;
 pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
 
+% keep a copy of pfm.i_upd
+i_upd = pfm.i_upd;
+
 % Set the algorithm for the perfect foresight solver
 options_.stack_solve_algo = options_.ep.stack_solve_algo;
 
@@ -190,23 +193,27 @@ while (t<sample_size)
         initial_path = simult_(initial_conditions,dr,exo_simul_1(2:end,:),1);
         endo_simul_1(:,1:end-1) = initial_path(:,1:end-1)*ep.init+endo_simul_1(:,1:end-1)*(1-ep.init);
     else
-        endo_simul_1 = repmat(steady_state,1,periods1+2);
+        if t==1
+            endo_simul_1 = repmat(steady_state,1,periods1+2);
+        end
     end
     % Solve a perfect foresight model.
     increase_periods = 0;
+    % Keep a copy of endo_simul_1
     endo_simul = endo_simul_1;
     while 1
         if ~increase_periods
             if bytecode_flag
+                oo_.endo_simul = endo_simul_1;
+                oo_.exo_simul = exo_simul_1;
                 [flag,tmp] = bytecode('dynamic');
+                flag
+                pause
             else
                 flag = 1;
             end
             if flag
-                [flag,tmp] = solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,...
-                                                                  pfm1, ...
-                                                                  options_.ep.nnodes,...
-                                                                  options_.ep.order);
+                [flag,tmp,err] = solve_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1);
             end
             info_convergence = ~flag;
         end
@@ -275,6 +282,8 @@ while (t<sample_size)
             end
             % Solve the perfect foresight model with an increased number of periods.
             if bytecode_flag
+                oo_.endo_simul = endo_simul_1;
+                oo_.exo_simul = exo_simul_1;
                 [flag,tmp] = bytecode('dynamic');
             else
                 flag = 1;
@@ -327,14 +336,30 @@ while (t<sample_size)
         end
     end% while
     if ~info_convergence% If exited from the while loop without achieving convergence, use an homotopic approach
-        [INFO,tmp] = homotopic_steps(.5,.01,pfm1);
-        if (~isstruct(INFO) && isnan(INFO)) || ~info_convergence
-            [INFO,tmp] = homotopic_steps(0,.01,pfm1);
+        if ~do_not_check_stability_flag
+            periods1 = ep.periods;
+            pfm1.periods = periods1;
+            pfm1.i_upd = i_upd;
+            exo_simul_1 = exo_simul_1(1:(periods1+2),:);
+            endo_simul_1 = endo_simul_1(:,1:(periods1+2));
+        end
+        [INFO,tmp] = homotopic_steps(endo_simul,exo_simul_1,.5,.01,pfm);
+        if isstruct(INFO)
+            info_convergence = INFO.convergence;
+        else
+            info_convergence = 0;
+        end
+        if ~info_convergence
+            [INFO,tmp] = homotopic_steps(endo_simul,exo_simul_1,0,.01,pfm);
+            if isstruct(INFO)
+                info_convergence = INFO.convergence;
+            else
+                info_convergence = 0;
+            end
             if ~info_convergence
                 disp('Homotopy:: No convergence of the perfect foresight model solver!')
                 error('I am not able to simulate this model!');
             else
-                info_convergence = 1;
                 endo_simul_1 = tmp;
                 if verbosity && info_convergence
                     disp('Homotopy:: Convergence of the perfect foresight model solver!')
@@ -349,7 +374,10 @@ while (t<sample_size)
         end
     end
     % Save results of the perfect foresight model solver.
-    time_series(:,t) = tmp;
+    time_series(:,t) = endo_simul_1(:,2);
+    endo_simul_1(:,1:end-1) = endo_simul_1(:,2:end);
+    endo_simul_1(:,1) = time_series(:,t);
+    endo_simul_1(:,end) = oo_.steady_state;
 end% (while) loop over t
 
 dyn_waitbar_close(hh);

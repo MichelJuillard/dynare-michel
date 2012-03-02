@@ -3,6 +3,7 @@ function [flag,endo_simul,err] = solve_perfect_foresight_model(endo_simul,exo_si
     flag = 0;
     err = 0;
     stop = 0;
+    nan_flag = 0;
 
     model_dynamic = pfm.dynamic_model;
 
@@ -57,6 +58,10 @@ function [flag,endo_simul,err] = solve_perfect_foresight_model(endo_simul,exo_si
             break
         end
         dy = -A\res;
+        if any(isnan(dy))
+            nan_flag = 1;
+            break
+        end
         Y(pfm.i_upd) =   Y(pfm.i_upd) + dy;
     end
 
@@ -69,6 +74,17 @@ function [flag,endo_simul,err] = solve_perfect_foresight_model(endo_simul,exo_si
             fprintf('\n') ;
         end
         flag = 1;% more iterations are needed.
+        endo_simul = 1;
+    end
+    if nan_flag
+        if pfm.verbose
+            fprintf('\n') ;
+            disp(['     Total time of simulation        :' num2str(etime(clock,h1))]) ;
+            fprintf('\n') ;
+            disp(['WARNING : NaNs!']) ;
+            fprintf('\n') ;
+        end
+        flag = 1;
         endo_simul = 1;
     end
     if pfm.verbose
