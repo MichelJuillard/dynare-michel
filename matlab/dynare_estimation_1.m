@@ -31,8 +31,17 @@ function dynare_estimation_1(var_list_,dname)
 
 global M_ options_ oo_ estim_params_ bayestopt_ dataset_
 
+% Set particle filter flag.
+if options_.order > 1
+    options_.particle_filter.status = 1;
+end
+
 if ~options_.dsge_var
-    objective_function = str2func('dsge_likelihood');
+    if options_.particle_filter.status
+        objective_function = str2func('non_linear_dsge_likelihood');
+    else
+        objective_function = str2func('dsge_likelihood');
+    end
 else
     objective_function = str2func('DsgeVarLikelihood');
 end
