@@ -178,9 +178,10 @@ particle.unscented.alpha = 1 ;
 particle.unscented.beta = 2 ;
 particle.unscented.kappa = 1 ;
 % Configuration of resampling in case of particles
-particle.resampling = 'systematic' ;
+particle.resampling.status = 'systematic' ;
 % Choice of the resampling method
-particle.resampling_method = 'traditional' ;
+particle.resampling.method1 = 'traditional' ;
+particle.resampling.method2 = 'kitagawa';
 % Configuration of the mixture filters
 particle.mixture_method = 'particles' ;
 % Size of the different mixtures

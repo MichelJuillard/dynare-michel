@@ -1,4 +1,4 @@
-function indx = resample(weights,method)
+function indx = resample(weights,method1,method2)
 % Resamples particles.
 
 %@info:
@@ -54,11 +54,17 @@ function indx = resample(weights,method)
 % AUTHOR(S) frederic DOT karame AT univ DASH evry DOT fr
 %           stephane DOT adjemian AT univ DASH lemans DOT fr
 
-switch method
+switch method1
   case 'residual'
     indx = residual_resampling(weights);
   case 'traditional'
-    indx = traditional_resampling(weights);
+    if strcmpi(method2,'kitagawa')
+        indx = traditional_resampling(weights,rand);
+    elseif strcmpi(method2,'stratified')
+        indx = traditional_resampling(weights,rand(size(weights)));
+    else
+        error('particle::resample: Unknown method!')
+    end
   otherwise
     error('particle::resample: Unknown method!')
 end
