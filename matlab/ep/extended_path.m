@@ -146,7 +146,7 @@ covariance_matrix = M_.Sigma_e(positive_var_indx,positive_var_indx);
 covariance_matrix_upper_cholesky = chol(covariance_matrix);
 
 % (re)Set exo_nbr
-exo_nbr = effective_number_of_shocks;
+%exo_nbr = effective_number_of_shocks;
 
 % Set seed.
 if options_.ep.set_dynare_seed_to_default
@@ -267,9 +267,8 @@ while (t<sample_size)
                 % If the previous call to the perfect foresight model solver exited
                 % announcing that the routine converged, adapt the size of endo_simul_1
                 % and exo_simul_1.
-                endo_simul_1 = [endo_simul_1, repmat(steady_state,1,ep.step)];
-                endo_simul_1(:,t+1) = tmp;
-                exo_simul_1  = [exo_simul_1; zeros(ep.step,size(shocks,2))];
+                endo_simul_1 = [ tmp , repmat(steady_state,1,ep.step) ];
+                exo_simul_1  = [ exo_simul_1 ; zeros(ep.step,exo_nbr)];%size(shocks,2)) ];
                 tmp_old = tmp;
             else
                 % If the previous call to the perfect foresight model solver exited
@@ -278,7 +277,7 @@ while (t<sample_size)
                 % to know where the routine did stop, even if convergence was not
                 % achieved.
                 endo_simul_1 = [ endo_simul_1 , repmat(steady_state,1,ep.step) ];
-                exo_simul_1  = [ exo_simul_1 ; zeros(ep.step,size(shocks,2)) ];
+                exo_simul_1  = [ exo_simul_1 ; zeros(ep.step,exo_nbr)];%size(shocks,2)) ];
             end
             % Solve the perfect foresight model with an increased number of periods.
             if bytecode_flag
