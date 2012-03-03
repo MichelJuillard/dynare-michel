@@ -58,7 +58,7 @@ function [y,y_] = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,gh
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -129,8 +129,10 @@ end
 %$ ss = ones(n,1);
 %$
 %$ % Call the tested routine.
-%$ y1 = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu);
-%$ [y2,y2_] = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss);
+%$ for i=1:10
+%$     y1 = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu);
+%$     [y2,y2_] = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss);
+%$ end
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(y1,ones(n,1));
@@ -179,3 +181,49 @@ end
 %$ % Check the results.
 %$ T = all(t);
 %@eof:2
+
+%@test:3
+%$ Bohrbug = 1; % A bug that manifests reliably under a possibly unknown but well-defined set of conditions.
+%$ if ~Bohrbug
+%$     n = 2;
+%$     q = 3;
+%$
+%$     yhat = .01*randn(n,1);
+%$     epsilon = .001*randn(q,1);
+%$     ghx = rand(n,n);
+%$     ghu = rand(n,q);
+%$     constant = ones(n,1);
+%$     ghxx = rand(n,n*n);
+%$     ghuu = rand(n,q*q);
+%$     ghxu = rand(n,n*q);
+%$     yhat_ = zeros(n,1);
+%$     ss = ones(n,1);
+%$
+%$     % Call the tested routine (mex version).
+%$     y1a = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu);
+%$     [y2a,y2a_] = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss);
+%$
+%$     % Call the tested routine (matlab version)
+%$     path_to_mex = fileparts(which(['qmc_sequence.' mexext]));
+%$     where_am_i_coming_from = pwd;
+%$     cd(path_to_mex);
+%$     tar('local_state_space_iteration_2.tar',['local_state_space_iteration_2.' mexext]);
+%$     cd(where_am_i_coming_from);
+%$     dynare_config([],0);
+%$     y1b = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu);
+%$     [y2b,y2b_] = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss);
+%$     cd(path_to_mex);
+%$     untar('local_state_space_iteration_2.tar');
+%$     delete('local_state_space_iteration_2.tar');
+%$     cd(where_am_i_coming_from);
+%$     dynare_config([],0);
+%$     % Check the results.
+%$     t(1) = dyn_assert(y1a,y1b);
+%$     t(2) = dyn_assert(y2a,y2b);
+%$     t(3) = dyn_assert(y2a_,y2b_);
+%$     T = all(t);
+%$ else
+%$     t(1) = 1;
+%$     T = all(t);
+%$ end
+%@eof:3
