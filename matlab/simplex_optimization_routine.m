@@ -1,17 +1,17 @@
 function [x,fval,exitflag] = simplex_optimization_routine(objective_function,x,options,varargin)
 % Nelder-Mead like optimization routine.
 % By default, we use standard values for the reflection, the expansion, the contraction and the shrink coefficients (alpha = 1, chi = 2, psi = 1 / 2 and σ = 1 / 2).
-% See http://en.wikipedia.org/wiki/Nelder-Mead_method 
+% See http://en.wikipedia.org/wiki/Nelder-Mead_method
 %
-% This routine uses the Nelder-Mead simplex (direct search) method. 
-% As chaining could reveal interesting to reach the solution neighborhood, 
-% the function automatically restarts from the current solution while 
-% amelioration is possible. 
+% This routine uses the Nelder-Mead simplex (direct search) method.
+% As chaining could reveal interesting to reach the solution neighborhood,
+% the function automatically restarts from the current solution while
+% amelioration is possible.
 %
 % INPUTS
 % objective_function     [string]       Name of the iobjective function to be minimized.
 % x                      [double]       n*1 vector, starting guess of the optimization routine.
-% options                [structure]    
+% options                [structure]
 %
 % OUTPUTS
 %
@@ -42,14 +42,14 @@ verbose = 2;
 number_of_variables = length(x);
 
 % Set tolerance parameter.
-if isfield(options,'tolerance') && isfield(options.tolerance,'x') 
+if isfield(options,'tolerance') && isfield(options.tolerance,'x')
     x_tolerance = options.tolerance.x;
 else
     x_tolerance = 1e-4;
 end
 
 % Set tolerance parameter.
-if isfield(options,'tolerance') && isfield(options.tolerance,'f') 
+if isfield(options,'tolerance') && isfield(options.tolerance,'f')
     f_tolerance = options.tolerance.f;
 else
     f_tolerance = 1e-4;
@@ -157,7 +157,7 @@ zero_delta = delta/200;% To be used instead of delta if x(i) is zero.
 if isfield(options,'max_no_improvements')
     max_no_improvements = options.max_no_improvements;
 else
-    max_no_improvements = number_of_variables*10; 
+    max_no_improvements = number_of_variables*10;
 end
 
 % Set vector of indices.
@@ -331,7 +331,7 @@ while (func_count < max_func_calls) && (iter_count < max_iterations) && (simplex
         else% xr is not better than previous point v(:,n).
             if fxr < fv(end)% xr is better than previous worst point [=> outside contraction].
                 xc = (1 + psi*rho)*xbar - psi*rho*v(:,end);
-                x  = xc; 
+                x  = xc;
                 fxc = feval(objective_function,x,varargin{:});
                 func_count = func_count+1;
                 if fxc <= fxr
@@ -343,7 +343,7 @@ while (func_count < max_func_calls) && (iter_count < max_iterations) && (simplex
                 end
             else% xr is the worst point [=> inside contraction].
                 xcc = (1-psi)*xbar + psi*v(:,end);
-                x   = xcc; 
+                x   = xcc;
                 fxcc = feval(objective_function,x,varargin{:});
                 func_count = func_count+1;
                 if fxcc < fv(end)
