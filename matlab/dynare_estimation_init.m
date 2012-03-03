@@ -58,12 +58,8 @@ for i = 1:size(M_.endo_names,1)
     end
 end
 
-% Set the order of approximation to one (if needed).
-if options_.order > 1 && isempty(options_.nonlinear_filter)
-    disp('This version of Dynare cannot estimate non linearized models!')
-    disp('Set "order" equal to 1.')
-    disp(' ')
-    options_.order = 1;
+if options_.order>2
+    error(['I cannot estimate a model with a ' int2str(options_.order) ' order approximation of the model!'])
 end
 
 % Set options_.lik_init equal to 3 if diffuse filter is used or
