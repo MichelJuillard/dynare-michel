@@ -127,7 +127,6 @@ persistent init_flag
 persistent restrict_variables_idx observed_variables_idx state_variables_idx mf0 mf1
 persistent sample_size number_of_state_variables number_of_observed_variables number_of_structural_innovations
 
-
 % Initialization of the persistent variable.
 if ~nargin || isempty(penalty)
     penalty = 1e8;
@@ -172,26 +171,26 @@ end
 % Get the diagonal elements of the covariance matrices for the structural innovations (Q) and the measurement error (H).
 Q = Model.Sigma_e;
 H = Model.H;
-for i=1:EstimatedParameters_.nvx
-    k =EstimatedParameters_.var_exo(i,1);
+for i=1:EstimatedParameters.nvx
+    k =EstimatedParameters.var_exo(i,1);
     Q(k,k) = xparam1(i)*xparam1(i);
 end
-offset = EstimatedParameters_.nvx;
-if EstimatedParameters_.nvn
-    for i=1:EstimatedParameters_.nvn
-        k = EstimatedParameters_.var_endo(i,1);
+offset = EstimatedParameters.nvx;
+if EstimatedParameters.nvn
+    for i=1:EstimatedParameters.nvn
+        k = EstimatedParameters.var_endo(i,1);
         H(k,k) = xparam1(i+offset)*xparam1(i+offset);
     end
-    offset = offset+EstimatedParameters_.nvn;
+    offset = offset+EstimatedParameters.nvn;
 else
     H = zeros(nvobs);
 end
 
 % Get the off-diagonal elements of the covariance matrix for the structural innovations. Test if Q is positive definite.
-if EstimatedParameters_.ncx
-    for i=1:EstimatedParameters_.ncx
-        k1 =EstimatedParameters_.corrx(i,1);
-        k2 =EstimatedParameters_.corrx(i,2);
+if EstimatedParameters.ncx
+    for i=1:EstimatedParameters.ncx
+        k1 =EstimatedParameters.corrx(i,1);
+        k2 =EstimatedParameters.corrx(i,2);
         Q(k1,k2) = xparam1(i+offset)*sqrt(Q(k1,k1)*Q(k2,k2));
         Q(k2,k1) = Q(k1,k2);
     end
@@ -208,14 +207,14 @@ if EstimatedParameters_.ncx
             return
         end
     end
-    offset = offset+EstimatedParameters_.ncx;
+    offset = offset+EstimatedParameters.ncx;
 end
 
 % Get the off-diagonal elements of the covariance matrix for the measurement errors. Test if H is positive definite.
-if EstimatedParameters_.ncn
-    for i=1:EstimatedParameters_.ncn
-        k1 = DynareOptions.lgyidx2varobs(EstimatedParameters_.corrn(i,1));
-        k2 = DynareOptions.lgyidx2varobs(EstimatedParameters_.corrn(i,2));
+if EstimatedParameters.ncn
+    for i=1:EstimatedParameters.ncn
+        k1 = DynareOptions.lgyidx2varobs(EstimatedParameters.corrn(i,1));
+        k2 = DynareOptions.lgyidx2varobs(EstimatedParameters.corrn(i,2));
         H(k1,k2) = xparam1(i+offset)*sqrt(H(k1,k1)*H(k2,k2));
         H(k2,k1) = H(k1,k2);
     end
@@ -232,12 +231,12 @@ if EstimatedParameters_.ncn
             return
         end
     end
-    offset = offset+EstimatedParameters_.ncn;
+    offset = offset+EstimatedParameters.ncn;
 end
 
 % Update estimated structural parameters in Mode.params.
-if EstimatedParameters_.np > 0
-    Model.params(EstimatedParameters_.param_vals(:,1)) = xparam1(offset+1:end);
+if EstimatedParameters.np > 0
+    Model.params(EstimatedParameters.param_vals(:,1)) = xparam1(offset+1:end);
 end
 
 % Update Model.Sigma_e and Model.H.
