@@ -3888,6 +3888,9 @@ Uses Dynare implementation of the Nelder-Mead simplex based optimization
 routine (generally more efficient than the MATLAB or Octave implementation
 available with @code{mode_compute=7})
 
+@item 9
+Uses the CMA-ES (Covariance Matrix Adaptation Evolution Strategy) algorithm, an evolutionary algorithm for difficult non-linear non-convex optimization 
+
 @item @var{FUNCTION_NAME}
 It is also possible to give a @var{FUNCTION_NAME} to this option,
 instead of an @var{INTEGER}. In that case, Dynare takes the return
