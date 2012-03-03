@@ -267,25 +267,15 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         [xparam1,fval,exitflag] = fminsearch(objective_function,xparam1,optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 8
         % Dynare implementation of the simplex algorithm.
-        [xparam1,fval,exitflag] = simplex_optimization-routine(objective_function,xparam1,optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
-      case 9         
+        [xparam1,fval,exitflag] = simplex_optimization_routine(objective_function,xparam1,options_.simplex,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+      case 9
         H0 = 1e-4*ones(nx,1);
-        opts.SaveVariables='off';
-        opts.DispFinal='on';
-        opts.WarnOnEqualFunctionValues='no';
-        opts.DispModulo='10';
-        opts.LogModulo='0';
-        opts.LogTime='0';
         warning('off','CMAES:NonfinitenessRange');
         warning('off','CMAES:InitialSigma');
-        if ~options_.dsge_var
-            [x, fval, COUNTEVAL, STOPFLAG, OUT, BESTEVER] = cmaes('dsge_likelihood',xparam1,H0,opts,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
-        else
-            [x, fval, COUNTEVAL, STOPFLAG, OUT, BESTEVER] = cmaes('DsgeVarLikelihood',xparam1,H0,opts,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
-        end
+        [x, fval, COUNTEVAL, STOPFLAG, OUT, BESTEVER] = cmaes(objective_function,xparam1,H0,options_.cmaes,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         xparam1=BESTEVER.x;
-        disp(sprintf('\n Objective function at mode: %f',fval))       
-    case 101
+        disp(sprintf('\n Objective function at mode: %f',fval))
+      case 101
         myoptions=soptions;
         myoptions(2)=1e-6; %accuracy of argument
         myoptions(3)=1e-6; %accuracy of function (see Solvopt p.29)
