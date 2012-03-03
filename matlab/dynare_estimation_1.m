@@ -12,7 +12,7 @@ function dynare_estimation_1(var_list_,dname)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2011 Dynare Team
+% Copyright (C) 2003-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
