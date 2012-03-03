@@ -145,7 +145,7 @@ trend_coeff     = [];
 cost_flag       = 1;
 
 % Set the number of observed variables
-nvobs = DynareDataset.info.vobs;
+nvobs = DynareDataset.info.nvobs;
 
 %------------------------------------------------------------------------------
 % 1. Get the structural parameters & define penalties
