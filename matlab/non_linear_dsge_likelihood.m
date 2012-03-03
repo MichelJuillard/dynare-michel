@@ -101,7 +101,7 @@ function [fval,exit_flag,ys,trend_coeff,info,Model,DynareOptions,BayesInfo,Dynar
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2010-2011 Dynare Team
+% Copyright (C) 2010, 2011, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -197,8 +197,8 @@ if EstimatedParameters_.ncx
     end
     % Try to compute the cholesky decomposition of Q (possible iff Q is positive definite)
     [CholQ,testQ] = chol(Q);
-    if testQ 
-        % The variance-covariance matrix of the structural innovations is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty. 
+    if testQ
+        % The variance-covariance matrix of the structural innovations is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty.
         a = diag(eig(Q));
         k = find(a < 0);
         if k > 0
@@ -212,7 +212,7 @@ if EstimatedParameters_.ncx
 end
 
 % Get the off-diagonal elements of the covariance matrix for the measurement errors. Test if H is positive definite.
-if EstimatedParameters_.ncn 
+if EstimatedParameters_.ncn
     for i=1:EstimatedParameters_.ncn
         k1 = DynareOptions.lgyidx2varobs(EstimatedParameters_.corrn(i,1));
         k2 = DynareOptions.lgyidx2varobs(EstimatedParameters_.corrn(i,2));
@@ -266,8 +266,8 @@ BayesInfo.mf = BayesInfo.mf1;
 
 % Define the deterministic linear trend of the measurement equation.
 if DynareOptions.noconstant
-    constant = zeros(nvobs,1); 
-else    
+    constant = zeros(nvobs,1);
+else
     if DynareOptions.loglinear
         constant = log(SteadyState(BayesInfo.mfys));
     else
@@ -332,7 +332,7 @@ ReducedForm.mf1 = mf1;
 
 % Set initial condition.
 switch DynareOptions.particle.initialization
-  case 1% Initial state vector covariance is the ergodic variance associated to the first order Taylor-approximation of the model. 
+  case 1% Initial state vector covariance is the ergodic variance associated to the first order Taylor-approximation of the model.
     StateVectorMean = ReducedForm.constant(mf0);
     StateVectorVariance = lyapunov_symm(ReducedForm.ghx(mf0,:),ReducedForm.ghu(mf0,:)*ReducedForm.Q*ReducedForm.ghu(mf0,:)',1e-12,1e-12);
   case 2% Initial state vector covariance is a monte-carlo based estimate of the ergodic variance (consistent with a k-order Taylor-approximation of the model).

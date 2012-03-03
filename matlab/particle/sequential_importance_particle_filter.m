@@ -5,7 +5,7 @@ function [LIK,lik] = sequential_importance_particle_filter(ReducedForm,Y,start,D
 %! @deftypefn {Function File} {@var{y}, @var{y_} =} sequential_importance_particle_filter (@var{ReducedForm},@var{Y}, @var{start}, @var{DynareOptions})
 %! @anchor{particle/sequential_importance_particle_filter}
 %! @sp 1
-%! Evaluates the likelihood of a nonlinear model with a particle filter (optionally with resampling). 
+%! Evaluates the likelihood of a nonlinear model with a particle filter (optionally with resampling).
 %!
 %! @sp 2
 %! @strong{Inputs}
@@ -14,7 +14,7 @@ function [LIK,lik] = sequential_importance_particle_filter(ReducedForm,Y,start,D
 %! @item ReducedForm
 %! Structure describing the state space model (built in @ref{non_linear_dsge_likelihood}).
 %! @item Y
-%! p*smpl matrix of doubles (p is the number of observed variables), the (detrended) data.  
+%! p*smpl matrix of doubles (p is the number of observed variables), the (detrended) data.
 %! @item start
 %! Integer scalar, likelihood evaluation starts at observation 'start'.
 %! @item DynareOptions
@@ -38,7 +38,7 @@ function [LIK,lik] = sequential_importance_particle_filter(ReducedForm,Y,start,D
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -56,10 +56,10 @@ function [LIK,lik] = sequential_importance_particle_filter(ReducedForm,Y,start,D
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % AUTHOR(S) frederic DOT karame AT univ DASH evry DOT fr
-%           stephane DOT adjemian AT univ DASH lemans DOT fr    
+%           stephane DOT adjemian AT univ DASH lemans DOT fr
 
-persistent init_flag 
-persistent mf0 mf1 
+persistent init_flag
+persistent mf0 mf1
 persistent number_of_particles
 persistent sample_size number_of_observed_variables number_of_structural_innovations
 
@@ -73,13 +73,13 @@ steadystate = ReducedForm.steadystate;
 constant = ReducedForm.constant;
 state_variables_steady_state = ReducedForm.state_variables_steady_state;
 
-% Set persistent variables.
+% Set persistent variables (if needed).
 if isempty(init_flag)
     mf0 = ReducedForm.mf0;
     mf1 = ReducedForm.mf1;
     sample_size = size(Y,2);
     number_of_observed_variables = length(mf1);
-    number_of_structural_innovations = length(ReducedForm.Q); 
+    number_of_structural_innovations = length(ReducedForm.Q);
     number_of_particles = DynareOptions.particle.number_of_particles;
     init_flag = 1;
 end
@@ -93,7 +93,7 @@ ghxx = ReducedForm.ghxx;
 ghuu = ReducedForm.ghuu;
 ghxu = ReducedForm.ghxu;
 
-% Get covariance matrices
+% Get covariance matrices.
 Q = ReducedForm.Q;
 H = ReducedForm.H;
 if isempty(H)
@@ -111,7 +111,7 @@ stream=RandStream('mt19937ar','Seed',1);
 RandStream.setDefaultStream(stream);
 
 % Initialization of the likelihood.
-const_lik = log(2*pi)*number_of_observed_variables; 
+const_lik = log(2*pi)*number_of_observed_variables;
 lik  = NaN(sample_size,1);
 
 % Initialization of the weights across particles.
@@ -138,7 +138,7 @@ for t=1:sample_size
         weights = ones(1,number_of_particles) ;
     elseif ~isempty(strmatch(DynareOptions.particle_filter.resampling,'none','exact'))
         StateVectors = tmp(mf0,:);
-        weights = number_of_particles*weights ;
+        weights = number_of_particles*weights;
     end
 end
 
