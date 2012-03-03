@@ -134,7 +134,7 @@ for t=1:sample_size
     Neff = 1/(weights*weights');
     if (Neff<.5*sample_size && ~isempty(strmatch(DynareOptions.particle.resampling,'generic','exact'))) || ~isempty(strmatch(DynareOptions.particle.resampling,'systematic','exact'))
         nb_obs_resamp = nb_obs_resamp+1 ;
-        StateVectors = tmp(mf0,resample(weights));
+        StateVectors = tmp(mf0,resample(weights,DynareOptions.particle.resampling_method));
         weights = ones(1,number_of_particles) ;
     elseif ~isempty(strmatch(DynareOptions.particle_filter.resampling,'none','exact'))
         StateVectors = tmp(mf0,:);
