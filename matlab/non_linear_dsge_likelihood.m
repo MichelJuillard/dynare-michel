@@ -355,7 +355,7 @@ ReducedForm.StateVectorVariance = StateVectorVariance;
 % 4. Likelihood evaluation
 %------------------------------------------------------------------------------
 DynareOptions.warning_for_steadystate = 0;
-LIK = feval(DynareOptions.particle.algorithm,ReducedForm,Y,[]);
+LIK = feval(DynareOptions.particle.algorithm,ReducedForm,Y,[],DynareOptions);
 if imag(LIK)
     likelihood = penalty;
     cost_flag  = 0;
