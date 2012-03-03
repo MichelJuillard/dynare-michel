@@ -210,6 +210,7 @@ end
 k2 = union(var_obs_index,[dr.nstatic+1:dr.nstatic+dr.npred]', 'rows');
 % Set restrict_state to postion of observed + state variables in expanded state vector.
 oo_.dr.restrict_var_list = k2;
+bayestopt_.restrict_var_list = k2;
 % set mf0 to positions of state variables in restricted state vector for likelihood computation.
 [junk,bayestopt_.mf0] = ismember([dr.nstatic+1:dr.nstatic+dr.npred]',k2);
 % Set mf1 to positions of observed variables in restricted state vector for likelihood computation.
