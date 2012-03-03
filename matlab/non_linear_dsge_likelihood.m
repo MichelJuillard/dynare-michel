@@ -274,7 +274,6 @@ else
     end
 end
 
-
 % Define the deterministic linear trend of the measurement equation.
 if BayesInfo.with_trend
     trend_coeff = zeros(DynareDataset.info.nvobs,1);
@@ -293,7 +292,7 @@ end
 start = DynareOptions.presample+1;
 np    = size(T,1);
 mf    = BayesInfo.mf;
-Y     = transpose(dataset_.rawdata);
+Y     = transpose(DynareDataset.rawdata);
 
 %------------------------------------------------------------------------------
 % 3. Initial condition of the Kalman filter
