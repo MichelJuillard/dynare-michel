@@ -353,8 +353,18 @@ M_.bvar = [];
 options_.homotopy_mode = 0;
 options_.homotopy_steps = 1;
 
-% Simplex routine (variation on Nelder Mead algorithm)
+% Simplex optimization routine (variation on Nelder Mead algorithm).
 options_.simplex = [];
+
+% CMAES optimization routine.
+cmaes.SaveVariables='off';
+cmaes.DispFinal='on';
+cmaes.WarnOnEqualFunctionValues='no';
+cmaes.DispModulo='10';
+cmaes.LogModulo='0';
+cmaes.LogTime='0';
+options_.cmaes = cmaes;
+
 
 % prior analysis
 options_.prior_mc = 20000;
