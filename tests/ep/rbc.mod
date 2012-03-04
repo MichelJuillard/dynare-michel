@@ -53,6 +53,8 @@ end;
 steady;
 
 options_.ep.verbosity = 0;
+options_.ep.order = 1;
+options_.ep.nnodes = 2;
 options_.console_mode = 0;
 
-ts = extended_path([],1000);
+ts = extended_path([],100);

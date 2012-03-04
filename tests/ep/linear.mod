@@ -29,12 +29,16 @@ steady;
 options_.maxit_ = 100;
 options_.ep.verbosity = 0;
 options_.ep.stochastic.status = 0;
+options_.ep.order = 0;
+options_.ep.nnodes = 0;
 options_.console_mode = 0;
 
-ts = extended_path([],1000);
+ts = extended_path([],100);
 
 options_.ep.stochastic.status = 1;
-sts = extended_path([],1000);
+options_.ep.order = 1;
+options_.ep.nnodes = 3;
+sts = extended_path([],100);
 
 if max(max(abs(ts-sts))) > 1e-12
    error('extended path algorithm fails in ./tests/ep/linear.mod')

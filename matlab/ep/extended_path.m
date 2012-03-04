@@ -38,13 +38,25 @@ verbosity = options_.ep.verbosity+options_.ep.debug;
 % Prepare a structure needed by the matlab implementation of the perfect foresight model solver
 pfm.lead_lag_incidence = M_.lead_lag_incidence;
 pfm.ny = M_.endo_nbr;
-pfm.max_lag = M_.maximum_endo_lag;
-pfm.nyp = nnz(pfm.lead_lag_incidence(1,:));
-pfm.iyp = find(pfm.lead_lag_incidence(1,:)>0);
-pfm.ny0 = nnz(pfm.lead_lag_incidence(2,:));
-pfm.iy0 = find(pfm.lead_lag_incidence(2,:)>0);
-pfm.nyf = nnz(pfm.lead_lag_incidence(3,:));
-pfm.iyf = find(pfm.lead_lag_incidence(3,:)>0);
+pfm.Sigma_e = M_.Sigma_e;
+max_lag = M_.maximum_endo_lag;
+pfm.max_lag = max_lag;
+if pfm.max_lag > 0
+    pfm.nyp = nnz(pfm.lead_lag_incidence(1,:));
+    pfm.iyp = find(pfm.lead_lag_incidence(1,:)>0);
+else
+    pfm.nyp = 0;
+    pfm.iyp = [];
+end
+pfm.ny0 = nnz(pfm.lead_lag_incidence(max_lag+1,:));
+pfm.iy0 = find(pfm.lead_lag_incidence(max_lag+1,:)>0);
+if M_.maximum_endo_lead
+    pfm.nyf = nnz(pfm.lead_lag_incidence(max_lag+2,:));
+    pfm.iyf = find(pfm.lead_lag_incidence(max_lag+2,:)>0);
+else
+    pfm.nyf = 0;
+    pfm.iyf = [];
+end
 pfm.nd = pfm.nyp+pfm.ny0+pfm.nyf;
 pfm.nrc = pfm.nyf+1;
 pfm.isp = [1:pfm.nyp];
@@ -55,9 +67,18 @@ pfm.iz = [1:pfm.ny+pfm.nyp+pfm.nyf];
 pfm.periods = options_.ep.periods;
 pfm.steady_state = oo_.steady_state;
 pfm.params = M_.params;
-pfm.i_cols_1 = nonzeros(pfm.lead_lag_incidence(2:3,:)');
-pfm.i_cols_A1 = find(pfm.lead_lag_incidence(2:3,:)');
-pfm.i_cols_T = nonzeros(pfm.lead_lag_incidence(1:2,:)');
+if M_.maximum_endo_lead
+    pfm.i_cols_1 = nonzeros(pfm.lead_lag_incidence(max_lag+(1:2),:)');
+    pfm.i_cols_A1 = find(pfm.lead_lag_incidence(max_lag+(1:2),:)');
+else
+    pfm.i_cols_1 = nonzeros(pfm.lead_lag_incidence(max_lag+1,:)');
+    pfm.i_cols_A1 = find(pfm.lead_lag_incidence(max_lag+1,:)');
+end
+if max_lag > 0
+    pfm.i_cols_T = nonzeros(pfm.lead_lag_incidence(1:2,:)');
+else
+    pfm.i_cols_T = nonzeros(pfm.lead_lag_incidence(1,:)');
+end
 pfm.i_cols_j = 1:pfm.nd;
 pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
 pfm.dynamic_model = str2func([M_.fname,'_dynamic']);
@@ -239,8 +260,9 @@ while (t<sample_size)
                 % If the previous call to the perfect foresight model solver exited
                 % announcing that the routine converged, adapt the size of endo_simul_1
                 % and exo_simul_1.
-                endo_simul_1 = [ tmp , repmat(steady_state,1,ep.step) ];
-                exo_simul_1  = [ exo_simul_1 ; zeros(ep.step,size(shocks,2)) ];
+                endo_simul_1 = [endo_simul_1, repmat(steady_state,1,ep.step)];
+                endo_simul_1(:,t+1) = tmp;
+                exo_simul_1  = [exo_simul_1; zeros(ep.step,size(shocks,2))];
                 tmp_old = tmp;
             else
                 % If the previous call to the perfect foresight model solver exited
@@ -258,7 +280,10 @@ while (t<sample_size)
                 flag = 1;
             end
             if flag
-                [flag,tmp] = solve_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1);
+                [flag,tmp] = solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,...
+                                                                  pfm1, ...
+                                                                  options_.ep.nnodes,...
+                                                                  options_.ep.order);
             end
             info_convergence = ~flag;
             if info_convergence
@@ -266,7 +291,7 @@ while (t<sample_size)
                 % change during the first periods.
                 % Compute the maximum deviation between old path and new path over the
                 % first periods
-                delta = max(max(abs(tmp(:,2:ep.fp)-tmp_old(:,2:ep.fp))));
+                delta = max(max(abs(tmp-tmp_old)));
                 if delta < dynatol.x
                     % If the maximum deviation is close enough to zero, reset the number
                     % of periods to ep.periods
@@ -324,10 +349,7 @@ while (t<sample_size)
         end
     end
     % Save results of the perfect foresight model solver.
-    time_series(:,t) = endo_simul_1(:,2);
-    oo_.endo_simul(:,1:end-1) = oo_.endo_simul(:,2:end);
-    oo_.endo_simul(:,1) = time_series(:,t);
-    oo_.endo_simul(:,end) = oo_.steady_state;
+    time_series(:,t) = tmp;
 end% (while) loop over t
 
 dyn_waitbar_close(hh);
