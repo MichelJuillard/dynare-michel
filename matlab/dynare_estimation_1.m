@@ -281,7 +281,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         H0 = 1e-4*ones(nx,1);
         warning('off','CMAES:NonfinitenessRange');
         warning('off','CMAES:InitialSigma');
-        [x, fval, COUNTEVAL, STOPFLAG, OUT, BESTEVER] = cmaes(objective_function,xparam1,H0,options_.cmaes,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        [x, fval, COUNTEVAL, STOPFLAG, OUT, BESTEVER] = cmaes(func2str(objective_function),xparam1,H0,options_.cmaes,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         xparam1=BESTEVER.x;
         disp(sprintf('\n Objective function at mode: %f',fval))
       case 101
