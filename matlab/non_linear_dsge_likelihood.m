@@ -141,7 +141,7 @@ end
 fval            = [];
 ys              = [];
 trend_coeff     = [];
-cost_flag       = 1;
+exit_flag       = 1;
 
 % Set the number of observed variables
 nvobs = DynareDataset.info.nvobs;
@@ -154,7 +154,7 @@ nvobs = DynareDataset.info.nvobs;
 if (DynareOptions.mode_compute~=1) & any(xparam1<BayesInfo.lb)
     k = find(xparam1 < BayesInfo.lb);
     fval = penalty+sum((BayesInfo.lb(k)-xparam1(k)).^2);
-    cost_flag = 0;
+    exit_flag = 0;
     info = 41;
     return
 end
@@ -163,7 +163,7 @@ end
 if (DynareOptions.mode_compute~=1) & any(xparam1>BayesInfo.ub)
     k = find(xparam1>BayesInfo.ub);
     fval = penalty+sum((xparam1(k)-BayesInfo.ub(k)).^2);
-    cost_flag = 0;
+    exit_flag = 0;
     info = 42;
     return
 end
@@ -202,7 +202,7 @@ if EstimatedParameters.ncx
         k = find(a < 0);
         if k > 0
             fval = penalty+sum(-a(k));
-            cost_flag = 0;
+            exit_flag = 0;
             info = 43;
             return
         end
@@ -226,7 +226,7 @@ if EstimatedParameters.ncn
         k = find(a < 0);
         if k > 0
             fval = penalty+sum(-a(k));
-            cost_flag = 0;
+            exit_flag = 0;
             info = 44;
             return
         end
@@ -252,11 +252,11 @@ Model.H = H;
 
 if info(1) == 1 || info(1) == 2 || info(1) == 5
     fval = penalty+1;
-    cost_flag = 0;
+    exit_flag = 0;
     return
 elseif info(1) == 3 || info(1) == 4 || info(1)==6 ||info(1) == 19 || info(1) == 20 || info(1) == 21
     fval = penalty+info(2);
-    cost_flag = 0;
+    exit_flag = 0;
     return
 end
 
@@ -358,10 +358,10 @@ DynareOptions.warning_for_steadystate = 0;
 LIK = feval(DynareOptions.particle.algorithm,ReducedForm,Y,[],DynareOptions);
 if imag(LIK)
     likelihood = penalty;
-    cost_flag  = 0;
+    exit_flag  = 0;
 elseif isnan(LIK)
     likelihood = penalty;
-    cost_flag  = 0;
+    exit_flag  = 0;
 else
     likelihood = LIK;
 end
