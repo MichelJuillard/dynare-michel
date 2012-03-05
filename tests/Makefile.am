@@ -179,7 +179,10 @@ EXTRA_DIST = \
 	kalman_filter_smoother/fs2000a_steadystate.m \
 	identification/kim/kim2_steadystate.m \
 	ep/mean_preserving_spread.m \
-	ep/rbc_steadystate.m
+	ep/rbc_steadystate.m \
+	particle/dsge_base_steadystate.m \
+	particle/dsge_base2_steadystate.m \
+	particle/fs2000_particle_steadystate.m
 
 TARGETS =
 
