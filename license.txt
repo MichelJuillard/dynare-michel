@@ -1,15 +1,15 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: Dynare
 Upstream-Contact: Dynare Team, whose members in 2012 are:
- Stéphane Adjemian <stephane.adjemian@ens.fr>
- Houtan Bastani <houtan.bastani@ens.fr>
- Michel Juillard <michel.juillard@mjui.fr>
- Frédéric Karamé <frederic.karame@univ-evry.fr>
- Junior Maih <junior.maih@gmail.com>
- Ferhat Mihoubi <fmihoubi@univ-evry.fr>
- George Perendia <george@perendia.orangehome.co.uk>
- Marco Ratto <marco.ratto@jrc.ec.europa.eu>
- Sébastien Villemot <sebastien.villemot@ens.fr>
+                  Stéphane Adjemian <stephane.adjemian@ens.fr>
+                  Houtan Bastani <houtan.bastani@ens.fr>
+                  Michel Juillard <michel.juillard@mjui.fr>
+                  Frédéric Karamé <frederic.karame@univ-evry.fr>
+                  Junior Maih <junior.maih@gmail.com>
+                  Ferhat Mihoubi <fmihoubi@univ-evry.fr>
+                  George Perendia <george@perendia.orangehome.co.uk>
+                  Marco Ratto <marco.ratto@jrc.ec.europa.eu>
+                  Sébastien Villemot <sebastien.villemot@ens.fr>
 Source: http://www.dynare.org
 
 Files: *
@@ -255,14 +255,14 @@ License: GPL-3+ with Autoconf exception
 Files: m4/ax_boost_base.m4
 Copyright: 2008 Thomas Porschberg <thomas@randspringer.de>
            2009 Dynare Team
-License:
+License: other
  Copying and distribution of this file, with or without modification, are
  permitted in any medium without royalty provided the copyright notice
  and this notice are preserved.
 
 Files: m4/ax_compare_version.m4
 Copyright: 2008 Tim Toolan <toolan@ele.uri.edu>
-License:
+License: other
  Copying and distribution of this file, with or without modification, are
  permitted in any medium without royalty provided the copyright notice
  and this notice are preserved.
