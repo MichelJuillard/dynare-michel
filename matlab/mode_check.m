@@ -1,4 +1,43 @@
 function mode_check(fun,x,hessian,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
+% Checks the estimated ML mode or Posterior mode.
+
+%@info:
+%! @deftypefn {Function File} {@var{y}, @var{y_} =} sequential_importance_particle_filter (@var{ReducedForm},@var{Y}, @var{start}, @var{DynareOptions})
+%! @anchor{particle/sequential_importance_particle_filter}
+%! @sp 1
+%! Checks the estimated ML mode or Posterior mode by plotting sections of the likelihood/posterior kernel.
+%! Each plot shows the variation of the likelihood implied by the variations of a single parameter, ceteris paribus)
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item ReducedForm
+%! Structure describing the state space model (built in @ref{non_linear_dsge_likelihood}).
+%! @item Y
+%! p*smpl matrix of doubles (p is the number of observed variables), the (detrended) data.
+%! @item start
+%! Integer scalar, likelihood evaluation starts at observation 'start'.
+%! @item DynareOptions
+%! Structure specifying Dynare's options.
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item LIK
+%! double scalar, value of (minus) the logged likelihood.
+%! @item lik
+%! smpl*1 vector of doubles, density of the observations at each period.
+%! @end table
+%! @sp 2
+%! @strong{This function is called by:}
+%! @ref{non_linear_dsge_likelihood}
+%! @sp 2
+%! @strong{This function calls:}
+%!
+%! @end deftypefn
+%@eod:
+
 
 % function mode_check(x,fval,hessian,gend,data,lb,ub)
 % Checks the maximum likelihood mode
@@ -18,7 +57,7 @@ function mode_check(fun,x,hessian,DynareDataset,DynareOptions,Model,EstimatedPar
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2010 Dynare Team
+% Copyright (C) 2003-2010, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -62,6 +101,8 @@ if TeX
     fprintf(fidTeX,' \n');
 end
 
+ll = DynareOptions.mode_check_neighbourhood_size;
+
 for plt = 1:nbplt,
     if TeX
         NAMES = [];
@@ -82,9 +123,18 @@ for plt = 1:nbplt,
             end
         end
         xx = x;
-        l1 = max(BayesInfo.lb(kk),0.5*x(kk));
-        l2 = min(BayesInfo.ub(kk),1.5*x(kk));
-        z = [l1:(l2-l1)/20:l2];
+        l1 = max(BayesInfo.lb(kk),(1-ll)*x(kk)); m1 = 0;
+        l2 = min(BayesInfo.ub(kk),(1+ll)*x(kk));
+        if l2<(1+ll)*x(kk)
+            l1 = x(kk) - (l2-x(kk));
+            m1 = 1;
+        end
+        if ~m1 && (l1>(1-ll)*x(kk)) && (x(kk)+(x(kk)-l1)<ub(kk))
+            l2 = x(kk) + (x(kk)-l1);
+        end
+        z1 = l1:((x(kk)-l1)/10):x(kk);
+        z2 = x(kk):((l2-x(kk))/10):l2;
+        z  = union(z1,z2);
         if DynareOptions.mode_check_nolik==0,
             y = zeros(length(z),2);
             dy = priordens(xx,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
