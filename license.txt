@@ -16,18 +16,6 @@ Source: http://www.dynare.org
 Files: *
 Copyright: 1996-2012 Dynare Team
 License: GPL-3+
- Dynare is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- Dynare is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 Files: matlab/AIM/SP*
 Copyright: public-domain
@@ -54,18 +42,6 @@ License: public-domain
 Files: matlab/bfgsi.m
 Copyright: 1993-2009 Christopher Sims
 License: GPL-3+
- Dynare is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- Dynare is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 Files: matlab/csolve.m matlab/csminit1.m matlab/numgrad2.m matlab/numgrad3.m
  matlab/numgrad5.m matlab/csminwel.m matlab/bvar_density.m
@@ -74,35 +50,11 @@ Files: matlab/csolve.m matlab/csminit1.m matlab/numgrad2.m matlab/numgrad3.m
 Copyright: 1993-2009 Christopher Sims
            2006-2011 Dynare Team
 License: GPL-3+
- Dynare is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- Dynare is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 Files: matlab/cmaes.m
 Copyright: 2001-2012 Nikolaus Hansen
            2012 Dynare Team
 License: GPL-3+
- Dynare is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- Dynare is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 Files: matlab/missing/stats/normpdf.m matlab/missing/stats/gamcdf.m
  matlab/missing/stats/common_size.m matlab/missing/stats/chi2inv.m
@@ -114,161 +66,42 @@ Files: matlab/missing/stats/normpdf.m matlab/missing/stats/gamcdf.m
 Copyright: 1995-2007 Kurt Hornik
            2008-2009 Dynare Team
 License: GPL-3+
- Dynare is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- Dynare is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 Files: matlab/missing/bicgstab/bicgstab.m
 Copyright: 2008 Radek Salac
 License: GPL-3+
- This file is part of Octave.
- .
- Octave is free software; you can redistribute it and/or modify it
- under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 3 of the License, or (at
- your option) any later version.
- .
- Octave is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with Octave; see the file COPYING.  If not, see
- <http://www.gnu.org/licenses/>.
 
 Files: doc/dynare.texi doc/*.tex doc/*.svg doc/*.dia doc/*.pdf doc/*.bib
 Copyright: 1996-2012 Dynare Team
 License: GFDL-NIV-1.3+
- Permission is granted to copy, distribute and/or modify this document
- under the terms of the GNU Free Documentation License, Version 1.3 or
- any later version published by the Free Software Foundation; with no
- Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
- .
- A copy of the license can be found at <http://www.gnu.org/licenses/fdl.txt>
 
 Files: doc/userguide/*.tex doc/userguide/*.bib doc/userguide/*.pdf
 Copyright: 2007-2011 Tommaso Mancini Griffoli
 License: GFDL-NIV-1.3+
- Permission is granted to copy, distribute and/or modify this document
- under the terms of the GNU Free Documentation License, Version 1.3 or
- any later version published by the Free Software Foundation; with no
- Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
- .
- A copy of the license can be found at <http://www.gnu.org/licenses/fdl.txt>
 
 Files: doc/dr.tex doc/bvar_a_la_sims.tex
 Copyright: 2007-2011 Sébastien Villemot
 License: GFDL-NIV-1.3+
- Permission is granted to copy, distribute and/or modify this document
- under the terms of the GNU Free Documentation License, Version 1.3 or
- any later version published by the Free Software Foundation; with no
- Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
- .
- A copy of the license can be found at <http://www.gnu.org/licenses/fdl.txt>
 
 Files: dynare++/*.cweb dynare++/*.hweb dynare++/*.cpp dynare++/*.h
  dynare++/*.tex dynare++/*.mod dynare++/*.m dynare++/*.web dynare++/*.lex
  dynare++/*.y
 Copyright: 2004-2011 Ondra Kamenik
 License: GPL-3+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 Files: dynare++/utils/*.cpp dynare++/utils/*.h dynare++/parser/*.cpp
  dynare++/parser/*.h dynare++/parser/*.lex dynare++/parser/*.y
 Copyright: 2004-2011 Ondra Kamenik
 License: LGPL-3+
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU Lesser General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU Lesser General Public License for more details.
- .
- You should have received a copy of the GNU Lesser General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 Files: m4/ax_blas.m4 m4/ax_lapack.m4
 Copyright: 2008 Steven G. Johnson <stevenj@alum.mit.edu>
 License: GPL-3+ with Autoconf exception
- This program is free software: you can redistribute it and/or modify it
- under the terms of the GNU General Public License as published by the
- Free Software Foundation, either version 3 of the License, or (at your
- option) any later version.
- .
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
- Public License for more details.
- .
- You should have received a copy of the GNU General Public License along
- with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- As a special exception, the respective Autoconf Macro's copyright owner
- gives unlimited permission to copy, distribute and modify the configure
- scripts that are the output of Autoconf when processing the Macro. You
- need not follow the terms of the GNU General Public License when using
- or distributing such scripts, even though portions of the text of the
- Macro appear in them. The GNU General Public License (GPL) does govern
- all other use of the material that constitutes the Autoconf Macro.
- .
- This special exception to the GPL applies to versions of the Autoconf
- Macro released by the Autoconf Archive. When you make and distribute a
- modified version of the Autoconf Macro, you may extend this special
- exception to the GPL to apply to your modified version as well.
 
 Files: m4/ax_pthread.m4
 Copyright: 2008 Steven G. Johnson <stevenj@alum.mit.edu>
            2010 Dynare Team
 License: GPL-3+ with Autoconf exception
- This program is free software: you can redistribute it and/or modify it
- under the terms of the GNU General Public License as published by the
- Free Software Foundation, either version 3 of the License, or (at your
- option) any later version.
- .
- This program is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
- Public License for more details.
- .
- You should have received a copy of the GNU General Public License along
- with this program. If not, see <http://www.gnu.org/licenses/>.
- .
- As a special exception, the respective Autoconf Macro's copyright owner
- gives unlimited permission to copy, distribute and modify the configure
- scripts that are the output of Autoconf when processing the Macro. You
- need not follow the terms of the GNU General Public License when using
- or distributing such scripts, even though portions of the text of the
- Macro appear in them. The GNU General Public License (GPL) does govern
- all other use of the material that constitutes the Autoconf Macro.
- .
- This special exception to the GPL applies to versions of the Autoconf
- Macro released by the Autoconf Archive. When you make and distribute a
- modified version of the Autoconf Macro, you may extend this special
- exception to the GPL to apply to your modified version as well.
 
 Files: m4/ax_boost_base.m4
 Copyright: 2008 Thomas Porschberg <thomas@randspringer.de>
@@ -289,22 +122,72 @@ Files: m4/ax_latex_bibtex_test.m4 m4/ax_latex_class.m4 m4/ax_tex_test.m4
 Copyright: 2008 Boretti Mathieu <boretti@eig.unige.ch>
            2009 Dynare Team
 License: LGPL-2.1+
- This library is free software; you can redistribute it and/or modify it
- under the terms of the GNU Lesser General Public License as published by
- the Free Software Foundation; either version 2.1 of the License, or (at
- your option) any later version.
- .
- This library is distributed in the hope that it will be useful, but
- WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser
- General Public License for more details.
- .
- You should have received a copy of the GNU Lesser General Public License
- along with this library. If not, see <http://www.gnu.org/licenses/>.
 
 Files: m4/ax_matlab_arch.m4 m4/ax_matlab.m4 m4/ax_mexext.m4
 Copyright: 2002-2003 Ralph Schleicher
            2009 Dynare Team
+License: GPL-2+ with Autoconf exception
+
+Files: dynare.el
+Copyright: 2010 Yannick Kalantzis
+License: GPL-3+
+
+Files: mex/sources/libslicot/*
+Copyright: 2002-2009 NICONET e.V.
+License: GPL-2+
+
+Files: mex/sources/sobol/sobol.hh mex/sources/sobol/initialize_v_array.hh
+ mex/sources/sobol/initialize_v_array.inc
+Copyright: 2009 John Burkardt
+           2010-2011 Dynare Team
+License: LGPL-3+
+
+Files: ms-sbvar/utilities_dw/*
+Copyright: 1996-2011 Daniel Waggoner
+License: GPL-3+
+
+Files: ms-sbvar/switch_dw/*
+Copyright: 1996-2011 Daniel Waggoner and Tao Zha
+License: GPL-3+
+
+Files: ms-sbvar/switch_dw/state_space/sbvar/dw_csminwel.c
+ state_space/sbvar/dw_csminwel.h
+Copyright: 1996 Christopher Sims
+           2003 Karibzhanov, Waggoner and Zha
+License: GPL-3+
+
+Files: matlab/ms-sbvar/cstz/*
+Copyright: 1993-2011 Tao Zha
+License: GPL-3+
+
+Files: matlab/ms-sbvar/cstz/bfgsi.m matlab/ms-sbvar/cstz/csminit.m
+ matlab/ms-sbvar/cstz/csminwel.m
+Copyright: 1993-2011 Tao Zha and Christopher Sims
+License: GPL-3+
+
+License: GFDL-NIV-1.3+
+ Permission is granted to copy, distribute and/or modify this document
+ under the terms of the GNU Free Documentation License, Version 1.3 or
+ any later version published by the Free Software Foundation; with no
+ Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+ .
+ A copy of the license can be found at <http://www.gnu.org/licenses/fdl.txt>
+
+License: GPL-2+
+ This program is free software: you can redistribute it and/or
+ modify it under the terms of the GNU General Public License as
+ published by the Free Software Foundation, either version 2 of
+ the License, or (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see
+ <http://www.gnu.org/licenses/>.
+
 License: GPL-2+ with Autoconf exception
  This program is free software; you can redistribute it and/or
  modify it under the terms of the GNU General Public License as
@@ -325,44 +208,61 @@ License: GPL-2+ with Autoconf exception
  it under the same distribution terms that you use for the rest
  of that program.
 
-Files: dynare.el
-Copyright: 2010 Yannick Kalantzis
 License: GPL-3+
- This program is free software; you can redistribute it and/or modify
+ Dynare is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
  the Free Software Foundation, either version 3 of the License, or
  (at your option) any later version.
  .
- This program is distributed in the hope that it will be useful,
+ Dynare is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  GNU General Public License for more details.
  .
  You should have received a copy of the GNU General Public License
- along with this program.  If not, see
- <http://www.gnu.org/licenses/>.
+ along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-Files: mex/sources/libslicot/*
-Copyright: 2002-2009 NICONET e.V.
-License: GPL-2+
- This program is free software: you can redistribute it and/or
- modify it under the terms of the GNU General Public License as
- published by the Free Software Foundation, either version 2 of
- the License, or (at your option) any later version.
+License: GPL-3+ with Autoconf exception
+ This program is free software: you can redistribute it and/or modify it
+ under the terms of the GNU General Public License as published by the
+ Free Software Foundation, either version 3 of the License, or (at your
+ option) any later version.
  .
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ Public License for more details.
  .
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see
- <http://www.gnu.org/licenses/>.
+ You should have received a copy of the GNU General Public License along
+ with this program. If not, see <http://www.gnu.org/licenses/>.
+ .
+ As a special exception, the respective Autoconf Macro's copyright owner
+ gives unlimited permission to copy, distribute and modify the configure
+ scripts that are the output of Autoconf when processing the Macro. You
+ need not follow the terms of the GNU General Public License when using
+ or distributing such scripts, even though portions of the text of the
+ Macro appear in them. The GNU General Public License (GPL) does govern
+ all other use of the material that constitutes the Autoconf Macro.
+ .
+ This special exception to the GPL applies to versions of the Autoconf
+ Macro released by the Autoconf Archive. When you make and distribute a
+ modified version of the Autoconf Macro, you may extend this special
+ exception to the GPL to apply to your modified version as well.
 
-Files: mex/sources/sobol/sobol.hh mex/sources/sobol/initialize_v_array.hh
- mex/sources/sobol/initialize_v_array.inc
-Copyright: 2009 John Burkardt
-           2010-2011 Dynare Team
+License: LGPL-2.1+
+ This library is free software; you can redistribute it and/or modify it
+ under the terms of the GNU Lesser General Public License as published by
+ the Free Software Foundation; either version 2.1 of the License, or (at
+ your option) any later version.
+ .
+ This library is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser
+ General Public License for more details.
+ .
+ You should have received a copy of the GNU Lesser General Public License
+ along with this library. If not, see <http://www.gnu.org/licenses/>.
+
 License: LGPL-3+
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU Lesser General Public License as published by
@@ -376,86 +276,3 @@ License: LGPL-3+
  .
  You should have received a copy of the GNU Lesser General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-Files: ms-sbvar/utilities_dw/*
-Copyright: 1996-2011 Daniel Waggoner
-License: GPL-3+
- This free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- It is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- If you did not received a copy of the GNU General Public License
- with this software, see <http://www.gnu.org/licenses/>.
-
-Files: ms-sbvar/switch_dw/*
-Copyright: 1996-2011 Daniel Waggoner and Tao Zha
-License: GPL-3+
- This free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- It is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- If you did not received a copy of the GNU General Public License
- with this software, see <http://www.gnu.org/licenses/>.
-
-Files: ms-sbvar/switch_dw/state_space/sbvar/dw_csminwel.c
- state_space/sbvar/dw_csminwel.h
-Copyright: 1996 Christopher Sims
-           2003 Karibzhanov, Waggoner and Zha
-License: GPL-3+
- This free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- It is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- If you did not received a copy of the GNU General Public License
- with this software, see <http://www.gnu.org/licenses/>.
-
-Files: matlab/ms-sbvar/cstz/*
-Copyright: 1993-2011 Tao Zha
-License: GPL-3+
- This free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- It is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- If you did not received a copy of the GNU General Public License
- with this software, see <http://www.gnu.org/licenses/>.
-
-Files: matlab/ms-sbvar/cstz/bfgsi.m matlab/ms-sbvar/cstz/csminit.m
- matlab/ms-sbvar/cstz/csminwel.m
-Copyright: 1993-2011 Tao Zha and Christopher Sims
-License: GPL-3+
- This free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
- .
- It is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- If you did not received a copy of the GNU General Public License
- with this software, see <http://www.gnu.org/licenses/>.
