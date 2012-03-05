@@ -82,8 +82,7 @@ state_variance_rank = size(StateVectorVarianceSquareRoot,2);
 Q_lower_triangular_cholesky = chol(Q)';
 
 % Set seed for randn().
-stream=RandStream('mt19937ar','Seed',1);
-RandStream.setDefaultStream(stream);
+set_dynare_seed('default');
 
 % Initialization of the likelihood.
 const_lik = log(2*pi)*number_of_observed_variables;
