@@ -39,14 +39,10 @@ License: public-domain
  Journal of Economic Dynamics and Control, 2010, vol. 34, issue 3,
  pages 472-489
 
-Files: matlab/bfgsi.m
-Copyright: 1993-2009 Christopher Sims
-License: GPL-3+
-
-Files: matlab/csolve.m matlab/csminit1.m matlab/numgrad2.m matlab/numgrad3.m
- matlab/numgrad5.m matlab/csminwel.m matlab/bvar_density.m
- matlab/bvar_toolbox.m matlab/partial_information/PI_gensys.m
- matlab/qzswitch.m matlab/qzdiv.m
+Files: matlab/bfgsi.m matlab/csolve.m matlab/csminit1.m matlab/numgrad2.m
+ matlab/numgrad3.m matlab/numgrad5.m matlab/csminwel.m matlab/bvar_density.m
+ matlab/bvar_toolbox.m matlab/partial_information/PI_gensys.m matlab/qzswitch.m
+ matlab/qzdiv.m
 Copyright: 1993-2009 Christopher Sims
            2006-2011 Dynare Team
 License: GPL-3+
