@@ -2,8 +2,8 @@ function mode_check(fun,x,hessian,DynareDataset,DynareOptions,Model,EstimatedPar
 % Checks the estimated ML mode or Posterior mode.
 
 %@info:
-%! @deftypefn {Function File} {@var{y}, @var{y_} =} sequential_importance_particle_filter (@var{ReducedForm},@var{Y}, @var{start}, @var{DynareOptions})
-%! @anchor{particle/sequential_importance_particle_filter}
+%! @deftypefn {Function File} mode_check (@var{fun}, @var{x}, @var{hessian}, @var{DynareDataset}, @var{DynareOptions}, @var{Model}, @var{EstimatedParameters}, @var{BayesInfo}, @var{DynareResults})
+%! @anchor{mode_check}
 %! @sp 1
 %! Checks the estimated ML mode or Posterior mode by plotting sections of the likelihood/posterior kernel.
 %! Each plot shows the variation of the likelihood implied by the variations of a single parameter, ceteris paribus)
@@ -11,51 +11,34 @@ function mode_check(fun,x,hessian,DynareDataset,DynareOptions,Model,EstimatedPar
 %! @strong{Inputs}
 %! @sp 1
 %! @table @ @var
-%! @item ReducedForm
-%! Structure describing the state space model (built in @ref{non_linear_dsge_likelihood}).
-%! @item Y
-%! p*smpl matrix of doubles (p is the number of observed variables), the (detrended) data.
+%! @item fun
+%! Objective function.
+%! @item x
+%! Estimated mode.
 %! @item start
-%! Integer scalar, likelihood evaluation starts at observation 'start'.
+%! Hessian of the objective function at the estimated mode @var{x}.
+%! @item DynareDataset
+%! Structure specifying the dataset used for estimation (dataset_).
 %! @item DynareOptions
-%! Structure specifying Dynare's options.
+%! Structure defining dynare's options (options_).
+%! @item Model
+%! Structure specifying the (estimated) model (M_).
+%! @item EstimatedParameters
+%! Structure specifying the estimated parameters (estimated_params_).
+%! @item BayesInfo
+%! Structure containing information about the priors used for estimation (bayestopt_).
+%! @item DynareResults
+%! Structure gathering the results (oo_).
 %! @end table
 %! @sp 2
 %! @strong{Outputs}
-%! @sp 1
-%! @table @ @var
-%! @item LIK
-%! double scalar, value of (minus) the logged likelihood.
-%! @item lik
-%! smpl*1 vector of doubles, density of the observations at each period.
-%! @end table
 %! @sp 2
 %! @strong{This function is called by:}
-%! @ref{non_linear_dsge_likelihood}
 %! @sp 2
 %! @strong{This function calls:}
-%!
+%! The objective function (@var{func}).
 %! @end deftypefn
 %@eod:
-
-
-% function mode_check(x,fval,hessian,gend,data,lb,ub)
-% Checks the maximum likelihood mode
-%
-% INPUTS
-%    x:       mode
-%    fval:    value at the maximum likelihood mode
-%    hessian: matrix of second order partial derivatives
-%    gend:    scalar specifying the number of observations
-%    data:    matrix of data
-%    lb:      lower bound
-%    ub:      upper bound
-%
-% OUTPUTS
-%    none
-%
-% SPECIAL REQUIREMENTS
-%    none
 
 % Copyright (C) 2003-2010, 2012 Dynare Team
 %
