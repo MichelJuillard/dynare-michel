@@ -60,6 +60,7 @@ MODFILES = \
 	fs2000/fs2000a.mod \
 	fs2000/fs2000c.mod \
 	fs2000/fs2000d.mod \
+	fs2000/fs2000_cmaes.mod \
 	homotopy/homotopy1_test.mod \
 	homotopy/homotopy2_test.mod \
 	homotopy/homotopy3_test.mod \
