@@ -213,7 +213,15 @@ while (t<sample_size)
                 flag = 1;
             end
             if flag
-                [flag,tmp,err] = solve_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1);
+                if options_.ep.order == 0
+                    [flag,tmp,err] = ...
+                        solve_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1);
+                else
+                    [flag,tmp] = solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,...
+                                                                      pfm1, ...
+                                                                      options_.ep.nnodes,...
+                                                                      options_.ep.order);
+                end
             end
             info_convergence = ~flag;
         end
@@ -267,7 +275,7 @@ while (t<sample_size)
                 % If the previous call to the perfect foresight model solver exited
                 % announcing that the routine converged, adapt the size of endo_simul_1
                 % and exo_simul_1.
-                endo_simul_1 = [ tmp , repmat(steady_state,1,ep.step) ];
+                endo_simul_1 = [ endo_simul_1 , repmat(steady_state,1,ep.step) ];
                 exo_simul_1  = [ exo_simul_1 ; zeros(ep.step,exo_nbr)];%size(shocks,2)) ];
                 tmp_old = tmp;
             else
@@ -288,10 +296,15 @@ while (t<sample_size)
                 flag = 1;
             end
             if flag
-                [flag,tmp] = solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,...
-                                                                  pfm1, ...
-                                                                  options_.ep.nnodes,...
-                                                                  options_.ep.order);
+                if options_.ep.order == 0
+                    [flag,tmp,err] = ...
+                        solve_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1);
+                else
+                    [flag,tmp] = solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,...
+                                                                      pfm1, ...
+                                                                      options_.ep.nnodes,...
+                                                                      options_.ep.order);
+                end
             end
             info_convergence = ~flag;
             if info_convergence
@@ -299,7 +312,7 @@ while (t<sample_size)
                 % change during the first periods.
                 % Compute the maximum deviation between old path and new path over the
                 % first periods
-                delta = max(max(abs(tmp-tmp_old)));
+                delta = max(max(abs(tmp(:,1)-tmp_old(:,1))));
                 if delta < dynatol.x
                     % If the maximum deviation is close enough to zero, reset the number
                     % of periods to ep.periods
