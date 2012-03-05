@@ -62,6 +62,7 @@ options_.mode_check_neighbourhood_size = 0.5;
 % Default number of threads for parallelized mex files.
 options_.threads.kronecker.A_times_B_kronecker_C = 1;
 options_.threads.kronecker.sparse_hessian_times_B_kronecker_C = 1;
+options_.threads.local_state_space_iteration_2 = 1;
 
 % steady state
 options_.jacobian_flag = 1;
@@ -176,9 +177,9 @@ particle.algorithm = 'sequential_importance_particle_filter';
 % Set the Gaussian approximation method
 particle.approximation_method = 'unscented';
 % Set unscented parameters alpha, beta and kappa for gaussian approximation
-particle.unscented.alpha = 1 ;
-particle.unscented.beta = 2 ;
-particle.unscented.kappa = 1 ;
+particle.unscented.alpha = 1;
+particle.unscented.beta = 2;
+particle.unscented.kappa = 1;
 % Configuration of resampling in case of particles
 particle.resampling.status = 'systematic' ;
 % Choice of the resampling method

@@ -20,7 +20,7 @@ function [LIK,lik] = auxiliary_particle_filter(ReducedForm,Y,start,DynareOptions
 % NOTES
 %   The vector "lik" is used to evaluate the jacobian of the likelihood.
 
-% Copyright (C) 2009-2010 Dynare Team
+% Copyright (C) 2011, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -94,7 +94,7 @@ weights = ones(1,number_of_particles);
 StateVectors = bsxfun(@plus,StateVectorVarianceSquareRoot*randn(state_variance_rank,number_of_particles),StateVectorMean);
 for t=1:sample_size
     yhat = bsxfun(@minus,StateVectors,state_variables_steady_state);
-    tmp = local_state_space_iteration_2(yhat,zeros(number_of_structural_innovations,number_of_particles),ghx,ghu,constant,ghxx,ghuu,ghxu);
+    tmp = local_state_space_iteration_2(yhat,zeros(number_of_structural_innovations,number_of_particles),ghx,ghu,constant,ghxx,ghuu,ghxu,DynareOptions.threads.local_state_space_iteration_2);
     PredictedObservedMean = mean(tmp(mf1,:),2);
     PredictionError = bsxfun(@minus,Y(:,t),tmp(mf1,:));
     dPredictedObservedMean = bsxfun(@minus,tmp(mf1,:),PredictedObservedMean);
@@ -104,17 +104,17 @@ for t=1:sample_size
     sum_tau_tilde = sum(tau_tilde) ;
     lik(t) = log(sum_tau_tilde) ;
     tau_tilde = tau_tilde/sum_tau_tilde;
-    indx_resmpl = resample(tau_tilde) ;
-    yhat = yhat(:,indx_resmpl) ;
-    wtilde = wtilde(indx_resmpl) ;
+    indx_resmpl = resample(tau_tilde);
+    yhat = yhat(:,indx_resmpl);
+    wtilde = wtilde(indx_resmpl);
     epsilon = Q_lower_triangular_cholesky*randn(number_of_structural_innovations,number_of_particles);
-    tmp = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu);
-    StateVectors = tmp(mf0,:) ;
+    tmp = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,DynareOptions.threads.local_state_space_iteration_2);
+    StateVectors = tmp(mf0,:);
     PredictedObservedMean = mean(tmp(mf1,:),2);
     PredictionError = bsxfun(@minus,Y(:,t),tmp(mf1,:));
     dPredictedObservedMean = bsxfun(@minus,tmp(mf1,:),PredictedObservedMean);
     PredictedObservedVariance = (dPredictedObservedMean*dPredictedObservedMean')/number_of_particles+H;
-    lnw = exp(-.5*(const_lik+log(det(PredictedObservedVariance))+sum(PredictionError.*(PredictedObservedVariance\PredictionError),1))) ;
+    lnw = exp(-.5*(const_lik+log(det(PredictedObservedVariance))+sum(PredictionError.*(PredictedObservedVariance\PredictionError),1)));
     wtilde = lnw./wtilde;
     weights = wtilde/sum(wtilde);
 end

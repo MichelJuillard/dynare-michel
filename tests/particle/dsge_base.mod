@@ -63,7 +63,14 @@ end;
 
 varobs y_obs l_obs i_obs;
 
-options_.particle_filter.algorithm = 'sequential_importance_particle_filter';
-options_.particle_filter.initialization = 1;
+options_.particle.status = 1;
+options_.particle.algorithm = 'sequential_importance_particle_filter';
+options_.particle.initialization = 1;
+particle.number_of_particles = 500;
 
-estimation(datafile=data_benchmark,order=2,nobs=100,mh_replic=0,mode_compute=8,mode_check);
+set_dynare_threads('local_state_space_iteration_2',2);
+
+//estimation(datafile=data_benchmark,order=2,nobs=100,mh_replic=0,mode_compute=6);
+//estimation(datafile=data_benchmark,order=2,nobs=100,mh_replic=0,mode_compute=8,mode_file=dsge_base_mode);
+//estimation(datafile=data_benchmark,order=2,nobs=100,mh_replic=0,mode_compute=8,mode_file=dsge_base_mode);
+estimation(datafile=data_benchmark,order=2,nobs=100,mh_replic=0,mode_compute=4,mode_file=dsge_base_mode,mode_check);
