@@ -33,11 +33,21 @@ global M_ options_ oo_ estim_params_ bayestopt_ dataset_
 
 % Set particle filter flag.
 if options_.order > 1
-    options_.particle_filter.status = 1;
+    if options_.particle.status && options_.order==2
+        disp(' ')
+        disp('Estimation using a non linear filter!')
+        disp(' ')
+    elseif options_.particle.status && options_.order==2
+        error(['Non linear filter are not implemented with order ' int2str(options_.order) ' approximation of the model!'])
+    elseif ~options_.particle.status && options_.order==2
+        error('If you want to estimate the model with a second order approximation using a non linear filter, set options_.particle.status=1;')
+    else
+        error(['Cannot estimate a model with an order ' int2str(options_.order) ' approximation!'])
+    end
 end
 
 if ~options_.dsge_var
-    if options_.particle_filter.status
+    if options_.particle.status
         objective_function = str2func('non_linear_dsge_likelihood');
     else
         objective_function = str2func('dsge_likelihood');
