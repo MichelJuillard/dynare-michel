@@ -14,7 +14,8 @@ EXTRA_DIST = \
 	kalman_steady_state \
 	ms-sbvar \
 	block_kalman_filter \
-	sobol
+	sobol \
+	local_state_space_iterations
 
 clean-local:
 	rm -rf `find mex/sources -name *.o`
