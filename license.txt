@@ -8,6 +8,7 @@ Upstream-Contact: Dynare Team, whose members in 2012 are:
                   Junior Maih <junior.maih@gmail.com>
                   Ferhat Mihoubi <fmihoubi@univ-evry.fr>
                   George Perendia <george@perendia.orangehome.co.uk>
+                  Johannes Pfeifer <jpfeifer@gmx.de>
                   Marco Ratto <marco.ratto@jrc.ec.europa.eu>
                   Sébastien Villemot <sebastien.villemot@ens.fr>
 Source: http://www.dynare.org
