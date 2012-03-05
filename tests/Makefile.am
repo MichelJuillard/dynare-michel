@@ -122,7 +122,10 @@ MODFILES = \
 	second_order/ds1.mod \
 	second_order/ds2.mod \
 	ep/rbc.mod \
-	ep/linear.mod
+	ep/linear.mod \
+	particle/dsge_base.mod \
+	particle/dsge_base2.mod \
+	particle/fs2000_particle.mod
 
 EXTRA_DIST = \
 	$(MODFILES) \
