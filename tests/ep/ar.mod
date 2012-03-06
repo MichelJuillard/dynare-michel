@@ -38,7 +38,7 @@ options_.ep.nnodes = 0;
 options_.console_mode = 0;
 
 
-ts = extended_path([],1000);
+ts = extended_path([],100);
 
 
 options_.ep.verbosity = 0;
