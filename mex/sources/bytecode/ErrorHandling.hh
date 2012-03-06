@@ -113,7 +113,10 @@ public:
                                                                value2(value2_arg)
   {
     ostringstream tmp;
-    tmp << " with X=" << value1 << "\n";
+    if (abs(value1) > 1e-10 )
+      tmp << " with X=" << value1 << "\n";
+    else
+      tmp << " with X=" << value1 << " and a=" << value2 << "\n";
     completeErrorMsg(tmp.str());
   };
 };
