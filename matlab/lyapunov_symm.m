@@ -1,4 +1,4 @@
-function [x,u] = lyapunov_symm(a,b,qz_criterium,lyapunov_complex_threshold,method)
+function [x,u] = lyapunov_symm(a,b,qz_criterium,lyapunov_complex_threshold,method, R)
 % Solves the Lyapunov equation x-a*x*a' = b, for b and x symmetric matrices.
 % If a has some unit roots, the function computes only the solution of the stable subsystem.
 %  
@@ -12,6 +12,7 @@ function [x,u] = lyapunov_symm(a,b,qz_criterium,lyapunov_complex_threshold,metho
 %                                                               variables and the schur decomposition is triggered.    
 %                                                      method=2 then U, T, n and k are declared as persistent 
 %                                                               variables and the schur decomposition is not performed.
+%                                                      method=3 fixed point method
 % OUTPUTS
 %   x:      [double]    m*m solution matrix of the lyapunov equation, where m is the dimension of the stable subsystem.
 %   u:      [double]    Schur vectors associated with unit roots  
@@ -38,10 +39,55 @@ function [x,u] = lyapunov_symm(a,b,qz_criterium,lyapunov_complex_threshold,metho
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
 if nargin<5
     method = 0;
 end
+
+if method == 3
+    persistent X method1;
+    if ~isempty(method1)
+        method = method1;
+    end;
+    fprintf(' [methode=%d] ',method);
+    if method == 3
+        %tol = 1e-8;
+        tol = 1e-10;
+        it_fp = 0;
+        evol = 100;
+        if isempty(X)
+            X = b;
+            max_it_fp = 2000;
+        else
+            max_it_fp = 300;
+        end;
+        at = a';
+        %fixed point iterations
+        while evol > tol && it_fp < max_it_fp;
+            X_old = X;
+            X = a * X * at + b;
+            evol = max(sum(abs(X - X_old))); %norm_1
+            %evol = max(sum(abs(X - X_old)')); %norm_inf
+            it_fp = it_fp + 1;
+        end;
+        fprintf('lyapunov it_fp=%d evol=%g\n',it_fp,evol);
+        if it_fp >= max_it_fp
+            disp(['convergence not achieved in solution of Lyapunov equation after ' int2str(it_fp) ' iterations, switching method from 3 to 0']);
+            method1 = 0;
+            method = 0;
+        else
+            method1 = 3;
+            x = X;
+            return;
+        end;
+    end;
+elseif method == 4
+    % works only with Matlab System Control toolbox
+    chol_b = R*chol(b,'lower');
+    Rx = dlyapchol(a,chol_b);
+    x = Rx' * Rx;
+    return;
+end;
+
 if method
     persistent U T k n
 else

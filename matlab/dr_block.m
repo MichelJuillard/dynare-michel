@@ -567,7 +567,9 @@ for i = 1:Size;
                 if block_type == 5
                     vghx_other = - inv(kron(eye(size(D_,2)), A_) + kron(C_', B_)) * vec(D_);
                     ghx_other = reshape(vghx_other, size(D_,1), size(D_,2));
-                else
+                elseif options_.sylvester_fp == 1
+                    ghx_other = gensylv_fp(A_, B_, C_, D_, i);
+                else 
                     [err, ghx_other] = gensylv(1, A_, B_, C_, -D_);
                 end;
                 if options_.aim_solver ~= 1 && options_.use_qzdiv
