@@ -148,7 +148,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
 
     if options.steadystate_flag && updated_params_flag && ~isreal(params)
         info(1) = 23;
-        info(2) = sum(imag(M.params).^2);
+        info(2) = sum(imag(params).^2);
         return
     end
 
