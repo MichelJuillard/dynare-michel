@@ -61,8 +61,6 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
             updated_params_flag = max(abs(params1-params))>1e-12;
         elseif length(find(isnan(params))) && ~length(find(isnan(params1)))
             updated_params_flag = 1;
-        else
-            updated_params_flag = 0;
         end
         if updated_params_flag
             params = params1;
