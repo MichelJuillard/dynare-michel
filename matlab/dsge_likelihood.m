@@ -366,7 +366,11 @@ switch DynareOptions.lik_init
         % Use standard kalman filter except if the univariate filter is explicitely choosen.
         kalman_algo = 1;
     end
-    Pstar = lyapunov_symm(T,R*Q*R',DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
+    if DynareOptions.lyapunov_fp == 1
+        Pstar = lyapunov_symm(T,Q,DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold, 4, R);
+    else
+        Pstar = lyapunov_symm(T,R*Q*R',DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
+    end;
     Pinf  = [];
     a     = zeros(mm,1);
     Zflag = 0;

@@ -382,6 +382,14 @@ options_.use_dll = 0;
 % model evaluated using bytecode.dll
 options_.bytecode = 0;
 
+% use a fixed point method to solve Sylvester equation (for large scale
+% models)
+options_.sylvester_fp = 0;
+
+% use a fixed point method to solve Lyapunov equation (for large scale
+% models)
+options_.lyapunov_fp = 0;
+
 % dates for historical time series
 options_.initial_date.freq = 1;
 options_.initial_date.period = 1;
