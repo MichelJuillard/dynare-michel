@@ -52,7 +52,7 @@ estimated_params_init;
 alp, 0.4;
 bet, 0.99;
 tet, 0.357 ;
-tau, 3;
+tau, 40;
 delt, 0.02;
 rho, 0.95;
 stderr e_a, .035;
@@ -64,7 +64,13 @@ end;
 
 varobs y l i;
 
-options_.particle_filter.algorithm = 'sequential_importance_particle_filter';
-options_.particle_filter.initialization = 1;
+options_.particle.status = 1;
+options_.particle.algorithm = 'sequential_importance_particle_filter';
+options_.particle.initialization = 1;
+options_.particle.number_of_particles = 5000;
 
-estimation(datafile=data_risky_perturb2,order=2,nobs=100,mh_replic=0,mode_compute=8,mode_check);
+options_.mode_check_neighbourhood_size = 0.05;
+
+set_dynare_threads('local_state_space_iteration2',3);
+
+estimation(datafile=data_risky_perturb2,order=2,nobs=100,mh_replic=0,mode_compute=4,mode_check);
