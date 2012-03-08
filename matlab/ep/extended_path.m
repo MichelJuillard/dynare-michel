@@ -207,20 +207,14 @@ while (t<sample_size)
                 oo_.endo_simul = endo_simul_1;
                 oo_.exo_simul = exo_simul_1;
                 [flag,tmp] = bytecode('dynamic');
-                flag
-                pause
             else
                 flag = 1;
             end
             if flag
-                if options_.ep.order == 0
-                    [flag,tmp,err] = ...
-                        solve_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1);
+                if options_.ep.stochastic.order == 0
+                    [flag,tmp,err] = solve_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1);
                 else
-                    [flag,tmp] = solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,...
-                                                                      pfm1, ...
-                                                                      options_.ep.nnodes,...
-                                                                      options_.ep.order);
+                    [flag,tmp] = solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1,options_.ep.stochastic.nodes,options_.ep.stochastic.order);
                 end
             end
             info_convergence = ~flag;
@@ -275,8 +269,8 @@ while (t<sample_size)
                 % If the previous call to the perfect foresight model solver exited
                 % announcing that the routine converged, adapt the size of endo_simul_1
                 % and exo_simul_1.
-                endo_simul_1 = [ endo_simul_1 , repmat(steady_state,1,ep.step) ];
-                exo_simul_1  = [ exo_simul_1 ; zeros(ep.step,exo_nbr)];%size(shocks,2)) ];
+                endo_simul_1 = [ tmp , repmat(steady_state,1,ep.step) ];
+                exo_simul_1  = [ exo_simul_1 ; zeros(ep.step,exo_nbr)];
                 tmp_old = tmp;
             else
                 % If the previous call to the perfect foresight model solver exited
@@ -285,7 +279,7 @@ while (t<sample_size)
                 % to know where the routine did stop, even if convergence was not
                 % achieved.
                 endo_simul_1 = [ endo_simul_1 , repmat(steady_state,1,ep.step) ];
-                exo_simul_1  = [ exo_simul_1 ; zeros(ep.step,exo_nbr)];%size(shocks,2)) ];
+                exo_simul_1  = [ exo_simul_1 ; zeros(ep.step,exo_nbr)];
             end
             % Solve the perfect foresight model with an increased number of periods.
             if bytecode_flag
@@ -296,14 +290,10 @@ while (t<sample_size)
                 flag = 1;
             end
             if flag
-                if options_.ep.order == 0
-                    [flag,tmp,err] = ...
-                        solve_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1);
+                if options_.ep.stochastic.order == 0
+                    [flag,tmp,err] = solve_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1);
                 else
-                    [flag,tmp] = solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,...
-                                                                      pfm1, ...
-                                                                      options_.ep.nnodes,...
-                                                                      options_.ep.order);
+                    [flag,tmp] = solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1,options_.ep.stochastic.nodes,options_.ep.stochastic.order);
                 end
             end
             info_convergence = ~flag;
@@ -312,7 +302,7 @@ while (t<sample_size)
                 % change during the first periods.
                 % Compute the maximum deviation between old path and new path over the
                 % first periods
-                delta = max(max(abs(tmp(:,1)-tmp_old(:,1))));
+                delta = max(max(abs(tmp(:,2)-tmp_old(:,2))));
                 if delta < dynatol.x
                     % If the maximum deviation is close enough to zero, reset the number
                     % of periods to ep.periods
@@ -355,14 +345,14 @@ while (t<sample_size)
             exo_simul_1 = exo_simul_1(1:(periods1+2),:);
             endo_simul_1 = endo_simul_1(:,1:(periods1+2));
         end
-        [INFO,tmp] = homotopic_steps(endo_simul,exo_simul_1,.5,.01,pfm);
+        [INFO,tmp] = homotopic_steps(endo_simul,exo_simul_1,.5,.01,pfm1);
         if isstruct(INFO)
             info_convergence = INFO.convergence;
         else
             info_convergence = 0;
         end
         if ~info_convergence
-            [INFO,tmp] = homotopic_steps(endo_simul,exo_simul_1,0,.01,pfm);
+            [INFO,tmp] = homotopic_steps(endo_simul,exo_simul_1,0,.01,pfm1);
             if isstruct(INFO)
                 info_convergence = INFO.convergence;
             else
