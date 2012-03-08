@@ -56,7 +56,7 @@ if isempty(init_flag)
     sample_size = size(Y,2);
     number_of_observed_variables = length(mf1);
     number_of_structural_innovations = length(ReducedForm.Q);
-    number_of_particles = DynareOptions.particle_filter.number_of_particles;
+    number_of_particles = DynareOptions.particle.number_of_particles;
     init_flag = 1;
 end
 
