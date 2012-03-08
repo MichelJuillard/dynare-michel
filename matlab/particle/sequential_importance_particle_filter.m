@@ -115,7 +115,7 @@ lik  = NaN(sample_size,1);
 
 % Initialization of the weights across particles.
 nb_obs_resamp = 0 ;
-weights = ones(1,number_of_particles) ;
+weights = ones(1,number_of_particles)/number_of_particles ;
 StateVectors = bsxfun(@plus,StateVectorVarianceSquareRoot*randn(state_variance_rank,number_of_particles),StateVectorMean);
 for t=1:sample_size
     yhat = bsxfun(@minus,StateVectors,state_variables_steady_state);
@@ -134,10 +134,9 @@ for t=1:sample_size
     if (Neff<.5*sample_size && strcmpi(DynareOptions.particle.resampling.status,'generic')) || strcmpi(DynareOptions.particle.resampling.status,'systematic')
         nb_obs_resamp = nb_obs_resamp+1 ;
         StateVectors = tmp(mf0,resample(weights,DynareOptions.particle.resampling.method1,DynareOptions.particle.resampling.method2));
-        weights = ones(1,number_of_particles) ;
+        weights = ones(1,number_of_particles)/number_of_particles ;
     elseif strcmpi(DynareOptions.particle_filter.resampling.status,'none')
         StateVectors = tmp(mf0,:);
-        weights = number_of_particles*weights;
     end
 end
 
