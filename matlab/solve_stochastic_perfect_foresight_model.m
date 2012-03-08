@@ -16,15 +16,15 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
     i_cols_A1 = pfm.i_cols_A1;
     i_cols_j = pfm.i_cols_j;
     i_cols_T = nonzeros(lead_lag_incidence(1:2,:)');
-    
+
     maxit = pfm.maxit_;
     tolerance = pfm.tolerance;
     verbose = pfm.verbose;
-    
+
     number_of_shocks = size(exo_simul,2);
 
     [nodes,weights] = gauss_hermite_weights_and_nodes(nnodes);
-    
+
     if number_of_shocks>1
         nodes = repmat(nodes,1,number_of_shocks)*chol(pfm.Sigma_e);
         % to be fixed for Sigma ~= I
@@ -58,7 +58,7 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
     % and so on until size ny x nnodes^order
     world_nbr = nnodes^order;
     Y = repmat(endo_simul(:),1,world_nbr);
-    
+
     % The columns of A map the elements of Y such that
     % each block of Y with ny rows are unfolded column wise
     dimension = ny*(sum(nnodes.^(0:order-1),2)+(periods-order)*world_nbr);
@@ -82,7 +82,7 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
             n2 = n2+ny;
         end
     end
-    
+
     h1 = clock;
     for iter = 1:maxit
         h2 = clock;
@@ -183,7 +183,7 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
         end
         err = max(abs(res));
         if err < tolerance
-            stop = 1 ;
+            stop = 1;
             if verbose
                 fprintf('\n') ;
                 disp([' Total time of simulation        :' num2str(etime(clock,h1))]) ;
@@ -192,7 +192,7 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
                 fprintf('\n') ;
             end
             flag = 0;% Convergency obtained.
-            endo_simul = Y(ny+(1:ny),1);
+            endo_simul = reshape(Y(:,1),ny,periods+2);%Y(ny+(1:ny),1);
             break
         end
         dy = -A\res;
