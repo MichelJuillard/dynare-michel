@@ -89,14 +89,14 @@ if options_.ms.regimes
     end
 
     for regime_i=1:n_regimes
+        irf_title = ['Impulse Responses, Regime ' num2str(regime_i)];
         irf_data = load([irfdir filesep 'ir_percentiles_regime_' ...
             num2str(regime_i-1) '_' options_.ms.output_file_tag ...
             '.out'], '-ascii');
         irf_data = reshape_ascii_irf_data(M_.endo_nbr, percentiles_size, ...
             options_.ms.horizon, irf_data);
         save([irfdir filesep 'irf_regime_' num2str(regime_i-1)], 'irf_data');
-        plot_ms_irf(M_, options_, irf_data, ...
-            ['Impulse Responses, Regime ' num2str(regime_i)], varlist);
+        plot_ms_irf(M_, options_, irf_data, irf_title, varlist);
     end
 else
     if options_.ms.regime

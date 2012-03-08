@@ -87,6 +87,7 @@ if options_.ms.regimes
     end
 
     for regime_i=1:n_regimes
+        forecast_title = ['Forecast, Regimes ' num2str(regime_i)];
         forecast_data = load([forecastdir filesep 'forecasts_percentiles_regime_' ...
             num2str(regime_i-1) '_' options_.ms.output_file_tag ...
             '.out'], '-ascii');
@@ -94,9 +95,7 @@ if options_.ms.regimes
             percentiles_size, options_.ms.horizon, forecast_data);
         save([forecastdir filesep 'forecast_regime_' num2str(regime_i-1)], ...
             'forecast_data');
-        plot_ms_forecast(M_, options_, forecast_data, ...
-            ['Forecast, Regimes' num2str(regime_i)], ...
-            options_.graph_save_formats, options_.TeX);
+        plot_ms_forecast(M_, options_, forecast_data, forecast_title);
     end
 else
     if options_.ms.regime
@@ -115,7 +114,6 @@ else
     forecast_data = reshape_ascii_forecast_data(M_.endo_nbr, ...
         percentiles_size, options_.ms.horizon, forecast_data);
     save([forecastdir filesep save_filename], 'forecast_data');
-    plot_ms_forecast(M_, options_, forecast_data, forecast_title, ...
-        options_.graph_save_formats, options_.TeX);
+    plot_ms_forecast(M_, options_, forecast_data, forecast_title);
 end
 end

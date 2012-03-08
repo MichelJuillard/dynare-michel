@@ -1,12 +1,14 @@
-function plot_ms_variance_decomposition(M_, options_, vd, title_, graph_save_formats, TeX, varargin)
-% function plot_ms_variance_decomposition(M_, options_, vd, title_, graph_save_formats, TeX, varargin)
+function plot_ms_variance_decomposition(M_, options_, vd, figure_name, varargin)
+% function plot_ms_variance_decomposition(M_, options_, vd, figure_name, varargin)
 % plot the variance decomposition of shocks
 %
-% Inputs
-%       M_
-%		shocks: matrix of the individual shocks Tx(KxK)with J=number of shocks
+% INPUTS
+%    M_:          (struct)    model structure
+%    options_:    (struct)    options
+%    vd:          (matrix)    variance decomposition
+%    figure_name: (string)    graph name
 %
-% Optional Inputs
+% OPTIONAL INPUTS
 %		'data': the actual data, TxK with K=number of data series
 %		'steady': the steady state value, TxK
 %		'shock_names': to specify the names of the shocks
@@ -14,8 +16,11 @@ function plot_ms_variance_decomposition(M_, options_, vd, title_, graph_save_for
 %		'dates': pass a date vector to use, otherwise will just index on 1:T
 %		'colors': Jx3 list of the rgb colors to use for each shock
 %
-% Example:
-% plot_historic_decomposition(shocks,'VD','shock_names',shock_names,'series_names',series_names)
+% OUTPUTS
+%    none
+%
+% SPECIAL REQUIREMENTS
+%    none
 
 % Copyright (C) 2011-2012 Dynare Team
 %
@@ -35,7 +40,7 @@ function plot_ms_variance_decomposition(M_, options_, vd, title_, graph_save_for
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if length(size(vd)) == 3
-    plot_ms_variance_decomposition_error_bands(M_, options_, vd, title_);
+    plot_ms_variance_decomposition_error_bands(M_, options_, vd, figure_name);
     return;
 end
 
@@ -111,7 +116,7 @@ end
     % add an extra period to the time series
     x(T+1) = x(T) + (x(T) - x(T-1));
 
-    figure('Name',title_)
+    figure('Name',figure_name)
     for k=1:K
         % Go through each series
         subplot(K,1,k);
@@ -163,5 +168,6 @@ end
     end
     dyn_save_graph([options_.ms.output_file_tag filesep 'Output' ...
         filesep 'Variance_Decomposition'], 'MS-Variance-Decomposition', ...
-        graph_save_formats, TeX,names,tex_names,'Variance decomposition');
+        options_.graph_save_formats, options_.TeX, names, tex_names, ...
+        'Variance decomposition');
 end
