@@ -96,24 +96,24 @@ end
 % Create plots
 if options_.ms.regimes
     n_chains = length(options_.ms.ms_chain);
-    n_states=1;
+    n_regimes=1;
     for i_chain=1:n_chains
-        n_states = n_states*length(options_.ms.ms_chain(i_chain).regime);
+        n_regimes = n_regimes*length(options_.ms.ms_chain(i_chain).regime);
     end
 
-    for state_i=1:n_states
-        vd_data = load([outfile num2str(state_i-1) '_' ...
+    for regime_i=1:n_regimes
+        vd_data = load([outfile num2str(regime_i-1) '_' ...
             options_.ms.output_file_tag '.out'], '-ascii');
         vd_data = reshape_ascii_variance_decomposition_data( ...
             M_.endo_nbr, percentiles_size, options_.ms.horizon, vd_data);
-        save([vddir filesep 'variance_decomposition_state_' num2str(state_i-1)], 'vd_data');
+        save([vddir filesep 'variance_decomposition_regime_' num2str(regime_i-1)], 'vd_data');
         plot_ms_variance_decomposition(M_, options_, vd_data, ...
-            ['Variance Decomposition, State ...' num2str(state_i)], ...
+            ['Variance Decomposition, Regime ' num2str(regime_i)], ...
             options_.graph_save_formats, options_.TeX);
     end
 else
     if options_.ms.regime
-        vd_title = ['Variance Decomposition, State ' num2str(options_.ms.regime)];
+        vd_title = ['Variance Decomposition, Regime ' num2str(options_.ms.regime)];
         save_filename = ['variance_decomposition_regime_' num2str(options_.ms.regime-1)];
     else
         save_filename = 'variance_decomposition';

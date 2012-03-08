@@ -83,27 +83,27 @@ mexErrCheck('ms_irf',err);
 % Plot IRFs
 if options_.ms.regimes
     n_chains = length(options_.ms.ms_chain);
-    n_states=1;
+    n_regimes=1;
     for i_chain=1:n_chains
-        n_states = n_states*length(options_.ms.ms_chain(i_chain).regime);
+        n_regimes = n_regimes*length(options_.ms.ms_chain(i_chain).regime);
     end
 
-    for state_i=1:n_states
+    for regime_i=1:n_regimes
         irf_data = load([irfdir filesep 'ir_percentiles_regime_' ...
-            num2str(state_i-1) '_' options_.ms.output_file_tag ...
+            num2str(regime_i-1) '_' options_.ms.output_file_tag ...
             '.out'], '-ascii');
         irf_data = reshape_ascii_irf_data(M_.endo_nbr, percentiles_size, ...
             options_.ms.horizon, irf_data);
-        save([irfdir filesep 'irf_state_' num2str(state_i-1)], 'irf_data');
+        save([irfdir filesep 'irf_regime_' num2str(regime_i-1)], 'irf_data');
         plot_ms_irf(M_, options_, irf_data, ...
-            ['Impulse Responses, State ' num2str(state_i)], varlist);
+            ['Impulse Responses, Regime ' num2str(regime_i)], varlist);
     end
 else
     if options_.ms.regime
         irf_data = load([irfdir filesep 'ir_percentiles_regime_' ...
             num2str(options_.ms.regime-1) '_' options_.ms.output_file_tag ...
             '.out'], '-ascii');
-        irf_title = ['Impulse Response, State ' num2str(options_.ms.regime)];
+        irf_title = ['Impulse Response, Regime ' num2str(options_.ms.regime)];
         save_filename = ['irf_regime_' num2str(options_.ms.regime-1)];
     elseif options_.ms.filtered_probabilities
         irf_data = load([irfdir filesep 'ir_percentiles_filtered_' ...
