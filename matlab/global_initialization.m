@@ -132,7 +132,7 @@ ep.periods = 200;
 % Default step for increasing the number of periods if needed
 ep.step = 50;
 % Set check_stability flag
-ep.check_stability = 1;
+ep.check_stability = 0;
 % Define last periods used to test if the solution is stable with respect to an increase in the number of periods.
 ep.lp = 5;
 % Define first periods used to test if the solution is stable with respect to an increase in the number of periods.
@@ -144,11 +144,9 @@ ep.set_dynare_seed_to_default = 1;
 % Set algorithm for the perfect foresight solver
 ep.stack_solve_algo = 4;
 % Stochastic extended path related options.
-ep.stochastic.status = 0;
 ep.stochastic.method = 'tensor';
 ep.stochastic.ortpol = 'hermite';
-ep.stochastic.scramble = 0;
-ep.stochastic.order = 1;
+ep.stochastic.order = 0;
 ep.stochastic.nodes = 5;
 ep.stochastic.pruned.status = 0;
 ep.stochastic.pruned.relative = 1e-5;
