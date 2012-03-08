@@ -72,11 +72,7 @@ if options_.block && ~options_.bytecode
                                      oo_.steady_state,...
                                      [oo_.exo_steady_state; ...
                             oo_.exo_det_steady_state], M_.params);
-        if isempty(M_.blocksMFS{i})
-            idx = var_indx;
-        else
-            idx = M_.blocksMFS{i};
-        end
+        idx = M_.blocksEQU{i};
         z(idx) = r;
     end
 elseif options_.bytecode
