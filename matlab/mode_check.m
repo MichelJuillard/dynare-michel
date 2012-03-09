@@ -112,7 +112,7 @@ for plt = 1:nbplt,
             l1 = x(kk) - (l2-x(kk));
             m1 = 1;
         end
-        if ~m1 && (l1>(1-ll)*x(kk)) && (x(kk)+(x(kk)-l1)<ub(kk))
+        if ~m1 && (l1>(1-ll)*x(kk)) && (x(kk)+(x(kk)-l1)<BayesInfo.ub(kk))
             l2 = x(kk) + (x(kk)-l1);
         end
         z1 = l1:((x(kk)-l1)/10):x(kk);
