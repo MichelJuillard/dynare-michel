@@ -135,7 +135,7 @@ for t=1:sample_size
         nb_obs_resamp = nb_obs_resamp+1 ;
         StateVectors = tmp(mf0,resample(weights,DynareOptions.particle.resampling.method1,DynareOptions.particle.resampling.method2));
         weights = ones(1,number_of_particles)/number_of_particles ;
-    elseif strcmpi(DynareOptions.particle_filter.resampling.status,'none')
+    elseif strcmpi(DynareOptions.particle.resampling.status,'none')
         StateVectors = tmp(mf0,:);
     end
 end
