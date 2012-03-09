@@ -130,6 +130,7 @@ for t=1:sample_size
     wtilde = weights.*exp(lnw-dfac);
     lik(t) = log(mean(wtilde))+dfac;
     weights = wtilde/sum(wtilde);
+    % sum(weights>max(weights)*1e-6)
     Neff = 1/(weights*weights');
     if (Neff<DynareOptions.particle.resampling.neff_threshold*sample_size && strcmpi(DynareOptions.particle.resampling.status,'generic')) || strcmpi(DynareOptions.particle.resampling.status,'systematic')
         nb_obs_resamp = nb_obs_resamp+1 ;
