@@ -91,7 +91,7 @@ while iter < step_nbr
     old_ss = oo_.steady_state;
 
     try
-        steady_(M_,options_,oo_);
+        oo_.steady_state = steady_(M_,options_,oo_);
         
         if length([kplus; kminus]) == nv
             return
