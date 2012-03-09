@@ -11,7 +11,7 @@ function global_initialization()
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2011 Dynare Team
+% Copyright (C) 2003-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -237,9 +237,9 @@ options_.ramsey_policy = 0;
 options_.timeless = 0;
 
 % estimation
-estimation_info.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
-                               'mode', {}, 'stdev', {}, 'date1', {}, ...
-                               'date2', {}, 'shift', {}, 'variance', {});
+estimation_info.parameters.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
+                                          'mode', {}, 'stdev', {}, 'date1', {}, ...
+                                          'date2', {}, 'shift', {}, 'variance', {});
 estimation_info.structural_innovation.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
                                                   'mode', {}, 'stdev', {}, 'date1', {}, ...
                                                   'date2', {}, 'shift', {}, 'variance', {});
