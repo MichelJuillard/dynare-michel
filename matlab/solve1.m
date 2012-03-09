@@ -77,7 +77,7 @@ for its = 1:maxit
         fvec = fvec(j1);
         fjac = fjac(j1,j2);
     else
-        dh = max(abs(x(j2)),options_.gstep*ones(nn,1))*eps^(1/3);
+        dh = max(abs(x(j2)),options_.gstep(1)*ones(nn,1))*eps^(1/3);
         
         for j = 1:nn
             xdh = x ;

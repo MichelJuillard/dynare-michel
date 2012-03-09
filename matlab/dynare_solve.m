@@ -105,7 +105,7 @@ elseif options_.solve_algo == 2 || options_.solve_algo == 4
 
     if ~jacobian_flag
         fjac = zeros(nn,nn) ;
-        dh = max(abs(x),options_.gstep*ones(nn,1))*eps^(1/3);
+        dh = max(abs(x),options_.gstep(1)*ones(nn,1))*eps^(1/3);
         for j = 1:nn
             xdh = x ;
             xdh(j) = xdh(j)+dh(j) ;
