@@ -252,10 +252,12 @@ estimation_info.measurement_error.prior = struct('name', {}, 'shape', {}, 'mean'
 estimation_info.measurement_error_corr.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
                                                   'mode', {}, 'stdev', {}, 'date1', {}, ...
                                                   'date2', {}, 'shift', {}, 'variance', {});
+estimation_info.parameters.prior_index = {};
 estimation_info.measurement_error.prior_index = {};
 estimation_info.structural_innovation.prior_index = {};
 estimation_info.measurement_error_corr.prior_index = {};
 estimation_info.structural_innovation_corr.prior_index = {};
+estimation_info.parameters.options_index = {};
 estimation_info.measurement_error.options_index = {};
 estimation_info.structural_innovation.options_index = {};
 estimation_info.measurement_error_corr.options_index = {};
