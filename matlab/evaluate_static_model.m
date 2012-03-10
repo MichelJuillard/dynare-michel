@@ -53,6 +53,10 @@ function [residuals,check1,jacob] = evaluate_static_model(ys,exo_ss,params,M,opt
                 % have zero residuals by construction
                 if ~isempty(mfsb)
                     residuals(mfsb) = feval(fh_static,b,ys,exo_ss,params);
+                else
+                    %need to evaluate the recursive blocks to compute the
+                    %temporary terms
+                    feval(fh_static,b,ys,exo_ss,params);
                 end
             end
         else

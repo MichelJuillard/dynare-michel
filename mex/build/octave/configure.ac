@@ -131,6 +131,7 @@ AC_CONFIG_FILES([Makefile
                  kalman_steady_state/Makefile
                  ms_sbvar/Makefile
                  block_kalman_filter/Makefile
-		 sobol/Makefile])
+		 sobol/Makefile
+		 local_state_space_iterations/Makefile])
 
 AC_OUTPUT

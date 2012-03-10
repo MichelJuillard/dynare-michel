@@ -21,7 +21,7 @@ sigma2  =  0.0001;
 
 external_function(name=mean_preserving_spread);
 
-model(block,bytecode);
+model(use_dll);
 
   // Eq. n°1:
   efficiency = rho*efficiency(-1) + EfficiencyInnovation;
@@ -53,6 +53,8 @@ end;
 steady;
 
 options_.ep.verbosity = 0;
+options_.ep.order = 1;
+options_.ep.nnodes = 2;
 options_.console_mode = 0;
 
-ts = extended_path([],1000);
+ts = extended_path([],100);

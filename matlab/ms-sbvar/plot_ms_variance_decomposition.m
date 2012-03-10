@@ -1,12 +1,14 @@
-function plot_ms_variance_decomposition(M_, options_, vd, title_, graph_save_formats, TeX, varargin)
-% function plot_ms_variance_decomposition(M_, options_, vd, title_, graph_save_formats, TeX, varargin)
+function plot_ms_variance_decomposition(M_, options_, vd, figure_name, varargin)
+% function plot_ms_variance_decomposition(M_, options_, vd, figure_name, varargin)
 % plot the variance decomposition of shocks
 %
-% Inputs
-%       M_
-%		shocks: matrix of the individual shocks Tx(KxK)with J=number of shocks
+% INPUTS
+%    M_:          (struct)    model structure
+%    options_:    (struct)    options
+%    vd:          (matrix)    variance decomposition
+%    figure_name: (string)    graph name
 %
-% Optional Inputs
+% OPTIONAL INPUTS
 %		'data': the actual data, TxK with K=number of data series
 %		'steady': the steady state value, TxK
 %		'shock_names': to specify the names of the shocks
@@ -14,10 +16,13 @@ function plot_ms_variance_decomposition(M_, options_, vd, title_, graph_save_for
 %		'dates': pass a date vector to use, otherwise will just index on 1:T
 %		'colors': Jx3 list of the rgb colors to use for each shock
 %
-% Example:
-% plot_historic_decomposition(shocks,'VD','shock_names',shock_names,'series_names',series_names)
+% OUTPUTS
+%    none
+%
+% SPECIAL REQUIREMENTS
+%    none
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -34,6 +39,11 @@ function plot_ms_variance_decomposition(M_, options_, vd, title_, graph_save_for
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+if length(size(vd)) == 3
+    plot_ms_variance_decomposition_error_bands(M_, options_, vd, figure_name);
+    return;
+end
+
     nvars = M_.endo_nbr;
     endo_names = M_.endo_names;
 
@@ -48,11 +58,13 @@ function plot_ms_variance_decomposition(M_, options_, vd, title_, graph_save_for
             m = m + 1;
         end
     end
-    
+
     dims = size(vd);
     if length(dims) == 3
-  	[T,K,J] = dims;
-  	shocks = vd;
+        T = dims(1);
+        K = dims(2);
+        J = dims(3);
+        shocks = vd;
     else
         T = dims(1);
         K = nvars;
@@ -65,30 +77,25 @@ function plot_ms_variance_decomposition(M_, options_, vd, title_, graph_save_for
         end
         shocks = temp_vd;
     end
-    
+
     for i=1:nvars
         shock_names{i} = endo_names(i,:);
         series_names{i} = endo_names(i,:);
     end
 
-    if nargin < 2
-        title_ = '';
-    end
-
-    x = [1:T]; plot_dates = 0;
-    
+    x = [1:T];
+    plot_dates = 0;
     data = 0;
     steady = 0;
-    
     colors = [ .1 .1 .75
                .8 0 0
                1 .7 .25
-               1 1 0	
-               .5 1 .5 
+               1 1 0
+               .5 1 .5
                .7 .7 .1
                .5 .6 .2
                .1 .5 .1];
-    
+
     % overide the defaults with optional inputs
     for i=1:length(varargin)
         if strcmpi(varargin{i},'data')
@@ -105,12 +112,11 @@ function plot_ms_variance_decomposition(M_, options_, vd, title_, graph_save_for
             colors = varargin{i+1};
         end
     end
-    
+
     % add an extra period to the time series
     x(T+1) = x(T) + (x(T) - x(T-1));
 
-    
-    figure('Name',title_)
+    figure('Name',figure_name)
     for k=1:K
         % Go through each series
         subplot(K,1,k);
@@ -144,13 +150,13 @@ function plot_ms_variance_decomposition(M_, options_, vd, title_, graph_save_for
             plot(x(2:end)',steady(:,k), '--k','LineWidth',2.25);
         end
         if k==K
-	    if exist('OCTAVE_VERSION')
+            if exist('OCTAVE_VERSION')
                 legend(shock_names,'Location','SouthOutside');
-	    else 
-                legend(shock_names,'Location','BestOutside','Orientation','horizontal'); 
+            else
+                legend(shock_names,'Location','BestOutside','Orientation','horizontal');
             end
         end
-        
+
         hold off
         if plot_dates
             datetick 'x';
@@ -159,9 +165,9 @@ function plot_ms_variance_decomposition(M_, options_, vd, title_, graph_save_for
         ylim([0 , 1])
         grid on
         title(series_names{k});
-        %suptitle(title_);
     end
     dyn_save_graph([options_.ms.output_file_tag filesep 'Output' ...
         filesep 'Variance_Decomposition'], 'MS-Variance-Decomposition', ...
-        graph_save_formats, TeX,names,tex_names,'Variance decomposition');
+        options_.graph_save_formats, options_.TeX, names, tex_names, ...
+        'Variance decomposition');
 end

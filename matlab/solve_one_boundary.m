@@ -55,7 +55,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, steady_state, ...
 %   none.
 %  
 
-% Copyright (C) 1996-2011 Dynare Team
+% Copyright (C) 1996-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -225,8 +225,7 @@ for it_=start:incr:finish
                     disp('steady: fsolve');
                 end
                 if ~exist('OCTAVE_VERSION')
-                    [has_optimization_toolbox junk] = license('checkout','optimization_toolbox');
-                    if ~has_optimization_toolbox
+                    if ~user_has_matlab_license('optimization_toolbox')
                         error('SOLVE_ONE_BOUNDARY: you can''t use solve_algo=0 since you don''t have MATLAB''s Optimization Toolbox')
                     end
                 end

@@ -30,21 +30,30 @@ function x0 = stab_map_(OutputDirectoryName)
 %
 % USES qmc_sequence, stab_map_1, stab_map_2
 %
-% Part of the Sensitivity Analysis Toolbox for DYNARE
-%
-% Written by Marco Ratto, 2006
+% Written by Marco Ratto
 % Joint Research Centre, The European Commission,
 % (http://eemc.jrc.ec.europa.eu/),
 % marco.ratto@jrc.it
 %
-% Disclaimer: This software is not subject to copyright protection and is in the public domain.
-% It is an experimental system. The Joint Research Centre of European Commission
-% assumes no responsibility whatsoever for its use by other parties
-% and makes no guarantees, expressed or implied, about its quality, reliability, or any other
-% characteristic. We would appreciate acknowledgement if the software is used.
 % Reference:
 % M. Ratto, Global Sensitivity Analysis for Macroeconomic models, MIMEO, 2006.
+
+% Copyright (C) 2012 Dynare Team
 %
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 %global bayestopt_ estim_params_ dr_ options_ ys_ fname_
 global bayestopt_ estim_params_ options_ oo_ M_
@@ -79,6 +88,7 @@ nshock = nshock + estim_params_.nvn;
 nshock = nshock + estim_params_.ncx;
 nshock = nshock + estim_params_.ncn;
 lpmat0=[];
+xparam1=[];
 
 pshape = bayestopt_.pshape(nshock+1:end);
 p1 = bayestopt_.p1(nshock+1:end);
@@ -387,6 +397,9 @@ else
     end
     load(filetoload,'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd')
     Nsam = size(lpmat,1);
+    if pprior==0,
+        eval(['load ' options_.mode_file '.mat;']);
+    end
 
 
     if prepSA & isempty(strmatch('T',who('-file', filetoload),'exact')),
@@ -522,18 +535,18 @@ if length(iunstable)>0 & length(iunstable)<Nsam,
     c0=corrcoef(lpmat(istable,:));
     c00=tril(c0,-1);
 
-    stab_map_2(lpmat(istable,:),alpha2, pvalue_corr, asname, OutputDirectoryName);
+    stab_map_2(lpmat(istable,:),alpha2, pvalue_corr, asname, OutputDirectoryName,xparam1);
     if length(iunstable)>10,
-        stab_map_2(lpmat(iunstable,:),alpha2, pvalue_corr, auname, OutputDirectoryName);
+        stab_map_2(lpmat(iunstable,:),alpha2, pvalue_corr, auname, OutputDirectoryName,xparam1);
     end
     if length(iindeterm)>10,
-        stab_map_2(lpmat(iindeterm,:),alpha2, pvalue_corr, aindname, OutputDirectoryName);
+        stab_map_2(lpmat(iindeterm,:),alpha2, pvalue_corr, aindname, OutputDirectoryName,xparam1);
     end
     if length(ixun)>10,
-        stab_map_2(lpmat(ixun,:),alpha2, pvalue_corr, aunstname, OutputDirectoryName);
+        stab_map_2(lpmat(ixun,:),alpha2, pvalue_corr, aunstname, OutputDirectoryName,xparam1);
     end
     if length(iwrong)>10,
-        stab_map_2(lpmat(iwrong,:),alpha2, pvalue_corr, awrongname, OutputDirectoryName);
+        stab_map_2(lpmat(iwrong,:),alpha2, pvalue_corr, awrongname, OutputDirectoryName,xparam1);
     end
 
     x0=0.5.*(bayestopt_.ub(1:nshock)-bayestopt_.lb(1:nshock))+bayestopt_.lb(1:nshock);

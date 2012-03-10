@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2011 Dynare Team
+ * Copyright (C) 2010-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -371,7 +371,7 @@ ConfigFile::addConfFileElement(bool inNode, bool inCluster, member_nodes_t membe
 }
 
 void
-ConfigFile::checkPass() const
+ConfigFile::checkPass(WarningConsolidation &warnings) const
 {
   if (!parallel && !parallel_test)
     return;
@@ -389,9 +389,9 @@ ConfigFile::checkPass() const
 #if !defined(_WIN32) && !defined(__CYGWIN32__)
       //For Linux/Mac, check that cpuNbr starts at 0
       if (it->second->minCpuNbr != 0)
-        cout << "WARNING: On Unix-based operating systems, you cannot specify the CPU that is used" << endl
-             << "         in parallel processing. This will be adjusted for you such that the same" << endl
-             << "         number of CPUs are used." << endl;
+        warnings << "WARNING: On Unix-based operating systems, you cannot specify the CPU that is "
+                 << "used in parallel processing. This will be adjusted for you such that the "
+                 << "same number of CPUs are used." << endl;
 #endif
       if (!it->second->computerName.compare("localhost")) // We are working locally
         {

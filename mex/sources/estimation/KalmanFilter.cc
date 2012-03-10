@@ -73,36 +73,6 @@ KalmanFilter::compute_zeta_varobs_back_mixed(const std::vector<size_t> &zeta_bac
   return zeta_varobs_back_mixed;
 }
 
-double
-KalmanFilter::compute(const MatrixConstView &dataView, VectorView &steadyState,
-                      const Matrix &Q, const Matrix &H, const Vector &deepParams,
-                      VectorView &vll, MatrixView &detrendedDataView,
-                      size_t start, size_t period, double &penalty, int &info)
-{
-  double lik = INFINITY;
-  try
-    {
-      if (period == 0) // initialise all KF matrices
-        initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T, Pstar, Pinf,
-                                    penalty, dataView, detrendedDataView, info);
-      else             // initialise parameter dependent KF matrices only but not Ps
-        initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T,
-                                    penalty, dataView, detrendedDataView, info);
-
-      lik = filter(detrendedDataView, H, vll, start, info);
-    }
-  catch (const DecisionRules::BlanchardKahnException &bke)
-    {
-      info = 22;
-      return penalty;
-    }
-
-  if (info != 0)
-    return penalty;
-  else
-    return lik;
-
-};
 
 /**
  * Multi-variate standard Kalman Filter
@@ -110,7 +80,7 @@ KalmanFilter::compute(const MatrixConstView &dataView, VectorView &steadyState,
 double
 KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, VectorView &vll, size_t start, int &info)
 {
-  double loglik = 0.0, ll, logFdet, Fdet, dvtFinvVt;
+  double loglik = 0.0, ll, logFdet = 0.0, Fdet, dvtFinvVt;
   size_t p = Finv.getRows();
   bool nonstationary = true;
   a_init.setAll(0.0);

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2011 Dynare Team
+ * Copyright (C) 2003-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -100,6 +100,7 @@ class ParsingDriver;
 %token END ENDVAL EQUAL ESTIMATION ESTIMATED_PARAMS ESTIMATED_PARAMS_BOUNDS ESTIMATED_PARAMS_INIT
 %token FILENAME FILTER_STEP_AHEAD FILTERED_VARS FIRST_OBS LAST_OBS SET_TIME
 %token <string_val> FLOAT_NUMBER
+%token DEFAULT FIXED_POINT
 %token FORECAST K_ORDER_SOLVER INSTRUMENTS PRIOR SHIFT MEAN STDEV VARIANCE MODE INTERVAL SHAPE DOMAINN
 %token GAMMA_PDF GRAPH CONDITIONAL_VARIANCE_DECOMPOSITION NOCHECK STD
 %token HISTVAL HOMOTOPY_SETUP HOMOTOPY_MODE HOMOTOPY_STEPS HP_FILTER HP_NGRID
@@ -108,7 +109,7 @@ class ParsingDriver;
 %token <string_val> DATE_NUMBER
 %token INV_GAMMA_PDF INV_GAMMA1_PDF INV_GAMMA2_PDF IRF IRF_SHOCKS
 %token KALMAN_ALGO KALMAN_TOL SUBSAMPLES OPTIONS
-%token LABELS LAPLACE LIK_ALGO LIK_INIT LINEAR LOAD_IDENT_FILES LOAD_MH_FILE LOAD_PARAMS_AND_STEADY_STATE LOGLINEAR
+%token LABELS LAPLACE LIK_ALGO LIK_INIT LINEAR LOAD_IDENT_FILES LOAD_MH_FILE LOAD_PARAMS_AND_STEADY_STATE LOGLINEAR LYAPUNOV
 %token MARKOWITZ MARGINAL_DENSITY MAX MAXIT
 %token MFS MH_DROP MH_INIT_SCALE MH_JSCALE MH_MODE MH_NBLOCKS MH_REPLIC MH_RECOVER MIN MINIMAL_SOLVING_PERIODS
 %token MODE_CHECK MODE_COMPUTE MODE_FILE MODEL MODEL_COMPARISON MODEL_INFO MSHOCKS ABS SIGN
@@ -121,9 +122,9 @@ class ParsingDriver;
 %token PRINT PRIOR_MC PRIOR_TRUNC PRIOR_MODE PRIOR_MEAN POSTERIOR_MODE POSTERIOR_MEAN POSTERIOR_MEDIAN PRUNING
 %token <string_val> QUOTED_STRING
 %token QZ_CRITERIUM FULL DSGE_VAR DSGE_VARLAG DSGE_PRIOR_WEIGHT
-%token RELATIVE_IRF REPLIC RPLOT SAVE_PARAMS_AND_STEADY_STATE
+%token RELATIVE_IRF REPLIC RPLOT SAVE_PARAMS_AND_STEADY_STATE PARAMETER_UNCERTAINTY
 %token SHOCKS SHOCK_DECOMPOSITION SIGMA_E SIMUL SIMUL_ALGO SIMUL_SEED SMOOTHER STACK_SOLVE_ALGO STEADY_STATE_MODEL SOLVE_ALGO
-%token STDERR STEADY STOCH_SIMUL
+%token STDERR STEADY STOCH_SIMUL SYLVESTER REGIMES REGIME
 %token TEX RAMSEY_POLICY PLANNER_DISCOUNT DISCRETIONARY_POLICY
 %token <string_val> TEX_NAME
 %token UNIFORM_PDF UNIT_ROOT_VARS USE_DLL USEAUTOCORR GSA_SAMPLE_FILE
@@ -694,8 +695,8 @@ svar_identification_elem : EXCLUSION LAG INT_NUMBER ';' svar_equation_list
                            { driver.add_constants_exclusion(); }
                          | RESTRICTION EQUATION INT_NUMBER COMMA
 			 { driver.add_restriction_equation_nbr($3);}
-                           restriction_expression EQUAL 
-                                {driver.add_restriction_equal();} 
+                           restriction_expression EQUAL
+                                {driver.add_restriction_equal();}
                            restriction_expression ';'
                          | UPPER_CHOLESKY ';'
                            { driver.add_upper_cholesky(); }
@@ -925,6 +926,7 @@ stoch_simul_options : o_dr_algo
                     | o_conditional_variance_decomposition
                     | o_k_order_solver
                     | o_pruning
+                    | o_sylvester
                     ;
 
 symbol_list : symbol_list symbol
@@ -1339,6 +1341,8 @@ estimation_options : o_datafile
                    | o_cova_compute
                    | o_irf_shocks
                    | o_sub_draws
+                   | o_sylvester
+                   | o_lyapunov
                    ;
 
 list_optim_option : QUOTED_STRING COMMA QUOTED_STRING
@@ -1437,6 +1441,7 @@ identification_option : o_ar
                       | o_gsa_sample_file
                       | o_parameter_set
                       | o_lik_init
+                      | o_kalman_algo
                       ;
 
 model_comparison : MODEL_COMPARISON mc_filename_list ';'
@@ -1630,7 +1635,10 @@ ms_variance_decomposition_option : o_output_file_tag
                                  | o_shocks_per_parameter
                                  | o_thinning_factor
                                  | o_free_parameters
-                                 | o_median
+                                 | o_regime
+                                 | o_regimes
+                                 | o_parameter_uncertainty
+                                 | o_horizon
                                  ;
 
 ms_variance_decomposition_options_list : ms_variance_decomposition_option COMMA ms_variance_decomposition_options_list
@@ -1647,13 +1655,15 @@ ms_forecast_option : o_output_file_tag
                    | o_file_tag
                    | o_simulation_file_tag
                    | o_data_obs_nbr
-                   | o_no_error_bands
                    | o_error_band_percentiles
                    | o_shock_draws
                    | o_shocks_per_parameter
                    | o_thinning_factor
                    | o_free_parameters
                    | o_median
+                   | o_regime
+                   | o_regimes
+                   | o_parameter_uncertainty
                    ;
 
 ms_forecast_options_list : ms_forecast_option COMMA ms_forecast_options_list
@@ -1669,15 +1679,17 @@ ms_forecast : MS_FORECAST ';'
 ms_irf_option : o_output_file_tag
               | o_file_tag
               | o_simulation_file_tag
+              | o_parameter_uncertainty
               | o_horizon
               | o_filtered_probabilities
-              | o_no_error_bands
               | o_error_band_percentiles
               | o_shock_draws
               | o_shocks_per_parameter
               | o_thinning_factor
               | o_free_parameters
               | o_median
+              | o_regime
+              | o_regimes
               ;
 
 ms_irf_options_list : ms_irf_option COMMA ms_irf_options_list
@@ -1850,6 +1862,8 @@ dynare_sensitivity_option : o_gsa_identification
                           | o_load_ident_files
                           | o_useautocorr
                           | o_ar
+                          | o_kalman_algo
+                          | o_lik_init
                           ;
 
 shock_decomposition_options_list : shock_decomposition_option COMMA shock_decomposition_options_list
@@ -2069,6 +2083,10 @@ o_aim_solver: AIM_SOLVER {driver.option_num("aim_solver", "1"); };
 o_partial_information : PARTIAL_INFORMATION {driver.option_num("partial_information", "1"); };
 o_sub_draws: SUB_DRAWS EQUAL INT_NUMBER {driver.option_num("sub_draws",$3);};
 o_planner_discount : PLANNER_DISCOUNT EQUAL expression { driver.declare_optimal_policy_discount_factor_parameter($3); };
+o_sylvester : SYLVESTER EQUAL FIXED_POINT {driver.option_num("sylvester_fp", "1"); }
+               | SYLVESTER EQUAL DEFAULT {driver.option_num("sylvester_fp", "0"); };
+o_lyapunov : LYAPUNOV EQUAL FIXED_POINT {driver.option_num("lyapunov_fp", "1"); }
+              | LYAPUNOV EQUAL DEFAULT {driver.option_num("lyapunov_fp", "0"); };
 
 o_bvar_prior_tau : BVAR_PRIOR_TAU EQUAL signed_number { driver.option_num("bvar_prior_tau", $3); };
 o_bvar_prior_decay : BVAR_PRIOR_DECAY EQUAL non_negative_number { driver.option_num("bvar_prior_decay", $3); };
@@ -2305,6 +2323,7 @@ o_use_mean_center : USE_MEAN_CENTER { driver.option_num("ms.use_mean_center","1"
 o_proposal_type : PROPOSAL_TYPE EQUAL INT_NUMBER { driver.option_num("ms.proposal_type",$3); }
 o_proposal_lower_bound : PROPOSAL_LOWER_BOUND EQUAL signed_number { driver.option_num("ms.proposal_lower_bound",$3); }
 o_proposal_upper_bound : PROPOSAL_UPPER_BOUND EQUAL signed_number { driver.option_num("ms.proposal_upper_bound",$3); }
+o_parameter_uncertainty : PARAMETER_UNCERTAINTY { driver.option_num("ms.parameter_uncertainty","1"); };
 o_horizon : HORIZON EQUAL INT_NUMBER { driver.option_num("ms.horizon",$3); };
 o_filtered_probabilities : FILTERED_PROBABILITIES { driver.option_num("ms.filtered_probabilities","1"); };
 o_real_time_smoothed : REAL_TIME_SMOOTHED { driver.option_num("ms.real_time_smoothed_probabilities","1"); };
@@ -2314,6 +2333,8 @@ o_shock_draws : SHOCK_DRAWS EQUAL INT_NUMBER { driver.option_num("ms.shock_draws
 o_shocks_per_parameter : SHOCKS_PER_PARAMETER EQUAL INT_NUMBER { driver.option_num("ms.shocks_per_parameter",$3); };
 o_free_parameters : FREE_PARAMETERS EQUAL vec_value { driver.option_num("ms.free_parameters",$3); };
 o_median : MEDIAN { driver.option_num("ms.median","1"); };
+o_regimes : REGIMES { driver.option_num("ms.regimes","1"); };
+o_regime : REGIME EQUAL INT_NUMBER { driver.option_num("ms.regime",$3); };
 o_data_obs_nbr : DATA_OBS_NBR EQUAL INT_NUMBER { driver.option_num("ms.forecast_data_obs",$3); };
 
 range : symbol ':' symbol

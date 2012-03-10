@@ -61,6 +61,7 @@ protected:
   void print_a_block(const int size, const int type, string bin_basename, bool steady_state, int block_num,
                      const bool is_linear, const int symbol_table_endo_nbr, const int Block_List_Max_Lag,
                      const int Block_List_Max_Lead, const int u_count_int, int block);
+  void SingularDisplay(int Per_u_, bool evaluate, int Block_Count, int size, bool steady_state, it_code_type begining);
   vector<Block_contain_type> Block_Contain;
   code_liste_type code_liste;
   it_code_type it_code;

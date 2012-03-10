@@ -559,6 +559,7 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
     si0=[];
     de0=[];
     
+    disp('Checking Hardware please wait ...');
     if (DataInput(Node).Local == 1)
         if Environment,
             [si0 de0]=system('grep processor /proc/cpuinfo');
@@ -579,7 +580,7 @@ for Node=1:length(DataInput) % To obtain a recoursive function remove the 'for'
     
     
     RealCPUnbr='';
-    keyboard;
+%    keyboard;
     RealCPUnbr=GiveCPUnumber(de0,OStargetUnix);
     
     % Questo controllo penso che si possa MIGLIORARE!!!!!

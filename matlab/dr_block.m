@@ -567,7 +567,9 @@ for i = 1:Size;
                 if block_type == 5
                     vghx_other = - inv(kron(eye(size(D_,2)), A_) + kron(C_', B_)) * vec(D_);
                     ghx_other = reshape(vghx_other, size(D_,1), size(D_,2));
-                else
+                elseif options_.sylvester_fp == 1
+                    ghx_other = gensylv_fp(A_, B_, C_, D_, i);
+                else 
                     [err, ghx_other] = gensylv(1, A_, B_, C_, -D_);
                 end;
                 if options_.aim_solver ~= 1 && options_.use_qzdiv
@@ -650,7 +652,7 @@ for i = 1:Size;
         end
     end;
     if task ~=1
-        if (maximum_lag > 0 && n_pred > 0)
+        if (maximum_lag > 0 && (n_pred > 0 || n_both > 0))
             sorted_col_dr_ghx = M_.block_structure.block(i).sorted_col_dr_ghx;
             dr.ghx(endo, sorted_col_dr_ghx) = dr.ghx(endo, sorted_col_dr_ghx) + ghx;
             data(i).ghx = ghx;

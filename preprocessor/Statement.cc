@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2011 Dynare Team
+ * Copyright (C) 2006-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -43,7 +43,15 @@ ModFileStructure::ModFileStructure() :
   dsge_prior_weight_in_estimated_params(false),
   dsge_var_calibrated(""),
   dsge_var_estimated(false),
-  bayesian_irf_present(false)
+  bayesian_irf_present(false),
+  estimation_data_statement_present(false),
+  prior_statement_present(false),
+  std_prior_statement_present(false),
+  corr_prior_statement_present(false),
+  options_statement_present(false),
+  std_options_statement_present(false),
+  corr_options_statement_present(false),
+  last_markov_switching_chain(0)
 {
 }
 
@@ -52,7 +60,7 @@ Statement::~Statement()
 }
 
 void
-Statement::checkPass(ModFileStructure &mod_file_struct)
+Statement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
 }
 

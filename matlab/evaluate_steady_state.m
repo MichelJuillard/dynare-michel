@@ -1,7 +1,7 @@
 function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadystate_check_flag)
 % function [ys,info] = evaluate_steady_state(M,options,oo)
-% Computes the steady state 
-%  
+% Computes the steady state
+%
 % INPUTS
 %   ys_init                   vector           initial values used to compute the steady
 %                                                 state
@@ -10,8 +10,8 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
 %   oo                        struct           output results
 %   steadystate_check_flag    boolean          if true, check that the
 %                                              steadystate verifies the
-%                                              static model         
-%  
+%                                              static model
+%
 % OUTPUTS
 %   ys                        vector           steady state
 %   params                    vector           model parameters possibly
@@ -41,23 +41,27 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
 
     info = 0;
     check = 0;
-    
+
     steadystate_flag = options.steadystate_flag;
     params = M.params;
     exo_ss = [oo.exo_steady_state; oo.exo_det_steady_state];
     updated_params_flag = 0;
-    
+
     if length(M.aux_vars) > 0
-        h_set_auxiliary_variables = str2func([M.fname '_set_auxiliary_variables']);                       
+        h_set_auxiliary_variables = str2func([M.fname '_set_auxiliary_variables']);
         ys_init = h_set_auxiliary_variables(ys_init,exo_ss,M.params);
     end
-    
+
     if options.ramsey_policy
         [ys,params] = dyn_ramsey_static(ys_init,M,options,oo);
     elseif steadystate_flag
         % explicit steady state file
         [ys,params1,check] = evaluate_steady_state_file(ys_init,exo_ss,params,M.fname,steadystate_flag);
-        updated_params_flag = max(abs(params1-params)) > 1e-12;
+        if ~length(find(isnan(params))) && ~length(find(isnan(params1)))
+            updated_params_flag = max(abs(params1-params))>1e-12;
+        elseif length(find(isnan(params))) && ~length(find(isnan(params1)))
+            updated_params_flag = 1;
+        end
         if updated_params_flag
             params = params1;
         end
@@ -88,7 +92,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
             end
             [ys,check] = dynare_solve('restricted_steadystate',...
                                                     ys(indv),...
-                                                    options.jacobian_flag, ...         
+                                                    options.jacobian_flag, ...
                                                     exo_ss,indv);
         end
     elseif (options.bytecode == 0 && options.block == 0)
@@ -96,7 +100,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
             % non linear model
             [ys,check] = dynare_solve([M.fname '_static'],...
                                       ys_init,...
-                                      options.jacobian_flag, ...     
+                                      options.jacobian_flag, ...
                                       exo_ss, params);
         else
             % linear model
@@ -140,13 +144,13 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
         return
     end
 
-    if options.steadystate_flag && updated_params_flag && ~isreal(M.params)
+    if options.steadystate_flag && updated_params_flag && ~isreal(params)
         info(1) = 23;
-        info(2) = sum(imag(M.params).^2);
+        info(2) = sum(imag(params).^2);
         return
     end
 
-    if options.steadystate_flag && updated_params_flag  && ~isempty(find(isnan(M.params)))
+    if options.steadystate_flag && updated_params_flag  && ~isempty(find(isnan(params)))
         info(1) = 24;
         info(2) = NaN;
         return

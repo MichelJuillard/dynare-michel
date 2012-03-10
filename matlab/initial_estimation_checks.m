@@ -42,6 +42,12 @@ if DynareOptions.dsge_var
     [fval,cost_flag,info] = DsgeVarLikelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
 else
     [fval,cost_flag,ys,trend_coeff,info] = dsge_likelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
+    if DynareOptions.mode_compute == 5
+        % this call is necessary to initialized persistent variable
+        % 'penalty' in dsge_likelihood_hh
+        [fval,llik,cost_flag,ys,trend_coeff,info] = ...
+            dsge_likelihood_hh(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
+    end
 end
 
 if info(1) > 0

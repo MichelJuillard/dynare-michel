@@ -40,12 +40,6 @@ LogPosteriorDensity::LogPosteriorDensity(const std::string &modName, EstimatedPa
 
 }
 
-double
-LogPosteriorDensity::compute(Matrix &steadyState, const Vector &estParams, Vector &deepParams, const MatrixConstView &data, Matrix &Q, Matrix &H, size_t presampleStart, int &info)
-{
-  return -logLikelihoodMain.compute(steadyState, estParams, deepParams, data, Q, H, presampleStart, info)
-    -logPriorDensity.compute(estParams);
-}
 
 /**
  * vector of log likelihoods for each Kalman step

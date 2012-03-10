@@ -1,24 +1,46 @@
 function mode_check(fun,x,hessian,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
+% Checks the estimated ML mode or Posterior mode.
 
-% function mode_check(x,fval,hessian,gend,data,lb,ub)
-% Checks the maximum likelihood mode
-%
-% INPUTS
-%    x:       mode
-%    fval:    value at the maximum likelihood mode
-%    hessian: matrix of second order partial derivatives
-%    gend:    scalar specifying the number of observations
-%    data:    matrix of data
-%    lb:      lower bound
-%    ub:      upper bound
-%
-% OUTPUTS
-%    none
-%
-% SPECIAL REQUIREMENTS
-%    none
+%@info:
+%! @deftypefn {Function File} mode_check (@var{fun}, @var{x}, @var{hessian}, @var{DynareDataset}, @var{DynareOptions}, @var{Model}, @var{EstimatedParameters}, @var{BayesInfo}, @var{DynareResults})
+%! @anchor{mode_check}
+%! @sp 1
+%! Checks the estimated ML mode or Posterior mode by plotting sections of the likelihood/posterior kernel.
+%! Each plot shows the variation of the likelihood implied by the variations of a single parameter, ceteris paribus)
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item fun
+%! Objective function.
+%! @item x
+%! Estimated mode.
+%! @item start
+%! Hessian of the objective function at the estimated mode @var{x}.
+%! @item DynareDataset
+%! Structure specifying the dataset used for estimation (dataset_).
+%! @item DynareOptions
+%! Structure defining dynare's options (options_).
+%! @item Model
+%! Structure specifying the (estimated) model (M_).
+%! @item EstimatedParameters
+%! Structure specifying the estimated parameters (estimated_params_).
+%! @item BayesInfo
+%! Structure containing information about the priors used for estimation (bayestopt_).
+%! @item DynareResults
+%! Structure gathering the results (oo_).
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 2
+%! @strong{This function is called by:}
+%! @sp 2
+%! @strong{This function calls:}
+%! The objective function (@var{func}).
+%! @end deftypefn
+%@eod:
 
-% Copyright (C) 2003-2010 Dynare Team
+% Copyright (C) 2003-2010, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -62,6 +84,8 @@ if TeX
     fprintf(fidTeX,' \n');
 end
 
+ll = DynareOptions.mode_check_neighbourhood_size;
+
 for plt = 1:nbplt,
     if TeX
         NAMES = [];
@@ -82,9 +106,18 @@ for plt = 1:nbplt,
             end
         end
         xx = x;
-        l1 = max(BayesInfo.lb(kk),0.5*x(kk));
-        l2 = min(BayesInfo.ub(kk),1.5*x(kk));
-        z = [l1:(l2-l1)/20:l2];
+        l1 = max(BayesInfo.lb(kk),(1-ll)*x(kk)); m1 = 0;
+        l2 = min(BayesInfo.ub(kk),(1+ll)*x(kk));
+        if l2<(1+ll)*x(kk)
+            l1 = x(kk) - (l2-x(kk));
+            m1 = 1;
+        end
+        if ~m1 && (l1>(1-ll)*x(kk)) && (x(kk)+(x(kk)-l1)<BayesInfo.ub(kk))
+            l2 = x(kk) + (x(kk)-l1);
+        end
+        z1 = l1:((x(kk)-l1)/10):x(kk);
+        z2 = x(kk):((l2-x(kk))/10):l2;
+        z  = union(z1,z2);
         if DynareOptions.mode_check_nolik==0,
             y = zeros(length(z),2);
             dy = priordens(xx,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);

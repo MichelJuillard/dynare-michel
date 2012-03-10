@@ -2,7 +2,7 @@ function gsa_plotmatrix(type,varargin)
 % function gsa_plotmatrix(type,varargin)
 % extended version of the standard MATLAB plotmatrix 
 
-% Copyright (C) 2011-2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -101,7 +101,7 @@ function [fval,exit_flag,ys,trend_coeff,info,Model,DynareOptions,BayesInfo,Dynar
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2010-2011 Dynare Team
+% Copyright (C) 2010, 2011, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -127,7 +127,6 @@ persistent init_flag
 persistent restrict_variables_idx observed_variables_idx state_variables_idx mf0 mf1
 persistent sample_size number_of_state_variables number_of_observed_variables number_of_structural_innovations
 
-
 % Initialization of the persistent variable.
 if ~nargin || isempty(penalty)
     penalty = 1e8;
@@ -142,10 +141,10 @@ end
 fval            = [];
 ys              = [];
 trend_coeff     = [];
-cost_flag       = 1;
+exit_flag       = 1;
 
 % Set the number of observed variables
-nvobs = DynareDataset.info.vobs;
+nvobs = DynareDataset.info.nvobs;
 
 %------------------------------------------------------------------------------
 % 1. Get the structural parameters & define penalties
@@ -155,7 +154,7 @@ nvobs = DynareDataset.info.vobs;
 if (DynareOptions.mode_compute~=1) & any(xparam1<BayesInfo.lb)
     k = find(xparam1 < BayesInfo.lb);
     fval = penalty+sum((BayesInfo.lb(k)-xparam1(k)).^2);
-    cost_flag = 0;
+    exit_flag = 0;
     info = 41;
     return
 end
@@ -164,7 +163,7 @@ end
 if (DynareOptions.mode_compute~=1) & any(xparam1>BayesInfo.ub)
     k = find(xparam1>BayesInfo.ub);
     fval = penalty+sum((xparam1(k)-BayesInfo.ub(k)).^2);
-    cost_flag = 0;
+    exit_flag = 0;
     info = 42;
     return
 end
@@ -172,50 +171,50 @@ end
 % Get the diagonal elements of the covariance matrices for the structural innovations (Q) and the measurement error (H).
 Q = Model.Sigma_e;
 H = Model.H;
-for i=1:EstimatedParameters_.nvx
-    k =EstimatedParameters_.var_exo(i,1);
+for i=1:EstimatedParameters.nvx
+    k =EstimatedParameters.var_exo(i,1);
     Q(k,k) = xparam1(i)*xparam1(i);
 end
-offset = EstimatedParameters_.nvx;
-if EstimatedParameters_.nvn
-    for i=1:EstimatedParameters_.nvn
-        k = EstimatedParameters_.var_endo(i,1);
+offset = EstimatedParameters.nvx;
+if EstimatedParameters.nvn
+    for i=1:EstimatedParameters.nvn
+        k = EstimatedParameters.var_endo(i,1);
         H(k,k) = xparam1(i+offset)*xparam1(i+offset);
     end
-    offset = offset+EstimatedParameters_.nvn;
+    offset = offset+EstimatedParameters.nvn;
 else
     H = zeros(nvobs);
 end
 
 % Get the off-diagonal elements of the covariance matrix for the structural innovations. Test if Q is positive definite.
-if EstimatedParameters_.ncx
-    for i=1:EstimatedParameters_.ncx
-        k1 =EstimatedParameters_.corrx(i,1);
-        k2 =EstimatedParameters_.corrx(i,2);
+if EstimatedParameters.ncx
+    for i=1:EstimatedParameters.ncx
+        k1 =EstimatedParameters.corrx(i,1);
+        k2 =EstimatedParameters.corrx(i,2);
         Q(k1,k2) = xparam1(i+offset)*sqrt(Q(k1,k1)*Q(k2,k2));
         Q(k2,k1) = Q(k1,k2);
     end
     % Try to compute the cholesky decomposition of Q (possible iff Q is positive definite)
     [CholQ,testQ] = chol(Q);
-    if testQ 
-        % The variance-covariance matrix of the structural innovations is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty. 
+    if testQ
+        % The variance-covariance matrix of the structural innovations is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty.
         a = diag(eig(Q));
         k = find(a < 0);
         if k > 0
             fval = penalty+sum(-a(k));
-            cost_flag = 0;
+            exit_flag = 0;
             info = 43;
             return
         end
     end
-    offset = offset+EstimatedParameters_.ncx;
+    offset = offset+EstimatedParameters.ncx;
 end
 
 % Get the off-diagonal elements of the covariance matrix for the measurement errors. Test if H is positive definite.
-if EstimatedParameters_.ncn 
-    for i=1:EstimatedParameters_.ncn
-        k1 = DynareOptions.lgyidx2varobs(EstimatedParameters_.corrn(i,1));
-        k2 = DynareOptions.lgyidx2varobs(EstimatedParameters_.corrn(i,2));
+if EstimatedParameters.ncn
+    for i=1:EstimatedParameters.ncn
+        k1 = DynareOptions.lgyidx2varobs(EstimatedParameters.corrn(i,1));
+        k2 = DynareOptions.lgyidx2varobs(EstimatedParameters.corrn(i,2));
         H(k1,k2) = xparam1(i+offset)*sqrt(H(k1,k1)*H(k2,k2));
         H(k2,k1) = H(k1,k2);
     end
@@ -227,17 +226,17 @@ if EstimatedParameters_.ncn
         k = find(a < 0);
         if k > 0
             fval = penalty+sum(-a(k));
-            cost_flag = 0;
+            exit_flag = 0;
             info = 44;
             return
         end
     end
-    offset = offset+EstimatedParameters_.ncn;
+    offset = offset+EstimatedParameters.ncn;
 end
 
 % Update estimated structural parameters in Mode.params.
-if EstimatedParameters_.np > 0
-    Model.params(EstimatedParameters_.param_vals(:,1)) = xparam1(offset+1:end);
+if EstimatedParameters.np > 0
+    Model.params(EstimatedParameters.param_vals(:,1)) = xparam1(offset+1:end);
 end
 
 % Update Model.Sigma_e and Model.H.
@@ -253,11 +252,11 @@ Model.H = H;
 
 if info(1) == 1 || info(1) == 2 || info(1) == 5
     fval = penalty+1;
-    cost_flag = 0;
+    exit_flag = 0;
     return
 elseif info(1) == 3 || info(1) == 4 || info(1)==6 ||info(1) == 19 || info(1) == 20 || info(1) == 21
     fval = penalty+info(2);
-    cost_flag = 0;
+    exit_flag = 0;
     return
 end
 
@@ -266,15 +265,14 @@ BayesInfo.mf = BayesInfo.mf1;
 
 % Define the deterministic linear trend of the measurement equation.
 if DynareOptions.noconstant
-    constant = zeros(nvobs,1); 
-else    
+    constant = zeros(nvobs,1);
+else
     if DynareOptions.loglinear
         constant = log(SteadyState(BayesInfo.mfys));
     else
         constant = SteadyState(BayesInfo.mfys);
     end
 end
-
 
 % Define the deterministic linear trend of the measurement equation.
 if BayesInfo.with_trend
@@ -294,7 +292,7 @@ end
 start = DynareOptions.presample+1;
 np    = size(T,1);
 mf    = BayesInfo.mf;
-Y     = transpose(dataset_.rawdata);
+Y     = transpose(DynareDataset.rawdata);
 
 %------------------------------------------------------------------------------
 % 3. Initial condition of the Kalman filter
@@ -332,10 +330,10 @@ ReducedForm.mf1 = mf1;
 
 % Set initial condition.
 switch DynareOptions.particle.initialization
-  case 1% Initial state vector variance is the ergodic variance associated to the first order Taylor-approximation of the model. 
+  case 1% Initial state vector covariance is the ergodic variance associated to the first order Taylor-approximation of the model.
     StateVectorMean = ReducedForm.constant(mf0);
     StateVectorVariance = lyapunov_symm(ReducedForm.ghx(mf0,:),ReducedForm.ghu(mf0,:)*ReducedForm.Q*ReducedForm.ghu(mf0,:)',1e-12,1e-12);
-  case 2% Initial state vector variance is a monte-carlo based estimate of the ergodic variance (consistent with a k-order Taylor-approximation of the model).
+  case 2% Initial state vector covariance is a monte-carlo based estimate of the ergodic variance (consistent with a k-order Taylor-approximation of the model).
     StateVectorMean = ReducedForm.constant(mf0);
     old_DynareOptionsperiods = DynareOptions.periods;
     DynareOptions.periods = 5000;
@@ -344,7 +342,7 @@ switch DynareOptions.particle.initialization
     StateVectorVariance = cov(y_');
     DynareOptions.periods = old_DynareOptionsperiods;
     clear('old_DynareOptionsperiods','y_');
-  case 3
+  case 3% Initial state vector covariance is a diagonal matrix.
     StateVectorMean = ReducedForm.constant(mf0);
     StateVectorVariance = DynareOptions.particle.initial_state_prior_std*eye(number_of_state_variables);
   otherwise
@@ -357,13 +355,13 @@ ReducedForm.StateVectorVariance = StateVectorVariance;
 % 4. Likelihood evaluation
 %------------------------------------------------------------------------------
 DynareOptions.warning_for_steadystate = 0;
-LIK = feval(DynareOptions.particle.algorithm,ReducedForm,Y,[]);
+LIK = feval(DynareOptions.particle.algorithm,ReducedForm,Y,[],DynareOptions);
 if imag(LIK)
     likelihood = penalty;
-    cost_flag  = 0;
+    exit_flag  = 0;
 elseif isnan(LIK)
     likelihood = penalty;
-    cost_flag  = 0;
+    exit_flag  = 0;
 else
     likelihood = LIK;
 end

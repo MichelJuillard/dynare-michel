@@ -169,9 +169,8 @@ if t<last
 end
 
 % Compute minus the log-likelihood.
-if presample
-    if presample>=diffuse_periods
-        likk = likk(1+(presample-diffuse_periods):end);
-    end
+if presample > diffuse_periods
+    LIK = sum(likk(1+presample-diffuse_periods:end));
+else
+    LIK = sum(likk);
 end
-LIK = sum(likk);

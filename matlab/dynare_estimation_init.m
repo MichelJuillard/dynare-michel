@@ -58,12 +58,8 @@ for i = 1:size(M_.endo_names,1)
     end
 end
 
-% Set the order of approximation to one (if needed).
-if options_.order > 1 && isempty(options_.nonlinear_filter)
-    disp('This version of Dynare cannot estimate non linearized models!')
-    disp('Set "order" equal to 1.')
-    disp(' ')
-    options_.order = 1;
+if options_.order>2
+    error(['I cannot estimate a model with a ' int2str(options_.order) ' order approximation of the model!'])
 end
 
 % Set options_.lik_init equal to 3 if diffuse filter is used or
@@ -214,6 +210,7 @@ end
 k2 = union(var_obs_index,[dr.nstatic+1:dr.nstatic+dr.npred]', 'rows');
 % Set restrict_state to postion of observed + state variables in expanded state vector.
 oo_.dr.restrict_var_list = k2;
+bayestopt_.restrict_var_list = k2;
 % set mf0 to positions of state variables in restricted state vector for likelihood computation.
 [junk,bayestopt_.mf0] = ismember([dr.nstatic+1:dr.nstatic+dr.npred]',k2);
 % Set mf1 to positions of observed variables in restricted state vector for likelihood computation.
@@ -327,8 +324,9 @@ nvx = estim_params_.nvx;
 ncx = estim_params_.ncx;
 nvn = estim_params_.nvn;
 ncn = estim_params_.ncn;
-M.params(estim_params_.param_vals(:,1)) = xparam1(nvx+ncx+nvn+ncn+1:end);
-
+if isfield(estim_params_,'param_vals')
+  M.params(estim_params_.param_vals(:,1)) = xparam1(nvx+ncx+nvn+ncn+1:end);
+end;
 oo_.steady_state = evaluate_steady_state(oo_.steady_state,M,options_,oo_,steadystate_check_flag);
 if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
     options_.noconstant = 1;

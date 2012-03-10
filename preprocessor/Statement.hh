@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2011 Dynare Team
+ * Copyright (C) 2006-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -27,6 +27,7 @@ using namespace std;
 #include <map>
 
 #include "SymbolList.hh"
+#include "WarningConsolidation.hh"
 
 class ModFileStructure
 {
@@ -100,6 +101,8 @@ public:
   bool std_options_statement_present;
   //! Whether there is a corr options statement present
   bool corr_options_statement_present;
+  //! Last chain number for Markov Switching statement
+  int last_markov_switching_chain;
 };
 
 class Statement
@@ -107,7 +110,11 @@ class Statement
 public:
   virtual ~Statement();
   //! Do some internal check, and fill the ModFileStructure class
-  virtual void checkPass(ModFileStructure &mod_file_struct);
+  /*! Don't forget to update ComputingTasks.hh, Shocks.hh and
+    NumericalInitialization.hh if you modify the signature of this
+    method. Otherwise the default implementation (i.e. a no-op) will apply and
+    some checks won't be run. */
+  virtual void checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings);
   virtual void computingPass();
   //! Write Matlab output code
   /*!

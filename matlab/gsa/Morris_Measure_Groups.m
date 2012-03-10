@@ -1,6 +1,4 @@
-
 function [SAmeas, OutMatrix] = Morris_Measure_Groups(NumFact, Sample, Output, p, Group)
-
 % [SAmeas, OutMatrix] = Morris_Measure_Groups(NumFact, Sample, Output, p, Group)
 %
 % Given the Morris sample matrix, the output values and the group matrix compute the Morris measures
@@ -11,18 +9,35 @@ function [SAmeas, OutMatrix] = Morris_Measure_Groups(NumFact, Sample, Output, p,
 % Each column represents one group. 
 % The element of each column are zero if the factor is not in the
 % group. Otherwise it is 1.
-
+%
 % Sample := Matrix of the Morris sampled trajectories 
-
+%
 % Output := Matrix of the output(s) values in correspondence of each point
 % of each trajectory
-
+%
 % k = Number of factors
 % -------------------------------------------------------------------------
 % OUTPUTS 
 % OutMatrix (NumFactor*NumOutputs, 3)= [Mu*, Mu, StDev]
 % for each output it gives the three measures of each factor
 % -------------------------------------------------------------------------
+
+% Copyright (C) 2012 Dynare Team
+%
+% This file is part of Dynare.
+%
+% Dynare is free software: you can redistribute it and/or modify
+% it under the terms of the GNU General Public License as published by
+% the Free Software Foundation, either version 3 of the License, or
+% (at your option) any later version.
+%
+% Dynare is distributed in the hope that it will be useful,
+% but WITHOUT ANY WARRANTY; without even the implied warranty of
+% MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+% GNU General Public License for more details.
+%
+% You should have received a copy of the GNU General Public License
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if nargin==0,
   disp(' ')

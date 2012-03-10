@@ -48,8 +48,15 @@ public:
                       const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
                       const std::vector<size_t> &zeta_static_arg, const double qz_criterium_arg, const std::vector<size_t> &varobs_arg,
                       double riccati_tol_arg, double lyapunov_tol_arg, int &info_arg);
-  double compute(Matrix &steadyState, const Vector &estParams, Vector &deepParams,
-                 const MatrixConstView &data, Matrix &Q, Matrix &H, size_t presampleStart, int &info);
+
+  template <class VEC1, class VEC2>
+  double
+  compute(VEC1 &steadyState, VEC2 &estParams, VectorView &deepParams, const MatrixConstView &data, MatrixView &Q, Matrix &H, size_t presampleStart, int &info)
+  {
+    return -logLikelihoodMain.compute(steadyState, estParams, deepParams, data, Q, H, presampleStart, info)
+      -logPriorDensity.compute(estParams);
+  }
+
   Vector&getLikVector();
 
 };

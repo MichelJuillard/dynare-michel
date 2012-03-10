@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 Dynare Team
+ * Copyright (C) 2008-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -55,7 +55,7 @@ private:
 
 public:
   // construct and load Dynamic model DLL
-  DynamicModelDLL(const string &fname, const string &sExt) throw (DynareException);
+  DynamicModelDLL(const string &fname) throw (DynareException);
   virtual ~DynamicModelDLL();
 
   void eval(const Vector &y, const Vector &x, const Vector &params, const Vector &ySteady,

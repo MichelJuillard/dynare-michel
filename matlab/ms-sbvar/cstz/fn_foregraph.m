@@ -39,8 +39,7 @@ hornum = cell(length(vyrs),1);    % horizontal year (number)
 count=0;
 for k=vyrs'
    count=count+1;
-   jnk=num2str(k);
-   hornum{count}=jnk(3:4);   % e.g., with '1990', we have '90'
+   hornum{count}=num2str(k);
 end
 
 count=0;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2010 Dynare Team
+ * Copyright (C) 2008-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -162,6 +162,24 @@ MacroDriver::begin_if(const MacroValue *value) throw (MacroValue::TypeError)
   if (!ival)
     throw MacroValue::TypeError("Argument of @#if must be an integer");
   last_if = (bool) ival->value;
+}
+
+void
+MacroDriver::begin_ifdef(const string &name)
+{
+  try
+    {
+      get_variable(name);
+      const MacroValue *one = new IntMV(*this, 1);
+      begin_if(one);
+      delete one;
+    }
+  catch (UnknownVariable &)
+    {
+      const MacroValue *zero = new IntMV(*this, 0);
+      begin_if(zero);
+      delete zero;
+    }
 }
 
 void

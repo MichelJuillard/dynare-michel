@@ -11,7 +11,7 @@ function global_initialization()
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2011 Dynare Team
+% Copyright (C) 2003-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -41,11 +41,13 @@ options_.terminal_condition = 0;
 options_.rplottype = 0;
 options_.smpl = 0;
 options_.dynatol.f = 1e-5;
-options_.dynatol.x = 1e-5; 
+options_.dynatol.x = 1e-5;
 options_.maxit_ = 10;
 options_.slowc = 1;
 options_.timing = 0;
-options_.gstep = 1e-2;
+options_.gstep = ones(2,1);
+options_.gstep(1) = 1e-2;
+options_.gstep(2) = 1.0;
 options_.scalv = 1;
 options_.debug = 0;
 options_.initval_file = 0;
@@ -57,9 +59,12 @@ options_.solve_tolf = eps^(1/3);
 options_.solve_tolx = eps^(2/3);
 options_.solve_maxit = 500;
 
-% Default number of threads for parallelized mex files.  
+options_.mode_check_neighbourhood_size = 0.5;
+
+% Default number of threads for parallelized mex files.
 options_.threads.kronecker.A_times_B_kronecker_C = 1;
 options_.threads.kronecker.sparse_hessian_times_B_kronecker_C = 1;
+options_.threads.local_state_space_iteration_2 = 1;
 
 % steady state
 options_.jacobian_flag = 1;
@@ -109,10 +114,16 @@ options_.SpectralDensity = 0;
 
 % Extended path options
 %
+% Set debug flag
+ep.debug = 0;
+% Set memory flag
+ep.memory = 0;
 % Set verbose mode
 ep.verbosity = 0;
+% Set bytecode flag
+ep.use_bytecode = 0;
 % Initialization of the perfect foresight equilibrium paths
-% * init=0, previous solution is used.  
+% * init=0, previous solution is used.
 % * init=1, a path generated with the first order reduced form is used.
 % * init=2, mix of cases 0 and 1.
 ep.init = 0;
@@ -122,10 +133,12 @@ ep.maxit = 500;
 ep.periods = 200;
 % Default step for increasing the number of periods if needed
 ep.step = 50;
+% Set check_stability flag
+ep.check_stability = 0;
 % Define last periods used to test if the solution is stable with respect to an increase in the number of periods.
 ep.lp = 5;
 % Define first periods used to test if the solution is stable with respect to an increase in the number of periods.
-ep.fp = 100;
+ep.fp = 2;
 % Define the distribution for the structural innovations.
 ep.innovation_distribution = 'gaussian';
 % Set flag for the seed
@@ -133,9 +146,9 @@ ep.set_dynare_seed_to_default = 1;
 % Set algorithm for the perfect foresight solver
 ep.stack_solve_algo = 4;
 % Stochastic extended path related options.
-ep.stochastic.status = 0;
 ep.stochastic.method = 'tensor';
-ep.stochastic.order = 1;
+ep.stochastic.ortpol = 'hermite';
+ep.stochastic.order = 0;
 ep.stochastic.nodes = 5;
 ep.stochastic.pruned.status = 0;
 ep.stochastic.pruned.relative = 1e-5;
@@ -146,37 +159,39 @@ options_.ep = ep;
 
 % Particle filter
 %
-% Default is that we do not use the non linear kalman filter 
+% Default is that we do not use the non linear kalman filter
 particle.status = 0;
 % How do we initialize the states?
 particle.initialization = 1;
-particle_filter.initial_state_prior_std = .0001;
-% Set the default order of approximation of the model (perturbation). 
-particle_filter.perturbation = 2;
+particle.initial_state_prior_std = .0001;
+% Set the default order of approximation of the model (perturbation).
+particle.perturbation = 2;
 % Set the default number of particles.
-particle_filter.number_of_particles = 500;
+particle.number_of_particles = 500;
 % Set the default approximation order (Smolyak)
-particle_filter.smolyak_accuracy = 3;
+particle.smolyak_accuracy = 3;
 % By default we don't use pruning
-particle_filter.pruning = 0;
+particle.pruning = 0;
 % Set default algorithm
-particle_filter.algorithm = 'sequential_importance_particle_filter';
-% Set the Gaussian approximation method 
-particle_filter.approximation_method = 'unscented';
+particle.algorithm = 'sequential_importance_particle_filter';
+% Set the Gaussian approximation method
+particle.approximation_method = 'unscented';
 % Set unscented parameters alpha, beta and kappa for gaussian approximation
-particle_filter.unscented.alpha = 1 ;
-particle_filter.unscented.beta = 2 ;
-particle_filter.unscented.kappa = 1 ;
+particle.unscented.alpha = 1;
+particle.unscented.beta = 2;
+particle.unscented.kappa = 1;
 % Configuration of resampling in case of particles
-particle_filter.resampling = 'systematic' ;
-% Choice of the resampling method 
-particle_filter.resampling_method = 'traditional' ;
-% Configuration of the mixture filters 
-particle_filter.mixture_method = 'particles' ;
+particle.resampling.status = 'systematic'; % 'generic'
+particle.resampling.neff_threshold = .5;
+% Choice of the resampling method
+particle.resampling.method1 = 'traditional' ;
+particle.resampling.method2 = 'kitagawa';
+% Configuration of the mixture filters
+particle.mixture_method = 'particles' ;
 % Size of the different mixtures
-particle_filter.mixture_state_variables = 5 ;
-particle_filter.mixture_structural_shocks = 1 ;
-particle_filter.mixture_measurement_shocks = 1 ;
+particle.mixture_state_variables = 5 ;
+particle.mixture_structural_shocks = 1 ;
+particle.mixture_measurement_shocks = 1 ;
 % Copy ep structure in options_ global structure
 options_.particle = particle;
 
@@ -205,9 +220,9 @@ options_.solve_algo = 2;
 options_.linear = 0;
 options_.replic = 50;
 options_.drop = 100;
-% if mjdgges.dll (or .mexw32 or ....) doesn't exist, matlab/qz is added to the path. 
-% There exists now qz/mjdgges.m that contains the calls to the old Sims code 
-% Hence, if mjdgges.m is visible exist(...)==2, 
+% if mjdgges.dll (or .mexw32 or ....) doesn't exist, matlab/qz is added to the path.
+% There exists now qz/mjdgges.m that contains the calls to the old Sims code
+% Hence, if mjdgges.m is visible exist(...)==2,
 % this means that the DLL isn't avaiable and use_qzdiv is set to 1
 if exist('mjdgges','file')==2
     options_.use_qzdiv = 1;
@@ -225,9 +240,9 @@ options_.ramsey_policy = 0;
 options_.timeless = 0;
 
 % estimation
-estimation_info.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
-                               'mode', {}, 'stdev', {}, 'date1', {}, ...
-                               'date2', {}, 'shift', {}, 'variance', {});
+estimation_info.parameters.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
+                                          'mode', {}, 'stdev', {}, 'date1', {}, ...
+                                          'date2', {}, 'shift', {}, 'variance', {});
 estimation_info.structural_innovation.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
                                                   'mode', {}, 'stdev', {}, 'date1', {}, ...
                                                   'date2', {}, 'shift', {}, 'variance', {});
@@ -240,10 +255,12 @@ estimation_info.measurement_error.prior = struct('name', {}, 'shape', {}, 'mean'
 estimation_info.measurement_error_corr.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
                                                   'mode', {}, 'stdev', {}, 'date1', {}, ...
                                                   'date2', {}, 'shift', {}, 'variance', {});
+estimation_info.parameters.prior_index = {};
 estimation_info.measurement_error.prior_index = {};
 estimation_info.structural_innovation.prior_index = {};
 estimation_info.measurement_error_corr.prior_index = {};
 estimation_info.structural_innovation_corr.prior_index = {};
+estimation_info.parameters.options_index = {};
 estimation_info.measurement_error.options_index = {};
 estimation_info.structural_innovation.options_index = {};
 estimation_info.measurement_error_corr.options_index = {};
@@ -322,6 +339,7 @@ options_.filter_covariance = 0;
 options_.filter_decomposition = 0;
 options_.selected_variables_only = 0;
 options_.initialize_estimated_parameters_with_the_prior_mode = 0;
+options_.estimation_dll = 0;
 % Misc
 options_.conf_sig = 0.6;
 oo_.exo_simul = [];
@@ -341,8 +359,18 @@ M_.bvar = [];
 options_.homotopy_mode = 0;
 options_.homotopy_steps = 1;
 
-% Simplex routine (variation on Nelder Mead algorithm)
+% Simplex optimization routine (variation on Nelder Mead algorithm).
 options_.simplex = [];
+
+% CMAES optimization routine.
+cmaes.SaveVariables='off';
+cmaes.DispFinal='on';
+cmaes.WarnOnEqualFunctionValues='no';
+cmaes.DispModulo='10';
+cmaes.LogModulo='0';
+cmaes.LogTime='0';
+options_.cmaes = cmaes;
+
 
 % prior analysis
 options_.prior_mc = 20000;
@@ -356,6 +384,14 @@ options_.use_dll = 0;
 
 % model evaluated using bytecode.dll
 options_.bytecode = 0;
+
+% use a fixed point method to solve Sylvester equation (for large scale
+% models)
+options_.sylvester_fp = 0;
+
+% use a fixed point method to solve Lyapunov equation (for large scale
+% models)
+options_.lyapunov_fp = 0;
 
 % dates for historical time series
 options_.initial_date.freq = 1;

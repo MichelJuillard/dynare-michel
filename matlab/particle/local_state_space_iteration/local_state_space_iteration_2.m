@@ -1,8 +1,8 @@
-function [y,y_] = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss)
+function [y,y_] = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,a,b,c)%yhat_,ss)
 
 %@info:
 %! @deftypefn {Function File} {@var{y}, @var{y_} =} local_state_equation_2 (@var{yhat},@var{epsilon}, @var{ghx}, @var{ghu}, @var{constant}, @var{ghxx}, @var{ghuu}, @var{ghxu}, @var{yhat_}, @var{ss})
-%! @anchor{particle/local_state_equation_2}
+%! @anchor{particle/local_state_space_iteration_2}
 %! @sp 1
 %! Given the states (y) and structural innovations (epsilon), this routine computes the level of selected endogenous variables when the
 %! model is approximated by an order two taylor expansion around the deterministic steady state. Depending on the number of input/output
@@ -58,7 +58,7 @@ function [y,y_] = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -76,23 +76,23 @@ function [y,y_] = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-%           frederic DOT karame AT univ DASH evry DOT fr    
+%           frederic DOT karame AT univ DASH evry DOT fr
 
-number_of_threads = 1;
-
-if nargin==8
-    pruning = 0;
+if nargin==9
+    pruning = 0; numthreads = a;
     if nargout>1
-        error('local_state_equation_2:: Numbers of input and output argument are inconsistent!')
+        error('local_state_space_iteration_2:: Numbers of input and output argument are inconsistent!')
     end
-elseif nargin==10
-    pruning = 1;
+elseif nargin==11
+    pruning = 1; numthreads = c; yhat_ = a; ss = b;
     if nargout~=2
-        error('local_state_equation_2:: Numbers of input and output argument are inconsistent!')
+        error('local_state_space_iteration_2:: Numbers of input and output argument are inconsistent!')
     end
 else
-    error('local_state_equation_2:: Wrong number of input arguments!')
+    error('local_state_space_iteration_2:: Wrong number of input arguments!')
 end
+
+number_of_threads = numthreads;
 
 switch pruning
   case 0
@@ -129,8 +129,10 @@ end
 %$ ss = ones(n,1);
 %$
 %$ % Call the tested routine.
-%$ y1 = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu);
-%$ [y2,y2_] = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss);
+%$ for i=1:10
+%$     y1 = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,1);
+%$     [y2,y2_] = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss,1);
+%$ end
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(y1,ones(n,1));
@@ -162,13 +164,112 @@ end
 %$ yhat_ = zeros(n,1);
 %$ ss = dr.ys(istates,:);
 %$
+%$ t = ones(2,1);
+%$
 %$ % Call the tested routine.
-%$ y1 = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu);
-%$ [y2,y2_] = local_state_equation_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss);
+%$ try
+%$     y1 = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,1);
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$ try
+%$     [y2,y2_] = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss,1);
+%$ catch
+%$     t(2) = 0;
+%$ end
 %$
 %$ % Check the results.
-%$ t(1) = 1;%dyn_assert(y1,ones(n,1));
-%$ t(2) = 1;%dyn_assert(y2,ones(n,1));
-%$ t(3) = 1;%dyn_assert(y2_,ones(n,1));
 %$ T = all(t);
 %@eof:2
+
+%@test:3
+%$ Bohrbug = 1; % A bug that manifests reliably under a possibly unknown but well-defined set of conditions.
+%$ if ~Bohrbug
+%$     n = 2;
+%$     q = 3;
+%$
+%$     yhat = .01*randn(n,1);
+%$     epsilon = .001*randn(q,1);
+%$     ghx = rand(n,n);
+%$     ghu = rand(n,q);
+%$     constant = ones(n,1);
+%$     ghxx = rand(n,n*n);
+%$     ghuu = rand(n,q*q);
+%$     ghxu = rand(n,n*q);
+%$     yhat_ = zeros(n,1);
+%$     ss = ones(n,1);
+%$
+%$     % Call the tested routine (mex version).
+%$     y1a = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,1);
+%$     [y2a,y2a_] = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss,1);
+%$
+%$     % Call the tested routine (matlab version)
+%$     path_to_mex = fileparts(which(['qmc_sequence.' mexext]));
+%$     where_am_i_coming_from = pwd;
+%$     cd(path_to_mex);
+%$     tar('local_state_space_iteration_2.tar',['local_state_space_iteration_2.' mexext]);
+%$     cd(where_am_i_coming_from);
+%$     dynare_config([],0);
+%$     y1b = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,1);
+%$     [y2b,y2b_] = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,ss,1);
+%$     cd(path_to_mex);
+%$     untar('local_state_space_iteration_2.tar');
+%$     delete('local_state_space_iteration_2.tar');
+%$     cd(where_am_i_coming_from);
+%$     dynare_config([],0);
+%$     % Check the results.
+%$     t(1) = dyn_assert(y1a,y1b);
+%$     t(2) = dyn_assert(y2a,y2b);
+%$     t(3) = dyn_assert(y2a_,y2b_);
+%$     T = all(t);
+%$ else
+%$     t(1) = 1;
+%$     T = all(t);
+%$ end
+%@eof:3
+
+
+%@test:4
+%$ % TIMING TEST (parallelization with openmp)
+%$ old_path = pwd;
+%$ cd([fileparts(which('dynare')) '/../tests/']);
+%$ dynare('dsge_base2');
+%$ load dsge_base2;
+%$ cd(old_path);
+%$ dr = oo_.dr;
+%$ clear('oo_','options_','M_');
+%$ delete([fileparts(which('dynare')) '/../tests/dsge_base2.mat']);
+%$ istates = dr.nstatic+(1:dr.npred);
+%$ n = dr.npred;
+%$ q = size(dr.ghu,2);
+%$ yhat = zeros(n,10000000);
+%$ epsilon = zeros(q,10000000);
+%$ ghx = dr.ghx(istates,:);
+%$ ghu = dr.ghu(istates,:);
+%$ constant = dr.ys(istates,:)+dr.ghs2(istates,:);
+%$ ghxx = dr.ghxx(istates,:);
+%$ ghuu = dr.ghuu(istates,:);
+%$ ghxu = dr.ghxu(istates,:);
+%$ yhat_ = zeros(n,10000000);
+%$ ss = dr.ys(istates,:);
+%$
+%$ t = NaN(4,1);
+%$ tic, for i=1:10, y1 = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,1); end
+%$ t1 = toc;
+%$ tic, for i=1:10, y2 = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,2); end
+%$ t2 = toc;
+%$ t(1) = dyn_assert(y1,y2,1e-15); clear('y1');
+%$ tic, for i=1:10, y3 = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,3); end
+%$ t3 = toc;
+%$ t(2) = dyn_assert(y2,y3,1e-15); clear('y2');
+%$ tic, for i=1:10, y4 = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,4); end
+%$ t4 = toc;
+%$ t(3) = dyn_assert(y4,y3,1e-15); clear('y3','y4');
+%$ t(4) = (t1>t2) && (t2>t3) && (t3>t4);
+%$ if ~t(4)
+%$     disp('Timmings:')
+%$     [t1, t2, t3, t4]
+%$ end
+%$ % Check the results.
+%$ T = all(t);
+%@eof:4

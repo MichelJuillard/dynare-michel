@@ -14,7 +14,7 @@ function [options_, oo_]=ms_forecast(M_, options_, oo_)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -34,46 +34,86 @@ function [options_, oo_]=ms_forecast(M_, options_, oo_)
 disp('MS-SBVAR Forecasts');
 options_ = set_file_tags(options_);
 [options_, oo_] = set_ms_estimation_file(options_.ms.file_tag, options_, oo_);
-options_ = set_ms_simulation_file(options_);
-clean_files_for_second_type_of_mex(M_, options_, 'forecast')
+clean_ms_forecast_files(options_.ms.output_file_tag);
 forecastdir = [options_.ms.output_file_tag filesep 'Forecast'];
 create_dir(forecastdir);
 
-opt = { ...
-    {'file_tag', options_.ms.file_tag}, ...
-    {'seed', options_.DynareRandomStreams.seed}, ...
-    {'horizon', options_.ms.horizon}, ...
-    {'number_observations', options_.ms.forecast_data_obs}, ...
-    {'error_bands', options_.ms.error_bands}, ...
-    {'percentiles', options_.ms.percentiles}, ...
-    {'thin', options_.ms.thinning_factor}
-    };
+% setup command line options
+opt = ['-forecast -nodate -seed ' num2str(options_.DynareRandomStreams.seed)];
+opt = [opt ' -do ' forecastdir];
+opt = [opt ' -ft ' options_.ms.file_tag];
+opt = [opt ' -fto ' options_.ms.output_file_tag];
+opt = [opt ' -horizon ' num2str(options_.ms.horizon)];
+opt = [opt ' -thin ' num2str(options_.ms.thinning_factor)];
+opt = [opt ' -data ' num2str(options_.ms.forecast_data_obs)];
 
-if options_.ms.median
-    opt = [opt(:)' {{'median'}}];
+if options_.ms.regimes
+    opt = [opt ' -regimes'];
+elseif options_.ms.regime
+    % regime-1 since regime is 0-indexed in C but 1-indexed in Matlab
+    opt = [opt ' -regime ' num2str(options_.ms.regime-1)];
 end
 
-[err, forecast] = mex_ms_forecast([opt(:)', {{'free_parameters',oo_.ms.maxparams}, ...
-    {'shocks_per_parameter', options_.ms.shock_draws}}]);
-mexErrCheck('mex_ms_forecast ergodic ', err);
-plot_ms_forecast(M_,options_,forecast,'Forecast',options_.graph_save_formats,options_.TeX);
+if options_.ms.parameter_uncertainty
+    options_ = set_ms_simulation_file(options_);
+    opt = [opt ' -parameter_uncertainty'];
+    opt = [opt ' -shocks_per_parameter ' num2str(options_.ms.shocks_per_parameter)];
+else
+    opt = [opt ' -shocks_per_parameter ' num2str(options_.ms.shock_draws)];
+end
 
-[err, regime_forecast] = mex_ms_forecast([opt(:)', {{'free_parameters',oo_.ms.maxparams}, ...
-    {'shocks_per_parameter', options_.ms.shock_draws}, {'regimes'}}]);
-mexErrCheck('mex_ms_forecast ergodic regimes', err);
-save([forecastdir filesep 'ergodic_forecast.mat'], 'forecast', 'regime_forecast');
+percentiles_size = 0;
+if options_.ms.median
+    percentiles_size = 1;
+    opt = [opt ' -percentiles ' num2str(percentiles_size) ' 0.5'];
+else
+    percentiles_size = size(options_.ms.percentiles,2);
+    opt = [opt ' -percentiles ' num2str(percentiles_size)];
+    for i=1:size(options_.ms.percentiles,2)
+        opt = [opt ' ' num2str(options_.ms.percentiles(i))];
+    end
+end
 
-if exist(options_.ms.mh_file,'file') > 0
-    [err, forecast] = mex_ms_forecast([opt(:)', {{'free_parameters',oo_.ms.maxparams}, ...
-        {'shocks_per_parameter', options_.ms.shocks_per_parameter}, ...
-        {'simulation_file', options_.ms.mh_file}, {'parameter_uncertainty'}}]);
-    mexErrCheck('mex_ms_forecast bayesian ', err);
-    plot_ms_forecast(M_,options_,forecast,'Forecast w/ Parameter Uncertainty',options_.graph_save_formats,options_.TeX);
+% forecast
+[err] = ms_sbvar_command_line(opt);
+mexErrCheck('ms_forecast',err);
 
-    [err, regime_forecast] = mex_ms_forecast([opt(:)', {{'free_parameters',oo_.ms.maxparams}, ...
-        {'shocks_per_parameter', options_.ms.shocks_per_parameter}, ...
-        {'simulation_file', options_.ms.mh_file}, {'parameter_uncertainty','regimes'}}]);
-    mexErrCheck('mex_ms_forecast bayesian regimes ', err);
-    save([forecastdir filesep 'bayesian_forecast.mat'], 'forecast', 'regime_forecast');
+% Plot Forecasts
+if options_.ms.regimes
+    n_chains = length(options_.ms.ms_chain);
+    n_regimes=1;
+    for i_chain=1:n_chains
+        n_regimes = n_regimes*length(options_.ms.ms_chain(i_chain).regime);
+    end
+
+    for regime_i=1:n_regimes
+        forecast_title = ['Forecast, Regimes ' num2str(regime_i)];
+        forecast_data = load([forecastdir filesep 'forecasts_percentiles_regime_' ...
+            num2str(regime_i-1) '_' options_.ms.output_file_tag ...
+            '.out'], '-ascii');
+        forecast_data = reshape_ascii_forecast_data(M_.endo_nbr, ...
+            percentiles_size, options_.ms.horizon, forecast_data);
+        save([forecastdir filesep 'forecast_regime_' num2str(regime_i-1)], ...
+            'forecast_data');
+        plot_ms_forecast(M_, options_, forecast_data, forecast_title);
+    end
+else
+    if options_.ms.regime
+        forecast_data = load([forecastdir filesep 'forecasts_percentiles_regime_' ...
+            num2str(options_.ms.regime-1) '_' options_.ms.output_file_tag ...
+            '.out'], '-ascii');
+        forecast_title = ['Forecast, Regime ' num2str(options_.ms.regime)];
+        save_filename = ['forecast_regime_' num2str(options_.ms.regime-1)];
+    else
+        forecast_data = load([forecastdir filesep 'forecasts_percentiles_' ...
+            options_.ms.output_file_tag '.out'], '-ascii');
+        forecast_title = 'Forecast';
+        save_filename = 'forecast';
+    end
+
+    forecast_data = reshape_ascii_forecast_data(M_.endo_nbr, ...
+        percentiles_size, options_.ms.horizon, forecast_data);
+    save([forecastdir filesep save_filename], 'forecast_data');
+    plot_ms_forecast(M_, options_, forecast_data, forecast_title);
 end
 end

@@ -142,6 +142,7 @@ switch Strategy
             save(['temp_input.mat'],'fInputVar')
         end
         save(['temp_input.mat'],'Parallel','-append')
+        closeSlave(Parallel,PRCDir,-1);
 end
 
 
@@ -423,6 +424,7 @@ for j=1:totCPU,
                     
                     if isempty(PRCDirSnapshot{indPC}),
                         PRCDirSnapshot(indPC)=dynareParallelSnapshot(PRCDir,Parallel(indPC));
+                        PRCDirSnapshotInit(indPC) = PRCDirSnapshot(indPC);
                     else
                         PRCDirSnapshot(indPC)=dynareParallelGetNewFiles(PRCDir,Parallel(indPC),PRCDirSnapshot(indPC));
                     end
@@ -453,6 +455,7 @@ end
 
 if Strategy==0 || newInstance, % See above.
     PRCDirSnapshot=dynareParallelSnapshot(PRCDir,Parallel(1:totSlaves));
+    PRCDirSnapshotInit = PRCDirSnapshot;
     
     % Run the slaves.
     if  ~ispc, %isunix || (~matlab_ver_less_than('7.4') && ismac),
@@ -587,6 +590,7 @@ NuoviFilecopiati=zeros(1,totSlaves);
 
 ForEver=1;
 statusString = '';
+flag_CloseAllSlaves=0;
 
 while (ForEver)
     
@@ -607,6 +611,12 @@ while (ForEver)
         try
             if ~isempty(['comp_status_',fname,int2str(j),'.mat'])
                 load(['comp_status_',fname,int2str(j),'.mat']);
+%                 whoCloseAllSlaves = who(['comp_status_',fname,int2str(j),'.mat','CloseAllSlaves']);
+                if exist('CloseAllSlaves') && flag_CloseAllSlaves==0,
+                    flag_CloseAllSlaves=1;
+                    whoiamCloseAllSlaves=j;
+                    closeSlave(Parallel(1:totSlaves),PRCDir,1);
+                end
             end
             pcerdone(j) = prtfrc;
             idCPU(j) = njob;
@@ -711,11 +721,16 @@ for j=1:totCPU,
         for jstack=1:length(fOutputVar.error.stack)
             fOutputVar.error.stack(jstack),
         end
-    else
+    elseif flag_CloseAllSlaves==0,
         fOutVar(j)=fOutputVar;
+    elseif j==whoiamCloseAllSlaves,
+        fOutVar=fOutputVar;        
     end
 end
 
+if flag_CloseAllSlaves==1,
+    closeSlave(Parallel(1:totSlaves),PRCDir,-1);
+end
 
 if iscrash,
     error('Remote jobs crashed');
@@ -737,10 +752,11 @@ switch Strategy
                 [A B C]=rmdir('dynareParallelLogFiles');
                 mkdir('dynareParallelLogFiles');
             end
-            
-            copyfile('*.log','dynareParallelLogFiles');
-            delete([fname,'*.log']);
-            
+            try
+                copyfile('*.log','dynareParallelLogFiles');
+                mydelete([fname,'*.log']);
+            catch
+            end
             mydelete(['*_core*_input*.mat']);
             %             if Parallel(indPC).Local == 1
             %                 delete(['slaveParallel_input*.mat']);

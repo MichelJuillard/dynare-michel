@@ -1,6 +1,6 @@
 @#define extended_path_version = 1
 
-var Capital, Output, Labour, Consumption, Efficiency, efficiency, ExpectedTerm, LagrangeMultiplier;
+var Capital, Output, Labour, Consumption, Investment, Efficiency, efficiency, ExpectedTerm;
 
 varexo EfficiencyInnovation;
 
@@ -28,7 +28,7 @@ sigma2  =  0.001;
 
 external_function(name=mean_preserving_spread);
 
-model(block,bytecode,cutoff=0);
+model(use_dll);
 
   // Eq. n°1:
   efficiency = rho*efficiency(-1) + EfficiencyInnovation;
@@ -40,19 +40,19 @@ model(block,bytecode,cutoff=0);
   Output = Efficiency*(alpha*(Capital(-1)^psi)+(1-alpha)*(Labour^psi))^(1/psi);
 
   // Eq. n°4:
-  Capital = max(Output-Consumption + (1-delta)*Capital(-1),(1-delta)*Capital(-1));
+  Capital = max(Output-Consumption,0) + (1-delta)*Capital(-1);
 
   // Eq. n°5:
   ((1-theta)/theta)*(Consumption/(1-Labour)) - (1-alpha)*(Output/Labour)^(1-psi);
 
   // Eq. n°6:
-  (((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption - LagrangeMultiplier  - ExpectedTerm(1);
+  ExpectedTerm = beta*((((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption)*(alpha*((Output/Capital(-1))^(1-psi))+1-delta);
 
   // Eq. n°7:
-  (Capital==(1-delta)*Capital(-1))*(Output-Consumption) + (1-(Capital==(1-delta)*Capital(-1)))*LagrangeMultiplier = 0;
-  
-  // Eq. n°8:
-  ExpectedTerm = beta*(((((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption)*(alpha*((Output/Capital(-1))^(1-psi))+(1-delta))-(1-delta)*LagrangeMultiplier);
+  Investment = Capital - (1-delta)*Capital(-1);
+
+  // Eq. n°8: (Euler equation, to be skipped if investment is on its lower bound)
+  (Investment>0)*((((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption - ExpectedTerm(1)) + (1-(Investment>0))*(Output-Consumption);
 
 end;
 
@@ -64,15 +64,14 @@ end;
     end;
 
     steady;
-    
+
     options_.maxit_ = 100;
     options_.ep.verbosity = 0;
-    options_.ep.stochastic.status = 0;
+    options_.ep.stochastic.order = 0;
     options_.console_mode = 0;
-
     ts = extended_path([],1000);
-    
-    options_.ep.stochastic.status = 1;
+
+    options_.ep.stochastic.order = 1;
     sts = extended_path([],1000);
 
     figure(1)
@@ -83,7 +82,7 @@ end;
 
     figure(3)
     plot(sts(2,:)-ts(2,:))
-    
+
 @#else
 
     shocks;
@@ -93,12 +92,17 @@ end;
     end;
 
     steady;
-    
+
     options_.maxit_ = 100;
-    
+
     simul(periods=4000);
 
     n = 100;
+
+    figure('Name','(rbcii) Investment.');
     plot(Output(1:n)-Consumption(1:n),'-b','linewidth',2)
-    
+
+    figure('Name','(rbcii) Lagrange multiplier associated to the positivity constraint on investment.');
+    plot(LagrangeMultiplier(1:n),'-b','linewidth',2)
+
 @#endif

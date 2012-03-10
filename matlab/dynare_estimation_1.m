@@ -12,7 +12,7 @@ function dynare_estimation_1(var_list_,dname)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2011 Dynare Team
+% Copyright (C) 2003-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -31,8 +31,29 @@ function dynare_estimation_1(var_list_,dname)
 
 global M_ options_ oo_ estim_params_ bayestopt_ dataset_
 
+% Set particle filter flag.
+if options_.order > 1
+    if options_.particle.status && options_.order==2
+        disp(' ')
+        disp('Estimation using a non linear filter!')
+        disp(' ')
+    elseif options_.particle.status && options_.order>2
+        error(['Non linear filter are not implemented with order ' int2str(options_.order) ' approximation of the model!'])
+    elseif ~options_.particle.status && options_.order==2
+        disp('If you want to estimate the model with a second order approximation using a non linear filter, set options_.particle.status=1;')
+        disp('I set order=1!')
+        options_.order=1;
+    else
+        error(['Cannot estimate a model with an order ' int2str(options_.order) ' approximation!'])
+    end
+end
+
 if ~options_.dsge_var
-    objective_function = str2func('dsge_likelihood');
+    if options_.particle.status
+        objective_function = str2func('non_linear_dsge_likelihood');
+    else
+        objective_function = str2func('dsge_likelihood');
+    end
 else
     objective_function = str2func('DsgeVarLikelihood');
 end
@@ -267,7 +288,14 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         [xparam1,fval,exitflag] = fminsearch(objective_function,xparam1,optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 8
         % Dynare implementation of the simplex algorithm.
-        [xparam1,fval,exitflag] = simplex_optimization-routine(objective_function,xparam1,optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        [xparam1,fval,exitflag] = simplex_optimization_routine(objective_function,xparam1,options_.simplex,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+      case 9
+        H0 = 1e-4*ones(nx,1);
+        warning('off','CMAES:NonfinitenessRange');
+        warning('off','CMAES:InitialSigma');
+        [x, fval, COUNTEVAL, STOPFLAG, OUT, BESTEVER] = cmaes(func2str(objective_function),xparam1,H0,options_.cmaes,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        xparam1=BESTEVER.x;
+        disp(sprintf('\n Objective function at mode: %f',fval))
       case 101
         myoptions=soptions;
         myoptions(2)=1e-6; %accuracy of argument

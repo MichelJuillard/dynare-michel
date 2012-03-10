@@ -141,6 +141,8 @@ for i = 1:lags
          sgpbid((i-1)*nvar+j) = lagdecay^2/sgsh(j);  % ith equation
       elseif (q_m==4)
          sgpbid((i-1)*nvar+j) = (1/i^mu(4))^2/sgsh(j);  % ith equation
+      elseif (q_m==1)
+         sgpbid((i-1)*nvar+j) = (1/(i*4)^mu(4))^2/sgsh(j);  % ith equation
       else
 			error('Incompatibility with lags, check the possible errors!!!')
          %warning('Incompatibility with lags, check the possible errors!!!')

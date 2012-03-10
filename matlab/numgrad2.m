@@ -32,6 +32,7 @@ g=zeros(n,1);
 badg=0;
 goog=1;
 scale=1;
+g0 = 0;
 for i=1:n
     if size(x,1)>size(x,2)
         tvecv=tvec(i,:);

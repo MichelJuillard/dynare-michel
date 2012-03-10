@@ -295,15 +295,15 @@ Stéphane Adjemian (Université du Maine, Gains and Cepremap), Houtan
 Bastani (Cepremap), Michel Juillard (Banque de France), Frédéric Karamé
 (Université d'Évry, Epee and Cepremap), Junior Maih (Norges Bank),
 Ferhat Mihoubi (Université d'Évry, Epee and Cepremap), George Perendia,
-Marco Ratto (JRC) and Sébastien Villemot (Cepremap and Paris School of
-Economics). Increasingly, the developer base is expanding, as tools
-developed by researchers outside of Cepremap are integrated into
-Dynare. Financial support is provided by Cepremap, Banque de France and
-DSGE-net (an international research network for DSGE modeling). The
-Dynare project also received funding through the Seventh Framework
-Programme for Research (FP7) of the European Commission's Socio-economic
-Sciences and Humanities (SSH) Program from October 2008 to September
-2011 under grant agreement SSH-CT-2009-225149.
+Johannes Pfeifer, Marco Ratto (JRC) and Sébastien Villemot (Cepremap and
+Paris School of Economics). Increasingly, the developer base is
+expanding, as tools developed by researchers outside of Cepremap are
+integrated into Dynare. Financial support is provided by Cepremap,
+Banque de France and DSGE-net (an international research network for
+DSGE modeling). The Dynare project also received funding through the
+Seventh Framework Programme for Research (FP7) of the European
+Commission's Socio-economic Sciences and Humanities (SSH) Program from
+October 2008 to September 2011 under grant agreement SSH-CT-2009-225149.
 
 Interaction between developers and users of Dynare is central to the
 project. A @uref{http://www.dynare.org/phpBB3, web forum} is available
@@ -3888,6 +3888,9 @@ Uses Dynare implementation of the Nelder-Mead simplex based optimization
 routine (generally more efficient than the MATLAB or Octave implementation
 available with @code{mode_compute=7})
 
+@item 9
+Uses the CMA-ES (Covariance Matrix Adaptation Evolution Strategy) algorithm, an evolutionary algorithm for difficult non-linear non-convex optimization 
+
 @item @var{FUNCTION_NAME}
 It is also possible to give a @var{FUNCTION_NAME} to this option,
 instead of an @var{INTEGER}. In that case, Dynare takes the return
@@ -3988,6 +3991,7 @@ and graphics that can be later directly included in LaTeX files (not
 yet implemented)
 
 @item kalman_algo = @var{INTEGER}
+@anchor{kalman_algo}
 @dots{}
 
 @item kalman_tol = @var{DOUBLE}
@@ -5263,6 +5267,9 @@ Critical value for correlation @math{\rho}: plot couples of parmaters with
 @item mode_file = @var{FILENAME}
 @xref{mode_file}.
 
+@item kalman_algo = @var{INTEGER}
+@xref{kalman_algo}.
+
 @end table
 @customhead{Identification Analysis Options}
 @table @code
@@ -5289,6 +5296,9 @@ for identification analysis. Default: @code{0}
 
 @item ar = @var{INTEGER}
 Maximum number of lags for moments in identification analysis. Default: @code{1}
+
+@item lik_init = @var{INTEGER}
+@xref{lik_init}.
 
 @end table
 
@@ -5356,6 +5366,9 @@ Specify the parameter set to use. Default: @code{prior_mean}
 
 @item lik_init = @var{INTEGER}
 @xref{lik_init}.
+
+@item kalman_algo = @var{INTEGER}
+@xref{kalman_algo}.
 
 @end table
 
@@ -5841,20 +5854,17 @@ model. Output @code{.eps} files are contained in
 @xref{simulation_file_tag}.
 
 @item horizon = @var{INTEGER}
-The forecast horizon. Default: @code{12}
+@anchor{horizon} The forecast horizon. Default: @code{12}
 
 @item filtered_probabilities
 @anchor{filtered_probabilities} Uses filtered probabilities at the end
-of the sample as initial conditions for regime probabilities. Default:
-@code{off}
-
-@item no_error_bands
-@anchor{no_error_bands} Do not output error bands. Default: @code{off}
-(@i{i.e.} output error bands)
+of the sample as initial conditions for regime probabilities. Only one
+of @code{filtered_probabilities}, @code{regime} and @code{regimes} may
+be passed. Default: @code{off}
 
 @item error_band_percentiles = [@var{DOUBLE1} @dots{}]
 @anchor{error_band_percentiles} The percentiles to compute. Default:
-@code{[0.16 0.50 0.84]}. If @code{no_error_bands} is passed, the default
+@code{[0.16 0.50 0.84]}. If @code{median} is passed, the default
 is @code{[0.5]}
 
 @item shock_draws = @var{INTEGER}
@@ -5873,11 +5883,25 @@ draws in posterior draws file are used. Default: @code{1}
 @anchor{free_parameters} A vector of free parameters to initialize theta
 of the model. Default: use estimated parameters
 
-@item median
-@anchor{median}
+@item parameter_uncertainty
+@anchor{parameter_uncertainty} Calculate IRFs under parameter
+uncertainty. Requires that @command{ms_simulation} has been
+run. Default: @code{off}
 
-A shortcut to setting @code{error_band_percentiles=[0.5]}. Default:
-@code{off}
+@item regime = @var{INTEGER}
+@anchor{regime} Given the data and model parameters, what is the ergodic
+probability of being in the specified regime. Only one of
+@code{filtered_probabilities}, @code{regime} and @code{regimes} may be
+passed. Default: @code{off}
+
+@item regimes
+@anchor{regimes} Describes the evolution of regimes. Only one of
+@code{filtered_probabilities}, @code{regime} and @code{regimes} may be
+passed. Default: @code{off}
+
+@item median
+@anchor{median} A shortcut to setting
+@code{error_band_percentiles=[0.5]}. Default: @code{off}
 
 @end table
 
@@ -5909,9 +5933,6 @@ while data files are contained in @code{<output_file_tag/Forecast>}.
 @item data_obs_nbr = @var{INTEGER}
 The number of data points included in the output. Default: @code{0}
 
-@item no_error_bands
-@xref{no_error_bands}.
-
 @item error_band_percentiles = [@var{DOUBLE1} @dots{}]
 @xref{error_band_percentiles}.
 
@@ -5926,6 +5947,16 @@ The number of data points included in the output. Default: @code{0}
 
 @item free_parameters = @var{NUMERICAL_VECTOR}
 @xref{free_parameters}.
+
+@item parameter_uncertainty
+@xref{parameter_uncertainty}.
+
+@item regime = @var{INTEGER}
+@xref{regime}.
+
+@item regimes
+
+@xref{regimes}.
 
 @item median
 
@@ -5959,11 +5990,15 @@ are contained in @code{<output_file_tag/Variance_Decomposition>}.
 @item simulation_file_tag = @var{FILENAME}
 @xref{simulation_file_tag}.
 
+@item horizon = @var{INTEGER}
+@xref{horizon}.
+
 @item filtered_probabilities
 @xref{filtered_probabilities}.
 
 @item no_error_bands
-@xref{no_error_bands}.
+Do not output percentile error bands (@i{i.e.} compute mean). Default:
+@code{off} (@i{i.e.} output error bands)
 
 @item error_band_percentiles = [@var{DOUBLE1} @dots{}]
 @xref{error_band_percentiles}.
@@ -5980,9 +6015,15 @@ are contained in @code{<output_file_tag/Variance_Decomposition>}.
 @item free_parameters = @var{NUMERICAL_VECTOR}
 @xref{free_parameters}.
 
-@item median
+@item parameter_uncertainty
+@xref{parameter_uncertainty}.
 
-@xref{median}.
+@item regime = @var{INTEGER}
+@xref{regime}.
+
+@item regimes
+
+@xref{regimes}.
 
 @end table
 
@@ -6075,7 +6116,7 @@ line. The main directives are:
 @item
 @code{@@#define}, for defining a macro-processor variable,
 @item
-@code{@@#if}, @code{@@#then}, @code{@@#else}, @code{@@#endif} for
+@code{@@#if}, @code{@@#ifdef}, @code{@@#else}, @code{@@#endif} for
 conditional statements,
 @item
 @code{@@#for}, @code{@@#endfor} for constructing loops.
@@ -6218,13 +6259,15 @@ end;
 @end deffn
 
 @deffn {Macro directive} @@#if @var{MACRO_EXPRESSION}
+@deffnx {Macro directive} @@#ifdef @var{MACRO_VARIABLE}
 @deffnx {Macro directive} @@#else
 @deffnx {Macro directive} @@#endif
 Conditional inclusion of some part of the @file{.mod} file.
-The lines between @code{@@#if} and the next @code{@@#else} or
-@code{@@#end} is executed only if the condition evaluates to a
-non-null integer. The @code{@@#else} branch is optional and, if
-present, is only evaluated if the condition evaluates to @code{0}.
+The lines between @code{@@#if} or @code{@@#ifdef} and the next
+@code{@@#else} or @code{@@#endif} is executed only if the condition
+evaluates to a non-null integer. The @code{@@#else} branch is optional
+and, if present, is only evaluated if the condition evaluates to
+@code{0}.
 
 @examplehead
 
@@ -6234,6 +6277,23 @@ Choose between two alternative monetary policy rules using a macro-variable:
 ...
 model;
 @@#if linear_mon_pol
+  i = w*i(-1) + (1-w)*i_ss + w2*(pie-piestar);
+@@#else
+  i = i(-1)^w * i_ss^(1-w) * (pie/piestar)^w2;
+@@#endif
+...
+end;
+@end example
+
+@examplehead
+
+Choose between two alternative monetary policy rules using a
+macro-variable. As @code{linear_mon_pol} was not previously defined in
+this example, the second equation will be chosen:
+
+@example
+model;
+@@#ifdef linear_mon_pol
   i = w*i(-1) + (1-w)*i_ss + w2*(pie-piestar);
 @@#else
   i = i(-1)^w * i_ss^(1-w) * (pie/piestar)^w2;

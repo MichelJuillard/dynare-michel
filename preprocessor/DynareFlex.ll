@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2011 Dynare Team
+ * Copyright (C) 2003-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -290,6 +290,8 @@ string eofbuff;
 <DYNARE_STATEMENT>dummy_obs {return token::DUMMY_OBS;}
 <DYNARE_STATEMENT>nstates {return token::NSTATES;}
 <DYNARE_STATEMENT>indxscalesstates {return token::INDXSCALESSTATES;}
+<DYNARE_STATEMENT>fixed_point {return token::FIXED_POINT;}
+<DYNARE_STATEMENT>default {return token::DEFAULT;}
 <DYNARE_STATEMENT>alpha {
   yylval->string_val = new string(yytext);
   return token::ALPHA;
@@ -373,6 +375,7 @@ string eofbuff;
 <DYNARE_STATEMENT>no_create_init {return token::NO_CREATE_INIT;};
 <DYNARE_STATEMENT>simulation_file_tag {return token::SIMULATION_FILE_TAG;};
 <DYNARE_STATEMENT>horizon {return token::HORIZON;}
+<DYNARE_STATEMENT>parameter_uncertainty {return token::PARAMETER_UNCERTAINTY;}
 <DYNARE_STATEMENT>no_error_bands {return token::NO_ERROR_BANDS;}
 <DYNARE_STATEMENT>error_band_percentiles {return token::ERROR_BAND_PERCENTILES;}
 <DYNARE_STATEMENT>shock_draws {return token::SHOCK_DRAWS;}
@@ -380,6 +383,8 @@ string eofbuff;
 <DYNARE_STATEMENT>thinning_factor {return token::THINNING_FACTOR;}
 <DYNARE_STATEMENT>free_parameters {return token::FREE_PARAMETERS;}
 <DYNARE_STATEMENT>median {return token::MEDIAN;}
+<DYNARE_STATEMENT>regime {return token::REGIME;}
+<DYNARE_STATEMENT>regimes {return token::REGIMES;}
 <DYNARE_STATEMENT>data_obs_nbr {return token::DATA_OBS_NBR;}
 <DYNARE_STATEMENT>filtered_probabilities {return token::FILTERED_PROBABILITIES;}
 <DYNARE_STATEMENT>real_time_smoothed {return token::REAL_TIME_SMOOTHED;}
@@ -481,6 +486,8 @@ string eofbuff;
 <DYNARE_STATEMENT>stack_solve_algo {return token::STACK_SOLVE_ALGO;}
 <DYNARE_STATEMENT>drop {return token::DROP;}
 <DYNARE_STATEMENT>order {return token::ORDER;}
+<DYNARE_STATEMENT>sylvester {return token::SYLVESTER;}
+<DYNARE_STATEMENT>lyapunov {return token::LYAPUNOV;}
 <DYNARE_STATEMENT>replic {return token::REPLIC;}
 <DYNARE_STATEMENT>ar {return token::AR;}
 <DYNARE_STATEMENT>nofunctions {return token::NOFUNCTIONS;}

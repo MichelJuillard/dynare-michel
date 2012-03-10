@@ -1,4 +1,4 @@
-function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood_hh(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
+function [fval,llik,cost_flag,ys,trend_coeff,info] = dsge_likelihood_hh(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
 % function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood_hh(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
 % Evaluates the posterior kernel of a dsge model.
 %
@@ -41,17 +41,20 @@ function [fval,llik,cost_flag,ys,trend_coeff,info] = DsgeLikelihood_hh(xparam1,D
 
 
 % Declaration of the penalty as a persistent variable.
-persistent penalty
 
-% Initialization of the persistent variable.
-if ~nargin || isempty(penalty)
-    penalty = 1e8;
-    if ~nargin, return, end
-end
-if nargin==1
-    penalty = xparam1;
-    return
-end
+% Persistent variable 'penalty' is used to compute an endogenous penalty to
+% the value 'fval' when various conditions are encountered. These conditions
+% set also 'exit_flag' equal to 0 instead of 1.  It is only when
+% dsge_likelihood_hh() is called by an newrat() called by
+% dynare_estimation_1() that 'exit_flag' is ignored and penalized 'fval' is
+% actually used.  
+% In that case, 'penalty' is properly initialized, at the very end of the
+% present function, by a call to dsge_likelihood_hh() made in
+% initial_estimation_checks(). If a condition triggers exit_flag ==
+% 0, initial_estimation_checks() triggers an error.
+% In summary, an initial call to the present function, without triggering
+% any condition, guarantees that 'penalty' is properly initialized when needed.
+persistent penalty
 
 % Initialization of the returned variables and others...
 fval        = [];
@@ -121,7 +124,7 @@ if EstimatedParameters.ncx
         a = diag(eig(Q));
         k = find(a < 0);
         if k > 0
-            fval = BayesInfo.penalty+sum(-a(k));
+            fval = penalty+sum(-a(k));
             exit_flag = 0;
             info = 43;
             return
@@ -145,7 +148,7 @@ if EstimatedParameters.ncn
         a = diag(eig(H));
         k = find(a < 0);
         if k > 0
-            fval = BayesInfo.penalty+sum(-a(k));
+            fval = penalty+sum(-a(k));
             exit_flag = 0;
             info = 44;
             return
@@ -251,6 +254,8 @@ end
 
 
 diffuse_periods = 0;
+correlated_errors_have_been_checked = 0;
+singular_diffuse_filter = 0;
 switch DynareOptions.lik_init
   case 1% Standard initialization with the steady state of the state equation.
     if kalman_algo~=2
@@ -271,10 +276,14 @@ switch DynareOptions.lik_init
     a     = zeros(mm,1);
     Zflag = 0;
   case 3% Diffuse Kalman filter (Durbin and Koopman)
-    if kalman_algo ~= 4
         % Use standard kalman filter except if the univariate filter is explicitely choosen.
+    if kalman_algo == 0
         kalman_algo = 3;
+    elseif ~((kalman_algo == 3) || (kalman_algo == 4)) 
+        error(['diffuse filter: options_.kalman_algo can only be equal ' ...
+               'to 0 (default), 3 or 4'])
     end
+
     [Z,T,R,QT,Pstar,Pinf] = schur_statespace_transformation(Z,T,R,Q,DynareOptions.qz_criterium);
     Zflag = 1;
     % Run diffuse kalman filter on first periods.
@@ -282,9 +291,9 @@ switch DynareOptions.lik_init
         % Multivariate Diffuse Kalman Filter
         if no_missing_data_flag
             [dLIK,dlik,a,Pstar] = kalman_filter_d(Y, 1, size(Y,2), ...
-                                                       zeros(mm,1), Pinf, Pstar, ...
-                                                       kalman_tol, riccati_tol, DynareOptions.presample, ...
-                                                       T,R,Q,H,Z,mm,pp,rr);
+                                                  zeros(mm,1), Pinf, Pstar, ...
+                                                  kalman_tol, riccati_tol, DynareOptions.presample, ...
+                                                  T,R,Q,H,Z,mm,pp,rr);
         else
             [dLIK,dlik,a,Pstar] = missing_observations_kalman_filter_d(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations, ...
                                                               Y, 1, size(Y,2), ...
@@ -295,39 +304,39 @@ switch DynareOptions.lik_init
         diffuse_periods = length(dlik);
         if isinf(dLIK)
             % Go to univariate diffuse filter if singularity problem.
-            kalman_algo = 4;
-            singularity_flag = 1;
+            singular_diffuse_filter
         end
     end
-    if (kalman_algo==4)
+    if singular_diffuse_filter || (kalman_algo==4)
         % Univariate Diffuse Kalman Filter
-        if singularity_flag
-            if isequal(H,0)
-                H = zeros(nobs,1);
-                mmm = mm;
+        if isequal(H,0)
+            H1 = zeros(nobs,1);
+            mmm = mm;
+        else
+            if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
+                H1 = diag(H);
+                mmm = mm; 
             else
-                if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
-                    H = diag(H);
-                    mmm = mm; 
-                else
-                    Z = [Z, eye(pp)];
-                    T = blkdiag(T,zeros(pp));
-                    Q = blkdiag(Q,H);
-                    R = blkdiag(R,eye(pp));
-                    Pstar = blkdiag(Pstar,H);
-                    Pinf  = blckdiag(Pinf,zeros(pp));
-                    H = zeros(nobs,1);
-                    mmm   = mm+pp;
-                end
+                Z = [Z, eye(pp)];
+                T = blkdiag(T,zeros(pp));
+                Q = blkdiag(Q,H);
+                R = blkdiag(R,eye(pp));
+                Pstar = blkdiag(Pstar,H);
+                Pinf  = blckdiag(Pinf,zeros(pp));
+                H1 = zeros(nobs,1);
+                mmm   = mm+pp;
             end
-            % no need to test again for correlation elements
-            singularity_flag = 0;
         end
-        [dLIK,dlik,a,Pstar] = univariate_kalman_filter_d(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations, ...
-                                                              Y, 1, size(Y,2), ...
-                                                              zeros(mmm,1), Pinf, Pstar, ...
-                                                              kalman_tol, riccati_tol, DynareOptions.presample, ...
-                                                              T,R,Q,H,Z,mmm,pp,rr);
+        % no need to test again for correlation elements
+        correlated_errors_have_been_checked = 1;
+        
+        [dLIK,dlik,a,Pstar] = univariate_kalman_filter_d(DynareDataset.missing.aindex,...
+                                                         DynareDataset.missing.number_of_observations,...
+                                                         DynareDataset.missing.no_more_missing_observations, ...
+                                                         Y, 1, size(Y,2), ...
+                                                         zeros(mmm,1), Pinf, Pstar, ...
+                                                         kalman_tol, riccati_tol, DynareOptions.presample, ...
+                                                         T,R,Q,H1,Z,mmm,pp,rr);
         diffuse_periods = length(dlik);
     end
   case 4% Start from the solution of the Riccati equation.
@@ -382,10 +391,10 @@ if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
     end
 end
 
-if ( singularity_flag || (kalman_algo==2) || (kalman_algo==4) )
+if (kalman_algo==2) || (kalman_algo==4)
     % Univariate Kalman Filter
     % resetting measurement error covariance matrix when necessary                                                           % 
-    if singularity_flag
+    if ~correlated_errors_have_been_checked
         if isequal(H,0)
             H = zeros(nobs,1);
             mmm = mm;

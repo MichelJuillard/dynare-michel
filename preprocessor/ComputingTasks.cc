@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2011 Dynare Team
+ * Copyright (C) 2003-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -38,7 +38,7 @@ SteadyStatement::SteadyStatement(const OptionsList &options_list_arg) :
 }
 
 void
-SteadyStatement::checkPass(ModFileStructure &mod_file_struct)
+SteadyStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.steady_present = true;
 }
@@ -63,7 +63,7 @@ CheckStatement::writeOutput(ostream &output, const string &basename) const
 }
 
 void
-CheckStatement::checkPass(ModFileStructure &mod_file_struct)
+CheckStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.check_present = true;
 }
@@ -74,7 +74,7 @@ ModelInfoStatement::ModelInfoStatement(const OptionsList &options_list_arg) :
 }
 
 void
-ModelInfoStatement::checkPass(ModFileStructure &mod_file_struct)
+ModelInfoStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   //mod_file_struct.model_info_present = true;
 }
@@ -92,7 +92,7 @@ SimulStatement::SimulStatement(const OptionsList &options_list_arg) :
 }
 
 void
-SimulStatement::checkPass(ModFileStructure &mod_file_struct)
+SimulStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.simul_present = true;
 }
@@ -112,7 +112,7 @@ StochSimulStatement::StochSimulStatement(const SymbolList &symbol_list_arg,
 }
 
 void
-StochSimulStatement::checkPass(ModFileStructure &mod_file_struct)
+StochSimulStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.stoch_simul_present = true;
 
@@ -173,7 +173,7 @@ RamseyPolicyStatement::RamseyPolicyStatement(const SymbolList &symbol_list_arg,
 }
 
 void
-RamseyPolicyStatement::checkPass(ModFileStructure &mod_file_struct)
+RamseyPolicyStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.ramsey_policy_present = true;
 
@@ -220,7 +220,7 @@ DiscretionaryPolicyStatement::DiscretionaryPolicyStatement(const SymbolList &sym
 }
 
 void
-DiscretionaryPolicyStatement::checkPass(ModFileStructure &mod_file_struct)
+DiscretionaryPolicyStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.discretionary_policy_present = true;
 
@@ -269,7 +269,7 @@ EstimationStatement::EstimationStatement(const SymbolList &symbol_list_arg,
 }
 
 void
-EstimationStatement::checkPass(ModFileStructure &mod_file_struct)
+EstimationStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.estimation_present = true;
 
@@ -325,26 +325,9 @@ EstimationStatement::checkPass(ModFileStructure &mod_file_struct)
   if (options_list.string_options.find("datafile") == options_list.string_options.end() &&
       !mod_file_struct.estimation_data_statement_present)
     {
-      cerr << "ERROR: The estimation statement requires a data file to be supplied "
-           << "either from the data statement or from the deprecated option datafile." << endl;
+      cerr << "ERROR: The estimation statement requires a data file to be supplied via the datafile option." << endl;
       exit(EXIT_FAILURE);
     }
-
-  if (options_list.string_options.find("datafile") != options_list.string_options.end())
-    cerr << "WARNING: The datafile option of estimation has been deprecated. "
-         << "Use the data command instead." << endl;
-
-  if (options_list.string_options.find("xls_sheet") != options_list.string_options.end())
-    cerr << "WARNING: The xls_sheet option of estimation has been deprecated. "
-         << "Use the data command instead." << endl;
-
-  if (options_list.string_options.find("xls_range") != options_list.string_options.end())
-    cerr << "WARNING: The xls_range option of estimation has been deprecated. "
-         << "Use the data command instead." << endl;
-
-  if (options_list.num_options.find("first_obs") != options_list.num_options.end())
-    cerr << "WARNING: The first_obs option of estimation has been deprecated. "
-         << "Use the data command instead." << endl;
 }
 
 void
@@ -361,7 +344,7 @@ DynareSensitivityStatement::DynareSensitivityStatement(const OptionsList &option
 }
 
 void
-DynareSensitivityStatement::checkPass(ModFileStructure &mod_file_struct)
+DynareSensitivityStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   OptionsList::num_options_t::const_iterator it = options_list.num_options.find("identification");
   if (it != options_list.num_options.end()
@@ -437,7 +420,7 @@ EstimatedParamsStatement::EstimatedParamsStatement(const vector<EstimationParams
 }
 
 void
-EstimatedParamsStatement::checkPass(ModFileStructure &mod_file_struct)
+EstimatedParamsStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   for (vector<EstimationParams>::const_iterator it = estim_params_list.begin();
        it != estim_params_list.end(); it++)
@@ -704,7 +687,7 @@ OsrParamsStatement::OsrParamsStatement(const SymbolList &symbol_list_arg) :
 }
 
 void
-OsrParamsStatement::checkPass(ModFileStructure &mod_file_struct)
+OsrParamsStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.osr_params_present = true;
 }
@@ -723,7 +706,7 @@ OsrStatement::OsrStatement(const SymbolList &symbol_list_arg,
 }
 
 void
-OsrStatement::checkPass(ModFileStructure &mod_file_struct)
+OsrStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.osr_present = true;
 
@@ -762,7 +745,7 @@ OptimWeightsStatement::OptimWeightsStatement(const var_weights_t &var_weights_ar
 }
 
 void
-OptimWeightsStatement::checkPass(ModFileStructure &mod_file_struct)
+OptimWeightsStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.optim_weights_present = true;
 }
@@ -868,7 +851,7 @@ PlannerObjectiveStatement::~PlannerObjectiveStatement()
 }
 
 void
-PlannerObjectiveStatement::checkPass(ModFileStructure &mod_file_struct)
+PlannerObjectiveStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   assert(model_tree->equation_number() == 1);
   mod_file_struct.planner_objective_present = true;
@@ -899,7 +882,7 @@ BVARDensityStatement::BVARDensityStatement(int maxnlags_arg, const OptionsList &
 }
 
 void
-BVARDensityStatement::checkPass(ModFileStructure &mod_file_struct)
+BVARDensityStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.bvar_present = true;
 }
@@ -918,7 +901,7 @@ BVARForecastStatement::BVARForecastStatement(int nlags_arg, const OptionsList &o
 }
 
 void
-BVARForecastStatement::checkPass(ModFileStructure &mod_file_struct)
+BVARForecastStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.bvar_present = true;
 }
@@ -936,7 +919,7 @@ SBVARStatement::SBVARStatement(const OptionsList &options_list_arg) :
 }
 
 void
-SBVARStatement::checkPass(ModFileStructure &mod_file_struct)
+SBVARStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.bvar_present = true;
 }
@@ -954,7 +937,7 @@ MSSBVAREstimationStatement::MSSBVAREstimationStatement(const OptionsList &option
 }
 
 void
-MSSBVAREstimationStatement::checkPass(ModFileStructure &mod_file_struct)
+MSSBVAREstimationStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.bvar_present = true;
 }
@@ -973,7 +956,7 @@ MSSBVARSimulationStatement::MSSBVARSimulationStatement(const OptionsList &option
 }
 
 void
-MSSBVARSimulationStatement::checkPass(ModFileStructure &mod_file_struct)
+MSSBVARSimulationStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.bvar_present = true;
 }
@@ -1001,7 +984,7 @@ MSSBVARComputeMDDStatement::MSSBVARComputeMDDStatement(const OptionsList &option
 }
 
 void
-MSSBVARComputeMDDStatement::checkPass(ModFileStructure &mod_file_struct)
+MSSBVARComputeMDDStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.bvar_present = true;
 }
@@ -1020,7 +1003,7 @@ MSSBVARComputeProbabilitiesStatement::MSSBVARComputeProbabilitiesStatement(const
 }
 
 void
-MSSBVARComputeProbabilitiesStatement::checkPass(ModFileStructure &mod_file_struct)
+MSSBVARComputeProbabilitiesStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.bvar_present = true;
 
@@ -1049,9 +1032,34 @@ MSSBVARIrfStatement::MSSBVARIrfStatement(const SymbolList &symbol_list_arg,
 }
 
 void
-MSSBVARIrfStatement::checkPass(ModFileStructure &mod_file_struct)
+MSSBVARIrfStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.bvar_present = true;
+
+  bool regime_present = false;
+  bool regimes_present = false;
+  bool filtered_probabilities_present = false;
+
+  OptionsList::num_options_t::const_iterator it = options_list.num_options.find("ms.regimes");
+  if (it != options_list.num_options.end())
+    regimes_present = true;
+
+  it = options_list.num_options.find("ms.regime");
+  if (it != options_list.num_options.end())
+    regime_present = true;
+
+  it = options_list.num_options.find("ms.filtered_probabilities");
+  if (it != options_list.num_options.end())
+    filtered_probabilities_present = true;
+
+  if ((filtered_probabilities_present && regime_present) ||
+      (filtered_probabilities_present && regimes_present) ||
+      (regimes_present && regime_present))
+      {
+        cerr << "ERROR: You may only pass one of regime, regimes and "
+             << "filtered_probabilities to ms_irf" << endl;
+        exit(EXIT_FAILURE);
+      }
 }
 
 void
@@ -1069,9 +1077,16 @@ MSSBVARForecastStatement::MSSBVARForecastStatement(const OptionsList &options_li
 }
 
 void
-MSSBVARForecastStatement::checkPass(ModFileStructure &mod_file_struct)
+MSSBVARForecastStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.bvar_present = true;
+
+  if (options_list.num_options.find("ms.regimes") != options_list.num_options.end())
+    if (options_list.num_options.find("ms.regime") != options_list.num_options.end())
+      {
+        cerr << "ERROR: You may only pass one of regime and regimes to ms_forecast" << endl;
+        exit(EXIT_FAILURE);
+      }
 }
 
 void
@@ -1088,9 +1103,34 @@ MSSBVARVarianceDecompositionStatement::MSSBVARVarianceDecompositionStatement(con
 }
 
 void
-MSSBVARVarianceDecompositionStatement::checkPass(ModFileStructure &mod_file_struct)
+MSSBVARVarianceDecompositionStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.bvar_present = true;
+
+  bool regime_present = false;
+  bool regimes_present = false;
+  bool filtered_probabilities_present = false;
+
+  OptionsList::num_options_t::const_iterator it = options_list.num_options.find("ms.regimes");
+  if (it != options_list.num_options.end())
+    regimes_present = true;
+
+  it = options_list.num_options.find("ms.regime");
+  if (it != options_list.num_options.end())
+    regime_present = true;
+
+  it = options_list.num_options.find("ms.filtered_probabilities");
+  if (it != options_list.num_options.end())
+    filtered_probabilities_present = true;
+
+  if ((filtered_probabilities_present && regime_present) ||
+      (filtered_probabilities_present && regimes_present) ||
+      (regimes_present && regime_present))
+      {
+        cerr << "ERROR: You may only pass one of regime, regimes and "
+             << "filtered_probabilities to ms_variance_decomposition" << endl;
+        exit(EXIT_FAILURE);
+      }
 }
 
 void
@@ -1113,7 +1153,7 @@ IdentificationStatement::IdentificationStatement(const OptionsList &options_list
 }
 
 void
-IdentificationStatement::checkPass(ModFileStructure &mod_file_struct)
+IdentificationStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.identification_present = true;
 }
@@ -1215,7 +1255,7 @@ SvarIdentificationStatement::getMaxLag() const
 }
 
 void
-SvarIdentificationStatement::checkPass(ModFileStructure &mod_file_struct)
+SvarIdentificationStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   if (!mod_file_struct.svar_identification_present)
     mod_file_struct.svar_identification_present = true;
@@ -1236,12 +1276,7 @@ SvarIdentificationStatement::checkPass(ModFileStructure &mod_file_struct)
 void
 SvarIdentificationStatement::writeOutput(ostream &output, const string &basename) const
 {
-  if (upper_cholesky_present && lower_cholesky_present)
-    {
-      cerr << "SvarIdentificationStatement::writeOutput() Should not arrive here (1). Please report this to the Dynare Team." << endl;
-      exit(EXIT_FAILURE);
-    }
-
+  assert(!(upper_cholesky_present && lower_cholesky_present));
   output << "%" << endl
          << "% SVAR IDENTIFICATION" << endl
          << "%" << endl;
@@ -1280,69 +1315,24 @@ SvarIdentificationStatement::writeOutput(ostream &output, const string &basename
       output << "options_.ms.Qi = cell(" << n << ",1);" << endl;
       output << "options_.ms.Ri = cell(" << n << ",1);" << endl;
 
-      // vector<int> rows(n);
-      // fill(rows.begin(),rows.end(),1);
-
       for (svar_identification_restrictions_t::const_iterator it = restrictions.begin(); it != restrictions.end(); it++)
         {
+          assert(it->lag >= 0);
 	  if (it->lag == 0)
-	    {
-	      output << "options_.ms.Qi{" << it->equation << "}(" << it->restriction_nbr << ", " << it->variable + 1 << ") = ";
-	      it->value->writeOutput(output);
-	      output << ";" << endl;
-	    }
-	  else if (it->lag > 0)
+            output << "options_.ms.Qi{" << it->equation << "}(" << it->restriction_nbr << ", " << it->variable + 1 << ") = ";
+	  else
 	    {
 	      int col = (it->lag-1)*n+it->variable+1;
 	      if (col > k)
-                     {
-                       cerr << "ERROR: lag =" << it->lag << ", num endog vars = " << n << "current endog var index = " << it->variable << ". Index "
-                            << "out of bounds. If the above does not represent a logical error, please report this to the Dyanre Team." << endl;
-                     }
+                {
+                  cerr << "ERROR: lag =" << it->lag << ", num endog vars = " << n << "current endog var index = " << it->variable << ". Index "
+                       << "out of bounds. If the above does not represent a logical error, please report this to the Dyanre Team." << endl;
+                  exit(EXIT_FAILURE);
+                }
 	      output << "options_.ms.Ri{" << it->equation << "}(" << it->restriction_nbr << ", " << col << ") = ";
-	      it->value->writeOutput(output);
-	      output << ";" << endl;
 	    }
-	  else
-	    {
-	      cerr << "SvarIdentificationStatement::writeOutput() Should not arrive here (3). Please report this to the Dynare Team." << endl;
-	      exit(EXIT_FAILURE);
-	    }
- 
-          // for (unsigned int h = 0; h < it->second.size(); h++)
-          //   {
-          //     int j = it->second.at(h) + 1;
-          //     int i = it->first.second;
-	  //     int lag = it->first.first;
-          //     if (j < 1 || j > n || (int) h+1 > n || i < 1)
-          //       {
-          //         cerr << "SvarIdentificationStatement::writeOutput() Should not arrive here (2). Please report this to the Dynare Team." << endl;
-          //         exit(EXIT_FAILURE);
-          //       }
-          //     if (i > n)
-          //       {
-          //         cerr << "ERROR: equation number " << i << " is greater than the number of endogenous variables, " << n << "." << endl;
-          //         exit(EXIT_FAILURE);
-          //       }
-
-          //     if (lag == 0)
-          //       output << "options_.ms.Qi{" << i << "}(" << h+1 << ", " << j << ") = 1;" << endl;
-          //     else if (lag > 0)
-          //       {
-          //         if ((lag-1)*n+j > k)
-          //           {
-          //             cerr << "ERROR: lag =" << lag << ", num endog vars = " << n << "current endog var index = " << j << ". Index "
-          //                  << "out of bounds. If the above does not represent a logical error, please report this to the Dyanre Team." << endl;
-          //           }
-          //         output << "options_.ms.Ri{" << i << "}(" << rows[i-1] << ", " << (lag-1)*n+j << ") = 1;" << endl;
-	  // 	  rows[i-1]++;
-          //       }
-          //     else
-          //       {
-          //         cerr << "SvarIdentificationStatement::writeOutput() Should not arrive here (3). Please report this to the Dynare Team." << endl;
-          //         exit(EXIT_FAILURE);
-          //       }
-          //   }
+          it->value->writeOutput(output);
+          output << ";" << endl;
         }
     }
 }
@@ -1356,11 +1346,7 @@ MarkovSwitchingStatement::MarkovSwitchingStatement(const OptionsList &options_li
       using namespace boost;
       OptionsList::num_options_t::const_iterator it_num_regimes =
         options_list.num_options.find("ms.number_of_regimes");
-      if (it_num_regimes ==  options_list.num_options.end())
-        {
-          cerr << "ERROR: should not arrive here: MarkovSwitchingStatement constructor" << endl;
-          exit(EXIT_FAILURE);
-        }
+      assert(it_num_regimes !=  options_list.num_options.end());
       int num_regimes = lexical_cast< int >(it_num_regimes->second);
 
       vector<string> tokenizedRestrictions;
@@ -1425,14 +1411,25 @@ MarkovSwitchingStatement::MarkovSwitchingStatement(const OptionsList &options_li
 }
 
 void
-MarkovSwitchingStatement::checkPass(ModFileStructure &mod_file_struct)
+MarkovSwitchingStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
+  OptionsList::num_options_t::const_iterator itChain = options_list.num_options.find("ms.chain");
+  assert(itChain != options_list.num_options.end());
+  int chainNumber = atoi(itChain->second.c_str());
+  if (++mod_file_struct.last_markov_switching_chain != chainNumber)
+    {
+      cerr << "ERROR: The markov_switching chain option takes consecutive integers "
+           << "beginning at 1." << endl;
+      exit(EXIT_FAILURE);
+    }
+
   OptionsList::num_options_t::const_iterator it_num = options_list.num_options.find("ms.restrictions");
   if (it_num != options_list.num_options.end())
     {
       using namespace boost;
       OptionsList::num_options_t::const_iterator it_num_regimes =
         options_list.num_options.find("ms.number_of_regimes");
+      assert(it_num_regimes != options_list.num_options.end());
       int num_regimes = lexical_cast< int >(it_num_regimes->second);
       vector<double> col_trans_prob_sum (num_regimes, 0);
       vector<double> row_trans_prob_sum (num_regimes, 0);
@@ -1499,39 +1496,23 @@ MarkovSwitchingStatement::writeOutput(ostream &output, const string &basename) c
   map<pair<int, int>, double >::const_iterator itR;
 
   itChain = options_list.num_options.find("ms.chain");
-  if (itChain == options_list.num_options.end())
-    {
-      cerr << "MarkovSwitchingStatement::writeOutput() Should not arrive here (1). "
-           << "Please report this to the Dynare Team." << endl;
-      exit(EXIT_FAILURE);
-    }
+  assert(itChain != options_list.num_options.end());
 
   itDuration = options_list.num_options.find("ms.duration");
-  if (itDuration == options_list.num_options.end())
-    {
-      cerr << "MarkovSwitchingStatement::writeOutput() Should not arrive here (2). "
-           << "Please report this to the Dynare Team." << endl;
-      exit(EXIT_FAILURE);
-    }
-  else if (atof(itDuration->second.c_str()) || infStr.compare(itDuration->second) == 0)
+  assert(itDuration != options_list.num_options.end());
+  if (atof(itDuration->second.c_str()) || infStr.compare(itDuration->second) == 0)
     isDurationAVec = false;
   output << "options_.ms.duration = " << itDuration->second << ";" << endl;
 
   itNOR = options_list.num_options.find("ms.number_of_regimes");
-  if (itNOR != options_list.num_options.end())
-    for (int i = 0; i < atoi(itNOR->second.c_str()); i++)
-      {
-        output << "options_.ms.ms_chain(" << itChain->second << ").regime("
-               << i+1 << ").duration = options_.ms.duration";
-        if (isDurationAVec)
-          output << "(" << i+1 << ")";
-        output << ";" << endl;
-      }
-  else
+  assert(itNOR != options_list.num_options.end());
+  for (int i = 0; i < atoi(itNOR->second.c_str()); i++)
     {
-      cerr << "MarkovSwitchingStatement::writeOutput() Should not arrive here (3). "
-           << "Please report this to the Dynare Team." << endl;
-      exit(EXIT_FAILURE);
+      output << "options_.ms.ms_chain(" << itChain->second << ").regime("
+             << i+1 << ").duration = options_.ms.duration";
+      if (isDurationAVec)
+        output << "(" << i+1 << ")";
+      output << ";" << endl;
     }
 
   int restrictions_index = 0;
@@ -1547,45 +1528,49 @@ SvarStatement::SvarStatement(const OptionsList &options_list_arg) :
 }
 
 void
+SvarStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
+{
+  OptionsList::num_options_t::const_iterator it0, it1, it2;
+  it0 = options_list.string_options.find("ms.coefficients");
+  it1 = options_list.string_options.find("ms.variances");
+  it2 = options_list.string_options.find("ms.constants");
+  assert((it0 != options_list.string_options.end()
+          && it1 == options_list.string_options.end()
+          && it2 == options_list.string_options.end()) ||
+         (it0 == options_list.string_options.end()
+          && it1 != options_list.string_options.end()
+          && it2 == options_list.string_options.end()) ||
+         (it0 == options_list.string_options.end()
+          && it1 == options_list.string_options.end()
+          && it2 != options_list.string_options.end()));
+}
+
+void
 SvarStatement::writeOutput(ostream &output, const string &basename) const
 {
   OptionsList::num_options_t::const_iterator it0, it1, it2;
   OptionsList::vec_int_options_t::const_iterator itv;
 
   it0 = options_list.num_options.find("ms.chain");
-  if (it0 != options_list.num_options.end())
-    output << "options_.ms.ms_chain(" << it0->second << ")";
-  else
-    {
-      cerr << "SvarStatement::writeOutput() Should not arrive here (1). Please report this to the Dynare Team." << endl;
-      exit(EXIT_FAILURE);
-    }
+  assert(it0 != options_list.num_options.end());
+  output << "options_.ms.ms_chain(" << it0->second << ")";
 
   it0 = options_list.string_options.find("ms.coefficients");
   it1 = options_list.string_options.find("ms.variances");
   it2 = options_list.string_options.find("ms.constants");
-  if (it0 != options_list.string_options.end()
-      && it1 == options_list.string_options.end()
-      && it2 == options_list.string_options.end())
+
+  if (it0 != options_list.string_options.end())
     output << "." << it0->second;
-  else if (it0 == options_list.string_options.end()
-           && it1 != options_list.string_options.end()
-           && it2 == options_list.string_options.end())
+  else if (it1 != options_list.string_options.end())
     output << "." << it1->second;
-  else if (it0 == options_list.string_options.end()
-           && it1 == options_list.string_options.end()
-           && it2 != options_list.string_options.end())
-    output << "." << it2->second;
   else
-    {
-      cerr << "SvarStatement::writeOutput() Should not arrive here (2). Please report this to the Dynare Team." << endl;
-      exit(EXIT_FAILURE);
-    }
+    output << "." << it2->second;
 
   itv = options_list.vector_int_options.find("ms.equations");
   output << ".equations = ";
   if (itv != options_list.vector_int_options.end())
     {
+      assert(itv->second.size() >= 1);
       if (itv->second.size() > 1)
         {
           output << "[";
@@ -1594,13 +1579,8 @@ SvarStatement::writeOutput(ostream &output, const string &basename) const
             output << *viit << ";";
           output << "];" << endl;
         }
-      else if (itv->second.size() == 1)
-        output << itv->second.front() << ";" << endl;
       else
-        {
-          cerr << "SvarStatement::writeOutput() Should not arrive here (3). Please report this to the Dynare Team." << endl;
-          exit(EXIT_FAILURE);
-        }
+        output << itv->second.front() << ";" << endl;
     }
   else
     output << "'ALL';" << endl;
@@ -1623,7 +1603,7 @@ EstimationDataStatement::EstimationDataStatement(const OptionsList &options_list
 }
 
 void
-EstimationDataStatement::checkPass(ModFileStructure &mod_file_struct)
+EstimationDataStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   mod_file_struct.estimation_data_statement_present = true;
 
@@ -1667,22 +1647,31 @@ BasicPriorStatement::BasicPriorStatement(const string &name_arg,
 }
 
 void
-BasicPriorStatement::checkPass(ModFileStructure &mod_file_struct)
+BasicPriorStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   if (prior_shape == eNoShape)
     {
       cerr << "ERROR: You must pass the shape option to the prior statement." << endl;
       exit(EXIT_FAILURE);
     }
-  if (options_list.num_options.find("date1") != options_list.num_options.end() ||
-      options_list.num_options.find("date2") != options_list.num_options.end())
-    if (options_list.num_options.find("date1") == options_list.num_options.end() ||
-        options_list.num_options.find("date2") == options_list.num_options.end())
-      {
-        cerr << "ERROR: PriorStatement::checkPass(1). Should not arrive here. "
-             << "Please inform Dynare Team." << endl;
-        exit(EXIT_FAILURE);
-      }
+
+  assert((options_list.num_options.find("date1") != options_list.num_options.end() &&
+          options_list.num_options.find("date2") != options_list.num_options.end()) ||
+         (options_list.num_options.find("date1") == options_list.num_options.end() &&
+          options_list.num_options.find("date2") == options_list.num_options.end()));
+
+  OptionsList::num_options_t::const_iterator it_num = options_list.num_options.find("domain");
+  if (it_num != options_list.num_options.end())
+    {
+      using namespace boost;
+      vector<string> tokenizedDomain;
+      split(tokenizedDomain, it_num->second, is_any_of("[ ]"), token_compress_on);
+      if (tokenizedDomain.size() != 4)
+        {
+          cerr << "ERROR: You must pass exactly two values to the domain option." << endl;
+          exit(EXIT_FAILURE);
+        }
+    }
 }
 
 void
@@ -1744,9 +1733,9 @@ PriorStatement::PriorStatement(const string &name_arg,
 }
 
 void
-PriorStatement::checkPass(ModFileStructure &mod_file_struct)
+PriorStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
-  BasicPriorStatement::checkPass(mod_file_struct);
+  BasicPriorStatement::checkPass(mod_file_struct, warnings);
   if (!mod_file_struct.prior_statement_present)
     first_statement_encountered = true;
   mod_file_struct.prior_statement_present = true;
@@ -1755,7 +1744,7 @@ PriorStatement::checkPass(ModFileStructure &mod_file_struct)
 void
 PriorStatement::writeOutput(ostream &output, const string &basename) const
 {
-  string lhs_field = ".prior";
+  string lhs_field = ".parameters.prior";
 
   writePriorIndex(output, lhs_field);
   output << "estimation_info" << lhs_field << "_index(prior_indx) = {'" << name << "'};" << endl
@@ -1784,9 +1773,9 @@ StdPriorStatement::StdPriorStatement(const string &name_arg,
 }
 
 void
-StdPriorStatement::checkPass(ModFileStructure &mod_file_struct)
+StdPriorStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
-  BasicPriorStatement::checkPass(mod_file_struct);
+  BasicPriorStatement::checkPass(mod_file_struct, warnings);
   if (!mod_file_struct.std_prior_statement_present)
     first_statement_encountered = true;
   mod_file_struct.std_prior_statement_present = true;
@@ -1826,9 +1815,9 @@ CorrPriorStatement::CorrPriorStatement(const string &name_arg1, const string &na
 }
 
 void
-CorrPriorStatement::checkPass(ModFileStructure &mod_file_struct)
+CorrPriorStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
-  BasicPriorStatement::checkPass(mod_file_struct);
+  BasicPriorStatement::checkPass(mod_file_struct, warnings);
   if (symbol_table.getType(name) != symbol_table.getType(name1))
     {
       cerr << "ERROR: In the corr(A,B).prior statement, A and B must be of the same type. "
@@ -1877,17 +1866,12 @@ BasicOptionsStatement::BasicOptionsStatement(const string &name_arg,
 }
 
 void
-BasicOptionsStatement::checkPass(ModFileStructure &mod_file_struct)
+BasicOptionsStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
-  if (options_list.num_options.find("date1") != options_list.num_options.end() ||
-      options_list.num_options.find("date2") != options_list.num_options.end())
-    if (options_list.num_options.find("date1") == options_list.num_options.end() ||
-        options_list.num_options.find("date2") == options_list.num_options.end())
-      {
-        cerr << "ERROR: OptionsStatement::checkPass(1). Should not arrive here. "
-             << "Please inform Dynare Team." << endl;
-        exit(EXIT_FAILURE);
-      }
+  assert((options_list.num_options.find("date1") != options_list.num_options.end() &&
+          options_list.num_options.find("date2") != options_list.num_options.end()) ||
+         (options_list.num_options.find("date1") == options_list.num_options.end() &&
+          options_list.num_options.find("date2") == options_list.num_options.end()));
 }
 
 void
@@ -1929,9 +1913,9 @@ OptionsStatement::OptionsStatement(const string &name_arg,
 }
 
 void
-OptionsStatement::checkPass(ModFileStructure &mod_file_struct)
+OptionsStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
-  BasicOptionsStatement::checkPass(mod_file_struct);
+  BasicOptionsStatement::checkPass(mod_file_struct, warnings);
   if (!mod_file_struct.options_statement_present)
     first_statement_encountered = true;
   mod_file_struct.options_statement_present = true;
@@ -1940,7 +1924,7 @@ OptionsStatement::checkPass(ModFileStructure &mod_file_struct)
 void
 OptionsStatement::writeOutput(ostream &output, const string &basename) const
 {
-  string lhs_field = ".options";
+  string lhs_field = ".parameters.options";
 
   writeOptionsIndex(output, lhs_field);
   output << "estimation_info" << lhs_field <<"_index(options_indx) = {'" << name << "'};" << endl
@@ -1962,9 +1946,9 @@ StdOptionsStatement::StdOptionsStatement(const string &name_arg,
 }
 
 void
-StdOptionsStatement::checkPass(ModFileStructure &mod_file_struct)
+StdOptionsStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
-  BasicOptionsStatement::checkPass(mod_file_struct);
+  BasicOptionsStatement::checkPass(mod_file_struct, warnings);
   if (!mod_file_struct.std_options_statement_present)
     first_statement_encountered = true;
   mod_file_struct.std_options_statement_present = true;
@@ -1998,7 +1982,7 @@ CorrOptionsStatement::CorrOptionsStatement(const string &name_arg1, const string
 }
 
 void
-CorrOptionsStatement::checkPass(ModFileStructure &mod_file_struct)
+CorrOptionsStatement::checkPass(ModFileStructure &mod_file_struct, WarningConsolidation &warnings)
 {
   if (symbol_table.getType(name) != symbol_table.getType(name1))
     {

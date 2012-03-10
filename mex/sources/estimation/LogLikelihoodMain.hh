@@ -50,14 +50,29 @@ public:
    * Q and H KF matrices of shock and measurement error varinaces and covariances
    * KF logLikelihood calculation start period.
    */
-  double compute(Matrix &steadyState, const Vector &estParams, Vector &deepParams, const MatrixConstView &data,
-                 Matrix &Q, Matrix &H, size_t presampleStart, int &info); // for calls from estimation and to set Steady State
 
-  Vector &
-  getVll()
+  template <class VEC1, class VEC2>
+  double compute(VEC1 &steadyState, VEC2 &estParams, VectorView &deepParams, const MatrixConstView &data, 
+		 MatrixView &Q, Matrix &H, size_t start, int &info)
   {
-    return vll;
+    double logLikelihood = 0;
+    for (size_t i = 0; i < estSubsamples.size(); ++i)
+      {
+	VectorView vSteadyState (steadyState,0,steadyState.getSize());
+
+	MatrixConstView dataView(data, 0, estSubsamples[i].startPeriod,
+				 data.getRows(), estSubsamples[i].endPeriod-estSubsamples[i].startPeriod+1);
+	MatrixView detrendedDataView(detrendedData, 0, estSubsamples[i].startPeriod,
+				     data.getRows(), estSubsamples[i].endPeriod-estSubsamples[i].startPeriod+1);
+
+	VectorView vllView(vll, estSubsamples[i].startPeriod, estSubsamples[i].endPeriod-estSubsamples[i].startPeriod+1);
+	logLikelihood += logLikelihoodSubSample.compute(vSteadyState, dataView, estParams, deepParams,
+							Q, H, vllView, detrendedDataView, info, start, i);
+      }
+    return logLikelihood;
   };
+
+  Vector &getVll() { return vll; };
 };
 
 #endif // !defined(E126AEF5_AC28_400a_821A_3BCFD1BC4C22__INCLUDED_)

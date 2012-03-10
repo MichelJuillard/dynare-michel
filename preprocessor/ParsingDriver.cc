@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2011 Dynare Team
+ * Copyright (C) 2003-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -27,6 +27,7 @@
 #include "ParsingDriver.hh"
 #include "Statement.hh"
 #include "ExprNode.hh"
+#include "WarningConsolidation.hh"
 
 bool
 ParsingDriver::symbol_exists_and_is_not_modfile_local_or_external_function(const char *s)
@@ -117,7 +118,7 @@ ParsingDriver::error(const string &m)
 void
 ParsingDriver::warning(const string &m)
 {
-  cerr << "WARNING: " << location << ": " << m << endl;
+  mod_file->warnings << "WARNING: " << location << ": " << m << endl;
 }
 
 void
@@ -363,7 +364,7 @@ ParsingDriver::end_nonstationary_var(expr_t deflator)
 void
 ParsingDriver::periods(string *periods)
 {
-  warning("periods: this command is now deprecated and may be removed in a future version of Dynare. Please use the \"periods\" option of the \"simul\" command instead.");
+  warning("periods: this command is now deprecated and may be removed in a future version of Dynare. Please use the ''periods'' option of the ''simul'' command instead.");
 
   int periods_val = atoi(periods->c_str());
   mod_file->addStatement(new PeriodsStatement(periods_val));
@@ -973,7 +974,7 @@ ParsingDriver::add_constants_exclusion()
 void
 ParsingDriver::do_sigma_e()
 {
-  warning("Sigma_e: this command is now deprecated and may be removed in a future version of Dynare. Please use the \"shocks\" command instead.");
+  warning("Sigma_e: this command is now deprecated and may be removed in a future version of Dynare. Please use the ''shocks'' command instead.");
 
   try
     {
@@ -1212,7 +1213,7 @@ void
 ParsingDriver::set_unit_root_vars()
 {
   mod_file->addStatement(new UnitRootVarsStatement());
-  warning("'unit_root_vars' is now obsolete; use option 'diffuse_filter' of 'estimation' instead");
+  warning("''unit_root_vars'' is now obsolete; use the ''diffuse_filter'' option of ''estimation'' instead");
   symbol_list.clear();
 }
 
@@ -1357,7 +1358,7 @@ void
 ParsingDriver::set_std_options(string *name)
 {
   check_symbol_is_endogenous_or_exogenous(name);
-  //  mod_file->addStatement(new StdOptionsStatement(*name, options_list, mod_file->symbol_table));
+  mod_file->addStatement(new StdOptionsStatement(*name, options_list, mod_file->symbol_table));
   options_list.clear();
   delete name;
 }
@@ -1381,7 +1382,7 @@ ParsingDriver::set_corr_options(string *name1, string *name2)
 {
   check_symbol_is_endogenous_or_exogenous(name1);
   check_symbol_is_endogenous_or_exogenous(name2);
-  //  mod_file->addStatement(new CorrOptionsStatement(*name1, *name2, options_list, mod_file->symbol_table));
+  mod_file->addStatement(new CorrOptionsStatement(*name1, *name2, options_list, mod_file->symbol_table));
   options_list.clear();
   delete name1;
   delete name2;
@@ -1541,7 +1542,7 @@ ParsingDriver::run_dynasave(string *filename)
 void
 ParsingDriver::run_load_params_and_steady_state(string *filename)
 {
-  mod_file->addStatement(new LoadParamsAndSteadyStateStatement(*filename, mod_file->symbol_table));
+  mod_file->addStatement(new LoadParamsAndSteadyStateStatement(*filename, mod_file->symbol_table, mod_file->warnings));
   delete filename;
 }
 
@@ -2263,7 +2264,7 @@ ParsingDriver::add_model_var_or_external_function(string *function_name, bool in
   else
     { //First time encountering this external function i.e., not previously declared or encountered
       if (in_model_block)
-        error("To use an external function within the model block, you must first declare it via the external_function() statement.");
+        error("To use an external function (" + *function_name + ") within the model block, you must first declare it via the external_function() statement.");
 
       declare_symbol(function_name, eExternalFunction, NULL);
       current_external_function_options.nargs = stack_external_function_args.top().size();

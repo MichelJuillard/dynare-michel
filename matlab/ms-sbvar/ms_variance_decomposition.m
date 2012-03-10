@@ -34,46 +34,97 @@ function [options_, oo_]=ms_variance_decomposition(M_, options_, oo_)
 disp('MS-SBVAR Variance Decomposition');
 options_ = set_file_tags(options_);
 [options_, oo_] = set_ms_estimation_file(options_.ms.file_tag, options_, oo_);
-options_ = set_ms_simulation_file(options_);
-clean_files_for_second_type_of_mex(M_, options_, 'variance_decomposition')
+clean_ms_variance_decomposition_files(options_.ms.output_file_tag);
 vddir = [options_.ms.output_file_tag filesep 'Variance_Decomposition'];
 create_dir(vddir);
 
-% NOTICE THAT VARIANCE DECOMPOSITION DEFAULTS TO USING THE MEAN, NOT MEDIAN OR BANDED
+% setup command line options
+opt = ['-variance_decomposition -seed ' num2str(options_.DynareRandomStreams.seed)];
+opt = [opt ' -do ' vddir];
+opt = [opt ' -ft ' options_.ms.file_tag];
+opt = [opt ' -fto ' options_.ms.output_file_tag];
+opt = [opt ' -horizon ' num2str(options_.ms.horizon)];
+opt = [opt ' -thin ' num2str(options_.ms.thinning_factor)];
 
-opt = {
-    {'file_tag', options_.ms.file_tag}, ...
-    {'seed', options_.DynareRandomStreams.seed}, ...
-    {'horizon', options_.ms.horizon}, ...
-    {'filtered', options_.ms.filtered_probabilities}, ...
-    {'error_bands', options_.ms.error_bands}, ...
-    {'percentiles', options_.ms.percentiles}, ...
-    {'thin', options_.ms.thinning_factor}, ...
-    {'mean'} ...
-    };
-
-if options_.ms.median
-    opt = [opt(:)' {{'median'}}];
+if options_.ms.regimes
+    opt = [opt ' -regimes'];
+elseif options_.ms.regime
+    % regime-1 since regime is 0-indexed in C but 1-indexed in Matlab
+    opt = [opt ' -regime ' num2str(options_.ms.regime-1)];
+elseif options_.ms.filtered_probabilities
+    opt = [opt ' -filtered'];
 end
 
-[err, vd] = mex_ms_variance_decomposition([opt(:)', {{'free_parameters',oo_.ms.maxparams}, ...
-    {'shocks_per_parameter', options_.ms.shock_draws}}]);
-mexErrCheck('mex_ms_variance_decomposition ergodic ', err);
-plot_ms_variance_decomposition(M_,options_,vd, 'Ergodic Variance Decomposition',options_.graph_save_formats,options_.TeX);
+if options_.ms.parameter_uncertainty
+    options_ = set_ms_simulation_file(options_);
+    opt = [opt ' -parameter_uncertainty'];
+    opt = [opt ' -shocks_per_parameter ' num2str(options_.ms.shocks_per_parameter)];
+else
+    opt = [opt ' -shocks_per_parameter ' num2str(options_.ms.shock_draws)];
+end
 
-[err, regime_vd] = mex_ms_variance_decomposition([opt(:)', {{'free_parameters',oo_.ms.maxparams}, ...
-    {'shocks_per_parameter', options_.ms.shock_draws}, {'regimes'}}]);
-mexErrCheck('mex_ms_variance_decomposition ergodic regimes', err);
-save([vddir filesep 'ergodic_vd.mat'], 'vd', 'regime_vd');
+percentiles_size = 1;
+outfile = [vddir filesep 'var_decomp_mean_'];
+if options_.ms.error_bands
+    % error_bands / percentiles used differently by
+    % Dan's variance decomposition code
+    % no_error_bands => mean is computed
+    percentiles_size = size(options_.ms.percentiles,2);
+    opt = [opt ' -percentiles ' num2str(percentiles_size)];
+    for i=1:size(options_.ms.percentiles,2)
+        opt = [opt ' ' num2str(options_.ms.percentiles(i))];
+    end
+    outfile = [vddir filesep 'var_decomp_percentiles_'];
+end
 
-if exist(options_.ms.mh_file,'file') > 0
-    [err, vd] = mex_ms_variance_decomposition([opt(:)', {{'simulation_file',options_.ms.mh_file}, ...
-        {'shocks_per_parameter', options_.ms.shocks_per_parameter}, {'parameter_uncertainty'}}]);
-    mexErrCheck('mex_ms_variance_decomposition bayesian ', err);
+% variance_decomposition
+[err] = ms_sbvar_command_line(opt);
+mexErrCheck('ms_variance_decomposition',err);
 
-    [err, regime_vd] = mex_ms_variance_decomposition([opt(:)', {{'simulation_file',options_.ms.mh_file}, ...
-        {'shocks_per_parameter', options_.ms.shocks_per_parameter}, {'parameter_uncertainty'}, {'regimes'}}]);
-    mexErrCheck('mex_ms_variance_decomposition bayesian regimes ', err);
-    save([vddir filesep 'bayesian_vd.mat'], 'vd', 'regime_vd');
+if options_.ms.regime || options_.ms.regimes
+    outfile = [outfile 'regime_'];
+    if options_.ms.regime
+        outfile = [outfile num2str(options_.ms.regime-1) ...
+            '_' options_.ms.output_file_tag '.out'];
+    end
+elseif options_.ms.filtered_probabilities
+    outfile = [outfile 'filtered_' options_.ms.output_file_tag '.out'];
+else
+    outfile = [outfile 'ergodic_' options_.ms.output_file_tag '.out'];
+end
+
+% Create plots
+if options_.ms.regimes
+    n_chains = length(options_.ms.ms_chain);
+    n_regimes=1;
+    for i_chain=1:n_chains
+        n_regimes = n_regimes*length(options_.ms.ms_chain(i_chain).regime);
+    end
+    for regime_i=1:n_regimes
+        vd_title = ['Variance Decomposition, Regime ' num2str(regime_i)];
+        vd_data = load([outfile num2str(regime_i-1) '_' ...
+            options_.ms.output_file_tag '.out'], '-ascii');
+        vd_data = reshape_ascii_variance_decomposition_data( ...
+            M_.endo_nbr, percentiles_size, options_.ms.horizon, vd_data);
+        save([vddir filesep 'variance_decomposition_regime_' num2str(regime_i-1)], 'vd_data');
+        plot_ms_variance_decomposition(M_, options_, vd_data, vd_title);
+    end
+else
+    if options_.ms.regime
+        vd_title = ['Variance Decomposition, Regime ' num2str(options_.ms.regime)];
+        save_filename = ['variance_decomposition_regime_' num2str(options_.ms.regime-1)];
+    else
+        save_filename = 'variance_decomposition';
+        if options_.ms.filtered_probabilities
+            vd_title = 'Variance Decomposition Filtered';
+        else
+            vd_title = 'Variance Decomposition Ergodic';
+        end
+    end
+    vd_data = load(outfile, '-ascii');
+    vd_data = reshape_ascii_variance_decomposition_data( ...
+        M_.endo_nbr, percentiles_size, options_.ms.horizon, vd_data);
+    save([vddir filesep save_filename], 'vd_data');
+    plot_ms_variance_decomposition(M_, options_, vd_data, vd_title);
 end
 end

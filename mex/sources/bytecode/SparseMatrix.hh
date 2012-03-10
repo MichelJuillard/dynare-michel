@@ -63,21 +63,22 @@ class SparseMatrix : public ErrorMsg
 public:
   SparseMatrix();
   void Simulate_Newton_Two_Boundaries(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, bool cvg, int &iter, int minimal_solving_periods, int stack_solve_algo, unsigned int endo_name_length, char *P_endo_names) /*throw(ErrorHandlingException)*/;
-  void Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter, bool steady_state, int stack_solve_algo, int solve_algo);
+  bool Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, bool print_it, bool cvg, int &iter, bool steady_state, int stack_solve_algo, int solve_algo);
   void Direct_Simulate(int blck, int y_size, int it_, int y_kmin, int y_kmax, int Size, int periods, bool print_it, int iter);
   void fixe_u(double **u, int u_count_int, int max_lag_plus_max_lead_plus_1);
   void Read_SparseMatrix(string file_name, const int Size, int periods, int y_kmin, int y_kmax, bool steady_state, bool two_boundaries, int stack_solve_algo, int solve_algo);
   void Read_file(string file_name, int periods, int u_size1, int y_size, int y_kmin, int y_kmax, int &nb_endo, int &u_count, int &u_count_init, double *u);
+  void Singular_display(int block, int Size, bool steady_state, it_code_type it_code);
   double g0, gp0, glambda2, try_at_iteration;
 
 private:
   void Init_GE(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM);
   void Init_Matlab_Sparse(int periods, int y_kmin, int y_kmax, int Size, map<pair<pair<int, int>, int>, int> &IM, mxArray *A_m, mxArray *b_m, mxArray *x0_m);
   void Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, int>, int> &IM, mxArray *A_m, mxArray *b_m, bool &zero_solution, mxArray *x0_m);
-  void Simple_Init(int it_, int y_kmin, int y_kmax, int Size, std::map<std::pair<std::pair<int, int>, int>, int> &IM, bool &zero_solution);
+  void Simple_Init(int Size, std::map<std::pair<std::pair<int, int>, int>, int> &IM, bool &zero_solution);
   void End_GE(int Size);
   void Solve_ByteCode_Symbolic_Sparse_GaussianElimination(int Size, bool symbolic, int Block_number);
-  void Solve_ByteCode_Sparse_GaussianElimination(int Size, int blck, bool steady_state, int it_);
+  bool Solve_ByteCode_Sparse_GaussianElimination(int Size, int blck, bool steady_state, int it_);
   void Solve_Matlab_Relaxation(mxArray *A_m, mxArray *b_m, unsigned int Size, double slowc_l, bool is_two_boundaries, int  it_);
   void Solve_Matlab_LU_UMFPack(mxArray *A_m, mxArray *b_m, int Size, double slowc_l, bool is_two_boundaries, int it_);
   void Solve_Matlab_GMRES(mxArray *A_m, mxArray *b_m, int Size, double slowc, int block, bool is_two_boundaries, int it_, bool steady_state, mxArray *x0_m);
@@ -104,12 +105,12 @@ private:
   void CheckIt(int y_size, int y_kmin, int y_kmax, int Size, int periods, int iter);
   void Check_the_Solution(int periods, int y_kmin, int y_kmax, int Size, double *u, int *pivot, int *b);
   int complete(int beg_t, int Size, int periods, int *b);
-  double bksub(int tbreak, int last_period, int Size, double slowc_l
+  void bksub(int tbreak, int last_period, int Size, double slowc_l
 #ifdef PROFILER
                , long int *nmul
 #endif
                );
-  double simple_bksub(int it_, int Size, double slowc_l);
+  void simple_bksub(int it_, int Size, double slowc_l);
   mxArray *Sparse_transpose(mxArray *A_m);
   mxArray *Sparse_mult_SAT_SB(mxArray *A_m, mxArray *B_m);
   mxArray *Sparse_mult_SAT_B(mxArray *A_m, mxArray *B_m);

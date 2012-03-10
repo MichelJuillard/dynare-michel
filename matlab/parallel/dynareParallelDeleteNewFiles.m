@@ -57,9 +57,9 @@ for indPC=1:length(Parallel),
                 fileaddress={sT(1:SlashNumberAndPosition(end)),sT(SlashNumberAndPosition(end)+1:end)};
                 dynareParallelDelete(fileaddress{2},[PRCDir,fS,fileaddress{1}],Parallel(indPC));
 
-                display('New file deleted in remote -->');
-                display(fileaddress{2});
-                display('<--');
+                disp('New file deleted in remote -->');
+                disp(fileaddress{2});
+                disp('<--');
 
             end
         else

@@ -1,20 +1,21 @@
-function [info,tmp] = homotopic_steps(initial_weight,step_length,time)
-global oo_ options_ M_
+function [info,tmp] = homotopic_steps(endo_simul0,exo_simul0,initial_weight,step_length,pfm)
+global options_ oo_
+
+%Set bytecode flag
+bytecode_flag = options_.ep.use_bytecode;
+
+% Set increase and decrease factors.
+increase_factor = 5.0;
+decrease_factor = 0.2;
 
 % Save current state of oo_.endo_simul and oo_.exo_simul.
-endo_simul = oo_.endo_simul;
-exxo_simul = oo_.exo_simul;
-
-% Reset exo_simul to zero.
-oo_.exo_simul = zeros(size(oo_.exo_simul));
-
+endo_simul = endo_simul0;
+exxo_simul = exo_simul0;
 
 initial_step_length = step_length;
 max_iter = 1000/step_length;
 weight   = initial_weight;
-verbose  = 1;
-iter     = 0;
-ctime    = 0;
+verbose  = options_.ep.debug;
 
 reduce_step_flag = 0;
 
@@ -22,183 +23,114 @@ if verbose
     format long
 end
 
-homotopy_1 = 1; % Only innovations are rescaled. Starting from weight equal to initial_weight.
-homotopy_2 = 0; % Only innovations are rescaled. Starting from weight equal to zero.
-
-disp(' ')
-
-if homotopy_1
-    while weight<1
-        iter = iter+1;
-        oo_.exo_simul(2,:) = weight*exxo_simul(2,:);
-        t0 = tic;
+% (re)Set iter.
+iter = 0;
+% (re)Set iter.
+jter = 0;
+% (re)Set weight.
+weight = initial_weight;
+% (re)Set exo_simul to zero.
+exo_simul0 = zeros(size(exo_simul0));
+while weight<1
+    iter = iter+1;
+    exo_simul0(2,:) = weight*exxo_simul(2,:);
+    if bytecode_flag
+        oo_.endo_simul = endo_simul_1;
+        oo_.exo_simul = exo_simul_1;
         [flag,tmp] = bytecode('dynamic');
-        TeaTime = toc(t0);
-        ctime = ctime+TeaTime;
-        %old_weight = weight;
-        info.convergence = ~flag;
-        if verbose
-            if ~info.convergence
-                disp(['Iteration n° ' int2str(iter) ', weight is ' num2str(weight,8) ', Convergence problem!' ])
-            else
-                disp(['Iteration n° ' int2str(iter) ', weight is ' num2str(weight,8) ', Ok!' ])
-            end
-        end
-        if ~info.convergence
-            if abs(weight-initial_weight)<1e-12% First iterations.
-                if verbose
-                    disp('I am reducing the initial weight!')
-                end
-                initial_weight = initial_weight/1.1;
-                weight = initial_weight;
-                if weight<1/4
-                    homotopy_1 = 0;
-                    homotopy_2 = 1;
-                    break
-                end
-                continue
-            else% A good initial weight has been obtained. In case of convergence problem we have to reduce the step length.
-                if verbose
-                    disp('I am reducing the step length!')
-                end
-                weight = weight-step_length;
-                step_length=step_length/10;
-                weight = weight+step_length;
-                if 10*step_length<options_.dynatol.x
-                    homotopy_1 = 0;
-                    homotopy_2 = 0;
-                    break
-                end
-                continue
-            end
+    else
+        flag = 1;
+    end
+    if flag
+        [flag,tmp] = solve_perfect_foresight_model(endo_simul0,exo_simul0,pfm);
+    end
+    info.convergence = ~flag;% Equal to one if the perfect foresight solver converged for the current value of weight.
+    if verbose
+        if info.convergence
+            disp(['Iteration n° ' int2str(iter) ', weight is ' num2str(weight,8) ', Ok!' ])
         else
-            oo_.endo_simul = tmp;
-            info.time = ctime;
-            if abs(1-weight)<=1e-12;
-                homotopy_1 = 0;
-                homotopy_2 = 0;
-                break
-            end
-            weight = weight+step_length;
-            %step_length = initial_step_length;
-        end
-        if iter>max_iter
-            info = NaN;
-            return
+            disp(['Iteration n° ' int2str(iter) ', weight is ' num2str(weight,8) ', Convergence problem!' ])
         end
     end
-    if weight<1 && homotopy_1
-        oo_.exo_simul(2,:) = exxo_simul(2,:);
-        t0 = tic; 
-        [flag,tmp] = bytecode('dynamic');
-        TeaTime = toc(t0);
-        ctime = ctime+TeaTime;
-        info.convergence = ~flag;
-        info.time = ctime;
-        if info.convergence
-            oo_.endo_simul = tmp;
-            homotopy_1 = 0;
-            homotopy_2 = 0;
-            return
-        else
-            if step_length>1e-12
-                if verbose
-                    disp('I am reducing step length!')
-                end
-                step_length=step_length/2;
-            else
-                weight = initial_weight;
-                step_length = initial_step_length;
-                info = NaN;
-                homotopy_2 = 1;
-                homotopy_1 = 0;
+    if info.convergence
+        %if d<stochastic_extended_path_depth
+            endo_simul0 = tmp;
+            %end
+        jter = jter + 1;
+        if jter>3
+            if verbose
+                disp('I am increasing the step length!')
             end
+            step_length=step_length*increase_factor;
+            jter = 0;
         end
+        if abs(1-weight)<options_.dynatol.x;
+            break
+        end
+        weight = weight+step_length;
+    else% Perfect foresight solver failed for the current value of weight.
+        if initial_weight>0 && abs(weight-initial_weight)<1e-12% First iteration, the initial weight is too high.
+            if verbose
+                disp('I am reducing the initial weight!')
+            end
+            initial_weight = initial_weight/2;
+            weight = initial_weight;
+            if weight<1e-12
+                endo_simul0 = endo_simul;
+                exo_simul0 = exxo_simul;
+                info.convergence = 0;
+                info.depth = d;
+                tmp = [];
+                return
+            end
+            continue
+        else% Initial weight is OK, but the perfect foresight solver failed on some subsequent iteration.
+            if verbose
+                disp('I am reducing the step length!')
+            end
+            jter = 0;
+            if weight>0
+                weight = weight-step_length;
+            end
+            step_length=step_length*decrease_factor;
+            weight = weight+step_length;
+            if step_length<options_.dynatol.x
+                break
+            end
+            continue
+        end
+    end
+    if iter>max_iter
+        info = NaN;
+        return
     end
 end
-
-iter   = 0;
-weight = 0; 
-
-if homotopy_2
-    while weight<1
-        iter = iter+1;
-        oo_.exo_simul(2,:) = weight*exxo_simul(2,:);
-        if time==1
-            oo_.endo_simul = repmat(oo_.steady_state,1,size(oo_.endo_simul,2));
-        else
-            oo_.endo_simul = endo_simul;
-        end
-        t0 = tic;
+if weight<1
+    exo_simul0 = exxo_simul;
+    if bytecode_flag
+        oo_.endo_simul = endo_simul_1;
+        oo_.exo_simul = exo_simul_1;
         [flag,tmp] = bytecode('dynamic');
-        TeaTime = toc(t0);
-        ctime = ctime+TeaTime;
-        old_weight = weight;
-        info.convergence = ~flag;
-        if verbose
-            if ~info.convergence
-                disp(['Iteration n° ' int2str(iter) ', weight is ' num2str(old_weight,8) ', Convergence problem!' ])
-            else
-                disp(['Iteration n° ' int2str(iter) ', weight is ' num2str(old_weight,8) ', Ok!' ])
-            end
-        end
-        if ~info.convergence
-            if iter==1
-                disp('I am not able to simulate this model!')
-                disp('There is something wrong with the initial condition of the homotopic')
-                disp('approach...')
-                error(' ')
-            else
-                if verbose
-                    disp('I am reducing the step length!')
-                end
-                step_length=step_length/10;
-                if 10*step_length<options_.dynatol.x
-                    homotopy_1 = 0;
-                    homotopy_2 = 0;
-                    break
-                end
-                weight = old_weight+step_length;
-            end
-        else
-            oo_.endo_simul = tmp;
-            info.time = ctime;
-            if abs(1-weight)<=1e-12;
-                homotopy_2 = 1;
-                break
-            end
-            weight = weight+step_length;
-            step_length = initial_step_length;
-        end
-        if iter>max_iter
-            info = NaN;
-            return
-        end
+    else
+        flag = 1;
     end
-    if weight<1 && homotopy_2
-        oo_.exo_simul(2,:) = exxo_simul(2,:);
-        t0 = tic; 
-        [flag,tmp] = bytecode('dynamic');
-        TeaTime = toc(t0);
-        ctime = ctime+TeaTime;
-        info.convergence = ~flag;
-        info.time = ctime;
-        if info.convergence
-            oo_.endo_simul = tmp;
-            homotopy_1 = 0;
+    if flag
+        [flag,tmp] = solve_perfect_foresight_model(endo_simul0,exo_simul0,pfm);
+    end
+    info.convergence = ~flag;
+    if info.convergence
+        endo_simul0 = tmp;
+        return
+    else
+        if step_length>options_.dynatol.x
+            endo_simul0 = endo_simul;
+            exo_simul0 = exxo_simul;
+            info.convergence = 0;
+            info.depth = d;
+            tmp = [];
+            return
         else
-            if step_length>1e-12
-                if verbose
-                    disp('I am reducing step length!')
-                end
-                step_length=step_length/2;
-            else
-                weight = initial_weight;
-                step_length = initial_step_length;
-                info = NaN;
-                homotopy_2 = 1;
-                homotopy_1 = 0;
-            end
+            error('extended_path::homotopy: Oups! I did my best, but I am not able to simulate this model...')
         end
     end
 end

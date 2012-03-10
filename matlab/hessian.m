@@ -39,7 +39,7 @@ if ~isa(func, 'function_handle')
     func = str2func(func);
 end
 n=size(x,1);
-h1=max(abs(x),sqrt(gstep)*ones(n,1))*eps^(1/6);
+h1=max(abs(x),sqrt(gstep(1))*ones(n,1))*eps^(1/6)*gstep(2);
 h_1=h1;
 xh1=x+h1;
 h1=xh1-x;

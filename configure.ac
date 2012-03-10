@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Copyright (C) 2009-2011 Dynare Team
+dnl Copyright (C) 2009-2012 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -30,7 +30,7 @@ case ${host_os} in
   *mingw32*)
     # On mingw32, we don't want dynamic libgcc
     # Note that static-libstdc++ is only supported since GCC 4.5 (but generates no error on older versions)
-    LDFLAGS="$LDFLAGS -static-libgcc -static-libstdc++"
+    LDFLAGS="$LDFLAGS -static-libgcc -static-libstdc++ -static-libgfortran"
     have_windows="yes"
     ;;
   *cygwin*)
@@ -155,6 +155,15 @@ AC_CHECK_PROG([CWEAVE], [cweave], [cweave])
 AM_CONDITIONAL([HAVE_CWEAVE], [test "x$CWEAVE" != "x"])
 
 AC_PROG_F77
+AC_F77_LIBRARY_LDFLAGS
+# Hack to get static linking of libgfortran on MinGW
+# (-static-libgfortran doesn't act on gcc/g++)
+case ${host_os} in
+  *mingw32*)
+    FLIBS=`echo $FLIBS | sed 's/-lgfortran/-Wl,-Bstatic -lgfortran -Wl,-Bdynamic/'`
+    ;;
+esac
+
 if test "x$F77" != "x"; then
    AX_BLAS
    AX_LAPACK
