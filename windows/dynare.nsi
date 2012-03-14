@@ -87,7 +87,7 @@ SectionEnd
 
 Section "MEX files for MATLAB 32-bit, version 7.5 to 7.14 (R2007b to R2012a)"
  SetOutPath $INSTDIR\mex\matlab\win32-7.5-7.14
- File ..\mex\matlab\win32-7.5-7.13\*.mexw32
+ File ..\mex\matlab\win32-7.5-7.14\*.mexw32
 SectionEnd
 
 # Currently we don't have that version of MATLAB
@@ -108,12 +108,12 @@ SectionEnd
 
 Section "MEX files for MATLAB 64-bit, version 7.8 to 7.14 (R2009a to R2012a)"
  SetOutPath $INSTDIR\mex\matlab\win64-7.8-7.14
- File ..\mex\matlab\win64-7.8-7.13\*.mexw64
+ File ..\mex\matlab\win64-7.8-7.14\*.mexw64
 SectionEnd
 
 SectionGroupEnd
 
-Section "MEX files for Octave 3.6.1 (MinGW build)"
+Section "MEX files for Octave 3.6.1 (MinGW)"
  SetOutPath $INSTDIR\mex\octave
  File ..\mex\octave\*.mex ..\mex\octave\*.oct
 SectionEnd
