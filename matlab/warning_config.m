@@ -41,6 +41,8 @@ if exist('OCTAVE_VERSION')
     warning('off', 'Octave:num-to-str');
     warning('off', 'Octave:resize-on-range-error');
     warning('off', 'Octave:str-to-num');
+    warning('off', 'Octave:array-as-scalar');
+    warning('off', 'Octave:array-as-vector');
     if octave_ver_less_than('3.6')
         warning('off', 'Octave:string-concat');
     else
