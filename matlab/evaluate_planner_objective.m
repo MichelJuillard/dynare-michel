@@ -56,7 +56,7 @@ gu(dr.order_var,:) = dr.ghu;
 if options.ramsey_policy && options.order == 1 && ~options.linear
     options.order = 2;
     options.qz_criterium = 1+1e-6;
-    [dr,info] = dr1(oo.dr,0,M,options,oo);
+    [dr,info] = stochastic_solvers(oo.dr,0,M,options,oo);
     Gyy = dr.ghxx(nstatic+(1:npred),:);
     Guu = dr.ghuu(nstatic+(1:npred),:);
     Gyu = dr.ghxu(nstatic+(1:npred),:);
