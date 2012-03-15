@@ -512,7 +512,7 @@ if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
         disp(sprintf('Log data density [Laplace approximation] is %f.',oo_.MarginalDensity.LaplaceApproximation))
         disp(' ')
     end
-elseif ~any(bayestopt_.pshape > 0) && options_.mh_posterior_mode_estimation
+elseif ~any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
     disp(' ')
     disp('RESULTS FROM MAXIMUM LIKELIHOOD')
     tstath = zeros(nx,1);
@@ -609,6 +609,8 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
         fprintf(fidTeX,'{\\tiny \n');
         fprintf(fidTeX,'\\begin{table}\n');
         fprintf(fidTeX,'\\centering\n');
+        fprintf(fidTeX,'\\caption{Results from posterior maximization (parameters)}\n ');
+        fprintf(fidTeX,'\\label{Table:Posterior:1}\n');
         fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
@@ -623,11 +625,22 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
                     xparam1(ip),...
                     stdh(ip));
             ip = ip + 1;
+            if ~mod(i,50) && i<np,
+                fprintf(fidTeX,'\\hline \n');
+                fprintf(fidTeX,'\\multicolumn{6}{c}{(Table continues next page ...)} \\\\ \n')';
+                fprintf(fidTeX,'\\end{tabular}\n ');
+                fprintf(fidTeX,'\\end{table}\n');
+                fprintf(fidTeX,'\\begin{table}\n');
+                fprintf(fidTeX,'\\centering\n');
+                fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
+                fprintf(fidTeX,'\\multicolumn{6}{c}{( ... Table continued)} \\\\ \n')';
+                fprintf(fidTeX,'\\hline\\hline \\\\ \n');
+                fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
+                fprintf(fidTeX,'\\hline \\\\ \n');
+            end
         end
         fprintf(fidTeX,'\\hline\\hline \n');
         fprintf(fidTeX,'\\end{tabular}\n ');
-        fprintf(fidTeX,'\\caption{Results from posterior parameters (parameters)}\n ');
-        fprintf(fidTeX,'\\label{Table:Posterior:1}\n');
         fprintf(fidTeX,'\\end{table}\n');
         fprintf(fidTeX,'} \n');
         fprintf(fidTeX,'%% End of TeX file.\n');
@@ -644,6 +657,8 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
         fprintf(fidTeX,'{\\tiny \n');
         fprintf(fidTeX,'\\begin{table}\n');
         fprintf(fidTeX,'\\centering\n');
+        fprintf(fidTeX,'\\caption{Results from posterior maximization (standard deviation of structural shocks)}\n ');
+        fprintf(fidTeX,'\\label{Table:Posterior:2}\n');
         fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
@@ -659,11 +674,22 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
                     xparam1(ip), ...
                     stdh(ip));
             ip = ip+1;
+            if ~mod(i,50) && i<nvx,
+                fprintf(fidTeX,'\\hline \n');
+                fprintf(fidTeX,'\\multicolumn{6}{c}{(Table continues next page ...)} \\\\ \n')';
+                fprintf(fidTeX,'\\end{tabular}\n ');
+                fprintf(fidTeX,'\\end{table}\n');
+                fprintf(fidTeX,'\\begin{table}\n');
+                fprintf(fidTeX,'\\centering\n');
+                fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
+                fprintf(fidTeX,'\\multicolumn{6}{c}{( ... Table continued)} \\\\ \n')';
+                fprintf(fidTeX,'\\hline\\hline \\\\ \n');
+                fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
+                fprintf(fidTeX,'\\hline \\\\ \n');
+            end
         end
         fprintf(fidTeX,'\\hline\\hline \n');
         fprintf(fidTeX,'\\end{tabular}\n ');
-        fprintf(fidTeX,'\\caption{Results from posterior parameters (standard deviation of structural shocks)}\n ');
-        fprintf(fidTeX,'\\label{Table:Posterior:2}\n');
         fprintf(fidTeX,'\\end{table}\n');
         fprintf(fidTeX,'} \n');
         fprintf(fidTeX,'%% End of TeX file.\n');
@@ -679,6 +705,8 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,'\\begin{table}\n');
         fprintf(fidTeX,'\\centering\n');
+        fprintf(fidTeX,'\\caption{Results from posterior maximization (standard deviation of measurement errors)}\n ');
+        fprintf(fidTeX,'\\label{Table:Posterior:3}\n');
         fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n')
@@ -694,11 +722,22 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
                     xparam1(ip),...
                     stdh(ip));
             ip = ip+1;
+            if ~mod(i,50) && i<nvn,
+                fprintf(fidTeX,'\\hline \n');
+                fprintf(fidTeX,'\\multicolumn{6}{c}{(Table continues next page ...)} \\\\ \n')';
+                fprintf(fidTeX,'\\end{tabular}\n ');
+                fprintf(fidTeX,'\\end{table}\n');
+                fprintf(fidTeX,'\\begin{table}\n');
+                fprintf(fidTeX,'\\centering\n');
+                fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
+                fprintf(fidTeX,'\\multicolumn{6}{c}{( ... Table continued)} \\\\ \n')';
+                fprintf(fidTeX,'\\hline\\hline \\\\ \n');
+                fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
+                fprintf(fidTeX,'\\hline \\\\ \n');
+            end
         end
         fprintf(fidTeX,'\\hline\\hline \n');
         fprintf(fidTeX,'\\end{tabular}\n ');
-        fprintf(fidTeX,'\\caption{Results from posterior parameters (standard deviation of measurement errors)}\n ');
-        fprintf(fidTeX,'\\label{Table:Posterior:3}\n');
         fprintf(fidTeX,'\\end{table}\n');
         fprintf(fidTeX,'%% End of TeX file.\n');
         fclose(fidTeX);
@@ -713,6 +752,8 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,'\\begin{table}\n');
         fprintf(fidTeX,'\\centering\n');
+        fprintf(fidTeX,'\\caption{Results from posterior parameters (correlation of structural shocks)}\n ');
+        fprintf(fidTeX,'\\label{Table:Posterior:4}\n');
         fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n')
@@ -729,11 +770,22 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
                     xparam1(ip), ...
                     stdh(ip));
             ip = ip+1;
+            if ~mod(i,50) && i<ncx,
+                fprintf(fidTeX,'\\hline \n');
+                fprintf(fidTeX,'\\multicolumn{6}{c}{(Table continues next page ...)} \\\\ \n')';
+                fprintf(fidTeX,'\\end{tabular}\n ');
+                fprintf(fidTeX,'\\end{table}\n');
+                fprintf(fidTeX,'\\begin{table}\n');
+                fprintf(fidTeX,'\\centering\n');
+                fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
+                fprintf(fidTeX,'\\multicolumn{6}{c}{( ... Table continued)} \\\\ \n')';
+                fprintf(fidTeX,'\\hline\\hline \\\\ \n');
+                fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
+                fprintf(fidTeX,'\\hline \\\\ \n');
+            end
         end
         fprintf(fidTeX,'\\hline\\hline \n');
         fprintf(fidTeX,'\\end{tabular}\n ');
-        fprintf(fidTeX,'\\caption{Results from posterior parameters (correlation of structural shocks)}\n ');
-        fprintf(fidTeX,'\\label{Table:Posterior:4}\n');
         fprintf(fidTeX,'\\end{table}\n');
         fprintf(fidTeX,'%% End of TeX file.\n');
         fclose(fidTeX);
@@ -748,6 +800,8 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,'\\begin{table}\n');
         fprintf(fidTeX,'\\centering\n');
+        fprintf(fidTeX,'\\caption{Results from posterior parameters (correlation of measurement errors)}\n ');
+        fprintf(fidTeX,'\\label{Table:Posterior:5}\n');
         fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n')
@@ -764,11 +818,22 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
                     xparam1(ip), ...
                     stdh(ip));
             ip = ip+1;
+            if ~mod(i,50) && i<ncn,
+                fprintf(fidTeX,'\\hline \n');
+                fprintf(fidTeX,'\\multicolumn{6}{c}{(Table continues next page ...)} \\\\ \n')';
+                fprintf(fidTeX,'\\end{tabular}\n ');
+                fprintf(fidTeX,'\\end{table}\n');
+                fprintf(fidTeX,'\\begin{table}\n');
+                fprintf(fidTeX,'\\centering\n');
+                fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
+                fprintf(fidTeX,'\\multicolumn{6}{c}{( ... Table continued)} \\\\ \n')';
+                fprintf(fidTeX,'\\hline\\hline \\\\ \n');
+                fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
+                fprintf(fidTeX,'\\hline \\\\ \n');
+            end
         end
         fprintf(fidTeX,'\\hline\\hline \n');
         fprintf(fidTeX,'\\end{tabular}\n ');
-        fprintf(fidTeX,'\\caption{Results from posterior parameters (correlation of measurement errors)}\n ');
-        fprintf(fidTeX,'\\label{Table:Posterior:5}\n');
         fprintf(fidTeX,'\\end{table}\n');
         fprintf(fidTeX,'%% End of TeX file.\n');
         fclose(fidTeX);
@@ -869,79 +934,20 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(i1,:)) ...
               ' = updated_variables(i,:)'';']);
     end
-    [nbplt,nr,nc,lr,lc,nstar] = pltorg(M_.exo_nbr);
-    if options_.TeX
-        fidTeX = fopen([M_.fname '_SmoothedShocks.TeX'],'w');
-        fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n');
-        fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
-        fprintf(fidTeX,' \n');
-    end
-    if nbplt == 1
-        if options_.nograph
-            hh = figure('Name','Smoothed shocks','Visible','off');
-        else
-            hh = figure('Name','Smoothed shocks');
-        end
-        NAMES = [];
-        if options_.TeX, TeXNAMES = []; end
-        for i=1:M_.exo_nbr
-            subplot(nr,nc,i);
-            plot(1:gend,innov(i,:),'-k','linewidth',1)
-            hold on
-            plot([1 gend],[0 0],'-r','linewidth',.5)
-            hold off
-            xlim([1 gend])
-            name    = deblank(M_.exo_names(i,:));
-            if isempty(NAMES)
-                NAMES = name;
-            else
-                NAMES = char(NAMES,name);
-            end
-            if ~isempty(options_.XTick)
-                set(gca,'XTick',options_.XTick)
-                set(gca,'XTickLabel',options_.XTickLabel)
-            end
-            if options_.TeX
-                texname = M_.exo_names_tex(i,1);
-                if isempty(TeXNAMES)
-                    TeXNAMES = ['$ ' deblank(texname) ' $'];
-                else
-                    TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
-                end
-            end
-            title(name,'Interpreter','none')
-            eval(['oo_.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
-        end
-        eval(['print -depsc2 ' M_.fname '_SmoothedShocks' int2str(1) '.eps']);
-        if ~exist('OCTAVE_VERSION')
-            eval(['print -dpdf ' M_.fname '_SmoothedShocks' int2str(1)]);
-            saveas(hh,[M_.fname '_SmoothedShocks' int2str(1) '.fig']);
-        end
+    if ~options_.nograph,
+        [nbplt,nr,nc,lr,lc,nstar] = pltorg(M_.exo_nbr);
         if options_.TeX
-            fprintf(fidTeX,'\\begin{figure}[H]\n');
-            for jj = 1:M_.exo_nbr
-                fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-            end
-            fprintf(fidTeX,'\\centering \n');
-            fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedShocks%s}\n',M_.fname,int2str(1));
-            fprintf(fidTeX,'\\caption{Smoothed shocks.}');
-            fprintf(fidTeX,'\\label{Fig:SmoothedShocks:%s}\n',int2str(1));
-            fprintf(fidTeX,'\\end{figure}\n');
-            fprintf(fidTeX,'\n');
-            fprintf(fidTeX,'%% End of TeX file.\n');
-            fclose(fidTeX);
+            fidTeX = fopen([M_.fname '_SmoothedShocks.TeX'],'w');
+            fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n');
+            fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
+            fprintf(fidTeX,' \n');
         end
-    else
-        for plt = 1:nbplt-1
-            if options_.nograph
-                hh = figure('Name','Smoothed shocks','Visible','off');
-            else
-                hh = figure('Name','Smoothed shocks');
-            end
-            set(0,'CurrentFigure',hh)
+        for plt = 1:nbplt,
+            hh = dyn_figure(options_,'Name','Smoothed shocks');
             NAMES = [];
             if options_.TeX, TeXNAMES = []; end
-            for i=1:nstar
+            nstar0=min(nstar,M_.exo_nbr-(plt-1)*nstar);
+            for i=1:nstar0,
                 k = (plt-1)*nstar+i;
                 subplot(nr,nc,i);
                 plot([1 gend],[0 0],'-r','linewidth',.5)
@@ -970,14 +976,10 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 title(name,'Interpreter','none')
                 eval(['oo_.SmoothedShocks.' deblank(name) ' = innov(k,:)'';']);
             end
-            eval(['print -depsc2 ' M_.fname '_SmoothedShocks' int2str(plt) '.eps']);
-            if ~exist('OCTAVE_VERSION')
-                eval(['print -dpdf ' M_.fname '_SmoothedShocks' int2str(plt)]);
-                saveas(hh,[M_.fname '_SmoothedShocks' int2str(plt) '.fig']);
-            end
+            dyn_saveas(hh,[M_.fname '_SmoothedShocks' int2str(plt)],options_);
             if options_.TeX
                 fprintf(fidTeX,'\\begin{figure}[H]\n');
-                for jj = 1:nstar
+                for jj = 1:nstar0
                     fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
                 end
                 fprintf(fidTeX,'\\centering \n');
@@ -988,62 +990,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 fprintf(fidTeX,'\n');
             end
         end
-        if options_.nograph
-            hh = figure('Name','Smoothed shocks','Visible','off');
-        else
-            hh = figure('Name','Smoothed shocks');
-        end
-        set(0,'CurrentFigure',hh)
-        NAMES = [];
-        if options_.TeX, TeXNAMES = []; end
-        for i=1:M_.exo_nbr-(nbplt-1)*nstar
-            k = (nbplt-1)*nstar+i;
-            if lr ~= 0
-                subplot(lr,lc,i);
-            else
-                subplot(nr,nc,i);
-            end
-            plot([1 gend],[0 0],'-r','linewidth',0.5)
-            hold on
-            plot(1:gend,innov(k,:),'-k','linewidth',1)
-            hold off
-            name     = deblank(M_.exo_names(k,:));
-            if isempty(NAMES)
-                NAMES = name;
-            else
-                NAMES = char(NAMES,name);
-            end
-            if ~isempty(options_.XTick)
-                set(gca,'XTick',options_.XTick)
-                set(gca,'XTickLabel',options_.XTickLabel)
-            end
-            xlim([1 gend])
-            if options_.TeX
-                texname  = M_.exo_names_tex(k,:);
-                if isempty(TeXNAMES)
-                    TeXNAMES = ['$ ' deblank(texname) ' $'];
-                else
-                    TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
-                end
-            end
-            title(name,'Interpreter','none')
-            eval(['oo_.SmoothedShocks.' deblank(name) ' = innov(k,:)'';']);
-        end
-        eval(['print -depsc2 ' M_.fname '_SmoothedShocks' int2str(nbplt) '.eps']);
-        if ~exist('OCTAVE_VERSION')
-            eval(['print -dpdf ' M_.fname '_SmoothedShocks' int2str(nbplt)]);
-            saveas(hh,[M_.fname '_SmoothedShocks' int2str(nbplt) '.fig']);
-        end
         if options_.TeX
-            fprintf(fidTeX,'\\begin{figure}[H]\n');
-            for jj = 1:size(NAMES,1);
-                fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-            end
-            fprintf(fidTeX,'\\centering \n');
-            fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedShocks%s}\n',M_.fname,int2str(nbplt));
-            fprintf(fidTeX,'\\caption{Smoothed shocks.}');
-            fprintf(fidTeX,'\\label{Fig:SmoothedShocks:%s}\n',int2str(nbplt));
-            fprintf(fidTeX,'\\end{figure}\n');
             fprintf(fidTeX,'\n');
             fprintf(fidTeX,'%% End of TeX file.\n');
             fclose(fidTeX);
@@ -1076,76 +1023,16 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             eval(['oo_.SmoothedMeasurementErrors.' deblank(options_.varobs(i,:)) ...
                   ' = measurement_error(i,:)'';']);
         end
-        [nbplt,nr,nc,lr,lc,nstar] = pltorg(number_of_plots_to_draw);
-        if options_.TeX
-            fidTeX = fopen([M_.fname '_SmoothedObservationErrors.TeX'],'w');
-            fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n');
-            fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
-            fprintf(fidTeX,' \n');
-        end
-        if nbplt == 1
-            if options_.nograph
-                hh = figure('Name','Smoothed observation errors','Visible','off');
-            else
-                hh = figure('Name','Smoothed observation errors');
-            end
-            set(0,'CurrentFigure',hh)
-            NAMES = [];
-            if options_.TeX, TeXNAMES = []; end
-            for i=1:number_of_plots_to_draw
-                subplot(nr,nc,i);
-                plot(1:gend,measurement_error(index(i),:),'-k','linewidth',1)
-                hold on
-                plot([1 gend],[0 0],'-r','linewidth',.5)
-                hold off
-                name    = deblank(options_.varobs(index(i),:));
-                if isempty(NAMES)
-                    NAMES = name;
-                else
-                    NAMES = char(NAMES,name);
-                end
-                if ~isempty(options_.XTick)
-                    set(gca,'XTick',options_.XTick)
-                    set(gca,'XTickLabel',options_.XTickLabel)
-                end
-                if options_.TeX
-                    idx = strmatch(options_.varobs(indx(i),:),M_.endo_names,'exact');
-                    texname = M_.endo_names_tex(idx,:);
-                    if isempty(TeXNAMES)
-                        TeXNAMES = ['$ ' deblank(texname) ' $'];
-                    else
-                        TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
-                    end
-                end
-                title(name,'Interpreter','none')
-            end
-            eval(['print -depsc2 ' M_.fname '_SmoothedObservationErrors' int2str(1) '.eps']);
-            if ~exist('OCTAVE_VERSION')
-                eval(['print -dpdf ' M_.fname '_SmoothedObservationErrors' int2str(1)]);
-                saveas(hh,[M_.fname '_SmoothedObservationErrors' int2str(1) '.fig']);
-            end
+        if ~options_.nograph
+            [nbplt,nr,nc,lr,lc,nstar] = pltorg(number_of_plots_to_draw);
             if options_.TeX
-                fprintf(fidTeX,'\\begin{figure}[H]\n');
-                for jj = 1:number_of_plots_to_draw
-                    fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-                end
-                fprintf(fidTeX,'\\centering \n');
-                fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_SmoothedObservationErrors%s}\n',M_.fname,int2str(1));
-                fprintf(fidTeX,'\\caption{Smoothed observation errors.}');
-                fprintf(fidTeX,'\\label{Fig:SmoothedObservationErrors:%s',int2str(1));
-                fprintf(fidTeX,'\\end{figure}\n');
-                fprintf(fidTeX,'\n');
-                fprintf(fidTeX,'%% End of TeX file.\n');
-                fclose(fidTeX);
+                fidTeX = fopen([M_.fname '_SmoothedObservationErrors.TeX'],'w');
+                fprintf(fidTeX,'%% TeX eps-loader file generated by dynare_estimation.m (Dynare).\n');
+                fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
+                fprintf(fidTeX,' \n');
             end
-        else
             for plt = 1:nbplt
-                if options_.nograph
-                    hh = figure('Name','Smoothed observation errors','Visible','off');
-                else
-                    hh = figure('Name','Smoothed observation errors');
-                end
-                set(0,'CurrentFigure',hh)
+                hh = dyn_figure(options_,'Name','Smoothed observation errors');
                 NAMES = [];
                 if options_.TeX, TeXNAMES = []; end
                 for i=1:min(nstar,number_of_plots_to_draw-(nbplt-1)*nstar)
@@ -1166,7 +1053,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                         set(gca,'XTickLabel',options_.XTickLabel)
                     end
                     if options_.TeX
-                        idx = strmatch(options_.varobs(k),M_.endo_names,'exact');
+                        idx = strmatch(options_.varobs(index(k),:),M_.endo_names,'exact');
                         texname = M_.endo_names_tex(idx,:);
                         if isempty(TeXNAMES)
                             TeXNAMES = ['$ ' deblank(texname) ' $'];
@@ -1176,11 +1063,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     end
                     title(name,'Interpreter','none')
                 end
-                eval(['print -depsc2 ' M_.fname '_SmoothedObservationErrors' int2str(plt) '.eps']);
-                if ~exist('OCTAVE_VERSION')
-                    eval(['print -dpdf ' M_.fname '_SmoothedObservationErrors' int2str(plt)]);
-                    saveas(hh,[M_.fname '_SmoothedObservationErrors' int2str(plt) '.fig']);
-                end
+                dyn_saveas(hh,[M_.fname '_SmoothedObservationErrors' int2str(plt)],options_);
                 if options_.TeX
                     fprintf(fidTeX,'\\begin{figure}[H]\n');
                     for jj = 1:nstar
@@ -1194,11 +1077,17 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     fprintf(fidTeX,'\n');
                 end
             end
+            if options_.TeX
+                fprintf(fidTeX,'\n');
+                fprintf(fidTeX,'%% End of TeX file.\n');
+                fclose(fidTeX);
+            end
         end
     end
     %%
     %%  Historical and smoothed variabes
     %%
+    if ~options_.nograph
     [nbplt,nr,nc,lr,lc,nstar] = pltorg(n_varobs);
     if options_.TeX
         fidTeX = fopen([M_.fname '_HistoricalAndSmoothedVariables.TeX'],'w');
@@ -1206,133 +1095,14 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         fprintf(fidTeX,['%% ' datestr(now,0) '\n']);
         fprintf(fidTeX,' \n');
     end
-    if nbplt == 1
-        if options_.nograph
-            hh = figure('Name','Historical and smoothed variables','Visible','off');
-        else
-            hh = figure('Name','Historical and smoothed variables');
-        end
+    for plt = 1:nbplt,
+        hh = dyn_figure(options_,'Name','Historical and smoothed variables');
         NAMES = [];
         if options_.TeX, TeXNAMES = []; end
-        for i=1:n_varobs
+        nstar0=min(nstar,n_varobs-(plt-1)*nstar);
+        for i=1:nstar0,
+            k = (plt-1)*nstar+i;
             subplot(nr,nc,i);
-            plot(1:gend,yf(i,:),'-r','linewidth',1)
-            hold on
-            plot(1:gend,rawdata(:,i),'-k','linewidth',1)
-            hold off
-            name    = deblank(options_.varobs(i,:));
-            if isempty(NAMES)
-                NAMES = name;
-            else
-                NAMES = char(NAMES,name);
-            end
-            if ~isempty(options_.XTick)
-                set(gca,'XTick',options_.XTick)
-                set(gca,'XTickLabel',options_.XTickLabel)
-            end
-            xlim([1 gend])
-            if options_.TeX
-                idx = strmatch(options_.varobs(i,:),M_.endo_names,'exact');
-                texname = M_.endo_names_tex(idx,:);
-                if isempty(TeXNAMES)
-                    TeXNAMES = ['$ ' deblank(texname) ' $'];
-                else
-                    TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
-                end
-            end
-            title(name,'Interpreter','none')
-        end
-        eval(['print -depsc2 ' M_.fname '_HistoricalAndSmoothedVariables' int2str(1) '.eps']);
-        if ~exist('OCTAVE_VERSION')
-            eval(['print -dpdf ' M_.fname '_HistoricalAndSmoothedVariables' int2str(1)]);
-            saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(1) '.fig']);
-        end
-        if options_.TeX
-            fprintf(fidTeX,'\\begin{figure}[H]\n');
-            for jj = 1:n_varobs
-                fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-            end
-            fprintf(fidTeX,'\\centering \n');
-            fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n',M_.fname,int2str(1));
-            fprintf(fidTeX,'\\caption{Historical and smoothed variables.}');
-            fprintf(fidTeX,'\\label{Fig:HistoricalAndSmoothedVariables:%s}\n',int2str(1));
-            fprintf(fidTeX,'\\end{figure}\n');
-            fprintf(fidTeX,'\n');
-            fprintf(fidTeX,'%% End of TeX file.\n');
-            fclose(fidTeX);
-        end
-    else
-        for plt = 1:nbplt-1
-            if options_.nograph
-                hh = figure('Name','Historical and smoothed variables','Visible','off');
-            else
-                hh = figure('Name','Historical and smoothed variables');
-            end
-            set(0,'CurrentFigure',hh)
-            NAMES = [];
-            if options_.TeX, TeXNAMES = []; end
-            for i=1:nstar
-                k = (plt-1)*nstar+i;
-                subplot(nr,nc,i);
-                plot(1:gend,yf(k,:),'-r','linewidth',1)
-                hold on
-                plot(1:gend,rawdata(:,k),'-k','linewidth',1)
-                hold off
-                name = deblank(options_.varobs(k,:));
-                if isempty(NAMES)
-                    NAMES = name;
-                else
-                    NAMES = char(NAMES,name);
-                end
-                if ~isempty(options_.XTick)
-                    set(gca,'XTick',options_.XTick)
-                    set(gca,'XTickLabel',options_.XTickLabel)
-                end
-                xlim([1 gend])
-                if options_.TeX
-                    idx = strmatch(options_.varobs(k,:),M_.endo_names,'exact');
-                    texname = M_.endo_names_tex(idx,:);
-                    if isempty(TeXNAMES)
-                        TeXNAMES = ['$ ' deblank(texname) ' $'];
-                    else
-                        TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
-                    end
-                end
-                title(name,'Interpreter','none')
-            end
-            eval(['print -depsc2 ' M_.fname '_HistoricalAndSmoothedVariables' int2str(plt) '.eps']);
-            if ~exist('OCTAVE_VERSION')
-                eval(['print -dpdf ' M_.fname '_HistoricalAndSmoothedVariables' int2str(plt)]);
-                saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(plt) '.fig']);
-            end
-            if options_.TeX
-                fprintf(fidTeX,'\\begin{figure}[H]\n');
-                for jj = 1:nstar
-                    fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
-                end
-                fprintf(fidTeX,'\\centering \n');
-                fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n',M_.fname,int2str(plt));
-                fprintf(fidTeX,'\\caption{Historical and smoothed variables.}');
-                fprintf(fidTeX,'\\label{Fig:HistoricalAndSmoothedVariables:%s}\n',int2str(plt));
-                fprintf(fidTeX,'\\end{figure}\n');
-                fprintf(fidTeX,'\n');
-            end
-        end
-        if options_.nograph
-            hh = figure('Name','Historical and smoothed variables','Visible','off');
-        else
-            hh = figure('Name','Historical and smoothed variables');
-        end
-        set(0,'CurrentFigure',hh)
-        NAMES = [];
-        if options_.TeX, TeXNAMES = []; end
-        for i=1:n_varobs-(nbplt-1)*nstar
-            k = (nbplt-1)*nstar+i;
-            if lr ~= 0
-                subplot(lr,lc,i);
-            else
-                subplot(nr,nc,i);
-            end
             plot(1:gend,yf(k,:),'-r','linewidth',1)
             hold on
             plot(1:gend,rawdata(:,k),'-k','linewidth',1)
@@ -1349,7 +1119,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             end
             xlim([1 gend])
             if options_.TeX
-                idx = strmatch(options_.varobs(i,:),M_.endo_names,'exact');
+                idx = strmatch(options_.varobs(k,:),M_.endo_names,'exact');
                 texname = M_.endo_names_tex(idx,:);
                 if isempty(TeXNAMES)
                     TeXNAMES = ['$ ' deblank(texname) ' $'];
@@ -1357,27 +1127,27 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     TeXNAMES = char(TeXNAMES,['$ ' deblank(texname) ' $']);
                 end
             end
-            title(name,'Interpreter','none');
+            title(name,'Interpreter','none')
         end
-        eval(['print -depsc2 ' M_.fname '_HistoricalAndSmoothedVariables' int2str(nbplt) '.eps']);
-        if ~exist('OCTAVE_VERSION')
-            eval(['print -dpdf ' M_.fname '_HistoricalAndSmoothedVariables' int2str(nbplt)]);
-            saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(nbplt) '.fig']);
-        end
+        dyn_saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(plt)],options_);
         if options_.TeX
             fprintf(fidTeX,'\\begin{figure}[H]\n');
-            for jj = 1:size(NAMES,1);
+            for jj = 1:nstar0,
                 fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TeXNAMES(jj,:)));
             end
             fprintf(fidTeX,'\\centering \n');
-            fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n',M_.fname,int2str(nbplt));
+            fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_HistoricalAndSmoothedVariables%s}\n',M_.fname,int2str(plt));
             fprintf(fidTeX,'\\caption{Historical and smoothed variables.}');
-            fprintf(fidTeX,'\\label{Fig:HistoricalAndSmoothedVariables:%s}\n',int2str(nbplt));
+            fprintf(fidTeX,'\\label{Fig:HistoricalAndSmoothedVariables:%s}\n',int2str(plt));
             fprintf(fidTeX,'\\end{figure}\n');
             fprintf(fidTeX,'\n');
-            fprintf(fidTeX,'%% End of TeX file.\n');
-            fclose(fidTeX);
         end
+    end
+    if options_.TeX
+        fprintf(fidTeX,'\n');
+        fprintf(fidTeX,'%% End of TeX file.\n');
+        fclose(fidTeX);
+    end
     end
 end
 

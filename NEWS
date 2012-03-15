@@ -1,3 +1,44 @@
+Announcement for Dynare 4.2.5 (on 2012-03-14)
+=============================================
+
+We are pleased to announce the release of Dynare 4.2.5.
+
+This is a bugfix release.
+
+The Windows package for the new release is already available for download at
+the official Dynare website <http://www.dynare.org>. The Mac and Linux packages
+should follow soon.
+
+All users are strongly encouraged to upgrade.
+
+The new release is compatible with MATLAB versions ranging from 7.0 (R14) to
+7.14 (R2012a) and with GNU Octave versions ranging from 3.0 to 3.6.
+
+Note that GNU Octave users under Windows will have to upgrade to GNU Octave
+version 3.6.1 (MinGW). The Octave installer can be downloaded at:
+
+ http://www.dynare.org/octave/Octave3.6.1_gcc4.6.2_20120303-setup.exe
+
+Here is a non-exhaustive list of the problems identified in version 4.2.4 and
+that have been fixed in version 4.2.5:
+
+ * The MATLAB optimization toolbox was sometimes not correctly detected even
+   when installed
+
+ * Using the inverse gamma distribution with extreme hyperparameter values
+   could lead to a crash
+
+ * Various issues in the accelerated deterministic solver with block
+   decomposition
+
+ * Various issues in the parallelization engine
+
+ * Compatibility issues with the Global Sensitivity Analysis toolbox
+
+ * The Dynare++ binary was broken in the Windows package because of a missing
+   dynamic library
+
+
 Announcement for Dynare 4.2.4 (on 2011-12-02)
 =============================================
 
