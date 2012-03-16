@@ -9,6 +9,8 @@
 
 !include dynare-version.nsi
 
+SetCompressor /SOLID lzma
+
 Name "Dynare ${VERSION}"
 
 OutFile "dynare-${VERSION}-win.exe"
