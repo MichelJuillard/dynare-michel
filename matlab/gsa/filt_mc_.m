@@ -408,7 +408,7 @@ else
     
     param_names='';
     for j=1:npar+nshock,
-        param_names=str2mat(param_names, bayestopt_.name{j});
+        param_names=char(param_names, bayestopt_.name{j});
     end
     param_names=param_names(2:end,:);
     
@@ -528,9 +528,9 @@ else
         end
         %subplot(3,2,6)
         if exist('OCTAVE_VERSION'),
-            legend(str2mat('base',vvarvecm(np,:)),'location','eastoutside');
+            legend(char('base',vvarvecm(np,:)),'location','eastoutside');
         else
-            h0=legend(str2mat('base',vvarvecm(np,:)),0);
+            h0=legend(char('base',vvarvecm(np,:)),0);
             set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3],'interpreter','none');
         end
         %h0=legend({'base',vnam{np}}',0);
@@ -599,9 +599,9 @@ else
             title([pnam{nsnam(j)}],'interpreter','none')
         end
         if exist('OCTAVE_VERSION'),
-            legend(str2mat('base',vvarvecm(np,:)),'location','eastoutside');
+            legend(char('base',vvarvecm(np,:)),'location','eastoutside');
         else
-            h0=legend(str2mat('base',vvarvecm(np,:)),0);
+            h0=legend(char('base',vvarvecm(np,:)),0);
             set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3],'interpreter','none')
         end
         %h0=legend({'base',vnam{np}}',0);
