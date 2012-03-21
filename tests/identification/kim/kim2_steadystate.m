@@ -1,4 +1,4 @@
-function [ys,check1]=kim_steadystate(junk, ys)
+function [ys,check1]=kim2_steadystate(junk, ys)
 
 global M_ options_
 
