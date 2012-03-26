@@ -389,7 +389,7 @@ If under MATLAB: the optimization toolbox, the statistics toolbox;
 @item
 If under GNU Octave, the following
 @uref{http://octave.sourceforge.net/,Octave-Forge} packages: optim,
-statistics.
+io, java, statistics.
 
 @end itemize
 
@@ -2033,7 +2033,11 @@ MAT-file (extension @file{.mat}): same as for M-files.
 
 @item
 Excel file (extension @file{.xls}): for each endogenous and exogenous,
-the file must contain a column of the same name (not supported under Octave).
+the file must contain a column of the same name (supported under Octave
+if the @uref{http://octave.sourceforge.net/io/,io} and
+@uref{http://octave.sourceforge.net/java/,java} packages from
+Octave-Forge are installed, along with a
+@uref{http://www.java.com/download,Java Runtime Environment}).
 @end itemize
 
 @customhead{Warning}
@@ -3707,8 +3711,12 @@ graphs of smoothed shocks, smoothed observation errors, smoothed and historical 
 
 @item datafile = @var{FILENAME}
 @anchor{datafile}
-The datafile (a @file{.m} file, a @file{.mat} file or, under MATLAB, a
-@file{.xls} file)
+The datafile: a @file{.m} file, a @file{.mat} file or, a
+@file{.xls} file (the latter format is supported under Octave
+if the @uref{http://octave.sourceforge.net/io/,io} and
+@uref{http://octave.sourceforge.net/java/,java} packages from
+Octave-Forge are installed, along with a
+@uref{http://www.java.com/download,Java Runtime Environment})
 
 @item xls_sheet = @var{NAME}
 @anchor{xls_sheet}
