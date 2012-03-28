@@ -243,6 +243,7 @@ options_.ramsey_policy = 0;
 options_.timeless = 0;
 
 % estimation
+estimation_info.subsamples.range = struct('date1', {}, 'date2', {});
 estimation_info.parameters.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
                                           'mode', {}, 'stdev', {}, 'date1', {}, ...
                                           'date2', {}, 'shift', {}, 'variance', {});
@@ -258,6 +259,8 @@ estimation_info.measurement_error.prior = struct('name', {}, 'shape', {}, 'mean'
 estimation_info.measurement_error_corr.prior = struct('name', {}, 'shape', {}, 'mean', {}, ...
                                                   'mode', {}, 'stdev', {}, 'date1', {}, ...
                                                   'date2', {}, 'shift', {}, 'variance', {});
+estimation_info.subsamples_index = {};
+estimation_info.subsamples.range_index = {};
 estimation_info.parameters.prior_index = {};
 estimation_info.measurement_error.prior_index = {};
 estimation_info.structural_innovation.prior_index = {};
