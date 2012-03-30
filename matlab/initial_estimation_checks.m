@@ -1,4 +1,4 @@
-function DynareResults = initial_estimation_checks(xparam1,DynareDataset,Model,EstimatedParameters,DynareOptions,BayesInfo,DynareResults)
+function DynareResults = initial_estimation_checks(objective_function,xparam1,DynareDataset,Model,EstimatedParameters,DynareOptions,BayesInfo,DynareResults)
 % function initial_estimation_checks(xparam1,gend,data,data_index,number_of_observations,no_more_missing_observations)
 % Checks data (complex values, ML evaluation, initial values, BK conditions,..)
 %
@@ -35,19 +35,24 @@ if DynareDataset.info.nvobs>Model.exo_nbr+EstimatedParameters.nvn
 end
 
 % check if steady state solves static model (except if diffuse_filter == 1)
-[DynareResults.steady_state] = ...
-    evaluate_steady_state(DynareResults.steady_state,Model,DynareOptions,DynareResults,DynareOptions.diffuse_filter==0);
+[DynareResults.steady_state] = evaluate_steady_state(DynareResults.steady_state,Model,DynareOptions,DynareResults,DynareOptions.diffuse_filter==0);
+
+% Evaluate the likelihood.
+[fval,a,b,c,d] = feval(objective_function,xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
 
 if DynareOptions.dsge_var
-    [fval,cost_flag,info] = DsgeVarLikelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
+    info = b;
 else
-    [fval,cost_flag,ys,trend_coeff,info] = dsge_likelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
-    if DynareOptions.mode_compute == 5
-        % this call is necessary to initialized persistent variable
-        % 'penalty' in dsge_likelihood_hh
-        [fval,llik,cost_flag,ys,trend_coeff,info] = ...
-            dsge_likelihood_hh(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
-    end
+    info = d;
+end
+
+if strcmp(objective_function,'dsge_likelihood') && DynareOptions.mode_compute==5
+    % this call is necessary to initialized persistent variable
+    % 'penalty' in dsge_likelihood_hh
+    [fval,llik,cost_flag,ys,trend_coeff,info] = ...
+        dsge_likelihood_hh(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
+elseif ~strcmp(objective_function,'dsge_likelihood') && DynareOptions.mode_compute==5
+    error('Options mode_compute=5 is not compatible with non linear filters or Dsge-VAR models!')
 end
 
 if info(1) > 0

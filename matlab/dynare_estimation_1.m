@@ -113,7 +113,7 @@ if options_.dsge_var
 end
 
 
-oo_ = initial_estimation_checks(xparam1,dataset_,M_,estim_params_,options_,bayestopt_,oo_);
+oo_ = initial_estimation_checks(objective_function,xparam1,dataset_,M_,estim_params_,options_,bayestopt_,oo_);
 
 if isequal(options_.mode_compute,0) && isempty(options_.mode_file) && options_.mh_posterior_mode_estimation==0
     if options_.smoother == 1
