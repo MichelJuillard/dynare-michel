@@ -38,9 +38,9 @@ global estimation_info
 if isempty(name2) % parameter or std() statement
     subsamples_indx = find(strcmp(name1, estimation_info.subsamples_index) == 1);
 else % corr statement
-    subsamples_indx = find(strcmp([name1 '_' name2], estimation_info.subsamples_index) == 1);
+    subsamples_indx = find(strcmp([name1 ':' name2], estimation_info.subsamples_index) == 1);
     if isempty(subsamples_indx)
-        subsamples_indx = find(strcmp([name2 '_' name1], estimation_info.subsamples_index) == 1);
+        subsamples_indx = find(strcmp([name2 ':' name1], estimation_info.subsamples_index) == 1);
     end
 end
 
