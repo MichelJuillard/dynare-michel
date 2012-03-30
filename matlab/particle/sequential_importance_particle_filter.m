@@ -128,7 +128,7 @@ for t=1:sample_size
     lnw = -.5*(const_lik+log(det(PredictedObservedVariance))+sum(PredictionError.*(PredictedObservedVariance\PredictionError),1));
     dfac = max(lnw);
     wtilde = weights.*exp(lnw-dfac);
-    lik(t) = log(mean(wtilde))+dfac;
+    lik(t) = log(sum(wtilde))+dfac;
     weights = wtilde/sum(wtilde);
     % sum(weights>max(weights)*1e-6)
     Neff = 1/(weights*weights');
