@@ -1,26 +1,28 @@
-function new_particles = univariate_smooth_resmp(weights,particles,number)
-% Smooth Resamples particles.
+function resampled_particles = univariate_smooth_resampling(weights,particles,number_of_partitions)
+% Smooth Resampling of the  particles.
 
 %@info:
-%! @deftypefn {Function File} {@var{indx} =} resample (@var{weights}, @var{method})
-%! @anchor{particle/resample}
+%! @deftypefn {Function File} {@var{resampled_particles} =} univariate_smooth_resampling (@var{weights}, @var{particles}, @var{number_of_partitions})
+%! @anchor{particle/univariate_smooth_resampling}
 %! @sp 1
-%! Resamples particles.
+%! Smooth Resampling of the  particles (univariate version).
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
 %! @table @ @var
 %! @item weights
 %! n*1 vector of doubles, particles' weights.
-%! @item method
-%! string equal to 'residual' or 'traditional'.
+%! @item particles
+%! n*1 vector of doubles, particles.
+%! @item number_of_partitions
+%! Integer scalar.
 %! @end table
 %! @sp 2
 %! @strong{Outputs}
 %! @sp 1
 %! @table @ @var
 %! @item indx
-%! n*1 vector of intergers, indices.
+%! n*1 vector of doubles, resampled particles.
 %! @end table
 %! @sp 2
 %! @strong{This function is called by:}
@@ -28,13 +30,11 @@ function new_particles = univariate_smooth_resmp(weights,particles,number)
 %! @ref{particle/sequantial_importance_particle_filter}
 %! @sp 2
 %! @strong{This function calls:}
-%! @sp 1
-%! @ref{residual_resampling}, @ref{traditional_resampling}
 %! @sp 2
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011, 2012 Dynare Team
+% Copyright (C) 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -55,7 +55,7 @@ function new_particles = univariate_smooth_resmp(weights,particles,number)
 %           stephane DOT adjemian AT univ DASH lemans DOT fr
 
 M = length(particles) ;
-lambda_tilde = [ (.5*(2*weights(1)+weights(2))) ;       
+lambda_tilde = [ (.5*(2*weights(1)+weights(2))) ;
                  (.5*(weights(2:M-1)+weights(3:M))) ;
                  (.5*(weights(M-1)+2*weights(M))) ] ;
 lambda_bar = cumsum(lambda_tilde) ;
@@ -64,17 +64,16 @@ u = rand(1,1) ;
 new_particles = zeros(number,1) ;
 i = 1 ;
 j = 1 ;
-while i<=number 
+while i<=number
     u_j = ( i-1 + u)/number ;
-    while u_j>lambda_bar(j) 
+    while u_j>lambda_bar(j)
         j = j+1 ;
-        if j==M 
+        if j==M
             j = M-1 ;
             break ;
-        end 
-    end  
+        end
+    end
     u_star = (u_j - (lambda_bar(j)-lambda_tilde(j)))./lambda_tilde(j) ;
     new_particles(i) = (particles(j+1) - particles(j))*u_star + particles(j) ;
     i = i+1 ;
-end 
-
+end
