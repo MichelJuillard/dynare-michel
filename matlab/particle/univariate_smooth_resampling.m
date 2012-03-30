@@ -1,8 +1,8 @@
-function resampled_particles = univariate_smooth_resampling(weights,particles,number_of_partitions)
+function new_particles = univariate_smooth_resampling(weights,particles,number_of_new_particles)
 % Smooth Resampling of the  particles.
 
 %@info:
-%! @deftypefn {Function File} {@var{resampled_particles} =} univariate_smooth_resampling (@var{weights}, @var{particles}, @var{number_of_partitions})
+%! @deftypefn {Function File} {@var{new_particles} =} univariate_smooth_resampling (@var{weights}, @var{number_of_new_particles})
 %! @anchor{particle/univariate_smooth_resampling}
 %! @sp 1
 %! Smooth Resampling of the  particles (univariate version).
@@ -14,7 +14,7 @@ function resampled_particles = univariate_smooth_resampling(weights,particles,nu
 %! n*1 vector of doubles, particles' weights.
 %! @item particles
 %! n*1 vector of doubles, particles.
-%! @item number_of_partitions
+%! @item number_of_new_particles
 %! Integer scalar.
 %! @end table
 %! @sp 2
@@ -22,7 +22,7 @@ function resampled_particles = univariate_smooth_resampling(weights,particles,nu
 %! @sp 1
 %! @table @ @var
 %! @item indx
-%! n*1 vector of doubles, resampled particles.
+%! number_of_new_particles*1 vector of doubles, new particles.
 %! @end table
 %! @sp 2
 %! @strong{This function is called by:}
@@ -61,11 +61,11 @@ lambda_tilde = [ (.5*(2*weights(1)+weights(2))) ;
 lambda_bar = cumsum(lambda_tilde) ;
 lambda_bar = lambda_bar(1:M-1) ;
 u = rand(1,1) ;
-new_particles = zeros(number,1) ;
+new_particles = zeros(number_of_new_particles,1) ;
 i = 1 ;
 j = 1 ;
-while i<=number
-    u_j = ( i-1 + u)/number ;
+while i<=number_of_new_particles
+    u_j = ( i-1 + u)/number_of_new_particles ;
     while u_j>lambda_bar(j)
         j = j+1 ;
         if j==M
