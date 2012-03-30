@@ -184,11 +184,13 @@ particle.unscented.alpha = 1;
 particle.unscented.beta = 2;
 particle.unscented.kappa = 1;
 % Configuration of resampling in case of particles
-particle.resampling.status = 'systematic'; % 'generic'
+particle.resampling.status = 'systematic'; % 'none', 'generic', 'smoothed'
 particle.resampling.neff_threshold = .5;
 % Choice of the resampling method
 particle.resampling.method1 = 'traditional' ;
 particle.resampling.method2 = 'kitagawa';
+% Number of partitions for the smoothed resampling method
+DynareOptions.particle.resampling.number_of_partitions = 200;
 % Configuration of the mixture filters
 particle.mixture_method = 'particles' ;
 % Size of the different mixtures
