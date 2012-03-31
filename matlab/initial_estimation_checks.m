@@ -46,13 +46,15 @@ else
     info = d;
 end
 
-if strcmp(objective_function,'dsge_likelihood') && DynareOptions.mode_compute==5
-    % this call is necessary to initialized persistent variable
-    % 'penalty' in dsge_likelihood_hh
-    [fval,llik,cost_flag,ys,trend_coeff,info] = ...
-        dsge_likelihood_hh(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
-elseif ~strcmp(objective_function,'dsge_likelihood') && DynareOptions.mode_compute==5
-    error('Options mode_compute=5 is not compatible with non linear filters or Dsge-VAR models!')
+if DynareOptions.mode_compute==5
+    if strcmp(func2str(objective_function),'dsge_likelihood')
+        % this call is necessary to initialized persistent variable
+        % 'penalty' in dsge_likelihood_hh
+        [fval,llik,cost_flag,ys,trend_coeff,info] = ...
+            dsge_likelihood_hh(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
+    else
+        error('Options mode_compute=5 is not compatible with non linear filters or Dsge-VAR models!')
+    end
 end
 
 if info(1) > 0
