@@ -3878,7 +3878,8 @@ Uses @code{fminunc} optimization routine
 Uses Chris Sims's @code{csminwel}
 
 @item 5
-Uses Marco Ratto's @code{newrat}
+Uses Marco Ratto's @code{newrat}. This value is not compatible with non
+linear filters or DSGE-VAR models
 
 @item 6
 Uses a Monte-Carlo based optimization routine (see
