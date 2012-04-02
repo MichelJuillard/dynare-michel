@@ -44,9 +44,9 @@ end
 if isempty(name2) % parameter or std() statement
     indx = eval(['find(strcmp(name1, estimation_info.' substructure_name ') == 1)']);
 else % corr statement
-    indx = eval(['find(strcmp([''' name1 '_' name2 '''], estimation_info.' substructure_name ') == 1)']);
+    indx = eval(['find(strcmp([''' name1 ':' name2 '''], estimation_info.' substructure_name ') == 1)']);
     if isempty(indx)
-        indx = eval(['find(strcmp([''' name2 '_' name1 '''], estimation_info.' substructure_name ') == 1)']);
+        indx = eval(['find(strcmp([''' name2 ':' name1 '''], estimation_info.' substructure_name ') == 1)']);
     end
 end
 

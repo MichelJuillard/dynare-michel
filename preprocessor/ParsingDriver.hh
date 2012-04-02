@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003-2011 Dynare Team
+ * Copyright (C) 2003-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -392,8 +392,14 @@ public:
   void set_prior(string *arg1, string *arg2);
   //! Adds the variance option to its temporary holding place
   void set_prior_variance(expr_t variance=NULL);
+  //! Copies the prior from_name to_name
+  void copy_prior(string *to_declaration_type, string *to_name1, string *to_name2, string *to_subsample_name,
+                  string *from_declaration_type, string *from_name1, string *from_name2, string *from_subsample_name);
   //! Sets the options for a parameter
   void set_options(string *arg1, string *arg2);
+  //! Copies the options from_name to_name
+  void copy_options(string *to_declaration_type, string *to_name1, string *to_name2, string *to_subsample_name,
+                    string *from_declaration_type, string *from_name1, string *from_name2, string *from_subsample_name);
   //! Sets the prior for estimated std dev
   void set_std_prior(string *arg1, string *arg2);
   //! Sets the options for estimated std dev
