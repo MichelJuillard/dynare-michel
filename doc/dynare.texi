@@ -6958,10 +6958,18 @@ Multi-country RBC model with time to build, presented in @cite{Backus,
 Kehoe and Kydland (1992)}.
 @end table
 
+@item agtrend.mod
+Small open economy RBC model with shocks to the growth trend, presented
+in @cite{Aguiar and Gopinath (2004)}.
+
 @node Bibliography
 @chapter Bibliography
 
 @itemize
+
+@item
+Aguiar, Mark and Gopinath, Gita (2004): ``Emerging Market Business
+Cycles: The Cycle is the Trend,'' @i{NBER Working Paper}, 10734
 
 @item
 Backus, David K., Patrick J. Kehoe, and Finn E. Kydland (1992):
