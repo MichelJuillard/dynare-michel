@@ -93,7 +93,7 @@ phi = 3.76;
 @#endif
 
 @#if ghh == 1
-r_star = mu_g^(-sigma)/beta - 1;
+r_star = mu_g^sigma/beta - 1;
 @#else
 r_star = mu_g^(1-gamma*(1-sigma))/beta - 1;
 @#endif
