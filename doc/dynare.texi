@@ -372,7 +372,7 @@ In order to run Dynare, you need one of the following:
 MATLAB version 7.0 (R14) or above;
 
 @item
-GNU Octave version 3.0.0 or above.
+GNU Octave version 3.2.2 or above.
 @end itemize
 
 Some installation instructions for GNU Octave can be found on the
@@ -401,7 +401,7 @@ MATLAB: see
 @uref{http://www.dynare.org/DynareWiki/ConfigureMatlabWindowsForMexCompilation,instructions
 on the Dynare wiki}. Users of Octave under Linux should install the
 package for MEX file compilation (under Debian or Ubuntu, it is called
-@file{octave3.2-headers} or @file{octave3.0-headers}). If you are
+@file{liboctave-dev} or @file{octave3.2-headers}). If you are
 using Octave or MATLAB under Mac OS X, you should install the latest
 version of XCode: see
 @uref{http://www.dynare.org/DynareWiki/InstallOnMacOSX,instructions on
