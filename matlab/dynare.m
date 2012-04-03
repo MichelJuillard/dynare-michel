@@ -16,7 +16,7 @@ function dynare(fname, varargin)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2011 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -101,9 +101,10 @@ for i=2:nargin
     command = [command ' ' varargin{i-1}];
 end
 
-% Workaround for bug in Octave >= 3.2
+% Workaround for bug in Octave 3.2
 % See http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=550823
-if exist('OCTAVE_VERSION') && ~octave_ver_less_than('3.2.0')
+if exist('OCTAVE_VERSION') && ~octave_ver_less_than('3.2.0') ...
+        && octave_ver_less_than('3.4.0')
     sleep(2)
 end
 
