@@ -154,7 +154,7 @@ end
 
 SampleSize = options_ident.prior_mc;
 
-if ~(exist('sylvester3mr','file')==2),
+if ~(exist('sylvester3','file')==2),
 
     dynareroot = strrep(which('dynare'),'dynare.m','');
     addpath([dynareroot 'gensylv'])
