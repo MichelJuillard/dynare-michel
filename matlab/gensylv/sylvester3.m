@@ -1,5 +1,5 @@
-function x=sylvester3(a,b,c,d)
-% solves a*x+b*x*c=d
+function x=sylvester3mr(a,b,c,d)
+% solves a*x+b*x*c=d where d is [n x m x p]
 
 % Copyright (C) 2005-2009 Dynare Team
 %
@@ -20,53 +20,72 @@ function x=sylvester3(a,b,c,d)
 
 n = size(a,1);
 m = size(c,1);
+p = size(d,3);
 if n == 1
-    x=d./(a*ones(1,m)+b*c);
+    for j=1:p,
+        x(:,:,j)=d(:,:,j)./(a*ones(1,m)+b*c);
+    end
     return
 end
 if m == 1
-    x = (a+c*b)\d;
+    for j=1:p,
+        x(:,:,j) = (a+c*b)\d(:,:,j);
+    end
     return;
 end
-x=zeros(n,m);
+x=zeros(n,m,p);
 [u,t]=schur(c);
 if exist('OCTAVE_VERSION')
     [aa,bb,qq,zz]=qz(full(a),full(b));
-    d=qq'*d*u;
+    for j=1:p,
+        d(:,:,j)=qq'*d(:,:,j)*u;
+    end
 else
     [aa,bb,qq,zz]=qz(full(a),full(b),'real'); % available in Matlab version 6.0
-    d=qq*d*u;
+    for j=1:p,
+        d(:,:,j)=qq*d(:,:,j)*u;
+    end
 end
 i = 1;
+c = zeros(n,1,p);
 while i < m
     if t(i+1,i) == 0
         if i == 1
-            c = zeros(n,1);
+            c = zeros(n,1,p);
         else
-            c = bb*(x(:,1:i-1)*t(1:i-1,i));
+            for j=1:p,
+                c(:,:,j) = bb*(x(:,1:i-1,j)*t(1:i-1,i));
+            end
         end
-        x(:,i)=(aa+bb*t(i,i))\(d(:,i)-c);
+        x(:,i,:)=(aa+bb*t(i,i))\squeeze(d(:,i,:)-c);
         i = i+1;
     else
         if i == n
-            c = zeros(n,1);
-            c1 = zeros(n,1);
+            c = zeros(n,1,p);
+            c1 = zeros(n,1,p);
         else
-            c = bb*(x(:,1:i-1)*t(1:i-1,i));
-            c1 = bb*(x(:,1:i-1)*t(1:i-1,i+1));
+            for j=1:p,
+                c(:,:,j) = bb*(x(:,1:i-1,j)*t(1:i-1,i));
+                c1(:,:,j) = bb*(x(:,1:i-1,j)*t(1:i-1,i+1));
+            end
         end
-        z = [aa+bb*t(i,i) bb*t(i+1,i); bb*t(i,i+1) aa+bb*t(i+1,i+1)]...
-            \[d(:,i)-c;d(:,i+1)-c1];
-        x(:,i) = z(1:n);
-        x(:,i+1) = z(n+1:end);
+        bigmat = ([aa+bb*t(i,i) bb*t(i+1,i); bb*t(i,i+1) aa+bb*t(i+1,i+1)]);
+        z = bigmat\squeeze([d(:,i,:)-c;d(:,i+1,:)-c1]);
+        x(:,i,:) = z(1:n,:);
+        x(:,i+1,:) = z(n+1:end,:);
         i = i + 2;
     end
 end
 if i == m
-    c = bb*(x(:,1:m-1)*t(1:m-1,m));
-    x(:,m)=(aa+bb*t(m,m))\(d(:,m)-c);
+    for j=1:p,
+        c(:,:,j) = bb*(x(:,1:m-1,j)*t(1:m-1,m));
+    end
+    aabbt = (aa+bb*t(m,m));
+    x(:,m,:)=aabbt\squeeze(d(:,m,:)-c);
 end
-x=zz*x*u';
+for j=1:p,
+    x(:,:,j)=zz*x(:,:,j)*u';
+end
 
 % 01/25/03 MJ corrected bug for i==m (sign of c in x determination)
 % 01/31/03 MJ added 'real' to qz call

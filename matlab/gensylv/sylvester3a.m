@@ -1,7 +1,7 @@
-function x=sylvester3a(x0,a,b,c,d)
+function [x0, flag]=sylvester3a(x0,a,b,c,dd)
 % solves iteratively ax+bxc=d
 
-% Copyright (C) 2005-2009 Dynare Team
+% Copyright (C) 2005-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -20,15 +20,19 @@ function x=sylvester3a(x0,a,b,c,d)
 
 a_1 = inv(a);
 b = a_1*b;
-d = a_1*d;
-e = 1;
-iter = 1;
-while e > 1e-8 & iter < 500
-    x = d-b*x0*c;
-    e = max(max(abs(x-x0)));
-    x0 = x;
-    iter = iter + 1;
-end
-if iter == 500
-    warning('sylvester3a : Only accuracy of %10.8f is achieved after 500 iterations') 
+flag=0;
+for j=1:size(dd,3),
+    d = a_1*dd(:,:,j);
+    e = 1;
+    iter = 1;
+    while e > 1e-8 && iter < 500
+        x = d-b*x0(:,:,j)*c;
+        e = max(max(abs(x-x0(:,:,j))));
+        x0(:,:,j) = x;
+        iter = iter + 1;
+    end
+    if iter == 500
+        sprintf('sylvester3amr : Only accuracy of %10.8f is achieved after 500 iterations',e);
+        flag=1;
+    end
 end
