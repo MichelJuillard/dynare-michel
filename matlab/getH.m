@@ -356,6 +356,10 @@ else % generalized sylvester equation
         d(:,:,j) = Dg2(:,:,j)-elem(:,:,j)*A;
     end
     xx=sylvester3mr(a,b,c,d);
+    flag=1;
+    while flag,
+    [xx, flag]=sylvester3amr(xx,a,b,c,d);
+    end
     H=zeros(m*m+m*(m+1)/2,param_nbr+length(indexo));
     if nargout>1,
         dOm = zeros(m,m,param_nbr+length(indexo));
@@ -436,6 +440,10 @@ if nargout > 5,
         end
     end
     xx2=sylvester3mr(a,b,c,d);
+    flag=1;
+    while flag,
+    [xx2, flag]=sylvester3amr(xx2,a,b,c,d);
+    end
     jcount = 0;
     for j=1:param_nbr,
         for i=j:param_nbr,
