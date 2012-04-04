@@ -138,6 +138,10 @@ if info(1)==0,
             [fval,cost_flag,ys,trend_coeff,info,M_,options_,bayestopt_,oo_,DLIK,AHess] = dsge_likelihood(params',data_info,options_,M_,estim_params_,bayestopt_,oo_,derivatives_info);
 %                 fval = DsgeLikelihood(xparam1,data_info,options_,M_,estim_params_,bayestopt_,oo_);
             AHess=-AHess;
+            if min(eig(AHess))<0,
+                error('Analytic Hessian is not positive semi-definite!')
+            end
+%             chol(AHess);
             ide_hess.AHess= AHess;
             deltaM = sqrt(diag(AHess));
             iflag=any((deltaM.*deltaM)==0);
@@ -153,7 +157,9 @@ if info(1)==0,
             cmm = NaN(size(siJ,1),size(siJ,1));
             ind1=find(ide_hess.ind0);
             cmm = siJ(:,ind1)*((AHess(ind1,ind1))\siJ(:,ind1)');
-            chh = siH(:,ind1)*((AHess(ind1,ind1))\siH(:,ind1)');
+            temp1=((AHess(ind1,ind1))\siH(:,ind1)');
+            diag_chh=sum(siH(:,ind1)'.*temp1)';
+%             chh = siH(:,ind1)*((AHess(ind1,ind1))\siH(:,ind1)');
             ind1=ind1(ind1>offset);
             clre = siLRE(:,ind1-offset)*((AHess(ind1,ind1))\siLRE(:,ind1-offset)');
             rhoM=sqrt(1./diag(inv(tildaM(indok,indok))));
@@ -190,12 +196,16 @@ if info(1)==0,
 %             rhoM=sqrt(1-1./diag(inv(tildaM)));
 %             rhoM=(1-1./diag(inv(tildaM)));
             ind1=find(ide_hess.ind0);
-            chh = siH(:,ind1)*((MIM(ind1,ind1))\siH(:,ind1)');
+            temp1=((MIM(ind1,ind1))\siH(:,ind1)');
+            diag_chh=sum(siH(:,ind1)'.*temp1)';
+%             chh = siH(:,ind1)*((MIM(ind1,ind1))\siH(:,ind1)');
             ind1=ind1(ind1>offset);
             clre = siLRE(:,ind1-offset)*((MIM(ind1,ind1))\siLRE(:,ind1-offset)');
-            rhoM(indok)=sqrt(1./diag(inv(tildaM(indok,indok))));
-            normaliz(indok) = (sqrt(diag(inv(tildaM(indok,indok))))./deltaM(indok))'; %sqrt(diag(inv(MIM(indok,indok))))';
-%             deltaM = deltaM.*abs(params');
+            if ~isempty(indok),
+                rhoM(indok)=sqrt(1./diag(inv(tildaM(indok,indok))));
+                normaliz(indok) = (sqrt(diag(inv(tildaM(indok,indok))))./deltaM(indok))'; %sqrt(diag(inv(MIM(indok,indok))))';
+            end
+            %             deltaM = deltaM.*abs(params')
             flag_score=0;
         end
         ide_strength_J(indok) = (1./(normaliz(indok)'./abs(params(indok)')));
@@ -212,7 +222,8 @@ if info(1)==0,
 %         isok = find((abs(TAU)>=1.e-8));
 %         quant(isok,:) = siH(isok,:)./repmat(TAU(isok,1),1,nparam);
 %         quant(inok,:) = siH(inok,:)./repmat(mean(abs(TAU)),length(inok),nparam);
-        quant = siH./repmat(sqrt(diag(chh)),1,nparam);
+%         quant = siH./repmat(sqrt(diag(chh)),1,nparam);
+        quant = siH./repmat(sqrt(diag_chh),1,nparam);
         siHnorm = vnorm(quant).*normaliz1;
         %                 siHnorm = vnorm(siH./repmat(TAU,1,nparam)).*normaliz;
         quant=[];
