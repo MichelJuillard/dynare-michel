@@ -22,7 +22,7 @@ global options_ oo_
 
 mm=zeros(length(indx),replic);
 
-disp('Evaluting simulated moment uncertainty ... please wait')
+disp('Evaluating simulated moment uncertainty ... please wait')
 disp(['Doing ',int2str(replic),' replicas of length ',int2str(periods),' periods.'])
 noprint0 = options_.noprint;
 for j=1:replic;
