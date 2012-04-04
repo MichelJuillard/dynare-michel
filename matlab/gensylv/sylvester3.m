@@ -38,7 +38,7 @@ end
 if exist('OCTAVE_VERSION')
     [aa,bb,qq,zz]=qz(full(a),full(b));
     for j=1:p,
-        d(:,:,j)=qq'*d(:,:,j)*u;
+        d(:,:,j)=qq*d(:,:,j)*u;
     end
 else
     [aa,bb,qq,zz]=qz(full(a),full(b),'real'); % available in Matlab version 6.0
