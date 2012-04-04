@@ -61,7 +61,7 @@ options_ident = set_default_option(options_ident,'advanced',0);
 options_ident = set_default_option(options_ident,'normalize_jacobians',1);
 options_ident = set_default_option(options_ident,'lik_init',1);
 if options_ident.gsa_sample_file,
-    GSAFolder = checkpath('gsa');
+    GSAFolder = checkpath('gsa',M_.dname);
     if options_ident.gsa_sample_file==1,
         load([GSAFolder,filesep,fname_,'_prior'],'lpmat','lpmat0','istable');
     elseif options_ident.gsa_sample_file==2,
@@ -105,11 +105,13 @@ nlags = options_ident.ar;
 periods = options_ident.periods;
 replic = options_ident.replic;
 useautocorr = options_ident.useautocorr;
+options_.order=1;
 options_.ar=nlags;
 options_.prior_mc = options_ident.prior_mc;
 options_.options_ident = options_ident;
 options_.Schur_vec_tol = 1.e-8;
 options_.nomoments=0;
+options_.analytic_derivation=1;
 
 options_ = set_default_option(options_,'datafile',[]);
 options_.mode_compute = 0;
