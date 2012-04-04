@@ -1,4 +1,4 @@
-function x=sylvester3mr(a,b,c,d)
+function x=sylvester3(a,b,c,d)
 % solves a*x+b*x*c=d where d is [n x m x p]
 
 % Copyright (C) 2005-2009 Dynare Team
@@ -21,6 +21,7 @@ function x=sylvester3mr(a,b,c,d)
 n = size(a,1);
 m = size(c,1);
 p = size(d,3);
+x=zeros(n,m,p);
 if n == 1
     for j=1:p,
         x(:,:,j)=d(:,:,j)./(a*ones(1,m)+b*c);
@@ -33,7 +34,6 @@ if m == 1
     end
     return;
 end
-x=zeros(n,m,p);
 [u,t]=schur(c);
 if exist('OCTAVE_VERSION')
     [aa,bb,qq,zz]=qz(full(a),full(b));

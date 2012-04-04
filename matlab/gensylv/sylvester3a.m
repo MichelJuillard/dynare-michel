@@ -32,7 +32,7 @@ for j=1:size(dd,3),
         iter = iter + 1;
     end
     if iter == 500
-        sprintf('sylvester3amr : Only accuracy of %10.8f is achieved after 500 iterations',e);
+        sprintf('sylvester3a : Only accuracy of %10.8f is achieved after 500 iterations',e);
         flag=1;
     end
 end
