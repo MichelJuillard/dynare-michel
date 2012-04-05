@@ -5575,7 +5575,7 @@ Use cross @math{A^0} and @math{A^+} restrictions. Default: @code{off}
 @item contemp_reduced_form
 Use contemporaneous recursive reduced form. Default: @code{off}
 
-@item no_bayesian_prior = @var{INTEGER}
+@item no_bayesian_prior
 Do not use bayesian prior. Default: @code{off} (@i{i.e.} use bayesian
 prior)
 
