@@ -3863,7 +3863,10 @@ Specifies the optimizer for the mode computation:
 @table @code
 
 @item 0
-The mode isn't computed. @code{mode_file} option must be specified
+The mode isn't computed. When @code{mode_file} option is specified, the
+mode is simply read from that file. When @code{mode_file} option is not
+specified, Dynare reports the value of the posterior (likelihood)
+evaluated at the initial value of the parameters.
 
 @item 1
 Uses @code{fmincon} optimization routine (not available under Octave)
