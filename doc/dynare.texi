@@ -3864,9 +3864,16 @@ Specifies the optimizer for the mode computation:
 
 @item 0
 The mode isn't computed. When @code{mode_file} option is specified, the
-mode is simply read from that file. When @code{mode_file} option is not
-specified, Dynare reports the value of the posterior (likelihood)
-evaluated at the initial value of the parameters.
+mode is simply read from that file. 
+
+When @code{mode_file} option is not
+specified, Dynare reports the value of the log posterior (log likelihood)
+evaluated at the initial value of the parameters. 
+
+When @code{mode_file}
+option is not specified and there is no @code{estimated_params} block,
+but the @code{smoother} option is used, it is a roundabout way to
+compute the smoothed value of the variables of a model with calibrated parameters.
 
 @item 1
 Uses @code{fmincon} optimization routine (not available under Octave)
