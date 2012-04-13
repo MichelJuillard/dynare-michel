@@ -1,6 +1,7 @@
 function [options_, oo_]=set_ms_estimation_file(file_tag, options_, oo_)
 % function [options_, oo_]=set_ms_estimation_file(file_tag, options_, oo_)
-% Set options_.ms.free_param_file based on user input
+% Set oo_.ms.maxparams, oo_.ms.A0, oo_.ms.Aplus, oo_.ms.Zeta, oo_.ms.Q
+% based on estimation output files
 %
 % INPUTS
 %    file_tag:    (string)    necessary because of different meanings of
@@ -36,8 +37,15 @@ function [options_, oo_]=set_ms_estimation_file(file_tag, options_, oo_)
 options_.ms.free_param_file = ['est_free_' file_tag '.out'];
 if ~exist(options_.ms.free_param_file,'file')
     error(['ERROR: Could not find free parameter file: ' options_.ms.free_param_file]);
+else
+    oo_.ms.maxparams = load(options_.ms.free_param_file);
+    oo_.ms.maxparams = oo_.ms.maxparams(3:end)';
 end
 
-oo_.ms.maxparams = load(options_.ms.free_param_file);
-oo_.ms.maxparams = oo_.ms.maxparams(3:end)';
+options_.ms.VAR_parameters_file = [file_tag '.mat'];
+if ~exist(options_.ms.VAR_parameters_file,'file')
+    error(['ERROR: Could not find VAR parameters file: ' options_.ms.VAR_parameters_file]);
+else
+    oo_.ms = load(options_.ms.VAR_parameters_file);
+end
 end
