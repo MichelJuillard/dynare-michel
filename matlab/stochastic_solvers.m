@@ -175,16 +175,6 @@ else
         end
     end
 
-    if options_.loglinear == 1
-        k = find(dr.kstate(:,2) <= M_.maximum_endo_lag+1);
-        klag = dr.kstate(k,[1 2]);
-        k1 = dr.order_var;
-        
-        dr.ghx = repmat(1./dr.ys(k1),1,size(dr.ghx,2)).*dr.ghx.* ...
-                 repmat(dr.ys(k1(klag(:,1)))',size(dr.ghx,1),1);
-        dr.ghu = repmat(1./dr.ys(k1),1,size(dr.ghu,2)).*dr.ghu;
-    end
-
     %exogenous deterministic variables
     if M_.exo_det_nbr > 0
         f1 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+2:end,order_var))));
@@ -206,3 +196,15 @@ else
                                      options_.threads.kronecker.sparse_hessian_times_B_kronecker_C);
     end
 end
+
+if options_.loglinear == 1
+    % this needs to be extended for order=2,3
+    k = find(dr.kstate(:,2) <= M_.maximum_endo_lag+1);
+    klag = dr.kstate(k,[1 2]);
+    k1 = dr.order_var;
+    
+    dr.ghx = repmat(1./dr.ys(k1),1,size(dr.ghx,2)).*dr.ghx.* ...
+             repmat(dr.ys(k1(klag(:,1)))',size(dr.ghx,1),1);
+    dr.ghu = repmat(1./dr.ys(k1),1,size(dr.ghu,2)).*dr.ghu;
+end
+
