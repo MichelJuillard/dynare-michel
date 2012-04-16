@@ -55,7 +55,7 @@ end
 
 [oo_.steady_state,M_.params,info] = steady_(M_,options_,oo_);
 
-if info(1)
+if info(1) && options_.steady.stop_on_error
     print_info(info,options_.noprint);
 end
 

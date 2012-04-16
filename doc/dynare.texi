@@ -2430,6 +2430,23 @@ Defines the number of steps when performing a homotopy. See
 
 @item nocheck
 Don't check the steady state values when they are provided explicitely either by a steady state file or a @code{steady_state_model} block. This is useful for models with unit roots as, in this case, the steady state is not unique or doesn't exist.
+
+@item stop_on_error = @var{INTEGER}
+Normally, @code{steady} stops on error with a message. However, in
+special circumstances, such as chaining homotopy steps, it may be useful
+to let it continue to the next step even if the current one was not
+successful. @code{stop_on_error} can take two values:
+@table @code
+
+@item 0
+@code{steady} doesn't stop on error
+
+@item 1
+@code{steady} stops on error
+@end table
+
+@noindent
+Default is @code{1}
 @end table
 
 @examplehead

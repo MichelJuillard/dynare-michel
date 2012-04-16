@@ -80,6 +80,7 @@ else
 end
 options_.steadystate_partial = [];
 options_.steadystate.nocheck = 0;
+options_.steady.stop_on_error = 1;
 
 % subset of the estimated deep parameters
 options_.ParamSubSet = 'None';
