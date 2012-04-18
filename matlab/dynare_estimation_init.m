@@ -253,7 +253,7 @@ if options_.block == 1
 
     [k2, i_posA, i_posB] = union(k3p, M_.state_var', 'rows');
     bayestopt_.smoother_var_list = [k3p(i_posA); M_.state_var(sort(i_posB))'];
-    [junk,bayestopt_.smoother_saved_var_list] = intersect(k3p,bayestopt_.smoother_var_list(:));
+    [junk,junk,bayestopt_.smoother_saved_var_list] = intersect(k3p,bayestopt_.smoother_var_list(:));
     [junk,ic] = intersect(bayestopt_.smoother_var_list,M_.state_var);
     bayestopt_.smoother_restrict_columns = ic;
     [junk,bayestopt_.smoother_mf] = ismember(k1, ...
@@ -273,7 +273,7 @@ else
     oo_.dr.restrict_columns = [ic; length(k2)+(1:nspred-npred)'];
 
     bayestopt_.smoother_var_list = union(k2,k3);
-    [junk,bayestopt_.smoother_saved_var_list] = intersect(k3,bayestopt_.smoother_var_list(:));
+    [junk,junk,bayestopt_.smoother_saved_var_list] = intersect(k3,bayestopt_.smoother_var_list(:));
     [junk,ic] = intersect(bayestopt_.smoother_var_list,nstatic+(1:npred)');
     bayestopt_.smoother_restrict_columns = ic;
     [junk,bayestopt_.smoother_mf] = ismember(var_obs_index, ...
