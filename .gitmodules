@@ -4,3 +4,6 @@
 [submodule "contrib/ms-sbvar/switch_dw"]
 	path = contrib/ms-sbvar/switch_dw
 	url = http://www.dynare.org/git/frbatlanta/switch_dw.git
+[submodule "contrib/ms-sbvar/TZcode"]
+	path = contrib/ms-sbvar/TZcode
+	url = http://www.dynare.org/git/frbatlanta/TZcode.git

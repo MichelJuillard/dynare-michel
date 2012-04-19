@@ -152,13 +152,83 @@ Copyright: 1996 Christopher Sims
            2003 Karibzhanov, Waggoner and Zha
 License: GPL-3+
 
-Files: matlab/ms-sbvar/cstz/*
-Copyright: 1993-2011 Tao Zha
+Files: contrib/ms-sbvar/TZcode/*
+Copyright: 1997-2012 Tao Zha
 License: GPL-3+
 
-Files: matlab/ms-sbvar/cstz/bfgsi.m matlab/ms-sbvar/cstz/csminit.m
- matlab/ms-sbvar/cstz/csminwel.m
-Copyright: 1993-2011 Tao Zha and Christopher Sims
+Files: contrib/ms-sbvar/TZcode/MatlabFiles/szbvar.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/phg233.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/phg235.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/pwf234.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/pmddf235.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/pmddf234.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/pmddf236.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/csminwel.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/phg234.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/pwf235.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/mnpdf.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/szasbvar.m
+Copyright: 1997-2012 Christopher A. Sims and Tao Zha
+License: GPL-3+
+
+Files: contrib/ms-sbvar/TZcode/MatlabFiles/pmddf233.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/csminit.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/gensysoldversion.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/gensys_z2new.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/gensysct.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/csminitworksuntiil0205.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/gensys_z2.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/qzdiv.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/pwf233.m
+Copyright: 1997-2012 Christopher A. Sims
+License: GPL-3+
+
+Files: contrib/ms-sbvar/TZcode/MatlabFiles/srestrictrwzalg.m
+Copyright: 1997-2012 Juan Rubio-Ramirez, Daniel Waggoner and Tao Zha
+License: GPL-3+
+
+Files: contrib/ms-sbvar/TZcode/MatlabFiles/clmonq.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/clgls.m
+Copyright: 1997-2012 Eric Leeper and Tao Zha
+License: GPL-3+
+
+Files: contrib/ms-sbvar/TZcode/MatlabFiles/a0lhfun.m
+Copyright: 1997-2012 Eric Leeper
+License: GPL-3+
+
+Files: contrib/ms-sbvar/TZcode/MatlabFiles/suptitle.m
+Copyright: 1997-2012 Drea Thomas
+License: GPL-3+
+
+Files: contrib/ms-sbvar/TZcode/MatlabFiles/fn_gibbsrvar.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/gibbsvar.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/simtanzphi.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/fn_gibbsglb.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/fn_gibbsrvar_setup.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/gibbsglb.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/fn_gibbsrvaroldworks.m
+Copyright: 1997-2012 Daniel Waggoner and Tao Zha
+License: GPL-3+
+
+Files: contrib/ms-sbvar/TZcode/MatlabFiles/gensys.m
+Copyright: 1996-2012 Christopher A. Sims
+License: GPL-3+
+
+Files: contrib/ms-sbvar/TZcode/MatlabFiles/xydata.m
+Copyright: 1997-2012 Lutz Kilian and Tao Zha
+License: GPL-3+
+
+Files: contrib/ms-sbvar/TZcode/MatlabFiles/bfgsi.m
+Copyright: 1996 Christopher A. Sims
+License: GPL-3+
+
+Files: contrib/ms-sbvar/TZcode/MatlabFiles/qplot2.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/ellipse.m
+Copyright: 1997-2012 Clark A. Burdick
+License: GPL-3+
+
+Files: contrib/ms-sbvar/TZcode/MatlabFiles/chol2.m
+Copyright: 1996-2012 Tao Zha
 License: GPL-3+
 
 License: GFDL-NIV-1.3+
