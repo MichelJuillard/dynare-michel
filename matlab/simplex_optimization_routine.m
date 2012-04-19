@@ -151,7 +151,6 @@ else
     delta = 0.05;
 end
 DELTA = delta;
-zero_delta = delta/200;% To be used instead of delta if x(i) is zero.
 
 % Set max_no_improvements.
 if isfield(options,'max_no_improvements')
@@ -510,6 +509,7 @@ function [v,fv,delta] = simplex_initialization(objective_function,point,point_sc
     v(:,1) = point;
     fv = zeros(n+1,1);
     fv(1) = point_score;
+    zero_delta = delta/200;% To be used instead of delta if x(i) is zero.
     if length(delta)==1
         delta = repmat(delta,n,1);
     end
