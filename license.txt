@@ -138,15 +138,15 @@ Copyright: 2009 John Burkardt
            2010-2011 Dynare Team
 License: LGPL-3+
 
-Files: ms-sbvar/utilities_dw/*
+Files: contrib/ms-sbvar/utilities_dw/*
 Copyright: 1996-2011 Daniel Waggoner
 License: GPL-3+
 
-Files: ms-sbvar/switch_dw/*
+Files: contrib/ms-sbvar/switch_dw/*
 Copyright: 1996-2011 Daniel Waggoner and Tao Zha
 License: GPL-3+
 
-Files: ms-sbvar/switch_dw/state_space/sbvar/dw_csminwel.c
+Files: contrib/ms-sbvar/switch_dw/state_space/sbvar/dw_csminwel.c
  state_space/sbvar/dw_csminwel.h
 Copyright: 1996 Christopher Sims
            2003 Karibzhanov, Waggoner and Zha
