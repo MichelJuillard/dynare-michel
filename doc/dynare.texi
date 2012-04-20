@@ -74,14 +74,14 @@ A copy of the license can be found at @uref{http://www.gnu.org/licenses/fdl.txt}
 @titlepage
 @title Dynare
 @subtitle Reference Manual, version @value{VERSION}
-@author Stéphane Adjemian
+@author StÃ©phane Adjemian
 @author Houtan Bastani
 @author Michel Juillard
 @author Junior Maih
 @author Ferhat Mihoubi
 @author George Perendia
 @author Marco Ratto
-@author Sébastien Villemot
+@author SÃ©bastien Villemot
 @page
 @vskip 0pt plus 1filll
 @insertcopying
@@ -292,11 +292,11 @@ The development of Dynare is mainly done at
 @uref{http://www.cepremap.ens.fr, Cepremap} by a core team of
 researchers who devote part of their time to software
 development. Currently the development team of Dynare is composed of
-Stéphane Adjemian (Université du Maine, Gains and Cepremap), Houtan
-Bastani (Cepremap), Michel Juillard (Banque de France), Frédéric Karamé
-(Université d'Évry, Epee and Cepremap), Junior Maih (Norges Bank),
-Ferhat Mihoubi (Université d'Évry, Epee and Cepremap), George Perendia,
-Johannes Pfeifer, Marco Ratto (JRC) and Sébastien Villemot (Cepremap and
+StÃ©phane Adjemian (UniversitÃ© du Maine, Gains and Cepremap), Houtan
+Bastani (Cepremap), Michel Juillard (Banque de France), FrÃ©dÃ©ric KaramÃ©
+(UniversitÃ© d'Ã‰vry, Epee and Cepremap), Junior Maih (Norges Bank),
+Ferhat Mihoubi (UniversitÃ© d'Ã‰vry, Epee and Cepremap), George Perendia,
+Johannes Pfeifer, Marco Ratto (JRC) and SÃ©bastien Villemot (Cepremap and
 Paris School of Economics). Increasingly, the developer base is
 expanding, as tools developed by researchers outside of Cepremap are
 integrated into Dynare. Financial support is provided by Cepremap,
@@ -336,8 +336,8 @@ If you would like to refer to Dynare in a research article, the
 recommended way is to cite the present manual, as follows:
 
 @quotation
-Stéphane Adjemian, Houtan Bastani, Michel Juillard, Ferhat Mihoubi,
-George Perendia, Marco Ratto and Sébastien Villemot (2011), ``Dynare:
+StÃ©phane Adjemian, Houtan Bastani, Michel Juillard, Ferhat Mihoubi,
+George Perendia, Marco Ratto and SÃ©bastien Villemot (2011), ``Dynare:
 Reference Manual, Version 4,'' @i{Dynare Working Papers}, 1, CEPREMAP
 @end quotation
 
@@ -2852,7 +2852,7 @@ In a stochastic context, Dynare computes one or several simulations
 corresponding to a random draw of the shocks. Dynare uses a Taylor
 approximation, up to third order, of the expectation functions (see
 @cite{Judd (1996)}, @cite{Collard and Juillard (2001a)}, @cite{Collard
-and Juillard (2001b)}, and @cite{Schmitt-Grohé and Uríbe (2004)}). The
+and Juillard (2001b)}, and @cite{Schmitt-GrohÃ© and UrÃ­be (2004)}). The
 details of the Dynare implementation of the first order solution are
 given in @cite{Villemot (2011)}.
 
@@ -7160,9 +7160,9 @@ State Vector for Diffuse State Space Models,'' @i{Journal of Time
 Series Analysis}, 24(1), 85--98.
 
 @item
-Laffargue, Jean-Pierre (1990): ``Résolution d'un modèle
-macroéconomique avec anticipations rationnelles'', @i{Annales
-d'Économie et Statistique}, 17, 97--119.
+Laffargue, Jean-Pierre (1990): ``RÃ©solution d'un modÃ¨le
+macroÃ©conomique avec anticipations rationnelles'', @i{Annales
+d'Ã‰conomie et Statistique}, 17, 97--119.
 
 @item
 Lubik, Thomas and Frank Schorfheide (2007): ``Do Central Banks Respond
@@ -7192,7 +7192,7 @@ Schorfheide, Frank (2000): ``Loss Function-based evaluation of DSGE
 models,'' @i{Journal of Applied Econometrics}, 15(6), 645--670.
 
 @item
-Schmitt-Grohé, Stephanie and Martin Uríbe (2004): ``Solving Dynamic
+Schmitt-GrohÃ©, Stephanie and Martin UrÃ­be (2004): ``Solving Dynamic
 General Equilibrium Models Using a Second-Order Approximation to the
 Policy Function,'' @i{Journal of Economic Dynamics and Control},
 28(4), 755--775.
@@ -7208,7 +7208,7 @@ Stochastic General Equilibrium Model of the Euro Area,'' @i{Journal of
 the European Economic Association}, 1(5), 1123--1175.
 
 @item
-Villemot, Sébastien (2011): ``Solving rational expectations models at
+Villemot, SÃ©bastien (2011): ``Solving rational expectations models at
 first order: what Dynare does,'' @i{Dynare Working Papers}, 2,
 CEPREMAP
 
