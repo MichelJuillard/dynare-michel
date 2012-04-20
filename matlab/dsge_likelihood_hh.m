@@ -144,7 +144,7 @@ if EstimatedParameters.ncn
     % Try to compute the cholesky decomposition of H (possible iff H is positive definite)
     [CholH,testH] = chol(H);
     if testH
-        % The variance-covariance matrix of the structural innovations is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty.
+        % The variance-covariance matrix of the measurement errors is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty.
         a = diag(eig(H));
         k = find(a < 0);
         if k > 0
