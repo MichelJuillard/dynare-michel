@@ -5,7 +5,9 @@ if DO_SOMETHING
 SUBDIRS = mjdgges kronecker bytecode libdynare++ gensylv k_order_perturbation dynare_simul_ qzcomplex ordschur block_kalman_filter sobol local_state_space_iterations
 
 if HAVE_GSL
+if HAVE_MATIO
 SUBDIRS += ms_sbvar
+endif
 endif
 
 # libslicot must come before kalman_steady_state
