@@ -72,7 +72,7 @@ if ~noprint
       case 42
         error('one (many) parameter(s) do(es) not satisfy the upper bound');
       case 43
-        error('Covariance matrix of shocks is not positive definite')
+        error('Covariance matrix of structural shocks is not positive definite')
       case 44 %DsgeLikelihood_hh / dsge_likelihood
         error('The covariance matrix of the measurement errors is not positive definite.');
       case 45 %DsgeLikelihood_hh / dsge_likelihood
