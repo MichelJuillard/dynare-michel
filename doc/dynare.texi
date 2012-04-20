@@ -385,12 +385,13 @@ features, but are in no way required:
 @itemize
 
 @item
-If under MATLAB: the optimization toolbox, the statistics toolbox;
+If under MATLAB: the optimization toolbox, the statistics toolbox, the
+control system toolbox;
 
 @item
 If under GNU Octave, the following
 @uref{http://octave.sourceforge.net/,Octave-Forge} packages: optim,
-io, java, statistics.
+io, java, statistics, control.
 
 @end itemize
 
@@ -3054,22 +3055,25 @@ variables, then this is the full information case and this option has
 no effect. More references can be found at
 @uref{http://www.dynare.org/DynareWiki/PartialInformation}.
 
-@item sylvester = OPTION
+@item sylvester = @var{OPTION}
 @anchor{sylvester}
-Determines the algorithm used to solve the Sylvester equation for block decomposed model. Possible values for @code{OPTION} are:
+Determines the algorithm used to solve the Sylvester equation for block decomposed model. Possible values for @code{@var{OPTION}} are:
 
 @table @code
 
-@item DEFAULT
-Uses the default solver for Sylvester equations (@code{gensylv}) based on Ondra Kamenik algorithm (see @uref{http://www.dynare.org/documentation-and-support/dynarepp/sylvester.pdf/at_download/file} for more informations).
+@item default
+Uses the default solver for Sylvester equations (@code{gensylv}) based
+on Ondra Kamenik algorithm (see
+@uref{http://www.dynare.org/documentation-and-support/dynarepp/sylvester.pdf/at_download/file,the
+Dynare Website} for more information).
 
-@item FIXED_POINT
-Uses a fixed point algorithm to solve the Sylvester equation (@code{gensylv_fp}). This method is faster than the @code{DEFAULT} one for large scale models.
+@item fixed_point
+Uses a fixed point algorithm to solve the Sylvester equation (@code{gensylv_fp}). This method is faster than the @code{default} one for large scale models.
 
 @end table
 
 @noindent
-Default value is @code{DEFAULT}
+Default value is @code{default}
 
 @item sylvester_fixed_point_tol = @var{DOUBLE}
 @anchor{sylvester_fixed_point_tol}
@@ -4090,29 +4094,34 @@ with @ref{dsge_var}.
 @item sylvester_fixed_point_tol = @var{DOUBLE}
 @xref{sylvester_fixed_point_tol}.
 
-@item lyapunov = OPTION
+@item lyapunov = @var{OPTION}
 @anchor{lyapunov}
-Determines the algorithm used to solve the Laypunov equation to initialized the variance-covariance matrix of the Kalman filter using the steady-state value of state variables. Possible values for @code{OPTION} are:
+Determines the algorithm used to solve the Laypunov equation to initialized the variance-covariance matrix of the Kalman filter using the steady-state value of state variables. Possible values for @code{@var{OPTION}} are:
 
 @table @code
 
-@item DEFAULT
-Uses the default solver for Lyapunov equations (@code{lyapunov_symm} with method<=2) based on Bartels-Stewart algorithm.
+@item default
+Uses the default solver for Lyapunov equations based on Bartels-Stewart algorithm.
 
-@item FIXED_POINT
-Uses a fixed point algorithm to solve the Lyapunov equation (@code{lyapunov_symm} with method=3). This method is faster than the @code{DEFAULT} one for large scale models, but it could require a large amount of iterations.
+@item fixed_point
+Uses a fixed point algorithm to solve the Lyapunov equation. This method is faster than the @code{default} one for large scale models, but it could require a large amount of iterations.
 
-@item DOUBLING
+@item doubling
 Uses a doubling algorithm to solve the Lyapunov equation (@code{disclyap_fast}). This method is faster than the two previous one for large scale models.
 
 
-@item SQUARE_ROOT_SOLVER
-Uses a square-root solver for Lyapunov equations (@code{dlyapchol}). This method is fast for large scale models, but it requires the Control System Toolbox with MATLAB and the Control Package with OCTAVE.
+@item square_root_solver
+Uses a square-root solver for Lyapunov equations
+(@code{dlyapchol}). This method is fast for large scale models
+(available under MATLAB if the control system toolbox is installed;
+available under Octave if the
+@uref{http://octave.sourceforge.net/control/,control} package from
+Octave-Forge is installed)
 
 @end table
 
 @noindent
-Default value is @code{DEFAULT}
+Default value is @code{default}
 
 @item lyapunov_fixed_point_tol = @var{DOUBLE}
 @anchor{lyapunov_fixed_point_tol}
