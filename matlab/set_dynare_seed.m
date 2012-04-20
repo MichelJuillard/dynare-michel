@@ -2,7 +2,7 @@ function set_dynare_seed(a,b)
 % Set seeds depending on matlab (octave) version. This routine is called in dynare_config and can be called by the 
 % user in the mod file.
 %    
-% Copyright (C) 2010-2011 Dynare Team
+% Copyright (C) 2010-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -32,12 +32,20 @@ if matlab_random_streams% Use new matlab interface.
             options_.DynareRandomStreams.algo = 'mt19937ar';
             options_.DynareRandomStreams.seed = 0;
             s = RandStream(options_.DynareRandomStreams.algo,'Seed',options_.DynareRandomStreams.seed);
-            reset(RandStream.setDefaultStream(s));
+            if matlab_ver_less_than('7.12')
+                reset(RandStream.setDefaultStream(s));
+            else
+                reset(RandStream.setGlobalStream(s));
+            end
             return
         end
         if ischar(a) && strcmpi(a,'reset')
             s = RandStream(options_.DynareRandomStreams.algo,'Seed',options_.DynareRandomStreams.seed);
-            reset(RandStream.setDefaultStream(s));
+            if matlab_ver_less_than('7.12')
+                reset(RandStream.setDefaultStream(s));
+            else
+                reset(RandStream.setGlobalStream(s));
+            end
             return
         end
         if ischar(a)
@@ -47,7 +55,11 @@ if matlab_random_streams% Use new matlab interface.
             options_.DynareRandomStreams.algo = 'mt19937ar';
             options_.DynareRandomStreams.seed = a;
             s = RandStream(options_.DynareRandomStreams.algo,'Seed',options_.DynareRandomStreams.seed);
-            reset(RandStream.setDefaultStream(s));
+            if matlab_ver_less_than('7.12')
+                reset(RandStream.setDefaultStream(s));
+            else
+                reset(RandStream.setGlobalStream(s));
+            end
             return
         end
     elseif nargin==2
@@ -70,7 +82,11 @@ if matlab_random_streams% Use new matlab interface.
         options_.DynareRandomStreams.algo = a;
         options_.DynareRandomStreams.seed = b;
         s = RandStream(options_.DynareRandomStreams.algo,'Seed',options_.DynareRandomStreams.seed);
-        reset(RandStream.setDefaultStream(s));
+        if matlab_ver_less_than('7.12')
+            reset(RandStream.setDefaultStream(s));
+        else
+            reset(RandStream.setGlobalStream(s));
+        end
     end
 else% Use old matlab interface.
     if nargin==1

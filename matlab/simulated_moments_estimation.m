@@ -14,7 +14,7 @@ function [param,sigma] = simulated_moments_estimation(dataset,options,parallel)
 % SPECIAL REQUIREMENTS
 %  The user has to provide a file where the moment conditions are defined.
 
-% Copyright (C) 2010-2011 Dynare Team
+% Copyright (C) 2010-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -269,7 +269,11 @@ fprintf(fid,['tmp([' num2str(variance_idx)  ']) = xparams(1:' int2str(nv) ').^2;
 fprintf(fid,'M_.Sigma_e = diag(tmp);')
 
 fprintf(fid,['stream=RandStream(''mt19937ar'',''Seed'',' int2str(slave_number) ');\n']);
-fprintf(fid,['RandStream.setDefaultStream(stream);\n\n']);
+if matlab_ver_less_than('7.12')
+      fprintf(fid,['RandStream.setDefaultStream(stream);\n\n']);
+else
+      fprintf(fid,['RandStream.setGlobalStream(stream);\n\n']);
+end
 
 fprintf(fid,['maxNumCompThreads(' int2str(threads_per_job) ');\n\n']);
 
