@@ -1730,7 +1730,7 @@ declared as @code{AUX_EXPECT_LAG_1 = x(+2)}.
 
 Auxiliary variables are also introduced by the preprocessor for the
 @code{ramsey_policy} command. In this case, they are used to represent the Lagrange
-multipliers when first order conditions of the ramsey problem are computed.
+multipliers when first order conditions of the Ramsey problem are computed.
 The new variables take the form @code{MULT_@var{i}}, where @var{i} represents
 the constraint with which the multiplier is associated (counted from the
 order of declaration in the model block).
@@ -4738,6 +4738,12 @@ This command accepts all options of @code{stoch_simul}, plus:
 
 @item planner_discount = @var{EXPRESSION}
 Declares the discount factor of the central planner. Default: @code{1.0}
+
+@item instruments = (@var{VARIABLE_NAME},@dots{})
+Declares instrument variables for the computation of the steady state
+under optimal policy. Requires a @code{steady_state_model} block or a
+@code{@dots{}_steadystate.m} file. See below.
+
 @end table
 
 Note that only first order approximation is available (@i{i.e.}
@@ -4750,6 +4756,26 @@ This command generates all the output variables of @code{stoch_simul}.
 @vindex oo_.planner_objective_value
 In addition, it stores the value of planner objective function under
 Ramsey policy in @code{oo_.planner_objective_value}.
+
+@customhead{Steay state}
+
+Dynare takes advantage of the fact that the Lagrange multipliers appear
+linearly in the equations of the steady state of the model under optimal
+policy. Nevertheless, it is in general very difficult to compute the
+steady state with simply a numerical guess in @code{initval} for the
+endogenous variables.
+
+It greatly facilitates the computation, if the user provides an
+analytical solution for the steady state (in @code{steady_state_model}
+block or in a @code{@dots{}_steadystate.m} file). In this case, it is
+necessary to provide a steady state solution CONDITIONAL on the value of
+the instruments in the optimal policy problem and declared with option
+@code{instruments}. Note that choosing the instruments is partly a
+matter of interpretation and you can choose instruments that are handy
+from a mathematical point of view but different from the instruments you
+would refer to in the analysis of the paper. Typical example is choosing
+inflation or nominal interest rate as an instrument.
+
 
 @end deffn
 
