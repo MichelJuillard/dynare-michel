@@ -85,7 +85,15 @@ if method == 3
     end;
 elseif method == 4
     % works only with Matlab System Control toolbox or octave the control package,
-    % the presence of the toolbox or package has to be tested 
+    if exist('OCTAVE_VERSION')
+        if ~user_has_octave_forge_package('control')
+            error('lyapunov=square_root_solver not available; you must install the control package from Octave Forge')
+        end
+    else
+        if ~user_has_matlab_license('control_toolbox')
+            error('lyapunov=square_root_solver not available; you must install the control system toolbox')
+        end
+    end
     chol_b = R*chol(b,'lower');
     Rx = dlyapchol(a,chol_b);
     x = Rx' * Rx;
