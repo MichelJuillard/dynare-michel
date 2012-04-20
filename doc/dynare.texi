@@ -98,124 +98,125 @@ This is Dynare Reference Manual, version @value{VERSION}.
 @end ifnottex
 
 @menu
-* Introduction::
-* Installation and configuration::
-* Dynare invocation::
-* Dynare internal documentation and unitary tests::
-* The Model file::
-* The Configuration File::
-* Examples::
-* Bibliography::
-* Command and Function Index::
-* Variable Index::
+* Introduction::                
+* Installation and configuration::  
+* Dynare invocation::           
+* The Model file::              
+* The Configuration File::      
+* Examples::                    
+* Dynare internal documentation and unitary tests::  
+* Bibliography::                
+* Command and Function Index::  
+* Variable Index::              
 
 @detailmenu
  --- The Detailed Node Listing ---
 
 Introduction
 
-* What is Dynare ?::
-* Documentation sources::
-* Citing Dynare in your research::
+* What is Dynare ?::            
+* Documentation sources::       
+* Citing Dynare in your research::  
 
 Installation and configuration
 
-* Software requirements::
-* Installation of Dynare::
-* Configuration::
+* Software requirements::       
+* Installation of Dynare::      
+* Configuration::               
 
 Installation of Dynare
 
-* On Windows::
-* On Debian GNU/Linux and Ubuntu::
-* On Mac OS X::
-* For other systems::
+* On Windows::                  
+* On Debian GNU/Linux and Ubuntu::  
+* On Mac OS X::                 
+* For other systems::           
 
 Configuration
 
-* For MATLAB::
-* For GNU Octave::
-* Some words of warning::
+* For MATLAB::                  
+* For GNU Octave::              
+* Some words of warning::       
 
 The Model file
 
-* Conventions::
-* Variable declarations::
-* Expressions::
-* Parameter initialization::
-* Model declaration::
-* Auxiliary variables::
-* Initial and terminal conditions::
-* Shocks on exogenous variables::
-* Other general declarations::
-* Steady state::
-* Getting information about the model::
-* Deterministic simulation::
-* Stochastic solution and simulation::
-* Estimation::
-* Forecasting::
-* Optimal policy::
-* Sensitivity and identification analysis::
-* Displaying and saving results::
-* Macro-processing language::
-* Misc commands::
+* Conventions::                 
+* Variable declarations::       
+* Expressions::                 
+* Parameter initialization::    
+* Model declaration::           
+* Auxiliary variables::         
+* Initial and terminal conditions::  
+* Shocks on exogenous variables::  
+* Other general declarations::  
+* Steady state::                
+* Getting information about the model::  
+* Deterministic simulation::    
+* Stochastic solution and simulation::  
+* Estimation::                  
+* Forecasting::                 
+* Optimal policy::              
+* Sensitivity and identification analysis::  
+* Markov-switching SBVAR::      
+* Displaying and saving results::  
+* Macro-processing language::   
+* Misc commands::               
 
 Expressions
 
-* Parameters and variables::
-* Operators::
-* Functions::
+* Parameters and variables::    
+* Operators::                   
+* Functions::                   
 
 Parameters and variables
 
-* Inside the model::
-* Outside the model::
+* Inside the model::            
+* Outside the model::           
 
 Functions
 
-* Built-in Functions::
-* External Functions::
+* Built-in Functions::          
+* External Functions::          
 
 Steady state
 
-* Finding the steady state with Dynare nonlinear solver::
-* Using a steady state file::
+* Finding the steady state with Dynare nonlinear solver::  
+* Using a steady state file::   
 
 Stochastic solution and simulation
 
-* Computing the stochastic solution::
-* Typology and ordering of variables::
-* First order approximation::
-* Second order approximation::
-* Third order approximation::
+* Computing the stochastic solution::  
+* Typology and ordering of variables::  
+* First order approximation::   
+* Second order approximation::  
+* Third order approximation::   
 
 Sensitivity and identification analysis
 
-* Sampling::
-* Stability Mapping::
-* Reduced Form Mapping::
-* RMSE::
-* Screening Analysis::
-* Identification Analysis::
-* Performing Sensitivity and Identification Analysis::
+* Sampling::                    
+* Stability Mapping::           
+* Reduced Form Mapping::        
+* RMSE::                        
+* Screening Analysis::          
+* Identification Analysis::     
+* Performing Sensitivity and Identification Analysis::  
 
 Macro-processing language
 
-* Macro expressions::
-* Macro directives::
-* Typical usages::
-* MATLAB/Octave loops versus macro-processor loops::
+* Macro expressions::           
+* Macro directives::            
+* Typical usages::              
+* MATLAB/Octave loops versus macro-processor loops::  
 
 Typical usages
 
-* Modularization::
-* Indexed sums or products::
-* Multi-country models::
-* Endogeneizing parameters::
+* Modularization::              
+* Indexed sums or products::    
+* Multi-country models::        
+* Endogeneizing parameters::    
 
 The Configuration File
 
-* Parallel Configuration::
+* Parallel Configuration::      
 
 @end detailmenu
 @end menu
@@ -224,9 +225,9 @@ The Configuration File
 @chapter Introduction
 
 @menu
-* What is Dynare ?::
-* Documentation sources::
-* Citing Dynare in your research::
+* What is Dynare ?::            
+* Documentation sources::       
+* Citing Dynare in your research::  
 @end menu
 
 @node What is Dynare ?
@@ -350,9 +351,9 @@ If you want to give a URL, use the address of the Dynare website:
 @chapter Installation and configuration
 
 @menu
-* Software requirements::
-* Installation of Dynare::
-* Configuration::
+* Software requirements::       
+* Installation of Dynare::      
+* Configuration::               
 @end menu
 
 @node Software requirements
@@ -421,10 +422,10 @@ upgrade Dynare and discard the previous version without having to worry
 about your own files.
 
 @menu
-* On Windows::
-* On Debian GNU/Linux and Ubuntu::
-* On Mac OS X::
-* For other systems::
+* On Windows::                  
+* On Debian GNU/Linux and Ubuntu::  
+* On Mac OS X::                 
+* For other systems::           
 @end menu
 
 @node On Windows
@@ -490,9 +491,9 @@ Wiki}.
 @section Configuration
 
 @menu
-* For MATLAB::
-* For GNU Octave::
-* Some words of warning::
+* For MATLAB::                  
+* For GNU Octave::              
+* Some words of warning::       
 @end menu
 
 @node For MATLAB
@@ -769,49 +770,6 @@ during the computation.
 @defvr {MATLAB/Octave variable} oo_
 Structure containing the various results of the computations.
 @end defvr
-
--*-
-
-@node Dynare internal documentation and unitary tests
-@chapter Dynare internal documentation and unitary tests
-
-One can obtain internal documentation of matlab/octave's routines or perform unitary tests
-using the @code{internals} command. This is a new feature, and, at this time, will work properly for
-a small number of routines. At the top of the (available) matlab/octave routines a commented block for
-the internal documentation is written in the GNU texinfo documentation format. This block is
-processed by calling texinfo from matlab. Consequently, texinfo has to be installed
-on your machine.
-
-@deffn {MATLAB/Octave command} internals @var{FLAG} @var{ROUTINENAME}[.m]
-
-@descriptionhead
-
-Depending on the @var{FLAG} this command prints internal documentation of a matlab/octave
-routine or triggers unitary tests associated to this routine.
-
-@flagshead
-
-@table @code
-
-@item --info
-Prints on screen the internal documentation of @var{ROUTINENAME} (if this routine exists and if this
-routine has texinfo internal documentation header). If the command is executed in the matlab directory
-of Dynare, then the path to @var{ROUTINENAME} has to be provided.
-
-@item --test
-Performs the unitary test associated to  @var{ROUTINENAME} (if this routine exists and if the matalab/octave m
-file has unitary test sections).
-
-@end table
-
-@examplehead
-
-@example
-internals --info particle/local_state_iteration
-internals --test particle/local_state_iteration
-@end example
-
-@end deffn
 
 @node The Model file
 @chapter The Model file
@@ -1187,9 +1145,9 @@ Represents infinity.
 @end deffn
 
 @menu
-* Parameters and variables::
-* Operators::
-* Functions::
+* Parameters and variables::    
+* Operators::                   
+* Functions::                   
 @end menu
 
 @node Parameters and variables
@@ -1200,8 +1158,8 @@ typing their names. The semantics of parameters and variables is quite
 different whether they are used inside or outside the model block.
 
 @menu
-* Inside the model::
-* Outside the model::
+* Inside the model::            
+* Outside the model::           
 @end menu
 
 @node Inside the model
@@ -1288,8 +1246,8 @@ internally and how this affects the output.
 @subsection Functions
 
 @menu
-* Built-in Functions::
-* External Functions::
+* Built-in Functions::          
+* External Functions::          
 @end menu
 
 @node Built-in Functions
@@ -2310,8 +2268,8 @@ give more guidance to Dynare, using your knowledge of the model, by
 providing it with a ``steady state file''.
 
 @menu
-* Finding the steady state with Dynare nonlinear solver::
-* Using a steady state file::
+* Finding the steady state with Dynare nonlinear solver::  
+* Using a steady state file::   
 @end menu
 
 @node Finding the steady state with Dynare nonlinear solver
@@ -2895,11 +2853,11 @@ details of the Dynare implementation of the first order solution are
 given in @cite{Villemot (2011)}.
 
 @menu
-* Computing the stochastic solution::
-* Typology and ordering of variables::
-* First order approximation::
-* Second order approximation::
-* Third order approximation::
+* Computing the stochastic solution::  
+* Typology and ordering of variables::  
+* First order approximation::   
+* Second order approximation::  
+* Third order approximation::   
 @end menu
 
 @node Computing the stochastic solution
@@ -4843,13 +4801,13 @@ Sensitivity analysis results are saved locally in @code{<mod_file>/GSA},
 where @code{<mod_file>.mod} is the name of the DYNARE model file.
 
 @menu
-* Sampling::
-* Stability Mapping::
-* Reduced Form Mapping::
-* RMSE::
-* Screening Analysis::
-* Identification Analysis::
-* Performing Sensitivity and Identification Analysis::
+* Sampling::                    
+* Stability Mapping::           
+* Reduced Form Mapping::        
+* RMSE::                        
+* Screening Analysis::          
+* Identification Analysis::     
+* Performing Sensitivity and Identification Analysis::  
 @end menu
 
 @node Sampling
@@ -6192,10 +6150,10 @@ types: integer, character string, array of integers, array of
 strings.
 
 @menu
-* Macro expressions::
-* Macro directives::
-* Typical usages::
-* MATLAB/Octave loops versus macro-processor loops::
+* Macro expressions::           
+* Macro directives::            
+* Typical usages::              
+* MATLAB/Octave loops versus macro-processor loops::  
 @end menu
 
 @node Macro expressions
@@ -6405,10 +6363,10 @@ and to abort. The argument must evaluate to a string.
 @subsection Typical usages
 
 @menu
-* Modularization::
-* Indexed sums or products::
-* Multi-country models::
-* Endogeneizing parameters::
+* Modularization::              
+* Indexed sums or products::    
+* Multi-country models::        
+* Endogeneizing parameters::    
 @end menu
 
 @node Modularization
@@ -6760,7 +6718,7 @@ Is @code{true} or @code{false}.
 @end table
 
 @menu
-* Parallel Configuration::
+* Parallel Configuration::      
 @end menu
 
 @node Parallel Configuration
@@ -7016,6 +6974,47 @@ Small open economy RBC model with shocks to the growth trend, presented
 in @cite{Aguiar and Gopinath (2004)}.
 
 @end table
+
+@node Dynare internal documentation and unitary tests
+@chapter Dynare internal documentation and unitary tests
+
+One can obtain internal documentation of matlab/octave's routines or perform unitary tests
+using the @code{internals} command. This is a new feature, and, at this time, will work properly for
+a small number of routines. At the top of the (available) matlab/octave routines a commented block for
+the internal documentation is written in the GNU texinfo documentation format. This block is
+processed by calling texinfo from matlab. Consequently, texinfo has to be installed
+on your machine.
+
+@deffn {MATLAB/Octave command} internals @var{FLAG} @var{ROUTINENAME}[.m]
+
+@descriptionhead
+
+Depending on the @var{FLAG} this command prints internal documentation of a matlab/octave
+routine or triggers unitary tests associated to this routine.
+
+@flagshead
+
+@table @code
+
+@item --info
+Prints on screen the internal documentation of @var{ROUTINENAME} (if this routine exists and if this
+routine has texinfo internal documentation header). If the command is executed in the matlab directory
+of Dynare, then the path to @var{ROUTINENAME} has to be provided.
+
+@item --test
+Performs the unitary test associated to  @var{ROUTINENAME} (if this routine exists and if the matalab/octave m
+file has unitary test sections).
+
+@end table
+
+@examplehead
+
+@example
+internals --info particle/local_state_iteration
+internals --test particle/local_state_iteration
+@end example
+
+@end deffn
 
 @node Bibliography
 @chapter Bibliography
