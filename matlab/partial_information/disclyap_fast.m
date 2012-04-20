@@ -1,4 +1,4 @@
-function X=disclyap_fast(G,V,ch)
+function X=disclyap_fast(G,V,tol,ch)
 % function X=disclyap_fast(G,V,ch)
 % 
 % Solve the discrete Lyapunov Equation 
@@ -28,14 +28,14 @@ function X=disclyap_fast(G,V,ch)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if nargin == 2 || isempty( ch ) == 1 
+if nargin <= 3 || isempty( ch ) == 1 
     flag_ch = 0; 
 else 
     flag_ch = 1; 
 end 
 s=size(G,1); 
 
-tol = 1e-16; 
+%tol = 1e-16; 
 
 P0=V; 
 A0=G; 

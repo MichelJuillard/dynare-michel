@@ -74,14 +74,14 @@ A copy of the license can be found at @uref{http://www.gnu.org/licenses/fdl.txt}
 @titlepage
 @title Dynare
 @subtitle Reference Manual, version @value{VERSION}
-@author StÃ©phane Adjemian
+@author Stéphane Adjemian
 @author Houtan Bastani
 @author Michel Juillard
 @author Junior Maih
 @author Ferhat Mihoubi
 @author George Perendia
 @author Marco Ratto
-@author SÃ©bastien Villemot
+@author Sébastien Villemot
 @page
 @vskip 0pt plus 1filll
 @insertcopying
@@ -291,11 +291,11 @@ The development of Dynare is mainly done at
 @uref{http://www.cepremap.ens.fr, Cepremap} by a core team of
 researchers who devote part of their time to software
 development. Currently the development team of Dynare is composed of
-StÃ©phane Adjemian (UniversitÃ© du Maine, Gains and Cepremap), Houtan
-Bastani (Cepremap), Michel Juillard (Banque de France), FrÃ©dÃ©ric KaramÃ©
-(UniversitÃ© d'Ã‰vry, Epee and Cepremap), Junior Maih (Norges Bank),
-Ferhat Mihoubi (UniversitÃ© d'Ã‰vry, Epee and Cepremap), George Perendia,
-Johannes Pfeifer, Marco Ratto (JRC) and SÃ©bastien Villemot (Cepremap and
+Stéphane Adjemian (Université du Maine, Gains and Cepremap), Houtan
+Bastani (Cepremap), Michel Juillard (Banque de France), Frédéric Karamé
+(Université d'Évry, Epee and Cepremap), Junior Maih (Norges Bank),
+Ferhat Mihoubi (Université d'Évry, Epee and Cepremap), George Perendia,
+Johannes Pfeifer, Marco Ratto (JRC) and Sébastien Villemot (Cepremap and
 Paris School of Economics). Increasingly, the developer base is
 expanding, as tools developed by researchers outside of Cepremap are
 integrated into Dynare. Financial support is provided by Cepremap,
@@ -335,8 +335,8 @@ If you would like to refer to Dynare in a research article, the
 recommended way is to cite the present manual, as follows:
 
 @quotation
-StÃ©phane Adjemian, Houtan Bastani, Michel Juillard, Ferhat Mihoubi,
-George Perendia, Marco Ratto and SÃ©bastien Villemot (2011), ``Dynare:
+Stéphane Adjemian, Houtan Bastani, Michel Juillard, Ferhat Mihoubi,
+George Perendia, Marco Ratto and Sébastien Villemot (2011), ``Dynare:
 Reference Manual, Version 4,'' @i{Dynare Working Papers}, 1, CEPREMAP
 @end quotation
 
@@ -2890,7 +2890,7 @@ In a stochastic context, Dynare computes one or several simulations
 corresponding to a random draw of the shocks. Dynare uses a Taylor
 approximation, up to third order, of the expectation functions (see
 @cite{Judd (1996)}, @cite{Collard and Juillard (2001a)}, @cite{Collard
-and Juillard (2001b)}, and @cite{Schmitt-GrohÃ© and UrÃ­be (2004)}). The
+and Juillard (2001b)}, and @cite{Schmitt-Grohé and Uríbe (2004)}). The
 details of the Dynare implementation of the first order solution are
 given in @cite{Villemot (2011)}.
 
@@ -3090,6 +3090,28 @@ that if @code{varobs} is not present or contains all endogenous
 variables, then this is the full information case and this option has
 no effect. More references can be found at
 @uref{http://www.dynare.org/DynareWiki/PartialInformation}.
+
+@item sylvester = OPTION
+@anchor{sylvester}
+Determines the algorithm used to solve the Sylvester equation for block decomposed model. Possible values for @code{OPTION} are:
+
+@table @code
+
+@item DEFAULT
+Uses the default solver for Sylvester equations (@code{gensylv}) based on Ondra Kamenik algorithm (see @uref{http://www.dynare.org/documentation-and-support/dynarepp/sylvester.pdf/at_download/file} for more informations).
+
+@item FIXED_POINT
+Uses a fixed point algorithm to solve the Sylvester equation (@code{gensylv_fp}). This method is faster than the @code{DEFAULT} one for large scale models.
+
+@end table
+
+@noindent
+Default value is @code{DEFAULT}
+
+@item sylvester_fixed_point_tol = @var{DOUBLE}
+@anchor{sylvester_fixed_point_tol}
+It is the convergence criterion used in the fixed point sylvester solver. Its default value is 1e-12.
+
 @end table
 
 @outputhead
@@ -4098,6 +4120,46 @@ with @ref{dsge_var}.
 
 @item aim_solver
 @xref{aim_solver}.
+
+@item sylvester = OPTION
+@xref{sylvester}.
+
+@item sylvester_fixed_point_tol = @var{DOUBLE}
+@xref{sylvester_fixed_point_tol}.
+
+@item lyapunov = OPTION
+@anchor{lyapunov}
+Determines the algorithm used to solve the Laypunov equation to initialized the variance-covariance matrix of the Kalman filter using the steady-state value of state variables. Possible values for @code{OPTION} are:
+
+@table @code
+
+@item DEFAULT
+Uses the default solver for Lyapunov equations (@code{lyapunov_symm} with method<=2) based on Bartels-Stewart algorithm.
+
+@item FIXED_POINT
+Uses a fixed point algorithm to solve the Lyapunov equation (@code{lyapunov_symm} with method=3). This method is faster than the @code{DEFAULT} one for large scale models, but it could require a large amount of iterations.
+
+@item DOUBLING
+Uses a doubling algorithm to solve the Lyapunov equation (@code{disclyap_fast}). This method is faster than the two previous one for large scale models.
+
+
+@item SQUARE_ROOT_SOLVER
+Uses a square-root solver for Lyapunov equations (@code{dlyapchol}). This method is fast for large scale models, but it requires the Control System Toolbox with MATLAB and the Control Package with OCTAVE.
+
+@end table
+
+@noindent
+Default value is @code{DEFAULT}
+
+@item lyapunov_fixed_point_tol = @var{DOUBLE}
+@anchor{lyapunov_fixed_point_tol}
+This is the convergence criterion used in the fixed point lyapunov solver. Its default value is 1e-10.
+
+@item lyapunov_doubling_tol = @var{DOUBLE}
+@anchor{lyapunov_doubling_tol}
+This is the convergence criterion used in the doubling algorithm to solve the lyapunov equation. Its default value is 1e-16.
+
+
 @end table
 
 @customhead{Note}
@@ -7068,9 +7130,9 @@ State Vector for Diffuse State Space Models,'' @i{Journal of Time
 Series Analysis}, 24(1), 85--98.
 
 @item
-Laffargue, Jean-Pierre (1990): ``RÃ©solution d'un modÃ¨le
-macroÃ©conomique avec anticipations rationnelles'', @i{Annales
-d'Ã‰conomie et Statistique}, 17, 97--119.
+Laffargue, Jean-Pierre (1990): ``Résolution d'un modèle
+macroéconomique avec anticipations rationnelles'', @i{Annales
+d'Économie et Statistique}, 17, 97--119.
 
 @item
 Lubik, Thomas and Frank Schorfheide (2007): ``Do Central Banks Respond
@@ -7100,7 +7162,7 @@ Schorfheide, Frank (2000): ``Loss Function-based evaluation of DSGE
 models,'' @i{Journal of Applied Econometrics}, 15(6), 645--670.
 
 @item
-Schmitt-GrohÃ©, Stephanie and Martin UrÃ­be (2004): ``Solving Dynamic
+Schmitt-Grohé, Stephanie and Martin Uríbe (2004): ``Solving Dynamic
 General Equilibrium Models Using a Second-Order Approximation to the
 Policy Function,'' @i{Journal of Economic Dynamics and Control},
 28(4), 755--775.
@@ -7116,7 +7178,7 @@ Stochastic General Equilibrium Model of the Euro Area,'' @i{Journal of
 the European Economic Association}, 1(5), 1123--1175.
 
 @item
-Villemot, SÃ©bastien (2011): ``Solving rational expectations models at
+Villemot, Sébastien (2011): ``Solving rational expectations models at
 first order: what Dynare does,'' @i{Dynare Working Papers}, 2,
 CEPREMAP
 

@@ -134,7 +134,7 @@ exo_names=M_.exo_names(M_.exo_names_orig_ord,:);
 DPDR=DD*PP*DD'+RR;
 I_DPDR=inv(DPDR);
 PDIDPDRD=PP*DD'*I_DPDR*DD;
-MSIG=disclyap_fast(CCCC, CCCC*PDIDPDRD*PP*CCCC');
+MSIG=disclyap_fast(CCCC, CCCC*PDIDPDRD*PP*CCCC', options_.lyapunov_doubling_tol);
 
 COV_P=[ PP, PP; PP, PP+MSIG]; % P0
 
