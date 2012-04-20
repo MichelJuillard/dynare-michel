@@ -215,10 +215,10 @@ if options_.irf
                 if nbplt == 0
                 elseif nbplt == 1
                     if options_.relative_irf
-                        hh = figure('Name',['Relative response to' ...
+                        hh = dyn_figure(options_,'Name',['Relative response to' ...
                                             ' orthogonalized shock to ' tit(i,:)]);
                     else
-                        hh = figure('Name',['Orthogonalized shock to' ...
+                        hh = dyn_figure(options_,'Name',['Orthogonalized shock to' ...
                                             ' ' tit(i,:)]);
                     end
                     for j = 1:number_of_plots_to_draw
@@ -230,11 +230,7 @@ if options_.irf
                         xlim([1 options_.irf]);
                         title(deblank(mylist(j,:)),'Interpreter','none');
                     end
-                    eval(['print -depsc2 ' M_.fname '_IRF_' deblank(tit(i,:)) '.eps']);
-                    if ~exist('OCTAVE_VERSION')
-                        eval(['print -dpdf ' M_.fname  '_IRF_' deblank(tit(i,:))]);
-                        saveas(hh,[M_.fname  '_IRF_' deblank(tit(i,:)) '.fig']);
-                    end
+                    dyn_saveas(hh,[M_.fname '_IRF_' deblank(tit(i,:))],options_);
                     if TeX
                         fprintf(fidTeX,'\\begin{figure}[H]\n');
                         for j = 1:number_of_plots_to_draw
@@ -247,14 +243,13 @@ if options_.irf
                         fprintf(fidTeX,'\\end{figure}\n');
                         fprintf(fidTeX,' \n');
                     end
-                    %   close(hh)
                 else
                     for fig = 1:nbplt-1
-                        if options_.relative_irf == 1
-                            hh = figure('Name',['Relative response to orthogonalized shock' ...
+                        if options_.relative_irf
+                            hh = dyn_figure(options_,'Name',['Relative response to orthogonalized shock' ...
                                                 ' to ' tit(i,:) ' figure ' int2str(fig)]);
                         else
-                            hh = figure('Name',['Orthogonalized shock to ' tit(i,:) ...
+                            hh = dyn_figure(options_,'Name',['Orthogonalized shock to ' tit(i,:) ...
                                                 ' figure ' int2str(fig)]);
                         end
                         for plt = 1:nstar
@@ -266,11 +261,7 @@ if options_.irf
                             xlim([1 options_.irf]);
                             title(deblank(mylist((fig-1)*nstar+plt,:)),'Interpreter','none');
                         end
-                        eval(['print -depsc2 ' M_.fname '_IRF_' deblank(tit(i,:)) int2str(fig) '.eps']);
-                        if ~exist('OCTAVE_VERSION')
-                            eval(['print -dpdf ' M_.fname  '_IRF_' deblank(tit(i,:)) int2str(fig)]);
-                            saveas(hh,[M_.fname  '_IRF_' deblank(tit(i,:)) int2str(fig) '.fig']);
-                        end
+                        dyn_saveas(hh,[ M_.fname '_IRF_' deblank(tit(i,:)) int2str(fig)],options_);
                         if TeX
                             fprintf(fidTeX,'\\begin{figure}[H]\n');
                             for j = 1:nstar
@@ -289,9 +280,8 @@ if options_.irf
                             fprintf(fidTeX,'\\end{figure}\n');
                             fprintf(fidTeX,' \n');
                         end
-                        %                                       close(hh);
                     end
-                    hh = figure('Name',['Orthogonalized shock to ' tit(i,:) ' figure ' int2str(nbplt) '.']);
+                    hh = dyn_figure(options_,'Name',['Orthogonalized shock to ' tit(i,:) ' figure ' int2str(nbplt) '.']);
                     m = 0;
                     for plt = 1:number_of_plots_to_draw-(nbplt-1)*nstar;
                         m = m+1;
@@ -303,11 +293,7 @@ if options_.irf
                         xlim([1 options_.irf]);
                         title(deblank(mylist((nbplt-1)*nstar+plt,:)),'Interpreter','none');
                     end
-                    eval(['print -depsc2 ' M_.fname '_IRF_' deblank(tit(i,:)) int2str(nbplt) '.eps']);
-                    if ~exist('OCTAVE_VERSION')
-                        eval(['print -dpdf ' M_.fname  '_IRF_' deblank(tit(i,:)) int2str(nbplt)]);
-                        saveas(hh,[M_.fname  '_IRF_' deblank(tit(i,:)) int2str(nbplt) '.fig']);
-                    end
+                    dyn_saveas(hh,[ M_.fname '_IRF_' deblank(tit(i,:)) int2str(nbplt) ],options_);
                     if TeX
                         fprintf(fidTeX,'\\begin{figure}[H]\n');
                         for j = 1:m
@@ -326,7 +312,6 @@ if options_.irf
                         fprintf(fidTeX,'\\end{figure}\n');
                         fprintf(fidTeX,' \n');
                     end
-                    %                           close(hh);
                 end
             end
         end

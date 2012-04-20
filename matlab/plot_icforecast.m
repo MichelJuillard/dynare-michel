@@ -1,4 +1,4 @@
-function plot_icforecast(Variables,periods)
+function plot_icforecast(Variables,periods,options_)
 % Build plots for the conditional forecasts.
 %
 % INPUTS 
@@ -43,11 +43,11 @@ for i=1:size(Variables,1)
     eval(['m1 = forecasts.cond.mean.' Variables(i,:) ';'])
     eval(['ci2 = forecasts.uncond.ci.' Variables(i,:) ';'])
     eval(['m2 = forecasts.uncond.mean.' Variables(i,:) ';'])
-    build_figure(Variables(i,:),ci1(:,1:periods),ci2(:,1:periods),m1(1:periods),m2(1:periods));
+    build_figure(Variables(i,:),ci1(:,1:periods),ci2(:,1:periods),m1(1:periods),m2(1:periods),options_);
 end
 
-function build_figure(name,cci1,cci2,mm1,mm2)
-figure('Name',['Conditional forecast: ' name '.']);
+function build_figure(name,cci1,cci2,mm1,mm2,options_)
+hh = dyn_figure(options_,'Name',['Conditional forecast: ' name '.']);
 H = length(mm1);
 h1 = area(1:H,cci1(2,1:H));
 set(h1,'BaseValue',min([min(cci1(1,:)),min(cci2(1,:))]))

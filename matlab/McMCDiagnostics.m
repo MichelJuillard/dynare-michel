@@ -130,11 +130,7 @@ clear pmet temp moyenne CSUP CINF csup cinf n linea iter tmp;
 pages = floor(npar/3);
 k = 0;  
 for i = 1:pages
-    if options_.nograph
-        h = figure('Name','MCMC univariate diagnostic (Brooks and Gelman,1998)','Visible','off');
-    else
-        h = figure('Name','MCMC univariate diagnostic (Brooks and Gelman,1998)');
-    end    
+    h=dyn_figure(options_,'Name','MCMC univariate diagnostic (Brooks and Gelman,1998)');
     boxplot = 1;
     for j = 1:3 % Loop over parameters
         k = k+1;
@@ -172,15 +168,7 @@ for i = 1:pages
             boxplot = boxplot + 1;
         end
     end
-    eval(['print -depsc2 ' DirectoryName '/' M_.fname '_udiag' int2str(i) '.eps']);
-    if ~exist('OCTAVE_VERSION')
-        eval(['print -dpdf ' DirectoryName '/' M_.fname '_udiag' int2str(i)]);
-    end
-    if options_.nograph, set(h,'visible','on'), end
-    if ~exist('OCTAVE_VERSION')
-        saveas(h,[DirectoryName '/' M_.fname '_udiag' int2str(i) '.fig']);
-    end
-    if options_.nograph, close(h), end
+    dyn_saveas(h,[DirectoryName '/' M_.fname '_udiag' int2str(i)],options_);
     if TeX
         fprintf(fidTeX,'\\begin{figure}[H]\n');
         for jj = 1:size(NAMES,1)
@@ -205,10 +193,7 @@ if reste
         nr = 2;
         nc = 3;
     end
-    if options_.nograph
-        h = figure('Name','MCMC univariate diagnostic (Brooks and Gelman, 1998)','Visible','off');
-    else
-        h = figure('Name','MCMC univariate diagnostic (Brooks and Gelman, 1998)');
+    h = dyn_figure(options_,'Name','MCMC univariate diagnostic (Brooks and Gelman, 1998)');
     end  
     boxplot = 1;
     for j = 1:reste
@@ -247,15 +232,7 @@ if reste
             boxplot = boxplot + 1;
         end
     end
-    eval(['print -depsc2 ' DirectoryName '/' M_.fname '_udiag' int2str(pages+1) '.eps']);
-    if ~exist('OCTAVE_VERSION')
-        eval(['print -dpdf ' DirectoryName '/' M_.fname '_udiag' int2str(pages+1)]);
-    end
-    if options_.nograph, set(h,'visible','on'), end
-    if ~exist('OCTAVE_VERSION')
-        saveas(h,[DirectoryName '/' M_.fname '_udiag' int2str(pages+1) '.fig']);
-    end
-    if options_.nograph, close(h), end
+    dyn_saveas(h,[ DirectoryName '/' M_.fname '_udiag' int2str(pages+1)],options_);
     if TeX
         fprintf(fidTeX,'\\begin{figure}[H]\n');
         for jj = 1:size(NAMES,1);
@@ -331,11 +308,8 @@ for iter  = Origin:StepSize:NumberOfDraws
     end
 end
 MDIAG(:,[2 4 6],:) = MDIAG(:,[2 4 6],:)/nblck;  
-if options_.nograph
-    h = figure('Name','Multivariate diagnostic','Visible','off');
-else
-    h = figure('Name','Multivariate diagnostic');
-end
+
+h = dyn_figure(options_,'Name','Multivariate diagnostic');
 boxplot = 1;
 for crit = 1:3
     if crit == 1
@@ -367,15 +341,8 @@ for crit = 1:3
     title(namnam,'Interpreter','none');
     boxplot = boxplot + 1;
 end
-eval(['print -depsc2 ' DirectoryName '/' M_.fname '_mdiag.eps']);
-if ~exist('OCTAVE_VERSION')
-    eval(['print -dpdf ' DirectoryName '/' M_.fname '_mdiag']);
-end
-if options_.nograph, set(h,'visible','on'), end
-if ~exist('OCTAVE_VERSION')
-    saveas(h,[DirectoryName '/' M_.fname '_mdiag.fig']);
-end
-if options_.nograph, close(h), end
+dyn_saveas(h,[ DirectoryName '/' M_.fname '_mdiag'],options_);
+
 if TeX
     fprintf(fidTeX,'\\begin{figure}[H]\n');
     for jj = 1:3

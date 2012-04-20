@@ -112,7 +112,7 @@ if nnobs > 1 && horizon > 0
     m = 1;
     for i = 1:size(var_list,1)
         if mod(i,nstar) == 1
-            hfig = figure('Name','Out of sample forecasts');
+            hfig = dyn_figure(options_,'Name','Out of sample forecasts');
             m = 1;
         end
         subplot(nr,nc,m)

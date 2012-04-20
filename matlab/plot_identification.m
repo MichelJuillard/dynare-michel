@@ -1,5 +1,5 @@
-function plot_identification(params,idemoments,idehess,idemodel, idelre, advanced, tittxt, name, IdentifDirectoryName, save_figure)
-% function plot_identification(params,idemoments,idehess,idemodel, idelre, advanced, tittxt, name, IdentifDirectoryName, save_figure)
+function plot_identification(params,idemoments,idehess,idemodel, idelre, advanced, tittxt, name, IdentifDirectoryName)
+% function plot_identification(params,idemoments,idehess,idemodel, idelre, advanced, tittxt, name, IdentifDirectoryName)
 %
 % INPUTS
 %    o params             [array] parameter values for identification checks
@@ -11,7 +11,6 @@ function plot_identification(params,idemoments,idehess,idemodel, idelre, advance
 %    o tittxt             [char] name of the results to plot 
 %    o name               [char] list of names
 %    o IdentifDirectoryName   [char] directory name
-%    o save_figure        [integer] flag  for saving plots (=1) or not (=0)
 %    
 % OUTPUTS
 %    None
@@ -38,9 +37,6 @@ function plot_identification(params,idemoments,idehess,idemodel, idelre, advance
 
 global M_ options_
 
-if nargin<10 || isempty(save_figure),
-    save_figure=1;
-end
 
 [SampleSize, nparam]=size(params);
 siJnorm = idemoments.siJnorm;
@@ -56,7 +52,7 @@ tittxt1=regexprep(tittxt, ' ', '_');
 tittxt1=strrep(tittxt1, '.', '');
 if SampleSize == 1,
     siJ = idemoments.siJ;
-    figure('Name',[tittxt, ' - Identification using info from observables']),
+    hh = dyn_figure(options_,'Name',[tittxt, ' - Identification using info from observables']);
     subplot(211)
     mmm = (idehess.ide_strength_J);
     [ss, is] = sort(mmm);
@@ -88,16 +84,12 @@ if SampleSize == 1,
     else
         title('Sensitivity component with moments Information matrix (log-scale)')
     end
-    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_strength_' tittxt1 '.eps']);
-    if ~exist('OCTAVE_VERSION'),
-        saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_strength_',tittxt1])
-        eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_strength_' tittxt1]);
-    end
+    dyn_saveas(hh,[IdentifDirectoryName '/' M_.fname '_ident_strength_' tittxt1],options_);
     
     if advanced,
         disp(' ')
         disp('Press ENTER to display advanced diagnostics'), pause(5),
-        figure('Name',[tittxt, ' - Sensitivity plot']),
+        hh = dyn_figure(options_,'Name',[tittxt, ' - Sensitivity plot']);
         subplot(211)
         mmm = (siJnorm)'./max(siJnorm);
         mmm1 = (siHnorm)'./max(siHnorm);
@@ -115,14 +107,7 @@ if SampleSize == 1,
             text(ip,dy(1),name{is(ip)},'rotation',90,'HorizontalAlignment','right','interpreter','none')
         end
         title('Sensitivity bars using derivatives (log-scale)')
-        if save_figure
-            eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_sensitivity_' tittxt1 '.eps']);
-            if ~exist('OCTAVE_VERSION'),
-                saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_sensitivity_',tittxt1])
-                eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_sensitivity_' tittxt1]);
-            end
-            close(gcf);
-        end
+        dyn_saveas(hh,[IdentifDirectoryName '/' M_.fname '_sensitivity_' tittxt1 ],options_);
         
         % identificaton patterns
         for  j=1:size(idemoments.cosnJ,2),
@@ -143,7 +128,7 @@ if SampleSize == 1,
                 end
                 fprintf('%-15s [%s] %10.3f\n',name{i},namx,idemoments.cosnJ(i,j))
             end
-            figure('name',[tittxt,' - Collinearity patterns with ', int2str(j) ,' parameter(s)']),
+            hh = dyn_figure(options_,'Name',[tittxt,' - Collinearity patterns with ', int2str(j) ,' parameter(s)']);
             imagesc(pax,[0 1]);
             set(gca,'xticklabel','')
             set(gca,'yticklabel','')
@@ -162,33 +147,26 @@ if SampleSize == 1,
             set(gca,'xgrid','on')
             set(gca,'ygrid','on')
             xlabel([tittxt,' - Collinearity patterns with ', int2str(j) ,' parameter(s)'],'interpreter','none')
-            if save_figure
-                eval(['print -depsc ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_' tittxt1 '_' int2str(j) '.eps']);
-                if ~exist('OCTAVE_VERSION'),
-                    saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_collinearity_', tittxt1, '_', int2str(j)])
-                    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_collinearity_' tittxt1 '_' int2str(j)]);
-                end
-                close(gcf);
-            end
+            dyn_saveas(hh,[ IdentifDirectoryName '/' M_.fname '_ident_collinearity_' tittxt1 '_' int2str(j) ],options_);
         end
         disp('')
         if idehess.flag_score,
             [U,S,V]=svd(idehess.AHess,0);
             S=diag(S);
             if nparam<5,
-                f1 = figure('name',[tittxt,' - Identification patterns (Information matrix)']);
+                f1 = dyn_figure(options_,'Name',[tittxt,' - Identification patterns (Information matrix)']);
             else
-                f1 = figure('name',[tittxt,' - Identification patterns (Information matrix): SMALLEST SV']);
-                f2 = figure('name',[tittxt,' - Identification patterns (Information matrix): HIGHEST SV']);
+                f1 = dyn_figure(options_,'Name',[tittxt,' - Identification patterns (Information matrix): SMALLEST SV']);
+                f2 = dyn_figure(options_,'Name',[tittxt,' - Identification patterns (Information matrix): HIGHEST SV']);
             end
         else
             S = idemoments.S;
             V = idemoments.V;
             if nparam<5,
-                f1 = figure('name',[tittxt,' - Identification patterns (moments)']);
+                f1 = dyn_figure(options_,'Name',[tittxt,' - Identification patterns (moments)']);
             else
-                f1 = figure('name',[tittxt,' - Identification patterns (moments): SMALLEST SV']);
-                f2 = figure('name',[tittxt,' - Identification patterns (moments): HIGHEST SV']);
+                f1 = dyn_figure(options_,'Name',[tittxt,' - Identification patterns (moments): SMALLEST SV']);
+                f2 = dyn_figure(options_,'Name',[tittxt,' - Identification patterns (moments): HIGHEST SV']);
             end
         end
         for j=1:min(nparam,8),
@@ -215,28 +193,14 @@ if SampleSize == 1,
             end
             title(['Singular value ',num2str(Stit)])
         end
-        if save_figure,
-            figure(f1);
-            eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_1.eps']);
-            if ~exist('OCTAVE_VERSION'),
-                saveas(f1,[IdentifDirectoryName,'/',M_.fname,'_ident_pattern_',tittxt1,'_1'])
-                eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_1']);
-            end
-            close(f1);
-            if nparam>4,
-                figure(f2),
-                eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_2.eps']);
-                if ~exist('OCTAVE_VERSION'),
-                    saveas(f2,[IdentifDirectoryName,'/',M_.fname,'_ident_pattern_',tittxt1,'_2'])
-                    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_2']);
-                end
-                close(f2);
-            end
+        dyn_saveas(f1,[  IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_1' ],options_);
+        if nparam>4,
+            dyn_saveas(f2,[  IdentifDirectoryName '/' M_.fname '_ident_pattern_' tittxt1 '_2' ],options_);
         end
     end
     
 else
-    figure('Name',['MC sensitivities']),
+    hh = dyn_figure(options_,'Name',['MC sensitivities']);
     subplot(211)
     mmm = (idehess.ide_strength_J);
     [ss, is] = sort(mmm);
@@ -262,17 +226,12 @@ else
         legend('Moments','Model','LRE model','Location','Best')
     end
     title('MC mean of sensitivity measures')
-    eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_MC_sensitivity.eps']);
-    if ~exist('OCTAVE_VERSION'),
-        saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_MC_sensitivity'])
-        eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_MC_sensitivity']);
-    end
-    close(gcf); 
+    dyn_saveas(hh,[ IdentifDirectoryName '/' M_.fname '_MC_sensitivity' ],options_);
     if advanced,
         disp(' ')
         disp('Press ENTER to display advanced diagnostics'), pause(5),
 %         options_.nograph=1;
-        figure('Name','MC Condition Number'),
+        hh = dyn_figure(options_,'Name','MC Condition Number');
         subplot(221)
         hist(log10(idemodel.cond))
         title('log10 of Condition number in the model')
@@ -282,12 +241,7 @@ else
         subplot(223)
         hist(log10(idelre.cond))
         title('log10 of Condition number in the LRE model')
-        eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_ident_COND.eps']);
-        if ~exist('OCTAVE_VERSION'),
-            saveas(gcf,[IdentifDirectoryName,'/',M_.fname,'_ident_COND'])
-            eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_ident_COND']);
-        end
-        close(gcf);
+        dyn_saveas(hh,[IdentifDirectoryName '/' M_.fname '_ident_COND' ],options_);
         ncut=floor(SampleSize/10*9);
         [dum,is]=sort(idelre.cond);
         [proba, dproba] = stab_map_1(params, is(1:ncut), is(ncut+1:end), 'MC_HighestCondNumberLRE', 1, [], IdentifDirectoryName, 0.1);
@@ -307,10 +261,10 @@ else
 %         end
 
         if nparam<5,
-            f1 = figure('name',[tittxt,' - MC Identification patterns (moments)']);
+            f1 = dyn_figure(options_,'Name',[tittxt,' - MC Identification patterns (moments): HIGHEST SV'])
         else
-            f1 = figure('name',[tittxt,' - MC Identification patterns (moments): SMALLEST SV']);
-            f2 = figure('name',[tittxt,' - MC Identification patterns (moments): HIGHEST SV']);
+            f1 = dyn_figure(options_,'Name',[tittxt,' - MC Identification patterns (moments): SMALLEST SV']);
+            f2 = dyn_figure(options_,'Name',[tittxt,' - MC Identification patterns (moments): HIGHEST SV']);
         end
         nplots=min(nparam,8);
         if nplots>4,
@@ -346,23 +300,9 @@ else
             end
             title(['MEAN Singular value ',num2str(Stit)])
         end
-        if save_figure,
-            figure(f1);
-            eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_1.eps']);
-            if ~exist('OCTAVE_VERSION'),
-                saveas(f1,[IdentifDirectoryName,'/',M_.fname,'_MC_dent_pattern_1'])
-                eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_1']);
-            end
-            close(f1);
-            if nparam>4,
-                figure(f2),
-                eval(['print -depsc2 ' IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_2.eps']);
-                if ~exist('OCTAVE_VERSION'),
-                    saveas(f2,[IdentifDirectoryName,'/',M_.fname,'_MC_ident_pattern_2'])
-                    eval(['print -dpdf ' IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_2']);
-                end
-                close(f2);
-            end
+        dyn_saveas(f1,[IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_1' ],options_);
+        if nparam>4,
+            dyn_saveas(f2,[  IdentifDirectoryName '/' M_.fname '_MC_ident_pattern_2' ],options_);
         end
     end
 end

@@ -71,7 +71,7 @@ for j=1:size(anamendo,1),
       if ~isempty(y0),
         if mod(iplo,9)==0,
           ifig=ifig+1;
-          figure('name',[namendo,' vs. shocks ',int2str(ifig)]),
+          hh=dyn_figure(options_,'name',[namendo,' vs. shocks ',int2str(ifig)]);
           iplo=0;
         end
         iplo=iplo+1;
@@ -90,20 +90,20 @@ for j=1:size(anamendo,1),
         end
         title([namendo,' vs. ',namexo],'interpreter','none')
         if iplo==9,
-          saveas(gcf,[dirname,'/',M_.fname,'_', namendo,'_vs_shock_',num2str(ifig)])
-          eval(['print -depsc2 ' dirname,'/',M_.fname,'_', namendo,'_vs_shock_',num2str(ifig)]);
-          eval(['print -dpdf ' dirname,'/',M_.fname,'_', namendo,'_vs_shock_',num2str(ifig)]);
-          close(gcf)
+          dyn_saveas(hh,[dirname,'/',M_.fname,'_', namendo,'_vs_shock_',num2str(ifig)],options_);  
+          if ~options.nodisplay
+            close(hh);
+          end
         end
 
       end
     end
   end
   if iplo<9 & iplo>0 & ifig,
-    saveas(gcf,[dirname,'/',M_.fname,'_', namendo,'_vs_shocks_',num2str(ifig)])
-    eval(['print -depsc2 ' dirname,'/',M_.fname,'_', namendo,'_vs_shocks_',num2str(ifig)]);
-    eval(['print -dpdf ' dirname,'/',M_.fname,'_', namendo,'_vs_shocks_',num2str(ifig)]);
-    close(gcf)
+    dyn_saveas(hh,[dirname,'/',M_.fname,'_', namendo,'_vs_shocks_',num2str(ifig)],options_);
+    if ~options.nodisplay
+      close(hh);
+    end
   end
 
   iplo=0;
@@ -137,23 +137,20 @@ for j=1:size(anamendo,1),
 
         title([namendo,' vs. ',namlagendo,'(-1)'],'interpreter','none')
         if iplo==9,
-          saveas(gcf,[dirname,'/',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)])
-          eval(['print -depsc2 ' dirname,'/',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)]);
-          eval(['print -dpdf ' dirname,'/',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)]);
-          close(gcf)
+          dyn_saveas(hh,[dirname,'/',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)],options_);  
+          if ~options.nodisplay
+            close(hh);
+          end
         end
       end
     end
   end
   if iplo<9 & iplo>0 & ifig,
-    saveas(gcf,[dirname,'/',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)])
-    eval(['print -depsc2 ' dirname,'/',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)]);
-    eval(['print -dpdf ' dirname,'/',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)]);
-    close(gcf)
+    dyn_saveas(hh,[dirname,'/',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)],options_);      
   end
 end
 
-figure, 
+hh=dyn_figure(options_); 
 %bar(SA)
 % boxplot(SA','whis',10,'symbol','r.')
 myboxplot(SA',[],'.',[],10)
@@ -167,8 +164,4 @@ end
 xlabel(' ')
 ylabel('Elementary Effects')
 title('Reduced form screening')
-
-saveas(gcf,[dirname,'/',M_.fname,'_redform_screen'])
-eval(['print -depsc2 ' dirname,'/',M_.fname,'_redform_screen']);
-eval(['print -dpdf ' dirname,'/',M_.fname,'_redform_screen']);
-
+dyn_saveas(hh,[dirname,'/',M_.fname,'_redform_screen'],options_);

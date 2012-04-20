@@ -77,7 +77,7 @@ if opt_gsa.load_ident_files==0,
     ifig=0;
     for j=1:M_.exo_nbr,
       if mod(j,6)==1
-        figure('name',['Variance decomposition shocks']);
+        hh=dyn_figure(options_,'name',['Variance decomposition shocks']);
         ifig=ifig+1;
         iplo=0;
       end
@@ -95,10 +95,10 @@ if opt_gsa.load_ident_files==0,
       ylabel(' ')
       title(M_.exo_names(j,:),'interpreter','none')
       if mod(j,6)==0 | j==M_.exo_nbr,
-        saveas(gcf,[OutputDirectoryName,'/',fname_,'_vdec_exo_',int2str(ifig)])
-        eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_vdec_exo_',int2str(ifig)]);
-        eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_vdec_exo_',int2str(ifig)]);
-        close(gcf),
+        dyn_saveas(hh,[OutputDirectoryName,'/',fname_,'_vdec_exo_',int2str(ifig)],options_);  
+        if ~options.nodisplay
+            close(hh);
+        end      
       end
     end
   end
@@ -204,7 +204,7 @@ if opt_gsa.morris==1,
     load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAvdec','vdec','ir_vdec','ic_vdec')
   end
   
-  figure,
+  hh = dyn_figure(options_);
 %   boxplot(SAvdec,'whis',10,'symbol','r.')
   myboxplot(SAvdec,[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
@@ -217,10 +217,10 @@ if opt_gsa.morris==1,
   end
   xlabel(' ')
   title('All variance decomposition')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_vdec'])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_vdec']);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_vdec']);
-  close(gcf)
+  dyn_saveas(hh,[OutputDirectoryName,'/',fname_,'_morris_vdec'],options_);
+  if ~options.nodisplay
+    close(hh);
+  end
   else
   save([OutputDirectoryName,'/',fname_,'_morris_IDE'],'vdec')
     
@@ -312,7 +312,7 @@ if opt_gsa.morris==1,
     load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'ac','ir_ac','ic_ac')
   end
   
-  figure,
+  hh=dyn_figure(options_);
 %   boxplot(SAcc,'whis',10,'symbol','r.')
   myboxplot(SAcc,[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
@@ -325,9 +325,7 @@ if opt_gsa.morris==1,
   end
   xlabel(' ')
   title('EET All moments')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_moments'])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_moments']);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_moments']);
+  dyn_saveas(hh,[OutputDirectoryName,'/',fname_,'_morris_moments'],options_);
 %   close(gcf),
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -709,7 +707,7 @@ if opt_gsa.morris==1,
   else
     load([OutputDirectoryName,'/',fname_,'_morris_IDE'],'SAnorm','SAmunorm','SAsignorm')
   end
-  figure, %bar(SAnorm(:,irel))
+  hh=dyn_figure(options_); %bar(SAnorm(:,irel))
 %   boxplot(SAnorm','whis',10,'symbol','r.')
   myboxplot(SAnorm',[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
@@ -723,11 +721,9 @@ if opt_gsa.morris==1,
   end
   xlabel(' ')
   title('Elementary effects in the model')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morris_par'])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morris_par']);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_par']);
+  dyn_saveas(hh,[OutputDirectoryName,'/',fname_,'_morris_par'],options_);
 
-  figure, %bar(SAmunorm(:,irel))
+  hh=dyn_figure(options_); %bar(SAmunorm(:,irel))
 %   boxplot(SAmunorm','whis',10,'symbol','r.')
   myboxplot(SAmunorm',[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
@@ -740,12 +736,12 @@ if opt_gsa.morris==1,
   end
   xlabel(' ')
   title('\mu in the model')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morrismu_par'])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morrismu_par']);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morrismu_par']);
-  close(gcf),
-  
-  figure, %bar(SAsignorm(:,irel))
+  dyn_saveas(hh,[OutputDirectoryName,'/',fname_,'_morrismu_par'],options_);
+  if ~options.nodisplay
+    close(hh);
+  end
+
+  hh=dyn_figure(options_); %bar(SAsignorm(:,irel))
 %   boxplot(SAsignorm','whis',10,'symbol','r.')
   myboxplot(SAsignorm',[],'.',[],10)
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
@@ -758,10 +754,10 @@ if opt_gsa.morris==1,
   end
   xlabel(' ')
   title('\sigma in the model')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_morrissig_par'])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_morrissig_par']);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morrissig_par']);
-  close(gcf),
+  dyn_saveas(hh,[OutputDirectoryName,'/',fname_,'_morrissig_par'],options_);
+  if ~options.nodisplay
+    close(hh);
+  end
 
   %     figure, bar(SAnorm(:,irel)')
   %     set(gca,'xtick',[1:j0])
@@ -1509,7 +1505,8 @@ else,  % main effects analysis
 %   SAmeanexo=mean(SAmomN(:,1:nshock));
 
 %   figure, bar(latent'*SAcc),
-  figure, bar(sum(SAcc)),
+  hh=dyn_figure(options_);
+  bar(sum(SAcc)),
   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:npT])
   set(gca,'xlim',[0.5 npT+0.5])
   ydum = get(gca,'ylim');
@@ -1521,10 +1518,8 @@ else,  % main effects analysis
   end
   xlabel(' ')
   title(['Identifiability indices in the ',fsuffix,' moments.'],'interpreter','none')
-  saveas(gcf,[OutputDirectoryName,'/',fname_,'_ident_ALL',fsuffix])
-  eval(['print -depsc2 ' OutputDirectoryName '/' fname_ '_ident_ALL',fsuffix]);
-  eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_ident_ALL',fsuffix]);
-
+  dyn_saveas(hh,[OutputDirectoryName,'/',fname_,'_ident_ALL',fsuffix],options_);
+  
 %   figure, bar(SAmeanexo),
 %   set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:nshock])
 %   set(gca,'xlim',[0.5 nshock+0.5])

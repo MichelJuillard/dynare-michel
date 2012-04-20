@@ -74,7 +74,7 @@ for j=1:npar,
       j2=j2+1;
       if mod(j2,12)==1,
         ifig=ifig+1;
-        hh=figure('name',['Correlations in the ',fnam,' sample ', num2str(ifig)]);
+        hh=dyn_figure(options_,'name',['Correlations in the ',fnam,' sample ', num2str(ifig)]);
       end
       subplot(3,4,j2-(ifig-1)*12)
       %             bar(c0(i2,j)), 
@@ -97,23 +97,17 @@ for j=1:npar,
       end
       title(['cc = ',num2str(c0(i2(jx),j))])
       if (mod(j2,12)==0) && j2>0,
-        eval(['print -depsc2 ' dirname '/' fig_nam_ int2str(ifig)  '.eps']);
-        if ~exist('OCTAVE_VERSION'),
-          saveas(hh,[dirname,'/',fig_nam_,int2str(ifig)])
-          eval(['print -dpdf ' dirname '/' fig_nam_ int2str(ifig)]);
+        dyn_saveas(hh,[dirname,'/',fig_nam_,int2str(ifig)],options_);
+        if ~options.nodisplay
+          close(hh);
         end
-        if options_.nograph, close(hh), end
       end
           end
+          
     end
   end
   if (j==(npar)) && j2>0,
-    eval(['print -depsc2 ' dirname '/' fig_nam_ int2str(ifig)  '.eps']);
-    if ~exist('OCTAVE_VERSION'),
-      saveas(gcf,[dirname,'/',fig_nam_,int2str(ifig)])
-      eval(['print -dpdf ' dirname '/' fig_nam_ int2str(ifig)]);
-    end
-    if options_.nograph, close(gcf), end
+    dyn_saveas(hh,[dirname,'/',fig_nam_,int2str(ifig)],options_);
   end
   
 end

@@ -61,13 +61,13 @@ end
 
 m = 1;
 n_fig = 1;
-figure('Name','Forecasts (I)')
+hh=dyn_figure(options_,'Name','Forecasts (I)');
 for j= 1:nvar
     if m > nc*nr; 
-        eval(['print -depsc ' fname '/graphs/forcst' int2str(n_fig) ...
-              '.eps;'])
+        dyn_saveas(hh,[ fname '/graphs/forcst' int2str(n_fig)],options_);
+        
         n_fig =n_fig+1;
-        eval(['figure(''Name'',''Forecast (' int2str(n_fig) ')'');']);
+        eval(['hh=dyn_figure(options_,''Name'',''Forecast (' int2str(n_fig) ')'');']);
         m = 1;
     end
     subplot(nr,nc,m);
@@ -91,5 +91,5 @@ for j= 1:nvar
 end
 
 if m > 1
-    eval(['print -deps ' fname '/graphs/forcst' int2str(n_fig) '.eps;'])
+    dyn_saveas(hh,[fname '/graphs/forcst' int2str(n_fig)],options_);
 end

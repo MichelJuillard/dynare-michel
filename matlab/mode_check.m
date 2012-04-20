@@ -91,7 +91,7 @@ for plt = 1:nbplt,
         NAMES = [];
         TeXNAMES = [];
     end
-    hh = figure('Name','Check plots');
+    hh = dyn_figure(DynareOptions,'Name','Check plots');
     for k=1:min(nstar,length(x)-(plt-1)*nstar)
         subplot(nr,nc,k)
         kk = (plt-1)*nstar+k;
@@ -160,12 +160,7 @@ for plt = 1:nbplt,
         text(0.25,0.5,'log-post')
         text(0.69,0.5,'log-lik kernel')
     end
-    eval(['print -depsc2 ' Model.fname '_CheckPlots' int2str(plt) '.eps']);
-    if ~exist('OCTAVE_VERSION')
-        eval(['print -dpdf ' Model.fname '_CheckPlots' int2str(plt)]);
-        saveas(hh,[Model.fname '_CheckPlots' int2str(plt) '.fig']);
-    end
-    if DynareOptions.nograph, close(hh), end
+    dyn_saveas(hh,[ Model.fname '_CheckPlots' int2str(plt) ],DynareOptions);
     if TeX
         % TeX eps loader file
         fprintf(fidTeX,'\\begin{figure}[H]\n');

@@ -107,7 +107,7 @@ for j=1:size(anamendo,1)
       if (max(y0)-min(y0))>1.e-10,
         if mod(iplo,9)==0,
           ifig=ifig+1;
-          hfig = figure('name',[namendo,' vs. shocks ',int2str(ifig)]);
+          hfig = dyn_figure(options_,'name',[namendo,' vs. shocks ',int2str(ifig)]);
           iplo=0;
         end
         iplo=iplo+1;
@@ -156,20 +156,20 @@ for j=1:size(anamendo,1)
         end
         title([logflag,' ',namendo,' vs. ',namexo],'interpreter','none')
         if iplo==9,
-          saveas(gcf,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)])
-          eval(['print -depsc2 ' dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)]);
-          eval(['print -dpdf ' dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)]);
-          close(gcf)
+          dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)],options_);  
+          if ~options.nodisplay
+            close(hfig);
+          end
         end
       
       end
     end
   end
   if iplo<9 & iplo>0 & ifig,
-    saveas(gcf,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)])
-    eval(['print -depsc2 ' dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)]);
-    eval(['print -dpdf ' dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)]);
-    close(gcf)
+    dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)],options_);
+    if ~options.nodisplay
+        close(hfig);
+    end
   end
   ifig=0;
   iplo=0;
@@ -183,7 +183,7 @@ for j=1:size(anamendo,1)
       if (max(y0)-min(y0))>1.e-10,
         if mod(iplo,9)==0,
           ifig=ifig+1;
-          hfig = figure('name',[namendo,' vs. lags ',int2str(ifig)]);
+          hfig = dyn_figure(options_,'name',[namendo,' vs. lags ',int2str(ifig)]);
           iplo=0;
         end
         iplo=iplo+1;
@@ -232,25 +232,25 @@ for j=1:size(anamendo,1)
         end
         title([logflag,' ',namendo,' vs. ',namlagendo,'(-1)'],'interpreter','none')
         if iplo==9,
-          saveas(gcf,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)])
-          eval(['print -depsc2 ' dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)]);
-          eval(['print -dpdf ' dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)]);
-          close(gcf)
+          dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],options_);  
+            if ~options.nodisplay
+                close(hfig);
+            end
         end
       
       end
     end
   end
   if iplo<9 & iplo>0 & ifig,
-    saveas(gcf,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)])
-    eval(['print -depsc2 ' dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)]);
-    eval(['print -dpdf ' dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)]);
-    close(gcf)
+    dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],options_);  
+    if ~options.nodisplay
+      close(hfig);
+    end
   end
 end
 
 if ilog==0,
-figure, %bar(si)
+hfig=dyn_figure(options_); %bar(si)
 % boxplot(si','whis',10,'symbol','r.')
 myboxplot(si',[],'.',[],10)
 xlabel(' ')
@@ -262,13 +262,10 @@ for ip=1:np,
   text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 title('Reduced form GSA')
-
-saveas(gcf,[dirname,'/',M_.fname,'_redform_gsa'])
-eval(['print -depsc2 ' dirname,'/',M_.fname,'_redform_gsa']);
-eval(['print -dpdf ' dirname,'/',M_.fname,'_redform_gsa']);
+dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_gsa'],options_);
 
 else
-figure, %bar(silog)
+hfig=dyn_figure(options_); %bar(silog)
 % boxplot(silog','whis',10,'symbol','r.')
 myboxplot(silog',[],'.',[],10)
 set(gca,'xticklabel',' ','fontsize',10,'xtick',[1:np])
@@ -280,10 +277,7 @@ for ip=1:np,
   text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
 end
 title('Reduced form GSA - Log-transformed elements')
-
-saveas(gcf,[dirname,'/',M_.fname,'_redform_gsa_log'])
-eval(['print -depsc2 ' dirname,'/',M_.fname,'_redform_gsa_log']);
-eval(['print -dpdf ' dirname,'/',M_.fname,'_redform_gsa_log']);
+dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_gsa_log'],options_);
 
 end
 function si  = redform_private(x0, y0, pshape, pd, iload, pnames, namy, namx, xdir)
@@ -302,14 +296,14 @@ x00=x0;
 
 fname=[xdir,'/map'];
 if iload==0,
-  figure, hist(y0,30), title([namy,' vs. ', namx])
+  hfig=dyn_figure(options_); hist(y0,30), title([namy,' vs. ', namx])
   if isempty(dir(xdir))
     mkdir(xdir)
   end
-  saveas(gcf,[xdir,'/', namy,'_vs_', namx])
-  eval(['print -depsc2 ' xdir,'/', namy,'_vs_', namx]);
-  eval(['print -dpdf ' xdir,'/', namy,'_vs_', namx]);
-  close(gcf)
+  dyn_saveas(hfig,[xdir,'/', namy,'_vs_', namx],options_);
+  if ~options.nodisplay
+    close(hfig);
+  end
 %   gsa_ = gsa_sdp_dyn(y0, x0, -2, [],[],[],1,fname, pnames);
   nrun=length(y0);
   nest=min(250,nrun);
@@ -325,36 +319,39 @@ if iload==0,
   hfig=gsa_sdp_plot(gsa_,fname,pnames,iii(1:min(12,np)));
   close(hfig);
   gsa_.x0=x0(1:nfit,:);
+  if ~options.nodisplay
+    close(hfig);
+  end
 %   copyfile([fname,'_est.mat'],[fname,'.mat'])
-  figure, 
+  hfig=dyn_figure(options_); 
   plot(y0(1:nfit),[gsa_.fit y0(1:nfit)],'.'), 
   title([namy,' vs. ', namx,' fit'])
-  saveas(gcf,[xdir,'/', namy,'_vs_', namx,'_fit'])
-  eval(['print -depsc2 ' xdir,'/', namy,'_vs_', namx,'_fit']);
-  eval(['print -dpdf ' xdir,'/', namy,'_vs_', namx,'_fit']);
-  close(gcf)
+  dyn_saveas(hfig,[xdir,'/', namy,'_vs_', namx,'_fit'],options_);
+  if ~options.nodisplay
+   close(hfig);
+  end
   if nfit<nrun,
     npred=[nfit+1:nrun];
   yf = ss_anova_fcast(x0(npred,:), gsa_);
-  figure, 
+  hfig=dyn_figure(options_); 
   plot(y0(npred),[yf y0(npred)],'.'), 
   title([namy,' vs. ', namx,' pred'])
-  saveas(gcf,[xdir,'/', namy,'_vs_', namx,'_pred'])
-  eval(['print -depsc2 ' xdir,'/', namy,'_vs_', namx,'_pred']);
-  eval(['print -dpdf ' xdir,'/', namy,'_vs_', namx,'_pred']);
-  close(gcf)
+  dyn_saveas(hfig,[xdir,'/', namy,'_vs_', namx,'_pred'],options_);
+  if ~options.nodisplay
+    close(hfig);
+  end
   end
 else
 %   gsa_ = gsa_sdp_dyn(y0, x0, 0, [],[],[],0,fname, pnames);
   gsa_ = gsa_sdp(y0, x0, 0, [],[],[],0,fname, pnames);
   yf = ss_anova_fcast(x0, gsa_);
-  figure, 
+  hfig=dyn_figure(options_); 
   plot(y0,[yf y0],'.'), 
   title([namy,' vs. ', namx,' pred'])
-  saveas(gcf,[xdir,'/', namy,'_vs_', namx,'_pred'])
-  eval(['print -depsc2 ' xdir,'/', namy,'_vs_', namx,'_pred']);
-  eval(['print -dpdf ' xdir,'/', namy,'_vs_', namx,'_pred']);
-  close(gcf)
+  dyn_saveas(hfig,[xdir,'/', namy,'_vs_', namx,'_pred'],options_);  
+  if ~options.nodisplay
+    close(hfig);
+  end
 end
 % si = gsa_.multivariate.si;
 si = gsa_.si;

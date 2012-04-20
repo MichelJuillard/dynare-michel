@@ -264,7 +264,7 @@ if iload <=0,
 %     normLRE = max(abs(siLRE)')';
     save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_point', 'idemoments_point','idemodel_point', 'idelre_point','store_options_ident')
     disp_identification(params, idemodel_point, idemoments_point, name);
-    plot_identification(params,idemoments_point,idehess_point,idemodel_point,idelre_point,advanced,parameters,name,IdentifDirectoryName,1);
+    plot_identification(params,idemoments_point,idehess_point,idemodel_point,idelre_point,advanced,parameters,name,IdentifDirectoryName);
 
     if SampleSize > 1,
         disp(' ')
@@ -437,13 +437,13 @@ end
 if iload,
     disp(['Testing ',parameters])
     disp_identification(idehess_point.params, idemodel_point, idemoments_point, name);
-    plot_identification(idehess_point.params,idemoments_point,idehess_point,idemodel_point,idelre_point,advanced,parameters,name,IdentifDirectoryName,1);
+    plot_identification(idehess_point.params,idemoments_point,idehess_point,idemodel_point,idelre_point,advanced,parameters,name,IdentifDirectoryName);
 end
 if SampleSize > 1,
     fprintf('\n')
     disp('Testing MC sample')
     disp_identification(pdraws, idemodel, idemoments, name);
-    plot_identification(pdraws,idemoments,idehess_point,idemodel,idelre,advanced,'MC sample - ',name, IdentifDirectoryName, 1);
+    plot_identification(pdraws,idemoments,idehess_point,idemodel,idelre,advanced,'MC sample - ',name, IdentifDirectoryName);
     if advanced,
         jcrit=find(idemoments.ino);
         if length(jcrit)<SampleSize,
@@ -460,7 +460,7 @@ if SampleSize > 1,
                 end
                 disp_identification(pdraws(jmax,:), idemodel_max, idemoments_max, name);
                 close all,
-                plot_identification(pdraws(jmax,:),idemoments_max,idehess_max,idemodel_max,idelre_max,1,tittxt,name,IdentifDirectoryName,1);
+                plot_identification(pdraws(jmax,:),idemoments_max,idehess_max,idemodel_max,idelre_max,1,tittxt,name,IdentifDirectoryName);
                 [dum,jmin]=min(idemoments.cond);
                 fprintf('\n')
                 tittxt = 'Draw with SMALLEST condition number';
@@ -473,7 +473,7 @@ if SampleSize > 1,
                 end
                 disp_identification(pdraws(jmin,:), idemodel_min, idemoments_min, name);
                 close all,
-                plot_identification(pdraws(jmin,:),idemoments_min,idehess_min,idemodel_min,idelre_min,1,tittxt,name,IdentifDirectoryName,1);
+                plot_identification(pdraws(jmin,:),idemoments_min,idehess_min,idemodel_min,idelre_min,1,tittxt,name,IdentifDirectoryName);
             else
                 for j=1:length(jcrit),
                     tittxt = ['Rank deficient draw n. ',int2str(j)];
@@ -485,7 +485,7 @@ if SampleSize > 1,
                     end
                     disp_identification(pdraws(jcrit(j),:), idemodel_(j), idemoments_(j), name);
                     close all,
-                    plot_identification(pdraws(jcrit(j),:),idemoments_(j),idehess_(j),idemodel_(j),idelre_(j),1,tittxt,name,IdentifDirectoryName,1);
+                    plot_identification(pdraws(jcrit(j),:),idemoments_(j),idehess_(j),idemodel_(j),idelre_(j),1,tittxt,name,IdentifDirectoryName);
                 end
                 if ~iload,
                     save([IdentifDirectoryName '/' M_.fname '_identif.mat'], 'idehess_', 'idemoments_','idemodel_', 'idelre_', 'jcrit', '-append');

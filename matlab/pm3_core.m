@@ -67,7 +67,7 @@ end
 
 figunumber = 0;
 subplotnum = 0;
-hh = figure('Name',[tit1 ' ' int2str(figunumber+1)]);
+hh = dyn_figure(options_,'Name',[tit1 ' ' int2str(figunumber+1)]);
 RemoteFlag = 0;
 if whoiam,
     if Parallel(ThisMatlab).Local ==0
@@ -101,19 +101,14 @@ for i=fpar:nvar
     end
     
     if subplotnum == MaxNumberOfPlotsPerFigure || i == nvar
-        eval(['print -depsc2 ' M_.dname '/Output/'  M_.fname '_' name3 '_' deblank(tit3(i,:)) '.eps' ]);
-        if ~exist('OCTAVE_VERSION')
-            eval(['print -dpdf ' M_.dname '/Output/' M_.fname  '_' name3 '_' deblank(tit3(i,:))]);
-            saveas(hh,[M_.dname '/Output/' M_.fname '_' name3 '_' deblank(tit3(i,:)) '.fig']);
-        end
+        dyn_saveas(hh,[M_.dname '/Output/'  M_.fname '_' name3 '_' deblank(tit3(i,:))],options_);
         if RemoteFlag==1,
             OutputFileName = [OutputFileName; {[M_.dname, filesep, 'Output',filesep], [M_.fname '_' name3 '_' deblank(tit3(i,:)) '.*']}];
         end
-        if options_.nograph, close(hh), end
         subplotnum = 0;
         figunumber = figunumber+1;
         if (i ~= nvar)
-            hh = figure('Name',[name3 ' ' int2str(figunumber+1)]);
+            hh = dyn_figure(options_,'Name',[name3 ' ' int2str(figunumber+1)]);
         end
     end
     

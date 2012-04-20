@@ -289,7 +289,7 @@ else
     for i=1:size(vvarvecm,1),
         if mod(i,9)==1,
             ifig=ifig+1;
-            figure('name',['Prior ',int2str(ifig)])
+            hh=dyn_figure(options_,'name',['Prior ',int2str(ifig)]);
         end
         subplot(3,3,i-9*(ifig-1))
         h=cumplot(lnprior(ixx(1:nfilt0(i),i)));
@@ -300,34 +300,24 @@ else
         title(vvarvecm(i,:),'interpreter','none')
         if mod(i,9)==0 | i==size(vvarvecm,1)
             if options_.opt_gsa.ppost
-                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_lnprior',int2str(ifig)  '.eps']);
-                if ~exist('OCTAVE_VERSION'),
-                    saveas(gcf,[OutDir,'/',fname_,'_rmse_post_lnprior',int2str(ifig)])
-                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_lnprior',int2str(ifig)]);
-                end
+                dyn_saveas(hh,[OutDir '/' fname_ '_rmse_post_lnprior',int2str(ifig)],options_);
             else
                 if options_.opt_gsa.pprior
-                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_lnprior',int2str(ifig)  '.eps']);
-                    if ~exist('OCTAVE_VERSION'),
-                        saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_lnprior',int2str(ifig)])
-                        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_lnprior',int2str(ifig)]);
-                    end
+                    dyn_saveas(hh,[OutDir '/' fname_ '_rmse_prior_lnprior',int2str(ifig) ],options_);
                 else
-                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_lnprior',int2str(ifig)  '.eps']);
-                    if ~exist('OCTAVE_VERSION'),
-                        saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_lnprior',int2str(ifig)])
-                        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_lnprior',int2str(ifig)]);
-                    end
+                    dyn_saveas(hh,[OutDir '/' fname_ '_rmse_mc_lnprior',int2str(ifig) ],options_);
                 end
             end
-            close(gcf)
+            if ~options.nodisplay
+                close(hh);
+            end
         end
     end
     ifig=0;
     for i=1:size(vvarvecm,1),
         if mod(i,9)==1,
             ifig=ifig+1;
-            figure('name',['Likelihood ',int2str(ifig)])
+            hh = dyn_figure(options_,'Name',['Likelihood ',int2str(ifig)]);
         end
         subplot(3,3,i-9*(ifig-1))
         h=cumplot(likelihood(ixx(1:nfilt0(i),i)));
@@ -341,34 +331,24 @@ else
         end
         if mod(i,9)==0 | i==size(vvarvecm,1)
             if options_.opt_gsa.ppost
-                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_lnlik',int2str(ifig)  '.eps']);
-                if ~exist('OCTAVE_VERSION'),
-                    saveas(gcf,[OutDir,'/',fname_,'_rmse_post_lnlik',int2str(ifig)])
-                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_lnlik',int2str(ifig)]);
-                end
+                dyn_saveas(hh,[OutDir '/' fname_ '_rmse_post_lnlik',int2str(ifig) ],options_);
             else
                 if options_.opt_gsa.pprior
-                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_lnlik',int2str(ifig)  '.eps']);
-                    if ~exist('OCTAVE_VERSION'),
-                        saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_lnlik',int2str(ifig)])
-                        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_lnlik',int2str(ifig)]);
-                    end
+                    dyn_saveas(hh,[OutDir '/' fname_ '_rmse_prior_lnlik',int2str(ifig)],options_);
                 else
-                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_lnlik',int2str(ifig)  '.eps']);
-                    if ~exist('OCTAVE_VERSION'),
-                        saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_lnlik',int2str(ifig)])
-                        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_lnlik',int2str(ifig)]);
-                    end
+                    dyn_saveas(hh,[OutDir '/' fname_ '_rmse_mc_lnlik',int2str(ifig) ],options_);
                 end
             end
-            close(gcf)
+            if ~options.nodisplay
+                close(hh);
+            end
         end
     end
     ifig=0;
     for i=1:size(vvarvecm,1),
         if mod(i,9)==1,
             ifig=ifig+1;
-            figure('name',['Posterior ',int2str(ifig)])
+            hh = dyn_figure(options_,'Name',['Posterior ',int2str(ifig)]);
         end
         subplot(3,3,i-9*(ifig-1))
         h=cumplot(logpo2(ixx(1:nfilt0(i),i)));
@@ -382,27 +362,17 @@ else
         end
         if mod(i,9)==0 | i==size(vvarvecm,1)
             if options_.opt_gsa.ppost
-                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_lnpost',int2str(ifig)  '.eps']);
-                if ~exist('OCTAVE_VERSION'),
-                    saveas(gcf,[OutDir,'/',fname_,'_rmse_post_lnpost',int2str(ifig)])
-                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_lnpost',int2str(ifig)]);
-                end
+                dyn_saveas(hh,[OutDir '/' fname_ '_rmse_post_lnpost',int2str(ifig) ],options_);
             else
                 if options_.opt_gsa.pprior
-                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_lnpost',int2str(ifig)  '.eps']);
-                    if ~exist('OCTAVE_VERSION'),
-                        saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_lnpost',int2str(ifig)])
-                        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_lnpost',int2str(ifig)]);
-                    end
+                    dyn_saveas(hh,[OutDir '/' fname_ '_rmse_prior_lnpost',int2str(ifig)],options_);
                 else
-                    eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_lnpost',int2str(ifig)  '.eps']);
-                    if ~exist('OCTAVE_VERSION'),
-                        saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_lnpost',int2str(ifig)])
-                        eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_lnpost',int2str(ifig)]);
-                    end
+                    dyn_saveas(hh,[OutDir '/' fname_ '_rmse_mc_lnpost',int2str(ifig)],options_);
                 end
             end
-            close(gcf)
+            if ~options.nodisplay
+                close(hh);
+            end
         end
     end
     
@@ -501,7 +471,7 @@ else
     % plot trade-offs
     a00=jet(size(vvarvecm,1));
     for ix=1:ceil(length(nsnam)/5),
-        figure,
+        hh = dyn_figure(options_);
         for j=1+5*(ix-1):min(size(snam2,1),5*ix),
             subplot(2,3,j-5*(ix-1))
             %h0=cumplot(x(:,nsnam(j)+nshock));
@@ -536,24 +506,12 @@ else
         %h0=legend({'base',vnam{np}}',0);
         %set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
         if options_.opt_gsa.ppost
-            eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_' int2str(ix) '.eps']);
-            if ~exist('OCTAVE_VERSION'),
-                saveas(gcf,[OutDir,'/',fname_,'_rmse_post_',num2str(ix)])
-                eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_' int2str(ix)]);
-            end
+            dyn_saveas(hh,[ OutDir '/' fname_ '_rmse_post_' int2str(ix)],options_);
         else
             if options_.opt_gsa.pprior
-                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_' int2str(ix) '.eps']);
-                if ~exist('OCTAVE_VERSION'),
-                    saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_',num2str(ix)])
-                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_' int2str(ix)]);
-                end
+                dyn_saveas(hh,[OutDir '/' fname_ '_rmse_prior_' int2str(ix) ],options_);
             else
-                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_' int2str(ix)  '.eps']);
-                if ~exist('OCTAVE_VERSION'),
-                    saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_',num2str(ix)])
-                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_' int2str(ix)]);
-                end
+                dyn_saveas(hh,[OutDir '/' fname_ '_rmse_mc_' int2str(ix)],options_);
             end
         end
     end
@@ -569,7 +527,7 @@ else
     %kernel_function = 'uniform';     % Gaussian kernel for Fast Fourrier Transform approximaton.
     
     for ix=1:ceil(length(nsnam)/5),
-        figure,
+        hh = dyn_figure(options_);
         for j=1+5*(ix-1):min(size(snam2,1),5*ix),
             subplot(2,3,j-5*(ix-1))
             optimal_bandwidth = mh_optimal_bandwidth(x(:,nsnam(j)),size(x,1),bandwidth,kernel_function);
@@ -607,29 +565,16 @@ else
         %h0=legend({'base',vnam{np}}',0);
         %set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
         if options_.opt_gsa.ppost
-            eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_post_dens_' int2str(ix)  '.eps']);
-            if ~exist('OCTAVE_VERSION'),
-                saveas(gcf,[OutDir,'/',fname_,'_rmse_post_dens_',num2str(ix)])
-                eval(['print -dpdf ' OutDir '/' fname_ '_rmse_post_dens_' int2str(ix)]);
-            end
+            dyn_saveas(hh,[ OutDir '/' fname_ '_rmse_post_dens_' int2str(ix) ],options_);
         else
             if options_.opt_gsa.pprior
-                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_prior_dens_' int2str(ix)  '.eps']);
-                if ~exist('OCTAVE_VERSION'),
-                    saveas(gcf,[OutDir,'/',fname_,'_rmse_prior_dens_',num2str(ix)])
-                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_prior_dens_' int2str(ix)]);
-                end
+                dyn_saveas(hh,[OutDir '/' fname_ '_rmse_prior_dens_' int2str(ix)],options_);
             else
-                eval(['print -depsc2 ' OutDir '/' fname_ '_rmse_mc_dens_' int2str(ix)  '.eps']);
-                if ~exist('OCTAVE_VERSION'),
-                    saveas(gcf,[OutDir,'/',fname_,'_rmse_mc_dens_',num2str(ix)])
-                    eval(['print -dpdf ' OutDir '/' fname_ '_rmse_mc_dens_' int2str(ix)]);
-                end
+                dyn_saveas(hh,[OutDir '/' fname_ '_rmse_mc_dens_' int2str(ix) ],options_);
             end
         end
     end
     close all
-    
     % for j=1:size(SP,2),
     %     nfig=0;
     %     np=find(SP(:,j));

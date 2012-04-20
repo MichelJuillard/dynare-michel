@@ -63,11 +63,7 @@ for i=1:npar
     subplotnum = subplotnum+1;
     if subplotnum == 1
         figunumber = figunumber+1;
-        if options_.nograph
-            hfig = figure('Name',figurename,'Visible','off');
-        else
-            hfig = figure('Name',figurename);
-        end
+        hfig=dyn_figure(options_,'Name',figurename);
     end
     [nam,texnam] = get_the_name(i,TeX,M_,estim_params_,options_);
     if subplotnum == 1
@@ -156,16 +152,7 @@ for i=1:npar
     hold off;
     drawnow
     if subplotnum == MaxNumberOfPlotPerFigure || i == npar;
-        eval(['print -depsc2 ' OutputDirectoryName '/' M_.fname '_PriorsAndPosteriors' int2str(figunumber) '.eps']);
-        if ~exist('OCTAVE_VERSION')
-            eval(['print -dpdf ' OutputDirectoryName '/' M_.fname '_PriorsAndPosteriors' int2str(figunumber)]);
-        end
-        if options_.nograph, 
-            set(hfig,'Visible','on');
-        end
-        if ~exist('OCTAVE_VERSION')
-            saveas(hfig,[OutputDirectoryName '/' M_.fname '_PriorsAndPosteriors' int2str(figunumber) '.fig']);
-        end
+        dyn_saveas(hfig,[OutputDirectoryName '/' M_.fname '_PriorsAndPosteriors' int2str(figunumber)],options_);
         if TeX
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for j = 1:size(NAMES,1)
@@ -181,9 +168,6 @@ for i=1:npar
                 fprintf(fidTeX,'%% End of TeX file.\n');
                 fclose(fidTeX);
             end
-        end
-        if options_.nograph, 
-            close(hfig), 
         end
         subplotnum = 0;
     end
