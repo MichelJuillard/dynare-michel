@@ -685,6 +685,10 @@ step. Useful in conjunction with @code{savemacro} when one wants that to
 reuse the intermediary @file{.mod} file, without having it cluttered by
 line numbering directives.
 
+@item nolog
+Instructs Dynare to no create a logfile of this run in
+@file{@var{FILENAME}.log}. The default is to create the logfile.
+
 @item warn_uninit
 Display a warning for each variable or parameter which is not
 initialized. @xref{Parameter initialization}, or
