@@ -39,7 +39,7 @@ License: public-domain
  Journal of Economic Dynamics and Control, 2010, vol. 34, issue 3,
  pages 472-489
 
-Files: matlab/bfgsi.m matlab/csolve.m matlab/csminit1.m matlab/numgrad2.m
+Files: matlab/bfgsi1.m matlab/csolve.m matlab/csminit1.m matlab/numgrad2.m
  matlab/numgrad3.m matlab/numgrad5.m matlab/csminwel.m matlab/bvar_density.m
  matlab/bvar_toolbox.m matlab/partial_information/PI_gensys.m matlab/qzswitch.m
  matlab/qzdiv.m

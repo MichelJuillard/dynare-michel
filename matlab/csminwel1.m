@@ -273,7 +273,7 @@ while ~done
     %badgh
     stuck = (abs(fh-f) < crit);
     if (~badg) && (~badgh) && (~stuck)
-        H = bfgsi(H,gh-g,xh-x);
+        H = bfgsi1(H,gh-g,xh-x);
     end
     if Verbose
         disp('----')

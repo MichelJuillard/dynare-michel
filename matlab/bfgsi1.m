@@ -1,5 +1,5 @@
-function H = bfgsi(H0,dg,dx)
-% H = bfgsi(H0,dg,dx)
+function H = bfgsi1(H0,dg,dx)
+% H = bfgsi1(H0,dg,dx)
 % dg is previous change in gradient; dx is previous change in x;
 % 6/8/93 version that updates inverse hessian instead of hessian
 % itself.
