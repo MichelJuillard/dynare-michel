@@ -18,7 +18,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = \
 	matlab \
-	ms-sbvar \
+	contrib \
 	uncrustify.cfg \
 	NEWS \
 	license.txt \
