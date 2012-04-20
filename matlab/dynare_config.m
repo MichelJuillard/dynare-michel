@@ -88,15 +88,9 @@ end
 
 % nanmean is in Octave Forge Statistics package and in MATLAB Statistics
 % toolbox
-if exist('OCTAVE_VERSION')
-    [desc,flag] = pkg('describe', 'statistics');
-    if ~isequal(flag{1,1}, 'Loaded')
-        addpath([dynareroot '/missing/nanmean'])
-    end
-else
-    if ~user_has_matlab_license('statistics_toolbox')
-        addpath([dynareroot '/missing/nanmean'])
-    end
+if (exist('OCTAVE_VERSION') && ~user_has_octave_forge_package('statistics')) ...
+    || (~exist('OCTAVE_VERSION') && ~user_has_matlab_license('statistics_toolbox'))
+    addpath([dynareroot '/missing/nanmean'])
 end
 
 % Add path to MEX files
