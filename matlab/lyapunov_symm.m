@@ -1,11 +1,14 @@
-function [x,u] = lyapunov_symm(a,b,qz_criterium,lyapunov_complex_threshold,method, R)
+function [x,u] = lyapunov_symm(a,b,third_argument,lyapunov_complex_threshold,method, R)
 % Solves the Lyapunov equation x-a*x*a' = b, for b and x symmetric matrices.
 % If a has some unit roots, the function computes only the solution of the stable subsystem.
 %  
 % INPUTS:
 %   a                           [double]    n*n matrix.
 %   b                           [double]    n*n matrix.
-%   qz_criterium                [double]    scalar, unit root threshold for eigenvalues in a.
+%   third_argument              [double]    scalar, if method <= 2 :
+%                                                      qz_criterium = third_argument unit root threshold for eigenvalues in a,
+%                                                    elseif method = 3 :
+%                                                      tol =third_argument the convergence criteria for fixed_point algorithm.
 %   lyapunov_complex_threshold  [double]    scalar, complex block threshold for the upper triangular matrix T.
 %   method                      [integer]   Scalar, if method=0 [default] then U, T, n and k are not persistent.  
 %                                                      method=1 then U, T, n and k are declared as persistent 
@@ -48,10 +51,10 @@ if method == 3
     if ~isempty(method1)
         method = method1;
     end;
+    tol = third_argument;
     fprintf(' [methode=%d] ',method);
     if method == 3
-        %tol = 1e-8;
-        tol = 1e-10;
+        %tol = 1e-10;
         it_fp = 0;
         evol = 100;
         if isempty(X)
@@ -81,13 +84,15 @@ if method == 3
         end;
     end;
 elseif method == 4
-    % works only with Matlab System Control toolbox
+    % works only with Matlab System Control toolbox or octave the control package,
+    % the presence of the toolbox or package has to be tested 
     chol_b = R*chol(b,'lower');
     Rx = dlyapchol(a,chol_b);
     x = Rx' * Rx;
     return;
 end;
 
+qz_criterium = third_argument;
 if method
     persistent U T k n
 else

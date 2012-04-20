@@ -568,7 +568,7 @@ for i = 1:Size;
                     vghx_other = - inv(kron(eye(size(D_,2)), A_) + kron(C_', B_)) * vec(D_);
                     ghx_other = reshape(vghx_other, size(D_,1), size(D_,2));
                 elseif options_.sylvester_fp == 1
-                    ghx_other = gensylv_fp(A_, B_, C_, D_, i);
+                    ghx_other = gensylv_fp(A_, B_, C_, D_, i, options_.sylvester_fixed_point_tol);
                 else 
                     [err, ghx_other] = gensylv(1, A_, B_, C_, -D_);
                 end;

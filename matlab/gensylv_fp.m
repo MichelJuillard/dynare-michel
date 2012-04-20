@@ -1,4 +1,4 @@
-function X = gensylv_fp(A, B, C, D, block)
+function X = gensylv_fp(A, B, C, D, block, tol)
 % function X = gensylv_fp(A, B, C, D)
 % Solve the Sylvester equation:
 % A * X + B * X * C + D = 0
@@ -8,6 +8,7 @@ function X = gensylv_fp(A, B, C, D, block)
 %   C
 %   D
 %   block : block number (for storage purpose) 
+%   tol : convergence criteria
 % OUTPUTS
 %   X solution
 %    
@@ -39,9 +40,8 @@ function X = gensylv_fp(A, B, C, D, block)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-%tol = 1e-07;
-%tol = 1e-13;
-tol = 1e-12;
+
+%tol = 1e-12;
 evol = 100;
 A1 = inv(A);
 eval(['persistent hxo_' int2str(block) ';']);

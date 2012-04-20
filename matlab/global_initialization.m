@@ -421,13 +421,22 @@ options_.use_dll = 0;
 % model evaluated using bytecode.dll
 options_.bytecode = 0;
 
-% use a fixed point method to solve Sylvester equation (for large scale
-% models)
+% if equal to 1 use a fixed point method to solve Sylvester equation (for large scale models)
 options_.sylvester_fp = 0;
 
-% use a fixed point method to solve Lyapunov equation (for large scale
-% models)
+% convergence criteria to solve iteratively a sylvester equations
+options_.sylvester_fixed_point_tol = 1e-12;
+
+% if 1 use a fixed point method to solve Lyapunov equation (for large scale models)
 options_.lyapunov_fp = 0;
+% if 1 use a doubling algorithm to solve Lyapunov equation (for large scale models)
+options_.lyapunov_db = 0;
+% if 1 use a squre root solver to solve Lyapunov equation (for large scale models)
+options_.lyapunov_srs = 0;
+
+% convergence criterion for iteratives methods to solve lyapunov equations
+options_.lyapunov_fixed_point_tol = 1e-10;
+options_.lyapunov_doubling_tol = 1e-16;
 
 % dates for historical time series
 options_.initial_date.freq = 1;
