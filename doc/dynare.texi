@@ -2928,7 +2928,8 @@ The Taylor approximation is computed around the steady state
 
 The IRFs are computed as the difference between the trajectory of a
 variable following a shock at the beginning of period 1 and its steady
-state value.
+state value. More details on the computation of IRFs can be found on the
+@uref{http://www.dynare.org/DynareWiki/IrFs,DynareWiki}.
 
 Variance decomposition, correlation, autocorrelation are only
 displayed for variables with positive variance. Impulse response
