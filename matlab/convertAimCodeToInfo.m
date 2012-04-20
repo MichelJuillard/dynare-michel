@@ -13,6 +13,8 @@ function [info] = convertAimCodeToInfo(aimCode)
 %      (aimCode==5)  e='Aim: q(:,right) is singular.';
 %      (aimCode==61) e='Aim: too many exact shiftrights.';
 %      (aimCode==62) e='Aim: too many numeric shiftrights.';
+%      (aimCode==63) e='Aim: A is NAN or INF.';
+%      (aimCode==64) e='Aim: Problem in SPEIG.';
 %
 % OUTPUTS
 %   info        [integer]    Code to be used to print error in print_info.m
@@ -53,6 +55,10 @@ switch aimCode
     info = 161;
   case 62
     info = 162;
+  case 63; 
+    info = 163;
+  case 64
+    info = 164;
   otherwise
     info = 1;
 end

@@ -28,6 +28,8 @@ function [dr,aimcode,rts]=dynAIMsolver1(jacobia_,M_,dr)
 %      (c==5)  e='Aim: q(:,right) is singular.';
 %      (c==61) e='Aim: too many exact shiftrights.';
 %      (c==62) e='Aim: too many numeric shiftrights.';
+%      (c==63) e='Aim: A is NAN or INF.';
+%      (c==64) e='Aim: Problem in SPEIG.';
 %      else    e='Aimerr: return code not properly specified';
 %    
 % SPECIAL REQUIREMENTS

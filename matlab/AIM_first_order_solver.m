@@ -73,7 +73,7 @@ function [dr,info]=AIM_first_order_solver(jacobia,M,dr,qz_criterium)
     [dr,aimcode]=dynAIMsolver1(jacobia,M,dr);
 
     if aimcode ~=1
-        info(1) = aimcode;
+        info(1) = convertAimCodeToInfo(aimCode); %convert to be in the 100 range
         info(2) = 1.0e+8;
         return
     end

@@ -95,19 +95,23 @@ if ~noprint
       case 102
         error('Aim: roots not correctly computed by real_schur');
       case 103
-        error('Aim: too many big roots');
+        error('Aim: too many explosive roots: no stable equilibrium');
       case 135
-        error('Aim: too many big roots, and q(:,right) is singular');
+        error('Aim: too many explosive roots, and q(:,right) is singular');
       case 104
-        error('Aim: too few big roots');
+        error('Aim: too few explosive roots: indeterminacy');
       case 145
-        error('Aim: too few big roots, and q(:,right) is singular');
+        error('Aim: too few explosive roots, and q(:,right) is singular');
       case 105
         error('Aim: q(:,right) is singular');
       case 161
         error('Aim: too many exact shiftrights');
       case 162
         error('Aim: too many numeric shiftrights');
+      case 163
+        error('Aim: A is NAN or INF.')
+      case 164
+        error('Aim: Problem in SPEIG.')
       otherwise
         error('This case shouldn''t happen. Contact the authors of Dynare')
     end
