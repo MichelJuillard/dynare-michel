@@ -1,6 +1,6 @@
 function osr(var_list,params,i_var,W)
 
-% Copyright (C) 2001-2010 Dynare Team
+% Copyright (C) 2001-2010,2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -20,15 +20,7 @@ function osr(var_list,params,i_var,W)
 global M_ options_ oo_  
 
 options_.order = 1;
-options_ = set_default_option(options_,'linear',0);
-options_ = set_default_option(options_,'ar',5);
-options_ = set_default_option(options_,'irf',40);
-options_ = set_default_option(options_,'drop',100);
 options_ = set_default_option(options_,'replic',1);
-options_ = set_default_option(options_,'nomoments',0);
-options_ = set_default_option(options_,'nocorr',0);
-options_ = set_default_option(options_,'hp_filter',0);
-options_ = set_default_option(options_,'hp_ngrid',512);
 options_ = set_default_option(options_,'simul',0);
 options_ = set_default_option(options_,'periods',1);
 

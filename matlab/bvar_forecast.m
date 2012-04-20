@@ -11,7 +11,7 @@ function bvar_forecast(nlags)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2007-2010 Dynare Team
+% Copyright (C) 2007-2010,2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -30,7 +30,6 @@ function bvar_forecast(nlags)
 
 global options_ oo_ M_
 
-options_ = set_default_option(options_, 'bvar_replic', 2000);
 if options_.forecast == 0
     error('bvar_forecast: you must specify "forecast" option')
 end

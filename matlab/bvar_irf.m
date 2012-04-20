@@ -11,7 +11,7 @@ function bvar_irf(nlags,identification)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2007-2009 Dynare Team
+% Copyright (C) 2007-2009,2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -33,8 +33,6 @@ global options_ oo_ M_
 if nargin==1
     identification = 'Cholesky';
 end
-
-options_ = set_default_option(options_, 'bvar_replic', 2000);
 
 [ny, nx, posterior, prior] = bvar_toolbox(nlags);
 

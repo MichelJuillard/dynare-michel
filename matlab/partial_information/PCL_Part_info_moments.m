@@ -5,7 +5,7 @@ function  AutoCOR_YRk=PCL_Part_info_moments( H, varobs, dr,ivar)
 % Pearlman, Currie and Levine 1986 solution.
 % 22/10/06 - Version 2 for new Riccati with 4 params instead 5 
 
-% Copyright (C) 2006-2011 Dynare Team
+% Copyright (C) 2006-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -166,8 +166,6 @@ else
     COR_Y=[];
 end
 
-ar = options_.ar;
-options_ = set_default_option(options_,'ar',5);
 ar = options_.ar;
 if ar > 0
     COV_YRk= zeros(nn,ar); 

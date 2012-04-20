@@ -1,7 +1,7 @@
 function disp_moments(y,var_list)
 % Displays moments of simulated variables
 
-% Copyright (C) 2001-2011 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -80,8 +80,6 @@ if options_.nocorr == 0
     end
 end
 
-ar = options_.ar;
-options_ = set_default_option(options_,'ar',5);
 ar = options_.ar;
 if ar > 0
     autocorr = [];

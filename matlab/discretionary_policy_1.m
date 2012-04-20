@@ -1,6 +1,6 @@
 function [dr,ys,info]=discretionary_policy_1(oo_,Instruments)
 
-% Copyright (C) 2007-2011 Dynare Team
+% Copyright (C) 2007-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -20,10 +20,8 @@ function [dr,ys,info]=discretionary_policy_1(oo_,Instruments)
 global M_ options_
 persistent Hold
 
-options_ = set_default_option(options_,'noprint',0);
 options_ = set_default_option(options_,'qz_criterium',1.000001);
 options_ = set_default_option(options_,'solve_maxit',3000);
-options_ = set_default_option(options_,'discretion_tol',1e-7);
 
 % safeguard against issues like running ramsey policy first and then running discretion
 if isfield(M_,'orig_model')

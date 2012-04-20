@@ -12,7 +12,7 @@ function simul
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 1996-2011 Dynare Team
+% Copyright (C) 1996-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -55,7 +55,6 @@ if size(M_.lead_lag_incidence,2)-nnz(M_.lead_lag_incidence(M_.maximum_endo_lag+1
     error (mess) ;
 end
 
-options_ = set_default_option(options_,'periods',0);
 if options_.periods == 0
     error('SIMUL: number of periods for the simulation isn''t specified')
 end

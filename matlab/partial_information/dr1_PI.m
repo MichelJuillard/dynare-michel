@@ -40,7 +40,7 @@ function [dr,info,M_,options_,oo_] = dr1_PI(dr,task,M_,options_,oo_)
 %   none.
 %  
 
-% Copyright (C) 1996-2011 Dynare Team
+% Copyright (C) 1996-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -60,10 +60,6 @@ function [dr,info,M_,options_,oo_] = dr1_PI(dr,task,M_,options_,oo_)
 global lq_instruments;
 info = 0;
 
-options_ = set_default_option(options_,'loglinear',0);
-options_ = set_default_option(options_,'noprint',0);
-options_ = set_default_option(options_,'olr',0);
-options_ = set_default_option(options_,'olr_beta',1);
 options_ = set_default_option(options_,'qz_criterium',1.000001);
 
 xlen = M_.maximum_endo_lead + M_.maximum_endo_lag + 1;

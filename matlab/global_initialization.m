@@ -86,8 +86,19 @@ options_.steady.stop_on_error = 1;
 options_.ParamSubSet = 'None';
 
 % bvar-dsge
+M_.bvar = [];
 options_.dsge_var = 0;
 options_.dsge_varlag = 4;
+
+% BVAR a la Sims
+options_.bvar_replic = 2000;
+options_.bvar_prior_tau = 3;
+options_.bvar_prior_decay = 0.5;
+options_.bvar_prior_lambda = 5;
+options_.bvar_prior_mu = 2;
+options_.bvar_prior_omega = 1;
+options_.bvar_prior_flat = 0;
+options_.bvar_prior_train = 0;
 
 % Optimization algorithm [6] gmhmaxlik
 options_.Opt6Iter = 2;
@@ -380,9 +391,6 @@ oo_.exo_det_simul = [];
 M_.params = [];
 M_.endo_histval = [];
 
-% BVAR
-M_.bvar = [];
-
 % homotopy
 options_.homotopy_mode = 0;
 options_.homotopy_steps = 1;
@@ -428,6 +436,7 @@ options_.initial_date.subperiod = 0;
 
 % discretionary policy
 options_.discretionary_policy = 0;
+options_.discretionary_tol = 1e-7;
 
 % Shock decomposition
 options_.parameter_set = [];

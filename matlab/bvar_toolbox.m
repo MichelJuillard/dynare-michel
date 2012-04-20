@@ -42,7 +42,7 @@ function [ny, nx, posterior, prior, forecast_data] = bvar_toolbox(nlags)
 %    - bvar_prior_{tau,decay,lambda,mu,omega,flat,train}
 
 % Copyright (C) 2003-2007 Christopher Sims
-% Copyright (C) 2007-2011 Dynare Team
+% Copyright (C) 2007-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -66,14 +66,6 @@ dataset = read_variables(options_.datafile, options_.varobs, [], options_.xls_sh
 options_ = set_default_option(options_, 'nobs', size(dataset,1)-options_.first_obs+1);
 
 % Parameters for prior
-options_ = set_default_option(options_, 'bvar_prior_tau', 3);
-options_ = set_default_option(options_, 'bvar_prior_decay', 0.5);
-options_ = set_default_option(options_, 'bvar_prior_lambda', 5);
-options_ = set_default_option(options_, 'bvar_prior_mu', 2);
-options_ = set_default_option(options_, 'bvar_prior_omega', 1);
-options_ = set_default_option(options_, 'bvar_prior_flat', 0);
-options_ = set_default_option(options_, 'bvar_prior_train', 0);
-
 if options_.first_obs + options_.presample <= nlags
     error('first_obs+presample should be > nlags (for initializing the VAR)')
 end

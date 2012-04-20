@@ -35,7 +35,6 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
 
 global options_
 
-options_ = set_default_option(options_,'solve_algo',2);
 info = 0;
 if options_.solve_algo == 0
     if ~exist('OCTAVE_VERSION')

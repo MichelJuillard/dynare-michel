@@ -25,7 +25,7 @@ function [dr,info]=PCL_resol(ys,check_flag)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2011 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -47,7 +47,6 @@ global it_
 
 jacobian_flag = 0; 
 
-options_ = set_default_option(options_,'jacobian_flag',1);
 info = 0;
 
 it_ = M_.maximum_lag + 1 ;
