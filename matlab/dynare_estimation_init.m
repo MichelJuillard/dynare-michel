@@ -166,6 +166,10 @@ else% If estim_params_ is empty...
     estim_params_.np = 0;
 end
 
+% storing prior parameters in results
+oo_.prior.mean = bayestopt_.p1;
+oo_.prior.variance = diag(bayestopt_.p2.^2);
+
 % Is there a linear trend in the measurement equation?
 if ~isfield(options_,'trend_coeffs') % No!
     bayestopt_.with_trend = 0;

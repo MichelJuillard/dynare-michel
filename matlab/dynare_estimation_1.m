@@ -384,10 +384,13 @@ if options_.mode_check == 1 && ~options_.mh_posterior_mode_estimation
     mode_check(objective_function,xparam1,hh,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
 end
 
+oo_.posterior.optimization.mode = xparam1;
+oo_.posterior.optimization.variance = [];
 if ~options_.mh_posterior_mode_estimation
     if options_.cova_compute
         invhess = inv(hh);
         stdh = sqrt(diag(invhess));
+        oo_.posterior.optimization.variance = invhess;
     end
 else
     variances = bayestopt_.p2.*bayestopt_.p2;
@@ -474,8 +477,8 @@ if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
             k2 = estim_params_.corrx(i,2);
             name = [deblank(M_.exo_names(k1,:)) ',' deblank(M_.exo_names(k2,:))];
             NAME = [deblank(M_.exo_names(k1,:)) '_' deblank(M_.exo_names(k2,:))];
-            disp(sprintf('%-*s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', name, ...
-                         header_width,bayestopt_.p1(ip),xparam1(ip),stdh(ip),tstath(ip),  ...
+            disp(sprintf('%-*s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
+                         header_width,name,bayestopt_.p1(ip),xparam1(ip),stdh(ip),tstath(ip),  ...
                          pnames(bayestopt_.pshape(ip)+1,:), bayestopt_.p2(ip)));
             M_.Sigma_e(k1,k2) = xparam1(ip)*sqrt(M_.Sigma_e(k1,k1)*M_.Sigma_e(k2,k2));
             M_.Sigma_e(k2,k1) = M_.Sigma_e(k1,k2);
@@ -493,8 +496,8 @@ if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
             k2 = estim_params_.corrn(i,2);
             name = [deblank(M_.endo_names(k1,:)) ',' deblank(M_.endo_names(k2,:))];
             NAME = [deblank(M_.endo_names(k1,:)) '_' deblank(M_.endo_names(k2,:))];
-            disp(sprintf('%-*s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', name, ...
-                         header_width,bayestopt_.p1(ip),xparam1(ip),stdh(ip),tstath(ip), ...
+            disp(sprintf('%-*s %7.3f %8.4f %7.4f %7.4f %4s %6.4f', ...
+                         header_width,name,bayestopt_.p1(ip),xparam1(ip),stdh(ip),tstath(ip), ...
                          pnames(bayestopt_.pshape(ip)+1,:), bayestopt_.p2(ip)));
             eval(['oo_.posterior_mode.measurement_errors_corr.' NAME ' = xparam1(ip);']);
             eval(['oo_.posterior_std.measurement_errors_corr.' NAME ' = stdh(ip);']);
@@ -882,6 +885,8 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
             [marginal,oo_] = marginal_density(M_, options_, estim_params_, oo_);
             oo_ = GetPosteriorParametersStatistics(estim_params_, M_, options_, bayestopt_, oo_);
             oo_ = PlotPosteriorDistributions(estim_params_, M_, options_, bayestopt_, oo_);
+            [oo_.posterior.metropolis.mean,oo_.posterior.metropolis.variance] ...
+                = GetPosteriorMeanVariance(M_,options_.mh_drop);
         else
             load([M_.fname '_results'],'oo_');
         end
