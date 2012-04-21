@@ -193,6 +193,8 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
             end
             flag = 0;% Convergency obtained.
             endo_simul = reshape(Y(:,1),ny,periods+2);%Y(ny+(1:ny),1);
+            figure;plot(Y(16:ny:(periods+2)*ny,:))
+            pause
             break
         end
         dy = -A\res;

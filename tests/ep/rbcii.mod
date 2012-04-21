@@ -68,11 +68,12 @@ end;
     options_.maxit_ = 100;
     options_.ep.verbosity = 0;
     options_.ep.stochastic.order = 0;
+    options_.ep.stochastic.nodes = 2;
     options_.console_mode = 0;
-    ts = extended_path([],1000);
+    ts = extended_path([],100);
 
     options_.ep.stochastic.order = 1;
-    sts = extended_path([],1000);
+    sts = extended_path([],100);
 
     figure(1)
     plot(ts(2,:)-ts(4,:));
