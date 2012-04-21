@@ -446,7 +446,7 @@ function [dr] = first_step_ds(x,M,dr,options,oo)
     b = zeros(M.endo_nbr,M.endo_nbr);
     b(:,cols_b) = d1a(:,cols_j);
 
-    [dr,info] = dyn_first_order_solver(d1a,b,M,dr,options,0);
+    [dr,info] = dyn_first_order_solver(d1a,M,dr,options,0);
     if info
         [m1,m2]=max(abs(ys-old_ys));
         disp([m1 m2])
@@ -481,10 +481,10 @@ function [resid,dr] = risky_residuals_k_order(ys,M,dr,options,oo)
                                      [oo.exo_simul ...
                         oo.exo_det_simul], M.params, dr.ys, 2);
 
-    hessian = sparse(d2(:,1), d2(:,2), d2(:,3), ...
-                     size(d1, 1), size(d1, 2)*size(d1, 2));
-    fy3 = sparse(d2(:,1), d2(:,2), d2(:,3), ...
-                     size(d1, 1), size(d1, 2)^3);
+% $$$     hessian = sparse(d2(:,1), d2(:,2), d2(:,3), ...
+% $$$                      size(d1, 1), size(d1, 2)*size(d1, 2));
+% $$$     fy3 = sparse(d2(:,1), d2(:,2), d2(:,3), ...
+% $$$                      size(d1, 1), size(d1, 2)^3);
 
     options.order = 3;
     
@@ -500,8 +500,8 @@ function [resid,dr] = risky_residuals_k_order(ys,M,dr,options,oo)
 % $$$     b(:,cols_b) = d1(:,cols_j);
 
 % $$$     [dr,info] = dyn_first_order_solver(d1,b,M,dr,options,0);
-        [g_0, g_1, g_2, g_3] = k_order_perturbation(dr,0,M,options, oo , ['.' ...
-                            mexext],d1,d2,d3);
+        [err,g_0, g_1, g_2, g_3] = k_order_perturbation(dr,M,options);
+        mexErrCheck('k_order_perturbation', err);
         gu1 = g_1(dr.i_fwrd_g,end-exo_nbr+1:end);
         guu = unfold(g_2(:,end-nu2+1:end),exo_nbr);
         d1old = d1;
