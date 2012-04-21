@@ -62,6 +62,8 @@ if ischar(parameters)
         parameters = bayestopt_.p5(:);
       case 'prior_mean'
         parameters = bayestopt_.p1;
+      case 'calibration'
+        parameters = [];
       otherwise
         disp('evaluate_smoother:: If the input argument is a string, then it has to be equal to:')
         disp('                     ''posterior_mode'', ')
@@ -69,6 +71,7 @@ if ischar(parameters)
         disp('                     ''posterior_median'', ')
         disp('                     ''prior_mode'' or')
         disp('                     ''prior_mean''.')
+        disp('                     ''calibration''.')
         error
     end
 end
