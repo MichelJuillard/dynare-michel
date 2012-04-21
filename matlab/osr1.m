@@ -54,6 +54,7 @@ verbose = 2;
 
 [f,p]=csminwel1('osr_obj',t0,H0,[],crit,nit,options_.gradient_method,options_.gradient_epsilon,i_params,...
                 inv_order_var(i_var),weights(i_var,i_var));
+oo_.osr.objective_function = f;
 
 %  options = optimset('fminunc');
 %  options = optimset('display','iter');
