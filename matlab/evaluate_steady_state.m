@@ -55,7 +55,11 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
         [ys,params] = dyn_ramsey_static(ys_init,M,options,oo);
     elseif steadystate_flag
         % explicit steady state file
-        [ys,params1,check] = evaluate_steady_state_file(ys_init,exo_ss,M,options);
+        [ys,params1,info] = evaluate_steady_state_file(ys_init,exo_ss,M, ...
+                                                       options);
+        if info(1)
+            return;
+        end
     elseif (options.bytecode == 0 && options.block == 0)
         if options.linear == 0
             % non linear model
@@ -101,18 +105,6 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
 
     if ~isempty(find(isnan(ys)))
         info(1) = 22;
-        info(2) = NaN;
-        return
-    end
-
-    if options.steadystate_flag && updated_params_flag && ~isreal(params)
-        info(1) = 23;
-        info(2) = sum(imag(params).^2);
-        return
-    end
-
-    if options.steadystate_flag && updated_params_flag  && ~isempty(find(isnan(params)))
-        info(1) = 24;
         info(2) = NaN;
         return
     end
