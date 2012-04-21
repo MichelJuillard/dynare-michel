@@ -31,6 +31,10 @@ function make_y_
 
 global M_ options_ oo_ ys0_ 
 
+[oo_.steady_state,M_.params,check] = ...
+    evaluate_steady_state_file(oo_.steady_state,oo_.exo_steady_state,M_, ...
+                               options_);
+
 if isempty(oo_.steady_state)
     oo_.steady_state = zeros(M_.endo_nbr,1);
 end

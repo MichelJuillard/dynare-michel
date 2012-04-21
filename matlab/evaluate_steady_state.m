@@ -1,5 +1,5 @@
 function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadystate_check_flag)
-% function [ys,info] = evaluate_steady_state(M,options,oo)
+% function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadystate_check_flag)
 % Computes the steady state
 %
 % INPUTS
@@ -45,7 +45,6 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
     steadystate_flag = options.steadystate_flag;
     params = M.params;
     exo_ss = [oo.exo_steady_state; oo.exo_det_steady_state];
-    updated_params_flag = 0;
 
     if length(M.aux_vars) > 0
         h_set_auxiliary_variables = str2func([M.fname '_set_auxiliary_variables']);
@@ -56,45 +55,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
         [ys,params] = dyn_ramsey_static(ys_init,M,options,oo);
     elseif steadystate_flag
         % explicit steady state file
-        [ys,params1,check] = evaluate_steady_state_file(ys_init,exo_ss,params,M.fname,steadystate_flag);
-        if ~length(find(isnan(params))) && ~length(find(isnan(params1)))
-            updated_params_flag = max(abs(params1-params))>1e-12;
-        elseif length(find(isnan(params))) && ~length(find(isnan(params1)))
-            updated_params_flag = 1;
-        end
-        if updated_params_flag
-            params = params1;
-        end
-        % adding values for auxiliary variables
-        if length(M.aux_vars) > 0
-            ys = h_set_auxiliary_variables(ys,exo_ss,M.params);
-        end
-        check1 = 0;
-        if steadystate_check_flag
-            % Check whether the steady state obtained from the _steadystate file is a steady state.
-            [residuals,check] = evaluate_static_model(ys,exo_ss,params,M,options);
-            if check
-                info(1) = 19;
-                info(2) = check; % to be improved
-                return;
-            end
-            if max(abs(residuals)) > options.dynatol.f
-            info(1) = 19;
-            info(2) = residuals'*residuals;
-            return
-        end
-    elseif ~isempty(options.steadystate_partial)
-            ssvar = options.steadystate_partial.ssvar;
-            nov   = length(ssvar);
-            indv  = zeros(nov,1);
-            for i = 1:nov
-                indv(i) = strmatch(ssvar(i),M.endo_names,'exact');
-            end
-            [ys,check] = dynare_solve('restricted_steadystate',...
-                                                    ys(indv),...
-                                                    options.jacobian_flag, ...
-                                                    exo_ss,indv);
-        end
+        [ys,params1,check] = evaluate_steady_state_file(ys_init,exo_ss,M,options);
     elseif (options.bytecode == 0 && options.block == 0)
         if options.linear == 0
             % non linear model
@@ -106,7 +67,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
             % linear model
             fh_static = str2func([M.fname '_static']);
             [fvec,jacob] = fh_static(ys_init,exo_ss, ...
-                                 params);
+                                     params);
             if max(abs(fvec)) > 1e-12
                 ys = ys_init-jacob\fvec;
             else

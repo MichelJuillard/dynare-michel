@@ -53,8 +53,7 @@ if options_.steadystate_flag
     end
     ys(k_inst) = inst_val;
     exo_ss = [oo.exo_steady_state oo.exo_det_steady_state];
-    [xx,params,check] = evaluate_steady_state_file(ys,exo_ss,params,...
-                                                 M.fname,options_.steadystate_flag);
+    [xx,params,check] = evaluate_steady_state_file(ys,exo_ss,M,options_);
 else
     n_var = M.orig_endo_nbr;
     xx = oo.steady_state(1:n_var);
@@ -103,9 +102,8 @@ if options_.steadystate_flag
     oo.steady_state(k_inst) = x;
     [x,params,check] = evaluate_steady_state_file(oo.steady_state,...
                                                   [oo.exo_steady_state; ...
-                                                  oo.exo_det_steady_state] ...
-                                                  ,params,fname,...
-                                                  options_.steadystate_flag);
+                                                  oo.exo_det_steady_state], ...
+                                                  M,options_);
 end
 
 xx = zeros(endo_nbr,1);
