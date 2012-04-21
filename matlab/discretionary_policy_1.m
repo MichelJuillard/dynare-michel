@@ -109,7 +109,7 @@ B=jacobia_(:,nnz(iyv)+1:end);
 %%% MAIN ENGINE %%%
 qz_criterium = options_.qz_criterium;
 solve_maxit = options_.solve_maxit;
-discretion_tol = options_.discretion_tol;
+discretion_tol = options_.discretionary_tol;
 
 if ~isempty(Hold)
 	[H,G,info]=discretionary_policy_engine(Alag,A0,Alead,B,W,instr_id,beta,solve_maxit,discretion_tol,qz_criterium,Hold);

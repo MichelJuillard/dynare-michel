@@ -4824,7 +4824,15 @@ discretion
 
 @optionshead
 
-This command accepts the same options than @code{ramsey_policy}.
+This command accepts the same options than @code{ramsey_policy}, plus:
+
+@table @code
+
+@item discretionary_tol = @var{NON-NEGATIVE DOUBLE}
+Sets the tolerance level used to assess convergence of the solution
+algorithm. Default: @code{1e-7}.
+
+@end table
 
 @end deffn
 
