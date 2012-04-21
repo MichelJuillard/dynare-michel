@@ -24,6 +24,8 @@ oldoptions = options_;
 options_.order = 1;
 info = stoch_simul(var_list);
 
+oo_.steady_state = oo_.dr.ys;
+
 if options_.noprint == 0
     disp_steady_state(M_,oo_)
     for i=M_.orig_endo_nbr:M_.endo_nbr

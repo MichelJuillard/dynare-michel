@@ -40,7 +40,7 @@ nl_func = @(x) dyn_ramsey_static_1(x,M,options_,oo);
 if options_.steadystate_flag
     k_inst = [];
     instruments = options_.instruments;
-    inst_nbr = size(options_.instruments);
+    inst_nbr = size(options_.instruments,1);
     for i = 1:inst_nbr
         k_inst = [k_inst; strmatch(options_.instruments(i,:), ...
                                    M.endo_names,'exact')];
@@ -54,13 +54,13 @@ if options_.steadystate_flag
     ys(k_inst) = inst_val;
     exo_ss = [oo.exo_steady_state oo.exo_det_steady_state];
     [xx,params,check] = evaluate_steady_state_file(ys,exo_ss,M,options_);
+    [junk,jun,steady_state] = nl_func(inst_val);
 else
     n_var = M.orig_endo_nbr;
     xx = oo.steady_state(1:n_var);
     [xx,info1] = dynare_solve(nl_func,xx,0);
-    steady_state = nl_func(xx);
+    [junk,junk,steady_state] = nl_func(xx);
 end
-[junk,junk,steady_state] = nl_func(xx);
 
 
 
