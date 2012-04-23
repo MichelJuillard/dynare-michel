@@ -136,6 +136,7 @@ function [dr,info] = dyn_first_order_solver(jacobia,M_,dr,options,task)
 
     if info1
         if info1 == -30
+            % one eigenvalue is close to 0/0
             info(1) = 7;
         else
             info(1) = 2;
