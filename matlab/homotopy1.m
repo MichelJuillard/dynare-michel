@@ -77,5 +77,12 @@ for i=1:step_nbr+1
     oo_.exo_steady_state(values(ix,2)) = points(ix,i);
     oo_.exo_det_steady_state(values(ixd,2)) = points(ixd,i);
 
-    oo_.steady_state = steady_(M_,options_,oo_);
+    [steady_state,M_.params,info] = steady_(M_,options_,oo_);
+    if info(1) == 0
+        % if homotopy step is not successful, current values of steady
+        % state are not modified
+        oo_.steady_state = steady_state;
+    else 
+        break
+    end
 end

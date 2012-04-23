@@ -53,12 +53,16 @@ switch options_.homotopy_mode
     homotopy3(options_.homotopy_values, options_.homotopy_steps);
 end
 
-[oo_.steady_state,M_.params,info] = steady_(M_,options_,oo_);
+[steady_state,M_.params,info] = steady_(M_,options_,oo_);
 
-if info(1) && options_.steady.stop_on_error
+if info(1) == 0
+    oo_.steady_state = steady_state;
+    disp_steady_state(M_,oo_);
+elseif options_.steady.stop_on_error
     print_info(info,options_.noprint);
+else
+    disp(['Warning: steady state could not be computed but steady.stop_on_error ' ...
+          '== 0, so I continue'])
 end
-
-disp_steady_state(M_,oo_);
 
 M_.Sigma_e = Sigma_e;
