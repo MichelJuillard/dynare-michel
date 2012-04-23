@@ -35,6 +35,7 @@ function [steady_state,params,check] = dyn_ramsey_static(x,M,options_,oo)
 steady_state = [];
 params = M.params;
 check = 0;
+options_.steadystate.nocheck = 1;
 nl_func = @(x) dyn_ramsey_static_1(x,M,options_,oo);
 
 if options_.steadystate_flag

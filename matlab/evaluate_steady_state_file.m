@@ -78,7 +78,7 @@ function [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M,options)
     end
 
     % adding values for auxiliary variables
-    if length(M.aux_vars) > 0
+    if length(M.aux_vars) > 0 && ~options.ramsey_policy
         h_set_auxiliary_variables = str2func([M.fname '_set_auxiliary_variables']);
         ys = h_set_auxiliary_variables(ys,exo_ss,params);
     end
