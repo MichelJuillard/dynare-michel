@@ -34,4 +34,4 @@ dist-hook:
 	rm -rf `find $(distdir)/matlab $(distdir)/examples -name *~`
 	rm -f $(distdir)/matlab/dynare_m$(EXEEXT) $(distdir)/matlab/dynare_version.m
 	$(MKDIR_P) $(distdir)/mex/matlab $(distdir)/mex/octave
-	rm -rf `find $(distdir)/ms-sbvar -name '.git*'`
+	rm -rf `find $(distdir)/contrib -name '.git*'`

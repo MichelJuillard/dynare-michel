@@ -60,6 +60,9 @@ Section "Dynare core (preprocessor and M-files)"
  File /r ..\matlab\*.m
  File ..\matlab\dynare_m.exe
 
+ SetOutPath $INSTDIR\contrib
+ File /r ..\contrib\*.m
+
  WriteUninstaller $INSTDIR\uninstall.exe
 
  # Create start menu entries
@@ -156,6 +159,7 @@ Section "Uninstall"
  Delete $INSTDIR\mexopts-win64.bat
  Delete $INSTDIR\dynare.el
  Rmdir /r $INSTDIR\matlab
+ Rmdir /r $INSTDIR\contrib
  Rmdir /r $INSTDIR\mex
  Rmdir /r $INSTDIR\dynare++
  Rmdir /r $INSTDIR\doc
