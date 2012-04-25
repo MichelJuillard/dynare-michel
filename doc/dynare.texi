@@ -3986,6 +3986,23 @@ variables. Results are stored in
 @code{oo_.PosteriorTheoreticalMoments} (see below for a description of
 this variable)
 
+@item conditional_variance_decomposition = @var{INTEGER}
+See below.
+
+@item conditional_variance_decomposition = [@var{INTEGER1}:@var{INTEGER2}]
+See below.
+
+@item conditional_variance_decomposition = [@var{INTEGER1} @var{INTEGER2} @dots{}]
+Computes the posterior distribution of the conditional variance
+decomposition for the specified period(s). The periods must be strictly
+positive. Conditional variances are given by @math{var(y_{t+k}|t)}. For
+period 1, the conditional variance decomposition provides the
+decomposition of the effects of shocks upon impact. The results are
+stored in
+@code{oo_.PosteriorTheoreticalMoments.dsge.ConditionalVarianceDecomposition},
+but currently there is not output. Note that this option requires the
+option @code{moments_varendo} to be specified.
+
 @item filtered_vars
 @vindex oo_.FilteredVariables
 @anchor{filtered_vars} Triggers the computation of the posterior
