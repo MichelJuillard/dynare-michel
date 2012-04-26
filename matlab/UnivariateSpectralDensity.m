@@ -30,12 +30,12 @@ omega = []; f = [];
 if options_.order > 1
     disp('UnivariateSpectralDensity :: I Cannot compute the theoretical spectral density') 
     disp('with a second order approximation of the DSGE model!')
-    disp('Set order = 1.')
+    disp('Please set order = 1. I abort')
     return
 end
 pltinfo  = options_.SpectralDensity.plot; 
 cutoff   = options_.SpectralDensity.cutoff; 
-sdl      = options_.SepctralDensity.sdl; 
+sdl      = options_.SpectralDensity.sdl; 
 omega    = (0:sdl:pi)';
 GridSize = length(omega);
 exo_names_orig_ord  = M_.exo_names_orig_ord;
@@ -55,7 +55,7 @@ ivar=zeros(nvar,1);
 for i=1:nvar
     i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
     if isempty(i_tmp)
-        error (['One of the variable specified does not exist']) ;
+        error (['One of the variables specified does not exist']) ;
     else
         ivar(i) = i_tmp;
     end
