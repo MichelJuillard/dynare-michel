@@ -286,7 +286,7 @@ if options_.irf
     end
 end
 
-if options_.SpectralDensity == 1
+if options_.SpectralDensity.trigger == 1
     [omega,f] = UnivariateSpectralDensity(oo_.dr,var_list);
 end
 

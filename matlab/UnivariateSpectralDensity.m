@@ -33,10 +33,9 @@ if options_.order > 1
     disp('Set order = 1.')
     return
 end
-
-pltinfo  = 1;%options_.SpectralDensity.Th.plot;
-cutoff   = 150;%options_.SpectralDensity.Th.cutoff;
-sdl      = 0.01;%options_.SepctralDensity.Th.sdl;
+pltinfo  = options_.SpectralDensity.plot; 
+cutoff   = options_.SpectralDensity.cutoff; 
+sdl      = options_.SepctralDensity.sdl; 
 omega    = (0:sdl:pi)';
 GridSize = length(omega);
 exo_names_orig_ord  = M_.exo_names_orig_ord;

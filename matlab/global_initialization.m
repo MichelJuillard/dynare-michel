@@ -125,7 +125,10 @@ options_.nomoments = 0;
 options_.nocorr = 0;
 options_.periods = 0;
 options_.noprint = 0;
-options_.SpectralDensity = 0;
+options_.SpectralDensity.trigger = 0;
+options_.SpectralDensity.plot  = 1; 
+options_.SpectralDensity.cutoff  = 150; 
+options_.SpectralDensity.sdl = 0.01; 
 
 % Extended path options
 %
