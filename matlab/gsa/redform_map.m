@@ -157,7 +157,7 @@ for j=1:size(anamendo,1)
         title([logflag,' ',namendo,' vs. ',namexo],'interpreter','none')
         if iplo==9,
           dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)],options_);  
-          if ~options.nodisplay
+          if ~options_.nodisplay
             close(hfig);
           end
         end
@@ -167,7 +167,7 @@ for j=1:size(anamendo,1)
   end
   if iplo<9 & iplo>0 & ifig,
     dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)],options_);
-    if ~options.nodisplay
+    if ~options_.nodisplay
         close(hfig);
     end
   end
@@ -233,7 +233,7 @@ for j=1:size(anamendo,1)
         title([logflag,' ',namendo,' vs. ',namlagendo,'(-1)'],'interpreter','none')
         if iplo==9,
           dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],options_);  
-            if ~options.nodisplay
+            if ~options_.nodisplay
                 close(hfig);
             end
         end
@@ -243,7 +243,7 @@ for j=1:size(anamendo,1)
   end
   if iplo<9 & iplo>0 & ifig,
     dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],options_);  
-    if ~options.nodisplay
+    if ~options_.nodisplay
       close(hfig);
     end
   end
@@ -301,7 +301,7 @@ if iload==0,
     mkdir(xdir)
   end
   dyn_saveas(hfig,[xdir,'/', namy,'_vs_', namx],options_);
-  if ~options.nodisplay
+  if ~options_.nodisplay
     close(hfig);
   end
 %   gsa_ = gsa_sdp_dyn(y0, x0, -2, [],[],[],1,fname, pnames);
@@ -319,7 +319,7 @@ if iload==0,
   hfig=gsa_sdp_plot(gsa_,fname,pnames,iii(1:min(12,np)));
   close(hfig);
   gsa_.x0=x0(1:nfit,:);
-  if ~options.nodisplay
+  if ~options_.nodisplay
     close(hfig);
   end
 %   copyfile([fname,'_est.mat'],[fname,'.mat'])
@@ -327,7 +327,7 @@ if iload==0,
   plot(y0(1:nfit),[gsa_.fit y0(1:nfit)],'.'), 
   title([namy,' vs. ', namx,' fit'])
   dyn_saveas(hfig,[xdir,'/', namy,'_vs_', namx,'_fit'],options_);
-  if ~options.nodisplay
+  if ~options_.nodisplay
    close(hfig);
   end
   if nfit<nrun,
@@ -337,7 +337,7 @@ if iload==0,
   plot(y0(npred),[yf y0(npred)],'.'), 
   title([namy,' vs. ', namx,' pred'])
   dyn_saveas(hfig,[xdir,'/', namy,'_vs_', namx,'_pred'],options_);
-  if ~options.nodisplay
+  if ~options_.nodisplay
     close(hfig);
   end
   end
@@ -349,7 +349,7 @@ else
   plot(y0,[yf y0],'.'), 
   title([namy,' vs. ', namx,' pred'])
   dyn_saveas(hfig,[xdir,'/', namy,'_vs_', namx,'_pred'],options_);  
-  if ~options.nodisplay
+  if ~options_.nodisplay
     close(hfig);
   end
 end

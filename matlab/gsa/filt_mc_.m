@@ -308,7 +308,7 @@ else
                     dyn_saveas(hh,[OutDir '/' fname_ '_rmse_mc_lnprior',int2str(ifig) ],options_);
                 end
             end
-            if ~options.nodisplay
+            if ~options_.nodisplay
                 close(hh);
             end
         end
@@ -339,7 +339,7 @@ else
                     dyn_saveas(hh,[OutDir '/' fname_ '_rmse_mc_lnlik',int2str(ifig) ],options_);
                 end
             end
-            if ~options.nodisplay
+            if ~options_.nodisplay
                 close(hh);
             end
         end
@@ -370,7 +370,7 @@ else
                     dyn_saveas(hh,[OutDir '/' fname_ '_rmse_mc_lnpost',int2str(ifig)],options_);
                 end
             end
-            if ~options.nodisplay
+            if ~options_.nodisplay
                 close(hh);
             end
         end

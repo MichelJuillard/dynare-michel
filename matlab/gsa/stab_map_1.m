@@ -98,7 +98,7 @@ for i=1:ceil(nparplot/12),
     title([ftit{j},'. p-value ', num2str(proba(ipar(j)),2)],'interpreter','none')
   end
   dyn_saveas(hh,[dirname,'/',fname_,'_',aname,'_SA_',int2str(i)],options_);
-  if ~options.nodisplay
+  if ~options_.nodisplay
     close(hh);
   end
 end

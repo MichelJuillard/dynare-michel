@@ -96,7 +96,7 @@ if opt_gsa.load_ident_files==0,
       title(M_.exo_names(j,:),'interpreter','none')
       if mod(j,6)==0 | j==M_.exo_nbr,
         dyn_saveas(hh,[OutputDirectoryName,'/',fname_,'_vdec_exo_',int2str(ifig)],options_);  
-        if ~options.nodisplay
+        if ~options_.nodisplay
             close(hh);
         end      
       end
@@ -218,7 +218,7 @@ if opt_gsa.morris==1,
   xlabel(' ')
   title('All variance decomposition')
   dyn_saveas(hh,[OutputDirectoryName,'/',fname_,'_morris_vdec'],options_);
-  if ~options.nodisplay
+  if ~options_.nodisplay
     close(hh);
   end
   else
@@ -737,7 +737,7 @@ if opt_gsa.morris==1,
   xlabel(' ')
   title('\mu in the model')
   dyn_saveas(hh,[OutputDirectoryName,'/',fname_,'_morrismu_par'],options_);
-  if ~options.nodisplay
+  if ~options_.nodisplay
     close(hh);
   end
 
@@ -755,7 +755,7 @@ if opt_gsa.morris==1,
   xlabel(' ')
   title('\sigma in the model')
   dyn_saveas(hh,[OutputDirectoryName,'/',fname_,'_morrissig_par'],options_);
-  if ~options.nodisplay
+  if ~options_.nodisplay
     close(hh);
   end
 

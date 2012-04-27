@@ -194,7 +194,6 @@ if reste
         nc = 3;
     end
     h = dyn_figure(options_,'Name','MCMC univariate diagnostic (Brooks and Gelman, 1998)');
-    end  
     boxplot = 1;
     for j = 1:reste
         k = k+1;
