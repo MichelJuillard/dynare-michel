@@ -337,7 +337,7 @@ kalman_algo = DynareOptions.kalman_algo;
 % resetting measurement errors covariance matrix for univariate filters
 if (kalman_algo == 2) || (kalman_algo == 4)
     if isequal(H,0)
-        H = zeros(nobs,1);
+        H = zeros(pp,1);
         mmm = mm;
     else
         if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
@@ -350,7 +350,7 @@ if (kalman_algo == 2) || (kalman_algo == 4)
             R = blkdiag(R,eye(pp));
             Pstar = blkdiag(Pstar,H);
             Pinf  = blckdiag(Pinf,zeros(pp));
-            H = zeros(nobs,1);
+            H = zeros(pp,1);
             mmm   = mm+pp;
         end
     end
@@ -402,18 +402,18 @@ switch DynareOptions.lik_init
     if (kalman_algo==3)
         % Multivariate Diffuse Kalman Filter
         if no_missing_data_flag
-            [dLIK,tmp,a,Pstar] = kalman_filter_d(Y, 1, size(Y,2), ...
+            [dLIK,dlik,a,Pstar] = kalman_filter_d(Y, 1, size(Y,2), ...
                                                        zeros(mm,1), Pinf, Pstar, ...
                                                        kalman_tol, riccati_tol, DynareOptions.presample, ...
                                                        T,R,Q,H,Z,mm,pp,rr);
         else
-            [dLIK,tmp,a,Pstar] = missing_observations_kalman_filter_d(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations, ...
+            [dLIK,dlik,a,Pstar] = missing_observations_kalman_filter_d(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations, ...
                                                               Y, 1, size(Y,2), ...
                                                               zeros(mm,1), Pinf, Pstar, ...
                                                               kalman_tol, riccati_tol, DynareOptions.presample, ...
                                                               T,R,Q,H,Z,mm,pp,rr);
         end
-        diffuse_periods = length(tmp);
+        diffuse_periods = length(dlik);
         if isinf(dLIK)
             % Go to univariate diffuse filter if singularity problem.
             singular_diffuse_filter = 1;
@@ -422,7 +422,7 @@ switch DynareOptions.lik_init
     if singular_diffuse_filter || (kalman_algo==4)
         % Univariate Diffuse Kalman Filter
         if isequal(H,0)
-            H1 = zeros(nobs,1);
+            H1 = zeros(pp,1);
             mmm = mm;
         else
             if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
@@ -435,21 +435,21 @@ switch DynareOptions.lik_init
                 R = blkdiag(R,eye(pp));
                 Pstar = blkdiag(Pstar,H);
                 Pinf  = blckdiag(Pinf,zeros(pp));
-                H1 = zeros(nobs,1);
+                H1 = zeros(pp,1);
                 mmm   = mm+pp;
             end
         end
         % no need to test again for correlation elements
         correlated_errors_have_been_checked = 1;
 
-        [dLIK,tmp,a,Pstar] = univariate_kalman_filter_d(DynareDataset.missing.aindex,...
+        [dLIK,dlik,a,Pstar] = univariate_kalman_filter_d(DynareDataset.missing.aindex,...
                                                         DynareDataset.missing.number_of_observations,...
                                                         DynareDataset.missing.no_more_missing_observations, ...
                                                         Y, 1, size(Y,2), ...
                                                         zeros(mmm,1), Pinf, Pstar, ...
                                                         kalman_tol, riccati_tol, DynareOptions.presample, ...
                                                         T,R,Q,H1,Z,mmm,pp,rr);
-        diffuse_periods = length(tmp);
+        diffuse_periods = length(dlik);
     end
   case 4% Start from the solution of the Riccati equation.
     if kalman_algo ~= 2
@@ -588,7 +588,7 @@ if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
             [err, LIK] = block_kalman_filter(T,R,Q,H,Pstar,Y,start,Z,kalman_tol,riccati_tol, Model.nz_state_var, Model.n_diag, Model.nobs_non_statevar);
             mexErrCheck('block_kalman_filter', err);
         else
-            LIK = kalman_filter(Y,diffuse_periods+1,size(Y,2), ...
+            [LIK,lik] = kalman_filter(Y,diffuse_periods+1,size(Y,2), ...
                                 a,Pstar, ...
                                 kalman_tol, riccati_tol, ...
                                 DynareOptions.presample, ...
@@ -607,7 +607,7 @@ if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
             end
         end
     else
-        LIK = missing_observations_kalman_filter(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations,Y,diffuse_periods+1,size(Y,2), ...
+        [LIK,lik] = missing_observations_kalman_filter(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations,Y,diffuse_periods+1,size(Y,2), ...
                                                a, Pstar, ...
                                                kalman_tol, DynareOptions.riccati_tol, ...
                                                DynareOptions.presample, ...
@@ -622,6 +622,9 @@ if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
     else
         if DynareOptions.lik_init==3
             LIK = LIK + dLIK;
+            if analytic_derivation==0 && nargout==2,
+                lik = [dlik; lik];
+            end
         end
     end
 end
@@ -631,7 +634,7 @@ if (kalman_algo==2) || (kalman_algo==4)
     % resetting measurement error covariance matrix when necessary                                                           % 
     if ~correlated_errors_have_been_checked
         if isequal(H,0)
-            H = zeros(nobs,1);
+            H = zeros(pp,1);
             mmm = mm;
         else
             if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
@@ -644,20 +647,23 @@ if (kalman_algo==2) || (kalman_algo==4)
                 R = blkdiag(R,eye(pp));
                 Pstar = blkdiag(Pstar,H);
                 Pinf  = blckdiag(Pinf,zeros(pp));
-                H = zeros(nobs,1);
+                H = zeros(pp,1);
                 mmm   = mm+pp;
             end
         end
     end
 
-    LIK = univariate_kalman_filter(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations,Y,diffuse_periods+1,size(Y,2), ...
+    [LIK, lik] = univariate_kalman_filter(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations,Y,diffuse_periods+1,size(Y,2), ...
                                        a,Pstar, ...
                                        DynareOptions.kalman_tol, ...
                                        DynareOptions.riccati_tol, ...
                                        DynareOptions.presample, ...
-                                       T,Q,R,H,Z,mmm,pp,rr,diffuse_periods);
+                                       T,Q,R,H,Z,mmm,pp,rr,Zflag,diffuse_periods);
     if DynareOptions.lik_init==3
         LIK = LIK+dLIK;
+        if analytic_derivation==0 && nargout==2,
+            lik = [dlik; lik];
+        end
     end
 end
 
@@ -695,3 +701,8 @@ DynareOptions.kalman_algo = kalman_algo;
 
 % Update the penalty.
 penalty = fval;
+
+if analytic_derivation==0 && nargout==2,
+    lik=lik(start:end,:);
+    DLIK=[-lnprior; lik(:)];
+end
