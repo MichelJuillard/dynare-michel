@@ -38,6 +38,9 @@ if ~exist('OCTAVE_VERSION')
         eval(['print -dpdf ' fname]);
     end
     if find(strcmp('fig',DynareOptions.graph_format))
+        if DynareOptions.nodisplay
+            set(h, 'Visible','on');
+        end
         saveas(h,[fname '.fig']);
     end
 end
