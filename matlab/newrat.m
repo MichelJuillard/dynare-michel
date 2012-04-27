@@ -54,7 +54,8 @@ htol=htol_base;
 htol0=htol_base;
 gibbstol=length(BayesInfo.pshape)/50; %25;
 
-func_hh = str2func([func2str(func0),'_hh']);
+% func0 = str2func([func2str(func0),'_hh']);
+% func0 = func0;
 fval0=feval(func0,x,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
 fval=fval0;
 
@@ -62,7 +63,7 @@ fval=fval0;
 mr_hessian(1,x,[],[],[],DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
 
 if isempty(hh)
-    [dum, gg, htol0, igg, hhg, h1]=mr_hessian(0,x,func_hh,flagit,htol,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
+    [dum, gg, htol0, igg, hhg, h1]=mr_hessian(0,x,func0,flagit,htol,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
     hh0 = reshape(dum,nx,nx);
     hh=hhg;
     if min(eig(hh0))<0
@@ -155,7 +156,7 @@ while norm(gg)>gtol && check==0 && jit<nit
         if flagit==2
             hh=hh0;
         elseif flagg>0
-            [dum, gg, htol0, igg, hhg,h1]=mr_hessian(0,xparam1,func_hh,flagg,ftol0,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
+            [dum, gg, htol0, igg, hhg,h1]=mr_hessian(0,xparam1,func0,flagg,ftol0,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
             if flagg==2
                 hh = reshape(dum,nx,nx);
                 ee=eig(hh);
@@ -190,7 +191,7 @@ while norm(gg)>gtol && check==0 && jit<nit
             catch
                 save m1.mat x fval0 nig
             end
-            [dum, gg, htol0, igg, hhg, h1]=mr_hessian(0,xparam1,func_hh,flagit,htol,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
+            [dum, gg, htol0, igg, hhg, h1]=mr_hessian(0,xparam1,func0,flagit,htol,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
             if htol0>htol
                 htol=htol0;
                 disp(' ')
@@ -247,6 +248,3 @@ end
 return
 
 
-function f00 = lsearch(lam,func,x,dx,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
-    x0=x-dx*lam;
-    f00=feval(func,x0,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
