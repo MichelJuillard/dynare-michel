@@ -52,11 +52,11 @@ for i=1:m
     else
         h = H(:,i);
     end   
-    [Fh,flag] = feval(fcn, x+transpose(h), varargin{:});
+    [Fh,junk1,junk2,flag] = feval(fcn, x+transpose(h), varargin{:});
     if flag
         G(:,i) = (Fh-F)/epsilon;
     else
-        [Fh,flag] = feval(fcn, x-transpose(h), varargin{:});
+        [Fh,junk1,junk2,flag] = feval(fcn, x-transpose(h), varargin{:});
         if flag
             G(:,i) = (F-Fh)/epsilon;
         else

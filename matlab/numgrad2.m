@@ -39,11 +39,11 @@ for i=1:n
     else
         tvecv=tvec(:,i);
     end
-    [fh,cost_flag] = feval(fcn, x+scale*transpose(tvecv), varargin{:});
+    [fh,junk1,junk2,cost_flag] = feval(fcn, x+scale*transpose(tvecv), varargin{:});
     if cost_flag
         g0 = (fh - f0) / (scale*delta);
     else
-        [fh,cost_flag] = feval(fcn, x-scale*transpose(tvecv), varargin{:});
+        [fh,junk1,junk2,cost_flag] = feval(fcn, x-scale*transpose(tvecv), varargin{:});
         if cost_flag
             g0 = (f0-fh) / (scale*delta);
         else

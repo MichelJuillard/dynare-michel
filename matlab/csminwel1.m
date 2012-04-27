@@ -63,7 +63,7 @@ snit=100;
 %   stailstr=[' P' num2str(i) stailstr];
 %end
 
-[f0,cost_flag] = feval(fcn,x0,varargin{:});
+[f0,junk1,junk2,cost_flag] = feval(fcn,x0,varargin{:});
 
 if ~cost_flag
     disp('Bad initial parameter.') 
@@ -79,8 +79,11 @@ if NumGrad
       case 5
         [g,badg] = numgrad5(fcn, f0, x0, epsilon, varargin{:});    
     end
-else
+elseif ischar(grad)
     [g,badg] = feval(grad,x0,varargin{:});
+else
+    g=junk1;
+    badg=0;
 end
 retcode3=101;
 x=x0;
@@ -126,8 +129,11 @@ while ~done
                   case 5
                     [g1,badg1] = numgrad5(fcn, f1, x1, epsilon, varargin{:});             
                 end
-            else
+            elseif ischar(grad),
                 [g1 badg1] = feval(grad,x1,varargin{:});
+            else
+                [junk1,g1,junk2, cost_flag] = feval(fcn,x1,varargin{:});
+                badg1 = ~cost_flag;
             end
             wall1=badg1;
             % g1
@@ -160,8 +166,11 @@ while ~done
                           case 5
                             [g2,badg2] = numgrad5(fcn, f2, x2, epsilon, varargin{:});                   
                         end
-                    else
+                    elseif ischar(grad),
                         [g2 badg2] = feval(grad,x2,varargin{:});
+                    else
+                        [junk1,g2,junk2, cost_flag] = feval(fcn,x1,varargin{:});
+                        badg2 = ~cost_flag;
                     end
                     wall2=badg2;
                     % g2
@@ -195,8 +204,11 @@ while ~done
                                   case 5
                                     [g3,badg3] = numgrad5(fcn, f3, x3, epsilon, varargin{:});                         
                                 end
-                            else
+                            elseif ischar(grad),
                                 [g3 badg3] = feval(grad,x3,varargin{:});
+                            else
+                                [junk1,g3,junk2, cost_flag] = feval(fcn,x1,varargin{:});
+                                badg3 = ~cost_flag;
                             end
                             wall3=badg3;
                             % g3
@@ -259,8 +271,11 @@ while ~done
                   case 5
                     [gh,badgh] = numgrad5(fcn, fh, xh, epsilon, varargin{:});
                 end
-            else
+            elseif ischar(grad),
                 [gh badgh] = feval(grad, xh,varargin{:});
+            else
+                [junk1,gh,junk2, cost_flag] = feval(fcn,x1,varargin{:});
+                badgh = ~cost_flag;
             end
         end
         badgh=1;
@@ -273,7 +288,7 @@ while ~done
     %badgh
     stuck = (abs(fh-f) < crit);
     if (~badg) && (~badgh) && (~stuck)
-        H = bfgsi1(H,gh-g,xh-x);
+        H = bfgsi(H,gh-g,xh-x);
     end
     if Verbose
         disp('----')

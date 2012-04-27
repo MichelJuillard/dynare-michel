@@ -1,4 +1,4 @@
-function [fval,exit_flag,info,PHI,SIGMAu,iXX,prior] = DsgeVarLikelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
+function [fval,grad,hess,exit_flag,info,PHI,SIGMAu,iXX,prior] = DsgeVarLikelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
 % Evaluates the posterior kernel of the bvar-dsge model.
 %
 % INPUTS
@@ -36,6 +36,9 @@ function [fval,exit_flag,info,PHI,SIGMAu,iXX,prior] = DsgeVarLikelihood(xparam1,
 
 % Declaration of the persistent variables.
 persistent penalty dsge_prior_weight_idx
+
+grad=[];
+hess=[];
 
 % Initialization of the penalty
 if ~nargin || isempty(penalty)

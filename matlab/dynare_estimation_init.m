@@ -284,6 +284,13 @@ else
                                              bayestopt_.smoother_var_list);
 end;
 
+if options_.analytic_derivation,
+    if ~(exist('sylvester3','file')==2),        
+        dynareroot = strrep(which('dynare'),'dynare.m','');
+        addpath([dynareroot 'gensylv'])
+    end
+end
+
 % Test if the data file is declared.
 if isempty(options_.datafile)
     if gsa_flag

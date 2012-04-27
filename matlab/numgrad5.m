@@ -50,15 +50,15 @@ for i=1:n
     else
         tvecv=tvec(:,i);
     end
-    [f1,cost_flag1] = feval(fcn, x+scale*transpose(tvecv), varargin{:});
-    [f2,cost_flag2] = feval(fcn, x-scale*transpose(tvecv), varargin{:});
+    [f1,junk1,junk2,cost_flag1] = feval(fcn, x+scale*transpose(tvecv), varargin{:});
+    [f2,junk1,junk2,cost_flag2] = feval(fcn, x-scale*transpose(tvecv), varargin{:});
     if cost_flag1==0 || cost_flag2==0
         cost_flag3 = 0;
         cost_flag4 = 0;
         disp('numgrad:: I cannot use the five points formula!!')
     else
-        [f3,cost_flag3] = feval(fcn, x+2*scale*transpose(tvecv), varargin{:});
-        [f4,cost_flag4] = feval(fcn, x-2*scale*transpose(tvecv), varargin{:});
+        [f3,junk1,junk2,cost_flag3] = feval(fcn, x+2*scale*transpose(tvecv), varargin{:});
+        [f4,junk1,junk2,cost_flag4] = feval(fcn, x-2*scale*transpose(tvecv), varargin{:});
     end
     if cost_flag1 && cost_flag2 && cost_flag3 && cost_flag4% Five Points formula
         g0 = (8*(f1 - f2)+ f4-f3) / (12*scale*delta);

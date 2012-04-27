@@ -1,4 +1,4 @@
-function [LIK,likk,a] = univariate_kalman_filter_ss(Y,start,last,a,P,kalman_tol,T,H,Z,pp,Zflag)
+function [LIK,likk,a] = univariate_kalman_filter_ss(Y,start,last,a,P,kalman_tol,T,H,Z,pp,Zflag,analytic_derivation,Da,DT,DYss,DP,DH,D2a,D2T,D2Yss,D2P)
 % Computes the likelihood of a stationnary state space model (steady state univariate kalman filter).
 
 %@info:
@@ -83,10 +83,33 @@ likk = zeros(smpl,1);      % Initialization of the vector gathering the densitie
 LIK  = Inf;                % Default value of the log likelihood.
 l2pi = log(2*pi);
 
+if nargin<12
+    analytic_derivation = 0;
+end
+
+if  analytic_derivation == 0,
+    DLIK=[];
+    Hess=[];
+else
+    k = size(DT,3);                                 % number of structural parameters
+    DLIK  = zeros(k,1);                             % Initialization of the score.
+    if analytic_derivation==2,
+        Hess  = zeros(k,k);                             % Initialization of the Hessian
+    else
+        Hess=[];
+    end
+end
+
 % Steady state kalman filter.
 while t<=last
     s  = t-start+1;
     PP = P;
+    if analytic_derivation,
+        DPP = DP;
+        if analytic_derivation==2,
+            D2PP = D2P;
+        end
+    end
     for i=1:pp
         if Zflag
             prediction_error = Y(i,t) - Z(i,:)*a;
@@ -102,6 +125,24 @@ while t<=last
             a  = a + Ki*prediction_error;
             PP = PP - PPZ*Ki';
             likk(s) = likk(s) + log(Fi) + prediction_error*prediction_error/Fi + l2pi;
+            if analytic_derivation,
+                if analytic_derivation==2,
+                    [Da,DPP,DLIKt,D2a,D2PP, Hesst] = univariate_computeDLIK(k,i,Z(i,:),Zflag,prediction_error,Ki,PPZ,Fi,Da,DYss,DPP,DH(i,:),0,D2a,D2Yss,D2PP);
+                else
+                    [Da,DPP,DLIKt] = univariate_computeDLIK(k,i,Z(i,:),Zflag,prediction_error,Ki,PPZ,Fi,Da,DYss,DPP,DH(i,:),0);
+                end
+                DLIK = DLIK + DLIKt;
+                if analytic_derivation==2,
+                    Hess = Hess + Hesst;
+                end
+            end
+        end
+    end
+    if analytic_derivation,        
+        if analytic_derivation==2,
+            [Da,junk,D2a] = univariate_computeDstate(k,a,P,T,Da,DP,DT,[],0,D2a,D2P,D2T);
+        else
+            Da = univariate_computeDstate(k,a,P,T,Da,DP,DT,[],0);
         end
     end
     a = T*a;
@@ -111,3 +152,9 @@ end
 likk = .5*likk;
 
 LIK = sum(likk);
+if analytic_derivation==2,
+    LIK={LIK,DLIK,Hess};
+end
+if analytic_derivation==1,
+    LIK={LIK,DLIK};
+end

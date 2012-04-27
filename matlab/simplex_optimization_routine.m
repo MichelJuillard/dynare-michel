@@ -151,6 +151,7 @@ else
     delta = 0.05;
 end
 DELTA = delta;
+zero_delta = delta/200;% To be used instead of delta if x(i) is zero.
 
 % Set max_no_improvements.
 if isfield(options,'max_no_improvements')
@@ -173,7 +174,7 @@ if verbose
     disp(' ')
 end
 initial_point = x;
-[initial_score,nopenalty] = feval(objective_function,x,varargin{:});
+[initial_score,junk1,junk2,nopenalty] = feval(objective_function,x,varargin{:});
 if ~nopenalty
     error('simplex_optimization_routine:: Initial condition is wrong!')
 else
@@ -509,7 +510,6 @@ function [v,fv,delta] = simplex_initialization(objective_function,point,point_sc
     v(:,1) = point;
     fv = zeros(n+1,1);
     fv(1) = point_score;
-    zero_delta = delta/200;% To be used instead of delta if x(i) is zero.
     if length(delta)==1
         delta = repmat(delta,n,1);
     end
@@ -522,7 +522,7 @@ function [v,fv,delta] = simplex_initialization(objective_function,point,point_sc
         end
         v(:,j+1) = y;
         x = y;
-        [fv(j+1),nopenalty_flag] = feval(objective_function,x,varargin{:});
+        [fv(j+1),junk1,junk2,nopenalty_flag] = feval(objective_function,x,varargin{:});
         if check_delta
             while ~nopenalty_flag
                 if y(j)~=0
@@ -538,7 +538,7 @@ function [v,fv,delta] = simplex_initialization(objective_function,point,point_sc
                 end
                 v(:,j+1) = y;
                 x = y;
-                [fv(j+1),nopenalty_flag] = feval(objective_function,x,varargin{:});
+                [fv(j+1),junk1,junk2,nopenalty_flag] = feval(objective_function,x,varargin{:});
             end
         end
     end

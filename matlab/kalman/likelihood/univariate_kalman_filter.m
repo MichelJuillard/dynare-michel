@@ -120,6 +120,34 @@ notsteady = 1;
 oldK = Inf;
 K = NaN(mm,pp);
 
+if  analytic_derivation == 0,
+    DLIK=[];
+    Hess=[];
+else
+    k = size(DT,3);                                 % number of structural parameters
+    DLIK  = zeros(k,1);                             % Initialization of the score.
+    Da    = zeros(mm,k);                            % Derivative State vector.
+    
+    if Zflag==0,
+        C = zeros(pp,mm);
+        for ii=1:pp; C(ii,Z(ii))=1;end         % SELECTION MATRIX IN MEASUREMENT EQ. (FOR WHEN IT IS NOT CONSTANT)
+    else
+        C=Z;
+    end
+    dC = zeros(pp,mm,k);   % either selection matrix or schur have zero derivatives
+    if analytic_derivation==2,
+        Hess  = zeros(k,k);                             % Initialization of the Hessian
+        D2a    = zeros(mm,k,k);                             % State vector.
+        d2C = zeros(pp,mm,k,k);
+    else
+        Hess=[];
+        D2a=[];
+        D2T=[];
+        D2Yss=[];
+    end
+    LIK={inf,DLIK,Hess};
+end
+
 while notsteady && t<=last
     s = t-start+1;
     d_index = data_index{t};
@@ -144,9 +172,29 @@ while notsteady && t<=last
             if t>=no_more_missing_observations
                 K(:,i) = Ki;
             end
+            lik(s) = lik(s) + log(Fi) + prediction_error*prediction_error/Fi + l2pi;
+            if analytic_derivation,
+                if analytic_derivation==2,
+                    [Da,DP,DLIKt,D2a,D2P, Hesst] = univariate_computeDLIK(k,i,z(i,:),Zflag,prediction_error,Ki,PZ,Fi,Da,DYss,DP,DH(d_index(i),:),notsteady,D2a,D2Yss,D2P);
+                else
+                    [Da,DP,DLIKt] = univariate_computeDLIK(k,i,z(i,:),Zflag,prediction_error,Ki,PZ,Fi,Da,DYss,DP,DH(d_index(i),:),notsteady);
+                end
+                if t>presample
+                    DLIK = DLIK + DLIKt;
+                    if analytic_derivation==2,
+                        Hess = Hess + Hesst;
+                    end
+                end
+            end
             a = a + Ki*prediction_error;
             P = P - PZ*Ki';
-            lik(s) = lik(s) + log(Fi) + prediction_error*prediction_error/Fi + l2pi;
+        end
+    end
+    if analytic_derivation,        
+        if analytic_derivation==2,
+            [Da,DP,D2a,D2P] = univariate_computeDstate(k,a,P,T,Da,DP,DT,DOm,notsteady,D2a,D2P,D2T,D2Om);
+        else
+            [Da,DP] = univariate_computeDstate(k,a,P,T,Da,DP,DT,DOm,notsteady);
         end
     end
     a = T*a;
@@ -163,7 +211,21 @@ lik(1:s) = .5*lik(1:s);
 
 % Call steady state univariate kalman filter if needed.
 if t<last
-    [tmp, lik(s+1:end)] = univariate_kalman_filter_ss(Y,t,last,a,P,kalman_tol,T,H,Z,pp,Zflag);
+    if analytic_derivation,
+        if analytic_derivation==2,
+            [tmp, lik(s+1:end)] = univariate_kalman_filter_ss(Y,t,last,a,P,kalman_tol,T,H,Z,pp,Zflag, ...
+                analytic_derivation,Da,DT,DYss,DP,DH,D2a,D2T,D2Yss,D2P);
+        else
+            [tmp, lik(s+1:end)] = univariate_kalman_filter_ss(Y,t,last,a,P,kalman_tol,T,H,Z,pp,Zflag, ...
+                analytic_derivation,Da,DT,DYss,DP,DH);
+        end
+        DLIK = DLIK + tmp{2};
+        if analytic_derivation==2,
+            Hess = Hess + tmp{3};
+        end
+    else
+        [tmp, lik(s+1:end)] = univariate_kalman_filter_ss(Y,t,last,a,P,kalman_tol,T,H,Z,pp,Zflag);
+    end
 end
 
 % Compute minus the log-likelihood.
@@ -171,4 +233,14 @@ if presample > diffuse_periods
     LIK = sum(lik(1+presample-diffuse_periods:end));
 else
     LIK = sum(lik);
+end
+
+if analytic_derivation,
+    DLIK = DLIK/2;
+    if analytic_derivation==2,
+        Hess = -Hess/2;
+        LIK={LIK, DLIK, Hess};
+    else
+        LIK={LIK, DLIK};
+    end
 end

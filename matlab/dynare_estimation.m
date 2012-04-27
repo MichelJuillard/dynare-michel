@@ -53,6 +53,12 @@ end
 
 M_.dname = dname;
 
+if options_.mode_compute && options_.analytic_derivation,
+    analytic_derivation0=options_.analytic_derivation;
+    options_.analytic_derivation=1;
+end
+    
+
 if nnobs > 1
     for i=1:nnobs
         options_.nobs = nobs(i);
@@ -62,6 +68,10 @@ if nnobs > 1
     end
 else
     dynare_estimation_1(var_list,dname);
+end
+
+if options_.mode_compute && options_.analytic_derivation,
+    options_.analytic_derivation=analytic_derivation0;
 end
 
 if nnobs > 1 && horizon > 0

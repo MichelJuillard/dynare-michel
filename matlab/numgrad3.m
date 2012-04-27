@@ -45,8 +45,8 @@ for i=1:n
     else
         tvecv=tvec(:,i);
     end
-    [f1,cost_flag1] = feval(fcn, x+scale*transpose(tvecv), varargin{:});
-    [f2,cost_flag2] = feval(fcn, x-scale*transpose(tvecv), varargin{:});
+    [f1,junk1,junk2,cost_flag1] = feval(fcn, x+scale*transpose(tvecv), varargin{:});
+    [f2,junk1,junk2,cost_flag2] = feval(fcn, x-scale*transpose(tvecv), varargin{:});
     if cost_flag1 && cost_flag2
         g0 = (f1 - f2) / (2*scale*delta);
     else

@@ -1,4 +1,4 @@
-function [LIK, likk, a] = kalman_filter_ss(Y,start,last,a,T,K,iF,dF,Z,pp,Zflag)
+function [LIK, likk, a] = kalman_filter_ss(Y,start,last,a,T,K,iF,dF,Z,pp,Zflag,analytic_derivation,Da,DT,DYss,D2a,D2T,D2Yss)
 % Computes the likelihood of a stationnary state space model (steady state kalman filter).
 
 %@info:
@@ -80,6 +80,23 @@ smpl = last-start+1;
 t    = start;              % Initialization of the time index.
 likk = zeros(smpl,1);      % Initialization of the vector gathering the densities.
 LIK  = Inf;                % Default value of the log likelihood.
+notsteady = 0;
+if nargin<12
+    analytic_derivation = 0;
+end
+
+if  analytic_derivation == 0,
+    DLIK=[];
+    Hess=[];
+else
+    k = size(DT,3);                                 % number of structural parameters
+    DLIK  = zeros(k,1);                             % Initialization of the score.
+    if analytic_derivation==2,
+        Hess  = zeros(k,k);                             % Initialization of the Hessian
+    else
+        Hess=[];
+    end
+end
 
 while t <= last
     if Zflag
@@ -87,7 +104,19 @@ while t <= last
     else
         v = Y(:,t)-a(Z);
     end
-    a = T*(a+K*v);
+    tmp = (a+K*v);
+    if analytic_derivation,
+        if analytic_derivation==2,
+            [Da,junk,DLIKt,D2a,junk2, Hesst] = computeDLIK(k,tmp,Z,Zflag,v,T,K,[],iF,Da,DYss,DT,[],[],[],notsteady,D2a,D2Yss,D2T,[],[]);
+        else
+            [Da,junk,DLIKt] = computeDLIK(k,tmp,Z,Zflag,v,T,K,[],iF,Da,DYss,DT,[],[],[],notsteady);
+        end
+        DLIK = DLIK + DLIKt;
+        if analytic_derivation==2,
+            Hess = Hess + Hesst;
+        end
+    end
+    a = T*tmp;
     likk(t-start+1) = transpose(v)*iF*v;
     t = t+1;
 end
@@ -100,3 +129,9 @@ likk = .5*(likk + pp*log(2*pi));
 
 % Sum the observation's densities (minus the likelihood)
 LIK = sum(likk);
+if analytic_derivation==2,
+    LIK={LIK,DLIK,Hess};
+end
+if analytic_derivation==1,
+    LIK={LIK,DLIK};
+end

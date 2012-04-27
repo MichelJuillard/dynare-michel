@@ -1,4 +1,4 @@
-function [g,flag] = moment_function(xparams,sample_moments,dataset,options,parallel)
+function [g,grad,hess,flag] = moment_function(xparams,sample_moments,dataset,options,parallel)
 % Evaluates the moment function of the Simulated Moments Method (discrepancy between sample and
 % ).
 %
@@ -15,7 +15,7 @@ function [g,flag] = moment_function(xparams,sample_moments,dataset,options,paral
 % SPECIAL REQUIREMENTS
 %  The user has to provide a file where the moment conditions are defined.
 
-% Copyright (C) 2010-2012 Dynare Team
+% Copyright (C) 2010 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -37,14 +37,12 @@ persistent mainStream mainState
 persistent priorObjectiveValue
 
 flag = 1;
+grad=[];
+hess=[];
 
 if nargin<5
     if isempty(mainStream)
-        if matlab_ver_less_than('7.12')
-            mainStream = RandStream.getDefaultStream;
-        else
-            mainStream = RandStream.getGlobalStream;
-        end
+        mainStream = RandStream.getDefaultStream;
         mainState  = mainStream.State;
     else
         mainStream.State = mainState;

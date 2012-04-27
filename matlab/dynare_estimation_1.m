@@ -168,6 +168,9 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         if isfield(options_,'optim_opt')
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
         end
+        if options_.analytic_derivation,
+            optim_options = optimset(optim_options,'GradObj','on');
+        end
             [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
                 fmincon(objective_function,xparam1,[],[],[],[],lb,ub,[],optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 2
@@ -177,14 +180,23 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         if isfield(options_,'optim_opt')
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
         end
+        if options_.analytic_derivation,
+            optim_options = optimset(optim_options,'GradObj','on');
+        end
         [xparam1,fval,exitflag] = fminunc(objective_function,xparam1,optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 4
         H0 = 1e-4*eye(nx);
         crit = 1e-7;
         nit = 1000;
         verbose = 2;
+        if options_.analytic_derivation,
+            analytic_grad=1;
+        else
+            analytic_grad=[];
+        end
+
             [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-                csminwel1(objective_function,xparam1,H0,[],crit,nit,options_.gradient_method,options_.gradient_epsilon,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+                csminwel1(objective_function,xparam1,H0,analytic_grad,crit,nit,options_.gradient_method,options_.gradient_epsilon,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
             disp(sprintf('Objective function at mode: %f',fval))
       case 5
         if isfield(options_,'hess')
@@ -350,8 +362,17 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
     end
     if ~isequal(options_.mode_compute,6) && ~isequal(options_.mode_compute,'prior')
         if options_.cova_compute == 1
-            hh = reshape(hessian(objective_function,xparam1, ...
-                                     options_.gstep,dataset_,options_,M_,estim_params_,bayestopt_,oo_),nx,nx);
+            if options_.analytic_derivation && strcmp(func2str(objective_function),'dsge_likelihood'),
+                ana_deriv = options_.analytic_derivation;
+                options_.analytic_derivation = 2;
+                [junk1, junk2, hh] = feval(objective_function,xparam1, ...
+                    dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+                options_.analytic_derivation = ana_deriv;
+                
+            else
+                hh = reshape(hessian(objective_function,xparam1, ...
+                    options_.gstep,dataset_,options_,M_,estim_params_,bayestopt_,oo_),nx,nx);
+            end
         end
     end
     parameter_names = bayestopt_.name;
@@ -865,11 +886,14 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
         if options_.load_mh_file && options_.use_mh_covariance_matrix
             invhess = compute_mh_covariance_matrix;
         end
+        ana_deriv = options_.analytic_derivation;
+        options_.analytic_derivation = 0;
         if options_.cova_compute
             feval(options_.posterior_sampling_method,objective_function,options_.proposal_distribution,xparam1,invhess,bounds,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         else
             error('I Cannot start the MCMC because the hessian of the posterior kernel at the mode was not computed.')
         end
+        options_.analytic_derivation = ana_deriv;
     end
     if options_.mh_posterior_mode_estimation
         CutSample(M_, options_, estim_params_);
