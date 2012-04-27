@@ -1,4 +1,4 @@
-function [LIK, likk,a,P] = univariate_kalman_filter(data_index,number_of_observations,no_more_missing_observations,Y,start,last,a,P,kalman_tol,riccati_tol,presample,T,Q,R,H,Z,mm,pp,rr,Zflag,diffuse_periods)
+function [LIK, lik,a,P] = univariate_kalman_filter(data_index,number_of_observations,no_more_missing_observations,Y,start,last,a,P,kalman_tol,riccati_tol,presample,T,Q,R,H,Z,mm,pp,rr,Zflag,diffuse_periods,analytic_derivation,DT,DYss,DOm,DH,DP,D2T,D2Yss,D2Om,D2H,D2P)
 % Computes the likelihood of a stationnary state space model (univariate approach).
 
 %@info:
@@ -141,7 +141,7 @@ while notsteady && t<=last
         end
         if Fi>kalman_tol
             Ki =  PZ/Fi;
-            if t>no_more_missing_observations
+            if t>=no_more_missing_observations
                 K(:,i) = Ki;
             end
             a = a + Ki*prediction_error;
