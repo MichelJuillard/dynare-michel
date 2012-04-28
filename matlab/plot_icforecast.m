@@ -34,7 +34,7 @@ end
 
 load conditional_forecasts;
 
-if nargin==1% Set default number of periods.
+if nargin==1 || isempty(periods) % Set default number of periods.
     eval(['periods = length(forecasts.cond.mean.' Variables(1,:) ');']);
 end
 
