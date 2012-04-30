@@ -39,6 +39,12 @@ persistent penalty dsge_prior_weight_idx
 
 grad=[];
 hess=[];
+exit_flag = [];
+info = [];
+PHI = [];
+SIGMAu = [];
+iXX = [];
+prior = [];
 
 % Initialization of the penalty
 if ~nargin || isempty(penalty)
@@ -263,7 +269,7 @@ end
 lnprior = priordens(xparam1,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
 fval = (lik-lnprior);
 
-if (nargout == 6)
+if (nargout == 8)
     if isinf(dsge_prior_weight)
         iXX = iGXX;
     else
@@ -271,7 +277,7 @@ if (nargout == 6)
     end
 end
 
-if (nargout==7)
+if (nargout==9)
     if isinf(dsge_prior_weight)
         iXX = iGXX;
     else

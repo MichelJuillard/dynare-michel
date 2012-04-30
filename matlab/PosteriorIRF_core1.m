@@ -180,7 +180,7 @@ while fpar<npar
     end
     if MAX_nirfs_dsgevar
         IRUN = IRUN+1;
-        [fval,cost_flag,info,PHI,SIGMAu,iXX] =  DsgeVarLikelihood(deep',dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        [fval,junk1,junk2,cost_flag,info,PHI,SIGMAu,iXX] =  DsgeVarLikelihood(deep',dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         dsge_prior_weight = M_.params(strmatch('dsge_prior_weight',M_.param_names));
         DSGE_PRIOR_WEIGHT = floor(dataset_.info.ntobs*(1+dsge_prior_weight));
         SIGMA_inv_upper_chol = chol(inv(SIGMAu*dataset_.info.ntobs*(dsge_prior_weight+1)));

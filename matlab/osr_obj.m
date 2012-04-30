@@ -1,4 +1,4 @@
-function [loss,vx,info]=osr_obj(x,i_params,i_var,weights);
+function [loss,vx,junk,exit_flag]=osr_obj(x,i_params,i_var,weights);
 % objective function for optimal simple rules (OSR)
 
 % Copyright (C) 2005-2009 Dynare Team
@@ -21,6 +21,8 @@ function [loss,vx,info]=osr_obj(x,i_params,i_var,weights);
 global M_ oo_ options_ optimal_Q_ it_
 %  global ys_ Sigma_e_ endo_nbr exo_nbr optimal_Q_ it_ ykmin_ options_
 
+junk = [];
+exit_flag = 1;
 vx = [];
 % set parameters of the policiy rule
 M_.params(i_params) = x;
