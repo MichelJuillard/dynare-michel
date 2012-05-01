@@ -210,7 +210,7 @@ end
 lik(1:s) = .5*lik(1:s);
 
 % Call steady state univariate kalman filter if needed.
-if t<last
+if t <= last
     if analytic_derivation,
         if analytic_derivation==2,
             [tmp, lik(s+1:end)] = univariate_kalman_filter_ss(Y,t,last,a,P,kalman_tol,T,H,Z,pp,Zflag, ...
