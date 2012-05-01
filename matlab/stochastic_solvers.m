@@ -170,7 +170,7 @@ else
 
     else  % use original Dynare solver
         [dr,info] = dyn_first_order_solver(jacobia_,M_,dr,options_,task);
-        if info || task
+        if info(1) || task
             return;
         end
     end
