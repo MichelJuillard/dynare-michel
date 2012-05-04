@@ -40,7 +40,7 @@ end
 % Evaluate the likelihood.
 [fval,junk1,junk2,a,b,c,d] = feval(objective_function,xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
 
-if DynareOptions.dsge_var
+if DynareOptions.dsge_var || strcmp(func2str(objective_function),'non_linear_dsge_likelihood')
     info = b;
 else
     info = d;
