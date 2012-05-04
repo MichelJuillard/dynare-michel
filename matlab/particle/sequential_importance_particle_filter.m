@@ -130,10 +130,10 @@ for t=1:sample_size
     wtilde = weights.*exp(lnw-dfac);
     lik(t) = log(sum(wtilde))+dfac;
     weights = wtilde/sum(wtilde);
-    if strcmp(DynareOptions.particle.resampling.status,'generic'))
+    if strcmp(DynareOptions.particle.resampling.status,'generic')
         Neff = 1/(weights*weights');
     end
-    if (Neff<DynareOptions.particle.resampling.neff_threshold*sample_size && strcmp(DynareOptions.particle.resampling.status,'generic')) || strcmp(DynareOptions.particle.resampling.status,'systematic')
+    if (strcmp(DynareOptions.particle.resampling.status,'generic') && Neff<DynareOptions.particle.resampling.neff_threshold*sample_size ) || strcmp(DynareOptions.particle.resampling.status,'systematic')
         nb_obs_resamp = nb_obs_resamp+1 ;
         StateVectors = tmp(mf0,resample(weights,DynareOptions.particle.resampling.method1,DynareOptions.particle.resampling.method2));
         weights = ones(1,number_of_particles)/number_of_particles;
