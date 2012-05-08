@@ -115,7 +115,7 @@ IntegDerivs(int r, const IntSequence& nvs, const _Tgss& g, const __Tm& mom,
 			Symmetry sym(i,0,0,p);
 			_Ttensor* ten = new _Ttensor(r, TensorDimens(sym, nvs));
 			@<calculate derivative $h_{y^i\sigma^p}$@>;
-			insert(ten);
+			this->insert(ten);
 		}
 	}
 }
@@ -256,7 +256,7 @@ symmetric polynomial. Note that the derivative get the true |nvs|.
 				IntSequence coor(sym, pp);
 				_Ttensor* ten = new _Ttensor(*(g_int_cent.get(Symmetry(d))), ss, coor,
 											 TensorDimens(sym, true_nvs));
-				insert(ten);
+				this->insert(ten);
 			}
 		}
 	}

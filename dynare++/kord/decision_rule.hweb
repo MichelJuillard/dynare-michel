@@ -217,7 +217,7 @@ void fillTensors(const _Tg& g, double sigma)
 		_Ttensym* g_yud = new _Ttensym(ypart.ny(), ypart.nys()+nu, d);
 		g_yud->zeros();
 		@<fill tensor of |g_yud| of dimension |d|@>;
-		insert(g_yud);
+		this->insert(g_yud);
 	}
 }
 
@@ -274,7 +274,7 @@ void centralize(const DecisionRuleImpl& dr)
 		pol.derivative(d-1);
 		_Ttensym* der = pol.evalPartially(d, dstate);
 		der->mult(1.0/dfac);
-		insert(der);
+		this->insert(der);
 	}
 }
 
@@ -556,7 +556,7 @@ void fillTensors(const _Tg& g, double sigma)
 				g_yd->add(mult, *ten);
 			}
 		}
-		insert(g_yd);
+		this->insert(g_yd);
 	}
 }
 

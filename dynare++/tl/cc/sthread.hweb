@@ -340,7 +340,7 @@ void remove(const void* c, const char* id)
 {
 	iterator it = _Tparent::find(mmkey(c, id));
 	if (it != _Tparent::end())
-		erase(it);
+		this->erase(it);
 }
 
 @ This is the |synchro| class. The constructor of this class tries to

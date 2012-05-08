@@ -74,10 +74,10 @@ public:@;
 			nvs[0] = fo.ypart.nys(); nvs[1] = fo.nu; nvs[2] = fo.nu; nvs[3] = 1;
 			_Ttensor* ten = new _Ttensor(fo.ypart.ny(), TensorDimens(Symmetry(1,0,0,0),nvs));
 			ten->zeros(); ten->add(1.0, fo.gy);
-			insert(ten);
+			this->insert(ten);
 			ten = new _Ttensor(fo.ypart.ny(), TensorDimens(Symmetry(0,1,0,0), nvs));
 			ten->zeros(); ten->add(1.0, fo.gu);
-			insert(ten);
+			this->insert(ten);
 		}
 };
 
