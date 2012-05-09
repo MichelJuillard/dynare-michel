@@ -176,7 +176,7 @@ mex/build/matlab/run_m2html.m
 .DS_Store
 
 # MS-Sbvar
-/ms-sbvar/*.prn
-/ms-sbvar/*.dat
-/ms-sbvar/sbvar_commandline
-/ms-sbvar/sbvar_init_file
+/contrib/ms-sbvar/*.prn
+/contrib/ms-sbvar/*.dat
+/contrib/ms-sbvar/sbvar_commandline
+/contrib/ms-sbvar/sbvar_init_file
