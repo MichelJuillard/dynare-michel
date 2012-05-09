@@ -6971,6 +6971,10 @@ be used but the range will be adjusted to begin at one.
 The name or IP address of the node. If you want to run locally, use
 @code{localhost} (case-sensitive).
 
+@item Port = @var{INTEGER}
+The port number to connect to on the node. The default is empty,
+meaning that the connection will be made to the default SSH port (22).
+
 @item UserName = @var{USER_NAME}
 The username used to log into a remote system. Required for remote
 runs on all platforms.
@@ -7026,6 +7030,7 @@ MatlabOctavePath = matlab
 [node]
 Name = n3
 ComputerName = dynserv.dynare.org
+Port = 3333
 CPUnbr = [2:4]
 UserName = usern
 RemoteDirectory = /home/usern/Remote
