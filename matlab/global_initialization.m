@@ -515,3 +515,13 @@ set_dynare_seed('default');
 % Create directories
 [junk,junk]=mkdir(M_.fname);
 [junk,junk]=mkdir([M_.fname '/Output']);
+
+% Load user configuration file.
+if isunix
+    origin = pwd;
+    cd('~/')
+    if exist('dynare_configuration.m')
+        dynare_configuration;
+    end
+    cd(origin)
+end
