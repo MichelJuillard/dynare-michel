@@ -55,7 +55,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
         [ys,params] = dyn_ramsey_static(ys_init,M,options,oo);
     elseif steadystate_flag
         % explicit steady state file
-        [ys,params1,info] = evaluate_steady_state_file(ys_init,exo_ss,M, ...
+        [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M, ...
                                                        options);
         if info(1)
             return;
