@@ -210,7 +210,7 @@ end
 likk(1:s) = .5*(likk(1:s) + pp*log(2*pi));
 
 % Call steady state Kalman filter if needed.
-if t<last
+if t <= last
     if analytic_derivation,
         if analytic_derivation==2,
             [tmp, likk(s+1:end)] = kalman_filter_ss(Y,t,last,a,T,K,iF,dF,Z,pp,Zflag, ...
