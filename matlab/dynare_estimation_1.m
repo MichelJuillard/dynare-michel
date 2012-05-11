@@ -1028,18 +1028,14 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
     %%
     %%  Smooth observational errors...
     %%
-    if options_.noconstant
-        yf = zeros(n_varobs,gend);
+    if options_.prefilter == 1
+        yf = atT(bayestopt_.mf,:)+repmat(dataset_.descriptive.mean',1,gend);
+    elseif options_.loglinear == 1
+        yf = atT(bayestopt_.mf,:)+repmat(log(ys(bayestopt_.mfys)),1,gend)+...
+             trend_coeff*[1:gend];
     else
-        if options_.prefilter == 1
-            yf = atT(bayestopt_.mf,:)+repmat(bayestopt_.mean_varobs,1,gend);
-        elseif options_.loglinear == 1
-            yf = atT(bayestopt_.mf,:)+repmat(log(ys(bayestopt_.mfys)),1,gend)+...
-                 trend_coeff*[1:gend];
-        else
-            yf = atT(bayestopt_.mf,:)+repmat(ys(bayestopt_.mfys),1,gend)+...
-                 trend_coeff*[1:gend];
-        end
+        yf = atT(bayestopt_.mf,:)+repmat(ys(bayestopt_.mfys),1,gend)+...
+             trend_coeff*[1:gend];
     end
     if nvn
         number_of_plots_to_draw = 0;
@@ -1132,9 +1128,9 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         for i=1:nstar0,
             k = (plt-1)*nstar+i;
             subplot(nr,nc,i);
-            plot(1:gend,yf(k,:),'-r','linewidth',1)
+            plot(1:gend,yf(k,:),'--r','linewidth',1)
             hold on
-            plot(1:gend,rawdata(:,k),'-k','linewidth',1)
+            plot(1:gend,rawdata(:,k),'--k','linewidth',1)
             hold off
             name = deblank(options_.varobs(k,:));
             if isempty(NAMES)
