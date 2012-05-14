@@ -93,7 +93,7 @@ elseif options_.order == 2
     else
         [junk,jacobia_,hessian1] = feval([M_.fname '_dynamic'],z(iyr0),...
                                          exo_simul, ...
-                                         M_.params, dr.ys, 3);
+                                         M_.params, dr.ys, it_);
     end;
     if options_.use_dll
         % In USE_DLL mode, the hessian is in the 3-column sparse representation
