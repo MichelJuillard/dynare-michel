@@ -19,7 +19,7 @@ function simk
 %   None.
 %  
 
-% Copyright (C) 1996-2011 Dynare Team
+% Copyright (C) 1996-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -139,7 +139,7 @@ for iter = 1:options_.maxit_
     i = M_.maximum_endo_lag+1 ;
     while (i>1) && (it_<=options_.periods+M_.maximum_endo_lag)
         h3 = clock ;
-        [d1,jacobian] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul, M_.params, it_);
+        [d1,jacobian] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul, M_.params,oo_.steady_state, it_);
         d1 = -d1 ;
         err_f = max(err_f,max(abs(d1)));
         if lky(i) ~= 0
@@ -226,7 +226,7 @@ for iter = 1:options_.maxit_
     end
     icr0 = (it_-M_.maximum_lag-M_.maximum_endo_lag -1)*ny ;
     while it_ <= options_.periods+M_.maximum_lag
-        [d1,jacobian] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul, M_.params, it_);
+        [d1,jacobian] = feval([M_.fname '_dynamic'],oo_.endo_simul(iyr),oo_.exo_simul, M_.params,oo_.steady_state, it_);
         d1 = -d1 ;
         err_f = max(err_f,max(abs(d1)));
         w0 = jacobian(:,1:isc(1)) ;
