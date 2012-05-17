@@ -2391,26 +2391,28 @@ number of computations attempted before giving up.
 Defines the number of steps when performing a homotopy. See
 @code{homotopy_mode} option for more details.
 
-@item nocheck
-Don't check the steady state values when they are provided explicitely either by a steady state file or a @code{steady_state_model} block. This is useful for models with unit roots as, in this case, the steady state is not unique or doesn't exist.
 
-@item stop_on_error = @var{INTEGER}
-Normally, @code{steady} stops on error with a message. However, in
-special circumstances, such as chaining homotopy steps, it may be useful
-to let it continue to the next step even if the current one was not
-successful. @code{stop_on_error} can take two values:
+@item homotopy_force_continue = @var{INTEGER}
+This option controls what happens when homotopy fails.
+
 @table @code
 
 @item 0
-@code{steady} doesn't stop on error
+@code{steady} fails with an error message
 
 @item 1
-@code{steady} stops on error
+@code{steady} keeps the values of the last homotopy step that was
+successful and continues. BE CAREFUL: parameters and/or exogenous
+variables are NOT at the value expected by the user
 @end table
 
 @noindent
-Default is @code{1}
+Default is @code{0}.
+
+@item nocheck
+Don't check the steady state values when they are provided explicitely either by a steady state file or a @code{steady_state_model} block. This is useful for models with unit roots as, in this case, the steady state is not unique or doesn't exist.
 @end table
+
 
 @examplehead
 
