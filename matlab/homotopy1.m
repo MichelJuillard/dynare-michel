@@ -1,4 +1,4 @@
-function homotopy1(values, step_nbr)
+function [M,oo,info,last_values,ip,ix,ixd] = homotopy1(values, step_nbr, M, options, oo)
 % function homotopy1(values, step_nbr)
 %
 % Implements homotopy (mode 1) for steady-state computation.
@@ -16,9 +16,17 @@ function homotopy1(values, step_nbr)
 %                   Column 3 can contain NaNs, in which case previous
 %                   initialization of variable will be used as initial value.
 %    step_nbr:      number of steps for homotopy
+%    M              struct of model parameters
+%    options        struct of options
+%    oo             struct of outputs
 %
 % OUTPUTS
-%    none
+%    M              struct of model parameters
+%    oo             struct of outputs
+%    last_values    last set of values fir which a solution was found
+%    ip             index of parameters
+%    ix             index of exogenous variables
+%    ixp            index of exogenous deterministic variables
 %
 % SPECIAL REQUIREMENTS
 %    none
@@ -40,8 +48,7 @@ function homotopy1(values, step_nbr)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ oo_ options_
-
+last_values = [];
 nv = size(values, 1);
 
 ip = find(values(:,1) == 4); % Parameters
@@ -56,11 +63,11 @@ end
 % when initial value has not been given in homotopy_setup block
 oldvalues = values(:,3);
 ipn = find(values(:,1) == 4 & isnan(oldvalues));
-oldvalues(ipn) = M_.params(values(ipn, 2));
+oldvalues(ipn) = M.params(values(ipn, 2));
 ixn = find(values(:,1) == 1 & isnan(oldvalues));
-oldvalues(ixn) = oo_.exo_steady_state(values(ixn, 2));
+oldvalues(ixn) = oo.exo_steady_state(values(ixn, 2));
 ixdn = find(values(:,1) == 2 & isnan(oldvalues));
-oldvalues(ixdn) = oo_.exo_det_steady_state(values(ixdn, 2));
+oldvalues(ixdn) = oo.exo_det_steady_state(values(ixdn, 2));
 
 points = zeros(nv, step_nbr+1);
 for i = 1:nv
@@ -73,16 +80,23 @@ end
 
 for i=1:step_nbr+1
     disp([ 'HOMOTOPY mode 1: computing step ' int2str(i-1) '/' int2str(step_nbr) '...' ])
-    M_.params(values(ip,2)) = points(ip,i);
-    oo_.exo_steady_state(values(ix,2)) = points(ix,i);
-    oo_.exo_det_steady_state(values(ixd,2)) = points(ixd,i);
+    old_params = M.params;
+    old_exo = oo.exo_steady_state;
+    old_exo_det = oo.exo_det_steady_state;
+    M.params(values(ip,2)) = points(ip,i);
+    oo.exo_steady_state(values(ix,2)) = points(ix,i);
+    oo.exo_det_steady_state(values(ixd,2)) = points(ixd,i);
 
-    [steady_state,M_.params,info] = steady_(M_,options_,oo_);
+    [steady_state,M.params,info] = steady_(M,options,oo);
     if info(1) == 0
         % if homotopy step is not successful, current values of steady
         % state are not modified
-        oo_.steady_state = steady_state;
+        oo.steady_state = steady_state;
     else 
+        M.params = old_params;
+        oo.exo_steady_state = old_exo;
+        oo.exo_det_steady_state = old_exo_det;
+        last_values = points(:,i-1);
         break
     end
 end

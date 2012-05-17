@@ -43,26 +43,48 @@ Sigma_e = M_.Sigma_e;
 % Set M_.Sigma_e=0 (we compute the *deterministic* steady state)
 M_.Sigma_e = zeros(size(Sigma_e));
 
-
+info = 0;
 switch options_.homotopy_mode
   case 1
-    homotopy1(options_.homotopy_values, options_.homotopy_steps);
+    [M_,oo_,info,last_values,ip,ix,ixd] = homotopy1(options_.homotopy_values, options_.homotopy_steps,M_,options_,oo_);
   case 2
     homotopy2(options_.homotopy_values, options_.homotopy_steps);
   case 3
     homotopy3(options_.homotopy_values, options_.homotopy_steps);
 end
 
+if info(1)
+    hv = options_.homotopy_values;
+    disp(' ')
+    disp('WARNING: homotopy step was not comleted')
+    disp('The last values for which a solution was found are:')
+    for i=1:length(ip)
+        disp(sprintf('%12s %12.6f',M_.param_names(hv(ip(i),2),:), ...
+                     last_values(ip(i))))
+    end
+    for i=1:length(ix)
+        disp(sprintf('%12s %12.6f',M_.exo_names(hv(ix(i),2),:), ...
+                     last_values(ix(i))))
+    end
+    for i=1:length(ixd)
+        disp(sprintf('%12s %12.6f',M_.exo_det_names(hv(ixd(i),2),:), ...
+                     last_values(ixd(i))))
+    end
+    
+    if options_.homotopy_force_continue
+        disp('Option homotopy_continue is set, so I continue ...')
+    else
+        error('Homotopy step failed')
+    end
+end
+    
 [steady_state,M_.params,info] = steady_(M_,options_,oo_);
 
 if info(1) == 0
     oo_.steady_state = steady_state;
     disp_steady_state(M_,oo_);
-elseif options_.steady.stop_on_error
-    print_info(info,options_.noprint);
 else
-    disp(['Warning: steady state could not be computed but steady.stop_on_error ' ...
-          '== 0, so I continue'])
+    print_info(info,options_.noprint);
 end
 
 M_.Sigma_e = Sigma_e;
