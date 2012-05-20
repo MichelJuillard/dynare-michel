@@ -75,9 +75,9 @@ last_values(ixdn) = oo.exo_det_steady_state(values(ixdn, 2));
 
 targetvalues = values(:,4);
 
-if min(abs(targetvalues - last_values)) < tol
-    error('HOMOTOPY mode 3: distance between initial and final values should be at least %e for all variables', tol)
-end
+%if min(abs(targetvalues - last_values)) < tol
+%    error('HOMOTOPY mode 3: distance between initial and final values should be at least %e for all variables', tol)
+%end
 iplus = find(targetvalues > last_values);
 iminus = find(targetvalues < last_values);
 
@@ -90,7 +90,7 @@ last_values = [];
 disp('HOMOTOPY mode 3: launching solver at initial point...')
 
 iter = 1;
-while iter < step_nbr
+while iter <= step_nbr
     
     M.params(values(ip,2)) = curvalues(ip);
     oo.exo_steady_state(values(ix,2)) = curvalues(ix);
@@ -140,3 +140,6 @@ while iter < step_nbr
     iter = iter + 1;
 end
 disp('HOMOTOPY mode 3: failed, maximum iterations reached')
+M.params = old_params;
+oo.exo_steady_state = old_exo_steady_state;
+oo.exo_det_steady_state = old_exo_det_steady_state;
