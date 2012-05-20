@@ -1,4 +1,4 @@
-function [M,oo,info,last_values,ip,ix,ixd] = homotopy1(values, step_nbr, M, options, oo)
+function [M,oo,info,ip,ix,ixd] = homotopy1(values, step_nbr, M, options, oo)
 % function homotopy1(values, step_nbr)
 %
 % Implements homotopy (mode 1) for steady-state computation.
@@ -23,7 +23,6 @@ function [M,oo,info,last_values,ip,ix,ixd] = homotopy1(values, step_nbr, M, opti
 % OUTPUTS
 %    M              struct of model parameters
 %    oo             struct of outputs
-%    last_values    last set of values fir which a solution was found
 %    ip             index of parameters
 %    ix             index of exogenous variables
 %    ixp            index of exogenous deterministic variables
@@ -48,7 +47,6 @@ function [M,oo,info,last_values,ip,ix,ixd] = homotopy1(values, step_nbr, M, opti
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-last_values = [];
 nv = size(values, 1);
 
 ip = find(values(:,1) == 4); % Parameters
@@ -96,7 +94,6 @@ for i=1:step_nbr+1
         M.params = old_params;
         oo.exo_steady_state = old_exo;
         oo.exo_det_steady_state = old_exo_det;
-        last_values = points(:,i-1);
         break
     end
 end

@@ -46,29 +46,29 @@ M_.Sigma_e = zeros(size(Sigma_e));
 info = 0;
 switch options_.homotopy_mode
   case 1
-    [M_,oo_,info,last_values,ip,ix,ixd] = homotopy1(options_.homotopy_values, options_.homotopy_steps,M_,options_,oo_);
+    [M_,oo_,info,ip,ix,ixd] = homotopy1(options_.homotopy_values,options_.homotopy_steps,M_,options_,oo_);
   case 2
     homotopy2(options_.homotopy_values, options_.homotopy_steps);
   case 3
-    homotopy3(options_.homotopy_values, options_.homotopy_steps);
+    [M_,oo_,info,ip,ix,ixd] = homotopy3(options_.homotopy_values,options_.homotopy_steps,M_,options_,oo_);
 end
 
 if info(1)
     hv = options_.homotopy_values;
     disp(' ')
-    disp('WARNING: homotopy step was not comleted')
+    disp('WARNING: homotopy step was not completed')
     disp('The last values for which a solution was found are:')
     for i=1:length(ip)
         disp(sprintf('%12s %12.6f',M_.param_names(hv(ip(i),2),:), ...
-                     last_values(ip(i))))
+                     M_.params(hv(ip(i)))))
     end
     for i=1:length(ix)
         disp(sprintf('%12s %12.6f',M_.exo_names(hv(ix(i),2),:), ...
-                     last_values(ix(i))))
+                     oo_.exo_steady_state(hv(ix(i)))))
     end
     for i=1:length(ixd)
         disp(sprintf('%12s %12.6f',M_.exo_det_names(hv(ixd(i),2),:), ...
-                     last_values(ixd(i))))
+                     oo_.exo_det_steady_state(hv(ixd(i)))))
     end
     
     if options_.homotopy_force_continue

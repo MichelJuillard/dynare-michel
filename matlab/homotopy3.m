@@ -1,4 +1,4 @@
-function homotopy3(values, step_nbr)
+function [M,oo,info,ip,ix,ixd]=homotopy3(values, step_nbr, M, options, oo)
 % function homotopy3(values, step_nbr)
 %
 % Implements homotopy (mode 3) for steady-state computation.
@@ -18,9 +18,17 @@ function homotopy3(values, step_nbr)
 %                   Column 3 can contain NaNs, in which case previous
 %                   initialization of variable will be used as initial value.
 %    step_nbr:      maximum number of steps to try before aborting
+%    M              struct of model parameters
+%    options        struct of options
+%    oo             struct of outputs
 %
 % OUTPUTS
-%    none
+%    M              struct of model parameters
+%    oo             struct of outputs
+%    info           return status 0: OK, 1: failed
+%    ip             index of parameters
+%    ix             index of exogenous variables
+%    ixp            index of exogenous deterministic variables
 %
 % SPECIAL REQUIREMENTS
 %    none
@@ -42,8 +50,7 @@ function homotopy3(values, step_nbr)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ oo_ options_
-
+info = [];
 tol = 1e-8;
 
 nv = size(values,1);
@@ -58,41 +65,43 @@ end
 
 % Construct vector of starting values, using previously initialized values
 % when initial value has not been given in homotopy_setup block
-oldvalues = values(:,3);
-ipn = find(values(:,1) == 4 & isnan(oldvalues));
-oldvalues(ipn) = M_.params(values(ipn, 2));
-ixn = find(values(:,1) == 1 & isnan(oldvalues));
-oldvalues(ixn) = oo_.exo_steady_state(values(ixn, 2));
-ixdn = find(values(:,1) == 2 & isnan(oldvalues));
-oldvalues(ixdn) = oo_.exo_det_steady_state(values(ixdn, 2));
+last_values = values(:,3);
+ipn = find(values(:,1) == 4 & isnan(last_values));
+last_values(ipn) = M.params(values(ipn, 2));
+ixn = find(values(:,1) == 1 & isnan(last_values));
+last_values(ixn) = oo.exo_steady_state(values(ixn, 2));
+ixdn = find(values(:,1) == 2 & isnan(last_values));
+last_values(ixdn) = oo.exo_det_steady_state(values(ixdn, 2));
 
 targetvalues = values(:,4);
 
-if min(abs(targetvalues - oldvalues)) < tol
+if min(abs(targetvalues - last_values)) < tol
     error('HOMOTOPY mode 3: distance between initial and final values should be at least %e for all variables', tol)
 end
-iplus = find(targetvalues > oldvalues);
-iminus = find(targetvalues < oldvalues);
+iplus = find(targetvalues > last_values);
+iminus = find(targetvalues < last_values);
 
-curvalues = oldvalues;
-inc = (targetvalues-oldvalues)/2;
+curvalues = last_values;
+inc = (targetvalues-last_values)/2;
 kplus = [];
 kminus = [];
+last_values = [];
 
 disp('HOMOTOPY mode 3: launching solver at initial point...')
 
 iter = 1;
 while iter < step_nbr
     
-    M_.params(values(ip,2)) = curvalues(ip);
-    oo_.exo_steady_state(values(ix,2)) = curvalues(ix);
-    oo_.exo_det_steady_state(values(ixd,2)) = curvalues(ixd);
+    M.params(values(ip,2)) = curvalues(ip);
+    oo.exo_steady_state(values(ix,2)) = curvalues(ix);
+    oo.exo_det_steady_state(values(ixd,2)) = curvalues(ixd);
     
-    old_ss = oo_.steady_state;
+    old_ss = oo.steady_state;
 
-    try
-        oo_.steady_state = steady_(M_,options_,oo_);
-        
+    [steady_state,params,info] = steady_(M,options,oo);
+    if info(1) == 0
+        oo.steady_state = steady_state;
+        M.params = params;
         if length([kplus; kminus]) == nv
             return
         end
@@ -101,25 +110,33 @@ while iter < step_nbr
         else
             disp('HOMOTOPY mode 3: successful step, now multiplying increment by 2...')
         end
-        oldvalues = curvalues;
+        last_values = curvalues;
+        old_params = params;
+        old_exo_steady_state = oo.exo_steady_state;
+        old_exo_det_steady_state = oo.exo_det_steady_state;
         inc = 2*inc;
-    catch E
-        disp(E.message)
+    elseif iter == 1
+        error('HOMOTOPY mode 3: can''t solve the model at 1st iteration')
+    else
         disp('HOMOTOPY mode 3: failed step, now dividing increment by 2...')
         inc = inc/2;
-        oo_.steady_state = old_ss;
+        oo.steady_state = old_ss;
     end      
     
-    curvalues = oldvalues + inc;
+    curvalues = last_values + inc;
     kplus = find(curvalues(iplus) >= targetvalues(iplus));
     curvalues(iplus(kplus)) = targetvalues(iplus(kplus));
     kminus = find(curvalues(iminus) <= targetvalues(iminus));
     curvalues(iminus(kminus)) = targetvalues(iminus(kminus));
 
     if max(abs(inc)) < tol
-        error('HOMOTOPY mode 3: failed, increment has become too small')
+        disp('HOMOTOPY mode 3: failed, increment has become too small')
+        M.params = old_params;
+        oo.exo_steady_state = old_exo_steady_state;
+        oo.exo_det_steady_state = old_exo_det_steady_state;
+        return
     end
     
     iter = iter + 1;
 end
-error('HOMOTOPY mode 3: failed, maximum iterations reached')
+disp('HOMOTOPY mode 3: failed, maximum iterations reached')
