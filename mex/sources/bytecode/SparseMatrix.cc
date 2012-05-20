@@ -3008,10 +3008,12 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
                     select = true;
                     break;
                   }
+#ifdef DEBUG
               if (select)
                 mexPrintf("-> variable %s (%d) at time %d = %f direction = %f\n", get_variable(eEndogenous, j).c_str(), j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
               else
                 mexPrintf("   variable %s (%d) at time %d = %f direction = %f\n", get_variable(eEndogenous, j).c_str(), j+1, it_, y[j+it_*y_size], direction[j+it_*y_size]);
+#endif
             }
           if (steady_state)
             {
