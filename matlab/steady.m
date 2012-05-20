@@ -82,8 +82,13 @@ end
 
 if info(1) == 0
     oo_.steady_state = steady_state;
-    disp_steady_state(M_,oo_);
+    if options_.noprint == 0
+        disp_steady_state(M_,oo_);
+    end
 else
+    if options_.noprint == 0
+        resid;
+    end
     print_info(info,options_.noprint);
 end
 
