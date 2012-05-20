@@ -52,10 +52,6 @@ if options_.steadystate_flag
         evaluate_steady_state(oo_.steady_state,M_,options_,oo_,0);
 end
 
-if info(1)
-    print_info(info,options_.noprint)
-end
-
 % Keep of a copy of M_.Sigma_e
 Sigma_e = M_.Sigma_e;
 
@@ -118,5 +114,10 @@ if nargout == 0
         disp(' ')
     end
 end
+
+if info(1)
+    print_info(info,options_.noprint)
+end
+
 
 oo_.steady_state = steady_state_old;
