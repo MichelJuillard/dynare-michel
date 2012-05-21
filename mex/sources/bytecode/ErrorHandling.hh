@@ -1253,7 +1253,7 @@ public:
                       int derivOrder = nearbyint(Stackf.top());
                       Stackf.pop();
                       if (fabs(v1f) < NEAR_ZERO && v2f > 0
-                          && derivOrder >= v2f
+                          && derivOrder > v2f
                           && fabs(v2f-nearbyint(v2f)) < NEAR_ZERO)
                         {
                           r = 0.0;

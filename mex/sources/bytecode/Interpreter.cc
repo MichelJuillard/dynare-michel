@@ -890,7 +890,7 @@ Interpreter::compute_block_time(int Per_u_, bool evaluate, int block_num, int si
                 try
                   {
                     if (fabs(v1) < NEAR_ZERO && v2 > 0
-                        && derivOrder >= v2
+                        && derivOrder > v2
                         && fabs(v2-nearbyint(v2)) < NEAR_ZERO)
                       Stack.push(0.0);
                     else
