@@ -3622,6 +3622,28 @@ options must be filled: for example, if you want to specify
 @var{PRIOR_4TH_PARAMETER}. Use empty values, if these parameters don't
 apply.
 
+@examplehead
+
+The following line:
+@example
+corr eps_1, eps_2, 0.5,  ,  , beta_pdf, 0, 0.3, -1, 1;
+@end example
+sets a generalized beta prior for the correlation between @code{eps_1} and
+@code{eps_2} with mean 0 and variance 0.3. By setting
+@var{PRIOR_3RD_PARAMETER} to -1 and @var{PRIOR_4TH_PARAMETER} to 1 the
+standard beta distribution with support [0,1] is changed to a
+generalized beta with support [-1,1]. Note that @var{LOWER_BOUND} and
+@var{UPPER_BOUND} are left empty and thus default to -1 and 1,
+respectively. The initial value is set to 0.5.
+
+Similarly, the following line:
+@example
+corr eps_1, eps_2, 0.5,  -0.5,  1, beta_pdf, 0, 0.3, -1, 1;
+@end example
+sets the same generalized beta distribution as before, but now truncates
+this distribution to [-0.5,1] through the use of @var{LOWER_BOUND} and
+@var{UPPER_BOUND}. Hence, the prior does not integrate to 1 anymore.
+
 @customhead{Parameter transformation}
 
 Sometimes, it is desirable to estimate a transformation of a parameter
