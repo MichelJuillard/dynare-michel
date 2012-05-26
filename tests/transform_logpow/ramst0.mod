@@ -21,7 +21,7 @@ k = ((delt+bet)/(1.0*aa*alph))^(1/(alph-1))+50;
 c = aa*k^alph-delt*k+10;
 end;
 
-steady(transform_logpow);
+steady;
 
 check;
 
