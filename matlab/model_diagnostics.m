@@ -1,10 +1,10 @@
-function model_diagnostics(M_,options_,oo_)
-% function model_diagnostics(M_,options_,oo_)
+function model_diagnostics(M,options,oo)
+% function model_diagnostics(M,options,oo)
 %   computes various diagnostics on the model 
 % INPUTS
-%   M_         [matlab structure] Definition of the model.           
-%   options_   [matlab structure] Global options.
-%   oo_        [matlab structure] Results 
+%   M         [matlab structure] Definition of the model.           
+%   options   [matlab structure] Global options.
+%   oo        [matlab structure] Results 
 %    
 % OUTPUTS
 %   none
@@ -35,11 +35,11 @@ function model_diagnostics(M_,options_,oo_)
 
 global jacob
 
-endo_nbr = M_.endo_nbr;
-endo_names = M_.endo_names;
-lead_lag_incidence = M_.lead_lag_incidence;
-maximum_lag = M_.maximum_lag;
-maximum_lead = M_.maximum_lead;
+endo_nbr = M.endo_nbr;
+endo_names = M.endo_names;
+lead_lag_incidence = M.lead_lag_incidence;
+maximum_lag = M.maximum_lag;
+maximum_lead = M.maximum_lead;
 
 %
 % missing variables at the current period
@@ -58,65 +58,15 @@ end
 %
 info = 0;
 
-it_ = M_.maximum_lag + 1 ;
+it_ = M.maximum_lag + 1 ;
 
-if M_.exo_nbr == 0
-    oo_.exo_steady_state = [] ;
+if M.exo_nbr == 0
+    oo.exo_steady_state = [] ;
 end
 
 % check if ys is steady state
-tempex = oo_.exo_simul;
-oo_.exo_simul = repmat(oo_.exo_steady_state',M_.maximum_lag+M_.maximum_lead+1,1);
-if M_.exo_det_nbr > 0 
-    tempexdet = oo_.exo_det_simul;
-    oo_.exo_det_simul = repmat(oo_.exo_det_steady_state',M_.maximum_lag+M_.maximum_lead+1,1);
-end
-dr.ys = oo_.steady_state;
-check1 = 0;
-% testing for steadystate file
-fh = str2func([M_.fname '_static']);
-if options_.steadystate_flag
-    [ys,check1] = feval([M_.fname '_steadystate'],dr.ys,...
-                        [oo_.exo_steady_state; oo_.exo_det_steady_state]);
-    M_.params = evalin('base','M_.params;');
-    if size(ys,1) < M_.endo_nbr 
-        if length(M_.aux_vars) > 0
-            ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars,...
-                                                        M_.fname,...
-                                                        oo_.exo_steady_state,...
-                                                        oo_.exo_det_steady_state,...
-                                                        M_.params,...
-                                                        options_.bytecode);
-        else
-            error([M_.fname '_steadystate.m doesn''t match the model']);
-        end
-    end
-    dr.ys = ys;
-else
-    % testing if ys isn't a steady state or if we aren't computing Ramsey policy
-    if  options_.ramsey_policy == 0
-        if options_.linear == 0
-            % nonlinear models
-            if max(abs(feval(fh,dr.ys,[oo_.exo_steady_state; ...
-                                    oo_.exo_det_steady_state], M_.params))) > options_.dynatol.f
-                [ys,check1] = dynare_solve(fh,dr.ys,1,...
-                                           [oo_.exo_steady_state; ...
-                                    oo_.exo_det_steady_state], ...
-                                           M_.params);
-                if ~check1
-                    dr.ys = ys;
-                end
-            end
-        else
-            % linear models
-            [fvec,jacob] = feval(fh,dr.ys,[oo_.exo_steady_state;...
-                                oo_.exo_det_steady_state], M_.params);
-            if max(abs(fvec)) > 1e-12
-                dr.ys = dr.ys-jacob\fvec;
-            end
-        end
-    end
-end
+[dr.ys,params,check1]=evaluate_steady_state(oo.steady_state,M,options,oo,1);
+
 % testing for problem
 if check1
     disp('model diagnostic can''t obtain the steady state')
@@ -131,44 +81,62 @@ end
 %
 % singular Jacobian of static model
 %
+if ~isfield(M,'blocksMFS')
+    nb = 1;
+else
+    nb = length(M.blocksMFS);
+end
 
-[res,jacob]=feval(fh,dr.ys,[oo_.exo_steady_state; oo_.exo_det_steady_state], ...
-                  M_.params);
-rank_jacob = rank(jacob);
-if rank_jacob < endo_nbr
-    disp(['model_diagnostic: the Jacobian of the static model is ' ...
-          'singular'])
-    disp(['there is ' num2str(endo_nbr-rank_jacob) ...
-          ' colinear relationships between the variables and the equations'])
-    ncol = null(jacob);
-    n_rel = size(ncol,2);
-    for i = 1:n_rel
-        if n_rel  > 1
-            disp(['Relation ' int2str(i)])
+exo = [oo.exo_steady_state; oo.exo_det_steady_state];
+for b=1:nb
+    if options.bytecode
+        if nb == 1
+            [chk, res, jacob] = bytecode(dr.ys, exo, M.params, dr.ys, 1, exo, ...
+                                    'evaluate', 'static');
+        else
+            [chk, res, jacob] = bytecode(dr.ys, exo, M.params, dr.ys, 1, exo, ...
+                                         'evaluate', 'static',['block=' ...
+                                int2str(b)]);
         end
-        disp('Colinear variables:')
-        for j=1:10
-            k = find(abs(ncol(:,i)) > 10^-j);
-            if max(abs(jacob(:,k)*ncol(k,i))) < 1e-6
-                break
-            end
-        end
-        disp(endo_names(k,:))
+    else
+        [res,jacob]=feval([M.fname '_static'],dr.ys,exo,M.params);
     end
-    neq = null(jacob');
-    n_rel = size(neq,2);
-    for i = 1:n_rel
-        if n_rel  > 1
-            disp(['Relation ' int2str(i)])
-        end
-        disp('Colinear equations')
-        for j=1:10
-            k = find(abs(neq(:,i)) > 10^-j);
-            if max(abs(jacob(k,:)'*neq(k,i))) < 1e-6
-                break
+    rank_jacob = rank(jacob);
+    if rank_jacob < size(jacob,1)
+        disp(['model_diagnostic: the Jacobian of the static model is ' ...
+              'singular'])
+        disp(['there is ' num2str(endo_nbr-rank_jacob) ...
+              ' colinear relationships between the variables and the equations'])
+        ncol = null(jacob);
+        n_rel = size(ncol,2);
+        for i = 1:n_rel
+            if n_rel  > 1
+                disp(['Relation ' int2str(i)])
             end
+            disp('Colinear variables:')
+            for j=1:10
+                k = find(abs(ncol(:,i)) > 10^-j);
+                if max(abs(jacob(:,k)*ncol(k,i))) < 1e-6
+                    break
+                end
+            end
+            disp(endo_names(k,:))
         end
-        disp(k')
+        neq = null(jacob');
+        n_rel = size(neq,2);
+        for i = 1:n_rel
+            if n_rel  > 1
+                disp(['Relation ' int2str(i)])
+            end
+            disp('Colinear equations')
+            for j=1:10
+                k = find(abs(neq(:,i)) > 10^-j);
+                if max(abs(jacob(k,:)'*neq(k,i))) < 1e-6
+                    break
+                end
+            end
+            disp(k')
+        end
     end
 end
 
