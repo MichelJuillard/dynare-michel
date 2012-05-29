@@ -2569,6 +2569,15 @@ function returning several arguments:
 Dynare will automatically generate a steady state file using the
 information provided in this block.
 
+@customhead{Steady state file for deterministic models}
+
+@code{steady_state_model} block works also with deterministic
+models. An @code{initval} block and, when necessary, an @code{endval}
+block, is used to set the value of the exogenous variables. Each
+@code{initval} or @code{endval} block must be followed by @code{steady}
+to execute the function created by @code{steady_state_model} and set the
+initial, respectively terminal, steady state.
+
 @examplehead
 
 @example

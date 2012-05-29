@@ -125,7 +125,13 @@ MODFILES = \
 	second_order/ds1.mod \
 	second_order/ds2.mod \
 	ep/rbc.mod \
-	ep/linear.mod
+	ep/linear.mod \
+	deterministic_simulations/deterministic_model_purely_forward.mod \
+	deterministic_simulations/rbc_det1.mod \
+	deterministic_simulations/rbc_det2.mod \
+	deterministic_simulations/rbc_det3.mod \
+	deterministic_simulations/rbc_det4.mod \
+	deterministic_simulations/rbc_det5.mod
 
 EXTRA_DIST = \
 	$(MODFILES) \
