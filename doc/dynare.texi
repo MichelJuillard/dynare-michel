@@ -4761,6 +4761,9 @@ This problem is solved using a numerical optimizer.
 This command accept the same options than @code{stoch_simul}
 (@pxref{Computing the stochastic solution}).
 
+The value of the objective is stored in the variable
+@code{oo_.osr.objective_function}, which is described below.
+
 @end deffn
 
 @anchor{osr_params}
@@ -4789,6 +4792,11 @@ the form:
 @end example
 
 @end deffn
+
+@defvr {MATLAB/Octave variable} oo_.osr.objective_function
+After an execution of the @code{osr} command, this variable contains
+the value of the objective under optimal policy.
+@end defvr
 
 @deffn Command ramsey_policy [@var{VARIABLE_NAME}@dots{}];
 @deffnx Command ramsey_policy (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
