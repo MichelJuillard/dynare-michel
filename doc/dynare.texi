@@ -4437,6 +4437,10 @@ over @code{alt_model}.
 This command computes and displays shock decomposition according to
 the model for a given sample.
 
+Note that this command must come after either @code{estimation} (in case
+of an estimated model) or @code{stoch_simul} (in case of a calibrated
+model).
+
 @optionshead
 
 @table @code
@@ -4444,16 +4448,21 @@ the model for a given sample.
 @item parameter_set = @var{PARAMETER_SET}
 Specify the parameter set to use for running the smoother. The
 @var{PARAMETER_SET} can take one of the following five values:
-@code{prior_mode}, @code{prior_mean}, @code{posterior_mode},
-@code{posterior_mean}, @code{posterior_median}. Default value:
-@code{posterior_mean} if Metropolis has been run, else
-@code{posterior_mode}.
+@code{calibration}, @code{prior_mode}, @code{prior_mean},
+@code{posterior_mode}, @code{posterior_mean},
+@code{posterior_median}. Default value: @code{posterior_mean} if
+Metropolis has been run, else @code{posterior_mode}.
 
 @item shocks = (@var{VARIABLE_NAME} [@var{VARIABLE_NAME} @dots{}]  [ ; @var{VARIABLE_NAME} [@var{VARIABLE_NAME} @dots{}] @dots{}] )
 @dots{}
 
 @item labels = ( @var{VARIABLE_NAME} [@var{VARIABLE_NAME} @dots{}] )
 @dots{}
+
+@item datafile = @var{FILENAME}
+@xref{datafile}. Useful when computing the shock decomposition on a
+calibrated model.
+
 @end table
 
 @end deffn
@@ -5514,7 +5523,7 @@ If equal to @code{2}, triggers gsa Monte-Carlo sample (@i{i.e.} loads a sample c
 @item gsa_sample_file = @var{FILENAME}
 Uses the provided path to a specific user defined sample file. Default: @code{0}
 
-@item parameter_set = @code{prior_mode} | @code{prior_mean} | @code{posterior_mode} | @code{posterior_mean} | @code{posterior_median}
+@item parameter_set = @code{calibration} | @code{prior_mode} | @code{prior_mean} | @code{posterior_mode} | @code{posterior_mean} | @code{posterior_median}
 Specify the parameter set to use. Default: @code{prior_mean}
 
 @item lik_init = @var{INTEGER}

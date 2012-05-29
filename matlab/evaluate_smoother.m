@@ -63,6 +63,9 @@ if ischar(parameters)
       case 'prior_mean'
         parameters = bayestopt_.p1;
       case 'calibration'
+        if isempty(oo_.dr)
+            error('You must run ''stoch_simul'' first.');
+        end
         parameters = [];
       otherwise
         disp('evaluate_smoother:: If the input argument is a string, then it has to be equal to:')
