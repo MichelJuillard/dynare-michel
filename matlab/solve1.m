@@ -116,8 +116,7 @@ for its = 1:maxit
             p = e*[-r(1:end-n,1:end-n)\fvec(1:end-n);zeros(n,1)];
         end     
     elseif bad_cond_flag && cond(fjac) > 1/sqrt(eps)
-        fjac
-        fjac2=fjac'*fjac
+        fjac2=fjac'*fjac;
         p=-(fjac2+1e6*sqrt(nn*eps)*max(sum(abs(fjac2)))*eye(nn))\(fjac'*fvec);
     else
         p = -fjac\fvec ;
