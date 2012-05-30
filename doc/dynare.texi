@@ -4047,11 +4047,15 @@ this variable)
 @vindex oo_.SmoothedVariables
 @vindex oo_.SmoothedShocks
 @vindex oo_.SmoothedMeasurementErrors
-@anchor{smoother} Triggers the computation of the posterior
-distribution of smoothered endogenous variables and shocks. Results
-are stored in @code{oo_.SmoothedVariables}, @code{oo_.SmoothedShocks}
-and @code{oo_.SmoothedMeasurementErrors} (see below for a description
-of these variables)
+@vindex oo_.UpdatedVariables
+@anchor{smoother} Triggers the computation of the posterior distribution
+of smoothered endogenous variables and shocks. Results are stored in
+@code{oo_.SmoothedVariables}, @code{oo_.SmoothedShocks} and
+@code{oo_.SmoothedMeasurementErrors}.  Also triggers the computation of
+@code{oo_.UpdatedVariables}, which contains the estimation of the
+expected value of variables given the information available at the
+@emph{current} date.  See below for a description of all these
+variables.
 
 @item forecast = @var{INTEGER}
 @vindex oo_.forecast
@@ -4329,6 +4333,16 @@ Variable set by the @code{estimation} command, if it is used with the
 @code{smoother} option. Fields are of the form:
 @example
 @code{oo_.SmoothedVariables.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.UpdatedVariables
+Variable set by the @code{estimation} command, if it is used with the
+@code{smoother} option. Contains the estimation of the expected value of
+variables given the information available at the @emph{current}
+date. Fields are of the form:
+@example
+@code{oo_.UpdatedVariables.@var{VARIABLE_NAME}}
 @end example
 @end defvr
 
