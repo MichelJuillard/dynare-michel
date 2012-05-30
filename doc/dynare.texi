@@ -4081,8 +4081,12 @@ yet implemented)
 forecast covariance matrices.
 
 @item filter_step_ahead = [@var{INTEGER1}:@var{INTEGER2}]
+@anchor{filter_step_ahead}
+@vindex oo_.FilteredVariablesKStepAhead
+@vindex oo_.FilteredVariablesKStepAheadVariances
 @anchor{filter_step_ahead} Triggers the computation k-step ahead
-filtered values.
+filtered values. Stores results in @code{oo_.FilteredVariablesKStepAhead}
+and @code{oo_.FilteredVariablesKStepAheadVariances}.
 
 @item filter_decomposition
 @anchor{filter_decomposition} Triggers the computation of the shock
@@ -4302,6 +4306,16 @@ Variable set by the @code{estimation} command, if it is used with the
 @example
 @code{oo_.FilteredVariables.@var{VARIABLE_NAME}}
 @end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.FilteredVariablesKStepAhead
+Variable set by the @code{estimation} command, if it is used with the
+@code{filter_step_ahead} option.
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.FilteredVariablesKStepAheadVariances
+Variable set by the @code{estimation} command, if it is used with the
+@code{filter_step_ahead} option.
 @end defvr
 
 @defvr {MATLAB/Octave variable} oo_.PosteriorIRF.dsge
