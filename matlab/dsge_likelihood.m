@@ -361,7 +361,7 @@ if (kalman_algo == 2) || (kalman_algo == 4)
     else
         if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
             H = diag(H);
-            mmm = mm; 
+            mmm = mm;
         else
             Z = [Z, eye(pp)];
             T = blkdiag(T,zeros(pp));
@@ -410,7 +410,7 @@ switch DynareOptions.lik_init
         % Use standard kalman filter except if the univariate filter is explicitely choosen.
     if kalman_algo == 0
         kalman_algo = 3;
-    elseif ~((kalman_algo == 3) || (kalman_algo == 4)) 
+    elseif ~((kalman_algo == 3) || (kalman_algo == 4))
             error(['diffuse filter: options_.kalman_algo can only be equal ' ...
                    'to 0 (default), 3 or 4'])
     end
@@ -475,16 +475,18 @@ switch DynareOptions.lik_init
         kalman_algo = 1;
     end
     if isequal(H,0)
-        [err,Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(Z,np,length(Z))));
+        [err,Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(Z,mm,length(Z))));
     else
-        [err,Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(Z,np,length(Z))),H);
+        [err,Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(Z,mm,length(Z))),H);
     end
     if err
         disp(['dsge_likelihood:: I am not able to solve the Riccati equation, so I switch to lik_init=1!']);
         DynareOptions.lik_init = 1;
         Pstar = lyapunov_symm(T,R*Q*R',DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
     end
-    Pinf  = [];
+    Pinf = [];
+    a = zeros(mm,1);
+    Zflag = 0;
   otherwise
     error('dsge_likelihood:: Unknown initialization approach for the Kalman filter!')
 end
