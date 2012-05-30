@@ -57,7 +57,7 @@ FirstMhFile = record.KeepedDraws.FirstMhFile;
 NumberOfDraws = TotalNumberOfMhDraws-floor(options_.mh_drop*TotalNumberOfMhDraws);
 clear record;
 
-pnames=['     ';'beta ';'gamm ';'norm ';'invg ';'unif ';'invg2'];
+pnames=['     ';'beta ';'gamma';'norm ';'invg ';'unif ';'invg2'];
 header_width = row_header_width(M_,estim_params_,bayestopt_);
 tit2 = sprintf('%-*s %10s %10s %16s %6s %10s\n',header_width+2,' ','prior mean','post. mean','conf. interval','prior','pstdev');
 pformat = '%-*s %10.3f %10.4f %10.4f %8.4f %6s %10.4f';
@@ -103,6 +103,8 @@ if np
                      pnames(bayestopt_.pshape(ip)+1,:), ...
                      bayestopt_.p2(ip)));    
         if TeX
+            k = estim_params_.param_vals(i,1);
+            name = deblank(M_.param_names_tex(k,:));
             TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.p1(ip),...
                     bayestopt_.p2(ip),post_mean,sqrt(post_var),hpd_interval);
         end
@@ -147,7 +149,8 @@ if nvx
         end
         disp(sprintf(pformat,header_width,name,bayestopt_.p1(ip),post_mean,hpd_interval,...
                      pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.p2(ip)));
-        if TeX
+        if TeX,
+            name = deblank(M_.exo_names_tex(k,:));
             TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.p1(ip),...
                     bayestopt_.p2(ip),post_mean,sqrt(post_var),hpd_interval);
         end
@@ -188,6 +191,8 @@ if nvn
         disp(sprintf(pformat,header_width,name,bayestopt_.p1(ip),post_mean,hpd_interval, ...
                      pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.p2(ip)));
         if TeX
+            k = estim_params_.var_endo(i,1);
+            name = deblank(M_.endo_names_tex(k,:));
             TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.p1(ip),...
                     bayestopt_.p2(ip),post_mean,sqrt(post_var),hpd_interval);
         end
@@ -241,6 +246,7 @@ if ncx
         disp(sprintf(pformat, header_width,name,bayestopt_.p1(ip),post_mean,hpd_interval, ...
                      pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.p2(ip)));
         if TeX
+            name = ['(',deblank(M_.exo_names_tex(k1,:)) ',' deblank(M_.exo_names_tex(k2,:)),')'];
             TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.p1(ip),...
                     bayestopt_.p2(ip),post_mean,sqrt(post_var),hpd_interval);
         end
@@ -291,7 +297,8 @@ if ncn
         end
         disp(sprintf(pformat, header_width,name,bayestopt_.p1(ip),post_mean,hpd_interval, ...
                      pnames(bayestopt_.pshape(ip)+1,:),bayestopt_.p2(ip)));
-        if TeX
+        if TeX,
+            name = ['(',deblank(M_.endo_names_tex(k1,:)) ',' deblank(M_.endo_names_tex(k2,:)),')'];
             TeXCore(fid,name,deblank(pnames(bayestopt_.pshape(ip)+1,:)),bayestopt_.p1(ip),...
                     bayestopt_.p2(ip),post_mean,sqrt(post_var),hpd_interval);            
         end
@@ -314,13 +321,25 @@ fprintf(fidTeX,['%% RESULTS FROM METROPOLIS HASTINGS (' title ')\n']);
 fprintf(fidTeX,['%% ' datestr(now,0)]);
 fprintf(fidTeX,' \n');
 fprintf(fidTeX,' \n');
-fprintf(fidTeX,'\\begin{table}\n');
-fprintf(fidTeX,'\\centering\n');
-fprintf(fidTeX,'\\begin{tabular}{l|lcccccc} \n');
+fprintf(fidTeX,'\\begin{center}\n');
+fprintf(fidTeX,'\\begin{longtable}{l|lcccccc} \n');
+fprintf(fidTeX,['\\caption{Results from Metropolis-Hastings (' title ')}\n ']);
+fprintf(fidTeX,['\\label{Table:MHPosterior:' int2str(fnum)  '}\\\\\n']);
 fprintf(fidTeX,'\\hline\\hline \\\\ \n');
 fprintf(fidTeX,['  & Prior distribution & Prior mean  & Prior ' ...
                 's.d. & Posterior mean & Posterior s.d.  & HPD inf & HPD sup\\\\ \n']);
-fprintf(fidTeX,'\\hline \\\\ \n');
+fprintf(fidTeX,'\\hline \\endfirsthead \n');
+fprintf(fidTeX,['\\caption{(continued)}']);
+fprintf(fidTeX,['\\label{Table:MHPosterior:' int2str(fnum)  '}\\\\\n']);
+fprintf(fidTeX,'\\hline\\hline \\\\ \n');
+fprintf(fidTeX,['  & Prior distribution & Prior mean  & Prior ' ...
+                's.d. & Posterior mean & Posterior s.d.  & HPD inf & HPD sup\\\\ \n']);
+fprintf(fidTeX,'\\hline \\endhead \n');
+
+fprintf(fidTeX,'\\hline \\multicolumn{8}{r}{(Continued on next page)} \\\\ \\hline \\endfoot \n');
+fprintf(fidTeX,'\\hline \\hline \\endlastfoot \n');
+
+
 fid = fidTeX;
 
 
@@ -337,11 +356,8 @@ fprintf(fid,['$%s$ & %s & %7.3f & %6.4f & %7.3f& %6.4f & %7.4f & %7.4f \\\\ \n']
 
 
 function TeXEnd(fid,fnum,title)
-fprintf(fid,'\\hline\\hline \n');
-fprintf(fid,'\\end{tabular}\n ');    
-fprintf(fid,['\\caption{Results from Metropolis-Hastings (' title ')}\n ']);
-fprintf(fid,['\\label{Table:MHPosterior:' int2str(fnum)  '}\n']);
-fprintf(fid,'\\end{table}\n');
+fprintf(fid,'\\end{longtable}\n ');    
+fprintf(fid,'\\end{center}\n');
 fprintf(fid,'%% End of TeX file.\n');
 fclose(fid);
 

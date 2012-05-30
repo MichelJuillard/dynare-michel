@@ -221,13 +221,16 @@ if isnumeric(options_.parallel),
     % Parallel execution!
 else
     [nCPU, totCPU, nBlockPerCPU] = distributeJobs(options_.parallel, 1, B);
+    ifil=zeros(7,totCPU);
     for j=1:totCPU-1,
-        nfiles = ceil(nBlockPerCPU(j)/MAX_nsmoo);
-        ifil(1,j+1) =ifil(1,j)+nfiles;
-        nfiles = ceil(nBlockPerCPU(j)/MAX_ninno);
-        ifil(2,j+1) =ifil(2,j)+nfiles;
-        nfiles = ceil(nBlockPerCPU(j)/MAX_nerro);
-        ifil(3,j+1) =ifil(3,j)+nfiles;
+        if run_smoother
+            nfiles = ceil(nBlockPerCPU(j)/MAX_nsmoo);
+            ifil(1,j+1) =ifil(1,j)+nfiles;
+            nfiles = ceil(nBlockPerCPU(j)/MAX_ninno);
+            ifil(2,j+1) =ifil(2,j)+nfiles;
+            nfiles = ceil(nBlockPerCPU(j)/MAX_nerro);
+            ifil(3,j+1) =ifil(3,j)+nfiles;
+        end
         if naK
             nfiles = ceil(nBlockPerCPU(j)/MAX_naK);
             ifil(4,j+1) =ifil(4,j)+nfiles;
@@ -274,16 +277,16 @@ if ~isnumeric(options_.parallel),
     leaveSlaveOpen = options_.parallel_info.leaveSlaveOpen;
     if options_.parallel_info.leaveSlaveOpen == 0,
         % Commenting for testing!!!
-        % options_.parallel_info.leaveSlaveOpen = 1; % Force locally to leave open remote matlab sessions (repeated pm3 calls)
+        options_.parallel_info.leaveSlaveOpen = 1; % Force locally to leave open remote matlab sessions (repeated pm3 calls)
     end
 end
 
 if options_.smoother
     pm3(endo_nbr,gend,ifil(1),B,'Smoothed variables',...
-        '',M_.endo_names(1:M_.orig_endo_nbr, :),'tit_tex',M_.endo_names,...
+        '',M_.endo_names(1:M_.orig_endo_nbr, :),M_.endo_names_tex,M_.endo_names,...
         varlist,'SmoothedVariables',DirectoryName,'_smooth');
     pm3(exo_nbr,gend,ifil(2),B,'Smoothed shocks',...
-        '',M_.exo_names,'tit_tex',M_.exo_names,...
+        '',M_.exo_names,M_.exo_names_tex,M_.exo_names,...
         M_.exo_names,'SmoothedShocks',DirectoryName,'_inno');
     if nvn
         % needs to  be fixed
