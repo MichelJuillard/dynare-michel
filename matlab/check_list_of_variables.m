@@ -56,7 +56,7 @@ end
 
 if isempty(varlist)
     disp(' ')
-    disp(['You did not declare endogenous variables after the estimation command.'])
+    disp(['You did not declare endogenous variables after the estimation/calib_smoother command.'])
     cas = [];
     if options_.bayesian_irf
         cas = 'Posterior IRFs';
@@ -70,30 +70,23 @@ if isempty(varlist)
     end
     if options_.smoother
         if isempty(cas)
-            cas = 'Posterior smoothed variables';
+            cas = 'Smoothed variables';
         else
-            cas = [ cas , ', posterior smoothed variables'];
-        end
-    end
-    if options_.smoother
-        if isempty(cas)
-            cas = 'Posterior smoothed variables';
-        else
-            cas = [ cas , ', posterior smoothed variables'];
+            cas = [ cas , ', smoothed variables'];
         end
     end
     if ~isempty(options_.filter_step_ahead)
         if isempty(cas)
-            cas = 'Posterior k-step ahead filtered variables';
+            cas = 'k-step ahead filtered variables';
         else
-            cas = [ cas , ', posterior k-step ahead filtered variables'];
+            cas = [ cas , ', k-step ahead filtered variables'];
         end
     end
     if options_.forecast
         if isempty(cas)
-            cas = 'Posterior forecasts';
+            cas = 'Forecasts';
         else
-            cas = [ cas , ' and posterior forecats'];
+            cas = [ cas , ' and forecats'];
         end
     end
     if ~isempty(cas)

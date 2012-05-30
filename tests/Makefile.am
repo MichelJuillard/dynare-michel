@@ -22,6 +22,7 @@ MODFILES = \
 	predetermined_variables.mod \
 	fs2000_nonstationary.mod \
 	fs2000_ssfile.mod \
+	fs2000_calib.mod \
 	comments.mod \
 	histval_sto.mod \
 	histval_det.mod \

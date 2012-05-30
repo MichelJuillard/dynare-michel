@@ -4520,6 +4520,42 @@ See @file{bvar-a-la-sims.pdf}, which comes with Dynare distribution,
 for more information on this command.
 @end deffn
 
+@deffn Command calib_smoother [@var{VARIABLE_NAME}]@dots{};
+@deffnx Command calib_smoother (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}]@dots{};
+
+@descriptionhead
+
+This command computes the smoothed variables (and possible the filtered
+variables) on a @code{calibrated} model.
+
+A datafile must be provided, and the observable variables declared with
+@code{varobs}.
+
+@vindex{oo_.SmoothedVariables}
+@vindex{oo_.SmoothedShocks}
+@vindex{oo_.UpdatedVariables}
+By default, the command computes the smoothed variables and shocks and stores the
+results in @code{oo_.SmoothedVariables} and
+@code{oo_.SmoothedShocks}. It also fills @code{oo_.UpdatedVariables}.
+
+@optionshead
+
+@table @code
+
+@item datafile = @var{FILENAME}
+@xref{datafile}.
+
+@item filtered_vars
+Triggers the computation of filtered variables. @xref{filtered_vars} for
+more details.
+
+@item filter_step_ahead = [@var{INTEGER1}:@var{INTEGER2}]
+@xref{filter_step_ahead}.
+
+@end table
+
+@end deffn
+
 
 @node Forecasting
 @section Forecasting
