@@ -4084,7 +4084,7 @@ forecast covariance matrices.
 @anchor{filter_step_ahead}
 @vindex oo_.FilteredVariablesKStepAhead
 @vindex oo_.FilteredVariablesKStepAheadVariances
-@anchor{filter_step_ahead} Triggers the computation k-step ahead
+@code{filter_step_ahead} Triggers the computation k-step ahead
 filtered values. Stores results in @code{oo_.FilteredVariablesKStepAhead}
 and @code{oo_.FilteredVariablesKStepAheadVariances}.
 
@@ -4531,9 +4531,9 @@ variables) on a @code{calibrated} model.
 A datafile must be provided, and the observable variables declared with
 @code{varobs}.
 
-@vindex{oo_.SmoothedVariables}
-@vindex{oo_.SmoothedShocks}
-@vindex{oo_.UpdatedVariables}
+@vindex oo_.SmoothedVariables
+@vindex oo_.SmoothedShocks
+@vindex oo_.UpdatedVariables 
 By default, the command computes the smoothed variables and shocks and stores the
 results in @code{oo_.SmoothedVariables} and
 @code{oo_.SmoothedShocks}. It also fills @code{oo_.UpdatedVariables}.
@@ -4546,7 +4546,7 @@ results in @code{oo_.SmoothedVariables} and
 @xref{datafile}.
 
 @item filtered_vars
-Triggers the computation of filtered variables. @xref{filtered_vars} for
+Triggers the computation of filtered variables. See @code{filtered_vars} for
 more details.
 
 @item filter_step_ahead = [@var{INTEGER1}:@var{INTEGER2}]
