@@ -4084,9 +4084,9 @@ forecast covariance matrices.
 @anchor{filter_step_ahead}
 @vindex oo_.FilteredVariablesKStepAhead
 @vindex oo_.FilteredVariablesKStepAheadVariances
-@code{filter_step_ahead} Triggers the computation k-step ahead
-filtered values. Stores results in @code{oo_.FilteredVariablesKStepAhead}
-and @code{oo_.FilteredVariablesKStepAheadVariances}.
+Triggers the computation k-step ahead filtered values. Stores results in
+@code{oo_.FilteredVariablesKStepAhead} and
+@code{oo_.FilteredVariablesKStepAheadVariances}.
 
 @item filter_decomposition
 @anchor{filter_decomposition} Triggers the computation of the shock
@@ -4546,7 +4546,7 @@ results in @code{oo_.SmoothedVariables} and
 @xref{datafile}.
 
 @item filtered_vars
-Triggers the computation of filtered variables. See @code{filtered_vars} for
+Triggers the computation of filtered variables. @xref{filtered_vars} for
 more details.
 
 @item filter_step_ahead = [@var{INTEGER1}:@var{INTEGER2}]

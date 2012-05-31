@@ -22,7 +22,6 @@ MODFILES = \
 	predetermined_variables.mod \
 	fs2000_nonstationary.mod \
 	fs2000_ssfile.mod \
-	fs2000_calib.mod \
 	comments.mod \
 	histval_sto.mod \
 	histval_det.mod \
@@ -65,6 +64,7 @@ MODFILES = \
 	fs2000/fs2000c.mod \
 	fs2000/fs2000d.mod \
 	fs2000/fs2000_cmaes.mod \
+	fs2000/fs2000_calib.mod \
 	homotopy/homotopy1_test.mod \
 	homotopy/homotopy2_test.mod \
 	homotopy/homotopy3_test.mod \
