@@ -153,7 +153,7 @@ Copyright: 1996 Christopher Sims
 License: GPL-3+
 
 Files: contrib/ms-sbvar/TZcode/*
-Copyright: 1997-2012 Tao Zha
+Copyright: 1996-2012 Tao Zha
 License: GPL-3+
 
 Files: contrib/ms-sbvar/TZcode/MatlabFiles/szbvar.m
@@ -180,7 +180,9 @@ Files: contrib/ms-sbvar/TZcode/MatlabFiles/pmddf233.m
  contrib/ms-sbvar/TZcode/MatlabFiles/gensys_z2.m
  contrib/ms-sbvar/TZcode/MatlabFiles/qzdiv.m
  contrib/ms-sbvar/TZcode/MatlabFiles/pwf233.m
-Copyright: 1997-2012 Christopher A. Sims
+ contrib/ms-sbvar/TZcode/MatlabFiles/gensys.m
+ contrib/ms-sbvar/TZcode/MatlabFiles/bfgsi.m
+Copyright: 1996-2012 Christopher A. Sims
 License: GPL-3+
 
 Files: contrib/ms-sbvar/TZcode/MatlabFiles/srestrictrwzalg.m
@@ -210,25 +212,13 @@ Files: contrib/ms-sbvar/TZcode/MatlabFiles/fn_gibbsrvar.m
 Copyright: 1997-2012 Daniel Waggoner and Tao Zha
 License: GPL-3+
 
-Files: contrib/ms-sbvar/TZcode/MatlabFiles/gensys.m
-Copyright: 1996-2012 Christopher A. Sims
-License: GPL-3+
-
 Files: contrib/ms-sbvar/TZcode/MatlabFiles/xydata.m
 Copyright: 1997-2012 Lutz Kilian and Tao Zha
-License: GPL-3+
-
-Files: contrib/ms-sbvar/TZcode/MatlabFiles/bfgsi.m
-Copyright: 1996 Christopher A. Sims
 License: GPL-3+
 
 Files: contrib/ms-sbvar/TZcode/MatlabFiles/qplot2.m
  contrib/ms-sbvar/TZcode/MatlabFiles/ellipse.m
 Copyright: 1997-2012 Clark A. Burdick
-License: GPL-3+
-
-Files: contrib/ms-sbvar/TZcode/MatlabFiles/chol2.m
-Copyright: 1996-2012 Tao Zha
 License: GPL-3+
 
 License: GFDL-NIV-1.3+
