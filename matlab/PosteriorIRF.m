@@ -172,6 +172,7 @@ localVars.IRUN = IRUN;
 localVars.irun = irun;
 localVars.irun2=irun2;
 localVars.nosaddle=nosaddle;
+localVars.npar = npar;
 
 localVars.type=type;
 if strcmpi(type,'posterior')

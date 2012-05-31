@@ -175,7 +175,7 @@ for i = 1:pages
             fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
         end    
         fprintf(fidTeX,'\\centering \n');
-        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_udiag%s}\n',M_.fname,int2str(i));
+        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_udiag%s}\n',[DirectoryName '/' M_.fname],int2str(i));
         fprintf(fidTeX,'\\caption{Univariate convergence diagnostics for the Metropolis-Hastings.\n');
         fprintf(fidTeX,'The first, second and third columns are respectively the criteria based on\n');
         fprintf(fidTeX,'the eighty percent interval, the second and third moments.}');
@@ -238,7 +238,7 @@ if reste
             fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),deblank(TEXNAMES(jj,:)));
         end    
         fprintf(fidTeX,'\\centering \n');
-        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_udiag%s}\n',M_.fname,int2str(pages+1));
+        fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_udiag%s}\n',[DirectoryName '/' M_.fname],int2str(pages+1));
         if reste == 2
             fprintf(fidTeX,'\\caption{Univariate convergence diagnostics for the Metropolis-Hastings.\n');
             fprintf(fidTeX,'The first, second and third columns are respectively the criteria based on\n');
@@ -348,7 +348,7 @@ if TeX
         fprintf(fidTeX,'\\psfrag{%s}[1][][0.5][0]{%s}\n',deblank(NAMES(jj,:)),' ');
     end    
     fprintf(fidTeX,'\\centering \n');
-    fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_mdiag}\n',M_.fname);
+    fprintf(fidTeX,'\\includegraphics[scale=0.5]{%s_mdiag}\n',[DirectoryName '/' M_.fname]);
     fprintf(fidTeX,'\\caption{Multivariate convergence diagnostics for the Metropolis-Hastings.\n');
     fprintf(fidTeX,'The first, second and third rows are respectively the criteria based on\n');
     fprintf(fidTeX,'the eighty percent interval, the second and third moments. The different \n');

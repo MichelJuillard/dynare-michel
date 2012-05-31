@@ -630,15 +630,20 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
         fprintf(fidTeX,['%% ' datestr(now,0)]);
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,' \n');
-        fprintf(fidTeX,'{\\tiny \n');
-        fprintf(fidTeX,'\\begin{table}\n');
-        fprintf(fidTeX,'\\centering\n');
+        fprintf(fidTeX,'\\begin{center}\n');
+        fprintf(fidTeX,'\\begin{longtable}{l|lcccc} \n');
         fprintf(fidTeX,'\\caption{Results from posterior maximization (parameters)}\n ');
-        fprintf(fidTeX,'\\label{Table:Posterior:1}\n');
-        fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
+        fprintf(fidTeX,'\\label{Table:Posterior:1}\\\\\n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
-        fprintf(fidTeX,'\\hline \\\\ \n');
+        fprintf(fidTeX,'\\hline \\endfirsthead \n');
+        fprintf(fidTeX,'\\caption{(continued)}\n ');
+        fprintf(fidTeX,'\\label{Table:Posterior:1}\\\\\n');
+        fprintf(fidTeX,'\\hline\\hline \\\\ \n');
+        fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
+        fprintf(fidTeX,'\\hline \\endhead \n');
+        fprintf(fidTeX,'\\hline \\multicolumn{6}{r}{(Continued on next page)} \\\\ \\hline \\endfoot \n');
+        fprintf(fidTeX,'\\hline \\hline \\endlastfoot \n');
         ip = nvx+nvn+ncx+ncn+1;
         for i=1:np
             fprintf(fidTeX,'$%s$ & %s & %7.3f & %6.4f & %8.4f & %7.4f \\\\ \n',...
@@ -649,24 +654,9 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
                     xparam1(ip),...
                     stdh(ip));
             ip = ip + 1;
-            if ~mod(i,50) && i<np,
-                fprintf(fidTeX,'\\hline \n');
-                fprintf(fidTeX,'\\multicolumn{6}{c}{(Table continues next page ...)} \\\\ \n')';
-                fprintf(fidTeX,'\\end{tabular}\n ');
-                fprintf(fidTeX,'\\end{table}\n');
-                fprintf(fidTeX,'\\begin{table}\n');
-                fprintf(fidTeX,'\\centering\n');
-                fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
-                fprintf(fidTeX,'\\multicolumn{6}{c}{( ... Table continued)} \\\\ \n')';
-                fprintf(fidTeX,'\\hline\\hline \\\\ \n');
-                fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
-                fprintf(fidTeX,'\\hline \\\\ \n');
-            end
         end
-        fprintf(fidTeX,'\\hline\\hline \n');
-        fprintf(fidTeX,'\\end{tabular}\n ');
-        fprintf(fidTeX,'\\end{table}\n');
-        fprintf(fidTeX,'} \n');
+        fprintf(fidTeX,'\\end{longtable}\n ');    
+        fprintf(fidTeX,'\\end{center}\n');
         fprintf(fidTeX,'%% End of TeX file.\n');
         fclose(fidTeX);
     end
@@ -678,15 +668,20 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
         fprintf(fidTeX,['%% ' datestr(now,0)]);
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,' \n');
-        fprintf(fidTeX,'{\\tiny \n');
-        fprintf(fidTeX,'\\begin{table}\n');
-        fprintf(fidTeX,'\\centering\n');
+        fprintf(fidTeX,'\\begin{center}\n');
+        fprintf(fidTeX,'\\begin{longtable}{l|lcccc} \n');
         fprintf(fidTeX,'\\caption{Results from posterior maximization (standard deviation of structural shocks)}\n ');
-        fprintf(fidTeX,'\\label{Table:Posterior:2}\n');
-        fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
+        fprintf(fidTeX,'\\label{Table:Posterior:2}\\\\\n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
         fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
-        fprintf(fidTeX,'\\hline \\\\ \n');
+        fprintf(fidTeX,'\\hline \\endfirsthead \n');
+        fprintf(fidTeX,'\\caption{(continued)}\n ');
+        fprintf(fidTeX,'\\label{Table:Posterior:2}\\\\\n');
+        fprintf(fidTeX,'\\hline\\hline \\\\ \n');
+        fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
+        fprintf(fidTeX,'\\hline \\endhead \n');
+        fprintf(fidTeX,'\\hline \\multicolumn{6}{r}{(Continued on next page)} \\\\ \\hline \\endfoot \n');
+        fprintf(fidTeX,'\\hline \\hline \\endlastfoot \n');
         ip = 1;
         for i=1:nvx
             k = estim_params_.var_exo(i,1);
@@ -698,24 +693,9 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
                     xparam1(ip), ...
                     stdh(ip));
             ip = ip+1;
-            if ~mod(i,50) && i<nvx,
-                fprintf(fidTeX,'\\hline \n');
-                fprintf(fidTeX,'\\multicolumn{6}{c}{(Table continues next page ...)} \\\\ \n')';
-                fprintf(fidTeX,'\\end{tabular}\n ');
-                fprintf(fidTeX,'\\end{table}\n');
-                fprintf(fidTeX,'\\begin{table}\n');
-                fprintf(fidTeX,'\\centering\n');
-                fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
-                fprintf(fidTeX,'\\multicolumn{6}{c}{( ... Table continued)} \\\\ \n')';
-                fprintf(fidTeX,'\\hline\\hline \\\\ \n');
-                fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
-                fprintf(fidTeX,'\\hline \\\\ \n');
-            end
         end
-        fprintf(fidTeX,'\\hline\\hline \n');
-        fprintf(fidTeX,'\\end{tabular}\n ');
-        fprintf(fidTeX,'\\end{table}\n');
-        fprintf(fidTeX,'} \n');
+        fprintf(fidTeX,'\\end{longtable}\n ');    
+        fprintf(fidTeX,'\\end{center}\n');
         fprintf(fidTeX,'%% End of TeX file.\n');
         fclose(fidTeX);
     end
@@ -727,14 +707,20 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
         fprintf(fidTeX,['%% ' datestr(now,0)]);
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,' \n');
-        fprintf(fidTeX,'\\begin{table}\n');
-        fprintf(fidTeX,'\\centering\n');
+        fprintf(fidTeX,'\\begin{center}\n');
+        fprintf(fidTeX,'\\begin{longtable}{l|lcccc} \n');
         fprintf(fidTeX,'\\caption{Results from posterior maximization (standard deviation of measurement errors)}\n ');
-        fprintf(fidTeX,'\\label{Table:Posterior:3}\n');
-        fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
+        fprintf(fidTeX,'\\label{Table:Posterior:3}\\\\\n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
-        fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n')
-        fprintf(fidTeX,'\\hline \\\\ \n');
+        fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n');
+        fprintf(fidTeX,'\\hline \\endfirsthead \n');
+        fprintf(fidTeX,'\\caption{(continued)}\n ');
+        fprintf(fidTeX,'\\label{Table:Posterior:3}\\\\\n');
+        fprintf(fidTeX,'\\hline\\hline \\\\ \n');
+        fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n');
+        fprintf(fidTeX,'\\hline \\endhead \n');
+        fprintf(fidTeX,'\\hline \\multicolumn{6}{r}{(Continued on next page)} \\\\ \\hline \\endfoot \n');
+        fprintf(fidTeX,'\\hline \\hline \\endlastfoot \n');
         ip = nvx+1;
         for i=1:nvn
             idx = strmatch(options_.varobs(estim_params_.var_endo(i,1),:),M_.endo_names);
@@ -746,23 +732,9 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
                     xparam1(ip),...
                     stdh(ip));
             ip = ip+1;
-            if ~mod(i,50) && i<nvn,
-                fprintf(fidTeX,'\\hline \n');
-                fprintf(fidTeX,'\\multicolumn{6}{c}{(Table continues next page ...)} \\\\ \n')';
-                fprintf(fidTeX,'\\end{tabular}\n ');
-                fprintf(fidTeX,'\\end{table}\n');
-                fprintf(fidTeX,'\\begin{table}\n');
-                fprintf(fidTeX,'\\centering\n');
-                fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
-                fprintf(fidTeX,'\\multicolumn{6}{c}{( ... Table continued)} \\\\ \n')';
-                fprintf(fidTeX,'\\hline\\hline \\\\ \n');
-                fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
-                fprintf(fidTeX,'\\hline \\\\ \n');
-            end
         end
-        fprintf(fidTeX,'\\hline\\hline \n');
-        fprintf(fidTeX,'\\end{tabular}\n ');
-        fprintf(fidTeX,'\\end{table}\n');
+        fprintf(fidTeX,'\\end{longtable}\n ');    
+        fprintf(fidTeX,'\\end{center}\n');
         fprintf(fidTeX,'%% End of TeX file.\n');
         fclose(fidTeX);
     end
@@ -774,14 +746,20 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
         fprintf(fidTeX,['%% ' datestr(now,0)]);
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,' \n');
-        fprintf(fidTeX,'\\begin{table}\n');
-        fprintf(fidTeX,'\\centering\n');
+        fprintf(fidTeX,'\\begin{center}\n');
+        fprintf(fidTeX,'\\begin{longtable}{l|lcccc} \n');
         fprintf(fidTeX,'\\caption{Results from posterior parameters (correlation of structural shocks)}\n ');
-        fprintf(fidTeX,'\\label{Table:Posterior:4}\n');
-        fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
+        fprintf(fidTeX,'\\label{Table:Posterior:4}\\\\\n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
-        fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n')
-        fprintf(fidTeX,'\\hline \\\\ \n');
+        fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n');
+        fprintf(fidTeX,'\\hline \\endfirsthead \n');
+        fprintf(fidTeX,'\\caption{(continued)}\n ');
+        fprintf(fidTeX,'\\label{Table:Posterior:4}\\\\\n');
+        fprintf(fidTeX,'\\hline\\hline \\\\ \n');
+        fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n');
+        fprintf(fidTeX,'\\hline \\endhead \n');
+        fprintf(fidTeX,'\\hline \\multicolumn{6}{r}{(Continued on next page)} \\\\ \\hline \\endfoot \n');
+        fprintf(fidTeX,'\\hline \\hline \\endlastfoot \n');
         ip = nvx+nvn+1;
         for i=1:ncx
             k1 = estim_params_.corrx(i,1);
@@ -794,23 +772,9 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
                     xparam1(ip), ...
                     stdh(ip));
             ip = ip+1;
-            if ~mod(i,50) && i<ncx,
-                fprintf(fidTeX,'\\hline \n');
-                fprintf(fidTeX,'\\multicolumn{6}{c}{(Table continues next page ...)} \\\\ \n')';
-                fprintf(fidTeX,'\\end{tabular}\n ');
-                fprintf(fidTeX,'\\end{table}\n');
-                fprintf(fidTeX,'\\begin{table}\n');
-                fprintf(fidTeX,'\\centering\n');
-                fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
-                fprintf(fidTeX,'\\multicolumn{6}{c}{( ... Table continued)} \\\\ \n')';
-                fprintf(fidTeX,'\\hline\\hline \\\\ \n');
-                fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
-                fprintf(fidTeX,'\\hline \\\\ \n');
-            end
         end
-        fprintf(fidTeX,'\\hline\\hline \n');
-        fprintf(fidTeX,'\\end{tabular}\n ');
-        fprintf(fidTeX,'\\end{table}\n');
+        fprintf(fidTeX,'\\end{longtable}\n ');    
+        fprintf(fidTeX,'\\end{center}\n');
         fprintf(fidTeX,'%% End of TeX file.\n');
         fclose(fidTeX);
     end
@@ -822,14 +786,20 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
         fprintf(fidTeX,['%% ' datestr(now,0)]);
         fprintf(fidTeX,' \n');
         fprintf(fidTeX,' \n');
-        fprintf(fidTeX,'\\begin{table}\n');
-        fprintf(fidTeX,'\\centering\n');
+        fprintf(fidTeX,'\\begin{center}\n');
+        fprintf(fidTeX,'\\begin{longtabe}{l|lcccc} \n');
         fprintf(fidTeX,'\\caption{Results from posterior parameters (correlation of measurement errors)}\n ');
-        fprintf(fidTeX,'\\label{Table:Posterior:5}\n');
-        fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
+        fprintf(fidTeX,'\\label{Table:Posterior:5}\\\\\n');
         fprintf(fidTeX,'\\hline\\hline \\\\ \n');
-        fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n')
-        fprintf(fidTeX,'\\hline \\\\ \n');
+        fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n');
+        fprintf(fidTeX,'\\hline \\endfirsthead \n');
+        fprintf(fidTeX,'\\caption{(continued)}\n ');
+        fprintf(fidTeX,'\\label{Table:Posterior:5}\\\\\n');
+        fprintf(fidTeX,'\\hline\\hline \\\\ \n');
+        fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. &  Posterior mode & s.d. \\\\ \n');
+        fprintf(fidTeX,'\\hline \\endhead \n');
+        fprintf(fidTeX,'\\hline \\multicolumn{6}{r}{(Continued on next page)} \\\\ \\hline \\endfoot \n');
+        fprintf(fidTeX,'\\hline \\hline \\endlastfoot \n');
         ip = nvx+nvn+ncx+1;
         for i=1:ncn
             k1 = estim_params_.corrn(i,1);
@@ -842,23 +812,9 @@ if any(bayestopt_.pshape > 0) && options_.TeX %% Bayesian estimation (posterior 
                     xparam1(ip), ...
                     stdh(ip));
             ip = ip+1;
-            if ~mod(i,50) && i<ncn,
-                fprintf(fidTeX,'\\hline \n');
-                fprintf(fidTeX,'\\multicolumn{6}{c}{(Table continues next page ...)} \\\\ \n')';
-                fprintf(fidTeX,'\\end{tabular}\n ');
-                fprintf(fidTeX,'\\end{table}\n');
-                fprintf(fidTeX,'\\begin{table}\n');
-                fprintf(fidTeX,'\\centering\n');
-                fprintf(fidTeX,'\\begin{tabular}{l|lcccc} \n');
-                fprintf(fidTeX,'\\multicolumn{6}{c}{( ... Table continued)} \\\\ \n')';
-                fprintf(fidTeX,'\\hline\\hline \\\\ \n');
-                fprintf(fidTeX,'  & Prior distribution & Prior mean  & Prior s.d. & Posterior mode & s.d. \\\\ \n');
-                fprintf(fidTeX,'\\hline \\\\ \n');
-            end
         end
-        fprintf(fidTeX,'\\hline\\hline \n');
-        fprintf(fidTeX,'\\end{tabular}\n ');
-        fprintf(fidTeX,'\\end{table}\n');
+        fprintf(fidTeX,'\\end{longtable}\n ');    
+        fprintf(fidTeX,'\\end{center}\n');
         fprintf(fidTeX,'%% End of TeX file.\n');
         fclose(fidTeX);
     end

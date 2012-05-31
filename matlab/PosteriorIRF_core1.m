@@ -53,18 +53,10 @@ IRUN = myinputs.IRUN;
 irun =myinputs.irun;
 irun2=myinputs.irun2;
 nosaddle=myinputs.nosaddle;
+npar=myinputs.npar;
 type=myinputs.type;
 if ~strcmpi(type,'prior'),
     x=myinputs.x;
-end
-
-if options_.dsge_var
-    gend=myinputs.gend;
-    nvobs=myinputs.nvobs;
-    NumberOfParametersPerEquation = myinputs.NumberOfParametersPerEquation;
-    NumberOfLags = myinputs.NumberOfLags;
-    NumberOfLagsTimesNvobs = myinputs.NumberOfLagsTimesNvobs;
-    Companion_matrix = myinputs.Companion_matrix;
 end
 
 nvar=myinputs.nvar;
@@ -76,6 +68,17 @@ MAX_nruns=myinputs.MAX_nruns;
 NumberOfIRFfiles_dsge=myinputs.NumberOfIRFfiles_dsge;
 NumberOfIRFfiles_dsgevar=myinputs.NumberOfIRFfiles_dsgevar;
 ifil2=myinputs.ifil2;
+
+if options_.dsge_var
+    gend=myinputs.gend;
+    nvobs=myinputs.nvobs;
+    NumberOfParametersPerEquation = myinputs.NumberOfParametersPerEquation;
+    NumberOfLags = myinputs.NumberOfLags;
+    NumberOfLagsTimesNvobs = myinputs.NumberOfLagsTimesNvobs;
+    Companion_matrix = myinputs.Companion_matrix;
+    stock_irf_bvardsge = zeros(options_.irf,nvobs,M_.exo_nbr,MAX_nirfs_dsgevar);
+end
+
 
 if whoiam
     Parallel=myinputs.Parallel;
@@ -129,7 +132,8 @@ if whoiam
 end
 
 % Parallel 'while' very good!!!
-
+stock_param=zeros(MAX_nruns,npar);
+stock_irf_dsge=zeros(options_.irf,nvar,M_.exo_nbr,MAX_nirfs_dsge);
 while fpar<npar
     fpar = fpar + 1;
     irun = irun+1;
