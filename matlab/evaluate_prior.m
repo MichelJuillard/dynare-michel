@@ -61,5 +61,5 @@ if ischar(parameters)
         error
     end
 end
-clear('priordens');
+
 ldens = priordens(parameters, bayestopt_.pshape, bayestopt_.p6, bayestopt_.p7, bayestopt_.p3, bayestopt_.p4);

@@ -82,9 +82,7 @@ if isempty(dataset)
     dataset = initialize_dataset(options_.datafile,options_.varobs,options_.first_obs,options_.nobs,transformation,options_.prefilter,xls);
 end
 
-pshape_original   = bayestopt_.pshape;
-bayestopt_.pshape = Inf(size(bayestopt_.pshape));
-
 llik = -dsge_likelihood(parameters,dataset,options_,M_,estim_params_,bayestopt_,oo_);
+ldens = evaluate_prior(parameters);
+llik = llik - ldens;
 
-bayestopt_.pshape = pshape_original;
