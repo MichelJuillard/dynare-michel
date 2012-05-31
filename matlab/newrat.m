@@ -61,16 +61,22 @@ fval=fval0;
 
 % initialize mr_gstep and mr_hessian
 mr_hessian(1,x,[],[],[],DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
+outer_product_gradient=1;
 
 if isempty(hh)
     [dum, gg, htol0, igg, hhg, h1]=mr_hessian(0,x,func0,flagit,htol,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
-    hh0 = reshape(dum,nx,nx);
-    hh=hhg;
-    if min(eig(hh0))<0
-        hh0=hhg; %generalized_cholesky(hh0);
-    elseif flagit==2
-        hh=hh0;
-        igg=inv(hh);
+    if isempty(dum),
+        outer_product_gradient=0;
+        igg = 1e-4*eye(nx);
+    else
+        hh0 = reshape(dum,nx,nx);
+        hh=hhg;
+        if min(eig(hh0))<0
+            hh0=hhg; %generalized_cholesky(hh0);
+        elseif flagit==2
+            hh=hh0;
+            igg=inv(hh);
+        end
     end
     if htol0>htol
         htol=htol0;
@@ -192,6 +198,9 @@ while norm(gg)>gtol && check==0 && jit<nit
                 save m1.mat x fval0 nig
             end
             [dum, gg, htol0, igg, hhg, h1]=mr_hessian(0,xparam1,func0,flagit,htol,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
+            if isempty(dum),
+                outer_product_gradient=0;
+            end
             if htol0>htol
                 htol=htol0;
                 disp(' ')
@@ -199,26 +208,33 @@ while norm(gg)>gtol && check==0 && jit<nit
                 disp('Tolerance has to be relaxed')
                 disp(' ')
             end
-            hh0 = reshape(dum,nx,nx);
-            hh=hhg;
-            if flagit==2
-                if min(eig(hh0))<=0
-                    hh0=hhg; %generalized_cholesky(hh0);
-                else
-                    hh=hh0;
-                    igg=inv(hh);
+            if ~outer_product_gradient,
+                H = bfgsi1(H,gg-g(:,icount),xparam1-x(:,icount));
+                hh=inv(H);
+                hhg=hh;
+            else
+                hh0 = reshape(dum,nx,nx);
+                hh=hhg;
+                if flagit==2
+                    if min(eig(hh0))<=0
+                        hh0=hhg; %generalized_cholesky(hh0);
+                    else
+                        hh=hh0;
+                        igg=inv(hh);
+                    end
                 end
+                H = igg;
             end
         end
         disp(['Gradient norm  ',num2str(norm(gg))])
         ee=eig(hh);
         disp(['Minimum Hessian eigenvalue ',num2str(min(ee))])
         disp(['Maximum Hessian eigenvalue ',num2str(max(ee))])
-        if max(eig(hh))<0, disp('Negative definite Hessian! Local maximum!'), pause, end,
+        if max(eig(hh))<0, disp('Negative definite Hessian! Local maximum!'), pause(1), end,
         t=toc;
         disp(['Elapsed time for iteration ',num2str(t),' s.'])
         g(:,icount+1)=gg;
-        H = igg;
+
         save m1.mat x hh g hhg igg fval0 nig H
     end
 end

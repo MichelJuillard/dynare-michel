@@ -11,7 +11,7 @@ function [hessian_mat, gg, htol1, ihh, hh_mat0, hh1] = mr_hessian(init,x,func,hf
 %    of the log-likelihood to compute outer product gradient
 %  x = parameter values
 %  hflag = 0, Hessian computed with outer product gradient, one point
-%  increments for partial derivatives in  gradients
+%  increments for partial derivatives in gradients
 %  hflag = 1, 'mixed' Hessian: diagonal elements computed with numerical second order derivatives
 %             with correlation structure as from outer product gradient;
 %             two point evaluation of derivatives for partial derivatives
@@ -55,6 +55,12 @@ end
 h2=BayesInfo.ub-BayesInfo.lb;
 hmax=BayesInfo.ub-x;
 hmax=min(hmax,x-BayesInfo.lb);
+if isempty(ff0),
+    outer_product_gradient=0;
+else
+    outer_product_gradient=1;
+end
+
 
 h1 = min(h1,0.5.*hmax);
 
@@ -64,9 +70,11 @@ end
 xh1=x;
 f1=zeros(size(f0,1),n);
 f_1=f1;
-ff1=zeros(size(ff0));
-ff_1=ff1;
-ggh=zeros(size(ff0,1),n);
+if outer_product_gradient
+    ff1=zeros(size(ff0));
+    ff_1=ff1;
+    ggh=zeros(size(ff0,1),n);
+end
 
 i=0;
 while i<n
@@ -124,20 +132,24 @@ while i<n
         end
     end
     f1(:,i)=fx;
-    if any(isnan(ffx))
-        ff1=ones(size(ff0)).*fx/length(ff0);
-    else
-        ff1=ffx;
+    if outer_product_gradient,
+        if any(isnan(ffx))
+            ff1=ones(size(ff0)).*fx/length(ff0);
+        else
+            ff1=ffx;
+        end
     end
     xh1(i)=x(i)-h1(i);
     [fx, ffx]=feval(func,xh1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
     f_1(:,i)=fx;
-    if any(isnan(ffx))
-        ff_1=ones(size(ff0)).*fx/length(ff0);
-    else
-        ff_1=ffx;
+    if outer_product_gradient,
+        if any(isnan(ffx))
+            ff_1=ones(size(ff0)).*fx/length(ff0);
+        else
+            ff_1=ffx;
+        end
+        ggh(:,i)=(ff1-ff_1)./(2.*h1(i));
     end
-    ggh(:,i)=(ff1-ff_1)./(2.*h1(i));
     xh1(i)=x(i);
     if hcheck && htol<1
         htol=min(1,max(min(abs(dx))*2,htol*10));
@@ -152,85 +164,93 @@ xh_1=xh1;
 
 gg=(f1'-f_1')./(2.*h1);
 
-if hflag==2
-    gg=(f1'-f_1')./(2.*h1);
-    hessian_mat = zeros(size(f0,1),n*n);
-    for i=1:n
-        if i > 1
-            k=[i:n:n*(i-1)];
-            hessian_mat(:,(i-1)*n+1:(i-1)*n+i-1)=hessian_mat(:,k);
+if outer_product_gradient,
+    if hflag==2
+        gg=(f1'-f_1')./(2.*h1);
+        hessian_mat = zeros(size(f0,1),n*n);
+        for i=1:n
+            if i > 1
+                k=[i:n:n*(i-1)];
+                hessian_mat(:,(i-1)*n+1:(i-1)*n+i-1)=hessian_mat(:,k);
+            end
+            hessian_mat(:,(i-1)*n+i)=(f1(:,i)+f_1(:,i)-2*f0)./(h1(i)*h_1(i));
+            temp=f1+f_1-f0*ones(1,n);
+            for j=i+1:n
+                xh1(i)=x(i)+h1(i);
+                xh1(j)=x(j)+h_1(j);
+                xh_1(i)=x(i)-h1(i);
+                xh_1(j)=x(j)-h_1(j);
+                temp1 = feval(func,xh1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
+                temp2 = feval(func,xh_1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
+                hessian_mat(:,(i-1)*n+j)=-(-temp1 -temp2+temp(:,i)+temp(:,j))./(2*h1(i)*h_1(j));
+                xh1(i)=x(i);
+                xh1(j)=x(j);
+                xh_1(i)=x(i);
+                xh_1(j)=x(j);
+                j=j+1;
+            end
+            i=i+1;
         end
-        hessian_mat(:,(i-1)*n+i)=(f1(:,i)+f_1(:,i)-2*f0)./(h1(i)*h_1(i));
-        temp=f1+f_1-f0*ones(1,n);
-        for j=i+1:n
-            xh1(i)=x(i)+h1(i);
-            xh1(j)=x(j)+h_1(j);
-            xh_1(i)=x(i)-h1(i);
-            xh_1(j)=x(j)-h_1(j);
-            temp1 = feval(func,xh1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
-            temp2 = feval(func,xh_1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
-            hessian_mat(:,(i-1)*n+j)=-(-temp1 -temp2+temp(:,i)+temp(:,j))./(2*h1(i)*h_1(j));
-            xh1(i)=x(i);
-            xh1(j)=x(j);
-            xh_1(i)=x(i);
-            xh_1(j)=x(j);
-            j=j+1;
+    elseif hflag==1
+        hessian_mat = zeros(size(f0,1),n*n);
+        for i=1:n
+            dum = (f1(:,i)+f_1(:,i)-2*f0)./(h1(i)*h_1(i));
+            if dum>eps
+                hessian_mat(:,(i-1)*n+i)=dum;
+            else
+                hessian_mat(:,(i-1)*n+i)=max(eps, gg(i)^2);
+            end
         end
-        i=i+1;
     end
-elseif hflag==1
-    hessian_mat = zeros(size(f0,1),n*n);
-    for i=1:n
-        dum = (f1(:,i)+f_1(:,i)-2*f0)./(h1(i)*h_1(i));
-        if dum>eps
-            hessian_mat(:,(i-1)*n+i)=dum;
-        else
-            hessian_mat(:,(i-1)*n+i)=max(eps, gg(i)^2);
-        end
-    end
-end
-
-gga=ggh.*kron(ones(size(ff1)),2.*h1');  % re-scaled gradient
-hh_mat=gga'*gga;  % rescaled outer product hessian
-hh_mat0=ggh'*ggh;  % outer product hessian
-A=diag(2.*h1);  % rescaling matrix
-% igg=inv(hh_mat);  % inverted rescaled outer product hessian
-ihh=A'*(hh_mat\A);  % inverted outer product hessian
-if hflag>0 && min(eig(reshape(hessian_mat,n,n)))>0
-    hh0 = A*reshape(hessian_mat,n,n)*A';  %rescaled second order derivatives
-    hh = reshape(hessian_mat,n,n);  %rescaled second order derivatives
-    sd0=sqrt(diag(hh0));   %rescaled 'standard errors' using second order derivatives
-    sd=sqrt(diag(hh_mat));  %rescaled 'standard errors' using outer product
-    hh_mat=hh_mat./(sd*sd').*(sd0*sd0');  %rescaled inverse outer product with 'true' std's
-    igg=inv(hh_mat);   % rescaled outer product hessian with 'true' std's
+    
+    gga=ggh.*kron(ones(size(ff1)),2.*h1');  % re-scaled gradient
+    hh_mat=gga'*gga;  % rescaled outer product hessian
+    hh_mat0=ggh'*ggh;  % outer product hessian
+    A=diag(2.*h1);  % rescaling matrix
+    % igg=inv(hh_mat);  % inverted rescaled outer product hessian
     ihh=A'*(hh_mat\A);  % inverted outer product hessian
-    hh_mat0=inv(A)'*hh_mat*inv(A);  % outer product hessian with 'true' std's
-    sd=sqrt(diag(ihh));   %standard errors
-    sdh=sqrt(1./diag(hh));   %diagonal standard errors
-    for j=1:length(sd)
-        sd0(j,1)=min(BayesInfo.p2(j), sd(j));  %prior std
-        sd0(j,1)=10^(0.5*(log10(sd0(j,1))+log10(sdh(j,1))));
+    if hflag>0 && min(eig(reshape(hessian_mat,n,n)))>0
+        hh0 = A*reshape(hessian_mat,n,n)*A';  %rescaled second order derivatives
+        hh = reshape(hessian_mat,n,n);  %rescaled second order derivatives
+        sd0=sqrt(diag(hh0));   %rescaled 'standard errors' using second order derivatives
+        sd=sqrt(diag(hh_mat));  %rescaled 'standard errors' using outer product
+        hh_mat=hh_mat./(sd*sd').*(sd0*sd0');  %rescaled inverse outer product with 'true' std's
+        igg=inv(hh_mat);   % rescaled outer product hessian with 'true' std's
+        ihh=A'*(hh_mat\A);  % inverted outer product hessian
+        hh_mat0=inv(A)'*hh_mat*inv(A);  % outer product hessian with 'true' std's
+        sd=sqrt(diag(ihh));   %standard errors
+        sdh=sqrt(1./diag(hh));   %diagonal standard errors
+        for j=1:length(sd)
+            sd0(j,1)=min(BayesInfo.p2(j), sd(j));  %prior std
+            sd0(j,1)=10^(0.5*(log10(sd0(j,1))+log10(sdh(j,1))));
+        end
+        ihh=ihh./(sd*sd').*(sd0*sd0');  %inverse outer product with modified std's
+        igg=inv(A)'*ihh*inv(A);  % inverted rescaled outer product hessian with modified std's
+        hh_mat=inv(igg);   % outer product rescaled hessian with modified std's
+        hh_mat0=inv(A)'*hh_mat*inv(A);  % outer product hessian with modified std's
+        %     sd0=sqrt(1./diag(hh0));   %rescaled 'standard errors' using second order derivatives
+        %     sd=sqrt(diag(igg));  %rescaled 'standard errors' using outer product
+        %     igg=igg./(sd*sd').*(sd0*sd0');  %rescaled inverse outer product with 'true' std's
+        %     hh_mat=inv(igg);   % rescaled outer product hessian with 'true' std's
+        %     ihh=A'*igg*A;  % inverted outer product hessian
+        %     hh_mat0=inv(A)'*hh_mat*inv(A);  % outer product hessian with 'true' std's
     end
-    ihh=ihh./(sd*sd').*(sd0*sd0');  %inverse outer product with modified std's
-    igg=inv(A)'*ihh*inv(A);  % inverted rescaled outer product hessian with modified std's
-    hh_mat=inv(igg);   % outer product rescaled hessian with modified std's
-    hh_mat0=inv(A)'*hh_mat*inv(A);  % outer product hessian with modified std's
-                                    %     sd0=sqrt(1./diag(hh0));   %rescaled 'standard errors' using second order derivatives
-                                    %     sd=sqrt(diag(igg));  %rescaled 'standard errors' using outer product
-                                    %     igg=igg./(sd*sd').*(sd0*sd0');  %rescaled inverse outer product with 'true' std's
-                                    %     hh_mat=inv(igg);   % rescaled outer product hessian with 'true' std's
-                                    %     ihh=A'*igg*A;  % inverted outer product hessian
-                                    %     hh_mat0=inv(A)'*hh_mat*inv(A);  % outer product hessian with 'true' std's
-end
-if hflag<2
-    hessian_mat=hh_mat0(:);
+    if hflag<2
+        hessian_mat=hh_mat0(:);
+    end
+    
+    if any(isnan(hessian_mat))
+        hh_mat0=eye(length(hh_mat0));
+        ihh=hh_mat0;
+        hessian_mat=hh_mat0(:);
+    end
+    hh1=h1;
+    save hess.mat hessian_mat
+else
+    hessian_mat=[];
+    ihh=[];
+    hh_mat0 = [];
+    hh1 = [];
 end
 
-if any(isnan(hessian_mat))
-    hh_mat0=eye(length(hh_mat0));
-    ihh=hh_mat0;
-    hessian_mat=hh_mat0(:);
-end
-hh1=h1;
 htol1=htol;
-save hess.mat hessian_mat

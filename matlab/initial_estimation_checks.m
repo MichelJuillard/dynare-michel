@@ -46,11 +46,11 @@ else
     info = d;
 end
 
-if DynareOptions.mode_compute==5
-    if ~strcmp(func2str(objective_function),'dsge_likelihood')
-        error('Options mode_compute=5 is not compatible with non linear filters or Dsge-VAR models!')
-    end
-end
+% if DynareOptions.mode_compute==5
+%     if ~strcmp(func2str(objective_function),'dsge_likelihood')
+%         error('Options mode_compute=5 is not compatible with non linear filters or Dsge-VAR models!')
+%     end
+% end
 
 if info(1) > 0
     disp('Error in computing likelihood for initial parameter values')
