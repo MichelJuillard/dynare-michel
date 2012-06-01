@@ -26,15 +26,15 @@ sigma2  =  0.001;
     rho = 0.800;
 @#endif
 
-external_function(name=mean_preserving_spread);
+external_function(name=mean_preserving_spread,nargs=2);
 
-model(use_dll);
+model;
 
   // Eq. n°1:
   efficiency = rho*efficiency(-1) + EfficiencyInnovation;
 
   // Eq. n°2:
-  Efficiency = effstar*exp(efficiency-mean_preserving_spread(rho));
+  Efficiency = effstar*exp(efficiency-mean_preserving_spread(rho,sigma2));
 
   // Eq. n°3:
   Output = Efficiency*(alpha*(Capital(-1)^psi)+(1-alpha)*(Labour^psi))^(1/psi);
@@ -56,6 +56,27 @@ model(use_dll);
 
 end;
 
+steady_state_model;
+efficiency = 0;
+Efficiency = effstar*exp(efficiency-mean_preserving_spread(rho,sigma2));
+// Compute steady state ratios.
+Output_per_unit_of_Capital=((1/beta-1+delta)/alpha)^(1/(1-psi));
+Consumption_per_unit_of_Capital=Output_per_unit_of_Capital-delta;
+Labour_per_unit_of_Capital=(((Output_per_unit_of_Capital/Efficiency)^psi-alpha)/(1-alpha))^(1/psi);
+Output_per_unit_of_Labour=Output_per_unit_of_Capital/Labour_per_unit_of_Capital;
+Consumption_per_unit_of_Labour=Consumption_per_unit_of_Capital/Labour_per_unit_of_Capital;
+
+// Compute steady state share of capital.
+ShareOfCapital=alpha/(alpha+(1-alpha)*Labour_per_unit_of_Capital^psi);
+
+/// Compute steady state of the endogenous variables.
+Labour=1/(1+Consumption_per_unit_of_Labour/((1-alpha)*theta/(1-theta)*Output_per_unit_of_Labour^(1-psi)));
+Consumption = Consumption_per_unit_of_Labour*Labour;
+Capital = Labour/Labour_per_unit_of_Capital;
+Output = Output_per_unit_of_Capital*Capital;
+Investment = delta*Capital;
+ExpectedTerm = beta*((((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption)*(alpha*((Output/Capital)^(1-psi))+1-delta);
+end;
 
 @#if extended_path_version
 

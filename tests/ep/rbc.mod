@@ -57,10 +57,10 @@ options_.ep.stochastic.nodes = 2;
 options_.console_mode = 0;
 
 options_.ep.stochastic.order = 0;
-ts0 = extended_path([],100);
+//ts0 = extended_path([],100);
 
 options_.ep.stochastic.order = 1;
-ts1 = extended_path([],100);
+//ts1 = extended_path([],100);
 
 options_.ep.stochastic.order = 2;
 ts2 = extended_path([],100);
