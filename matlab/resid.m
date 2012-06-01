@@ -36,21 +36,13 @@ if nargin && ischar(junk)
     tagname = junk;
 end
 
-
 tags  = M_.equations_tags;
 istag = 0;
 if length(tags)
     istag = 1;
 end
 
-
 steady_state_old = oo_.steady_state;
-
-info = 0;
-if options_.steadystate_flag
-    [oo_.steady_state,M.params,info] = ...
-        evaluate_steady_state(oo_.steady_state,M_,options_,oo_,0);
-end
 
 % Keep of a copy of M_.Sigma_e
 Sigma_e = M_.Sigma_e;
@@ -58,6 +50,11 @@ Sigma_e = M_.Sigma_e;
 % Set M_.Sigma_e=0 (we evaluate the *deterministic* static model)
 M_.Sigma_e = zeros(size(Sigma_e));
 
+info = 0;
+if options_.steadystate_flag
+    [oo_.steady_state,M.params,info] = ...
+        evaluate_steady_state(oo_.steady_state,M_,options_,oo_,0);
+end
 
 % Compute the residuals
 if options_.block && ~options_.bytecode
