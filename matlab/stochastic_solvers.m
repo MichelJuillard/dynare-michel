@@ -156,12 +156,6 @@ if M_.maximum_endo_lead == 0
         error(['2nd and 3rd order approximation not implemented for purely ' ...
                'backward models'])
     end
-elseif M_.maximum_endo_lag == 0
-    % purely forward model
-    dr.ghx = [];
-    dr.ghu = -b\jacobia_(:,nz+1:end);
-    dr.eigval = [];
-    dr.rank = 0;
 elseif options_.risky_steadystate
     [dr,info] = dyn_risky_steadystate_solver(oo_.steady_state,M_,dr, ...
                                              options_,oo_);
