@@ -96,6 +96,12 @@ end;
     options_.ep.stochastic.order = 1;
     sts = extended_path([],100);
 
+    options_.ep.stochastic.order = 2;
+    sts2 = extended_path([],100);
+
+    options_.ep.stochastic.order = 3;
+    sts3 = extended_path([],100);
+
     figure(1)
     plot(ts(2,:)-ts(4,:));
 
@@ -105,6 +111,8 @@ end;
     figure(3)
     plot(sts(2,:)-ts(2,:))
 
+    figure(4)
+    plot([(ts(2,:)-ts(4,:))' (sts(2,:)-sts(4,:))' (sts2(2,:)-sts2(4,:))' (sts3(2,:)-sts3(4,:))']) 
 @#else
 
     shocks;
