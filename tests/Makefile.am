@@ -186,8 +186,7 @@ EXTRA_DIST = \
 	kalman_filter_smoother/fsdat_simul.m \
 	kalman_filter_smoother/fs2000a_steadystate.m \
 	identification/kim/kim2_steadystate.m \
-	ep/mean_preserving_spread.m \
-	ep/rbc_steadystate.m
+	ep/mean_preserving_spread.m
 
 TARGETS =
 
