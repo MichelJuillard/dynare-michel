@@ -75,7 +75,7 @@ for blockFlag = 0:1
         default_stack_solve_algo = 0;
         if !blockFlag && !bytecodeFlag
             solve_algos = 0:4;
-            stack_solve_algos = 0;
+            stack_solve_algos = [0 6];
         elseif blockFlag && !bytecodeFlag
             solve_algos = [0:4 6 8];
             stack_solve_algos = [0 1 3 4];

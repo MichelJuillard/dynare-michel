@@ -2795,7 +2795,7 @@ Algorithm used for computing the solution. Possible values are:
 
 @item 0
 Newton method to solve simultaneously all the equations for every
-period, see @cite{Juillard (1996)} (Default).
+period, using sparse matrices (Default).
 
 @item 1
 Use a Newton algorithm with a sparse LU solver at each iteration
@@ -2821,6 +2821,13 @@ declaration}).
 Use a Newton algorithm with a sparse Gaussian elimination (SPE) solver
 at each iteration (requires @code{bytecode} option, @pxref{Model
 declaration}).
+
+@item 6
+Use the historical algorithm proposed in @cite{Juillard (1996)}: it is
+slower than @code{stack_solve_algo=0}, but may be less memory consuming
+on big models (not available with @code{bytecode} and/or @code{block}
+options).
+
 @end table
 
 @item markowitz = @var{DOUBLE}

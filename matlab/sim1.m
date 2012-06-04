@@ -1,21 +1,19 @@
 function sim1
 % function sim1
-% performs deterministic simulations with lead or lag on one period
+% Performs deterministic simulations with lead or lag on one period.
+% Uses sparse matrices.
 %
 % INPUTS
 %   ...
 % OUTPUTS
 %   ...
 % ALGORITHM
-%   Laffargue, Boucekkine, Juillard (LBJ)
-%   see Juillard (1996) Dynare: A program for the resolution and
-%   simulation of dynamic models with forward variables through the use
-%   of a relaxation algorithm. CEPREMAP. Couverture Orange. 9602.
+%   ...
 %
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 1996-2010 Dynare Team
+% Copyright (C) 1996-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -36,13 +34,19 @@ global M_ options_ oo_
 
 lead_lag_incidence = M_.lead_lag_incidence;
 
-ny = size(oo_.endo_simul,1) ;
+ny = M_.endo_nbr;
+
+max_lag = M_.maximum_endo_lag;
+
 nyp = nnz(lead_lag_incidence(1,:)) ;
-nyf = nnz(lead_lag_incidence(3,:)) ;
-nrs = ny+nyp+nyf+1 ;
-nrc = nyf+1 ;
-iyf = find(lead_lag_incidence(3,:)>0) ;
 iyp = find(lead_lag_incidence(1,:)>0) ;
+ny0 = nnz(lead_lag_incidence(2,:)) ;
+iy0 = find(lead_lag_incidence(2,:)>0) ;
+nyf = nnz(lead_lag_incidence(3,:)) ;
+iyf = find(lead_lag_incidence(3,:)>0) ;
+
+nd = nyp+ny0+nyf;
+nrc = nyf+1 ;
 isp = [1:nyp] ;
 is = [nyp+1:ny+nyp] ;
 isf = iyf+nyp ;
@@ -50,57 +54,63 @@ isf1 = [nyp+ny+1:nyf+nyp+ny+1] ;
 stop = 0 ;
 iz = [1:ny+nyp+nyf];
 
+periods = options_.periods
+steady_state = oo_.steady_state;
+params = M_.params;
+endo_simul = oo_.endo_simul;
+exo_simul = oo_.exo_simul;
+i_cols_1 = nonzeros(lead_lag_incidence(2:3,:)');
+i_cols_A1 = find(lead_lag_incidence(2:3,:)');
+i_cols_T = nonzeros(lead_lag_incidence(1:2,:)');
+i_cols_j = 1:nd;
+i_upd = ny+(1:periods*ny);
+
+Y = endo_simul(:);
+
 disp (['-----------------------------------------------------']) ;
 disp (['MODEL SIMULATION :']) ;
 fprintf('\n') ;
 
-it_init = M_.maximum_lag+1 ;
 
+model_dynamic = str2func([M_.fname,'_dynamic']);
+z = Y(find(lead_lag_incidence'));
+[d1,jacobian] = model_dynamic(z,oo_.exo_simul, params, ...
+                              steady_state,2);
+
+A = sparse([],[],[],periods*ny,periods*ny,periods*nnz(jacobian));
+res = zeros(periods*ny,1);
+
+    
 h1 = clock ;
 for iter = 1:options_.maxit_
     h2 = clock ;
     
-    if options_.terminal_condition == 0
-        c = zeros(ny*options_.periods,nrc) ;
-    else
-        c = zeros(ny*(options_.periods+1),nrc) ;
-    end
+    i_rows = 1:ny;
+    i_cols = find(lead_lag_incidence');
+    i_cols_A = i_cols;
     
-    it_ = it_init ;
-    z = [oo_.endo_simul(iyp,it_-1) ; oo_.endo_simul(:,it_) ; oo_.endo_simul(iyf,it_+1)] ;
-    [d1,jacobian] = feval([M_.fname '_dynamic'],z,oo_.exo_simul, M_.params, oo_.steady_state,it_);
-    jacobian = [jacobian(:,iz) -d1] ;
-    ic = [1:ny] ;
-    icp = iyp ;
-    c (ic,:) = jacobian(:,is)\jacobian(:,isf1) ;
-    for it_ = it_init+(1:options_.periods-1)
-        z = [oo_.endo_simul(iyp,it_-1) ; oo_.endo_simul(:,it_) ; oo_.endo_simul(iyf,it_+1)] ;
-        [d1,jacobian] = feval([M_.fname '_dynamic'],z,oo_.exo_simul, ...
-                              M_.params, oo_.steady_state, it_);
-        jacobian = [jacobian(:,iz) -d1] ;
-        jacobian(:,[isf nrs]) = jacobian(:,[isf nrs])-jacobian(:,isp)*c(icp,:) ;
-        ic = ic + ny ;
-        icp = icp + ny ;
-        c (ic,:) = jacobian(:,is)\jacobian(:,isf1) ;
+    for it = 2:(periods+1)
+
+        [d1,jacobian] = model_dynamic(Y(i_cols),exo_simul, params, ...
+                                      steady_state,it);
+        if it == 2
+            A(i_rows,i_cols_A1) = jacobian(:,i_cols_1);
+        elseif it == periods+1
+            A(i_rows,i_cols_A(i_cols_T)) = jacobian(:,i_cols_T);
+        else
+            A(i_rows,i_cols_A) = jacobian(:,i_cols_j);
+        end
+
+        res(i_rows) = d1;
+        
+        i_rows = i_rows + ny;
+        i_cols = i_cols + ny;
+        if it > 2
+            i_cols_A = i_cols_A + ny;
+        end
     end
-    
-    if options_.terminal_condition == 1
-        s = eye(ny) ;
-        s(:,isf) = s(:,isf)+c(ic,1:nyf) ;
-        ic = ic + ny ;
-        c(ic,nrc) = s\c(ic,nrc) ;
-        c = bksup1(c,ny,nrc,iyf,options_.periods) ;
-        c = reshape(c,ny,options_.periods+1) ;
-        oo_.endo_simul(:,it_init+(0:options_.periods)) = oo_.endo_simul(:,it_init+(0:options_.periods))+options_.slowc*c ;
-    else
-        c = bksup1(c,ny,nrc,iyf,options_.periods) ;
-        c = reshape(c,ny,options_.periods) ;
-        oo_.endo_simul(:,it_init+(0:options_.periods-1)) = oo_.endo_simul(:,it_init+(0:options_.periods-1))+options_.slowc*c ;
-    end
-    
-    err = max(max(abs(c./options_.scalv')));
-    disp([num2str(iter) ' -     err = ' num2str(err)]) ;
-    disp(['     Time of iteration       :' num2str(etime(clock,h2))]) ;
+        
+    err = max(abs(res));
     
     if err < options_.dynatol.f
         stop = 1 ;
@@ -112,9 +122,16 @@ for iter = 1:options_.maxit_
         oo_.deterministic_simulation.status = 1;% Convergency obtained.
         oo_.deterministic_simulation.error = err;
         oo_.deterministic_simulation.iterations = iter;
+        oo_.endo_simul = reshape(Y,ny,periods+2);
         break
     end
+
+    dy = -A\res;
+    
+    Y(i_upd) =   Y(i_upd) + dy;
+
 end
+
 
 if ~stop
     fprintf('\n') ;

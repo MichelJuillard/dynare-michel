@@ -33,16 +33,21 @@ global M_ options_ oo_
 
 test_for_deep_parameters_calibration(M_);
 
-if options_.stack_solve_algo < 0 || options_.stack_solve_algo > 5
-    error('SIMUL: stack_solve_algo must be between 0 and 5')
+if options_.stack_solve_algo < 0 || options_.stack_solve_algo > 6
+    error('SIMUL: stack_solve_algo must be between 0 and 6')
 end
 
-if ~options_.block && ~options_.bytecode && options_.stack_solve_algo ~= 0
-    error('SIMUL: you must use stack_solve_algo=0 when not using block nor bytecode option')
+if ~options_.block && ~options_.bytecode && options_.stack_solve_algo ~= 0 ...
+        && options_.stack_solve_algo ~= 6
+    error('SIMUL: you must use stack_solve_algo=0 or stack_solve_algo=6 when not using block nor bytecode option')
 end
 
 if options_.block && ~options_.bytecode && options_.stack_solve_algo == 5
     error('SIMUL: you can''t use stack_solve_algo = 5 without bytecode option')
+end
+
+if (options_.block || options_.bytecode) && options_.stack_solve_algo == 6
+    error('SIMUL: you can''t use stack_solve_algo = 6 with block or bytecode option')
 end
 
 if exist('OCTAVE_VERSION') && options_.stack_solve_algo == 2
@@ -91,7 +96,11 @@ else
         elseif M_.maximum_endo_lag == 0 % Purely forward model
             sim1_purely_forward;
         else % General case
-            sim1;
+            if options_.stack_solve_algo == 0
+                sim1;
+            else % stack_solve_algo = 6
+                sim1_lbj;
+            end
         end
     end;
 end;
