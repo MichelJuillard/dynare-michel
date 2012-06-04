@@ -26,7 +26,6 @@ MODFILES = \
 	histval_sto.mod \
 	histval_det.mod \
 	auxiliary_variables/test1.mod \
-	deterministic_model_purely_forward.mod \
 	expectations/expectation.mod \
 	expectations/expectation_ss.mod \
 	expectations/expectation_ss_old.mod \
