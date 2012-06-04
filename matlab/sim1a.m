@@ -1,21 +1,19 @@
-function sim1
-% function sim1
-% performs deterministic simulations with lead or lag on one period
+function sim1a
+% function sim1a
+% Performs deterministic simulations with lead or lag on one period
+% Alternative algorithm to the one implemented in sim1
 %
 % INPUTS
 %   ...
 % OUTPUTS
 %   ...
 % ALGORITHM
-%   Laffargue, Boucekkine, Juillard (LBJ)
-%   see Juillard (1996) Dynare: A program for the resolution and
-%   simulation of dynamic models with forward variables through the use
-%   of a relaxation algorithm. CEPREMAP. Couverture Orange. 9602.
+%   ...
 %
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 1996-2010 Dynare Team
+% Copyright (C) 1996-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
