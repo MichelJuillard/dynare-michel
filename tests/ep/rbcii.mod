@@ -1,6 +1,6 @@
 @#define extended_path_version = 1
 
-var Capital, Output, Labour, Consumption, Investment, Efficiency, efficiency, ExpectedTerm;
+var Capital, Output, Labour, Consumption,  Investment, Output1, Labour1, Consumption1, Output2, Labour2, Consumption2, Efficiency, efficiency, ExpectedTerm;
 
 varexo EfficiencyInnovation;
 
@@ -30,29 +30,33 @@ external_function(name=mean_preserving_spread,nargs=2);
 
 model;
 
-  // Eq. n°1:
   efficiency = rho*efficiency(-1) + EfficiencyInnovation;
 
-  // Eq. n°2:
   Efficiency = effstar*exp(efficiency-mean_preserving_spread(rho,sigma2));
 
-  // Eq. n°3:
-  Output = Efficiency*(alpha*(Capital(-1)^psi)+(1-alpha)*(Labour^psi))^(1/psi);
+  (((Consumption1^theta)*((1-Labour1)^(1-theta)))^(1-tau))/Consumption1 - ExpectedTerm(1);
 
-  // Eq. n°4:
-  Capital = max(Output-Consumption,0) + (1-delta)*Capital(-1);
-
-  // Eq. n°5:
-  ((1-theta)/theta)*(Consumption/(1-Labour)) - (1-alpha)*(Output/Labour)^(1-psi);
-
-  // Eq. n°6:
   ExpectedTerm = beta*((((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption)*(alpha*((Output/Capital(-1))^(1-psi))+1-delta);
 
-  // Eq. n°7:
-  Investment = Capital - (1-delta)*Capital(-1);
+  ((1-theta)/theta)*(Consumption1/(1-Labour1)) - (1-alpha)*(Output1/Labour1)^(1-psi);
 
-  // Eq. n°8: (Euler equation, to be skipped if investment is on its lower bound)
-  (Investment>0)*((((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption - ExpectedTerm(1)) + (1-(Investment>0))*(Output-Consumption);
+  Output1 = Efficiency*(alpha*(Capital(-1)^psi)+(1-alpha)*(Labour1^psi))^(1/psi);
+
+  Consumption2  = Output2;
+
+  ((1-theta)/theta)*(Consumption2/(1-Labour2)) - (1-alpha)*(Output2/Labour2)^(1-psi);
+
+  Output2 = Efficiency*(alpha*(Capital(-1)^psi)+(1-alpha)*(Labour2^psi))^(1/psi);
+
+  Consumption = (Output1 > Consumption1)*Consumption1 + (1-(Output1 > Consumption1))*Consumption2;
+
+  Labour = (Output1 > Consumption1)*Labour1 + (1-(Output1 > Consumption1))*Labour2;
+
+  Output = (Output1 > Consumption1)*Output1 + (1-(Output1 > Consumption1))*Output2;
+
+  Capital = Output-Consumption + (1-delta)*Capital(-1);
+
+  Investment = Capital - (1-delta)*Capital(-1);
 
 end;
 
@@ -76,6 +80,12 @@ Capital = Labour/Labour_per_unit_of_Capital;
 Output = Output_per_unit_of_Capital*Capital;
 Investment = delta*Capital;
 ExpectedTerm = beta*((((Consumption^theta)*((1-Labour)^(1-theta)))^(1-tau))/Consumption)*(alpha*((Output/Capital)^(1-psi))+1-delta);
+Output1 = Output;
+Output2 = Output;
+Labour1 = Labour;
+Labour2 = Labour;
+Consumption1 = Consumption;
+Consumption2 = Consumption;
 end;
 
 @#if extended_path_version
@@ -84,12 +94,12 @@ end;
     var EfficiencyInnovation = sigma2;
     end;
 
-    steady;
+    steady(nocheck);
 
     options_.maxit_ = 100;
     options_.ep.verbosity = 0;
     options_.ep.stochastic.order = 0;
-    options_.ep.stochastic.nodes = 2;
+    options_.ep.stochastic.nodes = 5;
     options_.console_mode = 0;
     ts = extended_path([],100);
 
@@ -99,8 +109,10 @@ end;
     options_.ep.stochastic.order = 2;
     sts2 = extended_path([],100);
 
-    options_.ep.stochastic.order = 3;
-    sts3 = extended_path([],100);
+//    options_.ep.stochastic.order = 3;
+//    sts3 = extended_path([],100);
+
+      save rbcii ts sts sts2 sts3;
 
     figure(1)
     plot(ts(2,:)-ts(4,:));
@@ -112,7 +124,9 @@ end;
     plot(sts(2,:)-ts(2,:))
 
     figure(4)
-    plot([(ts(2,:)-ts(4,:))' (sts(2,:)-sts(4,:))' (sts2(2,:)-sts2(4,:))' (sts3(2,:)-sts3(4,:))']) 
+//    plot([(ts(2,:)-ts(4,:))' (sts(2,:)-sts(4,:))' (sts2(2,:)-sts2(4,:))' (sts3(2,:)-sts3(4,:))']) 
+    plot([(ts(2,:)-ts(4,:))' (sts(2,:)-sts(4,:))']) 
+
 @#else
 
     shocks;
