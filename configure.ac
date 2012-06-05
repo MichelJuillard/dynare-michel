@@ -17,7 +17,7 @@ dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_PREREQ([2.61])
+AC_PREREQ([2.62])
 AC_INIT([dynare], [4.3-unstable])
 AC_CONFIG_SRCDIR([preprocessor/DynareMain.cc])
 AM_INIT_AUTOMAKE([1.11 -Wall -Werror foreign no-dist-gzip dist-xz tar-pax])
