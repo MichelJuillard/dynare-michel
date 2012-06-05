@@ -34,6 +34,7 @@ function sim1_purely_backward
         yb = oo_.endo_simul(:,it-1); % Values at previous period, also used as guess value for current period
         yb1 = yb(iyb);
        
-        oo_.endo_simul(:,it) = solve1(model_dynamic, [yb1; yb], 1:M_.endo_nbr, nyb+1:nyb+M_.endo_nbr, 1, 1, oo_.exo_simul, M_.params, oo_.steady_state, it)(nyb+1:nyb+M_.endo_nbr);
+        tmp = solve1(model_dynamic, [yb1; yb], 1:M_.endo_nbr, nyb+1:nyb+M_.endo_nbr, 1, 1, oo_.exo_simul, M_.params, oo_.steady_state, it);
+        oo_.endo_simul(:,it) = tmp(nyb+1:nyb+M_.endo_nbr);
     end
     

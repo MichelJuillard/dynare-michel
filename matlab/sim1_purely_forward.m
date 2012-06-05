@@ -33,6 +33,7 @@ function sim1_purely_forward
         yf = oo_.endo_simul(:,it+1); % Values at next period, also used as guess value for current period
         yf1 = yf(iyf);
        
-        oo_.endo_simul(:,it) = solve1(model_dynamic, [yf; yf1], 1:M_.endo_nbr, 1:M_.endo_nbr, 1, 1, oo_.exo_simul, M_.params, oo_.steady_state, it)(1:M_.endo_nbr);
+        tmp = solve1(model_dynamic, [yf; yf1], 1:M_.endo_nbr, 1:M_.endo_nbr, 1, 1, oo_.exo_simul, M_.params, oo_.steady_state, it);
+        oo_.endo_simul(:,it) = tmp(1:M_.endo_nbr);
     end
     
