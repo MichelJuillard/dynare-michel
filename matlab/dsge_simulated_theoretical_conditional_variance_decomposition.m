@@ -54,7 +54,7 @@ if ~posterior
     end
     options_.varlist = options_.prior_analysis_endo_var_list;
 end
-[ivar,vartan ] = set_stationary_variables_list(options_, M_);
+[ivar,vartan ] = get_variables_list(options_, M_);
 if ~posterior
     if exist('temp','var')
         options_.varlist = temp;

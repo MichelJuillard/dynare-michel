@@ -1,13 +1,12 @@
-function [ivar,vartan,options_] = set_stationary_variables_list(options_,M_)
-% This function builds a vector of indices targeting to the stationary
-% variables in varlist.
+function [ivar,vartan,options_] = get_variables_list(options_,M_)
+% This function builds a vector of indices in varlist or varobs.
 % 
 % INPUTS 
 %   o options_   [structure]  Describes global options. 
 %   o M_         [structure]  Describes the model.
 % OUTPUTS 
 %   o ivar       [integer]    nvar*1 vector of indices (nvar is the number
-%                             of stationary variables).
+%                             of variables).
 %   o vartan     [char]       array of characters (with nvar rows).
 %   o options_   [structure]  Describes global options.
 % 
@@ -17,7 +16,7 @@ function [ivar,vartan,options_] = set_stationary_variables_list(options_,M_)
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2007-2011 Dynare Team
+% Copyright (C) 2007-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
