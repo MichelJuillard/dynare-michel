@@ -65,6 +65,7 @@ MODFILES = \
 	fs2000/fs2000_cmaes.mod \
 	fs2000/fs2000_calib.mod \
 	fs2000/fs2000_analytic_derivation.mod \
+	fs2000/fs2000_particle.mod \
 	homotopy/homotopy1_test.mod \
 	homotopy/homotopy2_test.mod \
 	homotopy/homotopy3_test.mod \

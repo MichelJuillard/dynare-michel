@@ -40,9 +40,7 @@ if options_.order > 1
     elseif options_.particle.status && options_.order>2
         error(['Non linear filter are not implemented with order ' int2str(options_.order) ' approximation of the model!'])
     elseif ~options_.particle.status && options_.order==2
-        disp('If you want to estimate the model with a second order approximation using a non linear filter, set options_.particle.status=1;')
-        disp('I set order=1!')
-        options_.order=1;
+        error('For estimating the model with a second order approximation using a non linear filter, one should have options_.particle.status=1;')
     else
         error(['Cannot estimate a model with an order ' int2str(options_.order) ' approximation!'])
     end
