@@ -2179,7 +2179,7 @@ SparseMatrix::Singular_display(int block, int Size, bool steady_state, it_code_t
   mexCallMATLAB(3, lhs, 1, rhs, "svd");
   mxArray* SVD_u = lhs[0];
   mxArray* SVD_s = lhs[1];
-  mxArray* SVD_v = lhs[2];
+  //mxArray* SVD_v = lhs[2];
   double *SVD_ps = mxGetPr(SVD_s);
   double *SVD_pu = mxGetPr(SVD_u);
   for (int i = 0; i < Size; i++)
