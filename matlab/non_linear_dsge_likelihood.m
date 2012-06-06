@@ -151,7 +151,7 @@ nvobs = DynareDataset.info.nvobs;
 %------------------------------------------------------------------------------
 
 % Return, with endogenous penalty, if some parameters are smaller than the lower bound of the prior domain.
-if (DynareOptions.mode_compute~=1) & any(xparam1<BayesInfo.lb)
+if (DynareOptions.mode_compute~=1) && any(xparam1<BayesInfo.lb)
     k = find(xparam1 < BayesInfo.lb);
     fval = penalty+sum((BayesInfo.lb(k)-xparam1(k)).^2);
     exit_flag = 0;
@@ -160,7 +160,7 @@ if (DynareOptions.mode_compute~=1) & any(xparam1<BayesInfo.lb)
 end
 
 % Return, with endogenous penalty, if some parameters are greater than the upper bound of the prior domain.
-if (DynareOptions.mode_compute~=1) & any(xparam1>BayesInfo.ub)
+if (DynareOptions.mode_compute~=1) && any(xparam1>BayesInfo.ub)
     k = find(xparam1>BayesInfo.ub);
     fval = penalty+sum((xparam1(k)-BayesInfo.ub(k)).^2);
     exit_flag = 0;
