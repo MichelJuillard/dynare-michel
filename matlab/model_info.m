@@ -19,39 +19,53 @@ function model_info(varargin);
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global M_;
-fprintf('                                          Informations about %s\n',M_.fname);
+if sum(strcmp(varargin,'static')) > 0
+    static = 1;
+else
+    static = 0;
+end;
+if sum(strcmp(varargin,'incidence')) > 0
+    incidence = 1;
+else
+    incidence = 0;
+end;
+if static
+    fprintf('                                          Informations about %s (static model)\n',M_.fname);
+    block_structre_str = 'block_structure_stat';
+    block_structure = M_.block_structure_stat;
+    nb_leadlag = 1;
+else
+    fprintf('                                          Informations about %s (dynamic model)\n',M_.fname);
+    block_structre_str = 'block_structure';
+    block_structure = M_.block_structure;
+    nb_leadlag = 3;
+end;
 fprintf(strcat('                                          ===================',char(ones(1,length(M_.fname))*'='),'\n\n'));
-if(isfield(M_,'block_structure'))
-    nb_blocks=length(M_.block_structure.block);
+if(isfield(M_,block_structre_str))
+    nb_blocks=length(block_structure.block);
     fprintf('The model has %d equations and is decomposed in %d blocks as follow:\n',M_.endo_nbr,nb_blocks);
     fprintf('===============================================================================================================\n');
     fprintf('| %10s | %10s | %30s | %14s | %31s |\n','Block no','Size','Block Type','   Equation','Dependent variable');
     fprintf('|============|============|================================|================|=================================|\n');
     for i=1:nb_blocks
-        size_block=length(M_.block_structure.block(i).equation);
+        size_block=length(block_structure.block(i).equation);
         if(i>1)
             fprintf('|------------|------------|--------------------------------|----------------|---------------------------------|\n');
         end;
         for j=1:size_block
             if(j==1)
-                fprintf('| %10d | %10d | %30s | %14d | %-6d %24s |\n',i,size_block,Sym_type(M_.block_structure.block(i).Simulation_Type),M_.block_structure.block(i).equation(j),M_.block_structure.block(i).variable(j),M_.endo_names(M_.block_structure.block(i).variable(j),:));
+                fprintf('| %10d | %10d | %30s | %14d | %-6d %24s |\n',i,size_block,Sym_type(block_structure.block(i).Simulation_Type),block_structure.block(i).equation(j),block_structure.block(i).variable(j),M_.endo_names(block_structure.block(i).variable(j),:));
             else
-                fprintf('| %10s | %10s | %30s | %14d | %-6d %24s |\n','','','',M_.block_structure.block(i).equation(j),M_.block_structure.block(i).variable(j),M_.endo_names(M_.block_structure.block(i).variable(j),:));
+                fprintf('| %10s | %10s | %30s | %14d | %-6d %24s |\n','','','',block_structure.block(i).equation(j),block_structure.block(i).variable(j),M_.endo_names(block_structure.block(i).variable(j),:));
             end;
         end;
     end;
     fprintf('===============================================================================================================\n');
     fprintf('\n');
-    for k=1:M_.maximum_endo_lag+M_.maximum_endo_lead+1
-        if(k==M_.maximum_endo_lag+1)
-            fprintf('%-30s %s','the variable','is used in equations Contemporaneously');
-        elseif(k<M_.maximum_endo_lag+1)
-            fprintf('%-30s %s %d','the variable','is used in equations with lag ',M_.maximum_endo_lag+1-k);
-        else
-            fprintf('%-30s %s %d','the variable','is used in equations with lead ',k-(M_.maximum_endo_lag+1));
-        end;
-        if(size(M_.block_structure.incidence(k).sparse_IM,1)>0)
-            IM=sortrows(M_.block_structure.incidence(k).sparse_IM,2);
+    if static
+        fprintf('%-30s %s','the variable','is used in equations Contemporaneously');
+        if(size(block_structure.incidence.sparse_IM,1)>0)
+            IM=sortrows(block_structure.incidence.sparse_IM,2);
         else
             IM=[];
         end;
@@ -65,17 +79,42 @@ if(isfield(M_,'block_structure'))
             last=IM(i,2);
         end;
         fprintf('\n\n');
+    else
+        for k=1:M_.maximum_endo_lag+M_.maximum_endo_lead+1
+            if(k==M_.maximum_endo_lag+1)
+                fprintf('%-30s %s','the variable','is used in equations Contemporaneously');
+            elseif(k<M_.maximum_endo_lag+1)
+                fprintf('%-30s %s %d','the variable','is used in equations with lag ',M_.maximum_endo_lag+1-k);
+            else
+                fprintf('%-30s %s %d','the variable','is used in equations with lead ',k-(M_.maximum_endo_lag+1));
+            end;
+            if(size(block_structure.incidence(k).sparse_IM,1)>0)
+                IM=sortrows(block_structure.incidence(k).sparse_IM,2);
+            else
+                IM=[];
+            end;
+            size_IM=size(IM,1);
+            last=99999999;
+            for i=1:size_IM
+                if(last~=IM(i,2))
+                    fprintf('\n%-30s',M_.endo_names(IM(i,2),:));
+                end;
+                fprintf(' %5d',IM(i,1));
+                last=IM(i,2);
+            end;
+            fprintf('\n\n');
+        end;
     end;
     
     %printing the gross incidence matrix
     IM_star = char([kron(ones(M_.endo_nbr, M_.endo_nbr-1), double(blanks(3))) double(blanks(M_.endo_nbr)')]);
-    for i = 1:3
-        n = size(M_.block_structure.incidence(i).sparse_IM,1);
+    for i = 1:nb_leadlag
+        n = size(block_structure.incidence(i).sparse_IM,1);
         for j = 1:n
-            if ismember(M_.block_structure.incidence(i).sparse_IM(j,2), M_.state_var)
-                IM_star(M_.block_structure.incidence(i).sparse_IM(j,1), 3 * (M_.block_structure.incidence(i).sparse_IM(j,2) - 1) + 1) = 'X';
+            if ismember(block_structure.incidence(i).sparse_IM(j,2), M_.state_var)
+                IM_star(block_structure.incidence(i).sparse_IM(j,1), 3 * (block_structure.incidence(i).sparse_IM(j,2) - 1) + 1) = 'X';
             else
-                IM_star(M_.block_structure.incidence(i).sparse_IM(j,1), 3 * (M_.block_structure.incidence(i).sparse_IM(j,2) - 1) + 1) = '1';
+                IM_star(block_structure.incidence(i).sparse_IM(j,1), 3 * (block_structure.incidence(i).sparse_IM(j,2) - 1) + 1) = '1';
             end;
         end;
     end;
@@ -88,7 +127,7 @@ if(isfield(M_,'block_structure'))
             var_names = [var_names; blank; M_.endo_names(i,:)];
         end;
     end;
-    if nargin == 1 && strcmp(varargin{1},'incidence')
+    if incidence
         topp = [char(kron(double(blanks(ceil(log10(M_.endo_nbr)))),ones(size(M_.endo_names,2),1))) var_names' ];
         bott = [int2str(seq') blanks(M_.endo_nbr)' blanks(M_.endo_nbr)' IM_star];
         fprintf('\n                                          Gross incidence matrix\n');
@@ -97,42 +136,42 @@ if(isfield(M_,'block_structure'))
     
         %printing the reordered incidence matrix
         IM_star_reordered = char([kron(ones(M_.endo_nbr, M_.endo_nbr-1), double(blanks(3))) double(blanks(M_.endo_nbr)')]);
-        eq(M_.block_structure.equation_reordered) = seq;
-        va(M_.block_structure.variable_reordered) = seq;
+        eq(block_structure.equation_reordered) = seq;
+        va(block_structure.variable_reordered) = seq;
         barre_blank = [ barre(size(M_.endo_names,2)); blanks(size(M_.endo_names,2))];
         cur_block = 1;
         for i = 1:M_.endo_nbr
             past_block = cur_block;
-            while ismember(M_.block_structure.variable_reordered(i), M_.block_structure.block(cur_block).variable) == 0;
+            while ismember(block_structure.variable_reordered(i), block_structure.block(cur_block).variable) == 0;
                 cur_block = cur_block + 1;
             end;
             if i == 1
-                var_names = [blank; M_.endo_names(M_.block_structure.variable_reordered(i),:)];
+                var_names = [blank; M_.endo_names(block_structure.variable_reordered(i),:)];
             else
                 if past_block ~= cur_block
-                    var_names = [var_names; barre_blank; M_.endo_names(M_.block_structure.variable_reordered(i),:)];
+                    var_names = [var_names; barre_blank; M_.endo_names(block_structure.variable_reordered(i),:)];
                 else
-                    var_names = [var_names; blank; M_.endo_names(M_.block_structure.variable_reordered(i),:)];
+                    var_names = [var_names; blank; M_.endo_names(block_structure.variable_reordered(i),:)];
                 end
             end;
         end;
         topp = [char(kron(double(blanks(ceil(log10(M_.endo_nbr)))),ones(size(M_.endo_names,2),1))) var_names' ];
         n_state_var = length(M_.state_var);
         IM_state_var = zeros(n_state_var, n_state_var);
-        inv_variable_reordered(M_.block_structure.variable_reordered) = 1:M_.endo_nbr;
-        state_equation = M_.block_structure.equation_reordered(inv_variable_reordered(M_.state_var));
-        for i = 1:3
-            n = size(M_.block_structure.incidence(i).sparse_IM,1);
+        inv_variable_reordered(block_structure.variable_reordered) = 1:M_.endo_nbr;
+        state_equation = block_structure.equation_reordered(inv_variable_reordered(M_.state_var));
+        for i = 1:nb_leadlag
+            n = size(block_structure.incidence(i).sparse_IM,1);
             for j = 1:n
-                [tf, loc] = ismember(M_.block_structure.incidence(i).sparse_IM(j,2), M_.state_var);
+                [tf, loc] = ismember(block_structure.incidence(i).sparse_IM(j,2), M_.state_var);
                 if tf
-                    IM_star_reordered(eq(M_.block_structure.incidence(i).sparse_IM(j,1)), 3 * (va(M_.block_structure.incidence(i).sparse_IM(j,2)) - 1) + 1) = 'X';
-                    [tfi, loci] = ismember(M_.block_structure.incidence(i).sparse_IM(j,1), state_equation);
+                    IM_star_reordered(eq(block_structure.incidence(i).sparse_IM(j,1)), 3 * (va(block_structure.incidence(i).sparse_IM(j,2)) - 1) + 1) = 'X';
+                    [tfi, loci] = ismember(block_structure.incidence(i).sparse_IM(j,1), state_equation);
                     if tfi
                         IM_state_var(loci, loc) = 1;
                     end;
                 else
-                    IM_star_reordered(eq(M_.block_structure.incidence(i).sparse_IM(j,1)), 3 * (va(M_.block_structure.incidence(i).sparse_IM(j,2)) - 1) + 1) = '1';
+                    IM_star_reordered(eq(block_structure.incidence(i).sparse_IM(j,1)), 3 * (va(block_structure.incidence(i).sparse_IM(j,2)) - 1) + 1) = '1';
                 end;
             end;
         end;
@@ -143,7 +182,7 @@ if(isfield(M_,'block_structure'))
         block = {};
         for i = 1:n_state_var;
             past_block = cur_block;
-            while ismember(M_.state_var(i), M_.block_structure.block(cur_block).variable) == 0;
+            while ismember(M_.state_var(i), block_structure.block(cur_block).variable) == 0;
                 cur_block = cur_block + 1;
             end;
             if (past_block ~= cur_block) || (past_block == cur_block && i == n_state_var)
@@ -154,7 +193,7 @@ if(isfield(M_,'block_structure'))
         cur_block = 1;
         for i = 1:M_.endo_nbr
             past_block = cur_block;
-            while ismember(M_.block_structure.variable_reordered(i), M_.block_structure.block(cur_block).variable) == 0;
+            while ismember(block_structure.variable_reordered(i), block_structure.block(cur_block).variable) == 0;
                 cur_block = cur_block + 1;
             end;
             if past_block ~= cur_block
@@ -164,7 +203,7 @@ if(isfield(M_,'block_structure'))
             end;
         end
         
-        bott = [int2str(M_.block_structure.equation_reordered') blanks(M_.endo_nbr)' blanks(M_.endo_nbr)' IM_star_reordered];
+        bott = [int2str(block_structure.equation_reordered') blanks(M_.endo_nbr)' blanks(M_.endo_nbr)' IM_star_reordered];
         fprintf('\n                                          Reordered incidence matrix\n');
         fprintf('                                          ==========================\n');
         disp([topp; bott]);

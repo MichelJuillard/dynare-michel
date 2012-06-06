@@ -2667,6 +2667,7 @@ command.
 @end defvr
 
 @deffn Command model_info ;
+@deffnx Command model_info (@var{OPTIONS}@dots{});
 
 @descriptionhead
 
@@ -2730,6 +2731,22 @@ variables. The block looks like: @math{g_j(y_{j,t}, y_t, y_{t-1},
 to @samp{SIMPLE} if the block has only one equation. If several
 equation appears in the block, @var{x} is equal to @samp{COMPLETE}.
 @end table
+
+@optionshead
+
+@table @code
+
+@item 'static'
+Prints out the block decomposition of the static model. 
+Without 'static' option model_info displays the block decomposition 
+of the dynamic model.
+
+@item 'incidence'
+Displays the gross incidence matrix and the reordered incidence matrix 
+of the block decomposed model.
+
+@end table
+
 
 @end deffn
 

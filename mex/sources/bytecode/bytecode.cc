@@ -439,9 +439,12 @@ main(int nrhs, const char *prhs[])
                       for (int i = 0; i < nb_blocks; i++)
                         {
                           mxSetFieldByNumber(plhs[2], i, jacob_field_number, interprete.get_jacob(i));
-                          mxSetFieldByNumber(plhs[2], i, jacob_exo_field_number, interprete.get_jacob_exo(i));
-                          mxSetFieldByNumber(plhs[2], i, jacob_exo_det_field_number, interprete.get_jacob_exo_det(i));
-                          mxSetFieldByNumber(plhs[2], i, jacob_other_endo_field_number, interprete.get_jacob_other_endo(i));
+                          if (!steady_state)
+                            {
+                              mxSetFieldByNumber(plhs[2], i, jacob_exo_field_number, interprete.get_jacob_exo(i));
+                              mxSetFieldByNumber(plhs[2], i, jacob_exo_det_field_number, interprete.get_jacob_exo_det(i));
+                              mxSetFieldByNumber(plhs[2], i, jacob_other_endo_field_number, interprete.get_jacob_other_endo(i));
+                            }
                         }
                     }
                 }
