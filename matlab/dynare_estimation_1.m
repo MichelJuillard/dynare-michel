@@ -889,6 +889,10 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
     end
 end
 
+if options_.particle.status
+    return
+end
+
 if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.pshape ...
                                                       > 0) && options_.load_mh_file)) ...
     || ~options_.smoother ) && options_.partial_information == 0  % to be fixed
