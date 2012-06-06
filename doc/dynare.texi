@@ -4198,7 +4198,8 @@ This is the convergence criterion used in the doubling algorithm to solve the ly
 
 @item analytic_derivation
 Triggers estimation with analytic gradient. The final hessian is also
-computed analytically.
+computed analytically. Only works for stationary models without
+missing observations.
 
 @end table
 
