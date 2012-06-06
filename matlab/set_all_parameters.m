@@ -63,11 +63,16 @@ end
 offset = nvx+nvn;
 
 % setting shocks covariances
+if ~isempty(M_.Correlation_matrix)
+    Sigma_e = diag(sqrt(diag(Sigma_e)))*M_.Correlation_matrix*diag(sqrt(diag(Sigma_e)));
+end
 if ncx
     corrx = estim_params_.corrx;
     for i=1:ncx
         k1 = corrx(i,1);
         k2 = corrx(i,2);
+        M_.Correlation_matrix(k1,k2) = xparam1(i+offset);
+        M_.Correlation_matrix(k2,k1) = M_.Correlation_matrix(k1,k2);
         Sigma_e(k1,k2) = xparam1(i+offset)*sqrt(Sigma_e(k1,k1)*Sigma_e(k2,k2));
         Sigma_e(k2,k1) = Sigma_e(k1,k2);
     end
