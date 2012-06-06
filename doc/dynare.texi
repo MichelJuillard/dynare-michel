@@ -4196,6 +4196,9 @@ This is the convergence criterion used in the fixed point lyapunov solver. Its d
 @anchor{lyapunov_doubling_tol}
 This is the convergence criterion used in the doubling algorithm to solve the lyapunov equation. Its default value is 1e-16.
 
+@item analytic_derivation
+Triggers estimation with analytic gradient. The final hessian is also
+computed analytically.
 
 @end table
 
