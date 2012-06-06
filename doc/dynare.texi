@@ -3000,7 +3000,8 @@ Order of Taylor approximation. Acceptable values are @code{1},
 @code{2} and @code{3}. Note that for third order,
 @code{k_order_solver} option is implied and only empirical moments are
 available (you must provide a value for @code{periods}
-option). Default: @code{2}.
+option). Default: @code{2} (except after an @code{estimation} command,
+in which case the default is the value used for the estimation).
 
 @item k_order_solver
 @anchor{k_order_solver}
