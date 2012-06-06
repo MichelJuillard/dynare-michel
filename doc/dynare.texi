@@ -4542,7 +4542,8 @@ This command computes the smoothed variables (and possible the filtered
 variables) on a @code{calibrated} model.
 
 A datafile must be provided, and the observable variables declared with
-@code{varobs}.
+@code{varobs}. The smoother is based on a first-order approximation of
+the model.
 
 @vindex oo_.SmoothedVariables
 @vindex oo_.SmoothedShocks
