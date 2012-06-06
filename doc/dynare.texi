@@ -4962,7 +4962,8 @@ inflation or nominal interest rate as an instrument.
 @descriptionhead
 
 This command computes an approximation of the optimal policy under
-discretion
+discretion. The algorithm implemented is essentially an LQ solver, and
+is described by @cite{Dennis (2007)}.
 
 @optionshead
 
@@ -7278,6 +7279,11 @@ Collard, Fabrice and Michel Juillard (2001b): ``A Higher-Order Taylor
 Expansion Approach to Simulation of Stochastic Forward-Looking Models
 with an Application to a Non-Linear Phillips Curve,'' @i{Computational
 Economics}, 17, 125--139.
+
+@item
+Dennis, Richard (2007): ``Optimal Policy In Rational Expectations
+Models: New Solution Algorithms,'' @i{Macroeconomic Dynamics}, 11(1),
+31--55
 
 @item
 Durbin, J. and S. J. Koopman (2001), @i{Time Series Analysis by State

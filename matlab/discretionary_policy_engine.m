@@ -4,8 +4,9 @@ function [H,G,retcode]=discretionary_policy_engine(AAlag,AA0,AAlead,BB,bigw,inst
 % AAlag*yy_{t-1}+AA0*yy_t+AAlead*yy_{t+1}+BB*e=0, with W the weight on the
 % variables in vector y_t and instr_id is the location of the instruments
 % in the yy_t vector.
-% We use the Dennis algorithm and so we need to re-write the model in the
-% form A0*y_t=A1*y_{t-1}+A2*y_{t+1}+A3*x_t+A4*x_{t+1}+A5*e_t, with W the
+% We use the Dennis (2007, Macroeconomic Dynamics) algorithm and so we need
+% to re-write the model in the form
+%  A0*y_t=A1*y_{t-1}+A2*y_{t+1}+A3*x_t+A4*x_{t+1}+A5*e_t, with W the
 % weight on the y_t vector and Q the weight on the x_t vector of
 % instruments.
 
