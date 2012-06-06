@@ -517,11 +517,7 @@ set_dynare_seed('default');
 [junk,junk]=mkdir([M_.fname '/Output']);
 
 % Load user configuration file.
-if isunix
-    origin = pwd;
-    cd('~/')
-    if exist('dynare_configuration.m')
-        dynare_configuration;
-    end
-    cd(origin)
+if isfield(options_, 'global_init_file')
+    run(options_.global_init_file);
 end
+

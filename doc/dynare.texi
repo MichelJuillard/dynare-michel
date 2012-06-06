@@ -216,6 +216,7 @@ Typical usages
 
 The Configuration File
 
+* Dynare Configuration::        
 * Parallel Configuration::      
 
 @end detailmenu
@@ -6944,8 +6945,42 @@ Is @code{true} or @code{false}.
 @end table
 
 @menu
+* Dynare Configuration::        
 * Parallel Configuration::      
 @end menu
+
+@node Dynare Configuration
+@section Dynare Configuration
+
+This section explains how to configure Dynare for general
+processing. Currently, there is only one option available.
+
+@deffn {Configuration block} [hooks]
+
+@descriptionhead
+
+The @code{[hooks]} block can be used to specify configuration options
+that will be used when running dynare.
+
+@optionshead
+
+@table @code
+
+@item GlobalInitFile = @var{PATH_AND_FILE}
+The location of the global initialization file to be run at the end of
+@code{global_initialization.m}
+
+@end table
+
+@examplehead
+
+@example
+[hooks]
+GlobalInitFile = /home/usern/dynare/myInitFile.m
+
+@end example
+
+@end deffn
 
 @node Parallel Configuration
 @section Parallel Configuration
