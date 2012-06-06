@@ -1,5 +1,5 @@
-function [g, badg] = numgrad(fcn,f0,x,epsilon,varargin)
-% function [g badg] = numgrad(fcn,xvarargin)
+function [g, badg] = numgrad2(fcn,f0,x,epsilon,varargin)
+% function [g badg] = numgrad2(fcn,xvarargin)
 
 % Original file downloaded from:
 % http://sims.princeton.edu/yftp/optimize/mfiles/numgrad.m
