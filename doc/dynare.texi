@@ -4160,6 +4160,14 @@ this covariance matrix. Default is @code{1}.
 @xref{solve_algo}.
 
 @item order = @var{INTEGER}
+When @code{2}, the likelihood is  evaluated with a particle filter based
+on    a    second    order    approximation   of    the    model    (see
+@cite{Fernandez-Villaverde  and   Rubio-Ramirez  (2005)}).   Default  is
+@code{1}, ie the lilkelihood of  the linearized model is evaluated using
+a standard Kalman filter.
+
+
+@item order = @var{INTEGER}
 @xref{order}.
 
 @item irf = @var{INTEGER}
@@ -7352,6 +7360,11 @@ Estimation of Dynamic Nonlinear Rational Expectation Models,''
 Fernandez-Villaverde, Jesus and Juan Rubio-Ramirez (2004): ``Comparing
 Dynamic Equilibrium Economies to Data: A Bayesian Approach,''
 @i{Journal of Econometrics}, 123, 153--187.
+
+@item
+Fernandez-Villaverde, Jesus and Juan Rubio-Ramirez (2005): ``Estimating
+Dynamic Equilibrium Economies: Linear versus Nonlinear Likelihood,''
+@i{Journal of Applied Econometrics}, 20, 891--910.
 
 @item
 Ireland, Peter (2004): ``A Method for Taking Models to the Data,''
