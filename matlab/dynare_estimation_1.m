@@ -58,6 +58,12 @@ end
 
 [dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list_, dname, [], M_, options_, oo_, estim_params_, bayestopt_);
 
+% Set sigma_e_is_diagonal flag (needed if the shocks block is not declared in the mod file)
+M_.sigma_e_is_diagonal = 1;
+if estim_params_.ncx
+    M_.sigma_e_is_diagonal = 0;
+end
+
 data = dataset_.data;
 rawdata = dataset_.rawdata;
 data_index = dataset_.missing.aindex;
