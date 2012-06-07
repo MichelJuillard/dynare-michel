@@ -135,7 +135,7 @@ end
 for b=1:B
     %deep = GetOneDraw(NumberOfDraws,FirstMhFile,LastMhFile,FirstLine,MAX_nruns,DirectoryName);
     [deep, logpo] = GetOneDraw(type);
-    set_all_parameters(deep);
+    M_ = set_all_parameters(deep,estim_params_,M_);
     [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
     [alphahat,etahat,epsilonhat,ahat,SteadyState,trend_coeff,aK] = ...
         DsgeSmoother(deep,gend,Y,data_index);

@@ -1,4 +1,4 @@
-function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_)
+function results = prior_sampler(drsave,M_,bayestopt_,options_,oo_,estim_params_)
 % This function builds a (big) prior sample.
 %
 % INPUTS
@@ -79,7 +79,7 @@ file_indx_number = 0;
 while iteration < NumberOfSimulations
     loop_indx = loop_indx+1;
     params = prior_draw();
-    set_all_parameters(params);
+    M_ = set_all_parameters(params,estim_params_,M_);
     [dr,INFO,M_,options_,oo_] = resol(work,M_,options_,oo_);
     switch INFO(1)
       case 0

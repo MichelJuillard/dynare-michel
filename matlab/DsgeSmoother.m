@@ -62,7 +62,7 @@ decomp        = [];
 nobs            = size(options_.varobs,1);
 smpl          = size(Y,2);
 
-set_all_parameters(xparam1);
+M_ = set_all_parameters(xparam1,estim_params_,M_);
 
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program

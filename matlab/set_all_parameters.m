@@ -1,18 +1,39 @@
-function set_all_parameters(xparam1)
+function M = set_all_parameters(xparam1,estim_params,M)
 
-% function set_all_parameters(xparam1)
-% Sets parameters value 
-% 
-% INPUTS
-%    xparam1:   vector of parameters to be estimated (initial values)
-%    
-% OUTPUTS
-%    none
-%        
-% SPECIAL REQUIREMENTS
-%    none
+%@info:
+%! @deftypefn {Function File} {@var{M} =} dynSeries (@var{xparams1},@var{estim_params},@var{M})
+%! @anchor{set_all_parameters}
+%! @sp 1
+%! Update parameter values (deep parameters and covariance matrices).
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item xparam1
+%! N*1 vector of doubles, the values of the N estimated parameters.
+%! @item estim_params
+%! Dynare structure describing the estimated parameters.
+%! @item M
+%! Dynare structure describing the model.
+%! @end table
+%! @sp 1
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item M
+%! Dynare structure describing the model, with updated parameters and covariances matrices.
+%! @end table
+%! @sp 2
+%! @strong{This function is called by:}
+%! @sp 1
+%! @ref{DsgeSmoother}, @ref{dynare_estimation_1}, @ref{@@gsa/filt_mc_}, @ref{identification_analysis}, @ref{PosteriorFilterSmootherAndForecast}, @ref{prior_posterior_statistics_core}, @ref{prior_sampler}
+%! @sp 2
+%! @strong{This function calls:}
+%! @sp 2
+%! @end deftypefn
+%@eod:
 
-% Copyright (C) 2003-2009 Dynare Team
+% Copyright (C) 2003-2009, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -29,19 +50,17 @@ function set_all_parameters(xparam1)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global estim_params_ M_
-
-nvx = estim_params_.nvx;
-ncx = estim_params_.ncx;
-nvn = estim_params_.nvn;
-ncn = estim_params_.ncn;
-np = estim_params_.np;
-Sigma_e = M_.Sigma_e;
-H = M_.H;
+nvx = estim_params.nvx;
+ncx = estim_params.ncx;
+nvn = estim_params.nvn;
+ncn = estim_params.ncn;
+np = estim_params.np;
+Sigma_e = M.Sigma_e;
+H = M.H;
 
 % setting shocks variance
 if nvx
-    var_exo = estim_params_.var_exo;
+    var_exo = estim_params.var_exo;
     for i=1:nvx
         k =var_exo(i,1);
         Sigma_e(k,k) = xparam1(i)^2;
@@ -52,7 +71,7 @@ offset = nvx;
 
 % setting measument error variance
 if nvn
-    var_endo = estim_params_.var_endo;
+    var_endo = estim_params.var_endo;
     for i=1:nvn
         k = var_endo(i,1);
         H(k,k) = xparam1(i+offset)^2;
@@ -63,16 +82,16 @@ end
 offset = nvx+nvn;
 
 % setting shocks covariances
-if ~isempty(M_.Correlation_matrix)
-    Sigma_e = diag(sqrt(diag(Sigma_e)))*M_.Correlation_matrix*diag(sqrt(diag(Sigma_e)));
+if ~isempty(M.Correlation_matrix)
+    Sigma_e = diag(sqrt(diag(Sigma_e)))*M.Correlation_matrix*diag(sqrt(diag(Sigma_e)));
 end
 if ncx
-    corrx = estim_params_.corrx;
+    corrx = estim_params.corrx;
     for i=1:ncx
         k1 = corrx(i,1);
         k2 = corrx(i,2);
-        M_.Correlation_matrix(k1,k2) = xparam1(i+offset);
-        M_.Correlation_matrix(k2,k1) = M_.Correlation_matrix(k1,k2);
+        M.Correlation_matrix(k1,k2) = xparam1(i+offset);
+        M.Correlation_matrix(k2,k1) = M.Correlation_matrix(k1,k2);
         Sigma_e(k1,k2) = xparam1(i+offset)*sqrt(Sigma_e(k1,k1)*Sigma_e(k2,k2));
         Sigma_e(k2,k1) = Sigma_e(k1,k2);
     end
@@ -82,7 +101,7 @@ end
 offset = nvx+nvn+ncx;
 % setting measurement error covariances
 if ncn
-    corrn = estim_params_.corrn;
+    corrn = estim_params.corrn;
     for i=1:ncn
         k1 = corr(i,1);
         k2 = corr(i,2);
@@ -96,13 +115,13 @@ offset = nvx+ncx+nvn+ncn;
 % setting structural parameters
 %
 if np
-    M_.params(estim_params_.param_vals(:,1)) = xparam1(offset+1:end);
+    M.params(estim_params.param_vals(:,1)) = xparam1(offset+1:end);
 end
 
-% updating matrices in M_
-if nvx
-    M_.Sigma_e = Sigma_e;
+% updating matrices in M
+if nvx || ncx
+    M.Sigma_e = Sigma_e;
 end
 if nvn
-    M_.H = H;
+    M.H = H;
 end

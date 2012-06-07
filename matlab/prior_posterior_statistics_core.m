@@ -149,7 +149,7 @@ for b=fpar:B
             logpo = evaluate_posterior_kernel(deep');
         end
     end
-    set_all_parameters(deep);
+    M_ = set_all_parameters(deep,estim_params_,M_);
     [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 
     if run_smoother

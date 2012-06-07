@@ -108,7 +108,7 @@ end
 M_.dname = M_.fname;
 
 if info==1% Prior simulations (BK).
-    results = prior_sampler(0,M_,bayestopt_,options_,oo_);
+    results = prior_sampler(0,M_,bayestopt_,options_,oo_,estim_params_);
     % Display prior mass info
     disp(['Prior mass = ' num2str(results.prior.mass)])
     disp(['BK indeterminacy share                = ' num2str(results.bk.indeterminacy_share)])

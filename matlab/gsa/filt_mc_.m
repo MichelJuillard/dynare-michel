@@ -112,12 +112,12 @@ else
 end
 if ~loadSA,
     if exist('xparam1','var')
-        set_all_parameters(xparam1);
+        M_ = set_all_parameters(xparam1,estim_params_,M_);
         steady_(M_,options_,oo_);
         ys_mode=oo_.steady_state;
     end
     if exist('xparam1_mean','var')
-        set_all_parameters(xparam1_mean);
+        M_ = set_all_parameters(xparam1_mean,estim_params_,M_);
         steady_(M_,options_,oo_);
         ys_mean=oo_.steady_state;
     end

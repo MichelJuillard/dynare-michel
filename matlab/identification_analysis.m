@@ -48,7 +48,7 @@ persistent indH indJJ indLRE
 nparam=length(params);
 np=length(indx);
 offset=nparam-np;
-set_all_parameters(params);
+M_ = set_all_parameters(params,estim_params_,M_);
 
 nlags = options_ident.ar;
 useautocorr = options_ident.useautocorr;
