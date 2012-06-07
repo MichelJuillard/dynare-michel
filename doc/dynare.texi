@@ -3002,8 +3002,22 @@ them is the default).
 Don't print moments of the endogenous variables (printing them is the
 default).
 
-@item nograph.
-Doesn't do the graphs. Useful for loops.
+@item nograph
+@anchor{nograph} Do not create graphs (which implies that they are not
+saved to the disk nor displayed). If this option is not used, graphs
+will be saved to disk (to the format specified by @code{graph_format}
+option) and displayed to screen (unless @code{nodisplay} option is
+used).
+
+@item nodisplay
+@anchor{nodisplay} Do not display the graphs, but still save them to disk
+(unless @code{nograph} is used).
+
+@item graph_format = @var{FORMAT}
+@anchor{graph_format}
+Specify the file format for graphs saved to disk. Possible values are
+@code{eps} (the default), @code{pdf} and @code{fig} (the latter is not
+available under Octave).
 
 @item noprint
 Don't print anything. Useful for loops.
@@ -3841,8 +3855,13 @@ result in absurd prior densities.
 Default value is @code{1}.
 
 @item nograph
-@anchor{nograph}
-No graphs should be plotted
+@xref{nograph}.
+
+@item nodisplay
+@xref{nodisplay}.
+
+@item graph_format = @var{FORMAT}
+@xref{graph_format}.
 
 @item lik_init = @var{INTEGER}
 @anchor{lik_init}
@@ -4648,7 +4667,14 @@ Number of periods of the forecast. Default: @code{40}
 interval. Default: @code{0.90}
 
 @item nograph
-Don't display graphics.
+@xref{nograph}.
+
+@item nodisplay
+@xref{nodisplay}.
+
+@item graph_format = @var{FORMAT}
+@xref{graph_format}.
+
 @end table
 
 @customhead{Initial Values}
@@ -5252,6 +5278,8 @@ command. These are:
 @item @code{prefilter}
 @item @code{presample}
 @item @code{nograph}
+@item @code{nodisplay}
+@item @code{graph_format}
 @item @code{conf_sig}
 @item @code{loglinear}
 @item @code{mode_file}
@@ -5566,6 +5594,12 @@ Critical value for correlation @math{\rho}: plot couples of parmaters with
 
 @item nograph
 @xref{nograph}.
+
+@item nodisplay
+@xref{nodisplay}.
+
+@item graph_format = @var{FORMAT}
+@xref{graph_format}.
 
 @item conf_sig = @var{DOUBLE}
 @xref{conf_sig}.
