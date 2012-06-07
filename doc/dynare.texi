@@ -4160,15 +4160,12 @@ this covariance matrix. Default is @code{1}.
 @xref{solve_algo}.
 
 @item order = @var{INTEGER}
-When @code{2}, the likelihood is  evaluated with a particle filter based
-on    a    second    order    approximation   of    the    model    (see
-@cite{Fernandez-Villaverde  and   Rubio-Ramirez  (2005)}).   Default  is
-@code{1}, ie the lilkelihood of  the linearized model is evaluated using
-a standard Kalman filter.
-
-
-@item order = @var{INTEGER}
-@xref{order}.
+Order of approximation, either @code{1} or @code{2}. When equal to
+@code{2}, the likelihood is evaluated with a particle filter based on
+a second order approximation of the model (see
+@cite{Fernandez-Villaverde and Rubio-Ramirez (2005)}).  Default is
+@code{1}, ie the lilkelihood of the linearized model is evaluated
+using a standard Kalman filter.
 
 @item irf = @var{INTEGER}
 @xref{irf}. Only used if @ref{bayesian_irf} is passed.
