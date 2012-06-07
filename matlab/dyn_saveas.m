@@ -33,16 +33,15 @@ function dyn_saveas(h,fname,DynareOptions)
 if find(strcmp('eps',DynareOptions.graph_format))
     eval(['print -depsc2 ' fname '.eps']);
 end
-if ~exist('OCTAVE_VERSION')
-    if find(strcmp('pdf',DynareOptions.graph_format))
-        eval(['print -dpdf ' fname]);
+if find(strcmp('pdf',DynareOptions.graph_format))
+    eval(['print -dpdf ' fname]);
+end
+if ~exist('OCTAVE_VERSION') ...
+   && find(strcmp('fig',DynareOptions.graph_format))
+    if DynareOptions.nodisplay
+        set(h, 'Visible','on');
     end
-    if find(strcmp('fig',DynareOptions.graph_format))
-        if DynareOptions.nodisplay
-            set(h, 'Visible','on');
-        end
-        saveas(h,[fname '.fig']);
-    end
+    saveas(h,[fname '.fig']);
 end
 if DynareOptions.nodisplay
     close(h);
