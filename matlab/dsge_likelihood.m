@@ -209,31 +209,13 @@ if ~isequal(DynareOptions.mode_compute,1) && any(xparam1>BayesInfo.ub)
 end
 
 % Get the diagonal elements of the covariance matrices for the structural innovations (Q) and the measurement error (H).
+Model = set_all_parameters(xparam1,EstimatedParameters,Model);
+
 Q = Model.Sigma_e;
 H = Model.H;
-for i=1:EstimatedParameters.nvx
-    k =EstimatedParameters.var_exo(i,1);
-    Q(k,k) = xparam1(i)*xparam1(i);
-end
-offset = EstimatedParameters.nvx;
-if EstimatedParameters.nvn
-    for i=1:EstimatedParameters.nvn
-        k = EstimatedParameters.var_endo(i,1);
-        H(k,k) = xparam1(i+offset)*xparam1(i+offset);
-    end
-    offset = offset+EstimatedParameters.nvn;
-else
-    H = zeros(DynareDataset.info.nvobs);
-end
 
-% Get the off-diagonal elements of the covariance matrix for the structural innovations. Test if Q is positive definite.
+% Test if Q is positive definite.
 if EstimatedParameters.ncx
-    for i=1:EstimatedParameters.ncx
-        k1 =EstimatedParameters.corrx(i,1);
-        k2 =EstimatedParameters.corrx(i,2);
-        Q(k1,k2) = xparam1(i+offset)*sqrt(Q(k1,k1)*Q(k2,k2));
-        Q(k2,k1) = Q(k1,k2);
-    end
     % Try to compute the cholesky decomposition of Q (possible iff Q is positive definite)
     [CholQ,testQ] = chol(Q);
     if testQ
@@ -247,17 +229,10 @@ if EstimatedParameters.ncx
             return
         end
     end
-    offset = offset+EstimatedParameters.ncx;
 end
 
-% Get the off-diagonal elements of the covariance matrix for the measurement errors. Test if H is positive definite.
+% Test if H is positive definite.
 if EstimatedParameters.ncn
-    for i=1:EstimatedParameters.ncn
-        k1 = DynareOptions.lgyidx2varobs(EstimatedParameters.corrn(i,1));
-        k2 = DynareOptions.lgyidx2varobs(EstimatedParameters.corrn(i,2));
-        H(k1,k2) = xparam1(i+offset)*sqrt(H(k1,k1)*H(k2,k2));
-        H(k2,k1) = H(k1,k2);
-    end
     % Try to compute the cholesky decomposition of H (possible iff H is positive definite)
     [CholH,testH] = chol(H);
     if testH
@@ -271,17 +246,8 @@ if EstimatedParameters.ncn
             return
         end
     end
-    offset = offset+EstimatedParameters.ncn;
 end
 
-% Update estimated structural parameters in Mode.params.
-if EstimatedParameters.np > 0
-    Model.params(EstimatedParameters.param_vals(:,1)) = xparam1(offset+1:end);
-end
-
-% Update Model.Sigma_e and Model.H.
-Model.Sigma_e = Q;
-Model.H = H;
 
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program
