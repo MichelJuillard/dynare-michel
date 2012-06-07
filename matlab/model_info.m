@@ -1,7 +1,7 @@
 function model_info(varargin);
 %function model_info;
 
-% Copyright (C) 2008-2010 Dynare Team
+% Copyright (C) 2008-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -20,16 +20,16 @@ function model_info(varargin);
 
 global M_;
 if sum(strcmp(varargin,'static')) > 0
-    static = 1;
+    static_ = 1;
 else
-    static = 0;
+    static_ = 0;
 end;
 if sum(strcmp(varargin,'incidence')) > 0
     incidence = 1;
 else
     incidence = 0;
 end;
-if static
+if static_
     fprintf('                                          Informations about %s (static model)\n',M_.fname);
     block_structre_str = 'block_structure_stat';
     block_structure = M_.block_structure_stat;
@@ -62,7 +62,7 @@ if(isfield(M_,block_structre_str))
     end;
     fprintf('===============================================================================================================\n');
     fprintf('\n');
-    if static
+    if static_
         fprintf('%-30s %s','the variable','is used in equations Contemporaneously');
         if(size(block_structure.incidence.sparse_IM,1)>0)
             IM=sortrows(block_structure.incidence.sparse_IM,2);
