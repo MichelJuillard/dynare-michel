@@ -4087,8 +4087,13 @@ variables.
 @vindex oo_.forecast
 @anchor{forecast} Computes the posterior distribution of a forecast on
 @var{INTEGER} periods after the end of the sample used in
-estimation. The result is stored in variable @code{oo_.forecast}
-(@pxref{Forecasting})
+estimation. If no Metropolis-Hastings is computed, the result is
+stored in variable @code{oo_.forecast} and corresponds to the forecast
+at the posterior mode. If a Metropolis-Hastings is computed, the
+distribution of forecasts is stored in variables
+@code{oo_.PointForecast} and
+@code{oo_.MeanForecast}. @xref{Forecasting}) for a description of
+these variables.
 
 @item tex
 @anchor{tex} Requests the printing of results and graphs in TeX tables
@@ -4597,7 +4602,7 @@ more details.
 @section Forecasting
 
 On a calibrated model, forecasting is done using the @code{forecast}
-command. On an estimated command, use the @code{forecast} option of
+command. On an estimated model, use the @code{forecast} option of
 @code{estimation} command.
 
 It is also possible to compute forecasts on a calibrated or estimated
@@ -4678,8 +4683,9 @@ forecast;
 
 @defvr {MATLAB/Octave variable} oo_.forecast
 Variable set by the @code{forecast} command, or by the
-@code{estimation} command if used with the @code{forecast}
-option. Fields are of the form:
+@code{estimation} command if used with the @code{forecast} option and
+if no Metropolis-Hastings has been computed (in that case, the
+forecast is computed for the posterior mode). Fields are of the form:
 @example
 @code{oo_.forecast.@var{FORECAST_MOMENT}.@var{VARIABLE_NAME}}
 @end example
@@ -4714,6 +4720,37 @@ Standard deviation of the posterior distribution of forecasts
 @end table
 
 @end defvr
+
+
+@defvr {MATLAB/Octave variable} oo_.PointForecast
+Set by the @code{estimation} command, if it is used with the
+@code{forecast} option and if either @code{mh_replic > 0} or
+@code{load_mh_file} option is used.
+
+Contains the distribution of forecasts taking into account the
+uncertainty about both parameters and shocks.
+
+Fields are of the form:
+@example
+@code{oo_.PointForecast.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
+@defvr {MATLAB/Octave variable} oo_.MeanForecast
+Set by the @code{estimation} command, if it is used with the
+@code{forecast} option and if either @code{mh_replic > 0} or
+@code{load_mh_file} option is used.
+
+Contains the distribution of forecasts where the uncertainty about
+shocks is averaged out. The distribution of forecasts therefore only
+represents the uncertainty about parameters.
+
+Fields are of the form:
+@example
+@code{oo_.MeanForecast.@var{MOMENT_NAME}.@var{VARIABLE_NAME}}
+@end example
+@end defvr
+
 
 @deffn Command conditional_forecast (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}@dots{}];
 
