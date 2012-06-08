@@ -168,6 +168,11 @@ end
 
 % Set flag related to analytical derivatives.
 analytic_derivation = DynareOptions.analytic_derivation;
+
+if analytic_derivation && DynareOptions.loglinear
+    error('The analytic_derivation and loglinear options are not compatible')
+end
+
 if nargout==1,
     analytic_derivation=0;
 end
