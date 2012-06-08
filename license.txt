@@ -124,7 +124,7 @@ Copyright: 2002-2003 Ralph Schleicher
            2009 Dynare Team
 License: GPL-2+ with Autoconf exception
 
-Files: dynare.el
+Files: scripts/dynare.el
 Copyright: 2010 Yannick Kalantzis
 License: GPL-3+
 
