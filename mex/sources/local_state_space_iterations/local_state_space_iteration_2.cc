@@ -310,7 +310,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   double *ghxx = mxGetPr(prhs[5]);
   double *ghuu = mxGetPr(prhs[6]);
   double *ghxu = mxGetPr(prhs[7]);
-  double *yhat_, *ss;
+  double *yhat_ = NULL, *ss = NULL;
   if (nrhs>9)
     {
       yhat_ = mxGetPr(prhs[8]);

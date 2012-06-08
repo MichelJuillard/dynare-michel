@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2011 Dynare Team
+ * Copyright (C) 2006-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -34,12 +34,11 @@ my_criteria(const double *alphar, const double *alphai, const double *beta)
 void
 mjdgges(double *a, double *b, double *z, double *n, double *sdim, double *eval_r, double *eval_i, double *info)
 {
-  lapack_int i_n, i_info, i_sdim, one, lwork;
+  lapack_int i_n, i_info, i_sdim, lwork;
   double *alphar, *alphai, *beta, *work, *par, *pai, *pb, *per, *pei;
   double *junk;
   lapack_int *bwork;
 
-  one = 1;
   i_n = (lapack_int)*n;
   alphar = mxCalloc(i_n, sizeof(double));
   alphai = mxCalloc(i_n, sizeof(double));

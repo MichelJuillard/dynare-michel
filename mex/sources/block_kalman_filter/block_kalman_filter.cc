@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2011 Dynare Team
+ * Copyright (C) 2007-2012 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -247,7 +247,6 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   for (int i = 0; i < n; i++)
     i_nz_state_var[i] = nz_state_var[i];
 
-  int n_diag = mxGetScalar(prhs[11]);
 #else
   mxArray *M_;
   M_ = mexGetVariable("global", "M_");
@@ -342,7 +341,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   lapack_int* iw = (lapack_int*)mxMalloc(pp * sizeof(lapack_int));
   lapack_int* ipiv = (lapack_int*)mxMalloc(pp * sizeof(lapack_int));
   lapack_int info = 0;
-  double anorm, rcond;
+  double rcond;
   #ifdef BLAS
   mxArray* p_P_t_t1 = mxCreateDoubleMatrix(n, n, mxREAL);
   #else

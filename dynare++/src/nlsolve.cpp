@@ -21,7 +21,7 @@ double GoldenSectionSearch::search(OneDFunction& f, double x1, double x2)
 	if (init_bracket(f, x1, x2, b)) {
 		double fb = f.eval(b);
 		double f1 = f.eval(x1);
-		double f2 = f.eval(x2);
+		f.eval(x2);
 		double dx;
 		do {
 			double w = (b-x1)/(x2-x1);
@@ -38,7 +38,6 @@ double GoldenSectionSearch::search(OneDFunction& f, double x1, double x2)
 				// x is on the left from b
 				if (f1 > fx && fx < fb) {
 					// pickup bracket [f1,fx,fb]
-					f2 = fb;
 					x2 = b;
 					fb = fx;
 					b = x;
@@ -51,7 +50,6 @@ double GoldenSectionSearch::search(OneDFunction& f, double x1, double x2)
 				// x is on the right from b
 				if (f1 > fb && fb < fx) {
 					// pickup bracket [f1,fb,fx]
-					f2 = fx;
 					x2 = x;
 				} else {
 					// pickup bracket [fb,fx,f2]

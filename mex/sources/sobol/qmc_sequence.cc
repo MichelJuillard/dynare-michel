@@ -1,7 +1,7 @@
 /*
 ** Computes Quasi Monte-Carlo sequence.
 **
-** Copyright (C) 2010-2011 Dynare Team
+** Copyright (C) 2010-2012 Dynare Team
 **
 ** This file is part of Dynare (can be used outside Dynare).
 **
@@ -135,7 +135,7 @@ void mexFunction( int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     {
       DYN_MEX_FUNC_ERR_MSG_TXT("qmc_sequence:: The fifth input argument must be a positive scalar!");
     }
-  double *lower_bounds, *upper_bounds;
+  double *lower_bounds = NULL, *upper_bounds = NULL;
   int unit_hypercube_flag = 1;
   if ( (type==0) && (nrhs>4) )
     {

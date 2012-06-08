@@ -3001,11 +3001,15 @@ SparseMatrix::Simulate_Newton_One_Boundary(int blck, int y_size, int it_, int y_
         {
           for (j = 0; j < y_size; j++)
             {
+#ifdef DEBUG
               bool select = false;
+#endif
               for (int i = 0; i < Size; i++)
                 if (j == index_vara[i])
                   {
+#ifdef DEBUG
                     select = true;
+#endif
                     break;
                   }
 #ifdef DEBUG
