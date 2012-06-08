@@ -1,4 +1,4 @@
-function time_series = extended_path(initial_conditions,sample_size)
+function time_series = extended_path_parfor(initial_conditions,sample_size)
 % Stochastic simulation of a non linear DSGE model using the Extended Path method (Fair and Taylor 1983). A time
 % series of size T  is obtained by solving T perfect foresight models.
 %
@@ -14,7 +14,7 @@ function time_series = extended_path(initial_conditions,sample_size)
 %
 % SPECIAL REQUIREMENTS
 
-% Copyright (C) 2009, 2010, 2011 Dynare Team
+% Copyright (C) 2009-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
