@@ -1484,9 +1484,10 @@ in those cases.}
 @item block
 @anchor{block}
 Perform the block decomposition of the model, and exploit it in
-computations. See
+computations (steady-state, deterministic simulation, 
+stochastic simulation with first order approximation and estimation). See
 @uref{http://www.dynare.org/DynareWiki/FastDeterministicSimulationAndSteadyStateComputation,Dynare
-wiki} for details on the algorithm.
+wiki} for details on the algorithms used in deterministic simulation and steady-state computation.
 
 @item bytecode
 @anchor{bytecode}
@@ -2953,6 +2954,8 @@ The covariance matrix of the shocks is specified with the
 When a list of @var{VARIABLE_NAME} is specified, results are displayed
 only for these variables.
 
+The @code{stoch_simul} command with a first order approximation can benefit from the block decomposition of the model (@pxref{block}).
+
 @optionshead
 
 @table @code
@@ -3501,6 +3504,10 @@ DSGE-VAR.
 Note that in order to avoid stochastic singularity, you must have at
 least as many shocks or measurement errors in your model as you have
 observed variables.
+
+The estimation using a first order approximation can benefit from the block 
+decomposition of the model (@pxref{block}).
+
 
 @deffn Command varobs @var{VARIABLE_NAME}@dots{};
 
