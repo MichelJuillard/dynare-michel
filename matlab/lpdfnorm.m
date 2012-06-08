@@ -35,9 +35,9 @@ if nargin<2, a=0; end
 ldens = -log(b) -.5*log(2*pi) - .5*((x-a)./b).*((x-a)./b) ;
 
 if nargout >1 
-    Dldens =  - (1/b)*((x-a)/b) ;
+    Dldens =  - (1./b).*((x-a)./b) ;
 end
 
 if nargout == 3 
-    D2ldens =  - (1/b)^2 ;
+    D2ldens =  - (1./b).^2 ;
 end
