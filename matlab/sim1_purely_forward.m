@@ -1,4 +1,4 @@
-function sim1_purely_forward
+function sim1_purely_forward()
 % Performs deterministic simulation of a purely forward model
 
 % Copyright (C) 2012 Dynare Team

@@ -1,4 +1,4 @@
-function simul
+function simul()
 % Computes deterministic simulations
 %  
 % INPUTS

@@ -1,4 +1,4 @@
-function sim1_purely_backward
+function sim1_purely_backward()
 % Performs deterministic simulation of a purely backward model
 
 % Copyright (C) 2012 Dynare Team

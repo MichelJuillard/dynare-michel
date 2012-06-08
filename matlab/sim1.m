@@ -1,4 +1,4 @@
-function sim1
+function sim1()
 % function sim1
 % Performs deterministic simulations with lead or lag on one period.
 % Uses sparse matrices.

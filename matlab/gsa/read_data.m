@@ -1,4 +1,4 @@
-function [gend, data] = read_data
+function [gend, data] = read_data()
 % Written by Marco Ratto
 % Joint Research Centre, The European Commission,
 % (http://eemc.jrc.ec.europa.eu/),

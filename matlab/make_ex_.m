@@ -1,4 +1,4 @@
-function make_ex_
+function make_ex_()
 % forms oo_.exo_simul and oo_.exo_det_simul
 %
 % INPUTS

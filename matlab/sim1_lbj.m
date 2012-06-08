@@ -1,4 +1,4 @@
-function sim1_lbj
+function sim1_lbj()
 % function sim1_lbj
 % performs deterministic simulations with lead or lag on one period
 % using the historical LBJ algorithm

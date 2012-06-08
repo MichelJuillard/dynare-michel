@@ -1,4 +1,4 @@
-function make_y_
+function make_y_()
 % function make_y_
 % forms oo_.endo_simul as guess values for deterministic simulations
 %  
