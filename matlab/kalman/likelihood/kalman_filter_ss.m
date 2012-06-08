@@ -81,6 +81,7 @@ t    = start;              % Initialization of the time index.
 likk = zeros(smpl,1);      % Initialization of the vector gathering the densities.
 LIK  = Inf;                % Default value of the log likelihood.
 notsteady = 0;
+asy_hess=0;
 if nargin<12
     analytic_derivation = 0;
 end
@@ -91,10 +92,16 @@ if  analytic_derivation == 0,
 else
     k = size(DT,3);                                 % number of structural parameters
     DLIK  = zeros(k,1);                             % Initialization of the score.
+    dlikk = zeros(smpl,k);
     if analytic_derivation==2,
         Hess  = zeros(k,k);                             % Initialization of the Hessian
     else
-        Hess=[];
+        asy_hess=D2a;
+        if asy_hess,
+            Hess  = zeros(k,k);                             % Initialization of the Hessian
+        else
+            Hess=[];
+        end
     end
 end
 
@@ -109,12 +116,13 @@ while t <= last
         if analytic_derivation==2,
             [Da,junk,DLIKt,D2a,junk2, Hesst] = computeDLIK(k,tmp,Z,Zflag,v,T,K,[],iF,Da,DYss,DT,[],[],[],notsteady,D2a,D2Yss,D2T,[],[]);
         else
-            [Da,junk,DLIKt] = computeDLIK(k,tmp,Z,Zflag,v,T,K,[],iF,Da,DYss,DT,[],[],[],notsteady);
+            [Da,junk,DLIKt,Hesst] = computeDLIK(k,tmp,Z,Zflag,v,T,K,[],iF,Da,DYss,DT,[],[],[],notsteady);
         end
         DLIK = DLIK + DLIKt;
-        if analytic_derivation==2,
+        if analytic_derivation==2 || asy_hess,
             Hess = Hess + Hesst;
         end
+        dlikk(t-start+1,:)=DLIKt;
     end
     a = T*tmp;
     likk(t-start+1) = transpose(v)*iF*v;
@@ -129,9 +137,17 @@ likk = .5*(likk + pp*log(2*pi));
 
 % Sum the observation's densities (minus the likelihood)
 LIK = sum(likk);
-if analytic_derivation==2,
-    LIK={LIK,DLIK,Hess};
+if analytic_derivation,
+    dlikk = dlikk/2;
+    DLIK = DLIK/2;
+    likk = {likk, dlikk};
 end
-if analytic_derivation==1,
+if analytic_derivation==2 || asy_hess,
+    if asy_hess==0,
+        Hess = Hess + tril(Hess,-1)';
+    end
+    Hess = -Hess/2;
+    LIK={LIK,DLIK,Hess};
+elseif analytic_derivation==1,
     LIK={LIK,DLIK};
 end

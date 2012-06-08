@@ -30,7 +30,7 @@ if notsteady,
             DF(j)=Z*DP(:,:,j)*Z'+DH;
             DK(:,j) = (DP(:,:,j)*Z')/F-PZ*DF(j)/F^2;
         end
-        if nargout>3
+        if nargout>4
             D2F = zeros(k,k);
             D2v = zeros(k,k);
             D2K = zeros(rows(K),k,k);
@@ -50,7 +50,7 @@ if notsteady,
         Dv   = -Da(Z,:) - DYss(Z,:);
         DF = squeeze(DP(Z,Z,:))+DH';
         DK = squeeze(DP(:,Z,:))/F-PZ*transpose(DF)/F^2;
-        if nargout>3
+        if nargout>4
             D2v   = squeeze(-D2a(Z,:,:) - D2Yss(Z,:,:));
             D2F = squeeze(D2P(Z,Z,:,:));
             D2K = squeeze(D2P(:,Z,:,:))/F;
@@ -60,7 +60,7 @@ if notsteady,
             end
         end
     end
-    if nargout>3
+    if nargout>4
         DD2K(:,indx,:,:)=D2K;
         DD2F(indx,:,:)=D2F;
     end
@@ -69,13 +69,13 @@ if notsteady,
 else
     DK = squeeze(DDK(:,indx,:));
     DF = DDF(indx,:)';
-    if nargout>3
+    if nargout>4
         D2K = squeeze(DD2K(:,indx,:,:));
         D2F = squeeze(DD2F(indx,:,:));
     end
     if Zflag
         Dv   = -Z*Da(:,:) - Z*DYss(:,:);
-        if nargout>3
+        if nargout>4
             D2v = zeros(k,k);
             for j=1:k,
                 D2v(:,j)   = -Z*D2a(:,:,j) - Z*D2Yss(:,:,j);
@@ -83,7 +83,7 @@ else
         end
     else
         Dv   = -Da(Z,:) - DYss(Z,:);
-        if nargout>3
+        if nargout>4
             D2v   = squeeze(-D2a(Z,:,:) - D2Yss(Z,:,:));
         end
     end
@@ -93,10 +93,15 @@ DLIK = DF/F + 2*Dv'/F*v - v^2/F^2*DF;
 if nargout==6
     Hesst = D2F/F-1/F^2*(DF*DF') + 2*D2v/F*v + 2*(Dv'*Dv)/F - 2*(DF*Dv)*v/F^2 ...
         - v^2/F^2*D2F - 2*v/F^2*(Dv'*DF') + 2*v^2/F^3*(DF*DF');
+elseif nargout==4,
+    D2a = 1/F^2*(DF*DF') + 2*(Dv'*Dv)/F ;
+%     D2a = -1/F^2*(DF*DF') + 2*(Dv'*Dv)/F  + 2*v^2/F^3*(DF*DF') ...
+%         - 2*(DF*Dv)*v/F^2 - 2*v/F^2*(Dv'*DF');
+%     D2a = +2*(Dv'*Dv)/F + (DF' * DF)/F^2;
 end
 
 Da = Da + DK*v+K*Dv;
-if nargout>3
+if nargout>4
     
     D2a = D2a + D2K*v;
     for j=1:k,
@@ -121,7 +126,7 @@ if notsteady,
             DP1(:,:,j)=DP(:,:,j) - (DP(:,Z,j))*K'-PZ*DK(:,j)';
         end
     end
-    if nargout>3,
+    if nargout>4,
         if Zflag,
             for j=1:k,
                 D2P = D2P;

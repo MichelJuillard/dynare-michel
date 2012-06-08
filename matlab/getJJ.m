@@ -28,10 +28,10 @@ warning('off','MATLAB:divideByZero')
 if kronflag == -1,
     fun = 'thet2tau';
     params0 = M_.params;
-    JJ = fjaco(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],indx,indexo,1,mf,nlags,useautocorr);
+    JJ = fjaco(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],M_, oo_, indx,indexo,1,mf,nlags,useautocorr);
     M_.params = params0;
     params0 = M_.params;
-    H = fjaco(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],indx,indexo,0,mf,nlags,useautocorr);
+    H = fjaco(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],M_, oo_, indx,indexo,0,mf,nlags,useautocorr);
     M_.params = params0;
     assignin('base','M_', M_);
     assignin('base','oo_', oo_);

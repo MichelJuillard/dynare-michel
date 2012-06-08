@@ -332,7 +332,7 @@ if (kalman_algo == 2) || (kalman_algo == 4)
     else
         if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
             H = diag(H);
-            mmm = mm;
+            mmm = mm; 
         else
             Z = [Z, eye(pp)];
             T = blkdiag(T,zeros(pp));
@@ -381,7 +381,7 @@ switch DynareOptions.lik_init
         % Use standard kalman filter except if the univariate filter is explicitely choosen.
     if kalman_algo == 0
         kalman_algo = 3;
-    elseif ~((kalman_algo == 3) || (kalman_algo == 4))
+    elseif ~((kalman_algo == 3) || (kalman_algo == 4)) 
             error(['diffuse filter: options_.kalman_algo can only be equal ' ...
                    'to 0 (default), 3 or 4'])
     end
@@ -455,7 +455,7 @@ switch DynareOptions.lik_init
         DynareOptions.lik_init = 1;
         Pstar = lyapunov_symm(T,R*Q*R',DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
     end
-    Pinf = [];
+    Pinf  = [];
     a = zeros(mm,1);
     Zflag = 0;
   otherwise
@@ -471,7 +471,11 @@ if analytic_derivation,
     no_DLIK = 0;
     full_Hess = analytic_derivation==2;
     asy_Hess = analytic_derivation==-2;
+    outer_product_gradient = analytic_derivation==-1;
     if asy_Hess,
+        analytic_derivation=1;
+    end
+    if outer_product_gradient,
         analytic_derivation=1;
     end
     DLIK = [];
@@ -516,7 +520,7 @@ if analytic_derivation,
     DT = DT(iv,iv,:);
     DOm = DOm(iv,iv,:);
     DYss = DYss(iv,:);
-    DH=zeros([size(H),length(xparam1)]);
+    DH=zeros([length(H),length(H),length(xparam1)]);
     DQ=zeros([size(Q),length(xparam1)]);
     DP=zeros([size(T),length(xparam1)]);
     if full_Hess,
@@ -578,7 +582,7 @@ if analytic_derivation,
         end
     end
     if analytic_derivation==1,
-        analytic_deriv_info={analytic_derivation,DT,DYss,DOm,DH,DP};
+        analytic_deriv_info={analytic_derivation,DT,DYss,DOm,DH,DP,asy_Hess};
     else
         analytic_deriv_info={analytic_derivation,DT,DYss,DOm,DH,DP,D2T,D2Yss,D2Om,D2H,D2P};
     end
@@ -614,6 +618,8 @@ if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
     if analytic_derivation,
         LIK1=LIK;
         LIK=LIK1{1};
+        lik1=lik;
+        lik=lik1{1};
     end
     if isinf(LIK)
         if kalman_algo == 1
@@ -645,6 +651,7 @@ if (kalman_algo==2) || (kalman_algo==4)
             if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
                 H = diag(H);
                 mmm = mm;
+                clear tmp
                 if analytic_derivation,
                     for j=1:pp,
                         tmp(j,:)=DH(j,j,:);
@@ -676,6 +683,8 @@ if (kalman_algo==2) || (kalman_algo==4)
     if analytic_derivation,
         LIK1=LIK;
         LIK=LIK1{1};
+        lik1=lik;
+        lik=lik1{1};
     end
     if DynareOptions.lik_init==3
         LIK = LIK+dLIK;
@@ -690,13 +699,17 @@ if analytic_derivation
         DLIK = LIK1{2};
         %                 [DLIK] = score(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,Z,kalman_tol,riccati_tol);
     end
-    if full_Hess,
+    if full_Hess ,
         Hess = -LIK1{3};
         %                     [Hess, DLL] = get_Hessian(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,D2T,D2Yss,D2Om,D2H,D2P,start,Z,kalman_tol,riccati_tol);
         %                     Hess0 = getHessian(Y,T,DT,D2T, R*Q*transpose(R),DOm,D2Om,Z,DYss,D2Yss);
     end
     if asy_Hess,
-        [Hess] = AHessian(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,Z,kalman_tol,riccati_tol);
+%         if ~((kalman_algo==2) || (kalman_algo==4)),
+%             [Hess] = AHessian(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,Z,kalman_tol,riccati_tol);
+%         else
+        Hess = LIK1{3};
+%         end
     end
 end
 
@@ -724,6 +737,11 @@ if analytic_derivation
     end
     if no_DLIK==0
         DLIK = DLIK - dlnprior';
+    end
+    if outer_product_gradient,
+        dlik = lik1{2};
+        dlik=[- dlnprior; dlik(start:end,:)];
+        Hess = dlik'*dlik;
     end
 else
     lnprior = priordens(xparam1,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
