@@ -19,16 +19,15 @@ ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = \
 	matlab \
 	contrib \
-	uncrustify.cfg \
 	NEWS \
 	license.txt \
-	dynare.el \
 	windows/dynare.nsi \
 	windows/mexopts-win32.bat \
 	windows/mexopts-win64.bat \
 	windows/README.txt \
 	osx \
-	examples
+	examples \
+	scripts
 
 dist-hook:
 	rm -rf `find $(distdir)/matlab $(distdir)/examples -name *~`
