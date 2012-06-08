@@ -1,4 +1,4 @@
-function tau = thet2tau(params, indx, indexo, flagmoments,mf,nlags,useautocorr)
+function tau = thet2tau(params, M_, oo_, indx, indexo, flagmoments,mf,nlags,useautocorr)
 
 %
 % Copyright (C) 2011 Dynare Team
@@ -18,17 +18,17 @@ function tau = thet2tau(params, indx, indexo, flagmoments,mf,nlags,useautocorr)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ oo_ options_
+global options_
 
 if nargin==1,
     indx = [1:M_.param_nbr];
     indexo = [];
 end
 
-if nargin<4,
+if nargin<6,
     flagmoments=0;
 end
-if nargin<7 || isempty(useautocorr),
+if nargin<9 || isempty(useautocorr),
     useautocorr=0;
 end
 
