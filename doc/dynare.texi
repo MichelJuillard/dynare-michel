@@ -2875,7 +2875,8 @@ The simulated endogenous variables are available in global matrix
 @defvr {MATLAB/Octave variable} oo_.endo_simul
 This variable stores the result of a deterministic simulation
 (computed by @code{simul}) or of a stochastic simulation (computed by
-@code{stoch_simul} with the @code{periods} option).
+@code{stoch_simul} with the @code{periods} option or by
+@code{extended_path}).
 
 The variables are arranged row by row, in order of declaration (as in
 @code{M_.endo_names}). Note that this variable also contains initial
@@ -2883,16 +2884,38 @@ and terminal conditions, so it has more columns than the value of
 @code{periods} option.
 @end defvr
 
+@anchor{oo_.exo_simul}
+@defvr {MATLAB/Octave variable} oo_.exo_simul
+This variable stores the path of exogenous variables during a
+simulation (computed by @code{simul}, @code{stoch_simul} or
+@code{extended_path}).
+
+The variables are arranged in columns, in order of declaration (as in
+@code{M_.endo_names}). Periods are in rows. Note that this convention
+regarding columns and rows is the opposite of the convention for
+@code{oo_.endo_simul}!
+
+@end defvr
+
 @node Stochastic solution and simulation
 @section Stochastic solution and simulation
 
 In a stochastic context, Dynare computes one or several simulations
-corresponding to a random draw of the shocks. Dynare uses a Taylor
+corresponding to a random draw of the shocks.
+
+The main algorithm for solving stochastic models relies on a Taylor
 approximation, up to third order, of the expectation functions (see
 @cite{Judd (1996)}, @cite{Collard and Juillard (2001a)}, @cite{Collard
 and Juillard (2001b)}, and @cite{Schmitt-Grohé and Uríbe (2004)}). The
 details of the Dynare implementation of the first order solution are
-given in @cite{Villemot (2011)}.
+given in @cite{Villemot (2011)}. Such a solution is computed using
+the @code{stoch_simul} command.
+
+As an alternative, it is possible to compute a simulation to a
+stochastic model using the @emph{extended path} method presented by
+@cite{Fair and Taylor (1983)}. This method is especially useful when
+there are strong nonlinearities or binding constraints. Such a
+solution is computed using the @code{extended_path} command.
 
 @menu
 * Computing the stochastic solution::  
@@ -3052,7 +3075,9 @@ periods to use in the simulations. Values of the @code{initval} block,
 possibly recomputed by @code{steady}, will be used as starting point
 for the simulation. The simulated endogenous variables are made
 available to the user in a vector for each variable and in the global
-matrix @code{oo_.endo_simul} (@pxref{oo_.endo_simul}). Default: @code{0}.
+matrix @code{oo_.endo_simul} (@pxref{oo_.endo_simul}). The simulated
+exogenous variables are made available in @code{oo_.exo_simul}
+(@pxref{oo_.exo_simul}). Default: @code{0}.
 
 @item qz_criterium = @var{DOUBLE}
 Value used to split stable from unstable eigenvalues in reordering the
@@ -3249,6 +3274,37 @@ rules or transition equations expressing the current value of the endogenous
 variables of the model as function of the previous state of the model and
 shocks oberved at the beginning of the period. The decision rules are stored
 in the structure @code{oo_.dr} which is described below.
+
+@deffn Command extended_path ;
+@deffnx Command extended_path (@var{OPTIONS}@dots{}) ;
+
+@descriptionhead
+
+@code{extended_path} solves a stochastic (@i{i.e.} rational
+expectations) model, using the @emph{extended path} method presented
+by @cite{Fair and Taylor (1983)}.
+
+This function first computes a random path for the exogenous variables
+(stored in @code{oo_.exo_simul}, @pxref{oo_.exo_simul}) and then
+computes the corresponding path for endogenous variables, taking the
+steady state as starting point. The result of the simulation is stored
+in @code{oo_.endo_simul} (@pxref{oo_.endo_simul}).
+
+@optionshead
+
+@table @code
+
+@item periods = @var{INTEGER}
+The number of periods for which the simulation is to be computed. No
+default value, mandatory option.
+
+@item solver_periods = @var{INTEGER}
+The number of periods used to compute the approximate solution
+at every iteration of the algorithm. Default: @code{200}.
+
+@end table
+
+@end deffn
 
 @node Typology and ordering of variables
 @subsection Typology and ordering of variables
