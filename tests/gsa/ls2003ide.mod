@@ -66,23 +66,14 @@ disp('CREATE SCREENING SAMPLE, CHECK FOR STABILITY AND PERFORM A SCREENING FOR I
 disp('TYPE II ERRORS')
 disp(' ')
 disp('PRESS ENTER TO CONTUNUE');
-pause;
+pause(5);
 
 dynare_sensitivity(identification=1, morris_nliv=6, morris_ntra=50);
 
 disp('CREATE MC SAMPLE, CHECK FOR STABILITY AND PERFORM IDENTIFICATION ANALYSIS');
-disp('TYPE I (main effects)')
-disp(' ')
-disp('PRESS ENTER TO CONTUNUE');
-pause;
-dynare_sensitivity(identification=1, morris=0);
-
-disp('USE PREVIOUS MC SAMPLE AND PERFORM IDENTIFICATION ANALYSIS');
 disp('WIth analytic derivatives')
 disp(' ')
 disp('PRESS ENTER TO CONTUNUE');
-pause;
-dynare_sensitivity(identification=1, load_stab=1, stab=0, morris=2);
+pause(5);
+dynare_sensitivity(identification=1, morris=2);
 
-
-stoch_simul(order=1,irf=40);
