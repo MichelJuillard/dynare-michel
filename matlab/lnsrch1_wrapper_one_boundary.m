@@ -21,7 +21,7 @@ function r = lnsrch1_wrapper_one_boundary(ya, y_index, fname, y, x, params, stea
 %   none.
 %  
 
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2009-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

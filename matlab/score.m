@@ -8,7 +8,7 @@ function [DLIK] = score(T,R,Q,H,P,Y,DT,DYss,DOm,DH,DP,start,mf,kalman_tol,riccat
 % NOTE: the derivative matrices (DT,DR ...) are 3-dim. arrays with last
 % dimension equal to the number of structural parameters
 
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2009-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

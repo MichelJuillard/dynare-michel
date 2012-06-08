@@ -11,7 +11,7 @@ function bvar_irf(nlags,identification)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2007-2009,2012 Dynare Team
+% Copyright (C) 2007-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -15,7 +15,7 @@ function [posterior_mean,posterior_covariance,posterior_mode,posterior_kernel_at
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2006-2010 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

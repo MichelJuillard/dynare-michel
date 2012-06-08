@@ -1,6 +1,6 @@
 function osr(var_list,params,i_var,W)
 
-% Copyright (C) 2001-2010,2012 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

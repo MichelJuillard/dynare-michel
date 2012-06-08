@@ -81,7 +81,7 @@ function [dLIK, dlikk, a, Pstar, llik] = univariate_kalman_filter_d(data_index, 
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2004-2011 Dynare Team
+% Copyright (C) 2004-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

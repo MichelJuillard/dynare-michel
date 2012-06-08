@@ -1,7 +1,7 @@
 function [cmm, mm] = simulated_moment_uncertainty(indx, periods, replic)
 
 %
-% Copyright (C) 2009-2010 Dynare Team
+% Copyright (C) 2009-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -1,7 +1,7 @@
 function [loss,vx,junk,exit_flag]=osr_obj(x,i_params,i_var,weights);
 % objective function for optimal simple rules (OSR)
 
-% Copyright (C) 2005-2009 Dynare Team
+% Copyright (C) 2005-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

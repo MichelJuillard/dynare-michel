@@ -11,7 +11,7 @@ function [g, badg, f0, f1, f2] = numgrad3(fcn,f0,x,epsilon,varargin)
 % http://sims.princeton.edu/yftp/optimize/mfiles/numgrad.m
 
 % Copyright (C) 1993-2007 Christopher Sims
-% Copyright (C) 2008-2010 Dynare Team
+% Copyright (C) 2008-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

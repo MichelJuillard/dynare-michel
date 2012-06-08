@@ -1,7 +1,7 @@
 function []=graph_decomp(z,shock_names,endo_names,i_var,initial_date)
 %function []=graph_decomp(z,varlist,initial_period,freq)
 
-% Copyright (C) 2010 Dynare Team
+% Copyright (C) 2010-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

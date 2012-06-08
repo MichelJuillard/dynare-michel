@@ -24,7 +24,7 @@ function oo = evaluate_smoother(parameters)
 % [1] This function use persistent variables for the dataset and the description of the missing observations. Consequently, if this function
 %     is called more than once (by changing the value of parameters) the sample *must not* change.
 
-% Copyright (C) 2010-2011 Dynare Team
+% Copyright (C) 2010-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

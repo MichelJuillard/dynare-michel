@@ -101,7 +101,7 @@ function [fval,exit_flag,ys,trend_coeff,info,Model,DynareOptions,BayesInfo,Dynar
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2010, 2011, 2012 Dynare Team
+% Copyright (C) 2010-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

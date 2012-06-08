@@ -16,7 +16,7 @@ function sim1_lbj()
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 1996-2010 Dynare Team
+% Copyright (C) 1996-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -15,7 +15,7 @@ function [nvar,vartan,CorrFileNumber] = dsge_simulated_theoretical_correlation(S
 %   vartan         [char]
 %   CorrFileNumber [integer]
 
-% Copyright (C) 2007-2009 Dynare Team
+% Copyright (C) 2007-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -18,7 +18,7 @@ function hessian_mat = hessian(func,x,gstep,varargin)
 %    none
 %  
 
-% Copyright (C) 2001-2009 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

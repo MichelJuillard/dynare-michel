@@ -33,7 +33,7 @@ function [M,oo,info,ip,ix,ixd]=homotopy3(values, step_nbr, M, options, oo)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2008-2009 Dynare Team
+% Copyright (C) 2008-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

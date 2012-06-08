@@ -11,7 +11,7 @@ function [mhname,info] = get_name_of_the_last_mh_file(M_)
 %                          file. Otherwise info is equal to zero (a likely reason for this is 
 %                          that the mcmc simulations were not completed).      
 
-% Copyright (C) 2008-2010 Dynare Team
+% Copyright (C) 2008-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

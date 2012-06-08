@@ -14,7 +14,7 @@ function [logged_prior_density, dlprior, d2lprior] = priordens(x, pshape, p6, p7
 %    logged_prior_density  [double]  scalar, log of the prior density evaluated at x.
 %
 
-% Copyright (C) 2003-2010 Dynare Team
+% Copyright (C) 2003-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -36,7 +36,7 @@ function T = reduced_rank_cholesky(X)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2009, 2010, 2011 Dynare Team
+% Copyright (C) 2009-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -5,7 +5,7 @@ function [omega,f] = UnivariateSpectralDensity(dr,var_list)
 % 
 % Adapted from th_autocovariances.m.  
 
-% Copyright (C) 2006-2011 Dynare Team
+% Copyright (C) 2006-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

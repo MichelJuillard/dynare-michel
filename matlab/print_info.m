@@ -10,7 +10,7 @@ function print_info(info,noprint)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2011 Dynare Team
+% Copyright (C) 2005-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

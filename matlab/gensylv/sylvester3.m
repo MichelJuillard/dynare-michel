@@ -1,7 +1,7 @@
 function x=sylvester3(a,b,c,d)
 % solves a*x+b*x*c=d where d is [n x m x p]
 
-% Copyright (C) 2005-2009 Dynare Team
+% Copyright (C) 2005-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

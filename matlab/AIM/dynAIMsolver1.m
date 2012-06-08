@@ -46,7 +46,7 @@ function [dr,aimcode,rts]=dynAIMsolver1(jacobia_,M_,dr)
 %
 % GP July 2008 
 
-% Copyright (C) 2008-2009 Dynare Team
+% Copyright (C) 2008-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

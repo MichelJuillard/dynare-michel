@@ -2,7 +2,7 @@ function [H, dA, dOm, Hss, gp, d2A, d2Om, H2ss] = getH(A, B, M_,oo_,kronflag,ind
 
 % computes derivative of reduced form linear model w.r.t. deep params
 %
-% Copyright (C) 2010-2011 Dynare Team
+% Copyright (C) 2010-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

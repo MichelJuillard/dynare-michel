@@ -26,7 +26,7 @@ function imcforecast(constrained_paths, constrained_vars, options_cond_fcst)
 %  [1] Results are stored in a structure which is saved in a mat file called conditional_forecasts.mat.
 %  [2] Use the function plot_icforecast to plot the results. 
 
-% Copyright (C) 2006-2010 Dynare Team
+% Copyright (C) 2006-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -17,7 +17,7 @@ function [x,fval,exitflag] = simplex_optimization_routine(objective_function,x,o
 %
 %
 
-% Copyright (C) 2010, 2011 Dynare Team
+% Copyright (C) 2010-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

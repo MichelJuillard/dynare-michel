@@ -26,7 +26,7 @@ function [x,u] = lyapunov_symm(a,b,third_argument,lyapunov_complex_threshold,met
 % SPECIAL REQUIREMENTS
 %   None
 
-% Copyright (C) 2006-2010 Dynare Team
+% Copyright (C) 2006-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

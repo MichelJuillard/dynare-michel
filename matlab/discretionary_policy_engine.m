@@ -10,7 +10,7 @@ function [H,G,retcode]=discretionary_policy_engine(AAlag,AA0,AAlead,BB,bigw,inst
 % weight on the y_t vector and Q the weight on the x_t vector of
 % instruments.
 
-% Copyright (C) 2007-2011 Dynare Team
+% Copyright (C) 2007-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

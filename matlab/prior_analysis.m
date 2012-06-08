@@ -1,5 +1,5 @@
 function oo_ = prior_analysis(type,arg1,arg2,arg3,options_,M_,oo_,estim_params_)
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2009-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

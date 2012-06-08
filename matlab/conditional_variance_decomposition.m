@@ -16,7 +16,7 @@ function ConditionalVarianceDecomposition = conditional_variance_decomposition(S
 %
 % [1] In this version, absence of measurement errors is assumed...
 
-% Copyright (C) 2010 Dynare Team
+% Copyright (C) 2010-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

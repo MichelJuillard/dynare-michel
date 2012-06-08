@@ -20,7 +20,7 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,bad_cond_flag,varargin)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2010 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

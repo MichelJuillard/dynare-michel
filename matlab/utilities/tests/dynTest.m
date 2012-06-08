@@ -32,7 +32,7 @@ function dynTest(fun,dynare_path)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 % stephane DOT adjemian AT univ DASH lemans DOT fr
 %
 % This file is part of Dynare.

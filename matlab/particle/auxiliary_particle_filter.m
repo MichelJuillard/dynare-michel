@@ -20,7 +20,7 @@ function [LIK,lik] = auxiliary_particle_filter(ReducedForm,Y,start,DynareOptions
 % NOTES
 %   The vector "lik" is used to evaluate the jacobian of the likelihood.
 
-% Copyright (C) 2011, 2012 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

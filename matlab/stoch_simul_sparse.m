@@ -1,7 +1,7 @@
 function info=stoch_simul_sparse(var_list)
 % This file is a modified version of stoch_simul.m: common parts should be factorized!
 
-% Copyright (C) 2001-2010 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -1,5 +1,5 @@
 function [info,description] = check_prior_analysis_data(type,M_)
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2009-2011 Dynare Team
 %
 % This file is part of Dynare.
 %

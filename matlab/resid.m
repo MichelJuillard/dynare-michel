@@ -12,7 +12,7 @@ function z = resid(junk)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2011 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

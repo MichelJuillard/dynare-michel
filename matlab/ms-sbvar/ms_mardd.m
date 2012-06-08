@@ -6,7 +6,7 @@ function ms_mardd(options_)
 %
 % Tao Zha, September 1999.  Quick revisions, May 2003.  Final revision, September 2004.
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
