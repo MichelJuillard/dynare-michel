@@ -130,7 +130,9 @@ if info(1)==0,
             options_.noprint = 1;
             options_.order = 1;
             options_.periods = data_info.info.ntobs+100;
-            options_.kalman_algo = 1;
+            if options_.kalman_algo > 2,
+                options_.kalman_algo = 1;
+            end
             options_.analytic_derivation = -2;
             info = stoch_simul(options_.varobs);
             data_info.data=oo_.endo_simul(options_.varobs_id,100+1:end);

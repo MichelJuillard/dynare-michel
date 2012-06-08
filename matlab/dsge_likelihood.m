@@ -520,7 +520,7 @@ if analytic_derivation,
     DT = DT(iv,iv,:);
     DOm = DOm(iv,iv,:);
     DYss = DYss(iv,:);
-    DH=zeros([size(H),length(xparam1)]);
+    DH=zeros([length(H),length(H),length(xparam1)]);
     DQ=zeros([size(Q),length(xparam1)]);
     DP=zeros([size(T),length(xparam1)]);
     if full_Hess,
@@ -651,6 +651,7 @@ if (kalman_algo==2) || (kalman_algo==4)
             if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
                 H = diag(H);
                 mmm = mm;
+                clear tmp
                 if analytic_derivation,
                     for j=1:pp,
                         tmp(j,:)=DH(j,j,:);
@@ -704,11 +705,11 @@ if analytic_derivation
         %                     Hess0 = getHessian(Y,T,DT,D2T, R*Q*transpose(R),DOm,D2Om,Z,DYss,D2Yss);
     end
     if asy_Hess,
-        if ~((kalman_algo==2) || (kalman_algo==4)),
-            [Hess] = AHessian(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,Z,kalman_tol,riccati_tol);
-        else
+%         if ~((kalman_algo==2) || (kalman_algo==4)),
+%             [Hess] = AHessian(T,R,Q,H,Pstar,Y,DT,DYss,DOm,DH,DP,start,Z,kalman_tol,riccati_tol);
+%         else
         Hess = LIK1{3};
-        end
+%         end
     end
 end
 
