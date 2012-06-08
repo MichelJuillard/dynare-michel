@@ -768,6 +768,8 @@ if opt_gsa.morris==1,
   %     eval(['print -dpdf ' OutputDirectoryName '/' fname_ '_morris_redform']);
 
 elseif opt_gsa.morris==3,
+    return
+    
   np=estim_params_.np;
   na=(4*np+1)*opt_gsa.Nsam;
   for j=1:j0,

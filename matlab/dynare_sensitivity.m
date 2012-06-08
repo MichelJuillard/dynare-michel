@@ -79,6 +79,11 @@ if options_gsa.identification,
     options_gsa = set_default_option(options_gsa,'ar',1);
     options_gsa = set_default_option(options_gsa,'useautocorr',0);
     options_.ar = options_gsa.ar;
+    if options_gsa.morris==0,
+        disp('The option morris = 0 is no longer supported (Type I errors)')
+        disp('This option is reset at morris = 2 (local identification analysis).')
+        options_gsa.morris=2;
+    end
     if options_gsa.morris==2,
         if isfield(options_,'options_ident'),
             options_.options_ident.load_ident_files = options_gsa.load_ident_files;
@@ -122,7 +127,13 @@ if options_gsa.redform,
     options_gsa.ppost=0;
 end
 
-if options_gsa.morris==1 || options_gsa.morris==3,
+if options_gsa.morris>2,
+    disp('The option morris = 3 is no longer supported')
+    disp('the option is reset at morris = 1 .')
+    options_gsa.morris=1;
+end
+   
+if options_gsa.morris==1,
     if ~options_gsa.identification,
         options_gsa.redform=1;
     end
@@ -134,12 +145,12 @@ if options_gsa.morris==1 || options_gsa.morris==3,
     options_gsa.load_rmse=0;
     options_gsa.alpha2_stab=1;
     options_gsa.ksstat=1;
-    if options_gsa.morris==3,
-        options_gsa = set_default_option(options_gsa,'Nsam',256);
-        OutputDirectoryName = CheckPath('gsa/identif',M_.dname);
-    else
+%     if options_gsa.morris==3,
+%         options_gsa = set_default_option(options_gsa,'Nsam',256);
+%         OutputDirectoryName = CheckPath('gsa/identif',M_.dname);
+%     else
         OutputDirectoryName = CheckPath('gsa/screen',M_.dname);
-    end
+%     end
 else
     OutputDirectoryName = CheckPath('gsa',M_.dname);
 end

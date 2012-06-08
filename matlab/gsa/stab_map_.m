@@ -122,9 +122,9 @@ if fload==0,
         Nsam=size(lpmat,1);
         lpmat0 = lpmat(:,1:nshock);
         lpmat = lpmat(:,nshock+1:end);
-    elseif opt_gsa.morris==3,
-        lpmat = prep_ide(Nsam,np,5);
-        Nsam=size(lpmat,1);
+%     elseif opt_gsa.morris==3,
+%         lpmat = prep_ide(Nsam,np,5);
+%         Nsam=size(lpmat,1);
     else
         if np<52 & ilptau>0,
             [lpmat] = qmc_sequence(np, int64(0), 0, Nsam)';
