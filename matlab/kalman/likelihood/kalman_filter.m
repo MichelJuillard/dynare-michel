@@ -128,6 +128,7 @@ asy_hess=0;
 if  analytic_derivation == 0,
     DLIK=[];
     Hess=[];
+    LIKK=[];
 else
     k = size(DT,3);                                 % number of structural parameters
     DLIK  = zeros(k,1);                             % Initialization of the score.
