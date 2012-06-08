@@ -50,7 +50,7 @@ end
 %         DOm = DR(:,:,ii)*Q*transpose(R) + R*DQ(:,:,ii)*transpose(R) + R*Q*transpose(DR(:,:,ii)); 
 %     end
     
-    while notsteady & t<smpl
+    while notsteady && t<smpl
         t  = t+1;
         v  = Y(:,t)-a(mf);
         F  = P(mf,mf) + H;
@@ -112,7 +112,7 @@ end
             a = T*(a+K*v);
         lik(t) = transpose(v)*iF*v;
         end
-        AHess = AHess + .5*(smpl+t0-1)*(vecDPmf' * kron(iF,iF) * vecDPmf);
+        AHess = AHess + .5*(smpl-t0+1)*(vecDPmf' * kron(iF,iF) * vecDPmf);
         if nargout > 1
         for ii = 1:k
 %             DLIK(ii,1)  = DLIK(ii,1) + (smpl-t0+1)*trace( iF*DF(:,:,ii) );

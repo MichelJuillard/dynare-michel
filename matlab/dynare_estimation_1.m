@@ -213,22 +213,29 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         else
             flag = 1;
         end
-        if ~exist('igg','var'),  % by M. Ratto
-            hh=[];
-            gg=[];
-            igg=[];
-        end   % by M. Ratto
         if isfield(options_,'ftol')
             crit = options_.ftol;
         else
             crit = 1.e-5;
+        end
+        if options_.analytic_derivation,
+            analytic_grad=1;
+            ana_deriv = options_.analytic_derivation;
+            options_.analytic_derivation = -1;
+            crit = 1.e-7;
+            flag = 0;
+        else
+            analytic_grad=0;
         end
         if isfield(options_,'nit')
             nit = options_.nit;
         else
             nit=1000;
         end
-        [xparam1,hh,gg,fval,invhess] = newrat(objective_function,xparam1,hh,gg,igg,crit,nit,flag,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        [xparam1,hh,gg,fval,invhess] = newrat(objective_function,xparam1,analytic_grad,crit,nit,flag,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        if options_.analytic_derivation,
+            options_.analytic_derivation = ana_deriv;
+        end
         parameter_names = bayestopt_.name;
         save([M_.fname '_mode.mat'],'xparam1','hh','gg','fval','invhess','parameter_names');
       case 6

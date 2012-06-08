@@ -7,7 +7,7 @@ function [ide_hess, ide_moments, ide_model, ide_lre, derivatives_info, info] = i
 %    o indx               [array] index of estimated parameters
 %    o indexo             [array] index of estimated shocks
 %    o options_ident      [structure] identification options
-%    o data_info          [structure] data info for Kalmna Filter
+%    o data_info          [structure] data info for Kalman Filter
 %    o prior_exist        [integer] 
 %                           =1 when prior exists and indentification is checked only for estimated params and shocks
 %                           =0 when prior is not defined and indentification is checked for all params and shocks

@@ -123,10 +123,13 @@ if isempty(dataset_),
     dataset_.info.varobs = options_.varobs;
     dataset_.rawdata = [];
     dataset_.missing.state = 0;
-    dataset_.missing.aindex = [];
+    for jdata=1:periods,
+        temp1{jdata}=[1:dataset_.info.nvobs]';
+    end
+    dataset_.missing.aindex = temp1;
     dataset_.missing.vindex = [];
     dataset_.missing.number_of_observations = [];
-    dataset_.missing.no_more_missing_observations = [];
+    dataset_.missing.no_more_missing_observations = 1;
     dataset_.descriptive.mean = [];
     dataset_.data = [];
 

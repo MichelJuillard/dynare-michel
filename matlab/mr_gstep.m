@@ -21,6 +21,10 @@ function [f0, x, ig] = mr_gstep(h1,x,func0,htol0,DynareDataset,DynareOptions,Mod
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 n=size(x,1);
+if isempty(h1),
+    h1=DynareOptions.gradient_epsilon*ones(n,1);
+end
+
 
 if isempty(htol0)
     htol = 1.e-6;

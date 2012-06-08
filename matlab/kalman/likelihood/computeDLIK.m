@@ -24,18 +24,18 @@ persistent DK DF D2K D2F
 if notsteady
 if Zflag
     [DK,DF,DP1] = computeDKalmanZ(T,DT,DOm,P,DP,DH,Z,iF,K);
-    if nargout>3,
+    if nargout>4,
         [D2K,D2F,D2P1] = computeD2KalmanZ(T,DT,D2T,D2Om,P,DP,D2P,DH,Z,iF,K,DK);
     end
 else
     [DK,DF,DP1] = computeDKalman(T,DT,DOm,P,DP,DH,Z,iF,K);
-    if nargout>3,
+    if nargout>4,
         [D2K,D2F,D2P1] = computeD2Kalman(T,DT,D2T,D2Om,P,DP,D2P,DH,Z,iF,K,DK);
     end
 end
 else
     DP1=DP;
-    if nargout>3,
+    if nargout>4,
         D2P1=D2P;
     end
 end
@@ -95,8 +95,25 @@ for ii = 1:k
             end
         end
     end
+        
     Da(:,ii)   = DT(:,:,ii)*tmp + T*dtmp(:,ii);
     DLIK(ii,1)  = trace( iF*DF(:,:,ii) ) + 2*Dv(:,ii)'*iF*v - v'*(iF*DF(:,:,ii)*iF)*v;
+end
+
+if nargout==4,
+    %         Hesst(ii,jj) = getHesst_ij(v,Dv(:,ii),Dv(:,jj),0,iF,diFi,diFj,0,dFj,0);
+    vecDPmf = reshape(DF,[],k);
+    D2a = 2*Dv'*iF*Dv + (vecDPmf' * kron(iF,iF) * vecDPmf);
+%     for ii = 1:k
+%         
+%         diFi = -iF*DF(:,:,ii)*iF;
+%         for jj = 1:ii
+%             dFj    = DF(:,:,jj);
+%             diFj   = -iF*DF(:,:,jj)*iF;
+%             
+%             Hesst(ii,jj) = getHesst_ij(v*0,Dv(:,ii),Dv(:,jj),v*0,iF,diFi,diFj,0,-dFj,0);
+%         end
+%     end
 end
 
 % end of computeDLIK

@@ -1,4 +1,4 @@
-function [LIK, likk, a, P] = kalman_filter(Y,start,last,a,P,kalman_tol,riccati_tol,presample,T,Q,R,H,Z,mm,pp,rr,Zflag,diffuse_periods,analytic_derivation,DT,DYss,DOm,DH,DP,D2T,D2Yss,D2Om,D2H,D2P)
+function [LIK, LIKK, a, P] = kalman_filter(Y,start,last,a,P,kalman_tol,riccati_tol,presample,T,Q,R,H,Z,mm,pp,rr,Zflag,diffuse_periods,analytic_derivation,DT,DYss,DOm,DH,DP,D2T,D2Yss,D2Om,D2H,D2P)
 % Computes the likelihood of a stationnary state space model.
 
 %@info:
@@ -123,6 +123,7 @@ LIK  = Inf;                % Default value of the log likelihood.
 oldK = Inf;
 notsteady   = 1;
 F_singular  = 1;
+asy_hess=0;
 
 if  analytic_derivation == 0,
     DLIK=[];
@@ -131,6 +132,7 @@ else
     k = size(DT,3);                                 % number of structural parameters
     DLIK  = zeros(k,1);                             % Initialization of the score.
     Da    = zeros(mm,k);                            % Derivative State vector.
+    dlikk = zeros(smpl,k);
     
     if Zflag==0,
         C = zeros(pp,mm);
@@ -144,12 +146,17 @@ else
         D2a    = zeros(mm,k,k);                             % State vector.
         d2C = zeros(pp,mm,k,k);
     else
+        asy_hess=D2T;
         Hess=[];
         D2a=[];
         D2T=[];
         D2Yss=[];
     end
+    if asy_hess,
+        Hess  = zeros(k,k);                             % Initialization of the Hessian
+    end
     LIK={inf,DLIK,Hess};
+    LIKK={likk,dlikk};
 end
 
 while notsteady && t<=last
@@ -185,14 +192,15 @@ while notsteady && t<=last
             if analytic_derivation==2,
                 [Da,DP,DLIKt,D2a,D2P, Hesst] = computeDLIK(k,tmp,Z,Zflag,v,T,K,P,iF,Da,DYss,DT,DOm,DP,DH,notsteady,D2a,D2Yss,D2T,D2Om,D2P);
             else
-                [Da,DP,DLIKt] = computeDLIK(k,tmp,Z,Zflag,v,T,K,P,iF,Da,DYss,DT,DOm,DP,DH,notsteady);
+                [Da,DP,DLIKt,Hesst] = computeDLIK(k,tmp,Z,Zflag,v,T,K,P,iF,Da,DYss,DT,DOm,DP,DH,notsteady);
             end
             if t>presample
                 DLIK = DLIK + DLIKt;
-                if analytic_derivation==2,
+                if analytic_derivation==2 || asy_hess,
                     Hess = Hess + Hesst;
                 end
             end
+            dlikk(s,:)=DLIKt;
         end
         a = T*tmp;
         P=Ptmp;
@@ -208,19 +216,31 @@ end
 
 % Add observation's densities constants and divide by two.
 likk(1:s) = .5*(likk(1:s) + pp*log(2*pi));
+if analytic_derivation,
+    DLIK = DLIK/2;
+    dlikk = dlikk/2;
+    if analytic_derivation==2 || asy_hess,
+        if asy_hess==0,
+        Hess = Hess + tril(Hess,-1)';
+        end
+        Hess = -Hess/2;
+    end
+end
 
 % Call steady state Kalman filter if needed.
 if t <= last
     if analytic_derivation,
         if analytic_derivation==2,
-            [tmp, likk(s+1:end)] = kalman_filter_ss(Y,t,last,a,T,K,iF,dF,Z,pp,Zflag, ...
+            [tmp, tmp2] = kalman_filter_ss(Y,t,last,a,T,K,iF,dF,Z,pp,Zflag, ...
                 analytic_derivation,Da,DT,DYss,D2a,D2T,D2Yss);
         else
-            [tmp, likk(s+1:end)] = kalman_filter_ss(Y,t,last,a,T,K,iF,dF,Z,pp,Zflag, ...
-                analytic_derivation,Da,DT,DYss);
+            [tmp, tmp2] = kalman_filter_ss(Y,t,last,a,T,K,iF,dF,Z,pp,Zflag, ...
+                analytic_derivation,Da,DT,DYss,asy_hess);
         end
+        likk(s+1:end)=tmp2{1};
+        dlikk(s+1:end,:)=tmp2{2};
         DLIK = DLIK + tmp{2};
-        if analytic_derivation==2,
+        if analytic_derivation==2 || asy_hess,
             Hess = Hess + tmp{3};
         end
     else
@@ -229,20 +249,19 @@ if t <= last
 end
 
 % Compute minus the log-likelihood.
-if presample
-    if presample>=diffuse_periods
-        likk = likk(1+(presample-diffuse_periods):end);
-    end
+if presample>diffuse_periods,
+    LIK = sum(likk(1+(presample-diffuse_periods):end));
+else
+    LIK = sum(likk);
 end
-LIK = sum(likk);
 
 if analytic_derivation,
-    DLIK = DLIK/2;
-    if analytic_derivation==2,
-        Hess = Hess + tril(Hess,-1)';
-        Hess = -Hess/2;
+    if analytic_derivation==2 || asy_hess,
         LIK={LIK, DLIK, Hess};
     else
         LIK={LIK, DLIK};
     end
+    LIKK={likk, dlikk};
+else
+    LIKK=likk;
 end
