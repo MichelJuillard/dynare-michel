@@ -457,7 +457,12 @@ switch DynareOptions.lik_init
     error('dsge_likelihood:: Unknown initialization approach for the Kalman filter!')
 end
 
-if analytic_derivation
+if analytic_derivation,
+    offset = EstimatedParameters.nvx;
+    offset = offset+EstimatedParameters.nvn;
+    offset = offset+EstimatedParameters.ncx;
+    offset = offset+EstimatedParameters.ncn;
+
     no_DLIK = 0;
     full_Hess = analytic_derivation==2;
     asy_Hess = analytic_derivation==-2;
