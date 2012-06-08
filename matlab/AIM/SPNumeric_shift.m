@@ -1,3 +1,4 @@
+function [h,q,iq,nnumeric] = SPNumeric_shift(h,q,iq,qrows,qcols,neq,condn)
 %  [h,q,iq,nnumeric] = ...
 %             SPNumeric_shift(h,q,iq,qrows,qcols,neq,condn)
 %
@@ -27,7 +28,6 @@
 % Journal of Economic Dynamics and Control, 2010, vol. 34, issue 3,
 % pages 472-489
 
-function [h,q,iq,nnumeric] = SPNumeric_shift(h,q,iq,qrows,qcols,neq,condn)
 
 nnumeric = 0;
 left     = 1:qcols;

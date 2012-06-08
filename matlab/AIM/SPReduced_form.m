@@ -1,3 +1,4 @@
+function [nonsing,b] = SPReduced_form(q,qrows,qcols,bcols,neq,condn);
 % [nonsing,b] = SPReduced_form(q,qrows,qcols,bcols,neq,b,condn);
 %
 % Compute reduced-form coefficient matrix, b.
@@ -26,7 +27,6 @@
 % Journal of Economic Dynamics and Control, 2010, vol. 34, issue 3,
 % pages 472-489
 
-function [nonsing,b] = SPReduced_form(q,qrows,qcols,bcols,neq,condn);
 b=[];
 %qs=SPSparse(q);
 qs=sparse(q);

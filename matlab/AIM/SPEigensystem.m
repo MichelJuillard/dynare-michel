@@ -1,3 +1,4 @@
+function [w,rts,lgroots,flag_trouble] = SPEigensystem(a,uprbnd,rowsLeft)
 %  [w,rts,lgroots] = SPEigensystem(a,uprbnd)
 %
 %  Compute the roots and the left eigenvectors of the companion
@@ -29,7 +30,6 @@
 % Journal of Economic Dynamics and Control, 2010, vol. 34, issue 3,
 % pages 472-489
 
-function [w,rts,lgroots,flag_trouble] = SPEigensystem(a,uprbnd,rowsLeft) 
 opts.disp=0; 
 % next block is commented out because eigs() intermitently returns different rts
 %try

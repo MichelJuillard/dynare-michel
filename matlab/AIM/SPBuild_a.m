@@ -1,3 +1,4 @@
+function [a,ia,js] = SPBuild_a(h,qcols,neq)
 %  [a,ia,js] = SPBuild_a(h,qcols,neq)
 %
 %  Build the companion matrix, deleting inessential lags.
@@ -27,7 +28,6 @@
 % Journal of Economic Dynamics and Control, 2010, vol. 34, issue 3,
 % pages 472-489
 
-function [a,ia,js] = SPBuild_a(h,qcols,neq)
 
 left  = 1:qcols;
 right = qcols+1:qcols+neq;

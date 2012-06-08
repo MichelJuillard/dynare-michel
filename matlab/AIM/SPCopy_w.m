@@ -1,3 +1,4 @@
+function  q = SPCopy_w(q,w,js,iq,qrows)
 % q = SPCopy_w(q,w,js,iq,qrows)
 %
 %  Copy the eigenvectors corresponding to the largest roots into the
@@ -27,7 +28,6 @@
 % Journal of Economic Dynamics and Control, 2010, vol. 34, issue 3,
 % pages 472-489
 
-function  q = SPCopy_w(q,w,js,iq,qrows)
 
 if(iq < qrows)
    lastrows = iq+1:qrows;

@@ -1,3 +1,4 @@
+function scof = SPObstruct(cof,cofb,neq,nlag,nlead)
 % scof = SPObstruct(cof,cofb,neq,nlag,nlead)
 %
 % Construct the coefficients in the observable structure.
@@ -38,7 +39,6 @@
 % Journal of Economic Dynamics and Control, 2010, vol. 34, issue 3,
 % pages 472-489
 
-function scof = SPObstruct(cof,cofb,neq,nlag,nlead)
 
 
 % Append the negative identity to cofb

@@ -1,3 +1,5 @@
+function [b,rts,ia,nexact,nnumeric,lgroots,aimcode] = ...
+                        SPAmalg(h,neq,nlag,nlead,condn,uprbnd)
 %  [b,rts,ia,nexact,nnumeric,lgroots,aimcode] = ...
 %                       SPAmalg(h,neq,nlag,nlead,condn,uprbnd)
 %
@@ -54,8 +56,6 @@
 % Journal of Economic Dynamics and Control, 2010, vol. 34, issue 3,
 % pages 472-489
 
-function [b,rts,ia,nexact,nnumeric,lgroots,aimcode] = ...
-                        SPAmalg(h,neq,nlag,nlead,condn,uprbnd)
 b=[];rts=[];ia=[];nexact=[];nnumeric=[];lgroots=[];aimcode=[];
 if(nlag<1 || nlead<1) 
     error('Aim_eig: model must have at least one lag and one lead');
