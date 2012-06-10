@@ -30,6 +30,14 @@ function t_crit = tcrit(n,pval0)
 if nargin==1 || isempty(pval0),
     pval0=0.05;
 end
+if pval0==1,
+    t_crit=0;
+    return,
+end
+if pval0==0,
+    t_crit=inf;
+    return,
+end
 pval = [  0.10    0.05   0.025    0.01   0.005   0.001];
 pval0=max(pval0,min(pval));
 ncol=min(find(pval<=pval0))+1;

@@ -1,4 +1,4 @@
-function redform_map(dirname)
+function redform_map(dirname,options_gsa_)
 %function redform_map(dirname)
 % inputs (from opt_gsa structure
 % anamendo    = options_gsa_.namendo;
@@ -39,7 +39,7 @@ function redform_map(dirname)
 
 global M_ oo_ estim_params_ options_ bayestopt_
 
-options_gsa_ = options_.opt_gsa;
+% options_gsa_ = options_.opt_gsa;
 
 anamendo = options_gsa_.namendo;
 anamlagendo = options_gsa_.namlagendo;
@@ -48,8 +48,11 @@ iload = options_gsa_.load_redform;
 pprior = options_gsa_.pprior;
 ilog = options_gsa_.logtrans_redform;
 threshold = options_gsa_.threshold_redform;
-ksstat = options_gsa_.ksstat_redform;
+% ksstat = options_gsa_.ksstat_redform;
 alpha2 = options_gsa_.alpha2_redform;
+alpha2=0;
+pvalue_ks = options_gsa_.ksstat_redform;
+pvalue_corr = options_gsa_.alpha2_redform;
 
 pnames = M_.param_names(estim_params_.param_vals(:,1),:);
 if nargin==0,
@@ -57,14 +60,14 @@ if nargin==0,
 end
 
 if pprior
-  load([dirname,'/',M_.fname,'_prior']);
+  load([dirname,'/',M_.fname,'_prior'],'lpmat', 'lpmat0', 'istable','T');
   adir=[dirname '/redform_stab'];
 else
-  load([dirname,'/',M_.fname,'_mc']);
+  load([dirname,'/',M_.fname,'_mc'],'lpmat', 'lpmat0', 'istable','T');
   adir=[dirname '/redform_mc'];
 end
 if ~exist('T')
-  stab_map_(dirname);
+  stab_map_(dirname,options_gsa_);
 if pprior
   load([dirname,'/',M_.fname,'_prior'],'T');
 else
@@ -79,6 +82,7 @@ adir0=pwd;
 
 nspred=size(T,2)-M_.exo_nbr;
 x0=lpmat(istable,:);
+xx0=lpmat0(istable,:);
 [kn, np]=size(x0);
 offset = length(bayestopt_.pshape)-np;
 if options_gsa_.prior_range,
@@ -90,7 +94,7 @@ else
 end
 
 nsok = length(find(M_.lead_lag_incidence(M_.maximum_lag,:)));
-clear lpmat lpmat0 egg iunstable yys
+clear lpmat lpmat0 
 js=0;
 for j=1:size(anamendo,1)
   namendo=deblank(anamendo(j,:));
@@ -105,7 +109,7 @@ for j=1:size(anamendo,1)
       %y0=squeeze(T(iendo,iexo+nspred,istable));
       y0=squeeze(T(iendo,iexo+nspred,:));
       if (max(y0)-min(y0))>1.e-10,
-        if mod(iplo,9)==0,
+        if mod(iplo,9)==0 && isempty(threshold),
           ifig=ifig+1;
           hfig = dyn_figure(options_,'name',[namendo,' vs. shocks ',int2str(ifig)]);
           iplo=0;
@@ -115,28 +119,46 @@ for j=1:size(anamendo,1)
         xdir0 = [adir,'/',namendo,'_vs_', namexo];
         if ilog==0,
           if isempty(threshold)
-            si(:,js) = redform_private(x0, y0, pshape, pd, iload, pnames, namendo, namexo, xdir0);
+            if isempty(dir(xdir0))
+                mkdir(xdir0)
+            end
+            si(:,js) = redform_private(x0, y0, pshape, pd, iload, pnames, namendo, namexo, xdir0, options_gsa_);
           else
             iy=find( (y0>threshold(1)) & (y0<threshold(2)));
             iyc=find( (y0<=threshold(1)) | (y0>=threshold(2)));
             xdir = [xdir0,'_cut'];
-            if ~isempty(iy),
-              si(:,js) = redform_private(x0(iy,:), y0(iy), pshape, pd, iload, pnames, namendo, namexo, xdir);
+            if isempty(dir(xdir))
+                mkdir(xdir)
             end
-            if ~isempty(iy) & ~isempty(iyc)
+%             if ~isempty(iy),
+%               si(:,js) = redform_private(x0(iy,:), y0(iy), pshape, pd, iload, pnames, namendo, namexo, xdir, options_gsa_);
+%             else
+              si(:,js) = NaN(np,1);
+%             end
+            if ~isempty(iy) && ~isempty(iyc)
             delete([xdir, '/*cut*.*'])
             [proba, dproba] = stab_map_1(x0, iy, iyc, 'cut',0);
-            indsmirnov = find(dproba>ksstat);
+%             indsmirnov = find(dproba>ksstat);
+            indsmirnov = find(proba<pvalue_ks);
             stab_map_1(x0, iy, iyc, 'cut',1,indsmirnov,xdir);
-            stab_map_2(x0(iy,:),alpha2,'cut',xdir)
-            stab_map_2(x0(iyc,:),alpha2,'trim',xdir)
+            stab_map_2(x0(iy,:),alpha2,pvalue_corr,'cut',xdir)
+            stab_map_2(x0(iyc,:),alpha2,pvalue_corr,'trim',xdir)
+            lpmat=x0(iy,:);
+            lpmat0=xx0(iy,:);
+            istable=[1:length(iy)];
+            save([xdir,filesep,'threshold.mat'],'lpmat','lpmat0','istable')
+            clear lpmat lpmat0 istable
             end
           end
         else
           [yy, xdir] = log_trans_(y0,xdir0);
-          silog(:,js) = redform_private(x0, yy, pshape, pd, iload, pnames, namendo, namexo, xdir);
+          if isempty(dir(xdir))
+              mkdir(xdir)
+          end
+          silog(:,js) = redform_private(x0, yy, pshape, pd, iload, pnames, namendo, namexo, xdir, options_gsa_);
         end
 
+        if isempty(threshold)
         figure(hfig)
         subplot(3,3,iplo),
         if ilog,
@@ -161,11 +183,12 @@ for j=1:size(anamendo,1)
             close(hfig);
           end
         end
+        end
       
       end
     end
   end
-  if iplo<9 & iplo>0 & ifig,
+  if iplo<9 && iplo>0 && ifig,
     dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)],options_);
     if ~options_.nodisplay
         close(hfig);
@@ -181,7 +204,7 @@ for j=1:size(anamendo,1)
       %y0=squeeze(T(iendo,ilagendo,istable));
       y0=squeeze(T(iendo,ilagendo,:));
       if (max(y0)-min(y0))>1.e-10,
-        if mod(iplo,9)==0,
+        if mod(iplo,9)==0 && isempty(threshold),
           ifig=ifig+1;
           hfig = dyn_figure(options_,'name',[namendo,' vs. lags ',int2str(ifig)]);
           iplo=0;
@@ -191,28 +214,45 @@ for j=1:size(anamendo,1)
         xdir0 = [adir,'/',namendo,'_vs_', namlagendo];
         if ilog==0,
         if isempty(threshold)
-          si(:,js) = redform_private(x0, y0, pshape, pd, iload, pnames, namendo, namlagendo, xdir0);
+          if isempty(dir(xdir0))
+              mkdir(xdir0)
+          end
+          si(:,js) = redform_private(x0, y0, pshape, pd, iload, pnames, namendo, namlagendo, xdir0, options_gsa_);
         else
           iy=find( (y0>threshold(1)) & (y0<threshold(2)));
           iyc=find( (y0<=threshold(1)) | (y0>=threshold(2)));
           xdir = [xdir0,'_cut'];
-          if ~isempty(iy)
-          si(:,js) = redform_private(x0(iy,:), y0(iy), pshape, pd, iload, pnames, namendo, namlagendo, xdir);
+          if isempty(dir(xdir))
+              mkdir(xdir)
           end
-          if ~isempty(iy) & ~isempty(iyc),
+%           if ~isempty(iy)
+%           si(:,js) = redform_private(x0(iy,:), y0(iy), pshape, pd, iload, pnames, namendo, namlagendo, xdir, options_gsa_);
+%           end
+          if ~isempty(iy) && ~isempty(iyc),
           delete([xdir, '/*cut*.*'])
           [proba, dproba] = stab_map_1(x0, iy, iyc, 'cut',0);
-          indsmirnov = find(dproba>ksstat);
+%           indsmirnov = find(dproba>ksstat);
+          indsmirnov = find(proba<pvalue_ks);
           stab_map_1(x0, iy, iyc, 'cut',1,indsmirnov,xdir);
-          stab_map_2(x0(iy,:),alpha2,'cut',xdir)
-          stab_map_2(x0(iyc,:),alpha2,'trim',xdir)
+          stab_map_2(x0(iy,:),alpha2,pvalue_corr,'cut',xdir)
+          stab_map_2(x0(iyc,:),alpha2,pvalue_corr,'trim',xdir)
+          lpmat=x0(iy,:);
+          lpmat0=xx0(iy,:);
+          istable=[1:length(iy)];
+          save([xdir,filesep,'threshold.mat'],'lpmat','lpmat0','istable')
+          clear lpmat lpmat0 istable
+
           end
         end
         else
           [yy, xdir] = log_trans_(y0,xdir0);
-          silog(:,js) = redform_private(x0, yy, pshape, pd, iload, pnames, namendo, namlagendo, xdir);
+          if isempty(dir(xdir))
+              mkdir(xdir)
+          end
+          silog(:,js) = redform_private(x0, yy, pshape, pd, iload, pnames, namendo, namlagendo, xdir, options_gsa_);
         end
 
+        if isempty(threshold)
         figure(hfig),
         subplot(3,3,iplo),
         if ilog,
@@ -237,11 +277,12 @@ for j=1:size(anamendo,1)
                 close(hfig);
             end
         end
+        end
       
       end
     end
   end
-  if iplo<9 & iplo>0 & ifig,
+  if iplo<9 && iplo>0 && ifig,
     dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],options_);  
     if ~options_.nodisplay
       close(hfig);
@@ -249,6 +290,7 @@ for j=1:size(anamendo,1)
   end
 end
 
+if isempty(threshold),
 if ilog==0,
 hfig=dyn_figure(options_); %bar(si)
 % boxplot(si','whis',10,'symbol','r.')
@@ -280,10 +322,12 @@ title('Reduced form GSA - Log-transformed elements')
 dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_gsa_log'],options_);
 
 end
-function si  = redform_private(x0, y0, pshape, pd, iload, pnames, namy, namx, xdir)
+end
+
+function si  = redform_private(x0, y0, pshape, pd, iload, pnames, namy, namx, xdir, opt_gsa)
 global bayestopt_ options_
 
-opt_gsa=options_.opt_gsa;
+% opt_gsa=options_.opt_gsa;
 np=size(x0,2);
 x00=x0;
   if opt_gsa.prior_range,
@@ -319,9 +363,6 @@ if iload==0,
   hfig=gsa_sdp_plot(gsa_,fname,pnames,iii(1:min(12,np)));
   close(hfig);
   gsa_.x0=x0(1:nfit,:);
-  if ~options_.nodisplay
-    close(hfig);
-  end
 %   copyfile([fname,'_est.mat'],[fname,'.mat'])
   hfig=dyn_figure(options_); 
   plot(y0(1:nfit),[gsa_.fit y0(1:nfit)],'.'), 

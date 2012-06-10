@@ -1,4 +1,4 @@
-function [rmse_MC, ixx] = filt_mc_(OutDir,data_info)
+function [rmse_MC, ixx] = filt_mc_(OutDir,options_gsa_)
 % function [rmse_MC, ixx] = filt_mc_(OutDir)
 % inputs (from opt_gsa structure)
 % vvarvecm = options_gsa_.var_rmse;
@@ -35,13 +35,14 @@ function [rmse_MC, ixx] = filt_mc_(OutDir,data_info)
 
 global bayestopt_ estim_params_ M_ options_ oo_
 
-options_gsa_=options_.opt_gsa;
+% options_gsa_=options_.opt_gsa;
 vvarvecm = options_gsa_.var_rmse;
 loadSA   = options_gsa_.load_rmse;
 pfilt    = options_gsa_.pfilt_rmse;
 alpha    = options_gsa_.alpha_rmse;
-alpha2   = options_gsa_.alpha2_rmse;
-pvalue   = options_gsa_.pvalue_corr;
+% alpha2   = options_gsa_.alpha2_rmse;
+alpha2 = 0;
+pvalue   = options_gsa_.alpha2_rmse;
 istart   = options_gsa_.istart_rmse;
 alphaPC  = 0.5;
 
@@ -210,9 +211,9 @@ if ~loadSA,
         save([OutDir,filesep,fnamtmp,'.mat'], 'x', 'logpo2', 'likelihood', 'rmse_MC', 'rmse_mode','rmse_pmean')
     else
         if options_.opt_gsa.lik_only
-            save([OutDir,filesep,fnamtmp, '.mat'], 'likelihood', '-append')
+            save([OutDir,filesep,fnamtmp, '.mat'], 'x', 'logpo2','likelihood', '-append')
         else
-            save([OutDir,filesep,fnamtmp, '.mat'], 'likelihood', 'rmse_MC','-append')
+            save([OutDir,filesep,fnamtmp, '.mat'], 'x', 'logpo2','likelihood', 'rmse_MC','-append')
             if exist('xparam1_mean','var')
                 save([OutDir,filesep,fnamtmp, '.mat'], 'rmse_pmean','-append')
             end
@@ -222,7 +223,7 @@ if ~loadSA,
         end
     end
 else
-    if options_.opt_gsa.lik_only & options_.opt_gsa.ppost==0
+    if options_.opt_gsa.lik_only && options_.opt_gsa.ppost==0
         load([OutDir,filesep,fnamtmp, '.mat'],'x','logpo2','likelihood');
     else
         load([OutDir,filesep,fnamtmp, '.mat'],'x','logpo2','likelihood','rmse_MC','rmse_mode','rmse_pmean');
@@ -238,21 +239,21 @@ if ~options_.opt_gsa.ppost
     [dum, ipost]=sort(-logpo2);
     [dum, ilik]=sort(-likelihood);
 end
-if ~options_.opt_gsa.ppost & options_.opt_gsa.lik_only
+if ~options_.opt_gsa.ppost && options_.opt_gsa.lik_only
     if options_.opt_gsa.pprior
         anam='rmse_prior_post';
     else
         anam='rmse_mc_post';
     end
     stab_map_1(x, ipost(1:nfilt), ipost(nfilt+1:end), anam, 1,[],OutDir);
-    stab_map_2(x(ipost(1:nfilt),:),alpha2,anam, OutDir);
+    stab_map_2(x(ipost(1:nfilt),:),alpha2,pvalue,anam, OutDir);
     if options_.opt_gsa.pprior
         anam='rmse_prior_lik';
     else
         anam='rmse_mc_lik';
     end
     stab_map_1(x, ilik(1:nfilt), ilik(nfilt+1:end), anam, 1,[],OutDir);
-    stab_map_2(x(ilik(1:nfilt),:),alpha2,anam, OutDir);
+    stab_map_2(x(ilik(1:nfilt),:),alpha2,pvalue,anam, OutDir);
 else
     for i=1:size(vvarvecm,1),
         [dum, ixx(:,i)]=sort(rmse_MC(:,i));
@@ -260,7 +261,7 @@ else
             %nfilt0(i)=length(find(rmse_MC(:,i)<rmse_pmean(i)));
             rmse_txt=rmse_pmean;
         else
-            if options_.opt_gsa.pprior | ~exist('rmse_pmean'),
+            if options_.opt_gsa.pprior || ~exist('rmse_pmean'),
                 if exist('rmse_mode'),
                     rmse_txt=rmse_mode;
                 else
@@ -298,7 +299,7 @@ else
         h=cumplot(lnprior(ixx(nfilt0(i)+1:end,i)));
         set(h,'color','green')
         title(vvarvecm(i,:),'interpreter','none')
-        if mod(i,9)==0 | i==size(vvarvecm,1)
+        if mod(i,9)==0 || i==size(vvarvecm,1)
             if options_.opt_gsa.ppost
                 dyn_saveas(hh,[OutDir '/' fname_ '_rmse_post_lnprior',int2str(ifig)],options_);
             else
@@ -329,7 +330,7 @@ else
         if options_.opt_gsa.ppost==0,
             set(gca,'xlim',[min( likelihood(ixx(1:nfilt0(i),i)) ) max( likelihood(ixx(1:nfilt0(i),i)) )])
         end
-        if mod(i,9)==0 | i==size(vvarvecm,1)
+        if mod(i,9)==0 || i==size(vvarvecm,1)
             if options_.opt_gsa.ppost
                 dyn_saveas(hh,[OutDir '/' fname_ '_rmse_post_lnlik',int2str(ifig) ],options_);
             else
@@ -360,7 +361,7 @@ else
         if options_.opt_gsa.ppost==0,
             set(gca,'xlim',[min( logpo2(ixx(1:nfilt0(i),i)) ) max( logpo2(ixx(1:nfilt0(i),i)) )])
         end
-        if mod(i,9)==0 | i==size(vvarvecm,1)
+        if mod(i,9)==0 || i==size(vvarvecm,1)
             if options_.opt_gsa.ppost
                 dyn_saveas(hh,[OutDir '/' fname_ '_rmse_post_lnpost',int2str(ifig) ],options_);
             else
@@ -402,7 +403,7 @@ else
     rmse_MC=rmse_MC(:,ivar);
     
     disp(' ')
-    % if options_.opt_gsa.ppost==0 & options_.opt_gsa.pprior,
+    % if options_.opt_gsa.ppost==0 && options_.opt_gsa.pprior,
     disp(['Sample filtered the ',num2str(pfilt*100),'% best RMSE''s for each observed series ...' ])
     % else
     %   disp(['Sample filtered the best RMSE''s smaller than RMSE at the posterior mean ...' ])
@@ -414,7 +415,7 @@ else
     disp(' ')
     disp(' ')
     disp('RMSE ranges after filtering:')
-    if options_.opt_gsa.ppost==0 & options_.opt_gsa.pprior,
+    if options_.opt_gsa.ppost==0 && options_.opt_gsa.pprior,
         disp(['             best ',num2str(pfilt*100),'% filtered             remaining 90%'])
         disp(['             min            max            min            max            posterior mode'])
     else
@@ -478,13 +479,18 @@ else
             h0=cumplot(x(:,nsnam(j)));
             set(h0,'color',[0 0 0])
             hold on,
-            np=find(SP(nsnam(j),:));
+            npx=find(SP(nsnam(j),:)==0);
             %a0=jet(nsp(nsnam(j)));
-            a0=a00(np,:);
-            for i=1:nsp(nsnam(j)), %size(vvarvecm,1),
+%             a0=a00(np,:);
+            for i=1:size(vvarvecm,1),
                 %h0=cumplot(x(ixx(1:nfilt,np(i)),nsnam(j)+nshock));
-                h0=cumplot(x(ixx(1:nfilt0(np(i)),np(i)),nsnam(j)));
-                set(h0,'color',a0(i,:))
+%                 h0=cumplot(x(ixx(1:nfilt0(np(i)),np(i)),nsnam(j)));
+                if any(npx==i),
+                    h0=cumplot(x(ixx(1:nfilt0(i),i),nsnam(j))*NaN);
+                else
+                    h0=cumplot(x(ixx(1:nfilt0(i),i),nsnam(j)));
+            end
+                set(h0,'color',a00(i,:))
             end
             ydum=get(gca,'ylim');
             %xdum=xparam1(nshock+nsnam(j));
@@ -498,9 +504,9 @@ else
         end
         %subplot(3,2,6)
         if exist('OCTAVE_VERSION'),
-            legend(char('base',vvarvecm(np,:)),'location','eastoutside');
+            legend(char('base',vvarvecm),'location','eastoutside');
         else
-            h0=legend(char('base',vvarvecm(np,:)),0);
+            h0=legend(char('base',vvarvecm),0);
             set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3],'interpreter','none');
         end
         %h0=legend({'base',vnam{np}}',0);
@@ -520,104 +526,6 @@ else
     for j=1:size(SP,2),
         nsx(j)=length(find(SP(:,j)));
     end
-    
-    number_of_grid_points = 2^9;      % 2^9 = 512 !... Must be a power of two.
-    bandwidth = 0;                    % Rule of thumb optimal bandwidth parameter.
-    kernel_function = 'gaussian';     % Gaussian kernel for Fast Fourrier Transform approximaton.
-    %kernel_function = 'uniform';     % Gaussian kernel for Fast Fourrier Transform approximaton.
-    
-    for ix=1:ceil(length(nsnam)/5),
-        hh = dyn_figure(options_);
-        for j=1+5*(ix-1):min(size(snam2,1),5*ix),
-            subplot(2,3,j-5*(ix-1))
-            optimal_bandwidth = mh_optimal_bandwidth(x(:,nsnam(j)),size(x,1),bandwidth,kernel_function);
-            [x1,f1] = kernel_density_estimate(x(:,nsnam(j)),number_of_grid_points,...
-                size(x,1),optimal_bandwidth,kernel_function);
-            h0 = plot(x1, f1,'k');
-            hold on,
-            np=find(SP(nsnam(j),:));
-            %a0=jet(nsp(nsnam(j)));
-            a0=a00(np,:);
-            for i=1:nsp(nsnam(j)), %size(vvarvecm,1),
-                optimal_bandwidth = mh_optimal_bandwidth(x(ixx(1:nfilt0(np(i)),np(i)),nsnam(j)),nfilt,bandwidth,kernel_function);
-                [x1,f1] = kernel_density_estimate(x(ixx(1:nfilt0(np(i)),np(i)),nsnam(j)),number_of_grid_points,...
-                    nfilt, optimal_bandwidth,kernel_function);
-                h0 = plot(x1, f1);
-                set(h0,'color',a0(i,:))
-            end
-            ydum=get(gca,'ylim');
-            set(gca,'ylim',[0 ydum(2)]);
-            if exist('xparam1')
-                %xdum=xparam1(nshock+nsnam(j));
-                xdum=xparam1(nsnam(j));
-                h1=plot([xdum xdum],[0 ydum(2)]);
-                set(h1,'color',[0.85 0.85 0.85],'linewidth',2)
-            end
-            xlabel('')
-            title([pnam{nsnam(j)}],'interpreter','none')
-        end
-        if exist('OCTAVE_VERSION'),
-            legend(char('base',vvarvecm(np,:)),'location','eastoutside');
-        else
-            h0=legend(char('base',vvarvecm(np,:)),0);
-            set(h0,'fontsize',6,'position',[0.7 0.1 0.2 0.3],'interpreter','none')
-        end
-        %h0=legend({'base',vnam{np}}',0);
-        %set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
-        if options_.opt_gsa.ppost
-            dyn_saveas(hh,[ OutDir '/' fname_ '_rmse_post_dens_' int2str(ix) ],options_);
-        else
-            if options_.opt_gsa.pprior
-                dyn_saveas(hh,[OutDir '/' fname_ '_rmse_prior_dens_' int2str(ix)],options_);
-            else
-                dyn_saveas(hh,[OutDir '/' fname_ '_rmse_mc_dens_' int2str(ix) ],options_);
-            end
-        end
-    end
-    close all
-    % for j=1:size(SP,2),
-    %     nfig=0;
-    %     np=find(SP(:,j));
-    %     for i=1:nsx(j), %size(vvarvecm,1),
-    %         if mod(i,12)==1,
-    %             nfig=nfig+1;
-    %             %figure('name',['Sensitivity of fit of ',vnam{j}]),
-    %             figure('name',['Sensitivity of fit of ',deblank(vvarvecm(j,:)),' ',num2str(nfig)]),
-    %         end
-    %
-    %         subplot(3,4,i-12*(nfig-1))
-    %         optimal_bandwidth = mh_optimal_bandwidth(x(ixx(1:nfilt,j),np(i)),nfilt,bandwidth,kernel_function);
-    %         [x1,f1] = kernel_density_estimate(x(ixx(1:nfilt,j),np(i)),number_of_grid_points,...
-    %             nfilt, optimal_bandwidth,kernel_function);
-    %         plot(x1, f1,':k','linewidth',2)
-    %         optimal_bandwidth = mh_optimal_bandwidth(x(ixx(nfilt+1:end,j),np(i)),nruns-nfilt,bandwidth,kernel_function);
-    %         [x1,f1] = kernel_density_estimate(x(ixx(nfilt+1:end,j),np(i)),number_of_grid_points,...
-    %             nruns-nfilt,optimal_bandwidth,kernel_function);
-    %         hold on, plot(x1, f1,'k','linewidth',2)
-    %         ydum=get(gca,'ylim');
-    %         %xdum=xparam1(nshock+np(i));
-    %         xdum=xparam1(np(i));
-    %         h1=plot([xdum xdum],ydum);
-    %         set(h1,'color',[0.85 0.85 0.85],'linewidth',2)
-    %         %xdum1=mean(x(ixx(1:nfilt,j),np(i)+nshock));
-    %         xdum1=mean(x(ixx(1:nfilt,j),np(i)));
-    %         h2=plot([xdum1 xdum1],ydum);
-    %         set(h2,'color',[0 1 0],'linewidth',2)
-    %         %         h0=cumplot(x(nfilt+1:end,np(i)+nshock));
-    %         %         set(h0,'color',[1 1 1])
-    %         %         hold on,
-    %         %         h0=cumplot(x(ixx(1:nfilt,j),np(i)+nshock));
-    %         %         set(h0,'linestyle',':','color',[1 1 1])
-    %         %title([pnam{np(i)}])
-    %         title([pnam{np(i)},'. K-S prob ', num2str(PP(np(i),j))],'interpreter','none')
-    %         xlabel('')
-    %         if mod(i,12)==0 | i==nsx(j),
-    %             saveas(gcf,[fname_,'_rmse_',deblank(vvarvecm(j,:)),'_',int2str(nfig)])
-    %             close(gcf)
-    %         end
-    %     end
-    % end
-    
     
     disp(' ')
     disp(' ')

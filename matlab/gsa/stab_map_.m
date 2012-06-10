@@ -1,4 +1,4 @@
-function x0 = stab_map_(OutputDirectoryName)
+function x0 = stab_map_(OutputDirectoryName,opt_gsa)
 %
 % function x0 = stab_map_(OutputDirectoryName)
 %
@@ -58,7 +58,7 @@ function x0 = stab_map_(OutputDirectoryName)
 %global bayestopt_ estim_params_ dr_ options_ ys_ fname_
 global bayestopt_ estim_params_ options_ oo_ M_
 
-opt_gsa=options_.opt_gsa;
+% opt_gsa=options_.opt_gsa;
 
 Nsam   = opt_gsa.Nsam;
 fload  = opt_gsa.load_stab;
@@ -568,6 +568,8 @@ else
 
 end
 
+xparam1=x0;
+save prior_ok xparam1;
 
 options_.periods=opt.periods;
 if isfield(opt,'nomoments'),

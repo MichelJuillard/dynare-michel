@@ -1,5 +1,5 @@
-function redform_screen(dirname)
-%function redform_map(dirname)
+function redform_screen(dirname, options_gsa_)
+%function redform_map(dirname, options_gsa_)
 % inputs (from opt_gsa structure
 % anamendo    = options_gsa_.namendo;
 % anamlagendo = options_gsa_.namlagendo;
@@ -33,7 +33,7 @@ function redform_screen(dirname)
 
 global M_ oo_ estim_params_ options_ bayestopt_
 
-options_gsa_ = options_.opt_gsa;
+% options_gsa_ = options_.opt_gsa;
 
 anamendo = options_gsa_.namendo;
 anamlagendo = options_gsa_.namlagendo;
