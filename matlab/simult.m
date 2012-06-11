@@ -35,10 +35,6 @@ global M_ options_ oo_
 order = options_.order;
 replic = options_.simul_replic;
 
-if replic == 0
-    replic = 1;
-end
-
 if replic > 1
     fname = [M_.fname,'_simul'];
     fh = fopen(fname,'w+');

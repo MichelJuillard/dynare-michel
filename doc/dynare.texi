@@ -3090,6 +3090,13 @@ problems. Default: @code{1.000001} (except when estimating with
 Number of simulated series used to compute the IRFs. Default: @code{1}
 if @code{order}=@code{1}, and @code{50} otherwise.
 
+@item simul_replic = @var{INTEGER}
+Number of series to simulate when empirical moments are requested
+(@i{i.e.} @code{periods} > 0). Note that if this option is greater
+than @code{1}, the additional series will not be used for computing
+the empirical moments but will simply be saved in binary form to the
+file @file{@var{FILENAME}_simul}. Default: @code{1}.
+
 @item solve_algo = @var{INTEGER}
 @xref{solve_algo}, for the possible values and their meaning.
 
