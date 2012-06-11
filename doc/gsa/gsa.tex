@@ -167,9 +167,9 @@ out-of-sample validation. \vspace{0.5cm}
                             &   & of reduced form coefficients\\
                             &   & [\verb"max" \verb"max"] =  analyse filtered \\
                             &   & entries within the range [\verb"max" \verb"max"] \\
-       \verb"ksstat_redform"& 0.1& critical value for Smirnov statistics $d$ \\
+       \verb"ksstat_redform"& 0.001& p-value for Smirnov statistics $d$ \\
                             &   & when reduced form entries are filtered\\
-       \verb"alpha2_redform"& 0.3& critical value for correlation $\rho$ \\
+       \verb"alpha2_redform"& 0.001& p-value for correlation $\rho$ \\
                             &   & when reduced form entries are filtered\\
               \verb"namendo"& () & list of endogenous variables \\
                             & : & jolly character to indicate ALL endogenous \\
@@ -234,12 +234,11 @@ options of \verb"dynare_estimation". These are:
                             &    & filter the best 10\% for each observed series\\
           \verb"istart_rmse"& 1& start computing RMSE's from \verb"istart_rmse":\\
                             &  & use 2 to avoid big initial error \\
-           \verb"alpha_rmse"& 0.002& critical value for Smirnov statistics $d$:\\
-                            &   & plot parameters with $d>$\verb"alpha_rmse"\\
-          \verb"alpha2_rmse"& 1& critical value for correlation $\rho$\\
+           \verb"alpha_rmse"& 0.001& p-value for Smirnov statistics $d$:\\
+                            &   & plot parameters with $pvalue<$\verb"alpha_rmse"\\
+          \verb"alpha2_rmse"& 0.001& p-value for correlation $\rho$\\
                             &  & plot couples of parameters with
-                            $|\rho|>$\verb"alpha2_rmse"\\
-                 \verb"glue"& 0& prepare for GLUE graphical interface\\\hline
+                            $pvalue<$\verb"alpha2_rmse"\\
 \end{tabular}
 
 \subsection{Screening analysis}

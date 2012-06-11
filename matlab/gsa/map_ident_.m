@@ -1,4 +1,4 @@
-function map_ident_(OutputDirectoryName)
+function map_ident_(OutputDirectoryName,opt_gsa)
 
 % Copyright (C) 2012 Dynare Team
 %
@@ -19,7 +19,7 @@ function map_ident_(OutputDirectoryName)
 
 global bayestopt_ M_ options_ estim_params_ oo_
 
-opt_gsa = options_.opt_gsa;
+% opt_gsa = options_.opt_gsa;
 fname_ = M_.fname;
 nliv   = opt_gsa.morris_nliv;
 ntra   = opt_gsa.morris_ntra;

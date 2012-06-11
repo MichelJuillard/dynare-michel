@@ -1,5 +1,5 @@
 function stab_map_2(x,alpha2, pvalue, fnam, dirname,xparam1)
-% function stab_map_2(x, alpha2, pvalue, fnam, dirname)
+% function stab_map_2(x, alpha2, pvalue, fnam, dirname,xparam1)
 %
 % Written by Marco Ratto
 % Joint Research Centre, The European Commission,
@@ -108,10 +108,13 @@ for j=1:npar,
   end
   if (j==(npar)) && j2>0,
     dyn_saveas(hh,[dirname,'/',fig_nam_,int2str(ifig)],options_);
+    if ~options_.nodisplay
+        close(hh);
+    end
   end
   
 end
 if ifig==0,
-  disp(['No correlation term >', num2str(alpha2),' found for ',fnam])
+    disp(['No correlation term with pvalue <', num2str(pvalue),' found for ',fnam])
 end
 %close all
