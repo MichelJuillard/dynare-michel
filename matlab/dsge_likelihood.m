@@ -596,7 +596,7 @@ end
 
 if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
     if no_missing_data_flag
-        if DynareOptions.block == 1
+        if DynareOptions.block
             [err, LIK] = block_kalman_filter(T,R,Q,H,Pstar,Y,start,Z,kalman_tol,riccati_tol, Model.nz_state_var, Model.n_diag, Model.nobs_non_statevar);
             mexErrCheck('block_kalman_filter', err);
         else
@@ -609,11 +609,16 @@ if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
                             
         end
     else
-        [LIK,lik] = missing_observations_kalman_filter(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations,Y,diffuse_periods+1,size(Y,2), ...
+        if 0 %DynareOptions.block
+            [err, LIK,lik] = block_kalman_filter(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations,...
+                                                                 T,R,Q,H,Pstar,Y,start,Z,kalman_tol,riccati_tol, Model.nz_state_var, Model.n_diag, Model.nobs_non_statevar);
+        else
+            [LIK,lik] = missing_observations_kalman_filter(DynareDataset.missing.aindex,DynareDataset.missing.number_of_observations,DynareDataset.missing.no_more_missing_observations,Y,diffuse_periods+1,size(Y,2), ...
                                                a, Pstar, ...
                                                kalman_tol, DynareOptions.riccati_tol, ...
                                                DynareOptions.presample, ...
                                                T,Q,R,H,Z,mm,pp,rr,Zflag,diffuse_periods);
+        end;
     end
     if analytic_derivation,
         LIK1=LIK;
