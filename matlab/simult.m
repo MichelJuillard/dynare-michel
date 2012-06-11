@@ -33,7 +33,7 @@ function y_=simult(y0, dr)
 global M_ options_ oo_
 
 order = options_.order;
-replic = options_.replic;
+replic = options_.simul_replic;
 
 if replic == 0
     replic = 1;

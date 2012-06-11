@@ -238,6 +238,7 @@ options_.pruning = 0;
 options_.solve_algo = 2;
 options_.linear = 0;
 options_.replic = 50;
+options_.simul_replic = 0;
 options_.drop = 100;
 % if mjdgges.dll (or .mexw32 or ....) doesn't exist, matlab/qz is added to the path.
 % There exists now qz/mjdgges.m that contains the calls to the old Sims code
