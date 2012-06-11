@@ -30,18 +30,21 @@ else
     incidence = 0;
 end;
 if static_
-    fprintf('                                          Informations about %s (static model)\n',M_.fname);
-    block_structre_str = 'block_structure_stat';
-    block_structure = M_.block_structure_stat;
-    nb_leadlag = 1;
-else
-    fprintf('                                          Informations about %s (dynamic model)\n',M_.fname);
-    block_structre_str = 'block_structure';
-    block_structure = M_.block_structure;
-    nb_leadlag = 3;
-end;
-fprintf(strcat('                                          ===================',char(ones(1,length(M_.fname))*'='),'\n\n'));
+        fprintf('                                          Informations about %s (static model)\n',M_.fname);
+        block_structre_str = 'block_structure_stat';
+        nb_leadlag = 1;
+    else
+        fprintf('                                          Informations about %s (dynamic model)\n',M_.fname);
+        block_structre_str = 'block_structure';
+        nb_leadlag = 3;
+    end;
 if(isfield(M_,block_structre_str))
+    if static_
+        block_structure = M_.block_structure_stat;
+    else
+        block_structure = M_.block_structure;
+    end;
+    fprintf(strcat('                                          ===================',char(ones(1,length(M_.fname))*'='),'\n\n'));
     nb_blocks=length(block_structure.block);
     fprintf('The model has %d equations and is decomposed in %d blocks as follow:\n',M_.endo_nbr,nb_blocks);
     fprintf('===============================================================================================================\n');
