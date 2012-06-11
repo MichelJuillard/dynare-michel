@@ -54,7 +54,7 @@ Section "Dynare core (preprocessor and M-files)"
  SectionIn RO
 !insertmacro DETERMINE_CONTEXT
  SetOutPath $INSTDIR
- File README.txt ..\NEWS mexopts-win32.bat mexopts-win64.bat ..\license.txt ..\dynare.el
+ File README.txt ..\NEWS mexopts-win32.bat mexopts-win64.bat ..\license.txt
 
  SetOutPath $INSTDIR\matlab
  File /r ..\matlab\*.m
@@ -62,6 +62,9 @@ Section "Dynare core (preprocessor and M-files)"
 
  SetOutPath $INSTDIR\contrib
  File /r ..\contrib\*.m
+
+ SetOutPath $INSTDIR\scripts
+ File /r ..\scripts\*
 
  WriteUninstaller $INSTDIR\uninstall.exe
 
@@ -157,13 +160,13 @@ Section "Uninstall"
  Delete $INSTDIR\license.txt
  Delete $INSTDIR\mexopts-win32.bat
  Delete $INSTDIR\mexopts-win64.bat
- Delete $INSTDIR\dynare.el
  Rmdir /r $INSTDIR\matlab
  Rmdir /r $INSTDIR\contrib
  Rmdir /r $INSTDIR\mex
  Rmdir /r $INSTDIR\dynare++
  Rmdir /r $INSTDIR\doc
  Rmdir /r $INSTDIR\examples
+ Rmdir /r $INSTDIR\scripts
  # We don't force deletion of installation directory (with /r), to avoid deleting important files
  Rmdir $INSTDIR
 
