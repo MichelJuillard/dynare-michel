@@ -48,7 +48,8 @@ class BlockKalmanFilter
   bool notsteady, F_singular, missing_observations;
   lapack_int *iw, *ipiv;
   double anorm, rcond;
-  int size_d_index, no_more_missing_observations, number_of_observations;
+  lapack_int size_d_index;
+  int no_more_missing_observations, number_of_observations;
   const mxArray* pdata_index;
   vector<int> d_index;
   const mxArray* pd_index;
