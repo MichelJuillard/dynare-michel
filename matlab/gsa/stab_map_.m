@@ -126,9 +126,9 @@ if fload==0,
 %         lpmat = prep_ide(Nsam,np,5);
 %         Nsam=size(lpmat,1);
     else
-        if np<52 & ilptau>0,
+        if np<52 && ilptau>0,
             [lpmat] = qmc_sequence(np, int64(0), 0, Nsam)';
-            if np>30 | ilptau==2, % scrambled lptau
+            if np>30 || ilptau==2, % scrambled lptau
                 for j=1:np,
                     lpmat(:,j)=lpmat(randperm(Nsam),j);
                 end
@@ -302,7 +302,7 @@ if fload==0,
                     if any(isnan(egg(1:nspred,j)))
                         iwrong(j)=j;
                     else
-                        if (nboth | nfwrd) & abs(egg(nspred+1,j))<=options_.qz_criterium,
+                        if (nboth || nfwrd) && abs(egg(nspred+1,j))<=options_.qz_criterium,
                             iindeterm(j)=j;
                         end
                     end
@@ -402,7 +402,7 @@ else
     end
 
 
-    if prepSA & isempty(strmatch('T',who('-file', filetoload),'exact')),
+    if prepSA && isempty(strmatch('T',who('-file', filetoload),'exact')),
         h = dyn_waitbar(0,'Please wait...');
         options_.periods=0;
         options_.nomoments=1;
@@ -463,7 +463,7 @@ delete([OutputDirectoryName,'/',fname_,'_',auname,'_corr_*.*']);
 delete([OutputDirectoryName,'/',fname_,'_',aunstname,'_corr_*.*']);
 delete([OutputDirectoryName,'/',fname_,'_',aindname,'_corr_*.*']);
 
-if length(iunstable)>0 & length(iunstable)<Nsam,
+if length(iunstable)>0 && length(iunstable)<Nsam,
     fprintf(['%4.1f%% of the prior support is stable.\n'],length(istable)/Nsam*100)
     fprintf(['%4.1f%% of the prior support is unstable.\n'],(length(iunstable)-length(iwrong)-length(iindeterm) )/Nsam*100)
     if ~isempty(iindeterm),
