@@ -335,7 +335,7 @@ nvx = estim_params_.nvx;
 ncx = estim_params_.ncx;
 nvn = estim_params_.nvn;
 ncn = estim_params_.ncn;
-if ~isempty(estim_params_.param_vals)
+if estim_params_.np
   M.params(estim_params_.param_vals(:,1)) = xparam1(nvx+ncx+nvn+ncn+1:end);
 end;
 oo_.steady_state = evaluate_steady_state(oo_.steady_state,M,options_,oo_,steadystate_check_flag);

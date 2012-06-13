@@ -94,11 +94,7 @@ if nvn
     bayestopt_.p3 = [ bayestopt_.p3; estim_params_.var_endo(:,8)];
     bayestopt_.p4 = [ bayestopt_.p4; estim_params_.var_endo(:,9)];
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.var_endo(:,10)];
-    if isempty(bayestopt_.name)
-        bayestopt_.name = cellstr(char(options_.varobs(estim_params_.var_endo(:,1),:)));
-    else
-        bayestopt_.name = cellstr(char(char(bayestopt_.name), options_.varobs(estim_params_.var_endo(:,1),:)));
-    end
+    bayestopt_.name = [ bayestopt_.name; cellstr(options_.varobs(estim_params_.var_endo(:,1),:))];
 end
 if ncx
     xparam1 = [xparam1; estim_params_.corrx(:,3)];
@@ -110,13 +106,9 @@ if ncx
     bayestopt_.p3 = [ bayestopt_.p3; estim_params_.corrx(:,9)];
     bayestopt_.p4 = [ bayestopt_.p4; estim_params_.corrx(:,10)];
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.corrx(:,11)];
-    if isempty(bayestopt_.name)
-        bayestopt_.name = cellstr(char(char(strcat(cellstr(M_.exo_names(estim_params_.corrx(:,1),:)), ...
-                                                   ',' , cellstr(M_.exo_names(estim_params_.corrx(:,2),:))))));
-    else
-        bayestopt_.name = cellstr(char(char(bayestopt_.name), char(strcat(cellstr(M_.exo_names(estim_params_.corrx(:,1),:)), ...
-                                                          ',' , cellstr(M_.exo_names(estim_params_.corrx(:,2),:))))));
-    end
+    bayestopt_.name = [bayestopt_.name; cellstr(['corr ' ...
+                        deblank(M_.exo_names(estim_params_.corrx(:,1),:)) ...
+                        ', ' , deblank(M_.exo_names(estim_params_.corrx(:,2),:))])];
 end
 if ncn
     if isequal(M_.H,0)
@@ -132,13 +124,9 @@ if ncn
     bayestopt_.p3 = [ bayestopt_.p3; estim_params_.corrn(:,9)];
     bayestopt_.p4 = [ bayestopt_.p4; estim_params_.corrn(:,10)];
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.corrn(:,11)];
-    if isempty(bayestopt_.name)
-        bayestopt_.name = cellstr(char(char(strcat(cellstr(M_.endo_names(estim_params_.corrn(:,1),:)),...
-                                                   ',' ,  cellstr(M_.endo_names(estim_params_.corrn(:,2),:))))));
-    else
-        bayestopt_.name = cellstr(char(char(bayestopt_.name), char(strcat(cellstr(M_.endo_names(estim_params_.corrn(:,1),:)),...
-                                                          ',' ,  cellstr(M_.endo_names(estim_params_.corrn(:,2),:))))));
-    end
+    bayestopt_.name = [bayestiopt_.name; cellstr(['corr ' ...
+                        deblank(M_.exo_names(estim_params_.corrn(:,1),:)) ...
+                        ', ' , deblank(M_.exo_names(estim_params_.corrn(:,2),:))])];
 end
 if np
     xparam1 = [xparam1; estim_params_.param_vals(:,2)];
@@ -150,11 +138,7 @@ if np
     bayestopt_.p3 = [ bayestopt_.p3; estim_params_.param_vals(:,8)];
     bayestopt_.p4 = [ bayestopt_.p4; estim_params_.param_vals(:,9)];
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.param_vals(:,10)];
-    if isempty(bayestopt_.name)
-        bayestopt_.name = cellstr(char(M_.param_names(estim_params_.param_vals(:,1),:)));
-    else
-        bayestopt_.name = cellstr(char(char(bayestopt_.name),M_.param_names(estim_params_.param_vals(:,1),:)));
-    end
+    bayestopt_.name = [bayestopt_.name; cellstr(M_.param_names(estim_params_.param_vals(:,1),:))];
 end
 
 bayestopt_.ub = ub;
@@ -175,6 +159,11 @@ for i=1:length(k)
     end
     mu = (bayestopt_.p1(k(i))-bayestopt_.p3(k(i)))/(bayestopt_.p4(k(i))-bayestopt_.p3(k(i)));
     stdd = bayestopt_.p2(k(i))/(bayestopt_.p4(k(i))-bayestopt_.p3(k(i)));
+    if stdd^2 > (1-mu)*mu
+        error(sprintf(['Error in prior for %s: in a beta distribution with ' ...
+                       'mean %f, the standard error can''t be larger than' ...
+                       ' %f.'], bayestopt_.name{k(i)},mu,sqrt((1-mu)*mu)))
+    end
     bayestopt_.p6(k(i)) = (1-mu)*mu^2/stdd^2 - mu ;
     bayestopt_.p7(k(i)) = bayestopt_.p6(k(i))*(1/mu-1) ;
     m = compute_prior_mode([ bayestopt_.p6(k(i)) , bayestopt_.p7(k(i)) , bayestopt_.p3(k(i)) , bayestopt_.p4(k(i)) ],1);

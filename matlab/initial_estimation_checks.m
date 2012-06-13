@@ -51,6 +51,11 @@ end
 %         error('Options mode_compute=5 is not compatible with non linear filters or Dsge-VAR models!')
 %     end
 % end
+if isnan(fval)
+    error('The initial value of the likelihood is NaN')
+elseif imag(fval)
+    error('The initial value of the likelihood is complex')
+end
 
 if info(1) > 0
     disp('Error in computing likelihood for initial parameter values')
