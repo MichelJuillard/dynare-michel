@@ -1,17 +1,13 @@
-function planner_objective_value = evaluate_planner_objective(M,oo,options)
+function planner_objective_value = evaluate_planner_objective(M,options,oo)
 
 %function oo1 = evaluate_planner_objective(dr,M,oo,options)
 %  computes value of planner objective function     
 % 
 % INPUTS
-%   dr:       (structure) decision rule
 %   M:        (structure) model description
-%   oo:       (structure) output results
 %   options:  (structure) options
+%   oo:       (structure) output results
 %    
-% OUTPUTS
-%   oo1:      (structure) updated output results
-%
 % SPECIAL REQUIREMENTS
 %   none
 
@@ -105,30 +101,48 @@ else
     Wyu = Uy*gyu+Uyygygu+beta*(Wy*Gyu+Wyygygu);
     Wss = (Uy*gss+beta*(Wuu*M.Sigma_e(:)+Wy*Gss))/(1-beta);
 end
+% initialize yhat1 at the steady state
+yhat1 = oo.steady_state;
 if options.ramsey_policy
-    yhat = zeros(M.endo_nbr,1);
-    yhat(1:M.orig_endo_nbr) = oo.steady_state(1:M.orig_endo_nbr);
-else
-    yhat = oo.endo_simul;
+    % initialize le Lagrange multipliers to 0 in yhat2
+    yhat2 = zeros(M.endo_nbr,1);
+    yhat2(1:M.orig_endo_nbr) = oo.steady_state(1:M.orig_endo_nbr);
 end
-yhat = yhat(dr.order_var(nstatic+(1:npred)),1)-dr.ys(dr.order_var(nstatic+(1:npred)));
+if ~isempty(M.endo_histval)
+    % initialize endogenous state variable to histval if necessary
+    yhat1(1:M.orig_endo_nbr) = M.endo_histval(1:M.orig_endo_nbr);
+    if options.ramsey_policy
+        yhat12(1:M.orig_endo_nbr) = M.endo_histval(1:M.orig_endo_nbr);
+    end
+
+end
+yhat1 = yhat1(dr.order_var(nstatic+(1:npred)),1)-dr.ys(dr.order_var(nstatic+(1:npred)));
+yhat2 = yhat2(dr.order_var(nstatic+(1:npred)),1)-dr.ys(dr.order_var(nstatic+(1:npred)));
 u = oo.exo_simul(1,:)';
 
-[Wyyyhatyhat, err] = A_times_B_kronecker_C(Wyy,yhat,yhat,options.threads.kronecker.A_times_B_kronecker_C);
+[Wyyyhatyhat1, err] = A_times_B_kronecker_C(Wyy,yhat1,yhat1,options.threads.kronecker.A_times_B_kronecker_C);
 mexErrCheck('A_times_B_kronecker_C', err);
 [Wuuuu, err] = A_times_B_kronecker_C(Wuu,u,u,options.threads.kronecker.A_times_B_kronecker_C);
 mexErrCheck('A_times_B_kronecker_C', err);
-[Wyuyhatu, err] = A_times_B_kronecker_C(Wyu,yhat,u,options.threads.kronecker.A_times_B_kronecker_C);
+[Wyuyhatu1, err] = A_times_B_kronecker_C(Wyu,yhat1,u,options.threads.kronecker.A_times_B_kronecker_C);
 mexErrCheck('A_times_B_kronecker_C', err);
-planner_objective_value(1) = Wbar+Wy*yhat+Wu*u+Wyuyhatu ...
-    + 0.5*(Wyyyhatyhat + Wuuuu+Wss);
-planner_objective_value(2) = Wbar + 0.5*Wss;
+planner_objective_value(1) = Wbar+Wy*yhat1+Wu*u+Wyuyhatu1 ...
+    + 0.5*(Wyyyhatyhat1 + Wuuuu+Wss);
+if options.ramsey_policy
+    [Wyyyhatyhat2, err] = A_times_B_kronecker_C(Wyy,yhat2,yhat2,options.threads.kronecker.A_times_B_kronecker_C);
+    mexErrCheck('A_times_B_kronecker_C', err);
+    [Wyuyhatu2, err] = A_times_B_kronecker_C(Wyu,yhat2,u,options.threads.kronecker.A_times_B_kronecker_C);
+    mexErrCheck('A_times_B_kronecker_C', err);
+    planner_objective_value(2) = Wbar+Wy*yhat2+Wu*u+Wyuyhatu2 ...
+        + 0.5*(Wyyyhatyhat2 + Wuuuu+Wss);
+end
+
 if ~options.noprint
     disp(' ')
     disp('Approximated value of planner objective function')
     disp(['    - with initial Lagrange multipliers set to 0: ' ...
-          num2str(planner_objective_value(1)) ])
-    disp(['    - with initial Lagrange multipliers set to steady state: ' ...
           num2str(planner_objective_value(2)) ])
+    disp(['    - with initial Lagrange multipliers set to steady state: ' ...
+          num2str(planner_objective_value(1)) ])
     disp(' ')
 end
