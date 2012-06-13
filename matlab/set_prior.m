@@ -99,7 +99,7 @@ end
 if ncx
     xparam1 = [xparam1; estim_params_.corrx(:,3)];
     ub = [ub; max(min(estim_params_.corrx(:,5),1),-1)];
-    lb = [lb; max(min(estim_params_.corrx(:,4),1),-1)];
+    lb = [lb; min(max(estim_params_.corrx(:,4),-1),1)];
     bayestopt_.pshape = [ bayestopt_.pshape; estim_params_.corrx(:,6)];
     bayestopt_.p1 = [ bayestopt_.p1; estim_params_.corrx(:,7)];
     bayestopt_.p2 = [ bayestopt_.p2; estim_params_.corrx(:,8)];
@@ -117,7 +117,7 @@ if ncn
     end
     xparam1 = [xparam1; estim_params_.corrn(:,3)];
     ub = [ub; max(min(estim_params_.corrn(:,5),1),-1)];
-    lb = [lb; max(min(estim_params_.corrn(:,4),1),-1)];
+    lb = [lb; min(max(estim_params_.corrn(:,4),-1),1)];
     bayestopt_.pshape = [ bayestopt_.pshape; estim_params_.corrn(:,6)];
     bayestopt_.p1 = [ bayestopt_.p1; estim_params_.corrn(:,7)];
     bayestopt_.p2 = [ bayestopt_.p2; estim_params_.corrn(:,8)];
