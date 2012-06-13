@@ -1,6 +1,6 @@
 % computes the steady state of fs2000 analyticaly
 % largely inspired by the program of F. Schorfheide
-function [ys,check] = fs2000k_steadystate(ys,exe)
+function [ys,check] = fs2000_b1L1L_steadystate(ys,exe)
   global M_
   
   alp = M_.params(1); 

@@ -1,4 +1,4 @@
-function [ys,check] = wlash1_old_ss_steadystate(ys0,exo)
+function [ys,check] = walsh1_old_ss_steadystate(ys0,exo)
     global M_
     
     check = 0;
