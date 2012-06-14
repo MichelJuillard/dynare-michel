@@ -60,7 +60,7 @@ bayestopt_.p6 = []; % first hyper-parameter (\alpha for the BETA and GAMMA distr
 bayestopt_.p7 = []; % second hyper-parameter (\beta for the BETA and GAMMA distributions, \nu for the INVERSE GAMMAs, standard deviation for the GAUSSIAN distribution, upper bound for the UNIFORM distribution).
 
 bayestopt_.jscale = [];
-bayestopt_.name = [];
+bayestopt_.name = {};
 if nvx
     xparam1 = estim_params_.var_exo(:,2);
     ub = estim_params_.var_exo(:,4); 
