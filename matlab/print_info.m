@@ -65,7 +65,7 @@ if ~noprint
         error('Some updated params are complex')
       case 24
         error('Some updated params contain NaN or Inf')
-      case 30 
+      case 30
         error('Variance can''t be computed')
       case 41
         error('one (many) parameter(s) do(es) not satisfy the lower bound');
@@ -77,20 +77,22 @@ if ~noprint
         error('The covariance matrix of the measurement errors is not positive definite.');
       case 45 %DsgeLikelihood_hh / dsge_likelihood
         error('Likelihood is not a number (NaN) or a complex number');
+      case 46 %DsgeLikelihood_hh / dsge_likelihood
+        error('Likelihood is a complex number');
+      case 47 %DsgeLikelihood_hh / dsge_likelihood
+        error('Prior density is not a number (NaN)');
+      case 48 %DsgeLikelihood_hh / dsge_likelihood
+        error('Prior density is a complex number');
       case 51
         error('You are estimating a DSGE-VAR model, but the value of the dsge prior weight is too low!')
       case 52 %DsgeVarLikelihood
         error('');
       case 61 %Discretionary policy
-        error(['Discretionary policy: maximum number of iterations has ' ...
-               'been reached. Procedure failed. ']);
+        error(['Discretionary policy: maximum number of iterations has been reached. Procedure failed. ']);
       case 62
-        error(['Discretionary policy: some eigenvalues greater than ' ...
-               'options_.qz_criterium. Model potentially unstable.']);
+        error(['Discretionary policy: some eigenvalues greater than options_.qz_criterium. Model potentially unstable.']);
       case 63
-        error(['Discretionary policy: NaN elements are present in the ' ...
-               'solution. Procedure failed.']);
-        
+        error(['Discretionary policy: NaN elements are present in the solution. Procedure failed.']);
         % Aim Code Conversions by convertAimCodeToInfo.m
       case 102
         error('Aim: roots not correctly computed by real_schur');

@@ -80,8 +80,12 @@ function [fval,DLIK,Hess,exit_flag,ys,trend_coeff,info,Model,DynareOptions,Bayes
 %! The covariance matrix of the measurement errors is not positive definite.
 %! @item info==45
 %! Likelihood is not a number (NaN).
-%! @item info==45
+%! @item info==46
 %! Likelihood is a complex valued number.
+%! @item info==47
+%! Posterior kernel is not a number (logged prior density is NaN)
+%! @item info==48
+%! Posterior kernel is a complex valued number (logged prior density is complex).
 %! @end table
 %! @item Model
 %! Matlab's structure describing the model (initialized by dynare, see @ref{M_}).
@@ -133,7 +137,7 @@ function [fval,DLIK,Hess,exit_flag,ys,trend_coeff,info,Model,DynareOptions,Bayes
 % set also 'exit_flag' equal to 0 instead of 1.  It is only when
 % dsge_likelihood() is called by an optimizer called by
 % dynare_estimation_1() that 'exit_flag' is ignored and penalized 'fval' is
-% actually used.  
+% actually used.
 % In that case, 'penalty' is properly initialized, at the very end of the
 % present function, by a call to dsge_likelihood() made in
 % initial_estimation_checks(). If a condition triggers exit_flag ==
@@ -176,7 +180,7 @@ end
 if nargout==1,
     analytic_derivation=0;
 end
-    
+
 %------------------------------------------------------------------------------
 % 1. Get the structural parameters & define penalties
 %------------------------------------------------------------------------------
@@ -332,7 +336,7 @@ if (kalman_algo == 2) || (kalman_algo == 4)
     else
         if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
             H = diag(H);
-            mmm = mm; 
+            mmm = mm;
         else
             Z = [Z, eye(pp)];
             T = blkdiag(T,zeros(pp));
@@ -381,7 +385,7 @@ switch DynareOptions.lik_init
         % Use standard kalman filter except if the univariate filter is explicitely choosen.
     if kalman_algo == 0
         kalman_algo = 3;
-    elseif ~((kalman_algo == 3) || (kalman_algo == 4)) 
+    elseif ~((kalman_algo == 3) || (kalman_algo == 4))
             error(['diffuse filter: options_.kalman_algo can only be equal ' ...
                    'to 0 (default), 3 or 4'])
     end
@@ -417,7 +421,7 @@ switch DynareOptions.lik_init
         else
             if all(all(abs(H-diag(diag(H)))<1e-14))% ie, the covariance matrix is diagonal...
                 H1 = diag(H);
-                mmm = mm; 
+                mmm = mm;
             else
                 Z = [Z, eye(pp)];
                 T = blkdiag(T,zeros(pp));
@@ -605,8 +609,8 @@ if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
                                 kalman_tol, riccati_tol, ...
                                 DynareOptions.presample, ...
                                 T,Q,R,H,Z,mm,pp,rr,Zflag,diffuse_periods, ...
-                                analytic_deriv_info{:}); 
-                            
+                                analytic_deriv_info{:});
+
         end
     else
         if 0 %DynareOptions.block
@@ -644,7 +648,7 @@ end
 
 if (kalman_algo==2) || (kalman_algo==4)
     % Univariate Kalman Filter
-    % resetting measurement error covariance matrix when necessary                                                           % 
+    % resetting measurement error covariance matrix when necessary                                                           %
     if ~correlated_errors_have_been_checked
         if isequal(H,0)
             H = zeros(pp,1);
@@ -718,17 +722,19 @@ if analytic_derivation
     end
 end
 
-
 if isnan(LIK)
     info = 45;
     exit_flag = 0;
     return
 end
+
 if imag(LIK)~=0
-    likelihood = penalty;
-else
-    likelihood = LIK;
+    info = 46;
+    exit_flag = 0;
+    return
 end
+
+likelihood = LIK;
 
 % ------------------------------------------------------------------------------
 % 5. Adds prior if necessary
@@ -751,7 +757,20 @@ if analytic_derivation
 else
     lnprior = priordens(xparam1,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
 end
+
 fval    = (likelihood-lnprior);
+
+if isnan(fval)
+    info = 47;
+    exit_flag = 0;
+    return
+end
+
+if imag(fval)~=0
+    info = 48;
+    exit_flag = 0;
+    return
+end
 
 % Update DynareOptions.kalman_algo.
 DynareOptions.kalman_algo = kalman_algo;
