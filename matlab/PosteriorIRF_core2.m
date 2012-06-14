@@ -89,7 +89,6 @@ for i=fpar:npar,
     for j=1:nvar
         if max(abs(MeanIRF(:,j,i))) > 10^(-6)
             subplotnum = subplotnum+1;
-            dyn_figure(options_,'Name',['Relative response to orthogonalized shock to ' tit(i,:)])
             if subplotnum == 1 && options_.relative_irf
                 hh = dyn_figure(options_,'Name',['Relative response to orthogonalized shock to ' tit(i,:)]);
             elseif subplotnum == 1 && ~options_.relative_irf
