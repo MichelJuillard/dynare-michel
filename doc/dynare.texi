@@ -1778,7 +1778,7 @@ implemented in @code{simul}.
 For this last reason, it necessary to provide values for all the
 endogenous variables in an @code{initval} block (even though,
 theoretically, initial conditions are only necessary for lagged
-variables). If some exogenous variables are not mentionned in the
+variables). If some variables, endogenous or exogenous, are not mentionned in the
 @code{initval} block, a zero value is assumed.
 
 Note that if the @code{initval} block is immediately followed by a
