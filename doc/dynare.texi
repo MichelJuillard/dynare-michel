@@ -1853,7 +1853,7 @@ for the non-linear solver implemented in @code{simul}.
 For this last reason, it necessary to provide values for all the
 endogenous variables in an @code{endval} block (even though,
 theoretically, initial conditions are only necessary for forward
-variables). If some exogenous variables are not mentionned in the
+variables). If some variables, endogenous or exogenous, are not mentionned in the
 @code{endval} block, a zero value is assumed.
 
 Note that if the @code{endval} block is immediately followed by a
@@ -1923,7 +1923,8 @@ Variables not initialized in the @code{histval} block are assumed to
 have a value of zero at period 0 and before. Note that this behavior
 differs from the case where there is no @code{histval} block, where all
 variables are initialized at their steady state value at period 0 and
-before.
+before (except when a @code{steady} command doesn't follow an
+@code{initval} block).
 
 @examplehead
 
