@@ -145,13 +145,13 @@ disp('Press ENTER to continue'); pause(5);
 
 // run this to generate posterior mode and Metropolis files if not yet done
 estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2,
-   prefilter=1,mh_jscale=0.5,mh_replic=5000, mode_compute=4, nograph, mh_drop=0.6,
+   prefilter=1,mh_jscale=0.5,mh_replic=5000, mode_compute=4, mh_drop=0.6, nodisplay,
    bayesian_irf, filtered_vars, smoother) y_obs R_obs pie_obs dq de;
 
 
 // run this to produce posterior samples of filtered, smoothed and irf variables, if not yet done
 //estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2,prefilter=1,mh_jscale=0.3,
-//          mh_replic=0, mode_file=ls2003_mode, mode_compute=0, nograph, load_mh_file, bayesian_irf,
+//          mh_replic=0, mode_file=ls2003_mode, mode_compute=0, load_mh_file, bayesian_irf,
 //		  filtered_vars, smoother, mh_drop=0.6);
 
 disp(' ');
@@ -211,7 +211,7 @@ disp('RMSE ANALYSIS FOR POSTERIOR MCMC sample (ppost=1)');
 disp('Needs a call to dynare_estimation to load all MH environment');
 disp('Press ENTER to continue'); pause(5);
 //estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2, mode_file=ls2003_mode, load_mh_file,
-//  prefilter=1,mh_jscale=0.5,mh_replic=0, mode_compute=0, nograph, mh_drop=0.6);
+//  prefilter=1,mh_jscale=0.5,mh_replic=0, mode_compute=0, mh_drop=0.6);
 
 dynare_sensitivity(stab=0, // no need for stability analysis since the posterior sample is surely OK
 rmse=1,ppost=1);
