@@ -1,4 +1,4 @@
-function disp_identification(pdraws, idemodel, idemoments, name)
+function disp_identification(pdraws, idemodel, idemoments, name, advanced)
 
 % Copyright (C) 2008-2011 Dynare Team
 %
@@ -18,6 +18,10 @@ function disp_identification(pdraws, idemodel, idemoments, name)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 global options_
+
+if nargin < 5 || isempty(advanced),
+    advanced=0;
+end
 
 [SampleSize, npar] = size(pdraws);
 % jok = 0;
@@ -261,3 +265,27 @@ end
 % end
 % disp(' ')
 
+% identificaton patterns
+if SampleSize==1 && advanced,
+    disp(' ')
+    disp('Press ENTER to print advanced diagnostics'), pause(5),
+    for  j=1:size(idemoments.cosnJ,2),
+        pax=NaN(npar,npar);
+        fprintf('\n')
+        disp(['Collinearity patterns with ', int2str(j) ,' parameter(s)'])
+        fprintf('%-15s [%-*s] %10s\n','Parameter',(15+1)*j,' Expl. params ','cosn')
+        for i=1:npar,
+            namx='';
+            for in=1:j,
+                dumpindx = idemoments.pars{i,j}(in);
+                if isnan(dumpindx),
+                    namx=[namx ' ' sprintf('%-15s','--')];
+                else
+                    namx=[namx ' ' sprintf('%-15s',name{dumpindx})];
+                    pax(i,dumpindx)=idemoments.cosnJ(i,j);
+                end
+            end
+            fprintf('%-15s [%s] %10.3f\n',name{i},namx,idemoments.cosnJ(i,j))
+        end
+    end
+end

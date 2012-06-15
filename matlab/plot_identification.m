@@ -87,8 +87,10 @@ if SampleSize == 1,
     dyn_saveas(hh,[IdentifDirectoryName '/' M_.fname '_ident_strength_' tittxt1],options_);
     
     if advanced,
-        disp(' ')
-        disp('Press ENTER to display advanced diagnostics'), pause(5),
+        if ~options_.nodisplay,
+            disp(' ')
+            disp('Press ENTER to plot advanced diagnostics'), pause(5),
+        end
         hh = dyn_figure(options_,'Name',[tittxt, ' - Sensitivity plot']);
         subplot(211)
         mmm = (siJnorm)'./max(siJnorm);
@@ -112,9 +114,9 @@ if SampleSize == 1,
         % identificaton patterns
         for  j=1:size(idemoments.cosnJ,2),
             pax=NaN(nparam,nparam);
-            fprintf('\n')
-            disp(['Collinearity patterns with ', int2str(j) ,' parameter(s)'])
-            fprintf('%-15s [%-*s] %10s\n','Parameter',(15+1)*j,' Expl. params ','cosn')
+%             fprintf('\n')
+%             disp(['Collinearity patterns with ', int2str(j) ,' parameter(s)'])
+%             fprintf('%-15s [%-*s] %10s\n','Parameter',(15+1)*j,' Expl. params ','cosn')
             for i=1:nparam,
                 namx='';
                 for in=1:j,
@@ -126,7 +128,7 @@ if SampleSize == 1,
                         pax(i,dumpindx)=idemoments.cosnJ(i,j);
                     end
                 end
-                fprintf('%-15s [%s] %10.3f\n',name{i},namx,idemoments.cosnJ(i,j))
+%                 fprintf('%-15s [%s] %10.3f\n',name{i},namx,idemoments.cosnJ(i,j))
             end
             hh = dyn_figure(options_,'Name',[tittxt,' - Collinearity patterns with ', int2str(j) ,' parameter(s)']);
             imagesc(pax,[0 1]);
@@ -228,8 +230,10 @@ else
     title('MC mean of sensitivity measures')
     dyn_saveas(hh,[ IdentifDirectoryName '/' M_.fname '_MC_sensitivity' ],options_);
     if advanced,
-        disp(' ')
-        disp('Press ENTER to display advanced diagnostics'), pause(5),
+        if ~options_.nodisplay,
+            disp(' ')
+            disp('Press ENTER to display advanced diagnostics'), pause(5),
+        end
 %         options_.nograph=1;
         hh = dyn_figure(options_,'Name','MC Condition Number');
         subplot(221)
