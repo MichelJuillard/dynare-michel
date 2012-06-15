@@ -255,6 +255,16 @@ else
 end
 if verbose
     disp([ message 'Quasi Monte-Carlo sequence (Sobol).' ])
+end
+
+% Test if MS-SBVAR DLL is present
+if exist('ms_sbvar_command_line', 'file') == 3
+    message = '[mex] ';
+else
+    message = '[no]  ';
+end
+if verbose
+    disp([ message 'Markov Switching SBVAR.' ])
     disp(' ')
 end
 
