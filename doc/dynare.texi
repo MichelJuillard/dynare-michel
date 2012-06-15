@@ -5784,6 +5784,15 @@ Specify the parameter set to use. Default: @code{prior_mean}
 @item kalman_algo = @var{INTEGER}
 @xref{kalman_algo}.
 
+@item nograph
+@xref{nograph}.
+
+@item nodisplay
+@xref{nodisplay}.
+
+@item graph_format = @var{FORMAT}
+@xref{graph_format}.
+
 @end table
 
 @end deffn
