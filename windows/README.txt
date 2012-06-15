@@ -95,9 +95,11 @@ be displayed when you launch Dynare:
   [mex] Sylvester equation solution.
   [mex] Kronecker products.
   [mex] Sparse kronecker products.
+  [mex] Local state space iteraton (second order).
   [mex] Bytecode evaluation.
   [mex] k-order perturbation solver.
   [mex] k-order solution simulation.
+  [mex] Quasi Monte-Carlo sequence (Sobol).
 
 On the contrary, if DLL are not detected, Dynare will fallback on
 slower alternatives written in M-files (only for some of the DLLs),
@@ -108,9 +110,11 @@ and display the following:
   [m]   Sylvester equation solution.
   [m]   Kronecker products.
   [m]   Sparse kronecker products.
+  [no]  Local state space iteraton (second order).
   [no]  Bytecode evaluation.
   [no]  k-order perturbation solver.
   [no]  k-order solution simulation.
+  [no]  Quasi Monte-Carlo sequence (Sobol).
 
 In this last case, Dynare will run correctly on the basic features,
 but with suboptimal speed, and some features will be missing. There
