@@ -7469,26 +7469,26 @@ Cycles: The Cycle is the Trend,'' @i{NBER Working Paper}, 10734
 @item
 Backus, David K., Patrick J. Kehoe, and Finn E. Kydland (1992):
 ``International Real Business Cycles,'' @i{Journal of Political
-Economy}, 100(4), 745--775.
+Economy}, 100(4), 745--775
 
 @item
 Boucekkine, Raouf (1995): ``An alternative methodology for solving
 nonlinear forward-looking models,'' @i{Journal of Economic Dynamics
-and Control}, 19, 711--734.
+and Control}, 19, 711--734
 
 @item
-Collard, Fabrice (2001): ``Stochastic simulations with Dynare: A practical guide''.
+Collard, Fabrice (2001): ``Stochastic simulations with Dynare: A practical guide''
 
 @item
 Collard, Fabrice and Michel Juillard (2001a): ``Accuracy of stochastic
 perturbation methods: The case of asset pricing models,'' @i{Journal
-of Economic Dynamics and Control}, 25, 979--999.
+of Economic Dynamics and Control}, 25, 979--999
 
 @item
 Collard, Fabrice and Michel Juillard (2001b): ``A Higher-Order Taylor
 Expansion Approach to Simulation of Stochastic Forward-Looking Models
 with an Application to a Non-Linear Phillips Curve,'' @i{Computational
-Economics}, 17, 125--139.
+Economics}, 17, 125--139
 
 @item
 Dennis, Richard (2007): ``Optimal Policy In Rational Expectations
@@ -7497,71 +7497,71 @@ Models: New Solution Algorithms,'' @i{Macroeconomic Dynamics}, 11(1),
 
 @item
 Durbin, J. and S. J. Koopman (2001), @i{Time Series Analysis by State
-Space Methods}, Oxford University Press.
+Space Methods}, Oxford University Press
 
 @item
 Fair, Ray and John Taylor (1983): ``Solution and Maximum Likelihood
 Estimation of Dynamic Nonlinear Rational Expectation Models,''
-@i{Econometrica}, 51, 1169--1185.
+@i{Econometrica}, 51, 1169--1185
 
 @item
-Fernandez-Villaverde, Jesus and Juan Rubio-Ramirez (2004): ``Comparing
+Fernández-Villaverde, Jesús and Juan Rubio-Ramírez (2004): ``Comparing
 Dynamic Equilibrium Economies to Data: A Bayesian Approach,''
-@i{Journal of Econometrics}, 123, 153--187.
+@i{Journal of Econometrics}, 123, 153--187
 
 @item
-Fernandez-Villaverde, Jesus and Juan Rubio-Ramirez (2005): ``Estimating
+Fernández-Villaverde, Jesús and Juan Rubio-Ramírez (2005): ``Estimating
 Dynamic Equilibrium Economies: Linear versus Nonlinear Likelihood,''
-@i{Journal of Applied Econometrics}, 20, 891--910.
+@i{Journal of Applied Econometrics}, 20, 891--910
 
 @item
 Ireland, Peter (2004): ``A Method for Taking Models to the Data,''
-@i{Journal of Economic Dynamics and Control}, 28, 1205--26.
+@i{Journal of Economic Dynamics and Control}, 28, 1205--26
 
 @item
-Iskrev, Nikolay (2010). ``Local identification in DSGE models,''
-@i{Journal of Monetary Economics}, 57(2), 189--202.
+Iskrev, Nikolay (2010): ``Local identification in DSGE models,''
+@i{Journal of Monetary Economics}, 57(2), 189--202
 
 @item
 Judd, Kenneth (1996): ``Approximation, Perturbation, and Projection
 Methods in Economic Analysis'', in @i{Handbook of Computational
 Economics}, ed. by Hans Amman, David Kendrick, and John Rust, North
-Holland Press, 511--585.
+Holland Press, 511--585
 
 @item
 Juillard, Michel (1996): ``Dynare: A program for the resolution and
 simulation of dynamic models with forward variables through the use of
-a relaxation algorithm,'' CEPREMAP, @i{Couverture Orange}, 9602.
+a relaxation algorithm,'' CEPREMAP, @i{Couverture Orange}, 9602
 
 @item
 Kim, Jinill, Sunghyun Kim, Ernst Schaumburg, and Christopher A. Sims
 (2008): ``Calculating and using second-order accurate solutions of
 discrete time dynamic equilibrium models,'' @i{Journal of Economic
-Dynamics and Control}, 32(11), 3397--3414.
+Dynamics and Control}, 32(11), 3397--3414
 
 @item
 Koopman, S. J. and J. Durbin (2003): ``Filtering and Smoothing of
 State Vector for Diffuse State Space Models,'' @i{Journal of Time
-Series Analysis}, 24(1), 85--98.
+Series Analysis}, 24(1), 85--98
 
 @item
 Laffargue, Jean-Pierre (1990): ``Résolution d'un modèle
 macroéconomique avec anticipations rationnelles'', @i{Annales
-d'Économie et Statistique}, 17, 97--119.
+d'Économie et Statistique}, 17, 97--119
 
 @item
 Lubik, Thomas and Frank Schorfheide (2007): ``Do Central Banks Respond
 to Exchange Rate Movements? A Structural Investigation,'' @i{Journal
-of Monetary Economics}, 54(4), 1069--1087.
+of Monetary Economics}, 54(4), 1069--1087
 
 @item
 Mancini-Griffoli, Tommaso (2007): ``Dynare User Guide: An introduction
-to the solution and estimation of DSGE models''.
+to the solution and estimation of DSGE models''
 
 @item
 Pearlman, Joseph, David Currie, and Paul Levine (1986): ``Rational
 expectations models with partial information,'' @i{Economic
-Modelling}, 3(2), 90--105.
+Modelling}, 3(2), 90--105
 
 @item
 Rabanal, Pau and Juan Rubio-Ramirez (2003): ``Comparing New Keynesian
@@ -7569,28 +7569,28 @@ Models of the Business Cycle: A Bayesian Approach,'' Federal Reserve
 of Atlanta, @i{Working Paper Series}, 2003-30.
 
 @item
-Ratto, Marco (2008): ``Analysing dsge models with global sensitivity
-analysis''. @i{Computational Economics}, 31, 115--139.
+Ratto, Marco (2008): ``Analysing DSGE models with global sensitivity
+analysis'', @i{Computational Economics}, 31, 115--139
 
 @item
 Schorfheide, Frank (2000): ``Loss Function-based evaluation of DSGE
-models,'' @i{Journal of Applied Econometrics}, 15(6), 645--670.
+models,'' @i{Journal of Applied Econometrics}, 15(6), 645--670
 
 @item
 Schmitt-Grohé, Stephanie and Martin Uríbe (2004): ``Solving Dynamic
 General Equilibrium Models Using a Second-Order Approximation to the
 Policy Function,'' @i{Journal of Economic Dynamics and Control},
-28(4), 755--775.
+28(4), 755--775
 
 @item
 Sims, Christopher A., Daniel F. Waggoner and Tao Zha (2008): ``Methods for
 inference in large multiple-equation Markov-switching models,''
-@i{Journal of Econometrics}, 146, 255--274.
+@i{Journal of Econometrics}, 146, 255--274
 
 @item
 Smets, Frank and Rafael Wouters (2003): ``An Estimated Dynamic
 Stochastic General Equilibrium Model of the Euro Area,'' @i{Journal of
-the European Economic Association}, 1(5), 1123--1175.
+the European Economic Association}, 1(5), 1123--1175
 
 @item
 Villemot, Sébastien (2011): ``Solving rational expectations models at
