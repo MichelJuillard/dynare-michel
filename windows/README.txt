@@ -95,7 +95,7 @@ be displayed when you launch Dynare:
   [mex] Sylvester equation solution.
   [mex] Kronecker products.
   [mex] Sparse kronecker products.
-  [mex] Local state space iteraton (second order).
+  [mex] Local state space iteration (second order).
   [mex] Bytecode evaluation.
   [mex] k-order perturbation solver.
   [mex] k-order solution simulation.
@@ -110,7 +110,7 @@ and display the following:
   [m]   Sylvester equation solution.
   [m]   Kronecker products.
   [m]   Sparse kronecker products.
-  [no]  Local state space iteraton (second order).
+  [m]   Local state space iteration (second order).
   [no]  Bytecode evaluation.
   [no]  k-order perturbation solver.
   [no]  k-order solution simulation.

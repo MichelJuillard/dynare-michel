@@ -183,7 +183,7 @@ mex_status(4,2) = {'kronecker'};
 mex_status(4,3) = {'Sparse kronecker products'};
 mex_status(5,1) = {'local_state_space_iteration_2'};
 mex_status(5,2) = {'particle/local_state_space_iteration'};
-mex_status(5,3) = {'Local state space iteraton (second order)'};
+mex_status(5,3) = {'Local state space iteration (second order)'};
 number_of_mex_files = size(mex_status,1);
 %% Remove some directories from matlab's path. This is necessary if the user has
 %% added dynare_v4/matlab with the subfolders. Matlab has to ignore these
