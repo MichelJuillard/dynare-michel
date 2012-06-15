@@ -171,10 +171,10 @@ if SampleSize == 1,
         end
         for j=1:min(nparam,8),
             if j<5,
-                figure(f1),
+                set(0,'CurrentFigure',f1),
                 jj=j;
             else
-                figure(f2),
+                set(0,'CurrentFigure',f2),
                 jj=j-4;
             end
             subplot(4,1,jj),
@@ -261,7 +261,7 @@ else
 %         end
 
         if nparam<5,
-            f1 = dyn_figure(options_,'Name',[tittxt,' - MC Identification patterns (moments): HIGHEST SV'])
+            f1 = dyn_figure(options_,'Name',[tittxt,' - MC Identification patterns (moments): HIGHEST SV']);
         else
             f1 = dyn_figure(options_,'Name',[tittxt,' - MC Identification patterns (moments): SMALLEST SV']);
             f2 = dyn_figure(options_,'Name',[tittxt,' - MC Identification patterns (moments): HIGHEST SV']);
@@ -274,12 +274,12 @@ else
         end
         for j=1:nplots,
             if (nparam>4 && j<=ceil(nplots/2)) || nparam<5,
-                figure(f1),
+                set(0,'CurrentFigure',f1),
                 jj=j;
                 VVV=squeeze(abs(idemoments.V(:,:,end-j+1)));
                 SSS = idemoments.S(:,end-j+1);
             else
-                figure(f2),
+                set(0,'CurrentFigure',f2),
                 jj=j-ceil(nplots/2);
                 VVV=squeeze(abs(idemoments.V(:,:,jj)));
                 SSS = idemoments.S(:,jj);
