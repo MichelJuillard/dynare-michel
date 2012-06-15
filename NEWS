@@ -1,3 +1,184 @@
+Announcement for Dynare 4.3.0 (on 2012-06-15)
+=============================================
+
+We are pleased to announce the release of Dynare 4.3.0.
+
+This major release adds new features and fixes various bugs.
+
+The Windows and Mac packages are already available for download. The GNU/Linux
+packages should follow soon.
+
+All users are strongly encouraged to upgrade.
+
+The new release is compatible with MATLAB versions ranging from 7.0 (R14) to
+7.14 (R2012a) and with GNU Octave versions ranging from 3.2 to 3.6.
+
+Here is the list of main user-visible changes:
+
+
+* New major algorithms:
+
+ - Nonlinear estimation with a particle filter based on a second order
+   approximation of the model, as in Fernández-Villaverde and Rubio-Ramírez
+   (2005); this is triggered by setting `order=2' in the `estimation' command
+
+ - Extended path solution method as in Fair and Taylor (1983); see the
+   `extended_path' command
+
+ - Support for Markov-Switching Structural Bayesian VARs (MS-SBVAR) along the
+   lines of Sims, Waggoner and Zha (2008) (see the dedicated section in the
+   reference manual)
+
+ - Optimal policy under discretion along the lines of Dennis (2007); see the
+   `discretionary_policy' command
+
+ - Identification analysis along the lines of Iskrev (2010); see the
+   `identification' command
+
+ - The Global Sensitivity Analysis toolbox (Ratto, 2008) is now part of the
+   official Dynare distribution
+
+
+* Other algorithmic improvements:
+
+ - Stochastic simulation and estimation can benefit from block decomposition
+   (with the `block' option of `model'; only at 1st order)
+
+ - Possibility of running smoother and filter on a calibrated model; see the
+   `calib_smoother' command
+
+ - Possibility of doing conditional forecast on a calibrated model; see the
+   `parameter_set=calibration' option of the `conditional_forecast' command
+
+ - The default algorithm for deterministic simulations has changed and is now
+   based on sparse matrices; the historical algorithm (Laffargue, Boucekkine
+   and Juillard) is still available under the `stack_solve_algo=6'option of the
+   `simul' command
+
+ - Possibility of using an analytic gradient for the estimation; see the
+   `analytic_derivation' option of the `estimation' command
+
+ - Implementation of the Nelder-Mead simplex based optimization routine for
+   computing the posterior mode; available under the `mode_compute=8' option of
+   the `estimation' command
+
+ - Implementation of the CMA Evolution Strategy algorithm for computing the
+   posterior mode; available under the `mode_compute=9' option of the
+   `estimation' command
+
+ - New solvers for Lyapunov equations which can accelerate the estimation of
+   large models; see the `lyapunov' option of the `estimation' command
+
+ - New solvers for Sylvester equations which can accelerate the resolution of
+   large models with block decomposition; see the `sylvester' option of the
+   `stoch_simul' and `estimation' commands
+
+ - The `ramsey_policy' command now displays the planner objective value
+   function under Ramsey policy and stores it in `oo_.planner_objective_value'
+
+ - Theoretical autocovariances are now computed when the `block' option is
+   present
+
+ - The `linear' option is now compatible with the `block' and `bytecode'
+   options
+
+ - The `loglinear' option now works with purely backward or forward models at
+   first order
+
+
+* New features in the user interface:
+
+ - New mathematical primitives allowed in model block: `abs()', `sign()'
+
+ - The behavior with respect to graphs has changed:
+
+    + By default, Dynare now displays graphs and saves them to disk in EPS
+      format only
+
+    + The format can be changed to PDF or FIG with the new `graph_format'
+      option
+
+    + It is possible to save graphs to disk without displaying them with the
+      new `nodisplay' option
+
+ - New `nocheck' option to the `steady' command: tells not to check the steady
+   state and accept values given by the user (useful for models with unit
+   roots)
+
+ - A series of deterministic shocks can be passed as a pre-defined vector in
+   the `values' statement of a `shocks' block
+
+ - New option `sub_draws' in the `estimation' command for controlling the
+   number of draws used in computing the posterior distributions of various
+   objects
+
+ - New macroprocessor command `@#ifdef' for testing if a macro-variable is
+   defined
+
+ - New option `irf_shocks' of the `stoch_simul' command, to allow IRFs to be
+   created only for certain exogenous variables
+
+ - In the parallel engine, possibility of assigning different weights to nodes
+   in the cluster and of creating clusters comprised of nodes with different
+   operating systems (see the relevant section in the reference manual)
+
+ - It is now possible to redefine a parameter in the `steady_state_model' block
+   (use with caution)
+
+ - New option `maxit' in the `simul' and `steady' commands to determine the
+   maximum number of iterations of the nonlinear solver
+
+ - New option `homotopy_force_continue' in the `steady' command to control the
+   behavior when a homotopy fails
+
+ - Possibility of globally altering the defaults of options by providing a file
+   in the `GlobalInitFile' field of the configuration file (use with caution)
+
+ - New option `nolog' to the `dynare' command line to avoid creating a logfile
+
+ - New option `-D' to the `dynare' command line with for defining
+   macro-variables
+
+
+* Miscellaneous:
+
+ - The `use_dll' option of `model' now creates a MEX file for the static model
+   in addition to that for the dynamic model
+
+ - The `unit_root_vars' command is now obsolete; use the `diffuse_filter'
+   option of the `estimation' command instead
+
+ - New option `--burn' to Dynare++ to discard initial simulation points
+
+ - New top-level MATLAB/Octave command `internals' for internal documentation
+   and unitary tests
+
+
+* References:
+
+- Dennis, Richard (2007): “Optimal Policy In Rational Expectations Models: New
+  Solution Algorithms,” Macroeconomic Dynamics, 11(1), 31–55
+
+- Fair, Ray and John Taylor (1983): “Solution and Maximum Likelihood Estimation
+  of Dynamic Nonlinear Rational Expectation Models,” Econometrica, 51,
+  1169–1185
+
+- Fernández-Villaverde, Jesús and Juan Rubio-Ramírez (2005): “Estimating
+  Dynamic Equilibrium Economies: Linear versus Nonlinear Likelihood,” Journal
+  of Applied Econometrics, 20, 891–910
+
+- Iskrev, Nikolay (2010): “Local identification in DSGE models,” Journal of
+  Monetary Economics, 57(2), 189–202
+
+- Ratto, Marco (2008): “Analysing DSGE models with global sensitivity
+  analysis'', Computational Economics, 31, 115–139
+
+- Sims, Christopher A., Daniel F. Waggoner and Tao Zha (2008): “Methods for
+  inference in large multiple-equation Markov-switching models,” Journal of
+  Econometrics, 146, 255–274
+
+
+
 Announcement for Dynare 4.2.5 (on 2012-03-14)
 =============================================
 
