@@ -286,6 +286,7 @@ else
             PP(j,i)=P;
         end
     end
+    if ~options_.nograph,
     ifig=0;
     for i=1:size(vvarvecm,1),
         if mod(i,9)==1,
@@ -375,6 +376,7 @@ else
                 close(hh);
             end
         end
+    end
     end
     
     param_names='';
@@ -470,6 +472,7 @@ else
     pnam=bayestopt_.name;
     
     % plot trade-offs
+    if ~options_.nograph
     a00=jet(size(vvarvecm,1));
     for ix=1:ceil(length(nsnam)/5),
         hh = dyn_figure(options_);
@@ -522,6 +525,7 @@ else
         end
     end
     close all
+    end
     
     for j=1:size(SP,2),
         nsx(j)=length(find(SP(:,j)));

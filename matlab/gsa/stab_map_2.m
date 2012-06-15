@@ -64,57 +64,70 @@ if ishock==0
 else
   npar=estim_params_.np+nshock;
 end
+disp([' '])
+disp(['Correlation analysis for ',fnam])
+
 for j=1:npar,
-  i2=find(abs(c00(:,j))>alpha2);
-  if length(i2)>0,
-    for jx=1:length(i2),
-          tval  = abs(c00(i2(jx),j)*sqrt( (nsam-2)/(1-c00(i2(jx),j)^2) ));
-          tcr = tcrit(nsam-2,pvalue);
-          if tval>tcr,
-      j2=j2+1;
-      if mod(j2,12)==1,
-        ifig=ifig+1;
-        hh=dyn_figure(options_,'name',['Correlations in the ',fnam,' sample ', num2str(ifig)]);
-      end
-      subplot(3,4,j2-(ifig-1)*12)
-      %             bar(c0(i2,j)), 
-      %             set(gca,'xticklabel',bayestopt_.name(i2)), 
-      %             set(gca,'xtick',[1:length(i2)])
-      %plot(stock_par(ixx(nfilt+1:end,i),j),stock_par(ixx(nfilt+1:end,i),i2(jx)),'.k')
-      %hold on, 
-      plot(x(:,j),x(:,i2(jx)),'.')
-      if ~isempty(xparam1)
-          hold on, plot(xparam1(j),xparam1(i2(jx)),'ro')
-      end
-      %             xlabel(deblank(estim_params_.param_names(j,:)),'interpreter','none'), 
-      %             ylabel(deblank(estim_params_.param_names(i2(jx),:)),'interpreter','none'), 
-      if ishock,
-        xlabel(bayestopt_.name{j},'interpreter','none'), 
-        ylabel(bayestopt_.name{i2(jx)},'interpreter','none'), 
-      else
-        xlabel(bayestopt_.name{j+nshock},'interpreter','none'), 
-        ylabel(bayestopt_.name{i2(jx)+nshock},'interpreter','none'), 
-      end
-      title(['cc = ',num2str(c0(i2(jx),j))])
-      if (mod(j2,12)==0) && j2>0,
+    i2=find(abs(c00(:,j))>alpha2);
+    if length(i2)>0,
+        for jx=1:length(i2),
+            tval  = abs(c00(i2(jx),j)*sqrt( (nsam-2)/(1-c00(i2(jx),j)^2) ));
+            tcr = tcrit(nsam-2,pvalue);
+            if tval>tcr,
+                j2=j2+1;
+                if ishock,
+                    tmp_name = (['[',bayestopt_.name{j},',',bayestopt_.name{i2(jx)},']']);
+                else
+                    tmp_name = (['[',bayestopt_.name{j+nshock},',',bayestopt_.name{i2(jx)+nshock},']']);
+                end
+                fprintf(1,'%20s: corrcoef = %7.3f\n',tmp_name,c0(i2(jx),j));
+                    
+                if ~options_.nograph,
+                    
+                if mod(j2,12)==1,
+                    ifig=ifig+1;
+                    hh=dyn_figure(options_,'name',['Correlations in the ',fnam,' sample ', num2str(ifig)]);
+                end
+                subplot(3,4,j2-(ifig-1)*12)
+                %             bar(c0(i2,j)),
+                %             set(gca,'xticklabel',bayestopt_.name(i2)),
+                %             set(gca,'xtick',[1:length(i2)])
+                %plot(stock_par(ixx(nfilt+1:end,i),j),stock_par(ixx(nfilt+1:end,i),i2(jx)),'.k')
+                %hold on,
+                plot(x(:,j),x(:,i2(jx)),'.')
+                if ~isempty(xparam1)
+                    hold on, plot(xparam1(j),xparam1(i2(jx)),'ro')
+                end
+                %             xlabel(deblank(estim_params_.param_names(j,:)),'interpreter','none'),
+                %             ylabel(deblank(estim_params_.param_names(i2(jx),:)),'interpreter','none'),
+                if ishock,
+                    xlabel(bayestopt_.name{j},'interpreter','none'),
+                    ylabel(bayestopt_.name{i2(jx)},'interpreter','none'),
+                else
+                    xlabel(bayestopt_.name{j+nshock},'interpreter','none'),
+                    ylabel(bayestopt_.name{i2(jx)+nshock},'interpreter','none'),
+                end
+                title(['cc = ',num2str(c0(i2(jx),j))])
+                if (mod(j2,12)==0) && j2>0,
+                    dyn_saveas(hh,[dirname,'/',fig_nam_,int2str(ifig)],options_);
+                    if ~options_.nodisplay
+                        close(hh);
+                    end
+                end
+                end
+            end
+            
+        end
+    end
+    if ~options_.nograph && (j==(npar)) && j2>0,
         dyn_saveas(hh,[dirname,'/',fig_nam_,int2str(ifig)],options_);
         if ~options_.nodisplay
-          close(hh);
+            close(hh);
         end
-      end
-          end
-          
     end
-  end
-  if (j==(npar)) && j2>0,
-    dyn_saveas(hh,[dirname,'/',fig_nam_,int2str(ifig)],options_);
-    if ~options_.nodisplay
-        close(hh);
-    end
-  end
-  
+    
 end
-if ifig==0,
+if j2==0,
     disp(['No correlation term with pvalue <', num2str(pvalue),' found for ',fnam])
 end
 %close all

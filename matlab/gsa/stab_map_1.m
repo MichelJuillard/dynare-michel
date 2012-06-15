@@ -77,7 +77,7 @@ if isempty(ipar),
     ipar=find(proba<pcrit);
 end
 nparplot=length(ipar);
-if iplot
+if iplot && ~options_.nograph
   lpmat=lpmat(:,ipar);
   ftit=bayestopt_.name(ipar+nshock*(1-ishock));
   
