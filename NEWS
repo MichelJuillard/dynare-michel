@@ -1,19 +1,21 @@
 Announcement for Dynare 4.3.0 (on 2012-06-15)
 =============================================
 
-We are pleased to announce the release of Dynare 4.3.0.
+We are pleased to announce the release of Dynare 4.3.0. This major release adds
+new features and fixes various bugs.
 
-This major release adds new features and fixes various bugs.
+The Windows and Mac packages are already available for download at:
 
-The Windows and Mac packages are already available for download. The GNU/Linux
-packages should follow soon.
+ http://www.dynare.org/download/dynare-4.3
+
+The GNU/Linux packages should follow soon.
 
 All users are strongly encouraged to upgrade.
 
 The new release is compatible with MATLAB versions ranging from 7.0 (R14) to
 7.14 (R2012a) and with GNU Octave versions ranging from 3.2 to 3.6.
 
-Here is the list of main user-visible changes:
+Here is the list of the main user-visible changes:
 
 
 * New major algorithms:
@@ -140,7 +142,7 @@ Here is the list of main user-visible changes:
    macro-variables
 
 
-* Miscellaneous:
+* Miscellaneous changes:
 
  - The `use_dll' option of `model' now creates a MEX file for the static model
    in addition to that for the dynamic model
@@ -154,28 +156,53 @@ Here is the list of main user-visible changes:
    and unitary tests
 
 
+* Bugs and problems identified in version 4.2.5 and that have been fixed in
+  version 4.3.0:
+
+ - Backward models with the `loglinear' option were incorrectly handled
+
+ - Solving for hyperparameters of inverse gamma priors was sometimes crashing
+
+ - The deterministic solver for purely forward models was broken
+
+ - When running `estimation' or `identification' on models with non-diagonal
+   structural error covariance matrices, while not simultaneously estimating
+   the correlation between shocks (i.e. calibrating the correlation), the
+   off-diagonal elements were incorrectly handled or crashes were occuring
+
+ - When using the `prefilter' option, smoother plots were omitting the smoothed
+   observables
+
+ - In the rare case of entering and expression x as x^(alpha-1) with x being 0
+   in steady state and alpha being a parameter equal to 2, the Jacobian was
+   evaluating to 0 instead of 1
+
+ - Setting the prior for shock correlations was failing if a lower bound was not
+   explicitly specified
+
+
 * References:
 
-- Dennis, Richard (2007): “Optimal Policy In Rational Expectations Models: New
-  Solution Algorithms,” Macroeconomic Dynamics, 11(1), 31–55
+ - Dennis, Richard (2007): “Optimal Policy In Rational Expectations Models: New
+   Solution Algorithms,” Macroeconomic Dynamics, 11(1), 31–55
 
-- Fair, Ray and John Taylor (1983): “Solution and Maximum Likelihood Estimation
-  of Dynamic Nonlinear Rational Expectation Models,” Econometrica, 51,
-  1169–1185
+ - Fair, Ray and John Taylor (1983): “Solution and Maximum Likelihood
+   Estimation of Dynamic Nonlinear Rational Expectation Models,” Econometrica,
+   51, 1169–1185
 
-- Fernández-Villaverde, Jesús and Juan Rubio-Ramírez (2005): “Estimating
-  Dynamic Equilibrium Economies: Linear versus Nonlinear Likelihood,” Journal
-  of Applied Econometrics, 20, 891–910
+ - Fernández-Villaverde, Jesús and Juan Rubio-Ramírez (2005): “Estimating
+   Dynamic Equilibrium Economies: Linear versus Nonlinear Likelihood,” Journal
+   of Applied Econometrics, 20, 891–910
 
-- Iskrev, Nikolay (2010): “Local identification in DSGE models,” Journal of
-  Monetary Economics, 57(2), 189–202
+ - Iskrev, Nikolay (2010): “Local identification in DSGE models,” Journal of
+   Monetary Economics, 57(2), 189–202
 
-- Ratto, Marco (2008): “Analysing DSGE models with global sensitivity
-  analysis'', Computational Economics, 31, 115–139
+ - Ratto, Marco (2008): “Analysing DSGE models with global sensitivity
+   analysis'', Computational Economics, 31, 115–139
 
-- Sims, Christopher A., Daniel F. Waggoner and Tao Zha (2008): “Methods for
-  inference in large multiple-equation Markov-switching models,” Journal of
-  Econometrics, 146, 255–274
+ - Sims, Christopher A., Daniel F. Waggoner and Tao Zha (2008): “Methods for
+   inference in large multiple-equation Markov-switching models,” Journal of
+   Econometrics, 146, 255–274
 
 
 
