@@ -43,8 +43,7 @@ function oo = evaluate_smoother(parameters)
 
 global options_ M_ bayestopt_ oo_
 
-persistent load_data
-persistent gend  data  data_index  number_of_observations  no_more_missing_observations
+persistent dataset_
 
 if nargin==0
     parameters = 'posterior_mode';
@@ -79,43 +78,22 @@ if ischar(parameters)
     end
 end
 
-if isempty(load_data)
-    % Get the data.
-    n_varobs = size(options_.varobs,1);
-    rawdata = read_variables(options_.datafile,options_.varobs,[],options_.xls_sheet,options_.xls_range);
-    options_ = set_default_option(options_,'nobs',size(rawdata,1)-options_.first_obs+1);
-    gend = options_.nobs;
-    rawdata = rawdata(options_.first_obs:options_.first_obs+gend-1,:);
-    % Transform the data.
-    if options_.loglinear
-        if ~options_.logdata
-            rawdata = log(rawdata);
-        end
+if isempty(dataset_)
+    % Load and transform data.
+    transformation = [];
+    if options_.loglinear && ~options_.logdata
+        transformation = @log;
     end
-    % Test if the data set is real.
-    if ~isreal(rawdata)
-        error('There are complex values in the data! Probably  a wrong transformation')
+    xls.sheet = options_.xls_sheet;
+    xls.range = options_.xls_range;
+
+    if ~isfield(options_,'nobs')
+        options_.nobs = [];
     end
-    % Detrend the data.
-    options_.missing_data = any(any(isnan(rawdata)));
-    if options_.prefilter == 1
-        if options_.missing_data
-            bayestopt_.mean_varobs = zeros(n_varobs,1);
-            for variable=1:n_varobs
-                rdx = find(~isnan(rawdata(:,variable)));
-                m = mean(rawdata(rdx,variable));
-                rawdata(rdx,variable) = rawdata(rdx,variable)-m;
-                bayestopt_.mean_varobs(variable) = m;
-            end
-        else
-            bayestopt_.mean_varobs = mean(rawdata,1)';
-            rawdata = rawdata-repmat(bayestopt_.mean_varobs',gend,1);
-        end
-    end
-    data = transpose(rawdata);
-    % Handle the missing observations.
-    [data_index,number_of_observations,no_more_missing_observations] = describe_missing_data(data,gend,n_varobs);
-    missing_value = ~(number_of_observations == gend*n_varobs);
+
+    dataset_ = initialize_dataset(options_.datafile,options_.varobs,options_.first_obs,options_.nobs,transformation,options_.prefilter,xls);
+    options_.nobs = dataset_.info.ntobs;
+
     % Determine if a constant is needed.
     if options_.steadystate_flag% if the *_steadystate.m file is provided.
         [ys,tchek] = feval([M_.fname '_steadystate'],...
@@ -143,15 +121,15 @@ if isempty(load_data)
     else
         options_.noconstant = 0;
     end
-    load_data = 1;
 end
 
 pshape_original   = bayestopt_.pshape;
 bayestopt_.pshape = Inf(size(bayestopt_.pshape));
-clear('priordens')%
+clear('priordens')
 
-[atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp] ...
-    = DsgeSmoother(parameters,gend,data,data_index,missing_value);
+[atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp] = ...
+    DsgeSmoother(parameters,dataset_.info.ntobs,dataset_.data,dataset_.missing.aindex,dataset_.missing.state);
+
 oo.Smoother.SteadyState = ys;
 oo.Smoother.TrendCoeffs = trend_coeff;
 if options_.filter_covariance
