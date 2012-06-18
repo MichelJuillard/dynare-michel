@@ -112,9 +112,8 @@ if ~isempty(M.endo_histval)
     % initialize endogenous state variable to histval if necessary
     yhat1(1:M.orig_endo_nbr) = M.endo_histval(1:M.orig_endo_nbr);
     if options.ramsey_policy
-        yhat12(1:M.orig_endo_nbr) = M.endo_histval(1:M.orig_endo_nbr);
+        yhat2(1:M.orig_endo_nbr) = M.endo_histval(1:M.orig_endo_nbr);
     end
-
 end
 yhat1 = yhat1(dr.order_var(nstatic+(1:npred)),1)-dr.ys(dr.order_var(nstatic+(1:npred)));
 yhat2 = yhat2(dr.order_var(nstatic+(1:npred)),1)-dr.ys(dr.order_var(nstatic+(1:npred)));
