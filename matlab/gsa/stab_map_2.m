@@ -119,7 +119,7 @@ for j=1:npar,
             
         end
     end
-    if ~options_.nograph && (j==(npar)) && j2>0,
+    if ~options_.nograph && (j==(npar)) && j2>0 && (mod(j2,12)~=0),
         dyn_saveas(hh,[dirname,'/',fig_nam_,int2str(ifig)],options_);
         if ~options_.nodisplay
             close(hh);
