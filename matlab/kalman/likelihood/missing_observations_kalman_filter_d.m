@@ -67,6 +67,10 @@ dlik = zeros(smpl,1);      % Initialization of the vector gathering the densitie
 dLIK = Inf;                % Default value of the log likelihood.
 oldK = Inf;
 
+if isequal(H,0)
+    H = zeros(pp,pp);
+end
+
 while rank(Pinf,kalman_tol) && (t<=last)
     s = t-start+1;
     d_index = data_index{t};
@@ -107,7 +111,7 @@ while rank(Pinf,kalman_tol) && (t<=last)
             dlik(s) = log(det(Finf));
             iFinf  = inv(Finf);
             Kinf   = Pinf*ZZ'*iFinf;
-            Fstar  = ZZ*Pstar*ZZ' + H;
+            Fstar  = ZZ*Pstar*ZZ' + H(d_index,d_index);
             Kstar  = (Pstar*ZZ'-Kinf*Fstar)*iFinf;
             Pstar  = T*(Pstar-Pstar*ZZ'*Kinf'-Pinf*ZZ'*Kstar')*T'+QQ;
             Pinf   = T*(Pinf-Pinf*ZZ'*Kinf')*T';

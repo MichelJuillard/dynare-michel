@@ -67,6 +67,10 @@ if isempty(diffuse_periods)
     diffuse_periods = 0;
 end
 
+if isequal(H,0)
+    H = zeros(pp,pp);
+end
+
 % Get sample size.
 smpl = last-start+1;
 
