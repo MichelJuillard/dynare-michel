@@ -20,6 +20,10 @@ function [dr,ys,info]=discretionary_policy_1(oo_,Instruments)
 global M_ options_
 persistent Hold
 
+dr = [];
+ys = [];
+info = 0;
+
 options_ = set_default_option(options_,'qz_criterium',1.000001);
 options_ = set_default_option(options_,'solve_maxit',3000);
 
