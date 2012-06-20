@@ -99,7 +99,7 @@ for j=1:size(anamendo,1),
       end
     end
   end
-  if iplo<9 & iplo>0 & ifig,
+  if iplo<9 && iplo>0 && ifig,
     dyn_saveas(hh,[dirname,'/',M_.fname,'_', namendo,'_vs_shocks_',num2str(ifig)],options_);
     if ~options_.nodisplay
       close(hh);
@@ -117,7 +117,7 @@ for j=1:size(anamendo,1),
       if ~isempty(y0),
         if mod(iplo,9)==0,
           ifig=ifig+1;
-          figure('name',[namendo,' vs. lagged endogenous ',int2str(ifig)]),
+          hh=dyn_figure(options_,'name',[namendo,' vs. lagged endogenous ',int2str(ifig)]);
           iplo=0;
         end
         iplo=iplo+1;
@@ -145,7 +145,7 @@ for j=1:size(anamendo,1),
       end
     end
   end
-  if iplo<9 & iplo>0 & ifig,
+  if iplo<9 && iplo>0 && ifig,
     dyn_saveas(hh,[dirname,'/',M_.fname,'_', namendo,'_vs_lags_',num2str(ifig)],options_);      
   end
 end
