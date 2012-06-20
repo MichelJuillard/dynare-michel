@@ -32,13 +32,13 @@
 
 \author{Marco Ratto\\
 European Commission, Joint Research Centre \\
-TP361, IPSC, via E. Fermi 1\\21020 Ispra
+TP361, IPSC, \\21027 Ispra
 (VA) Italy\\
-\texttt{marco.ratto@jrc.it}
+\texttt{marco.ratto@jrc.ec.europa.eu}
 \thanks{The author gratefully thanks Christophe Planas, Kenneth Judd, Michel Juillard,
 Alessandro Rossi, Frank Schorfheide and the participants to the
 Courses on Global Sensitivity Analysis for Macroeconomic
-Models (Ispra, 2006-2007-2008) for interesting discussions and
+Models (Ispra, 2006-2007-2008-2010) for interesting discussions and
 helpful suggestions.}}
 
 %%% To have the current date inserted, use \date{\today}:
@@ -123,7 +123,10 @@ beforehand}.
           \verb"morris_ntra"& 20& number of trajectories in Morris design\\
                 \verb"ppost"& 0& 0 = don't use Metropolis posterior sample\\
                             &  & 1 = use Metropolis posterior sample: this \\
-                            &  & \hspace{0.5 cm} overrides any other sampling option!  \\ \hline
+                            &  & \hspace{0.5 cm} overrides any other sampling option!  \\
+    \verb"neighborhood_width"& []& $\delta$ (real number$>0$) uniform sample in the\\
+                            &  & neighborhood of the posterior mode $\hat{\theta}$ \\
+                            &  & interval width: $\hat{\theta}(1\pm\delta)$ \\\hline
 \end{tabular}
 \subsection{Stability mapping}
 \begin{tabular}{r|l|l}
@@ -132,11 +135,13 @@ beforehand}.
                             &  & 0 = no stability mapping is performed\\
             \verb"load_stab"& 0& 0 =  generate a new sample\\
                             &  & 1 = load a previously created sample \\
-          \verb"alpha2_stab"& 0.4& critical value for correlations $\rho$ in filtered samples:\\
+          \verb"pvalue_corr"& 0.001& critical p-value for correlations $\rho$ in filtered samples:\\
                             &    & plot couples of parameters with \\
-                            &   & $|\rho|>$\verb"alpha2_stab"\\
-               \verb"ksstat"& 0.1& critical value for Smirnov statistics $d$: \\
-                            &   & plot parameters with $d>$\verb"ksstat"\\ \hline
+                            &   & p-value$<$\verb"pvalue_corr"\\
+          \verb"pvalue_ks"  & 0.001& critical p-value for Smirnov statistics $d$: \\
+                            &   & plot parameters with p-value$<$\verb"pvalue_ks"\\
+          \verb"lik_init"  & 1& 1 = the model is stationary (unit roots are `explosive')\\
+                            &   & 3 = the model has unit roots (unit roots are `stable')\\ \hline
 \end{tabular}
 
 \newpage
@@ -167,10 +172,13 @@ out-of-sample validation. \vspace{0.5cm}
                             &   & of reduced form coefficients\\
                             &   & [\verb"max" \verb"max"] =  analyse filtered \\
                             &   & entries within the range [\verb"max" \verb"max"] \\
-       \verb"ksstat_redform"& 0.001& p-value for Smirnov statistics $d$ \\
-                            &   & when reduced form entries are filtered\\
-       \verb"alpha2_redform"& 0.001& p-value for correlation $\rho$ \\
-                            &   & when reduced form entries are filtered\\
+       \verb"ksstat_redform"& 0.001& critical p-value for Smirnov statistics $d$ \\
+                            &   & when \verb"threshold_redform" is active\\
+                            &   & plot parameters with p-value$<$\verb"ksstat_redform"\\
+       \verb"alpha2_redform"& 0.001& critical p-value for correlation $\rho$ \\
+                            &   & when \verb"threshold_redform" is active\\
+                            &    & plot couples of parameters with \\
+                            &   & p-value$<$\verb"alpha2_redform"\\
               \verb"namendo"& () & list of endogenous variables \\
                             & : & jolly character to indicate ALL endogenous \\
            \verb"namlagendo"& () & list of lagged endogenous variables:\\
@@ -212,6 +220,7 @@ options of \verb"dynare_estimation". These are:
   \item \verb"datafile"
   \item \verb"mode_file"
   \item \verb"first_obs"
+  \item \verb"lik_init"
   \item \verb"nobs"
   \item \verb"prefilter"
   \item \verb"presample"
@@ -235,10 +244,10 @@ options of \verb"dynare_estimation". These are:
           \verb"istart_rmse"& 1& start computing RMSE's from \verb"istart_rmse":\\
                             &  & use 2 to avoid big initial error \\
            \verb"alpha_rmse"& 0.001& p-value for Smirnov statistics $d$:\\
-                            &   & plot parameters with $pvalue<$\verb"alpha_rmse"\\
+                            &   & plot parameters with p-value$<$\verb"alpha_rmse"\\
           \verb"alpha2_rmse"& 0.001& p-value for correlation $\rho$\\
                             &  & plot couples of parameters with
-                            $pvalue<$\verb"alpha2_rmse"\\
+                            p-value$<$\verb"alpha2_rmse"\\
 \end{tabular}
 
 \subsection{Screening analysis}
@@ -248,14 +257,12 @@ with respect to those listed in the `Sampling options':
 performs all the analyses required and displays results.
 
 
-\subsection{Identification analysis (under development)}
+\subsection{Identification analysis}
 Setting the option \verb"identification=1", an identification
 analysis based on theoretical moments is performed. Sensitivity plots are provided that
 allow to infer which parameters are most likely to be less
 identifiable.
 
-Prerequisite for properly running all the identification routines, is the keyword
-\verb"identification;" in the DYNARE model file. This keyword triggers the computation of analytic derivatives of the model with respect to estimated parameters and shocks. This is required for options \verb"morris=2" below, which implement \cite{Iskrev2009} identification analysis.
 \vspace{1cm}
 
 
@@ -263,36 +270,23 @@ Prerequisite for properly running all the identification routines, is the keywor
                 option name & default & description  \\ \hline
        \verb"identification"& 0 & 0 = no identification analysis  \\
                             &   & 1 = performs identification analysis:\\
-                            &   & this forces \verb"redform"=0 and default\verb"morris"=1\\
+                            &   & this forces \verb"redform"=0 and default \verb"morris"=1\\
                \verb"morris"& 1 & 1 = Screening analysis (Type II error)\\
-                            &   & 0 = ANOVA Mapping (Type I error)\\
-                            &   & 2 = Analytic derivatives (similar to Type II error)\\
+                            &   & 2 = Analytic derivatives \citep{Iskrev2010,Iskrev2011}\\
           \verb"morris_nliv"& 6 & number of levels in Morris design\\
           \verb"morris_ntra"& 20& number of trajectories in Morris design\\
-          \verb"trans_ident"& 0 & data transformation for ANOVA Mapping\\
-                            &   & 0 = no transformation\\
-                            &   & 1 = log-transformation\\
-                            &   & 2 = rank-transformation\\\hline
 \end{tabular}
 
 \vspace{1cm}
 \noindent For example, the following commands in the DYNARE model file
 
 \vspace{1cm}
-\noindent\verb"identification;"\\
-\verb"dynare_sensitivity(identification=1, morris=2);"
+\noindent\verb"dynare_sensitivity(identification=1, morris=2);"
 
 \vspace{1cm}
-\noindent trigger the identification analysis using analytic derivatives \citep{Iskrev2009}, jointly with the mapping of the acceptable region.
+\noindent trigger the identification analysis using \cite{Iskrev2010,Iskrev2011}, jointly with the mapping of the acceptable region.
 
-The identification analysis with derivatives can also be triggered by the commands
 
-\vspace{1cm}
-\noindent\verb"identification;"\\
-\verb"dynare_identification;"
-
-\vspace{1cm}
-This does not do the mapping of acceptable regions for the model and uses the standard random sampler of DYNARE. It completely offsets any use of the sensitivity analysis toolbox.
 \newpage
 \section{Directory structure}
 Sensitivity analysis results are saved on the hard-disk of the
