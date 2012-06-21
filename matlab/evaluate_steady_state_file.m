@@ -61,15 +61,18 @@ function [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M,options)
     
     updated_params_flag = max(abs(params1-params)) > 1e-12 || ~isequal(isnan(params1),isnan(params)); %checks whether numbers or NaN changed
 
+    h_set_auxiliary_variables = str2func([M.fname '_set_auxiliary_variables']);
     if  isnan(updated_params_flag) || (updated_params_flag  && any(isnan(params(~isnan(params))-params1(~isnan(params))))) %checks if new NaNs were added
         info(1) = 24;
         info(2) = NaN;
+        ys = h_set_auxiliary_variables(ys,exo_ss,params);
         return
     end
 
     if updated_params_flag && ~isreal(params1)
         info(1) = 23;
         info(2) = sum(imag(params).^2);
+        ys = h_set_auxiliary_variables(ys,exo_ss,params);
         return
     end
     
@@ -79,7 +82,6 @@ function [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M,options)
 
     % adding values for auxiliary variables
     if length(M.aux_vars) > 0 && ~options.ramsey_policy
-        h_set_auxiliary_variables = str2func([M.fname '_set_auxiliary_variables']);
         ys = h_set_auxiliary_variables(ys,exo_ss,params);
     end
 
