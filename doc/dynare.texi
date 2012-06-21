@@ -2569,8 +2569,9 @@ function returning several arguments:
 [ @var{VARIABLE_NAME}, @var{VARIABLE_NAME}@dots{} ] = @var{EXPRESSION};
 @end example
 
-Dynare will automatically generate a steady state file using the
-information provided in this block.
+Dynare will automatically generate a steady state file (of the form
+@file{@var{FILENAME}_steadystate2.m}) using the information provided in
+this block.
 
 @customhead{Steady state file for deterministic models}
 
