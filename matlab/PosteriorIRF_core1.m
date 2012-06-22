@@ -1,4 +1,4 @@
-function myoutput=PosteriorIRF_core1(myinputs,fpar,npar,whoiam, ThisMatlab)
+function myoutput=PosteriorIRF_core1(myinputs,fpar,B,whoiam, ThisMatlab)
 %   PARALLEL CONTEXT
 %   This function perfom in parallel a portion of  PosteriorIRF.m code.
 %   This is a special kind of parallel function. Unlike of other parallel functions,
@@ -134,7 +134,7 @@ end
 % Parallel 'while' very good!!!
 stock_param=zeros(MAX_nruns,npar);
 stock_irf_dsge=zeros(options_.irf,nvar,M_.exo_nbr,MAX_nirfs_dsge);
-while fpar<npar
+while fpar<B
     fpar = fpar + 1;
     irun = irun+1;
     irun2 = irun2+1;
@@ -240,10 +240,10 @@ while fpar<npar
             stock_irf_dsgevar = zeros(options_.irf,dataset_.info.nvobs,M_.exo_nbr,MAX_nirfs_dsgevar);
         end
     end
-    if irun == MAX_nirfs_dsge || irun == npar || fpar == npar
-        if fpar == npar
+    if irun == MAX_nirfs_dsge || irun == B || fpar == B
+        if fpar == B
             stock_irf_dsge = stock_irf_dsge(:,:,:,1:irun);
-            if MAX_nirfs_dsgevar && (fpar == npar || IRUN == npar)
+            if MAX_nirfs_dsgevar && (fpar == B || IRUN == B)
                 stock_irf_bvardsge = stock_irf_bvardsge(:,:,:,1:IRUN);
                 instr = [MhDirectoryName '/' M_.fname '_irf_bvardsge' ...
                          int2str(NumberOfIRFfiles_dsgevar) '.mat stock_irf_bvardsge;'];
@@ -262,8 +262,8 @@ while fpar<npar
         NumberOfIRFfiles_dsge = NumberOfIRFfiles_dsge+1;
         irun = 0;
     end
-    if irun2 == MAX_nruns || fpar == npar
-        if fpar == npar
+    if irun2 == MAX_nruns || fpar == B
+        if fpar == B
             stock_param = stock_param(1:irun2,:);
         end
         stock = stock_param;
@@ -276,26 +276,26 @@ while fpar<npar
     end
 %     if exist('OCTAVE_VERSION'),
 %         if (whoiam==0),
-%             printf(['Posterior IRF  %3.f%% done\r'],(fpar/npar*100));
+%             printf(['Posterior IRF  %3.f%% done\r'],(fpar/B*100));
 %         end
 %     elseif ~whoiam,
-%         waitbar(fpar/npar,h);
+%         waitbar(fpar/B,h);
 %     end
 %     if whoiam,
 %         if ~exist('OCTAVE_VERSION')
 %             fprintf('Done! \n');
 %         end
-%         waitbarString = [ 'Subdraw ' int2str(fpar) '/' int2str(npar) ' done.'];
-%         fMessageStatus((fpar-fpar0)/(npar-fpar0),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
+%         waitbarString = [ 'Subdraw ' int2str(fpar) '/' int2str(B) ' done.'];
+%         fMessageStatus((fpar-fpar0)/(B-fpar0),whoiam,waitbarString, waitbarTitle, Parallel(ThisMatlab));
 %     end
-    dyn_waitbar((fpar-fpar0)/(npar-fpar0),h);
+    dyn_waitbar((fpar-fpar0)/(B-fpar0),h);
 end
 
 dyn_waitbar_close(h);
 
 if whoiam==0
     if nosaddle
-        disp(['PosteriorIRF :: Percentage of discarded posterior draws = ' num2str(nosaddle/(npar+nosaddle))])
+        disp(['PosteriorIRF :: Percentage of discarded posterior draws = ' num2str(nosaddle/(B+nosaddle))])
     end
 end
 
