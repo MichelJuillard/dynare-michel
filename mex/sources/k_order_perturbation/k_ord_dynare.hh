@@ -113,6 +113,10 @@ class KordpDynare : public DynamicModel
   const TwoDMatrix &ll_Incidence;
   double qz_criterium;
   vector<int> JacobianIndices;
+
+  TwoDMatrix *g1p;
+  TwoDMatrix *g2p;
+  TwoDMatrix *g3p;
 public:
   KordpDynare(const vector<string> &endo, int num_endo,
               const vector<string> &exo, int num_exo, int num_par,
