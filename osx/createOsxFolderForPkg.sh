@@ -37,9 +37,6 @@ cp $TOP_DYN_DIR/scripts/dynare.el                                $INSTALLDIR/scr
 cp $TOP_DYN_DIR/license.txt                                      $INSTALLDIR
 cp $TOP_DYN_DIR/NEWS                                             $INSTALLDIR
 
-# Matlab
-cp -r $TOP_DYN_DIR/matlab                                        $INSTALLDIR
-
 # TZ Matlab
 cp -r $TOP_DYN_DIR/contrib/ms-sbvar/TZcode/MatlabFiles           $INSTALLDIR/contrib/ms-sbvar/TZcode
 
@@ -54,6 +51,9 @@ cp -r $TOP_DYN_DIR/examples                                      $INSTALLDIR
 make pdf
 make
 
+# Matlab
+# Must come after configure because matlab/dynare_version.m is created by configure script
+cp -r $TOP_DYN_DIR/matlab                                        $INSTALLDIR
 
 ########################
 # MAKE BULK OF PACKAGE #
