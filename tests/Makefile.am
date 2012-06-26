@@ -7,6 +7,7 @@ MODFILES = \
 	example1_with_tags.mod \
 	example1_irf_shocks.mod \
 	example1_abs_sign.mod \
+	example1_macroif.mod \
 	t_sgu_ex1.mod \
 	osr_example.mod \
 	optimal_policy/ramsey.mod \
