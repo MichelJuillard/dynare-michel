@@ -2,7 +2,11 @@
 var y, c, k, a, h, b;
 varexo e, u;
 
+@#ifndef NOTDEFINED
 parameters beta, rho, alpha, delta, theta, psi, tau;
+@#else
+@#error "IFNDEF PROBLEM"
+@#endif
 
 @#ifdef NOTDEFINED
 @#error "IFDEF PROBLEM"
@@ -40,11 +44,15 @@ end;
 
 @#define DEFINED=0
 
+@#ifndef DEFINED
+@#error "IFNDEF PROBLEM"
+@#else
 shocks;
 var e; stderr 0.009;
 var u; stderr 0.009;
 var e, u = phi*0.009*0.009;
 end;
+@#endif
 
 @#ifdef DEFINED
 stoch_simul;
