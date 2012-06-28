@@ -284,6 +284,7 @@ if info(1)==0,
     normJ=1;
     [U, S, V]=svd(JJ(indJJ,:)./normJ,0);
     S=diag(S);
+    S=[S;zeros(size(JJ,2)-length(indJJ),1)];
     if nparam>8
         ide_moments.S = S([1:4, end-3:end]);
         ide_moments.V = V(:,[1:4, end-3:end]);
