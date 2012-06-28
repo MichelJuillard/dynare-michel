@@ -36,7 +36,7 @@ if M_.exo_nbr > 0
     oo_.exo_simul= ones(iter_ + M_.maximum_lag + M_.maximum_lead,1) * oo_.exo_steady_state';
 end
 
-check_model;
+check_model(M_);
 
 [oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 

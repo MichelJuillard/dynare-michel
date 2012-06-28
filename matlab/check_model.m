@@ -1,4 +1,4 @@
-function check_model()
+function check_model(DynareModel)
 
 % Copyright (C) 2005-2011 Dynare Team
 %
@@ -17,10 +17,8 @@ function check_model()
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_
-
-xlen = M_.maximum_exo_lag+M_.maximum_exo_lead + 1;
-if ~ M_.lead_lag_incidence(M_.maximum_lag+1,:) > 0
+xlen = DynareModel.maximum_exo_lag+DynareModel.maximum_exo_lead + 1;
+if ~ DynareModel.lead_lag_incidence(DynareModel.maximum_lag+1,:) > 0
     error ('RESOL: Error in model specification: some variables don"t appear as current') ;
 end
 
@@ -29,8 +27,7 @@ if xlen > 1
             ' current period. Use additional endogenous variables']) ;
 end
 
-if (M_.exo_det_nbr > 0) && (M_.maximum_lag > 1 || M_.maximum_lead > 1)
+if (DynareModel.exo_det_nbr > 0) && (DynareModel.maximum_lag > 1 || DynareModel.maximum_lead > 1)
     error(['Exogenous deterministic variables are currently only allowed in' ...
            ' models with leads and lags on only one period'])
 end
-
