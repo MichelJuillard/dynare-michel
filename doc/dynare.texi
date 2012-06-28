@@ -76,6 +76,7 @@ A copy of the license can be found at @uref{http://www.gnu.org/licenses/fdl.txt}
 @subtitle Reference Manual, version @value{VERSION}
 @author Stéphane Adjemian
 @author Houtan Bastani
+@author Frédéric Karamé
 @author Michel Juillard
 @author Junior Maih
 @author Ferhat Mihoubi
