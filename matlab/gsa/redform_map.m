@@ -133,6 +133,13 @@ for j=1:size(anamendo,1)
                         if isempty(dir(xdir))
                             mkdir(xdir)
                         end
+                        if ~options_.nograph,
+                            hf=dyn_figure(options_); hist(y0,30), title([namendo,' vs. ', namexo])
+                            dyn_saveas(hf,[xdir,'/', namendo,'_vs_', namexo],options_);
+                            if ~options_.nodisplay
+                                close(hf);
+                            end
+                        end
                         %             if ~isempty(iy),
                         %               si(:,js) = redform_private(x0(iy,:), y0(iy), pshape, pd, iload, pnames, namendo, namexo, xdir, options_gsa_);
                         %             else
@@ -237,6 +244,13 @@ for j=1:size(anamendo,1)
                         %           if ~isempty(iy)
                         %           si(:,js) = redform_private(x0(iy,:), y0(iy), pshape, pd, iload, pnames, namendo, namlagendo, xdir, options_gsa_);
                         %           end
+                        if ~options_.nograph,
+                            hf=dyn_figure(options_); hist(y0,30), title([namendo,' vs. ', namlagendo])
+                            dyn_saveas(hf,[xdir,'/', namendo,'_vs_', namlagendo],options_);
+                            if ~options_.nodisplay
+                                close(hf);
+                            end
+                        end
                         if ~isempty(iy) && ~isempty(iyc),
                             delete([xdir, '/*cut*.*'])
                             [proba, dproba] = stab_map_1(x0, iy, iyc, 'cut',0);
