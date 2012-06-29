@@ -337,7 +337,7 @@ switch DynareOptions.particle.initialization
     StateVectorMean = ReducedForm.constant(mf0);
     old_DynareOptionsperiods = DynareOptions.periods;
     DynareOptions.periods = 5000;
-    y_ = simult(oo_.steady_state, dr);
+    y_ = simult(oo_.steady_state, dr,Model,DynareOptions,DynareResults);
     y_ = y_(state_variables_idx,2001:5000);
     StateVectorVariance = cov(y_');
     DynareOptions.periods = old_DynareOptionsperiods;

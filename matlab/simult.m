@@ -1,19 +1,51 @@
-function y_=simult(y0, dr)
-% function y_=simult(y0, dr)
-% Recursive Monte Carlo simulations
-%
-% INPUTS
-%    y0:    vector of variables in initial period of the simulation
-%    dr:    structure of decisions rules for stochastic simulations
-%
-% OUTPUTS
-%    y_:    stochastic simulations results
-%
-% SPECIAL REQUIREMENTS
-%    none
-%  
+function [y_,DynareResults] =simult(y0, dr,DynareModel,DynareOptions,DynareResults)
+% Simulate a DSGE model (perturbation approach).
 
-% Copyright (C) 2001-2011 Dynare Team
+%@info:
+%! @deftypefn {Function File} {[@var{y_}, @var{DynareResults}] =} simult (@var{y0},@var{dr},@var{DynareModel},@var{DynareOptions},@var{DynareResults})
+%! @anchor{simult}
+%! @sp 1
+%! Simulate a DSGE model (perturbation approach).
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item y0
+%! Vector of doubles, initial conditions.
+%! @item dr
+%! Matlab's structure describing decision and transition rules.
+%! @item DynareModel
+%! Matlab's structure describing the model (initialized by dynare, see @ref{M_})
+%! @item DynareOptions
+%! Matlab's structure describing the current options (initialized by dynare, see @ref{options_}).
+%! @item DynareResults
+%! Matlab's structure gathering the results (see @ref{oo_}).
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item y_
+%! Matrix of doubles, simulated time series for all the endogenous variables (one per row).
+%! @item DynareResults
+%! Matlab's structure gathering the results (see @ref{oo_}).
+%! @end table
+%! @sp 2
+%! @strong{This function is called by:}
+%! @sp 1
+%! @ref{non_linear_dsge_likelihood}, @ref{pea/pea_initialization}, @ref{stoch_simul}
+%! @sp 2
+%! @strong{This function calls:}
+%! @sp 1
+%! @ref{simult_}
+%! @sp 2
+%! @strong{Remarks}
+%! @sp 1
+%! If the routine is called with only one output argument, then field exo_simul (structural innovations) is not updated.
+%! @end deftypefn
+%@eod:
+
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -30,27 +62,25 @@ function y_=simult(y0, dr)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ oo_
-
-order = options_.order;
-replic = options_.simul_replic;
+order = DynareOptions.order;
+replic = DynareOptions.simul_replic;
 
 if replic > 1
-    fname = [M_.fname,'_simul'];
+    fname = [DynareModel.fname,'_simul'];
     fh = fopen(fname,'w+');
 end
 
 % eliminate shocks with 0 variance
-i_exo_var = setdiff([1:M_.exo_nbr],find(diag(M_.Sigma_e) == 0));
+i_exo_var = setdiff([1:DynareModel.exo_nbr],find(diag(DynareModel.Sigma_e) == 0));
 nxs = length(i_exo_var);
-oo_.exo_simul = zeros(options_.periods,M_.exo_nbr);
-chol_S = chol(M_.Sigma_e(i_exo_var,i_exo_var));
+DynareResults.exo_simul = zeros(DynareOptions.periods,DynareModel.exo_nbr);
+chol_S = chol(DynareModel.Sigma_e(i_exo_var,i_exo_var));
 
 for i=1:replic
-    if ~isempty(M_.Sigma_e)
-        oo_.exo_simul(:,i_exo_var) = randn(options_.periods,nxs)*chol_S;
+    if ~isempty(DynareModel.Sigma_e)
+        DynareResults.exo_simul(:,i_exo_var) = randn(DynareOptions.periods,nxs)*chol_S;
     end
-    y_ = simult_(y0,dr,oo_.exo_simul,order);
+    y_ = simult_(y0,dr,DynareResults.exo_simul,order);
     % elimninating initial value
     y_ = y_(:,2:end);
     if replic > 1

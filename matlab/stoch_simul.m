@@ -138,7 +138,8 @@ if options_.periods > 0 && ~PI_PCL_solver
     else
         y0 = M_.endo_histval;
     end
-    oo_.endo_simul = simult(y0,oo_.dr);
+    [ys, oo_] = simult(y0,oo_.dr,M_,options_,oo_);
+    oo_.endo_simul = ys;
     dyn2vec;
 end
 
