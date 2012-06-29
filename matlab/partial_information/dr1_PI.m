@@ -155,7 +155,7 @@ if options_.debug
     save([M_.fname '_debug.mat'],'jacobia_')
 end
 
-dr=set_state_space(dr,M_);
+dr=set_state_space(dr,M_,options_);
 kstate = dr.kstate;
 kad = dr.kad;
 kae = dr.kae;

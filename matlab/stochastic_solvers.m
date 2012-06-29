@@ -57,7 +57,7 @@ if options_.k_order_solver;
         [dr,info] = dyn_risky_steadystate_solver(oo_.steady_state,M_,dr, ...
                                              options_,oo_);
     else
-        dr = set_state_space(dr,M_);
+        dr = set_state_space(dr,M_,options_);
         [dr,info] = k_order_pert(dr,M_,options_,oo_);
     end
     return;

@@ -40,7 +40,7 @@ end
 
 exe =zeros(M_.exo_nbr,1);
 
-oo_.dr = set_state_space(oo_.dr,M_);
+oo_.dr = set_state_space(oo_.dr,M_,options_);
 
 
 np = size(i_params,1);

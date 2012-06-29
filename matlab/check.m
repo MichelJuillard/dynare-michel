@@ -66,7 +66,7 @@ if isempty(options.qz_criterium)
     options.qz_criterium = 1+1e-6;
 end
 
-oo.dr=set_state_space(oo.dr,M);
+oo.dr=set_state_space(oo.dr,M,options);
 
 [dr,info,M,options,oo] = resol(1,M,options,oo);
 

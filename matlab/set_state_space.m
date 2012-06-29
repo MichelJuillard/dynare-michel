@@ -1,19 +1,38 @@
-function dr=set_state_space(dr,M_)
-% function dr = set_state_space(dr,M_)
-% finds the state vector for structural state space representation
-% sets many fields of dr 
-%
-% INPUTS
-%   dr: structure of decision rules for stochastic simulations
-%  
-% OUTPUTS
-%   dr: structure of decision rules for stochastic simulations
-%  
-% ALGORITHM
-%   ...
-% SPECIAL REQUIREMENTS
-%   none
-%  
+function dr=set_state_space(dr,DynareModel,DynareOptions)
+% Write the state space representation of the reduced form solution.
+
+%@info:
+%! @deftypefn {Function File} {[@var{dr} =} set_state_space (@var{dr},@var{DynareModel},@var{DynareOptions})
+%! @anchor{set_state_space}
+%! @sp 1
+%! Write the state space representation of the reduced form solution.
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item dr
+%! Matlab's structure describing decision and transition rules.
+%! @item DynareModel
+%! Matlab's structure describing the model (initialized by dynare, see @ref{M_})
+%! @item DynareOptions
+%! Matlab's structure describing the current options (initialized by dynare, see @ref{options_}).
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item dr
+%! Matlab's structure describing decision and transition rules.
+%! @end table
+%! @sp 2
+%! @strong{This function is called by:}
+%! @sp 1
+%! @ref{check}, @ref{discretionary_policy_1}, @ref{dynare_estimation_init}, @ref{dyn_risky_steady_state_solver}, @ref{osr1}, @ref{partial_information/dr1_PI}, @ref{pea/pea_initialization}, @ref{stochastic_solvers}, @ref{stoch_simul}
+%! @sp 2
+%! @strong{This function calls:}
+%! @sp 2
+%! @end deftypefn
+%@eod:
 
 % Copyright (C) 1996-2011 Dynare Team
 %
@@ -31,12 +50,11 @@ function dr=set_state_space(dr,M_)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-global options_
 
-max_lead = M_.maximum_endo_lead;
-max_lag = M_.maximum_endo_lag;
-endo_nbr = M_.endo_nbr;
-lead_lag_incidence = M_.lead_lag_incidence;
+max_lead = DynareModel.maximum_endo_lead;
+max_lag = DynareModel.maximum_endo_lag;
+endo_nbr = DynareModel.endo_nbr;
+lead_lag_incidence = DynareModel.lead_lag_incidence;
 klen = max_lag + max_lead + 1;
 
 fwrd_var = find(lead_lag_incidence(max_lag+2:end,:))';
@@ -55,8 +73,8 @@ nboth = length(both_var);
 npred = length(pred_var);
 nfwrd = length(fwrd_var);
 nstatic = length(stat_var);
-if options_.block == 1
-    order_var = M_.block_structure.variable_reordered;
+if DynareOptions.block == 1
+    order_var = DynareModel.block_structure.variable_reordered;
 else
     order_var = [ stat_var(:); pred_var(:); both_var(:); fwrd_var(:)];
 end;
@@ -65,7 +83,7 @@ inv_order_var(order_var) = (1:endo_nbr);
 % building kmask for z state vector in t+1
 if max_lag > 0
     kmask = [];
-    if max_lead > 0 
+    if max_lead > 0
         kmask = lead_lag_incidence(max_lag+2,order_var) ;
     end
     kmask = [kmask; lead_lag_incidence(1,order_var)] ;
@@ -81,30 +99,30 @@ kmask(i_kmask) = (1:nd);
 % auxiliary equations
 
 % elements that are both in z(t+1) and z(t)
-k1 = find([kmask(1:end-M_.endo_nbr) & kmask(M_.endo_nbr+1:end)] );
+k1 = find([kmask(1:end-DynareModel.endo_nbr) & kmask(DynareModel.endo_nbr+1:end)] );
 kad = [];
 kae = [];
 if ~isempty(k1)
-    kad = kmask(k1+M_.endo_nbr);
+    kad = kmask(k1+DynareModel.endo_nbr);
     kae = kmask(k1);
 end
 
 % composition of state vector
-% col 1: variable;           col 2: lead/lag in z(t+1); 
+% col 1: variable;           col 2: lead/lag in z(t+1);
 % col 3: A cols for t+1 (D); col 4: A cols for t (E)
 kstate = [ repmat([1:endo_nbr]',klen-1,1) kron([klen:-1:2]',ones(endo_nbr,1)) ...
            zeros((klen-1)*endo_nbr,2)];
 kiy = flipud(lead_lag_incidence(:,order_var))';
 kiy = kiy(:);
 if max_lead > 0
-    kstate(1:endo_nbr,3) = kiy(1:endo_nbr)-nnz(lead_lag_incidence(max_lag+1,:));  
+    kstate(1:endo_nbr,3) = kiy(1:endo_nbr)-nnz(lead_lag_incidence(max_lag+1,:));
     kstate(kstate(:,3) < 0,3) = 0;
-    kstate(endo_nbr+1:end,4) = kiy(2*endo_nbr+1:end);  
+    kstate(endo_nbr+1:end,4) = kiy(2*endo_nbr+1:end);
 else
-    kstate(:,4) = kiy(endo_nbr+1:end);  
+    kstate(:,4) = kiy(endo_nbr+1:end);
 end
 kstate = kstate(i_kmask,:);
-   
+
 dr.order_var = order_var;
 dr.inv_order_var = inv_order_var';
 dr.nstatic = nstatic;
