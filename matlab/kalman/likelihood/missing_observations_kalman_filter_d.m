@@ -70,6 +70,7 @@ oldK = Inf;
 if isequal(H,0)
     H = zeros(pp,pp);
 end
+s = 0;
 
 while rank(Pinf,kalman_tol) && (t<=last)
     s = t-start+1;
