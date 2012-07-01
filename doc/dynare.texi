@@ -3175,8 +3175,8 @@ Determines the method used to compute the decision rule. Possible values for @co
 @table @code
 
 @item default
-Uses the default method to compute the decision rule based on the generailzed schur decompostion 
-(see @uref{http://www.dynare.org/wp-repo/dynarewp002.pdf,the Dynare Website} for more information).
+Uses the default method to compute the decision rule based on the generalized Schur decomposition 
+(see @cite{Villemot (2011)} for more information).
 
 @item cycle_reduction
 Uses the cycle reduction algorithm to solve the polynomial equation for retrieving the coefficients 
