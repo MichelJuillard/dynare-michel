@@ -3168,6 +3168,29 @@ Default value is @code{default}
 @anchor{sylvester_fixed_point_tol}
 It is the convergence criterion used in the fixed point sylvester solver. Its default value is 1e-12.
 
+@item dr = @var{OPTION}
+@anchor{dr}
+Determines the method used to compute the decision rule. Possible values for @code{@var{OPTION}} are:
+
+@table @code
+
+@item default
+Uses the default method to compute the decision rule based on the generailzed schur decompostion 
+(see @uref{http://www.dynare.org/wp-repo/dynarewp002.pdf,the Dynare Website} for more information).
+
+@item cycle_reduction
+Uses the cycle reduction algorithm to solve the polynomial equation for retrieving the coefficients 
+associated to the endogenous variables in the decision rule. This method is faster than the @code{default} one for large scale models.
+
+@end table
+
+@noindent
+Default value is @code{default}
+
+@item dr_cycle_reduction_tol = @var{DOUBLE}
+@anchor{dr_cycle_reduction_tol}
+It is the convergence criterion used in the cycle reduction algorithm. Its default value is 1e-7.
+
 @end table
 
 @outputhead

@@ -422,88 +422,102 @@ for i = 1:Size;
 
         row_indx = n_static+1:n;
         
-        D = [[aa(row_indx,index_0m) zeros(n_dynamic,n_both) aa(row_indx,index_p)] ; [zeros(n_both, n_pred) eye(n_both) zeros(n_both, n_both + n_fwrd)]];
-        E = [-aa(row_indx,[index_m index_0p])  ; [zeros(n_both, n_both + n_pred) eye(n_both, n_both + n_fwrd) ] ];
-
-        [err, ss, tt, w, sdim, data(i).eigval, info1] = mjdgges(E,D,options_.qz_criterium);
-
-        if (verbose)
-            disp('eigval');
-            disp(data(i).eigval);
-        end;
-        if info1
-            info(1) = 2;
-            info(2) = info1;
-            return
+        if task ~= 1 && options_.dr_cycle_reduction == 1
+            A1 = [aa(row_indx,index_m ) zeros(n_dynamic,n_fwrd)];
+            B1 = [aa(row_indx,index_0m) aa(row_indx,index_0p) ];
+            C1 = [zeros(n_dynamic,n_pred) aa(row_indx,index_p)];
+            [ghx, info] = cycle_reduction(A1, B1, C1, options_.dr_cycle_reduction_tol);
+            %ghx
+            ghx = ghx(:,index_m);
+            hx = ghx(1:n_pred+n_both,:);
+            gx = ghx(1+n_pred:end,:);
         end
-        nba = nd-sdim;
-        if task == 1
-            data(i).rank = rank(w(nd-nyf+1:end,nd-nyf+1:end));
-            dr.rank = dr.rank + data(i).rank;
-            if ~exist('OCTAVE_VERSION','builtin')
-                data(i).eigval = eig(E,D);
+        
+        if (task ~= 1 && ((options_.dr_cycle_reduction == 1 && info ==1) || options_.dr_cycle_reduction == 0)) || task == 1
+            D = [[aa(row_indx,index_0m) zeros(n_dynamic,n_both) aa(row_indx,index_p)] ; [zeros(n_both, n_pred) eye(n_both) zeros(n_both, n_both + n_fwrd)]];
+            E = [-aa(row_indx,[index_m index_0p])  ; [zeros(n_both, n_both + n_pred) eye(n_both, n_both + n_fwrd) ] ];
+
+            [err, ss, tt, w, sdim, data(i).eigval, info1] = mjdgges(E,D,options_.qz_criterium);
+
+            if (verbose)
+                disp('eigval');
+                disp(data(i).eigval);
+            end;
+            if info1
+                info(1) = 2;
+                info(2) = info1;
+                return
             end
-            dr.eigval = [dr.eigval ; data(i).eigval];
-        end
-        if (verbose)
-            disp(['sum eigval > 1 = ' int2str(sum(abs(data(i).eigval) > 1.)) ' nyf=' int2str(nyf) ' and dr.rank=' int2str(data(i).rank)]);
-            disp(['data(' int2str(i) ').eigval']);
-            disp(data(i).eigval);
+            nba = nd-sdim;
+            if task == 1
+                data(i).rank = rank(w(nd-nyf+1:end,nd-nyf+1:end));
+                dr.rank = dr.rank + data(i).rank;
+                if ~exist('OCTAVE_VERSION','builtin')
+                    data(i).eigval = eig(E,D);
+                end
+                dr.eigval = [dr.eigval ; data(i).eigval];
+            end
+            if (verbose)
+                disp(['sum eigval > 1 = ' int2str(sum(abs(data(i).eigval) > 1.)) ' nyf=' int2str(nyf) ' and dr.rank=' int2str(data(i).rank)]);
+                disp(['data(' int2str(i) ').eigval']);
+                disp(data(i).eigval);
+            end;
+
+            %First order approximation
+            if task ~= 1
+                if nba ~= nyf
+                    sorted_roots = sort(abs(dr.eigval));
+                    if isfield(options_,'indeterminacy_continuity')
+                        if options_.indeterminacy_msv == 1
+                            [ss,tt,w,q] = qz(e',d');
+                            [ss,tt,w,junk] = reorder(ss,tt,w,q);
+                            ss = ss';
+                            tt = tt';
+                            w  = w';
+                            %nba = nyf;
+                        end
+                    else
+                        if nba > nyf
+                            temp = sorted_roots(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
+                            info(1) = 3;
+                        elseif nba < nyf;
+                            temp = sorted_roots(nd-nyf+1:nd-nba)-1-options_.qz_criterium;
+                            info(1) = 4;
+                        end
+                        info(2) = temp'*temp;
+                        return
+                    end
+                end
+                indx_stable_root = 1: (nd - nyf);     %=> index of stable roots
+                indx_explosive_root = n_pred + n_both + 1:nd;  %=> index of explosive roots
+                % derivatives with respect to dynamic state variables
+                % forward variables
+                Z = w';
+                Z11t = Z(indx_stable_root,    indx_stable_root)';
+                Z21  = Z(indx_explosive_root, indx_stable_root);
+                Z22  = Z(indx_explosive_root, indx_explosive_root);
+                if ~isfloat(Z21) && (condest(Z21) > 1e9)
+                    % condest() fails on a scalar under Octave
+                    info(1) = 5;
+                    info(2) = condest(Z21);
+                    return;
+                else
+                    %gx = -inv(Z22) * Z21;
+                    gx = - Z22 \ Z21;
+                end
+
+                % predetermined variables
+                hx =  Z11t * inv(tt(indx_stable_root, indx_stable_root)) * ss(indx_stable_root, indx_stable_root) * inv(Z11t);
+
+                k1 = 1:(n_pred+n_both);
+                k2 = 1:(n_fwrd+n_both);
+
+                ghx = [hx(k1,:); gx(k2(n_both+1:end),:)];
+            end;
         end;
         
-        %First order approximation
-        if task ~= 1
-            if nba ~= nyf
-                sorted_roots = sort(abs(dr.eigval));
-                if isfield(options_,'indeterminacy_continuity')
-                    if options_.indeterminacy_msv == 1
-                        [ss,tt,w,q] = qz(e',d');
-                        [ss,tt,w,junk] = reorder(ss,tt,w,q);
-                        ss = ss';
-                        tt = tt';
-                        w  = w';
-                        %nba = nyf;
-                    end
-                else
-                    if nba > nyf
-                        temp = sorted_roots(nd-nba+1:nd-nyf)-1-options_.qz_criterium;
-                        info(1) = 3;
-                    elseif nba < nyf;
-                        temp = sorted_roots(nd-nyf+1:nd-nba)-1-options_.qz_criterium;
-                        info(1) = 4;
-                    end
-                    info(2) = temp'*temp;
-                    return
-                end
-            end
-            indx_stable_root = 1: (nd - nyf);     %=> index of stable roots
-            indx_explosive_root = n_pred + n_both + 1:nd;  %=> index of explosive roots
-            % derivatives with respect to dynamic state variables
-            % forward variables
-            Z = w';
-            Z11t = Z(indx_stable_root,    indx_stable_root)';
-            Z21  = Z(indx_explosive_root, indx_stable_root);
-            Z22  = Z(indx_explosive_root, indx_explosive_root);
-            if ~isfloat(Z21) && (condest(Z21) > 1e9)
-                % condest() fails on a scalar under Octave
-                info(1) = 5;
-                info(2) = condest(Z21);
-                return;
-            else
-                %gx = -inv(Z22) * Z21;
-                gx = - Z22 \ Z21;
-            end
-
-            % predetermined variables
-            hx =  Z11t * inv(tt(indx_stable_root, indx_stable_root)) * ss(indx_stable_root, indx_stable_root) * inv(Z11t);
-            
-            k1 = 1:(n_pred+n_both);
-            k2 = 1:(n_fwrd+n_both);
-
-            ghx = [hx(k1,:); gx(k2(n_both+1:end),:)];
-            
+        if  task~= 1 
             %lead variables actually present in the model
-            
             j4 = n_static+n_pred+1:n_static+n_pred+n_both+n_fwrd;   % Index on the forward and both variables
             j3 = nonzeros(lead_lag_incidence(2,j4)) - n_static - 2 * n_pred - n_both;  % Index on the non-zeros forward and both variables
             j4 = find(lead_lag_incidence(2,j4)); 
