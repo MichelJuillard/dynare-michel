@@ -162,7 +162,6 @@ end
 % function.
 
 b = 0;
-nosaddle = 0;
 
 localVars=[];
 
@@ -171,7 +170,6 @@ localVars=[];
 localVars.IRUN = IRUN;
 localVars.irun = irun;
 localVars.irun2=irun2;
-localVars.nosaddle=nosaddle;
 localVars.npar = npar;
 
 localVars.type=type;
@@ -208,6 +206,7 @@ localVars.MhDirectoryName=MhDirectoryName;
 % Like sequential execution!
 if isnumeric(options_.parallel),
     [fout] = PosteriorIRF_core1(localVars,1,B,0);
+    nosaddle = fout.nosaddle;
 else
     % Parallel execution!
     [nCPU, totCPU, nBlockPerCPU] = distributeJobs(options_.parallel, 1, B);
@@ -241,6 +240,10 @@ else
         NamFileInput(length(NamFileInput)+1,:)={'',[M_.fname '_steadystate.m']};
     end
     [fout] = masterParallel(options_.parallel, 1, B,NamFileInput,'PosteriorIRF_core1', localVars, globalVars, options_.parallel_info);
+    nosaddle=0;
+    for j=1:length(fout),
+        nosaddle = nosaddle + fout(j).nosaddle;
+    end
     
 end
 

@@ -52,7 +52,6 @@ end
 IRUN = myinputs.IRUN;
 irun =myinputs.irun;
 irun2=myinputs.irun2;
-nosaddle=myinputs.nosaddle;
 npar=myinputs.npar;
 type=myinputs.type;
 if ~strcmpi(type,'prior'),
@@ -124,6 +123,7 @@ OutputFileName_param = {};
 
 fpar = fpar-1;
 fpar0=fpar;
+nosaddle=0;
 
 if whoiam
     ifil2=ifil2(whoiam);
@@ -163,8 +163,12 @@ while fpar<B
         elseif info(1) == 5
             errordef = 'Rank condition  is not satisfied';
         end
-        disp(['PosteriorIRF :: Dynare is unable to solve the model (' errordef ')'])
-        continue
+        if strcmpi(type,'prior'),
+            disp(['PosteriorIRF :: Dynare is unable to solve the model (' errordef ')'])
+            continue
+        else
+            error(['PosteriorIRF :: Dynare is unable to solve the model (' errordef ') with sample ' type])
+        end
     end
     SS(M_.exo_names_orig_ord,M_.exo_names_orig_ord) = M_.Sigma_e+1e-14*eye(M_.exo_nbr);
     SS = transpose(chol(SS));
@@ -305,6 +309,8 @@ end
 myoutput.OutputFileName = [OutputFileName_dsge;
                     OutputFileName_param;
                     OutputFileName_bvardsge];
+                
+myoutput.nosaddle = nosaddle;
 
 
 
