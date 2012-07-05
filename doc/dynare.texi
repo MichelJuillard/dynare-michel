@@ -463,7 +463,7 @@ Dynare will be installed under @file{/usr/share/dynare} and
 @subsection On Mac OS X
 
 Execute the automated installer called
-@file{dynare-4.@var{x}.@var{y}-macosx-10.5+10.6.pkg} (where
+@file{dynare-4.@var{x}.@var{y}.pkg} (where
 4.@var{x}.@var{y} is the version number), and follow the
 instructions. The default installation directory is
 @file{/Applications/Dynare/4.@var{x}.@var{y}}.
