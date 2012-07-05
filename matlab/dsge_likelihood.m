@@ -181,6 +181,10 @@ if nargout==1,
     analytic_derivation=0;
 end
 
+if analytic_derivation,
+    kron_flag=DynareOptions.analytic_derivation_mode;
+end
+
 %------------------------------------------------------------------------------
 % 1. Get the structural parameters & define penalties
 %------------------------------------------------------------------------------
@@ -490,9 +494,9 @@ if analytic_derivation,
         end
 
         if full_Hess,
-            [dum, DT, DOm, DYss, dum2, D2T, D2Om, D2Yss] = getH(A, B, Model,DynareResults,0,indparam,indexo);
+            [dum, DT, DOm, DYss, dum2, D2T, D2Om, D2Yss] = getH(A, B, Model,DynareResults,DynareOptions,kron_flag,indparam,indexo);
         else
-            [dum, DT, DOm, DYss] = getH(A, B, Model,DynareResults,0,indparam,indexo);
+            [dum, DT, DOm, DYss] = getH(A, B, Model,DynareResults,DynareOptions,kron_flag,indparam,indexo);
         end
     else
         DT = derivatives_info.DT;

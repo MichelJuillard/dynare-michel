@@ -1,4 +1,4 @@
-function [H, dA, dOm, Hss, gp, d2A, d2Om, H2ss] = getH(A, B, M_,oo_,kronflag,indx,indexo)
+function [H, dA, dOm, Hss, gp, d2A, d2Om, H2ss] = getH(A, B, M_,oo_,options_,kronflag,indx,indexo)
 
 % computes derivative of reduced form linear model w.r.t. deep params
 %
@@ -20,47 +20,73 @@ function [H, dA, dOm, Hss, gp, d2A, d2Om, H2ss] = getH(A, B, M_,oo_,kronflag,ind
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if nargin<3 || isempty(kronflag), kronflag = 0; end
-if nargin<4 || isempty(indx), indx = [1:M_.param_nbr];, end,
-if nargin<5 || isempty(indexo), indexo = [];, end,
-
+if nargin<4 || isempty(indx), indx = [1:M_.param_nbr]; end,
+if nargin<5 || isempty(indexo), indexo = []; end,
 
 [I,J]=find(M_.lead_lag_incidence');
 yy0=oo_.dr.ys(I);
+param_nbr = length(indx);
+if nargout>5,
+    param_nbr_2 = param_nbr*(param_nbr+1)/2;
+end
+
+m = size(A,1);
+n = size(B,2);
+
+if kronflag==-2,
+    if nargout>5,
+        [residual, g1, g2 ] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', ...
+            M_.params, oo_.dr.ys, 1);
+        g22 = hessian('thet2tau',[M_.params(indx)],options_.gstep,M_, oo_, indx,[],-1);
+        H2ss=g22(1:M_.endo_nbr,:);
+        H2ss = reshape(H2ss,[M_.endo_nbr param_nbr param_nbr]);
+        g22=g22(M_.endo_nbr+1:end,:);
+        g22 = reshape(g22,[size(g1) param_nbr param_nbr]);
+    else
+        [residual, g1 ] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', ...
+            M_.params, oo_.dr.ys, 1);        
+    end
+    gp = fjaco('thet2tau',[M_.params(indx)],M_, oo_, indx,[],-1);
+    Hss=gp(1:M_.endo_nbr,:);
+    gp=gp(M_.endo_nbr+1:end,:);
+    gp = reshape(gp,[size(g1) param_nbr]);
+else
+
 % yy0=[];
 % for j=1:size(M_.lead_lag_incidence,1);
 %     yy0 = [ yy0; oo_.dr.ys(find(M_.lead_lag_incidence(j,:)))];
 % end
 dyssdtheta=zeros(length(oo_.dr.ys),M_.param_nbr);
+d2yssdtheta=zeros(length(oo_.dr.ys),M_.param_nbr,M_.param_nbr);
 if nargout>5,
     [residual, gg1, gg2] = feval([M_.fname,'_static'],oo_.dr.ys, oo_.exo_steady_state', M_.params);
     [df, gp, d2f] = feval([M_.fname,'_params_derivs'],yy0, oo_.exo_steady_state', ...
-        M_.params, oo_.dr.ys, 1, dyssdtheta);
+        M_.params, oo_.dr.ys, 1, dyssdtheta, d2yssdtheta);
     d2f = get_all_resid_2nd_derivs(d2f,length(oo_.dr.ys),M_.param_nbr);
     d2f = d2f(:,indx,indx);
     if isempty(find(gg2)),
         for j=1:length(indx),
-        d2yssdtheta(:,:,j) = -gg1\d2f(:,:,j);
+        d2yssdtheta(:,indx,j) = -gg1\d2f(:,:,j);
         end
     else
         gam = d2f*0;
         for j=1:length(indx),
-        d2yssdtheta(:,:,j) = -gg1\(d2f(:,:,j)+gam(:,:,j));
+        d2yssdtheta(:,indx,j) = -gg1\(d2f(:,:,j)+gam(:,:,j));
         end
     end
 else
     [residual, gg1] = feval([M_.fname,'_static'],oo_.dr.ys, oo_.exo_steady_state', M_.params);
     df = feval([M_.fname,'_params_derivs'],yy0, oo_.exo_steady_state', ...
-        M_.params, oo_.dr.ys, 1, dyssdtheta);
+        M_.params, oo_.dr.ys, 1, dyssdtheta, d2yssdtheta);
 end
 dyssdtheta = -gg1\df;
 
 if any(any(isnan(dyssdtheta))),    
     [U,T] = schur(gg1);
-    global options_
     qz_criterium=options_.qz_criterium;
     e1 = abs(ordeig(T)) < qz_criterium-1;
     k = sum(e1);       % Number non stationary variables.
-    n = length(e1)-k;  % Number of stationary variables.
+%     n = length(e1)-k;  % Number of stationary variables.
     [U,T] = ordschur(U,T,e1);
     T = T(k+1:end,k+1:end);
     dyssdtheta = -U(:,k+1:end)*(T\U(:,k+1:end)')*df;
@@ -71,22 +97,24 @@ if any(any(isnan(dyssdtheta))),
     end
 end
 if nargout>5,
-[df, gp, d2f, gpp] = feval([M_.fname,'_params_derivs'],yy0, oo_.exo_steady_state', ...
-           M_.params, oo_.dr.ys, 1, dyssdtheta);
-H2ss = d2yssdtheta(oo_.dr.order_var,:,:);
-[residual, g1, g2, g3] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', ...
-                            M_.params, oo_.dr.ys, 1);
+    [df, gp, d2f, gpp] = feval([M_.fname,'_params_derivs'],yy0, oo_.exo_steady_state', ...
+        M_.params, oo_.dr.ys, 1, dyssdtheta, d2yssdtheta);
+    H2ss = d2yssdtheta(oo_.dr.order_var,:,:);
+    [residual, g1, g2, g3] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', ...
+        M_.params, oo_.dr.ys, 1);
+    nelem=size(g1,2);
+    g22 = get_all_2nd_derivs(gpp,m,nelem,M_.param_nbr);
+    g22 = g22(:,:,indx,indx);
 else
-[df, gp] = feval([M_.fname,'_params_derivs'],yy0, oo_.exo_steady_state', ...
-           M_.params, oo_.dr.ys, 1, dyssdtheta);
-[residual, g1, g2 ] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', ...
-                            M_.params, oo_.dr.ys, 1);
+    [df, gp] = feval([M_.fname,'_params_derivs'],yy0, oo_.exo_steady_state', ...
+        M_.params, oo_.dr.ys, 1, dyssdtheta,d2yssdtheta);
+    [residual, g1, g2 ] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', ...
+        M_.params, oo_.dr.ys, 1);
 end
 
 Hss = dyssdtheta(oo_.dr.order_var,indx);
 dyssdtheta = dyssdtheta(I,:);
 [nr, nc]=size(g2);
-[m, nelem]=size(g1);
 nc = sqrt(nc);
 ns = max(max(M_.lead_lag_incidence));
 gp2 = gp*0;
@@ -105,13 +133,7 @@ end
 
 gp = gp+gp2;
 gp = gp(:,:,indx);
-param_nbr = length(indx);
-if nargout>5,
-    param_nbr_2 = param_nbr*(param_nbr+1)/2;
 end
-
-m = size(A,1);
-n = size(B,2);
 
 
 
@@ -120,9 +142,6 @@ k11 = M_.lead_lag_incidence(find([1:klen] ~= M_.maximum_endo_lag+1),:);
 a = g1(:,nonzeros(k11'));
 da = gp(:,nonzeros(k11'),:);
 if nargout > 5,
-    nelem = size(g1,2);
-    g22 = get_all_2nd_derivs(gpp,m,nelem,M_.param_nbr);
-    g22 = g22(:,:,indx,indx);
     d2a = g22(:,nonzeros(k11'),:,:);
 end
 kstate = oo_.dr.kstate;
@@ -250,8 +269,8 @@ end
 % B0=B;
 % B = Bx; clear Bx B1;
 
-m = size(A,1);
-n = size(B,2);
+% m = size(A,1);
+% n = size(B,2);
 
 % Dg1 = zeros(m,m,param_nbr);
 % Dg1(:, nf, :) = -gp(:,M_.lead_lag_incidence(3,nf),:);
@@ -499,7 +518,7 @@ is=find(gpp(:,3)==i);
 is=is(find(gpp(is,4)==j));
 
 if ~isempty(is),
-    g22(gpp(is,1),gpp(is,2))=gpp(is,5);
+    g22(sub2ind([m,n],gpp(is,1),gpp(is,2)))=gpp(is,5)';
 end
 return
 

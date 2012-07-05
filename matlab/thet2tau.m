@@ -39,6 +39,13 @@ end
 [A,B,tele,tubbies,M_,options_,oo_] = dynare_resolve(M_,options_,oo_);
 if flagmoments==0,
     tau = [oo_.dr.ys(oo_.dr.order_var); A(:); dyn_vech(B*M_.Sigma_e*B')];
+elseif flagmoments==-1
+    [I,J]=find(M_.lead_lag_incidence');
+    yy0=oo_.dr.ys(I);
+    [residual, g1] = feval([M_.fname,'_dynamic'],yy0, oo_.exo_steady_state', ...
+        M_.params, oo_.dr.ys, 1);
+    tau=[oo_.dr.ys(oo_.dr.order_var); g1(:)];
+
 else
     GAM =  lyapunov_symm(A,B*M_.Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold);
     k = find(abs(GAM) < 1e-12);

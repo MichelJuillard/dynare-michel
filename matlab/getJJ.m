@@ -33,10 +33,21 @@ if kronflag == -1,
     params0 = M_.params;
     H = fjaco(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],M_, oo_, indx,indexo,0,mf,nlags,useautocorr);
     M_.params = params0;
+    params0 = M_.params;
+    gp = fjaco(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],M_, oo_, indx,indexo,-1);
+    M_.params = params0;
+    offset = length(indexo);
+    gp = gp(1:M_.endo_nbr,offset+1:end);
+    dYss = H(1:M_.endo_nbr,offset+1:end);
+    dA = reshape(H(M_.orig_endo_nbr+[1:numel(A)],:),[size(A),size(H,2)]);
+    dOm = dA*0;
+    for j=1:size(H,2),
+        dOm(:,:,j) = dyn_unvech(H(M_.orig_endo_nbr+numel(A)+1:end,j));
+    end
     assignin('base','M_', M_);
     assignin('base','oo_', oo_);
 else
-    [H, dA, dOm, dYss, gp] = getH(A, B, M_,oo_,kronflag,indx,indexo);
+    [H, dA, dOm, dYss, gp] = getH(A, B, M_,oo_,options_,kronflag,indx,indexo);
     gp = reshape(gp,size(gp,1)*size(gp,2),size(gp,3));
     gp = [dYss; gp];
     %   if isempty(H),

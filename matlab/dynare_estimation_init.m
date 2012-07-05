@@ -191,7 +191,7 @@ end
 bayestopt_.penalty = 1e8;
 
 % Get informations about the variables of the model.
-dr = set_state_space(oo_.dr,M_,options_);
+dr = set_state_space(oo_.dr,M_);
 oo_.dr = dr;
 nstatic = dr.nstatic;          % Number of static variables.
 npred = dr.npred;              % Number of predetermined variables.
@@ -285,9 +285,28 @@ else
 end;
 
 if options_.analytic_derivation,
-    if ~(exist('sylvester3','file')==2),        
+    if ~(exist('sylvester3','file')==2),
         dynareroot = strrep(which('dynare'),'dynare.m','');
         addpath([dynareroot 'gensylv'])
+    end
+    if estim_params_.np,
+        % check if steady state changes param values
+        M=M_;
+        M.params(estim_params_.param_vals(:,1)) = M.params(estim_params_.param_vals(:,1))*1.01;
+        if options_.diffuse_filter
+            steadystate_check_flag = 0;
+        else
+            steadystate_check_flag = 1;
+        end
+        [tmp1, params] = evaluate_steady_state(oo_.steady_state,M,options_,oo_,steadystate_check_flag);
+        change_flag=any(find(params-M.params));
+        if change_flag,
+            disp('The steadystate file changed the values for the following parameters: '),
+            disp(M.param_names(find(params-M.params),:))
+            disp('The derivatives of jacobian and steady-state will be computed numerically'),
+            disp('(re-set options_.analytic_derivation_mode= -2)'),
+            options_.analytic_derivation_mode= -2;
+        end
     end
 end
 
@@ -335,10 +354,10 @@ nvx = estim_params_.nvx;
 ncx = estim_params_.ncx;
 nvn = estim_params_.nvn;
 ncn = estim_params_.ncn;
-if estim_params_.np
+if estim_params_.np,
   M.params(estim_params_.param_vals(:,1)) = xparam1(nvx+ncx+nvn+ncn+1:end);
 end;
-oo_.steady_state = evaluate_steady_state(oo_.steady_state,M,options_,oo_,steadystate_check_flag);
+[oo_.steady_state, params] = evaluate_steady_state(oo_.steady_state,M,options_,oo_,steadystate_check_flag);
 if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
     options_.noconstant = 1;
 else

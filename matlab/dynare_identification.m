@@ -60,6 +60,7 @@ options_ident = set_default_option(options_ident,'replic',100);
 options_ident = set_default_option(options_ident,'advanced',0);
 options_ident = set_default_option(options_ident,'normalize_jacobians',1);
 options_ident = set_default_option(options_ident,'lik_init',1);
+options_ident = set_default_option(options_ident,'analytic_derivation',1);
 if options_ident.gsa_sample_file,
     GSAFolder = checkpath('gsa',M_.dname);
     if options_ident.gsa_sample_file==1,
@@ -117,6 +118,7 @@ options_ = set_default_option(options_,'datafile',[]);
 options_.mode_compute = 0;
 options_.plot_priors = 0;
 [dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_]=dynare_estimation_init(M_.endo_names,fname_,1, M_, options_, oo_, estim_params_, bayestopt_);
+options_ident.analytic_derivation_mode = options_.analytic_derivation_mode;
 if isempty(dataset_),
     dataset_.info.ntobs = periods;
     dataset_.info.nvobs = rows(options_.varobs);

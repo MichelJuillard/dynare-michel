@@ -57,6 +57,8 @@ replic = options_ident.replic;
 periods = options_ident.periods;
 max_dim_cova_group = options_ident.max_dim_cova_group;
 normalize_jacobians = options_ident.normalize_jacobians;
+kron_flag = options_ident.analytic_derivation_mode;
+    
 [I,J]=find(M_.lead_lag_incidence');
 
 ide_hess = struct();
@@ -75,7 +77,7 @@ if info(1)==0,
         oo_.dr.ys, 1);
     vg1 = [oo_.dr.ys(oo_.dr.order_var); vec(g1)];
 
-    [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo0,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
+    [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo0,options_,kron_flag,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
     derivatives_info.DT=dA;
     derivatives_info.DOm=dOm;
     derivatives_info.DYss=dYss;
@@ -85,7 +87,7 @@ if info(1)==0,
             disp('The number of moments with non-zero derivative is smaller than the number of parameters')
             disp(['Try increasing ar = ', int2str(nlags+1)])           
             nlags=nlags+1;
-            [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo0,options_,0,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
+            [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo0,options_,kron_flag,indx,indexo,bayestopt_.mf2,nlags,useautocorr);
             derivatives_info.DT=dA;
             derivatives_info.DOm=dOm;
             derivatives_info.DYss=dYss;
@@ -133,6 +135,7 @@ if info(1)==0,
             if options_.kalman_algo > 2,
                 options_.kalman_algo = 1;
             end
+            analytic_derivation = options_.analytic_derivation;
             options_.analytic_derivation = -2;
             info = stoch_simul(options_.varobs);
             data_info.data=oo_.endo_simul(options_.varobs_id,100+1:end);
@@ -140,6 +143,7 @@ if info(1)==0,
             derivatives_info.no_DLIK=1;
             [fval,DLIK,AHess,cost_flag,ys,trend_coeff,info,M_,options_,bayestopt_,oo_] = dsge_likelihood(params',data_info,options_,M_,estim_params_,bayestopt_,oo_,derivatives_info);
 %                 fval = DsgeLikelihood(xparam1,data_info,options_,M_,estim_params_,bayestopt_,oo_);
+            options_.analytic_derivation = analytic_derivation;
             AHess=-AHess;
             if min(eig(AHess))<0,
                 error('Analytic Hessian is not positive semi-definite!')
