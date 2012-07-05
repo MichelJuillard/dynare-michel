@@ -61,9 +61,6 @@ stderr e_ys,inv_gamma_pdf,1.2533,0.6551;
 stderr e_pies,inv_gamma_pdf,1.88,0.9827;
 end;
 
-options_.analytic_derivation=1;
 estimation(datafile=data_ca1,first_obs=8,nobs=79,mh_nblocks=2,
-   prefilter=1,mh_jscale=0.5,mh_replic=0, mode_compute=1);
+   prefilter=1,mh_jscale=0.5,mh_replic=0, mode_compute=1, analytic_derivation);
 
-identification;
-  
