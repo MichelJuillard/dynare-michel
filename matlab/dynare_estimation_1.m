@@ -186,7 +186,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
         end
         if options_.analytic_derivation,
-            optim_options = optimset(optim_options,'GradObj','on');
+            optim_options = optimset(optim_options,'GradObj','on','TolX',1e-7);
         end
             [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
                 fmincon(objective_function,xparam1,[],[],[],[],lb,ub,[],optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
@@ -426,7 +426,10 @@ if ~options_.mh_posterior_mode_estimation && options_.cova_compute
 end
 
 if options_.mode_check == 1 && ~options_.mh_posterior_mode_estimation
+    ana_deriv = options_.analytic_derivation;
+    options_.analytic_derivation = 0;
     mode_check(objective_function,xparam1,hh,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+    options_.analytic_derivation = ana_deriv;
 end
 
 oo_.posterior.optimization.mode = xparam1;
