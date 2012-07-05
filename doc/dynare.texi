@@ -7109,10 +7109,10 @@ function for more information.
 @end deffn
 
 @anchor{dynare_version}
-@deffn Command dynare_version ;
+@deffn {MATLAB/Octave command} dynare_version ;
 
 Output the version of Dynare that is currently being used (@i{i.e.}
-the one that is highest on the Matlab/Octave path).
+the one that is highest on the MATLAB/Octave path).
 
 @end deffn
 
