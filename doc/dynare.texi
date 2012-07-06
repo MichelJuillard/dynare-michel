@@ -1467,8 +1467,9 @@ used outside. A model local variable declaration looks like:
 
 @item linear
 Declares the model as being linear. It spares oneself from having to
-declare initial values for computing the steady state, and it sets
-automatically @code{order=1} in @code{stoch_simul}.
+declare initial values for computing the steady state of a stationary
+linear model. This options can't be used with non-linear models, it will
+NOT trigger linearization of the model.
 
 @item use_dll
 @anchor{use_dll}
@@ -3016,10 +3017,6 @@ The exogenous variables for which to compute IRFs. Default: all.
 Requests the computation of normalized IRFs in percentage of the
 standard error of each shock.
 
-@item linear
-Indicates that the original model is linear (put it rather in the
-@code{model} command).
-
 @item nocorr
 Don't print the correlation matrix (printing them is the default).
 
@@ -3227,10 +3224,10 @@ with a single stochastic shock @code{e}, with a standard error of
 @customhead{Example 2}
 
 @example
-stoch_simul(linear,irf=60) y k;
+stoch_simul(irf=60) y k;
 @end example
 
-Performs the simulation of a linear model and displays impulse
+Performs the simulation of a model and displays impulse
 response functions on 60 periods for variables @code{y} and @code{k}.
 @end deffn
 
