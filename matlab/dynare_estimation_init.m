@@ -191,7 +191,7 @@ end
 bayestopt_.penalty = 1e8;
 
 % Get informations about the variables of the model.
-dr = set_state_space(oo_.dr,M_);
+dr = set_state_space(oo_.dr,M_,options_);
 oo_.dr = dr;
 nstatic = dr.nstatic;          % Number of static variables.
 npred = dr.npred;              % Number of predetermined variables.
