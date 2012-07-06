@@ -39,6 +39,7 @@ wsOct
 !/external_function/extFunWithFirstAndSecondDerivs.m
 !/fs2000/fs2000a_steadystate.m
 !/fs2000/fsdat_simul.m
+!/fs2000/fsdat_simul_missing_obs.m
 !/gsa/data_ca1.m
 !/gsa/data_ca1.mat
 !/gsa/ls2003_mean.mat
