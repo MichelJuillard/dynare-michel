@@ -46,7 +46,30 @@ KordpDynare::KordpDynare(const vector<string> &endo, int num_endo,
   nYs(npred + nboth), nYss(nboth + nforw), nY(num_endo), nJcols(jcols), NNZD(nnzd), nSteps(nsteps),
   nOrder(norder), journal(jr), ySteady(ysteady), params(inParams), vCov(vcov),
   md(1), dnl(*this, endo), denl(*this, exo), dsnl(*this, dnl, denl), ss_tol(sstol), varOrder(var_order),
-  ll_Incidence(llincidence), qz_criterium(criterium), dynamicModelFile(dynamicModelFile_arg)
+  ll_Incidence(llincidence), qz_criterium(criterium), dynamicModelFile(dynamicModelFile_arg), g1p(NULL),
+  g2p(NULL), g3p(NULL)
+{
+  ReorderDynareJacobianIndices();
+
+  //	Initialise ModelDerivativeContainer(*this, this->md, nOrder);
+  for (int iord = 1; iord <= nOrder; iord++)
+    md.insert(new FSSparseTensor(iord, nY+nYs+nYss+nExog, nY));
+}
+
+KordpDynare::KordpDynare(const vector<string> &endo, int num_endo,
+                         const vector<string> &exo, int nexog, int npar,
+                         Vector &ysteady, TwoDMatrix &vcov, Vector &inParams, int nstat,
+                         int npred, int nforw, int nboth, const int jcols, const Vector &nnzd,
+                         const int nsteps, int norder,
+                         Journal &jr, DynamicModelAC *dynamicModelFile_arg, double sstol,
+                         const vector<int> &var_order, const TwoDMatrix &llincidence, double criterium,
+			 TwoDMatrix *g1_arg, TwoDMatrix *g2_arg, TwoDMatrix *g3_arg) throw (TLException) :
+  nStat(nstat), nBoth(nboth), nPred(npred), nForw(nforw), nExog(nexog), nPar(npar),
+  nYs(npred + nboth), nYss(nboth + nforw), nY(num_endo), nJcols(jcols), NNZD(nnzd), nSteps(nsteps),
+  nOrder(norder), journal(jr), ySteady(ysteady), params(inParams), vCov(vcov),
+  md(1), dnl(*this, endo), denl(*this, exo), dsnl(*this, dnl, denl), ss_tol(sstol), varOrder(var_order),
+  ll_Incidence(llincidence), qz_criterium(criterium), dynamicModelFile(dynamicModelFile_arg), 
+  g1p(g1_arg), g2p(g2_arg), g3p(g3_arg)
 {
   ReorderDynareJacobianIndices();
 
@@ -89,31 +112,34 @@ KordpDynare::evaluateSystem(Vector &out, const Vector &yym, const Vector &yy,
 void
 KordpDynare::calcDerivativesAtSteady() throw (DynareException)
 {
-  g1p = new TwoDMatrix(nY, nJcols);
-  g1p->zeros();
-
-  if (nOrder > 1)
+  if (g1p == NULL)
     {
-      // allocate space for sparse Hessian
-      g2p = new TwoDMatrix((int) NNZD[1], 3);
-      g2p->zeros();
+      g1p = new TwoDMatrix(nY, nJcols);
+      g1p->zeros();
+      
+      if (nOrder > 1)
+	{
+	  // allocate space for sparse Hessian
+	  g2p = new TwoDMatrix((int) NNZD[1], 3);
+	  g2p->zeros();
+	}
+      
+      if (nOrder > 2)
+	{
+	  g3p = new TwoDMatrix((int) NNZD[2], 3);
+	  g3p->zeros();
+	}
+
+      Vector xx(nexog());
+      xx.zeros();
+      
+      Vector out(nY);
+      out.zeros();
+      Vector llxSteady(nJcols-nExog);
+      LLxSteady(ySteady, llxSteady);
+      
+      dynamicModelFile->eval(llxSteady, xx, params, ySteady, out, g1p, g2p, g3p);
     }
-
-  if (nOrder > 2)
-    {
-      g3p = new TwoDMatrix((int) NNZD[2], 3);
-      g3p->zeros();
-    }
-
-  Vector xx(nexog());
-  xx.zeros();
-
-  Vector out(nY);
-  out.zeros();
-  Vector llxSteady(nJcols-nExog);
-  LLxSteady(ySteady, llxSteady);
-
-  dynamicModelFile->eval(llxSteady, xx, params, ySteady, out, g1p, g2p, g3p);
 
   populateDerivativesContainer(*g1p, 1, JacobianIndices);
   delete g1p;

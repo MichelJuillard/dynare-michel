@@ -68,8 +68,8 @@ extern "C" {
   mexFunction(int nlhs, mxArray *plhs[],
               int nrhs, const mxArray *prhs[])
   {
-    if (nrhs != 3 || nlhs < 2)
-      DYN_MEX_FUNC_ERR_MSG_TXT("Must have exactly 3 input parameters and take at least 2 output parameters.");
+    if (nrhs < 3 || nlhs < 2)
+      DYN_MEX_FUNC_ERR_MSG_TXT("Must have at least 3 input parameters and takes at least 2 output parameters.");
 
     const mxArray *dr = prhs[0];
     const mxArray *M_ = prhs[1];
@@ -189,7 +189,32 @@ extern "C" {
     if ((nEndo != nendo) || (nExog != nexo))
       DYN_MEX_FUNC_ERR_MSG_TXT("Incorrect number of input parameters.");
 
-    /* Fetch time index */
+    TwoDMatrix *g1m=NULL;
+    TwoDMatrix *g2m=NULL;
+    TwoDMatrix *g3m=NULL;
+    // derivatives passed as arguments */
+    if (nrhs > 3) 
+      {
+	const mxArray *g1 = prhs[3];
+	int m = (int) mxGetM(g1);
+	int n = (int) mxGetN(g1);
+	g1m = new TwoDMatrix(m, n, mxGetPr(g1));
+	if (nrhs > 4)
+	  {
+	    const mxArray *g2 = prhs[4];
+	    int m = (int) mxGetM(g2);
+	    int n = (int) mxGetN(g2);
+	    g2m = new TwoDMatrix(m, n, mxGetPr(g2));
+	    if (nrhs > 5)
+	      {
+		const mxArray *g3 = prhs[5];
+		int m = (int) mxGetM(g3);
+		int n = (int) mxGetN(g3);
+		g3m = new TwoDMatrix(m, n, mxGetPr(g3));
+	      }
+	  }
+      }
+	    
 
     const int nSteps = 0; // Dynare++ solving steps, for time being default to 0 = deterministic steady state
     const double sstol = 1.e-13; //NL solver tolerance from
@@ -216,7 +241,8 @@ extern "C" {
         KordpDynare dynare(endoNames, nEndo, exoNames, nExog, nPar,
                            ySteady, vCov, modParams, nStat, nPred, nForw, nBoth,
                            jcols, NNZD, nSteps, kOrder, journal, dynamicModelFile,
-                           sstol, var_order_vp, llincidence, qz_criterium);
+                           sstol, var_order_vp, llincidence, qz_criterium,
+			   g1m, g2m, g3m);
 
         // construct main K-order approximation class
 

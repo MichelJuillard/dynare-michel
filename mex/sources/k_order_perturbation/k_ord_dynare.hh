@@ -126,6 +126,14 @@ public:
               Journal &jr, DynamicModelAC *dynamicModelFile_arg, double sstol,
               const vector<int> &varOrder, const TwoDMatrix &ll_Incidence,
               double qz_criterium) throw (TLException);
+  KordpDynare(const vector<string> &endo, int num_endo,
+              const vector<string> &exo, int num_exo, int num_par,
+              Vector &ySteady, TwoDMatrix &vCov, Vector &params, int nstat, int nPred,
+              int nforw, int nboth, const int nJcols, const Vector &NNZD,
+              const int nSteps, const int ord,
+              Journal &jr, DynamicModelAC *dynamicModelFile_arg, double sstol,
+              const vector<int> &varOrder, const TwoDMatrix &ll_Incidence,
+              double qz_criterium, TwoDMatrix *g1_arg, TwoDMatrix *g2_arg, TwoDMatrix *g3_arg) throw (TLException);
 
   virtual ~KordpDynare();
   int
