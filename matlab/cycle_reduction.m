@@ -1,7 +1,7 @@
 function [X, info] = cycle_reduction(A0, A1, A2, cvg_tol, ch)
 % function [X, info] = cycle_reduction(A0,A1,A2,A3, cvg_tolch)
-% 
-% Solves Polynomial Equation: 
+%
+% Solves Polynomial Equation:
 % A0 + A1 * X + A2 * X² = 0
 % Using Cyclic Reduction algorithm
 % -  D.A. Bini, G. Latouche, B. Meini (2002), "Solving matrix polynomial equations arising in
@@ -27,43 +27,42 @@ function [X, info] = cycle_reduction(A0, A1, A2, cvg_tol, ch)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-  max_it = 300;
-  it = 0;
-  info = 0;
-  crit = 1+cvg_tol;
-  A_0 = A1;
-  A0_0 = A0;
-  A1_0 = A1;
-  A2_0 = A2;
-  while crit > cvg_tol && it < max_it;
-       i_A1_0 = inv(A1_0);
-       A2_0_i_A1_0 = A2_0 * i_A1_0;
-       A0_0_i_A1_0 = A0_0 * i_A1_0;
-       A1_INC = A2_0_i_A1_0 * A0_0;
-       A_1 = A_0 - A1_INC;
-       A0_1 = - A0_0_i_A1_0 * A0_0;
-       A1_1 = A1_0 - A0_0_i_A1_0 * A2_0 - A1_INC;
-       A2_1 = - A2_0_i_A1_0 * A2_0;
+max_it = 300;
+it = 0;
+info = 0;
+crit = 1+cvg_tol;
+A_0 = A1;
+A0_0 = A0;
+A1_0 = A1;
+A2_0 = A2;
+n = length(A0);
+id = 1:n;
 
+while crit > cvg_tol && it < max_it;
+    tmp = [A2_0; A0_0]/A1_0; % = [A2_0_i_A1_0; A0_0_i_A1_0]*inv(A1_0)
+    TMP = tmp*A0_0;
+    A2_1 = - tmp(id,:) * A2_0;
+    A_1 = A_0 - TMP(id,:);
+    A1_1 = A1_0 - tmp(n+id,:) * A2_0 - TMP(id,:);
+    crit = sum(sum(abs(A0_0)));
+    A_0 = A_1;
+    A0_0 = -TMP(n+id,:);
+    A1_0 = A1_1;
+    A2_0 = A2_1;
+    it = it + 1;
+end
 
-      crit = sum(sum(abs(A0_0)));
+if it==max_it
+    disp(['convergence not achieved after ' int2str(it) ' iterations']);
+    info = 1;
+end
 
-      A_0 = A_1;
-      A0_0 = A0_1;
-      A1_0 = A1_1;
-      A2_0 = A2_1;
-      it = it + 1;
-      %disp(['it=' int2str(it) ' crit = ' num2str(crit)]);
-  end;
-  if it==max_it
-      disp(['convergence not achieved after ' int2str(it) ' iterations']);
-      info = 1;
-  end
-  X = - inv(A_0) * A0;
-  if (nargin == 5 && ~isempty( ch ) == 1 )
-      %check the solution
-      res = A0 + A1 * X + A2 * X * X;
-      if (sum(sum(abs(res))) > cvg_tol)
-          disp(['the norm residual of the residu ' num2str(res) ' compare to the tolerance criterion ' num2str(cvg_tol)]);
-      end;
-  end;
+X = -A_0\A0;
+
+if (nargin == 5 && ~isempty( ch ) == 1 )
+    %check the solution
+    res = A0 + A1 * X + A2 * X * X;
+    if (sum(sum(abs(res))) > cvg_tol)
+        disp(['the norm residual of the residu ' num2str(res) ' compare to the tolerance criterion ' num2str(cvg_tol)]);
+    end
+end
