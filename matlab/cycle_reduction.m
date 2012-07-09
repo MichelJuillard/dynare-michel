@@ -10,7 +10,7 @@ function [X, info] = cycle_reduction(A0, A1, A2, cvg_tol, ch)
 %    SIAM J. Matrix Anal. Appl. 17 (1996) 906–926.
 % =================================================================
 
-% Copyright (C) 2006-2012 Dynare Team
+% Copyright (C) 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
