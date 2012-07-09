@@ -413,15 +413,14 @@ for i = 1:Size;
         index_0m = (n_static+1:n_static+n_pred) + indexi_0 - 1;
         index_0p = (n_static+n_pred+1:n) + indexi_0 - 1;
         index_m = 1:(n_pred+n_both);
-        indexi_p = max(lead_lag_incidence(2,:))+1;
-        index_p = indexi_p:size(jacob, 2);
+        index_p  = lead_lag_incidence(3,find(lead_lag_incidence(3,:)));
         nyf = n_fwrd + n_both;
         A = aa(:,index_m);  % Jacobain matrix for lagged endogeneous variables
         B = aa(:,index_c);  % Jacobian matrix for contemporaneous endogeneous variables
         C = aa(:,index_p);  % Jacobain matrix for led endogeneous variables
 
         row_indx = n_static+1:n;
-        
+
         if task ~= 1 && options_.dr_cycle_reduction == 1
             A1 = [aa(row_indx,index_m ) zeros(n_dynamic,n_fwrd)];
             B1 = [aa(row_indx,index_0m) aa(row_indx,index_0p) ];
