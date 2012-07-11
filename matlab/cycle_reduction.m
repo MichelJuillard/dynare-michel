@@ -1,14 +1,47 @@
 function [X, info] = cycle_reduction(A0, A1, A2, cvg_tol, ch)
-% function [X, info] = cycle_reduction(A0,A1,A2,A3, cvg_tolch)
-%
-% Solves Polynomial Equation:
-% A0 + A1 * X + A2 * X² = 0
-% Using Cyclic Reduction algorithm
-% -  D.A. Bini, G. Latouche, B. Meini (2002), "Solving matrix polynomial equations arising in
-%    queueing problems", Linear Algebra and its Applications 340 (2002) 225–244
-% -  D.A. Bini, B. Meini, On the solution of a nonlinear matrix equation arising in queueing problems,
-%    SIAM J. Matrix Anal. Appl. 17 (1996) 906–926.
-% =================================================================
+
+%@info:
+%! @deftypefn {Function File} {[@var{X}, @var{info}] =} cycle_reduction (@var{A0},@var{A1},@var{A2},@var{cvg_tol},@var{ch})
+%! @anchor{cycle_reduction}
+%! @sp 1
+%! Solves the quadratic matrix equation A2*X^2 + A1*X + A0 = 0.
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item A0
+%! Square matrix of doubles, n*n.
+%! @item A1
+%! Square matrix of doubles, n*n.
+%! @item A2
+%! Square matrix of doubles, n*n.
+%! @item cvg_tol
+%! Scalar double, tolerance parameter.
+%! @item ch
+%! Any matlab object, if not empty the solution is checked.
+%! @end table
+%! @sp 1
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item X
+%! Square matrix of doubles, n*n, solution of the matrix equation.
+%! @item info
+%! Scalar integer, if nonzero the algorithm failed in finding the solution of the matrix equation.
+%! @end table
+%! @sp 2
+%! @strong{This function is called by:}
+%! @sp 2
+%! @strong{This function calls:}
+%! @sp 2
+%! @strong{References:}
+%! @sp 1
+%! D.A. Bini, G. Latouche, B. Meini (2002), "Solving matrix polynomial equations arising in queueing problems", Linear Algebra and its Applications 340, pp. 222-244
+%! @sp 1
+%! D.A. Bini, B. Meini (1996), "On the solution of a nonlinear matrix equation arising in queueing problems", SIAM J. Matrix Anal. Appl. 17, pp. 906-926.
+%! @sp 2
+%! @end deftypefn
+%@eod:
 
 % Copyright (C) 2012 Dynare Team
 %
@@ -59,7 +92,7 @@ end
 
 X = -A_0\A0;
 
-if (nargin == 5 && ~isempty( ch ) == 1 )
+if (nargin == 5 && ~isempty(ch) )
     %check the solution
     res = A0 + A1 * X + A2 * X * X;
     if (sum(sum(abs(res))) > cvg_tol)
