@@ -28,8 +28,7 @@ function global_initialization()
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global oo_ M_ options_ estim_params_ bayestopt_ estimation_info ex0_ ys0_ ...
-    ex_det0_
+global oo_ M_ options_ estim_params_ bayestopt_ estimation_info ex0_ ys0_  ex_det0_
 
 estim_params_ = [];
 bayestopt_ = [];
@@ -450,6 +449,14 @@ options_.dr_cycle_reduction = 0;
 % convergence criterion for iteratives methods to solve the decision rule
 options_.dr_cycle_reduction_tol = 1e-7;
 
+% if equal to 1 use a logarithmic reduction method to compute the decision rule (for large scale models)
+options_.dr_logarithmic_reduction = 0;
+
+% convergence criterion for iteratives methods to solve the decision rule
+options_.dr_logarithmic_reduction_tol = 1e-12;
+
+% convergence criterion for iteratives methods to solve the decision rule
+options_.dr_logarithmic_reduction_maxiter = 100;
 
 % dates for historical time series
 options_.initial_date.freq = 1;

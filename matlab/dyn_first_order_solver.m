@@ -149,11 +149,15 @@ A = aa(:,index_m);  % Jacobain matrix for lagged endogeneous variables
 B = aa(:,index_c);  % Jacobian matrix for contemporaneous endogeneous variables
 C = aa(:,index_p);  % Jacobain matrix for led endogeneous variables
 
-if task ~= 1 && DynareOptions.dr_cycle_reduction == 1
+if task ~= 1 && (DynareOptions.dr_cycle_reduction || DynareOptions.dr_logarithmic_reduction)
     A1 = [aa(row_indx,index_m ) zeros(ndynamic,nfwrd)];
     B1 = [aa(row_indx,index_0m) aa(row_indx,index_0p) ];
     C1 = [zeros(ndynamic,npred) aa(row_indx,index_p)];
-    [ghx, info] = cycle_reduction(A1, B1, C1, DynareOptions.dr_cycle_reduction_tol);
+    if DynareOptions.dr_cycle_reduction == 1
+        [ghx, info] = cycle_reduction(A1, B1, C1, DynareOptions.dr_cycle_reduction_tol);
+    else
+        [ghx, info] = logarithmic_reduction(C1, B1, A1, DynareOptions.dr_logarithmic_reduction_tol, DynareOptions.dr_logarithmic_reduction_maxiter);
+    end
     ghx = ghx(:,index_m);
     hx = ghx(1:npred+nboth,:);
     gx = ghx(1+npred:end,:);
