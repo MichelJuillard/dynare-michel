@@ -39,9 +39,9 @@ n = length(A0);
 id = 1:n;
 
 while crit > cvg_tol && it < max_it;
-    tmp = [A2_0; A0_0]/A1_0; % = [A2_0_i_A1_0; A0_0_i_A1_0]*inv(A1_0)
+    tmp = [A2_0; A0_0]/A1_0;
     TMP = tmp*A0_0;
-    A2_1 = - tmp(id,:) * A2_0;
+    A2_1 = - tmp(id,:)* A2_0;
     A_1 = A_0 - TMP(id,:);
     A1_1 = A1_0 - tmp(n+id,:) * A2_0 - TMP(id,:);
     crit = sum(sum(abs(A0_0)));
