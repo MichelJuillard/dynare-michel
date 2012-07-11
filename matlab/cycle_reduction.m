@@ -99,3 +99,25 @@ if (nargin == 5 && ~isempty(ch) )
         disp(['the norm residual of the residu ' num2str(res) ' compare to the tolerance criterion ' num2str(cvg_tol)]);
     end
 end
+
+%@test:1
+%$ addpath ../matlab
+%$
+%$ % Set the dimension of the problem to be solved
+%$ n = 2000;
+%$ % Set the equation to be solved
+%$ A = eye(n);
+%$ B = diag(30*ones(n,1)); B(1,1) = 20; B(end,end) = 20; B = B - diag(10*ones(n-1,1),-1); B = B - diag(10*ones(n-1,1),1);
+%$ C = diag(15*ones(n,1)); C = C - diag(5*ones(n-1,1),-1); C = C - diag(5*ones(n-1,1),1);
+%$
+%$ % Solve the equation with the cycle reduction algorithm
+%$ tic, X1 = cycle_reduction(C,B,A,1e-7); toc
+%$
+%$ % Solve the equation with the logarithmic reduction algorithm
+%$ tic, X2 = logarithmic_reduction(A,B,C,1e-16,100); toc
+%$
+%$ % Check the results.
+%$ t(1) = dyn_assert(X1,X2,1e-12);
+%$
+%$ T = all(t);
+%@eof:1
