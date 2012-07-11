@@ -139,7 +139,8 @@ MODFILES = \
 	deterministic_simulations/rbc_det3.mod \
 	deterministic_simulations/rbc_det4.mod \
 	deterministic_simulations/rbc_det5.mod \
-	fs2000/fs2000_sd.mod
+	fs2000/fs2000_sd.mod \
+	walsh.mod
 
 EXTRA_DIST = \
 	$(MODFILES) \
