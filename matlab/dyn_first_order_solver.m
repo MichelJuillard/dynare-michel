@@ -69,9 +69,10 @@ persistent ndynamic nstatic nfwrd npred nboth nd nyf n
 
 
 if ~nargin
+    if nargout
+        error('dyn_first_order_solver:: Initialization mode returns zero argument!')
+    end
     reorder_jacobian_columns = [];
-    dr = [];
-    info = [];
     return
 end
 
@@ -112,7 +113,7 @@ if isempty(reorder_jacobian_columns)
     both_lagged_idx = lead_lag_incidence(1,both_id);
     both_leaded_idx = lead_lag_incidence(3,both_id);
     innovations_idx = (size(jacobia,2)-DynareModel.exo_nbr+1):size(jacobia,2);
-    dr.state_var  = [lag_idx, both_lagged_idx];
+    state_var  = [lag_idx, both_lagged_idx];
 
     indexi_0 = 0;
     if DynareModel.maximum_endo_lag > 0 && (npred > 0  || nboth > 0)
@@ -135,6 +136,8 @@ info = 0;
 
 dr.ghx = [];
 dr.ghu = [];
+
+dr.state_var = state_var;
 
 jacobia = jacobia(:,reorder_jacobian_columns);
 
