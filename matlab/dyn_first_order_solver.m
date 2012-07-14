@@ -188,7 +188,7 @@ if (task ~= 1 && ((DynareOptions.dr_cycle_reduction == 1 && info ==1) || DynareO
     nba = nd-sdim;
 
     if task == 1
-        dr.rank = rank(w(1:nyf,nd-nyf+1:end));
+        dr.rank = rank(w(npred+nboth+1:end,npred+nboth+1:end));
         % Under Octave, eig(A,B) doesn't exist, and
         % lambda = qz(A,B) won't return infinite eigenvalues
         if ~exist('OCTAVE_VERSION')
