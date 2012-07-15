@@ -296,7 +296,7 @@ if iload <=0,
         end
         [dum1, ideJ, ideH, ideGP, dum2 , info] = ...
             identification_analysis(params,indx,indexo,options_MC,dataset_, prior_exist, name_tex,0);
-        if iteration==0,
+        if iteration==0 && info(1)==0,
             MAX_tau   = min(SampleSize,ceil(MaxNumberOfBytes/(size(ideH.siH,1)*nparam)/8));
             stoH = zeros([size(ideH.siH,1),nparam,MAX_tau]);
             stoJJ = zeros([size(ideJ.siJ,1),nparam,MAX_tau]);
