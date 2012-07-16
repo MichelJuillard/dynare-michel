@@ -64,8 +64,11 @@ function [dr,info] = dyn_first_order_solver(jacobia,DynareModel,dr,DynareOptions
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-persistent reorder_jacobian_columns innovations_idx index_s index_m index_c index_p row_indx index_0m index_0p k1 k2 j3 j4 state_var
-persistent ndynamic nstatic nfwrd npred nboth nd nyf n
+persistent reorder_jacobian_columns innovations_idx index_s index_m index_c
+persistent index_p row_indx index_0m index_0p k1 k2 state_var
+persistent ndynamic nstatic nfwrd npred nboth nd nyf n_current index_d 
+persistent index_e index_d1 index_d2 index_e1 index_e2 row_indx_de_1 
+persistent row_indx_de_2 cols_b
 
 
 if ~nargin
@@ -76,8 +79,11 @@ if ~nargin
     return
 end
 
-if isempty(reorder_jacobian_columns)
+exo_nbr = DynareModel.exo_nbr;
 
+if isempty(reorder_jacobian_columns)
+    
+    maximum_lag = DynareModel.maximum_endo_lag;
     kstate   = dr.kstate;
     nfwrd    = dr.nfwrd;
     nboth    = dr.nboth;
@@ -85,7 +91,7 @@ if isempty(reorder_jacobian_columns)
     nstatic  = dr.nstatic;
     ndynamic = npred+nfwrd+nboth;
     nyf      = nfwrd + nboth;
-    n        = ndynamic+nstatic;
+    n        = DynareModel.endo_nbr;
 
     k1 = 1:(npred+nboth);
     k2 = 1:(nfwrd+nboth);
@@ -95,44 +101,60 @@ if isempty(reorder_jacobian_columns)
     lead_lag_incidence = DynareModel.lead_lag_incidence;
     nz = nnz(lead_lag_incidence);
 
-    %lead variables actually present in the model
-    j4 = nstatic+npred+1:nstatic+npred+nboth+nfwrd;   % Index on the forward and both variables
-    j3 = nonzeros(lead_lag_incidence(2,j4)) - nstatic - 2 * npred - nboth;  % Index on the non-zeros forward and both variables
-    j4 = find(lead_lag_incidence(2,j4));
-
-    no_lead_id = find(lead_lag_incidence(3,:)==0);
-    no_lag_id = find(lead_lag_incidence(1,:)==0);
-
-    static_id = intersect(no_lead_id,no_lag_id);
-    lag_id = setdiff(no_lead_id,static_id);
-    lead_id = setdiff(no_lag_id,static_id);
-    both_id = intersect(setdiff(1:n,no_lead_id),setdiff(1:n,no_lag_id));
-
-    lead_idx = lead_lag_incidence(3,lead_id);
-    lag_idx = lead_lag_incidence(1,lag_id);
-    both_lagged_idx = lead_lag_incidence(1,both_id);
-    both_leaded_idx = lead_lag_incidence(3,both_id);
-    innovations_idx = (size(jacobia,2)-DynareModel.exo_nbr+1):size(jacobia,2);
-    state_var  = [lag_idx, both_lagged_idx];
-
-    indexi_0 = 0;
-    if DynareModel.maximum_endo_lag > 0 && (npred > 0  || nboth > 0)
-        indexi_0 = min(lead_lag_incidence(2,:));
+    lead_id = find(lead_lag_incidence(maximum_lag+2,:));
+    lead_idx = lead_lag_incidence(maximum_lag+2,lead_id);
+    if maximum_lag
+        lag_id = find(lead_lag_incidence(1,:));
+        lag_idx = lead_lag_incidence(1,lag_id);
+        static_id = find((lead_lag_incidence(1,:) == 0) & ...
+                         (lead_lag_incidence(3,:) == 0));
+    else
+        lag_id = [];
+        lag_idx = [];
+        static_id = find(lead_lag_incidence(2,:)==0);
     end
 
-    index_c  = lead_lag_incidence(2,:);             % Index of all endogenous variables present at time=t
-    index_s  = lead_lag_incidence(2,1:nstatic);     % Index of all static endogenous variables present at time=t
-    index_0m = (nstatic+1:nstatic+npred)+indexi_0-1;
-    index_0p = (nstatic+npred+1:n)+indexi_0-1;
+    both_id = intersect(lead_id,lag_id);
+    if maximum_lag
+        no_both_lag_id = setdiff(lag_id,both_id);
+    else
+        no_both_lag_id = [];
+    end
+    innovations_idx = nz+(1:exo_nbr);
+    state_var  = [lag_id, both_id];
+
+    index_c  = nonzeros(lead_lag_incidence(maximum_lag+1,:));             % Index of all endogenous variables present at time=t
+    n_current = length(index_c);
+
+    index_s  = npred+nboth+(1:nstatic);     % Index of all static
+                                            % endogenous variables
+                                            % present at time=t
+    indexi_0 = npred+nboth;
+
+    npred0 = nnz(lead_lag_incidence(maximum_lag+1,no_both_lag_id));
+    index_0m = indexi_0+nstatic+(1:npred0);
+    nfwrd0 = nnz(lead_lag_incidence(2,lead_id));
+    index_0p = indexi_0+nstatic+npred0+(1:nfwrd0);
     index_m  = 1:(npred+nboth);
-    index_p  = lead_lag_incidence(3,find(lead_lag_incidence(3,:)));
-    row_indx = nstatic+1:n;
+    index_p  = npred+nboth+n_current+(1:(nfwrd+nboth));
+    row_indx_de_1 = 1:ndynamic;
+    row_indx_de_2 = ndynamic+1:nboth;
+    row_indx = nstatic+row_indx_de_1;
+    index_d = [index_0m index_p];
+    llx = lead_lag_incidence(:,order_var);
+    index_d1 = [find(llx(maximum_lag+1,nstatic+(1:npred))), npred+nboth+(1:nyf) ];
+    index_d2 = npred+1:nboth;
 
-    reorder_jacobian_columns = [lag_idx, both_lagged_idx, npred+nboth+[static_id lag_id both_id lead_id], both_leaded_idx, lead_idx, innovations_idx ];
+    index_e = [index_m index_0p];
+    index_e1 = [1:(npred+nboth), npred+nboth+find(llx(maximum_lag+1,nstatic+npred+(1: ...
+                                                      nyf)))];
+    index_e2 = npred+nboth+nfwrd+1:nboth;
+    
+    [junk,cols_b] = find(lead_lag_incidence(maximum_lag+1, order_var));
 
+    reorder_jacobian_columns = [nonzeros(lead_lag_incidence(:,order_var)'); ...
+                        nz+(1:exo_nbr)'];
 end
-
-info = 0;
 
 dr.ghx = [];
 dr.ghu = [];
@@ -149,32 +171,49 @@ else
 end
 
 A = aa(:,index_m);  % Jacobain matrix for lagged endogeneous variables
-B = aa(:,index_c);  % Jacobian matrix for contemporaneous endogeneous variables
+B(:,cols_b) = aa(:,index_c);  % Jacobian matrix for contemporaneous endogeneous variables
 C = aa(:,index_p);  % Jacobain matrix for led endogeneous variables
 
+info = 0;
+info1 = 1;
 if task ~= 1 && (DynareOptions.dr_cycle_reduction || DynareOptions.dr_logarithmic_reduction)
+    if n_current < DynareModel.endo_nbr
+        if DynareOptions.dr_cycle_reduction
+            error(['The cycle reduction algorithme can''t be used when the ' ...
+               'coefficient matrix for current variables is singular'])
+        elseif DynareOptions.dr_logarithmic_reduction
+            error(['The logarithmic reduction algorithme can''t be used when the ' ...
+                   'coefficient matrix for current variables is singular'])
+        end
+    end        
     A1 = [aa(row_indx,index_m ) zeros(ndynamic,nfwrd)];
     B1 = [aa(row_indx,index_0m) aa(row_indx,index_0p) ];
     C1 = [zeros(ndynamic,npred) aa(row_indx,index_p)];
     if DynareOptions.dr_cycle_reduction == 1
-        [ghx, info] = cycle_reduction(A1, B1, C1, DynareOptions.dr_cycle_reduction_tol);
+        [ghx, info1] = cycle_reduction(A1, B1, C1, DynareOptions.dr_cycle_reduction_tol);
     else
-        [ghx, info] = logarithmic_reduction(C1, B1, A1, DynareOptions.dr_logarithmic_reduction_tol, DynareOptions.dr_logarithmic_reduction_maxiter);
+        [ghx, info1] = logarithmic_reduction(C1, B1, A1, DynareOptions.dr_logarithmic_reduction_tol, DynareOptions.dr_logarithmic_reduction_maxiter);
     end
     ghx = ghx(:,index_m);
     hx = ghx(1:npred+nboth,:);
     gx = ghx(1+npred:end,:);
 end
 
-if (task ~= 1 && ((DynareOptions.dr_cycle_reduction == 1 && info ==1) || DynareOptions.dr_cycle_reduction == 0)) || task == 1
-    D = [[aa(row_indx,index_0m) zeros(ndynamic,nboth) aa(row_indx,index_p)] ; [zeros(nboth, npred) eye(nboth) zeros(nboth, nboth + nfwrd)]];
+if info1 == 1
+    D = zeros(ndynamic+nboth);
+    E = zeros(ndynamic+nboth);
+    D(row_indx_de_1,index_d1) = aa(row_indx,index_d);
+    D(row_indx_de_2,index_d2) = eye(nboth);
+    E(row_indx_de_1,index_e1) = -aa(row_indx,index_e);
+    E(row_indx_de_2,index_e2) = eye(nboth);
+    
     E = [-aa(row_indx,[index_m index_0p])  ; [zeros(nboth,nboth+npred) eye(nboth,nboth+nfwrd) ] ];
 
-    [err, ss, tt, w, sdim, dr.eigval, info1] = mjdgges(E,D,DynareOptions.qz_criterium);
+    [err, ss, tt, w, sdim, dr.eigval, info2] = mjdgges(E,D,DynareOptions.qz_criterium);
     mexErrCheck('mjdgges', err);
 
-    if info1
-        if info1 == -30
+    if info2
+        if info2 == -30
             % one eigenvalue is close to 0/0
             info(1) = 7;
         else
@@ -211,65 +250,64 @@ if (task ~= 1 && ((DynareOptions.dr_cycle_reduction == 1 && info ==1) || DynareO
     end
 
     %First order approximation
-    if task ~= 1
-        indx_stable_root = 1: (nd - nyf);     %=> index of stable roots
-        indx_explosive_root = npred + nboth + 1:nd;  %=> index of explosive roots
-                                                     % derivatives with respect to dynamic state variables
-                                                     % forward variables
-        Z = w';
-        Z11t = Z(indx_stable_root,    indx_stable_root)';
-        Z21  = Z(indx_explosive_root, indx_stable_root);
-        Z22  = Z(indx_explosive_root, indx_explosive_root);
-        if ~isfloat(Z21) && (condest(Z21) > 1e9)
-            info(1) = 5;
-            info(2) = condest(Z21);
-            return;
-        else
-            gx = - Z22 \ Z21;
-        end
-        % predetermined variables
-        hx =  Z11t * inv(tt(indx_stable_root, indx_stable_root)) * ss(indx_stable_root, indx_stable_root) * inv(Z11t);
-        ghx = [hx(k1,:); gx(k2(nboth+1:end),:)];
-    end;
-end
-
-if  task~= 1
-
-    if nstatic > 0
-        B_static = B(:,1:nstatic);  % submatrix containing the derivatives w.r. to static variables
+    indx_stable_root = 1: (nd - nyf);     %=> index of stable roots
+    indx_explosive_root = npred + nboth + 1:nd;  %=> index of explosive roots
+                                                 % derivatives with respect to dynamic state variables
+                                                 % forward variables
+    Z = w';
+    Z11t = Z(indx_stable_root,    indx_stable_root)';
+    Z21  = Z(indx_explosive_root, indx_stable_root);
+    Z22  = Z(indx_explosive_root, indx_explosive_root);
+    if ~isfloat(Z21) && (condest(Z21) > 1e9)
+        info(1) = 5;
+        info(2) = condest(Z21);
+        return;
     else
-        B_static = [];
-    end;
-    %static variables, backward variable, mixed variables and forward variables
-    B_pred = B(:,nstatic+1:nstatic+npred+nboth);
-    B_fyd = B(:,nstatic+npred+nboth+1:end);
-
-    % static variables
-    if nstatic > 0
-        temp = - C(1:nstatic,j3)*gx(j4,:)*hx;
-        b = aa(:,index_c);
-        b10 = b(1:nstatic, 1:nstatic);
-        b11 = b(1:nstatic, nstatic+1:n);
-        temp(:,index_m) = temp(:,index_m)-A(1:nstatic,:);
-        temp = b10\(temp-b11*ghx);
-        ghx = [temp; ghx];
-        temp = [];
+        gx = - Z22 \ Z21;
     end
+    % predetermined variables
+    hx =  Z11t * inv(tt(indx_stable_root, indx_stable_root)) * ss(indx_stable_root, indx_stable_root) * inv(Z11t);
+    ghx = [hx(k1,:); gx(k2(nboth+1:end),:)];
 
-    A_ = real([B_static C(:,j3)*gx+B_pred B_fyd]); % The state_variable of the block are located at [B_pred B_both]
-
-    if DynareModel.exo_nbr
-        if nstatic > 0
-            fu = Q' * jacobia(:,innovations_idx);
-        else
-            fu = jacobia(:,innovations_idx);
-        end;
-
-        ghu = - A_ \ fu;
-    else
-        ghu = [];
-    end;
 end
+
+dr.gx = gx;
+
+if nstatic > 0
+    B_static = B(:,1:nstatic);  % submatrix containing the derivatives w.r. to static variables
+else
+    B_static = [];
+end;
+%static variables, backward variable, mixed variables and forward variables
+B_pred = B(:,nstatic+1:nstatic+npred+nboth);
+B_fyd = B(:,nstatic+npred+nboth+1:end);
+
+% static variables
+if nstatic > 0
+    temp = - C(1:nstatic,:)*gx*hx;
+    b(:,cols_b) = aa(:,index_c);
+    b10 = b(1:nstatic, 1:nstatic);
+    b11 = b(1:nstatic, nstatic+1:end);
+    temp(:,index_m) = temp(:,index_m)-A(1:nstatic,:);
+    temp = b10\(temp-b11*ghx);
+    ghx = [temp; ghx];
+    temp = [];
+end
+
+A_ = real([B_static C*gx+B_pred B_fyd]); % The state_variable of the block are located at [B_pred B_both]
+
+if exo_nbr
+    if nstatic > 0
+        fu = Q' * jacobia(:,innovations_idx);
+    else
+        fu = jacobia(:,innovations_idx);
+    end;
+
+    ghu = - A_ \ fu;
+else
+    ghu = [];
+end;
+
 
 
 dr.ghx = ghx;
