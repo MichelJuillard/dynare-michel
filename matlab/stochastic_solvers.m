@@ -48,6 +48,10 @@ function [dr,info] = stochastic_solvers(dr,task,M_,options_,oo_)
 
 info = 0;
 
+if options_.linear
+    options_.order = 1;
+end
+
 if (options_.aim_solver == 1) && (options_.order > 1)
         error('Option "aim_solver" is incompatible with order >= 2')
 end
