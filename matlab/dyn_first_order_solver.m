@@ -136,19 +136,19 @@ if isempty(reorder_jacobian_columns)
     nfwrd0 = nnz(lead_lag_incidence(2,lead_id));
     index_0p = indexi_0+nstatic+npred0+(1:nfwrd0);
     index_m  = 1:(npred+nboth);
-    index_p  = npred+nboth+n_current+(1:(nfwrd+nboth));
+    index_p  = npred+nboth+n_current+(1:nfwrd+nboth);
     row_indx_de_1 = 1:ndynamic;
-    row_indx_de_2 = ndynamic+1:nboth;
+    row_indx_de_2 = ndynamic+(1:nboth);
     row_indx = nstatic+row_indx_de_1;
     index_d = [index_0m index_p];
     llx = lead_lag_incidence(:,order_var);
     index_d1 = [find(llx(maximum_lag+1,nstatic+(1:npred))), npred+nboth+(1:nyf) ];
-    index_d2 = npred+1:nboth;
+    index_d2 = npred+(1:nboth);
 
     index_e = [index_m index_0p];
-    index_e1 = [1:(npred+nboth), npred+nboth+find(llx(maximum_lag+1,nstatic+npred+(1: ...
+    index_e1 = [1:npred+nboth, npred+nboth+find(llx(maximum_lag+1,nstatic+npred+(1: ...
                                                       nyf)))];
-    index_e2 = npred+nboth+nfwrd+1:nboth;
+    index_e2 = npred+nboth+nfwrd+(1:nboth);
     
     [junk,cols_b] = find(lead_lag_incidence(maximum_lag+1, order_var));
 
