@@ -525,6 +525,8 @@ options_.risky_steadystate = 0;
 
 % initialize persistent variables in priordens()
 priordens([],[],[],[],[],[],1);
+% initialize persistent variables in dyn_first_order_solver()
+dyn_first_order_solver();
 
 % Set dynare random generator and seed.
 set_dynare_seed('default');
