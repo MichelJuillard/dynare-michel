@@ -138,9 +138,12 @@ if ~isempty(estim_params_)
     % Test if initial values of the estimated parameters are all between
     % the prior lower and upper bounds.
     if any(xparam1 < bounds(:,1)) || any(xparam1 > bounds(:,2))
-        find(xparam1 < bounds(:,1))
-        find(xparam1 > bounds(:,2))
-        error('Initial parameter values are outside parameter bounds')
+        outside_bound_vars=bayestopt_.name([find(xparam1 < bounds(:,1)); find(xparam1 > bounds(:,2))],:);
+        disp_string=[outside_bound_vars{1,:}];
+        for ii=2:size(outside_bound_vars,1)
+            disp_string=[disp_string,', ',outside_bound_vars{ii,:}];
+        end
+        error(['Initial value(s) of ', disp_string ,' are outside parameter bounds. Potentially, you should set prior_trunc=0.'])
     end
     lb = bounds(:,1);
     ub = bounds(:,2);
