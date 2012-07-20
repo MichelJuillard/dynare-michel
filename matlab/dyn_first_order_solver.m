@@ -185,7 +185,12 @@ if task ~= 1 && (DynareOptions.dr_cycle_reduction || DynareOptions.dr_logarithmi
             error(['The logarithmic reduction algorithme can''t be used when the ' ...
                    'coefficient matrix for current variables is singular'])
         end
-    end        
+    end  
+    if DynareOptions.gpu
+        gpuArray(A1);
+        gpuArray(B1);
+        gpuArray(C1);
+    end
     A1 = [aa(row_indx,index_m ) zeros(ndynamic,nfwrd)];
     B1 = [aa(row_indx,index_0m) aa(row_indx,index_0p) ];
     C1 = [zeros(ndynamic,npred) aa(row_indx,index_p)];
