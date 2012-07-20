@@ -258,9 +258,9 @@ if info1 == 1
     Z11t = Z(indx_stable_root,    indx_stable_root)';
     Z21  = Z(indx_explosive_root, indx_stable_root);
     Z22  = Z(indx_explosive_root, indx_explosive_root);
-    if ~isfloat(Z21) && (condest(Z21) > 1e9)
+    if ~isscalar(Z22) && (condest(Z22) > 1e9)
         info(1) = 5;
-        info(2) = condest(Z21);
+        info(2) = condest(Z22);
         return;
     else
         gx = - Z22 \ Z21;
