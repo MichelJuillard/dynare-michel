@@ -175,15 +175,14 @@ B(:,cols_b) = aa(:,index_c);  % Jacobian matrix for contemporaneous endogeneous 
 C = aa(:,index_p);  % Jacobain matrix for led endogeneous variables
 
 info = 0;
-info1 = 1;
 if task ~= 1 && (DynareOptions.dr_cycle_reduction || DynareOptions.dr_logarithmic_reduction)
     if n_current < DynareModel.endo_nbr
         if DynareOptions.dr_cycle_reduction
             error(['The cycle reduction algorithme can''t be used when the ' ...
-               'coefficient matrix for current variables is singular'])
+               'coefficient matrix for current variables isn''t invertible'])
         elseif DynareOptions.dr_logarithmic_reduction
             error(['The logarithmic reduction algorithme can''t be used when the ' ...
-                   'coefficient matrix for current variables is singular'])
+                   'coefficient matrix for current variables isn''t invertible'])
         end
     end  
     if DynareOptions.gpu
@@ -195,16 +194,18 @@ if task ~= 1 && (DynareOptions.dr_cycle_reduction || DynareOptions.dr_logarithmi
     B1 = [aa(row_indx,index_0m) aa(row_indx,index_0p) ];
     C1 = [zeros(ndynamic,npred) aa(row_indx,index_p)];
     if DynareOptions.dr_cycle_reduction == 1
-        [ghx, info1] = cycle_reduction(A1, B1, C1, DynareOptions.dr_cycle_reduction_tol);
+        [ghx, info] = cycle_reduction(A1, B1, C1, DynareOptions.dr_cycle_reduction_tol);
     else
-        [ghx, info1] = logarithmic_reduction(C1, B1, A1, DynareOptions.dr_logarithmic_reduction_tol, DynareOptions.dr_logarithmic_reduction_maxiter);
+        [ghx, info] = logarithmic_reduction(C1, B1, A1, DynareOptions.dr_logarithmic_reduction_tol, DynareOptions.dr_logarithmic_reduction_maxiter);
+    end
+    if info
+        % cycle_reduction or logarithmic redution failed and set info
+        return
     end
     ghx = ghx(:,index_m);
     hx = ghx(1:npred+nboth,:);
     gx = ghx(1+npred:end,:);
-end
-
-if info1 == 1
+else
     D = zeros(ndynamic+nboth);
     E = zeros(ndynamic+nboth);
     D(row_indx_de_1,index_d1) = aa(row_indx,index_d);
@@ -214,11 +215,11 @@ if info1 == 1
     
     E = [-aa(row_indx,[index_m index_0p])  ; [zeros(nboth,nboth+npred) eye(nboth,nboth+nfwrd) ] ];
 
-    [err, ss, tt, w, sdim, dr.eigval, info2] = mjdgges(E,D,DynareOptions.qz_criterium);
+    [err, ss, tt, w, sdim, dr.eigval, info1] = mjdgges(E,D,DynareOptions.qz_criterium);
     mexErrCheck('mjdgges', err);
 
-    if info2
-        if info2 == -30
+    if info1
+        if info1 == -30
             % one eigenvalue is close to 0/0
             info(1) = 7;
         else
@@ -260,20 +261,25 @@ if info1 == 1
                                                  % derivatives with respect to dynamic state variables
                                                  % forward variables
     Z = w';
-    Z11t = Z(indx_stable_root,    indx_stable_root)';
+    Z11 = Z(indx_stable_root,    indx_stable_root);
     Z21  = Z(indx_explosive_root, indx_stable_root);
     Z22  = Z(indx_explosive_root, indx_explosive_root);
-    if ~isscalar(Z22) && (condest(Z22) > 1e9)
+    [minus_gx,rc] = linsolve(Z22,Z21);
+    if rc < 1e-9
+        % Z22 is near singular
         info(1) = 5;
-        info(2) = condest(Z22);
+        info(2) = -log(rc);
         return;
-    else
-        gx = - Z22 \ Z21;
     end
+    gx  = -minus_gx;
     % predetermined variables
-    hx =  Z11t * inv(tt(indx_stable_root, indx_stable_root)) * ss(indx_stable_root, indx_stable_root) * inv(Z11t);
+    opts.UT = true;
+    opts.TRANSA = true;
+    hx1 = linsolve(tt(indx_stable_root, indx_stable_root),Z11,opts)';
+    opts.UT = false;
+    hx2 = linsolve(Z11,ss(indx_stable_root, indx_stable_root)',opts)';
+    hx =  hx1*hx2;
     ghx = [hx(k1,:); gx(k2(nboth+1:end),:)];
-
 end
 
 dr.gx = gx;
