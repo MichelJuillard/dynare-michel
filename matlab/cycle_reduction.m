@@ -66,6 +66,7 @@ info = 0;
 X = [];
 crit = Inf;
 A0_0 = A0;
+Ahat1 = A1;
 if (nargin == 5 && ~isempty(ch) )
     A1_0 = A1;
     A2_0 = A2;
@@ -76,11 +77,11 @@ id2 = id0+n;
 
 cont = 1;
 while cont 
-    crit > cvg_tol && it < max_it && ~isnan(crit)
     tmp = ([A0; A2]/A1)*[A0 A2];
     A1 = A1 - tmp(id0,id2) - tmp(id2,id0);
     A0 = -tmp(id0,id0);
     A2 = -tmp(id2,id2);
+    Ahat1 = Ahat1 -tmp(id2,id0);
     crit = norm(A0,1);
     if crit < cvg_tol
         % keep iterating until condition on A2 is met
@@ -90,17 +91,17 @@ while cont
     elseif isnan(crit) || it == max_it
         if crit < cvg_tol
             info(1) = 4;
-            info(2) = log(norm(A2,1))
+            info(2) = log(norm(A2,1));
         else
             info(1) = 3;
-            info(2) = log(norm(A1,1))
+            info(2) = log(norm(A1,1));
         end
         return
     end        
     it = it + 1;
 end
 
-X = -A1\A0_0;
+X = -Ahat1\A0_0;
 
 if (nargin == 5 && ~isempty(ch) )
     %check the solution

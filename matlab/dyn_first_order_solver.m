@@ -276,8 +276,7 @@ else
     opts.UT = true;
     opts.TRANSA = true;
     hx1 = linsolve(tt(indx_stable_root, indx_stable_root),Z11,opts)';
-    opts.UT = false;
-    hx2 = linsolve(Z11,ss(indx_stable_root, indx_stable_root)',opts)';
+    hx2 = linsolve(Z11,ss(indx_stable_root, indx_stable_root)')';
     hx =  hx1*hx2;
     ghx = [hx(k1,:); gx(k2(nboth+1:end),:)];
 end
