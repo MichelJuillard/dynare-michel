@@ -145,6 +145,10 @@ public:@;
 
 	void walkStochSteady();
 	TwoDMatrix* calcYCov() const;
+	const FGSContainer* get_rule_ders() const
+	      	{@+ return rule_ders;@+}	   
+	const FGSContainer* get_rule_ders_ss() const
+	      	{@+ return rule_ders;@+}	   
 protected:@;
 	void approxAtSteady();
 	void calcStochShift(Vector& out, double at_sigma) const;

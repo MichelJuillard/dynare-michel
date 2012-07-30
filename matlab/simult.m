@@ -78,7 +78,9 @@ chol_S = chol(DynareModel.Sigma_e(i_exo_var,i_exo_var));
 
 for i=1:replic
     if ~isempty(DynareModel.Sigma_e)
-        DynareResults.exo_simul(:,i_exo_var) = randn(DynareOptions.periods,nxs)*chol_S;
+        % we fill the shocks row wise to have the same values
+        % independently of the length of the simulation
+        DynareResults.exo_simul(:,i_exo_var) = randn(nxs,DynareOptions.periods)'*chol_S;
     end
     y_ = simult_(y0,dr,DynareResults.exo_simul,order);
     % elimninating initial value

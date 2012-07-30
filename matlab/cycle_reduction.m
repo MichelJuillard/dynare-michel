@@ -63,38 +63,49 @@ function [X, info] = cycle_reduction(A0, A1, A2, cvg_tol, ch)
 max_it = 300;
 it = 0;
 info = 0;
-crit = 1+cvg_tol;
-A_0 = A1;
+X = [];
+crit = Inf;
 A0_0 = A0;
-A1_0 = A1;
-A2_0 = A2;
+Ahat1 = A1;
+if (nargin == 5 && ~isempty(ch) )
+    A1_0 = A1;
+    A2_0 = A2;
+end
 n = length(A0);
-id = 1:n;
+id0 = 1:n;
+id2 = id0+n;
 
-while crit > cvg_tol && it < max_it;
-    tmp = [A2_0; A0_0]/A1_0;
-    TMP = tmp*A0_0;
-    A2_1 = - tmp(id,:)* A2_0;
-    A_1 = A_0 - TMP(id,:);
-    A1_1 = A1_0 - tmp(n+id,:) * A2_0 - TMP(id,:);
-    crit = sum(sum(abs(A0_0)));
-    A_0 = A_1;
-    A0_0 = -TMP(n+id,:);
-    A1_0 = A1_1;
-    A2_0 = A2_1;
+cont = 1;
+while cont 
+    tmp = ([A0; A2]/A1)*[A0 A2];
+    A1 = A1 - tmp(id0,id2) - tmp(id2,id0);
+    A0 = -tmp(id0,id0);
+    A2 = -tmp(id2,id2);
+    Ahat1 = Ahat1 -tmp(id2,id0);
+    crit = norm(A0,1);
+    if crit < cvg_tol
+        % keep iterating until condition on A2 is met
+        if norm(A2,1) < cvg_tol
+            cont = 0;
+        end
+    elseif isnan(crit) || it == max_it
+        if crit < cvg_tol
+            info(1) = 4;
+            info(2) = log(norm(A2,1));
+        else
+            info(1) = 3;
+            info(2) = log(norm(A1,1));
+        end
+        return
+    end        
     it = it + 1;
 end
 
-if it==max_it
-    disp(['convergence not achieved after ' int2str(it) ' iterations']);
-    info = 1;
-end
-
-X = -A_0\A0;
+X = -Ahat1\A0_0;
 
 if (nargin == 5 && ~isempty(ch) )
     %check the solution
-    res = A0 + A1 * X + A2 * X * X;
+    res = A0_0 + A1_0 * X + A2_0 * X * X;
     if (sum(sum(abs(res))) > cvg_tol)
         disp(['the norm residual of the residu ' num2str(res) ' compare to the tolerance criterion ' num2str(cvg_tol)]);
     end

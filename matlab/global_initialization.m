@@ -521,7 +521,11 @@ options_.graph_save_formats.eps = 1;
 options_.graph_save_formats.pdf = 0;
 options_.graph_save_formats.fig = 0;
 
+% risky steady state
 options_.risky_steadystate = 0;
+
+% use GPU
+options_.gpu = 0;
 
 % initialize persistent variables in priordens()
 priordens([],[],[],[],[],[],1);
