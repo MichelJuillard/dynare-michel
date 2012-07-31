@@ -49,6 +49,7 @@ MODFILES = \
 	k_order_perturbation/fs2000k2_m.mod \
 	k_order_perturbation/fs2000k_1_m.mod \
 	k_order_perturbation/fs2000k3_m.mod \
+	k_order_perturbation/fs2000k3_p.mod \
 	partial_information/PItest3aHc0PCLsimModPiYrVarobsAll.mod \
 	partial_information/PItest3aHc0PCLsimModPiYrVarobsCNR.mod \
 	arima/mod1.mod \

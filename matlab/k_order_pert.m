@@ -23,6 +23,9 @@ info = 0;
 M.var_order_endo_names = M.endo_names(dr.order_var,:);
 
 order = options.order;
+endo_nbr = M.endo_nbr;
+exo_nbr = M.exo_nbr;
+npred = dr.npred;
 
 switch(order)
   case 1
@@ -36,7 +39,25 @@ switch(order)
     dr.g_1 = g_1;
     dr.g_2 = g_2;
   case 3
-    [err, g_0, g_1, g_2, g_3] = k_order_perturbation(dr,M,options);
+    if options.pruning
+        [err, g_0, g_1, g_2, g_3, derivs] = k_order_perturbation(dr, ...
+                                                          M,options);
+        dr.ghx = derivs.gy;
+        dr.ghu = derivs.gu;
+        dr.ghxx = unfold2(derivs.gyy,npred);
+        dr.ghxu = derivs.gyu;
+        dr.ghuu = unfold2(derivs.guu,exo_nbr);
+        dr.ghs2 = derivs.gss;
+        dr.ghxxx = unfold3(derivs.gyyy,npred);
+        dr.ghxxu = unfold21(derivs.gyyu,npred,exo_nbr);
+        dr.ghxuu = unfold12(derivs.gyuu,npred,exo_nbr);
+        dr.ghuuu = unfold3(derivs.guuu,exo_nbr);
+        dr.ghxss = derivs.gyss;
+        dr.ghuss = derivs.guss;
+    else
+        [err, g_0, g_1, g_2, g_3] = k_order_perturbation(dr, ...
+                                                         M,options);
+    end
     mexErrCheck('k_order_perturbation', err);
     dr.g_0 = g_0;
     dr.g_1 = g_1;
@@ -46,10 +67,14 @@ switch(order)
     error('order > 3 isn''t implemented')
 end
 
+if options.pruning
+    return
+end
+
 npred = dr.npred;
 
-dr.ghx = g_1(:,1:npred);
-dr.ghu = g_1(:,npred+1:end);
+dr.ghx = dr.g_1(:,1:npred);
+dr.ghu = dr.g_1(:,npred+1:end);
 
 if options.loglinear == 1
     k = find(dr.kstate(:,2) <= M.maximum_endo_lag+1);
@@ -63,8 +88,6 @@ end
 
 if order > 1
     dr.ghs2 = 2*g_0;
-    endo_nbr = M.endo_nbr;
-    exo_nbr = M.exo_nbr;
     s0 = 0;
     s1 = 0;
     ghxx=zeros(endo_nbr, npred^2);
@@ -97,3 +120,66 @@ if order > 1
     dr.ghuu = ghuu;
 end
 
+function y = unfold2(x,n)
+y=zeros(size(x,1),n*n);
+m = 1;
+for i=1:n
+    for j=i:n
+        y(:,(i-1)*n+j)=x(:,m);
+        if j ~= i
+            y(:,(j-1)*n+i)=x(:,m);
+        end
+        m = m+1;
+    end
+end
+
+function y = unfold3(x,n)
+y = zeros(size(x,1),n*n*n);
+m = 1;
+for i=1:n
+    for j=i:n
+        for k=j:n
+            xx = x(:,m);
+            y(:,(i-1)*n*n+(j-1)*n+k) = xx;
+            y(:,(i-1)*n*n+(k-1)*n+j) = xx;
+            y(:,(j-1)*n*n+(k-1)*n+i) = xx;
+            y(:,(i-1)*n*n+(k-1)*n+j) = xx;
+            y(:,(k-1)*n*n+(i-1)*n+j) = xx;
+            y(:,(k-1)*n*n+(j-1)*n+i) = xx;
+        end
+    end
+end
+
+function y = unfold21(x,n1,n2)
+y = zeros(size(x,1),n1*n1*n2);
+m = 1;
+for i=1:n1
+    for j=i:n1
+        for k=1:n2
+            xx = x(:,m);
+            y(:,(i-1)*n1*n2+(j-1)*n2+k) = xx;
+            if j ~= i
+                y(:,(j-1)*n1*n2+(i-1)*n2+i) = xx;
+            end
+        end
+    end
+end
+
+function y = unfold12(x,n1,n2)
+y = zeros(size(x,1),n1*n2*n2);
+m = 1;
+for i=1:n1
+    for j=1:n2
+        for k=j:n2
+            xx = x(:,m);
+            y(:,(i-1)*n2*n2+(j-1)*n2+k) = xx;
+            if k ~= j
+                y(:,(i-1)*n2*n2+(k-1)*n2+j) = xx;
+            end
+        end
+    end
+end
+
+
+            
+            
