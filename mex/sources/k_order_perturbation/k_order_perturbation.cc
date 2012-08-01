@@ -260,8 +260,6 @@ extern "C" {
         // run stochastic steady
         app.walkStochSteady();
 
-	app.get_rule_ders()->print();
-
         /* Write derivative outputs into memory map */
         map<string, ConstTwoDMatrix> mm;
         app.getFoldDecisionRule().writeMMap(mm, string());
