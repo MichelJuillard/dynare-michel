@@ -62,6 +62,16 @@ DynareMxArrayToString(const mxArray *mxFldp, const int len, const int width, vec
         out[j] += cNamesCharStr[j+i*len];
 }
 
+void copy_derivatives(mxArray *destin,const Symmetry &sym,const FGSContainer *derivs,const std::string &fieldname)
+{
+  const TwoDMatrix* x = derivs->get(sym);
+  int n = x->numRows();
+  int m = x->numCols();
+  mxArray *tmp = mxCreateDoubleMatrix(n, m, mxREAL);
+  memcpy(mxGetPr(tmp),x->getData().base(),n*m*sizeof(double));
+  mxSetField(destin,0,fieldname.c_str(),tmp);
+}
+
 extern "C" {
 
   void
@@ -89,10 +99,10 @@ extern "C" {
     else
       kOrder = 1;
 
-    if (kOrder == 1 && nlhs != 2)
-      DYN_MEX_FUNC_ERR_MSG_TXT("k_order_perturbation at order 1 requires exactly 2 arguments in output");
-    else if (kOrder > 1 && nlhs != kOrder+2)
-      DYN_MEX_FUNC_ERR_MSG_TXT("k_order_perturbation at order > 1 requires exactly order+2 arguments in output");
+    //if (kOrder == 1 && nlhs != 2)
+    //  DYN_MEX_FUNC_ERR_MSG_TXT("k_order_perturbation at order 1 requires exactly 2 arguments in output");
+    //else if (kOrder > 1 && nlhs != kOrder+2)
+    //  DYN_MEX_FUNC_ERR_MSG_TXT("k_order_perturbation at order > 1 requires exactly order+2 arguments in output");
 
     double qz_criterium = 1+1e-6;
     mxFldp = mxGetField(options_, 0, "qz_criterium");
@@ -250,6 +260,8 @@ extern "C" {
         // run stochastic steady
         app.walkStochSteady();
 
+	app.get_rule_ders()->print();
+
         /* Write derivative outputs into memory map */
         map<string, ConstTwoDMatrix> mm;
         app.getFoldDecisionRule().writeMMap(mm, string());
@@ -275,18 +287,40 @@ extern "C" {
             for (map<string, ConstTwoDMatrix>::const_iterator cit = mm.begin();
                  ((cit != mm.end()) && (ii < nlhs)); ++cit)
               {
-                {
-                  plhs[ii] = mxCreateDoubleMatrix((*cit).second.numRows(), (*cit).second.numCols(), mxREAL);
-
-                  // Copy Dynare++ matrix into MATLAB matrix
-                  const ConstVector &vec = (*cit).second.getData();
-                  assert(vec.skip() == 1);
-                  memcpy(mxGetPr(plhs[ii]), vec.base(), vec.length() * sizeof(double));
-
-                  ++ii;
-                }
+		plhs[ii] = mxCreateDoubleMatrix((*cit).second.numRows(), (*cit).second.numCols(), mxREAL);
+		
+		// Copy Dynare++ matrix into MATLAB matrix
+		const ConstVector &vec = (*cit).second.getData();
+		assert(vec.skip() == 1);
+		memcpy(mxGetPr(plhs[ii]), vec.base(), vec.length() * sizeof(double));
+		
+		++ii;
+		
               }
-          }
+	    if (kOrder == 3 && nlhs > 4)
+	      {
+		const FGSContainer *derivs = app.get_rule_ders();
+		const std::string fieldnames[] = {"gy", "gu", "gyy", "gyu", "guu", "gss", 
+				      "gyyy", "gyyu", "gyuu", "guuu", "gyss", "guss"};
+		// creates the char** expected by mxCreateStructMatrix()
+		const char* c_fieldnames[12];
+		for (int i=0; i < 12;++i)
+		  c_fieldnames[i] = fieldnames[i].c_str();
+		plhs[ii] = mxCreateStructMatrix(1,1,12,c_fieldnames);
+		copy_derivatives(plhs[ii],Symmetry(1,0,0,0),derivs,"gy");
+		copy_derivatives(plhs[ii],Symmetry(0,1,0,0),derivs,"gu");
+		copy_derivatives(plhs[ii],Symmetry(2,0,0,0),derivs,"gyy");
+		copy_derivatives(plhs[ii],Symmetry(0,2,0,0),derivs,"guu");
+		copy_derivatives(plhs[ii],Symmetry(1,1,0,0),derivs,"gyu");
+		copy_derivatives(plhs[ii],Symmetry(0,0,0,2),derivs,"gss");
+		copy_derivatives(plhs[ii],Symmetry(3,0,0,0),derivs,"gyyy");
+		copy_derivatives(plhs[ii],Symmetry(0,3,0,0),derivs,"guuu");
+		copy_derivatives(plhs[ii],Symmetry(2,1,0,0),derivs,"gyyu");
+		copy_derivatives(plhs[ii],Symmetry(1,2,0,0),derivs,"gyuu");
+		copy_derivatives(plhs[ii],Symmetry(1,0,0,2),derivs,"gyss");
+		copy_derivatives(plhs[ii],Symmetry(0,1,0,2),derivs,"guss");
+	      }
+	  }
       }
     catch (const KordException &e)
       {
@@ -320,5 +354,4 @@ extern "C" {
     plhs[0] = mxCreateDoubleScalar(0);
   } // end of mexFunction()
 } // end of extern C
-
 #endif // ifdef MATLAB_MEX_FILE  to exclude mexFunction for other applications

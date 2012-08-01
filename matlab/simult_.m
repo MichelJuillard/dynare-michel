@@ -35,6 +35,8 @@ function y_=simult_(y0,dr,ex_,iorder)
 global M_ options_
 
 iter = size(ex_,1);
+endo_nbr = M_.endo_nbr;
+exo_nbr = M_.exo_nbr;
 
 y_ = zeros(size(y0,1),iter+M_.maximum_lag);
 y_(:,1) = y0;
@@ -51,19 +53,19 @@ if ~options_.k_order_solver
     end
 end
 
-if options_.k_order_solver% Call dynare++ routines.
-    ex_ = [zeros(1,M_.exo_nbr); ex_];
+if options_.k_order_solver && ~options_.pruning % Call dynare++ routines.
+    ex_ = [zeros(1,exo_nbr); ex_];
     switch options_.order
       case 1
-        [err, y_] = dynare_simul_(1,dr.nstatic,dr.npred-dr.nboth,dr.nboth,dr.nfwrd,M_.exo_nbr, ...
+        [err, y_] = dynare_simul_(1,dr.nstatic,dr.npred-dr.nboth,dr.nboth,dr.nfwrd,exo_nbr, ...
                                   y_(dr.order_var,1),ex_',M_.Sigma_e,options_.DynareRandomStreams.seed,dr.ys(dr.order_var),...
-                                  zeros(M_.endo_nbr,1),dr.g_1);
+                                  zeros(endo_nbr,1),dr.g_1);
       case 2
-        [err, y_] = dynare_simul_(2,dr.nstatic,dr.npred-dr.nboth,dr.nboth,dr.nfwrd,M_.exo_nbr, ...
+        [err, y_] = dynare_simul_(2,dr.nstatic,dr.npred-dr.nboth,dr.nboth,dr.nfwrd,exo_nbr, ...
                                   y_(dr.order_var,1),ex_',M_.Sigma_e,options_.DynareRandomStreams.seed,dr.ys(dr.order_var),dr.g_0, ...
                                   dr.g_1,dr.g_2);
       case 3
-        [err, y_] = dynare_simul_(3,dr.nstatic,dr.npred-dr.nboth,dr.nboth,dr.nfwrd,M_.exo_nbr, ...
+        [err, y_] = dynare_simul_(3,dr.nstatic,dr.npred-dr.nboth,dr.nboth,dr.nfwrd,exo_nbr, ...
                                   y_(dr.order_var,1),ex_',M_.Sigma_e,options_.DynareRandomStreams.seed,dr.ys(dr.order_var),dr.g_0, ...
                                   dr.g_1,dr.g_2,dr.g_3);
       otherwise
@@ -78,11 +80,11 @@ else
         else
             k2 = [];
         end;
-        order_var = 1:M_.endo_nbr;
+        order_var = 1:endo_nbr;
         dr.order_var = order_var;
     else
         k2 = dr.kstate(find(dr.kstate(:,2) <= M_.maximum_lag+1),[1 2]);
-        k2 = k2(:,1)+(M_.maximum_lag+1-k2(:,2))*M_.endo_nbr;
+        k2 = k2(:,1)+(M_.maximum_lag+1-k2(:,2))*endo_nbr;
         order_var = dr.order_var;
     end;
     
@@ -134,6 +136,56 @@ else
                 y_(dr.order_var,i) = constant + dr.ghx*yhat + dr.ghu*epsilon ...
                     + abcOut1 + abcOut2 + abcOut3;
             end
+         end
+      case 3
+        % only with pruning
+        ghx = dr.ghx;
+        ghu = dr.ghu;
+        ghxx = dr.ghxx;
+        ghxu = dr.ghxu;
+        ghuu = dr.ghuu;
+        ghs2 = dr.ghs2;
+        ghxxx = dr.ghxxx;
+        ghxxu = dr.ghxxu;
+        ghxuu = dr.ghxuu;
+        ghuuu = dr.ghuuu;
+        ghxss = dr.ghxss;
+        ghuss = dr.ghuss;
+        threads = options_.threads.kronecker.A_times_B_kronecker_C;
+        npred = dr.npred;
+        ipred = dr.nstatic+(1:npred);
+        yhat1 = y0(order_var(k2))-dr.ys(order_var(k2));
+        yhat2 = zeros(npred,1);
+        yhat3 = zeros(npred,1);
+        for i=2:iter+M_.maximum_lag
+            u = ex_(i-1,:)';
+            [gyy, err] = A_times_B_kronecker_C(ghxx,yhat1,threads);
+            mexErrCheck('A_times_B_kronecker_C', err);
+            [guu, err] = A_times_B_kronecker_C(ghuu,u,threads);
+            mexErrCheck('A_times_B_kronecker_C', err);
+            [gyu, err] = A_times_B_kronecker_C(ghxu,yhat1,u,threads);
+            mexErrCheck('A_times_B_kronecker_C', err);
+            y2a = kron(yhat1,yhat1);
+            [gyyy, err] = A_times_B_kronecker_C(ghxxx,y2a,yhat1,threads);
+            mexErrCheck('A_times_B_kronecker_C', err);
+            u2a = kron(u,u);
+            [guuu, err] = A_times_B_kronecker_C(ghuuu,u2a,u,threads);
+            mexErrCheck('A_times_B_kronecker_C', err);
+            yu = kron(yhat1,u);
+            [gyyu, err] = A_times_B_kronecker_C(ghxxu,yhat1,yu,threads);
+            mexErrCheck('A_times_B_kronecker_C', err);
+            [gyuu, err] = A_times_B_kronecker_C(ghxuu,yu,u,threads);
+            mexErrCheck('A_times_B_kronecker_C', err);
+            [gyy12, err] = A_times_B_kronecker_C(ghxx,yhat1,yhat2,threads);
+            mexErrCheck('A_times_B_kronecker_C', err);
+            yhat3 = ghx*yhat3 + gyyy + guuu + 3*(gyyu + gyuu  ...
+                    + gyy12 + ghxss*yhat1 + ghuss*u);
+            yhat2 = ghx*yhat2 + gyy + guu + 2*gyu + ghs2;
+            yhat1 = ghx*yhat1 + ghu*u;
+            y_(order_var,i) = yhat1 + (1/2)*yhat2 + (1/6)*yhat3;
+            yhat1 = yhat1(ipred);
+            yhat2 = yhat2(ipred);
+            yhat3 = yhat3(ipred);
         end
     end
 end

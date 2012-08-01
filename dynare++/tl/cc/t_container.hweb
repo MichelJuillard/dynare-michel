@@ -268,7 +268,7 @@ int getMaxDim() const
 @<|TensorContainer::print| code@>=
 void print() const
 {
-	printf("Tensor container: nvars=%d, tensors=%d\n", n, m.size());
+	printf("Tensor container: nvars=%d, tensors=%D\n", n, m.size());
 	for (const_iterator it = m.begin(); it != m.end(); ++it) {
 		printf("Symmetry: ");
 		(*it).first.print();
