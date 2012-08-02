@@ -568,16 +568,16 @@ if analytic_derivation,
         if full_Hess
         DTj = DT(:,:,j+offset);
         DPj = dum;
-        for i=1:j,
-            DTi = DT(:,:,i+offset);
-            DPi = DP(:,:,i+offset);
-            D2Tij = D2T(:,:,i,j);
-            D2Omij = D2Om(:,:,i,j);
+        for i=1:j+offset,
+            DTi = DT(:,:,i);
+            DPi = DP(:,:,i);
+            D2Tij = D2T(:,:,i,j+offset);
+            D2Omij = D2Om(:,:,i,j+offset);
             tmp = D2Tij*Pstar*T' + T*Pstar*D2Tij' + DTi*DPj*T' + DTj*DPi*T' + T*DPj*DTi' + T*DPi*DTj' + DTi*Pstar*DTj' + DTj*Pstar*DTi' + D2Omij;
             dum = lyapunov_symm(T,tmp,DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
             dum(abs(dum)<1.e-12) = 0;
-            D2P(:,:,i+offset,j+offset) = dum;
-            D2P(:,:,j+offset,i+offset) = dum;
+            D2P(:,:,i,j+offset) = dum;
+            D2P(:,:,j+offset,i) = dum;
         end
         end
     end
