@@ -130,22 +130,7 @@ function [fval,DLIK,Hess,exit_flag,ys,trend_coeff,info,Model,DynareOptions,Bayes
 
 % AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT FR
 
-% Declaration of the penalty as a persistent variable.
-
-% Persistent variable 'penalty' is used to compute an endogenous penalty to
-% the value 'fval' when various conditions are encountered. These conditions
-% set also 'exit_flag' equal to 0 instead of 1.  It is only when
-% dsge_likelihood() is called by an optimizer called by
-% dynare_estimation_1() that 'exit_flag' is ignored and penalized 'fval' is
-% actually used.
-% In that case, 'penalty' is properly initialized, at the very end of the
-% present function, by a call to dsge_likelihood() made in
-% initial_estimation_checks(). If a condition triggers exit_flag ==
-% 0, initial_estimation_checks() triggers an error.
-% In summary, an initial call to the present function, without triggering
-% any condition, guarantees that 'penalty' is properly initialized when needed.
-
-persistent penalty
+penalty = BayesInfo.penalty;
 
 % Initialization of the returned variables and others...
 fval        = [];
@@ -770,9 +755,6 @@ end
 
 % Update DynareOptions.kalman_algo.
 DynareOptions.kalman_algo = kalman_algo;
-
-% Update the penalty.
-penalty = fval;
 
 if analytic_derivation==0 && nargout==2,
     lik=lik(start:end,:);
