@@ -180,9 +180,6 @@ if ~options_.load_mh_file && ~options_.mh_recover
     % separate initializaton for each chain
     JSUM = 0;
     for j=1:nblck,
-        JSUM  = JSUM + sum(100*clock);
-        randn('state',JSUM);
-        rand('state',JSUM);
         record.Seeds(j).Normal = randn('state');
         record.Seeds(j).Unifor = rand('state');
     end
