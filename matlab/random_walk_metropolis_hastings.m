@@ -1,5 +1,5 @@
-function record=random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin)
-%function record=random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,varargin)
+function record=random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,dataset_,options_,M_,estim_params_,bayestopt_,oo_)
+%function record=random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh_bounds,dataset_,options_,M_,estim_params_,bayestopt_,oo_)
 % Random walk Metropolis-Hastings algorithm. 
 % 
 % INPUTS 
@@ -8,7 +8,12 @@ function record=random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv
 %   o xparam1    [double]   (p*1) vector of parameters to be estimated (initial values).
 %   o vv         [double]   (p*p) matrix, posterior covariance matrix (at the mode).
 %   o mh_bounds  [double]   (p*2) matrix defining lower and upper bounds for the parameters. 
-%   o varargin              list of argument following mh_bounds
+%   o dataset_              data structure
+%   o options_              options structure
+%   o M_                    model structure
+%   o estim_params_         estimated parameters structure
+%   o bayestopt_            estimation options structure
+%   o oo_                   outputs structure
 %  
 % OUTPUTS 
 %   o record     [struct]   structure describing the iterations
@@ -51,12 +56,11 @@ function record=random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ bayestopt_ estim_params_ oo_
 %%%%
 %%%% Initialization of the random walk metropolis-hastings chains.
 %%%%
 [ ix2, ilogpo2, ModelName, MhDirectoryName, fblck, fline, npar, nblck, nruns, NewFile, MAX_nruns, d ] = ...
-    metropolis_hastings_initialization(TargetFun, xparam1, vv, mh_bounds, varargin{:});
+    metropolis_hastings_initialization(TargetFun, xparam1, vv, mh_bounds,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
 
 InitSizeArray = min([repmat(MAX_nruns,nblck,1) fline+nruns-1],[],2);
 
@@ -93,10 +97,16 @@ localVars =   struct('TargetFun', TargetFun, ...
                      'nruns', nruns, ...
                      'NewFile', NewFile, ...
                      'MAX_nruns', MAX_nruns, ...
-                     'd', d);
-localVars.InitSizeArray=InitSizeArray;
-localVars.record=record;
-localVars.varargin=varargin;
+                     'd', d, ...
+                     'InitSizeArray',InitSizeArray, ...
+                     'record', record, ...
+                     'dataset_', dataset_, ...
+                     'options_', options_, ...
+                     'M_',M_, ...
+                     'bayestopt_', bayestopt_, ...
+                     'estim_params_', estim_params_, ...
+                     'oo_', oo_,...
+                     'varargin',[]);
 
 
 % The user don't want to use parallel computing, or want to compute a
@@ -110,11 +120,7 @@ if isnumeric(options_.parallel) || (nblck-fblck)==0,
     % Parallel in Local or remote machine.   
 else 
     % Global variables for parallel routines.
-    globalVars = struct('M_',M_, ...
-                        'options_', options_, ...
-                        'bayestopt_', bayestopt_, ...
-                        'estim_params_', estim_params_, ...
-                        'oo_', oo_);
+    globalVars = struct();
     
     % which files have to be copied to run remotely
     NamFileInput(1,:) = {'',[ModelName '_static.m']};

@@ -1,5 +1,7 @@
 function [ ix2, ilogpo2, ModelName, MhDirectoryName, fblck, fline, npar, nblck, nruns, NewFile, MAX_nruns, d ] = ...
-    metropolis_hastings_initialization(TargetFun, xparam1, vv, mh_bounds, varargin)
+    metropolis_hastings_initialization(TargetFun, xparam1, vv, mh_bounds,dataset_,options_,M_,estim_params_,bayestopt_,oo_)
+%function [ ix2, ilogpo2, ModelName, MhDirectoryName, fblck, fline, npar, nblck, nruns, NewFile, MAX_nruns, d ] = 
+%    metropolis_hastings_initialization(TargetFun, xparam1, vv, mh_bounds, dataset_,options_,M_,estim_params_,bayestopt_,oo_)
 % Metropolis-Hastings initialization.
 % 
 % INPUTS 
@@ -8,7 +10,12 @@ function [ ix2, ilogpo2, ModelName, MhDirectoryName, fblck, fline, npar, nblck, 
 %   o xparam1    [double]   (p*1) vector of parameters to be estimated (initial values).
 %   o vv         [double]   (p*p) matrix, posterior covariance matrix (at the mode).
 %   o mh_bounds  [double]   (p*2) matrix defining lower and upper bounds for the parameters. 
-%   o varargin              list of argument following mh_bounds
+%   o dataset_              data structure
+%   o options_              options structure
+%   o M_                    model structure
+%   o estim_params_         estimated parameters structure
+%   o bayestopt_            estimation options structure
+%   o oo_                   outputs structure
 %  
 % OUTPUTS 
 %   None  
@@ -33,8 +40,6 @@ function [ ix2, ilogpo2, ModelName, MhDirectoryName, fblck, fline, npar, nblck, 
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ bayestopt_
-
 ix2 = [];
 ilogpo2 = [];
 ModelName = []; 
@@ -54,7 +59,7 @@ if ~isempty(M_.bvar)
     ModelName = [M_.fname '_bvar'];
 end
 
-bayestopt_.penalty = 1e8;
+bayestopt_.penalty = Inf;
 
 MhDirectoryName = CheckPath('metropolis',M_.dname);
 
@@ -107,7 +112,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
                 candidate = rand_multivariate_normal( transpose(xparam1), d * options_.mh_init_scale, npar);
                 if all(candidate(:) > mh_bounds(:,1)) && all(candidate(:) < mh_bounds(:,2)) 
                     ix2(j,:) = candidate;
-                    ilogpo2(j) = - feval(TargetFun,ix2(j,:)',varargin{:});
+                    ilogpo2(j) = - feval(TargetFun,ix2(j,:)',dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                     if ilogpo2(j) <= - bayestopt_.penalty+1e-6
                         validate = 0;
                     else
@@ -142,7 +147,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
         candidate = transpose(xparam1);
         if all(candidate' > mh_bounds(:,1)) && all(candidate' < mh_bounds(:,2)) 
             ix2 = candidate;
-            ilogpo2 = - feval(TargetFun,ix2',varargin{:});
+            ilogpo2 = - feval(TargetFun,ix2',dataset_,options_,M_,estim_params_,bayestopt_,oo_);
             disp('MH: Initialization at the posterior mode.')
             disp(' ')
             fprintf(fidlog,['    Blck ' int2str(1) 'params:\n']);

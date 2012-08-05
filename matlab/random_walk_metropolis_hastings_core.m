@@ -68,9 +68,6 @@ if nargin<4,
     whoiam=0;
 end
 
-
-global bayestopt_ estim_params_ options_  M_ oo_
-
 % reshape 'myinputs' for local computation.
 % In order to avoid confusion in the name space, the instruction struct2local(myinputs) is replaced by:
 
@@ -90,6 +87,12 @@ MAX_nruns=myinputs.MAX_nruns;
 d=myinputs.d;
 InitSizeArray=myinputs.InitSizeArray;
 record=myinputs.record;
+dataset_ = myinputs.dataset_;
+bayestopt_ = myinputs.bayestopt_;
+estim_params_ = myinputs.estim_params_;
+options_ = myinputs.options_;
+M_ = myinputs.M_;
+oo_ = myinputs.oo_;
 varargin=myinputs.varargin;
 
 % Necessary only for remote computing!
@@ -168,7 +171,7 @@ for b = fblck:nblck,
         par = feval(ProposalFun, ix2(b,:), proposal_covariance_Cholesky_decomposition, n);
         if all( par(:) > mh_bounds(:,1) ) && all( par(:) < mh_bounds(:,2) )
             try
-                logpost = - feval(TargetFun, par(:),varargin{:});
+                logpost = - feval(TargetFun, par(:),dataset_,options_,M_,estim_params_,bayestopt_,oo_);
             catch
                 logpost = -inf;
             end
