@@ -120,6 +120,13 @@ if ~isreal(jacobia_)
     end
 end
 
+if any(any(isnan(jacobia_)))
+   info(1) = 8;
+   NaN_params=find(isnan(M_.params));
+   info(2:length(NaN_params)+1) =  NaN_params;
+   return
+end
+
 kstate = dr.kstate;
 kad = dr.kad;
 kae = dr.kae;
