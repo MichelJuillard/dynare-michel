@@ -56,6 +56,12 @@ function record=random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+
+% In Metropolis, we set penalty to Inf to as to reject all parameter sets
+% triggering error in target density computation
+
+bayestopt_.penalty = Inf;
+
 %%%%
 %%%% Initialization of the random walk metropolis-hastings chains.
 %%%%

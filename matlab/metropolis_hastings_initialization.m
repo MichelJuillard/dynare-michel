@@ -59,8 +59,6 @@ if ~isempty(M_.bvar)
     ModelName = [M_.fname '_bvar'];
 end
 
-bayestopt_.penalty = Inf;
-
 MhDirectoryName = CheckPath('metropolis',M_.dname);
 
 nblck = options_.mh_nblck;
@@ -113,7 +111,8 @@ if ~options_.load_mh_file && ~options_.mh_recover
                 if all(candidate(:) > mh_bounds(:,1)) && all(candidate(:) < mh_bounds(:,2)) 
                     ix2(j,:) = candidate;
                     ilogpo2(j) = - feval(TargetFun,ix2(j,:)',dataset_,options_,M_,estim_params_,bayestopt_,oo_);
-                    if ilogpo2(j) <= - bayestopt_.penalty+1e-6
+                    if ~isfinite(ilogpo2(j)) % if returned log-density is
+                                             % Inf or Nan (penalized value)
                         validate = 0;
                     else
                         fprintf(fidlog,['    Blck ' int2str(j) ':\n']);

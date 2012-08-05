@@ -103,9 +103,6 @@ if whoiam
         bayestopt_.p3,bayestopt_.p4,1);
 end
 
-% (re)Set the penalty
-bayestopt_.penalty = Inf;
-
 MhDirectoryName = CheckPath('metropolis',M_.dname);
 
 options_.lik_algo = 1;
