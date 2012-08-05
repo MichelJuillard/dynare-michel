@@ -1,4 +1,4 @@
-dnl Copyright (C) 2009-2011 Dynare Team
+dnl Copyright (C) 2009-2012 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -62,7 +62,7 @@ case ${MATLAB_ARCH} in
     ax_mexopts_ok="yes"
     ;;
   maci | maci64)
-    SDKROOT='/Developer/SDKs/MacOSX10.6.sdk'
+    SDKROOT='/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk'
     MACOSX_DEPLOYMENT_TARGET='10.6'
     if test "${MATLAB_ARCH}" = "maci"; then
         ARCHS='i386'

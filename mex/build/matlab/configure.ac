@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Copyright (C) 2009-2011 Dynare Team
+dnl Copyright (C) 2009-2012 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -17,7 +17,7 @@ dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-AC_PREREQ([2.61])
+AC_PREREQ([2.62])
 AC_INIT([dynare], [4.4-unstable])
 AC_CONFIG_SRCDIR([configure.ac])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])

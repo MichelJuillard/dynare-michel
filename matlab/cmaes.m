@@ -644,11 +644,11 @@ else % flgresume
   end
     
   % initialize random number generator
-  if ischar(opts.Seed)
-    randn('state', eval(opts.Seed));     % random number generator state
-  else
-    randn('state', opts.Seed);
-  end
+% $$$   if ischar(opts.Seed)
+% $$$     randn('state', eval(opts.Seed));     % random number generator state
+% $$$   else
+% $$$     randn('state', opts.Seed);
+% $$$   end
   %qqq
 %  load(opts.SaveFilename, 'startseed');
 %  randn('state', startseed);

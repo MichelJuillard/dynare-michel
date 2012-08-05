@@ -159,7 +159,7 @@ for i=1:n1
             xx = x(:,m);
             y(:,(i-1)*n1*n2+(j-1)*n2+k) = xx;
             if j ~= i
-                y(:,(j-1)*n1*n2+(i-1)*n2+i) = xx;
+                y(:,(j-1)*n1*n2+(i-1)*n2+k) = xx;
             end
         end
     end
