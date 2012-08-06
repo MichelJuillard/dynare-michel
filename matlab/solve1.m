@@ -1,4 +1,4 @@
-function [x,check] = solve1(func,x,j1,j2,jacobian_flag,bad_cond_flag,varargin)
+function [x,check] = solve1(func,x,j1,j2,jacobian_flag,bad_cond_flag,gstep,tolf,tolx,maxit,debug,varargin)
 % function [x,check] = solve1(func,x,j1,j2,jacobian_flag,bad_cond_flag,varargin)
 % Solves systems of non linear equations of several variables
 %
@@ -11,6 +11,12 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,bad_cond_flag,varargin)
 %    jacobian_flag=0: jacobian obtained numerically
 %    bad_cond_flag=1: when Jacobian is badly conditionned, use an
 %                     alternative formula to Newton step
+%    gstep            increment multiplier in numercial derivative
+%                     computation
+%    tolf             tolerance for residuals
+%    tolx             tolerance for solution variation
+%    maxit            maximum number of iterations
+%    debug            debug flag
 %    varargin:        list of arguments following bad_cond_flag
 %    
 % OUTPUTS
@@ -37,18 +43,13 @@ function [x,check] = solve1(func,x,j1,j2,jacobian_flag,bad_cond_flag,varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global M_ options_ fjac  
-
 nn = length(j1);
 fjac = zeros(nn,nn) ;
 g = zeros(nn,1) ;
 
-tolf = options_.solve_tolf ;
-tolx = options_.solve_tolx;
 tolmin = tolx ;
 
 stpmx = 100 ;
-maxit = options_.solve_maxit ;
 
 check = 0 ;
 
@@ -77,7 +78,7 @@ for its = 1:maxit
         fvec = fvec(j1);
         fjac = fjac(j1,j2);
     else
-        dh = max(abs(x(j2)),options_.gstep(1)*ones(nn,1))*eps^(1/3);
+        dh = max(abs(x(j2)),gstep(1)*ones(nn,1))*eps^(1/3);
         
         for j = 1:nn
             xdh = x ;
@@ -89,33 +90,10 @@ for its = 1:maxit
     end
 
     g = (fvec'*fjac)';
-    if options_.debug
+    if debug
         disp(['cond(fjac) ' num2str(cond(fjac))])
     end
-    M_.unit_root = 0;
-    if M_.unit_root
-        if first_time
-            first_time = 0;
-            [q,r,e]=qr(fjac);
-            n = sum(abs(diag(r)) < 1e-12);
-            fvec = q'*fvec;
-            p = e*[-r(1:end-n,1:end-n)\fvec(1:end-n);zeros(n,1)];
-            disp(' ')
-            disp('STEADY with unit roots:')
-            disp(' ')
-            if n > 0
-                disp(['   The following variable(s) kept their value given in INITVAL' ...
-                      ' or ENDVAL'])
-                disp(char(e(:,end-n+1:end)'*M_.endo_names))
-            else
-                disp('   STEADY can''t find any unit root!')
-            end
-        else
-            [q,r]=qr(fjac*e);
-            fvec = q'*fvec;
-            p = e*[-r(1:end-n,1:end-n)\fvec(1:end-n);zeros(n,1)];
-        end     
-    elseif bad_cond_flag && cond(fjac) > 1/sqrt(eps)
+    if bad_cond_flag && rcond(fjac) < sqrt(eps)
         fjac2=fjac'*fjac;
         p=-(fjac2+1e6*sqrt(nn*eps)*max(sum(abs(fjac2)))*eye(nn))\(fjac'*fvec);
     else
@@ -126,7 +104,7 @@ for its = 1:maxit
 
     [x,f,fvec,check]=lnsrch1(xold,fold,g,p,stpmax,func,j1,j2,varargin{:});
 
-    if options_.debug
+    if debug
         disp([its f])
         disp([xold x])
     end

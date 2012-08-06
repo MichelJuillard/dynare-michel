@@ -74,7 +74,9 @@ if options_.solve_algo == 0
     end
 elseif options_.solve_algo == 1
     nn = size(x,1);
-    [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,1,varargin{:});
+    [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,1,options_.gstep, ...
+                    options_.solve_tolf,options_.solve_tolx, ...
+                    options_.solve_maxit,options_.debug,varargin{:});
 elseif options_.solve_algo == 2 || options_.solve_algo == 4
     nn = size(x,1) ;
     tolf = options_.solve_tolf ;
@@ -125,14 +127,19 @@ elseif options_.solve_algo == 2 || options_.solve_algo == 4
         if options_.debug
             disp(['DYNARE_SOLVE (solve_algo=2|4): solving block ' num2str(i) ', of size ' num2str(r(i+1)-r(i)) ]);
         end
-        [x,info]=solve1(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag, bad_cond_flag, varargin{:});
+        [x,info]=solve1(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag, ...
+                        bad_cond_flag, options_.gstep, ...
+                        options_.solve_tolf,options_.solve_tolx, ...
+                        options_.solve_maxit,options_.debug,varargin{:});
         if info
             return
         end
     end
     fvec = feval(func,x,varargin{:});
     if max(abs(fvec)) > tolf
-        [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag, bad_cond_flag, varargin{:});
+        [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag, bad_cond_flag, ...
+                        options_.gstep, options_.solve_tolf,options_.solve_tolx, ...
+                        options_.solve_maxit,options_.debug,varargin{:});
     end
 elseif options_.solve_algo == 3
     if jacobian_flag
