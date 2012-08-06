@@ -51,7 +51,20 @@ if ~noprint
       case 7
         error(['One of the eigenvalues is close to 0/0 (the absolute ' ...
                'value of numerator and denominator is smaller than 1e-6)'])
-      case 19
+      case 8
+        if ~isempty(info(2))
+          global M_;
+            disp_string=deblank(M_.param_names(info(2),:));
+          for ii=1:length(info)-2
+            disp_string=[disp_string,', ',deblank(M_.param_names(info(2+ii),:))];
+          end
+          error(['The Jacobian contains NaNs because the following parameters are NaN: '...
+              disp_string])
+        else
+          error(['The Jacobian contains NaNs'])
+        end
+
+        case 19
         error('The steadystate file did not compute the steady state')
       case 20
         error(['Impossible to find the steady state. Either the model' ...
