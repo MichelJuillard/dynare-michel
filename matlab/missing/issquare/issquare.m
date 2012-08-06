@@ -4,7 +4,7 @@ function i = issquare(A)
 %! @deftypefn {Function File} {@var{i} =} issquare (@var{A})
 %! @anchor{issquare}
 %! @sp 1
-%! Returns 1 if @var{A} is a square matrix, 0 otherwise.
+%! If @var{A} is a square matrix, returns its dimension; otherwise return 0.
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
@@ -17,7 +17,7 @@ function i = issquare(A)
 %! @sp 1
 %! @table @ @var
 %! @item i
-%! Integer scalar (0 or 1).
+%! Integer scalar.
 %! @end table
 %! @sp 2
 %! @strong{This function is called by:}
@@ -45,4 +45,8 @@ function i = issquare(A)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 d = size(A);
-i = (length(d)==2) && (d(1)==d(2));
+if (length(d)==2) && (d(1)==d(2))
+  i = d(1);
+else
+  i = 0;
+end

@@ -66,8 +66,9 @@ addpath([dynareroot '/utilities/general/'])
 % or some MATLAB versions, and for which we provide some replacement functions
 
 if ~exist('OCTAVE_VERSION')
-    % Replacements for rows() and columns() (inexistent under MATLAB)
+    % Replacements for rows(), columns() and issquare() (inexistent under MATLAB)
     addpath([dynareroot '/missing/rows_columns'])
+    addpath([dynareroot '/missing/issquare'])
     % Replacement for vec() (inexistent under MATLAB)
     addpath([dynareroot '/missing/vec'])
     if ~user_has_matlab_license('statistics_toolbox')
