@@ -15,7 +15,8 @@ EXTRA_DIST = \
 	ms-sbvar \
 	block_kalman_filter \
 	sobol \
-	local_state_space_iterations
+	local_state_space_iterations \
+	linsolve
 
 clean-local:
 	rm -rf `find mex/sources -name *.o`

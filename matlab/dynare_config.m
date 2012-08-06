@@ -93,11 +93,6 @@ if (exist('OCTAVE_VERSION') && ~user_has_octave_forge_package('statistics')) ...
     addpath([dynareroot '/missing/nanmean'])
 end
 
-% linsolve is missing in Octave
-if (exist('OCTAVE_VERSION'))
-    addpath([dynareroot '/missing/linsolve'])
-end
-
 % Add path to MEX files
 if exist('OCTAVE_VERSION')
     addpath([dynareroot '../mex/octave/']);
