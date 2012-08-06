@@ -146,7 +146,8 @@ end
 [T,R,SteadyState,info,Model,DynareOptions,DynareResults] = dynare_resolve(Model,DynareOptions,DynareResults,'restrict');
 
 % Return, with endogenous penalty when possible, if dynare_resolve issues an error code (defined in resol).
-if info(1) == 1 || info(1) == 2 || info(1) == 5
+if info(1) == 1 || info(1) == 2 || info(1) == 5 || info(1) == 7 || info(1) ...
+            == 8 || info(1) == 22 || info(1) == 24
     fval = penalty+1;
     info = info(1);
     exit_flag = 0;
