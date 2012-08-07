@@ -43,7 +43,7 @@ Solves the linear system @math{A*X = B} and returns @var{X}.\n\
 Alternatively, if @var{options} is provided and has a field @code{TRANSA} equal \
 to @code{true}, then it solves the system @math{A'*X = B}.\n\
 \n\
-\n\Also, the @code{LT} field of @var{options} (resp. the @code{UT} field) can be set \
+Also, the @code{LT} field of @var{options} (resp. the @code{UT} field) can be set \
 to @code{true} to indicate that the matrix @var{a} is lower (resp. upper) \
 triangular; similarly, the @code{SYM} field can be set to @code{true} to \
 indicate that the matrix is symmetric.\n\
