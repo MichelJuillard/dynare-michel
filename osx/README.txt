@@ -53,13 +53,14 @@ specify a MOD file.
 Using Dynare with Octave
 ------------------------
 
-Dynare is now available for GNU Octave, a free clone of MATLAB (R) (see
+Dynare also works on top of GNU Octave, a free clone of MATLAB (R) (see
 <http://www.octave.org>).
 
-The recommended Octave distribution is the Octave 3.4
-precompiled binaries from Octave Forge, available at:
+This version of Dynare is compiled for Octave 3.6.2, and may not work
+with other versions of Octave. You can download Octave through the Homebrew
+package manager:
 
-  http://sourceforge.net/projects/octave/files/Octave%20MacOSX%20Binary/
+  http://mxcl.github.com/homebrew
 
 Every time you run Octave, you should type the two following commands (assuming
 that you have installed Dynare at the standard location, and replacing '4.x.y'
@@ -75,10 +76,6 @@ You can test your installation by typing 'dynare' at the Octave prompt. This
 should give you an error message complaining that you did not specify a MOD
 file.
 
-For more information about Dynare for Octave, go to:
-
-  http://www.dynare.org/DynareWiki/DynareOctave
-
 
 Dynamic Loadable Libraries
 --------------------------
@@ -91,13 +88,16 @@ If the libraries are correctly detected by MATLAB (R) or Octave, the following s
 be displayed when you launch Dynare:
 
   Configuring Dynare ...
+
   [mex] Generalized QZ.
   [mex] Sylvester equation solution.
   [mex] Kronecker products.
   [mex] Sparse kronecker products.
+  [mex] Local state space iteration (second order).
   [mex] Bytecode evaluation.
   [mex] k-order perturbation solver.
   [mex] k-order solution simulation.
+  [mex] Quasi Monte-Carlo sequence (Sobol).
 
 On the contrary, if the libraries are not detected, Dynare will fallback on
 slower alternatives written in M-files (which exist for some of the libraries),
@@ -108,9 +108,11 @@ and display the following:
   [m]   Sylvester equation solution.
   [m]   Kronecker products.
   [m]   Sparse kronecker products.
+  [m]   Local state space iteration (second order).
   [no]  Bytecode evaluation.
   [no]  k-order perturbation solver.
   [no]  k-order solution simulation.
+  [no]  Quasi Monte-Carlo sequence (Sobol).
 
 In this last case, Dynare will run correctly on the basic features,
 but with suboptimal speed, and some features will be missing. There
