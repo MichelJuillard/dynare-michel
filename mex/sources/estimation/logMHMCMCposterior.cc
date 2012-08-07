@@ -130,7 +130,13 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
   MATFile *drawmat; // MCMC draws output file pointer
   int matfStatus;
 #else   //  OCTAVE_MEX_FILE e.t.c.
+# if MATIO_MAJOR_VERSION > 1 || (MATIO_MAJOR_VERSION == 1 && MATIO_MINOR_VERSION >= 5)
+  size_t dims[2];
+  const matio_compression compression = MAT_COMPRESSION_NONE;
+# else
   int dims[2];
+  const int compression = COMPRESSION_NONE;
+# endif
   mat_t *drawmat;
   matvar_t *matvar;
   int matfStatus;
@@ -304,7 +310,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
             }
           else
             {
-              int start[2] = {0, 0}, edge[2] = {2, 2}, stride[2] = {1, 1}, err = 0;
+              int start[2] = {0, 0}, edge[2], stride[2] = {1, 1}, err = 0;
               mexPrintf("MHMCMC: Using interim partial draws file %s \n", mhFName.c_str());
               //              matvar = Mat_VarReadInfo(drawmat, "x2");
               matvar = Mat_VarReadInfo(drawmat, (char *) "x2");
@@ -317,9 +323,9 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
               else
                 {
                   // GetVariable(drawmat, "x2");
-                  dims[0] = matvar->dims[0]-1;
-                  dims[1] = matvar->dims[1]-1;
-                  err = Mat_VarReadData(drawmat, matvar, mxGetPr(mxMhParamDrawsPtr), start, stride, matvar->dims);
+                  edge[0] = matvar->dims[0];
+                  edge[1] = matvar->dims[1];
+                  err = Mat_VarReadData(drawmat, matvar, mxGetPr(mxMhParamDrawsPtr), start, stride, edge);
                   if (err)
                     {
                       fline(b) = 1;
@@ -339,9 +345,9 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
               else
                 {
                   // GetVariable(drawmat, "x2");
-                  dims[0] = matvar->dims[0]-1;
-                  dims[1] = matvar->dims[1]-1;
-                  err = Mat_VarReadData(drawmat, matvar, mxGetPr(mxMhLogPostDensPtr), start, stride, matvar->dims);
+                  edge[0] = matvar->dims[0];
+                  edge[1] = matvar->dims[1];
+                  err = Mat_VarReadData(drawmat, matvar, mxGetPr(mxMhLogPostDensPtr), start, stride, edge);
                   if (err)
                     {
                       fline(b) = 1;
@@ -513,7 +519,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
           dims[0] = currInitSizeArray;
           dims[1] = npar;
           matvar = Mat_VarCreate("x2", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, mxGetPr(mxMhParamDrawsPtr), 0);
-          matfStatus = Mat_VarWrite(drawmat, matvar, 0);
+          matfStatus = Mat_VarWrite(drawmat, matvar, compression);
           Mat_VarFree(matvar);
           if (matfStatus)
             {
@@ -523,7 +529,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
           //matfStatus = matPutVariable(drawmat, "logpo2", mxMhLogPostDensPtr);
           dims[1] = 1;
           matvar = Mat_VarCreate("logpo2", MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, mxGetPr(mxMhLogPostDensPtr), 0);
-          matfStatus = Mat_VarWrite(drawmat, matvar, 0);
+          matfStatus = Mat_VarWrite(drawmat, matvar, compression);
           Mat_VarFree(matvar);
           if (matfStatus)
             {
