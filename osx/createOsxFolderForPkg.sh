@@ -47,9 +47,18 @@ cp -r $TOP_DYN_DIR/examples                                      $INSTALLDIR
 ##########################################################
 # FIRST BUILD 32 BIT EVERYTHING, 32 BIT MATLAB < 7.5 MEX #
 ##########################################################
-./configure CFLAGS='-arch i386' CXXFLAGS='-arch i386' FFLAGS='-arch i386' LDFLAGS='-arch i386' --with-matlab=/Applications/MATLAB/R2007a MATLAB_VERSION=7.4 --with-gsl=/usr/local/Cellar/gsl/1.15_32bit
+./configure CFLAGS='-arch i386' CXXFLAGS='-arch i386' FFLAGS='-arch i386' LDFLAGS='-arch i386' --with-matlab=/Applications/MATLAB/R2007a MATLAB_VERSION=7.4 --with-gsl=/usr/local32
 make pdf
+
+cd $TOP_DYN_DIR/preprocessor
 make
+
+cd $TOP_DYN_DIR/dynare++
+make
+
+cd $TOP_DYN_DIR/mex/build/matlab
+make
+
 
 # Matlab
 # Must come after configure because matlab/dynare_version.m is created by configure script
@@ -73,21 +82,6 @@ cp $TOP_DYN_DIR/mex/build/matlab/local_state_space_iterations/*.mexmaci         
 cp $TOP_DYN_DIR/mex/build/matlab/mjdgges/*.mexmaci                                  $INSTALLDIR/mex/matlab/osx32-7.4
 cp $TOP_DYN_DIR/mex/build/matlab/ms_sbvar/*.mexmaci                                 $INSTALLDIR/mex/matlab/osx32-7.4
 cp $TOP_DYN_DIR/mex/build/matlab/sobol/*.mexmaci                                    $INSTALLDIR/mex/matlab/osx32-7.4
-
-# Octave
-cp $TOP_DYN_DIR/mex/build/octave/block_kalman_filter/*.mex                          $INSTALLDIR/mex/octave
-cp $TOP_DYN_DIR/mex/build/octave/bytecode/*.mex                                     $INSTALLDIR/mex/octave
-cp $TOP_DYN_DIR/mex/build/octave/dynare_simul_/*.mex                                $INSTALLDIR/mex/octave
-cp $TOP_DYN_DIR/mex/build/octave/gensylv/*.mex                                      $INSTALLDIR/mex/octave
-cp $TOP_DYN_DIR/mex/build/octave/k_order_perturbation/*.mex                         $INSTALLDIR/mex/octave
-cp $TOP_DYN_DIR/mex/build/octave/kalman_steady_state/*.mex                          $INSTALLDIR/mex/octave
-cp $TOP_DYN_DIR/mex/build/octave/kronecker/*.mex                                    $INSTALLDIR/mex/octave
-cp $TOP_DYN_DIR/mex/build/octave/local_state_space_iterations/*.mex                 $INSTALLDIR/mex/octave
-cp $TOP_DYN_DIR/mex/build/octave/mjdgges/*.mex                                      $INSTALLDIR/mex/octave
-cp $TOP_DYN_DIR/mex/build/octave/ms_sbvar/*.mex                                     $INSTALLDIR/mex/octave
-cp $TOP_DYN_DIR/mex/build/octave/ordschur/*.oct                                     $INSTALLDIR/mex/octave
-cp $TOP_DYN_DIR/mex/build/octave/qzcomplex/*.oct                                    $INSTALLDIR/mex/octave
-cp $TOP_DYN_DIR/mex/build/octave/sobol/*.mex                                        $INSTALLDIR/mex/octave
 
 # dynare++
 cp $TOP_DYN_DIR/dynare++/src/dynare++                                               $INSTALLDIR/dynare++
@@ -118,7 +112,7 @@ cp $TOP_DYN_DIR/dynare++/kord/kord.pdf                                          
 ##############################################
 make clean
 cd $TOP_DYN_DIR/mex/build/matlab
-./configure CFLAGS='-arch i386' CXXFLAGS='-arch i386' FFLAGS='-arch i386' LDFLAGS='-arch i386' --with-matlab=/Applications/MATLAB/MATLAB_R2009b_32bit/MATLAB_R2009b.app MATLAB_VERSION=7.9 MEXEXT='mexmaci' --with-gsl=/usr/local/Cellar/gsl/1.15_32bit
+./configure CFLAGS='-arch i386' CXXFLAGS='-arch i386' FFLAGS='-arch i386' LDFLAGS='-arch i386' --with-matlab=/Applications/MATLAB/MATLAB_R2009b_32bit/MATLAB_R2009b.app MATLAB_VERSION=7.9 MEXEXT='mexmaci' --with-gsl=/usr/local32
 make
 
 # Matlab
@@ -140,7 +134,7 @@ cp $TOP_DYN_DIR/mex/build/matlab/sobol/*.mexmaci                                
 #####################################
 make clean
 cd $TOP_DYN_DIR/mex/build/matlab
-./configure --with-matlab=/Applications/MATLAB/MATLAB_R2009b.app MATLAB_VERSION=7.9 --with-gsl=/usr/local/Cellar/gsl/1.15
+./configure --with-matlab=/Applications/MATLAB/MATLAB_R2009b.app MATLAB_VERSION=7.9
 make
 
 # Matlab
@@ -155,6 +149,30 @@ cp $TOP_DYN_DIR/mex/build/matlab/local_state_space_iterations/*.mexmaci64       
 cp $TOP_DYN_DIR/mex/build/matlab/mjdgges/*.mexmaci64                                  $INSTALLDIR/mex/matlab/osx64
 cp $TOP_DYN_DIR/mex/build/matlab/ms_sbvar/*.mexmaci64                                 $INSTALLDIR/mex/matlab/osx64
 cp $TOP_DYN_DIR/mex/build/matlab/sobol/*.mexmaci64                                    $INSTALLDIR/mex/matlab/osx64
+
+#####################################
+# RETURN TO BUILD 64 BIT OCTAVE MEX #
+#####################################
+make clean
+cd $TOP_DYN_DIR/mex/build/octave
+./configure
+make
+
+# Octave
+cp $TOP_DYN_DIR/mex/build/octave/block_kalman_filter/*.mex                          $INSTALLDIR/mex/octave
+cp $TOP_DYN_DIR/mex/build/octave/bytecode/*.mex                                     $INSTALLDIR/mex/octave
+cp $TOP_DYN_DIR/mex/build/octave/dynare_simul_/*.mex                                $INSTALLDIR/mex/octave
+cp $TOP_DYN_DIR/mex/build/octave/gensylv/*.mex                                      $INSTALLDIR/mex/octave
+cp $TOP_DYN_DIR/mex/build/octave/k_order_perturbation/*.mex                         $INSTALLDIR/mex/octave
+cp $TOP_DYN_DIR/mex/build/octave/kalman_steady_state/*.mex                          $INSTALLDIR/mex/octave
+cp $TOP_DYN_DIR/mex/build/octave/kronecker/*.mex                                    $INSTALLDIR/mex/octave
+cp $TOP_DYN_DIR/mex/build/octave/local_state_space_iterations/*.mex                 $INSTALLDIR/mex/octave
+cp $TOP_DYN_DIR/mex/build/octave/mjdgges/*.mex                                      $INSTALLDIR/mex/octave
+cp $TOP_DYN_DIR/mex/build/octave/ms_sbvar/*.mex                                     $INSTALLDIR/mex/octave
+cp $TOP_DYN_DIR/mex/build/octave/ordschur/*.oct                                     $INSTALLDIR/mex/octave
+cp $TOP_DYN_DIR/mex/build/octave/qzcomplex/*.oct                                    $INSTALLDIR/mex/octave
+cp $TOP_DYN_DIR/mex/build/octave/sobol/*.mex                                        $INSTALLDIR/mex/octave
+
 
 # clean everything
 cd $TOP_DYN_DIR
