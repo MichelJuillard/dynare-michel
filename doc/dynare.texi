@@ -5162,6 +5162,10 @@ This command computes an approximation of the optimal policy under
 discretion. The algorithm implemented is essentially an LQ solver, and
 is described by @cite{Dennis (2007)}.
 
+You should ensure that your model is linear and your objective is
+quadratic. Also, you should set the @code{linear} option of the
+@code{model} block.
+
 @optionshead
 
 This command accepts the same options than @code{ramsey_policy}, plus:
