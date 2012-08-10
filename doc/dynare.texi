@@ -4685,6 +4685,8 @@ See @file{bvar-a-la-sims.pdf}, which comes with Dynare distribution,
 for more information on this command.
 @end deffn
 
+Dynare can also run the smoother on a calibrated model:
+
 @deffn Command calib_smoother [@var{VARIABLE_NAME}]@dots{};
 @deffnx Command calib_smoother (@var{OPTIONS}@dots{}) [@var{VARIABLE_NAME}]@dots{};
 
