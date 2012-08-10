@@ -4987,8 +4987,8 @@ declared in @code{conditional_forecast}.
 @end deffn
 
 @deffn Command bvar_forecast ;
-This command computes in-sample or out-sample forecasts for an
-estimated BVAR model, using Minnesota priors.
+This command computes (out-of-sample) forecasts for an estimated BVAR
+model, using Minnesota priors.
 
 See @file{bvar-a-la-sims.pdf}, which comes with Dynare distribution,
 for more information on this command.
