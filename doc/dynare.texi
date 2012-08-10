@@ -5194,8 +5194,10 @@ You need to give the one-period objective, not the discounted lifetime
 objective. The discount factor is given by the @code{planner_discount}
 option of @code{ramsey_policy} and @code{discretionary_policy}.
 
-Note that with this command you are not limited to quadratic
+With @code{ramsey_policy}, you are not limited to quadratic
 objectives: you can give any arbitrary nonlinear expression.
+
+With @code{discretionary_policy}, the objective function must be quadratic.
 @end deffn
 
 @node Sensitivity and identification analysis
