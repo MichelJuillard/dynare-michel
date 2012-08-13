@@ -181,13 +181,13 @@ d2P1 = zeros(ns,ns,k,k);
 for ii = 1:k
     dAi = dA(:,:,ii);
     dFi = dP0(Z,Z,ii);
-    d2Omi = d2Om(:,:,ii);
+%     d2Omi = d2Om(:,:,ii);
     diFi = -iF*dFi*iF;
     dKi = dK0(:,:,ii);
-    for jj = 1:k
+    for jj = 1:ii,
         dAj = dA(:,:,jj);
         dFj = dP0(Z,Z,jj);
-        d2Omj = d2Om(:,:,jj);
+%         d2Omj = d2Om(:,:,jj);
         dFj = dP0(Z,Z,jj);
         diFj = -iF*dFj*iF;
         dKj = dK0(:,:,jj);
@@ -218,6 +218,9 @@ for ii = 1:k
     d2K(:,:,ii,jj)  = d2Kij; %#ok<NASGU>
     d2P1(:,:,ii,jj) = d2AtmpA  + d2Omij;  %#ok<*NASGU>
     d2S(:,:,ii,jj)  = d2Fij;
+    d2K(:,:,jj,ii)  = d2Kij; %#ok<NASGU>
+    d2P1(:,:,jj,ii) = d2AtmpA  + d2Omij;  %#ok<*NASGU>
+    d2S(:,:,jj,ii)  = d2Fij;
 %     d2iS(:,:,ii,jj) = d2iF;
     end
 end
@@ -244,13 +247,13 @@ d2P1 = zeros(ns,ns,k,k);
 for ii = 1:k
     dAi = dA(:,:,ii);
     dFi = Z*dP0(:,:,ii)*Z;
-    d2Omi = d2Om(:,:,ii);
+%     d2Omi = d2Om(:,:,ii);
     diFi = -iF*dFi*iF;
     dKi = dK0(:,:,ii);
-    for jj = 1:k
+    for jj = 1:ii,
         dAj = dA(:,:,jj);
         dFj = Z*dP0(:,:,jj)*Z;
-        d2Omj = d2Om(:,:,jj);
+%         d2Omj = d2Om(:,:,jj);
         dFj = Z*dP0(:,:,jj)*Z;
         diFj = -iF*dFj*iF;
         dKj = dK0(:,:,jj);
@@ -282,6 +285,9 @@ for ii = 1:k
     d2P1(:,:,ii,jj) = d2AtmpA  + d2Omij;  %#ok<*NASGU>
     d2S(:,:,ii,jj)  = d2Fij;
 %     d2iS(:,:,ii,jj) = d2iF;
+    d2K(:,:,jj,ii)  = d2Kij; %#ok<NASGU>
+    d2P1(:,:,jj,ii) = d2AtmpA  + d2Omij;  %#ok<*NASGU>
+    d2S(:,:,jj,ii)  = d2Fij;
     end
 end
 
