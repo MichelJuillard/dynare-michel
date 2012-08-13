@@ -4044,7 +4044,7 @@ simulation that crashed prematurely. Shouldn't be used together with
 @anchor{mode_file}
 Name of the file containing previous value for the mode. When
 computing the mode, Dynare stores the mode (@code{xparam1}) and the
-hessian (@code{hh}) in a file called
+hessian (@code{hh}, only if @code{cova_compute=1}) in a file called
 @file{@var{MODEL_FILENAME}_mode.mat}
 
 @item mode_compute = @var{INTEGER} | @var{FUNCTION_NAME}
@@ -4284,7 +4284,9 @@ computed after the computation of posterior mode (or maximum
 likelihood). This increases speed of computation in large models
 during development, when this information is not always necessary. Of
 course, it will break all successive computations that would require
-this covariance matrix. Default is @code{1}.
+this covariance matrix. Otherwise, if this option is equal to
+@code{1}, the covariance matrix is computed and stored in variable
+@code{hh} of @file{@var{MODEL_FILENAME}_mode.mat}. Default is @code{1}.
 
 @item solve_algo = @var{INTEGER}
 @xref{solve_algo}.
