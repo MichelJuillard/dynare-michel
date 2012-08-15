@@ -161,7 +161,7 @@ if nargout>5,
             gp22(j,i,:,:)=gp22(j,i,:,:)+reshape(tmpu+tmpu',[1 1 M_.param_nbr M_.param_nbr]);
         end
         tmp0=reshape(g2(j,:),[nc nc]);        
-        gp22(j,:,:,:)=gp22(j,:,:,:)+reshape(tmp0(:,1:ns)*d2yssdtheta(I,:,:),[1 nc M_.param_nbr M_.param_nbr]);
+        gp22(j,:,:,:)=gp22(j,:,:,:)+reshape(tmp0(:,1:ns)*d2yssdtheta(I,:),[1 nc M_.param_nbr M_.param_nbr]);
     end
 
     g22 = g22+gp22;
