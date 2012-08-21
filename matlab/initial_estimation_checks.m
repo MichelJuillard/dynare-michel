@@ -42,7 +42,10 @@ end
 [DynareResults.steady_state] = evaluate_steady_state(DynareResults.steady_state,Model,DynareOptions,DynareResults,DynareOptions.diffuse_filter==0);
 
 % Evaluate the likelihood.
+ana_deriv = DynareOptions.analytic_derivation;
+DynareOptions.analytic_derivation=0;
 [fval,junk1,junk2,a,b,c,d] = feval(objective_function,xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
+DynareOptions.analytic_derivation=ana_deriv;
 
 if DynareOptions.dsge_var || strcmp(func2str(objective_function),'non_linear_dsge_likelihood')
     info = b;
