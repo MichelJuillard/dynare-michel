@@ -142,7 +142,7 @@ while t<=last
                 if analytic_derivation==2 || asy_hess,
                     Hess = Hess + Hesst;
                 end
-                dlikk(s,:)=DLIKt;
+                dlikk(s,:)=dlikk(s,:)+DLIKt';
             end
         end
     end

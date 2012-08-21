@@ -191,7 +191,7 @@ while notsteady && t<=last
                         Hess = Hess + Hesst;
                     end
                 end
-                dlik(s,:)=DLIKt;
+                dlik(s,:)=dlik(s,:)+DLIKt';
             end
             a = a + Ki*prediction_error;
             P = P - PZ*Ki';
