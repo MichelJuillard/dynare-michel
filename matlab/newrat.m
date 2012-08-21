@@ -106,7 +106,7 @@ while norm(gg)>gtol && check==0 && jit<nit
     jit=jit+1;
     tic
     icount=icount+1;
-    bayestopt_.penalty = fval0(icount);
+    BayesInfo.penalty = fval0(icount);
     disp([' '])
     disp(['Iteration ',num2str(icount)])
     [fval,x0,fc,retcode] = csminit1(func0,xparam1,fval0(icount),gg,0,H,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);

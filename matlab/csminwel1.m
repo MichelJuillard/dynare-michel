@@ -40,7 +40,7 @@ function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel1(fcn,x0,H0,grad,crit,nit,m
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global bayestopt_
+% global bayestopt_
 
 fh = [];
 xh = [];
@@ -91,7 +91,7 @@ f=f0;
 H=H0;
 cliff=0;
 while ~done
-    bayestopt_.penalty = f;
+    varargin{5}.penalty = f;
     g1=[]; g2=[]; g3=[];
     %addition fj. 7/6/94 for control
     disp('-----------------')
