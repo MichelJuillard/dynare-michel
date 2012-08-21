@@ -466,6 +466,7 @@ if analytic_derivation,
     end
     DLIK = [];
     AHess = [];
+    iv = DynareResults.dr.restrict_var_list;
     if nargin<8 || isempty(derivatives_info)
         [A,B,nou,nou,Model,DynareOptions,DynareResults] = dynare_resolve(Model,DynareOptions,DynareResults);
         if ~isempty(EstimatedParameters.var_exo)
@@ -480,14 +481,15 @@ if analytic_derivation,
         end
 
         if full_Hess,
-            [dum, DT, DOm, DYss, dum2, D2T, D2Om, D2Yss] = getH(A, B, Model,DynareResults,DynareOptions,kron_flag,indparam,indexo);
+            [dum, DT, DOm, DYss, dum2, D2T, D2Om, D2Yss] = getH(A, B, Model,DynareResults,DynareOptions,kron_flag,indparam,indexo,iv);
+            clear dum dum2;
         else
-            [dum, DT, DOm, DYss] = getH(A, B, Model,DynareResults,DynareOptions,kron_flag,indparam,indexo);
+            [dum, DT, DOm, DYss] = getH(A, B, Model,DynareResults,DynareOptions,kron_flag,indparam,indexo,iv);
         end
     else
-        DT = derivatives_info.DT;
-        DOm = derivatives_info.DOm;
-        DYss = derivatives_info.DYss;
+        DT = derivatives_info.DT(iv,iv,:);
+        DOm = derivatives_info.DOm(iv,iv,:);
+        DYss = derivatives_info.DYss(iv,:);
         if isfield(derivatives_info,'full_Hess'),
             full_Hess = derivatives_info.full_Hess;
         end
@@ -501,11 +503,7 @@ if analytic_derivation,
         end
         clear('derivatives_info');
     end
-    iv = DynareResults.dr.restrict_var_list;
     DYss = [zeros(size(DYss,1),offset) DYss];
-    DT = DT(iv,iv,:);
-    DOm = DOm(iv,iv,:);
-    DYss = DYss(iv,:);
     DH=zeros([length(H),length(H),length(xparam1)]);
     DQ=zeros([size(Q),length(xparam1)]);
     DP=zeros([size(T),length(xparam1)]);
@@ -514,26 +512,25 @@ if analytic_derivation,
         tmp(j,:,:) = blkdiag(zeros(offset,offset), squeeze(D2Yss(j,:,:)));
         end
         D2Yss = tmp;
-        D2T = D2T(iv,iv,:,:);
-        D2Om = D2Om(iv,iv,:,:);
-        D2Yss = D2Yss(iv,:,:);
-        D2H=zeros([size(H),length(xparam1),length(xparam1)]);
-        D2P=zeros([size(T),length(xparam1),length(xparam1)]);
+        D2H=sparse(size(D2Om,1),size(D2Om,2)); %zeros([size(H),length(xparam1),length(xparam1)]);
+        D2P=sparse(size(D2Om,1),size(D2Om,2)); %zeros([size(T),length(xparam1),length(xparam1)]);
+        jcount=0;
     end
     for i=1:EstimatedParameters.nvx
         k =EstimatedParameters.var_exo(i,1);
         DQ(k,k,i) = 2*sqrt(Q(k,k));
         dum =  lyapunov_symm(T,DOm(:,:,i),DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
-        kk = find(abs(dum) < 1e-12);
-        dum(kk) = 0;
+%         kk = find(abs(dum) < 1e-12);
+%         dum(kk) = 0;
         DP(:,:,i)=dum;
         if full_Hess
         for j=1:i,
-            dum =  lyapunov_symm(T,D2Om(:,:,i,j),DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
-            kk = (abs(dum) < 1e-12);
-            dum(kk) = 0;
-            D2P(:,:,i,j)=dum;
-            D2P(:,:,j,i)=dum;
+            jcount=jcount+1;
+            dum =  lyapunov_symm(T,dyn_unvech(D2Om(:,jcount)),DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
+%             kk = (abs(dum) < 1e-12);
+%             dum(kk) = 0;
+            D2P(:,jcount)=dyn_vech(dum);
+%             D2P(:,:,j,i)=dum;
         end
         end
     end
@@ -548,22 +545,23 @@ if analytic_derivation,
     offset = offset + EstimatedParameters.nvn;
     for j=1:EstimatedParameters.np
         dum =  lyapunov_symm(T,DT(:,:,j+offset)*Pstar*T'+T*Pstar*DT(:,:,j+offset)'+DOm(:,:,j+offset),DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
-        kk = find(abs(dum) < 1e-12);
-        dum(kk) = 0;
+%         kk = find(abs(dum) < 1e-12);
+%         dum(kk) = 0;
         DP(:,:,j+offset)=dum;
         if full_Hess
         DTj = DT(:,:,j+offset);
         DPj = dum;
         for i=1:j+offset,
+            jcount=jcount+1;
             DTi = DT(:,:,i);
             DPi = DP(:,:,i);
-            D2Tij = D2T(:,:,i,j+offset);
-            D2Omij = D2Om(:,:,i,j+offset);
+            D2Tij = reshape(D2T(:,jcount),size(T));
+            D2Omij = dyn_unvech(D2Om(:,jcount));
             tmp = D2Tij*Pstar*T' + T*Pstar*D2Tij' + DTi*DPj*T' + DTj*DPi*T' + T*DPj*DTi' + T*DPi*DTj' + DTi*Pstar*DTj' + DTj*Pstar*DTi' + D2Omij;
             dum = lyapunov_symm(T,tmp,DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
-            dum(abs(dum)<1.e-12) = 0;
-            D2P(:,:,i,j+offset) = dum;
-            D2P(:,:,j+offset,i) = dum;
+%             dum(abs(dum)<1.e-12) = 0;
+            D2P(:,jcount) = dyn_vech(dum);
+%             D2P(:,:,j+offset,i) = dum;
         end
         end
     end
@@ -571,6 +569,7 @@ if analytic_derivation,
         analytic_deriv_info={analytic_derivation,DT,DYss,DOm,DH,DP,asy_Hess};
     else
         analytic_deriv_info={analytic_derivation,DT,DYss,DOm,DH,DP,D2T,D2Yss,D2Om,D2H,D2P};
+        clear DT DYss DOm DH DP D2T D2Yss D2Om D2H D2P,
     end
 else
     analytic_deriv_info={0};

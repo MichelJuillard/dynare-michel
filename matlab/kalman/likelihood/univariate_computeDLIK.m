@@ -34,12 +34,14 @@ if notsteady,
             D2F = zeros(k,k);
             D2v = zeros(k,k);
             D2K = zeros(rows(K),k,k);
+            jcount=0;
             for j=1:k,
                 D2v(:,j)   = -Z*D2a(:,:,j) - Z*D2Yss(:,:,j);
-                for i=j:k,
-                    D2F(j,i)=Z*D2P(:,:,j,i)*Z';
+                for i=1:j,
+                    jcount=jcount+1;
+                    D2F(j,i)=Z*dyn_unvech(D2P(:,jcount))*Z';
                     D2F(i,j)=D2F(j,i);
-                    D2K(:,j,i) = (D2P(:,:,j,i)*Z')/F-(DP(:,:,j)*Z')*DF(i)/F^2-(DP(:,:,i)*Z')*DF(j)/F^2- ...
+                    D2K(:,j,i) = (dyn_unvech(D2P(:,jcount))*Z')/F-(DP(:,:,j)*Z')*DF(i)/F^2-(DP(:,:,i)*Z')*DF(j)/F^2- ...
                         PZ*D2F(j,i)/F^2 + 2*PZ/F^3*DF(i)*DF(j);
                     D2K(:,i,j) = D2K(:,j,i);
                 end
@@ -51,12 +53,22 @@ if notsteady,
         DF = squeeze(DP(Z,Z,:))+DH';
         DK = squeeze(DP(:,Z,:))/F-PZ*transpose(DF)/F^2;
         if nargout>4
+            D2F = zeros(k,k);
+            D2K = zeros(rows(K),k,k);
             D2v   = squeeze(-D2a(Z,:,:) - D2Yss(Z,:,:));
-            D2F = squeeze(D2P(Z,Z,:,:));
-            D2K = squeeze(D2P(:,Z,:,:))/F;
+            jcount=0;
             for j=1:k,
-                D2K(:,:,j) = D2K(:,:,j) -PZ*D2F(j,:)/F^2 - squeeze(DP(:,Z,:))*DF(j)/F^2 - ...
-                    squeeze(DP(:,Z,j))*DF'/F^2 + 2/F^3*PZ*DF'*DF(j);
+                for i=1:j,
+                    jcount=jcount+1;
+                    tmp = dyn_unvech(D2P(:,jcount));
+                    D2F(j,i) = tmp(Z,Z);
+                    D2F(i,j)=D2F(j,i);
+                    D2K(:,i,j) = tmp(:,Z)/F;
+                    D2K(:,i,j) = D2K(:,i,j) -PZ*D2F(j,i)/F^2 - squeeze(DP(:,Z,i))*DF(j)/F^2 - ...
+                        squeeze(DP(:,Z,j))*DF(i)'/F^2 + 2/F^3*PZ*DF(i)'*DF(j);
+                    D2K(:,j,i) = D2K(:,i,j);
+%                     D2K = squeeze(D2P(:,Z,:,:))/F;
+                end
             end
         end
     end
@@ -129,15 +141,26 @@ if notsteady,
     if nargout>4,
         if Zflag,
             for j=1:k,
-                D2P = D2P;
+                for i=1:j,
+                    jcount = jcount+1;
+                    tmp = dyn_unvech(D2P(:,jcount));
+                    tmp = tmp - (tmp*Z')*K' - (DP(:,:,j)*Z')*DK(:,i)' ...
+                        - (DP(:,:,i)*Z')*DK(:,j)' -PZ*D2K(:,j,i)';
+                    D2P(:,jcount) = dyn_vech(tmp);
+%                     D2P(:,:,i,j) = D2P(:,:,j,i);
+                end
             end
         else
-            D2PZ = squeeze(D2P(:,Z,:,:));
             DPZ = squeeze(DP(:,Z,:));
+            jcount = 0;
             for j=1:k,
-                for i=j:k,
-                    D2P(:,:,j,i) = D2P(:,:,j,i) - D2PZ(:,j,i)*K' - DPZ(:,j)*DK(:,i)'- DPZ(:,i)*DK(:,j)' - PZ*squeeze(D2K(:,j,i))';
-                    D2P(:,:,i,j) = D2P(:,:,j,i);
+                for i=1:j,
+                    jcount = jcount+1;
+                    tmp = dyn_unvech(D2P(:,jcount));
+                    D2PZ = tmp(:,Z);
+                    tmp = tmp - D2PZ*K' - DPZ(:,j)*DK(:,i)'- DPZ(:,i)*DK(:,j)' - PZ*squeeze(D2K(:,j,i))';
+                    D2P(:,jcount) = dyn_vech(tmp);
+%                     D2P(:,:,i,j) = D2P(:,:,j,i);
                 end
             end
             

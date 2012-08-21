@@ -34,21 +34,23 @@ if notsteady,
     DP1 = DP1 + DOm;
 end
 if nargout>2,
+    jcount=0;
     for j=1:k,
         for i=1:j,
-            D2a(:,j,i) = DT(:,:,i)*Da(:,j) + DT(:,:,j)*Da(:,i) + T*D2a(:,j,i)+ D2T(:,:,j,i)*a;
+            jcount=jcount+1;
+            D2a(:,j,i) = DT(:,:,i)*Da(:,j) + DT(:,:,j)*Da(:,i) + T*D2a(:,j,i)+ reshape(D2T(:,jcount),size(T))*a;
             D2a(:,i,j) = D2a(:,j,i);
             if notsteady,
-                D2P(:,:,j,i) = T*D2P(:,:,j,i)*T' +DT(:,:,i)*DP(:,:,j)*T'+T*DP(:,:,j)*DT(:,:,i)' + ...
+                tmp = dyn_unvech(D2P(:,jcount));
+                tmp = T*tmp*T' +DT(:,:,i)*DP(:,:,j)*T'+T*DP(:,:,j)*DT(:,:,i)' + ...
                     DT(:,:,j)*DP(:,:,i)*T'+T*DP(:,:,i)*DT(:,:,j)' + ...
                     DT(:,:,j)*P*DT(:,:,i)'+DT(:,:,i)*P*DT(:,:,j)'+ ...
-                    D2T(:,:,j,i)*P*T'+T*P*D2T(:,:,j,i)';
-                D2P(:,:,i,j) = D2P(:,:,j,i);
+                    reshape(D2T(:,jcount),size(T))*P*T'+T*P*reshape(D2T(:,jcount),size(T))' + ...
+                    dyn_unvech(D2Om(:,jcount));
+                D2P(:,jcount) = dyn_vech(tmp);
+%                 D2P(:,:,i,j) = D2P(:,:,j,i);
             end
         end
     end
     
-    if notsteady,
-        D2P = D2P + D2Om;
-    end
 end

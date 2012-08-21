@@ -1,4 +1,4 @@
-function tau = thet2tau(params, M_, oo_, indx, indexo, flagmoments,mf,nlags,useautocorr)
+function tau = thet2tau(params, M_, oo_, indx, indexo, flagmoments,mf,nlags,useautocorr,iv)
 
 %
 % Copyright (C) 2011 Dynare Team
@@ -31,6 +31,9 @@ end
 if nargin<9 || isempty(useautocorr),
     useautocorr=0;
 end
+if nargin<10 || isempty(iv),
+    iv=[1:M_.endo_nbr];
+end
 
 M_.params(indx) = params(length(indexo)+1:end);
 if ~isempty(indexo)
@@ -38,7 +41,8 @@ if ~isempty(indexo)
 end
 [A,B,tele,tubbies,M_,options_,oo_] = dynare_resolve(M_,options_,oo_);
 if flagmoments==0,
-    tau = [oo_.dr.ys(oo_.dr.order_var); A(:); dyn_vech(B*M_.Sigma_e*B')];
+    ys=oo_.dr.ys(oo_.dr.order_var);
+    tau = [ys(iv); vec(A(iv,iv)); dyn_vech(B(iv,:)*M_.Sigma_e*B(iv,:)')];
 elseif flagmoments==-1
     [I,J]=find(M_.lead_lag_incidence');
     yy0=oo_.dr.ys(I);

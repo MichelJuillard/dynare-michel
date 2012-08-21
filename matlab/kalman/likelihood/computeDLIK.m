@@ -1,4 +1,4 @@
-function [Da,DP1,DLIK,D2a,D2P1,Hesst] = computeDLIK(k,tmp,Z,Zflag,v,T,K,P,iF,Da,DYss,DT,DOm,DP,DH,notsteady,D2a,D2Yss,D2T,D2Om,D2P)
+function [Da,DP,DLIK,D2a,D2P,Hesst] = computeDLIK(k,tmp,Z,Zflag,v,T,K,P,iF,Da,DYss,DT,DOm,DP,DH,notsteady,D2a,D2Yss,D2T,D2Om,D2P)
 
 % Copyright (C) 2012 Dynare Team
 %
@@ -25,18 +25,20 @@ if notsteady
 if Zflag
     [DK,DF,DP1] = computeDKalmanZ(T,DT,DOm,P,DP,DH,Z,iF,K);
     if nargout>4,
-        [D2K,D2F,D2P1] = computeD2KalmanZ(T,DT,D2T,D2Om,P,DP,D2P,DH,Z,iF,K,DK);
+        [D2K,D2F,D2P] = computeD2KalmanZ(T,DT,D2T,D2Om,P,DP,D2P,DH,Z,iF,K,DK);
     end
 else
     [DK,DF,DP1] = computeDKalman(T,DT,DOm,P,DP,DH,Z,iF,K);
     if nargout>4,
-        [D2K,D2F,D2P1] = computeD2Kalman(T,DT,D2T,D2Om,P,DP,D2P,DH,Z,iF,K,DK);
+        [D2K,D2F,D2P] = computeD2Kalman(T,DT,D2T,D2Om,P,DP,D2P,DH,Z,iF,K,DK);
     end
 end
+DP=DP1;
+clear DP1,
 else
-    DP1=DP;
+    DP=DP;
     if nargout>4,
-        D2P1=D2P;
+        D2P=D2P;
     end
 end
 
@@ -64,6 +66,7 @@ end
 
 Hesst = zeros(k,k);
 DLIK=zeros(k,1);
+jcount=0;
 for ii = 1:k
     %  dai = da(:,:,ii);
     dKi  = DK(:,:,ii);
@@ -72,6 +75,7 @@ for ii = 1:k
     if nargout>4,
         diFi = -iF*DF(:,:,ii)*iF;
         for jj = 1:ii
+            jcount=jcount+1;
             dFj    = DF(:,:,jj);
             diFj   = -iF*DF(:,:,jj)*iF;
             dKj  = DK(:,:,jj);
@@ -87,7 +91,7 @@ for ii = 1:k
                 d2vij  = -D2Yss(Z,jj,ii)  - D2a(Z,jj,ii);
             end
             d2tmpij = D2a(:,jj,ii) + d2Kij*v + dKj*Dv(:,ii) + dKi*Dv(:,jj) + K*d2vij;
-            D2a(:,jj,ii) = D2T(:,:,jj,ii)*tmp + DT(:,:,jj)*dtmp(:,ii) + DT(:,:,ii)*dtmp(:,jj) + T*d2tmpij;
+            D2a(:,jj,ii) = reshape(D2T(:,jcount),size(T))*tmp + DT(:,:,jj)*dtmp(:,ii) + DT(:,:,ii)*dtmp(:,jj) + T*d2tmpij;
             D2a(:,ii,jj) = D2a(:,jj,ii);
             
             if nargout==6,
@@ -125,19 +129,19 @@ Hesst_ij = trace(diSi*dSj + iS*d2Sij) + e'*d2iSij*e + 2*(dei'*diSj*e + dei'*iS*d
 
 % end of getHesst_ij
 
-function [DK,DF,DP1] = computeDKalman(T,DT,DOm,P,DP,DH,Z,iF,K)
+function [DK,DF,DP1] = computeDKalman(T,DT,DOm,P,DP1,DH,Z,iF,K)
 
 k      = size(DT,3);
 tmp    = P-K*P(Z,:);
 DF = zeros([size(iF),k]);
 DK = zeros([size(K),k]);
-DP1 = zeros([size(P),k]);
+% DP1 = zeros([size(P),k]);
 
 for ii = 1:k
-    DF(:,:,ii)  = DP(Z,Z,ii) + DH(:,:,ii);
+    DF(:,:,ii)  = DP1(Z,Z,ii) + DH(:,:,ii);
     DiF = -iF*DF(:,:,ii)*iF;
-    DK(:,:,ii)  = DP(:,Z,ii)*iF + P(:,Z)*DiF;
-    Dtmp        = DP(:,:,ii) - DK(:,:,ii)*P(Z,:) - K*DP(Z,:,ii);
+    DK(:,:,ii)  = DP1(:,Z,ii)*iF + P(:,Z)*DiF;
+    Dtmp        = DP1(:,:,ii) - DK(:,:,ii)*P(Z,:) - K*DP1(Z,:,ii);
     DP1(:,:,ii) = DT(:,:,ii)*tmp*T' + T*Dtmp*T' + T*tmp*DT(:,:,ii)' + DOm(:,:,ii);
 end
 
@@ -161,7 +165,7 @@ end
 
 % end of computeDKalmanZ
 
-function [d2K,d2S,d2P1] = computeD2Kalman(A,dA,d2A,d2Om,P0,dP0,d2P0,DH,Z,iF,K0,dK0);
+function [d2K,d2S,d2P1] = computeD2Kalman(A,dA,d2A,d2Om,P0,dP0,d2P1,DH,Z,iF,K0,dK0);
 % computes the second derivatives of the Kalman matrices
 % note: A=T in main func.
         
@@ -176,8 +180,9 @@ function [d2K,d2S,d2P1] = computeD2Kalman(A,dA,d2A,d2Om,P0,dP0,d2P0,DH,Z,iF,K0,d
 
 d2K  = zeros(ns,no,k,k);
 d2S  = zeros(no,no,k,k);
-d2P1 = zeros(ns,ns,k,k);
+% d2P1 = zeros(ns,ns,k,k);
 
+jcount=0;
 for ii = 1:k
     dAi = dA(:,:,ii);
     dFi = dP0(Z,Z,ii);
@@ -185,6 +190,7 @@ for ii = 1:k
     diFi = -iF*dFi*iF;
     dKi = dK0(:,:,ii);
     for jj = 1:ii,
+        jcount=jcount+1;
         dAj = dA(:,:,jj);
         dFj = dP0(Z,Z,jj);
 %         d2Omj = d2Om(:,:,jj);
@@ -192,9 +198,9 @@ for ii = 1:k
         diFj = -iF*dFj*iF;
         dKj = dK0(:,:,jj);
 
-        d2Aij = d2A(:,:,jj,ii);
-        d2Pij = d2P0(:,:,jj,ii);
-        d2Omij = d2Om(:,:,jj,ii);
+        d2Aij = reshape(d2A(:,jcount),[ns ns]);
+        d2Pij = dyn_unvech(d2P1(:,jcount));
+        d2Omij = dyn_unvech(d2Om(:,jcount));
        
     % second order
     
@@ -216,10 +222,10 @@ for ii = 1:k
     d2AtmpA = d2Aij*tmp*A' + A*d2tmp*A' + A*tmp*d2Aij' + dAi*dtmpj*A' + dAj*dtmpi*A' + A*dtmpj*dAi' + A*dtmpi*dAj' + dAi*tmp*dAj' + dAj*tmp*dAi';
 
     d2K(:,:,ii,jj)  = d2Kij; %#ok<NASGU>
-    d2P1(:,:,ii,jj) = d2AtmpA  + d2Omij;  %#ok<*NASGU>
+    d2P1(:,jcount) = dyn_vech(d2AtmpA  + d2Omij);  %#ok<*NASGU>
     d2S(:,:,ii,jj)  = d2Fij;
     d2K(:,:,jj,ii)  = d2Kij; %#ok<NASGU>
-    d2P1(:,:,jj,ii) = d2AtmpA  + d2Omij;  %#ok<*NASGU>
+%     d2P1(:,:,jj,ii) = d2AtmpA  + d2Omij;  %#ok<*NASGU>
     d2S(:,:,jj,ii)  = d2Fij;
 %     d2iS(:,:,ii,jj) = d2iF;
     end
@@ -227,7 +233,7 @@ end
 
 % end of computeD2Kalman
 
-function [d2K,d2S,d2P1] = computeD2KalmanZ(A,dA,d2A,d2Om,P0,dP0,d2P0,DH,Z,iF,K0,dK0);
+function [d2K,d2S,d2P1] = computeD2KalmanZ(A,dA,d2A,d2Om,P0,dP0,d2P1,DH,Z,iF,K0,dK0);
 % computes the second derivatives of the Kalman matrices
 % note: A=T in main func.
         
@@ -242,15 +248,17 @@ function [d2K,d2S,d2P1] = computeD2KalmanZ(A,dA,d2A,d2Om,P0,dP0,d2P0,DH,Z,iF,K0,
 
 d2K  = zeros(ns,no,k,k);
 d2S  = zeros(no,no,k,k);
-d2P1 = zeros(ns,ns,k,k);
+% d2P1 = zeros(ns,ns,k,k);
 
-for ii = 1:k
+jcount=0;
+for ii = 1:k,
     dAi = dA(:,:,ii);
     dFi = Z*dP0(:,:,ii)*Z;
 %     d2Omi = d2Om(:,:,ii);
     diFi = -iF*dFi*iF;
     dKi = dK0(:,:,ii);
     for jj = 1:ii,
+        jcount=jcount+1;
         dAj = dA(:,:,jj);
         dFj = Z*dP0(:,:,jj)*Z;
 %         d2Omj = d2Om(:,:,jj);
@@ -258,9 +266,9 @@ for ii = 1:k
         diFj = -iF*dFj*iF;
         dKj = dK0(:,:,jj);
 
-        d2Aij = d2A(:,:,jj,ii);
-        d2Pij = d2P0(:,:,jj,ii);
-        d2Omij = d2Om(:,:,jj,ii);
+        d2Aij = reshape(d2A(:,jcount),[ns ns]);
+        d2Pij = dyn_unvech(d2P1(:,jcount));
+        d2Omij = dyn_unvech(d2Om(:,jcount));
        
     % second order
     
@@ -282,11 +290,11 @@ for ii = 1:k
     d2AtmpA = d2Aij*tmp*A' + A*d2tmp*A' + A*tmp*d2Aij' + dAi*dtmpj*A' + dAj*dtmpi*A' + A*dtmpj*dAi' + A*dtmpi*dAj' + dAi*tmp*dAj' + dAj*tmp*dAi';
 
     d2K(:,:,ii,jj)  = d2Kij; %#ok<NASGU>
-    d2P1(:,:,ii,jj) = d2AtmpA  + d2Omij;  %#ok<*NASGU>
+    d2P1(:,jcount) = dyn_vech(d2AtmpA  + d2Omij);  %#ok<*NASGU>
     d2S(:,:,ii,jj)  = d2Fij;
 %     d2iS(:,:,ii,jj) = d2iF;
     d2K(:,:,jj,ii)  = d2Kij; %#ok<NASGU>
-    d2P1(:,:,jj,ii) = d2AtmpA  + d2Omij;  %#ok<*NASGU>
+%     d2P1(:,:,jj,ii) = d2AtmpA  + d2Omij;  %#ok<*NASGU>
     d2S(:,:,jj,ii)  = d2Fij;
     end
 end
