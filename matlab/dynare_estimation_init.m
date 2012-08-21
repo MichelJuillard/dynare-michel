@@ -288,6 +288,7 @@ else
 end;
 
 if options_.analytic_derivation,
+    options_.analytic_derivation = 1;
     if ~(exist('sylvester3','file')==2),
         dynareroot = strrep(which('dynare'),'dynare.m','');
         addpath([dynareroot 'gensylv'])
