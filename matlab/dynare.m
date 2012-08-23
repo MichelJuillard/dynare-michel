@@ -47,8 +47,8 @@ end
 warning_config()
 
 if exist('OCTAVE_VERSION')
-    if octave_ver_less_than('3.2.2')
-        warning('This version of Dynare has only been tested on Octave 3.2.2 and above. Since your Octave version is older than that, Dynare may fail to run, or give unexpected results. Consider upgrading your Octave installation.');
+    if octave_ver_less_than('3.4.0')
+        warning('This version of Dynare has only been tested on Octave 3.4.0 and above. Since your Octave version is older than that, Dynare may fail to run, or give unexpected results. Consider upgrading your Octave installation.');
     end
 else
     if matlab_ver_less_than('7.0')
