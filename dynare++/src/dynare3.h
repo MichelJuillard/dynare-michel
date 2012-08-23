@@ -14,6 +14,8 @@
 
 #include <vector>
 
+#include <matio.h>
+
 class Dynare;
 
 class DynareNameList : public NameList {
@@ -140,7 +142,7 @@ public:
 	void calcDerivatives(const Vector& yy, const Vector& xx);
 	void calcDerivativesAtSteady();
 
-	void writeMat4(FILE* fd, const char* prefix) const;
+	void writeMat(mat_t *fd, const char* prefix) const;
 	void writeDump(const std::string& basename) const;
 private:
 	void writeModelInfo(Journal& jr) const;

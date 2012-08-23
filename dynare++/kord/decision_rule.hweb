@@ -39,6 +39,8 @@ decision rule.
 #ifndef DECISION_RULE_H
 #define DECISION_RULE_H
 
+#include <matio.h>
+  
 #include "kord_exception.h"
 #include "korder.h"
 #include "normal_conjugate.h"
@@ -89,7 +91,7 @@ deviations from the rule's steady. |evaluate| method makes only one
 step of simulation (in terms of absolute values, not
 deviations). |centralizedClone| returns a new copy of the decision
 rule, which is centralized about provided fix-point. And finally
-|writeMat4| writes the decision rule to the Matlab MAT-4 file.
+|writeMat| writes the decision rule to the MAT file.
 
 @<|DecisionRule| class declaration@>=
 class DecisionRule {
@@ -101,7 +103,7 @@ public:@;
 	virtual void eval(emethod em, Vector& out, const ConstVector& v) const =0;
 	virtual void evaluate(emethod em, Vector& out, const ConstVector& ys,
 						  const ConstVector& u) const =0;
-	virtual void writeMat4(FILE* fd, const char* prefix) const =0;
+	virtual void writeMat(mat_t* fd, const char* prefix) const =0;
 	virtual DecisionRule* centralizedClone(const Vector& fixpoint) const =0;
 	virtual const Vector& getSteady() const =0;
 	virtual int nexog() const =0;
@@ -160,7 +162,7 @@ public:@;
 	@<|DecisionRuleImpl::simulate| code@>;
 	@<|DecisionRuleImpl::evaluate| code@>;
 	@<|DecisionRuleImpl::centralizedClone| code@>;
-	@<|DecisionRuleImpl::writeMat4| code@>;
+	@<|DecisionRuleImpl::writeMat| code@>;
 	int nexog() const
 		{@+ return nu;@+}
 	const PartitionY& getYPart() const
@@ -402,16 +404,16 @@ void eval(emethod em, Vector& out, const ConstVector& v) const
 		_Tparent::evalTrad(out, v);
 }
 
-@ Write the decision rule and steady state to the MAT--4 file.
-@<|DecisionRuleImpl::writeMat4| code@>=
-void writeMat4(FILE* fd, const char* prefix) const
+@ Write the decision rule and steady state to the MAT file.
+@<|DecisionRuleImpl::writeMat| code@>=
+void writeMat(mat_t* fd, const char* prefix) const
 {
-	ctraits<t>::Tpol::writeMat4(fd, prefix);
+	ctraits<t>::Tpol::writeMat(fd, prefix);
 	TwoDMatrix dum(ysteady.length(), 1);
 	dum.getData() = ysteady;
 	char tmp[100];
 	sprintf(tmp, "%s_ss", prefix);
-	ConstTwoDMatrix(dum).writeMat4(fd, tmp);
+	ConstTwoDMatrix(dum).writeMat(fd, tmp);
 }
 
 @ This is exactly the same as |DecisionRuleImpl<KOrder::fold>|. The
@@ -721,8 +723,8 @@ public:@;
 	const ExplicitShockRealization& getShocks(int i) const
 		{ @+ return *(shocks[i]);@+}
 	bool addDataSet(TwoDMatrix* d, ExplicitShockRealization* sr);
-	void writeMat4(const char* base, const char* lname) const;
-	void writeMat4(FILE* fd, const char* lname) const;
+	void writeMat(const char* base, const char* lname) const;
+	void writeMat(mat_t* fd, const char* lname) const;
 };
 
 @ This does the same as |SimResults| plus it calculates means and
@@ -738,7 +740,7 @@ public:@;
 		: SimResults(ny, nper, nburn), mean(ny), vcov(ny,ny)@+ {}
 	void simulate(int num_sim, const DecisionRule& dr, const Vector& start,
 				  const TwoDMatrix& vcov, Journal& journal);
-	void writeMat4(FILE* fd, const char* lname) const;
+	void writeMat(mat_t* fd, const char* lname) const;
 protected:@;
 	void calcMean();
 	void calcVcov();
@@ -758,7 +760,7 @@ public:@;
 		: SimResults(ny, nper, nburn), mean(ny,nper), variance(ny,nper)@+ {}
 	void simulate(int num_sim, const DecisionRule& dr, const Vector& start,
 				  const TwoDMatrix& vcov, Journal& journal);
-	void writeMat4(FILE* fd, const char* lname) const; 
+	void writeMat(mat_t* fd, const char* lname) const; 
 protected:@;
 	void calcMean();
 	void calcVariance();
@@ -789,7 +791,7 @@ public:@;
 		  means(ny, nper), variances(ny, nper)@+ {}
 	void simulate(const DecisionRule& dr, Journal& journal);
 	void simulate(const DecisionRule& dr);
-	void writeMat4(FILE* fd, const char* lname) const;
+	void writeMat(mat_t* fd, const char* lname) const;
 protected:@;
 	void calcMeans();
 	void calcVariances();
@@ -822,7 +824,7 @@ public:@;
 				  const TwoDMatrix& vcov, Journal& journal);
 	void simulate(int num_sim, const DecisionRule& dr, const Vector& start,
 				  const TwoDMatrix& vcov);
-	void writeMat4(FILE* fd, const char* lname);
+	void writeMat(mat_t* fd, const char* lname);
 };
 
 @ For each shock, this simulates plus and minus impulse. The class
@@ -850,7 +852,7 @@ public:@;
 			   const SimResults& control, const vector<int>& ili,
 			   Journal& journal);
 	~IRFResults();
-	void writeMat4(FILE* fd, const char* prefix) const;
+	void writeMat(mat_t* fd, const char* prefix) const;
 };
 
 @ This worker simulates the given decision rule and inserts the result

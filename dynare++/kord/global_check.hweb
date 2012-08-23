@@ -50,6 +50,8 @@ method and polar transformation. The shock $u$ are zeros.
 #ifndef GLOBAL_CHECK_H
 #define GLOBAL_CHECK_H
 
+#include <matio.h>
+
 #include "vector_function.h"
 #include "quadrature.h"
 
@@ -143,13 +145,13 @@ public:@;
 		  rf(approx), vfs(rf, n)@+ {}
 	void check(int max_evals, const ConstTwoDMatrix& y,
 			   const ConstTwoDMatrix& x, TwoDMatrix& out);
-	void checkAlongShocksAndSave(FILE* fd, const char* prefix,
+	void checkAlongShocksAndSave(mat_t* fd, const char* prefix,
 								 int m, double mult, int max_evals);
-	void checkOnEllipseAndSave(FILE* fd, const char* prefix,
+	void checkOnEllipseAndSave(mat_t* fd, const char* prefix,
 							   int m, double mult, int max_evals);
-	void checkAlongSimulationAndSave(FILE* fd, const char* prefix,
+	void checkAlongSimulationAndSave(mat_t* fd, const char* prefix,
 									 int m, int max_evals);
-	void checkUnconditionalAndSave(FILE* fd, const char* prefix,
+	void checkUnconditionalAndSave(mat_t* fd, const char* prefix,
 								   int m, int max_evals);
 protected:@;
 	void check(const Quadrature& quad, int level,

@@ -26,11 +26,11 @@ to allow submatrix construction from const reference arguments.
 #include "GeneralMatrix.h"
 
 #include <cstdio>
+#include <matio.h>
 
 class TwoDMatrix;
 @<|ConstTwoDMatrix| class declaration@>;
 @<|TwoDMatrix| class declaration@>;
-@<|Mat4Header| class declaration@>;
 
 #endif
 
@@ -57,7 +57,7 @@ public:@/
 		{@+ return numRows();@+}
 	int ncols() const
 		{@+ return numCols();@+}
-	void writeMat4(FILE* fd, const char* vname) const;
+	void writeMat(mat_t* fd, const char* vname) const;
 };
 
 @ Here we do the same as for |ConstTwoDMatrix| plus define
@@ -103,8 +103,8 @@ public:@/
 	@<|TwoDMatrix| row methods declarations@>;
 	@<|TwoDMatrix| column methods declarations@>;
 	void save(const char* fname) const;
-	void writeMat4(FILE* fd, const char* vname) const
-		{@+ ConstTwoDMatrix(*this).writeMat4(fd, vname);@+}
+	void writeMat(mat_t* fd, const char* vname) const
+		{@+ ConstTwoDMatrix(*this).writeMat(fd, vname);@+}
 };
 
 @ 
@@ -135,22 +135,5 @@ public:@/
 	void addColumn(double d, const ConstTwoDMatrix& m, int from, int to);
 	void addColumn(double d, const TwoDMatrix& m, int from, int to)
 		{@+ addColumn(d, ConstTwoDMatrix(m), from, to);@+}
-
-@ 
-@<|Mat4Header| class declaration@>=
-class Mat4Header {
-	int type;
-	int rows;
-	int cols;
-	int imagf;
-	int namelen;
-	const char* vname;
-public:@;
-	Mat4Header(const ConstTwoDMatrix& m, const char* vname);
-	Mat4Header(const ConstTwoDMatrix& m, const char* vname, const char* dummy);
-	void write(FILE* fd) const;
-};
-
-
 
 @ End of {\tt twod\_matrix.h} file.

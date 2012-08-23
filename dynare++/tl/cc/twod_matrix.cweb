@@ -8,13 +8,10 @@
 
 
 @<|ConstTwoDMatrix| constructors@>;
-@<|ConstTwoDMatrix::writeMat4| code@>;
+@<|ConstTwoDMatrix::writeMat| code@>;
 @<|TwoDMatrix| row methods code@>;
 @<|TwoDMatrix| column methods code@>;
 @<|TwoDMatrix::save| code@>;
-@<|Mat4Header| constructor 1 code@>;
-@<|Mat4Header| constructor 2 code@>;
-@<|Mat4Header::write| code@>;
 
 @ 
 @<|ConstTwoDMatrix| constructors@>=
@@ -34,14 +31,24 @@ ConstTwoDMatrix::ConstTwoDMatrix(int first_row, int num, const ConstTwoDMatrix& 
 	: ConstGeneralMatrix(m, first_row, 0, num, m.ncols())@+ {}
 
 @ 
-@<|ConstTwoDMatrix::writeMat4| code@>=
-void ConstTwoDMatrix::writeMat4(FILE* fd, const char* vname) const
+@<|ConstTwoDMatrix::writeMat| code@>=
+void ConstTwoDMatrix::writeMat(mat_t* fd, const char* vname) const
 {
-	Mat4Header header(*this, vname);
-	header.write(fd);
+  int dims[2];
+  dims[0] = nrows();
+  dims[1] = ncols();
+  double *data = new double[nrows()*ncols()];
+  
 	for (int j = 0; j < ncols(); j++)
 		for (int i = 0; i < nrows(); i++)
-			fwrite(&(get(i,j)), sizeof(double), 1, fd);
+			data[j*nrows()+i] = get(i,j);
+
+  matvar_t *v = Mat_VarCreate(vname, MAT_C_DOUBLE, MAT_T_DOUBLE, 2, dims, data, 0);
+
+  Mat_VarWrite(fd, v, COMPRESSION_NONE);
+
+  Mat_VarFree(v);
+  delete[] data;
 }
 
 @ 
@@ -104,34 +111,5 @@ void TwoDMatrix::save(const char* fname) const
 	}
 	fclose(fd);	
 }
-
-@ This constructs a MAT-4 header for Little Endian dense real double matrix.
-@<|Mat4Header| constructor 1 code@>=
-Mat4Header::Mat4Header(const ConstTwoDMatrix& m, const char* vn)
-	: type(0), rows(m.nrows()), cols(m.ncols()), imagf(0), namelen(strlen(vn)+1),
-	  vname(vn)
-{}
-
-
-@ This constructs a MAT-4 header for text matrix.
-@<|Mat4Header| constructor 2 code@>=
-Mat4Header::Mat4Header(const ConstTwoDMatrix& m, const char* vn, const char* dummy)
-	: type(1), rows(m.nrows()), cols(m.ncols()), imagf(0), namelen(strlen(vn)+1),
-	  vname(vn)
-{}
-
-
-@ 
-@<|Mat4Header::write| code@>=
-void Mat4Header::write(FILE* fd) const
-{
-	fwrite(&type, sizeof(int), 1, fd);
-	fwrite(&rows, sizeof(int), 1, fd);
-	fwrite(&cols, sizeof(int), 1, fd);
-	fwrite(&imagf, sizeof(int), 1, fd);
-	fwrite(&namelen, sizeof(int), 1, fd);
-	fwrite(vname, 1, namelen, fd);
-}
-
 
 @ End of {\tt twod\_matrix.cpp} file.

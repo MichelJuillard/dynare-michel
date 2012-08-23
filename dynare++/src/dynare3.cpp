@@ -122,32 +122,32 @@ Dynare::~Dynare()
 		delete fde;
 }
 
-void Dynare::writeMat4(FILE* fd, const char* prefix) const
+void Dynare::writeMat(mat_t* fd, const char* prefix) const
 {
 	char tmp[100];
 	sprintf(tmp, "%s_vars", prefix);
-	getAllEndoNames().writeMat4(fd, tmp);
-	getAllEndoNames().writeMat4Indices(fd, prefix);
+	getAllEndoNames().writeMat(fd, tmp);
+	getAllEndoNames().writeMatIndices(fd, prefix);
 	sprintf(tmp, "%s_state_vars", prefix);
-	getStateNames().writeMat4(fd, tmp);
+	getStateNames().writeMat(fd, tmp);
 	sprintf(tmp, "%s_shocks", prefix);
-	getExogNames().writeMat4(fd, tmp);
-	getExogNames().writeMat4Indices(fd, prefix);
+	getExogNames().writeMat(fd, tmp);
+	getExogNames().writeMatIndices(fd, prefix);
 	sprintf(tmp, "%s_vcov_exo", prefix);
-	model->getVcov().writeMat4(fd, tmp);
+	model->getVcov().writeMat(fd, tmp);
 	TwoDMatrix aux(1,1);
 	sprintf(tmp, "%s_nstat", prefix);
 	aux.get(0,0) = nstat();
-	aux.writeMat4(fd, tmp);
+	aux.writeMat(fd, tmp);
 	sprintf(tmp, "%s_npred", prefix);
 	aux.get(0,0) = npred();
-	aux.writeMat4(fd, tmp);
+	aux.writeMat(fd, tmp);
 	sprintf(tmp, "%s_nboth", prefix);
 	aux.get(0,0) = nboth();
-	aux.writeMat4(fd, tmp);
+	aux.writeMat(fd, tmp);
 	sprintf(tmp, "%s_nforw", prefix);
 	aux.get(0,0) = nforw();
-	aux.writeMat4(fd, tmp);
+	aux.writeMat(fd, tmp);
 }
 
 void Dynare::writeDump(const std::string&  basename) const

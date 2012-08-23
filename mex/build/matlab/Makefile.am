@@ -1,8 +1,13 @@
 ACLOCAL_AMFLAGS = -I ../../../m4
 
 # libdynare++ must come before gensylv, k_order_perturbation, dynare_simul_
+
 if DO_SOMETHING
-SUBDIRS = mjdgges kronecker bytecode libdynare++ gensylv k_order_perturbation dynare_simul_ estimation block_kalman_filter sobol local_state_space_iterations
+SUBDIRS = mjdgges kronecker bytecode libdynare++ gensylv estimation block_kalman_filter sobol local_state_space_iterations
+
+if HAVE_MATIO
+SUBDIRS += k_order_perturbation dynare_simul_
+endif
 
 if HAVE_GSL
 SUBDIRS += ms_sbvar

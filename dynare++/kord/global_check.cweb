@@ -229,7 +229,7 @@ changing $u$. We go through all elements of $u$ and vary them from
 $-mult\cdot\sigma$ to $mult\cdot\sigma$ in |m| steps.
 
 @<|GlobalChecker::checkAlongShocksAndSave| code@>=
-void GlobalChecker::checkAlongShocksAndSave(FILE* fd, const char* prefix,
+void GlobalChecker::checkAlongShocksAndSave(mat_t* fd, const char* prefix,
 											int m, double mult, int max_evals)
 {
 	JournalRecordPair pa(journal);
@@ -297,7 +297,7 @@ void GlobalChecker::checkAlongShocksAndSave(FILE* fd, const char* prefix,
 		}
 		char tmp[100];
 		sprintf(tmp, "%s_shock_%s_errors", prefix, model.getExogNames().getName(ishock));
-		err_out.writeMat4(fd, tmp);
+		err_out.writeMat(fd, tmp);
 	}
 
 
@@ -316,7 +316,7 @@ matrix of $u_t$ to zeros. Fourth we run the |check| method and save
 the results.
 
 @<|GlobalChecker::checkOnEllipseAndSave| code@>=
-void GlobalChecker::checkOnEllipseAndSave(FILE* fd, const char* prefix,
+void GlobalChecker::checkOnEllipseAndSave(mat_t* fd, const char* prefix,
 										  int m, double mult, int max_evals)
 {
 	JournalRecordPair pa(journal);
@@ -406,15 +406,15 @@ and initialize matrix of shocks |umat| to zero.
 
 	char tmp[100];
 	sprintf(tmp, "%s_ellipse_points", prefix);
-	ymat.writeMat4(fd, tmp);
+	ymat.writeMat(fd, tmp);
 	sprintf(tmp, "%s_ellipse_errors", prefix);
-	out.writeMat4(fd, tmp);
+	out.writeMat(fd, tmp);
 
 @ Here we check the errors along a simulation. We simulate, then set
 |x| to zeros, check and save results.
 
 @<|GlobalChecker::checkAlongSimulationAndSave| code@>=
-void GlobalChecker::checkAlongSimulationAndSave(FILE* fd, const char* prefix,
+void GlobalChecker::checkAlongSimulationAndSave(mat_t* fd, const char* prefix,
 												int m, int max_evals)
 {
 	JournalRecordPair pa(journal);
@@ -430,9 +430,9 @@ void GlobalChecker::checkAlongSimulationAndSave(FILE* fd, const char* prefix,
 
 	char tmp[100];
 	sprintf(tmp, "%s_simul_points", prefix);
-	y->writeMat4(fd, tmp);
+	y->writeMat(fd, tmp);
 	sprintf(tmp, "%s_simul_errors", prefix);
-	out.writeMat4(fd, tmp);
+	out.writeMat(fd, tmp);
 
 	delete y;
 }

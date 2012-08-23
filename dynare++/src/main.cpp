@@ -71,14 +71,14 @@ int main(int argc, char** argv)
 		// open mat file
 		std::string matfile(params.basename);
 		matfile += ".mat";
-		FILE* matfd = NULL;
-		if (NULL == (matfd=fopen(matfile.c_str(), "wb"))) {
+		mat_t* matfd = Mat_Create(matfile.c_str(), NULL);
+		if (matfd == NULL) {
 			fprintf(stderr, "Couldn't open %s for writing.\n", matfile.c_str());
 			exit(1);
 		}
 
 		// write info about the model (dimensions and variables)
-		dynare.writeMat4(matfd, params.prefix);
+		dynare.writeMat(matfd, params.prefix);
 		// write the dump file corresponding to the input
 		dynare.writeDump(params.basename);
 
@@ -103,7 +103,7 @@ int main(int argc, char** argv)
 
 		std::string ss_matrix_name(params.prefix);
 		ss_matrix_name += "_steady_states";
-		ConstTwoDMatrix(app.getSS()).writeMat4(matfd, ss_matrix_name.c_str());
+		ConstTwoDMatrix(app.getSS()).writeMat(matfd, ss_matrix_name.c_str());
 
 		// check the approximation
 		if (params.check_along_path || params.check_along_shocks
@@ -126,14 +126,14 @@ int main(int argc, char** argv)
 		}
 
 		// write the folded decision rule to the Mat-4 file
-		app.getFoldDecisionRule().writeMat4(matfd, params.prefix);
+		app.getFoldDecisionRule().writeMat(matfd, params.prefix);
 
 		// simulate conditional
 		if (params.num_condper > 0 && params.num_condsim > 0) {
 			SimResultsDynamicStats rescond(dynare.numeq(), params.num_condper, 0);
 			ConstVector det_ss(app.getSS(),0);
 			rescond.simulate(params.num_condsim, app.getFoldDecisionRule(), det_ss, dynare.getVcov(), journal);
-			rescond.writeMat4(matfd, params.prefix);
+			rescond.writeMat(matfd, params.prefix);
 		}
 
 		// simulate unconditional
@@ -142,12 +142,12 @@ int main(int argc, char** argv)
 		if (params.num_per > 0 && params.num_sim > 0) {
 			SimResultsStats res(dynare.numeq(), params.num_per, params.num_burn);
 			res.simulate(params.num_sim, dr, dynare.getSteady(), dynare.getVcov(), journal);
-			res.writeMat4(matfd, params.prefix);
+			res.writeMat(matfd, params.prefix);
 			
 			// impulse response functions
 			if (! irf_list_ind.empty()) {
 				IRFResults irf(dynare, dr, res, irf_list_ind, journal);
-				irf.writeMat4(matfd, params.prefix);
+				irf.writeMat(matfd, params.prefix);
 			}
 		}
 
@@ -155,10 +155,10 @@ int main(int argc, char** argv)
 		if (params.num_rtper > 0 && params.num_rtsim > 0) {
 			RTSimResultsStats rtres(dynare.numeq(), params.num_rtper, params.num_burn);
 			rtres.simulate(params.num_rtsim, dr, dynare.getSteady(), dynare.getVcov(), journal);
-			rtres.writeMat4(matfd, params.prefix);
+			rtres.writeMat(matfd, params.prefix);
 		}
 
-		fclose(matfd);
+		Mat_Close(matfd);
 
 	} catch (const KordException& e) {
 		printf("Caugth Kord exception: ");

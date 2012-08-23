@@ -5,7 +5,7 @@ k_order_perturbation_CPPFLAGS = -I$(top_srcdir)/../../../dynare++/src -I$(top_sr
 k_order_perturbation_CXXFLAGS = $(PTHREAD_CFLAGS)
 
 # libdynare++ must come before pthread
-k_order_perturbation_LDADD = ../libdynare++/libdynare++.a $(PTHREAD_LIBS) $(LIBADD_DLOPEN)
+k_order_perturbation_LDADD = ../libdynare++/libdynare++.a $(PTHREAD_LIBS) $(LIBADD_DLOPEN) $(LIBADD_MATIO)
 
 TOPDIR = $(top_srcdir)/../../sources/k_order_perturbation
 

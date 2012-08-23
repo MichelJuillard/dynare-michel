@@ -79,9 +79,9 @@ else
 fi
 
 if test "x$MKOCTFILE" != "x" -a "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"; then
-  BUILD_ESTIMATION_MEX_OCTAVE="yes"
+  BUILD_ESTIMATION_KORDER_DYNSIMUL_MEX_OCTAVE="yes"
 else
-  BUILD_ESTIMATION_MEX_OCTAVE="no (missing MatIO library)"
+  BUILD_ESTIMATION_KORDER_DYNSIMUL_MEX_OCTAVE="no (missing MatIO library)"
 fi
 
 if  test "x$MKOCTFILE" != "x" -a "x$F77" != "x"; then
@@ -109,10 +109,10 @@ AC_MSG_NOTICE([
 Dynare is now configured for building the following components...
 
 Binaries (with "make"):
- MEX files for Octave (except MS-SBVAR and Kalman Steady State):     $BUILD_MEX_OCTAVE
+ MEX files for Octave (except those listed below):                   $BUILD_MEX_OCTAVE
  MS-SBVAR MEX files for Octave:                                      $BUILD_MS_SBVAR_MEX_OCTAVE
  Kalman Steady State MEX file for Octave:                            $BUILD_KALMAN_STEADY_STATE_OCTAVE
- Estimation MEX for Octave:                                          $BUILD_ESTIMATION_MEX_OCTAVE
+ Estimation, k-order and dynare_simul MEX for Octave:                $BUILD_ESTIMATION_KORDER_DYNSIMUL_MEX_OCTAVE
 
 ])
 

@@ -77,6 +77,12 @@ AC_SUBST([LIBADD_DLOPEN])
 AX_GSL
 AM_CONDITIONAL([HAVE_GSL], [test "x$has_gsl" = "xyes"])
 
+# Check for libmatio, needed by MEX files using Dynare++ code
+AC_CHECK_HEADER([matio.h])
+AC_CHECK_LIB([matio], [Mat_Open], [LIBADD_MATIO="-lmatio"])
+AC_SUBST([LIBADD_MATIO])
+AM_CONDITIONAL([HAVE_MATIO], [test "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"])
+
 AM_CONDITIONAL([DO_SOMETHING], [test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes"])
 
 if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes"; then
@@ -87,6 +93,12 @@ if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x
   fi
 else
   BUILD_MEX_MATLAB="no (missing MATLAB, or unknown version, or unknown architecture)"
+fi
+
+if test "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"; then
+   BUILD_KORDER_DYNSIMUL_MEX_MATLAB="yes"
+else
+   BUILD_KORDER_DYNSIMUL_MEX_MATLAB="no (missing MatIO library)"
 fi
 
 if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$F77" != "x"; then
@@ -124,7 +136,8 @@ AC_MSG_NOTICE([
 Dynare is now configured for building the following components...
 
 Binaries (with "make"):
- MEX files for MATLAB (except MS-SBVAR and Kalman Steady State):     $BUILD_MEX_MATLAB
+ MEX files for MATLAB (except those listed below):                   $BUILD_MEX_MATLAB
+ k-order and dynare_simul MEX files for MATLAB:                      $BUILD_KORDER_DYNSIMUL_MEX_MATLAB
  MS-SBVAR MEX files for MATLAB:                                      $BUILD_MS_SBVAR_MEX_MATLAB
  Kalman Steady State MEX file for MATLAB:                            $BUILD_KALMAN_STEADY_STATE_MATLAB
  M2HTML documentation:                                               $BUILD_M2HTML

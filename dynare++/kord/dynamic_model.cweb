@@ -7,8 +7,8 @@
 #include "dynamic_model.h"
 
 @<|NameList::print| code@>;
-@<|NameList::writeMat4| code@>;
-@<|NameList::writeMat4Indices| code@>;
+@<|NameList::writeMat| code@>;
+@<|NameList::writeMatIndices| code@>;
 
 @ 
 @<|NameList::print| code@>=
@@ -19,8 +19,8 @@ void NameList::print() const
 }
 
 @ 
-@<|NameList::writeMat4| code@>=
-void NameList::writeMat4(FILE* fd, const char* vname) const
+@<|NameList::writeMat| code@>=
+void NameList::writeMat(mat_t* fd, const char* vname) const
 {
 	int maxlen = 0;
 	for (int i = 0; i < getNum(); i++)
@@ -30,29 +30,37 @@ void NameList::writeMat4(FILE* fd, const char* vname) const
 	if (maxlen == 0)
 		return;
 
-	TwoDMatrix m(getNum(), maxlen);
+  char *m = new char[getNum()*maxlen];
+
 	for (int i = 0; i < getNum(); i++)
 		for (int j = 0; j < maxlen; j++)
 			if (j < (int)strlen(getName(i)))
-				m.get(i,j) = (double)(getName(i)[j]);
+				m[j*getNum()+i] = getName(i)[j];
 			else
-				m.get(i,j) = (double)(' ');
+				m[j*getNum()+i] = ' ';
 
-	Mat4Header header(m, vname, "text matrix");
-	header.write(fd);
-	fwrite(m.getData().base(), sizeof(double), m.nrows()*m.ncols(), fd);
+  int dims[2];
+  dims[0] = getNum();
+  dims[1] = maxlen;
+
+  matvar_t *v = Mat_VarCreate(vname, MAT_C_CHAR, MAT_T_UINT8, 2, dims, m, 0);
+
+  Mat_VarWrite(fd, v, COMPRESSION_NONE);
+
+  Mat_VarFree(v);
+  delete[] m;
 }
 
 @ 
-@<|NameList::writeMat4Indices| code@>=
-void NameList::writeMat4Indices(FILE* fd, const char* prefix) const
+@<|NameList::writeMatIndices| code@>=
+void NameList::writeMatIndices(mat_t* fd, const char* prefix) const
 {
 	char tmp[100];
 	TwoDMatrix aux(1,1);
 	for (int i = 0; i < getNum(); i++) {
 		sprintf(tmp, "%s_i_%s", prefix, getName(i));
 		aux.get(0,0) = i+1;
-		aux.writeMat4(fd, tmp);
+		aux.writeMat(fd, tmp);
 	}
 }
 

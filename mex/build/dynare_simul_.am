@@ -5,6 +5,6 @@ dynare_simul__CPPFLAGS = -I$(top_srcdir)/../../../dynare++/sylv/cc -I$(top_srcdi
 dynare_simul__CXXFLAGS = $(PTHREAD_CFLAGS)
 
 # libdynare++ must come before pthread
-dynare_simul__LDADD = ../libdynare++/libdynare++.a $(PTHREAD_LIBS)
+dynare_simul__LDADD = ../libdynare++/libdynare++.a $(PTHREAD_LIBS) $(LIBADD_MATIO)
 
 nodist_dynare_simul__SOURCES = $(top_srcdir)/../../../dynare++/extern/matlab/dynare_simul.cpp

@@ -86,6 +86,12 @@ AC_DEFINE([BOOST_NO_HASH], [], [Don't use deprecated STL hash structures])
 AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])
 AC_SUBST([LIBADD_DLOPEN])
 
+# Check for libmatio, needed by Dynare++
+AC_CHECK_HEADER([matio.h])
+AC_CHECK_LIB([matio], [Mat_Open], [LIBADD_MATIO="-lmatio"])
+AC_SUBST([LIBADD_MATIO])
+AM_CONDITIONAL([HAVE_MATIO], [test "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"])
+
 AC_CHECK_PROG([MAKEINFO], [makeinfo], [makeinfo])
 
 AC_CHECK_PROG([PDFTEX], [pdftex], [pdftex])
@@ -232,14 +238,14 @@ AM_CONDITIONAL([ENABLE_ORG_EXPORT], [test "x$enable_org_export" != "x"])
 
 BUILD_PREPROCESSOR="yes"
 
-if test "x$ax_blas_ok" = "xyes" -a "x$ax_lapack_ok" = "xyes"; then
+if test "x$ax_blas_ok" = "xyes" -a "x$ax_lapack_ok" = "xyes" -a "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"; then
   if test x"$ax_pthread_ok" = "xyes"; then
      BUILD_DYNAREPLUSPLUS="yes"
   else
      BUILD_DYNAREPLUSPLUS="yes (without POSIX threads)"
   fi
 else
-  BUILD_DYNAREPLUSPLUS="no (missing one of: BLAS, LAPACK)"
+  BUILD_DYNAREPLUSPLUS="no (missing one of: BLAS, LAPACK, MatIO)"
 fi
 
 if test "x$CWEAVE" != "x" -a x"$PDFTEX" != "x" -a "x$ax_tex_have_eplain" = "xyes"; then

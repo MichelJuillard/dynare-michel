@@ -37,27 +37,27 @@ int DRFixPoint<KOrder::unfold>::newton_pause = 100;
 @<|SimResults::simulate| code1@>;
 @<|SimResults::simulate| code2@>;
 @<|SimResults::addDataSet| code@>;
-@<|SimResults::writeMat4| code1@>;
-@<|SimResults::writeMat4| code2@>;
+@<|SimResults::writeMat| code1@>;
+@<|SimResults::writeMat| code2@>;
 @<|SimResultsStats::simulate| code@>;
-@<|SimResultsStats::writeMat4| code@>;
+@<|SimResultsStats::writeMat| code@>;
 @<|SimResultsStats::calcMean| code@>;
 @<|SimResultsStats::calcVcov| code@>;
 @<|SimResultsDynamicStats::simulate| code@>;
-@<|SimResultsDynamicStats::writeMat4| code@>;
+@<|SimResultsDynamicStats::writeMat| code@>;
 @<|SimResultsDynamicStats::calcMean| code@>;
 @<|SimResultsDynamicStats::calcVariance| code@>;
 @<|SimResultsIRF::simulate| code1@>;
 @<|SimResultsIRF::simulate| code2@>;
 @<|SimResultsIRF::calcMeans| code@>;
 @<|SimResultsIRF::calcVariances| code@>;
-@<|SimResultsIRF::writeMat4| code@>;
+@<|SimResultsIRF::writeMat| code@>;
 @<|RTSimResultsStats::simulate| code1@>;
 @<|RTSimResultsStats::simulate| code2@>;
-@<|RTSimResultsStats::writeMat4| code@>;
+@<|RTSimResultsStats::writeMat| code@>;
 @<|IRFResults| constructor@>;
 @<|IRFResults| destructor@>;
-@<|IRFResults::writeMat4| code@>;
+@<|IRFResults::writeMat| code@>;
 @<|SimulationWorker::operator()()| code@>;
 @<|SimulationIRFWorker::operator()()| code@>;
 @<|RTSimulationWorker::operator()()| code@>;
@@ -169,23 +169,23 @@ bool SimResults::addDataSet(TwoDMatrix* d, ExplicitShockRealization* sr)
 }
 
 @ 
-@<|SimResults::writeMat4| code1@>=
-void SimResults::writeMat4(const char* base, const char* lname) const
+@<|SimResults::writeMat| code1@>=
+void SimResults::writeMat(const char* base, const char* lname) const
 {
 	char matfile_name[100];
 	sprintf(matfile_name, "%s.mat", base);
-	FILE* out;
-	if (NULL != (out=fopen(matfile_name, "wb"))) {
-		writeMat4(out, lname);
-		fclose(out);
+  mat_t* matfd = Mat_Create(matfile_name, NULL);
+  if (matfd != NULL) {
+		writeMat(matfd, lname);
+    Mat_Close(matfd);
 	}
 }
 
 @ This save the results as matrices with given prefix and with index
 appended. If there is only one matrix, the index is not appended.
 
-@<|SimResults::writeMat4| code2@>=
-void SimResults::writeMat4(FILE* fd, const char* lname) const
+@<|SimResults::writeMat| code2@>=
+void SimResults::writeMat(mat_t* fd, const char* lname) const
 {
 	char tmp[100];
 	for (int i = 0; i < getNumSets(); i++) {
@@ -194,7 +194,7 @@ void SimResults::writeMat4(FILE* fd, const char* lname) const
 		else
 			sprintf(tmp, "%s_data", lname);
 		ConstTwoDMatrix m(*(data[i]));
-		m.writeMat4(fd, tmp);
+		m.writeMat(fd, tmp);
 	}
 }
 
@@ -219,15 +219,15 @@ void SimResultsStats::simulate(int num_sim, const DecisionRule& dr,
 
 
 @ Here we do not save the data itself, we save only mean and vcov.
-@<|SimResultsStats::writeMat4| code@>=
-void SimResultsStats::writeMat4(FILE* fd, const char* lname) const
+@<|SimResultsStats::writeMat| code@>=
+void SimResultsStats::writeMat(mat_t* fd, const char* lname) const
 {
 	char tmp[100];
 	sprintf(tmp, "%s_mean", lname);
 	ConstTwoDMatrix m(num_y, 1, mean.base());
-	m.writeMat4(fd, tmp);
+	m.writeMat(fd, tmp);
 	sprintf(tmp, "%s_vcov", lname);
-	ConstTwoDMatrix(vcov).writeMat4(fd, tmp);
+	ConstTwoDMatrix(vcov).writeMat(fd, tmp);
 }
 
 @ 
@@ -291,14 +291,14 @@ void SimResultsDynamicStats::simulate(int num_sim, const DecisionRule& dr,
 }
 
 @ 
-@<|SimResultsDynamicStats::writeMat4| code@>=
-void SimResultsDynamicStats::writeMat4(FILE* fd, const char* lname) const
+@<|SimResultsDynamicStats::writeMat| code@>=
+void SimResultsDynamicStats::writeMat(mat_t* fd, const char* lname) const
 {
 	char tmp[100];
 	sprintf(tmp, "%s_cond_mean", lname);
-	ConstTwoDMatrix(mean).writeMat4(fd, tmp);
+	ConstTwoDMatrix(mean).writeMat(fd, tmp);
 	sprintf(tmp, "%s_cond_variance", lname);
-	ConstTwoDMatrix(variance).writeMat4(fd, tmp);
+	ConstTwoDMatrix(variance).writeMat(fd, tmp);
 }
 
 @ 
@@ -406,14 +406,14 @@ void SimResultsIRF::calcVariances()
 }
 
 @ 
-@<|SimResultsIRF::writeMat4| code@>=
-void SimResultsIRF::writeMat4(FILE* fd, const char* lname) const
+@<|SimResultsIRF::writeMat| code@>=
+void SimResultsIRF::writeMat(mat_t* fd, const char* lname) const
 {
 	char tmp[100];
 	sprintf(tmp, "%s_mean", lname);
-	means.writeMat4(fd, tmp);
+	means.writeMat(fd, tmp);
 	sprintf(tmp, "%s_var", lname);
-	variances.writeMat4(fd, tmp);
+	variances.writeMat(fd, tmp);
 }
 
 @ 
@@ -458,15 +458,15 @@ void RTSimResultsStats::simulate(int num_sim, const DecisionRule& dr, const Vect
 }
 
 @ 
-@<|RTSimResultsStats::writeMat4| code@>=
-void RTSimResultsStats::writeMat4(FILE* fd, const char* lname)
+@<|RTSimResultsStats::writeMat| code@>=
+void RTSimResultsStats::writeMat(mat_t* fd, const char* lname)
 {
 	char tmp[100];
 	sprintf(tmp, "%s_rt_mean", lname);
 	ConstTwoDMatrix m(nc.getDim(), 1, mean.base());
-	m.writeMat4(fd, tmp);
+	m.writeMat(fd, tmp);
 	sprintf(tmp, "%s_rt_vcov", lname);
-	ConstTwoDMatrix(vcov).writeMat4(fd, tmp);
+	ConstTwoDMatrix(vcov).writeMat(fd, tmp);
 }
 
 @ 
@@ -505,17 +505,17 @@ IRFResults::~IRFResults()
 }
 
 @ 
-@<|IRFResults::writeMat4| code@>=
-void IRFResults::writeMat4(FILE* fd, const char* prefix) const
+@<|IRFResults::writeMat| code@>=
+void IRFResults::writeMat(mat_t* fd, const char* prefix) const
 {
 	for (unsigned int i = 0; i < irf_list_ind.size(); i++) {
 		char tmp[100];
 		int ishock = irf_list_ind[i];
 		const char* shockname = model.getExogNames().getName(ishock);
 		sprintf(tmp, "%s_irfp_%s", prefix, shockname);
-		irf_res[2*i]->writeMat4(fd, tmp);
+		irf_res[2*i]->writeMat(fd, tmp);
 		sprintf(tmp, "%s_irfm_%s", prefix, shockname);
-		irf_res[2*i+1]->writeMat4(fd, tmp);
+		irf_res[2*i+1]->writeMat(fd, tmp);
 	}
 }
 

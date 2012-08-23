@@ -2,7 +2,9 @@ SUBDIRS = preprocessor doc tests mex/sources
 
 if HAVE_BLAS
 if HAVE_LAPACK
+if HAVE_MATIO
 SUBDIRS += dynare++
+endif
 endif
 endif
 
