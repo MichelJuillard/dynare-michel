@@ -1,4 +1,4 @@
-function []=graph_decomp(z,shock_names,endo_names,i_var,initial_date)
+function []=graph_decomp(z,shock_names,endo_names,i_var,initial_date,DynareModel,DynareOptions)
 %function []=graph_decomp(z,varlist,initial_period,freq)
 
 % Copyright (C) 2010-2011 Dynare Team
@@ -39,7 +39,7 @@ for j=1:nvar
     if ymax-ymin < 1e-6
         continue
     end
-    figure('Name',endo_names(i_var(j),:));
+    fhandle = dyn_figure(DynareOptions,'Name',endo_names(i_var(j),:));
     ax=axes('Position',[0.1 0.1 0.6 0.8]);
     axis(ax,[xmin xmax ymin ymax]);
     plot(ax,x(2:end),z1(end,:),'k-','LineWidth',2)
@@ -48,7 +48,7 @@ for j=1:nvar
         i_1 = i-1;
         yp = 0;
         ym = 0;
-        for k = 1:comp_nbr 
+        for k = 1:comp_nbr
             zz = z1(k,i);
             if zz > 0
                 fill([x(i) x(i) x(i+1) x(i+1)],[yp yp+zz yp+zz yp],k);
@@ -70,7 +70,7 @@ for j=1:nvar
     y1 = 0;
     height = 1/comp_nbr;
     labels = char(shock_names,'Initial values');
-    
+
     for i=1:comp_nbr
         fill([0 0 0.2 0.2],[y1 y1+0.7*height y1+0.7*height y1],i);
         hold on
@@ -78,5 +78,7 @@ for j=1:nvar
         hold on
         y1 = y1 + height;
     end
+
+    dyn_saveas(fhandle,[DynareModel.fname '_shock_decomposition_' endo_names(i_var(j),:)],DynareOptions);
     hold off
 end
