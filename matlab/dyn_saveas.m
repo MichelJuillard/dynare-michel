@@ -31,7 +31,7 @@ function dyn_saveas(h,fname,DynareOptions)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if (strcmp('eps',DynareOptions.graph_format))
-    eval(['print -depsc2 ' fname '.eps']);
+    eval(['print -depsc2 ' fname]);% '.eps']);
 end
 if (strcmp('pdf',DynareOptions.graph_format))
     eval(['print -dpdf ' fname]);
