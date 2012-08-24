@@ -71,10 +71,10 @@ for j=1:nvar
     height = 1/comp_nbr;
     labels = char(shock_names,'Initial values');
     
-    for j=1:comp_nbr
-        fill([0 0 0.2 0.2],[y1 y1+0.7*height y1+0.7*height y1],j);
+    for i=1:comp_nbr
+        fill([0 0 0.2 0.2],[y1 y1+0.7*height y1+0.7*height y1],i);
         hold on
-        text(0.3,y1+0.3*height,labels(j,:),'Interpreter','none');
+        text(0.3,y1+0.3*height,labels(i,:),'Interpreter','none');
         hold on
         y1 = y1 + height;
     end
