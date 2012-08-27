@@ -950,6 +950,9 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(i1,:)) ...
               ' = updated_variables(i,:)'';']);
     end
+    for i=1:M_.exo_nbr
+        eval(['oo_.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
+    end
     if ~options_.nograph,
         [nbplt,nr,nc,lr,lc,nstar] = pltorg(M_.exo_nbr);
         if options_.TeX
@@ -990,7 +993,6 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     end
                 end
                 title(name,'Interpreter','none')
-                eval(['oo_.SmoothedShocks.' deblank(name) ' = innov(k,:)'';']);
             end
             dyn_saveas(hh,[M_.fname '_SmoothedShocks' int2str(plt)],options_);
             if options_.TeX
