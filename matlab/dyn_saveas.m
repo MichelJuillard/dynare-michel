@@ -30,14 +30,14 @@ function dyn_saveas(h,fname,DynareOptions)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if (strcmp('eps',DynareOptions.graph_format))
+if any(strcmp('eps',cellstr(DynareOptions.graph_format)))
     eval(['print -depsc2 ' fname]);% '.eps']);
 end
-if (strcmp('pdf',DynareOptions.graph_format))
+if any(strcmp('pdf',cellstr(DynareOptions.graph_format)))
     eval(['print -dpdf ' fname]);
 end
 if ~exist('OCTAVE_VERSION') ...
-   && (strcmp('fig',DynareOptions.graph_format))
+   && any(strcmp('fig',cellstr(DynareOptions.graph_format)))
     if DynareOptions.nodisplay
         set(h, 'Visible','on');
     end
