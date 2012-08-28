@@ -40,7 +40,7 @@ function [fh,xh,gh,H,itct,fcount,retcodeh] = csminwel1(fcn,x0,H0,grad,crit,nit,m
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% global bayestopt_
+global objective_function_penalty_base
 
 fh = [];
 xh = [];
@@ -91,7 +91,9 @@ f=f0;
 H=H0;
 cliff=0;
 while ~done
-    varargin{5}.penalty = f;
+    % penalty for dsge_likelihood and DsgeVarLikelihood
+    objective_function_penalty_base = f;
+    
     g1=[]; g2=[]; g3=[];
     %addition fj. 7/6/94 for control
     disp('-----------------')

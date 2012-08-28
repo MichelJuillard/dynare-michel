@@ -38,7 +38,7 @@ if nargin<4,
 end
 
 
-global bayestopt_ estim_params_ options_  M_ oo_
+global bayestopt_ estim_params_ options_  M_ oo_ objective_function_penalty_base
 
 % Reshape 'myinputs' for local computation.
 % In order to avoid confusion in the name space, the instruction struct2local(myinputs) is replaced by:
@@ -69,7 +69,7 @@ if whoiam
 end
 
 % (re)Set the penalty.
-bayestopt_.penalty = Inf;
+objective_function_penalty_base = Inf;
 
 MhDirectoryName = CheckPath('metropolis',M_.dname);
 

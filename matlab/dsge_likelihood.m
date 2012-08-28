@@ -130,7 +130,7 @@ function [fval,DLIK,Hess,exit_flag,ys,trend_coeff,info,Model,DynareOptions,Bayes
 
 % AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT FR
 
-penalty = BayesInfo.penalty;
+global objective_function_penalty_base
 
 % Initialization of the returned variables and others...
 fval        = [];
@@ -177,7 +177,7 @@ end
 % Return, with endogenous penalty, if some parameters are smaller than the lower bound of the prior domain.
 if ~isequal(DynareOptions.mode_compute,1) && any(xparam1<BayesInfo.lb)
     k = find(xparam1<BayesInfo.lb);
-    fval = penalty+sum((BayesInfo.lb(k)-xparam1(k)).^2);
+    fval = objective_function_penalty_base+sum((BayesInfo.lb(k)-xparam1(k)).^2);
     exit_flag = 0;
     info = 41;
     if analytic_derivation,
@@ -189,7 +189,7 @@ end
 % Return, with endogenous penalty, if some parameters are greater than the upper bound of the prior domain.
 if ~isequal(DynareOptions.mode_compute,1) && any(xparam1>BayesInfo.ub)
     k = find(xparam1>BayesInfo.ub);
-    fval = penalty+sum((xparam1(k)-BayesInfo.ub(k)).^2);
+    fval = objective_function_penalty_base+sum((xparam1(k)-BayesInfo.ub(k)).^2);
     exit_flag = 0;
     info = 42;
     if analytic_derivation,
@@ -213,7 +213,7 @@ if EstimatedParameters.ncx
         a = diag(eig(Q));
         k = find(a < 0);
         if k > 0
-            fval = penalty+sum(-a(k));
+            fval = objective_function_penalty_base+sum(-a(k));
             exit_flag = 0;
             info = 43;
             return
@@ -230,7 +230,7 @@ if EstimatedParameters.ncn
         a = diag(eig(H));
         k = find(a < 0);
         if k > 0
-            fval = penalty+sum(-a(k));
+            fval = objective_function_penalty_base+sum(-a(k));
             exit_flag = 0;
             info = 44;
             return
@@ -249,7 +249,7 @@ end
 % Return, with endogenous penalty when possible, if dynare_resolve issues an error code (defined in resol).
 if info(1) == 1 || info(1) == 2 || info(1) == 5 || info(1) == 7 || info(1) ...
             == 8 || info(1) == 22 || info(1) == 24
-    fval = penalty+1;
+    fval = objective_function_penalty_base+1;
     info = info(1);
     exit_flag = 0;
     if analytic_derivation,
@@ -257,7 +257,7 @@ if info(1) == 1 || info(1) == 2 || info(1) == 5 || info(1) == 7 || info(1) ...
     end
     return
 elseif info(1) == 3 || info(1) == 4 || info(1)==6 ||info(1) == 19 || info(1) == 20 || info(1) == 21  || info(1) == 23
-    fval = penalty+info(2);
+    fval = objective_function_penalty_base+info(2);
     info = info(1);
     exit_flag = 0;
     if analytic_derivation,
