@@ -101,8 +101,7 @@ jloop=0;
 
 for b = fblck:nblck,
     jloop=jloop+1;
-    randn('state',record.Seeds(b).Normal);
-    rand('state',record.Seeds(b).Unifor);
+    set_dynare_random_generator_state(record.Seeds(b).Unifor,record.Seeds(b).Normal);
     if (options_.load_mh_file~=0)  && (fline(b)>1) && OpenOldFile(b)
         load(['./' MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) ...
               '_blck' int2str(b) '.mat'])
@@ -236,8 +235,7 @@ for b = fblck:nblck,
     elseif ~whoiam
         close(hh);
     end
-    record.Seeds(b).Normal = randn('state');
-    record.Seeds(b).Unifor = rand('state');
+    [record.Seeds(b).Unifor, record.Seeds(b).Normal] = get_dynare_random_generator_state();
     OutputFileName(jloop,:) = {[MhDirectoryName,filesep], [ModelName '_mh*_blck' int2str(b) '.mat']};
 end% End of the loop over the mh-blocks.
 

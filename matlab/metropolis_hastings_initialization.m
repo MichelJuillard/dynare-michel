@@ -184,8 +184,12 @@ if ~options_.load_mh_file && ~options_.mh_recover
     % separate initializaton for each chain
     JSUM = 0;
     for j=1:nblck,
-        record.Seeds(j).Normal = randn('state');
-        record.Seeds(j).Unifor = rand('state');
+        % we set a different seed for the random generator for each block
+        % then we record the corresponding random generator state (vector)
+        set_dynare_seed(options_.DynareRandomStreams.seed+j);
+        % record.Seeds keeps a vector of the random generator state and
+        % not the scalar seed despite its name
+        [record.Seeds(j).Unifor,record.Seeds(j).Normal] = get_dynare_random_generator_state();
     end
     record.InitialParameters = ix2;
     record.InitialLogLiK = ilogpo2;
