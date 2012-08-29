@@ -31,10 +31,18 @@ function dyn_saveas(h,fname,DynareOptions)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if any(strcmp('eps',cellstr(DynareOptions.graph_format)))
-    eval(['print -depsc2 ' fname]);% '.eps']);
+    if exist('OCTAVE_VERSION')
+        eval(['print -depsc2 ' fname '.eps']);
+    else
+        eval(['print -depsc2 ' fname]);
+    end
 end
 if any(strcmp('pdf',cellstr(DynareOptions.graph_format)))
-    eval(['print -dpdf ' fname]);
+    if exist('OCTAVE_VERSION')
+        warning('Octave cannot create pdf files!')
+    else
+        eval(['print -dpdf ' fname]);
+    end
 end
 if ~exist('OCTAVE_VERSION') ...
    && any(strcmp('fig',cellstr(DynareOptions.graph_format)))
