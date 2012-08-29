@@ -46,7 +46,7 @@ function [state_u,state_n] = get_dynare_random_generator_state(state_u,state_n)
                        'don''t understand the origin of the problem, ' ...
                        'please, contact Dynare''s development team.'])
             end
-            s_new = RandStream(s.type,'State',state_u);
+            s.State = state_u;
             if matlab_ver_less_than('7.12')
                 RandStream.setDefaultStream(s);
             else

@@ -135,7 +135,8 @@ jloop=0;
 JSUM = 0;
 for b = fblck:nblck,
     jloop=jloop+1;
-    set_dynare_seed(options_.DynareRandomStreams.seed+b);
+    set_dynare_random_generator_state(record.Seeds(b).Unifor, ...
+                                      record.Seeds(b).Normal); 
     if (options_.load_mh_file~=0) && (fline(b)>1) && OpenOldFile(b)
         load(['./' MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) ...
             '_blck' int2str(b) '.mat'])
