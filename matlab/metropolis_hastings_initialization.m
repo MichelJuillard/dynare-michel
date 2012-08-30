@@ -169,7 +169,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
     %% Creation of the mh-history file:
     %%
     file = dir([MhDirectoryName '/'  ModelName '_mh_history.mat']);
-    if length(files)
+    if length(file)
         delete([ MhDirectoryName '/' ModelName '_mh_history.mat']);
         disp('MH: Old mh_history file successfully erased!')
     end
