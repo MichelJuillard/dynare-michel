@@ -37,7 +37,6 @@ FFLAGS="$FFLAGS -Wall"
 CXXFLAGS="$CXXFLAGS -Wall -Wno-parentheses"
 
 AC_PROG_F77([gfortran g77 f77])
-AM_CONDITIONAL([HAVE_FORT], [test "x$F77" != "x"])
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
@@ -66,6 +65,14 @@ AC_CHECK_LIB([matio], [Mat_Open], [LIBADD_MATIO="-lmatio"])
 AC_SUBST([LIBADD_MATIO])
 AM_CONDITIONAL([HAVE_MATIO], [test "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"])
 
+# Check for libslicot, needed by kalman_steady_state
+AC_F77_FUNC(sb02od)
+AC_CHECK_LIB([slicot], [$sb02od], [LIBADD_SLICOT="-lslicot"],
+             [AC_CHECK_LIB([slicot_pic], [$sb02od], [LIBADD_SLICOT="-lslicot_pic"], [], [`$MKOCTFILE -p BLAS_LIBS` `$MKOCTFILE -p LAPACK_LIBS`])], # Fallback on libslicot_pic if dynamic libslicot not found
+             [`$MKOCTFILE -p BLAS_LIBS` `$MKOCTFILE -p LAPACK_LIBS`])
+AC_SUBST([LIBADD_SLICOT])
+AM_CONDITIONAL([HAVE_SLICOT], [test "x$LIBADD_SLICOT" != "x"])
+
 AM_CONDITIONAL([DO_SOMETHING], [test "x$MKOCTFILE" != "x"])
 
 if test "x$MKOCTFILE" != "x"; then
@@ -84,10 +91,10 @@ else
   BUILD_ESTIMATION_MEX_OCTAVE="no (missing MatIO library)"
 fi
 
-if  test "x$MKOCTFILE" != "x" -a "x$F77" != "x"; then
+if  test "x$MKOCTFILE" != "x" -a "x$LIBADD_SLICOT" != "x"; then
    BUILD_KALMAN_STEADY_STATE_OCTAVE="yes"
 else
-   BUILD_KALMAN_STEADY_STATE_OCTAVE="no (missing Fortran Compiler for compilation of libslicot)"
+   BUILD_KALMAN_STEADY_STATE_OCTAVE="no (missing SLICOT)"
 fi
 
 if test "x$MKOCTFILE" != "x" -a "x$has_gsl" = "xyes"; then
@@ -127,7 +134,6 @@ AC_CONFIG_FILES([Makefile
                  estimation/Makefile
                  qzcomplex/Makefile
                  ordschur/Makefile
-                 libslicot/Makefile
                  kalman_steady_state/Makefile
                  ms_sbvar/Makefile
                  block_kalman_filter/Makefile

@@ -10,7 +10,6 @@ EXTRA_DIST = \
 	qzcomplex \
 	k_order_perturbation \
 	ordschur \
-	libslicot \
 	kalman_steady_state \
 	ms-sbvar \
 	block_kalman_filter \

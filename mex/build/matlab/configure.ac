@@ -54,7 +54,6 @@ FFLAGS="$FFLAGS -Wall"
 CXXFLAGS="$CXXFLAGS -Wall -Wno-parentheses"
 
 AC_PROG_F77([gfortran g77 f77])
-AM_CONDITIONAL([HAVE_FORT], [test "x$F77" != "x"])
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_RANLIB
@@ -77,6 +76,27 @@ AC_SUBST([LIBADD_DLOPEN])
 AX_GSL
 AM_CONDITIONAL([HAVE_GSL], [test "x$has_gsl" = "xyes"])
 
+# Check for libslicot, needed by kalman_steady_state
+AC_F77_FUNC(sb02od)
+LDFLAGS_SAVED=$LDFLAGS
+LDFLAGS=$MATLAB_LDFLAGS
+case ${MATLAB_ARCH} in
+   glnxa64 | win64 | maci64)
+     AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.8], [use_64_bit_indexing=yes], [use_64_bit_indexing=no])
+     ;;
+   *)
+     use_64_bit_indexing=no  
+     ;;
+esac
+if test "$use_64_bit_indexing" = "yes"; then
+   AC_CHECK_LIB([slicot64_pic], [$sb02od], [LIBADD_SLICOT="-lslicot64_pic"], [], [$MATLAB_LIBS])
+else
+   AC_CHECK_LIB([slicot_pic], [$sb02od], [LIBADD_SLICOT="-lslicot_pic"], [], [$MATLAB_LIBS])
+fi
+LDFLAGS=$LDFLAGS_SAVED
+AC_SUBST([LIBADD_SLICOT])
+AM_CONDITIONAL([HAVE_SLICOT], [test "x$LIBADD_SLICOT" != "x"])
+
 AM_CONDITIONAL([DO_SOMETHING], [test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes"])
 
 if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes"; then
@@ -89,10 +109,10 @@ else
   BUILD_MEX_MATLAB="no (missing MATLAB, or unknown version, or unknown architecture)"
 fi
 
-if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$F77" != "x"; then
+if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$LIBADD_SLICOT" != "x"; then
    BUILD_KALMAN_STEADY_STATE_MATLAB="yes"
 else
-   BUILD_KALMAN_STEADY_STATE_MATLAB="no (missing Fortran Compiler for compilation of libslicot)"
+   BUILD_KALMAN_STEADY_STATE_MATLAB="no (missing SLICOT)"
 fi
 
 if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$has_gsl" = "xyes"; then
@@ -140,7 +160,6 @@ AC_CONFIG_FILES([Makefile
                  k_order_perturbation/Makefile
                  dynare_simul_/Makefile
                  estimation/Makefile
-                 libslicot/Makefile
                  kalman_steady_state/Makefile
                  ms_sbvar/Makefile
                  block_kalman_filter/Makefile
