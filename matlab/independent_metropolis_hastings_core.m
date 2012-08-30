@@ -105,13 +105,19 @@ for b = fblck:nblck,
         % this will not work if the master uses a random generator not
         % available in the slave (different Matlab version or
         % Matlab/Octave cluster). Therefor the trap.
-        set_dynare_seed(options_.DynareRandomStreams.algo);
+        
+        % this set the random generator type (the seed is useless but
+        % needed by the function)
+        set_dynare_seed(options_.DynareRandomStreams.algo,...
+                        options_.DynareRandomStreams.seed);
+        % this set the state 
         set_dynare_random_generator_state(record.Seeds(b).Unifor, ...
                                           record.Seeds(b).Normal);
     catch
+        % if the state set by master is incompatible with the slave, we
+        % only reseed 
         set_dynare_seed(options_.DynareRandomStreams.seed+b);
     end
-    set_dynare_random_generator_state(record.Seeds(b).Unifor,record.Seeds(b).Normal);
     if (options_.load_mh_file~=0)  && (fline(b)>1) && OpenOldFile(b)
         load(['./' MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) ...
               '_blck' int2str(b) '.mat'])
