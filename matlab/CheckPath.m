@@ -32,12 +32,16 @@ DirectoryName = [ dname '/' type ];
 
 if ~isdir(dname)
     % Make sure there isn't a file with the same name, see trac ticket #47
-    delete(dname)
+    if isfile(dname)
+        delete(dname)
+    end
     mkdir('.', dname);
 end
 
 if ~isdir(DirectoryName)
     % Make sure there isn't a file with the same name, see trac ticket #47
-    delete(DirectoryName)
+    if isfile(DirectoryName)
+        delete(DirectoryName)
+    end
     mkdir('.',DirectoryName);
 end
