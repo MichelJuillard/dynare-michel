@@ -345,6 +345,7 @@ options_.mh_mode = 1;
 options_.mh_nblck = 2;
 options_.mh_recover = 0;
 options_.mh_replic = 20000;
+options_.recursive_estimation_restart = 0;
 options_.mode_check = 0;
 options_.mode_check_nolik = 0;
 options_.mode_compute = 4;
