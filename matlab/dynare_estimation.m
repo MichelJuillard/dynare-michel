@@ -64,6 +64,7 @@ if nnobs > 1
         options_.nobs = nobs(i);
         M_.dname = [dname '_' int2str(nobs(i))];
         dynare_estimation_1(var_list,M_.dname);
+        options_.mode_file = [M_.fname '_mode'];
         oo_recursive_{nobs(i)} = oo_;
     end
 else
