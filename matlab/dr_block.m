@@ -462,9 +462,6 @@ for i = 1:Size;
                 data(i).rank = rank(w(nd-nyf+1:end,nd-nyf+1:end));
                 dr.full_rank = dr.full_rank && (rcond(w(nd-nyf+1:end,nd- ...
                                                         nyf+1:end)) > 1e-9);
-                if ~exist('OCTAVE_VERSION','builtin')
-                    data(i).eigval = eig(E,D);
-                end
                 dr.eigval = [dr.eigval ; data(i).eigval];
             end
             if (verbose)

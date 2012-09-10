@@ -238,11 +238,6 @@ else
         else
             dr.full_rank = 1;
         end            
-        % Under Octave, eig(A,B) doesn't exist, and
-        % lambda = qz(A,B) won't return infinite eigenvalues
-        if ~exist('OCTAVE_VERSION')
-            dr.eigval = eig(E,D);
-        end
         return
     end
 
