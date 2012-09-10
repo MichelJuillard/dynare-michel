@@ -86,7 +86,7 @@ end;
 n_explod = nnz(abs(eigenvalues_) > options.qz_criterium);
 
 result = 0;
-if (nyf== n_explod) && (dr.rank == nyf)
+if (nyf== n_explod) && (dr.full_rank)
     result = 1;
 end
 
@@ -99,7 +99,7 @@ if options.noprint == 0
     disp(sprintf('\nThere are %d eigenvalue(s) larger than 1 in modulus ', n_explod));
     disp(sprintf('for %d forward-looking variable(s)',nyf));
     disp(' ')
-    if dr.rank == nyf && nyf == n_explod
+    if result
         disp('The rank condition is verified.')
     else
         disp('The rank conditions ISN''T verified!')

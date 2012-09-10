@@ -72,7 +72,7 @@ else
     chck = 0;
 end;
 mexErrCheck('bytecode', chck);
-dr.rank = 0;
+dr.full_rank = 1;
 dr.eigval = [];
 dr.nstatic = 0;
 dr.nfwrd = 0;
@@ -151,7 +151,6 @@ for i = 1:Size;
             data(i).rank = 0;
         end
         dr.eigval = [dr.eigval ; data(i).eigval];
-        dr.rank = dr.rank + data(i).rank;
         %First order approximation
         if task ~= 1
             [tmp1, tmp2, indx_c] = find(M_.block_structure.block(i).lead_lag_incidence(2,:));
@@ -221,12 +220,14 @@ for i = 1:Size;
             indx_c = M_.block_structure.block(i).lead_lag_incidence(3,indx_r);
             data(i).eigval = 1 ./ diag(jacob(indx_r, indx_c));
             data(i).rank = sum(abs(data(i).eigval) > 0);
+            full_rank = (rcond(jacob(indx_r, indx_c)) > 1e-9);
         else
             data(i).eigval = [];
             data(i).rank = 0;
+            full_rank = 1;
         end
         dr.eigval = [dr.eigval ; data(i).eigval];
-        dr.rank = dr.rank + data(i).rank;
+        dr.full_rank = dr.full_rank && full_rank;
         %First order approximation
         if task ~= 1
             if (maximum_lag > 0)
@@ -310,11 +311,13 @@ for i = 1:Size;
         if maximum_lead > 0 && n_fwrd > 0
             data(i).eigval = - jacob(1 , n_pred + n - n_fwrd + 1 : n_pred + n) / jacob(1 , n_pred + n + 1 : n_pred + n + n_fwrd) ;
             data(i).rank = sum(abs(data(i).eigval) > 0);
+            full_rank = (abs(jacob(1,n_pred+n+1: n_pred_n+n_fwrd)) > 1e-9);
         else
             data(i).eigval = [];
             data(i).rank = 0;
+            full_rank = 1;
         end;
-        dr.rank = dr.rank + data(i).rank;
+        dr.full_rank = dr.full_rank && full_rank;
         dr.eigval = [dr.eigval ; data(i).eigval];
       case 6
       %% ------------------------------------------------------------------
@@ -323,11 +326,15 @@ for i = 1:Size;
             data(i).eigval = eig(- jacob(: , 1 : n_pred) / ...
                                  jacob(: , (n_pred + n_static + 1 : n_pred + n_static + n_pred )));
             data(i).rank = 0;
+            full_rank = (rcond(jacob(: , (n_pred + n_static + 1 : n_pred ...
+                                          + n_static + n_pred ))) > 1e-9);
         else
             data(i).eigval = [];
             data(i).rank = 0;
+            full_rank = 1;
         end;
         dr.eigval = [dr.eigval ; data(i).eigval];
+        dr.full_rank = dr.full_rank && full_rank;
         if task ~= 1
             if (maximum_lag > 0)
                  ghx = - jacob(: , 1 : n_pred) / jacob(: , n_pred + n_static + 1 : n_pred + n_static + n_pred + n_both);
@@ -390,11 +397,14 @@ for i = 1:Size;
             data(i).eigval = eig(- jacob(: , n_pred + n - n_fwrd + 1: n_pred + n))/ ...
                 jacob(: , n_pred + n + 1 : n_pred + n + n_fwrd);
             data(i).rank = sum(abs(data(i).eigval) > 0);
+            full_rank = (rcond(jacob(: , n_pred + n + 1 : n_pred + n + ...
+                                     n_fwrd)) > 1e-9);
         else
             data(i).eigval = [];
             data(i).rank = 0;
+            full_rank = 1;
         end;
-        dr.rank = dr.rank + data(i).rank;
+        dr.full_rank = dr.full_rank && full_rank;
         dr.eigval = [dr.eigval ; data(i).eigval];
       case {5,8}
       %% ------------------------------------------------------------------
@@ -450,7 +460,8 @@ for i = 1:Size;
             nba = nd-sdim;
             if task == 1
                 data(i).rank = rank(w(nd-nyf+1:end,nd-nyf+1:end));
-                dr.rank = dr.rank + data(i).rank;
+                dr.full_rank = dr.full_rank && (rcond(w(nd-nyf+1:end,nd- ...
+                                                        nyf+1:end)) > 1e-9);
                 if ~exist('OCTAVE_VERSION','builtin')
                     data(i).eigval = eig(E,D);
                 end
