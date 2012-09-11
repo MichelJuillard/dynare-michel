@@ -155,7 +155,7 @@ if M_.maximum_endo_lead == 0
             dr.ghu =  -b\jacobia_(:,nz+1:end); 
         end
         dr.eigval = eig(transition_matrix(dr));
-        dr.rank = 0;
+        dr.full_rank = 1;
         if any(abs(dr.eigval) > options_.qz_criterium)
             temp = sort(abs(dr.eigval));
             nba = nnz(abs(dr.eigval) > options_.qz_criterium);
