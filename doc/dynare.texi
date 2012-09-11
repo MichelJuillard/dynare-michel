@@ -3032,10 +3032,11 @@ used).
 (unless @code{nograph} is used).
 
 @item graph_format = @var{FORMAT}
+@itemx graph_format = ( @var{FORMAT}, @var{FORMAT}@dots{} )
 @anchor{graph_format}
-Specify the file format for graphs saved to disk. Possible values are
-@code{eps} (the default), @code{pdf} and @code{fig} (the latter is not
-available under Octave).
+Specify the file format(s) for graphs saved to disk. Possible values are
+@code{eps} (the default), @code{pdf} and @code{fig} (under Octave,
+only @code{eps} is available).
 
 @item noprint
 Don't print anything. Useful for loops.
@@ -3959,6 +3960,7 @@ Default value is @code{1}.
 @xref{nodisplay}.
 
 @item graph_format = @var{FORMAT}
+@itemx graph_format = ( @var{FORMAT}, @var{FORMAT}@dots{} )
 @xref{graph_format}.
 
 @item lik_init = @var{INTEGER}
@@ -4775,6 +4777,7 @@ interval. Default: @code{0.90}
 @xref{nodisplay}.
 
 @item graph_format = @var{FORMAT}
+@itemx graph_format = ( @var{FORMAT}, @var{FORMAT}@dots{} )
 @xref{graph_format}.
 
 @end table
@@ -5711,6 +5714,7 @@ Critical value for correlation @math{\rho}: plot couples of parmaters with
 @xref{nodisplay}.
 
 @item graph_format = @var{FORMAT}
+@itemx graph_format = ( @var{FORMAT}, @var{FORMAT}@dots{} )
 @xref{graph_format}.
 
 @item conf_sig = @var{DOUBLE}
@@ -5832,6 +5836,7 @@ Specify the parameter set to use. Default: @code{prior_mean}
 @xref{nodisplay}.
 
 @item graph_format = @var{FORMAT}
+@itemx graph_format = ( @var{FORMAT}, @var{FORMAT}@dots{} )
 @xref{graph_format}.
 
 @end table
