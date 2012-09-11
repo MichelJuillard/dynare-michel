@@ -22,7 +22,7 @@ AC_REQUIRE([AX_MATLAB_ARCH])
 AC_REQUIRE([AX_MATLAB_VERSION])
 AC_REQUIRE([AC_PROG_SED])
 
-AX_COMPARE_VERSION([$MATLAB_VERSION], [lt], [6.5], [AC_MSG_ERROR([Your MATLAB is too old, please upgrade to 6.5 (R13) at least.])])
+AX_COMPARE_VERSION([$MATLAB_VERSION], [lt], [7.0], [AC_MSG_ERROR([Your MATLAB is too old, please upgrade to 7.0 (R14) at least.])])
 
 AC_MSG_CHECKING([for options to compile MEX for MATLAB])
 
