@@ -1,4 +1,4 @@
-function [state_u,state_n] = get_dynare_random_generator_state(state_u,state_n)
+function [state_u,state_n] = set_dynare_random_generator_state(state_u,state_n)
 % Wet state of Matlab/Octave random generator depending on matlab
 % (octave) version. 
 % In older versions, Matlab kept one generator for uniformly distributed numbers and
