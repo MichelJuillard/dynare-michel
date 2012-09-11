@@ -107,4 +107,4 @@ end
 
 oo_.shock_decomposition = z;
 
-graph_decomp(z,M_.exo_names,M_.endo_names,i_var,options_.initial_date)
+graph_decomp(z,M_.exo_names,M_.endo_names,i_var,options_.initial_date,M_,options_)

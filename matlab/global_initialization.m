@@ -173,6 +173,13 @@ ep.stochastic.pruned.level = 1e-5;
 options_.ep = ep;
 
 
+% Simulations of backward looking models options
+%
+bnlms.set_dynare_seed_to_default = 1;
+bnlms.innovation_distribution = 'gaussian';
+options_.bnlms = bnlms;
+
+
 % Particle filter
 %
 % Default is that we do not use the non linear kalman filter
@@ -338,6 +345,7 @@ options_.mh_mode = 1;
 options_.mh_nblck = 2;
 options_.mh_recover = 0;
 options_.mh_replic = 20000;
+options_.recursive_estimation_restart = 0;
 options_.mode_check = 0;
 options_.mode_check_nolik = 0;
 options_.mode_compute = 4;

@@ -258,8 +258,18 @@ if iload <=0,
         parameters = 'Current_params';
         disp('Testing current parameter values')
     end
-    [idehess_point, idemoments_point, idemodel_point, idelre_point, derivatives_info_point] = ...
+    [idehess_point, idemoments_point, idemodel_point, idelre_point, derivatives_info_point, info] = ...
         identification_analysis(params,indx,indexo,options_ident,dataset_, prior_exist, name_tex,1);
+    if info(1)~=0,
+        disp(' ')
+        disp('----------- ')
+        disp('Parameter error:')
+        disp(['The model does not solve for ', parameters, ' with error code info = ', int2str(info(1))]),
+        disp('Identification stopped ')
+        disp('----------- ')
+        disp(' ')
+        return,
+    else
     idehess_point.params=params;
 %     siH = idemodel_point.siH;
 %     siJ = idemoments_point.siJ;
@@ -271,6 +281,7 @@ if iload <=0,
     disp_identification(params, idemodel_point, idemoments_point, name, advanced);
     if ~options_.nograph,
         plot_identification(params,idemoments_point,idehess_point,idemodel_point,idelre_point,advanced,parameters,name,IdentifDirectoryName);
+    end
     end
 
     if SampleSize > 1,

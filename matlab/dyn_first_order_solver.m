@@ -233,12 +233,11 @@ else
     nba = nd-sdim;
 
     if task == 1
-        dr.rank = rank(w(npred+nboth+1:end,npred+nboth+1:end));
-        % Under Octave, eig(A,B) doesn't exist, and
-        % lambda = qz(A,B) won't return infinite eigenvalues
-        if ~exist('OCTAVE_VERSION')
-            dr.eigval = eig(E,D);
-        end
+        if rcond(w(npred+nboth+1:end,npred+nboth+1:end)) < 1e-9
+            dr.full_rank = 0;
+        else
+            dr.full_rank = 1;
+        end            
         return
     end
 

@@ -135,13 +135,22 @@ jloop=0;
 JSUM = 0;
 for b = fblck:nblck,
     jloop=jloop+1;
-    try  % Trap in the case matlab slave is called from an octave master.
-        randn('state',record.Seeds(b).Normal);
-        rand('state',record.Seeds(b).Unifor);
+    try
+        % this will not work if the master uses a random generator not
+        % available in the slave (different Matlab version or
+        % Matlab/Octave cluster). Therefor the trap.
+        
+        % this set the random generator type (the seed is useless but
+        % needed by the function)
+        set_dynare_seed(options_.DynareRandomStreams.algo,...
+                        options_.DynareRandomStreams.seed);
+        % this set the state 
+        set_dynare_random_generator_state(record.Seeds(b).Unifor, ...
+                                          record.Seeds(b).Normal);
     catch
-        JSUM  = JSUM + sum(100*clock);
-        randn('state',JSUM);
-        rand('state',JSUM);
+        % if the state set by master is incompatible with the slave, we
+        % only reseed 
+        set_dynare_seed(options_.DynareRandomStreams.seed+b);
     end
     if (options_.load_mh_file~=0) && (fline(b)>1) && OpenOldFile(b)
         load(['./' MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) ...
@@ -276,8 +285,7 @@ for b = fblck:nblck,
 %         close(hh);
 %     end
     dyn_waitbar_close(hh);
-    record.Seeds(b).Normal = randn('state');
-    record.Seeds(b).Unifor = rand('state');
+    [record.Seeds(b).Unifor, record.Seeds(b).Normal] = get_dynare_random_generator_state();
     OutputFileName(jloop,:) = {[MhDirectoryName,filesep], [ModelName '_mh*_blck' int2str(b) '.mat']};
 end% End of the loop over the mh-blocks.
 

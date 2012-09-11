@@ -60,7 +60,8 @@ function record=random_walk_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv
 % In Metropolis, we set penalty to Inf to as to reject all parameter sets
 % triggering error in target density computation
 
-bayestopt_.penalty = Inf;
+global objective_function_penalty_base
+objective_function_penalty_base = Inf;
 
 %%%%
 %%%% Initialization of the random walk metropolis-hastings chains.

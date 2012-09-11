@@ -96,9 +96,7 @@ if isempty(dataset_)
 
     % Determine if a constant is needed.
     if options_.steadystate_flag% if the *_steadystate.m file is provided.
-        [ys,tchek] = feval([M_.fname '_steadystate'],...
-                           [zeros(M_.exo_nbr,1);...
-                            oo_.exo_det_steady_state]);
+        [ys,params,info] = evaluate_steady_state(oo_.steady_state,M_,options_,oo_,1);
         if size(ys,1) < M_.endo_nbr
             if length(M_.aux_vars) > 0
                 ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars,...

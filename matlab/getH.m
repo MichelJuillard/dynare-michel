@@ -236,10 +236,10 @@ if nargout>5,
             tmpu = (get_hess_deriv(hp,j,i,nc,M_.param_nbr))'*[dyssdtheta; zeros(nc-ns,M_.param_nbr)];
             tmpy = tmpx+tmpu+tmpu'+reshape(tmp0(i,:,:),[M_.param_nbr M_.param_nbr]);
             tmpy = tmpy + get_2nd_deriv_mat(gpp,j,i,M_.param_nbr);
+            tmpy = tmpy(indx,indx);
             if any(any(tmpy)),
-                tmpy = triu(tmpy(indx,indx));
-                ina = find(tmpy);
-                gp22(sub2ind([nr nc],j,i),ina)=tmpy(ina);
+                ina = find(triu(tmpy));
+                gp22(sub2ind([nr nc],j,i),ina)=transpose(tmpy(ina));
 %             gp22(j,i,:,:)= reshape(tmpy,[1 1 M_.param_nbr M_.param_nbr]);
 
             end

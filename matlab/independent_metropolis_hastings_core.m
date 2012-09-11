@@ -38,7 +38,7 @@ if nargin<4,
 end
 
 
-global bayestopt_ estim_params_ options_  M_ oo_
+global bayestopt_ estim_params_ options_  M_ oo_ objective_function_penalty_base
 
 % Reshape 'myinputs' for local computation.
 % In order to avoid confusion in the name space, the instruction struct2local(myinputs) is replaced by:
@@ -69,7 +69,7 @@ if whoiam
 end
 
 % (re)Set the penalty.
-bayestopt_.penalty = Inf;
+objective_function_penalty_base = Inf;
 
 MhDirectoryName = CheckPath('metropolis',M_.dname);
 
@@ -101,8 +101,23 @@ jloop=0;
 
 for b = fblck:nblck,
     jloop=jloop+1;
-    randn('state',record.Seeds(b).Normal);
-    rand('state',record.Seeds(b).Unifor);
+    try
+        % this will not work if the master uses a random generator not
+        % available in the slave (different Matlab version or
+        % Matlab/Octave cluster). Therefor the trap.
+        
+        % this set the random generator type (the seed is useless but
+        % needed by the function)
+        set_dynare_seed(options_.DynareRandomStreams.algo,...
+                        options_.DynareRandomStreams.seed);
+        % this set the state 
+        set_dynare_random_generator_state(record.Seeds(b).Unifor, ...
+                                          record.Seeds(b).Normal);
+    catch
+        % if the state set by master is incompatible with the slave, we
+        % only reseed 
+        set_dynare_seed(options_.DynareRandomStreams.seed+b);
+    end
     if (options_.load_mh_file~=0)  && (fline(b)>1) && OpenOldFile(b)
         load(['./' MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) ...
               '_blck' int2str(b) '.mat'])
@@ -236,8 +251,7 @@ for b = fblck:nblck,
     elseif ~whoiam
         close(hh);
     end
-    record.Seeds(b).Normal = randn('state');
-    record.Seeds(b).Unifor = rand('state');
+    [record.Seeds(b).Unifor, record.Seeds(b).Normal] = get_dynare_random_generator_state();
     OutputFileName(jloop,:) = {[MhDirectoryName,filesep], [ModelName '_mh*_blck' int2str(b) '.mat']};
 end% End of the loop over the mh-blocks.
 

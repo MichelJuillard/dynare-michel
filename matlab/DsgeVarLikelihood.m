@@ -34,10 +34,9 @@ function [fval,grad,hess,exit_flag,info,PHI,SIGMAu,iXX,prior] = DsgeVarLikelihoo
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+global objective_function_penalty_base
 % Declaration of the persistent variables.
 persistent dsge_prior_weight_idx
-
-penalty = BayesInfo.penalty;
 
 grad=[];
 hess=[];
@@ -85,7 +84,7 @@ exit_flag = 1;
 % Return, with endogenous penalty, if some dsge-parameters are smaller than the lower bound of the prior domain.
 if DynareOptions.mode_compute ~= 1 && any(xparam1 < BayesInfo.lb)
     k = find(xparam1 < BayesInfo.lb);
-    fval = penalty+sum((BayesInfo.lb(k)-xparam1(k)).^2);
+    fval = objective_function_penalty_base+sum((BayesInfo.lb(k)-xparam1(k)).^2);
     exit_flag = 0;
     info = 41;
     return;
@@ -94,7 +93,7 @@ end
 % Return, with endogenous penalty, if some dsge-parameters are greater than the upper bound of the prior domain.
 if DynareOptions.mode_compute ~= 1 && any(xparam1 > BayesInfo.ub)
     k = find(xparam1 > BayesInfo.ub);
-    fval = penalty+sum((xparam1(k)-BayesInfo.ub(k)).^2);
+    fval = objective_function_penalty_base+sum((xparam1(k)-BayesInfo.ub(k)).^2);
     exit_flag = 0;
     info = 42;
     return;
@@ -131,7 +130,7 @@ dsge_prior_weight = Model.params(dsge_prior_weight_idx);
 
 % Is the dsge prior proper?
 if dsge_prior_weight<(NumberOfParameters+NumberOfObservedVariables)/DynareDataset.info.ntobs;
-    fval = penalty+abs(DynareDataset.info.ntobs*dsge_prior_weight-(NumberOfParameters+NumberOfObservedVariables));
+    fval = objective_function_penalty_base+abs(DynareDataset.info.ntobs*dsge_prior_weight-(NumberOfParameters+NumberOfObservedVariables));
     exit_flag = 0;
     info = 51;
     return
@@ -148,12 +147,12 @@ end
 % Return, with endogenous penalty when possible, if dynare_resolve issues an error code (defined in resol).
 if info(1) == 1 || info(1) == 2 || info(1) == 5 || info(1) == 7 || info(1) ...
             == 8 || info(1) == 22 || info(1) == 24
-    fval = penalty+1;
+    fval = objective_function_penalty_base+1;
     info = info(1);
     exit_flag = 0;
     return
 elseif info(1) == 3 || info(1) == 4 || info(1) == 19 || info(1) == 20 || info(1) == 21
-    fval = penalty+info(2);
+    fval = objective_function_penalty_base+info(2);
     info = info(1);
     exit_flag = 0;
     return
@@ -228,7 +227,7 @@ if ~isinf(dsge_prior_weight)% Evaluation of the likelihood of the dsge-var model
     if ~ispd(SIGMAu)
         v = diag(SIGMAu);
         k = find(v<0);
-        fval = penalty + sum(v(k).^2);
+        fval = objective_function_penalty_base + sum(v(k).^2);
         info = 52;
         exit_flag = 0;
         return;

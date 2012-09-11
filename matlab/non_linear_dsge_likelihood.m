@@ -121,21 +121,11 @@ function [fval,exit_flag,ys,trend_coeff,info,Model,DynareOptions,BayesInfo,Dynar
 % AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
 %           frederic DOT karame AT univ DASH lemans DOT fr
 
+global objective_function_penalty_base
 % Declaration of the penalty as a persistent variable.
-persistent penalty
 persistent init_flag
 persistent restrict_variables_idx observed_variables_idx state_variables_idx mf0 mf1
 persistent sample_size number_of_state_variables number_of_observed_variables number_of_structural_innovations
-
-% Initialization of the persistent variable.
-if ~nargin || isempty(penalty)
-    penalty = 1e8;
-    if ~nargin, return, end
-end
-if nargin==1
-    penalty = xparam1;
-    return
-end
 
 % Initialization of the returned arguments.
 fval            = [];
@@ -153,7 +143,7 @@ nvobs = DynareDataset.info.nvobs;
 % Return, with endogenous penalty, if some parameters are smaller than the lower bound of the prior domain.
 if (DynareOptions.mode_compute~=1) && any(xparam1<BayesInfo.lb)
     k = find(xparam1 < BayesInfo.lb);
-    fval = penalty+sum((BayesInfo.lb(k)-xparam1(k)).^2);
+    fval = objective_function_penalty_base+sum((BayesInfo.lb(k)-xparam1(k)).^2);
     exit_flag = 0;
     info = 41;
     return
@@ -162,7 +152,7 @@ end
 % Return, with endogenous penalty, if some parameters are greater than the upper bound of the prior domain.
 if (DynareOptions.mode_compute~=1) && any(xparam1>BayesInfo.ub)
     k = find(xparam1>BayesInfo.ub);
-    fval = penalty+sum((xparam1(k)-BayesInfo.ub(k)).^2);
+    fval = objective_function_penalty_base+sum((xparam1(k)-BayesInfo.ub(k)).^2);
     exit_flag = 0;
     info = 42;
     return
@@ -201,7 +191,7 @@ if EstimatedParameters.ncx
         a = diag(eig(Q));
         k = find(a < 0);
         if k > 0
-            fval = penalty+sum(-a(k));
+            fval = objective_function_penalty_base+sum(-a(k));
             exit_flag = 0;
             info = 43;
             return
@@ -225,7 +215,7 @@ if EstimatedParameters.ncn
         a = diag(eig(H));
         k = find(a < 0);
         if k > 0
-            fval = penalty+sum(-a(k));
+            fval = objective_function_penalty_base+sum(-a(k));
             exit_flag = 0;
             info = 44;
             return
@@ -251,11 +241,11 @@ Model.H = H;
 [T,R,SteadyState,info,Model,DynareOptions,DynareResults] = dynare_resolve(Model,DynareOptions,DynareResults,'restrict');
 
 if info(1) == 1 || info(1) == 2 || info(1) == 5
-    fval = penalty+1;
+    fval = objective_function_penalty_base+1;
     exit_flag = 0;
     return
 elseif info(1) == 3 || info(1) == 4 || info(1)==6 ||info(1) == 19 || info(1) == 20 || info(1) == 21
-    fval = penalty+info(2);
+    fval = objective_function_penalty_base+info(2);
     exit_flag = 0;
     return
 end
@@ -357,10 +347,10 @@ ReducedForm.StateVectorVariance = StateVectorVariance;
 DynareOptions.warning_for_steadystate = 0;
 LIK = feval(DynareOptions.particle.algorithm,ReducedForm,Y,[],DynareOptions);
 if imag(LIK)
-    likelihood = penalty;
+    likelihood = objective_function_penalty_base;
     exit_flag  = 0;
 elseif isnan(LIK)
-    likelihood = penalty;
+    likelihood = objective_function_penalty_base;
     exit_flag  = 0;
 else
     likelihood = LIK;
