@@ -14,9 +14,8 @@ SUBDIRS += ms_sbvar
 endif
 endif
 
-# libslicot must come before kalman_steady_state
-if HAVE_FORT
-SUBDIRS += libslicot kalman_steady_state
+if HAVE_SLICOT
+SUBDIRS += kalman_steady_state
 endif
 
 if HAVE_MATIO
