@@ -92,9 +92,7 @@ if nargin>8 && initialize==1
         evalin('base','clear PRCDirTmp,')
     else
         % Delete the traces (if existing) of last local session of computations.
-        if Strategy==1,
-            mydelete(['slaveParallel_input*.mat']);
-        end
+        mydelete(['slaveParallel_input*.mat']);
     end
     return
 end
@@ -128,12 +126,8 @@ end
 % Save input data for use by the slaves.
 switch Strategy
     case 0
-        if exist('fGlobalVar'),
-            save([fname,'_input.mat'],'fInputVar','fGlobalVar')
-        else
-            save([fname,'_input.mat'],'fInputVar')
-        end
-        save([fname,'_input.mat'],'Parallel','-append')
+        storeGlobalVars([fname,'_input.mat']);
+        save([fname,'_input.mat'],'fInputVar','Parallel','-append')
         
     case 1
         if exist('fGlobalVar'),
@@ -270,7 +264,7 @@ for j=1:totCPU,
         % are created localy, then copied in remote directory and then
         % deleted (loacal)!
         
-        save( ['slaveParallel_input',int2str(j),'.mat'],'Parallel');
+        save( ['slaveParallel_input',int2str(j),'.mat'],'j');
         
         if Parallel(indPC).Local==0,
             dynareParallelSendFiles(['P_',fname,'_',int2str(j),'End.txt'],PRCDir,Parallel(indPC));
