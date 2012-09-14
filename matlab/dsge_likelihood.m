@@ -427,6 +427,13 @@ switch DynareOptions.lik_init
                                                         T,R,Q,H1,Z,mmm,pp,rr);
         diffuse_periods = length(dlik);
     end
+    if isnan(dLIK),
+        fval=dLIK;
+        info = 45;
+        exit_flag = 0;
+        return
+    end
+    
   case 4% Start from the solution of the Riccati equation.
     if kalman_algo ~= 2
         kalman_algo = 1;
