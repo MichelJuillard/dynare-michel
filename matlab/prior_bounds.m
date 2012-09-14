@@ -4,7 +4,7 @@ function bounds = prior_bounds(bayestopt,options)
 %! @deftypefn {Function File} {@var{bounds} =} prior_bounds (@var{bayesopt},@var{option})
 %! @anchor{prior_bounds}
 %! @sp 1
-%! Returns bounds for the prior densities. For each estimated parameter the upper and lower bounds
+%! Returns bounds for the prior densities. For each estimated parameter the lower and upper bounds
 %! are such that the defined intervals contains a probability mass equal to 1-2*@var{option}.prior_trunc. The
 %! default value for @var{option}.prior_trunc is 1e-10 (set in @ref{global_initialization}).
 %! @sp 2
@@ -43,7 +43,7 @@ function bounds = prior_bounds(bayestopt,options)
 %    bayestopt  [structure]  characterizing priors (shape, mean, p1..p4)
 %    
 % OUTPUTS
-%    bounds     [double]      matrix specifying prior bounds (row= parameter, column=upper&lower bound)
+%    bounds     [double]      matrix specifying prior bounds (row= parameter, column=lower&upper bound)
 %    
 % SPECIAL REQUIREMENTS
 %    none

@@ -106,9 +106,9 @@ if ncx
     bayestopt_.p3 = [ bayestopt_.p3; estim_params_.corrx(:,9)];
     bayestopt_.p4 = [ bayestopt_.p4; estim_params_.corrx(:,10)];
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.corrx(:,11)];
-    bayestopt_.name = [bayestopt_.name; cellstr(['corr ' ...
+    bayestopt_.name = [bayestopt_.name; cellstr([repmat('corr ',ncx,1)...
                         deblank(M_.exo_names(estim_params_.corrx(:,1),:)) ...
-                        ', ' , deblank(M_.exo_names(estim_params_.corrx(:,2),:))])];
+                        repmat(', ',ncx,1) , deblank(M_.exo_names(estim_params_.corrx(:,2),:))])];
 end
 if ncn
     if isequal(M_.H,0)
@@ -124,9 +124,9 @@ if ncn
     bayestopt_.p3 = [ bayestopt_.p3; estim_params_.corrn(:,9)];
     bayestopt_.p4 = [ bayestopt_.p4; estim_params_.corrn(:,10)];
     bayestopt_.jscale = [ bayestopt_.jscale; estim_params_.corrn(:,11)];
-    bayestopt_.name = [bayestiopt_.name; cellstr(['corr ' ...
+    bayestopt_.name = [bayestopt_.name; cellstr([repmat('corr ',ncn,1) ...
                         deblank(M_.exo_names(estim_params_.corrn(:,1),:)) ...
-                        ', ' , deblank(M_.exo_names(estim_params_.corrn(:,2),:))])];
+                        repmat(', ',ncn,1) , deblank(M_.exo_names(estim_params_.corrn(:,2),:))])];
 end
 if np
     xparam1 = [xparam1; estim_params_.param_vals(:,2)];
