@@ -523,6 +523,7 @@ if analytic_derivation,
         D2P=sparse(size(D2Om,1),size(D2Om,2)); %zeros([size(T),length(xparam1),length(xparam1)]);
         jcount=0;
     end
+    if DynareOptions.lik_init==1,
     for i=1:EstimatedParameters.nvx
         k =EstimatedParameters.var_exo(i,1);
         DQ(k,k,i) = 2*sqrt(Q(k,k));
@@ -541,6 +542,7 @@ if analytic_derivation,
         end
         end
     end
+    end
     offset = EstimatedParameters.nvx;
     for i=1:EstimatedParameters.nvn
         k = EstimatedParameters.var_endo(i,1);
@@ -550,6 +552,7 @@ if analytic_derivation,
         end
     end
     offset = offset + EstimatedParameters.nvn;
+    if DynareOptions.lik_init==1,
     for j=1:EstimatedParameters.np
         dum =  lyapunov_symm(T,DT(:,:,j+offset)*Pstar*T'+T*Pstar*DT(:,:,j+offset)'+DOm(:,:,j+offset),DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
 %         kk = find(abs(dum) < 1e-12);
@@ -571,6 +574,7 @@ if analytic_derivation,
 %             D2P(:,:,j+offset,i) = dum;
         end
         end
+    end
     end
     if analytic_derivation==1,
         analytic_deriv_info={analytic_derivation,DT,DYss,DOm,DH,DP,asy_Hess};
