@@ -155,8 +155,8 @@ while newRank && (t<=last)
 end
 
 if (t>last)
-    error(['univariate_diffuse_kalman_filter:: There isn''t enough information to estimate the initial conditions of the nonstationary variables']);
-    LIK = NaN;
+    warning(['univariate_diffuse_kalman_filter:: There isn''t enough information to estimate the initial conditions of the nonstationary variables']);
+    dLIK = NaN;
     return
 end
 
