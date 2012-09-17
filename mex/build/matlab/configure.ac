@@ -85,7 +85,15 @@ AM_CONDITIONAL([HAVE_MATIO], [test "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv
 # Check for libslicot, needed by kalman_steady_state
 AC_F77_FUNC(sb02od)
 LDFLAGS_SAVED=$LDFLAGS
-LDFLAGS=$MATLAB_LDFLAGS
+case ${MATLAB_ARCH} in
+   maci | maci64)
+     # Work around for exported_symbols_list flag present in Mac MATLAB_LDFLAGS
+     LDFLAGS=$MATLAB_LDFLAGS_NOMAP
+     ;;
+   *)
+     LDFLAGS=$MATLAB_LDFLAGS
+     ;;
+esac
 case ${MATLAB_ARCH} in
    glnxa64 | win64 | maci64)
      AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.8], [use_64_bit_indexing=yes], [use_64_bit_indexing=no])

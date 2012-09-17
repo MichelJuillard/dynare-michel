@@ -71,7 +71,11 @@ case ${MATLAB_ARCH} in
     fi
     MATLAB_DEFS="$MATLAB_DEFS -DNDEBUG"
     MATLAB_CFLAGS="-fno-common -no-cpp-precomp -arch $ARCHS -isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -fexceptions -O2"
-    MATLAB_LDFLAGS="-L$MATLAB/bin/${MATLAB_ARCH} -Wl,-twolevel_namespace -undefined error -arch $ARCHS -Wl,-syslibroot,$SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -bundle -Wl,-exported_symbols_list,\$(top_srcdir)/mexFunction-MacOSX.map"
+    # Work around for slicot configuration: need to remove exported_symbols_list
+    # flag because there's no mexfunction in the configure script
+    MATLAB_LDFLAGS_NOMAP="-L$MATLAB/bin/${MATLAB_ARCH} -Wl,-twolevel_namespace -undefined error -arch $ARCHS -Wl,-syslibroot,$SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -bundle"
+    MATLAB_MAPFLAG="-Wl,-exported_symbols_list,\$(top_srcdir)/mexFunction-MacOSX.map"
+    MATLAB_LDFLAGS="$MATLAB_LDFLAGS_NOMAP $MATLAB_MAPFLAG"
     MATLAB_LIBS="-lmx -lmex -lmat -lstdc++ -lmwlapack"
     MATLAB_CXXFLAGS="-fno-common -no-cpp-precomp -fexceptions -arch $ARCHS -isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -O2"
     MATLAB_FFLAGS="-fexceptions -fbackslash -arch $ARCHS"
