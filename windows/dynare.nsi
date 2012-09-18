@@ -83,11 +83,6 @@ SectionEnd
 
 SectionGroup "MEX files for MATLAB"
 
-Section "MEX files for MATLAB 32-bit, version 7.0 to 7.2 (R14 to R2006a)"
- SetOutPath $INSTDIR\mex\matlab\win32-7.0-7.2
- File ..\mex\matlab\win32-7.0-7.2\*.dll
-SectionEnd
-
 Section "MEX files for MATLAB 32-bit, version 7.3 to 7.4 (R2006b to R2007a)"
  SetOutPath $INSTDIR\mex\matlab\win32-7.3-7.4
  File ..\mex\matlab\win32-7.3-7.4\*.mexw32
@@ -96,11 +91,6 @@ SectionEnd
 Section "MEX files for MATLAB 32-bit, version 7.5 to 8.0 (R2007b to R2012b)"
  SetOutPath $INSTDIR\mex\matlab\win32-7.5-8.0
  File ..\mex\matlab\win32-7.5-8.0\*.mexw32
-SectionEnd
-
-Section "MEX files for MATLAB 64-bit, version 7.2 (R2006a)"
- SetOutPath $INSTDIR\mex\matlab\win64-7.2
- File ..\mex\matlab\win64-7.2\*.mexw64
 SectionEnd
 
 Section "MEX files for MATLAB 64-bit, version 7.3 to 7.4 (R2006b to R2007a)"

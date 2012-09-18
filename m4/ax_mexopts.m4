@@ -22,7 +22,7 @@ AC_REQUIRE([AX_MATLAB_ARCH])
 AC_REQUIRE([AX_MATLAB_VERSION])
 AC_REQUIRE([AC_PROG_SED])
 
-AX_COMPARE_VERSION([$MATLAB_VERSION], [lt], [7.0], [AC_MSG_ERROR([Your MATLAB is too old, please upgrade to 7.0 (R14) at least.])])
+AX_COMPARE_VERSION([$MATLAB_VERSION], [lt], [7.3], [AC_MSG_ERROR([Your MATLAB is too old, please upgrade to 7.3 (R2006b) at least.])])
 
 AC_MSG_CHECKING([for options to compile MEX for MATLAB])
 
@@ -52,7 +52,6 @@ case ${MATLAB_ARCH} in
     MATLAB_CFLAGS="-fexceptions -g -O2"
     MATLAB_CXXFLAGS="-g -O2"
     MATLAB_FFLAGS="-fexceptions -g -O2 -fno-underscoring"
-    AX_COMPARE_VERSION([$MATLAB_VERSION], [eq], [7.0.1], [AC_MSG_ERROR([MATLAB version 7.0.1 (R14SP1) is buggy (LAPACK library missing for MSVC), and can't be used for compiling MEX files])])
     MATLAB_DEFS="$MATLAB_DEFS -DNDEBUG"
     # Note that static-libstdc++ is only supported since GCC 4.5 (but generates no error on older versions)
     MATLAB_LDFLAGS="-static-libgcc -static-libstdc++ -shared \$(top_srcdir)/mex.def -L$MATLAB/bin/${MATLAB_ARCH}"

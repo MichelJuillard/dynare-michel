@@ -25,8 +25,8 @@ NOTE: Dynare comes with an automated uninstaller, which you can run from the
 Using Dynare with MATLAB (R)
 ----------------------------
 
-Dynare requires MATLAB (R) version 7.0 or above. With older versions of MATLAB (R),
-it may fail or give unexpected results.
+Dynare requires MATLAB (R) version 7.3 (R2006b) or above. With older versions
+of MATLAB (R), it may fail or give unexpected results.
 
 To use Dynare, you just have to add the 'matlab' subdirectory of your Dynare
 installation to MATLAB (R) path. You have two options for doing that:

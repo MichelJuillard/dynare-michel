@@ -77,8 +77,8 @@ if ~exist('OCTAVE_VERSION')
     end
 end
 
-% ordeig() was introducted in MATLAB 7.0.1, and doesn't exist in Octave
-if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.0.1')
+% ordeig() doesn't exist in Octave
+if exist('OCTAVE_VERSION')
     addpath([dynareroot '/missing/ordeig'])
 end
 
@@ -100,12 +100,7 @@ if exist('OCTAVE_VERSION')
 else
     % Add win32 specific paths for Dynare Windows package
     if strcmp(computer, 'PCWIN')
-        if matlab_ver_less_than('7.3')
-            mexpath = [dynareroot '../mex/matlab/win32-7.0-7.2'];
-            if exist(mexpath, 'dir')
-                addpath(mexpath)
-            end
-        elseif matlab_ver_less_than('7.5')
+        if matlab_ver_less_than('7.5')
             mexpath = [dynareroot '../mex/matlab/win32-7.3-7.4'];
             if exist(mexpath, 'dir')
                 addpath(mexpath)
@@ -120,12 +115,7 @@ else
 
     % Add win64 specific paths for Dynare Windows package
     if strcmp(computer, 'PCWIN64')
-        if matlab_ver_less_than('7.3')
-            mexpath = [dynareroot '../mex/matlab/win64-7.2'];
-            if exist(mexpath, 'dir')
-                addpath(mexpath)
-            end
-        elseif matlab_ver_less_than('7.5')
+        if matlab_ver_less_than('7.5')
             mexpath = [dynareroot '../mex/matlab/win64-7.3-7.4'];
             if exist(mexpath, 'dir')
                 addpath(mexpath)
