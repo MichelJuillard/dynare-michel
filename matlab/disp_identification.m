@@ -285,7 +285,7 @@ if SampleSize==1 && advanced,
                     pax(i,dumpindx)=idemoments.cosnJ(i,j);
                 end
             end
-            fprintf('%-15s [%s] %10.3f\n',name{i},namx,idemoments.cosnJ(i,j))
+            fprintf('%-15s [%s] %14.7f\n',name{i},namx,idemoments.cosnJ(i,j))
         end
     end
 end

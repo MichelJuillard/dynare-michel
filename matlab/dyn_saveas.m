@@ -44,12 +44,15 @@ if any(strcmp('pdf',cellstr(DynareOptions.graph_format)))
         eval(['print -dpdf ' fname]);
     end
 end
-if ~exist('OCTAVE_VERSION') ...
-   && any(strcmp('fig',cellstr(DynareOptions.graph_format)))
-    if DynareOptions.nodisplay
-        set(h, 'Visible','on');
+if any(strcmp('fig',cellstr(DynareOptions.graph_format)))
+    if exist('OCTAVE_VERSION')
+        warning('Octave cannot create fig files!')
+    else
+        if DynareOptions.nodisplay
+            set(h, 'Visible','on');
+        end
+        saveas(h,[fname '.fig']);
     end
-    saveas(h,[fname '.fig']);
 end
 if DynareOptions.nodisplay
     close(h);
