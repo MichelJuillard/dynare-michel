@@ -155,7 +155,7 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
 
     dr.ghxx = dr.ghxx(1:M_.endo_nbr,:);
     dr.ghxu = dr.ghxu(1:M_.endo_nbr,:);
-    rdr.ghuu = dr.ghuu(1:M_.endo_nbr,:);
+    dr.ghuu = dr.ghuu(1:M_.endo_nbr,:);
 
 
     % dr.ghs2
