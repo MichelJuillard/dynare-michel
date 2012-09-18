@@ -60,10 +60,8 @@ AX_GSL
 AM_CONDITIONAL([HAVE_GSL], [test "x$has_gsl" = "xyes"])
 
 # Check for libmatio, needed by estimation DLL (only under Octave, as an alternative to MATLAB's libmat)
-AC_CHECK_HEADER([matio.h])
-AC_CHECK_LIB([matio], [Mat_Open], [LIBADD_MATIO="-lmatio"])
-AC_SUBST([LIBADD_MATIO])
-AM_CONDITIONAL([HAVE_MATIO], [test "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"])
+AX_MATIO
+AM_CONDITIONAL([HAVE_MATIO], [test "x$has_matio" = "xyes"])
 
 # Check for libslicot, needed by kalman_steady_state
 AX_SLICOT([octave])
@@ -81,7 +79,7 @@ else
   BUILD_MEX_OCTAVE="no (missing mkoctfile)"
 fi
 
-if test "x$MKOCTFILE" != "x" -a "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"; then
+if test "x$MKOCTFILE" != "x" -a "x$has_matio" = "xyes"; then
   BUILD_ESTIMATION_KORDER_DYNSIMUL_MEX_OCTAVE="yes"
 else
   BUILD_ESTIMATION_KORDER_DYNSIMUL_MEX_OCTAVE="no (missing MatIO library)"
@@ -93,7 +91,7 @@ else
    BUILD_KALMAN_STEADY_STATE_OCTAVE="no (missing SLICOT)"
 fi
 
-if test "x$MKOCTFILE" != "x" -a "x$has_gsl" = "xyes" -a "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"; then
+if test "x$MKOCTFILE" != "x" -a "x$has_gsl" = "xyes" -a "x$has_matio" = "xyes"; then
    BUILD_MS_SBVAR_MEX_OCTAVE="yes"
 else
    BUILD_MS_SBVAR_MEX_OCTAVE="no (missing GSL or MatIO library)"

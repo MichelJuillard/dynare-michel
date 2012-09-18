@@ -77,10 +77,8 @@ AX_GSL
 AM_CONDITIONAL([HAVE_GSL], [test "x$has_gsl" = "xyes"])
 
 # Check for libmatio, needed by MEX files using Dynare++ code
-AC_CHECK_HEADER([matio.h])
-AC_CHECK_LIB([matio], [Mat_Open], [LIBADD_MATIO="-lmatio"])
-AC_SUBST([LIBADD_MATIO])
-AM_CONDITIONAL([HAVE_MATIO], [test "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"])
+AX_MATIO
+AM_CONDITIONAL([HAVE_MATIO], [test "x$has_matio" = "xyes"])
 
 # Check for libslicot, needed by kalman_steady_state
 AX_SLICOT([matlab])
@@ -98,7 +96,7 @@ else
   BUILD_MEX_MATLAB="no (missing MATLAB, or unknown version, or unknown architecture)"
 fi
 
-if test "x$ax_enable_matlab" = "xyes" -a "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"; then
+if test "x$ax_enable_matlab" = "xyes" -a "x$has_matio" = "xyes"; then
    BUILD_KORDER_DYNSIMUL_MEX_MATLAB="yes"
 else
    BUILD_KORDER_DYNSIMUL_MEX_MATLAB="no (missing MatIO library)"

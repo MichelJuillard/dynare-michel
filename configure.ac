@@ -87,10 +87,8 @@ AC_CHECK_LIB([dl], [dlopen], [LIBADD_DLOPEN="-ldl"], [])
 AC_SUBST([LIBADD_DLOPEN])
 
 # Check for libmatio, needed by Dynare++
-AC_CHECK_HEADER([matio.h])
-AC_CHECK_LIB([matio], [Mat_Open], [LIBADD_MATIO="-lmatio"])
-AC_SUBST([LIBADD_MATIO])
-AM_CONDITIONAL([HAVE_MATIO], [test "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"])
+AX_MATIO
+AM_CONDITIONAL([HAVE_MATIO], [test "x$has_matio" = "xyes"])
 
 AC_CHECK_PROG([MAKEINFO], [makeinfo], [makeinfo])
 
@@ -238,7 +236,7 @@ AM_CONDITIONAL([ENABLE_ORG_EXPORT], [test "x$enable_org_export" != "x"])
 
 BUILD_PREPROCESSOR="yes"
 
-if test "x$ax_blas_ok" = "xyes" -a "x$ax_lapack_ok" = "xyes" -a "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"; then
+if test "x$ax_blas_ok" = "xyes" -a "x$ax_lapack_ok" = "xyes" -a "x$has_matio" = "xyes"; then
   if test x"$ax_pthread_ok" = "xyes"; then
      BUILD_DYNAREPLUSPLUS="yes"
   else

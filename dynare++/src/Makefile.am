@@ -21,9 +21,9 @@ dynare___SOURCES = \
 	nlsolve.h \
 	$(GENERATED_FILES)
 
-dynare___CPPFLAGS = -I../sylv/cc -I../tl/cc -I../kord -I../integ/cc -I.. -I$(top_srcdir)/mex/sources -DDYNVERSION=\"$(PACKAGE_VERSION)\" $(BOOST_CPPFLAGS)
-dynare___LDFLAGS = $(BOOST_LDFLAGS)
-dynare___LDADD = ../kord/libkord.a ../integ/cc/libinteg.a ../tl/cc/libtl.a ../parser/cc/libparser.a ../utils/cc/libutils.a ../sylv/cc/libsylv.a $(noinst_LIBRARIES) $(LAPACK_LIBS) $(BLAS_LIBS) $(LIBS) $(FLIBS) $(PTHREAD_LIBS) $(LIBADD_MATIO)
+dynare___CPPFLAGS = -I../sylv/cc -I../tl/cc -I../kord -I../integ/cc -I.. -I$(top_srcdir)/mex/sources -DDYNVERSION=\"$(PACKAGE_VERSION)\" $(BOOST_CPPFLAGS) $(MATIO_CFLAGS)
+dynare___LDFLAGS = $(LDFLAGS_MATIO) $(BOOST_LDFLAGS)
+dynare___LDADD = ../kord/libkord.a ../integ/cc/libinteg.a ../tl/cc/libtl.a ../parser/cc/libparser.a ../utils/cc/libutils.a ../sylv/cc/libsylv.a $(LIBADD_MATIO) $(noinst_LIBRARIES) $(LAPACK_LIBS) $(BLAS_LIBS) $(LIBS) $(FLIBS) $(PTHREAD_LIBS)
 dynare___CXXFLAGS = $(PTHREAD_CFLAGS)
 
 BUILT_SOURCES = $(GENERATED_FILES)

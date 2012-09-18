@@ -2,9 +2,10 @@ noinst_PROGRAMS = k_order_perturbation
 
 k_order_perturbation_CPPFLAGS = -I$(top_srcdir)/../../../dynare++/src -I$(top_srcdir)/../../../dynare++/kord -I$(top_srcdir)/../../../dynare++/tl/cc -I$(top_srcdir)/../../../dynare++/utils/cc -I$(top_srcdir)/../../../dynare++/sylv/cc -I$(top_srcdir)/../../../dynare++/integ/cc -I$(top_srcdir)/../../sources
 
-k_order_perturbation_CXXFLAGS = $(PTHREAD_CFLAGS)
+k_order_perturbation_CXXFLAGS = $(CFLAGS_MATIO) $(PTHREAD_CFLAGS)
 
 # libdynare++ must come before pthread
+k_order_perturbation_LDFLAGS = $(LDFLAGS_MATIO)
 k_order_perturbation_LDADD = ../libdynare++/libdynare++.a $(PTHREAD_LIBS) $(LIBADD_DLOPEN) $(LIBADD_MATIO)
 
 TOPDIR = $(top_srcdir)/../../sources/k_order_perturbation
