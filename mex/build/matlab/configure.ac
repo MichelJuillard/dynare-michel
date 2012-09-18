@@ -83,33 +83,8 @@ AC_SUBST([LIBADD_MATIO])
 AM_CONDITIONAL([HAVE_MATIO], [test "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"])
 
 # Check for libslicot, needed by kalman_steady_state
-AC_F77_FUNC(sb02od)
-LDFLAGS_SAVED=$LDFLAGS
-case ${MATLAB_ARCH} in
-   maci | maci64)
-     # Work around for exported_symbols_list flag present in Mac MATLAB_LDFLAGS
-     LDFLAGS=$MATLAB_LDFLAGS_NOMAP
-     ;;
-   *)
-     LDFLAGS=$MATLAB_LDFLAGS
-     ;;
-esac
-case ${MATLAB_ARCH} in
-   glnxa64 | win64 | maci64)
-     AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.8], [use_64_bit_indexing=yes], [use_64_bit_indexing=no])
-     ;;
-   *)
-     use_64_bit_indexing=no  
-     ;;
-esac
-if test "$use_64_bit_indexing" = "yes"; then
-   AC_CHECK_LIB([slicot64_pic], [$sb02od], [LIBADD_SLICOT="-lslicot64_pic"], [], [$MATLAB_LIBS])
-else
-   AC_CHECK_LIB([slicot_pic], [$sb02od], [LIBADD_SLICOT="-lslicot_pic"], [], [$MATLAB_LIBS])
-fi
-LDFLAGS=$LDFLAGS_SAVED
-AC_SUBST([LIBADD_SLICOT])
-AM_CONDITIONAL([HAVE_SLICOT], [test "x$LIBADD_SLICOT" != "x"])
+AX_SLICOT([matlab])
+AM_CONDITIONAL([HAVE_SLICOT], [test "x$has_slicot" = "xyes"])
 
 AM_CONDITIONAL([DO_SOMETHING], [test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes"])
 
@@ -129,7 +104,7 @@ else
    BUILD_KORDER_DYNSIMUL_MEX_MATLAB="no (missing MatIO library)"
 fi
 
-if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$LIBADD_SLICOT" != "x"; then
+if test "x$ax_enable_matlab" = "xyes" -a "x$ax_matlab_version_ok" = "xyes" -a "x$ax_mexopts_ok" = "xyes" -a "x$has_slicot" = "xyes"; then
    BUILD_KALMAN_STEADY_STATE_MATLAB="yes"
 else
    BUILD_KALMAN_STEADY_STATE_MATLAB="no (missing SLICOT)"

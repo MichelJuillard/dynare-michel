@@ -51,8 +51,8 @@ if exist('OCTAVE_VERSION')
         warning('This version of Dynare has only been tested on Octave 3.4.0 and above. Since your Octave version is older than that, Dynare may fail to run, or give unexpected results. Consider upgrading your Octave installation.');
     end
 else
-    if matlab_ver_less_than('7.0')
-        warning('This version of Dynare has only been tested on MATLAB 7.0 (R14) and above. Since your MATLAB version is older than that, Dynare may fail to run, or give unexpected results. Consider upgrading your MATLAB installation, or switch to Octave.');
+    if matlab_ver_less_than('7.3')
+        warning('This version of Dynare has only been tested on MATLAB 7.3 (R2006b) and above. Since your MATLAB version is older than that, Dynare may fail to run, or give unexpected results. Consider upgrading your MATLAB installation, or switch to Octave.');
     end
 end
 
@@ -99,12 +99,6 @@ end
 command = ['"' dynareroot 'dynare_m" ' fname] ;
 for i=2:nargin
     command = [command ' ' varargin{i-1}];
-end
-
-% Workaround for bug in Octave 3.2
-% See http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=550823
-if exist('OCTAVE_VERSION') && octave_ver_less_than('3.4.0')
-    sleep(2)
 end
 
 [status, result] = system(command);

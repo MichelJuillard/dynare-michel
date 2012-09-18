@@ -66,12 +66,8 @@ AC_SUBST([LIBADD_MATIO])
 AM_CONDITIONAL([HAVE_MATIO], [test "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"])
 
 # Check for libslicot, needed by kalman_steady_state
-AC_F77_FUNC(sb02od)
-AC_CHECK_LIB([slicot], [$sb02od], [LIBADD_SLICOT="-lslicot"],
-             [AC_CHECK_LIB([slicot_pic], [$sb02od], [LIBADD_SLICOT="-lslicot_pic"], [], [`$MKOCTFILE -p BLAS_LIBS` `$MKOCTFILE -p LAPACK_LIBS`])], # Fallback on libslicot_pic if dynamic libslicot not found
-             [`$MKOCTFILE -p BLAS_LIBS` `$MKOCTFILE -p LAPACK_LIBS`])
-AC_SUBST([LIBADD_SLICOT])
-AM_CONDITIONAL([HAVE_SLICOT], [test "x$LIBADD_SLICOT" != "x"])
+AX_SLICOT([octave])
+AM_CONDITIONAL([HAVE_SLICOT], [test "x$has_slicot" = "xyes"])
 
 AM_CONDITIONAL([DO_SOMETHING], [test "x$MKOCTFILE" != "x"])
 
@@ -91,7 +87,7 @@ else
   BUILD_ESTIMATION_KORDER_DYNSIMUL_MEX_OCTAVE="no (missing MatIO library)"
 fi
 
-if  test "x$MKOCTFILE" != "x" -a "x$LIBADD_SLICOT" != "x"; then
+if  test "x$MKOCTFILE" != "x" -a "x$has_slicot" = "xyes"; then
    BUILD_KALMAN_STEADY_STATE_OCTAVE="yes"
 else
    BUILD_KALMAN_STEADY_STATE_OCTAVE="no (missing SLICOT)"

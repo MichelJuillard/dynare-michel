@@ -372,7 +372,7 @@ In order to run Dynare, you need one of the following:
 @itemize
 
 @item
-MATLAB version 7.0 (R14) or above;
+MATLAB version 7.3 (R2006b) or above;
 
 @item
 GNU Octave version 3.4.0 or above.

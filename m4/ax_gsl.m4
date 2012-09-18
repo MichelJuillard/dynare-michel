@@ -1,4 +1,4 @@
-dnl Detect the GSL.
+dnl Detect GSL.
 dnl We don't use the official M4 macro since it relies on the script gsl-config,
 dnl which does not work when cross-compiling.
 dnl
