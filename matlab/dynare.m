@@ -101,12 +101,6 @@ for i=2:nargin
     command = [command ' ' varargin{i-1}];
 end
 
-% Workaround for bug in Octave 3.2
-% See http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=550823
-if exist('OCTAVE_VERSION') && octave_ver_less_than('3.4.0')
-    sleep(2)
-end
-
 [status, result] = system(command);
 disp(result)
 if status
