@@ -388,21 +388,12 @@ if kronflag==1, % kronecker products
     H = -DfDtau\DfDthet;
     x = reshape(H(1:m*m,:),m,m,param_nbr);
     y = reshape(Dm*H(m*m+1:end,:),m,m,param_nbr);
-    if nauxe,
-        x = x(nauxe+1:end,nauxe+1:end,:);
-        y = y(nauxe+1:end,nauxe+1:end,:);
-        dA = x;
-        dOm = y;
-        m = size(y,1);
-        x = reshape(x,m*m,param_nbr);
-        Dm = duplication(m);
-        DmPl = inv(Dm'*Dm)*Dm';
-        y = DmPl*reshape(y,m*m,param_nbr);
-        H = [x;y];
-    else
-        dA = x;
-        dOm = y;
-    end
+    dA = x;
+    dOm = y;
+    % convert to dyn_vech
+    tmpH = Dm*H(m*m+1:end,:);
+    Index = find(triu(ones(m)));
+    H(m*m+1:end,:) = tmpH(Index,:);
 
     Hx = [];
     if ~isempty(indexo),
