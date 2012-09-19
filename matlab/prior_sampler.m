@@ -75,6 +75,8 @@ sampled_prior_covariance  = zeros(NumberOfParameters,NumberOfParameters);
 file_line_number = 0;
 file_indx_number = 0;
 
+oo_.dr=set_state_space(oo_.dr,M_,options_);
+
 % Simulations.
 while iteration < NumberOfSimulations
     loop_indx = loop_indx+1;
