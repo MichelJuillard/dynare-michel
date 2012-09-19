@@ -120,6 +120,8 @@ function [dr,info] = dyn_risky_steadystate_solver(ys0,M, ...
         %        ys0(l_var) = x;
         [resids,dr1] = risky_residuals_ds(x,pm,M,dr,options,oo); 
         ys1 = dr1.ys;
+    else
+        pm = model_structure(M,options);
     end
     
     [ys, info] = solve1(func,ys0,1:endo_nbr,1:endo_nbr,0,1, options.gstep, ...
@@ -132,9 +134,15 @@ function [dr,info] = dyn_risky_steadystate_solver(ys0,M, ...
     dr.ys = ys;
 
     [resid,dr] = func(ys,pm,M,dr,options,oo);
-
+    dr.ghs2 = zeros(M.endo_nbr,1);
+    
     for i=1:M.endo_nbr
-        disp(sprintf('%16s %12.6f %12.6f',M.endo_names(i,:),ys1(i), ys(i)))
+        if isfield(options,'portfolio') && options.portfolio == 1
+            disp(sprintf('%16s %12.6f %12.6f',M.endo_names(i,:),ys1(i), ...
+                         ys(i)))
+        else
+            disp(sprintf('%16s %12.6f %12.6f',M.endo_names(i,:),ys(i)))
+        end
     end
 
 end
@@ -171,8 +179,14 @@ function [resid,dr] = risky_residuals(ys,pm,M,dr,options,oo)
         dr = first_step_ds(x,pm,M,dr,options,oo);
         dr.ys = ys;
     else
-        d1a = d1;
-        d2a = d2;
+        pm = model_structure(M,options);
+        [dr,info] = dyn_first_order_solver(d1,M,dr,options,0);
+        if info
+            print_info();
+        end
+        dr = dyn_second_order_solver(d1,d2,dr,M,...
+                                     options.threads.kronecker.A_times_B_kronecker_C,...
+                                     options.threads.kronecker.sparse_hessian_times_B_kronecker_C);
     end
     
     gu1 = dr.ghu(pm.i_fwrd_g,:);
@@ -412,6 +426,31 @@ function y=unfold3(x,n)
             end
         end
     end
+end
+
+function pm  = model_structure(M,options)
+
+
+    lead_index = M.maximum_endo_lag+2;
+    lead_lag_incidence = M.lead_lag_incidence;
+    dr = struct();
+    dr = set_state_space(dr,M,options);
+    pm.i_fwrd_g = find(lead_lag_incidence(lead_index,dr.order_var)');    
+
+    i_fwrd_f1 = nonzeros(lead_lag_incidence(lead_index,dr.order_var));
+    pm.i_fwrd_f1 = i_fwrd_f1;
+    n = nnz(lead_lag_incidence)+M.exo_nbr;
+    ih = reshape(1:n*n,n,n);
+    i_fwrd_f2 = ih(i_fwrd_f1,i_fwrd_f1);
+    pm.i_fwrd_f2 = i_fwrd_f2(:);
+    i_fwrd1_f2 = ih(i_fwrd_f1,:);
+    pm.i_fwrd1_f2 = i_fwrd1_f2(:);
+
+    ih = reshape(1:n*n*n,n,n,n);
+    i_fwrd_f3 = ih(i_fwrd_f1,i_fwrd_f1,i_fwrd_f1);
+    pm.i_fwrd_f3 = i_fwrd_f3(:);
+    i_fwrd1_f3 = ih(i_fwrd_f1,i_fwrd_f1,:);
+    pm.i_fwrd1_f3 = i_fwrd1_f3(:);
 end
 
 function pm  = portfolio_model_structure(M,options)
