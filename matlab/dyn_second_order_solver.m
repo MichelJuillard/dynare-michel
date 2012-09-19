@@ -105,7 +105,6 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
     % Jacobian with respect to the variables with the highest lead
     fyp = jacobia(:,kstate(k1,3)+nnz(M_.lead_lag_incidence(M_.maximum_endo_lag+1,:)));
     B(:,nstatic+npred-dr.nboth+1:end) = fyp;
-    gx1 = dr.ghx;
     [junk,k1,k2] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+M_.maximum_endo_lead+1,order_var));
     A(1:M_.endo_nbr,nstatic+1:nstatic+npred)=...
         A(1:M_.endo_nbr,nstatic+[1:npred])+fyp*gx1(k1,1:npred);
@@ -185,54 +184,4 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
 
     % deterministic exogenous variables
     if M_.exo_det_nbr > 0
-        hud = dr.ghud{1}(nstatic+1:nstatic+npred,:);
-        zud=[zeros(np,M_.exo_det_nbr);dr.ghud{1};gx(:,1:npred)*hud;zeros(M_.exo_nbr,M_.exo_det_nbr);eye(M_.exo_det_nbr)];
-        R1 = hessian*kron(zx,zud);
-        dr.ghxud = cell(M_.exo_det_length,1);
-        kf = [M_.endo_nbr-nyf+1:M_.endo_nbr];
-        kp = nstatic+[1:npred];
-        dr.ghxud{1} = -M1*(R1+f1*dr.ghxx(kf,:)*kron(dr.ghx(kp,:),dr.ghud{1}(kp,:)));
-        Eud = eye(M_.exo_det_nbr);
-        for i = 2:M_.exo_det_length
-            hudi = dr.ghud{i}(kp,:);
-            zudi=[zeros(np,M_.exo_det_nbr);dr.ghud{i};gx(:,1:npred)*hudi;zeros(M_.exo_nbr+M_.exo_det_nbr,M_.exo_det_nbr)];
-            R2 = hessian*kron(zx,zudi);
-            dr.ghxud{i} = -M2*(dr.ghxud{i-1}(kf,:)*kron(Gy,Eud)+dr.ghxx(kf,:)*kron(dr.ghx(kp,:),dr.ghud{i}(kp,:)))-M1*R2;
-        end
-        R1 = hessian*kron(zu,zud);
-        dr.ghudud = cell(M_.exo_det_length,1);
-        kf = [M_.endo_nbr-nyf+1:M_.endo_nbr];
-        
-        dr.ghuud{1} = -M1*(R1+f1*dr.ghxx(kf,:)*kron(dr.ghu(kp,:),dr.ghud{1}(kp,:)));
-        Eud = eye(M_.exo_det_nbr);
-        for i = 2:M_.exo_det_length
-            hudi = dr.ghud{i}(kp,:);
-            zudi=[zeros(np,M_.exo_det_nbr);dr.ghud{i};gx(:,1:npred)*hudi;zeros(M_.exo_nbr+M_.exo_det_nbr,M_.exo_det_nbr)];
-            R2 = hessian*kron(zu,zudi);
-            dr.ghuud{i} = -M2*dr.ghxud{i-1}(kf,:)*kron(hu,Eud)-M1*R2;
-        end
-        R1 = hessian*kron(zud,zud);
-        dr.ghudud = cell(M_.exo_det_length,M_.exo_det_length);
-        dr.ghudud{1,1} = -M1*R1-M2*dr.ghxx(kf,:)*kron(hud,hud);
-        for i = 2:M_.exo_det_length
-            hudi = dr.ghud{i}(nstatic+1:nstatic+npred,:);
-            zudi=[zeros(np,M_.exo_det_nbr);dr.ghud{i};gx(:,1:npred)*hudi+dr.ghud{i-1}(kf,:);zeros(M_.exo_nbr+M_.exo_det_nbr,M_.exo_det_nbr)];
-            R2 = hessian*kron(zudi,zudi);
-            dr.ghudud{i,i} = -M2*(dr.ghudud{i-1,i-1}(kf,:)+...
-                                  2*dr.ghxud{i-1}(kf,:)*kron(hudi,Eud) ...
-                                  +dr.ghxx(kf,:)*kron(hudi,hudi))-M1*R2;
-            R2 = hessian*kron(zud,zudi);
-            dr.ghudud{1,i} = -M2*(dr.ghxud{i-1}(kf,:)*kron(hud,Eud)+...
-                                  dr.ghxx(kf,:)*kron(hud,hudi))...
-                -M1*R2;
-            for j=2:i-1
-                hudj = dr.ghud{j}(kp,:);
-                zudj=[zeros(np,M_.exo_det_nbr);dr.ghud{j};gx(:,1:npred)*hudj;zeros(M_.exo_nbr+M_.exo_det_nbr,M_.exo_det_nbr)];
-                R2 = hessian*kron(zudj,zudi);
-                dr.ghudud{j,i} = -M2*(dr.ghudud{j-1,i-1}(kf,:)+dr.ghxud{j-1}(kf,:)* ...
-                                      kron(hudi,Eud)+dr.ghxud{i-1}(kf,:)* ...
-                                      kron(hudj,Eud)+dr.ghxx(kf,:)*kron(hudj,hudi))-M1*R2;
-            end
-            
-        end
     end
