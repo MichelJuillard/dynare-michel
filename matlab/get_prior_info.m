@@ -1,9 +1,9 @@
 function get_prior_info(info,plt_flag)
 % Computes various prior statistics.
-%  
+%
 % INPUTS
 %   info     [integer]   scalar specifying what has to be done.
-%  
+%
 % OUTPUTS
 %   none
 %
@@ -45,6 +45,10 @@ end
 
 M_.dname = M_.fname;
 
+% Temporarly set options_.order equal to one
+order = options_.order;
+options_.order = 1;
+
 [xparam1,estim_params_,bayestopt_,lb,ub,M_] = set_prior(estim_params_,M_,options_);
 if plt_flag
     plot_priors(bayestopt_,M_,options_);
@@ -54,12 +58,12 @@ PriorNames = { 'Beta' , 'Gamma' , 'Gaussian' , 'Inverted Gamma' , 'Uniform' , 'I
 
 if size(M_.param_names,1)==size(M_.param_names_tex,1)% All the parameters have a TeX name.
     fidTeX = fopen('priors_data.tex','w+');
-    % Column 1: a string for the name of the prior distribution. 
+    % Column 1: a string for the name of the prior distribution.
     % Column 2: the prior mean.
     % Column 3: the prior standard deviation.
     % Column 4: the lower bound of the prior density support.
     % Column 5: the upper bound of the prior density support.
-    % Column 6: the lower bound of the interval containing 80% of the prior mass. 
+    % Column 6: the lower bound of the interval containing 80% of the prior mass.
     % Column 7: the upper bound of the interval containing 80% of the prior mass.
     prior_trunc_backup = options_.prior_trunc ;
     options_.prior_trunc = (1-options_.prior_interval)/2 ;
@@ -167,13 +171,13 @@ end
 
 if info==3% Prior simulations (2nd order moments).
     oo_ = compute_moments_varendo('prior',options_,M_,oo_);
-end 
+end
 
 if changed_qz_criterium_flag
     options_.qz_criterium = [];
 end
 
-
+options_.order = order;
 
 function format_string = build_format_string(bayestopt,i)
 format_string = ['%s & %s & %6.4f &'];
