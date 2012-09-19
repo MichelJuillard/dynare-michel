@@ -280,8 +280,6 @@ else
     ghx = [hx(k1,:); gx(k2(nboth+1:end),:)];
 end
 
-dr.gx = gx;
-
 if nstatic > 0
     B_static = B(:,1:nstatic);  % submatrix containing the derivatives w.r. to static variables
 else
@@ -317,8 +315,6 @@ else
     ghu = [];
 end;
 
-
-
 dr.ghx = ghx;
 dr.ghu = ghu;
 
@@ -329,4 +325,7 @@ if DynareOptions.aim_solver ~= 1 && DynareOptions.use_qzdiv
     hx = real(hx);
 end
 
+% non-predetermined variables
+dr.gx = gx;
+%predetermined (endogenous state) variables, square transition matrix
 dr.Gy = hx;
