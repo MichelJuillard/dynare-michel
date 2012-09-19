@@ -51,6 +51,6 @@ periods 2;
 values 0.2;
 end;
 
-stoch_simul(order=1,irf=0,noprint);
+stoch_simul(irf=0,noprint);
 
 forecast(periods=20);
