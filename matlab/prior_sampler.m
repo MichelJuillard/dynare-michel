@@ -87,7 +87,7 @@ set(hh,'Name','Prior sampler.');
 
 % Simulations.
 while iteration < NumberOfSimulations
-    if ~mod(t,10)
+    if ~mod(iteration,10)
         dyn_waitbar(iteration/NumberOfSimulations,hh,'Please wait. Prior sampler...');
     end
     loop_indx = loop_indx+1;
