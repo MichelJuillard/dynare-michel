@@ -32,7 +32,7 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2001-2011 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -56,8 +56,6 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
     Gy = dr.Gy;
     
     kstate = dr.kstate;
-    kad = dr.kad;
-    kae = dr.kae;
     nstatic = dr.nstatic;
     nfwrd = dr.nfwrd;
     npred = dr.npred;
@@ -68,9 +66,6 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
     lead_lag_incidence = M_.lead_lag_incidence;
 
     np = nd - nyf;
-    n2 = np + 1;
-    n3 = nyf;
-    n4 = n3 + 1;
 
     k1 = nonzeros(lead_lag_incidence(:,order_var)');
     kk = [k1; length(k1)+(1:M_.exo_nbr+M_.exo_det_nbr)'];
@@ -110,7 +105,6 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
     % Jacobian with respect to the variables with the highest lead
     fyp = jacobia(:,kstate(k1,3)+nnz(M_.lead_lag_incidence(M_.maximum_endo_lag+1,:)));
     B(:,nstatic+npred-dr.nboth+1:end) = fyp;
-    offset = M_.endo_nbr;
     gx1 = dr.ghx;
     [junk,k1,k2] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+M_.maximum_endo_lead+1,order_var));
     A(1:M_.endo_nbr,nstatic+1:nstatic+npred)=...
@@ -166,11 +160,8 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
     LHS = zeros(M_.endo_nbr,M_.endo_nbr);
     LHS(:,k0) = jacobia(:,nonzeros(lead_lag_incidence(M_.maximum_endo_lag+1,order_var)));
     RHS = zeros(M_.endo_nbr,M_.exo_nbr^2);
-    kk = find(kstate(:,2) == M_.maximum_endo_lag+2);
     gu = dr.ghu; 
     guu = dr.ghuu; 
-    Gu = [dr.ghu(nstatic+[1:npred],:); zeros(np-npred,M_.exo_nbr)];
-    Guu = [dr.ghuu(nstatic+[1:npred],:); zeros(np-npred,M_.exo_nbr*M_.exo_nbr)];
     E = eye(M_.endo_nbr);
     kh = reshape([1:nk^2],nk,nk);
     kp = sum(kstate(:,2) <= M_.maximum_endo_lag+1);
