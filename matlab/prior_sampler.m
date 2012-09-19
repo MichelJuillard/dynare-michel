@@ -68,7 +68,12 @@ else
     TableOfInformations(2:end,3) = cumsum(TableOfInformations(1:end-1,2))+1;
 end
 
-pdraws = cell(TableOfInformations(1,2),drsave+1) ;
+if drsave
+    pdraws = cell(TableOfInformations(1,2),drsave+2) ;
+else
+    pdraws = NaN(TableOfInformations(1,2),NumberOfParameters+1);
+end
+
 sampled_prior_expectation = zeros(NumberOfParameters,1);
 sampled_prior_covariance  = zeros(NumberOfParameters,NumberOfParameters);
 
@@ -83,13 +88,19 @@ while iteration < NumberOfSimulations
     params = prior_draw();
     M_ = set_all_parameters(params,estim_params_,M_);
     [dr,INFO,M_,options_,oo_] = resol(work,M_,options_,oo_);
+    file_line_number = file_line_number + 1;
+    iteration = iteration + 1;
+    if drsave
+        pdraws(file_line_number,1) = {params};
+        pdraws(file_line_number,2) = {INFO(1)};
+    else
+        pdraws(file_line_number,1:NumberOfParameters) = params;
+        pdraws(file_line_number,NumberOfParameters+1) = INFO(1);
+    end
     switch INFO(1)
       case 0
-        file_line_number = file_line_number + 1 ;
-        iteration = iteration + 1;
-        pdraws(file_line_number,1) = {params};
         if drsave
-            pdraws(file_line_number,2) = {dr};
+            pdraws(file_line_number,3) = {dr};
         end
         [sampled_prior_expectation,sampled_prior_covariance] = ...
             recursive_prior_moments(sampled_prior_expectation,sampled_prior_covariance,params,iteration);
@@ -124,7 +135,11 @@ while iteration < NumberOfSimulations
         file_indx_number = file_indx_number + 1;
         save([ PriorDirectoryName '/prior_draws' int2str(file_indx_number) '.mat' ],'pdraws');
         if file_indx_number<NumberOfFiles
-            pdraws = cell(TableOfInformations(file_indx_number+1,2),drsave+1);
+            if drsave
+                pdraws = cell(TableOfInformations(file_indx_number+1,2),drsave+2);
+            else
+                pdraws = NaN(TableOfInformations(file_indx_number+1,2),NumberOfParameters+1);
+            end
         end
         file_line_number = 0;
     end
