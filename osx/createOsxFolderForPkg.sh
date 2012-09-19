@@ -47,7 +47,7 @@ cp -r $TOP_DYN_DIR/examples                                      $INSTALLDIR
 ##########################################################
 # FIRST BUILD 32 BIT EVERYTHING, 32 BIT MATLAB < 7.5 MEX #
 ##########################################################
-./configure CFLAGS='-arch i386' CXXFLAGS='-arch i386' FFLAGS='-arch i386' LDFLAGS='-arch i386' --with-matlab=/Applications/MATLAB/R2007a MATLAB_VERSION=7.4 --with-gsl=/usr/local32
+./configure CFLAGS='-arch i386' CXXFLAGS='-arch i386' FFLAGS='-arch i386' LDFLAGS='-arch i386' --with-matlab=/Applications/MATLAB/R2007a MATLAB_VERSION=7.4 --with-gsl=/usr/local32 --with-slicot=/usr/local32 --with-matio=/usr/local32
 make pdf
 
 cd $TOP_DYN_DIR/preprocessor
@@ -112,7 +112,7 @@ cp $TOP_DYN_DIR/dynare++/kord/kord.pdf                                          
 ##############################################
 make clean
 cd $TOP_DYN_DIR/mex/build/matlab
-./configure CFLAGS='-arch i386' CXXFLAGS='-arch i386' FFLAGS='-arch i386' LDFLAGS='-arch i386' --with-matlab=/Applications/MATLAB/MATLAB_R2009b_32bit/MATLAB_R2009b.app MATLAB_VERSION=7.9 MEXEXT='mexmaci' --with-gsl=/usr/local32
+./configure CFLAGS='-arch i386' CXXFLAGS='-arch i386' FFLAGS='-arch i386' LDFLAGS='-arch i386' --with-matlab=/Applications/MATLAB/MATLAB_R2009b_32bit/MATLAB_R2009b.app MATLAB_VERSION=7.9 MEXEXT='mexmaci' --with-gsl=/usr/local32 --with-slicot=/usr/local32 --with-matio=/usr/local32
 make
 
 # Matlab
