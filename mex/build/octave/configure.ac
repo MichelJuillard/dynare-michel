@@ -93,10 +93,10 @@ else
    BUILD_KALMAN_STEADY_STATE_OCTAVE="no (missing SLICOT)"
 fi
 
-if test "x$MKOCTFILE" != "x" -a "x$has_gsl" = "xyes"; then
+if test "x$MKOCTFILE" != "x" -a "x$has_gsl" = "xyes" -a "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"; then
    BUILD_MS_SBVAR_MEX_OCTAVE="yes"
 else
-   BUILD_MS_SBVAR_MEX_OCTAVE="no (missing GSL)"
+   BUILD_MS_SBVAR_MEX_OCTAVE="no (missing GSL or MatIO library)"
 fi
 
 AC_ARG_ENABLE([openmp], AS_HELP_STRING([--enable-openmp], [use OpenMP for parallelization of some MEX files]), [
