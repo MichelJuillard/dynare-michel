@@ -98,7 +98,7 @@ else
   BUILD_MEX_MATLAB="no (missing MATLAB, or unknown version, or unknown architecture)"
 fi
 
-if test "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"; then
+if test "x$ax_enable_matlab" = "xyes" -a "x$ac_cv_header_matio_h" = "xyes" -a "x$ac_cv_lib_matio_Mat_Open" = "xyes"; then
    BUILD_KORDER_DYNSIMUL_MEX_MATLAB="yes"
 else
    BUILD_KORDER_DYNSIMUL_MEX_MATLAB="no (missing MatIO library)"
