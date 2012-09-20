@@ -34,6 +34,7 @@ AC_ARG_WITH(matio, AC_HELP_STRING([--with-matio=DIR], [prefix to MATIO installat
 
   ac_save_CPPFLAGS="$CPPFLAGS"
   ac_save_LDFLAGS="$LDFLAGS"
+  ac_save_LIBS="$LIBS"
 
   LIBADD_MATIO=""
   CPPFLAGS="$CPPFLAGS_MATIO $CPPFLAGS"
