@@ -55,7 +55,7 @@ function [ys,params,info] = evaluate_steady_state_file(ys_init,exo_ss,M,options)
     end            
     
     if check
-        info(1) = 19
+        info(1) = 19;
         info(2) = NaN;
     end
     
