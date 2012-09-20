@@ -25,28 +25,28 @@ AC_ARG_WITH(matio, AC_HELP_STRING([--with-matio=DIR], [prefix to MATIO installat
   has_matio=yes
 
   if test "x$matio_prefix" != "x"; then
-    CFLAGS_MATIO="-I$withval/include"
+    CPPFLAGS_MATIO="-I$withval/include"
     LDFLAGS_MATIO="-L$withval/lib"
   else
-    CFLAGS_MATIO=""
+    CPPFLAGS_MATIO=""
     LDFLAGS_MATIO=""
   fi
 
-  ac_save_CFLAGS="$CFLAGS"
+  ac_save_CPPFLAGS="$CPPFLAGS"
   ac_save_LDFLAGS="$LDFLAGS"
 
   LIBADD_MATIO=""
-  CFLAGS="$CFLAGS_MATIO $CFLAGS"
+  CPPFLAGS="$CPPFLAGS_MATIO $CPPFLAGS"
   LDFLAGS="$LDFLAGS_MATIO $LDFLAGS"
 
   AC_CHECK_HEADER([matio.h], [], [has_matio=no])
   AC_CHECK_LIB([matio], [Mat_Open], [LIBADD_MATIO="-lmatio"], [has_matio=no])
 
-  CFLAGS="$ac_save_CFLAGS"
+  CPPFLAGS="$ac_save_CPPFLAGS"
   LDFLAGS="$ac_save_LDFLAGS"
   LIBS="$ac_save_LIBS"
 
-  AC_SUBST(CFLAGS_MATIO)
+  AC_SUBST(CPPFLAGS_MATIO)
   AC_SUBST(LIBADD_MATIO)
   AC_SUBST(LDFLAGS_MATIO)
 ])

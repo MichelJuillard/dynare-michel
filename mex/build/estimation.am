@@ -1,7 +1,7 @@
 noinst_PROGRAMS = logposterior logMHMCMCposterior
 
 # We use shared flags so that automake does not compile things two times
-CPPFLAGS += -I$(top_srcdir)/../../sources/estimation/libmat -I$(top_srcdir)/../../sources/estimation/utils $(CFLAGS_MATIO) $(BOOST_CPPFLAGS)
+CPPFLAGS += -I$(top_srcdir)/../../sources/estimation/libmat -I$(top_srcdir)/../../sources/estimation/utils $(CPPFLAGS_MATIO) $(BOOST_CPPFLAGS)
 LDFLAGS += $(LDFLAGS_MATIO) $(BOOST_LDFLAGS)
 LDADD = $(LIBADD_DLOPEN) $(LIBADD_MATIO)
 
