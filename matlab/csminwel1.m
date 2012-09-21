@@ -52,6 +52,9 @@ done=0;
 itct=0;
 fcount=0;
 snit=100;
+gh = [];
+H = [];
+retcodeh = [];
 %tailstr = ')';
 %stailstr = [];
 % Lines below make the number of Pi's optional.  This is inefficient, though, and precludes
