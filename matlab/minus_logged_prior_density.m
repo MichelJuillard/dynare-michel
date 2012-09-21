@@ -1,4 +1,4 @@
-function [f,fake_1, fake_2, fake_3] = minus_logged_prior_density(xparams,pshape,p6,p7,p3,p4)
+function [fval,fake_1, fake_2, exit_flag ] = minus_logged_prior_density(xparams,pshape,p6,p7,p3,p4,DynareOptions,DynareModel,EstimatedParams,DynareResults)
 % Evaluates minus the logged prior density.
 % 
 % INPUTS 
@@ -28,8 +28,98 @@ function [f,fake_1, fake_2, fake_3] = minus_logged_prior_density(xparams,pshape,
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
+global objective_function_penalty_base
+
 fake_1 = 1;
 fake_2 = 1;
-fake_3 = 1;
 
-f = - priordens(xparams,pshape,p6,p7,p3,p4);
+exit_flag = 1;
+info = 0;
+
+%------------------------------------------------------------------------------
+% 1. Get the structural parameters & define penalties
+%------------------------------------------------------------------------------
+
+% Return, with endogenous penalty, if some parameters are smaller than the lower bound of the prior domain.
+if ~isequal(DynareOptions.mode_compute,1) && any(xparams<p3)
+    k = find(xparams<p3);
+    fval = objective_function_penalty_base+sum((p3(k)-xparams(k)).^2);
+    exit_flag = 0;
+    info = 41;
+    return
+end
+
+% Return, with endogenous penalty, if some parameters are greater than the upper bound of the prior domain.
+if ~isequal(DynareOptions.mode_compute,1) && any(xparams>p4)
+    k = find(xparams>p4);
+    fval = objective_function_penalty_base+sum((xparams(k)-p4(k)).^2);
+    exit_flag = 0;
+    info = 42;
+    return
+end
+
+% Get the diagonal elements of the covariance matrices for the structural innovations (Q) and the measurement error (H).
+DynareModel = set_all_parameters(xparams,EstimatedParams,DynareModel);
+
+Q = DynareModel.Sigma_e;
+H = DynareModel.H;
+
+% Test if Q is positive definite.
+if EstimatedParams.ncx
+    % Try to compute the cholesky decomposition of Q (possible iff Q is positive definite)
+    [CholQ,testQ] = chol(Q);
+    if testQ
+        % The variance-covariance matrix of the structural innovations is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty.
+        a = diag(eig(Q));
+        k = find(a < 0);
+        if k > 0
+            fval = objective_function_penalty_base+sum(-a(k));
+            exit_flag = 0;
+            info = 43;
+            return
+        end
+    end
+end
+
+% Test if H is positive definite.
+if EstimatedParams.ncn
+    % Try to compute the cholesky decomposition of H (possible iff H is positive definite)
+    [CholH,testH] = chol(H);
+    if testH
+        % The variance-covariance matrix of the measurement errors is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty.
+        a = diag(eig(H));
+        k = find(a < 0);
+        if k > 0
+            fval = objective_function_penalty_base+sum(-a(k));
+            exit_flag = 0;
+            info = 44;
+            return
+        end
+    end
+end
+
+
+%-----------------------------
+% 2. Check BK and steady state
+%-----------------------------
+
+M_ = set_all_parameters(xparams,EstimatedParams,DynareModel);
+[dr,info,DynareModel,DynareOptions,DynareResults] = resol(0,DynareModel,DynareOptions,DynareResults);
+
+% Return, with endogenous penalty when possible, if dynare_resolve issues an error code (defined in resol).
+if info(1) == 1 || info(1) == 2 || info(1) == 5 || info(1) == 7 || info(1) ...
+            == 8 || info(1) == 22 || info(1) == 24 || info(1) == 19
+    fval = objective_function_penalty_base+1;
+    info = info(1);
+    exit_flag = 0;
+    return
+elseif info(1) == 3 || info(1) == 4 || info(1)==6 || info(1) == 20 || info(1) == 21  || info(1) == 23
+    fval = objective_function_penalty_base+info(2);
+    info = info(1);
+    exit_flag = 0;
+    return
+end
+
+
+fval = - priordens(xparams,pshape,p6,p7,p3,p4);

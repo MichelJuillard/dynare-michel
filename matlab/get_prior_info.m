@@ -130,6 +130,7 @@ end
 
 if info==2% Prior optimization.
           % Initialize to the prior mode if possible
+    oo_.dr=set_state_space(oo_.dr,M_,options_);
     k = find(~isnan(bayestopt_.p5));
     xparam1(k) = bayestopt_.p5(k);
     % Pertubation of the initial condition.
@@ -139,7 +140,11 @@ if info==2% Prior optimization.
     while look_for_admissible_initial_condition
         xinit = xparam1+scale*randn(size(xparam1));
         if all(xinit(:)>bayestopt_.p3) && all(xinit(:)<bayestopt_.p4)
-            look_for_admissible_initial_condition = 0;
+            M_ = set_all_parameters(xinit,estim_params_,M_);
+            [dr,INFO,M_,options_,oo_] = resol(0,M_,options_,oo_);
+            if ~INFO(1)
+                look_for_admissible_initial_condition = 0;
+            end
         else
             if iter == 2000;
                 scale = scale/1.1;
@@ -155,7 +160,7 @@ if info==2% Prior optimization.
                                bayestopt_.p6, ...
                                bayestopt_.p7, ...
                                bayestopt_.p3, ...
-                               bayestopt_.p4);
+                               bayestopt_.p4,options_,M_,estim_params_,oo_);
     % Display the results.
     disp(' ')
     disp(' ')

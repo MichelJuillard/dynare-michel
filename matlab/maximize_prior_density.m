@@ -1,5 +1,5 @@
 function [xparams,lpd,hessian] = ...
-    maximize_prior_density(iparams, prior_shape, prior_hyperparameter_1, prior_hyperparameter_2, prior_inf_bound, prior_sup_bound)
+    maximize_prior_density(iparams, prior_shape, prior_hyperparameter_1, prior_hyperparameter_2, prior_inf_bound, prior_sup_bound,DynareOptions,DynareModel,EstimatedParams,DynareResults)
 % Maximizes the logged prior density using Chris Sims' optimization routine.
 % 
 % INPUTS 
@@ -41,7 +41,7 @@ gradient_method = 2;
 gradient_epsilon = 1e-6;
 
 [lpd,xparams,grad,hessian,itct,fcount,retcodehat] = ...
-    csminwel1('minus_logged_prior_density',iparams,H0,[],crit,nit,gradient_method, gradient_epsilon, ... 
-              prior_shape, prior_hyperparameter_1, prior_hyperparameter_2, prior_inf_bound, prior_sup_bound);
+    csminwel1('minus_logged_prior_density',iparams,H0,[],crit,nit,gradient_method, gradient_epsilon, ...
+              prior_shape, prior_hyperparameter_1, prior_hyperparameter_2, prior_inf_bound, prior_sup_bound,DynareOptions,DynareModel,EstimatedParams,DynareResults);
 
 lpd = -lpd;
