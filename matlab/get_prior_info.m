@@ -1,4 +1,4 @@
-function get_prior_info(info,plt_flag)
+function results = get_prior_info(info,plt_flag)
 % Computes various prior statistics.
 %
 % INPUTS
@@ -36,6 +36,9 @@ end
 if nargin==1
     plt_flag = 1;
 end
+
+% Initialize returned variable.
+results = [];
 
 changed_qz_criterium_flag  = 0;
 if isempty(options_.qz_criterium)
