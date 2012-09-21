@@ -91,7 +91,7 @@ GENERATED_FILES = \
 noinst_LIBRARIES = libtl.a
 
 libtl_a_SOURCES = $(CWEBSRC) $(GENERATED_FILES)
-libtl_a_CPPFLAGS = -I../../sylv/cc
+libtl_a_CPPFLAGS = -I../../sylv/cc $(CPPFLAGS_MATIO)
 libtl_a_CXXFLAGS = $(PTHREAD_CFLAGS)
 
 BUILT_SOURCES = $(GENERATED_FILES)

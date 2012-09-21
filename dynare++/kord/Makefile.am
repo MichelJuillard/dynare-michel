@@ -53,7 +53,7 @@ GENERATED_FILES = \
 noinst_LIBRARIES = libkord.a
 
 libkord_a_SOURCES = $(CWEBSRC) $(GENERATED_FILES)
-libkord_a_CPPFLAGS = -I../sylv/cc -I../tl/cc -I../integ/cc -I$(top_srcdir)/mex/sources
+libkord_a_CPPFLAGS = -I../sylv/cc -I../tl/cc -I../integ/cc -I$(top_srcdir)/mex/sources $(CPPFLAGS_MATIO)
 libkord_a_CXXFLAGS = $(PTHREAD_CFLAGS)
 
 BUILT_SOURCES = $(GENERATED_FILES)
