@@ -138,7 +138,7 @@ if info==2% Prior optimization.
     iter  = 0;
     while look_for_admissible_initial_condition
         xinit = xparam1+scale*randn(size(xparam1));
-        if all(xinit>bayestopt_.p3) && all(xinit<bayestopt_.p4)
+        if all(xinit(:)>bayestopt_.p3) && all(xinit(:)<bayestopt_.p4)
             look_for_admissible_initial_condition = 0;
         else
             if iter == 2000;
