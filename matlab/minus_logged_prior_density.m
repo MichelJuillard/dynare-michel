@@ -1,4 +1,4 @@
-function [f,fake] = minus_logged_prior_density(xparams,pshape,p6,p7,p3,p4)
+function [f,fake_1, fake_2, fake_3] = minus_logged_prior_density(xparams,pshape,p6,p7,p3,p4)
 % Evaluates minus the logged prior density.
 % 
 % INPUTS 
@@ -28,5 +28,8 @@ function [f,fake] = minus_logged_prior_density(xparams,pshape,p6,p7,p3,p4)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-fake = 1;
+fake_1 = 1;
+fake_2 = 1;
+fake_3 = 1;
+
 f = - priordens(xparams,pshape,p6,p7,p3,p4);
