@@ -26,7 +26,7 @@ function results = get_prior_info(info,plt_flag)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-global options_ M_ estim_params_ oo_
+global options_ M_ estim_params_ oo_ objective_function_penalty_base
 
 if ~nargin
     info = 0;
@@ -154,6 +154,11 @@ if info==2% Prior optimization.
             end
         end
     end
+    objective_function_penalty_base = minus_logged_prior_density(xinit, bayestopt_.pshape, ...
+                               bayestopt_.p6, ...
+                               bayestopt_.p7, ...
+                               bayestopt_.p3, ...
+                               bayestopt_.p4,options_,M_,estim_params_,oo_);
     % Maximization
     [xparams,lpd,hessian] = ...
         maximize_prior_density(xinit, bayestopt_.pshape, ...
