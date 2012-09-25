@@ -33,14 +33,10 @@ function options_=initialize_ms_sbvar_options(M_, options_)
 % all mex functions
 options_.ms.file_tag = M_.fname;
 options_.ms.create_init = 1;
-if isfield(options_.ms,'free_param_file')
-    options_.ms = rmfield(options_.ms,'free_param_file');
-end
+options_.ms.mh_file = '';
+options_.ms.free_param_file = '';
 if isfield(options_.ms,'simulation_file_tag')
     options_.ms = rmfield(options_.ms,'simulation_file_tag');
-end
-if isfield(options_.ms,'mh_file')
-    options_.ms = rmfield(options_.ms,'mh_file');
 end
 if isfield(options_.ms,'output_file_tag')
     options_.ms = rmfield(options_.ms,'output_file_tag');
@@ -58,15 +54,8 @@ options_.ms.alpha = 1;
 options_.ms.beta = 1;
 options_.ms.gsig2_lmdm = 50^2;
 options_.ms.specification = 2;
-if isfield(options_.ms,'initial_year')
-    options_.ms = rmfield(options_.ms,'initial_year');
-end
-if isfield(options_.ms,'final_year')
-    options_.ms = rmfield(options_.ms,'final_year');
-end
-if isfield(options_,'datafile')
-    options_ = rmfield(options_,'datafile');
-end
+options_.ms.initial_year = '';
+options_.ms.final_year = '';
 % estimation
 options_.ms.convergence_starting_value = 1e-3;
 options_.ms.convergence_ending_value = 1e-6;

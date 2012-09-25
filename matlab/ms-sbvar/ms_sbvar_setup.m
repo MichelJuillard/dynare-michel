@@ -11,7 +11,7 @@ function ms_sbvar_setup(options_)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2011 Dynare Team
+% Copyright (C) 2003-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -28,18 +28,7 @@ function ms_sbvar_setup(options_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ~isfield(options_.ms,'initial_year')
-    error('Must set initial_year option');
-end
-
-if ~isfield(options_.ms,'final_year')
-    error('Must set final_year option');
-end
-
-if ~isfield(options_,'datafile')
-    error('Must set datafile option');
-end
-
+check_datafile_years_assigned(options_)
 options_.data = read_variables(options_.datafile, ...
     options_.varobs, [], options_.xls_sheet, options_.xls_range);
 

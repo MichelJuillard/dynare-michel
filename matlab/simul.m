@@ -65,7 +65,7 @@ if options_.periods == 0
 end
 
 if ~ options_.initval_file
-    if ~isfield(options_,'datafile')
+    if isempty(options_.datafile)
         make_ex_;
         make_y_;
     else

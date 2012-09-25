@@ -32,7 +32,7 @@ global oo_ M_ options_ estim_params_ bayestopt_ estimation_info ex0_ ys0_  ex_de
 
 estim_params_ = [];
 bayestopt_ = [];
-
+options_.datafile = '';
 options_.console_mode = 0;
 
 options_.verbosity = 1;

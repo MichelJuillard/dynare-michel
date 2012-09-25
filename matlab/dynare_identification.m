@@ -114,7 +114,7 @@ options_.Schur_vec_tol = 1.e-8;
 options_.nomoments=0;
 options_.analytic_derivation=1;
 
-options_ = set_default_option(options_,'datafile',[]);
+options_ = set_default_option(options_,'datafile','');
 options_.mode_compute = 0;
 options_.plot_priors = 0;
 [dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_]=dynare_estimation_init(M_.endo_names,fname_,1, M_, options_, oo_, estim_params_, bayestopt_);
