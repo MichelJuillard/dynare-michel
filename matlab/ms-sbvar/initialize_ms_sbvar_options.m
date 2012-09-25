@@ -32,15 +32,11 @@ function options_=initialize_ms_sbvar_options(M_, options_)
 % MS SBVAR
 % all mex functions
 options_.ms.file_tag = M_.fname;
-options_.ms.create_init = 1;
 options_.ms.mh_file = '';
 options_.ms.free_param_file = '';
-if isfield(options_.ms,'simulation_file_tag')
-    options_.ms = rmfield(options_.ms,'simulation_file_tag');
-end
-if isfield(options_.ms,'output_file_tag')
-    options_.ms = rmfield(options_.ms,'output_file_tag');
-end
+options_.ms.output_file_tag = '';
+options_.ms.simulation_file_tag = '';
+options_.ms.create_init = 1;
 % prepare ms sbvar & estimation
 options_.ms.coefficients_prior_hyperparameters = [1.0 1.0 0.1 1.2 1.0 1.0];
 options_.ms.freq = 4;

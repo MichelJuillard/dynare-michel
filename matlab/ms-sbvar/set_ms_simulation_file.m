@@ -11,7 +11,7 @@ function options_=set_ms_simulation_file(options_)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -28,7 +28,7 @@ function options_=set_ms_simulation_file(options_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ~isfield(options_.ms, 'simulation_file_tag')
+if isempty(options_.ms.simulation_file_tag)
     options_.ms.simulation_file_tag = options_.ms.file_tag;
 end
 options_.ms.mh_file = ['simulation_' options_.ms.simulation_file_tag '.out'];
