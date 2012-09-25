@@ -6,7 +6,7 @@ DWUTILITIESDIR = $(top_srcdir)/../../../contrib/ms-sbvar/utilities_dw
 DYNMEXSRCDIR = $(top_srcdir)/../../sources
 MSMEXSRCDIR = $(DYNMEXSRCDIR)/ms-sbvar
 
-CPPFLAGS += $(GSL_CPPFLAGS) $(CPPFLAGS_MATIO) -DSTRUCTURED_COLUMN_MAJOR -I$(DYNMEXSRCDIR) -I$(MSMEXSRCDIR) -I$(DWUTILITIESDIR)/include -I$(DWSWITCHDIR)/switching -I$(DWSWITCHDIR)/state_space -I$(DWSWITCHDIR)/state_space/sbvar
+CPPFLAGS += $(GSL_CPPFLAGS) -DSTRUCTURED_COLUMN_MAJOR -I$(DYNMEXSRCDIR) -I$(MSMEXSRCDIR) -I$(DWUTILITIESDIR)/include -I$(DWSWITCHDIR)/switching -I$(DWSWITCHDIR)/state_space -I$(DWSWITCHDIR)/state_space/sbvar
 
 LIBS += $(GSL_LIBS)
 LDFLAGS += $(GSL_LDFLAGS)

@@ -2,8 +2,8 @@ EXEEXT = .mex
 include ../mex.am
 include ../../ms_sbvar.am
 
-ms_sbvar_command_line_CPPLAGS = $(MATIO_CPPFLAGS)
-ms_sbvar_create_init_file_CPPLAGS = $(MATIO_CPPFLAGS)
+ms_sbvar_command_line_CPPLAGS = $(CPPFLAGS_MATIO)
+ms_sbvar_create_init_file_CPPLAGS = $(CPPFLAGS_MATIO)
 
 ms_sbvar_command_line_LDFLAGS = $(LDFLAGS_MATIO)
 ms_sbvar_create_init_file_LDFLAGS = $(LDFLAGS_MATIO)
