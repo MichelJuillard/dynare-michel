@@ -41,6 +41,12 @@ if options_.ms.create_init
     clean_ms_estimation_files(options_.ms.file_tag);
     clean_ms_estimation_files(options_.ms.output_file_tag);
 else
+    if exist(['init_' options_.ms.file_tag '.dat'],'file') ~= 2 || ...
+            exist(['matlab_' options_.ms.file_tag '.prn'],'file') ~= 2 || ...
+            exist([options_.ms.file_tag '_markov_file.dat'],'file') ~= 2
+        error(['You must run ms_estimation without no_create_init as '...
+            'you are missing an initialization file it needs.']);
+    end
     if ~strcmp(options_.ms.file_tag, options_.ms.output_file_tag)
         clean_ms_estimation_files(options_.ms.output_file_tag);
     end
