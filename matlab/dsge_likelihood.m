@@ -428,8 +428,8 @@ switch DynareOptions.lik_init
         diffuse_periods = length(dlik);
     end
     if isnan(dLIK),
-        fval=dLIK;
         info = 45;
+        fval = objective_function_penalty_base + 100;
         exit_flag = 0;
         return
     end
