@@ -614,7 +614,7 @@ if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
                                                kalman_tol, DynareOptions.riccati_tol, ...
                                                DynareOptions.presample, ...
                                                T,Q,R,H,Z,mm,pp,rr,Zflag,diffuse_periods);
-        end;
+        end
     end
     if analytic_derivation,
         LIK1=LIK;
@@ -623,10 +623,19 @@ if ((kalman_algo==1) || (kalman_algo==3))% Multivariate Kalman Filter
         lik=lik1{1};
     end
     if isinf(LIK)
-        if kalman_algo == 1
-            kalman_algo = 2;
+        if DynareOptions.use_univariate_filters_if_singularity_is_detected
+            if kalman_algo == 1
+                kalman_algo = 2;
+            else
+                kalman_algo = 4;
+            end
         else
-            kalman_algo = 4;
+            if isinf(LIK)
+                info = 66;
+                fval = objective_function_penalty_base+1;
+                exit_flag = 0;
+                return
+            end
         end
     else
         if DynareOptions.lik_init==3

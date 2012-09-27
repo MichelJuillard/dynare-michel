@@ -330,6 +330,7 @@ options_.filtered_vars = 0;
 options_.first_obs = 1;
 options_.kalman_algo = 0;
 options_.kalman_tol = 1e-10;
+options_.use_univariate_filters_if_singularity_is_detected = 1;
 options_.riccati_tol = 1e-6;
 options_.lik_algo = 1;
 options_.lik_init = 1;
