@@ -315,6 +315,8 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
             save([M_.fname '_optimal_mh_scale_parameter.mat'],'Scale');
             bayestopt_.jscale = ones(length(xparam1),1)*Scale;
         end
+        parameter_names = bayestopt_.name;
+        save([M_.fname '_mode.mat'],'xparam1','hh','parameter_names');
       case 7
         % Matlab's simplex (Optimization toolbox needed).
         optim_options = optimset('display','iter','MaxFunEvals',1000000,'MaxIter',6000,'TolFun',1e-8,'TolX',1e-6);
