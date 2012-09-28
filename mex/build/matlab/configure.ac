@@ -20,7 +20,7 @@ dnl along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 AC_PREREQ([2.62])
 AC_INIT([dynare], [4.4-unstable])
 AC_CONFIG_SRCDIR([configure.ac])
-AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AM_INIT_AUTOMAKE([-Wall -Wno-portability -Werror foreign])
 
 dnl The following must occur before we modify CFLAGS/CXXFLAGS
 AC_CANONICAL_HOST
@@ -59,6 +59,7 @@ AC_PROG_CXX
 AC_PROG_RANLIB
 AX_PROG_LN_S
 AC_PROG_MKDIR_P
+AM_PROG_AR
 AX_PTHREAD
 # Check for boost libraries used in estimation DLL
 AC_LANG_PUSH([C++])

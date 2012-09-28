@@ -1,8 +1,8 @@
 noinst_LIBRARIES = libdynare++.a
 
-libdynare___a_CPPFLAGS = -I$(top_srcdir)/../../../dynare++/src -I$(top_srcdir)/../../../dynare++/kord -I$(top_srcdir)/../../../dynare++/tl/cc -I$(top_srcdir)/../../../dynare++/utils/cc -I$(top_srcdir)/../../../dynare++/sylv/cc -I$(top_srcdir)/../../../dynare++/integ/cc -I$(top_srcdir)/../../sources $(CPPFLAGS_MATIO)
+libdynare___a_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/../../../dynare++/src -I$(top_srcdir)/../../../dynare++/kord -I$(top_srcdir)/../../../dynare++/tl/cc -I$(top_srcdir)/../../../dynare++/utils/cc -I$(top_srcdir)/../../../dynare++/sylv/cc -I$(top_srcdir)/../../../dynare++/integ/cc -I$(top_srcdir)/../../sources $(CPPFLAGS_MATIO)
 
-libdynare___a_CXXFLAGS = $(PTHREAD_CFLAGS)
+libdynare___a_CXXFLAGS = $(AM_CXXFLAGS) $(PTHREAD_CFLAGS)
 
 TOPDIR = $(top_srcdir)/../../../dynare++
 

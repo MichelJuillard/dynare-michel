@@ -1,13 +1,13 @@
 EXEEXT = $(MEXEXT)
 
-CPPFLAGS += $(MATLAB_CPPFLAGS)
-CPPFLAGS += -I$(top_srcdir)/../../sources
+AM_CPPFLAGS = $(MATLAB_CPPFLAGS)
+AM_CPPFLAGS += -I$(top_srcdir)/../../sources
 
 DEFS += $(MATLAB_DEFS)
 DEFS += -DMATLAB_MEX_FILE
 DEFS += -DMEXEXT=\"$(MEXEXT)\"
 
-LDFLAGS += $(MATLAB_LDFLAGS)
+AM_LDFLAGS = $(MATLAB_LDFLAGS)
 LIBS += $(MATLAB_LIBS)
 
 all-local:

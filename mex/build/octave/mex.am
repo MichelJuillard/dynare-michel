@@ -1,17 +1,17 @@
-CPPFLAGS += $(shell $(MKOCTFILE) -p CPPFLAGS)
-CPPFLAGS += $(shell $(MKOCTFILE) -p INCFLAGS)
-CPPFLAGS += -I$(top_srcdir)/../../sources
+AM_CPPFLAGS = $(shell $(MKOCTFILE) -p CPPFLAGS)
+AM_CPPFLAGS += $(shell $(MKOCTFILE) -p INCFLAGS)
+AM_CPPFLAGS += -I$(top_srcdir)/../../sources
 
 DEFS += -DOCTAVE_MEX_FILE
 DEFS += -DMEXEXT=\".mex\"
 
-CFLAGS += $(shell $(MKOCTFILE) -p CPICFLAG)
-FFLAGS += $(shell $(MKOCTFILE) -p FPICFLAG)
-CXXFLAGS += $(shell $(MKOCTFILE) -p CXXPICFLAG)
+AM_CFLAGS = $(shell $(MKOCTFILE) -p CPICFLAG)
+AM_FFLAGS = $(shell $(MKOCTFILE) -p FPICFLAG)
+AM_CXXFLAGS = $(shell $(MKOCTFILE) -p CXXPICFLAG)
 
-LDFLAGS += $(shell $(MKOCTFILE) -p DL_LDFLAGS)
-LDFLAGS += $(shell $(MKOCTFILE) -p LFLAGS)
-LDFLAGS += $(shell $(MKOCTFILE) -p LDFLAGS)
+AM_LDFLAGS = $(shell $(MKOCTFILE) -p DL_LDFLAGS)
+AM_LDFLAGS += $(shell $(MKOCTFILE) -p LFLAGS)
+AM_LDFLAGS += $(shell $(MKOCTFILE) -p LDFLAGS)
 
 LIBS += $(shell $(MKOCTFILE) -p OCTAVE_LIBS)
 LIBS += $(shell $(MKOCTFILE) -p BLAS_LIBS)

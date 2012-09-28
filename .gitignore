@@ -26,6 +26,7 @@ depcomp
 install-sh
 missing
 ylwrap
+ar-lib
 
 # Doc rules
 *.pdf

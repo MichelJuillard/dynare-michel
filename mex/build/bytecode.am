@@ -1,6 +1,6 @@
 noinst_PROGRAMS = bytecode
 
-bytecode_CPPFLAGS = -I$(top_srcdir)/../../sources/bytecode -I$(top_srcdir)/../../../preprocessor
+bytecode_CPPFLAGS = $(AM_CPPFLAGS) -I$(top_srcdir)/../../sources/bytecode -I$(top_srcdir)/../../../preprocessor
 
 TOPDIR = $(top_srcdir)/../../sources/bytecode
 
