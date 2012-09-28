@@ -34,7 +34,8 @@ case ${MATLAB_ARCH} in
     MATLAB_CFLAGS="-fexceptions -fPIC -pthread -g -O2"
     MATLAB_CXXFLAGS="-fPIC -pthread -g -O2"
     MATLAB_FFLAGS="-fPIC -g -O2 -fexceptions"
-    MATLAB_LDFLAGS="-shared -Wl,--version-script,$MATLAB/extern/lib/${MATLAB_ARCH}/mexFunction.map -Wl,--no-undefined -Wl,-rpath-link,$MATLAB/bin/${MATLAB_ARCH} -L$MATLAB/bin/${MATLAB_ARCH}"
+    MATLAB_LDFLAGS_NOMAP="-shared -Wl,--no-undefined -Wl,-rpath-link,$MATLAB/bin/${MATLAB_ARCH} -L$MATLAB/bin/${MATLAB_ARCH}"
+    MATLAB_LDFLAGS="$MATLAB_LDFLAGS_NOMAP -Wl,--version-script,$MATLAB/extern/lib/${MATLAB_ARCH}/mexFunction.map"
     MATLAB_LIBS="-lmx -lmex -lmat -lm -lstdc++ -lmwlapack"
     # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
     AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} -lmwblas"])
@@ -54,7 +55,8 @@ case ${MATLAB_ARCH} in
     MATLAB_FFLAGS="-fexceptions -g -O2 -fno-underscoring"
     MATLAB_DEFS="$MATLAB_DEFS -DNDEBUG"
     # Note that static-libstdc++ is only supported since GCC 4.5 (but generates no error on older versions)
-    MATLAB_LDFLAGS="-static-libgcc -static-libstdc++ -shared \$(top_srcdir)/mex.def -L$MATLAB/bin/${MATLAB_ARCH}"
+    MATLAB_LDFLAGS_NOMAP="-static-libgcc -static-libstdc++ -shared -L$MATLAB/bin/${MATLAB_ARCH}"
+    MATLAB_LDFLAGS="$MATLAB_LDFLAGS_NOMAP $(pwd)/$srcdir/mex.def"
     MATLAB_LIBS="-lmex -lmx -lmat -lmwlapack"
     # Starting from MATLAB 7.5, BLAS and LAPACK are in distinct libraries
     AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.5], [MATLAB_LIBS="${MATLAB_LIBS} -lmwblas"])
@@ -70,11 +72,8 @@ case ${MATLAB_ARCH} in
     fi
     MATLAB_DEFS="$MATLAB_DEFS -DNDEBUG"
     MATLAB_CFLAGS="-fno-common -no-cpp-precomp -arch $ARCHS -isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -fexceptions -O2"
-    # Work around for slicot configuration: need to remove exported_symbols_list
-    # flag because there's no mexfunction in the configure script
     MATLAB_LDFLAGS_NOMAP="-L$MATLAB/bin/${MATLAB_ARCH} -Wl,-twolevel_namespace -undefined error -arch $ARCHS -Wl,-syslibroot,$SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -bundle"
-    MATLAB_MAPFLAG="-Wl,-exported_symbols_list,\$(top_srcdir)/mexFunction-MacOSX.map"
-    MATLAB_LDFLAGS="$MATLAB_LDFLAGS_NOMAP $MATLAB_MAPFLAG"
+    MATLAB_LDFLAGS="$MATLAB_LDFLAGS_NOMAP -Wl,-exported_symbols_list,$(pwd)/$srcdir/mexFunction-MacOSX.map"
     MATLAB_LIBS="-lmx -lmex -lmat -lstdc++ -lmwlapack"
     MATLAB_CXXFLAGS="-fno-common -no-cpp-precomp -fexceptions -arch $ARCHS -isysroot $SDKROOT -mmacosx-version-min=$MACOSX_DEPLOYMENT_TARGET -O2"
     MATLAB_FFLAGS="-fexceptions -fbackslash -arch $ARCHS"

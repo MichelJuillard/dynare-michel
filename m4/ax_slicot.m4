@@ -43,15 +43,8 @@ AC_DEFUN([AX_SLICOT],
   AC_F77_FUNC(sb02od)
 
   if test "x$1" = "xmatlab"; then
-    case ${MATLAB_ARCH} in
-       maci | maci64)
-         # Work around for exported_symbols_list flag present in Mac MATLAB_LDFLAGS
-         LDFLAGS="$MATLAB_LDFLAGS_NOMAP $LDFLAGS_SLICOT"
-         ;;
-       *)
-         LDFLAGS="$LDFLAGS $MATLAB_LDFLAGS $LDFLAGS_SLICOT"
-         ;;
-    esac
+    LDFLAGS="$MATLAB_LDFLAGS_NOMAP $LDFLAGS_SLICOT"
+
     case ${MATLAB_ARCH} in
        glnxa64 | win64 | maci64)
          AX_COMPARE_VERSION([$MATLAB_VERSION], [ge], [7.8], [use_64_bit_indexing=yes], [use_64_bit_indexing=no])
