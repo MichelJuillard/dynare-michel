@@ -99,8 +99,11 @@ options_.bvar_prior_flat = 0;
 options_.bvar_prior_train = 0;
 
 % Optimization algorithm [6] gmhmaxlik
-options_.Opt6Iter = 2;
-options_.Opt6Numb = 5000;
+gmhmaxlik.iterations = 3;
+gmhmaxlik.number = 20000;
+gmhmaxlik.nclimb = 200000;
+gmhmaxlik.nscale = 200000;
+options_.gmhmaxlik = gmhmaxlik;
 
 % Graphics
 options_.graphics.nrows = 3;

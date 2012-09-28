@@ -273,15 +273,15 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         end
         OldPostVar = CovJump;
         Scale = options_.mh_jscale;
-        for i=1:options_.Opt6Iter
+        for i=1:options_.gmhmaxlik.iterations
             if i == 1
-                if options_.Opt6Iter > 1
+                if options_.gmhmaxlik.iterations>1
                     flag = '';
                 else
                     flag = 'LastCall';
                 end
                 [xparam1,PostVar,Scale,PostMean] = ...
-                    gmhmaxlik(objective_function,xparam1,[lb ub],options_.Opt6Numb,Scale,flag,MeanPar,CovJump,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+                    gmhmaxlik(objective_function,xparam1,[lb ub],options_.gmhmaxlik,Scale,flag,MeanPar,CovJump,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 fval = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 options_.mh_jscale = Scale;
                 mouvement = max(max(abs(PostVar-OldPostVar)));
@@ -294,20 +294,24 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                 OldMode = fval;
             else
                 OldPostVar = PostVar;
-                if i<options_.Opt6Iter
+                if i<options_.gmhmaxlik.iterations
                     flag = '';
                 else
                     flag = 'LastCall';
                 end
                 [xparam1,PostVar,Scale,PostMean] = ...
                     gmhmaxlik(objective_function,xparam1,[lb ub],...
-                              options_.Opt6Numb,Scale,flag,PostMean,PostVar,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+                              options_.gmhmaxlik,Scale,flag,PostMean,PostVar,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 fval = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 options_.mh_jscale = Scale;
                 mouvement = max(max(abs(PostVar-OldPostVar)));
-                fval = dsge_likelihood(xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
-                disp(['Change in the covariance matrix = ' num2str(mouvement) '.'])
-                disp(['Mode improvement = ' num2str(abs(OldMode-fval))])
+                fval = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+                disp(' ')
+                disp('========================================================== ')
+                disp(['   Change in the covariance matrix = ' num2str(mouvement) '.'])
+                disp(['   Mode improvement = ' num2str(abs(OldMode-fval))])
+                disp(['   New value of jscale = ' num2str(Scale)])
+                disp('========================================================== ')
                 OldMode = fval;
             end
             hh = inv(PostVar);
@@ -315,6 +319,11 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
             save([M_.fname '_optimal_mh_scale_parameter.mat'],'Scale');
             bayestopt_.jscale = ones(length(xparam1),1)*Scale;
         end
+        disp(' ')
+        disp(['Optimal value of the scale parameter = ' num2str(Scale)])
+        disp(' ')
+        disp(['Final value of the log posterior (or likelihood): ' num2str(fval)])
+        disp(' ')
         parameter_names = bayestopt_.name;
         save([M_.fname '_mode.mat'],'xparam1','hh','parameter_names');
       case 7

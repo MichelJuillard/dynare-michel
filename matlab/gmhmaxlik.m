@@ -1,5 +1,5 @@
 function [PostMod,PostVar,Scale,PostMean] = ...
-    gmhmaxlik(ObjFun,xparam1,mh_bounds,num,iScale,info,MeanPar,VarCov,varargin)  
+    gmhmaxlik(ObjFun,xparam1,mh_bounds,options,iScale,info,MeanPar,VarCov,varargin)  
 
 %function [PostMod,PostVar,Scale,PostMean] = ...
 %gmhmaxlik(ObjFun,xparam1,mh_bounds,num,iScale,info,MeanPar,VarCov,varargin)  
@@ -9,7 +9,7 @@ function [PostMod,PostVar,Scale,PostMean] = ...
 %   o ObjFun     [char]     string specifying the name of the objective function.
 %   o xparam1    [double]   (p*1) vector of parameters to be estimated.
 %   o mh_bounds  [double]   (p*2) matrix defining lower and upper bounds for the parameters.
-%   o num        [integer]  scalar specifying the number of MH iterations in step 2.
+%   o options    [structure] options for the optimization algorithm (options_.gmhmaxlik).
 %   o iScale     [double]   scalar specifying the initial of the jumping distribution's scale parameter.
 %   o info       [char]     string, empty or equal to 'LastCall'.
 %   o MeanPar    [double]   (p*1) vector specifying the initial posterior mean.
@@ -59,7 +59,7 @@ function [PostMod,PostVar,Scale,PostMean] = ...
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2006-2011 Dynare Team
+% Copyright (C) 2006-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -81,9 +81,9 @@ global bayestopt_ estim_params_ options_
 options_.lik_algo = 1;
 npar = length(xparam1);
 
-NumberOfIterations = num;
-MaxNumberOfTuningSimulations   = 200000;
-MaxNumberOfClimbingSimulations = 200000;
+NumberOfIterations = options.number;
+MaxNumberOfTuningSimulations   = options.nscale;
+MaxNumberOfClimbingSimulations = options.nclimb;
 AcceptanceTarget               = 1/3;
 
 CovJump = VarCov;
@@ -187,6 +187,7 @@ PostMean = MeanPar;
 %% this is the last call to the routine, and I climb the hill (without
 %% updating the covariance matrix)...
 if strcmpi(info,'LastCall')
+    
     hh = dyn_waitbar(0,'Tuning of the scale parameter...');
     set(hh,'Name','Tuning of the scale parameter.'),
     j = 1; jj  = 1;
@@ -236,11 +237,9 @@ if strcmpi(info,'LastCall')
     %%
     %% Now I climb the hill
     %%
-    climb = 1;
-    if climb
+    if options.nclimb
         hh = dyn_waitbar(0,' ');
         set(hh,'Name','Now I am climbing the hill...'),
-        disp('Now I am climbing the hill...'),
         j = 1; jj  = 1;
         jsux = 0;
         test = 0;
