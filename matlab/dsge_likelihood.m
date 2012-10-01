@@ -429,7 +429,7 @@ switch DynareOptions.lik_init
     end
     if isnan(dLIK),
         info = 45;
-        fval = objective_function_penalty_base + 1.e8;
+        fval = objective_function_penalty_base + 100;
         exit_flag = 0;
         return
     end
