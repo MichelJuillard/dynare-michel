@@ -60,11 +60,12 @@ AC_DEFUN([AX_SLICOT],
        AC_CHECK_LIB([slicot_pic], [$sb02od], [LIBADD_SLICOT="-lslicot_pic"], [has_slicot=no], [$MATLAB_LIBS])
     fi
   else
-    LDFLAGS="$LDFLAGS $LDFLAGS_SLICOT"
+    LDFLAGS="$LDFLAGS `$MKOCTFILE -p LFLAGS` $LDFLAGS_SLICOT"
+    # Fallback on libslicot_pic if dynamic libslicot not found
     AC_CHECK_LIB([slicot], [$sb02od], [LIBADD_SLICOT="-lslicot"],
              [
                AC_CHECK_LIB([slicot_pic], [$sb02od], [LIBADD_SLICOT="-lslicot_pic"], [has_slicot=no], [`$MKOCTFILE -p BLAS_LIBS` `$MKOCTFILE -p LAPACK_LIBS`])
-             ], # Fallback on libslicot_pic if dynamic libslicot not found
+             ],
              [`$MKOCTFILE -p BLAS_LIBS` `$MKOCTFILE -p LAPACK_LIBS`])
   fi
 
