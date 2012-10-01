@@ -133,7 +133,7 @@ while i<n
     end
     f1(:,i)=fx;
     if outer_product_gradient,
-        if any(isnan(ffx))
+        if any(isnan(ffx)) || isempty(ffx),
             ff1=ones(size(ff0)).*fx/length(ff0);
         else
             ff1=ffx;
@@ -143,7 +143,7 @@ while i<n
     [fx, ffx]=feval(func,xh1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
     f_1(:,i)=fx;
     if outer_product_gradient,
-        if any(isnan(ffx))
+        if any(isnan(ffx)) || isempty(ffx),
             ff_1=ones(size(ff0)).*fx/length(ff0);
         else
             ff_1=ffx;
