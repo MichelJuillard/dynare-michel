@@ -2,7 +2,7 @@
  * Oct-file for bringing the complex QZ decomposition to Octave.
  * Simple wrapper around LAPACK's zgges.
  *
- * Written by Sebastien Villemot <sebastien.villemot@ens.fr>.
+ * Written by Sébastien Villemot <sebastien@dynare.org>.
  */
 
 /*

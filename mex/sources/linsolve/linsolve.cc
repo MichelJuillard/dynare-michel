@@ -6,7 +6,7 @@
  * - it only works with square matrices
  * - it only works on double matrices (no single precision or complex)
  *
- * Written by Sebastien Villemot <sebastien.villemot@ens.fr>.
+ * Written by Sébastien Villemot <sebastien@dynare.org>.
  */
 
 /*

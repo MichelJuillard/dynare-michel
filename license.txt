@@ -10,7 +10,7 @@ Upstream-Contact: Dynare Team, whose members in 2012 are:
                   George Perendia <george@perendia.orangehome.co.uk>
                   Johannes Pfeifer <jpfeifer@gmx.de>
                   Marco Ratto <marco.ratto@jrc.ec.europa.eu>
-                  Sébastien Villemot <sebastien.villemot@ens.fr>
+                  Sébastien Villemot <sebastien@dynare.org>
 Source: http://www.dynare.org
 
 Files: *

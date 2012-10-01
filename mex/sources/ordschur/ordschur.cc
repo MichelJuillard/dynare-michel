@@ -4,7 +4,7 @@
  * Only supports real (double precision) decomposition.
  * Only selection of eigenvalues with a boolean vector is supported.
  *
- * Written by Sebastien Villemot <sebastien.villemot@ens.fr>.
+ * Written by Sébastien Villemot <sebastien@dynare.org>.
  */
 
 /*
