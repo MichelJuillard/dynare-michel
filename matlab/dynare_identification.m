@@ -61,6 +61,16 @@ options_ident = set_default_option(options_ident,'advanced',0);
 options_ident = set_default_option(options_ident,'normalize_jacobians',1);
 options_ident = set_default_option(options_ident,'lik_init',1);
 options_ident = set_default_option(options_ident,'analytic_derivation',1);
+if isfield(options_ident,'nograph'),
+    options_.nograph=options_ident.nograph;
+end
+if isfield(options_ident,'nodisplay'),
+    options_.nodisplay=options_ident.nodisplay;
+end
+if isfield(options_ident,'graph_format'),
+    options_.graph_format=options_ident.graph_format;
+end
+
 if options_ident.gsa_sample_file,
     GSAFolder = checkpath('gsa',M_.dname);
     if options_ident.gsa_sample_file==1,
