@@ -244,7 +244,8 @@ clean-local:
 
 	rm -f arima/data1.m arima/data2.m \
 		k_order_perturbation/*.jnl \
-		k_order_perturbation/*.mat
+		k_order_perturbation/*.mat \
+		kalman_filter_smoother/data.mat
 
 	rm -rf ramsey_objective
 
