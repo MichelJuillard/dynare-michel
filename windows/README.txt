@@ -57,11 +57,11 @@ Using Dynare with Octave
 Dynare also works on top of GNU Octave, a free clone of MATLAB (R) (see
 <http://www.octave.org>).
 
-This version of Dynare is compiled for Octave 3.6.1 (MinGW), and may not work
-with other versions of Octave. You can download an installer for the right
-version of Octave at:
+This version of Dynare is compiled for Octave 3.6 (MinGW), and may not work
+with other versions of Octave. The recommended version of Octave can be
+downloaded at:
 
-  http://www.dynare.org/octave/Octave3.6.1_gcc4.6.2_20120303-setup.exe
+  http://www.dynare.org/download/octave/windows
 
 Every time you run Octave, you should type the two following commands (assuming
 that you have installed Dynare at the standard location, and replacing '4.x.y'
@@ -71,8 +71,8 @@ by correct version number):
 
 NOTE: if you don't want to type this command every time you run Octave, you can
 put it in a file called '.octaverc' in your home directory ('c:\Documents and
-Settings\USERNAME\' for Windows XP or 'c:\Users\USERNAME' for Windows 7). This
-file is run by Octave at every startup.
+Settings\USERNAME' for Windows XP or 'c:\Users\USERNAME' for Windows Vista/7).
+This file is run by Octave at every startup.
 
 You can test your installation by typing 'dynare' at the Octave prompt. This
 should give you an error message complaining that you did not specify a MOD

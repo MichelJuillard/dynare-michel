@@ -378,8 +378,8 @@ MATLAB version 7.3 (R2006b) or above;
 GNU Octave version 3.4.0 or above.
 @end itemize
 
-Some installation instructions for GNU Octave can be found on the
-@uref{http://www.dynare.org/DynareWiki/DynareOctave,Dynare Wiki}.
+Packages of GNU Octave can be downloaded on the
+@uref{http://www.dynare.org/download/octave,Dynare website}.
 
 The following optional extensions are also useful to benefit from extra
 features, but are in no way required:
