@@ -263,3 +263,11 @@ clean-local:
 		$(shell find -name wsMat.mat)
 
 	rm -f run_test_matlab_output.txt run_test_octave_output.txt
+
+	rm -rf ms-sbvar/init_* \
+		ms-sbvar/*.out \
+		ms-sbvar/*.mat \
+		ms-sbvar/*.prn \
+		ms-sbvar/*.dat \
+		ms-sbvar/tmv_rr_sr \
+		ms-sbvar/tmv_rr_tr
