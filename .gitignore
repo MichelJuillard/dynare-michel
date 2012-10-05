@@ -28,6 +28,9 @@ missing
 ylwrap
 ar-lib
 
+# Make Check Rules
+*.trs
+
 # Doc rules
 *.pdf
 *.aux

@@ -1,4 +1,9 @@
 MODFILES = \
+	estimation/fs2000_mc4.mod \
+	estimation/fs2000_mc4_mf.mod \
+	estimation/fs2000_mc6.mod \
+	estimation/fs2000_mc6_mf.mod \
+	gsa/ls2003.mod \
 	ramst.mod \
 	ramst_a.mod \
 	example1.mod \
@@ -96,7 +101,6 @@ MODFILES = \
 	external_function/example1_no_deriv_functions_provided.mod \
 	external_function/example1_no_deriv_functions_provided_dll.mod \
 	seeds.mod \
-	gsa/ls2003.mod \
 	identification/kim/kim2.mod \
 	identification/as2007/as2007.mod \
 	simul/example1.mod \
@@ -142,21 +146,72 @@ MODFILES = \
 	deterministic_simulations/rbc_det4.mod \
 	deterministic_simulations/rbc_det5.mod \
 	fs2000/fs2000_sd.mod \
-	walsh.mod \
-	estimation/fs2000_mc4.mod \
-	estimation/fs2000_mc4_mf.mod \
-	estimation/fs2000_mc6.mod \
-	estimation/fs2000_mc6_mf.mod
+	walsh.mod
+
+# Dependencies
+example1_use_dll.m.trs: example1.m.trs
+example1_use_dll.o.trs: example1.o.trs
+
+k_order_perturbation/fs2000k_1_m.m.trs: k_order_perturbation/fs2000k2_m.m.trs
+k_order_perturbation/fs2000k2_m.m.trs k_order_perturbation/fs2000k3_m.m.trs k_order_perturbation/fs2000k2_use_dll.m.trs k_order_perturbation/fs2000k3_use_dll.m.trs: k_order_perturbation/fs2000k2a.m.trs
+k_order_perturbation/fs2000k_1_use_dll.m.trs: k_order_perturbation/fs2000k2_use_dll.m.trs
+k_order_perturbation/fs2000k4.m.trs: k_order_perturbation/fs2000k++.m.trs
+
+k_order_perturbation/fs2000k_1_m.o.trs: k_order_perturbation/fs2000k2_m.o.trs
+k_order_perturbation/fs2000k2_m.o.trs k_order_perturbation/fs2000k3_m.o.trs k_order_perturbation/fs2000k2_use_dll.o.trs k_order_perturbation/fs2000k3_use_dll.o.trs: k_order_perturbation/fs2000k2a.o.trs
+k_order_perturbation/fs2000k_1_use_dll.o.trs: k_order_perturbation/fs2000k2_use_dll.o.trs
+k_order_perturbation/fs2000k4.o.trs: k_order_perturbation/fs2000k++.o.trs
+
+kalman_filter_smoother/algo1.m.trs kalman_filter_smoother/algo3.m.trs kalman_filter_smoother/algo4a.m.trs kalman_filter_smoother/algo4b.m.trs kalman_filter_smoother/algoH1.m.trs kalman_filter_smoother/algoH3.m.trs kalman_filter_smoother/fs2000.m.trs kalman_filter_smoother/fs2000_1.m.trs kalman_filter_smoother/fs2000_2.m.trs kalman_filter_smoother/fs2000a.m.trs: kalman_filter_smoother/gen_data.m.trs
+kalman_filter_smoother/algo1.o.trs kalman_filter_smoother/algo3.o.trs kalman_filter_smoother/algo4a.o.trs kalman_filter_smoother/algo4b.o.trs kalman_filter_smoother/algoH1.o.trs kalman_filter_smoother/algoH3.o.trs kalman_filter_smoother/fs2000.o.trs kalman_filter_smoother/fs2000_1.o.trs kalman_filter_smoother/fs2000_2.o.trs kalman_filter_smoother/fs2000a.o.trs: kalman_filter_smoother/gen_data.o.trs
+
+kalman_filter_smoother/algo2.m.trs: kalman_filter_smoother/algo1.m.trs
+kalman_filter_smoother/algo2.o.trs: kalman_filter_smoother/algo1.o.trs
+
+kalman_filter_smoother/algoH2.m.trs: kalman_filter_smoother/algoH1.m.trs
+kalman_filter_smoother/algoH2.o.trs: kalman_filter_smoother/algoH1.o.trs
+
+kalman_filter_smoother/algo4.m.trs: kalman_filter_smoother/algo3.m.trs
+kalman_filter_smoother/algo4.o.trs: kalman_filter_smoother/algo3.o.trs
+
+optimal_policy/nk_ramsey_expectation_a.m.trs: optimal_policy/nk_ramsey_expectation.m.trs
+optimal_policy/nk_ramsey_expectation_a.o.trs: optimal_policy/nk_ramsey_expectation.o.trs
+
+second_order/ds2.m.trs: second_order/ds1.m.trs
+second_order/ds2.o.trs: second_order/ds1.o.trs
+
+AIM/fs2000_b1L1L_AIM.m.trs: AIM/fs2000_b1L1L.m.trs
+AIM/fs2000x10L9_L_AIM.m.trs: AIM/fs2000x10L9_L.m.trs
+AIM/fs2000x10_L9_L_AIM.m.trs: AIM/fs2000x10_L9_L.m.trs
+AIM/ls2003_2L0L_AIM.m.trs: AIM/ls2003_2L0L.m.trs
+AIM/ls2003_2L2L_AIM.m.trs: AIM/ls2003_2L2L.m.trs
+AIM/fs2000_b1L1L_AIM.o.trs: AIM/fs2000_b1L1L.o.trs
+AIM/fs2000x10L9_L_AIM.o.trs: AIM/fs2000x10L9_L.o.trs
+AIM/fs2000x10_L9_L_AIM.o.trs: AIM/fs2000x10_L9_L.o.trs
+AIM/ls2003_2L0L_AIM.o.trs: AIM/ls2003_2L0L.o.trs
+AIM/ls2003_2L2L_AIM.o.trs: AIM/ls2003_2L2L.o.trs
+
+# Matlab TRS Files
+MTRSFILES = $(patsubst %.mod, %.m.trs, $(MODFILES))
+MTRSFILES += run_block_byte_tests_matlab.m.trs
+
+# Octave TRS Files
+OTRSFILES = $(patsubst %.mod, %.o.trs, $(MODFILES))
+OTRSFILES += run_block_byte_tests_octave.o.trs
+
 EXTRA_DIST = \
+	read_trs_files.sh \
+	run_test_matlab.m \
+	run_test_octave.m \
 	$(MODFILES) \
+	run_block_byte_tests_matlab.m \
+	run_block_byte_tests_octave.m \
 	homotopy/common.mod \
 	block_bytecode/ls2003.mod \
 	fs2000_ssfile_aux.m \
 	printMakeCheckMatlabErrMsg.m \
 	printMakeCheckOctaveErrMsg.m \
 	ramst_initval_file_data.m \
-	run_test_matlab.m \
-	run_test_octave.m \
 	test.m \
 	AIM/data_ca1.m \
 	AIM/fs2000_b1L1L_AIM_steadystate.m \
@@ -213,13 +268,44 @@ endif
 
 check-local: $(TARGETS)
 
-check-matlab:
-	DYNARE_VERSION="$(PACKAGE_VERSION)" MODFILES="$(MODFILES)" $(MATLAB)/bin/matlab -nodesktop -nosplash -r run_test_matlab
+if HAVE_OCTAVE
+	./read_trs_files.sh "$(OTRSFILES)"
+endif
 
-check-octave:
-	DYNARE_VERSION="$(PACKAGE_VERSION)" MODFILES="$(MODFILES)" $(OCTAVE) --no-init-file --silent --no-history run_test_octave.m
+if HAVE_CMD_LINE_MATLAB
+	./read_trs_files.sh "$(MTRSFILES)"
+endif
+	@cat run_test_matlab_output.txt
+	@cat run_test_octave_output.txt
+
+check-matlab: $(MTRSFILES)
+	@echo 'Matlab Tests Done'
+
+check-octave: $(OTRSFILES)
+	@echo 'Octave Tests Done'
+
+%.m.trs %.m.log: %.mod
+	DYNARE_VERSION="$(PACKAGE_VERSION)" TOP_TEST_DIR="$(PWD)" FILESTEM="$*" \
+		$(MATLAB)/bin/matlab -nosplash -nodisplay -logfile $*.m.log -r run_test_matlab
+
+%.m.trs %.m.log : %.m
+	DYNARE_VERSION="$(PACKAGE_VERSION)" TOP_TEST_DIR="$(PWD)" \
+		$(MATLAB)/bin/matlab -nosplash -nodisplay -logfile $*.m.log -r $*
+
+%.o.trs %.o.log: %.mod
+	DYNARE_VERSION="$(PACKAGE_VERSION)" TOP_TEST_DIR="$(PWD)" FILESTEM="$*" \
+		$(OCTAVE) --no-init-file --silent --no-history run_test_octave.m > $*.o.log 2>&1
+
+%.o.trs %.o.log : %.m
+	DYNARE_VERSION="$(PACKAGE_VERSION)" TOP_TEST_DIR="$(PWD)" \
+		$(OCTAVE) --no-init-file --silent --no-history $< > $*.o.log 2>&1
 
 clean-local:
+	rm -f $(MTRSFILES) \
+		$(OTRSFILES) \
+		$(patsubst %.trs, %.log, $(MTRSFILES)) \
+		$(patsubst %.trs, %.log, $(OTRSFILES))
+
 	rm -f $(patsubst %.mod, %.m, $(MODFILES)) \
 		$(patsubst %.mod, %_static.*, $(MODFILES)) \
 		$(patsubst %.mod, %_objective_static.m, $(MODFILES)) \
