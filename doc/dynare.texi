@@ -81,6 +81,7 @@ A copy of the license can be found at @uref{http://www.gnu.org/licenses/fdl.txt}
 @author Junior Maih
 @author Ferhat Mihoubi
 @author George Perendia
+@author Johannes Pfeifer
 @author Marco Ratto
 @author Sébastien Villemot
 @page
