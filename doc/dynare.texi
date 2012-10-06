@@ -4212,7 +4212,7 @@ stored in variable @code{oo_.forecast} and corresponds to the forecast
 at the posterior mode. If a Metropolis-Hastings is computed, the
 distribution of forecasts is stored in variables
 @code{oo_.PointForecast} and
-@code{oo_.MeanForecast}. @xref{Forecasting}) for a description of
+@code{oo_.MeanForecast}. @xref{Forecasting} for a description of
 these variables.
 
 @item tex
@@ -4711,7 +4711,7 @@ results in @code{oo_.SmoothedVariables} and
 @xref{datafile}.
 
 @item filtered_vars
-Triggers the computation of filtered variables. @xref{filtered_vars} for
+Triggers the computation of filtered variables. @xref{filtered_vars}, for
 more details.
 
 @item filter_step_ahead = [@var{INTEGER1}:@var{INTEGER2}]
