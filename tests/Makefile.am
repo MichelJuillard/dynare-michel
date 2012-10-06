@@ -151,7 +151,6 @@ EXTRA_DIST = \
 	printMakeCheckMatlabErrMsg.m \
 	printMakeCheckOctaveErrMsg.m \
 	ramst_initval_file_data.m \
-	run_test.m \
 	run_test_matlab.m \
 	run_test_octave.m \
 	test.m \
