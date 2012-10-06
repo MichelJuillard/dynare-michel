@@ -112,23 +112,12 @@ if strcmpi(ProposalFun,'rand_multivariate_normal')
 elseif strcmpi(ProposalFun,'rand_multivariate_student')
     n = options_.student_degrees_of_freedom;
 end
-% load([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
+
 %%%%
 %%%% NOW i run the (nblck-fblck+1) metropolis-hastings chains
 %%%%
 
-
-if any(isnan(bayestopt_.jscale))  || (options_.mode_compute==0 && ~isempty(options_.mode_file))
-    if exist([ModelName '_optimal_mh_scale_parameter.mat'])% This file is created by mode_compute=6.
-        load([ModelName '_optimal_mh_scale_parameter'])
-        proposal_covariance_Cholesky_decomposition = d*Scale;
-    else
-        error('mh:: Something is wrong. I can''t figure out the value of the scale parameter.')
-    end
-else
-    proposal_covariance_Cholesky_decomposition = d*diag(bayestopt_.jscale);
-end
-
+proposal_covariance_Cholesky_decomposition = d*diag(bayestopt_.jscale);
 
 jloop=0;
 

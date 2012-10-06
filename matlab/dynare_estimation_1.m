@@ -106,6 +106,20 @@ if ~isempty(options_.mode_file) && ~options_.mh_posterior_mode_estimation
     load(options_.mode_file);
 end
 
+%% load optimal_mh_scale parameter if previous run was with
+%% mode_compute=6
+mh_scale_fname = [M_.fname '_optimal_mh_scale_parameter.mat'];
+if exist(mh_scale_fname)
+    if options_.mode_compute == 0
+        tmp = load(mh_scale_fname,'Scale');
+        bayestopt_.mh_jscale = tmp.Scale;
+        clear tmp;
+    else
+        % remove the file if mode_compute ~= 0
+        delete('mh_scale_fname')
+    end
+end
+
 if ~isempty(estim_params_)
     set_parameters(xparam1);
 end
@@ -168,11 +182,6 @@ if isequal(options_.mode_compute,0) && isempty(options_.mode_file) && options_.m
         end
     end
     return
-end
-
-if isequal(options_.mode_compute,6)
-    % Erase previously computed optimal mh scale parameter.
-    delete([M_.fname '_optimal_mh_scale_parameter.mat'])
 end
 
 

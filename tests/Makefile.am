@@ -141,8 +141,11 @@ MODFILES = \
 	deterministic_simulations/rbc_det4.mod \
 	deterministic_simulations/rbc_det5.mod \
 	fs2000/fs2000_sd.mod \
-	walsh.mod
-
+	walsh.mod \
+	estimation/fs2000_mc4.mod \
+	estimation/fs2000_mc4_mf.mod \
+	estimation/fs2000_mc6.mod \
+	estimation/fs2000_mc6_mf.mod
 EXTRA_DIST = \
 	$(MODFILES) \
 	homotopy/common.mod \
@@ -193,6 +196,7 @@ EXTRA_DIST = \
 	kalman_filter_smoother/fsdat_simul.m \
 	kalman_filter_smoother/fs2000a_steadystate.m \
 	identification/kim/kim2_steadystate.m \
+	estimation/fsdat_simul.m \
 	ep/mean_preserving_spread.m
 
 TARGETS =
