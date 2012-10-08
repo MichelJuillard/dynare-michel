@@ -152,6 +152,9 @@ if ~isempty(estim_params_)
     bayestopt_.lb = lb;
     bayestopt_.ub = ub;
 else% If estim_params_ is empty (e.g. when running the smoother on a calibrated model)
+    if ~options_.smoother
+        error('ESTIMATION: the ''estimated_params'' block is mandatory (unless you are running a smoother)')
+    end
     xparam1 = [];
     bayestopt_.lb = [];
     bayestopt_.ub = [];
