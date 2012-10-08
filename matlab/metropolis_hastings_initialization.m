@@ -221,12 +221,10 @@ elseif options_.load_mh_file && ~options_.mh_recover
     file = dir([ MhDirectoryName '/'  ModelName '_mh_history.mat' ]);
     files = dir([ MhDirectoryName filesep ModelName '_mh*.mat']);
     if ~length(files)
-        disp('MH:: FAILURE! there is no MH file to load here!')
-        return
+        error('MH:: FAILURE! there is no MH file to load here!')
     end
     if ~length(file)
-        disp('MH:: FAILURE! there is no MH-history file!')
-        return
+        error('MH:: FAILURE! there is no MH-history file!')
     else
         load([ MhDirectoryName '/'  ModelName '_mh_history.mat'])
     end
@@ -281,8 +279,7 @@ elseif options_.mh_recover
     disp(' ')
     file = dir([MhDirectoryName '/'  ModelName '_mh_history.mat']);
     if ~length(file)
-        disp('MH:: FAILURE! there is no MH-history file!')
-        return
+        error('MH:: FAILURE! there is no MH-history file!')
     else
         load([ MhDirectoryName '/'  ModelName '_mh_history.mat'])
     end

@@ -37,12 +37,10 @@ DirectoryName = CheckPath('metropolis',M_.dname);
 file = dir([ DirectoryName ,filesep,  M_.fname '_mh_history.mat']);
 files = dir([ DirectoryName ,filesep, M_.fname '_mh*.mat' ]);
 if ~length(files)
-    disp('MH:: FAILURE! there is no MH file to load here!')
-    return
+    error('MH:: FAILURE! there is no MH file to load here!')
 end
 if ~length(file)
-    disp('MH:: FAILURE! there is no MH-history file!')
-    return
+    error('MH:: FAILURE! there is no MH-history file!')
 else
     load([ DirectoryName '/'  M_.fname '_mh_history.mat'])
 end
