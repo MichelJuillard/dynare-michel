@@ -151,7 +151,7 @@ if ~isempty(estim_params_)
     ub = bounds(:,2);
     bayestopt_.lb = lb;
     bayestopt_.ub = ub;
-else% If estim_params_ is empty...
+else% If estim_params_ is empty (e.g. when running the smoother on a calibrated model)
     xparam1 = [];
     bayestopt_.lb = [];
     bayestopt_.ub = [];
