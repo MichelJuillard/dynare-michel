@@ -13,7 +13,7 @@ function initvalf(fname_)
 %    All variables local to this function have an underscore appended to
 %    their name, to minimize clashes with model variables loaded by this function.
 
-% Copyright (C) 2003-2010 Dynare Team
+% Copyright (C) 2003-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -33,13 +33,39 @@ function initvalf(fname_)
 global M_ oo_ options_
 
 series_ = 1;
-if exist(fname_) == 2
-    eval(fname_);
-elseif exist([fname_ '.xls']) == 2
-    [data_,names_v_]=xlsread([fname_ '.xls']);
-    series_ = 0;
-elseif exist([fname_ '.mat']) == 2
-    load(fname_);
+
+[directory,basename,extension] = fileparts(fname_);
+
+% Auto-detect extension if not provided
+if isempty(extension)
+    if exist([basename '.m'],'file')
+        extension = '.m';
+    elseif exist([basename '.mat'],'file')
+        extension = '.mat';
+    elseif exist([basename '.xls'],'file')
+        extension = '.xls';
+    elseif exist([basename '.xlsx'],'file')
+        extension = '.xlsx';
+    else
+        error(['Can''t find datafile: ' basename '.{m,mat,xls,xlsx}']);
+    end
+end
+
+fullname = [basename extension];
+
+if ~exist(fullname)
+    error(['Can''t find datafile: ' fullname ]);
+end
+
+switch (extension)
+    case '.m'
+        eval(basename);
+    case '.mat'
+        load(basename);
+    case { '.xls', '.xlsx' }
+        [data_,names_v_]=xlsread(fullname); % Octave needs the extension explicitly
+    otherwise
+        error(['Unsupported extension for datafile: ' extension])
 end
 
 options_.initval_file = 1;

@@ -1993,9 +1993,10 @@ variable, the file must contain a row vector of the same name.
 MAT-file (extension @file{.mat}): same as for M-files.
 
 @item
-Excel file (extension @file{.xls}): for each endogenous and exogenous,
-the file must contain a column of the same name (supported under Octave
-if the @uref{http://octave.sourceforge.net/io/,io} and
+Excel file (extension @file{.xls} or @file{.xlsx}): for each
+endogenous and exogenous, the file must contain a column of the same
+name (supported under Octave if the
+@uref{http://octave.sourceforge.net/io/,io} and
 @uref{http://octave.sourceforge.net/java/,java} packages from
 Octave-Forge are installed, along with a
 @uref{http://www.java.com/download,Java Runtime Environment}).
@@ -3891,7 +3892,7 @@ graphs of smoothed shocks, smoothed observation errors, smoothed and historical 
 @item datafile = @var{FILENAME}
 @anchor{datafile}
 The datafile: a @file{.m} file, a @file{.mat} file or, a
-@file{.xls} file (the latter format is supported under Octave
+@file{.xls}/@file{.xlsx} file (the latter format is supported under Octave
 if the @uref{http://octave.sourceforge.net/io/,io} and
 @uref{http://octave.sourceforge.net/java/,java} packages from
 Octave-Forge are installed, along with a

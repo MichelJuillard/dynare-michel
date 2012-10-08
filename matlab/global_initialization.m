@@ -227,7 +227,7 @@ options_.particle = particle;
 options_.TeX = 0;
 
 % Exel
-options_.xls_sheet = '';
+options_.xls_sheet = 1; % Octave does not support the empty string, rather use first sheet
 options_.xls_range = '';
 
 % Prior draws
