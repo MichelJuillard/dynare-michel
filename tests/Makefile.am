@@ -217,7 +217,7 @@ check-matlab:
 	DYNARE_VERSION="$(PACKAGE_VERSION)" MODFILES="$(MODFILES)" $(MATLAB)/bin/matlab -nodesktop -nosplash -r run_test_matlab
 
 check-octave:
-	DYNARE_VERSION="$(PACKAGE_VERSION)" MODFILES="$(MODFILES)" $(OCTAVE) --norc --silent --no-history run_test_octave.m
+	DYNARE_VERSION="$(PACKAGE_VERSION)" MODFILES="$(MODFILES)" $(OCTAVE) --no-init-file --silent --no-history run_test_octave.m
 
 clean-local:
 	rm -f $(patsubst %.mod, %.m, $(MODFILES)) \
