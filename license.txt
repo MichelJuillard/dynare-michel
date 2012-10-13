@@ -129,10 +129,6 @@ Files: scripts/dynare.el
 Copyright: 2010 Yannick Kalantzis
 License: GPL-3+
 
-Files: mex/sources/libslicot/*
-Copyright: 2002-2009 NICONET e.V.
-License: GPL-2+
-
 Files: mex/sources/sobol/sobol.hh mex/sources/sobol/initialize_v_array.hh
  mex/sources/sobol/initialize_v_array.inc
 Copyright: 2009 John Burkardt
