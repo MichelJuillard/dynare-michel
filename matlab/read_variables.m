@@ -88,6 +88,11 @@ switch (extension)
         end
     case { '.xls', '.xlsx' }
         [num,txt,raw] = xlsread(fullname,xls_sheet,xls_range); % Octave needs the extension explicitly
+        for i=1:size(raw,2)
+            if isnan(raw{1,i})
+                raw{1,i} = ' ';
+            end
+        end
         for dyn_i_01=1:var_size_01
             iv = strmatch(var_names_01(dyn_i_01,:),raw(1,:),'exact');
             dyn_tmp_01 = [raw{2:end,iv}]';
