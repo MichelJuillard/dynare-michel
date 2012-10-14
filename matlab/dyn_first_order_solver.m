@@ -118,10 +118,10 @@ if isempty(reorder_jacobian_columns)
     if maximum_lag
         no_both_lag_id = setdiff(lag_id,both_id);
     else
-        no_both_lag_id = [];
+        no_both_lag_id = lag_id;
     end
     innovations_idx = nz+(1:exo_nbr);
-    state_var  = [lag_id, both_id];
+    state_var  = [no_both_lag_id, both_id];
 
     index_c  = nonzeros(lead_lag_incidence(maximum_lag+1,:));             % Index of all endogenous variables present at time=t
     n_current = length(index_c);
