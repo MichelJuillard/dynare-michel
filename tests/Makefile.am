@@ -191,6 +191,11 @@ AIM/fs2000x10_L9_L_AIM.o.trs: AIM/fs2000x10_L9_L.o.trs
 AIM/ls2003_2L0L_AIM.o.trs: AIM/ls2003_2L0L.o.trs
 AIM/ls2003_2L2L_AIM.o.trs: AIM/ls2003_2L2L.o.trs
 
+estimation/fs2000_mc4_mf.m.trs: estimation/fs2000_mc4.m.trs
+estimation/fs2000_mc6_mf.m.trs: estimation/fs2000_mc6.m.trs
+estimation/fs2000_mc4_mf.o.trs: estimation/fs2000_mc4.o.trs
+estimation/fs2000_mc6_mf.o.trs: estimation/fs2000_mc6.o.trs
+
 # Matlab TRS Files
 MTRSFILES = $(patsubst %.mod, %.m.trs, $(MODFILES))
 MTRSFILES += run_block_byte_tests_matlab.m.trs
