@@ -75,6 +75,7 @@ MODFILES = \
 	fs2000/fs2000_analytic_derivation.mod \
 	fs2000/fs2000_particle.mod \
 	fs2000/fs2000_missing_data.mod \
+	fs2000/fs2000_sd.mod \
 	homotopy/homotopy1_test.mod \
 	homotopy/homotopy2_test.mod \
 	homotopy/homotopy3_test.mod \
@@ -145,7 +146,6 @@ MODFILES = \
 	deterministic_simulations/rbc_det3.mod \
 	deterministic_simulations/rbc_det4.mod \
 	deterministic_simulations/rbc_det5.mod \
-	fs2000/fs2000_sd.mod \
 	walsh.mod
 
 # Dependencies
