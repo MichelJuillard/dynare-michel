@@ -196,6 +196,24 @@ estimation/fs2000_mc6_mf.m.trs: estimation/fs2000_mc6.m.trs
 estimation/fs2000_mc4_mf.o.trs: estimation/fs2000_mc4.o.trs
 estimation/fs2000_mc6_mf.o.trs: estimation/fs2000_mc6.o.trs
 
+arima/mod1a.m.trs: arima/mod1.m.trs
+arima/mod1b.m.trs: arima/mod1.m.trs
+arima/mod1c.m.trs: arima/mod1.m.trs
+arima/mod1a.o.trs: arima/mod1.o.trs
+arima/mod1b.o.trs: arima/mod1.o.trs
+arima/mod1c.o.trs: arima/mod1.o.trs
+arima/mod2a.m.trs: arima/mod2.m.trs
+arima/mod2b.m.trs: arima/mod2.m.trs
+arima/mod2c.m.trs: arima/mod2.m.trs
+arima/mod2a.o.trs: arima/mod2.o.trs
+arima/mod2b.o.trs: arima/mod2.o.trs
+arima/mod2c.o.trs: arima/mod2.o.trs
+
+dsge-var/dsgevar_forward_calibrated_lambda.m.trs: dsge-var/simul_hybrid.m.trs
+dsge-var/dsgevar_forward_estimated_lambda.m.trs: dsge-var/simul_hybrid.m.trs
+dsge-var/dsgevar_forward_calibrated_lambda.o.trs: dsge-var/simul_hybrid.o.trs
+dsge-var/dsgevar_forward_estimated_lambda.o.trs: dsge-var/simul_hybrid.o.trs
+
 # Matlab TRS Files
 MTRSFILES = $(patsubst %.mod, %.m.trs, $(MODFILES))
 MTRSFILES += run_block_byte_tests_matlab.m.trs
