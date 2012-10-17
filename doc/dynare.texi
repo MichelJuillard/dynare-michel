@@ -3026,8 +3026,8 @@ default).
 @anchor{nograph} Do not create graphs (which implies that they are not
 saved to the disk nor displayed). If this option is not used, graphs
 will be saved to disk (to the format specified by @code{graph_format}
-option) and displayed to screen (unless @code{nodisplay} option is
-used).
+option, except if @code{graph_format=none}) and displayed to screen
+(unless @code{nodisplay} option is used).
 
 @item nodisplay
 @anchor{nodisplay} Do not display the graphs, but still save them to disk
@@ -3037,8 +3037,9 @@ used).
 @itemx graph_format = ( @var{FORMAT}, @var{FORMAT}@dots{} )
 @anchor{graph_format}
 Specify the file format(s) for graphs saved to disk. Possible values are
-@code{eps} (the default), @code{pdf} and @code{fig} (under Octave,
-only @code{eps} is available).
+@code{eps} (the default), @code{pdf}, @code{fig} and @code{none} (under Octave,
+only @code{eps} and @code{none} are available). If the file format is set equal to
+@code{none}, the graphs are displayed but not saved to the disk.
 
 @item noprint
 Don't print anything. Useful for loops.
