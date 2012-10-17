@@ -1,7 +1,7 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: Dynare
 Upstream-Contact: Dynare Team, whose members in 2012 are:
-                  Stéphane Adjemian <stephane.adjemian@ens.fr>
+                  Stéphane Adjemian <stephane.adjemian@univ-lemans.fr>
                   Houtan Bastani <houtan.bastani@ens.fr>
                   Michel Juillard <michel.juillard@mjui.fr>
                   Frédéric Karamé <frederic.karame@univ-lemans.fr>
