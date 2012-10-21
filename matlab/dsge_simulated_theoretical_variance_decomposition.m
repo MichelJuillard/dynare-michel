@@ -125,7 +125,6 @@ for file = 1:NumberOfDrawsFiles
             if ~test% Prepare the last round...
                 Decomposition_array = zeros(NumberOfLinesInTheLastDecompFile,nvar*nexo);
                 NumberOfDecompLines = NumberOfLinesInTheLastDecompFile;
-                DecompFileNumber = DecompFileNumber - 1;
             elseif test<0;
                 Decomposition_array = zeros(MaXNumberOfDecompLines,nvar*nexo);
             else
