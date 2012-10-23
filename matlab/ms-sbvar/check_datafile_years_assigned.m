@@ -1,4 +1,4 @@
-function check_datafile_years_assigned(options_)
+function [final_year,final_subperiod]=check_datafile_years_assigned(options_)
 % function check_datafile_years_assigned(options_)
 % check that datafile, initial_year and final_year were assigned
 %
@@ -25,12 +25,18 @@ function check_datafile_years_assigned(options_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+final_year = [];
+final_subperiod = [];
+
 if isempty(options_.ms.initial_year)
     error('Must set initial_year option');
 end
 
 if isempty(options_.ms.final_year)
-    error('Must set final_year option');
+    n = size(options_.data,1);
+    freq = options_.ms.freq;
+    final_subperiod = mod(options_.ms.initial_subperiod+n-2,freq)+1;
+    final_year = options_.ms.initial_year + floor((n-1)/freq);
 end
 
 if isempty(options_.datafile)
