@@ -41,12 +41,8 @@ nData=(options_.ms.final_year-options_.ms.initial_year)*options_.ms.freq + (opti
 %options_.ms.data = datacbogdpffr;
 %clear datacbogdpffr;
 [nt,ndv]=size(options_.data);
-if nt~=nData
-   disp(' ')
-   warning(sprintf('nt=%d, Caution: not equal to the length in the data',nt));
-   %disp(sprintf('nt=%d, Caution: not equal to the length in the data',nt));
-   disp('Press ctrl-c to abort')
-   return
+if nt < nData
+    error('The declared sample is longer than the available data')
 end
 %--------
 %1    CBO output gap --  log(x_t)-log(x_t potential)
