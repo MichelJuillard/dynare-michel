@@ -29,7 +29,7 @@ mkdir -p "$INSTALLDIR/contrib/ms-sbvar/TZcode"
 mkdir -p "$INSTALLDIR/mex/octave"
 mkdir -p "$INSTALLDIR/mex/matlab/osx64"
 mkdir "$INSTALLDIR/mex/matlab/osx32-7.4"
-mkdir "$INSTALLDIR/mex/matlab/osx32-7.5-7.14"
+mkdir "$INSTALLDIR/mex/matlab/osx32-7.5-8.0"
 
 
 # top level
@@ -47,7 +47,7 @@ cp -r $TOP_DYN_DIR/examples                                      $INSTALLDIR
 ##########################################################
 # FIRST BUILD 32 BIT EVERYTHING, 32 BIT MATLAB < 7.5 MEX #
 ##########################################################
-./configure CFLAGS='-arch i386' CXXFLAGS='-arch i386' FFLAGS='-arch i386' LDFLAGS='-arch i386' --with-matlab=/Applications/MATLAB/R2007a MATLAB_VERSION=7.4 --with-gsl=/usr/local32 --with-slicot=/usr/local32 --with-matio=/usr/local32
+./configure FFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' CPPFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' LDFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' --with-matlab=/Applications/MATLAB/R2007a MATLAB_VERSION=7.4 --with-gsl=/usr/local32 --with-slicot=/usr/local32 --with-matio=/usr/local32
 make pdf
 
 cd $TOP_DYN_DIR/preprocessor
@@ -112,21 +112,21 @@ cp $TOP_DYN_DIR/dynare++/kord/kord.pdf                                          
 ##############################################
 make clean
 cd $TOP_DYN_DIR/mex/build/matlab
-./configure CFLAGS='-arch i386' CXXFLAGS='-arch i386' FFLAGS='-arch i386' LDFLAGS='-arch i386' --with-matlab=/Applications/MATLAB/MATLAB_R2009b_32bit/MATLAB_R2009b.app MATLAB_VERSION=7.9 MEXEXT='mexmaci' --with-gsl=/usr/local32 --with-slicot=/usr/local32 --with-matio=/usr/local32
+./configure FFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' CPPFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' LDFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' --with-matlab=/Applications/MATLAB/MATLAB_R2009b_32bit/MATLAB_R2009b.app MATLAB_VERSION=7.9 MEXEXT='mexmaci' --with-gsl=/usr/local32 --with-slicot=/usr/local32 --with-matio=/usr/local32
 make
 
 # Matlab
-cp $TOP_DYN_DIR/mex/build/matlab/block_kalman_filter/*.mexmaci                      $INSTALLDIR/mex/matlab/osx32-7.5-7.14
-cp $TOP_DYN_DIR/mex/build/matlab/bytecode/*.mexmaci                                 $INSTALLDIR/mex/matlab/osx32-7.5-7.14
-cp $TOP_DYN_DIR/mex/build/matlab/dynare_simul_/*.mexmaci                            $INSTALLDIR/mex/matlab/osx32-7.5-7.14
-cp $TOP_DYN_DIR/mex/build/matlab/gensylv/*.mexmaci                                  $INSTALLDIR/mex/matlab/osx32-7.5-7.14
-cp $TOP_DYN_DIR/mex/build/matlab/k_order_perturbation/*.mexmaci                     $INSTALLDIR/mex/matlab/osx32-7.5-7.14
-cp $TOP_DYN_DIR/mex/build/matlab/kalman_steady_state/*.mexmaci                      $INSTALLDIR/mex/matlab/osx32-7.5-7.14
-cp $TOP_DYN_DIR/mex/build/matlab/kronecker/*.mexmaci                                $INSTALLDIR/mex/matlab/osx32-7.5-7.14
-cp $TOP_DYN_DIR/mex/build/matlab/local_state_space_iterations/*.mexmaci             $INSTALLDIR/mex/matlab/osx32-7.5-7.14
-cp $TOP_DYN_DIR/mex/build/matlab/mjdgges/*.mexmaci                                  $INSTALLDIR/mex/matlab/osx32-7.5-7.14
-cp $TOP_DYN_DIR/mex/build/matlab/ms_sbvar/*.mexmaci                                 $INSTALLDIR/mex/matlab/osx32-7.5-7.14
-cp $TOP_DYN_DIR/mex/build/matlab/sobol/*.mexmaci                                    $INSTALLDIR/mex/matlab/osx32-7.5-7.14
+cp $TOP_DYN_DIR/mex/build/matlab/block_kalman_filter/*.mexmaci                      $INSTALLDIR/mex/matlab/osx32-7.5-8.0
+cp $TOP_DYN_DIR/mex/build/matlab/bytecode/*.mexmaci                                 $INSTALLDIR/mex/matlab/osx32-7.5-8.0
+cp $TOP_DYN_DIR/mex/build/matlab/dynare_simul_/*.mexmaci                            $INSTALLDIR/mex/matlab/osx32-7.5-8.0
+cp $TOP_DYN_DIR/mex/build/matlab/gensylv/*.mexmaci                                  $INSTALLDIR/mex/matlab/osx32-7.5-8.0
+cp $TOP_DYN_DIR/mex/build/matlab/k_order_perturbation/*.mexmaci                     $INSTALLDIR/mex/matlab/osx32-7.5-8.0
+cp $TOP_DYN_DIR/mex/build/matlab/kalman_steady_state/*.mexmaci                      $INSTALLDIR/mex/matlab/osx32-7.5-8.0
+cp $TOP_DYN_DIR/mex/build/matlab/kronecker/*.mexmaci                                $INSTALLDIR/mex/matlab/osx32-7.5-8.0
+cp $TOP_DYN_DIR/mex/build/matlab/local_state_space_iterations/*.mexmaci             $INSTALLDIR/mex/matlab/osx32-7.5-8.0
+cp $TOP_DYN_DIR/mex/build/matlab/mjdgges/*.mexmaci                                  $INSTALLDIR/mex/matlab/osx32-7.5-8.0
+cp $TOP_DYN_DIR/mex/build/matlab/ms_sbvar/*.mexmaci                                 $INSTALLDIR/mex/matlab/osx32-7.5-8.0
+cp $TOP_DYN_DIR/mex/build/matlab/sobol/*.mexmaci                                    $INSTALLDIR/mex/matlab/osx32-7.5-8.0
 
 
 #####################################
