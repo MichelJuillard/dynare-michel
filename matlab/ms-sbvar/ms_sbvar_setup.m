@@ -28,9 +28,13 @@ function ms_sbvar_setup(options_)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-check_datafile_years_assigned(options_)
 options_.data = read_variables(options_.datafile, ...
     options_.varobs, [], options_.xls_sheet, options_.xls_range);
+[final_year,final_subperiod] = check_datafile_years_assigned(options_);
+if ~isempty(final_year)
+    options_.ms.final_year = final_year;
+    opions_.ms.final_subperiod = final_subperiod;
+end
 
 if options_.ms.upper_cholesky
     if options_.ms.lower_cholesky
