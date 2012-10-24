@@ -725,12 +725,14 @@ end
 
 if isnan(LIK)
     info = 45;
+    fval = objective_function_penalty_base + 100;
     exit_flag = 0;
     return
 end
 
 if imag(LIK)~=0
     info = 46;
+    fval = objective_function_penalty_base + 100;
     exit_flag = 0;
     return
 end
@@ -763,12 +765,14 @@ fval    = (likelihood-lnprior);
 
 if isnan(fval)
     info = 47;
+    fval = objective_function_penalty_base + 100;
     exit_flag = 0;
     return
 end
 
 if imag(fval)~=0
     info = 48;
+    fval = objective_function_penalty_base + 100;
     exit_flag = 0;
     return
 end
