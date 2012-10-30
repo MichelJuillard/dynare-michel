@@ -101,6 +101,20 @@ for i=2:nargin
     command = [command ' ' varargin{i-1}];
 end
 
+if isempty(strfind(command, 'console'))
+    if exist('OCTAVE_VERSION')
+        if sum(get(0,'screensize'))==4
+            command = [command ' console'];
+        end
+    else
+        if isunix && (~usejava('jvm') || ...
+                ((matlab_ver_less_than('7.5') && sum(get(0,'ScreenSize'))==4) || ...
+                (~matlab_ver_less_than('7.5') && ~feature('ShowFigureWindows'))))
+            command = [command ' console'];
+        end
+    end
+end
+
 [status, result] = system(command);
 disp(result)
 if status
