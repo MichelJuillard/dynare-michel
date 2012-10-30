@@ -33,9 +33,19 @@ global oo_ M_ options_ estim_params_ bayestopt_ estimation_info ex0_ ys0_  ex_de
 estim_params_ = [];
 bayestopt_ = [];
 options_.datafile = '';
-options_.console_mode = 0;
-
 options_.verbosity = 1;
+options_.console_mode = 0;
+if exist('OCTAVE_VERSION')
+    if sum(get(0,'screensize'))==4
+        options_.console_mode = 1;
+    end
+else
+    if isunix && (~usejava('jvm') || ...
+            ((matlab_ver_less_than('7.5') && sum(get(0,'ScreenSize'))==4) || ...
+            (~matlab_ver_less_than('7.5') && ~feature('ShowFigureWindows'))))
+        options_.console_mode = 1;
+    end
+end
 
 options_.terminal_condition = 0;
 options_.rplottype = 0;
