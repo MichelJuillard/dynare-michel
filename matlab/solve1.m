@@ -59,9 +59,11 @@ fvec = fvec(j1);
 i = find(~isfinite(fvec));
 
 if ~isempty(i)
-    disp(['STEADY:  numerical initial values incompatible with the following' ...
-          ' equations'])
+    disp(['SOLVE1: during the resolution of the non-linear system, the evaluation of the following ' ...
+          'equation(s) resulted in a non-finite number:'])
     disp(j1(i)')
+    check = 1;
+    return;
 end
 
 f = 0.5*fvec'*fvec ;

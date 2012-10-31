@@ -35,7 +35,35 @@ function [x,info] = dynare_solve(func,x,jacobian_flag,varargin)
 
 global options_
 
+tolf = options_.solve_tolf ;
 info = 0;
+
+% checking initial values
+if jacobian_flag
+    [fvec,fjac] = feval(func,x,varargin{:});
+else
+    fvec = feval(func,x,varargin{:});
+    fjac = zeros(nn,nn) ;
+end
+
+i = find(~isfinite(fvec));
+
+if ~isempty(i)
+    disp(['STEADY:  numerical initial values or parameters incompatible with the following' ...
+          ' equations'])
+    disp(i')
+    disp('Please check for example')
+    disp('   i) if all parameters occurring in these equations are defined')
+    disp('  ii) that no division by an endogenous variable initialized to 0 occurs') 
+    info = 1;
+    x = NaN;
+    return;
+end
+
+if max(abs(fvec)) < tolf
+    return ;
+end
+
 if options_.solve_algo == 0
     if ~exist('OCTAVE_VERSION')
         if ~user_has_matlab_license('optimization_toolbox')
@@ -60,7 +88,7 @@ if options_.solve_algo == 0
         func = @(x) func2(x, varargin{:});
         % The Octave version of fsolve does not converge when it starts from the solution
         fvec = feval(func,x);
-        if max(abs(fvec)) >= options_.solve_tolf
+        if max(abs(fvec)) >= tolf
             [x,fval,exitval,output] = fsolve(func,x,options);
         else
             exitval = 3;
@@ -75,34 +103,10 @@ if options_.solve_algo == 0
 elseif options_.solve_algo == 1
     nn = size(x,1);
     [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,1,options_.gstep, ...
-                    options_.solve_tolf,options_.solve_tolx, ...
+                    tolf,options_.solve_tolx, ...
                     options_.solve_maxit,options_.debug,varargin{:});
 elseif options_.solve_algo == 2 || options_.solve_algo == 4
     nn = size(x,1) ;
-    tolf = options_.solve_tolf ;
-
-    if jacobian_flag
-        [fvec,fjac] = feval(func,x,varargin{:});
-    else
-        fvec = feval(func,x,varargin{:});
-        fjac = zeros(nn,nn) ;
-    end
-
-    i = find(~isfinite(fvec));
-    
-    if ~isempty(i)
-        disp(['STEADY:  numerical initial values incompatible with the following' ...
-              ' equations'])
-        disp(i')
-        disp('Please check for example')
-        disp('   i) if all parameters occurring in these equations are defined')
-        disp('  ii) that no division by an endogenous variable initialized to 0 occurs') 
-        error('exiting ...')
-    end
-    
-    if max(abs(fvec)) < tolf
-        return ;
-    end
 
     if ~jacobian_flag
         fjac = zeros(nn,nn) ;
@@ -129,7 +133,7 @@ elseif options_.solve_algo == 2 || options_.solve_algo == 4
         end
         [x,info]=solve1(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag, ...
                         bad_cond_flag, options_.gstep, ...
-                        options_.solve_tolf,options_.solve_tolx, ...
+                        tolf,options_.solve_tolx, ...
                         options_.solve_maxit,options_.debug,varargin{:});
         if info
             return
@@ -138,7 +142,7 @@ elseif options_.solve_algo == 2 || options_.solve_algo == 4
     fvec = feval(func,x,varargin{:});
     if max(abs(fvec)) > tolf
         [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag, bad_cond_flag, ...
-                        options_.gstep, options_.solve_tolf,options_.solve_tolx, ...
+                        options_.gstep, tolf,options_.solve_tolx, ...
                         options_.solve_maxit,options_.debug,varargin{:});
     end
 elseif options_.solve_algo == 3

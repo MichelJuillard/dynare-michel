@@ -64,12 +64,12 @@ if ~noprint
           error(['The Jacobian contains NaNs'])
         end
 
-        case 19
+      case 19
         error('The steadystate file did not compute the steady state')
       case 20
         error(['Impossible to find the steady state. Either the model' ...
-               ' doesn''t have a unique steady state of the guess values' ...
-               ' are too far from the solution'])
+               ' doesn''t have a steady state or there is an infinity of steady states' ...
+               ' or the guess values are too far from the solution'])
       case 21
         error('The steady state is complex')
       case 22
