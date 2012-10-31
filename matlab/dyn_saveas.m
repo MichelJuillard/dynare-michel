@@ -54,6 +54,10 @@ if any(strcmp('fig',cellstr(DynareOptions.graph_format)))
         saveas(h,[fname '.fig']);
     end
 end
+if any(strcmp('none',cellstr(DynareOptions.graph_format)))
+% don't save
+% check here as a reminder that none is an option to graph_format
+end
 if DynareOptions.nodisplay
     close(h);
 end
