@@ -148,7 +148,7 @@ if isempty(reorder_jacobian_columns)
     index_e = [index_m index_0p];
     index_e1 = [1:npred+nboth, npred+nboth+find(llx(maximum_lag+1,nstatic+npred+(1: ...
                                                       nyf)))];
-    index_e2 = npred+nboth+nfwrd+(1:nboth);
+    index_e2 = npred+nboth+(1:nboth);
     
     [junk,cols_b] = find(lead_lag_incidence(maximum_lag+1, order_var));
 
@@ -213,8 +213,6 @@ else
     E(row_indx_de_1,index_e1) = -aa(row_indx,index_e);
     E(row_indx_de_2,index_e2) = eye(nboth);
     
-    E = [-aa(row_indx,[index_m index_0p])  ; [zeros(nboth,nboth+npred) eye(nboth,nboth+nfwrd) ] ];
-
     [err, ss, tt, w, sdim, dr.eigval, info1] = mjdgges(E,D,DynareOptions.qz_criterium);
     mexErrCheck('mjdgges', err);
 
