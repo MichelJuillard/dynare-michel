@@ -44,7 +44,6 @@ function date = dynDate(a)
 %@eod:
 
 % Copyright (C) 2011 Dynare Team
-% stephane DOT adjemian AT univ DASH lemans DOT fr
 %
 % This file is part of Dynare.
 %
@@ -60,6 +59,8 @@ function date = dynDate(a)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
+% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
 
 date = struct;
 

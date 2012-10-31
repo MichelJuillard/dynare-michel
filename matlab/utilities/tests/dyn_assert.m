@@ -2,7 +2,6 @@ function t = dyn_assert(A,B,tol)
 % This function tests the equality of two objects.
 
 % Copyright (C) 2011 Dynare Team
-% stephane DOT adjemian AT univ DASH lemans DOT fr
 %
 % This file is part of Dynare.
 %
@@ -18,6 +17,8 @@ function t = dyn_assert(A,B,tol)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
+% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
 
 if ( (nargin<3) || isempty(tol) )
     use_isequal_matlab_builtin = 1;

@@ -32,7 +32,6 @@ function c = minus(a,b)
 %@eod:
 
 % Copyright (C) 2011 Dynare Team
-% stephane DOT adjemian AT univ DASH lemans DOT fr
 %
 % This file is part of Dynare.
 %
@@ -48,6 +47,8 @@ function c = minus(a,b)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
+% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
 
 if ~( isa(a,'dynDate') && isa(b,'dynDate') )
     error(['dynDate::minus: Input arguments ' inputname(1) ' and ' inputname(2) ' must be dynDate objects!'])

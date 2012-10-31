@@ -32,7 +32,6 @@ function [nodes,weights] = gauss_hermite_weights_and_nodes(n)
 %@eod:
 
 % Copyright (C) 2011 Dynare Team
-% stephane DOT adjemian AT univ DASH lemans DOT fr
 %
 % This file is part of Dynare.
 %
@@ -48,6 +47,8 @@ function [nodes,weights] = gauss_hermite_weights_and_nodes(n)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
+% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
 
 b = sqrt([1:n-1]/2);
 JacobiMatrix = diag(b,1)+diag(b,-1);

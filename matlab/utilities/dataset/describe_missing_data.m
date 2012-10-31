@@ -28,7 +28,6 @@ function [i,n,s,j] = describe_missing_data(data)
 %@eod:
     
 % Copyright (C) 2008-2011 Dynare Team
-% stephane DOT adjemian AT univ DASH lemans DOT fr
 %    
 % This file is part of Dynare.
 %
@@ -44,6 +43,8 @@ function [i,n,s,j] = describe_missing_data(data)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
+% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
 
 [observation_index,variable_index] = find(~isnan(data));
 [T,N] = size(data);

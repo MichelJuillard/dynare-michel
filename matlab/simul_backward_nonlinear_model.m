@@ -35,7 +35,6 @@ function DynareOutput = simul_backward_nonlinear_model(sample_size,DynareOptions
 %@eod:
 
 % Copyright (C) 2012 Dynare Team
-% stephane DOT adjemian AT univ DASH lemans DOT fr
 %
 % This file is part of Dynare.
 %
@@ -51,6 +50,8 @@ function DynareOutput = simul_backward_nonlinear_model(sample_size,DynareOptions
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+
+% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
 
 if DynareModel.maximum_lead
     error(['simul_backward_nonlinear_model:: The specified model is not backward looking!'])
