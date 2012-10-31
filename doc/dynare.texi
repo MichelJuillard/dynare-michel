@@ -1745,6 +1745,7 @@ For models with lags on more than one period, the command
 for periods before the beginning of the simulation.
 
 @deffn Block initval ;
+@deffnx Block initval (@var{OPTIONS}@dots{});
 
 @descriptionhead
 
@@ -1814,6 +1815,17 @@ in @code{forecast} (in this case, note that it is still possible to
 modify some of these initial values with @code{histval})
 @end itemize
 
+@optionshead
+
+@table @code
+
+@item all_values_required
+@anchor{all_values_required}
+Issues an error and stops processing the @file{.mod} file if there is at least
+one endogenous or exogenous variable that has not been set in the @code{initval}
+block.
+@end table
+
 @examplehead
 
 @example
@@ -1829,6 +1841,7 @@ steady;
 @end deffn
 
 @deffn Block endval ;
+@deffnx Block endval (@var{OPTIONS}@dots{});
 
 @descriptionhead
 
@@ -1863,6 +1876,12 @@ non-linear solver. An @code{endval} block followed by @code{steady} is
 formally equivalent to an @code{endval} block with the same values for
 the exogenous, and with the associated steady state values for the
 endogenous.
+
+@table @code
+
+@item all_values_required
+@xref{all_values_required}
+@end table
 
 @examplehead
 
