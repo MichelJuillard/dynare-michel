@@ -37,6 +37,7 @@ global options_
 
 tolf = options_.solve_tolf ;
 info = 0;
+nn = size(x,1);
 
 % checking initial values
 if jacobian_flag
@@ -101,13 +102,10 @@ if options_.solve_algo == 0
         info = 1;
     end
 elseif options_.solve_algo == 1
-    nn = size(x,1);
     [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,1,options_.gstep, ...
                     tolf,options_.solve_tolx, ...
                     options_.solve_maxit,options_.debug,varargin{:});
 elseif options_.solve_algo == 2 || options_.solve_algo == 4
-    nn = size(x,1) ;
-
     if ~jacobian_flag
         fjac = zeros(nn,nn) ;
         dh = max(abs(x),options_.gstep(1)*ones(nn,1))*eps^(1/3);
