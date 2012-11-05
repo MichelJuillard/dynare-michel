@@ -2913,7 +2913,7 @@ SparseMatrix::Solve_ByteCode_Symbolic_Sparse_GaussianElimination(int Size, bool 
 		  if (t > int(periods*0.35))
             {
               symbolic = false;
-              mxFree(save_opaa
+              mxFree(save_opaa);
               mxFree(save_opa);
               mxFree(save_op);
             }
