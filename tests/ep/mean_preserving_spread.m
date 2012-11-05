@@ -14,4 +14,4 @@ function m = mean_preserving_spread(autoregressive_parameter,sigma)
 %  stephane DOT adjemian AT univ DASH lemans DOT fr
 %  frederic DOT karame AT univ DASH evry DOT fr
 
-m = sigma/(1-autoregressive_parameter*autoregressive_parameter);
+m = .5*sigma*sigma/(1-autoregressive_parameter*autoregressive_parameter);
