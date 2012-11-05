@@ -35,15 +35,21 @@ function [flag,endo_simul,err] = solve_perfect_foresight_model(endo_simul,exo_si
     z = Y(find(pfm.lead_lag_incidence'));
     [d1,jacobian] = model_dynamic(z,exo_simul,pfm.params,pfm.steady_state,2);
 
+    % Initialization of the jacobian of the stacked model.
     A = sparse([],[],[],pfm.periods*pfm.ny,pfm.periods*pfm.ny,pfm.periods*nnz(jacobian));
+
+    % Initialization of the Newton residuals.
     res = zeros(pfm.periods*pfm.ny,1);
 
     h1 = clock;
+    
+    % Newton loop.
     for iter = 1:pfm.maxit_
         h2 = clock;
         i_rows = 1:pfm.ny;
         i_cols = find(pfm.lead_lag_incidence');
         i_cols_A = i_cols;
+        % Fill the jacobian of the stacked model.
         for it = 2:(pfm.periods+1)
             [d1,jacobian] = model_dynamic(Y(i_cols),exo_simul,pfm.params,pfm.steady_state,it);
             if it == 2
@@ -60,7 +66,8 @@ function [flag,endo_simul,err] = solve_perfect_foresight_model(endo_simul,exo_si
                 i_cols_A = i_cols_A + pfm.ny;
             end
         end
-        err = max(abs(res));
+        % Stop if Newton residuals are zero.
+        err = max(abs(res)); 
         if err < pfm.tolerance
             stop = 1 ;
             if pfm.verbose
@@ -74,11 +81,13 @@ function [flag,endo_simul,err] = solve_perfect_foresight_model(endo_simul,exo_si
             endo_simul = reshape(Y,pfm.ny,pfm.periods+2);
             break
         end
+        % Compute the Newton step. 
         dy = -A\res;
         if any(isnan(dy))
             nan_flag = 1;
             break
         end
+        % Update the endogenous variables paths.
         Y(pfm.i_upd) =   Y(pfm.i_upd) + dy;
     end
 
