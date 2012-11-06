@@ -2,7 +2,7 @@ var Capital, Output, Labour, Consumption, Efficiency, efficiency, ExpectedTerm;
 
 varexo EfficiencyInnovation;
 
-parameters beta, theta, tau, alpha, psi, delta, rho, effstar, sigma2;
+parameters beta, theta, tau, alpha, psi, delta, rho, effstar, sigma;
 
 /*
 ** Calibration
@@ -17,17 +17,17 @@ psi     =  -5.000;
 delta   =  0.020;
 rho     =  0.950;
 effstar =  1.000;
-sigma2  =  0.0001;
+sigma   =  0.0010;
 
 external_function(name=mean_preserving_spread,nargs=2);
 
 model(use_dll);
 
   // Eq. n°1:
-  efficiency = rho*efficiency(-1) + EfficiencyInnovation;
+  efficiency = rho*efficiency(-1) + sigma*EfficiencyInnovation;
 
   // Eq. n°2:
-  Efficiency = effstar*exp(efficiency-mean_preserving_spread(rho,sigma2));
+  Efficiency = effstar*exp(efficiency-mean_preserving_spread(rho,sigma));
 
   // Eq. n°3:
   Output = Efficiency*(alpha*(Capital(-1)^psi)+(1-alpha)*(Labour^psi))^(1/psi);
@@ -48,7 +48,7 @@ end;
 
 steady_state_model;
 efficiency = 0;
-Efficiency = effstar*exp(efficiency-mean_preserving_spread(rho,sigma2));
+Efficiency = effstar;//*exp(efficiency-mean_preserving_spread(rho,sigma2));
 // Compute steady state ratios.
 Output_per_unit_of_Capital=((1/beta-1+delta)/alpha)^(1/(1-psi));
 Consumption_per_unit_of_Capital=Output_per_unit_of_Capital-delta;
@@ -69,21 +69,26 @@ end;
 
 
 shocks;
-var EfficiencyInnovation = sigma2;
+var EfficiencyInnovation = 1;
 end;
 
 steady;
 
 options_.ep.verbosity = 0;
-options_.ep.stochastic.nodes = 2;
-options_.console_mode = 0;
 
 options_.ep.stochastic.order = 0;
-//ts0 = extended_path([],100);
+ts0 = extended_path([],100);
 
 options_.ep.stochastic.order = 1;
-//ts1 = extended_path([],100);
+options_.ep.stochastic.nodes = 3;
+ts1_3 = extended_path([],100);
+
+options_.ep.stochastic.nodes = 5;
+ts1_5 = extended_path([],100);
 
 options_.ep.stochastic.order = 2;
-ts2 = extended_path([],100);
+options_.ep.stochastic.nodes = 3;
+ts2_3 = extended_path([],100);
 
+options_.ep.stochastic.nodes = 5;
+ts2_5 = extended_path([],100);
