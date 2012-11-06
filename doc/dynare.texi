@@ -1877,6 +1877,8 @@ formally equivalent to an @code{endval} block with the same values for
 the exogenous, and with the associated steady state values for the
 endogenous.
 
+@optionshead
+
 @table @code
 
 @item all_values_required
