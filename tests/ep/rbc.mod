@@ -17,9 +17,7 @@ psi     =  -5.000;
 delta   =  0.020;
 rho     =  0.950;
 effstar =  1.000;
-sigma   =  0.0010;
-
-external_function(name=mean_preserving_spread,nargs=2);
+sigma   =  0.010;
 
 model(use_dll);
 
@@ -27,7 +25,7 @@ model(use_dll);
   efficiency = rho*efficiency(-1) + sigma*EfficiencyInnovation;
 
   // Eq. n°2:
-  Efficiency = effstar*exp(efficiency-mean_preserving_spread(rho,sigma));
+  Efficiency = effstar*exp(efficiency-.5*sigma*sigma/(1-rho*rho));
 
   // Eq. n°3:
   Output = Efficiency*(alpha*(Capital(-1)^psi)+(1-alpha)*(Labour^psi))^(1/psi);
@@ -48,7 +46,7 @@ end;
 
 steady_state_model;
 efficiency = 0;
-Efficiency = effstar;//*exp(efficiency-mean_preserving_spread(rho,sigma2));
+Efficiency = effstar;
 // Compute steady state ratios.
 Output_per_unit_of_Capital=((1/beta-1+delta)/alpha)^(1/(1-psi));
 Consumption_per_unit_of_Capital=Output_per_unit_of_Capital-delta;
@@ -72,7 +70,7 @@ shocks;
 var EfficiencyInnovation = 1;
 end;
 
-steady;
+steady(nocheck);
 
 options_.ep.verbosity = 0;
 
