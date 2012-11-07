@@ -62,6 +62,7 @@ else
   fprintf(fid,':test-result: PASS\n');
   fprintf(fid,':number-tests: 1\n');
   fprintf(fid,':number-failed-tests: 0\n');
+  fprintf(fid,':list-of-passed-tests: %s\n', [name '.mod']);
 end
 fclose(fid);
 

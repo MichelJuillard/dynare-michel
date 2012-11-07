@@ -148,6 +148,8 @@ MODFILES = \
 	deterministic_simulations/rbc_det5.mod \
 	walsh.mod
 
+XFAIL_MODFILES =
+
 # Dependencies
 example1_use_dll.m.trs: example1.m.trs
 example1_use_dll.o.trs: example1.o.trs
@@ -215,18 +217,21 @@ dsge-var/dsgevar_forward_calibrated_lambda.o.trs: dsge-var/simul_hybrid.o.trs
 dsge-var/dsgevar_forward_estimated_lambda.o.trs: dsge-var/simul_hybrid.o.trs
 
 # Matlab TRS Files
-MTRSFILES = $(patsubst %.mod, %.m.trs, $(MODFILES))
-MTRSFILES += run_block_byte_tests_matlab.m.trs
+M_TRS_FILES = $(patsubst %.mod, %.m.trs, $(MODFILES))
+M_TRS_FILES += run_block_byte_tests_matlab.m.trs
+M_XFAIL_TRS_FILES = $(patsubst %.mod, %.m.trs, $(XFAIL_MODFILES))
 
 # Octave TRS Files
-OTRSFILES = $(patsubst %.mod, %.o.trs, $(MODFILES))
-OTRSFILES += run_block_byte_tests_octave.o.trs
+O_TRS_FILES = $(patsubst %.mod, %.o.trs, $(MODFILES))
+O_TRS_FILES += run_block_byte_tests_octave.o.trs
+O_XFAIL_TRS_FILES = $(patsubst %.mod, %.o.trs, $(XFAIL_MODFILES))
 
 EXTRA_DIST = \
 	read_trs_files.sh \
 	run_test_matlab.m \
 	run_test_octave.m \
 	$(MODFILES) \
+	$(XFAIL_MODFILES) \
 	run_block_byte_tests_matlab.m \
 	run_block_byte_tests_octave.m \
 	homotopy/common.mod \
@@ -292,19 +297,19 @@ endif
 check-local: $(TARGETS)
 
 if HAVE_OCTAVE
-	./read_trs_files.sh "$(OTRSFILES)"
+	./read_trs_files.sh "$(O_TRS_FILES)" "$(O_XFAIL_TRS_FILES)"
 endif
 
 if HAVE_CMD_LINE_MATLAB
-	./read_trs_files.sh "$(MTRSFILES)"
+	./read_trs_files.sh "$(M_TRS_FILES)" "$(M_XFAIL_TRS_FILES)"
 endif
 	@cat run_test_matlab_output.txt
 	@cat run_test_octave_output.txt
 
-check-matlab: $(MTRSFILES)
+check-matlab: $(M_XFAIL_TRS_FILES) $(M_TRS_FILES)
 	@echo 'Matlab Tests Done'
 
-check-octave: $(OTRSFILES)
+check-octave: $(O_XFAIL_TRS_FILES) $(O_TRS_FILES)
 	@echo 'Octave Tests Done'
 
 %.m.trs %.m.log: %.mod
@@ -324,10 +329,14 @@ check-octave: $(OTRSFILES)
 		$(OCTAVE) --no-init-file --silent --no-history $< > $*.o.log 2>&1
 
 clean-local:
-	rm -f $(MTRSFILES) \
-		$(OTRSFILES) \
-		$(patsubst %.trs, %.log, $(MTRSFILES)) \
-		$(patsubst %.trs, %.log, $(OTRSFILES))
+	rm -f $(M_TRS_FILES) \
+		$(M_XFAIL_TRS_FILES) \
+		$(O_TRS_FILES) \
+		$(O_XFAIL_TRS_FILES) \
+		$(patsubst %.trs, %.log, $(M_TRS_FILES)) \
+		$(patsubst %.trs, %.log, $(M_XFAIL_TRS_FILES)) \
+		$(patsubst %.trs, %.log, $(O_TRS_FILES)) \
+		$(patsubst %.trs, %.log, $(O_XFAIL_TRS_FILES))
 
 	rm -f $(patsubst %.mod, %.m, $(MODFILES)) \
 		$(patsubst %.mod, %_static.*, $(MODFILES)) \

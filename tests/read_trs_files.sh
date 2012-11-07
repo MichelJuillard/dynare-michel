@@ -1,8 +1,11 @@
 #!/bin/bash
 
 declare -i total=0;
+declare -i total_xfail=0;
 declare -i failed=0;
+declare -i xpassed=0;
 declare -a failed_tests=("");
+declare -a xpassed_tests=("");
 
 # Parse TRS Files
 for file in $1 ; do
@@ -20,6 +23,24 @@ for file in $1 ; do
 done
 ((passed=$total-$failed));
 
+# Parse XFAIL TRS Files
+for file in $2 ; do
+  # Find number of tests run in xfail trs file
+  ((xfail = `grep number-tests $file | cut -d: -f3`))
+  ((total_xfail += $xfail))
+
+  # Find number of tests failed in trs file
+  numpassed=`grep number-failed-tests $file | cut -d: -f3`
+  if [ $numpassed -eq 0 ] ; then
+    ((xpassed += (($xfail - $numpassed))))
+    for xpassedfile in `grep list-of-passed-tests $file | cut -d: -f3` ; do
+      xpassed_tests=("${xpassed_tests[@]}" "$xpassedfile");
+    done
+  fi
+done
+((xfailed=$total_xfail-$xpassed));
+((total+=$total_xfail));
+
 # Determine if we are parsing Matlab or Octave trs files
 if [ `grep -c '.m.trs' <<< $1` -eq 0 ]; then
   prg='OCTAVE';
@@ -36,9 +57,22 @@ echo '================================'            >> $outfile
 echo '| TOTAL: '$total                             >> $outfile
 echo '|  PASS: '$passed                            >> $outfile
 echo '|  FAIL: '$failed                            >> $outfile
+echo '| XFAIL: '$xfailed                           >> $outfile
+echo '| XPASS: '$xpassed                           >> $outfile
 if [ $failed -gt 0 ] ; then
   echo '|  LIST OF FAILED TESTS:'                  >> $outfile
   for file in ${failed_tests[@]} ; do
+    if [ "$prg" == "MATLAB" ]; then
+      modfile=`sed 's/\.m\.trs/\.mod/g' <<< $file` >> $outfile
+    else
+      modfile=`sed 's/\.o\.trs/\.mod/g' <<< $file` >> $outfile
+    fi
+    echo '|     * '$modfile                        >> $outfile
+  done
+fi
+if [ $xpassed -gt 0 ] ; then
+  echo '|  LIST OF XPASSED TESTS:'                 >> $outfile
+  for file in ${xpassed_tests[@]} ; do
     if [ "$prg" == "MATLAB" ]; then
       modfile=`sed 's/\.m\.trs/\.mod/g' <<< $file` >> $outfile
     else
