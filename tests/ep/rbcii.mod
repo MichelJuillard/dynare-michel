@@ -102,7 +102,4 @@ copyfile('rbcii_steady_state.m','rbcii_steadystate2.m');
     figure('Name','(rbcii) Investment.');
     plot(Output(1:n)-Consumption(1:n),'-b','linewidth',2)
 
-    figure('Name','(rbcii) Lagrange multiplier associated to the positivity constraint on investment.');
-    plot(LagrangeMultiplier(1:n),'-b','linewidth',2)
-
 @#endif
