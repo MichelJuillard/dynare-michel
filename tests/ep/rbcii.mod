@@ -75,39 +75,23 @@ copyfile('rbcii_steady_state.m','rbcii_steadystate2.m');
     options_.ep.stochastic.order = 0;
     options_.ep.stochastic.nodes = 2;
     options_.console_mode = 0;
+
     ts = extended_path([],100);
 
     options_.ep.stochastic.order = 1;
-    sts = extended_path([],100);
-
-//    options_.ep.stochastic.order = 2;
-//    sts2 = extended_path([],100);
-
-//    options_.ep.stochastic.order = 3;
-//    sts3 = extended_path([],100);
-
-//    figure(1)
-//    plot(ts(2,:)-ts(4,:));
-
-//    figure(2)
-//    plot(sts(2,:)-sts(4,:));
-
-//    figure(3)
-//    plot(sts(2,:)-ts(2,:))
-
-//    figure(4)
-//    plot([(ts(2,:)-ts(4,:))' (sts(2,:)-sts(4,:))' (sts2(2,:)-sts2(4,:))' (sts3(2,:)-sts3(4,:))']) 
-//    plot([(ts(2,:)-ts(4,:))' (sts(2,:)-sts(4,:))']) 
-
+    profile on
+    ts1_4 = extended_path([],100);
+    profile off
+    profile viewer
 @#else
 
     shocks;
     var EfficiencyInnovation;
     periods 1;
-    values -.4;
+    values -.8;
     end;
 
-    steady;
+    steady;//(nocheck);
 
     options_.maxit_ = 100;
 
