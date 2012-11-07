@@ -4,7 +4,7 @@ var Capital, Output, Labour, Consumption,  Investment, Output1, Labour1, Consump
 
 varexo EfficiencyInnovation;
 
-parameters beta, theta, tau, alpha, psi, delta, rho, effstar, sigma2;
+parameters beta, theta, tau, alpha, psi, delta, rho, effstar, sigma;
 
 /*
 ** Calibration
@@ -15,24 +15,22 @@ beta    =  0.990;
 theta   =  0.357;
 tau     =  2.000;
 alpha   =  0.450;
-psi     =  -0.500;
+psi     = -0.500;
 delta   =  0.020;
 rho     =  0.995;
 effstar =  1.000;
-sigma2  =  0.001;
+sigma   =  0.100;
 
 
 @#if extended_path_version
     rho = 0.800;
 @#endif
 
-external_function(name=mean_preserving_spread,nargs=2);
+model(use_dll);
 
-model;
+  efficiency = rho*efficiency(-1) + sigma*EfficiencyInnovation;
 
-  efficiency = rho*efficiency(-1) + EfficiencyInnovation;
-
-  Efficiency = effstar*exp(efficiency-mean_preserving_spread(rho,sigma2));
+  Efficiency = effstar*exp(efficiency-.5*sigma*sigma/(1-rho*rho));
 
   (((Consumption1^theta)*((1-Labour1)^(1-theta)))^(1-tau))/Consumption1 - ExpectedTerm(1);
 
