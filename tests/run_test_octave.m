@@ -58,17 +58,10 @@ if testFailed
   fprintf(fid,':number-tests: 1\n');
   fprintf(fid,':number-failed-tests: 1\n');
   fprintf(fid,':list-of-failed-tests: %s\n', [name '.mod']);
-  fprintf(fid,':copy-in-global-log: yes\n');
-  fprintf(fid,':recheck: yes\n');
-  fprintf(fid,':test-global-result: FAIL\n');
 else
   fprintf(fid,':test-result: PASS\n');
   fprintf(fid,':number-tests: 1\n');
   fprintf(fid,':number-failed-tests: 0\n');
-  fprintf(fid,':list-of-failed-tests: \n');
-  fprintf(fid,':copy-in-global-log: no\n');
-  fprintf(fid,':recheck: no\n');
-  fprintf(fid,':test-global-result: PASS\n');
 end
 fclose(fid);
 
