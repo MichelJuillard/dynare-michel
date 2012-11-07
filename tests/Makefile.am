@@ -148,7 +148,7 @@ MODFILES = \
 	deterministic_simulations/rbc_det5.mod \
 	walsh.mod
 
-XFAIL_MODFILES =
+XFAIL_MODFILES = ramst_xfail.mod
 
 # Dependencies
 example1_use_dll.m.trs: example1.m.trs
