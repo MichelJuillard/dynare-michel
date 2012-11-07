@@ -52,7 +52,7 @@ estimated_params_init;
 alp, 0.4;
 bet, 0.99;
 tet, 0.357 ;
-tau, 40;
+tau, 50;
 delt, 0.02;
 rho, 0.95;
 stderr e_a, .035;
@@ -67,8 +67,9 @@ varobs y l i;
 options_.particle.status = 1;
 options_.particle.algorithm = 'sequential_importance_particle_filter';
 options_.particle.initialization = 1;
-options_.particle.number_of_particles = 1000;
-options_.particle.resampling.status = 'none';
+options_.particle.pruning = 1;
+options_.particle.number_of_particles = 20000;
+options_.particle.resampling.status = 'systematic';
 options_.particle.resampling.neff_threshold = .1;
 
 options_.gstep(1) = 1e-4;
@@ -78,4 +79,4 @@ options_.mode_check_neighbourhood_size = 0.05;
 
 set_dynare_threads('local_state_space_iteration_2',3);
 
-estimation(datafile=data_risky_perturb2,order=2,nobs=100,mh_replic=0,mode_compute=7,mode_file=dsge_base2_mode,mode_check);
+estimation(datafile=data_risky_perturb2,nograph,order=2,nobs=100,mh_replic=0,mode_compute=7,mode_check);
