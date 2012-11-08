@@ -3641,7 +3641,7 @@ the set of observed variables when solving the model under partial
 information.
 
 Only one instance of @code{varobs} is allowed in a model file. If one
-needs to declare observed variables in a loop, the macroprocessor can
+needs to declare observed variables in a loop, the macro-processor can
 be used as shown in the second example below.
 
 @customhead{Simple example}
