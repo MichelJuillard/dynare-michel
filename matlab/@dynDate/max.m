@@ -48,8 +48,6 @@ function c = max(a,b)
 
 % Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
 
-verbose = 0;
-
 if nargin~=2
     error('dynDate::min: I need exactly two input arguments!')
 end
@@ -58,7 +56,7 @@ if ~( isa(a,'dynDate') && isa(b,'dynDate'))
     error(['dynDate::min: Input arguments ' inputname(1) 'and ' inputname(2) ' have to be a dynDate objects!'])
 end
 
-if verbose && a.freq~=b.freq
+if ~isequal(a.freq,b.freq)
     error(['dynDate::min: Input arguments ' inputname(1) 'and ' inputname(2) ' have no common frequencies!'])
 end
 
