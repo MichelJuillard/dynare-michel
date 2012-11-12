@@ -72,7 +72,6 @@ else
 end
 
 %@test:1
-%$ addpath ../matlab
 %$ % Define a data set.
 %$ A = [transpose(1:10),2*transpose(1:10)];
 %$ B = [transpose(1:10),2*transpose(1:10)];
@@ -104,7 +103,6 @@ end
 %@eof:1
 
 %@test:2
-%$ addpath ../matlab
 %$ % Define a data set.
 %$ A = [transpose(1:10),2*transpose(1:10)];
 %$ B = [transpose(5:12),2*transpose(5:12)];
@@ -139,7 +137,6 @@ end
 %@eof:2
 
 %@test:3
-%$ addpath ../matlab
 %$ % Define a data set.
 %$ A = [transpose(1:7),2*transpose(1:7)];
 %$ B = [transpose(5:11),2*transpose(5:11)];
@@ -174,7 +171,6 @@ end
 %@eof:3
 
 %@test:4
-%$ addpath ../matlab
 %$ % Define a data set.
 %$ A = [transpose(1:7),2*transpose(1:7)];
 %$ B = [transpose(5:9),2*transpose(5:9)];
@@ -209,7 +205,6 @@ end
 %@eof:4
 
 %@test:5
-%$ addpath ../matlab
 %$ % Define a data set.
 %$ A = [transpose(1:10),2*transpose(1:10)];
 %$ B = [transpose(1:10),3*transpose(1:10)];
