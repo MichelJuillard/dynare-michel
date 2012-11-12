@@ -696,9 +696,9 @@ initialized. @xref{Parameter initialization}, or
 and exogenous variables.
 
 @item console
-Activate console mode: Dynare will not use graphical waitbars for long
-computations. Note that this option is only useful under MATLAB, since
-Octave does not provide graphical waitbar capabilities.
+Activate console mode. In addition to the behavior of
+@code{nodisplay}, Dynare will not use graphical waitbars for long
+computations.
 
 @item cygwin
 Tells Dynare that your MATLAB is configured for compiling MEX files with
