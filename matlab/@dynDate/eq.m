@@ -48,8 +48,6 @@ function c = eq(a,b)
 
 % Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
 
-verbose = 0;
-
 if nargin~=2
     error('dynDate::eq: I need exactly two input arguments!')
 end
