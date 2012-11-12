@@ -29,7 +29,7 @@ function c = ne(a,b)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -48,8 +48,6 @@ function c = ne(a,b)
 
 % Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
 
-verbose = 0;
-
 if nargin~=2
     error('dynDate::ne: I need exactly two input arguments!')
 end
@@ -58,9 +56,8 @@ if ~( isa(a,'dynDate') && isa(b,'dynDate'))
     error(['dynDate::ne: Input arguments ' inputname(1) 'and ' inputname(2) ' have to be a dynDate objects!'])
 end
 
-if verbose && a.freq~=b.freq
-    disp(['dynDate::ne: Input arguments ' inputname(1) 'and ' inputname(2) ' have no common frequencies!'])
-    c = 1;
+if ~isequal(a.freq,b.freq)
+    error(['dynDate::ne: Input arguments ' inputname(1) 'and ' inputname(2) ' have no common frequencies!'])
 end
 
 c = ~isequal(a.time,b.time);
@@ -81,12 +78,18 @@ c = ~isequal(a.time,b.time);
 %$ d3 = dynDate(date_3);
 %$ d4 = dynDate(date_4);
 %$ d5 = dynDate(date_5);
-%$ i1 = (d1~=d2);
+%$ try
+%$     What follows should fail because d1 and d2 do not have common frequency
+%$     d1~=d2;
+%$     t1 = 0;
+%$ catch
+%$     t1 = 1;
+%$ end
 %$ i2 = (d2~=d2);
 %$ i3 = (d4~=d5);
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(i1,1);
+%$ t(1) = t1;
 %$ t(2) = dyn_assert(i2,0);
 %$ t(3) = dyn_assert(i3,1);
 %$ T = all(t);
