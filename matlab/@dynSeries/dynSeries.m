@@ -178,7 +178,6 @@ end
 %@eof:1
 
 %@test:2
-%$ addpath ../matlab
 %$ % Define a data set.
 %$ A = transpose(1:10);
 %$
