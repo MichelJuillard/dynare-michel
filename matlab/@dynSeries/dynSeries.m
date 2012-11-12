@@ -166,6 +166,18 @@ end
 
 
 %@test:1
+%$ % Test if we can instantiate an empty dynSeries object.
+%$ try
+%$     ts = dynSeries();
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$ disp('coucou')
+%$ T = all(t);
+%@eof:1
+
+%@test:2
 %$ addpath ../matlab
 %$ % Define a data set.
 %$ A = transpose(1:10);
