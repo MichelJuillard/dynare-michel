@@ -71,6 +71,7 @@ date = class(date,'dynDate');
 
 switch nargin
   case 0
+    % Return an empty dynDate object.
     return
   case 1
     if ischar(a)% Weekly, Monthly or Quaterly data.
