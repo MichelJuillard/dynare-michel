@@ -173,7 +173,7 @@ end
 %$ catch
 %$     t(1) = 0;
 %$ end
-%$ disp('coucou')
+%$
 %$ T = all(t);
 %@eof:1
 
