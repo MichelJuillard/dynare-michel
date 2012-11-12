@@ -80,12 +80,17 @@ c = isequal(a.time,b.time);
 %$ d3 = dynDate(date_3);
 %$ d4 = dynDate(date_4);
 %$ d5 = dynDate(date_5);
-%$ i1 = (d1==d2);
+%$ try 
+%$    i1 = (d1==d2);
+%$    t1 = 0;
+%$ catch
+%$    t1 = 1;
+%$ end
 %$ i2 = (d2==d2);
 %$ i3 = (d4==d5);
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(i1,0);
+%$ t(1) = t1;
 %$ t(2) = dyn_assert(i2,1);
 %$ t(3) = dyn_assert(i3,0);
 %$ T = all(t);
