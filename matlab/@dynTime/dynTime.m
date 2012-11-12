@@ -41,7 +41,7 @@ function sp = dynTime(a)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -79,3 +79,4 @@ switch nargin
   otherwise
     error(['dynTime::dynTime: Too many input arguments!'])
 end
+
