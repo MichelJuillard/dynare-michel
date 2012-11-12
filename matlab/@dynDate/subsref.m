@@ -51,4 +51,65 @@ function B = subsref(A,S)
 
 % Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
 
-B = builtin('subsref', A, S);
+% Allow to populate an empty dynDate object or update a dynDate object 
+if isequal(length(S),1) && isequal(S.type,'()') && isequal(length(S.subs),1) && ischar(S.subs{1})
+    B = dynDate(S.subs{1});
+    return
+end
+
+% Give access to dynDate properties (time and freq).
+if isequal(length(S),1) && isequal(S.type,'.') && ( strcmp(S.subs,'time') || strcmp(S.subs,'freq') )  
+    B = builtin('subsref', A, S);
+    return
+end
+
+error('dynDate::subsref: You''re trying to do something wrong!')
+
+%@test:1
+%$ t = zeros(3,1);
+%$
+%$ % Instantiate an empty dynDate object
+%$ a = dynDate();
+%$ if all(isnan(a.time)) && isnan(a.freq)
+%$     t(1) = 1;
+%$ end
+%$
+%$ % Populate the empty dynDate object
+%$ try
+%$     a = a('1950Q1');
+%$     if isequal(a.time,[1950 1]) && isequal(a.freq,4)
+%$         t(2) = 1;
+%$     end
+%$ catch
+%$     % Nothing to do here...
+%$ end
+%$
+%$ % "Overwrite" a dynDate object
+%$ try
+%$     a = a('1945Q3');
+%$     if isequal(a.time,[1945 3]) && isequal(a.freq,4)
+%$         t(3) = 1;
+%$     end
+%$ catch
+%$     % Nothing to do here...
+%$ end
+%$
+%$ % Check the results.
+%$ T = all(t);
+%@eof:1
+
+%@test:2
+%$ % Instantiate a dynDate object
+%$ a = dynDate('1938Q4');
+%$
+%$ % Try to access a non existent (or forbidden) property
+%$ try
+%$     a.Time;
+%$     t = 0;
+%$ catch
+%$     t = 1;
+%$ end
+%$
+%$ T = all(t);
+%@eof:2
+
