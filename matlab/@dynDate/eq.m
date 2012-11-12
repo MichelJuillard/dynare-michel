@@ -58,9 +58,8 @@ if ~( isa(a,'dynDate') && isa(b,'dynDate'))
     error(['dynDate::eq: Input arguments ' inputname(1) 'and ' inputname(2) ' have to be a dynDate objects!'])
 end
 
-if verbose && a.freq~=b.freq
-    disp(['dynDate::eq: Input arguments ' inputname(1) 'and ' inputname(2) ' have no common frequencies!'])
-    c = 0;
+if ~isequal(a.freq,b.freq)
+    error(['dynDate::eq: Input arguments ' inputname(1) 'and ' inputname(2) ' have no common frequencies!'])
 end
 
 c = isequal(a.time,b.time);
