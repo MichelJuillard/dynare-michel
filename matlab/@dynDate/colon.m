@@ -54,15 +54,15 @@ if nargin~=2
 end
 
 if ~( isa(a,'dynDate') && isa(b,'dynDate'))
-    error(['dynTime::colon: Input arguments ' inputname(1) 'and ' inputname(2) ' have to be a dynDate objects!'])
+    error(['dynDate::colon: Input arguments ' inputname(1) 'and ' inputname(2) ' have to be a dynDate objects!'])
 end
 
 if a.freq~=b.freq
-    error(['dynTime::colon: Input arguments ' inputname(1) 'and ' inputname(2) ' must have common frequency!'])
+    error(['dynDate::colon: Input arguments ' inputname(1) 'and ' inputname(2) ' must have common frequency!'])
 end
 
 if a>b
-    error(['dynTime::colon: ' inputname(1) ' must precede ' inputname(2) '!' ])
+    error(['dynDate::colon: ' inputname(1) ' must precede ' inputname(2) '!' ])
 end
 
 if a==b% Time range with only one date.
