@@ -103,3 +103,23 @@ end
 %$ t(2) = dyn_assert(d3.freq,e.freq);
 %$ T = all(t);
 %@eof:1
+
+%@test:2
+%$ addpath ../matlab
+%$
+%$ % Create an empty dynDate object
+%$ date = dynDate();
+%$
+%$ % Define expected results.
+%$ e.freq = 4;
+%$ e.time = [1950 2; 1950 3; 1950 4; 1951 1; 1951 2; 1951 3; 1951 4];
+%$
+%$ % Call the tested routine.
+%$ d = date('1950Q2'):date('1951Q4');
+%$
+%$ % Check the results.
+%$ t(1) = dyn_assert(d.time,e.time);
+%$ t(2) = dyn_assert(d.freq,e.freq);
+%$ T = all(t);
+%@eof:2
+
