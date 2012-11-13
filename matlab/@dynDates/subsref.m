@@ -55,7 +55,7 @@ if isequal(S(1).type,'.')
     switch S(1).subs
       case {'time','freq','ndat'}                                   % Public members.
         B = builtin('subsref', A, S(1));
-      case {'sort'}                                                 % Give "dot access" to public methods.
+      case {'sort','append'}                                        % Give "dot access" to public methods.
         if length(S)==1
             B = feval(S(1).subs,A);
         else
