@@ -32,7 +32,7 @@ function B = subsref(A,S)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011, 2012e Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -50,8 +50,6 @@ function B = subsref(A,S)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
-
-B = builtin('subsref', A, S);
 
 if isequal(S(1).type,'.')
     switch S(1).subs
