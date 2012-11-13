@@ -63,6 +63,19 @@ if isequal(length(S),1) && isequal(S.type,'.') && ( strcmp(S.subs,'time') || str
     return
 end
 
+% Allow more complex call to subsref such that:
+%
+% a = dynDate();
+% a('2009M4').time
+%
+% should return a row vector [2009 4]. Note that the object name should not match any function name
+% declared in the matlab's path.
+if length(S)>1 && isequal(S(1).type,'()') && isequal(S(2).type,'.')
+    tmp = dynDate(S(1).subs{1});
+    B = builtin('subsref', tmp, S(2));
+    return
+end
+
 error('dynDate::subsref: You''re trying to do something wrong!')
 
 %@test:1
@@ -113,3 +126,16 @@ error('dynDate::subsref: You''re trying to do something wrong!')
 %$ T = all(t);
 %@eof:2
 
+%@test:3
+%$ % Try more complex call to overloaded subsref
+%$ t = zeros(1,1);
+%$ try
+%$     a = dynDate();
+%$     time = a('1973M1').time;
+%$     t(1) = 1;
+%$ catch
+%$     % Nothing to do here.
+%$ end
+%$
+%$ T = all(t);
+%@eof:3
