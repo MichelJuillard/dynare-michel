@@ -1,5 +1,5 @@
 function dd = append(dd,a)
-% sort method for dynDates class.
+% append method for dynDates class.
 
 %@info:
 %! @deftypefn {Function File} {@var{dd} =} sort (@var{dd}, @var{a})
