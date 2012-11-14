@@ -1,4 +1,4 @@
-function dd = sort(dd)
+function dd = unique(dd)
 % unique method for dynDates class.
 
 %@info:
@@ -28,7 +28,7 @@ function dd = sort(dd)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -48,7 +48,7 @@ function dd = sort(dd)
 % AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
 
 if ~isa(dd,'dynDates')
-    error(['dynDates::sort: Input argument ' inputname(dd) ' has to be a dynDates object.'])
+    error(['dynDates::unique: Input argument ' inputname(dd) ' has to be a dynDates object.'])
 end
 
 if dd.ndat==1
