@@ -83,8 +83,6 @@ else
 end
 
 %@test:1
-%$ addpath ../matlab
-%$
 %$ % Define two dates
 %$ date_1 = '1950Q2';
 %$ date_2 = '1951Q4';
@@ -105,8 +103,6 @@ end
 %@eof:1
 
 %@test:2
-%$ addpath ../matlab
-%$
 %$ % Create an empty dynDate object
 %$ date = dynDate();
 %$
@@ -122,4 +118,22 @@ end
 %$ t(2) = dyn_assert(d.freq,e.freq);
 %$ T = all(t);
 %@eof:2
+
+
+%@test:3
+%$ % Create an empty dynDate object for quaterly data
+%$ qq = dynDate('Q');
+%$
+%$ % Define expected results.
+%$ e.freq = 4;
+%$ e.time = [1950 2; 1950 3; 1950 4; 1951 1; 1951 2; 1951 3; 1951 4];
+%$
+%$ % Call the tested routine.
+%$ d = qq(1950,2):qq(1951,4);
+%$
+%$ % Check the results.
+%$ t(1) = dyn_assert(d.time,e.time);
+%$ t(2) = dyn_assert(d.freq,e.freq);
+%$ T = all(t);
+%@eof:3
 
