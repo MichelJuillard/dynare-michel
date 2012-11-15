@@ -75,48 +75,65 @@ switch nargin
     return
   case 1
     if ischar(a)% Weekly, Monthly or Quaterly data.
-        quaterly = findstr('Q',a);
-        monthly  = findstr('M',a);
-        weekly   = findstr('W',a);
-        if ~isempty(quaterly)
-            date.freq = 4;
-            date.time(1) = str2num(a(1:quaterly-1));
-            date.time(2) = str2num(a(quaterly+1:end));
-        end
-        if ~isempty(monthly)
-            date.freq = 12;
-            date.time(1) = str2num(a(1:monthly-1));
-            date.time(2) = str2num(a(monthly+1:end));
-        end
-        if ~isempty(weekly)
-            date.freq = 52;
-            date.time(1) = str2num(a(1:weekly-1));
-            date.time(2) = str2num(a(weekly+1:end));
-        end
-        if isempty(quaterly) && isempty(monthly) && isempty(weekly)
-            if any(isletter(a))
-                error('dynDate:: Using a string as an input argument, I can only handle weekly (W), monthly (M) or quaterly (Q) data!');
-            else
-                % Yearly data declared with a string
+        if length(a)>1
+            quaterly = findstr('Q',a);
+            monthly  = findstr('M',a);
+            weekly   = findstr('W',a);
+            if ~isempty(quaterly)
+                date.freq = 4;
+                date.time(1) = str2num(a(1:quaterly-1));
+                date.time(2) = str2num(a(quaterly+1:end));
+            end
+            if ~isempty(monthly)
+                date.freq = 12;
+                date.time(1) = str2num(a(1:monthly-1));
+                date.time(2) = str2num(a(monthly+1:end));
+            end
+            if ~isempty(weekly)
+                date.freq = 52;
+                date.time(1) = str2num(a(1:weekly-1));
+                date.time(2) = str2num(a(weekly+1:end));
+            end
+            if isempty(quaterly) && isempty(monthly) && isempty(weekly)
+                if any(isletter(a))
+                    error('dynDate:: Using a string as an input argument, I can only handle weekly (W), monthly (M) or quaterly (Q) data!');
+                else
+                    % Yearly data declared with a string
+                    date.freq = 1;
+                    date.time(1) = str2num(a);
+                    date.time(2) = 1;
+                end
+            end
+        else
+            switch a
+              case 'Q'
+                date.freq = 4;
+              case 'M'
+                date.freq = 12;
+              case 'W'
+                date.freq = 52;
+              otherwise
+                % Yearly data are assumed.
                 date.freq = 1;
-                date.time(1) = str2num(a);
-                date.time(2) = 1;
             end
         end
     elseif isa(a,'dynDate') % If input argument is a dynDate object then do a copy.
         date = a;
-    else% If b is not a string then yearly data are assumed.
-        date.freq = 1;
-        date.time(1) = a;
-        date.time(2) = 1;
+    else
+        if isequal(length(a),1)
+            % If b is not a string then yearly data are assumed.
+            date.freq = 1;
+            date.time(1) = a;
+            date.time(2) = 1;
+        else
+            error('dynDate:: Can''t instantiate the class, wrong calling sequence!')
+        end            
     end
   otherwise
     error('dynDate:: Can''t instantiate the class, wrong calling sequence!')
 end
 
 %@test:1
-%$ addpath ../matlab
-%$
 %$ % Define some dates
 %$ date_1 = 1950;
 %$ date_2 = '1950Q2';
@@ -154,5 +171,21 @@ end
 %$ t(8) = dyn_assert(d3.freq,e_freq_3);
 %$ t(9) = dyn_assert(d4.freq,e_freq_4);
 %$ t(10)= dyn_assert(d5.freq,e_freq_5);
+%$ T = all(t);
+%@eof:1
+
+%@test:2
+%$ % Instatiate an empty objects for quaterly, monthly and weekly dates.
+%$ qq = dynDate('Q');
+%$ mm = dynDate('M');
+%$ ww = dynDate('W');
+%$
+%$ % Check the results.
+%$ t(1) = dyn_assert(qq.freq,4);
+%$ t(2) = dyn_assert(mm.freq,12);
+%$ t(3) = dyn_assert(ww.freq,52);
+%$ t(4) = dyn_assert(all(isnan(qq.time)),1);
+%$ t(5) = dyn_assert(all(isnan(mm.time)),1);
+%$ t(6) = dyn_assert(all(isnan(ww.time)),1);
 %$ T = all(t);
 %@eof:1
