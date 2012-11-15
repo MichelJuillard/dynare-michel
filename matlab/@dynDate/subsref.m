@@ -51,14 +51,47 @@ function B = subsref(A,S)
 
 % Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
 
-% Allow to populate an empty dynDate object or update a dynDate object 
-if isequal(length(S),1) && isequal(S.type,'()') && isequal(length(S.subs),1) && ischar(S.subs{1})
-    B = dynDate(S.subs{1});
-    return
+% Allow to populate an empty dynDate object or update a dynDate object
+if isequal(length(S),1) && isequal(S.type,'()')
+    if isequal(length(S.subs),1) && ischar(S.subs{1})
+        B = dynDate(S.subs{1});
+        return
+    elseif isequal(length(S.subs),1) && isnumeric(S.subs{1})
+        % Yearly data are assumed.
+        if isequal(A.freq,1)
+            B = dynDate(S.subs{1});
+            return
+        end
+    elseif isequal(length(S.subs),2) && isequal(length(S.subs{1}),1) && isequal(length(S.subs{2}),1)
+        tmp = [];
+        switch A.freq
+          case 4
+            % Quaterly data
+            if S.subs{2}<5 && S.subs{2}>0
+                tmp = [num2str(S.subs{1}), 'Q' num2str(S.subs{2})];
+            end
+          case 12
+            % Monthly data
+            if S.subs{2}<13 && S.subs{2}>0
+                tmp = [num2str(S.subs{1}), 'M' num2str(S.subs{2})];
+            end
+          case 52
+            % Weekly data
+            if S.subs{2}<53 && S.subs{2}>0
+                tmp = [num2str(S.subs{1}), 'W' num2str(S.subs{2})];
+            end
+          otherwise
+            %
+        end
+        if ~isempty(tmp)
+            B = dynDate(tmp);
+            return
+        end
+    end
 end
 
 % Give access to dynDate properties (time and freq).
-if isequal(length(S),1) && isequal(S.type,'.') && ( strcmp(S.subs,'time') || strcmp(S.subs,'freq') )  
+if isequal(length(S),1) && isequal(S.type,'.') && ( strcmp(S.subs,'time') || strcmp(S.subs,'freq') )
     B = builtin('subsref', A, S);
     return
 end
@@ -137,5 +170,25 @@ error('dynDate::subsref: You''re trying to do something wrong!')
 %$     % Nothing to do here.
 %$ end
 %$
+%$ T = all(t);
+%@eof:3
+
+
+%@test:4
+%$ t = NaN(3,1);
+%$ % Instantiate an empty object for quaterly date
+%$ qq = dynDate('Q');
+%$ % Populate this object
+%$ a = qq(1938,4);
+%$ try
+%$    a = dynDate(1938,11);
+%$    t(3) = 0;
+%$ catch
+%$    t(3) = 1;
+%$ end
+%$
+%$ % Check the results
+%$ t(1) = dyn_assert(a.freq,4);
+%$ t(2) = dyn_assert(a.time,[1938,4]);
 %$ T = all(t);
 %@eof:3
