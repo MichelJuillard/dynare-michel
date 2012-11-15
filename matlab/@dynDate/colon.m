@@ -119,7 +119,6 @@ end
 %$ T = all(t);
 %@eof:2
 
-
 %@test:3
 %$ % Create an empty dynDate object for quaterly data
 %$ qq = dynDate('Q');
