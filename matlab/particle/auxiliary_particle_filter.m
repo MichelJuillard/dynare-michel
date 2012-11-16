@@ -44,6 +44,9 @@ if isempty(start)
     start = 1;
 end
 
+% Set flag for prunning
+pruning = DynareOptions.particle.pruning;
+
 % Get steady state and mean.
 steadystate = ReducedForm.steadystate;
 constant = ReducedForm.constant;
@@ -80,6 +83,10 @@ StateVectorMean = ReducedForm.StateVectorMean;
 StateVectorVarianceSquareRoot = reduced_rank_cholesky(ReducedForm.StateVectorVariance)';
 state_variance_rank = size(StateVectorVarianceSquareRoot,2);
 Q_lower_triangular_cholesky = chol(Q)';
+if pruning
+    StateVectorMean_ = StateVectorMean;
+    StateVectorVarianceSquareRoot_ = StateVectorVarianceSquareRoot;
+end
 
 % Set seed for randn().
 set_dynare_seed('default');
@@ -92,9 +99,17 @@ LIK  = NaN;
 % Initialization of the weights across particles.
 weights = ones(1,number_of_particles)/number_of_particles ;
 StateVectors = bsxfun(@plus,StateVectorVarianceSquareRoot*randn(state_variance_rank,number_of_particles),StateVectorMean);
+if pruning
+    StateVectors_ = StateVectors;
+end
 for t=1:sample_size
     yhat = bsxfun(@minus,StateVectors,state_variables_steady_state);
-    tmp = local_state_space_iteration_2(yhat,zeros(number_of_structural_innovations,number_of_particles),ghx,ghu,constant,ghxx,ghuu,ghxu,DynareOptions.threads.local_state_space_iteration_2);
+    if pruning
+        yhat_ = bsxfun(@minus,StateVectors_,state_variables_steady_state);
+        [tmp, tmp_] = local_state_space_iteration_2(yhat,zeros(number_of_structural_innovations,number_of_particles),ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,steadystate,DynareOptions.threads.local_state_space_iteration_2);
+    else
+        tmp = local_state_space_iteration_2(yhat,zeros(number_of_structural_innovations,number_of_particles),ghx,ghu,constant,ghxx,ghuu,ghxu,DynareOptions.threads.local_state_space_iteration_2);
+    end
     PredictedObservedMean = weights*(tmp(mf1,:)');
     PredictionError = bsxfun(@minus,Y(:,t),tmp(mf1,:));
     dPredictedObservedMean = bsxfun(@minus,tmp(mf1,:),PredictedObservedMean');
@@ -110,7 +125,13 @@ for t=1:sample_size
     yhat = yhat(:,indx_resmpl);
     wtilde = wtilde(indx_resmpl);
     epsilon = Q_lower_triangular_cholesky*randn(number_of_structural_innovations,number_of_particles);
-    tmp = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,DynareOptions.threads.local_state_space_iteration_2);
+    if pruning
+        yhat_ = yhat_(:,indx_resmpl);
+        [tmp, tmp_] = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,steadystate,DynareOptions.threads.local_state_space_iteration_2);
+        StateVectors_ = tmp_(mf0,:);
+    else
+        tmp = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,DynareOptions.threads.local_state_space_iteration_2);
+    end
     StateVectors = tmp(mf0,:);
     PredictedObservedMean = mean(tmp(mf1,:),2);
     PredictionError = bsxfun(@minus,Y(:,t),tmp(mf1,:));
@@ -119,9 +140,6 @@ for t=1:sample_size
     lnw = exp(-.5*(const_lik+log(det(PredictedObservedVariance))+sum(PredictionError.*(PredictedObservedVariance\PredictionError),1)));
     wtilde = lnw./wtilde;
     weights = wtilde/sum(wtilde);
-    %indx_resmpl = resample(weights ,DynareOptions.particle.resampling.method1,DynareOptions.particle.resampling.method2);
-    %StateVectors = StateVectors(:,indx_resmpl);
-    %weights = ones(1,number_of_particles)/number_of_particles ;
 end
 
 LIK = -sum(lik(start:end));
