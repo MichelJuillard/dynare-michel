@@ -98,15 +98,6 @@ nd = nnz(kmask);           % size of the state vector
 kmask(i_kmask) = (1:nd);
 % auxiliary equations
 
-% elements that are both in z(t+1) and z(t)
-k1 = find([kmask(1:end-DynareModel.endo_nbr) & kmask(DynareModel.endo_nbr+1:end)] );
-kad = [];
-kae = [];
-if ~isempty(k1)
-    kad = kmask(k1+DynareModel.endo_nbr);
-    kae = kmask(k1);
-end
-
 % composition of state vector
 % col 1: variable;           col 2: lead/lag in z(t+1);
 % col 3: A cols for t+1 (D); col 4: A cols for t (E)
@@ -128,8 +119,6 @@ dr.inv_order_var = inv_order_var';
 dr.nstatic = nstatic;
 dr.npred = npred+nboth;
 dr.kstate = kstate;
-dr.kad = kad;
-dr.kae = kae;
 dr.nboth = nboth;
 dr.nfwrd = nfwrd;
 % number of forward variables in the state vector

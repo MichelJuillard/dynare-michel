@@ -128,8 +128,6 @@ if any(any(isnan(jacobia_)))
 end
 
 kstate = dr.kstate;
-kad = dr.kad;
-kae = dr.kae;
 nstatic = dr.nstatic;
 nfwrd = dr.nfwrd;
 npred = dr.npred;

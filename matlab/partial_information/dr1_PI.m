@@ -157,8 +157,6 @@ end
 
 dr=set_state_space(dr,M_,options_);
 kstate = dr.kstate;
-kad = dr.kad;
-kae = dr.kae;
 nstatic = dr.nstatic;
 nfwrd = dr.nfwrd;
 npred = dr.npred;
