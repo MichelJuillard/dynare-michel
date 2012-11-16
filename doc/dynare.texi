@@ -1883,7 +1883,7 @@ endogenous.
 @table @code
 
 @item all_values_required
-@xref{all_values_required}
+@xref{all_values_required}.
 @end table
 
 @examplehead
@@ -4238,7 +4238,7 @@ stored in variable @code{oo_.forecast} and corresponds to the forecast
 at the posterior mode. If a Metropolis-Hastings is computed, the
 distribution of forecasts is stored in variables
 @code{oo_.PointForecast} and
-@code{oo_.MeanForecast}. @xref{Forecasting} for a description of
+@code{oo_.MeanForecast}. @xref{Forecasting}, for a description of
 these variables.
 
 @item tex
