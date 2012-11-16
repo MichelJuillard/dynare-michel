@@ -1,4 +1,4 @@
-function indx = residual_resampling(weights)
+function indx = residual_resampling(weights,noise)
 % Resamples particles.
 
 %@info:
@@ -30,7 +30,7 @@ function indx = residual_resampling(weights)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011-2012 Dynare Team
+% Copyright (C) 2011, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -53,6 +53,15 @@ function indx = residual_resampling(weights)
 % What is the number of particles?
 number_of_particles = length(weights);
 
+switch length(noise)
+  case 1
+    kitagawa_resampling = 1;
+  case number_of_particles
+    kitagawa_resampling = 0;
+  otherwise
+    error(['particle::resampling: Unknown method! The size of the second argument (' inputname(noise) ') is wrong.'])
+end
+
 % Set vectors of indices.
 jndx = 1:number_of_particles;
 indx = zeros(1,number_of_particles);
@@ -69,13 +78,20 @@ number_of_trials = number_of_particles-sum(iWEIGHTS);
 if number_of_trials
   WEIGHTS = (WEIGHTS-iWEIGHTS)/number_of_trials;
   EmpiricalCDF = cumsum(WEIGHTS);
-  u = fliplr(cumprod(rand(1,number_of_trials).^(1./(number_of_trials:-1:1))));
+  if kitagawa_resampling
+    u = (transpose(1:number_of_trials)-1+noise(:))/number_of_trials;  
+  else 
+    u = fliplr(cumprod(noise.^(1./(number_of_trials:-1:1))));
+  end
   j=1;
   for i=1:number_of_trials
     while (u(i)>EmpiricalCDF(j))
       j=j+1;
     end
     iWEIGHTS(j)=iWEIGHTS(j)+1;
+    if kitagawa_resampling==0
+       j=1; 
+    end
   end
 end
 
