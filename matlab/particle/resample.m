@@ -34,7 +34,7 @@ function indx = resample(weights,method1,method2)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011-2012 Dynare Team
+% Copyright (C) 2011, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -56,7 +56,13 @@ function indx = resample(weights,method1,method2)
 
 switch method1
   case 'residual'
-    indx = residual_resampling(weights);
+    if strcmpi(method2,'kitagawa')
+        indx = residual_resampling(weights,rand);
+    elseif strcmpi(method2,'stratified')
+        indx = residual_resampling(weights,rand(size(weights)));
+    else
+        error('particle::resample: Unknown method!')
+    end
   case 'traditional'
     if strcmpi(method2,'kitagawa')
         indx = traditional_resampling(weights,rand);
