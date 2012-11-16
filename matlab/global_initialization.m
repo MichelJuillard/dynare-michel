@@ -200,7 +200,7 @@ options_.bnlms = bnlms;
 particle.status = 0;
 % How do we initialize the states?
 particle.initialization = 1;
-particle.initial_state_prior_std = .0001;
+particle.initial_state_prior_std = .1;
 % Set the default order of approximation of the model (perturbation).
 particle.perturbation = 2;
 % Set the default number of particles.
@@ -211,12 +211,14 @@ particle.smolyak_accuracy = 3;
 particle.pruning = 0;
 % Set default algorithm
 particle.algorithm = 'sequential_importance_particle_filter';
-% Set the Gaussian approximation method
+% Set the Gaussian approximation method for Importance sampling
+particle.IS_approximation_method = 'unscented';
+% Set the Gaussian approximation method for particles distributions
 particle.approximation_method = 'unscented';
 % Set unscented parameters alpha, beta and kappa for gaussian approximation
-particle.unscented.alpha = 1;
+particle.unscented.alpha = .01;
 particle.unscented.beta = 2;
-particle.unscented.kappa = 1;
+particle.unscented.kappa = 0;
 % Configuration of resampling in case of particles
 particle.resampling.status = 'systematic'; % 'none', 'generic', 'smoothed'
 particle.resampling.neff_threshold = .5;
@@ -224,9 +226,9 @@ particle.resampling.neff_threshold = .5;
 particle.resampling.method1 = 'traditional' ;
 particle.resampling.method2 = 'kitagawa';
 % Number of partitions for the smoothed resampling method
-DynareOptions.particle.resampling.number_of_partitions = 200;
+particle.resampling.number_of_partitions = 200;
 % Configuration of the mixture filters
-particle.mixture_method = 'particles' ;
+%particle.mixture_method = 'particles' ;
 % Size of the different mixtures
 particle.mixture_state_variables = 5 ;
 particle.mixture_structural_shocks = 1 ;
