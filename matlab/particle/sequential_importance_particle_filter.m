@@ -72,7 +72,7 @@ end
 pruning = DynareOptions.particle.pruning;
 
 % Get steady state and mean.
-%steadystate = ReducedForm.steadystate;
+steadystate = ReducedForm.steadystate;
 constant = ReducedForm.constant;
 state_variables_steady_state = ReducedForm.state_variables_steady_state;
 
