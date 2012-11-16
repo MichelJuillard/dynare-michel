@@ -831,7 +831,8 @@ mutually exclusive arguments are separated by vertical bars: @samp{|};
 
 @item
 @var{DOUBLE} indicates a double precision number. The following syntaxes
-are valid: @code{1.1e3}, @code{1.1E3}, @code{1.1d3}, @code{1.1D3};
+are valid: @code{1.1e3}, @code{1.1E3}, @code{1.1d3}, @code{1.1D3}. In
+some places, infinite values @code{Inf} and @code{-Inf} are also allowed;
 
 @item
 @var{NUMERICAL_VECTOR} indicates a vector of numbers separated by spaces,
