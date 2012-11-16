@@ -107,16 +107,16 @@ for file = 1:NumberOfDrawsFiles
         end
         if first_call
             endo_nbr = M_.endo_nbr;
-            nstatic = dr.nstatic;
-            npred = dr.npred;
+            nstatic = M_.nstatic;
+            nspred = M_.nspred;
             iv = (1:endo_nbr)';
-            ic = [ nstatic+(1:npred) endo_nbr+(1:size(dr.ghx,2)-npred) ]';
+            ic = [ nstatic+(1:nspred) endo_nbr+(1:size(dr.ghx,2)-nspred) ]';
             StateSpaceModel.number_of_state_equations = M_.endo_nbr;
             StateSpaceModel.number_of_state_innovations = M_.exo_nbr;
             StateSpaceModel.sigma_e_is_diagonal = M_.sigma_e_is_diagonal;
             StateSpaceModel.order_var = dr.order_var;
             first_call = 0;
-            clear('endo_nbr','nstatic','npred','k');
+            clear('endo_nbr','nstatic','nspred','k');
         end
         [StateSpaceModel.transition_matrix,StateSpaceModel.impulse_matrix] = kalman_transition_matrix(dr,iv,ic,M_.exo_nbr);
         StateSpaceModel.state_innovations_covariance_matrix = M_.Sigma_e;

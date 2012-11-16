@@ -49,7 +49,7 @@ function [A,B,ys,info,Model,DynareOptions,DynareResults] = dynare_resolve(Model,
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2001-2011 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -83,11 +83,11 @@ end
 switch nargin
   case 3
     endo_nbr = Model.endo_nbr;
-    nstatic = DynareResults.dr.nstatic;
-    npred = DynareResults.dr.npred;
+    nstatic = Model.nstatic;
+    nspred = Model.nspred;
     iv = (1:endo_nbr)';
     if DynareOptions.block == 0
-        ic = [ nstatic+(1:npred) endo_nbr+(1:size(DynareResults.dr.ghx,2)-npred) ]';
+        ic = [ nstatic+(1:nspred) endo_nbr+(1:size(DynareResults.dr.ghx,2)-nspred) ]';
     else
         ic = DynareResults.dr.restrict_columns;
     end;

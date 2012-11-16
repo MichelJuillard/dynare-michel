@@ -66,7 +66,7 @@ function [dr,info] = dyn_first_order_solver(jacobia,DynareModel,dr,DynareOptions
 
 persistent reorder_jacobian_columns innovations_idx index_s index_m index_c
 persistent index_p row_indx index_0m index_0p k1 k2 state_var
-persistent ndynamic nstatic nfwrd npred nboth nd nyf n_current index_d 
+persistent ndynamic nstatic nfwrd npred nboth nd nsfwrd n_current index_d 
 persistent index_e index_d1 index_d2 index_e1 index_e2 row_indx_de_1 
 persistent row_indx_de_2 cols_b
 
@@ -85,12 +85,12 @@ if isempty(reorder_jacobian_columns)
     
     maximum_lag = DynareModel.maximum_endo_lag;
     kstate   = dr.kstate;
-    nfwrd    = dr.nfwrd;
-    nboth    = dr.nboth;
-    npred    = dr.npred-nboth;
-    nstatic  = dr.nstatic;
-    ndynamic = npred+nfwrd+nboth;
-    nyf      = nfwrd + nboth;
+    nfwrd    = DynareModel.nfwrd;
+    nboth    = DynareModel.nboth;
+    npred    = DynareModel.npred;
+    nstatic  = DynareModel.nstatic;
+    ndynamic = DynareModel.ndynamic;
+    nsfwrd   = DynareModel.nsfwrd;
     n        = DynareModel.endo_nbr;
 
     k1 = 1:(npred+nboth);
@@ -142,12 +142,12 @@ if isempty(reorder_jacobian_columns)
     row_indx = nstatic+row_indx_de_1;
     index_d = [index_0m index_p];
     llx = lead_lag_incidence(:,order_var);
-    index_d1 = [find(llx(maximum_lag+1,nstatic+(1:npred))), npred+nboth+(1:nyf) ];
+    index_d1 = [find(llx(maximum_lag+1,nstatic+(1:npred))), npred+nboth+(1:nsfwrd) ];
     index_d2 = npred+(1:nboth);
 
     index_e = [index_m index_0p];
     index_e1 = [1:npred+nboth, npred+nboth+find(llx(maximum_lag+1,nstatic+npred+(1: ...
-                                                      nyf)))];
+                                                      nsfwrd)))];
     index_e2 = npred+nboth+(1:nboth);
     
     [junk,cols_b] = find(lead_lag_incidence(maximum_lag+1, order_var));
@@ -239,13 +239,13 @@ else
         return
     end
 
-    if nba ~= nyf
+    if nba ~= nsfwrd
         temp = sort(abs(dr.eigval));
-        if nba > nyf
-            temp = temp(nd-nba+1:nd-nyf)-1-DynareOptions.qz_criterium;
+        if nba > nsfwrd
+            temp = temp(nd-nba+1:nd-nsfwrd)-1-DynareOptions.qz_criterium;
             info(1) = 3;
-        elseif nba < nyf;
-            temp = temp(nd-nyf+1:nd-nba)-1-DynareOptions.qz_criterium;
+        elseif nba < nsfwrd;
+            temp = temp(nd-nsfwrd+1:nd-nba)-1-DynareOptions.qz_criterium;
             info(1) = 4;
         end
         info(2) = temp'*temp;
@@ -253,7 +253,7 @@ else
     end
 
     %First order approximation
-    indx_stable_root = 1: (nd - nyf);     %=> index of stable roots
+    indx_stable_root = 1: (nd - nsfwrd);     %=> index of stable roots
     indx_explosive_root = npred + nboth + 1:nd;  %=> index of explosive roots
                                                  % derivatives with respect to dynamic state variables
                                                  % forward variables

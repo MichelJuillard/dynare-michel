@@ -14,7 +14,7 @@ function [y_,int_width]=simultxdet(y0,ex,ex_det, iorder,var_list,M_,oo_,options_
 % The condition size(ex,1)+M_.maximum_lag=size(ex_det,1) must be verified
 %  for consistency.
 
-% Copyright (C) 2008-2011 Dynare Team
+% Copyright (C) 2008-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -35,8 +35,8 @@ dr = oo_.dr;
 ykmin = M_.maximum_lag;
 endo_nbr = M_.endo_nbr;
 exo_det_steady_state = oo_.exo_det_steady_state;
-nstatic = dr.nstatic;
-npred =dr.npred;
+nstatic = M_.nstatic;
+nspred = M_.nspred;
 nc = size(dr.ghx,2);
 iter = size(ex,1);
 if size(ex_det, 1) ~= iter+ykmin
@@ -114,7 +114,7 @@ elseif iorder == 2
     end
 end
 
-[A,B] = kalman_transition_matrix(dr,nstatic+(1:npred),1:nc,M_.exo_nbr);
+[A,B] = kalman_transition_matrix(dr,nstatic+(1:nspred),1:nc,M_.exo_nbr);
 
 inv_order_var = dr.inv_order_var;
 ghx1 = dr.ghx(inv_order_var(ivar),:);

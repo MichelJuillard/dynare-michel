@@ -16,7 +16,7 @@ function oo_ = display_conditional_variance_decomposition(Steps, SubsetOfVariabl
 % [1] The covariance matrix of the state innovations needs to be diagonal.
 % [2] In this version, absence of measurement errors is assumed...
 
-% Copyright (C) 2010-2011 Dynare Team
+% Copyright (C) 2010-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -40,7 +40,7 @@ StateSpaceModel.number_of_state_innovations = exo_nbr;
 StateSpaceModel.sigma_e_is_diagonal = M_.sigma_e_is_diagonal;
 
 iv = (1:endo_nbr)';
-ic = dr.nstatic+(1:dr.npred)';
+ic = M_.nstatic+(1:M_.nspred)';
 
 [StateSpaceModel.transition_matrix,StateSpaceModel.impulse_matrix] = kalman_transition_matrix(dr,iv,ic,exo_nbr);
 StateSpaceModel.state_innovations_covariance_matrix = M_.Sigma_e;

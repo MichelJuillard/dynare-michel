@@ -38,7 +38,7 @@ function [result,info] = check(M, options, oo)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2001-2011 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -77,16 +77,13 @@ if info(1) ~= 0 && info(1) ~= 3 && info(1) ~= 4
 end
 
 eigenvalues_ = dr.eigval;
-if (options.block)
-    nyf = dr.nyf;
-else
-    nyf = nnz(dr.kstate(:,2)>M.maximum_endo_lag+1);
-end;
 [m_lambda,i]=sort(abs(eigenvalues_));
 n_explod = nnz(abs(eigenvalues_) > options.qz_criterium);
 
+nsfwrd = M.nsfwrd
+
 result = 0;
-if (nyf== n_explod) && (dr.full_rank)
+if (nsfwrd == n_explod) && (dr.full_rank)
     result = 1;
 end
 
@@ -97,7 +94,7 @@ if options.noprint == 0
     z=[m_lambda real(eigenvalues_(i)) imag(eigenvalues_(i))]';
     disp(sprintf('%16.4g %16.4g %16.4g\n',z))
     disp(sprintf('\nThere are %d eigenvalue(s) larger than 1 in modulus ', n_explod));
-    disp(sprintf('for %d forward-looking variable(s)',nyf));
+    disp(sprintf('for %d forward-looking variable(s)',nsfwrd));
     disp(' ')
     if result
         disp('The rank condition is verified.')

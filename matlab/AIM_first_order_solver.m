@@ -82,15 +82,15 @@ function [dr,info]=AIM_first_order_solver(jacobia,M,dr,qz_criterium)
     nd = size(dr.kstate,1);
     nba = nd-sum( abs(dr.eigval) < qz_criterium );
 
-    nyf = dr.nfwrd+dr.nboth;
+    nsfwrd = M.nsfwrd;
 
-    if nba ~= nyf
+    if nba ~= nsfwrd
         temp = sort(abs(dr.eigval));
-        if nba > nyf
-            temp = temp(nd-nba+1:nd-nyf)-1-qz_criterium;
+        if nba > nsfwrd
+            temp = temp(nd-nba+1:nd-nsfwrd)-1-qz_criterium;
             info(1) = 3;
-        elseif nba < nyf;
-            temp = temp(nd-nyf+1:nd-nba)-1-qz_criterium;
+        elseif nba < nsfwrd;
+            temp = temp(nd-nsfwrd+1:nd-nba)-1-qz_criterium;
             info(1) = 4;
         end
         info(2) = temp'*temp;

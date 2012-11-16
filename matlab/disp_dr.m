@@ -8,7 +8,7 @@ function disp_dr(dr,order,var_list)
 %    var_list [char array]:  list of endogenous variables for which the
 %                            decision rules should be printed
 
-% Copyright (C) 2001-2011 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -30,7 +30,7 @@ global M_ options_
 nx =size(dr.ghx,2);
 nu =size(dr.ghu,2);
 if options_.block
-    k = dr.npred + dr.nboth;
+    k = M_.nspred;
     k1 = 1:M_.endo_nbr;
 else
     k = find(dr.kstate(:,2) <= M_.maximum_lag+1);

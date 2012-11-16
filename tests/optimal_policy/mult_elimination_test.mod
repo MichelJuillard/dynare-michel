@@ -49,9 +49,9 @@ ramsey_policy(order=1,irf=0,planner_discount=0.95);
 
 dr2 = mult_elimination({'R'},M_,options_,oo_);
 
-k1 = oo_.dr.nstatic+(1:oo_.dr.npred);
+k1 = M_.nstatic+(1:M_.nspred);
 k2 = strmatch('MULT_',M_.endo_names(oo_.dr.order_var(k1),:));
-k3 = k1(setdiff(1:oo_.dr.npred,k2));
+k3 = k1(setdiff(1:M_.nspred,k2));
 k4 = oo_.dr.order_var(k3);
 
 V0 = oo_.var(k4,k4);

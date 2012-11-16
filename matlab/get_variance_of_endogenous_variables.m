@@ -13,7 +13,7 @@ function vx1 = get_variance_of_endogenous_variables(dr,i_var)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2011 Dynare Team
+% Copyright (C) 2003-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -36,14 +36,14 @@ endo_nbr = M_.endo_nbr;
 
 Sigma_e = M_.Sigma_e;
 
-nstatic = dr.nstatic;
-npred = dr.npred;
+nstatic = M_.nstatic;
+nspred = M_.nspred;
 ghx = dr.ghx(i_var,:);
 ghu = dr.ghu(i_var,:);
 nc = size(ghx,2);
 n = length(i_var);
 
-[A,B] = kalman_transition_matrix(dr,nstatic+(1:npred),1:nc,M_.exo_nbr);
+[A,B] = kalman_transition_matrix(dr,nstatic+(1:nspred),1:nc,M_.exo_nbr);
 
 [vx,u] = lyapunov_symm(A,B*Sigma_e*B',options_.qz_criterium,options_.lyapunov_complex_threshold);
 

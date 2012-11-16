@@ -76,9 +76,9 @@ ntra   = opt_gsa.morris_ntra;
 dr_ = oo_.dr;
 %if isfield(dr_,'ghx'),
 ys_ = oo_.dr.ys;
-nspred = dr_.nspred; %size(dr_.ghx,2);
-nboth = dr_.nboth;
-nfwrd = dr_.nfwrd;
+nspred = M_.nspred; %size(dr_.ghx,2);
+nboth = M_.nboth;
+nfwrd = M_.nfwrd;
 %end
 fname_ = M_.fname;
 

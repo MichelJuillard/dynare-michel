@@ -12,7 +12,7 @@ function dr=mult_elimination(varlist,M_, options_, oo_)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2011 Dynare Team
+% Copyright (C) 2003-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -31,21 +31,21 @@ function dr=mult_elimination(varlist,M_, options_, oo_)
 
 dr = oo_.dr;
 
-nstatic = dr.nstatic;
-npred = dr.npred;
+nstatic = M_.nstatic;
+nspred = M_.nspred;
 order_var = dr.order_var;
-nstates = M_.endo_names(order_var(nstatic+(1:npred)),:);
+nstates = M_.endo_names(order_var(nstatic+(1:nspred)),:);
 
 il = strmatch('MULT_',nstates);
-nil = setdiff(1:dr.npred,il);
+nil = setdiff(1:nspred,il);
 m_nbr = length(il);
 nm_nbr = length(nil);
 
 AA1 = dr.ghx(:,nil);
 AA2 = dr.ghx(:,il);
-A1 = dr.ghx(nstatic+(1:npred),nil);
-A2 = dr.ghx(nstatic+(1:npred),il);
-B = dr.ghu(nstatic+(1:npred),:);
+A1 = dr.ghx(nstatic+(1:nspred),nil);
+A2 = dr.ghx(nstatic+(1:nspred),il);
+B = dr.ghu(nstatic+(1:nspred),:);
 A11 = A1(nil,:);
 A21 = A1(il,:);
 A12 = A2(nil,:);
@@ -68,7 +68,7 @@ M2 = AA2*E2*[R2_1*Q2(:,1:n2)'*[Q1_12' Q1_22']*[A11;A21]; zeros(m_nbr-n2,length(n
 M3 = dr.ghu;
 M4 = AA2*E2*[R2_1*Q2(:,1:n2)'*[Q1_12' Q1_22']*[B1;B2]; zeros(m_nbr-n2,size(B,2))];
 
-k1 = nstatic+(1:npred);
+k1 = nstatic+(1:nspred);
 k1 = k1(nil);
 
 endo_nbr = M_.orig_endo_nbr;
@@ -100,7 +100,6 @@ dr.M3 = M3;
 dr.M4 = M4;
 
 nvar = length(varlist);
-nspred = dr.nspred;
 
 if nvar > 0 && options_.noprint == 0
     res_table = zeros(2*(nm_nbr+M_.exo_nbr),nvar);

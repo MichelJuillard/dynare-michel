@@ -128,11 +128,11 @@ if any(any(isnan(jacobia_)))
 end
 
 kstate = dr.kstate;
-nstatic = dr.nstatic;
-nfwrd = dr.nfwrd;
-npred = dr.npred;
-nboth = dr.nboth;
-nfwrds = nfwrd+nboth;
+nstatic = M_.nstatic;
+nfwrd = M_.nfwrd;
+nspred = M_.nspred;
+nboth = M_.nboth;
+nsfwrd = M_.nsfwrd;
 order_var = dr.order_var;
 nd = size(kstate,1);
 nz = nnz(M_.lead_lag_incidence);
@@ -194,34 +194,34 @@ if M_.exo_det_nbr > 0
     f1 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+2:end,order_var))));
     f0 = sparse(jacobia_(:,nonzeros(M_.lead_lag_incidence(M_.maximum_endo_lag+1,order_var))));
     fudet = sparse(jacobia_(:,nz+M_.exo_nbr+1:end));
-    M1 = inv(f0+[zeros(M_.endo_nbr,nstatic) f1*gx zeros(M_.endo_nbr,nfwrds-nboth)]);
+    M1 = inv(f0+[zeros(M_.endo_nbr,nstatic) f1*gx zeros(M_.endo_nbr,nsfwrd-nboth)]);
     M2 = M1*f1;
     dr.ghud = cell(M_.exo_det_length,1);
     dr.ghud{1} = -M1*fudet;
     for i = 2:M_.exo_det_length
-        dr.ghud{i} = -M2*dr.ghud{i-1}(end-nfwrds+1:end,:);
+        dr.ghud{i} = -M2*dr.ghud{i-1}(end-nsfwrd+1:end,:);
     end
 
     if options_.order > 1
         lead_lag_incidence = M_.lead_lag_incidence;
         k0 = find(lead_lag_incidence(M_.maximum_endo_lag+1,order_var)');
         k1 = find(lead_lag_incidence(M_.maximum_endo_lag+2,order_var)');
-        hu = dr.ghu(nstatic+[1:npred],:);
-        hud = dr.ghud{1}(nstatic+1:nstatic+npred,:);
-        zx = [eye(npred);dr.ghx(k0,:);gx*dr.Gy;zeros(M_.exo_nbr+M_.exo_det_nbr, ...
-                                               npred)];
-        zu = [zeros(npred,M_.exo_nbr); dr.ghu(k0,:); gx*hu; zeros(M_.exo_nbr+M_.exo_det_nbr, ...
+        hu = dr.ghu(nstatic+[1:nspred],:);
+        hud = dr.ghud{1}(nstatic+1:nstatic+nspred,:);
+        zx = [eye(nspred);dr.ghx(k0,:);gx*dr.Gy;zeros(M_.exo_nbr+M_.exo_det_nbr, ...
+                                               nspred)];
+        zu = [zeros(nspred,M_.exo_nbr); dr.ghu(k0,:); gx*hu; zeros(M_.exo_nbr+M_.exo_det_nbr, ...
                                                           M_.exo_nbr)];
-        zud=[zeros(npred,M_.exo_det_nbr);dr.ghud{1};gx(:,1:npred)*hud;zeros(M_.exo_nbr,M_.exo_det_nbr);eye(M_.exo_det_nbr)];
+        zud=[zeros(nspred,M_.exo_det_nbr);dr.ghud{1};gx(:,1:nspred)*hud;zeros(M_.exo_nbr,M_.exo_det_nbr);eye(M_.exo_det_nbr)];
         R1 = hessian1*kron(zx,zud);
         dr.ghxud = cell(M_.exo_det_length,1);
         kf = [M_.endo_nbr-nfwrd-nboth+1:M_.endo_nbr];
-        kp = nstatic+[1:npred];
+        kp = nstatic+[1:nspred];
         dr.ghxud{1} = -M1*(R1+f1*dr.ghxx(kf,:)*kron(dr.ghx(kp,:),dr.ghud{1}(kp,:)));
         Eud = eye(M_.exo_det_nbr);
         for i = 2:M_.exo_det_length
             hudi = dr.ghud{i}(kp,:);
-            zudi=[zeros(npred,M_.exo_det_nbr);dr.ghud{i};gx(:,1:npred)*hudi;zeros(M_.exo_nbr+M_.exo_det_nbr,M_.exo_det_nbr)];
+            zudi=[zeros(nspred,M_.exo_det_nbr);dr.ghud{i};gx(:,1:nspred)*hudi;zeros(M_.exo_nbr+M_.exo_det_nbr,M_.exo_det_nbr)];
             R2 = hessian1*kron(zx,zudi);
             dr.ghxud{i} = -M2*(dr.ghxud{i-1}(kf,:)*kron(dr.Gy,Eud)+dr.ghxx(kf,:)*kron(dr.ghx(kp,:),dr.ghud{i}(kp,:)))-M1*R2;
         end
@@ -231,7 +231,7 @@ if M_.exo_det_nbr > 0
         Eud = eye(M_.exo_det_nbr);
         for i = 2:M_.exo_det_length
             hudi = dr.ghud{i}(kp,:);
-            zudi=[zeros(npred,M_.exo_det_nbr);dr.ghud{i};gx(:,1:npred)*hudi;zeros(M_.exo_nbr+M_.exo_det_nbr,M_.exo_det_nbr)];
+            zudi=[zeros(nspred,M_.exo_det_nbr);dr.ghud{i};gx(:,1:nspred)*hudi;zeros(M_.exo_nbr+M_.exo_det_nbr,M_.exo_det_nbr)];
             R2 = hessian1*kron(zu,zudi);
             dr.ghuud{i} = -M2*dr.ghxud{i-1}(kf,:)*kron(hu,Eud)-M1*R2;
         end
@@ -239,8 +239,8 @@ if M_.exo_det_nbr > 0
         dr.ghudud = cell(M_.exo_det_length,M_.exo_det_length);
         dr.ghudud{1,1} = -M1*R1-M2*dr.ghxx(kf,:)*kron(hud,hud);
         for i = 2:M_.exo_det_length
-            hudi = dr.ghud{i}(nstatic+1:nstatic+npred,:);
-            zudi=[zeros(npred,M_.exo_det_nbr);dr.ghud{i};gx(:,1:npred)*hudi+dr.ghud{i-1}(kf,:);zeros(M_.exo_nbr+M_.exo_det_nbr,M_.exo_det_nbr)];
+            hudi = dr.ghud{i}(nstatic+1:nstatic+nspred,:);
+            zudi=[zeros(nspred,M_.exo_det_nbr);dr.ghud{i};gx(:,1:nspred)*hudi+dr.ghud{i-1}(kf,:);zeros(M_.exo_nbr+M_.exo_det_nbr,M_.exo_det_nbr)];
             R2 = hessian1*kron(zudi,zudi);
             dr.ghudud{i,i} = -M2*(dr.ghudud{i-1,i-1}(kf,:)+...
                                   2*dr.ghxud{i-1}(kf,:)*kron(hudi,Eud) ...
@@ -251,7 +251,7 @@ if M_.exo_det_nbr > 0
                 -M1*R2;
             for j=2:i-1
                 hudj = dr.ghud{j}(kp,:);
-                zudj=[zeros(npred,M_.exo_det_nbr);dr.ghud{j};gx(:,1:npred)*hudj;zeros(M_.exo_nbr+M_.exo_det_nbr,M_.exo_det_nbr)];
+                zudj=[zeros(nspred,M_.exo_det_nbr);dr.ghud{j};gx(:,1:nspred)*hudj;zeros(M_.exo_nbr+M_.exo_det_nbr,M_.exo_det_nbr)];
                 R2 = hessian1*kron(zudj,zudi);
                 dr.ghudud{j,i} = -M2*(dr.ghudud{j-1,i-1}(kf,:)+dr.ghxud{j-1}(kf,:)* ...
                                       kron(hudi,Eud)+dr.ghxud{i-1}(kf,:)* ...

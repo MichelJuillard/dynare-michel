@@ -35,14 +35,14 @@ global oo_ M_
     oo_.dr.ghx = ghx;
     oo_.dr.ghu = ghu;
     endo_nbr = M_.endo_nbr;
-    nstatic = oo_.dr.nstatic;
-    npred = oo_.dr.npred;
+    nstatic = M_.nstatic;
+    nspred = M_.nspred;
     iv = (1:endo_nbr)';
-    ic = [ nstatic+(1:npred) endo_nbr+(1:size(oo_.dr.ghx,2)-npred) ]';
+    ic = [ nstatic+(1:nspred) endo_nbr+(1:size(oo_.dr.ghx,2)-nspred) ]';
     aux = oo_.dr.transition_auxiliary_variables;
-    k = find(aux(:,2) > npred);
+    k = find(aux(:,2) > nspred);
     aux(:,2) = aux(:,2) + nstatic;
-    aux(k,2) = aux(k,2) + oo_.dr.nfwrd;
+    aux(k,2) = aux(k,2) + M_.nfwrd;
   end
   n_iv = length(iv);
   n_ir1 = size(aux,1);

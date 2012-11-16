@@ -3387,32 +3387,31 @@ Dynare distinguishes four types of endogenous variables:
 @table @emph
 
 @item Purely backward (or purely predetermined) variables
-@vindex oo_.dr.npred
-@vindex oo_.dr.nboth
+@vindex M_.npred
 Those that appear only at current and past period in the model, but
 not at future period (@i{i.e.} at @math{t} and @math{t-1} but not
 @math{t+1}). The number of such variables is equal to
-@code{oo_.dr.npred - oo_.dr.nboth}.
+@code{M_.npred}.
 
 @item Purely forward variables
-@vindex oo_.dr.nfwrd
+@vindex M_.nfwrd
 Those that appear only at current and future period in the model, but
 not at past period (@i{i.e.} at @math{t} and @math{t+1} but not
 @math{t-1}). The number of such variables is stored in
-@code{oo_.dr.nfwrd}.
+@code{M_.nfwrd}.
 
 @item Mixed variables
-@vindex oo_.dr.nboth
+@vindex M_.nboth
 Those that appear at current, past and future period in the model
 (@i{i.e.} at @math{t}, @math{t+1} and @math{t-1}). The number of such
-variables is stored in @code{oo_.dr.nboth}.
+variables is stored in @code{M_.nboth}.
 
 @item Static variables
-@vindex oo_.dr.nstatic
+@vindex M_.nstatic
 Those that appear only at current, not past and future period in the
 model (@i{i.e.} only at @math{t}, not at @math{t+1} or
 @math{t-1}). The number of such variables is stored in
-@code{oo_.dr.nstatic}.
+@code{M_.nstatic}.
 @end table
 
 Note that all endogenous variables fall into one of these four
@@ -3421,7 +3420,7 @@ categories, since after the creation of auxiliary variables
 and one lag. We therefore have the following identity:
 
 @example
-oo_.dr.npred + oo_.dr.nfwrd + oo_.dr.nstatic = M_.endo_nbr
+M_.npred + M_.both + M_.nfwrd + M_.nstatic = M_.endo_nbr
 @end example
 
 Internally, Dynare uses two orderings of the endogenous variables: the
@@ -3445,11 +3444,14 @@ to the endogenous variable numbered @code{oo_.dr_order_var(k)} in
 declaration order. Conversely, k-th declared variable is numbered
 @code{oo_.dr.inv_order_var(k)} in DR-order.
 
-@vindex oo_.dr.npred
+@vindex M_.nspred
+@vindex M_.nsfwrd
+@vindex M_.ndynamic
 Finally, the state variables of the model are the purely backward variables
 and the mixed variables. They are orderer in DR-order when they appear in
-decision rules elements. There are @code{oo_.dr.npred} such
-variables.
+decision rules elements. There are @code{M_.nspred = M_.npred + M_.nboth} such
+variables. Similarly, one has @code{M_.nfwrd = M_.nfwrd + M_.nboth},
+and @code{M_.ndynamic = M_.nfwrd+M_.nboth+M_.npred}.
 
 @node First order approximation
 @subsection First order approximation
@@ -3542,7 +3544,7 @@ where @math{y^s} is the steady state value of @math{y}, and @math{z_t} is a
 vector consisting of the deviation from the steady state of the state
 variables (in DR-order) at date @math{t-1} followed by the exogenous variables at
 date @math{t} (in declaration order). The vector @math{z_t} is
-therefore of size @math{n_z} = @code{oo_.dr.npred +
+therefore of size @math{n_z} = @code{M_.nspred +
 M_.exo_nbr}.
 
 The coefficients of the decision rules are stored as follows:

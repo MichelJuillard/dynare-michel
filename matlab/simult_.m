@@ -15,7 +15,7 @@ function y_=simult_(y0,dr,ex_,iorder)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2001-2011 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -57,15 +57,15 @@ if options_.k_order_solver && ~options_.pruning % Call dynare++ routines.
     ex_ = [zeros(1,exo_nbr); ex_];
     switch options_.order
       case 1
-        [err, y_] = dynare_simul_(1,dr.nstatic,dr.npred-dr.nboth,dr.nboth,dr.nfwrd,exo_nbr, ...
+        [err, y_] = dynare_simul_(1,M_.nstatic,M_.npred,M_.nboth,M_.nfwrd,exo_nbr, ...
                                   y_(dr.order_var,1),ex_',M_.Sigma_e,options_.DynareRandomStreams.seed,dr.ys(dr.order_var),...
                                   zeros(endo_nbr,1),dr.g_1);
       case 2
-        [err, y_] = dynare_simul_(2,dr.nstatic,dr.npred-dr.nboth,dr.nboth,dr.nfwrd,exo_nbr, ...
+        [err, y_] = dynare_simul_(2,M_.nstatic,M_.npred,M_.nboth,M_.nfwrd,exo_nbr, ...
                                   y_(dr.order_var,1),ex_',M_.Sigma_e,options_.DynareRandomStreams.seed,dr.ys(dr.order_var),dr.g_0, ...
                                   dr.g_1,dr.g_2);
       case 3
-        [err, y_] = dynare_simul_(3,dr.nstatic,dr.npred-dr.nboth,dr.nboth,dr.nfwrd,exo_nbr, ...
+        [err, y_] = dynare_simul_(3,M_.nstatic,M_.npred,M_.nboth,M_.nfwrd,exo_nbr, ...
                                   y_(dr.order_var,1),ex_',M_.Sigma_e,options_.DynareRandomStreams.seed,dr.ys(dr.order_var),dr.g_0, ...
                                   dr.g_1,dr.g_2,dr.g_3);
       otherwise
@@ -152,11 +152,11 @@ else
         ghxss = dr.ghxss;
         ghuss = dr.ghuss;
         threads = options_.threads.kronecker.A_times_B_kronecker_C;
-        npred = dr.npred;
-        ipred = dr.nstatic+(1:npred);
+        nspred = M_.nspred;
+        ipred = M_.nstatic+(1:nspred);
         yhat1 = y0(order_var(k2))-dr.ys(order_var(k2));
-        yhat2 = zeros(npred,1);
-        yhat3 = zeros(npred,1);
+        yhat2 = zeros(nspred,1);
+        yhat3 = zeros(nspred,1);
         for i=2:iter+M_.maximum_lag
             u = ex_(i-1,:)';
             [gyy, err] = A_times_B_kronecker_C(ghxx,yhat1,threads);

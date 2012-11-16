@@ -130,17 +130,17 @@ extern "C" {
     if (!ySteady.isFinite())
       DYN_MEX_FUNC_ERR_MSG_TXT("The steady state vector contains NaN or Inf");
 
-    mxFldp = mxGetField(dr, 0, "nstatic");
+    mxFldp = mxGetField(M_, 0, "nstatic");
     const int nStat = (int) mxGetScalar(mxFldp);
-    mxFldp = mxGetField(dr, 0, "npred");
-    int nPred = (int) mxGetScalar(mxFldp);
-    mxFldp = mxGetField(dr, 0, "nspred");
+    mxFldp = mxGetField(M_, 0, "npred");
+    const int nPred = (int) mxGetScalar(mxFldp);
+    mxFldp = mxGetField(M_, 0, "nspred");
     const int nsPred = (int) mxGetScalar(mxFldp);
-    mxFldp = mxGetField(dr, 0, "nboth");
+    mxFldp = mxGetField(M_, 0, "nboth");
     const int nBoth = (int) mxGetScalar(mxFldp);
-    mxFldp = mxGetField(dr, 0, "nfwrd");
+    mxFldp = mxGetField(M_, 0, "nfwrd");
     const int nForw = (int) mxGetScalar(mxFldp);
-    mxFldp = mxGetField(dr, 0, "nsfwrd");
+    mxFldp = mxGetField(M_, 0, "nsfwrd");
     const int nsForw = (int) mxGetScalar(mxFldp);
 
     mxFldp = mxGetField(M_, 0, "exo_nbr");
@@ -149,8 +149,6 @@ extern "C" {
     const int nEndo = (int) mxGetScalar(mxFldp);
     mxFldp = mxGetField(M_, 0, "param_nbr");
     const int nPar = (int) mxGetScalar(mxFldp);
-
-    nPred -= nBoth; // correct nPred for nBoth.
 
     mxFldp = mxGetField(dr, 0, "order_var");
     dparams = mxGetPr(mxFldp);

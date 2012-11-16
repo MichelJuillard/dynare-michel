@@ -31,8 +31,8 @@ function planner_objective_value = evaluate_planner_objective(M,options,oo)
 dr = oo.dr;
 endo_nbr = M.endo_nbr;
 exo_nbr = M.exo_nbr;
-nstatic = dr.nstatic;
-npred = dr.npred;
+nstatic = M.nstatic;
+nspred = M.nspred;
 lead_lag_incidence = M.lead_lag_incidence;
 beta = get_optimal_policy_discount_factor(M.params,M.param_names);
 if options.ramsey_policy
@@ -44,8 +44,8 @@ ipred = find(lead_lag_incidence(M.maximum_lag,:))';
 order_var = dr.order_var;
 LQ = true;
 
-Gy = dr.ghx(nstatic+(1:npred),:);
-Gu = dr.ghu(nstatic+(1:npred),:);
+Gy = dr.ghx(nstatic+(1:nspred),:);
+Gu = dr.ghu(nstatic+(1:nspred),:);
 gy(dr.order_var,:) = dr.ghx;
 gu(dr.order_var,:) = dr.ghu;
 
@@ -53,10 +53,10 @@ if options.ramsey_policy && options.order == 1 && ~options.linear
     options.order = 2;
     options.qz_criterium = 1+1e-6;
     [dr,info] = stochastic_solvers(oo.dr,0,M,options,oo);
-    Gyy = dr.ghxx(nstatic+(1:npred),:);
-    Guu = dr.ghuu(nstatic+(1:npred),:);
-    Gyu = dr.ghxu(nstatic+(1:npred),:);
-    Gss = dr.ghs2(nstatic+(1:npred),:);
+    Gyy = dr.ghxx(nstatic+(1:nspred),:);
+    Guu = dr.ghuu(nstatic+(1:nspred),:);
+    Gyu = dr.ghxu(nstatic+(1:nspred),:);
+    Gss = dr.ghs2(nstatic+(1:nspred),:);
     gyy(dr.order_var,:) = dr.ghxx;
     guu(dr.order_var,:) = dr.ghuu;
     gyu(dr.order_var,:) = dr.ghxu;
@@ -81,12 +81,12 @@ mexErrCheck('A_times_B_kronecker_C', err);
 mexErrCheck('A_times_B_kronecker_C', err);
 
 Wbar =U/(1-beta);
-Wy = Uy*gy/(eye(npred)-beta*Gy);
+Wy = Uy*gy/(eye(nspred)-beta*Gy);
 Wu = Uy*gu+beta*Wy*Gu;
 if LQ
-    Wyy = Uyygygy/(eye(npred*npred)-beta*kron(Gy,Gy));
+    Wyy = Uyygygy/(eye(nspred*nspred)-beta*kron(Gy,Gy));
 else
-    Wyy = (Uy*gyy+Uyygygy+beta*Wy*Gyy)/(eye(npred*npred)-beta*kron(Gy,Gy));
+    Wyy = (Uy*gyy+Uyygygy+beta*Wy*Gyy)/(eye(nspred*nspred)-beta*kron(Gy,Gy));
 end
 [Wyygugu, err] = A_times_B_kronecker_C(Wyy,Gu,Gu,options.threads.kronecker.A_times_B_kronecker_C);
 mexErrCheck('A_times_B_kronecker_C', err);
@@ -115,8 +115,8 @@ if ~isempty(M.endo_histval)
         yhat2(1:M.orig_endo_nbr) = M.endo_histval(1:M.orig_endo_nbr);
     end
 end
-yhat1 = yhat1(dr.order_var(nstatic+(1:npred)),1)-dr.ys(dr.order_var(nstatic+(1:npred)));
-yhat2 = yhat2(dr.order_var(nstatic+(1:npred)),1)-dr.ys(dr.order_var(nstatic+(1:npred)));
+yhat1 = yhat1(dr.order_var(nstatic+(1:nspred)),1)-dr.ys(dr.order_var(nstatic+(1:nspred)));
+yhat2 = yhat2(dr.order_var(nstatic+(1:nspred)),1)-dr.ys(dr.order_var(nstatic+(1:nspred)));
 u = oo.exo_simul(1,:)';
 
 [Wyyyhatyhat1, err] = A_times_B_kronecker_C(Wyy,yhat1,yhat1,options.threads.kronecker.A_times_B_kronecker_C);

@@ -24,7 +24,7 @@ function [Gamma_y,stationary_vars] = th_autocovariances(dr,ivar,M_,options_,node
 % SPECIAL REQUIREMENTS
 %   
 
-% Copyright (C) 2001-2011 Dynare Team
+% Copyright (C) 2001-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -65,15 +65,15 @@ nvar = size(ivar,1);
 
 ghx = dr.ghx;
 ghu = dr.ghu;
-npred = dr.npred;
-nstatic = dr.nstatic;
+nspred = M_.nspred;
+nstatic = M_.nstatic;
 
 nx = size(ghx,2);
 if options_.block == 0
     %order_var = dr.order_var;
     inv_order_var = dr.inv_order_var;
     kstate = dr.kstate;
-    ikx = [nstatic+1:nstatic+npred];
+    ikx = [nstatic+1:nstatic+nspred];
     k0 = kstate(find(kstate(:,2) <= M_.maximum_lag+1),:);
     i0 = find(k0(:,2) == M_.maximum_lag+1);
     i00 = i0;
@@ -96,13 +96,12 @@ else
     trend = 1:M_.endo_nbr;
     inv_order_var = trend(M_.block_structure.variable_reordered);
     ghu1(1:length(dr.state_var),:) = ghu(dr.state_var,:);
-    npred = npred + dr.nboth;
 end;
 b = ghu1*M_.Sigma_e*ghu1';
 
 
 if options_.block == 0
-    ipred = nstatic+(1:npred)';
+    ipred = nstatic+(1:nspred)';
 else
     ipred = dr.state_var;
 end;

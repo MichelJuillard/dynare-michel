@@ -25,7 +25,7 @@ M.var_order_endo_names = M.endo_names(dr.order_var,:);
 order = options.order;
 endo_nbr = M.endo_nbr;
 exo_nbr = M.exo_nbr;
-npred = dr.npred;
+nspred = M.nspred;
 
 switch(order)
   case 1
@@ -44,13 +44,13 @@ switch(order)
                                                           M,options);
         dr.ghx = derivs.gy;
         dr.ghu = derivs.gu;
-        dr.ghxx = unfold2(derivs.gyy,npred);
+        dr.ghxx = unfold2(derivs.gyy,nspred);
         dr.ghxu = derivs.gyu;
         dr.ghuu = unfold2(derivs.guu,exo_nbr);
         dr.ghs2 = derivs.gss;
-        dr.ghxxx = unfold3(derivs.gyyy,npred);
-        dr.ghxxu = unfold21(derivs.gyyu,npred,exo_nbr);
-        dr.ghxuu = unfold12(derivs.gyuu,npred,exo_nbr);
+        dr.ghxxx = unfold3(derivs.gyyy,nspred);
+        dr.ghxxu = unfold21(derivs.gyyu,nspred,exo_nbr);
+        dr.ghxuu = unfold12(derivs.gyuu,nspred,exo_nbr);
         dr.ghuuu = unfold3(derivs.guuu,exo_nbr);
         dr.ghxss = derivs.gyss;
         dr.ghuss = derivs.guss;
@@ -71,10 +71,10 @@ if options.pruning
     return
 end
 
-npred = dr.npred;
+nspred = M.nspred;
 
-dr.ghx = dr.g_1(:,1:npred);
-dr.ghu = dr.g_1(:,npred+1:end);
+dr.ghx = dr.g_1(:,1:nspred);
+dr.ghu = dr.g_1(:,nspred+1:end);
 
 if options.loglinear == 1
     k = find(dr.kstate(:,2) <= M.maximum_endo_lag+1);
@@ -90,27 +90,27 @@ if order > 1
     dr.ghs2 = 2*g_0;
     s0 = 0;
     s1 = 0;
-    ghxx=zeros(endo_nbr, npred^2);
-    ghxu=zeros(endo_nbr, npred*exo_nbr);
+    ghxx=zeros(endo_nbr, nspred^2);
+    ghxu=zeros(endo_nbr, nspred*exo_nbr);
     ghuu=zeros(endo_nbr, exo_nbr^2);
     for i=1:size(g_2,2)
-        if s0 < npred && s1 < npred
-            ghxx(:,s0*npred+s1+1) = 2*g_2(:,i);
+        if s0 < nspred && s1 < nspred
+            ghxx(:,s0*nspred+s1+1) = 2*g_2(:,i);
             if s1 > s0
-                ghxx(:,s1*npred+s0+1) = 2*g_2(:,i);
+                ghxx(:,s1*nspred+s0+1) = 2*g_2(:,i);
             end
-        elseif s0 < npred && s1 < npred+exo_nbr 
-            ghxu(:,(s0*exo_nbr+s1-npred+1)) = 2*g_2(:,i);
-        elseif s0 < npred+exo_nbr && s1 < npred+exo_nbr
-            ghuu(:,(s0-npred)*exo_nbr+s1-npred +1) = 2*g_2(:,i);
+        elseif s0 < nspred && s1 < nspred+exo_nbr 
+            ghxu(:,(s0*exo_nbr+s1-nspred+1)) = 2*g_2(:,i);
+        elseif s0 < nspred+exo_nbr && s1 < nspred+exo_nbr
+            ghuu(:,(s0-nspred)*exo_nbr+s1-nspred +1) = 2*g_2(:,i);
             if s1 > s0
-                ghuu(:,(s1-npred)*exo_nbr+s0-npred+1) = 2*g_2(:,i);
+                ghuu(:,(s1-nspred)*exo_nbr+s0-nspred+1) = 2*g_2(:,i);
             end
         else
             error('dr1:k_order_perturbation:g_2','Unaccounted columns in g_2');
         end
         s1 = s1+1;
-        if s1 == npred+exo_nbr
+        if s1 == nspred+exo_nbr
             s0 = s0+1;
             s1 = s0; 
         end

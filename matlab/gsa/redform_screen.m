@@ -48,7 +48,7 @@ end
 
 load([dirname,'/',M_.fname,'_prior'],'lpmat','lpmat0','istable','T');
 
-nspred=oo_.dr.nspred;
+nspred=M_.nspred;
 
 [kn, np]=size(lpmat);
 nshock = length(bayestopt_.pshape)-np;
@@ -110,7 +110,7 @@ for j=1:size(anamendo,1),
   ifig=0;
   for je=1:size(anamlagendo,1)
     namlagendo=deblank(anamlagendo(je,:));
-    ilagendo=strmatch(namlagendo,M_.endo_names(oo_.dr.order_var(oo_.dr.nstatic+1:oo_.dr.nstatic+nsok),:),'exact');
+    ilagendo=strmatch(namlagendo,M_.endo_names(oo_.dr.order_var(M_.nstatic+1:M_.nstatic+nsok),:),'exact');
 
     if ~isempty(ilagendo),
       y0=teff(T(iendo,ilagendo,:),kn,istable);

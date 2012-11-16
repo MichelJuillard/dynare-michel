@@ -13,7 +13,7 @@ function [A,B] = transition_matrix(dr, varargin)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2009 Dynare Team
+% Copyright (C) 2003-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -41,7 +41,7 @@ ykmin_ = M_.maximum_endo_lag;
 
 nx = size(dr.ghx,2);
 kstate = dr.kstate;
-ikx = [dr.nstatic+1:dr.nstatic+dr.npred];
+ikx = [M_.nstatic+1:M_.nstatic+M_.nspred];
 
 A = zeros(nx,nx);
 k0 = kstate(find(kstate(:,2) <= ykmin_+1),:);

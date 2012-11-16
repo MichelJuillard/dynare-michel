@@ -88,16 +88,9 @@ if ~options_.noprint
     disp(' ')
     disp(['  Number of variables:         ' int2str(M_.endo_nbr)])
     disp(['  Number of stochastic shocks: ' int2str(M_.exo_nbr)])
-    if (options_.block)
-        disp(['  Number of state variables:   ' int2str(oo_.dr.npred+oo_.dr.nboth)])
-        disp(['  Number of jumpers:           ' int2str(oo_.dr.nfwrd+oo_.dr.nboth)])
-    else
-        disp(['  Number of state variables:   ' ...
-              int2str(length(find(oo_.dr.kstate(:,2) <= M_.maximum_lag+1)))])
-        disp(['  Number of jumpers:           ' ...
-              int2str(length(find(oo_.dr.kstate(:,2) == M_.maximum_lag+2)))])
-    end;
-    disp(['  Number of static variables:  ' int2str(oo_.dr.nstatic)])
+    disp(['  Number of state variables:   ' int2str(M_.nspred)])
+    disp(['  Number of jumpers:           ' int2str(M_.nsfwrd)])
+    disp(['  Number of static variables:  ' int2str(M_.nstatic)])
     my_title='MATRIX OF COVARIANCE OF EXOGENOUS SHOCKS';
     labels = deblank(M_.exo_names);
     headers = char('Variables',labels);

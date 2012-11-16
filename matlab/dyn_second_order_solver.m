@@ -56,16 +56,16 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
     Gy = dr.Gy;
     
     kstate = dr.kstate;
-    nstatic = dr.nstatic;
-    nfwrd = dr.nfwrd;
-    npred = dr.npred;
-    nboth = dr.nboth;
-    nyf = nfwrd+nboth;
+    nstatic = M_.nstatic;
+    nfwrd = M_.nfwrd;
+    nspred = M_.nspred;
+    nboth = M_.nboth;
+    nsfwrd = M_.nsfwrd;
     order_var = dr.order_var;
     nd = size(kstate,1);
     lead_lag_incidence = M_.lead_lag_incidence;
 
-    np = nd - nyf;
+    np = nd - nsfwrd;
 
     k1 = nonzeros(lead_lag_incidence(:,order_var)');
     kk = [k1; length(k1)+(1:M_.exo_nbr+M_.exo_det_nbr)'];
@@ -80,7 +80,7 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
     zx(1:np,:)=eye(np);
     k0 = [1:M_.endo_nbr];
     gx1 = dr.ghx;
-    hu = dr.ghu(nstatic+[1:npred],:);
+    hu = dr.ghu(nstatic+[1:nspred],:);
     k0 = find(lead_lag_incidence(M_.maximum_endo_lag+1,order_var)');
     zx = [zx; gx1(k0,:)];
     zu = [zu; dr.ghu(k0,:)];
@@ -104,10 +104,10 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
     k1 = find(kstate(:,2) == M_.maximum_endo_lag+2);
     % Jacobian with respect to the variables with the highest lead
     fyp = jacobia(:,kstate(k1,3)+nnz(M_.lead_lag_incidence(M_.maximum_endo_lag+1,:)));
-    B(:,nstatic+npred-dr.nboth+1:end) = fyp;
+    B(:,nstatic+M_.npred+1:end) = fyp;
     [junk,k1,k2] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+M_.maximum_endo_lead+1,order_var));
-    A(1:M_.endo_nbr,nstatic+1:nstatic+npred)=...
-        A(1:M_.endo_nbr,nstatic+[1:npred])+fyp*gx1(k1,1:npred);
+    A(1:M_.endo_nbr,nstatic+1:nstatic+nspred)=...
+        A(1:M_.endo_nbr,nstatic+[1:nspred])+fyp*gx1(k1,1:nspred);
     C = Gy;
     D = [rhs; zeros(n-M_.endo_nbr,size(rhs,2))];
 
@@ -117,11 +117,11 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
 
     %ghxu
     %rhs
-    hu = dr.ghu(nstatic+1:nstatic+npred,:);
+    hu = dr.ghu(nstatic+1:nstatic+nspred,:);
     [rhs, err] = sparse_hessian_times_B_kronecker_C(hessian,zx,zu,threads_BC);
     mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
 
-    hu1 = [hu;zeros(np-npred,M_.exo_nbr)];
+    hu1 = [hu;zeros(np-nspred,M_.exo_nbr)];
     [nrhx,nchx] = size(Gy);
     [nrhu1,nchu1] = size(hu1);
 
@@ -150,7 +150,7 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
     % derivatives of F with respect to forward variables
     % reordering predetermined variables in diminishing lag order
     O1 = zeros(M_.endo_nbr,nstatic);
-    O2 = zeros(M_.endo_nbr,M_.endo_nbr-nstatic-npred);
+    O2 = zeros(M_.endo_nbr,M_.endo_nbr-nstatic-nspred);
     LHS = zeros(M_.endo_nbr,M_.endo_nbr);
     LHS(:,k0) = jacobia(:,nonzeros(lead_lag_incidence(M_.maximum_endo_lag+1,order_var)));
     RHS = zeros(M_.endo_nbr,M_.exo_nbr^2);
@@ -159,11 +159,11 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
     E = eye(M_.endo_nbr);
     kh = reshape([1:nk^2],nk,nk);
     kp = sum(kstate(:,2) <= M_.maximum_endo_lag+1);
-    E1 = [eye(npred); zeros(kp-npred,npred)];
+    E1 = [eye(nspred); zeros(kp-nspred,nspred)];
     H = E1;
-    hxx = dr.ghxx(nstatic+[1:npred],:);
+    hxx = dr.ghxx(nstatic+[1:nspred],:);
     [junk,k2a,k2] = find(M_.lead_lag_incidence(M_.maximum_endo_lag+2,order_var));
-    k3 = nnz(M_.lead_lag_incidence(1:M_.maximum_endo_lag+1,:))+(1:dr.nsfwrd)';
+    k3 = nnz(M_.lead_lag_incidence(1:M_.maximum_endo_lag+1,:))+(1:M_.nsfwrd)';
     [B1, err] = sparse_hessian_times_B_kronecker_C(hessian(:,kh(k3,k3)),gu(k2a,:),threads_BC);
     mexErrCheck('sparse_hessian_times_B_kronecker_C', err);
     RHS = RHS + jacobia(:,k2)*guu(k2a,:)+B1;

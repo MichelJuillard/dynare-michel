@@ -157,10 +157,10 @@ end
 
 dr=set_state_space(dr,M_,options_);
 kstate = dr.kstate;
-nstatic = dr.nstatic;
-nfwrd = dr.nfwrd;
-npred = dr.npred;
-nboth = dr.nboth;
+nstatic = M_.nstatic;
+nfwrd = M_.nfwrd;
+nspred = M_.nspred;
+nboth = M_.nboth;
 order_var = dr.order_var;
 nd = size(kstate,1);
 nz = nnz(M_.lead_lag_incidence);
@@ -240,7 +240,7 @@ end % end if useAIM and...
     %     E_t z(t+3) 
     
     % partition jacobian:
-    jlen=dr.nspred+dr.nsfwrd+M_.endo_nbr+M_.exo_nbr; % length of jacobian
+    jlen=M_.nspred+M_.nsfwrd+M_.endo_nbr+M_.exo_nbr; % length of jacobian
     PSI=-jacobia_(:, jlen-M_.exo_nbr+1:end); % exog
                                              % first transpose M_.lead_lag_incidence';
     lead_lag=M_.lead_lag_incidence';
@@ -251,12 +251,12 @@ end % end if useAIM and...
         AA2=AA0; % empty A2 and A3
         AA3=AA0;
         if xlen==nendo % && M_.maximum_lag <=1 && M_.maximum_lead <=1 % apply a shortcut
-            AA1=jacobia_(:,npred+1:npred+nendo); 
+            AA1=jacobia_(:,nspred+1:nspred+nendo); 
             if M_.maximum_lead ==1
                 fnd = find(lead_lag(:,M_.maximum_lag+2));
                 AA0(:, fnd)= jacobia_(:,nonzeros(lead_lag(:,M_.maximum_lag+2))); %forwd jacobian
             end
-            if npred>0 && M_.maximum_lag ==1  
+            if nspred>0 && M_.maximum_lag ==1  
                 fnd = find(lead_lag(:,1));
                 AA2(:, fnd)= jacobia_(:,nonzeros(lead_lag(:,1))); %backward
             end
@@ -264,7 +264,7 @@ end % end if useAIM and...
         if nendo-xlen==num_inst
             PSI=[PSI;zeros(num_inst, M_.exo_nbr)];
             % AA1 contemporary
-            AA_all=jacobia_(:,npred+1:npred+nendo); 
+            AA_all=jacobia_(:,nspred+1:nspred+nendo); 
             AA1=AA_all(:,lq_instruments.m_var); % endo without instruments
             lq_instruments.ij1=AA_all(:,lq_instruments.inst_var_indices); %  instruments only
             lq_instruments.B1=-[lq_instruments.ij1; eye(num_inst)];
@@ -279,7 +279,7 @@ end % end if useAIM and...
                 lq_instruments.B0=[lq_instruments.ij0; eye(num_inst)];
                 AA0=[AA0, zeros(xlen,num_inst); zeros(num_inst,xlen+num_inst)];
             end
-            if npred>0 && M_.maximum_lag ==1  
+            if nspred>0 && M_.maximum_lag ==1  
                 AA_all(:,:)=0.0;
                 fnd = find(lead_lag(:,1));
                 AA_all(:, fnd)= jacobia_(:,nonzeros(lead_lag(:,1))); %backward

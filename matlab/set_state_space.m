@@ -34,7 +34,7 @@ function dr=set_state_space(dr,DynareModel,DynareOptions)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 1996-2011 Dynare Team
+% Copyright (C) 1996-2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -69,10 +69,6 @@ else
     both_var = [];
     stat_var = setdiff([1:endo_nbr]',fwrd_var);
 end
-nboth = length(both_var);
-npred = length(pred_var);
-nfwrd = length(fwrd_var);
-nstatic = length(stat_var);
 if DynareOptions.block == 1
     order_var = DynareModel.block_structure.variable_reordered;
 else
@@ -116,14 +112,6 @@ kstate = kstate(i_kmask,:);
 
 dr.order_var = order_var;
 dr.inv_order_var = inv_order_var';
-dr.nstatic = nstatic;
-dr.npred = npred+nboth;
 dr.kstate = kstate;
-dr.nboth = nboth;
-dr.nfwrd = nfwrd;
-% number of forward variables in the state vector
-dr.nsfwrd = nfwrd+nboth;
-% number of predetermined variables in the state vector
-dr.nspred = npred+nboth;
 
 dr.transition_auxiliary_variables = [];

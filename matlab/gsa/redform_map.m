@@ -212,7 +212,7 @@ for j=1:size(anamendo,1)
     iplo=0;
     for je=1:size(anamlagendo,1)
         namlagendo=deblank(anamlagendo(je,:));
-        ilagendo=strmatch(namlagendo,M_.endo_names(oo_.dr.order_var(oo_.dr.nstatic+1:oo_.dr.nstatic+nsok),:),'exact');
+        ilagendo=strmatch(namlagendo,M_.endo_names(oo_.dr.order_var(M_.nstatic+1:M_.nstatic+nsok),:),'exact');
         disp(' ')
         disp(['[', namendo,' vs. lagged ',namlagendo,']'])
         
