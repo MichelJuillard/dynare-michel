@@ -2689,6 +2689,16 @@ Contains the eigenvalues of the model, as computed by the @code{check}
 command.
 @end defvr
 
+
+@deffn Command model_diagnostics ;
+
+This command performs various sanity checks on the model, and prints a
+message if a problem is detected (missing variables at current period,
+invalid steady state, singular Jacobian of static model).
+
+@end deffn
+
+
 @deffn Command model_info ;
 @deffnx Command model_info (@var{OPTIONS}@dots{});
 
