@@ -142,7 +142,7 @@ nvobs = DynareDataset.info.nvobs;
 
 % Return, with endogenous penalty, if some parameters are smaller than the lower bound of the prior domain.
 if (DynareOptions.mode_compute~=1) && any(xparam1<BayesInfo.lb)
-    k = find(xparam1 < BayesInfo.lb);
+    k = find(xparam1(:) < BayesInfo.lb);
     fval = objective_function_penalty_base+sum((BayesInfo.lb(k)-xparam1(k)).^2);
     exit_flag = 0;
     info = 41;
@@ -151,7 +151,7 @@ end
 
 % Return, with endogenous penalty, if some parameters are greater than the upper bound of the prior domain.
 if (DynareOptions.mode_compute~=1) && any(xparam1>BayesInfo.ub)
-    k = find(xparam1>BayesInfo.ub);
+    k = find(xparam1(:)>BayesInfo.ub);
     fval = objective_function_penalty_base+sum((xparam1(k)-BayesInfo.ub(k)).^2);
     exit_flag = 0;
     info = 42;
@@ -345,7 +345,11 @@ ReducedForm.StateVectorVariance = StateVectorVariance;
 % 4. Likelihood evaluation
 %------------------------------------------------------------------------------
 DynareOptions.warning_for_steadystate = 0;
+seed_norm_old = randn('state') ;
+seed_uniform_old = rand('state') ;
 LIK = feval(DynareOptions.particle.algorithm,ReducedForm,Y,[],DynareOptions);
+randn('state',seed_norm_old);
+rand('state',seed_uniform_old);
 if imag(LIK)
     likelihood = objective_function_penalty_base;
     exit_flag  = 0;
@@ -359,5 +363,5 @@ DynareOptions.warning_for_steadystate = 1;
 % ------------------------------------------------------------------------------
 % Adds prior if necessary
 % ------------------------------------------------------------------------------
-lnprior = priordens(xparam1,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
+lnprior = priordens(xparam1(:),BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
 fval    = (likelihood-lnprior);
