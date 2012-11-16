@@ -65,7 +65,7 @@ if options_.block && ~options_.bytecode
                                      oo_.steady_state,...
                                      [oo_.exo_steady_state; ...
                             oo_.exo_det_steady_state], M_.params);
-        idx = M_.blocksEQU{i};
+        idx = M_.block_structure_stat.block(i).equation;
         z(idx) = r;
     end
 elseif options_.bytecode
