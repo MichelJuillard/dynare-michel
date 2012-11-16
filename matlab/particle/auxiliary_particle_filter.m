@@ -20,7 +20,7 @@ function [LIK,lik] = auxiliary_particle_filter(ReducedForm,Y,start,DynareOptions
 % NOTES
 %   The vector "lik" is used to evaluate the jacobian of the likelihood.
 
-% Copyright (C) 2011-2012 Dynare Team
+% Copyright (C) 2011, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -90,19 +90,21 @@ lik  = NaN(sample_size,1);
 LIK  = NaN;
 
 % Initialization of the weights across particles.
-weights = ones(1,number_of_particles);
+weights = ones(1,number_of_particles)/number_of_particles ;
 StateVectors = bsxfun(@plus,StateVectorVarianceSquareRoot*randn(state_variance_rank,number_of_particles),StateVectorMean);
 for t=1:sample_size
     yhat = bsxfun(@minus,StateVectors,state_variables_steady_state);
     tmp = local_state_space_iteration_2(yhat,zeros(number_of_structural_innovations,number_of_particles),ghx,ghu,constant,ghxx,ghuu,ghxu,DynareOptions.threads.local_state_space_iteration_2);
-    PredictedObservedMean = mean(tmp(mf1,:),2);
+    PredictedObservedMean = weights*(tmp(mf1,:)');
     PredictionError = bsxfun(@minus,Y(:,t),tmp(mf1,:));
-    dPredictedObservedMean = bsxfun(@minus,tmp(mf1,:),PredictedObservedMean);
-    PredictedObservedVariance = (dPredictedObservedMean*dPredictedObservedMean')/number_of_particles+H;
+    dPredictedObservedMean = bsxfun(@minus,tmp(mf1,:),PredictedObservedMean');
+    PredictedObservedVariance = bsxfun(@times,weights,dPredictedObservedMean)*dPredictedObservedMean' +H;
     wtilde = exp(-.5*(const_lik+log(det(PredictedObservedVariance))+sum(PredictionError.*(PredictedObservedVariance\PredictionError),1))) ;
     tau_tilde = weights.*wtilde ;
     sum_tau_tilde = sum(tau_tilde) ;
-    lik(t) = log(sum_tau_tilde) ;
+    %var_wtilde = wtilde-sum_tau_tilde ;
+    %var_wtilde = var_wtilde'*var_wtilde/(number_of_particles-1) ;
+    lik(t) = log(sum_tau_tilde) ; %+ .5*var_wtilde/(number_of_particles*(sum_tau_tilde*sum_tau_tilde)) ;
     tau_tilde = tau_tilde/sum_tau_tilde;
     indx_resmpl = resample(tau_tilde,DynareOptions.particle.resampling.method1,DynareOptions.particle.resampling.method2);
     yhat = yhat(:,indx_resmpl);
@@ -113,10 +115,13 @@ for t=1:sample_size
     PredictedObservedMean = mean(tmp(mf1,:),2);
     PredictionError = bsxfun(@minus,Y(:,t),tmp(mf1,:));
     dPredictedObservedMean = bsxfun(@minus,tmp(mf1,:),PredictedObservedMean);
-    PredictedObservedVariance = (dPredictedObservedMean*dPredictedObservedMean')/number_of_particles+H;
+    PredictedObservedVariance = (dPredictedObservedMean*dPredictedObservedMean')/number_of_particles + H;
     lnw = exp(-.5*(const_lik+log(det(PredictedObservedVariance))+sum(PredictionError.*(PredictedObservedVariance\PredictionError),1)));
     wtilde = lnw./wtilde;
     weights = wtilde/sum(wtilde);
+    %indx_resmpl = resample(weights ,DynareOptions.particle.resampling.method1,DynareOptions.particle.resampling.method2);
+    %StateVectors = StateVectors(:,indx_resmpl);
+    %weights = ones(1,number_of_particles)/number_of_particles ;
 end
 
 LIK = -sum(lik(start:end));
