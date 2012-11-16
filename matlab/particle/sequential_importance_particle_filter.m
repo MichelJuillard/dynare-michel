@@ -169,7 +169,7 @@ for t=1:sample_size
     elseif strcmp(DynareOptions.particle.resampling.status,'none')
         StateVectors = tmp(mf0,:);
         if pruning
-            StateVectors_ = tmp_(mf0,:)
+            StateVectors_ = tmp_(mf0,:);
         end
     end
 end
