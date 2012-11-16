@@ -46,12 +46,12 @@ function [residuals,check1,jacob] = evaluate_static_model(ys,exo_ss,params,M,opt
         fh_static = str2func([M.fname '_static']);
         if options.block
             residuals = zeros(M.endo_nbr,1);
-            mfs = M.blocksMFS;
-            for b = 1:size(mfs,1)
-                mfsb = mfs{b};
+            for b = 1:length(M.block_structure_stat.block)
+                mfsb = M.block_structure_stat.block(b).variable;
                 % blocks that can be directly evaluated (mfsb is empty)
                 % have zero residuals by construction
-                if ~isempty(mfsb)
+                if M.block_structure_stat.block(b).Simulation_Type ~= 1 && ...
+                   M.block_structure_stat.block(b).Simulation_Type ~= 2
                     residuals(mfsb) = feval(fh_static,b,ys,exo_ss,params);
                 else
                     %need to evaluate the recursive blocks to compute the

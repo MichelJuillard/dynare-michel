@@ -2547,7 +2547,7 @@ Interpreter::compute_blocks(string file_name, string bin_basename, bool steady_s
   if (block >= (int) code.get_block_number())
     {
       ostringstream tmp;
-      tmp << " in compute_blocks, input argument block = " << block+1 << " is greater than the number of blocks in the model (" << code.get_block_number() << " see M_.blocksMFS)\n";
+      tmp << " in compute_blocks, input argument block = " << block+1 << " is greater than the number of blocks in the model (" << code.get_block_number() << " see M_.block_structure_stat.block)\n";
       throw FatalExceptionHandling(tmp.str());
     }
   //The big loop on intructions

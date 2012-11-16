@@ -81,10 +81,10 @@ end
 %
 % singular Jacobian of static model
 %
-if ~isfield(M,'blocksMFS')
+if ~isfield(M,'block_structure_stat')
     nb = 1;
 else
-    nb = length(M.blocksMFS);
+    nb = length(M.block_structure_stat.block);
 end
 
 exo = [oo.exo_steady_state; oo.exo_det_steady_state];

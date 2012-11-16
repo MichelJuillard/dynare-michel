@@ -19,13 +19,13 @@ function [x,info] = dynare_solve_block_or_bytecode(y, exo, params, options, M)
 info = 0;
 x = y;
 if options.block && ~options.bytecode
-    for b = 1:size(M.blocksMFS,1)
-        n = size(M.blocksMFS{b}, 1);
+    for b = 1:length(M.block_structure_stat.block)
         ss = x;
-        if n ~= 0
+        if M.block_structure_stat.block(b).Simulation_Type ~= 1 && ...
+           M.block_structure_stat.block(b).Simulation_Type ~= 2
             if options.solve_algo <= 4
                 [y, check] = dynare_solve('block_mfs_steadystate', ...
-                                          ss(M.blocksMFS{b}), ...
+                                          ss(M.block_structure_stat.block(b).variable), ...
                                           options.jacobian_flag, b, ss, exo, params, M);
                 if check ~= 0
                     %                    error(['STEADY: convergence
@@ -33,10 +33,11 @@ if options.block && ~options.bytecode
                     info = 1;
                     return
                 end
-                ss(M.blocksMFS{b}) = y;
+                ss(M.block_structure_stat.block(b).variable) = y;
             else
+                n = length(M.block_structure_stat.block(b).variable);
                 [ss, check] = solve_one_boundary([M.fname '_static_' int2str(b)], ss, exo, ...
-                                                 params, [], M.blocksMFS{b}, n, 1, 0, b, 0, options.maxit_, ...
+                                                 params, [], M.block_structure_stat.block(b).variable, n, 1, 0, b, 0, options.maxit_, ...
                                                  options.solve_tolf, ...
                                                  options.slowc, 0, options.solve_algo, 1, 0, 0,M,options);
                 if check
@@ -57,11 +58,11 @@ elseif options.bytecode
             return
         end
     elseif options.block
-        for b = 1:size(M.blocksMFS,1)
-            n = size(M.blocksMFS{b}, 1);
-            if n ~= 0
+        for b = 1:length(M.block_structure_stat.block)
+            if M.block_structure_stat.block(b).Simulation_Type ~= 1 && ...
+               M.block_structure_stat.block(b).Simulation_Type ~= 2
                 [y, check] = dynare_solve('block_bytecode_mfs_steadystate', ...
-                                          x(M.blocksMFS{b}), ...
+                                          x(M.block_structure_stat.block(b).variable), ...
                                           options.jacobian_flag, b, x, exo, params, M);
                 if check
                     %                    error(['STEADY: convergence
@@ -69,7 +70,7 @@ elseif options.bytecode
                     info = 1;
                     return
                 end
-                x(M.blocksMFS{b}) = y;
+                x(M.block_structure_stat.block(b).variable) = y;
             else
                 [chk, nulldev, nulldev1, x] = bytecode( x, exo, params, ...
                                                         x, 1, x, 'evaluate', 'static', ['block = ' int2str(b)]);
