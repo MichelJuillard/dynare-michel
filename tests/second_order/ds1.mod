@@ -64,6 +64,6 @@ end;
 
 resid(1);
 steady;
-model_diagnostics(M_,options_,oo_);
+model_diagnostics;
 check;
 stoch_simul(order=2,irf=0);
