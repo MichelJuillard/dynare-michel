@@ -80,18 +80,22 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
     % each block of Y with ny rows are unfolded column wise
     dimension = ny*(sum(nnodes.^(0:order-1),2)+(periods-order)*world_nbr);
     if order == 0
-        i_upd = ny+(1:ny*periods);
+        i_upd_r = (1:ny*periods);
+        i_upd_y = i_upd_r + ny;
     else
-        i_upd = zeros(dimension,1);
-        i_upd(1:ny) = ny+(1:ny);
+        i_upd_r = zeros(dimension,1);
+        i_upd_y = i_upd_r;
+        i_upd_r(1:ny) = (1:ny);
+        i_upd_y(1:ny) = ny+(1:ny);
         i1 = ny+1;
         i2 = 2*ny;
-        n1 = 2*ny+1;
-        n2 = 3*ny;
+        n1 = ny+1;
+        n2 = 2*ny;
         for i=2:periods
             k = n1:n2;
             for j=1:nnodes^min(i-1,order)
-                i_upd(i1:i2) = (n1:n2)+(j-1)*ny*(periods+2);
+                i_upd_r(i1:i2) = (n1:n2)+(j-1)*ny*periods;
+                i_upd_y(i1:i2) = (n1:n2)+ny+(j-1)*ny*(periods+2);
                 i1 = i2+1;
                 i2 = i2+ny;
             end
@@ -99,12 +103,13 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
             n2 = n2+ny;
         end
     end
-
+    icA = [find(lead_lag_incidence(1,:)) find(lead_lag_incidence(2,:))+world_nbr*ny ...
+           find(lead_lag_incidence(3,:))+2*world_nbr*ny]';
     h1 = clock;
     for iter = 1:maxit
         h2 = clock;
-        A = sparse([],[],[],dimension,dimension,(periods+2)*world_nbr*nnz(jacobian));
-        res = zeros(dimension,1);
+        A1 = sparse([],[],[],ny*(sum(nnodes.^(0:order-1),2)+1),dimension,(order+1)*world_nbr*nnz(jacobian));
+        res = zeros(ny,periods,world_nbr);
         i_rows = 1:ny;
         i_cols = find(lead_lag_incidence');
         i_cols_p = i_cols(1:nyp);
@@ -114,91 +119,85 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
         i_cols_Ap = i_cols_p;
         i_cols_As = i_cols_s;
         i_cols_Af = i_cols_f - ny;
-        for i = 1:periods
-            if i <= order+1
-                i_w_p = 1;
-                for j = 1:nnodes^(i-1)
-                    innovation = exo_simul;
-                    if i > 1
-                        innovation(i+1,:) = nodes(mod(j-1,nnodes)+1,:);
-                    end
-                    if i <= order
-                        for k=1:nnodes
-                            y = [Y(i_cols_p,i_w_p);
-                                 Y(i_cols_s,j);
-                                 Y(i_cols_f,(j-1)*nnodes+k)];
-                            [d1,jacobian] = dynamic_model(y,innovation,params,steady_state,i+1);
-                            if i == 1
-                                % in first period we don't keep track of
-                                % predetermined variables
-                                i_cols_A = [i_cols_As - ny; i_cols_Af];
-                                A(i_rows,i_cols_A) = A(i_rows,i_cols_A) + weights(k)*jacobian(:,i_cols_1);
-                            else
-                                i_cols_A = [i_cols_Ap; i_cols_As; i_cols_Af];
-                                A(i_rows,i_cols_A) = A(i_rows,i_cols_A) + weights(k)*jacobian(:,i_cols_j);
-                            end
-                            res(i_rows) = res(i_rows)+weights(k)*d1;
-                            i_cols_Af = i_cols_Af + ny;
-                        end
-                    else
+        for i = 1:order+1
+            i_w_p = 1;
+            for j = 1:nnodes^(i-1)
+                innovation = exo_simul;
+                if i > 1
+                    innovation(i+1,:) = nodes(mod(j-1,nnodes)+1,:);
+                end
+                if i <= order
+                    for k=1:nnodes
                         y = [Y(i_cols_p,i_w_p);
                              Y(i_cols_s,j);
-                             Y(i_cols_f,j)];
+                             Y(i_cols_f,(j-1)*nnodes+k)];
                         [d1,jacobian] = dynamic_model(y,innovation,params,steady_state,i+1);
                         if i == 1
                             % in first period we don't keep track of
                             % predetermined variables
                             i_cols_A = [i_cols_As - ny; i_cols_Af];
-                            A(i_rows,i_cols_A) = jacobian(:,i_cols_1);
+                            A1(i_rows,i_cols_A) = A1(i_rows,i_cols_A) + weights(k)*jacobian(:,i_cols_1);
                         else
                             i_cols_A = [i_cols_Ap; i_cols_As; i_cols_Af];
-                            A(i_rows,i_cols_A) = jacobian(:,i_cols_j);
+                            A1(i_rows,i_cols_A) = A1(i_rows,i_cols_A) + weights(k)*jacobian(:,i_cols_j);
                         end
-                        res(i_rows) = d1;
+                        res(:,i,j) = res(:,j,i)+weights(k)*d1;
                         i_cols_Af = i_cols_Af + ny;
                     end
-                    i_rows = i_rows + ny;
+                else
+                    y = [Y(i_cols_p,i_w_p);
+                         Y(i_cols_s,j);
+                         Y(i_cols_f,j)];
+                    [d1,jacobian] = dynamic_model(y,innovation,params,steady_state,i+1);
+                    if i == 1
+                        % in first period we don't keep track of
+                        % predetermined variables
+                        i_cols_A = [i_cols_As - ny; i_cols_Af];
+                        A1(i_rows,i_cols_A) = jacobian(:,i_cols_1);
+                    else
+                        i_cols_A = [i_cols_Ap; i_cols_As; i_cols_Af];
+                        A1(i_rows,i_cols_A) = jacobian(:,i_cols_j);
+                    end
+                    res(:,i,j) = d1;
+                    i_cols_Af = i_cols_Af + ny;
+                end
+                i_rows = i_rows + ny;
+                if mod(j,nnodes) == 0
+                    i_w_p = i_w_p + 1;
+                end
+                if i > 1
                     if mod(j,nnodes) == 0
-                        i_w_p = i_w_p + 1;
+                        i_cols_Ap = i_cols_Ap + ny;
                     end
-                    if i > 1
-                        if mod(j,nnodes) == 0
-                            i_cols_Ap = i_cols_Ap + ny;
-                        end
-                        i_cols_As = i_cols_As + ny;
-                    end
-                end
-                i_cols_p = i_cols_p + ny;
-                i_cols_s = i_cols_s + ny;
-                i_cols_f = i_cols_f + ny;
-            elseif i == periods
-                if i == order+2
-                    i_cols_A = [i_cols_Ap; i_cols_As; i_cols_Af];
-                end
-                for j=1:world_nbr
-                    [d1,jacobian] = dynamic_model(Y(i_cols,j),exo_simul, ...
-                                                  params,steady_state,i+1);
-                    A(i_rows,i_cols_A(i_cols_T)) = jacobian(:,i_cols_T);
-                    res(i_rows) = d1;
-                    i_rows = i_rows + ny;
-                    i_cols_A = i_cols_A + ny;
-                end
-            else
-                if i == order+2
-                    i_cols_A = [i_cols_Ap; i_cols_As; i_cols_Af];
-                end
-                for j=1:world_nbr
-                    [d1,jacobian] = dynamic_model(Y(i_cols,j), ...
-                                                  exo_simul,params,steady_state,i+1);
-                    A(i_rows,i_cols_A) = jacobian(:,i_cols_j);
-                    res(i_rows) = d1;
-                    i_rows = i_rows + ny;
-                    i_cols_A = i_cols_A + ny;
+                    i_cols_As = i_cols_As + ny;
                 end
             end
-            i_cols = i_cols + ny;
+            i_cols_p = i_cols_p + ny;
+            i_cols_s = i_cols_s + ny;
+            i_cols_f = i_cols_f + ny;
         end
-        err = max(abs(res));
+        nzA = cell(periods,world_nbr);
+        parfor j=1:world_nbr
+            i_rows_y = find(lead_lag_incidence')+(order+1)*ny;
+            offset_c = ny*(sum(nnodes.^(0:order-1),2)+j-1);
+            offset_r = (j-1)*ny;
+            for i=order+2:periods
+                [d1,jacobian] = dynamic_model(Y(i_rows_y,j), ...
+                                              exo_simul,params, ...
+                                              steady_state,i+1);
+                if i == periods
+                    [ir,ic,v] = find(jacobian(:,i_cols_T));
+                else
+                    [ir,ic,v] = find(jacobian(:,i_cols_j));
+                end
+                nzA{i,j} = [offset_r+ir,offset_c+icA(ic), v]';
+                res(:,i,j) = d1;
+                i_rows_y = i_rows_y + ny;
+                offset_c = offset_c + world_nbr*ny;
+                offset_r = offset_r + world_nbr*ny;
+            end
+        end
+        err = max(abs(res(i_upd_r)));
         if err < tolerance
             stop = 1;
             if verbose
@@ -214,8 +213,10 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
                                                       %            pause
             break
         end
-        dy = -A\res;
-        Y(i_upd) =   Y(i_upd) + dy;
+        A2 = [nzA{:}]';
+        A = [A1; sparse(A2(:,1),A2(:,2),A2(:,3),ny*(periods-order-1)*world_nbr,dimension)];
+        dy = -A\res(i_upd_r);
+        Y(i_upd_y) =   Y(i_upd_y) + dy;
     end
 
     if ~stop

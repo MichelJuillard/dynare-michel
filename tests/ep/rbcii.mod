@@ -79,10 +79,10 @@ copyfile('rbcii_steady_state.m','rbcii_steadystate2.m');
     ts = extended_path([],100);
 
     options_.ep.stochastic.order = 1;
-    profile on
+//    profile on
     ts1_4 = extended_path([],100);
-    profile off
-    profile viewer
+//    profile off
+//    profile viewer
 @#else
 
     shocks;
