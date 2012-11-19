@@ -1,4 +1,4 @@
-function [Q,R] = qr2(X)
+function [Q,R] = qr2(varargin)
 % This routine performs a qr decomposition of matrix X such that the
 % diagonal scalars of the upper-triangular matrix R are positive. If X 
 % is a full (column) rank matrix, then R is also the cholesky
@@ -34,7 +34,7 @@ function [Q,R] = qr2(X)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-[Q,R] = qr(X);
+[Q,R] = qr(varargin{:});
 indx = find(diag(R)<0);
 if ~isempty(indx)
     Q(:,indx) = -Q(:,indx);
