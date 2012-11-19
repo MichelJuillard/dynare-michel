@@ -38,7 +38,7 @@ function [LIK,lik] = sequential_importance_particle_filter(ReducedForm,Y,start,D
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011-2012 Dynare Team
+% Copyright (C) 2011, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -55,7 +55,7 @@ function [LIK,lik] = sequential_importance_particle_filter(ReducedForm,Y,start,D
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) frederic DOT karame AT univ DASH evry DOT fr
+% AUTHOR(S) frederic DOT karame AT univ DASH lemans DOT fr
 %           stephane DOT adjemian AT univ DASH lemans DOT fr
 
 persistent init_flag
@@ -103,6 +103,10 @@ if isempty(H)
     H = 0;
 end
 
+% Initialization of the likelihood.
+const_lik = log(2*pi)*number_of_observed_variables;
+lik  = NaN(sample_size,1);
+
 % Get initial condition for the state vector.
 StateVectorMean = ReducedForm.StateVectorMean;
 StateVectorVarianceSquareRoot = reduced_rank_cholesky(ReducedForm.StateVectorVariance)';
@@ -116,13 +120,12 @@ state_variance_rank = size(StateVectorVarianceSquareRoot,2);
 
 % Factorize the covariance matrix of the structural innovations
 Q_lower_triangular_cholesky = chol(Q)';
+[PredictedStateMean,PredictedStateVarianceSquareRoot,StateVectorMean,StateVectorVarianceSquareRoot] = ...
+        gaussian_filter_bank(ReducedForm,Y(:,1),StateVectorMean,StateVectorVarianceSquareRoot,Q_lower_triangular_cholesky,Q_lower_triangular_cholesky,H,DynareOptions) ;
+StateVectors = bsxfun(@plus,StateVectorVarianceSquareRoot*randn(state_variance_rank,number_of_particles),StateVectorMean) ;
 
 % Set seed for randn().
 set_dynare_seed('default');
-
-% Initialization of the likelihood.
-const_lik = log(2*pi)*number_of_observed_variables;
-lik  = NaN(sample_size,1);
 
 % Initialization of the weights across particles.
 weights = ones(1,number_of_particles)/number_of_particles ;
@@ -166,7 +169,7 @@ for t=1:sample_size
     elseif strcmp(DynareOptions.particle.resampling.status,'none')
         StateVectors = tmp(mf0,:);
         if pruning
-            StateVectors_ = tmp_(mf0,:)
+            StateVectors_ = tmp_(mf0,:);
         end
     end
 end

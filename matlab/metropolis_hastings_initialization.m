@@ -143,8 +143,8 @@ if ~options_.load_mh_file && ~options_.mh_recover
         disp(' ')
     else% Case 2: one chain (we start from the posterior mode)
         fprintf(fidlog,['  Initial values of the parameters:\n']);
-        candidate = transpose(xparam1);
-        if all(candidate' > mh_bounds(:,1)) && all(candidate' < mh_bounds(:,2)) 
+        candidate = transpose(xparam1(:));%
+        if all(candidate(:) > mh_bounds(:,1)) && all(candidate(:) < mh_bounds(:,2)) 
             ix2 = candidate;
             ilogpo2 = - feval(TargetFun,ix2',dataset_,options_,M_,estim_params_,bayestopt_,oo_);
             disp('MH: Initialization at the posterior mode.')

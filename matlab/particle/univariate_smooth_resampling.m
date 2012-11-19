@@ -51,29 +51,32 @@ function new_particles = univariate_smooth_resampling(weights,particles,number_o
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) frederic DOT karame AT univ DASH evry DOT fr
+% AUTHOR(S) frederic DOT karame AT univ DASH lemans DOT fr
 %           stephane DOT adjemian AT univ DASH lemans DOT fr
 
 M = length(particles) ;
-lambda_tilde = [ (.5*(2*weights(1)+weights(2))) ;
-                 (.5*(weights(2:M-1)+weights(3:M))) ;
-                 (.5*(weights(M-1)+2*weights(M))) ] ;
+lambda_tilde = [ (.5*weights(1)) ;
+                 (.5*(weights(1:M-1)+weights(2:M))) ;
+                 (.5*weights(M)) ] ;
 lambda_bar = cumsum(lambda_tilde) ;
-lambda_bar = lambda_bar(1:M-1) ;
 u = rand(1,1) ;
 new_particles = zeros(number_of_new_particles,1) ;
+rj = 0 ; 
 i = 1 ;
 j = 1 ;
 while i<=number_of_new_particles
     u_j = ( i-1 + u)/number_of_new_particles ;
     while u_j>lambda_bar(j)
+        rj = j ; 
         j = j+1 ;
-        if j==M
-            j = M-1 ;
-            break ;
-        end
     end
-    u_star = (u_j - (lambda_bar(j)-lambda_tilde(j)))./lambda_tilde(j) ;
-    new_particles(i) = (particles(j+1) - particles(j))*u_star + particles(j) ;
+    if rj==0 
+        new_particles(i) = particles(1) ;
+    elseif rj==M
+        new_particles(i) = particles(M) ;
+    else
+        u_star = (u_j - lambda_bar(rj))./lambda_tilde(rj+1) ;
+        new_particles(i) = (particles(rj+1) - particles(rj))*u_star + particles(rj) ;
+    end
     i = i+1 ;
 end

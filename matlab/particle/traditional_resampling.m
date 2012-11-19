@@ -33,7 +33,7 @@ function indx = traditional_resampling(weights,noise)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011-2012 Dynare Team
+% Copyright (C) 2011, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -73,7 +73,11 @@ end
 c = cumsum(weights);
 
 % Draw a starting point.
-randvec = (transpose(1:number_of_particles)-1+noise(:))/number_of_particles ;
+if kitagawa_resampling
+    randvec = (transpose(1:number_of_particles)-1+noise(:))/number_of_particles ;
+else 
+    randvec = fliplr(cumprod(noise.^(1./(number_of_particles:-1:1))));
+end
 
 % Start at the bottom of the CDF
 if kitagawa_resampling
