@@ -127,7 +127,7 @@ switch nargin
             if isempty(quaterly) && isempty(monthly) && isempty(weekly)
                 error('dynSeries:: Using a string as a second input argument, I can only handle weekly (W), monthly (M) or quaterly (Q) data!');
             end
-        else% If b is not a string then yearly data are assumed.
+        elseif isa(b,'dynDate')% If b is not a string then yearly data are assumed.
             ts.freq = 1;
         end
         ts.Time = ts.Time.setFreq(ts.freq);
