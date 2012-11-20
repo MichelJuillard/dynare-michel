@@ -100,7 +100,7 @@ if strcmpi(DynareOptions.particle.IS_approximation_method,'cubature') || strcmpi
     dObserved = bsxfun(@minus,tmp(mf1,:),PredictedObservedMean)'.*sqrt(weights);
     PredictedStateVarianceSquareRoot = chol(dState'*dState)';
     big_mat = [dObserved  dState ; [H_lower_triangular_cholesky zeros(number_of_observed_variables,number_of_state_variables)] ] ;
-    [mat1,mat] = qr2(big_mat) ;
+    [mat1,mat] = qr2(big_mat,0) ;
     mat = mat' ; 
     clear('mat1');
     PredictedObservedVarianceSquareRoot = mat(1:number_of_observed_variables,1:number_of_observed_variables) ;

@@ -22,7 +22,7 @@ for n=1:niters
     diffs = bsxfun(@minus,X,StateMu(:,j));
     tpost = (1/sqrt(new_pr(j)))*sqrt(posterior(j,:));
     diffs = bsxfun(@times,diffs,tpost);
-    [foo,tcov] = qr2(diffs') ;
+    [foo,tcov] = qr2(diffs',0);
     StateSqrtP(:,:,j) = tcov';
     if check
       if min(abs(diag(StateSqrtP(:,:,j)))) < MIN_COVAR_SQRT
