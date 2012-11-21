@@ -358,7 +358,6 @@ elseif isnan(LIK)
     exit_flag  = 0;
 else
     likelihood = LIK;
-    exit_flag  = 1;% 
 end
 DynareOptions.warning_for_steadystate = 1;
 % ------------------------------------------------------------------------------
