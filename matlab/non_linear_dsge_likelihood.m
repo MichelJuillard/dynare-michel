@@ -1,4 +1,4 @@
-function [fval,exit_flag,ys,trend_coeff,info,Model,DynareOptions,BayesInfo,DynareResults] = non_linear_dsge_likelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
+function [fval,ys,trend_coeff,exit_flag,info,Model,DynareOptions,BayesInfo,DynareResults] = non_linear_dsge_likelihood(xparam1,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults)
 % Evaluates the posterior kernel of a dsge model using a non linear filter.
 
 %@info:
@@ -358,6 +358,7 @@ elseif isnan(LIK)
     exit_flag  = 0;
 else
     likelihood = LIK;
+    exit_flag  = 1;% 
 end
 DynareOptions.warning_for_steadystate = 1;
 % ------------------------------------------------------------------------------
