@@ -40,11 +40,13 @@ AC_ARG_WITH(matio, AC_HELP_STRING([--with-matio=DIR], [prefix to MATIO installat
   CPPFLAGS="$CPPFLAGS_MATIO $CPPFLAGS"
   LDFLAGS="$LDFLAGS_MATIO $LDFLAGS"
 
+  dnl Workaround for the matio from RHEL 6 + EPEL 6
+  dnl If detected, libz is added to LIBS, used for matio test
+  LIBS=""
+  AC_CHECK_LIB([z], [compress])
+
   AC_CHECK_HEADER([matio.h], [], [has_matio=no])
-  AC_CHECK_LIB([matio], [Mat_Open], [LIBADD_MATIO="-lmatio"], [
-    dnl Retest with libz explicitly added, as a workaround for the matio from RHEL 6 + EPEL 6
-    AC_CHECK_LIB([matio], [Mat_Open], [LIBADD_MATIO="-lmatio -lz"], [has_matio=no], [-lz])
-  ])
+  AC_CHECK_LIB([matio], [Mat_Open], [LIBADD_MATIO="-lmatio $LIBS"], [has_matio=no])
 
   CPPFLAGS="$ac_save_CPPFLAGS"
   LDFLAGS="$ac_save_LDFLAGS"
