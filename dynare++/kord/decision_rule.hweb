@@ -350,7 +350,8 @@ rest of the matrix with zeros.
 		i++;
 	}
 
-@ Even clearer. We add the steady state to the numbers computed above and leave the padded columns to zero.
+@ Even clearer. We add the steady state to the numbers computed above
+and leave the padded columns to zero.
 
 @<add the steady state to columns of |res|@>=
 	for (int j = 0; j < i; j++) {
