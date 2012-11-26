@@ -50,4 +50,4 @@ if ~isa(a,'dynDate')
     error(['dynDate::isempty: Input argument ' inputname(1) ' have to be a dynDate object!'])
 end
 
-b = all(isnan(a.time));
+b = all(isnan(a.time)) && isnan(a.freq);
