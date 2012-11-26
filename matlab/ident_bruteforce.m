@@ -84,7 +84,9 @@ for ll = 1:n,
         for i=1:k,
             plist='';
             for ii=1:ll,
-                plist = [plist ' $' pnames_TeX(pars{i,ll}(ii),:) '$ '];
+                if ~isnan(pars{i,ll}),
+                    plist = [plist ' $' pnames_TeX(pars{i,ll}(ii),:) '$ '];
+                end
             end
             fprintf(fidTeX,'$%s$ & [%s] & %7.3f \\\\ \n',...
                 pnames_TeX(i,:),...
