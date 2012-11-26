@@ -1,4 +1,42 @@
-function [list_of_variables, data, time] = readcsv(file, withtime, withnames, noemptycell)
+function [freq, init, data, varlist] = load_csv_file_data(file, withtime, withnames, noemptycell)
+
+%@info:
+%! @deftypefn {Function File} {@var{freq}, @var{init}, @var{data}, @var{varlist} =} load_m_file_data (@var{file}, @var{withtime}, @var{withnames}, @var{noemptycell})
+%! @anchor{load_csv_file_data}
+%! @sp 1
+%! Loads data in a csv file.
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item file
+%! string, name of the m file (matlab/octave script).
+%! @item withtime
+%! Scalar integer, non zero iff the first column is for the dates of the observations.
+%! @item withnames
+%! Scalar integer, non zero iff the first row is for the names of the variables.
+%! @item noemptycell
+%! Scalar integer, non zero iff the csv file does not have empty cells.
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item freq
+%! Scalar integer (1, 4, 12, 52).
+%! @item init
+%! dynDate object, initial date.
+%! @item data
+%! Matrix of doubles, data.
+%! @item varlist
+%! Cell of strings (names of the variables in the database).
+%! @end table
+%! @sp 2
+%! @strong{Remarks}
+%! @sp 1
+%! The frequency and initial date can be specified with variables FREQ__ and INIT__ in the matlab/octave script. FREQ__ must be a scalar integer and INIT__ a string like '1938M11', '1945Q3', '1973W3' or '2009'. If these variables are not specified default values for freq and init are 1 and dynDate(1).
+%! @end deftypefn
+%@eod:
 
 % Copyright (C) 2012 Dynare Team
 %
@@ -19,6 +57,20 @@ function [list_of_variables, data, time] = readcsv(file, withtime, withnames, no
 
 % AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
 
+% Set defaults.
+if nargin<4
+    noemptycell = 1;
+    if nargin<3
+        withnames = 1;
+        if nargin <2
+            withtime = 1;
+            if nargin<1
+                error('load_csv_file_data:: I need at least one input (name of the csv file)!')
+            end
+        end
+    end
+end
+
 if ~withtime && ~withname && noemptycell
     % Use matlab builtin routine!
     data = csvread(file);
@@ -33,7 +85,7 @@ if ~( isequal(withnames,0) || isequal(withnames,1) )
 end
 
 % Output initialization 
-time = []; data = []; list_of_variables = [];
+time = []; data = []; varlist = [];
 
 % Check if file exists.
 if check_file_extension(file,'csv')
@@ -83,10 +135,10 @@ if withnames
         B = B(2:end);
         C = C(2:end);
     end
-    list_of_variables = cell(length(B),1);
-    number_of_variables = length(list_of_variables);
+    varlist = cell(length(B),1);
+    number_of_variables = length(varlist);
     for i=1:number_of_variables
-        list_of_variables(i) = {linee(B(i):C(i))};
+        varlist(i) = {linee(B(i):C(i))};
     end
     linea = linea+1;
 end
@@ -107,10 +159,12 @@ if withtime
         % Remove the Y (gpm/iris date format) if necessary
         tmp = { tmp(1:end-1) };
     end
-    initial_date = dynDate(tmp);
+    init = dynDate(tmp);
+    freq = init.freq;
     first = 2;
 else
-    initial_date = dynDate(1);
+    init = dynDate(1);
+    freq = 1;
     first = 1;
 end
 

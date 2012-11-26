@@ -1,4 +1,4 @@
-function ts = dynSeries(a,b,c,d)
+function ts = dynSeries(varargin)% dynSeries(a,b,c,d)
 
 %@info:
 %! @deftypefn {Function File} {@var{ts} =} dynSeries (@var{a},@var{b},@var{c},@var{d})
@@ -90,16 +90,38 @@ ts = struct;
 ts.data = [];
 ts.nobs = 0;
 ts.vobs = 0;
-ts.name = [];
-ts.tex  = [];
+ts.name = {};
+ts.tex  = {};
 ts.freq = [];
-ts.Time = dynTime();
+ts.init = dynDate();%ts.Time = dynTime();
 
 ts = class(ts,'dynSeries');
 
 switch nargin
   case 0
+    %  Create an empty dynSeries object.
     return
+  case 1
+    if isa(varargin{1},'dynDate')
+        if isempty(varargin{1})
+            error(['dynSeries:: ' inputname(1) ' (identified as a dynDate object) must be non empty!'])
+        else
+            % Create an empty dynSeries object with an initial date.
+            ts.init = varargin{1};
+            ts.freq = varargin{1}.freq;
+        end
+    elseif ischar(varargin{1})
+        % Create a dynSeries object loading data in a file (*.csv, *.m, *.mat).
+        if check_file_extension(varargin{1},'m')
+            [freq,init,data,varlist] = load_m_file_data(varargin{1});
+        elseif check_file_extension(varargin{1},'mat')
+            [freq,init,data,varlist] = load_mat_file_data(varargin{1});
+        elseif check_file_extension(varargin{1},'csv')
+            [freq,init,data,varlist] = load_csv_file_data(varargin{1});
+        else
+            error(['dynSeries:: I''m not able to load data from ' inputname(1) '!'])
+        end
+    end
   case {2,4}
     if nargin==2
         c = [];
