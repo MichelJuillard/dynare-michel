@@ -164,7 +164,7 @@ while (t<sample_size)
                 if options_.ep.stochastic.order == 0
                     [flag,tmp,err] = solve_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1);
                 else
-                    [flag,tmp] = solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1,options_.ep.stochastic.nodes,options_.ep.stochastic.order);
+                    [flag,tmp] = solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1,options_.ep.stochastic.quadrature.nodes,options_.ep.stochastic.order);
                 end
             end
             info_convergence = ~flag;

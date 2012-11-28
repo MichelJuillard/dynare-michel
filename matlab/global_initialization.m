@@ -176,13 +176,13 @@ ep.set_dynare_seed_to_default = 1;
 % Set algorithm for the perfect foresight solver
 ep.stack_solve_algo = 4;
 % Stochastic extended path related options.
-ep.stochastic.method = 'tensor';
-ep.stochastic.ortpol = 'hermite';
+ep.stochastic.method = '';
+ep.stochastic.quadrature.ortpol = 'hermite';
 ep.stochastic.order = 0;
-ep.stochastic.nodes = 5;
-ep.stochastic.pruned.status = 0;
-ep.stochastic.pruned.relative = 1e-5;
-ep.stochastic.pruned.level = 1e-5;
+ep.stochastic.quadrature.nodes = 5;
+ep.stochastic.quadrature.pruned.status = 0;
+ep.stochastic.quadrature.pruned.relative = 1e-5;
+ep.stochastic.quadrature.pruned.level = 1e-5;
 % Copy ep structure in options_ global structure
 options_.ep = ep;
 
