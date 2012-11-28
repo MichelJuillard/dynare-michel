@@ -60,15 +60,15 @@ if info(1)
     disp('The last values for which a solution was found are:')
     for i=1:length(ip)
         disp(sprintf('%12s %12.6f',M_.param_names(hv(ip(i),2),:), ...
-                     M_.params(hv(ip(i)))))
+                     M_.params(hv(ip(i),2))))
     end
     for i=1:length(ix)
         disp(sprintf('%12s %12.6f',M_.exo_names(hv(ix(i),2),:), ...
-                     oo_.exo_steady_state(hv(ix(i)))))
+                     oo_.exo_steady_state(hv(ix(i),2))))
     end
     for i=1:length(ixd)
         disp(sprintf('%12s %12.6f',M_.exo_det_names(hv(ixd(i),2),:), ...
-                     oo_.exo_det_steady_state(hv(ixd(i)))))
+                     oo_.exo_det_steady_state(hv(ixd(i),2))))
     end
     
     if options_.homotopy_force_continue
