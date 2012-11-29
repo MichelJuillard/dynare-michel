@@ -36,7 +36,7 @@ options_.verbosity = options_.ep.verbosity;
 verbosity = options_.ep.verbosity+options_.ep.debug;
 
 % Prepare a structure needed by the matlab implementation of the perfect foresight model solver
-pfm = setup_stochastic_perfect_foresight_model_solver(M_,options_,oo_,[],[]);
+pfm = setup_stochastic_perfect_foresight_model_solver(M_,options_,oo_,'Tensor-Gaussian-Quadrature');
 
 exo_nbr = M_.exo_nbr;
 periods = options_.periods;
