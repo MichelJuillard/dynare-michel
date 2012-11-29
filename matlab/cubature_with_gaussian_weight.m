@@ -59,16 +59,15 @@ if nargin<3 || isempty(method)
 end
 
 if strcmp(method,'Stroud') && isequal(n,3)
-    %V = sqrt(pi)^d;
-    r = sqrt(d/2);
+    r = sqrt(d);
     nodes = r*[eye(d),-eye(d)];
     weights = ones(2*d,1)/(2*d);
     return
 end
 
 if strcmp(method,'Stroud') &&  isequal(n,5)
-    r = sqrt((d+2)/2);
-    s = sqrt((d+2)/4);
+    r = sqrt((d+2));
+    s = sqrt((d+2)/2);
     m = 2*d^2+1;
     A = 2/(n+2);
     B = (4-d)/(2*(n+2)^2);
@@ -132,7 +131,6 @@ function m = ee(n,i,j)
 %$ end
 %$
 %$ % Check the results.
-%$ nodes = sqrt(2)*nodes;
 %$
 %$ % Compute (approximated) first order moments.
 %$ m1 = nodes*weights;
@@ -173,7 +171,7 @@ function m = ee(n,i,j)
 %$ end
 %$
 %$ % Check the results.
-%$ nodes = sqrt(2)*Omega*nodes;
+%$ nodes = Omega*nodes;
 %$
 %$ % Compute (approximated) first order moments.
 %$ m1 = nodes*weights;
@@ -214,7 +212,7 @@ function m = ee(n,i,j)
 %$ end
 %$
 %$ % Check the results.
-%$ nodes = sqrt(2)*Omega*nodes;
+%$ nodes = Omega*nodes;
 %$
 %$ % Compute (approximated) first order moments.
 %$ m1 = nodes*weights;
@@ -250,7 +248,7 @@ function m = ee(n,i,j)
 %$
 %$ % Correct nodes for the covariance matrix
 %$ for i=1:length(weights)
-%$     nodes(:,i) = sqrt(2)*Omega*nodes(:,i);
+%$     nodes(:,i) = Omega*nodes(:,i);
 %$ end
 %$
 %$ % Check the results.
@@ -288,7 +286,7 @@ function m = ee(n,i,j)
 %$ end
 %$
 %$ % Check the results.
-%$ nodes = sqrt(2)*nodes;
+%$ nodes = nodes;
 %$
 %$ % Compute (approximated) first order moments.
 %$ m1 = nodes*weights;
