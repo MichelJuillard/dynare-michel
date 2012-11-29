@@ -52,7 +52,7 @@ pfm.verbose = DynareOptions.ep.verbosity;
 pfm.maxit_ = DynareOptions.maxit_;
 pfm.tolerance = DynareOptions.dynatol.f;
 
-if nargin>3
+if nargin>3 && DynareOptions.ep.stochastic.order
     % Compute weights and nodes for the stochastic version of the extended path.
     switch IntegrationMethod
       case 'Tensor-Gaussian-Quadrature'
