@@ -3,7 +3,7 @@ function pfm = setup_stochastic_perfect_foresight_model_solver(DynareModel,Dynar
 pfm.lead_lag_incidence = DynareModel.lead_lag_incidence;
 pfm.ny = DynareModel.endo_nbr;
 pfm.Sigma = DynareModel.Sigma_e;
-pfm.omega = chol(pfm.Sigma,'upper'); % Sigma = Omega'*Omega
+pfm.Omega = chol(pfm.Sigma,'upper'); % Sigma = Omega'*Omega
 pfm.number_of_shocks = length(pfm.Sigma);
 pfm.stochastic_order = DynareOptions.ep.stochastic.order;
 pfm.max_lag = DynareModel.maximum_endo_lag;
@@ -61,7 +61,7 @@ if nargin>3
         % Replicate the univariate nodes for each innovation and dates, and, if needed, correlate them. 
         nodes = repmat(nodes,1,pfm.number_of_shocks*pfm.stochastic_order)*kron(eye(pfm.stochastic_order),pfm.Omega);
         % Put the nodes and weights in cells
-        for i=1:number_of_shocks
+        for i=1:pfm.number_of_shocks
             rr(i) = {nodes(:,i)};
             ww(i) = {weights};
         end
