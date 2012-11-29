@@ -43,7 +43,7 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
     [nodes,weights] = gauss_hermite_weights_and_nodes(nnodes);
 
     if number_of_shocks>1
-        nodes = repmat(nodes,1,number_of_shocks)*chol(pfm.Sigma_e);
+        nodes = repmat(nodes,1,number_of_shocks)*chol(pfm.Sigma);
         % to be fixed for Sigma ~= I
         for i=1:number_of_shocks
             rr(i) = {nodes(:,i)};
@@ -53,7 +53,7 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
         weights = prod(cartesian_product_of_sets(ww{:}),2);
         nnodes = nnodes^number_of_shocks;
     else
-        nodes = nodes*sqrt(pfm.Sigma_e);
+        nodes = nodes*sqrt(pfm.Sigma);
     end
 
     innovations = zeros(periods+2,number_of_shocks);
