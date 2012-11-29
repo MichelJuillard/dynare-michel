@@ -4201,7 +4201,8 @@ model. Default: @code{4}.
 distribution of the theoretical moments of the endogenous
 variables. Results are stored in
 @code{oo_.PosteriorTheoreticalMoments} (see below for a description of
-this variable)
+this variable). The number of lags in the autocorrelation function is
+controlled by the @code{ar} option.
 
 @item conditional_variance_decomposition = @var{INTEGER}
 See below.
@@ -4389,6 +4390,9 @@ This is the convergence criterion used in the doubling algorithm to solve the ly
 Triggers estimation with analytic gradient. The final hessian is also
 computed analytically. Only works for stationary models without
 missing observations.
+
+@item ar = @var{INTEGER}
+@xref{ar}. Only useful in conjuction with option @code{moments_varendo}.
 
 @end table
 
