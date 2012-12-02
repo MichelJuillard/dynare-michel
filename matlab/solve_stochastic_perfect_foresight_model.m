@@ -141,7 +141,7 @@ function [flag,endo_simul,err] = solve_stochastic_perfect_foresight_model(endo_s
                             i_cols_A = [i_cols_Ap; i_cols_As; i_cols_Af];
                             A1(i_rows,i_cols_A) = A1(i_rows,i_cols_A) + weights(k)*jacobian(:,i_cols_j);
                         end
-                        res(:,i,j) = res(:,j,i)+weights(k)*d1;
+                        res(:,i,j) = res(:,i,j)+weights(k)*d1;
                         i_cols_Af = i_cols_Af + ny;
                     end
                 else
