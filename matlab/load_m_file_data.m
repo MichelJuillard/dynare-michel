@@ -51,8 +51,10 @@ function [freq,init,data,varlist] = load_m_file_data(file)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr    
+
+[basename, ext] = strtok(file,'.');
     
-run(file);
+run(basename);
 
 if exist('INIT__','var')
     init = dynDate(INIT__);
