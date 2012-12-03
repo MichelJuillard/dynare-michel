@@ -187,3 +187,6 @@ for linea = 1+withnames:ndx
         end
     end
 end
+
+% Remove first line if withnames
+data = data(1+withnames:ndx,:);
