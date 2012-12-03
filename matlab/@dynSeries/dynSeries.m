@@ -93,7 +93,8 @@ ts.vobs = 0;
 ts.name = {};
 ts.tex  = {};
 ts.freq = [];
-ts.init = dynDate();%ts.Time = dynTime();
+ts.init = dynDate();
+ts.time = dynDates();
 
 ts = class(ts,'dynSeries');
 
@@ -110,6 +111,7 @@ switch nargin
             ts.init = varargin{1};
             ts.freq = varargin{1}.freq;
         end
+        return
     elseif ischar(varargin{1})
         % Create a dynSeries object loading data in a file (*.csv, *.m, *.mat).
         if check_file_extension(varargin{1},'m')
@@ -121,11 +123,25 @@ switch nargin
         else
             error(['dynSeries:: I''m not able to load data from ' inputname(1) '!'])
         end
+        ts.init = init;
+        ts.freq = freq;
+        ts.data = data;
+        ts.name = varlist;
+        ts.vobs = length(varlist);
+        ts.nobs = size(data,1); 
     end
   case {2,4}
-    if nargin==2
-        c = [];
+    a = varargin{1};
+    b = varargin{2};
+    if nargin<4
         d = [];
+    else
+        d = varargin{4};
+    end
+    if nargin<3
+        c = [];
+    else
+        c = varargin{3};
     end
     % Get data, number of observations and number of variables.
     ts.data = a;
@@ -137,6 +153,7 @@ switch nargin
             quaterly = findstr('Q',b);
             monthly  = findstr('M',b);
             weekly   = findstr('W',b);
+            yearly   = findstr('Y',b);
             if ~isempty(quaterly)
                 ts.freq = 4;
             end
@@ -146,46 +163,58 @@ switch nargin
             if ~isempty(weekly)
                 ts.freq = 52;
             end
-            if isempty(quaterly) && isempty(monthly) && isempty(weekly)
-                error('dynSeries:: Using a string as a second input argument, I can only handle weekly (W), monthly (M) or quaterly (Q) data!');
+            if ~isempty(yearly)
+                ts.freq = 1;
             end
-        elseif isa(b,'dynDate')% If b is not a string then yearly data are assumed.
+            if isempty(quaterly) && isempty(monthly) && isempty(weekly)  && isempty(yearly)
+                error('dynSeries:: Using a string as a second input argument, I can only handle weekly (W), monthly (M), quaterly (Q) or yearly (Y) data!');
+            end
+            ts.init = dynDate(b);
+        elseif isa(b,'dynDate') && ~isempty(b)
+            ts.freq = b.freq;
+            ts.init = b;
+        elseif isnumeric(b) && isreal(b) && isint(b)
             ts.freq = 1;
+            ts.init = dynDate(b);
+        else
+            error('dynSeries::dynSeries: Wrong calling sequence!');
         end
-        ts.Time = ts.Time.setFreq(ts.freq);
-        ts.Time = ts.Time.setTime(dynDate(b):dynDate(b)+ts.nobs);
     else% If b is empty.
         ts.freq = 1;
-        ts.Time = ts.Time.setFreq(1);
-        ts.Time = ts.Time.setTime([transpose(1:ts.nobs) ones(ts.nobs,1)]);
+        ts.init = dynDate(1);
     end
     % Get the names of the variables.
     if ~isempty(c)
-        if ts.vobs==size(c,1)
-            ts.name = c;
+        if ts.vobs==length(c)
+            for i=1:ts.vobs
+                ts.name = vertcat(ts.name, c(i) );
+            end
         else
-            error('dynSeries:: The number of declared names does not match the number of variables!')
+            error('dynSeries::dynSeries: The number of declared names does not match the number of variables!')
         end
     else
         for i=1:ts.vobs
-            ts.name = char(ts.name,'--NA--');
+            ts.name = vertcat(ts.name, {'--NA--'});
         end
     end
     if ~isempty(d)
-        if ts.vobs==size(d,1)
-            ts.tex = d;
+        if ts.vobs==length(d)
+            for i=1:ts.vobs
+                ts.tex = vertcat(ts.tex, d(i));
+            end
         else
-            error('dynSeries:: The number of declared tex names does not match the number of variables!')
+            error('dynSeries::dynSeries: The number of declared tex names does not match the number of variables!')
         end
     else
         for i=1:ts.vobs
-            ts.tex = char(ts.tex,'--NA--');
+            ts.tex = vertcat(ts.tex, {'--NA--'});
         end
     end
   otherwise
-    error('dynSeries:: Can''t instantiate the class, wrong calling sequence!')
+    error('dynSeries::dynSeries: Can''t instantiate the class, wrong calling sequence!')
 end
 
+ts.time = ts.init:(ts.init+ts.nobs);
 
 %@test:1
 %$ % Test if we can instantiate an empty dynSeries object.
@@ -200,39 +229,153 @@ end
 %@eof:1
 
 %@test:2
-%$ % Define a data set.
-%$ A = transpose(1:10);
+%$ t = zeros(4,1);
 %$
-%$ % Define initial date
-%$ B1 = 1950;
-%$ B2 = '1950Q2';
-%$ B3 = '1950M10';
-%$ B4 = '1950W50';
+%$ try
+%$     aa = dynDate('1938M11');
+%$     ts = dynSeries(aa);
+%$     t(1) = 1;
+%$ catch
+%$     t = 0;
+%$ end
 %$
-%$ % Define expected results.
-%$ e1.Time = transpose([1950 1951 1952 1953 1954 1955 1956 1957 1958 1959]);
-%$ e1.freq = 1;
-%$ e2.Time = char('1950Q2','1950Q3','1950Q4','1951Q1','1951Q2','1951Q3','1951Q4','1952Q1','1952Q2','1952Q3');
-%$ e2.freq = 4;
-%$ e3.Time = char('1950M10','1950M11','1950M12','1951M1','1951M2','1951M3','1951M4','1951M5','1951M6','1951M7');
-%$ e3.freq = 12;
-%$ e4.Time = char('1950W50','1950W51','1950W52','1951W1','1951W2','1951W3','1951W4','1951W5','1951W6','1951W7');
-%$ e4.freq = 52;
+%$ if length(t)>1
+%$     t(2) = dyn_assert(ts.freq,12);
+%$     t(3) = dyn_assert(ts.init.freq,12);
+%$     t(4) = dyn_assert(ts.init.time,[1938, 11]);
+%$ end
 %$
-%$ % Call the tested routine.
-%$ ts1 = dynSeries(A,B1);
-%$ ts2 = dynSeries(A,B2);
-%$ ts3 = dynSeries(A,B3);
-%$ ts4 = dynSeries(A,B4);
-%$
-%$ % Check the results.
-%$ t(1) = dyn_assert(getTime(ts1),e1.Time);
-%$ t(2) = dyn_assert(getTime(ts2),e2.Time);
-%$ t(3) = dyn_assert(getTime(ts3),e3.Time);
-%$ t(4) = dyn_assert(getTime(ts4),e4.Time);
-%$ t(5) = dyn_assert(ts1.freq,e1.freq);
-%$ t(6) = dyn_assert(ts2.freq,e2.freq);
-%$ t(7) = dyn_assert(ts3.freq,e3.freq);
-%$ t(8) = dyn_assert(ts4.freq,e4.freq);
 %$ T = all(t);
-%@eof:1
+%@eof:2
+
+%@test:3
+%$ t = zeros(6,1);
+%$
+%$ try
+%$     ts = dynSeries('dynseries_test_data.m');
+%$     t(1) = 1;
+%$ catch
+%$     t = 0;
+%$ end
+%$
+%$ if length(t)>1
+%$     t(2) = dyn_assert(ts.freq,4);
+%$     t(3) = dyn_assert(ts.init.freq,4);
+%$     t(4) = dyn_assert(ts.init.time,[1994, 3]);
+%$     t(5) = dyn_assert(ts.vobs,2);
+%$     t(6) = dyn_assert(ts.nobs,100);
+%$ end
+%$
+%$ T = all(t);
+%@eof:3
+
+%@test:4
+%$ t = zeros(6,1);
+%$
+%$ try
+%$     ts = dynSeries('dynseries_test_data.mat');
+%$     t(1) = 1;
+%$ catch
+%$     t = 0;
+%$ end
+%$
+%$ if length(t)>1
+%$     t(2) = dyn_assert(ts.freq,4);
+%$     t(3) = dyn_assert(ts.init.freq,4);
+%$     t(4) = dyn_assert(ts.init.time,[1994, 3]);
+%$     t(5) = dyn_assert(ts.vobs,2);
+%$     t(6) = dyn_assert(ts.nobs,100);
+%$ end
+%$
+%$ T = all(t);
+%@eof:4
+
+%@test:5
+%$ t = zeros(7,1);
+%$
+%$ try
+%$     ts = dynSeries('dynseries_test_data.csv');
+%$     t(1) = 1;
+%$ catch
+%$     t = 0;
+%$ end
+%$
+%$ if length(t)>1
+%$     t(2) = dyn_assert(ts.freq,4);
+%$     t(3) = dyn_assert(ts.init.freq,4);
+%$     t(4) = dyn_assert(ts.init.time,[1990, 1]);
+%$     t(5) = dyn_assert(ts.vobs,4);
+%$     t(6) = dyn_assert(ts.nobs,4);
+%$     t(7) = dyn_assert(ts.name,{'azert';'yuiop';'qsdfg';'jklm'}); 
+%$ end
+%$
+%$ T = all(t);
+%@eof:5
+
+%@test:6
+%$ t = zeros(7,1);
+%$
+%$ try
+%$     ts = dynSeries(transpose(1:5),[]);
+%$     t(1) = 1;
+%$ catch
+%$     t = 0;
+%$ end
+%$
+%$ if length(t)>1
+%$     t(2) = dyn_assert(ts.freq,1);
+%$     t(3) = dyn_assert(ts.init.freq,1);
+%$     t(4) = dyn_assert(ts.init.time,[1, 1]);
+%$     t(5) = dyn_assert(ts.vobs,1);
+%$     t(6) = dyn_assert(ts.nobs,5);
+%$     t(7) = dyn_assert(ts.name,{'--NA--'}); 
+%$ end
+%$
+%$ T = all(t);
+%@eof:6
+
+%@test:7
+%$ t = zeros(7,1);
+%$
+%$ try
+%$     ts = dynSeries(transpose(1:5),'1950Q1');
+%$     t(1) = 1;
+%$ catch
+%$     t = 0;
+%$ end
+%$
+%$ if length(t)>1
+%$     t(2) = dyn_assert(ts.freq,4);
+%$     t(3) = dyn_assert(ts.init.freq,4);
+%$     t(4) = dyn_assert(ts.init.time,[1950, 1]);
+%$     t(5) = dyn_assert(ts.vobs,1);
+%$     t(6) = dyn_assert(ts.nobs,5);
+%$     t(7) = dyn_assert(ts.name,{'--NA--'}); 
+%$ end
+%$
+%$ T = all(t);
+%@eof:7
+
+
+%@test:8
+%$ t = zeros(7,1);
+%$
+%$ try
+%$     ts = dynSeries([transpose(1:5), transpose(6:10)],'1950Q1',{'Output'; 'Consumption'}, {'Y_t'; 'C_t'});
+%$     t(1) = 1;
+%$ catch
+%$     t = 0;
+%$ end
+%$
+%$ if length(t)>1
+%$     t(2) = dyn_assert(ts.freq,4);
+%$     t(3) = dyn_assert(ts.init.freq,4);
+%$     t(4) = dyn_assert(ts.init.time,[1950, 1]);
+%$     t(5) = dyn_assert(ts.vobs,2);
+%$     t(6) = dyn_assert(ts.nobs,5);
+%$     t(7) = dyn_assert(ts.name,{'Output'; 'Consumption'}); 
+%$ end
+%$
+%$ T = all(t);
+%@eof:8
+

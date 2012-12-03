@@ -69,9 +69,9 @@ function us = subsref(ts, S)
 
 % AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
 
-if isequal(S.type,'.') & length(S)==1
+if length(S)==1 && isequal(S.type,'.')
     switch S.subs
-      case {'data','nobs','vobs','name','tex','freq','time','init','last','Time'} % Public members.
+      case {'data','nobs','vobs','name','tex','freq','time','init'}        % Public members.
         us = builtin('subsref', ts, S);
       case {'log','exp'}                                                   % Give "dot access" to public methods.
         us = feval(S.subs,ts);
@@ -85,9 +85,7 @@ if isequal(S.type,'.') & length(S)==1
             us.nobs = ts.nobs;
             us.vobs = 1;
             us.freq = ts.freq;
-            us.time = ts.time;
             us.init = ts.init;
-            us.last = ts.last;
             return
         else
             error('dynSeries::subsref: Unknown public method, public member or variable!')
@@ -95,7 +93,8 @@ if isequal(S.type,'.') & length(S)==1
     end
     return
 end
-if isequal(S.type,'()') & length(S)==1                                                    % Extract a sub-object by selecting a sub-sample.
+
+if length(S)==1 && isequal(S.type,'()')                                                    % Extract a sub-object by selecting a sub-sample.
     us = dynSeries();
     if size(ts.data,2)>1
         S.subs = [S.subs, ':'];
@@ -105,15 +104,15 @@ if isequal(S.type,'()') & length(S)==1                                          
     us.vobs = ts.vobs;
     us.freq = ts.freq;
     us.time = builtin('subsref', ts.time, S);
-    us.init = us.time(1,:);
-    us.last = us.time(end,:);
+    us.init = ts.init+S.subs{1}(1);
     us.name = ts.name;
     us.tex  = ts.tex;
+    return
 end
 
-if (length(S)==2) & (isequal(S(1).subs,'Time'))
-    if isequal(S(2).type,'.')
-        us = builtin('subsref', ts.Time, S(2));
+if (length(S)==2) && (isequal(S(1).subs,'init'))
+    if isequal(S(2).type,'.') && ( isequal(S(2).subs,'freq') || isequal(S(2).subs,'time') )
+        us = builtin('subsref', ts.init, S(2));
     else
         error('dynSeries:subsref:: I don''t understand what you are trying to do!')
     end
@@ -125,7 +124,7 @@ end
 %$ A = [transpose(1:10),2*transpose(1:10)];
 %$
 %$ % Define names
-%$ A_name = char('A1','A2');
+%$ A_name = {'A1';'A2'};
 %$
 %$ % Instantiate a time series object.
 %$ ts1 = dynSeries(A,[],A_name,[]);
@@ -137,20 +136,16 @@ end
 %$ e.data = [transpose(2:9),2*transpose(2:9)];
 %$ e.nobs = 8;
 %$ e.vobs = 2;
-%$ e.name = char('A1','A2');
+%$ e.name = {'A1';'A2'};
 %$ e.freq = 1;
-%$ tmp = ts1.time; e.time = tmp(2:9,:);
-%$ e.init = e.time(1,:);
-%$ e.last = e.time(end,:);
+%$ e.init = dynDate(2);
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(a.data,e.data);
-%$ t(2) = dyn_assert(a.time,e.time);
-%$ t(3) = dyn_assert(a.nobs,e.nobs);
-%$ t(4) = dyn_assert(a.vobs,e.vobs);
-%$ t(5) = dyn_assert(a.freq,e.freq);
-%$ t(6) = dyn_assert(a.init,e.init);
-%$ t(7) = dyn_assert(a.last,e.last);
+%$ t(2) = dyn_assert(a.nobs,e.nobs);
+%$ t(3) = dyn_assert(a.vobs,e.vobs);
+%$ t(4) = dyn_assert(a.freq,e.freq);
+%$ t(5) = dyn_assert(a.init,e.init);
 %$ T = all(t);
 %@eof:1
 
@@ -160,7 +155,7 @@ end
 %$ A = [transpose(1:10),2*transpose(1:10)];
 %$
 %$ % Define names
-%$ A_name = char('A1','A2');
+%$ A_name = {'A1';'A2'};
 %$
 %$ % Instantiate a time series object.
 %$ ts1 = dynSeries(A,[],A_name,[]);
@@ -172,20 +167,16 @@ end
 %$ e.data = transpose(1:10);
 %$ e.nobs = 10;
 %$ e.vobs = 1;
-%$ e.name = char('A1');
+%$ e.name = {'A1'};
 %$ e.freq = 1;
-%$ e.time = [transpose(1:10),ones(10,1)];
-%$ e.init = e.time(1,:);
-%$ e.last = e.time(end,:);
+%$ e.init = dynDate(1);
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(a.data,e.data);
-%$ t(2) = dyn_assert(a.time,e.time);
+%$ t(2) = dyn_assert(a.init,e.init);
 %$ t(3) = dyn_assert(a.nobs,e.nobs);
 %$ t(4) = dyn_assert(a.vobs,e.vobs);
 %$ t(5) = dyn_assert(a.freq,e.freq);
-%$ t(6) = dyn_assert(a.init,e.init);
-%$ t(7) = dyn_assert(a.last,e.last);
 %$ T = all(t);
 %@eof:2
 
@@ -195,7 +186,7 @@ end
 %$ A = [transpose(1:10),2*transpose(1:10)];
 %$
 %$ % Define names
-%$ A_name = char('A1','A2');
+%$ A_name = {'A1';'A2'};
 %$
 %$ % Instantiate a time series object.
 %$ ts1 = dynSeries(A,[],A_name,[]);
@@ -207,19 +198,15 @@ end
 %$ e.data = log(A);
 %$ e.nobs = 10;
 %$ e.vobs = 2;
-%$ e.name = char('A1','A2');
+%$ e.name = {'A1';'A2'};
 %$ e.freq = 1;
-%$ tmp = ts1.time; e.time = tmp(1:10,:);
-%$ e.init = e.time(1,:);
-%$ e.last = e.time(end,:);
+%$ e.init = dynDate(1);
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(a.data,e.data);
-%$ t(2) = dyn_assert(a.time,e.time);
-%$ t(3) = dyn_assert(a.nobs,e.nobs);
-%$ t(4) = dyn_assert(a.vobs,e.vobs);
-%$ t(5) = dyn_assert(a.freq,e.freq);
-%$ t(6) = dyn_assert(a.init,e.init);
-%$ t(7) = dyn_assert(a.last,e.last);
+%$ t(2) = dyn_assert(a.nobs,e.nobs);
+%$ t(3) = dyn_assert(a.vobs,e.vobs);
+%$ t(4) = dyn_assert(a.freq,e.freq);
+%$ t(5) = dyn_assert(a.init,e.init);
 %$ T = all(t);
 %@eof:3
