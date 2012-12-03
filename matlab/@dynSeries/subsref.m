@@ -119,7 +119,6 @@ if (length(S)==2) && (isequal(S(1).subs,'init'))
 end
 
 %@test:1
-%$ addpath ../matlab
 %$ % Define a data set.
 %$ A = [transpose(1:10),2*transpose(1:10)];
 %$
@@ -150,7 +149,6 @@ end
 %@eof:1
 
 %@test:2
-%$ addpath ../matlab
 %$ % Define a data set.
 %$ A = [transpose(1:10),2*transpose(1:10)];
 %$
@@ -181,7 +179,6 @@ end
 %@eof:2
 
 %@test:3
-%$ addpath ../matlab
 %$ % Define a data set.
 %$ A = [transpose(1:10),2*transpose(1:10)];
 %$
