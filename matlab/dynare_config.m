@@ -59,6 +59,7 @@ addpath([dynareroot '/gsa/'])
 addpath([dynareroot '/ep/'])
 addpath([dynareroot '/utilities/doc/'])
 addpath([dynareroot '/utilities/tests/'])
+addpath([dynareroot '/utilities/dates/'])
 addpath([dynareroot '/utilities/dataset/'])
 addpath([dynareroot '/utilities/general/'])
 
