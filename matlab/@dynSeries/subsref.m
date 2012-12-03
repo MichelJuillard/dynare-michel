@@ -94,20 +94,24 @@ if length(S)==1 && isequal(S.type,'.')
     return
 end
 
-if length(S)==1 && isequal(S.type,'()')                                                    % Extract a sub-object by selecting a sub-sample.
-    us = dynSeries();
-    if size(ts.data,2)>1
-        S.subs = [S.subs, ':'];
+if length(S)==1 && isequal(S.type,'()')
+    if ischar(S.subs{1})
+        us = dynSeries(S.subs{1});
+    else
+        % Extract a sub-object by selecting a sub-sample.
+        if size(ts.data,2)>1
+            S.subs = [S.subs, ':'];
+        end
+        us.data = builtin('subsref', ts.data, S);
+        us.nobs = size(us.data,1);
+        us.vobs = ts.vobs;
+        us.freq = ts.freq;
+        us.time = builtin('subsref', ts.time, S);
+        us.init = ts.init+S.subs{1}(1);
+        us.name = ts.name;
+        us.tex  = ts.tex;
+        return
     end
-    us.data = builtin('subsref', ts.data, S);
-    us.nobs = size(us.data,1);
-    us.vobs = ts.vobs;
-    us.freq = ts.freq;
-    us.time = builtin('subsref', ts.time, S);
-    us.init = ts.init+S.subs{1}(1);
-    us.name = ts.name;
-    us.tex  = ts.tex;
-    return
 end
 
 if (length(S)==2) && (isequal(S(1).subs,'init'))
@@ -207,3 +211,26 @@ end
 %$ t(5) = dyn_assert(a.init,e.init);
 %$ T = all(t);
 %@eof:3
+
+%@test:4
+%$ % Create an empty dynSeries object.
+%$ dataset = dynSeries();
+%$
+%$ t = zeros(5,1);
+%$
+%$ try
+%$    A = dataset('dynseries_test_data.csv');
+%$    t(1) = 1;
+%$ catch
+%$    t = 0;
+%$ end
+%$
+%$ % Check the results.
+%$ if length(t)>1
+%$     t(2) = dyn_assert(A.nobs,4);
+%$     t(3) = dyn_assert(A.vobs,4);
+%$     t(4) = dyn_assert(A.freq,4);
+%$     t(5) = dyn_assert(A.init,dynDate('1990Q1'));
+%$ end
+%$ T = all(t);
+%@eof:4
