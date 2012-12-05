@@ -1,4 +1,4 @@
-function ts = dynSeries(varargin)% dynSeries(a,b,c,d)
+function ts = dynSeries(varargin)
 
 %@info:
 %! @deftypefn {Function File} {@var{ts} =} dynSeries (@var{a},@var{b},@var{c},@var{d})
@@ -7,26 +7,33 @@ function ts = dynSeries(varargin)% dynSeries(a,b,c,d)
 %! Constructor for the Dynare time series class.
 %! @sp 2
 %! @strong{Inputs}
+%! @sp 2
+%! If @code{nargin==0} then an empty dynSeries object is created. The object can be populated with data subsequently using the overloaded subsref method.
+%! @sp 2
+%! If @code{nargin==1} and if the input argument is a @ref{dynDate} object, then a dynSeries object without data is created. This object can be populated with the overload subsref method.
+%! @sp 2
+%! If @code{nargin==1} and if the input argument is a string for the name of a csv, m or mat file containing data, then a dynSeries object is created from these data.
+%! @sp 2
+%! If @code{nargin>1}:
 %! @sp 1
 %! @table @ @var
 %! @item a
 %! T*1 vector or T*N matrix of data.
 %! @item b
-%! Initial date. For Quaterly, Monthly or Weekly data, b must be a string. For yearly data or if the frequence is not
-%! defined b must be an integer.
+%! Initial date. For Quaterly, Monthly or Weekly data, b must be a string. For yearly data or if the frequence is not defined b must be an integer.
 %! @item c
-%! N*q array of characters. Names of the N time series.
+%! N*1 cell array of strings. Names of the N time series.
 %! @item d
 %! N*p array of characters. TeX names of the N time series.
 %! @end table
-%! @sp 1
+%! @sp 2
 %! @strong{Outputs}
 %! @sp 1
 %! @table @ @var
 %! @item ts
 %! Dynare time series object.
 %! @end table
-%! @sp 1
+%! @sp 2
 %! @strong{Properties}
 %! @sp 1
 %! The constructor defines the following properties:
@@ -39,34 +46,20 @@ function ts = dynSeries(varargin)% dynSeries(a,b,c,d)
 %! @item vobs
 %! Scalar integer, the number of variables.
 %! @item name
-%! Array of chars (nvobs*n), names of the variables.
+%! Cell array of strings, names of the variables.
 %! @item tex
-%! Array of chars (nvobs*n), tex names of the variables.
+%! Cell array of strings, tex names of the variables.
 %! @item freq
 %! Scalar integer, the frequency of the time series. @var{freq} is equal to 1 if data are on a yearly basis or if
 %! frequency is unspecified. @var{freq} is equal to 4 if data are on a quaterly basis. @var{freq} is equal to
 %! 12 if data are on a monthly basis. @var{freq} is equal to 52 if data are on a weekly basis.
-%! @item time
-%! Array of integers (nobs*2). The first column defines the years associated to each observation. The second column,
-%! depending on the frequency, indicates the week, month or quarter numbers. For yearly data or unspecified frequency
-%! the second column is filled by ones.
 %! @item init
-%! Row vector of integers (1*2) indicating the year and the week, month or quarter of the first observation. @var{init}
-%! is the first row of @var{time}.
-%! @item last
-%! Row vector of integers (1*2) indicating the year and the week, month or quarter of the last observation. @var{init}
-%! is the first row of @var{time}.
+%! @ref{dynDate} object, initial date of the dataset.
 %! @end table
-%! @sp 1
-%! @strong{This function is called by:}
-%! @sp 2
-%! @strong{This function calls:}
-%! @ref{@@dynTime/dynTime}, @ref{@@dynTime/setTime}, @ref{@@dynTime/setFreq} 
-%!
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011, 2012 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -130,7 +123,7 @@ switch nargin
         ts.vobs = length(varlist);
         ts.nobs = size(data,1); 
     end
-  case {2,4}
+  case {2,3,4}
     a = varargin{1};
     b = varargin{2};
     if nargin<4

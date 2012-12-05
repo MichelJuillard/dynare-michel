@@ -41,12 +41,6 @@ function us = subsref(ts, S)
 %!   us = ts(3:50);
 %! @end example
 %!will create a new dynSeries object @var{us} by selecting a subsample out of @var{ts}.
-%! @sp 2
-%! @strong{This function is called by:}
-%! @sp 2
-%! @strong{This function calls:}
-%! @ref{dynSeries}, @ref{log}, @ref{exp}
-%!
 %! @end deftypefn
 %@eod:
 
