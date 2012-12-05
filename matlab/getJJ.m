@@ -37,7 +37,7 @@ if kronflag == -1,
     gp = fjaco(fun,[sqrt(diag(M_.Sigma_e(indexo,indexo))); M_.params(indx)],M_, oo_, indx,indexo,-1);
     M_.params = params0;
     offset = length(indexo);
-    gp = gp(1:M_.endo_nbr,offset+1:end);
+    gp = gp(:,offset+1:end);
     dYss = H(1:M_.endo_nbr,offset+1:end);
     dA = reshape(H(M_.orig_endo_nbr+[1:numel(A)],:),[size(A),size(H,2)]);
     dOm = dA*0;

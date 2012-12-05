@@ -82,7 +82,7 @@ if info(1)==0,
     derivatives_info.DOm=dOm;
     derivatives_info.DYss=dYss;
     if init,
-        indJJ = (find(max(abs(JJ'))>1.e-8));
+        indJJ = (find(max(abs(JJ'),[],1)>1.e-8));
         while length(indJJ)<nparam && nlags<10,
             disp('The number of moments with non-zero derivative is smaller than the number of parameters')
             disp(['Try increasing ar = ', int2str(nlags+1)])           
@@ -99,8 +99,8 @@ if info(1)==0,
             disp('Either further increase ar or reduce the list of estimated parameters')           
             error('IDETooManyParams',''),
         end
-        indH = (find(max(abs(H'))>1.e-8));
-        indLRE = (find(max(abs(gp'))>1.e-8));
+        indH = (find(max(abs(H'),[],1)>1.e-8));
+        indLRE = (find(max(abs(gp'),[],1)>1.e-8));
     end
     TAU(:,1)=tau(indH);
     LRE(:,1)=vg1(indLRE);
@@ -230,16 +230,31 @@ if info(1)==0,
 %         quant(isok,:) = siH(isok,:)./repmat(TAU(isok,1),1,nparam);
 %         quant(inok,:) = siH(inok,:)./repmat(mean(abs(TAU)),length(inok),nparam);
 %         quant = siH./repmat(sqrt(diag(chh)),1,nparam);
-        quant = siH./repmat(sqrt(diag_chh),1,nparam);
-        siHnorm = vnorm(quant).*normaliz1;
+        iy = find(diag_chh);
+        indH=indH(iy);
+        siH=siH(iy,:);
+        if ~isempty(iy),
+            quant = siH./repmat(sqrt(diag_chh(iy)),1,nparam);
+            siHnorm = vnorm(quant).*normaliz1;
+        else
+            siHnorm = [];
+        end
         %                 siHnorm = vnorm(siH./repmat(TAU,1,nparam)).*normaliz;
         quant=[];
 %         inok = find((abs(LRE)<1.e-8));
 %         isok = find((abs(LRE)>=1.e-8));
 %         quant(isok,:) = siLRE(isok,:)./repmat(LRE(isok,1),1,np);
 %         quant(inok,:) = siLRE(inok,:)./repmat(mean(abs(LRE)),length(inok),np);
-        quant = siLRE./repmat(sqrt(diag(clre)),1,np);
-        siLREnorm = vnorm(quant).*normaliz1(offset+1:end);
+        diag_clre = diag(clre);
+        iy = find(diag_clre);
+        indLRE=indLRE(iy);
+        siLRE=siLRE(iy,:);
+        if ~isempty(iy),
+            quant = siLRE./repmat(sqrt(diag_clre(iy)),1,np);
+            siLREnorm = vnorm(quant).*normaliz1(offset+1:end);
+        else
+            siLREnorm=[];
+        end
         %                 siLREnorm = vnorm(siLRE./repmat(LRE,1,nparam-offset)).*normaliz(offset+1:end);
         ide_hess.ide_strength_J=ide_strength_J; 
         ide_hess.ide_strength_J_prior=ide_strength_J_prior; 
