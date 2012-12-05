@@ -77,13 +77,13 @@ end
 %$ B = [transpose(1:10),2*transpose(1:10)];
 %$
 %$ % Define names
-%$ A_name = char('A1','A2');
-%$ B_name = char('B1','B2');
+%$ A_name = {'A1';'A2'};
+%$ B_name = {'B1';'B2'};
 %$
 %$ % Define expected results.
-%$ e.time = [transpose(1:10), ones(10,1)];
+%$ e.time = dynDate(1);
 %$ e.freq = 1;
-%$ e.name = char('A1','A2','B1','B2');
+%$ e.name = {'A1';'A2';'B1';'B2'};
 %$ e.data = [A,B];
 %$
 %$ % Instantiate two time series objects.
@@ -95,7 +95,7 @@ end
 %$
 %$ % Check the results.
 %$
-%$ t(1) = dyn_assert(ts3.Time.time,e.time);
+%$ t(1) = dyn_assert(ts3.init,e.time);
 %$ t(2) = dyn_assert(ts3.freq,e.freq);
 %$ t(3) = dyn_assert(ts3.data,e.data);
 %$ t(4) = dyn_assert(ts3.name,e.name);
@@ -108,8 +108,8 @@ end
 %$ B = [transpose(5:12),2*transpose(5:12)];
 %$
 %$ % Define names
-%$ A_name = char('A1','A2');
-%$ B_name = char('B1','B2');
+%$ A_name = {'A1';'A2'};
+%$ B_name = {'B1';'B2'};
 %$
 %$ % Define initial date
 %$ A_init = 2001;
@@ -117,8 +117,9 @@ end
 %$
 %$ % Define expected results.
 %$ e.time = [transpose(2000+(1:12)), ones(12,1)];
+%$ e.init = dynDate(2001);
 %$ e.freq = 1;
-%$ e.name = char('A1','A2','B1','B2');
+%$ e.name = {'A1';'A2';'B1';'B2'};
 %$ e.data = [ [A; NaN(2,2)], [NaN(4,2); B]];
 %$
 %$ % Instantiate two time series objects.
@@ -129,7 +130,7 @@ end
 %$ ts3 = [ts1,ts2];
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(ts3.Time.time,e.time);
+%$ t(1) = dyn_assert(ts3.init,e.init);
 %$ t(2) = dyn_assert(ts3.freq,e.freq);
 %$ t(3) = dyn_assert(ts3.data,e.data);
 %$ t(4) = dyn_assert(ts3.name,e.name);
@@ -142,17 +143,17 @@ end
 %$ B = [transpose(5:11),2*transpose(5:11)];
 %$
 %$ % Define names
-%$ A_name = char('A1','A2');
-%$ B_name = char('B1','B2');
+%$ A_name = {'A1';'A2'};
+%$ B_name = {'B1';'B2'};
 %$
 %$ % Define initial date
 %$ A_init = '1950Q1';
 %$ B_init = '1950Q3';
 %$
 %$ % Define expected results.
-%$ e.time = [ 1950, 1; 1950, 2; 1950, 3; 1950, 4; 1951, 1; 1951, 2; 1951, 3; 1951, 4; 1952, 1];
 %$ e.freq = 4;
-%$ e.name = char('A1','A2','B1','B2');
+%$ e.init = dynDate('1950Q1');
+%$ e.name = {'A1';'A2';'B1';'B2'};
 %$ e.data = [ [A; NaN(2,2)], [NaN(2,2); B]];
 %$
 %$ % Instantiate two time series objects.
@@ -163,7 +164,7 @@ end
 %$ ts3 = [ts1,ts2];
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(ts3.Time.time,e.time);
+%$ t(1) = dyn_assert(ts3.init,e.init);
 %$ t(2) = dyn_assert(ts3.freq,e.freq);
 %$ t(3) = dyn_assert(ts3.data,e.data);
 %$ t(4) = dyn_assert(ts3.name,e.name);
@@ -176,17 +177,17 @@ end
 %$ B = [transpose(5:9),2*transpose(5:9)];
 %$
 %$ % Define names
-%$ A_name = char('A1','A2');
-%$ B_name = char('B1','B2');
+%$ A_name = {'A1';'A2'};
+%$ B_name = {'B1';'B2'};
 %$
 %$ % Define initial date
 %$ A_init = '1950Q1';
 %$ B_init = '1950Q3';
 %$
 %$ % Define expected results.
-%$ e.time = [ 1950, 1; 1950, 2; 1950, 3; 1950, 4; 1951, 1; 1951, 2; 1951, 3];
+%$ e.init = dynDate(A_init);
 %$ e.freq = 4;
-%$ e.name = char('A1','A2','B1','B2');
+%$ e.name = {'A1';'A2';'B1';'B2'};
 %$ e.data = [ A, [NaN(2,2); B]];
 %$
 %$ % Instantiate two time series objects.
@@ -197,7 +198,7 @@ end
 %$ ts3 = [ts1,ts2];
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(ts3.Time.time,e.time);
+%$ t(1) = dyn_assert(ts3.init,e.init);
 %$ t(2) = dyn_assert(ts3.freq,e.freq);
 %$ t(3) = dyn_assert(ts3.data,e.data);
 %$ t(4) = dyn_assert(ts3.name,e.name);
@@ -211,14 +212,14 @@ end
 %$ C = [transpose(1:10),4*transpose(1:10)];
 %$
 %$ % Define names
-%$ A_name = char('A1','A2');
-%$ B_name = char('B1','B2');
-%$ C_name = char('C1','C2');
+%$ A_name = {'A1';'A2'};
+%$ B_name = {'B1';'B2'};
+%$ C_name = {'C1';'C2'};
 %$
 %$ % Define expected results.
-%$ e.time = [transpose(1:10), ones(10,1)];
+%$ e.init = dynDate(1);
 %$ e.freq = 1;
-%$ e.name = char('A1','A2','B1','B2','C1','C2');
+%$ e.name = {'A1';'A2';'B1';'B2';'C1';'C2'};
 %$ e.data = [A,B,C];
 %$
 %$ % Instantiate two time series objects.
@@ -230,7 +231,7 @@ end
 %$ ts4 = [ts1,ts2,ts3];
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(ts4.Time.time,e.time);
+%$ t(1) = dyn_assert(ts4.init,e.init);
 %$ t(2) = dyn_assert(ts4.freq,e.freq);
 %$ t(3) = dyn_assert(ts4.data,e.data);
 %$ t(4) = dyn_assert(ts4.name,e.name);

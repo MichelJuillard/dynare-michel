@@ -77,31 +77,34 @@ else
 end
 
 d_init_flag = 0;
-if ~isequal(b.Time(1),c.Time(1))
+if ~isequal(b.init,c.init)
     d_init_flag = 1;
 end
 
-d_last_flag = 0;
-if ~isequal(b.Time(end),c.Time(end))
-    d_last_flag = 1;
-end
-
 a.vobs = b.vobs+c.vobs;
-a.name = char(b.name,c.name);
-a.tex  = char(b.tex,c.tex);
+a.name = vertcat(b.name,c.name);
+a.tex  = vertcat(b.tex,c.tex);
 
-if ~( d_nobs_flag(1) || d_init_flag(1) || d_last_flag(1) )
-    a.Time = b.Time;
+if ~( d_nobs_flag(1) || d_init_flag(1) )
+    a.init = b.init;
     a.data = [b.data,c.data];
 else
-    [JUNK,IB] = setdiff(b.Time(:),c.Time(:),'rows');
-    [JUNK,IC] = setdiff(c.Time(:),b.Time(:),'rows');
-    [JUNK,JB,JC] = intersect(b.Time(:),c.Time(:),'rows');
-    a.Time = a.Time.setTime(sortrows([b.Time(IB); b.Time(JB); c.Time(IC)],[1 2]));
-    a.nobs = rows(a.Time(:));
-    a.data = NaN(a.nobs,a.vobs);
-    [junk,ia,ib] = intersect(a.Time(:),b.Time(:),'rows');
-    a.data(ia,1:b.vobs) = b.data;
-    [junk,ia,ic] = intersect(a.Time(:),c.Time(:),'rows');
-    a.data(ia,b.vobs+(1:c.vobs)) = c.data;
+    if b.init<=c.init
+        a.init = b.init;
+        if b.init<c.init
+            c.data = [NaN(c.init-b.init,c.vobs); c.data];
+        end
+    else
+        a.init = c.init;
+        b_first_lines = b.init-c.init;
+        b.data = [NaN(b.init-c.init,b.vobs); b.data];
+    end
+    b_last_date = b.init+b.nobs;
+    c_last_date = c.init+c.nobs;
+    if b_last_date<c_last_date
+        b.data = [b.data; NaN(c_last_date-b_last_date,b.vobs)];
+    elseif b_last_date>c_last_date
+        c.data = [c.data; NaN(b_last_date-c_last_date,c.vobs)];
+    end
+    a.data = [b.data, c.data];
 end
