@@ -24,8 +24,9 @@ dr = [];
 ys = [];
 info = 0;
 
-options_ = set_default_option(options_,'qz_criterium',1.000001);
-options_ = set_default_option(options_,'solve_maxit',3000);
+if isempty(options_.qz_criterium)
+    options_.qz_criterium = 1+1e-6;
+end
 
 % safeguard against issues like running ramsey policy first and then running discretion
 if isfield(M_,'orig_model')

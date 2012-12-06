@@ -20,9 +20,7 @@ function osr(var_list,params,i_var,W)
 global M_ options_ oo_  
 
 options_.order = 1;
-options_ = set_default_option(options_,'replic',1);
 options_ = set_default_option(options_,'simul',0);
-options_ = set_default_option(options_,'periods',1);
 
 if isempty(options_.qz_criterium)
     options_.qz_criterium = 1+1e-6;
