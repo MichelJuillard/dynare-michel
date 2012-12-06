@@ -97,10 +97,6 @@ if isfield(oo,'dr');
     dr = oo.dr;
 end
 
-info = 0;
-
-it_ = M.maximum_lag + 1 ;
-
 if M.exo_nbr == 0
     oo.exo_steady_state = [] ;
 end
@@ -113,10 +109,7 @@ end
 
 if options.block
     [dr,info,M,options,oo] = dr_block(dr,check_flag,M,options,oo);
-    oo.dr = dr;
 else
     [dr,info] = stochastic_solvers(dr,check_flag,M,options,oo);
-    oo.dr = dr;
 end
-
-
+oo.dr = dr;
