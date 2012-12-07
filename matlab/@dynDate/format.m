@@ -57,7 +57,7 @@ end
 
 switch date.freq
   case 1
-    p = num2str(date.time(1));
+    p = [num2str(date.time(1)) 'Y'];
   case 4
     p = [num2str(date.time(1)) 'Q' num2str(date.time(2))];
   case 12
@@ -84,7 +84,7 @@ end
 %$ d4 = dynDate(date_4); DATE_4 = format(d4);
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(num2str(date_1),DATE_1);
+%$ t(1) = dyn_assert([num2str(date_1) 'Y'],DATE_1);
 %$ t(2) = dyn_assert(date_2,DATE_2);
 %$ t(3) = dyn_assert(date_3,DATE_3);
 %$ t(4) = dyn_assert(date_4,DATE_4);
