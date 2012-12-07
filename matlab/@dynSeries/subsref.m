@@ -69,6 +69,9 @@ if length(S)==1 && isequal(S.type,'.')
         us = builtin('subsref', ts, S);
       case {'log','exp'}                                                   % Give "dot access" to public methods.
         us = feval(S.subs,ts);
+      case {'save'}
+        us = NaN;
+        save(ts);
       otherwise                                                            % Extract a sub-object by selecting one variable.
         ndx = strmatch(S.subs,ts.name);
         if ~isempty(ndx)
@@ -119,7 +122,15 @@ end
 
 if (length(S)==1) && isequal(S(1).type,'{}')
     us = extract(ts,S(1).subs{:});
+    return
 end
+
+if (length(S)==2) && isequal(S(1).subs,'save') && isequal(S(1).type,'.') && isequal(S(2).type,'()')
+    us = NaN;
+    save(ts,S(2).subs{:});
+    return
+end
+
 
 
 %@test:1
@@ -306,3 +317,40 @@ end
 %$ T = all(t);
 %@eof:6
 
+%@test:7
+%$ % Define a data set.
+%$ A = [transpose(1:10),2*transpose(1:10)];
+%$
+%$ % Define names
+%$ A_name = {'A1';'A2'};
+%$
+%$ % Instantiate a time series object.
+%$ try
+%$    ts1 = dynSeries(A,[],A_name,[]);
+%$    ts1.save;
+%$    t = 1;
+%$ catch
+%$    t = 0;
+%$ end
+%$
+%$ T = all(t);
+%@eof:7
+
+%@test:8
+%$ % Define a data set.
+%$ A = [transpose(1:10),2*transpose(1:10)];
+%$
+%$ % Define names
+%$ A_name = {'A1';'A2'};
+%$
+%$ % Instantiate a time series object.
+%$ try
+%$    ts1 = dynSeries(A,[],A_name,[]);
+%$    ts1.save('test_generated_data_file','m');
+%$    t = 1;
+%$ catch
+%$    t = 0;
+%$ end
+%$
+%$ T = all(t);
+%@eof:8
