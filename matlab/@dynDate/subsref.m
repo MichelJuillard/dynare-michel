@@ -90,6 +90,13 @@ if isequal(length(S),1) && isequal(S.type,'()')
     end
 end
 
+% Give access to dynDate methods (format).
+if isequal(length(S),1) && isequal(S.type,'.') && ( strcmp(S.subs,'format') )
+    B = format(A);
+    return
+end
+
+
 % Give access to dynDate properties (time and freq).
 if isequal(length(S),1) && isequal(S.type,'.') && ( strcmp(S.subs,'time') || strcmp(S.subs,'freq') )
     B = builtin('subsref', A, S);
