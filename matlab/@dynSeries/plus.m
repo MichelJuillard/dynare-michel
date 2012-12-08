@@ -77,8 +77,7 @@ A.name = repmat({'--NA--'},A.vobs,1);
 A.tex = repmat({'--NA--'},A.vobs,1);
 A.data = bsxfun(@plus,B.data,C.data);
 
-
-%@test:8
+%@test:1
 %$ % Define a datasets.
 %$ A = rand(10,2); B = randn(10,1);
 %$
@@ -103,4 +102,4 @@ A.data = bsxfun(@plus,B.data,C.data);
 %$    t(4) = dyn_assert(ts3.data,[A(:,1)+B, A(:,2)+B],1e-15);
 %$ end
 %$ T = all(t);
-%@eof:8
+%@eof:1

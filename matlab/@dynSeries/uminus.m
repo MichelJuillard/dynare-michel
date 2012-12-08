@@ -50,8 +50,7 @@ A.init = B.init;
 A.name = repmat({'--NA--'},A.vobs,1);
 A.data = -(B.data);
 
-
-%@test:8
+%@test:1
 %$ % Define a datasets.
 %$ A = rand(10,2);
 %$
@@ -75,4 +74,4 @@ A.data = -(B.data);
 %$    t(4) = dyn_assert(ts2.data,-A,1e-15);
 %$ end
 %$ T = all(t);
-%@eof:8
+%@eof:1
