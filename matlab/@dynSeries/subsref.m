@@ -131,6 +131,11 @@ if (length(S)==2) && isequal(S(1).subs,'save') && isequal(S(1).type,'.') && iseq
     return
 end
 
+if (length(S)==2) && isequal(S(1).subs,'set_names') && isequal(S(1).type,'.') && isequal(S(2).type,'()')
+    us = set_names(ts,S(2).subs{:});
+    return
+end
+
 
 
 %@test:1
