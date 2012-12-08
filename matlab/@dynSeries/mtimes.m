@@ -1,9 +1,9 @@
 function A = mtimes(B,C)
 %@info:
-%! @deftypefn {Function File} {@var{A} =} times (@var{B},@var{C})
-%! @anchor{@dynSeries/times}
+%! @deftypefn {Function File} {@var{A} =} mtimes (@var{B},@var{C})
+%! @anchor{@dynSeries/mtimes}
 %! @sp 1
-%! Overloads the times method for the Dynare time series class (@ref{dynSeries}).
+%! Overloads the mtimes method for the Dynare time series class (@ref{dynSeries}).
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
