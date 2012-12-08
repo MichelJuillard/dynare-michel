@@ -70,9 +70,11 @@ end
 A = dynSeries();
 
 A.freq = B.freq;
+A.init = B.init;
 A.nobs = max(B.nobs,C.nobs);
 A.vobs = max(B.vobs,C.vobs);
 A.name = repmat({'--NA--'},A.vobs,1);
+A.tex = repmat({'--NA--'},A.vobs,1);
 A.data = bsxfun(@plus,B.data,C.data);
 
 
