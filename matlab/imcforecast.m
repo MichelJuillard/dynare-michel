@@ -171,11 +171,8 @@ for i=1:n1
     mu(jdx(i),i) = 1;
 end
 
-if (size(constrained_paths,2) == 1);
-    constrained_paths = constrained_paths*ones(1,cL);
-else
-    cL = size(constrained_paths,2);
-end
+% number of periods with constrained values
+cL = size(constrained_paths,2);
 
 constrained_paths = bsxfun(@minus,constrained_paths,trend(idx,1:cL));
 
