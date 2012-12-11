@@ -80,10 +80,18 @@ eigenvalues_ = dr.eigval;
 [m_lambda,i]=sort(abs(eigenvalues_));
 n_explod = nnz(abs(eigenvalues_) > options.qz_criterium);
 
-nsfwrd = M.nsfwrd
+% Count number of forward looking variables
+if ~options.block
+    nyf = M.nsfwrd;
+else
+    nyf = 0;
+    for j = 1:length(M.block_structure.block)
+        nyf = nyf + M.block_structure.block(j).n_forward + M.block_structure.block(j).n_mixed;
+    end
+end
 
 result = 0;
-if (nsfwrd == n_explod) && (dr.full_rank)
+if (nyf == n_explod) && (dr.full_rank)
     result = 1;
 end
 
@@ -94,7 +102,7 @@ if options.noprint == 0
     z=[m_lambda real(eigenvalues_(i)) imag(eigenvalues_(i))]';
     disp(sprintf('%16.4g %16.4g %16.4g\n',z))
     disp(sprintf('\nThere are %d eigenvalue(s) larger than 1 in modulus ', n_explod));
-    disp(sprintf('for %d forward-looking variable(s)',nsfwrd));
+    disp(sprintf('for %d forward-looking variable(s)',nyf));
     disp(' ')
     if result
         disp('The rank condition is verified.')
