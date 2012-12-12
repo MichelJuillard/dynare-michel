@@ -125,6 +125,13 @@ if (length(S)==1) && isequal(S(1).type,'{}')
     return
 end
 
+if (length(S)==2) && isequal(S(1).type,'{}')
+    us = extract(ts,S(1).subs{:});
+    us = subsref(us, S(2));
+    return
+end
+
+
 if (length(S)==2) && isequal(S(1).subs,'save') && isequal(S(1).type,'.') && isequal(S(2).type,'()')
     us = NaN;
     save(ts,S(2).subs{:});
