@@ -136,6 +136,11 @@ if (length(S)==2) && isequal(S(1).subs,'set_names') && isequal(S(1).type,'.') &&
     return
 end
 
+if (length(S)==2) && isequal(S(1).subs,'name') && isequal(S(1).type,'.') && isequal(S(2).type,'{}')
+    us = ts.name{S(2).subs{1}};
+    return
+end
+
 
 
 %@test:1
