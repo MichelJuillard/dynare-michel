@@ -75,6 +75,8 @@ if nargin > 6  && initialization == 1
 end
 
 logged_prior_density = 0.0;
+dlprior = 0.0;
+d2lprior = 0.0;
 
 if tt1
     logged_prior_density = logged_prior_density + sum(lpdfgbeta(x(id1),p6(id1),p7(id1),p3(id1),p4(id1))) ;
