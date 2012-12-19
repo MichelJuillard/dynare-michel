@@ -67,7 +67,7 @@ if length(S)==1 && isequal(S.type,'.')
     switch S.subs
       case {'data','nobs','vobs','name','tex','freq','time','init'}        % Public members.
         us = builtin('subsref', ts, S);
-      case {'log','exp'}                                                   % Give "dot access" to public methods.
+      case {'log','exp','ygrowth','qgrowth','ydiff','qdiff'}               % Give "dot access" to public methods.
         us = feval(S.subs,ts);
       case {'save'}
         us = NaN;
