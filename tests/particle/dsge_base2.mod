@@ -69,7 +69,7 @@ options_.particle.status = 1;
 options_.particle.algorithm = 'sequential_importance_particle_filter';
 options_.particle.initialization = 1;
 options_.particle.pruning = 1;
-options_.particle.number_of_particles = 20000;
+options_.particle.number_of_particles = 2000;
 options_.particle.resampling.status = 'systematic';
 options_.particle.resampling.neff_threshold = .1;
 
