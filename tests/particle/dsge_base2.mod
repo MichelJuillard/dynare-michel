@@ -81,7 +81,7 @@ options_.particle.algorithm = 'sequential_importance_particle_filter';
 //options_.particle.algorithm = 'each_gaussian_filter';
 //options_.particle.algorithm = 'gaussian_filter';
 
-options_.particle.IS_approximation_method = 'quadrature' ;
+//options_.particle.IS_approximation_method = 'quadrature' ;
 //options_.particle.IS_approximation_method = 'cubature' ;
 //options_.particle.IS_approximation_method = 'unscented' ;
 
