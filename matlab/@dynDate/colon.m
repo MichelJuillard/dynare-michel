@@ -68,7 +68,7 @@ end
 if a==b% Time range with only one date.
     sp = dynTime();
     sp = sp.setFreq(a.freq);
-    sp = sp.setSize(n+1);
+    sp = sp.setSize(1);
     sp = sp.setTime(1,a.time);
 else
     n = b-a;
