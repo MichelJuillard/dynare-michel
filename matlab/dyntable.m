@@ -1,7 +1,7 @@
 function dyntable(title,headers,labels,values,label_width,val_width, ...
                   val_precis)
 
-% Copyright (C) 2002-2011 Dynare Team
+% Copyright (C) 2002-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -30,7 +30,11 @@ label_width = max(size(deblank(char(headers(1,:),labels)),2))+2;
 
 label_fmt = sprintf('%%-%ds',label_width);
 
-values_length = max(ceil(max(max(log10(abs(values(isfinite(values))))))),1)+val_precis+1;
+if all(~isfinite(values))
+    values_length = 4;
+else
+    values_length = max(ceil(max(max(log10(abs(values(isfinite(values))))))),1)+val_precis+1;
+end
 if any(values) < 0
     values_length = values_length+1;
 end
