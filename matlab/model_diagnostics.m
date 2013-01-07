@@ -16,7 +16,7 @@ function model_diagnostics(M,options,oo)
 %   none.
 %  
 
-% Copyright (C) 1996-2012 Dynare Team
+% Copyright (C) 1996-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -38,13 +38,12 @@ global jacob
 endo_nbr = M.endo_nbr;
 endo_names = M.endo_names;
 lead_lag_incidence = M.lead_lag_incidence;
-maximum_lag = M.maximum_lag;
-maximum_lead = M.maximum_lead;
+maximum_endo_lag = M.maximum_endo_lag;
 
 %
 % missing variables at the current period
 %
-k = find(lead_lag_incidence(maximum_lag+1,:)==0);
+k = find(lead_lag_incidence(maximum_endo_lag+1,:)==0);
 if ~isempty(k)
     disp(['The following endogenous variables aren''t present at ' ...
           'the current period in the model:'])
@@ -57,8 +56,6 @@ end
 % check steady state
 %
 info = 0;
-
-it_ = M.maximum_lag + 1 ;
 
 if M.exo_nbr == 0
     oo.exo_steady_state = [] ;
