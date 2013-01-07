@@ -59,7 +59,7 @@
 @c %**end of header
 
 @copying
-Copyright @copyright{} 1996-2012, Dynare Team.
+Copyright @copyright{} 1996-2013, Dynare Team.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -4099,13 +4099,17 @@ but the @code{smoother} option is used, it is a roundabout way to
 compute the smoothed value of the variables of a model with calibrated parameters.
 
 @item 1
-Uses @code{fmincon} optimization routine (not available under Octave)
+Uses @code{fmincon} optimization routine (available under MATLAB if
+the optimization toolbox is installed; not available under Octave)
 
 @item 2
 Value no longer used
 
 @item 3
-Uses @code{fminunc} optimization routine
+Uses @code{fminunc} optimization routine (available under MATLAB if
+the optimization toolbox is installed; available under Octave if the
+@uref{http://octave.sourceforge.net/optim/,optim} package from
+Octave-Forge is installed)
 
 @item 4
 Uses Chris Sims's @code{csminwel}

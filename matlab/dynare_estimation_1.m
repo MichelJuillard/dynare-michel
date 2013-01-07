@@ -12,7 +12,7 @@ function dynare_estimation_1(var_list_,dname)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2012 Dynare Team
+% Copyright (C) 2003-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -189,6 +189,12 @@ end
 if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
     switch options_.mode_compute
       case 1
+        if exist('OCTAVE_VERSION')
+            error('Option mode_compute=1 is not available under Octave')
+        elseif ~user_has_matlab_license('optimization_toolbox')
+            error('Option mode_compute=1 requires the Optimization Toolbox')
+        end
+
         optim_options = optimset('display','iter','LargeScale','off', ...
                                  'MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
         if isfield(options_,'optim_opt')
@@ -202,6 +208,12 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
       case 2
         error('ESTIMATION: mode_compute=2 option (Lester Ingber''s Adaptive Simulated Annealing) is no longer available')
       case 3
+        if exist('OCTAVE_VERSION') && ~user_has_octave_forge_package('optim')
+            error('Option mode_compute=3 requires the optim package')
+        elseif ~exist('OCTAVE_VERSION') && ~user_has_matlab_license('optimization_toolbox')
+            error('Option mode_compute=3 requires the Optimization Toolbox')
+        end
+
         optim_options = optimset('display','iter','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
         if isfield(options_,'optim_opt')
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
@@ -337,6 +349,12 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         save([M_.fname '_mode.mat'],'xparam1','hh','parameter_names');
       case 7
         % Matlab's simplex (Optimization toolbox needed).
+        if exist('OCTAVE_VERSION') && ~user_has_octave_forge_package('optim')
+            error('Option mode_compute=7 requires the optim package')
+        elseif ~exist('OCTAVE_VERSION') && ~user_has_matlab_license('optimization_toolbox')
+            error('Option mode_compute=7 requires the Optimization Toolbox')
+        end
+
         optim_options = optimset('display','iter','MaxFunEvals',1000000,'MaxIter',6000,'TolFun',1e-8,'TolX',1e-6);
         if isfield(options_,'optim_opt')
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
