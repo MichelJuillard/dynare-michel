@@ -221,7 +221,14 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         if options_.analytic_derivation,
             optim_options = optimset(optim_options,'GradObj','on');
         end
-        [xparam1,fval,exitflag] = fminunc(objective_function,xparam1,optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        if ~exist('OCTAVE_VERSION')
+            [xparam1,fval,exitflag] = fminunc(objective_function,xparam1,optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        else
+            % Under Octave, use a wrapper, since fminunc() does not have a 4th arg
+            func = @(x) objective_function(x, dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+            [xparam1,fval,exitflag] = fminunc(func,xparam1,optim_options);
+        end
+
       case 4
         H0 = 1e-4*eye(nx);
         crit = 1e-7;
