@@ -4788,7 +4788,7 @@ the restricted paths. Use @code{conditional_forecast},
 @code{conditional_forecast_paths} and @code{plot_conditional_forecast}
 for that purpose.
 If the model contains strong non-linearities, the conditional forecasts 
-can be computed using an extended path method with the @code{simulation} 
+can be computed using an extended path method with the @code{simulation_type} 
 option in @code{conditional_forecast} command set to @code{deterministic}. 
 Because in this case deterministic simulations are carried out, 
 the nature of the shocks (surprise or perfect foresight) has to be indicated 
