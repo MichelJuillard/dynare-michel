@@ -4,7 +4,7 @@ function sp = colon(a,b)
 %! @deftypefn {Function File} {@var{sp} =} colon (@var{a},@var{b})
 %! @anchor{@dynDate/colon}
 %! @sp 1
-%! Overloads the colon operator for the Dynare Dates class (@ref{dynDate}). Creates a @ref{dynTime} object.
+%! Overloads the colon operator for the Dynare Dates class (@ref{dynDate}). Creates a @ref{dynDates} object.
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
@@ -19,13 +19,13 @@ function sp = colon(a,b)
 %! @sp 1
 %! @table @ @var
 %! @item c
-%! Dynare Time object instantiated by @ref{dynTime}.
+%! Dynare Dates object instantiated by @ref{dynDates}.
 %! @end table
 %! @sp 2
 %! @strong{This function is called by:}
 %! @sp 2
 %! @strong{This function calls:}
-%! @ref{dynTime}, @ref{@@dynTime/setFreq}, @ref{@@dynTime/setTime}, @ref{@@dynTime/setSize}
+%! @ref{dynDates}, @ref{@@dynDates/setFreq}, @ref{@@dynDates/setTime}, @ref{@@dynDates/setSize}
 %!
 %! @end deftypefn
 %@eod:
@@ -50,7 +50,7 @@ function sp = colon(a,b)
 % Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
 
 if nargin~=2
-    error('dynTime::colon: I need exactly two input arguments!')
+    error('dynDate::colon: I need exactly two input arguments!')
 end
 
 if ~( isa(a,'dynDate') && isa(b,'dynDate'))
@@ -65,22 +65,28 @@ if a>b
     error(['dynDate::colon: ' inputname(1) ' must precede ' inputname(2) '!' ])
 end
 
-if a==b% Time range with only one date.
-    sp = dynTime();
-    sp = sp.setFreq(a.freq);
-    sp = sp.setSize(1);
-    sp = sp.setTime(1,a.time);
-else
-    n = b-a;
-    sp = dynTime();
-    sp = sp.setFreq(a.freq);
-    sp = sp.setSize(n+1);
-    sp = sp.setTime(1,a.time);
-    for t=2:n+1
-        a = +a;
-        sp = sp.setTime(t,a.time);
-    end
+sp = dynDates(a);
+n = b-a;
+for t=1:n
+    a = +a;
+    sp = sp.append(a);
 end
+% $$$ if a==b% Time range with only one date.
+% $$$     sp = dynDates(a);
+% $$$     sp = sp.setFreq(a.freq);
+% $$$     sp = sp.setSize(1);
+% $$$     sp = sp.setTime(1,a.time);
+% $$$ else
+% $$$     n = b-a;
+% $$$     sp = dynDates();
+% $$$     sp = sp.setFreq(a.freq);
+% $$$     sp = sp.setSize(n+1);
+% $$$     sp = sp.setTime(1,a.time);
+% $$$     for t=2:n+1
+% $$$         a = +a;
+% $$$         sp = sp.setTime(t,a.time);
+% $$$     end
+% $$$ end
 
 %@test:1
 %$ % Define two dates

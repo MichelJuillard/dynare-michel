@@ -66,9 +66,9 @@ function dd = dynDates(varargin)
 
 dd = struct;
 
-dd.ndat = [];
+dd.ndat = 0;
 dd.freq = [];
-dd.time = dynTime();
+dd.time = [];
 
 dd = class(dd,'dynDates');
 
@@ -80,7 +80,7 @@ switch nargin
     if isa(varargin{1},'dynDates')
         % Returns a copy of the input argument
         dd = varargin{1};
-    elseif ischar(varargin{1})
+    elseif ischar(varargin{1}) || isa(varargin{1},'dynDate')
         tmp = dynDate(varargin{1});
         dd.ndat = 1;
         dd.freq = tmp.freq;
