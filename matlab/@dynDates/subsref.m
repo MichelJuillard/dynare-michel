@@ -68,6 +68,11 @@ if isequal(S(1).type,'.')
       otherwise
         error('dynTime::subsref: Unknown public method or member!')
     end
+elseif isequal(S.type,'()')                                                    % Extract a sub-sample.
+    if length(S.subs)==1
+        S.subs = [S.subs, ':'];
+    end
+    B = builtin('subsref', A.time, S);
 else
     error('dynTime::subsref: Something is wrong in your syntax!')
 end
