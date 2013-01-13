@@ -88,6 +88,7 @@ a.tex  = vertcat(b.tex,c.tex);
 if ~( d_nobs_flag(1) || d_init_flag(1) )
     a.init = b.init;
     a.data = [b.data,c.data];
+    a.time = b.time;
 else
     if b.init<=c.init
         a.init = b.init;
@@ -107,4 +108,5 @@ else
         c.data = [c.data; NaN(b_last_date-c_last_date,c.vobs)];
     end
     a.data = [b.data, c.data];
+    a.time = unique([b.time, c.time]);
 end
