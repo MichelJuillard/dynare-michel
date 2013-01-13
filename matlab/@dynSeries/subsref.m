@@ -92,8 +92,6 @@ if length(S)==1 && isequal(S.type,'.')
 end
 
 if length(S)==1 && isequal(S.type,'()')
-    if isa(S.subs{1},'dynTime')
-        
     if ischar(S.subs{1})
         us = dynSeries(S.subs{1});
     else
