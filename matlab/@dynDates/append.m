@@ -53,8 +53,9 @@ if ~isa(dd,'dynDates')
     error(['dynDates::append: Input argument ' inputname(dd) ' has to be a dynDates object.'])
 end
 
-if ~isa(a,'dynDate') || ischar(a)
-    error(['dynDates::append: Input argument ' inputname(a) ' has to be a dynDate object or a string (formatted date).'])
+if ~(isa(a,'dynDate') || isa(a,'dynDates') || ischar(a))
+    error(['dynDates::append: Input argument ' inputname(a) ' has to be ' ...
+                        'a dynDate object or a dynDates object or a string (formatted date).'])
 end
 
 if isempty(a)
@@ -64,6 +65,9 @@ end
 if isa(a,'dynDate')
     dd.time = [dd.time; a.time];
     dd.ndat = dd.ndat+1;
+elseif isa(a,'dynDates')
+    dd.time = [dd.time; a.time];
+    dd.ndat = dd.ndat+a.ndat;
 else
     tmp = dynDate();
     dd.time = [dd.time; tmp(a).time];
