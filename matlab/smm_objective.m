@@ -15,7 +15,7 @@ function [r,flag] = smm_objective(xparams,sample_moments,weighting_matrix,option
 % SPECIAL REQUIREMENTS
 %  The user has to provide a file where the moment conditions are defined.
 
-% Copyright (C) 2010-2012 Dynare Team
+% Copyright (C) 2010-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -75,7 +75,7 @@ save('estimated_parameters.mat','xparams');
 
 % Check for local determinacy of the deterministic steady state.
 noprint = options_.noprint; options_.noprint = 1;
-[local_determinacy_and_stability,info] = check(M_,options_,oo_); options_.noprint = noprint;
+[oo_,local_determinacy_and_stability,info] = check(M_,options_,oo_); options_.noprint = noprint;
 if ~local_determinacy_and_stability
     r = priorObjectiveValue * (1+info(2));
     flag = 0;
