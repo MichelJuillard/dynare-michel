@@ -146,7 +146,13 @@ To save your simulated variables, you can add the following command at the end o
 \subsection{Referring to external files}
 You may find it convenient to refer to an external file, either to compute the steady state of your model, or when specifying shocks in an external file. The former is described in section \ref{sec:ssshock} of chapter \ref{ch:solbase} when discussing steady states. The advantage of using Matlab, say, to find your model's steady state was clear with respect to Dynare version 3, as the latter resorted to numerical approximations to find steady state values. But Dynare version 4 now uses the same analytical methods available in Matlab. For most usage scenarios, you should therefore do just as  well to ask Dynare to compute your model's steady state (except, maybe, if you want to run loops, to vary your parameter values, for instance, in which case writing a Matlab program may be more handy).\\
 
-But you may also be interested in the second possibility described above, namely of specifying shocks in an external file, to simulate a model based on shocks from a prior estimation, for instance. You could then retrieve the exogenous shocks from the oo\_ file by saving them in a file called datafile.mat. Finally, you could simulate a deterministic model with the shocks saved from the estimation by specifying the source file for the shocks, using the \\ \mbox{\texttt{shocks(shocks\_file = datafile.mat)}} command.
+But you may also be interested in the second possibility described above,
+namely of specifying shocks in an external file, to simulate a model based on
+shocks from a prior estimation, for instance. You could then retrieve the
+exogenous shocks from the oo\_ file by saving them in a file called
+datafile.mat. Finally, you could simulate a deterministic model with the shocks
+saved from the estimation by specifying the source file for the shocks, using
+the \\ \mbox{\texttt{initval\_file(filename = 'datafile.mat')}} command.
 But of course, this is a bit of a workaround, since you could also use the built-in commands in Dynare to generate impulse response functions from estimated shocks, as described in chapter \ref{ch:estbase}. \\
 
 \subsection{Infinite eigenvalues}
