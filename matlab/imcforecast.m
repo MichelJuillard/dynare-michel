@@ -46,7 +46,7 @@ function imcforecast(constrained_paths, constrained_vars, options_cond_fcst, con
 global options_ oo_ M_ bayestopt_
 
 
-if ~isempty(options_cond_fcst.simulation_type)
+if isfield(options_cond_fcst, 'simulation_type')
     if strcmp(options_cond_fcst.simulation_type, 'deterministic')
         disp('deterministic condtional forecast');
         det_cond_forecast(constrained_paths, constrained_vars, options_cond_fcst, constrained_perfect_foresight);
