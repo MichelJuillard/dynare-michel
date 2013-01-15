@@ -75,7 +75,7 @@ save('estimated_parameters.mat','xparams');
 
 % Check for local determinacy of the deterministic steady state.
 noprint = options_.noprint; options_.noprint = 1;
-[oo_,local_determinacy_and_stability,info] = check(M_,options_,oo_); options_.noprint = noprint;
+[eigval,local_determinacy_and_stability,info] = check(M_,options_,oo_); options_.noprint = noprint;
 if ~local_determinacy_and_stability
     r = priorObjectiveValue * (1+info(2));
     flag = 0;

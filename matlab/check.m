@@ -1,4 +1,4 @@
-function [oo,result,info] = check(M, options, oo)
+function [eigenvalues_,result,info] = check(M, options, oo)
 % Checks determinacy conditions by computing the generalized eigenvalues.
 
 %@info:
@@ -21,8 +21,8 @@ function [oo,result,info] = check(M, options, oo)
 %! @strong{Outputs}
 %! @sp 1
 %! @table @ @var
-%! @item oo
-%! Matlab's structure gathering the results (initialized by dynare).
+%! @item eigenvalues_
+%! Eigenvalues of the model.
 %! @item result
 %! Integer scalar equal to one (BK conditions are satisfied) or zero (otherwise).
 %! @item info
@@ -71,8 +71,6 @@ end
 oo.dr=set_state_space(oo.dr,M,options);
 
 [dr,info,M,options,oo] = resol(1,M,options,oo);
-
-oo.dr = dr;
 
 if info(1) ~= 0 && info(1) ~= 3 && info(1) ~= 4
     print_info(info, options.noprint);
