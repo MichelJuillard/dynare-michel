@@ -19,10 +19,16 @@ function sim1_purely_backward()
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
     global M_ options_ oo_
-
-    ny0 = nnz(M_.lead_lag_incidence(2,:)); % Number of variables at current period
-    nyb = nnz(M_.lead_lag_incidence(1,:)); % Number of variables at previous period
-    iyb = find(M_.lead_lag_incidence(1,:)>0); % Indices of variables at previous period
+    if size(M_.lead_lag_incidence,1) > 1
+        ny0 = nnz(M_.lead_lag_incidence(2,:)); % Number of variables at current period
+        nyb = nnz(M_.lead_lag_incidence(1,:)); % Number of variables at previous period
+        iyb = find(M_.lead_lag_incidence(1,:)>0); % Indices of variables at previous period
+    else
+        ny0 = nnz(M_.lead_lag_incidence(1,:)); % Number of variables at current period
+        nyb = 0;
+        iyb = [];
+    end
+        
 
     if ny0 ~= M_.endo_nbr
         error('SIMUL: all endogenous variables must appear at the current period')
