@@ -62,6 +62,8 @@ exo_simul = oo_.exo_simul;
 i_cols_1 = nonzeros(lead_lag_incidence(2:3,:)');
 i_cols_A1 = find(lead_lag_incidence(2:3,:)');
 i_cols_T = nonzeros(lead_lag_incidence(1:2,:)');
+i_cols_0 = nonzeros(lead_lag_incidence(2,:)');
+i_cols_A0 = find(lead_lag_incidence(2,:)');
 i_cols_j = 1:nd;
 i_upd = ny+(1:periods*ny);
 
@@ -93,10 +95,12 @@ for iter = 1:options_.maxit_
 
         [d1,jacobian] = model_dynamic(Y(i_cols),exo_simul, params, ...
                                       steady_state,it);
-        if it == 2
-            A(i_rows,i_cols_A1) = jacobian(:,i_cols_1);
+        if it == periods+1 && it == 2
+            A(i_rows,i_cols_A0) = jacobian(:,i_cols_0);
         elseif it == periods+1
             A(i_rows,i_cols_A(i_cols_T)) = jacobian(:,i_cols_T);
+        elseif it == 2
+            A(i_rows,i_cols_A1) = jacobian(:,i_cols_1);
         else
             A(i_rows,i_cols_A) = jacobian(:,i_cols_j);
         end
@@ -141,7 +145,7 @@ if ~stop
     fprintf('\n') ;
     oo_.deterministic_simulation.status = 0;% more iterations are needed.
     oo_.deterministic_simulation.error = err;
-    oo_.deterministic_simulation.errors = c/abs(err);    
+    %oo_.deterministic_simulation.errors = c/abs(err)    
     oo_.deterministic_simulation.iterations = options_.maxit_;
 end
 disp (['-----------------------------------------------------']) ;
