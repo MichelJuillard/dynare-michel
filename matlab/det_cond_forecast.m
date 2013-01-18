@@ -48,7 +48,7 @@ function det_cond_forecast(constrained_paths, constrained_vars, options_cond_fcs
 global options_ oo_ M_
 
 if ~isfield(options_cond_fcst,'periods') || isempty(options_cond_fcst.periods)
-    options_cond_fcst.periods = 60;
+    options_cond_fcst.periods = 100;
 end
 
 maximum_lag = M_.maximum_lag;
@@ -73,11 +73,13 @@ exo_names = M_.exo_names;
 controlled_varexo = zeros(1,n_control_exo);
 for i = 1:nx
     for j=1:n_control_exo
-        if strcmp(exo_names(i,:), options_cond_fcst.controlled_varexo(j,:))
+        if strcmp(deblank(exo_names(i,:)), deblank(options_cond_fcst.controlled_varexo(j,:)))
             controlled_varexo(j) = i;
         end
     end
 end
+
+%todo check if zero => error message
 
 save_options_initval_file = options_.initval_file;
 options_.initval_file = '__';
@@ -272,22 +274,23 @@ else
             
             disp('computation of derivatives w.r. to exogenous shocks');
             col_count = 1;
-            for j = controlled_varexo
+            for j = 1:length(controlled_varexo)
+                j_pos = controlled_varexo(j);
                 if constrained_perfect_foresight(j)
                     for time = time_index_constraint
-                        saved = oo_.exo_simul(time,j);
-                        oo_.exo_simul(time,j) = oo_.exo_simul(time,j) + eps1;
+                        saved = oo_.exo_simul(time,j_pos);
+                        oo_.exo_simul(time,j_pos) = oo_.exo_simul(time,j_pos) + eps1;
                         simul();
                         J(:,col_count) = (oo_.endo_simul(indx_endo) - ys) / eps1;
-                        oo_.exo_simul(time,j) = saved;
+                        oo_.exo_simul(time,j_pos) = saved;
                         col_count = col_count + 1;
                     end;
                 else
-                    saved = oo_.exo_simul(maximum_lag+1,j);
-                    oo_.exo_simul(maximum_lag+1,j) = oo_.exo_simul(maximum_lag+1,j) + eps1;
+                    saved = oo_.exo_simul(maximum_lag+1,j_pos);
+                    oo_.exo_simul(maximum_lag+1,j_pos) = oo_.exo_simul(maximum_lag+1,j_pos) + eps1;
                     simul();
                     J(:,col_count) = (oo_.endo_simul(indx_endo) - ys) / eps1;
-                    oo_.exo_simul(maximum_lag+1,j) = saved;
+                    oo_.exo_simul(maximum_lag+1,j_pos) = saved;
                     col_count = col_count + 1;
                 end;
             end;
@@ -304,12 +307,13 @@ else
                 D_exo = - J \ r;
                 old_exo = oo_.exo_simul;
                 col_count = 1;
-                for j = controlled_varexo
+                for j = 1:length(controlled_varexo)
+                    j_pos=controlled_varexo(j);
                     if constrained_perfect_foresight(j)
-                        oo_.exo_simul(time_index_constraint,j) = (oo_.exo_simul(time_index_constraint,j) + D_exo(col_count: col_count + constrained_periods - t));
+                        oo_.exo_simul(time_index_constraint,j_pos) = (oo_.exo_simul(time_index_constraint,j_pos) + D_exo(col_count: col_count + constrained_periods - t));
                         col_count = col_count + constrained_periods - t + 1;
                     else
-                        oo_.exo_simul(maximum_lag + 1,j) = oo_.exo_simul(maximum_lag + 1,j) + D_exo(col_count);
+                        oo_.exo_simul(maximum_lag + 1,j_pos) = oo_.exo_simul(maximum_lag + 1,j_pos) + D_exo(col_count);
                         col_count = col_count + 1;
                     end;
                 end;
@@ -319,16 +323,17 @@ else
         if ~convg
             error(['convergence not achived at time ' int2str(t) ' after ' int2str(it) ' iterations']);
         end;
-        for j = controlled_varexo
+        for j = 1:length(controlled_varexo)
+            j_pos=controlled_varexo(j);
             if constrained_perfect_foresight(j)
                 % in case of mixed surprise and perfect foresight
                 % endogenous path at each date all the exogenous paths have to be
                 % stored. The paths are stacked in exo.
                 for time = time_index_constraint;
-                    exo(past_val + time,j) = oo_.exo_simul(time,j);
+                    exo(past_val + time,j_pos) = oo_.exo_simul(time,j_pos);
                 end
             else
-                exo(maximum_lag + t,j) = oo_.exo_simul(maximum_lag + 1,j);
+                exo(maximum_lag + t,j_pos) = oo_.exo_simul(maximum_lag + 1,j_pos);
             end;
         end;
         past_val = past_val + length(time_index_constraint);
