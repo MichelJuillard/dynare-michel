@@ -124,7 +124,9 @@ if opt_gsa.load_ident_files==0,
 %     bayestopt_.restrict_aux, M_.exo_nbr);
   A = zeros(size(Aa,1),size(Aa,2)+size(Aa,1),length(istable));
   % Sig(estim_params_.var_exo(:,1))=lpmatx(1,:).^2;
-  set_shocks_param(lpmatx(1,:));
+  if ~isempty(lpmatx),
+      set_shocks_param(lpmatx(1,:));
+  end
   A(:,:,1)=[Aa, triu(Bb*M_.Sigma_e*Bb')];
   for j=2:length(istable),
     dr.ghx = T(:, [1:(nc1-M_.exo_nbr)],j);
@@ -133,7 +135,9 @@ if opt_gsa.load_ident_files==0,
 %       bayestopt_.restrict_var_list, ...
 %       bayestopt_.restrict_columns, ...
 %       bayestopt_.restrict_aux, M_.exo_nbr);
-    set_shocks_param(lpmatx(j,:));
+    if ~isempty(lpmatx),
+        set_shocks_param(lpmatx(j,:));
+    end
     A(:,:,j)=[Aa, triu(Bb*M_.Sigma_e*Bb')];
   end
   clear T;
