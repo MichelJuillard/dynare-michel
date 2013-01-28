@@ -1,4 +1,4 @@
-function indx = residual_resampling(weights,noise)
+function return_resample = residual_resampling(particles,weights,noise)
 % Resamples particles.
 
 %@info:
@@ -105,6 +105,11 @@ for i=1:number_of_particles
   k = k + iWEIGHTS(i);
 end
 
+if particles==0
+    return_resample = indx ;
+else
+    return_resample = particles(indx,:) ;
+end
 %@test:1
 %$ % Define the weights
 %$ weights = randn(2000,1).^2;
