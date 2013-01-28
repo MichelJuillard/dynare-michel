@@ -72,7 +72,7 @@ switch DynareOptions.particle.resampling.method1
         error('particle::resample: Unknown method!')
     end
   case 'smooth'
-    resampled_particles = multivariate_smooth_resampling2(particles,weights,DynareOptions.particle.resampling.number_of_partitions) ;
+    resampled_particles = multivariate_smooth_resampling(particles,weights) ;
   otherwise
     error('particle::resample: Unknown method!')
 end
