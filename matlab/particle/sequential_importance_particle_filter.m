@@ -60,7 +60,7 @@ function [LIK,lik] = sequential_importance_particle_filter(ReducedForm,Y,start,D
 
 persistent init_flag
 persistent mf0 mf1
-persistent number_of_particles
+persistent number_of_particles number_of_state_variables
 persistent sample_size number_of_observed_variables number_of_structural_innovations
 
 % Set default value for start
@@ -81,6 +81,7 @@ if isempty(init_flag)
     mf0 = ReducedForm.mf0;
     mf1 = ReducedForm.mf1;
     sample_size = size(Y,2);
+    number_of_state_variables = length(mf0);
     number_of_observed_variables = length(mf1);
     number_of_structural_innovations = length(ReducedForm.Q);
     number_of_particles = DynareOptions.particle.number_of_particles;
@@ -151,17 +152,14 @@ for t=1:sample_size
     wtilde = weights.*exp(lnw-dfac);
     lik(t) = log(sum(wtilde))+dfac;
     weights = wtilde/sum(wtilde);
-    if (strcmp(DynareOptions.particle.resampling.status,'generic') && neff(weights)<DynareOptions.particle.resampling.neff_threshold*sample_size ) || strcmp(DynareOptions.particle.resampling.status,'systematic')
-        idx = resample(weights,DynareOptions.particle.resampling.method1,DynareOptions.particle.resampling.method2);
-        StateVectors = tmp(mf0,idx);
+    if (strcmp(DynareOptions.particle.resampling.status,'generic') && neff(weights)<DynareOptions.particle.resampling.neff_threshold*sample_size ) || ...
+        strcmp(DynareOptions.particle.resampling.status,'systematic')
         if pruning
-            StateVectors_ = tmp_(mf0,idx);
-        end
-        weights = ones(1,number_of_particles)/number_of_particles;
-    elseif strcmp(DynareOptions.particle.resampling.status,'smoothed')
-        StateVectors = multivariate_smooth_resampling(weights',tmp(mf0,:)',number_of_particles,DynareOptions.particle.resampling.number_of_partitions)';
-        if pruning
-            StateVectors_ = multivariate_smooth_resampling(weights',tmp_(mf0,:)',number_of_particles,DynareOptions.particle.resampling.number_of_partitions)';
+            temp = resample([tmp(mf0,:)' tmp_(mf0,:)'],weights,DynareOptions);
+            StateVectors = temp(:,1:number_of_state_variables)' ;
+            StateVectors_ = temp(:,number_of_state_variables+1:2*number_of_state_variables)';
+        else
+            StateVectors = resample(tmp(mf0,:)',weights,DynareOptions)';
         end
         weights = ones(1,number_of_particles)/number_of_particles;
     elseif strcmp(DynareOptions.particle.resampling.status,'none')

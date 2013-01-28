@@ -149,12 +149,7 @@ for t=1:sample_size
         if (Neff<.5*sample_size && strcmpi(DynareOptions.particle.resampling.status,'generic')) || ... 
                                    strcmpi(DynareOptions.particle.resampling.status,'systematic')
             ks = ks + 1 ;
-            StateParticles = StateParticles(:,resample(SampleWeights',DynareOptions.particle.resampling.method1,DynareOptions.particle.resampling.method2)) ; 
-            StateVectorMean = mean(StateParticles,2) ;
-            StateVectorVarianceSquareRoot = reduced_rank_cholesky( (StateParticles*StateParticles')/(number_of_particles-1) - StateVectorMean*(StateVectorMean') )';
-            SampleWeights = 1/number_of_particles ;
-        elseif strcmp(DynareOptions.particle.resampling.status,'smoothed')
-            StateParticles = multivariate_smooth_resampling(SampleWeights,StateParticles',number_of_particles,DynareOptions.particle.resampling.number_of_partitions)';
+            StateParticles = resample(StateParticles',SampleWeights,DynareOptions)' ; 
             StateVectorMean = mean(StateParticles,2) ;
             StateVectorVarianceSquareRoot = reduced_rank_cholesky( (StateParticles*StateParticles')/(number_of_particles-1) - StateVectorMean*(StateVectorMean') )';
             SampleWeights = 1/number_of_particles ;

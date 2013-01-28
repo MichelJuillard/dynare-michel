@@ -37,7 +37,7 @@ function [LIK,lik] = auxiliary_particle_filter(ReducedForm,Y,start,DynareOptions
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 persistent init_flag mf0 mf1 number_of_particles
-persistent sample_size number_of_observed_variables number_of_structural_innovations
+persistent sample_size number_of_state_variables number_of_observed_variables number_of_structural_innovations
 
 % Set default
 if isempty(start)
@@ -57,6 +57,7 @@ if isempty(init_flag)
     mf0 = ReducedForm.mf0;
     mf1 = ReducedForm.mf1;
     sample_size = size(Y,2);
+    number_of_state_variables = length(mf0);
     number_of_observed_variables = length(mf1);
     number_of_structural_innovations = length(ReducedForm.Q);
     number_of_particles = DynareOptions.particle.number_of_particles;
@@ -121,12 +122,25 @@ for t=1:sample_size
     %var_wtilde = var_wtilde'*var_wtilde/(number_of_particles-1) ;
     lik(t) = log(sum_tau_tilde) ; %+ .5*var_wtilde/(number_of_particles*(sum_tau_tilde*sum_tau_tilde)) ;
     tau_tilde = tau_tilde/sum_tau_tilde;
-    indx_resmpl = resample(tau_tilde,DynareOptions.particle.resampling.method1,DynareOptions.particle.resampling.method2);
-    yhat = yhat(:,indx_resmpl);
-    wtilde = wtilde(indx_resmpl);
+    if pruning
+        temp = resample([yhat' yhat_'],tau_tilde',DynareOptions);
+        yhat = temp(:,1:number_of_state_variables)' ;
+        yhat_ = temp(:,number_of_state_variables+1:2*number_of_state_variables)' ;
+    else
+        yhat = resample(yhat',tau_tilde',DynareOptions)' ;
+    end
+    if pruning
+        [tmp, tmp_] = local_state_space_iteration_2(yhat,zeros(number_of_structural_innovations,number_of_particles),ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,steadystate,DynareOptions.threads.local_state_space_iteration_2);
+    else
+        tmp = local_state_space_iteration_2(yhat,zeros(number_of_structural_innovations,number_of_particles),ghx,ghu,constant,ghxx,ghuu,ghxu,DynareOptions.threads.local_state_space_iteration_2);
+    end
+    PredictedObservedMean = weights*(tmp(mf1,:)');
+    PredictionError = bsxfun(@minus,Y(:,t),tmp(mf1,:));
+    dPredictedObservedMean = bsxfun(@minus,tmp(mf1,:),PredictedObservedMean');
+    PredictedObservedVariance = bsxfun(@times,weights,dPredictedObservedMean)*dPredictedObservedMean' +H;
+    wtilde = exp(-.5*(const_lik+log(det(PredictedObservedVariance))+sum(PredictionError.*(PredictedObservedVariance\PredictionError),1))) ;
     epsilon = Q_lower_triangular_cholesky*randn(number_of_structural_innovations,number_of_particles);
     if pruning
-        yhat_ = yhat_(:,indx_resmpl);
         [tmp, tmp_] = local_state_space_iteration_2(yhat,epsilon,ghx,ghu,constant,ghxx,ghuu,ghxu,yhat_,steadystate,DynareOptions.threads.local_state_space_iteration_2);
         StateVectors_ = tmp_(mf0,:);
     else
