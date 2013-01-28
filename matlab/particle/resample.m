@@ -1,4 +1,4 @@
-function indx = resample(weights,method1,method2)
+function resampled_particles = resample(particles,weights,DynareOptions)
 % Resamples particles.
 
 %@info:
@@ -54,23 +54,25 @@ function indx = resample(weights,method1,method2)
 % AUTHOR(S) frederic DOT karame AT univ DASH evry DOT fr
 %           stephane DOT adjemian AT univ DASH lemans DOT fr
 
-switch method1
+switch DynareOptions.particle.resampling.method1
   case 'residual'
-    if strcmpi(method2,'kitagawa')
-        indx = residual_resampling(weights,rand);
-    elseif strcmpi(method2,'stratified')
-        indx = residual_resampling(weights,rand(size(weights)));
+    if strcmpi(DynareOptions.particle.resampling.method2,'kitagawa')
+        resampled_particles = residual_resampling(particles,weights,rand);
+    elseif strcmpi(DynareOptions.particle.resampling.method2,'stratified')
+        resampled_particles = residual_resampling(particles,weights,rand(size(weights)));
     else
         error('particle::resample: Unknown method!')
     end
   case 'traditional'
-    if strcmpi(method2,'kitagawa')
-        indx = traditional_resampling(weights,rand);
-    elseif strcmpi(method2,'stratified')
-        indx = traditional_resampling(weights,rand(size(weights)));
+    if strcmpi(DynareOptions.particle.resampling.method2,'kitagawa')
+        resampled_particles = traditional_resampling(particles,weights,rand);
+    elseif strcmpi(DynareOptions.particle.resampling.method2,'stratified')
+        resampled_particles = traditional_resampling(particles,weights,rand(size(weights)));
     else
         error('particle::resample: Unknown method!')
     end
+  case 'smooth'
+    resampled_particles = multivariate_smooth_resampling2(particles,weights,DynareOptions.particle.resampling.number_of_partitions) ;
   otherwise
     error('particle::resample: Unknown method!')
 end
