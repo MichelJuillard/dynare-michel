@@ -1,4 +1,4 @@
-function indx = traditional_resampling(weights,noise)
+function return_resample = traditional_resampling(particles,weights,noise)
 % Resamples particles.
 
 %@info:
@@ -94,6 +94,12 @@ else
     end
     % Matlab's indices start at 1...
     indx = indx+1;
+end
+
+if particles==0
+    return_resample = indx ;
+else
+    return_resample = particles(indx,:) ;
 end
 
 %@test:1
