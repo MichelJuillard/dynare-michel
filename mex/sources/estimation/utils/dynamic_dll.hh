@@ -61,6 +61,15 @@ public:
   void eval(const Vector &y, const Matrix &x, const VectorView &modParams, VEC &ySteady,
                       Vector &residual, Matrix *g1, Matrix *g2, Matrix *g3) throw (TSException)
   {
+    assert(y.getStride() == 1);
+    assert(x.getLd() == x.getRows());
+    assert(modParams.getStride() == 1);
+    assert(ySteady.getStride() == 1);
+    assert(residual.getStride() == 1);
+    assert(g1->getLd() == g1->getRows());
+    assert(g2->getLd() == g2->getRows());
+    assert(g3->getLd() == g3->getRows());
+
     Dynamic(y.getData(), x.getData(), 1, modParams.getData(), ySteady.getData(), 0, residual.getData(),
 	    g1 == NULL ? NULL : g1->getData(), g2 == NULL ? NULL : g2->getData(), g3 == NULL ? NULL : g3->getData());
   };
