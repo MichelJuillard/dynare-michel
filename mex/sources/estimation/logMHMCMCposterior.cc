@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2012 Dynare Team
+ * Copyright (C) 2010-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -54,28 +54,27 @@ void
 fillEstParamsInfo(const mxArray *estim_params_info, EstimatedParameter::pType type,
                   std::vector<EstimatedParameter> &estParamsInfo)
 {
-  // execute once only
-  static const mxArray *bayestopt_ = mexGetVariablePtr("global", "bayestopt_");
-  static const mxArray *bayestopt_ubp = mxGetField(bayestopt_, 0, "ub"); // upper bound
-  static const mxArray *bayestopt_lbp = mxGetField(bayestopt_, 0, "lb"); // lower bound
-  static const mxArray *bayestopt_p1p = mxGetField(bayestopt_, 0, "p1"); // prior mean
-  static const mxArray *bayestopt_p2p = mxGetField(bayestopt_, 0, "p2"); // prior standard deviation
-  static const mxArray *bayestopt_p3p = mxGetField(bayestopt_, 0, "p3"); // lower bound
-  static const mxArray *bayestopt_p4p = mxGetField(bayestopt_, 0, "p4"); // upper bound
-  static const mxArray *bayestopt_p6p = mxGetField(bayestopt_, 0, "p6"); // first hyper-parameter (\alpha for the BETA and GAMMA distributions, s for the INVERSE GAMMAs, expectation for the GAUSSIAN distribution, lower bound for the UNIFORM distribution).
-  static const mxArray *bayestopt_p7p = mxGetField(bayestopt_, 0, "p7"); // second hyper-parameter (\beta for the BETA and GAMMA distributions, \nu for the INVERSE GAMMAs, standard deviation for the GAUSSIAN distribution, upper bound for the UNIFORM distribution).
-  static const mxArray *bayestopt_jscalep = mxGetField(bayestopt_, 0, "jscale"); // MCMC jump scale
+  const mxArray *bayestopt_ = mexGetVariablePtr("global", "bayestopt_");
+  const mxArray *bayestopt_ubp = mxGetField(bayestopt_, 0, "ub"); // upper bound
+  const mxArray *bayestopt_lbp = mxGetField(bayestopt_, 0, "lb"); // lower bound
+  const mxArray *bayestopt_p1p = mxGetField(bayestopt_, 0, "p1"); // prior mean
+  const mxArray *bayestopt_p2p = mxGetField(bayestopt_, 0, "p2"); // prior standard deviation
+  const mxArray *bayestopt_p3p = mxGetField(bayestopt_, 0, "p3"); // lower bound
+  const mxArray *bayestopt_p4p = mxGetField(bayestopt_, 0, "p4"); // upper bound
+  const mxArray *bayestopt_p6p = mxGetField(bayestopt_, 0, "p6"); // first hyper-parameter (\alpha for the BETA and GAMMA distributions, s for the INVERSE GAMMAs, expectation for the GAUSSIAN distribution, lower bound for the UNIFORM distribution).
+  const mxArray *bayestopt_p7p = mxGetField(bayestopt_, 0, "p7"); // second hyper-parameter (\beta for the BETA and GAMMA distributions, \nu for the INVERSE GAMMAs, standard deviation for the GAUSSIAN distribution, upper bound for the UNIFORM distribution).
+  const mxArray *bayestopt_jscalep = mxGetField(bayestopt_, 0, "jscale"); // MCMC jump scale
 
-  static const size_t bayestopt_size = mxGetM(bayestopt_);
-  static const VectorConstView bayestopt_ub(mxGetPr(bayestopt_ubp), bayestopt_size, 1);
-  static const VectorConstView bayestopt_lb(mxGetPr(bayestopt_lbp), bayestopt_size, 1);
-  static const VectorConstView bayestopt_p1(mxGetPr(bayestopt_p1p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p1");
-  static const VectorConstView bayestopt_p2(mxGetPr(bayestopt_p2p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p2");
-  static const VectorConstView bayestopt_p3(mxGetPr(bayestopt_p3p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p3");
-  static const VectorConstView bayestopt_p4(mxGetPr(bayestopt_p4p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p4");
-  static const VectorConstView bayestopt_p6(mxGetPr(bayestopt_p6p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p6");
-  static const VectorConstView bayestopt_p7(mxGetPr(bayestopt_p7p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p7");
-  static const VectorConstView bayestopt_jscale(mxGetPr(bayestopt_jscalep), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "jscale");
+  const size_t bayestopt_size = mxGetM(bayestopt_);
+  const VectorConstView bayestopt_ub(mxGetPr(bayestopt_ubp), bayestopt_size, 1);
+  const VectorConstView bayestopt_lb(mxGetPr(bayestopt_lbp), bayestopt_size, 1);
+  const VectorConstView bayestopt_p1(mxGetPr(bayestopt_p1p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p1");
+  const VectorConstView bayestopt_p2(mxGetPr(bayestopt_p2p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p2");
+  const VectorConstView bayestopt_p3(mxGetPr(bayestopt_p3p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p3");
+  const VectorConstView bayestopt_p4(mxGetPr(bayestopt_p4p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p4");
+  const VectorConstView bayestopt_p6(mxGetPr(bayestopt_p6p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p6");
+  const VectorConstView bayestopt_p7(mxGetPr(bayestopt_p7p), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "p7");
+  const VectorConstView bayestopt_jscale(mxGetPr(bayestopt_jscalep), bayestopt_size, 1); //=mxGetField(bayestopt_, 0, "jscale");
 
   // loop processsing
   size_t m = mxGetM(estim_params_info), n = mxGetN(estim_params_info);
