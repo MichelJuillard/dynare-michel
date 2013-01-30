@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2012 Dynare Team
+ * Copyright (C) 2010-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -49,9 +49,9 @@ public:
                          double qz_criterium_arg, double lyapunov_tol_arg, int &info);
   virtual ~InitializeKalmanFilter();
   // initialise parameter dependent KF matrices only but not Ps
-  template <class VEC>
-  void initialize(VEC &steadyState, const VectorView &deepParams, Matrix &R,
-				     const MatrixView &Q, Matrix &RQRt, Matrix &T,
+  template <class Vec1, class Vec2, class Mat1, class Mat2>
+  void initialize(Vec1 &steadyState, const Vec2 &deepParams, Mat1 &R,
+				     const Mat2 &Q, Matrix &RQRt, Matrix &T,
 				     double &penalty, const MatrixConstView &dataView,
 				     MatrixView &detrendedDataView, int &info)
   {
@@ -63,9 +63,9 @@ public:
   }
 
   // initialise all KF matrices
-  template <class VEC>
-  void initialize(VEC &steadyState, const VectorView &deepParams, Matrix &R,
-				     const MatrixView &Q, Matrix &RQRt, Matrix &T, Matrix &Pstar, Matrix &Pinf,
+  template <class Vec1, class Vec2, class Mat1, class Mat2>
+  void initialize(Vec1 &steadyState, const Vec2 &deepParams, Mat1 &R,
+				     const Mat2 &Q, Matrix &RQRt, Matrix &T, Matrix &Pstar, Matrix &Pinf,
 				     double &penalty, const MatrixConstView &dataView,
 				     MatrixView &detrendedDataView, int &info)
   {
@@ -86,7 +86,16 @@ private:
   Matrix g_u;
   Matrix Rt, RQ;
   void setT(Matrix &T, int &info);
-  void setRQR(Matrix &R, const MatrixView &Q, Matrix &RQRt, int &info);
+
+  template <class Mat1, class Mat2>
+  void setRQR(Mat1 &R, const Mat2 &Q, Matrix &RQRt, int &info)
+  {
+    mat::assignByVectors(R, mat::nullVec, mat::nullVec, g_u, zeta_varobs_back_mixed, mat::nullVec);
+
+    //  Matrix RQRt=R*Q*R'
+    blas::gemm("N", "N", 1.0, R, Q, 0.0, RQ); // R*Q
+    blas::gemm("N", "T", 1.0, RQ, R, 0.0, RQRt); // R*Q*R'
+  }
   void setPstar(Matrix &Pstar, Matrix &Pinf, const Matrix &T, const Matrix &RQRt, int &info);
 
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2012 Dynare Team
+ * Copyright (C) 2010-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -42,8 +42,8 @@ public:
                 const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
                 const std::vector<size_t> &zeta_static_arg, double qz_criterium);
   virtual ~ModelSolution() {};
-  template <class VEC>
-  void compute(VEC &steadyState, const VectorView &deepParams,      Matrix &ghx, Matrix &ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
+  template <class Vec1, class Vec2, class Mat1, class Mat2>
+  void compute(Vec1 &steadyState, const Vec2 &deepParams, Mat1 &ghx, Mat2 &ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
   {
     // compute Steady State
     ComputeSteadyState(steadyState, deepParams);
@@ -66,9 +66,9 @@ private:
   DynamicModelDLL dynamicDLLp;
   Vector llXsteadyState;
   //Matrix jacobian;
-  template <class VEC>
-  void ComputeModelSolution(VEC &steadyState, const VectorView &deepParams,         
-			    Matrix &ghx, Matrix &ghu) 
+  template <class Vec1, class Vec2, class Mat1, class Mat2>
+  void ComputeModelSolution(Vec1 &steadyState, const Vec2 &deepParams,
+                            Mat1 &ghx, Mat2 &ghu)
     throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
   {
     // set extended Steady State
@@ -88,8 +88,8 @@ private:
     //compute rules
     decisionRules.compute(jacobian, ghx, ghu);
   }
-  template <class VEC>
-  void ComputeSteadyState(VEC &steadyState, const VectorView &deepParams)
+  template <class Vec1, class Vec2>
+  void ComputeSteadyState(Vec1 &steadyState, const Vec2 &deepParams)
   {
     // does nothig for time being.
   }

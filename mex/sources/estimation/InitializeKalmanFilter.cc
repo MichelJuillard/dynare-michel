@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2012 Dynare Team
+ * Copyright (C) 2010-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -61,16 +61,6 @@ InitializeKalmanFilter::setT(Matrix &T, int &info)
   // Initialize the empty columns of T to zero
   T.setAll(0.0);
   mat::assignByVectors(T, mat::nullVec, pi_bm_vbm, g_x, zeta_varobs_back_mixed, mat::nullVec);
-}
-
-void
-InitializeKalmanFilter::setRQR(Matrix &R, const MatrixView &Q, Matrix &RQRt, int &info)
-{
-  mat::assignByVectors(R, mat::nullVec, mat::nullVec, g_u, zeta_varobs_back_mixed, mat::nullVec);
-
-  //  Matrix RQRt=R*Q*R'
-  blas::gemm("N", "N", 1.0, R, Q, 0.0, RQ); // R*Q
-  blas::gemm("N", "T", 1.0, RQ, R, 0.0, RQRt); // R*Q*R'
 }
 
 void

@@ -57,9 +57,9 @@ public:
   virtual ~DynamicModelDLL();
 
   //! evaluate Dynamic model DLL
-  template<class VEC>
-  void eval(const Vector &y, const Matrix &x, const VectorView &modParams, VEC &ySteady,
-                      Vector &residual, Matrix *g1, Matrix *g2, Matrix *g3) throw (TSException)
+  template<class Vec1, class Vec2, class Vec3, class Vec4, class Mat1>
+  void eval(const Vec1 &y, const Mat1 &x, const Vec2 &modParams, const Vec3 &ySteady,
+            Vec4 &residual, Matrix *g1, Matrix *g2, Matrix *g3) throw (TSException)
   {
     assert(y.getStride() == 1);
     assert(x.getLd() == x.getRows());

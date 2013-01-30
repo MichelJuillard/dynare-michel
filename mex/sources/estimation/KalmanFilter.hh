@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2012 Dynare Team
+ * Copyright (C) 2009-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -54,9 +54,9 @@ public:
                double qz_criterium_arg, const std::vector<size_t> &varobs_arg,
                double riccati_tol_arg, double lyapunov_tol_arg, int &info);
 
-  template <class VEC>
-  double compute(const MatrixConstView &dataView, VEC &steadyState,
-                 const MatrixView &Q, const Matrix &H, const VectorView &deepParams,
+  template <class Vec1, class Vec2, class Mat1>
+  double compute(const MatrixConstView &dataView, Vec1 &steadyState,
+                 const Mat1 &Q, const Matrix &H, const Vec2 &deepParams,
                  VectorView &vll, MatrixView &detrendedDataView, size_t start, size_t period,
                  double &penalty, int &info)
   {
