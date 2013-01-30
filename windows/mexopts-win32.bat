@@ -16,7 +16,7 @@ rem You will also need the "mingw64-i686-gcc-g++" package.
 rem
 rem Initial version by Michel Juillard, revised by Sebastien Villemot.
 
-rem Copyright (C) 2009-2010 Dynare Team
+rem Copyright (C) 2009-2013 Dynare Team
 rem
 rem This file is part of Dynare.
 rem
@@ -56,7 +56,7 @@ rem ********************************************************************
 set PRELINK_CMDS1=echo EXPORTS > mex.def & echo mexFunction >> mex.def
 set LIBLOC=%MATLAB%\bin\win32\
 set LINKER=i686-w64-mingw32-gcc
-set LINKFLAGS= -static-libgcc -shared mex.def -L%LIBLOC%
+set LINKFLAGS= -static-libgcc -shared mex.def "-L%LIBLOC%"
 set LINKFLAGSPOST= -lmex -lmx -lmwlapack -lmwblas
 set LINKOPTIMFLAGS=-O3
 set LINKDEBUGFLAGS= -g -Wall
