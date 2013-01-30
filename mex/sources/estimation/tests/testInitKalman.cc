@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2011 Dynare Team
+ * Copyright (C) 2010-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -17,9 +17,6 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Test  for InitializeKalmanFilter
-// Uses fs2000k2e.mod and its ..._dynamic.mexw32
-
 #include "InitializeKalmanFilter.hh"
 
 int
@@ -27,7 +24,7 @@ main(int argc, char **argv)
 {
   if (argc < 2)
     {
-      std::cerr << argv[0] << ": please provide as argument the name of the dynamic DLL generated from fs2000k2.mod (typically fs2000k2_dynamic.mex*)" << std::endl;
+      std::cerr << argv[0] << ": please provide as argument the name of the dynamic DLL generated from fs2000k2e.mod (typically fs2000k2e_dynamic.mex*)" << std::endl;
       exit(EXIT_FAILURE);
     }
 
