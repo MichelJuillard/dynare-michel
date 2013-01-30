@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2012 Dynare Team
+ * Copyright (C) 2010-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -57,8 +57,6 @@ public:
   virtual ~DynamicModelDLL();
 
   //! evaluate Dynamic model DLL
-  void eval(const Vector &y, const Matrix &x, const Vector &params, VectorView &ySteady,
-            Vector &residual, Matrix *g1, Matrix *g2, Matrix *g3) throw (TSException);
   template<class VEC>
   void eval(const Vector &y, const Matrix &x, const VectorView &modParams, VEC &ySteady,
                       Vector &residual, Matrix *g1, Matrix *g2, Matrix *g3) throw (TSException)
