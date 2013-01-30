@@ -5,8 +5,8 @@ function [state_u,state_n] = get_dynare_random_generator_state()
 % one for normally distributed numbers. 
 % For backward compatibility, we return two vectors, but, in recent
 % versions of Matlab and in Octave, we return two identical vectors.
-%    
-% Copyright (C) 2010-2012 Dynare Team
+
+% Copyright (C) 2010-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -32,13 +32,13 @@ function [state_u,state_n] = get_dynare_random_generator_state()
             s = RandStream.getGlobalStream();
         end
         if isequal(s.Type,'legacy')
-            state_u = rand('state')
-            state_n = randn('state')
+            state_u = rand('state');
+            state_n = randn('state');
         else            
             state_u = s.State;
             state_n = state_u;
         end
     else% Use old matlab interface.
-        state_u = rand('state')
-        state_n = randn('state')
+        state_u = rand('state');
+        state_n = randn('state');
     end
