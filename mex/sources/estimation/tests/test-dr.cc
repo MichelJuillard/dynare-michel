@@ -3,7 +3,7 @@
  */
 
 /*
- * Copyright (C) 2010-2011 Dynare Team
+ * Copyright (C) 2010-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -172,7 +172,7 @@ main(int argc, char **argv)
   mat::transpose(real_g_y, real_g_y_prime);
   mat::sub(real_g_y, g_y);
 
-  assert(mat::nrminf(real_g_y) < 1e-13);
+  assert(mat::nrminf(real_g_y) < 1e-12);
 
   // Check the results for g_u
   double real_g_u_data[] = {
@@ -189,5 +189,5 @@ main(int argc, char **argv)
   mat::transpose(real_g_u, real_g_u_prime);
   mat::sub(real_g_u, g_u);
 
-  assert(mat::nrminf(real_g_u) < 1e-13);
+  assert(mat::nrminf(real_g_u) < 1e-12);
 }
