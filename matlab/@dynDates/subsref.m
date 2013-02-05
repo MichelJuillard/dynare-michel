@@ -32,7 +32,7 @@ function B = subsref(A,S)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011, 2012e Dynare Team
+% Copyright (C) 2011-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -62,11 +62,11 @@ if isequal(S(1).type,'.')
             if isequal(S(2).type,'()')
                 B = feval(S(1).subs,A,S(2).subs{:});
             else
-                error('dynTime::subsref: Something is wrong in your syntax!')
+                error('dynDates::subsref: Something is wrong in your syntax!')
             end
         end
       otherwise
-        error('dynTime::subsref: Unknown public method or member!')
+        error('dynDates::subsref: Unknown public method or member!')
     end
 elseif isequal(S.type,'()')                                                    % Extract a sub-sample.
     if length(S.subs)==1
@@ -74,5 +74,5 @@ elseif isequal(S.type,'()')                                                    %
     end
     B = builtin('subsref', A.time, S);
 else
-    error('dynTime::subsref: Something is wrong in your syntax!')
+    error('dynDates::subsref: Something is wrong in your syntax!')
 end
