@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2012 Dynare Team
+ * Copyright (C) 2009-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -23,8 +23,7 @@
 //  Created on:      14-Jan-2010 22:39:14
 ///////////////////////////////////////////////////////////
 
-//#include "LogLikelihoodSubSample.hh"
-#include "LogLikelihoodMain.hh" // use ...Main.hh for testing only
+#include "LogLikelihoodSubSample.hh"
 
 LogLikelihoodSubSample::~LogLikelihoodSubSample()
 {
