@@ -71,7 +71,7 @@ if nargin<4
     end
 end
 
-if ~withtime && ~withname && noemptycell
+if ~withtime && ~withnames && noemptycell
     % Use matlab builtin routine!
     data = csvread(file);
 end
