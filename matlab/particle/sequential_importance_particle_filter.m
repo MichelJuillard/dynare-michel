@@ -97,8 +97,8 @@ ghuu = ReducedForm.ghuu;
 ghxu = ReducedForm.ghxu;
 
 % Get covariance matrices.
-Q = ReducedForm.Q;
-H = ReducedForm.H;
+Q = ReducedForm.Q; % Covariance matrix of the structural innovations.
+H = ReducedForm.H; % COvariance matrix of the measurement errors.
 if isempty(H)
     H = 0;
 end
@@ -120,8 +120,6 @@ state_variance_rank = size(StateVectorVarianceSquareRoot,2);
 
 % Factorize the covariance matrix of the structural innovations
 Q_lower_triangular_cholesky = chol(Q)';
-[PredictedStateMean,PredictedStateVarianceSquareRoot,StateVectorMean,StateVectorVarianceSquareRoot] = ...
-        gaussian_filter_bank(ReducedForm,Y(:,1),StateVectorMean,StateVectorVarianceSquareRoot,Q_lower_triangular_cholesky,Q_lower_triangular_cholesky,H,DynareOptions) ;
 StateVectors = bsxfun(@plus,StateVectorVarianceSquareRoot*randn(state_variance_rank,number_of_particles),StateVectorMean) ;
 
 % Set seed for randn().
