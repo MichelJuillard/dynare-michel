@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2012 Dynare Team
+ * Copyright (C) 2009-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -110,7 +110,7 @@ private:
 		test = lapack::choleskyDecomp(Q, "L");
 		if (test > 0)
 		  {
-		    mexPrintf("Caugth unhandled exception with cholesky of Q matrix: ");
+		    mexPrintf("Caught unhandled exception with cholesky of Q matrix: ");
 		    logLikelihood = penalty;
 		    info = 1;
 		  }
@@ -146,7 +146,7 @@ private:
 		test = lapack::choleskyDecomp(H, "L");
 		if (test > 0)
 		  {
-		    mexPrintf("Caugth unhandled exception with cholesky of Q matrix: ");
+		    mexPrintf("Caught unhandled exception with cholesky of Q matrix: ");
 		    logLikelihood = penalty;
 		    info = 1;
 		  }
