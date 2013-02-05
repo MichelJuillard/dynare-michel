@@ -121,7 +121,9 @@ logposterior(VEC1 &estParams, const MatrixConstView &data,
   std::vector<size_t> zeta_fwrd, zeta_back, zeta_mixed, zeta_static;
   const mxArray *lli_mx = mxGetField(M_, 0, "lead_lag_incidence");
   MatrixConstView lli(mxGetPr(lli_mx), mxGetM(lli_mx), mxGetN(lli_mx), mxGetM(lli_mx));
-  if (lli.getRows() != 3 || lli.getCols() != n_endo)
+  if (lli.getRows() != 3)
+    throw LogposteriorMexErrMsgTxtException("Purely backward or purely forward models are not supported");
+  if (lli.getCols() != n_endo)
     throw LogposteriorMexErrMsgTxtException("Incorrect lead/lag incidence matrix");
 
   for (size_t i = 0; i < n_endo; i++)
