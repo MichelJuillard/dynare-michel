@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2010 Dynare Team
+ * Copyright (C) 2009-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -32,12 +32,8 @@ class DetrendData
 
 public:
   virtual ~DetrendData(){};
-  DetrendData(const bool logLinear); // add later Vector& trendCoeff);
+  DetrendData();
   void detrend(const VectorView &SteadyState, const MatrixConstView &dataView, MatrixView &detrendedDataView);
-
-private:
-  const bool logLinear;
-  //Vector trendCoeff;
 
 };
 

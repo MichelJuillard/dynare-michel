@@ -106,6 +106,14 @@ logposterior(VEC1 &estParams, const MatrixConstView &data,
 	     const mxArray *bayestopt_, const mxArray *oo_, VEC2 &steadyState, double *trend_coeff,
 	     int &info, VectorView &deepParams, Matrix &H, MatrixView &Q)
 {
+  double loglinear = *mxGetPr(mxGetField(options_, 0, "loglinear"));
+  if (loglinear == 1)
+    throw LogposteriorMexErrMsgTxtException("Option loglinear is not supported");
+
+  double with_trend = *mxGetPr(mxGetField(bayestopt_, 0, "with_trend"));
+  if (with_trend == 1)
+    throw LogposteriorMexErrMsgTxtException("Observation trends are not supported");
+
   // Construct arguments of constructor of LogLikelihoodMain
   char *fName = mxArrayToString(mxGetField(M_, 0, "fname"));
   std::string dynamicDllFile(fName);

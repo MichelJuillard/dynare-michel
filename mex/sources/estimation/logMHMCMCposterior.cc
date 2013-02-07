@@ -637,6 +637,15 @@ logMCMCposterior(VectorConstView &estParams, const MatrixConstView &data,
   const mxArray *M_ = mexGetVariablePtr("global", "M_");
   const mxArray *options_ = mexGetVariablePtr("global", "options_");
   const mxArray *estim_params_ = mexGetVariablePtr("global", "estim_params_");
+  const mxArray *bayestopt_ = mexGetVariablePtr("global", "bayestopt_");
+
+  double loglinear = *mxGetPr(mxGetField(options_, 0, "loglinear"));
+  if (loglinear == 1)
+    throw LogMHMCMCposteriorMexErrMsgTxtException("Option loglinear is not supported");
+
+  double with_trend = *mxGetPr(mxGetField(bayestopt_, 0, "with_trend"));
+  if (with_trend == 1)
+    throw LogMHMCMCposteriorMexErrMsgTxtException("Observation trends are not supported");
 
   // Construct arguments of constructor of LogLikelihoodMain
   char *fName = mxArrayToString(mxGetField(M_, 0, "fname"));
@@ -712,7 +721,6 @@ logMCMCposterior(VectorConstView &estParams, const MatrixConstView &data,
   // Construct GaussianPrior drawDistribution m=0, sd=1
   GaussianPrior drawGaussDist01(0.0, 1.0, -INFINITY, INFINITY, 0.0, 1.0);
   // get Jscale = diag(bayestopt_.jscale);
-  const mxArray *bayestopt_ = mexGetVariablePtr("global", "bayestopt_");
   const Matrix Jscale(n_estParams);
   const VectorConstView vJscale(mxGetPr(mxGetField(bayestopt_, 0, "jscale")), n_estParams, 1);
   Proposal pdd(vJscale, D);
