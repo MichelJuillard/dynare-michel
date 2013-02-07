@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2011 Dynare Team
+ * Copyright (C) 2010-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -95,11 +95,14 @@ DecisionRules::compute(const Matrix &jacobian, Matrix &g_y, Matrix &g_u) throw (
   assert(g_u.getRows() == n && g_u.getCols() == p);
 
   // Construct S, perform QR decomposition and get A = Q*jacobian
-  for (size_t i = 0; i < n_static; i++)
-    mat::col_copy(jacobian, n_back_mixed+zeta_static[i], S, i);
-
   A = MatrixConstView(jacobian, 0, 0, n, n_back_mixed + n + n_fwrd_mixed);
-  QR.computeAndLeftMultByQ(S, "T", A);
+  if (n_static > 0)
+    {
+      for (size_t i = 0; i < n_static; i++)
+        mat::col_copy(jacobian, n_back_mixed+zeta_static[i], S, i);
+
+      QR.computeAndLeftMultByQ(S, "T", A);
+    }
 
   // Construct matrix D
   D.setAll(0.0);
@@ -166,23 +169,26 @@ DecisionRules::compute(const Matrix &jacobian, Matrix &g_y, Matrix &g_u) throw (
     mat::row_copy(g_y_back, i, g_y, zeta_back_mixed[i]);
 
   // Compute DR for static variables w.r. to endogenous
-  g_y_static = MatrixView(A, 0, 0, n_static, n_back_mixed);
-  for (size_t i = 0; i < n_dynamic; i++)
+  if (n_static > 0)
     {
-      mat::row_copy(g_y, zeta_dynamic[i], g_y_dynamic, i);
-      mat::col_copy(A, n_back_mixed + zeta_dynamic[i], 0, n_static, A0d, i, 0);
-    }
-  blas::gemm("N", "N", 1.0, A0d, g_y_dynamic, 1.0, g_y_static);
-  blas::gemm("N", "N", 1.0, g_y_fwrd, g_y_back, 0.0, g_y_static_tmp);
-  blas::gemm("N", "N", 1.0, MatrixView(A, 0, n_back_mixed + n, n_static, n_fwrd_mixed),
-             g_y_static_tmp, 1.0, g_y_static);
-  for (size_t i = 0; i < n_static; i++)
-    mat::col_copy(A, n_back_mixed + zeta_static[i], 0, n_static, A0s, i, 0);
-  LU3.invMult("N", A0s, g_y_static);
-  mat::negate(g_y_static);
+      g_y_static = MatrixView(A, 0, 0, n_static, n_back_mixed);
+      for (size_t i = 0; i < n_dynamic; i++)
+        {
+          mat::row_copy(g_y, zeta_dynamic[i], g_y_dynamic, i);
+          mat::col_copy(A, n_back_mixed + zeta_dynamic[i], 0, n_static, A0d, i, 0);
+        }
+      blas::gemm("N", "N", 1.0, A0d, g_y_dynamic, 1.0, g_y_static);
+      blas::gemm("N", "N", 1.0, g_y_fwrd, g_y_back, 0.0, g_y_static_tmp);
+      blas::gemm("N", "N", 1.0, MatrixView(A, 0, n_back_mixed + n, n_static, n_fwrd_mixed),
+                 g_y_static_tmp, 1.0, g_y_static);
+      for (size_t i = 0; i < n_static; i++)
+        mat::col_copy(A, n_back_mixed + zeta_static[i], 0, n_static, A0s, i, 0);
+      LU3.invMult("N", A0s, g_y_static);
+      mat::negate(g_y_static);
 
-  for (size_t i = 0; i < n_static; i++)
-    mat::row_copy(g_y_static, i, g_y, zeta_static[i]);
+      for (size_t i = 0; i < n_static; i++)
+        mat::row_copy(g_y_static, i, g_y, zeta_static[i]);
+    }
 
   // Compute DR for all endogenous w.r. to shocks
   blas::gemm("N", "N", 1.0, MatrixConstView(jacobian, 0, n_back_mixed + n, n, n_fwrd_mixed), g_y_fwrd, 0.0, g_u_tmp1);
