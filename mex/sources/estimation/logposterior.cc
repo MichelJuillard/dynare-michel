@@ -181,9 +181,11 @@ logposterior(VEC1 &estParams, const MatrixConstView &data,
 
   EstimatedParametersDescription epd(estSubsamples, estParamsInfo);
 
+  bool noconstant = (bool) *mxGetPr(mxGetField(options_, 0, "noconstant"));
+
   // Allocate LogPosteriorDensity object
   LogPosteriorDensity lpd(dynamicDllFile, epd, n_endo, n_exo, zeta_fwrd, zeta_back, zeta_mixed, zeta_static,
-                          qz_criterium, varobs, riccati_tol, lyapunov_tol, info);
+                          qz_criterium, varobs, riccati_tol, lyapunov_tol, noconstant, info);
 
   // Construct arguments of compute() method
 

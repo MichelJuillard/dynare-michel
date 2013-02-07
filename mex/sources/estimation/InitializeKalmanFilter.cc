@@ -34,10 +34,14 @@ InitializeKalmanFilter::InitializeKalmanFilter(const std::string &dynamicDllFile
                                                const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg,
                                                const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg,
                                                const std::vector<size_t> &zeta_varobs_back_mixed_arg,
+                                               const std::vector<size_t> &varobs_arg,
                                                double qz_criterium_arg,
-                                               double lyapunov_tol_arg, int &info) :
+                                               double lyapunov_tol_arg,
+                                               bool noconstant_arg,
+                                               int &info) :
   lyapunov_tol(lyapunov_tol_arg),
   zeta_varobs_back_mixed(zeta_varobs_back_mixed_arg),
+  detrendData(varobs_arg, noconstant_arg),
   modelSolution(dynamicDllFile, n_endo_arg, n_exo_arg, zeta_fwrd_arg, zeta_back_arg,
                 zeta_mixed_arg, zeta_static_arg, qz_criterium_arg),
   discLyapFast(zeta_varobs_back_mixed.size()),

@@ -46,7 +46,9 @@ public:
   InitializeKalmanFilter(const std::string &dynamicDllFile, size_t n_endo, size_t n_exo, const std::vector<size_t> &zeta_fwrd_arg,
                          const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg,
                          const std::vector<size_t> &zeta_varobs_back_mixed_arg,
-                         double qz_criterium_arg, double lyapunov_tol_arg, int &info);
+                         const std::vector<size_t> &varobs_arg,
+                         double qz_criterium_arg, double lyapunov_tol_arg,
+                         bool noconstant_arg, int &info);
   virtual ~InitializeKalmanFilter();
   // initialise parameter dependent KF matrices only but not Ps
   template <class Vec1, class Vec2, class Mat1, class Mat2>

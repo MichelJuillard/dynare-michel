@@ -32,8 +32,12 @@ class DetrendData
 
 public:
   virtual ~DetrendData(){};
-  DetrendData();
+  DetrendData(const std::vector<size_t> &varobs_arg, bool noconstant_arg);
   void detrend(const VectorView &SteadyState, const MatrixConstView &dataView, MatrixView &detrendedDataView);
+
+private:
+  const std::vector<size_t> varobs;
+  const bool noconstant;
 
 };
 

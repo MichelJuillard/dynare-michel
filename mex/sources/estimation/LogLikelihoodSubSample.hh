@@ -39,7 +39,7 @@ public:
   LogLikelihoodSubSample(const std::string &dynamicDllFile, EstimatedParametersDescription &estiParDesc, size_t n_endo, size_t n_exo,
                          const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg,
                          const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg, const double qz_criterium,
-                         const std::vector<size_t> &varobs_arg, double riccati_tol_in, double lyapunov_tol, int &info);
+                         const std::vector<size_t> &varobs_arg, double riccati_tol_in, double lyapunov_tol, bool noconstant_arg, int &info);
 
   template <class VEC1, class VEC2>
   double compute(VEC1 &steadyState, const MatrixConstView &dataView, VEC2 &estParams, VectorView &deepParams,

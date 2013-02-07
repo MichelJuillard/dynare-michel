@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2012 Dynare Team
+ * Copyright (C) 2009-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -32,10 +32,11 @@ LogPosteriorDensity::~LogPosteriorDensity()
 LogPosteriorDensity::LogPosteriorDensity(const std::string &modName, EstimatedParametersDescription &estParamsDesc, size_t n_endo, size_t n_exo,
                                          const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
                                          const std::vector<size_t> &zeta_static_arg, const double qz_criterium_arg, const std::vector<size_t> &varobs_arg,
-                                         double riccati_tol_arg, double lyapunov_tol_arg, int &info_arg) :
+                                         double riccati_tol_arg, double lyapunov_tol_arg,
+                                         bool noconstant_arg, int &info_arg) :
   logPriorDensity(estParamsDesc),
   logLikelihoodMain(modName, estParamsDesc, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg,
-                    zeta_static_arg, qz_criterium_arg, varobs_arg, riccati_tol_arg, lyapunov_tol_arg, info_arg)
+                    zeta_static_arg, qz_criterium_arg, varobs_arg, riccati_tol_arg, lyapunov_tol_arg, noconstant_arg, info_arg)
 {
 
 }

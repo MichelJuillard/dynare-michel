@@ -25,7 +25,9 @@
 
 #include "DetrendData.hh"
 
-DetrendData::DetrendData()
+DetrendData::DetrendData(const std::vector<size_t> &varobs_arg,
+                         bool noconstant_arg)
+  : varobs(varobs_arg), noconstant(noconstant_arg)
 {
 };
 
@@ -33,6 +35,13 @@ void
 DetrendData::detrend(const VectorView &SteadyState, const MatrixConstView &dataView,
                      MatrixView &detrendedDataView)
 {
-  detrendedDataView = dataView;
+  if (noconstant)
+    detrendedDataView = dataView;
+  else
+    {
+      for (size_t i = 0; i < varobs.size(); i++)
+        for (size_t j = 0; j < dataView.getCols(); j++)
+          detrendedDataView(i, j) = dataView(i, j) - SteadyState(varobs[i]);
+    }
 };
 
