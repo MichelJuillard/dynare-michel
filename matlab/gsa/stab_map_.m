@@ -262,10 +262,13 @@ if fload==0,
                 T=zeros(size(dr_.ghx,1),size(dr_.ghx,2)+size(dr_.ghu,2),Nsam);
                 egg=zeros(length(dr_.eigval),Nsam);
             end
-            if infox{j},
+            if infox{j}(1),
 %                 disp('no solution'),
                 if isfield(oo_.dr,'ghx'),
                     oo_.dr=rmfield(oo_.dr,'ghx');
+                end
+                if (infox{j}(1)<3 || infox{j}(1)>5) && isfield(oo_.dr,'eigval'),
+                    oo_.dr=rmfield(oo_.dr,'eigval');
                 end
             end
         catch
