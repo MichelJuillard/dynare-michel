@@ -150,9 +150,9 @@ for b=fpar:B
         end
     end
     M_ = set_all_parameters(deep,estim_params_,M_);
-    [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 
     if run_smoother
+        [dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
         [alphahat,etahat,epsilonhat,alphatilde,SteadyState,trend_coeff,aK] = ...
             DsgeSmoother(deep,gend,Y,data_index,missing_value);
 
@@ -204,7 +204,8 @@ for b=fpar:B
             stock_forcst_mean(:,:,irun(6)) = yf';
             stock_forcst_point(:,:,irun(7)) = yf1';
         end
-
+    else
+        [T,R,SteadyState,info,M_,options_,oo_] = dynare_resolve(M_,options_,oo_);
     end
     stock_param(irun(5),:) = deep;
     stock_logpo(irun(5),1) = logpo;
@@ -213,7 +214,7 @@ for b=fpar:B
     irun = irun +  ones(7,1);
 
 
-    if irun(1) > MAX_nsmoo || b == B
+    if run_smoother && (irun(1) > MAX_nsmoo || b == B),
         stock = stock_smooth(:,:,1:irun(1)-1);
         ifil(1) = ifil(1) + 1;
         save([DirectoryName '/' M_.fname '_smooth' int2str(ifil(1)) '.mat'],'stock');
@@ -227,7 +228,7 @@ for b=fpar:B
         irun(1) = 1;
     end
 
-    if irun(2) > MAX_ninno || b == B
+    if run_smoother && (irun(2) > MAX_ninno || b == B)
         stock = stock_innov(:,:,1:irun(2)-1);
         ifil(2) = ifil(2) + 1;
         save([DirectoryName '/' M_.fname '_inno' int2str(ifil(2)) '.mat'],'stock');
@@ -237,7 +238,7 @@ for b=fpar:B
         irun(2) = 1;
     end
 
-    if nvn && (irun(3) > MAX_nerro || b == B)
+    if run_smoother && nvn && (irun(3) > MAX_nerro || b == B)
         stock = stock_error(:,:,1:irun(3)-1);
         ifil(3) = ifil(3) + 1;
         save([DirectoryName '/' M_.fname '_error' int2str(ifil(3)) '.mat'],'stock');
@@ -247,7 +248,7 @@ for b=fpar:B
         irun(3) = 1;
     end
 
-    if naK && (irun(4) > MAX_naK || b == B)
+    if run_smoother && naK && (irun(4) > MAX_naK || b == B)
         stock = stock_filter_step_ahead(:,:,:,1:irun(4)-1);
         ifil(4) = ifil(4) + 1;
         save([DirectoryName '/' M_.fname '_filter_step_ahead' int2str(ifil(4)) '.mat'],'stock');
@@ -267,7 +268,7 @@ for b=fpar:B
         irun(5) = 1;
     end
 
-    if horizon && (irun(6) > MAX_nforc1 || b == B)
+    if run_smoother && horizon && (irun(6) > MAX_nforc1 || b == B)
         stock = stock_forcst_mean(:,:,1:irun(6)-1);
         ifil(6) = ifil(6) + 1;
         save([DirectoryName '/' M_.fname '_forc_mean' int2str(ifil(6)) '.mat'],'stock');
@@ -277,7 +278,7 @@ for b=fpar:B
         irun(6) = 1;
     end
 
-    if horizon && (irun(7) > MAX_nforc2 ||  b == B)
+    if run_smoother && horizon && (irun(7) > MAX_nforc2 ||  b == B)
         stock = stock_forcst_point(:,:,1:irun(7)-1);
         ifil(7) = ifil(7) + 1;
         save([DirectoryName '/' M_.fname '_forc_point' int2str(ifil(7)) '.mat'],'stock');
