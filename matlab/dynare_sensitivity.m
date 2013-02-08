@@ -66,6 +66,9 @@ if ~isempty(options_gsa.datafile) || isempty(bayestopt_),
     if isfield(options_gsa,'lik_init'),
         options_.lik_init=options_gsa.lik_init;
     end
+    if isfield(options_gsa,'kalman_algo'),
+        options_.kalman_algo=options_gsa.kalman_algo;
+    end
     options_.mode_compute = 0;
     options_.filtered_vars = 1;
     options_.plot_priors = 0;
