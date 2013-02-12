@@ -62,6 +62,7 @@ addpath([dynareroot '/utilities/tests/'])
 addpath([dynareroot '/utilities/dates/'])
 addpath([dynareroot '/utilities/dataset/'])
 addpath([dynareroot '/utilities/general/'])
+addpath([dynareroot '/reports/'])
 
 % For functions that exist only under some Octave versions
 % or some MATLAB versions, and for which we provide some replacement functions
