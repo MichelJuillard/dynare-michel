@@ -30,20 +30,9 @@ function p = addSection(p, varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(nargin >= 1 && nargin <= 3, ['incorrect number of arguments passed ' ...
-    'to addSection']);
 assert(isa(p, 'page'), 'First argument must be a page object');
-if nargin > 1
-    assert(isa(varargin{1},'section'), ['Optional 2nd arg to addSection must be a ' ...
-        'Section']);
-    if nargin > 2
-        assert(isnumeric(varargin{2}), ['Optional 3rd arg to addSection must be ' ...
-            'an index']);
-    end
-end
-
 if nargin == 1
-    p.sections = p.sections.addSection(section());
+    p.sections = p.sections.addSection();
 elseif nargin == 2 || nargin == 3
     p.sections = p.sections.addSection(varargin{:});
 end

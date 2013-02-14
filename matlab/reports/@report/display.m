@@ -1,5 +1,5 @@
-function display(r)
-%function display(r)
+function display(o)
+%function display(o)
 % Display a Report object
 %
 % INPUTS
@@ -28,20 +28,21 @@ function display(r)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+name = 'report';
 disp(' ');
-disp([inputname(1) '.title = ']);
+disp([name '.title = ']);
 disp(' ');
-disp(['     ''' r.title '''']);
+disp(['     ''' o.title '''']);
 disp(' ')
-disp([inputname(1) '.orientation = ']);
+disp([name '.orientation = ']);
 disp(' ');
-disp(['     ''' r.orientation '''']);
+disp(['     ''' o.orientation '''']);
 disp(' ')
-disp([inputname(1) '.numPages() = ']);
+disp([name '.numPages() = ']);
 disp(' ');
-disp(['     ' num2str(numPages(r))]);
+disp(['     ' num2str(numPages(o))]);
 disp(' ');
-disp([inputname(1) '.pages = ']);
+disp([name '.pages = ']);
 disp(' ');
-disp(r.pages.getPages());
+disp(o.pages.getPages());
 end

@@ -1,5 +1,15 @@
-function oa = addObj(oa, varargin)
-%function oa = addObj(oa, varargin)
+function display(o)
+%function display(o)
+% Display a Section object
+%
+% INPUTS
+%   none
+%
+% OUTPUTS
+%   none
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,16 +28,7 @@ function oa = addObj(oa, varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(nargin >= 2 && nargin <= 3)
-assert(isa(oa, 'objArray'), 'First argument must be an objArray');
-assert(isobject(varargin{1}), 'Optional 2nd arg must be an object');
-if nargin == 3
-    assert(isnumeric(varargin{2}), 'Optional 3rd arg must be an index');
-end
-
-if nargin == 2
-    oa.objs{end+1} = varargin{1};
-elseif nargin == 3
-    oa.objs{varargin{2}} = varargin{1};
-end
+name = 'report.page.section';
+disp(' ');
+disp([name '.x = ']);
 end

@@ -19,6 +19,11 @@ function ss = addSection(ss, varargin)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 assert(nargin >= 1 && nargin <= 3)
+if nargin > 1
+    assert(isa(varargin{1},'section'), ['Optional 2nd arg to addSection ' ...
+                        'must be a Section']);
+end
+
 if nargin == 1
     ss.objArray = ss.objArray.addObj(section());
 else

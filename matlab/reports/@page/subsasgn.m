@@ -35,7 +35,7 @@ switch S.type
         B{index} = V;
     case '.'
         switch S.subs
-            case fields(A)
+            case fieldnames(A)
                 B.(S.subs) = V;
             otherwise
                 error(['field ' S.subs 'does not exist in the page class'])

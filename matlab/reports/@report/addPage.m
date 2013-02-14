@@ -43,7 +43,7 @@ if nargin > 1
 end
 
 if nargin == 1
-    r.pages = r.pages.addPage(page());
+    r.pages = r.pages.addPage();
 elseif nargin == 2 || nargin == 3
     r.pages = r.pages.addPage(varargin{:});
 end
