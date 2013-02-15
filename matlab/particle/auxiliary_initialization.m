@@ -20,7 +20,7 @@ function initial_distribution = auxiliary_initialization(ReducedForm,Y,start,Dyn
 % NOTES
 %   The vector "lik" is used to evaluate the jacobian of the likelihood.
 
-% Copyright (C) 2011, 2012 Dynare Team
+% Copyright (C) 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
