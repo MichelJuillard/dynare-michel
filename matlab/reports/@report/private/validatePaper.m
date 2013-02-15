@@ -1,5 +1,15 @@
-function ns = numSections(ss)
-% function ns = numSections(ss)
+function validatePaper(paper)
+%function validatePaper(paper)
+% Validate paper string
+%
+% INPUTS
+%   char : paper size
+%
+% OUTPUTS
+%   char : lowercase paper
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,5 +28,6 @@ function ns = numSections(ss)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-ns = ss.objArray.numObjs();
+assert(any(strcmpi(paper, {'a4', 'letter'})), ['Valid paper arguments ' ...
+                    'are: ''a4'' and ''letter''.']);
 end

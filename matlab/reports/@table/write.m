@@ -1,5 +1,15 @@
-function B = subsasgn(A, S, V)
-% function B = subsasgn(A, S, V)
+function write(o, fid, texIndent)
+%function write(o, fid)
+% Write a Page object
+%
+% INPUTS
+%   none
+%
+% OUTPUTS
+%   none
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,22 +28,13 @@ function B = subsasgn(A, S, V)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-B = A;
-if length(S) > 1
-    for i=1:(length(S)-1)
-        B = subsref(B, S(i));
-    end
-    B = subsasgn(B, S(end), V);
-    B = subsasgn(A, S(1:(end-1)), B);
-    return
-end
+assert(fid > 0);
+assert(isnumeric(texIndent));
 
-switch S.type
-    case '()'
-        index = S.subs{:};
-        assert(isnumeric(index));
-        B.objArray(index) = V;
-    otherwise
-        error('objArray subsasign syntax error')
-end
+fprintf(fid, '%d\% Page Object\n', texIndent);
+fprintf(fid, '%d\newpage\n', texIndent);
+
+o.sections.write(fid, texIndent+2);
+
+fprintf(fid, '%d\% End Page Object\n', texIndent);
 end

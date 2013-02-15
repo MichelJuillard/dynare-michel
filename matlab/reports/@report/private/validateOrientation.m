@@ -1,5 +1,5 @@
-function orientation = validateOrientation(orientation)
-%function orientation = validateOrientation(orientation)
+function validateOrientation(orientation)
+%function validateOrientation(orientation)
 % Validate orientation string
 %
 % INPUTS
@@ -28,8 +28,6 @@ function orientation = validateOrientation(orientation)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(any(strcmpi(orientation, {'portrait', 'landscape'})), ...
-    ['Valid orientation arguments are: ''portrait'' and ' ...
-    '''landscape''.']);
-orientation = lower(orientation);
+assert(any(strcmpi(orientation, {'portrait', 'landscape'})), ['Valid ' ...
+                    'orientation arguments are: ''portrait'' and ''landscape''.']);
 end

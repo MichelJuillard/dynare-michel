@@ -1,5 +1,5 @@
-function p = page(varargin)
-%function p = page(varargin)
+function o = page(varargin)
+%function o = page(varargin)
 % Page Class Constructor
 %
 % INPUTS
@@ -29,17 +29,36 @@ function p = page(varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-p = struct;
-p.sections = sections();
+o = struct;
+o.caption = '';
+o.orientation = 'portrait';
+o.sections = sections();
 
-switch nargin
-    case 0
-        p = class(p, 'page');
-    case 1
-        assert(isa(varargin{1}, 'page'), ['Page constructor: the only valid ' ...
-            'arguments are page objects']);
-        p = varargin{1};
-    otherwise
-        error('Page constructor: invalid number of arguments');
+if nargin == 1
+    assert(isa(varargin{1}, 'page'),['With one arg to Page constructor, ' ...
+                        'you must pass a page object']);
+    o = varargin{1};
+    return;
+elseif nargin > 1
+    if round(nargin/2) ~= nargin/2
+        error(['Options to Page constructor must be supplied in name/value ' ...
+               'pairs.']);
+    end
+
+    optNames = lower(fieldnames(o));
+
+    % overwrite default values
+    for pair = reshape(varargin, 2, [])
+        field = lower(pair{1});
+        if any(strmatch(field, optNames, 'exact'))
+            o.(field) = pair{2};
+        else
+            error('%s is not a recognized option to the Page constructor.', ...
+                  field);
+        end
+    end
 end
+
+% Create page object
+o = class(o, 'page');
 end

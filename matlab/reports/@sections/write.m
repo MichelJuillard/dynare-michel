@@ -1,5 +1,16 @@
-function ss = addSection(ss, varargin)
-% function ss = addSection(ss, varargin)
+function write(o, fid, indent)
+%function write(o, fid, indent)
+% Write Sections object
+%
+% INPUTS
+%   fid - int, file id
+%   indent - char, number of spaces to indent tex code
+%
+% OUTPUTS
+%   none
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,10 +29,11 @@ function ss = addSection(ss, varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(nargin >= 1 && nargin <= 3)
-if nargin == 1
-    ss.objArray = ss.objArray.addObj(section());
-else
-    ss.objArray = ss.objArray.addObj(varargin{:});
+assert(fid ~= -1);
+fprintf(fid, '\n%s%% Sections Object\n', indent);
+nps = numSections(o);
+for i=1:nps
+    o.objArray(i).write(fid, indent);
 end
+fprintf(fid, '%s%% End Sections Object\n\n', indent);
 end

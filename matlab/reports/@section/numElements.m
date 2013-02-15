@@ -1,5 +1,5 @@
-function B = subsasgn(A, S, V)
-% function B = subsasgn(A, S, V)
+function n = numElements(o)
+% function n = numElements(o)
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,22 +18,5 @@ function B = subsasgn(A, S, V)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-B = A;
-if length(S) > 1
-    for i=1:(length(S)-1)
-        B = subsref(B, S(i));
-    end
-    B = subsasgn(B, S(end), V);
-    B = subsasgn(A, S(1:(end-1)), B);
-    return
-end
-
-switch S.type
-    case '()'
-        index = S.subs{:};
-        assert(isnumeric(index));
-        B.objArray(index) = V;
-    otherwise
-        error('objArray subsasign syntax error')
-end
+n = o.elements.numElements();
 end

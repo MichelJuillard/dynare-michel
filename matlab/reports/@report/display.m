@@ -33,14 +33,32 @@ disp(' ');
 disp([name '.title = ']);
 disp(' ');
 disp(['     ''' o.title '''']);
+
+disp(' ')
+disp([name '.paper = ']);
+disp(' ');
+disp(['     ''' o.paper '''']);
+
 disp(' ')
 disp([name '.orientation = ']);
 disp(' ');
 disp(['     ''' o.orientation '''']);
+
+disp(' ')
+disp([name '.filename = ']);
+disp(' ');
+disp(['     ''' o.filename '''']);
+
+disp(' ')
+disp([name '.config = ']);
+disp(' ');
+disp(['     ''' o.config '''']);
+
 disp(' ')
 disp([name '.numPages() = ']);
 disp(' ');
 disp(['     ' num2str(numPages(o))]);
+
 disp(' ');
 disp([name '.pages = ']);
 disp(' ');

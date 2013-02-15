@@ -23,6 +23,13 @@ switch S(1).type
         switch S(1).subs
             case fieldnames(A)
                 A = A.(S(1).subs);
+            case {'write'}
+                if areParensNext(S)
+                    write(A, S(2).subs{:})
+                    S = shiftS(S);
+                else
+                    assert(false);
+                end
             case methods(A)
                 if areParensNext(S)
                     A = feval(S(1).subs, A, S(2).subs{:});
@@ -34,7 +41,7 @@ switch S(1).type
                 error(['Section Class: unknown field or method: ' S(1).subs]);
         end
     case '()'
-        A = getSections(A, S(1).subs{:});
+        A = getElements(A, S(1).subs{:});
     case '{}'
         error(['Section Class: ' S(1).type ' indexing not supported.']);
     otherwise

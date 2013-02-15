@@ -8,7 +8,7 @@ function p = addSection(p, varargin)
 %   3 args => add section at index
 %
 % OUTPUTS
-%   updated report object
+%   updated page object
 %
 % SPECIAL REQUIREMENTS
 %   none

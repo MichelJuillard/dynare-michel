@@ -1,5 +1,16 @@
-function B = subsasgn(A, S, V)
-% function B = subsasgn(A, S, V)
+function write(o, fid, indent)
+%function write(o, fid, indent)
+% Write a Page object
+%
+% INPUTS
+%   fid - int, file id
+%   indent - char, number of spaces to indent tex code
+%
+% OUTPUTS
+%   none
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,22 +29,16 @@ function B = subsasgn(A, S, V)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-B = A;
-if length(S) > 1
-    for i=1:(length(S)-1)
-        B = subsref(B, S(i));
-    end
-    B = subsasgn(B, S(end), V);
-    B = subsasgn(A, S(1:(end-1)), B);
-    return
-end
+assert(fid ~= -1);
 
-switch S.type
-    case '()'
-        index = S.subs{:};
-        assert(isnumeric(index));
-        B.objArray(index) = V;
-    otherwise
-        error('objArray subsasign syntax error')
+fprintf(fid, '\n%s%% Page Object\n', indent);
+if strcmpi(o.orientation, 'landscape')
+    fprintf(fid, '%s\\begin{landscape}\n', indent);
 end
+o.sections.write(fid, addIndentation(indent));
+if strcmpi(o.orientation, 'landscape')
+    fprintf(fid, '%s\\end{landscape}\n', indent);
+end
+fprintf(fid, '%s\\clearpage\n', indent);
+fprintf(fid, '%s%% End Page Object\n\n', indent);
 end

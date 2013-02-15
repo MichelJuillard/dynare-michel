@@ -1,6 +1,6 @@
-function display(o)
-%function display(o)
-% Display a Section object
+function write(o)
+%function write(o)
+% Write Report object
 %
 % INPUTS
 %   none
@@ -28,15 +28,29 @@ function display(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-name = 'report.page.section';
-disp(' ');
-disp([name '.align = ']);
-disp(' ');
-disp(['     ''' o.align '''']);
+[fid, msg] = fopen(o.filename, 'w');
+if fid == -1
+    error(msg);
+end
 
-disp(' ');
-disp([name '.elements = ']);
-disp(' ');
-disp(o.elements.getElements());
+fprintf(fid, '%% Report Object\n');
+fprintf(fid, '\\documentclass[11pt]{article}\n');
 
+fprintf(fid, '\\usepackage[%spaper,margin=2.5cm', o.paper);
+if strcmpi(o.orientation, 'landscape')
+    fprintf(fid, ',landscape');
+end
+fprintf(fid, ']{geometry}\n');
+fprintf(fid, '\\usepackage{graphicx}\n');
+fprintf(fid, '\\usepackage{pdflscape}\n')
+fprintf(fid, '\\begin{document}\n');
+
+o.pages.write(fid, addIndentation(''));
+
+fprintf(fid, '\\end{document}\n');
+fprintf(fid, '%% End Report Object\n');
+status = fclose(fid);
+if status == -1
+    error('Error closing %s\n', o.filename);
+end
 end

@@ -1,5 +1,17 @@
-function B = subsasgn(A, S, V)
-% function B = subsasgn(A, S, V)
+function o = addTable(o, varargin)
+%function o = addTable(o, varargin)
+% Add a table to the Cell Array of tables in the report
+%
+% INPUTS
+%   1 args => add empty table
+%   2 args => add given table
+%   3 args => add table at index
+%
+% OUTPUTS
+%   updated section object
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,22 +30,10 @@ function B = subsasgn(A, S, V)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-B = A;
-if length(S) > 1
-    for i=1:(length(S)-1)
-        B = subsref(B, S(i));
-    end
-    B = subsasgn(B, S(end), V);
-    B = subsasgn(A, S(1:(end-1)), B);
-    return
-end
-
-switch S.type
-    case '()'
-        index = S.subs{:};
-        assert(isnumeric(index));
-        B.objArray(index) = V;
-    otherwise
-        error('objArray subsasign syntax error')
+assert(isa(o, 'section'), 'First argument must be a section object');
+if nargin == 1
+    o.elements = o.elements.addTable();
+elseif nargin == 2 || nargin == 3
+    o.elements = o.elements.addTable(varargin{:});
 end
 end

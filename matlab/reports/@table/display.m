@@ -1,5 +1,15 @@
-function e = getSections(ss, varargin)
-% function e = getSections(ss, varargin)
+function display(o)
+%function display(o)
+% Display a Table object
+%
+% INPUTS
+%   none
+%
+% OUTPUTS
+%   none
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,5 +28,30 @@ function e = getSections(ss, varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-e = ss.objArray.getObjs(varargin{:});
+name = 'report.page.section.table';
+disp(' ');
+disp([name '.caption = ']);
+disp(' ');
+disp(['     ''' o.caption '''']);
+
+disp(' ');
+disp([name '.footnote = ']);
+disp(' ');
+disp(['     ''' o.footnote '''']);
+
+disp(' ');
+disp([name '.hlines = ']);
+disp(' ');
+disp(['     ''' o.hlines '''']);
+
+disp(' ');
+disp([name '.vlines = ']);
+disp(' ');
+disp(['     ''' o.vlines '''']);
+
+disp(' ');
+disp([name '.data = ']);
+disp(' ');
+disp(['     ''' o.data '''']);
+
 end

@@ -1,5 +1,16 @@
-function B = subsasgn(A, S, V)
-% function B = subsasgn(A, S, V)
+function write(o, fid, indent)
+%function write(o, fid, indent)
+% Write Section object
+%
+% INPUTS
+%   fid - int, file id
+%   indent - char, number of spaces to indent tex code
+%
+% OUTPUTS
+%   none
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,22 +29,16 @@ function B = subsasgn(A, S, V)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-B = A;
-if length(S) > 1
-    for i=1:(length(S)-1)
-        B = subsref(B, S(i));
-    end
-    B = subsasgn(B, S(end), V);
-    B = subsasgn(A, S(1:(end-1)), B);
-    return
+assert(fid ~= -1);
+
+fprintf(fid, '\n%s%% Section Object\n', indent);
+fprintf(fid, '%s\\noindent\\begin{minipage}[%s]{0.32\\hsize}\n', indent, o.align);
+
+ne = numElements(o);
+for i=1:ne
+    o.elements(i).write(fid, addIndentation(indent));
 end
 
-switch S.type
-    case '()'
-        index = S.subs{:};
-        assert(isnumeric(index));
-        B.objArray(index) = V;
-    otherwise
-        error('objArray subsasign syntax error')
-end
+fprintf(fid, '%s\\end{minipage}\n', indent);
+fprintf(fid, '%s%% End Section Object\n\n', indent);
 end

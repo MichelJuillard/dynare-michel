@@ -1,7 +1,16 @@
-function o = section(varargin)
-%function o = section(varargin)
-
-% Section produces a latex minipage
+function o = graph(varargin)
+%function o = graph(varargin)
+% Graph Class Constructor
+%
+% INPUTS
+%   0 args => empty graph
+%   1 arg (graph class) => copy object
+%
+% OUTPUTS
+%   none
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -21,21 +30,21 @@ function o = section(varargin)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 o = struct;
-o.align = 't';
-o.elements = elements();
-o.rows = 1;
-o.cols = 1;
-
+o.caption = '';
+o.footnote = '';
+o.filename = '';
+o.data = '';
+o.config = '';
 
 if nargin == 1
-    assert(isa(varargin{1}, 'section'),['With one arg to Section constructor, ' ...
-                        'you must pass a section object']);
+    assert(isa(varargin{1}, 'graph'),['With one arg to Graph constructor, ' ...
+                        'you must pass a graph object']);
     o = varargin{1};
     return;
 elseif nargin > 1
     if round(nargin/2) ~= nargin/2
-        error(['Options to Section constructor must be supplied in name/' ...
-               'value pairs.']);
+        error(['Options to Graph constructor must be supplied in name/value ' ...
+               'pairs.']);
     end
 
     optNames = lower(fieldnames(o));
@@ -46,13 +55,12 @@ elseif nargin > 1
         if any(strmatch(field, optNames, 'exact'))
             o.(field) = pair{2};
         else
-            error('%s is not a recognized option to the Section constructor.', ...
+            error('%s is not a recognized option to the Graph constructor.', ...
                   field);
         end
     end
 end
 
-% Create section object
-o = class(o, 'section');
+% Create graph object
+o = class(o, 'graph');
 end
-

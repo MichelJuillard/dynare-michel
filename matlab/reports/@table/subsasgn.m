@@ -29,11 +29,14 @@ if length(S) > 1
 end
 
 switch S.type
-    case '()'
-        index = S.subs{:};
-        assert(isnumeric(index));
-        B.objArray(index) = V;
+    case '.'
+        switch S.subs
+            case fieldnames(A)
+                B.(S.subs) = V;
+            otherwise
+                error(['field ' S.subs 'does not exist in the page class'])
+        end
     otherwise
-        error('objArray subsasign syntax error')
+        error('report subsasign syntax error')
 end
 end

@@ -1,13 +1,10 @@
-function r = report(varargin)
-%function r = report(varargin)
+function o = report(varargin)
+%function o = report(varargin)
 % Report Class Constructor
 %
 % INPUTS
-%   0 args => no title, portrait orientation
-%   1 arg (report class) => copy class
-%   1 arg (not report class) => title
-%   2 args (1st not report class) => title, orientation
-%   3 args (1st not report class) => title, orientation, configuraiton
+%   1 report class object => make a copy
+%   Otherwise, option/value pairs (see structure below for options)
 %
 % OUTPUTS
 %   none
@@ -33,51 +30,44 @@ function r = report(varargin)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % default values
-r = struct;
-r.title = '';
-r.orientation = 'portrait';
-r.pages = pages();
-r.config = '';
+o = struct;
+o.title = '';
+o.orientation = 'portrait';
+o.paper = 'a4';
+o.pages = pages();
+o.filename = 'report.tex';
+o.config = '';
 
-% Check arguments
 if nargin == 1
-    assert(isa(varargin{1}, 'report') || ischar(varargin{1}), ...
-        ['With one arg to report constructor, you must pass either '...
-        'a report object or a char.']);
-end
+    assert(isa(varargin{1}, 'report'),['With one arg to Report constructor, ' ...
+                        'you must pass a report object']);
+    r = varargin{1};
+    return;
+elseif nargin > 1
+    if round(nargin/2) ~= nargin/2
+        error(['Options to Report constructor must be supplied in name/value ' ...
+               'pairs.']);
+    end
 
-if nargin > 1
-    assert(~isa(varargin{1}, 'report'), ...
-        ['With multiple args to report constructor, first argument ' ...
-        'cannot be a report object.']);
-    for i=1:nargin
-        assert(ischar(varargin{i}), ...
-            ['With muliple args to report constructor, all '...
-            'arguments must be char.']);
+    optNames = lower(fieldnames(o));
+
+    % overwrite default values
+    for pair = reshape(varargin, 2, [])
+        field = lower(pair{1});
+        if any(strmatch(field, optNames, 'exact'))
+            if strcmp(field, 'orientation')
+                validateOrientation(pair{2});
+            elseif strcmp(field, 'paper')
+                validatePaper(pair{2});
+            end
+            o.(field) = pair{2};
+        else
+            error('%s is not a recognized option to the Report constructor.', ...
+                  field);
+        end
     end
 end
 
-% Initialize fields
-switch nargin
-    case 0
-    case 1
-        if isa(varargin{1}, 'report')
-            r = varargin{1};
-            return
-        else
-            r.title = varargin{1};
-        end
-    case 2
-        r.title = varargin{1};
-        r.orientation = validateOrientation(varargin{2});
-    case 3
-        r.title = varargin{1};
-        r.orientation = validateOrientation(varargin{2});
-        r.config = varargin{3};
-    otherwise
-        error('Report constructor: invalid number of arguments');
-end
-
 % Create report object
-r = class(r, 'report');
+o = class(o, 'report');
 end

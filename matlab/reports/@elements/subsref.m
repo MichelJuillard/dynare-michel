@@ -23,13 +23,6 @@ switch S(1).type
         switch S(1).subs
             case fieldnames(A)
                 A = A.(S(1).subs);
-            case {'write'}
-                if areParensNext(S)
-                    write(A, S(2).subs{:})
-                    S = shiftS(S);
-                else
-                    assert(false);
-                end
             case methods(A)
                 if areParensNext(S)
                     A = feval(S(1).subs, A, S(2).subs{:});
@@ -38,14 +31,14 @@ switch S(1).type
                     A = feval(S(1).subs, A);
                 end
             otherwise
-                error(['Pages Class: unknown field or method: ' S(1).subs]);
+                error(['Elements Class: unknown field or method: ' S(1).subs]);
         end
     case '()'
-        A = getPages(A, S(1).subs{:});
+        A = getElements(A, S(1).subs{:});
     case '{}'
-        error(['Pages Class: ' S(1).type ' indexing not supported.']);
+        error(['Elements Class: ' S(1).type ' indexing not supported.']);
     otherwise
-        error('Pages Class: subsref.m impossible case')
+        error('Elements Class: subsref.m impossible case')
 end
 
 S = shiftS(S);
