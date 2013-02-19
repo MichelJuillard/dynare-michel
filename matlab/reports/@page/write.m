@@ -1,13 +1,12 @@
-function write(o, fid, indent)
-%function write(o, fid, indent)
+function o = write(o, fid)
+%function o = write(o, fid)
 % Write a Page object
 %
 % INPUTS
 %   fid - int, file id
-%   indent - char, number of spaces to indent tex code
 %
 % OUTPUTS
-%   none
+%   o   - this
 %
 % SPECIAL REQUIREMENTS
 %   none
@@ -31,14 +30,19 @@ function write(o, fid, indent)
 
 assert(fid ~= -1);
 
-fprintf(fid, '\n%s%% Page Object\n', indent);
-if strcmpi(o.orientation, 'landscape')
-    fprintf(fid, '%s\\begin{landscape}\n', indent);
+fprintf(fid, '\n%% Page Object\n');
+if ~isempty(o.title)
+    fprintf(fid, '\\centerline{{\\Large %s}}\n', o.title);
 end
-o.sections.write(fid, addIndentation(indent));
 if strcmpi(o.orientation, 'landscape')
-    fprintf(fid, '%s\\end{landscape}\n', indent);
+    fprintf(fid, '\\begin{landscape}\n')
 end
-fprintf(fid, '%s\\clearpage\n', indent);
-fprintf(fid, '%s%% End Page Object\n\n', indent);
+
+o.sections.write(fid);
+
+if strcmpi(o.orientation, 'landscape')
+    fprintf(fid, '\\end{landscape}\n');
+end
+fprintf(fid, '\\clearpage\n');
+fprintf(fid, '%% End Page Object\n\n');
 end

@@ -30,12 +30,13 @@ function o = page(varargin)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 o = struct;
-o.caption = '';
-o.orientation = 'portrait';
+o.paper = '';
+o.title = '';
+o.orientation = '';
 o.sections = sections();
 
 if nargin == 1
-    assert(isa(varargin{1}, 'page'),['With one arg to Page constructor, ' ...
+    assert(isa(varargin{1}, 'page'), ['With one arg to Page constructor, ' ...
                         'you must pass a page object']);
     o = varargin{1};
     return;

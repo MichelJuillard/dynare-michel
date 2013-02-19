@@ -30,11 +30,24 @@ function o = graph(varargin)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 o = struct;
-o.caption = '';
-o.footnote = '';
-o.filename = '';
-o.data = '';
+
 o.config = '';
+
+o.title = '';
+o.ylabel = '';
+o.xlabel = '';
+o.zlabel = '';
+o.footnote = '';
+
+o.figname = '';
+o.data = '';
+o.seriestoplot = 'all';
+o.shade = ''; %{1959q1:1964q4}
+
+o.legend = false;
+o.legend_location = 'SouthEast';
+o.legend_orientation = 'horizontal';
+o.legend_font_size = 8;
 
 if nargin == 1
     assert(isa(varargin{1}, 'graph'),['With one arg to Graph constructor, ' ...

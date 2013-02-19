@@ -1,5 +1,5 @@
-function r = addPage(r, varargin)
-%function r = addPage(r, varargin)
+function o = addPage(o, varargin)
+%function o = addPage(o, varargin)
 % Add a page to the Cell Array of pages in the report
 %
 % INPUTS
@@ -30,21 +30,22 @@ function r = addPage(r, varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(nargin >= 1 && nargin <= 3, ['incorrect number of arguments passed ' ...
-    'to addPage']);
-assert(isa(r, 'report'), 'First argument must be a report object');
-if nargin > 1
-    assert(isa(varargin{1},'page'), ['Optional 2nd arg to addPage must be a ' ...
-        'Page']);
-    if nargin > 2
-        assert(isnumeric(varargin{2}), ['Optional 3rd arg to addPage must be ' ...
-            'an index']);
-    end
-end
+%assert(nargin >= 1 && nargin <= 3, ['incorrect number of arguments passed ' ...
+%    'to addPage']);
+%assert(isa(r, 'report'), 'First argument must be a report object');
+%if nargin > 1
+%    assert(isa(varargin{1},'page'), ['Optional 2nd arg to addPage must be a ' ...
+%        'Page']);
+%    if nargin > 2
+%        assert(isnumeric(varargin{2}), ['Optional 3rd arg to addPage must be ' ...
+%            'an index']);
+%    end
+%end
 
 if nargin == 1
-    r.pages = r.pages.addPage();
-elseif nargin == 2 || nargin == 3
-    r.pages = r.pages.addPage(varargin{:});
+    o.pages = o.pages.addPage('orientation', o.orientation, 'paper', o.paper);
+else
+    o.pages = o.pages.addPage('orientation', o.orientation, 'paper', ...
+                              o.paper, varargin{:});
 end
 end

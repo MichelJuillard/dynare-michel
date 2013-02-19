@@ -30,10 +30,5 @@ function o = addGraph(o, varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(isa(o, 'section'), 'First argument must be a section object');
-if nargin == 1
-    o.elements = o.elements.addGraph();
-elseif nargin == 2 || nargin == 3
-    o.elements = o.elements.addGraph(varargin{:});
-end
+o.elements = o.elements.addGraph(varargin{:});
 end

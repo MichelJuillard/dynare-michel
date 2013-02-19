@@ -1,13 +1,12 @@
-function write(o, fid, indent)
-%function write(o, fid, indent)
+function o = write(o, fid)
+%function o = write(o, fid)
 % Write Sections object
 %
 % INPUTS
 %   fid - int, file id
-%   indent - char, number of spaces to indent tex code
 %
 % OUTPUTS
-%   none
+%   o   - this
 %
 % SPECIAL REQUIREMENTS
 %   none
@@ -30,10 +29,10 @@ function write(o, fid, indent)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 assert(fid ~= -1);
-fprintf(fid, '\n%s%% Sections Object\n', indent);
+fprintf(fid, '\n%% Sections Object\n');
 nps = numSections(o);
 for i=1:nps
-    o.objArray(i).write(fid, indent);
+    o.objArray(i).write(fid);
 end
-fprintf(fid, '%s%% End Sections Object\n\n', indent);
+fprintf(fid, '%% End Sections Object\n\n');
 end

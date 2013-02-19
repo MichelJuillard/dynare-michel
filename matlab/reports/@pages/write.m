@@ -1,13 +1,12 @@
-function write(o, fid, indent)
-%function write(o, fid, indent)
+function o = write(o, fid)
+%function o = write(o, fid)
 % Write Pages object
 %
 % INPUTS
 %   fid - int, file id
-%   indent - char, number of spaces to indent tex code
 %
 % OUTPUTS
-%   none
+%   o   - this
 %
 % SPECIAL REQUIREMENTS
 %   none
@@ -30,10 +29,10 @@ function write(o, fid, indent)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 assert(fid ~= -1);
-fprintf(fid, '\n%s%% Pages Object\n', indent);
+fprintf(fid, '\n%% Pages Object\n');
 nps = numPages(o);
 for i=1:nps
-    o.objArray(i).write(fid, addIndentation(indent));
+    o.objArray(i).write(fid);
 end
-fprintf(fid, '%s%% End Pages Object\n\n', indent);
+fprintf(fid, '%% End Pages Object\n\n');
 end

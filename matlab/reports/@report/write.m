@@ -1,12 +1,12 @@
-function write(o)
-%function write(o)
+function o = write(o)
+%function o = write(o)
 % Write Report object
 %
 % INPUTS
-%   none
+%   o   - Report Object
 %
 % OUTPUTS
-%   none
+%   o   - Report Object
 %
 % SPECIAL REQUIREMENTS
 %   none
@@ -36,16 +36,18 @@ end
 fprintf(fid, '%% Report Object\n');
 fprintf(fid, '\\documentclass[11pt]{article}\n');
 
-fprintf(fid, '\\usepackage[%spaper,margin=2.5cm', o.paper);
+fprintf(fid, '\\usepackage[%spaper,margin=%s', o.paper, o.margin);
 if strcmpi(o.orientation, 'landscape')
     fprintf(fid, ',landscape');
 end
 fprintf(fid, ']{geometry}\n');
 fprintf(fid, '\\usepackage{graphicx}\n');
-fprintf(fid, '\\usepackage{pdflscape}\n')
+fprintf(fid, '\\usepackage{pdflscape}\n');
+fprintf(fid, '\\usepackage{pgf}\n');
+fprintf(fid, '\\usepackage{pgfplots}\n');
 fprintf(fid, '\\begin{document}\n');
 
-o.pages.write(fid, addIndentation(''));
+o.pages.write(fid);
 
 fprintf(fid, '\\end{document}\n');
 fprintf(fid, '%% End Report Object\n');

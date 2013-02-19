@@ -1,12 +1,12 @@
-function write(o, fid, texIndent)
-%function write(o, fid)
-% Write a Page object
+function o = write(o, fid)
+%function o = write(o, fid)
+% Write a Graph object
 %
 % INPUTS
-%   none
+%   fid - int, file id
 %
 % OUTPUTS
-%   none
+%   o   - this
 %
 % SPECIAL REQUIREMENTS
 %   none
@@ -28,13 +28,9 @@ function write(o, fid, texIndent)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(fid > 0);
-assert(isnumeric(texIndent));
-
-fprintf(fid, '%d\% Page Object\n', texIndent);
-fprintf(fid, '%d\newpage\n', texIndent);
-
-o.sections.write(fid, texIndent+2);
-
-fprintf(fid, '%d\% End Page Object\n', texIndent);
+assert(fid ~= -1);
+if isempty(o.figname)
+    o = createGraph(o);
+end
+fprintf(fid, '\\input{%s}', o.figname);
 end

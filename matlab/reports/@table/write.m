@@ -1,12 +1,12 @@
-function write(o, fid, texIndent)
-%function write(o, fid)
-% Write a Page object
+function o = write(o, fid)
+%function o = write(o, fid)
+% Write a Table object
 %
 % INPUTS
-%   none
+%   fid - int, file id
 %
 % OUTPUTS
-%   none
+%   o   - this
 %
 % SPECIAL REQUIREMENTS
 %   none
@@ -31,10 +31,7 @@ function write(o, fid, texIndent)
 assert(fid > 0);
 assert(isnumeric(texIndent));
 
-fprintf(fid, '%d\% Page Object\n', texIndent);
-fprintf(fid, '%d\newpage\n', texIndent);
+fprintf(fid, '%% Page Object\n');
 
-o.sections.write(fid, texIndent+2);
-
-fprintf(fid, '%d\% End Page Object\n', texIndent);
+fprintf(fid, '%% End Page Object\n');
 end

@@ -23,9 +23,7 @@ function o = section(varargin)
 o = struct;
 o.align = 't';
 o.elements = elements();
-o.rows = 1;
 o.cols = 1;
-
 
 if nargin == 1
     assert(isa(varargin{1}, 'section'),['With one arg to Section constructor, ' ...
@@ -55,4 +53,3 @@ end
 % Create section object
 o = class(o, 'section');
 end
-

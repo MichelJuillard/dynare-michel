@@ -30,10 +30,5 @@ function p = addSection(p, varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(isa(p, 'page'), 'First argument must be a page object');
-if nargin == 1
-    p.sections = p.sections.addSection();
-elseif nargin == 2 || nargin == 3
-    p.sections = p.sections.addSection(varargin{:});
-end
+p.sections = p.sections.addSection(varargin{:});
 end

@@ -18,10 +18,5 @@ function e = addTable(e, varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(nargin >= 1 && nargin <= 3)
-if nargin == 1
-    e.objArray = e.objArray.addObj(table());
-else
-    e.objArray = e.objArray.addObj(varargin{:});
-end
+e.objArray = e.objArray.addObj(table(varargin{:}));
 end

@@ -1,13 +1,12 @@
-function write(o, fid, indent)
-%function write(o, fid, indent)
+function o = write(o, fid)
+%function o = write(o, fid)
 % Write Section object
 %
 % INPUTS
 %   fid - int, file id
-%   indent - char, number of spaces to indent tex code
 %
 % OUTPUTS
-%   none
+%   o   - this
 %
 % SPECIAL REQUIREMENTS
 %   none
@@ -31,14 +30,30 @@ function write(o, fid, indent)
 
 assert(fid ~= -1);
 
-fprintf(fid, '\n%s%% Section Object\n', indent);
-fprintf(fid, '%s\\noindent\\begin{minipage}[%s]{0.32\\hsize}\n', indent, o.align);
+fprintf(fid, '%% Section Object\n');
+fprintf(fid, '\\begin{table}[%shtpb]\n', o.align);
+fprintf(fid, '\\resizebox{\\textwidth}{!}{\n');
+fprintf(fid, '\\begin{tabular}{');
+for i=1:o.cols
+    fprintf(fid, 'c');
+end
+fprintf(fid, '}\n');
+
+% Calculate scaling factor
+%sf = round(100/o.cols)/100-.01;
 
 ne = numElements(o);
 for i=1:ne
-    o.elements(i).write(fid, addIndentation(indent));
+    o.elements(i).write(fid);
+    if rem(i, o.cols)
+        fprintf(fid, ' & ');
+    else
+        fprintf(fid, '\\\\\n');
+    end
 end
 
-fprintf(fid, '%s\\end{minipage}\n', indent);
-fprintf(fid, '%s%% End Section Object\n\n', indent);
+fprintf(fid, '\\end{tabular}\n');
+fprintf(fid, '}\n');
+fprintf(fid, '\\end{table}\n');
+fprintf(fid, '%% End Section Object\n\n');
 end

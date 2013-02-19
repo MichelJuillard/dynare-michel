@@ -18,10 +18,11 @@ function ps = addPage(ps, varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(nargin >= 1 && nargin <= 3)
-if nargin == 1
-    ps.objArray = ps.objArray.addObj(page());
-else
-    ps.objArray = ps.objArray.addObj(varargin{:});
-end
+ps.objArray = ps.objArray.addObj(page(varargin{:}));
+%assert(nargin >= 1 && nargin <= 3)
+%if nargin == 1
+%    ps.objArray = ps.objArray.addObj(page());
+%else
+%    ps.objArray = ps.objArray.addObj(varargin{:});
+%end
 end

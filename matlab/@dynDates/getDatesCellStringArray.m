@@ -1,11 +1,12 @@
-function spaces=addIndentation(spaces)
-% Return new level of indentation for latex output
+function m = getDatesCellStringArray(dd)
+%function m = getDatesCellStringArray(dd)
+% Returns a cell array of strings containing the dates
 %
 % INPUTS
-%   spaces - char, current level of indentation
+%   dd - dynDates object
 %
 % OUTPUTS
-%   spaces - char, new level of indentation
+%   m  - cell array of strings
 %
 % SPECIAL REQUIREMENTS
 %   none
@@ -27,5 +28,26 @@ function spaces=addIndentation(spaces)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-spaces = [spaces '    '];
+dateSep = '';
+switch dd.freq
+    case 1
+    case 4
+        dateSep = 'q';
+    case 12
+        dateSep = 'm';
+    case 52
+        dateSep = 'w';
+    otherwise
+        error('Unknown frequency %d', dd.freq);
+end
+
+m = cell(0);
+for i = 1:dd.ndat
+    if isempty(dateSep)
+        newdate = num2str(dd.time(i,1));
+    else
+        newdate = [num2str(dd.time(i,1)) dateSep num2str(dd.time(i,2))];
+    end
+    m = { m{:} newdate };
+end
 end

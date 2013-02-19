@@ -30,9 +30,19 @@ function display(o)
 
 name = 'report.page.section.graph';
 disp(' ');
-disp([name '.caption = ']);
+disp([name '.title = ']);
 disp(' ');
-disp(['     ''' o.caption '''']);
+disp(['     ''' o.title '''']);
+
+disp(' ');
+disp([name '.xlabel = ']);
+disp(' ');
+disp(['     ''' o.xlabel '''']);
+
+disp(' ');
+disp([name '.ylabel = ']);
+disp(' ');
+disp(['     ''' o.ylabel '''']);
 
 disp(' ');
 disp([name '.footnote = ']);
@@ -40,7 +50,32 @@ disp(' ');
 disp(['     ''' o.footnote '''']);
 
 disp(' ');
-disp([name '.filename = ']);
+disp([name '.figname = ']);
 disp(' ');
-disp(['     ''' o.filename '''']);
+disp(['     ''' o.figname '''']);
+
+disp(' ');
+disp([name '.data = ']);
+disp(' ');
+display(o.data);
+
+disp(' ');
+disp([name '.seriestoplot = ']);
+disp(' ');
+disp(o.seriestoplot);
+
+disp(' ');
+disp([name '.config = ']);
+disp(' ');
+disp(['     ''' o.config '''']);
+
+disp(' ');
+disp([name '.legend = ']);
+disp(' ');
+disp(o.legend);
+
+disp(' ');
+disp([name '.shade = ']);
+disp(' ');
+disp(o.shade);
 end

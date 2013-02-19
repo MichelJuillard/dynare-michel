@@ -23,13 +23,6 @@ switch S(1).type
         switch S(1).subs
             case fieldnames(A)
                 A = A.(S(1).subs);
-            case {'write'}
-                if areParensNext(S)
-                    write(A, S(2).subs{:})
-                    S = shiftS(S);
-                else
-                    assert(false);
-                end
             case methods(A)
                 if areParensNext(S)
                     A = feval(S(1).subs, A, S(2).subs{:});

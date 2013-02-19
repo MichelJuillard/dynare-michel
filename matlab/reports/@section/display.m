@@ -35,8 +35,12 @@ disp(' ');
 disp(['     ''' o.align '''']);
 
 disp(' ');
+disp([name '.cols = ']);
+disp(' ');
+disp(o.cols);
+
+disp(' ');
 disp([name '.elements = ']);
 disp(' ');
 disp(o.elements.getElements());
-
 end
