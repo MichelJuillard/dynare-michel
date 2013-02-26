@@ -687,6 +687,9 @@ line numbering directives.
 Instructs Dynare to no create a logfile of this run in
 @file{@var{FILENAME}.log}. The default is to create the logfile.
 
+@item nowarn
+Suppresses all warnings.
+
 @item warn_uninit
 Display a warning for each variable or parameter which is not
 initialized. @xref{Parameter initialization}, or

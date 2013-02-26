@@ -10,7 +10,7 @@ function warning_config()
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2008-2012 Dynare Team
+% Copyright (C) 2008-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -55,3 +55,5 @@ else
     % interface to set seed of random number generators
     warning('off', 'MATLAB:RandStream:ActivatingLegacyGenerators');
 end
+
+lastwarn('') % Reset lastwarn, used to determine later if a warning has been emitted
