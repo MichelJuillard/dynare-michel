@@ -11,7 +11,7 @@ function global_initialization()
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2012 Dynare Team
+% Copyright (C) 2003-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -33,7 +33,6 @@ global oo_ M_ options_ estim_params_ bayestopt_ estimation_info ex0_ ys0_  ex_de
 estim_params_ = [];
 bayestopt_ = [];
 options_.datafile = '';
-options_.verbosity = 1;
 options_.terminal_condition = 0;
 options_.rplottype = 0;
 options_.smpl = 0;
