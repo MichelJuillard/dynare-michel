@@ -4432,19 +4432,6 @@ shocks are set to the posterior mean.
 Depending on the options, @code{estimation} stores results in various
 fields of the @code{oo_} structure, described below.
 
-@customhead{Running the smoother with calibrated parameters}
-
-It is possible to compute smoothed value of the endogenous variables
-and the shocks with calibrated parameters, without estimation
-proper. For this usage, there should be no @code{estimated_params}
-block. Observed variables must be declared. A dataset must be
-specified in the @code{estimation} instruction. In addition, use the
-following options:
-@code{mode_compute=0,mh_replic=0,smoother}. Currently, there is no
-specific output for this usage of the @code{estimation} command. The
-results are made available in fields of @code{oo_} structure. An
-example is available in @file{./tests/smoother/calibrated_model.mod}.
-
 @end deffn
 
 In the following variables, we will adopt the following shortcuts for
