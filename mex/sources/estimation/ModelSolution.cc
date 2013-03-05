@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2012 Dynare Team
+ * Copyright (C) 2010-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -37,7 +37,7 @@ ModelSolution::ModelSolution(const std::string &dynamicDllFile,  size_t n_endo_a
   n_jcols(n_exo+n_endo+ zeta_back_arg.size() /*nsPred*/ + zeta_fwrd_arg.size() /*nsForw*/ +2*zeta_mixed_arg.size()),
   jacobian(n_endo, n_jcols), residual(n_endo), Mx(1, n_exo),
   decisionRules(n_endo_arg, n_exo_arg, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, INqz_criterium),
-  dynamicDLLp(dynamicDllFile, n_exo),
+  dynamicDLLp(dynamicDllFile),
   llXsteadyState(n_jcols-n_exo)
 {
   Mx.setAll(0.0);

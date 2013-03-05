@@ -44,7 +44,6 @@ class DynamicModelDLL
 {
 private:
   DynamicFn Dynamic; // pointer to the Dynamic function in DLL
-  const size_t n_exog; // no of exogenous
 #if defined(_WIN32) || defined(__CYGWIN32__)
   HINSTANCE dynamicHinstance;  // DLL instance pointer in Windows
 #else
@@ -53,7 +52,7 @@ private:
 
 public:
   // construct and load Dynamic model DLL
-  DynamicModelDLL(const std::string &dynamicDllFile, size_t n_exog_arg) throw (TSException);
+  DynamicModelDLL(const std::string &dynamicDllFile) throw (TSException);
   virtual ~DynamicModelDLL();
 
   //! evaluate Dynamic model DLL

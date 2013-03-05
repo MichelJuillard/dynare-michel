@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2012 Dynare Team
+ * Copyright (C) 2010-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -23,8 +23,7 @@
 
 using namespace std;
 
-DynamicModelDLL::DynamicModelDLL(const std::string &dynamicDllFile, size_t n_exog_arg) throw (TSException) :
-  n_exog(n_exog_arg)
+DynamicModelDLL::DynamicModelDLL(const std::string &dynamicDllFile) throw (TSException)
 {
   std::string fName;
 #if !defined(__CYGWIN32__) && !defined(_WIN32)
