@@ -24,7 +24,7 @@ function myoutput=prior_posterior_statistics_core(myinputs,fpar,B,whoiam, ThisMa
 % SPECIAL REQUIREMENTS.
 %   None.
 
-% Copyright (C) 2005-2012 Dynare Team
+% Copyright (C) 2005-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -134,8 +134,10 @@ if run_smoother
   stock_smooth=NaN(endo_nbr,gend,MAX_nsmoo);
   stock_update=NaN(endo_nbr,gend,MAX_nsmoo);
   stock_innov=NaN(M_.exo_nbr,gend,MAX_ninno);  
-  stock_forcst_mean= NaN(endo_nbr,horizon+maxlag,MAX_nforc1);
-  stock_forcst_point = NaN(endo_nbr,horizon+maxlag,MAX_nforc2);
+  if horizon
+      stock_forcst_mean= NaN(endo_nbr,horizon+maxlag,MAX_nforc1);
+      stock_forcst_point = NaN(endo_nbr,horizon+maxlag,MAX_nforc2);
+  end
 end
 if nvn
   stock_error = NaN(endo_nbr,gend,MAX_nerro);
