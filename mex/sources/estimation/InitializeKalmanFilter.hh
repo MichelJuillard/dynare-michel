@@ -43,7 +43,7 @@ public:
   /*!
     \param[in] zeta_varobs_back_mixed_arg The union of indices of observed, backward and mixed variables
   */
-  InitializeKalmanFilter(const std::string &dynamicDllFile, size_t n_endo, size_t n_exo, const std::vector<size_t> &zeta_fwrd_arg,
+  InitializeKalmanFilter(const std::string &basename, size_t n_endo, size_t n_exo, const std::vector<size_t> &zeta_fwrd_arg,
                          const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg,
                          const std::vector<size_t> &zeta_varobs_back_mixed_arg,
                          const std::vector<size_t> &varobs_arg,

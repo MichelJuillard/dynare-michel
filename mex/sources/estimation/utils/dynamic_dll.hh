@@ -52,7 +52,7 @@ private:
 
 public:
   // construct and load Dynamic model DLL
-  DynamicModelDLL(const std::string &dynamicDllFile) throw (TSException);
+  DynamicModelDLL(const std::string &basename) throw (TSException);
   virtual ~DynamicModelDLL();
 
   //! evaluate Dynamic model DLL

@@ -30,7 +30,7 @@ InitializeKalmanFilter::~InitializeKalmanFilter()
 {
 }
 
-InitializeKalmanFilter::InitializeKalmanFilter(const std::string &dynamicDllFile, size_t n_endo_arg, size_t n_exo_arg,
+InitializeKalmanFilter::InitializeKalmanFilter(const std::string &basename, size_t n_endo_arg, size_t n_exo_arg,
                                                const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg,
                                                const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg,
                                                const std::vector<size_t> &zeta_varobs_back_mixed_arg,
@@ -42,7 +42,7 @@ InitializeKalmanFilter::InitializeKalmanFilter(const std::string &dynamicDllFile
   lyapunov_tol(lyapunov_tol_arg),
   zeta_varobs_back_mixed(zeta_varobs_back_mixed_arg),
   detrendData(varobs_arg, noconstant_arg),
-  modelSolution(dynamicDllFile, n_endo_arg, n_exo_arg, zeta_fwrd_arg, zeta_back_arg,
+  modelSolution(basename, n_endo_arg, n_exo_arg, zeta_fwrd_arg, zeta_back_arg,
                 zeta_mixed_arg, zeta_static_arg, qz_criterium_arg),
   discLyapFast(zeta_varobs_back_mixed.size()),
   g_x(n_endo_arg, zeta_back_arg.size() + zeta_mixed_arg.size()),

@@ -38,7 +38,7 @@ class ModelSolution
 {
 
 public:
-  ModelSolution(const std::string &dynamicDllFile,  size_t n_endo, size_t n_exo, const std::vector<size_t> &zeta_fwrd_arg,
+  ModelSolution(const std::string &basename,  size_t n_endo, size_t n_exo, const std::vector<size_t> &zeta_fwrd_arg,
                 const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
                 const std::vector<size_t> &zeta_static_arg, double qz_criterium);
   virtual ~ModelSolution() {};

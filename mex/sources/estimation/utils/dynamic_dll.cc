@@ -23,14 +23,14 @@
 
 using namespace std;
 
-DynamicModelDLL::DynamicModelDLL(const std::string &dynamicDllFile) throw (TSException)
+DynamicModelDLL::DynamicModelDLL(const std::string &basename) throw (TSException)
 {
   std::string fName;
 #if !defined(__CYGWIN32__) && !defined(_WIN32)
-  if (dynamicDllFile[0] != '/')
+  if (basename[0] != '/')
     fName = "./";
 #endif
-  fName += dynamicDllFile;
+  fName += basename + "_dynamic" + MEXEXT;
 
   try
     {

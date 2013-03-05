@@ -650,10 +650,8 @@ logMCMCposterior(VectorConstView &estParams, const MatrixConstView &data,
   // Construct arguments of constructor of LogLikelihoodMain
   char *fName = mxArrayToString(mxGetField(M_, 0, "fname"));
   std::string resultsFileStem(fName);
-  std::string dynamicDllFile(fName);
+  std::string basename(fName);
   mxFree(fName);
-  dynamicDllFile += "_dynamic";
-  dynamicDllFile += MEXEXT;
 
   size_t n_endo = (size_t) *mxGetPr(mxGetField(M_, 0, "endo_nbr"));
   size_t n_exo = (size_t) *mxGetPr(mxGetField(M_, 0, "exo_nbr"));
@@ -716,7 +714,7 @@ logMCMCposterior(VectorConstView &estParams, const MatrixConstView &data,
 
   // Allocate LogPosteriorDensity object
   int info;
-  LogPosteriorDensity lpd(dynamicDllFile, epd, n_endo, n_exo, zeta_fwrd, zeta_back, zeta_mixed, zeta_static,
+  LogPosteriorDensity lpd(basename, epd, n_endo, n_exo, zeta_fwrd, zeta_back, zeta_mixed, zeta_static,
                           qz_criterium, varobs, riccati_tol, lyapunov_tol, noconstant, info);
 
   // Construct MHMCMC Sampler

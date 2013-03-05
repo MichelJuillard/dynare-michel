@@ -31,7 +31,7 @@ KalmanFilter::~KalmanFilter()
 
 }
 
-KalmanFilter::KalmanFilter(const std::string &dynamicDllFile, size_t n_endo, size_t n_exo,
+KalmanFilter::KalmanFilter(const std::string &basename, size_t n_endo, size_t n_exo,
                            const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg,
                            const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg,
                            double qz_criterium_arg, const std::vector<size_t> &varobs_arg,
@@ -44,7 +44,7 @@ KalmanFilter::KalmanFilter(const std::string &dynamicDllFile, size_t n_endo, siz
   Finv(varobs_arg.size(), varobs_arg.size()), K(zeta_varobs_back_mixed.size(), varobs_arg.size()), KFinv(zeta_varobs_back_mixed.size(), varobs_arg.size()),
   oldKFinv(zeta_varobs_back_mixed.size(), varobs_arg.size()), a_init(zeta_varobs_back_mixed.size()),
   a_new(zeta_varobs_back_mixed.size()), vt(varobs_arg.size()), vtFinv(varobs_arg.size()), riccati_tol(riccati_tol_arg),
-  initKalmanFilter(dynamicDllFile, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg,
+  initKalmanFilter(basename, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg,
                    zeta_static_arg, zeta_varobs_back_mixed, varobs_arg, qz_criterium_arg, lyapunov_tol_arg, noconstant_arg, info),
   FUTP(varobs_arg.size()*(varobs_arg.size()+1)/2)
 {

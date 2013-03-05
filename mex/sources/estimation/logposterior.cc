@@ -116,10 +116,8 @@ logposterior(VEC1 &estParams, const MatrixConstView &data,
 
   // Construct arguments of constructor of LogLikelihoodMain
   char *fName = mxArrayToString(mxGetField(M_, 0, "fname"));
-  std::string dynamicDllFile(fName);
+  std::string basename(fName);
   mxFree(fName);
-  dynamicDllFile += "_dynamic";
-  dynamicDllFile += MEXEXT;
 
   size_t n_endo = (size_t) *mxGetPr(mxGetField(M_, 0, "endo_nbr"));
   size_t n_exo = (size_t) *mxGetPr(mxGetField(M_, 0, "exo_nbr"));
@@ -184,7 +182,7 @@ logposterior(VEC1 &estParams, const MatrixConstView &data,
   bool noconstant = (bool) *mxGetPr(mxGetField(options_, 0, "noconstant"));
 
   // Allocate LogPosteriorDensity object
-  LogPosteriorDensity lpd(dynamicDllFile, epd, n_endo, n_exo, zeta_fwrd, zeta_back, zeta_mixed, zeta_static,
+  LogPosteriorDensity lpd(basename, epd, n_endo, n_exo, zeta_fwrd, zeta_back, zeta_mixed, zeta_static,
                           qz_criterium, varobs, riccati_tol, lyapunov_tol, noconstant, info);
 
   // Construct arguments of compute() method
