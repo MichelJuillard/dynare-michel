@@ -38,6 +38,7 @@ ModelSolution::ModelSolution(const std::string &basename,  size_t n_endo_arg, si
   jacobian(n_endo, n_jcols), residual(n_endo), Mx(1, n_exo),
   decisionRules(n_endo_arg, n_exo_arg, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg, zeta_static_arg, INqz_criterium),
   dynamicDLLp(basename),
+  steadyStateSolver(basename, n_endo),
   llXsteadyState(n_jcols-n_exo)
 {
   Mx.setAll(0.0);

@@ -38,6 +38,10 @@ EXTRA_DIST = \
 	Proposal.cc \
 	Proposal.hh \
 	RandomWalkMetropolisHastings.hh \
+	SteadyStateSolver.cc \
+	SteadyStateSolver.hh \
 	utils/dynamic_dll.cc \
 	utils/dynamic_dll.hh \
+	utils/static_dll.cc \
+	utils/static_dll.hh \
 	utils/ts_exception.h

@@ -10,7 +10,7 @@ endif
 
 if HAVE_GSL
 if HAVE_MATIO
-SUBDIRS += ms_sbvar
+SUBDIRS += ms_sbvar estimation
 endif
 endif
 
@@ -18,7 +18,4 @@ if HAVE_SLICOT
 SUBDIRS += kalman_steady_state
 endif
 
-if HAVE_MATIO
-SUBDIRS += estimation
-endif
 endif

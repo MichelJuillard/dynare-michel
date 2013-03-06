@@ -1,9 +1,9 @@
 noinst_PROGRAMS = logposterior logMHMCMCposterior
 
 # We use shared flags so that automake does not compile things two times
-AM_CPPFLAGS += -I$(top_srcdir)/../../sources/estimation/libmat -I$(top_srcdir)/../../sources/estimation/utils $(CPPFLAGS_MATIO) $(BOOST_CPPFLAGS)
-AM_LDFLAGS += $(LDFLAGS_MATIO) $(BOOST_LDFLAGS)
-LDADD = $(LIBADD_DLOPEN) $(LIBADD_MATIO)
+AM_CPPFLAGS += -I$(top_srcdir)/../../sources/estimation/libmat -I$(top_srcdir)/../../sources/estimation/utils $(CPPFLAGS_MATIO) $(BOOST_CPPFLAGS) $(GSL_CPPFLAGS)
+AM_LDFLAGS += $(LDFLAGS_MATIO) $(BOOST_LDFLAGS) $(GSL_LDFLAGS)
+LDADD = $(LIBADD_DLOPEN) $(LIBADD_MATIO) $(GSL_LIBS)
 
 TOPDIR = $(top_srcdir)/../../sources/estimation
 
@@ -52,8 +52,12 @@ COMMON_SRCS = \
 	$(TOPDIR)/ModelSolution.hh \
 	$(TOPDIR)/Prior.cc \
 	$(TOPDIR)/Prior.hh \
+	$(TOPDIR)/SteadyStateSolver.cc \
+	$(TOPDIR)/SteadyStateSolver.hh \
 	$(TOPDIR)/utils/dynamic_dll.cc \
-	$(TOPDIR)/utils/dynamic_dll.hh
+	$(TOPDIR)/utils/dynamic_dll.hh \
+	$(TOPDIR)/utils/static_dll.cc \
+	$(TOPDIR)/utils/static_dll.hh
 
 nodist_logposterior_SOURCES = \
 	$(COMMON_SRCS) \

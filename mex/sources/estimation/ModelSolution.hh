@@ -27,6 +27,7 @@
 #define ModelSolution_5ADFF920_9C74_46f5_9FE9_88AD4D4BBF19__INCLUDED_
 
 #include "DecisionRules.hh"
+#include "SteadyStateSolver.hh"
 #include "dynamic_dll.hh"
 
 /**
@@ -43,10 +44,10 @@ public:
                 const std::vector<size_t> &zeta_static_arg, double qz_criterium);
   virtual ~ModelSolution() {};
   template <class Vec1, class Vec2, class Mat1, class Mat2>
-  void compute(Vec1 &steadyState, const Vec2 &deepParams, Mat1 &ghx, Mat2 &ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException)
+  void compute(Vec1 &steadyState, const Vec2 &deepParams, Mat1 &ghx, Mat2 &ghu) throw (DecisionRules::BlanchardKahnException, GeneralizedSchurDecomposition::GSDException, SteadyStateSolver::SteadyStateException)
   {
     // compute Steady State
-    ComputeSteadyState(steadyState, deepParams);
+    steadyStateSolver.compute(steadyState, Mx, deepParams);
 
     // then get jacobian and
 
@@ -64,6 +65,7 @@ private:
   Matrix Mx;
   DecisionRules decisionRules;
   DynamicModelDLL dynamicDLLp;
+  SteadyStateSolver steadyStateSolver;
   Vector llXsteadyState;
   //Matrix jacobian;
   template <class Vec1, class Vec2, class Mat1, class Mat2>
@@ -88,13 +90,6 @@ private:
     //compute rules
     decisionRules.compute(jacobian, ghx, ghu);
   }
-  template <class Vec1, class Vec2>
-  void ComputeSteadyState(Vec1 &steadyState, const Vec2 &deepParams)
-  {
-    // does nothig for time being.
-  }
-
-
 };
 
 #endif // !defined(5ADFF920_9C74_46f5_9FE9_88AD4D4BBF19__INCLUDED_)
