@@ -53,38 +53,24 @@ public:
                const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg,
                double qz_criterium_arg, const std::vector<size_t> &varobs_arg,
                double riccati_tol_arg, double lyapunov_tol_arg,
-               bool noconstant_arg, int &info);
+               bool noconstant_arg);
 
   template <class Vec1, class Vec2, class Mat1>
   double compute(const MatrixConstView &dataView, Vec1 &steadyState,
                  const Mat1 &Q, const Matrix &H, const Vec2 &deepParams,
-                 VectorView &vll, MatrixView &detrendedDataView, size_t start, size_t period,
-                 double &penalty, int &info)
+                 VectorView &vll, MatrixView &detrendedDataView, size_t start, size_t period)
   {
     double lik = INFINITY;
-    try
-      {
+
 	if (period == 0) // initialise all KF matrices
 	  initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T, Pstar, Pinf,
-				      penalty, dataView, detrendedDataView, info);
+                                dataView, detrendedDataView);
 	else             // initialise parameter dependent KF matrices only but not Ps
 	  initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T,
-				      penalty, dataView, detrendedDataView, info);
+                                dataView, detrendedDataView);
 
-	lik = filter(detrendedDataView, H, vll, start, info);
-      }
-    catch (const DecisionRules::BlanchardKahnException &bke)
-      {
-	info = 22;
-	return penalty;
-      }
-
-    if (info != 0)
-      return penalty;
-    else
-      return lik;
-
-  };
+  return filter(detrendedDataView, H, vll, start);
+  }
 
 private:
   const std::vector<size_t> zeta_varobs_back_mixed;
@@ -106,7 +92,7 @@ private:
   Vector FUTP; // F upper triangle packed as vector FUTP(i + (j-1)*j/2) = F(i,j) for 1<=i<=j;
 
   // Method
-  double filter(const MatrixView &detrendedDataView,  const Matrix &H, VectorView &vll, size_t start, int &info);
+  double filter(const MatrixView &detrendedDataView,  const Matrix &H, VectorView &vll, size_t start);
 
 };
 

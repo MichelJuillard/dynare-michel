@@ -114,7 +114,7 @@ fillEstParamsInfo(const mxArray *estim_params_info, EstimatedParameter::pType ty
 int
 sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
            VectorView &steadyState, VectorConstView &estParams, VectorView &deepParams, const MatrixConstView &data,
-           MatrixView &Q, Matrix &H, size_t presampleStart, int &info, const VectorConstView &nruns,
+           MatrixView &Q, Matrix &H, size_t presampleStart, const VectorConstView &nruns,
            size_t fblock, size_t nBlocks, Proposal pdd, EstimatedParametersDescription &epd,
            const std::string &resultsFileStem, size_t console_mode, size_t load_mh_file)
 {
@@ -397,7 +397,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
           try
             {
               jsux = rwmh.compute(mhLogPostDens, mhParamDraws, steadyState, startParams, deepParams, data, Q, H,
-                                  presampleStart, info, irun, currInitSizeArray, lpd, pdd, epd);
+                                  presampleStart, irun, currInitSizeArray, lpd, pdd, epd);
               irun = currInitSizeArray;
               sux += jsux*currInitSizeArray;
               j += currInitSizeArray; //j=j+1;
@@ -715,7 +715,7 @@ logMCMCposterior(VectorConstView &estParams, const MatrixConstView &data,
   // Allocate LogPosteriorDensity object
   int info;
   LogPosteriorDensity lpd(basename, epd, n_endo, n_exo, zeta_fwrd, zeta_back, zeta_mixed, zeta_static,
-                          qz_criterium, varobs, riccati_tol, lyapunov_tol, noconstant, info);
+                          qz_criterium, varobs, riccati_tol, lyapunov_tol, noconstant);
 
   // Construct MHMCMC Sampler
   RandomWalkMetropolisHastings rwmh(estParams.getSize());
@@ -727,7 +727,7 @@ logMCMCposterior(VectorConstView &estParams, const MatrixConstView &data,
   Proposal pdd(vJscale, D);
 
   //sample MHMCMC draws and get get last line run in the last MH block sub-array
-  int lastMHblockArrayLine = sampleMHMC(lpd, rwmh, steadyState, estParams, deepParams, data, Q, H, presample, info,
+  int lastMHblockArrayLine = sampleMHMC(lpd, rwmh, steadyState, estParams, deepParams, data, Q, H, presample,
                                         nMHruns, fblock, nBlocks, pdd, epd, resultsFileStem, console_mode, load_mh_file);
 
   // Cleanups

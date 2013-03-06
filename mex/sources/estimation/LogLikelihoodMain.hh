@@ -41,7 +41,7 @@ public:
                     const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg, const std::vector<size_t> &zeta_mixed_arg,
                     const std::vector<size_t> &zeta_static_arg, const double qz_criterium_arg, const std::vector<size_t> &varobs_arg,
                     double riccati_tol_arg, double lyapunov_tol_arg,
-                    bool noconstant_arg, int &info);
+                    bool noconstant_arg);
 
   /**
    * Compute method Inputs:
@@ -54,7 +54,7 @@ public:
 
   template <class VEC1, class VEC2>
   double compute(VEC1 &steadyState, VEC2 &estParams, VectorView &deepParams, const MatrixConstView &data, 
-		 MatrixView &Q, Matrix &H, size_t start, int &info)
+		 MatrixView &Q, Matrix &H, size_t start)
   {
     double logLikelihood = 0;
     for (size_t i = 0; i < estSubsamples.size(); ++i)
@@ -68,7 +68,7 @@ public:
 
 	VectorView vllView(vll, estSubsamples[i].startPeriod, estSubsamples[i].endPeriod-estSubsamples[i].startPeriod+1);
 	logLikelihood += logLikelihoodSubSample.compute(vSteadyState, dataView, estParams, deepParams,
-							Q, H, vllView, detrendedDataView, info, start, i);
+							Q, H, vllView, detrendedDataView, start, i);
       }
     return logLikelihood;
   };

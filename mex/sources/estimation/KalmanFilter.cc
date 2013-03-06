@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2012 Dynare Team
+ * Copyright (C) 2009-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -36,7 +36,7 @@ KalmanFilter::KalmanFilter(const std::string &basename, size_t n_endo, size_t n_
                            const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg,
                            double qz_criterium_arg, const std::vector<size_t> &varobs_arg,
                            double riccati_tol_arg, double lyapunov_tol_arg,
-                           bool noconstant_arg, int &info) :
+                           bool noconstant_arg) :
   zeta_varobs_back_mixed(compute_zeta_varobs_back_mixed(zeta_back_arg, zeta_mixed_arg, varobs_arg)),
   Z(varobs_arg.size(), zeta_varobs_back_mixed.size()), Zt(Z.getCols(), Z.getRows()), T(zeta_varobs_back_mixed.size()), R(zeta_varobs_back_mixed.size(), n_exo),
   Pstar(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()), Pinf(zeta_varobs_back_mixed.size(), zeta_varobs_back_mixed.size()),
@@ -45,7 +45,7 @@ KalmanFilter::KalmanFilter(const std::string &basename, size_t n_endo, size_t n_
   oldKFinv(zeta_varobs_back_mixed.size(), varobs_arg.size()), a_init(zeta_varobs_back_mixed.size()),
   a_new(zeta_varobs_back_mixed.size()), vt(varobs_arg.size()), vtFinv(varobs_arg.size()), riccati_tol(riccati_tol_arg),
   initKalmanFilter(basename, n_endo, n_exo, zeta_fwrd_arg, zeta_back_arg, zeta_mixed_arg,
-                   zeta_static_arg, zeta_varobs_back_mixed, varobs_arg, qz_criterium_arg, lyapunov_tol_arg, noconstant_arg, info),
+                   zeta_static_arg, zeta_varobs_back_mixed, varobs_arg, qz_criterium_arg, lyapunov_tol_arg, noconstant_arg),
   FUTP(varobs_arg.size()*(varobs_arg.size()+1)/2)
 {
   Z.setAll(0.0);
@@ -79,12 +79,14 @@ KalmanFilter::compute_zeta_varobs_back_mixed(const std::vector<size_t> &zeta_bac
  * Multi-variate standard Kalman Filter
  */
 double
-KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, VectorView &vll, size_t start, int &info)
+KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, VectorView &vll, size_t start)
 {
   double loglik = 0.0, ll, logFdet = 0.0, Fdet, dvtFinvVt;
   size_t p = Finv.getRows();
   bool nonstationary = true;
   a_init.setAll(0.0);
+  int info;
+  
   for (size_t t = 0; t < detrendedDataView.getCols(); ++t)
     {
       if (nonstationary)
@@ -106,12 +108,8 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
               FUTP(i + (j-1)*j/2 -1) = F(i-1, j-1);
 
           info = lapack::choleskySolver(FUTP, Finv, "U"); // F now contains its Chol decomposition!
-          if (info < 0)
-            {
-              std::cout << "Info:" << info << std::endl;
-              std::cout << "t:" << t << std::endl;
-              return 0;
-            }
+          assert(info >= 0);
+
           if (info > 0)
             {
               //enforce Pstar symmetry with P=(P+P')/2=0.5P+0.5P'
@@ -136,11 +134,10 @@ KalmanFilter::filter(const MatrixView &detrendedDataView,  const Matrix &H, Vect
                 for (size_t j = i; j <= p; ++j)
                   FUTP(i + (j-1)*j/2 -1) = F(i-1, j-1);
 
-              info = lapack::choleskySolver(FUTP, Finv, "U"); // F now contains its Chol decomposition!
-              if (info != 0)
-                {
-                  return 0;
-                }
+              info = lapack::choleskySolver(FUTP, Finv, "U"); // F now contains
+                                                              // its Chol
+                                                              // decomposition!
+              assert(info == 0);
             }
           // KFinv gain matrix
           blas::symm("R", "U", 1.0, Finv, K, 0.0, KFinv);

@@ -48,31 +48,31 @@ public:
                          const std::vector<size_t> &zeta_varobs_back_mixed_arg,
                          const std::vector<size_t> &varobs_arg,
                          double qz_criterium_arg, double lyapunov_tol_arg,
-                         bool noconstant_arg, int &info);
+                         bool noconstant_arg);
   virtual ~InitializeKalmanFilter();
   // initialise parameter dependent KF matrices only but not Ps
   template <class Vec1, class Vec2, class Mat1, class Mat2>
   void initialize(Vec1 &steadyState, const Vec2 &deepParams, Mat1 &R,
 				     const Mat2 &Q, Matrix &RQRt, Matrix &T,
-				     double &penalty, const MatrixConstView &dataView,
-				     MatrixView &detrendedDataView, int &info)
+				     const MatrixConstView &dataView,
+				     MatrixView &detrendedDataView)
   {
     modelSolution.compute(steadyState, deepParams, g_x, g_u);
     detrendData.detrend(steadyState, dataView, detrendedDataView);
 
-    setT(T, info);
-    setRQR(R, Q, RQRt, info);
+    setT(T);
+    setRQR(R, Q, RQRt);
   }
 
   // initialise all KF matrices
   template <class Vec1, class Vec2, class Mat1, class Mat2>
   void initialize(Vec1 &steadyState, const Vec2 &deepParams, Mat1 &R,
 				     const Mat2 &Q, Matrix &RQRt, Matrix &T, Matrix &Pstar, Matrix &Pinf,
-				     double &penalty, const MatrixConstView &dataView,
-				     MatrixView &detrendedDataView, int &info)
+				     const MatrixConstView &dataView,
+				     MatrixView &detrendedDataView)
   {
-    initialize(steadyState, deepParams, R, Q, RQRt, T, penalty, dataView, detrendedDataView, info);
-    setPstar(Pstar, Pinf, T, RQRt, info);
+    initialize(steadyState, deepParams, R, Q, RQRt, T, dataView, detrendedDataView);
+    setPstar(Pstar, Pinf, T, RQRt);
   }
 
 private:
@@ -87,10 +87,10 @@ private:
   Matrix g_x;
   Matrix g_u;
   Matrix Rt, RQ;
-  void setT(Matrix &T, int &info);
+  void setT(Matrix &T);
 
   template <class Mat1, class Mat2>
-  void setRQR(Mat1 &R, const Mat2 &Q, Matrix &RQRt, int &info)
+  void setRQR(Mat1 &R, const Mat2 &Q, Matrix &RQRt)
   {
     mat::assignByVectors(R, mat::nullVec, mat::nullVec, g_u, zeta_varobs_back_mixed, mat::nullVec);
 
@@ -98,7 +98,7 @@ private:
     blas::gemm("N", "N", 1.0, R, Q, 0.0, RQ); // R*Q
     blas::gemm("N", "T", 1.0, RQ, R, 0.0, RQRt); // R*Q*R'
   }
-  void setPstar(Matrix &Pstar, Matrix &Pinf, const Matrix &T, const Matrix &RQRt, int &info);
+  void setPstar(Matrix &Pstar, Matrix &Pinf, const Matrix &T, const Matrix &RQRt) throw (DiscLyapFast::DLPException);
 
 };
 

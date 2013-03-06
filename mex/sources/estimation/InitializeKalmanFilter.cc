@@ -37,8 +37,7 @@ InitializeKalmanFilter::InitializeKalmanFilter(const std::string &basename, size
                                                const std::vector<size_t> &varobs_arg,
                                                double qz_criterium_arg,
                                                double lyapunov_tol_arg,
-                                               bool noconstant_arg,
-                                               int &info) :
+                                               bool noconstant_arg) :
   lyapunov_tol(lyapunov_tol_arg),
   zeta_varobs_back_mixed(zeta_varobs_back_mixed_arg),
   detrendData(varobs_arg, noconstant_arg),
@@ -60,7 +59,7 @@ InitializeKalmanFilter::InitializeKalmanFilter(const std::string &basename, size
 
 }
 void
-InitializeKalmanFilter::setT(Matrix &T, int &info)
+InitializeKalmanFilter::setT(Matrix &T)
 {
   // Initialize the empty columns of T to zero
   T.setAll(0.0);
@@ -68,31 +67,11 @@ InitializeKalmanFilter::setT(Matrix &T, int &info)
 }
 
 void
-InitializeKalmanFilter::setPstar(Matrix &Pstar, Matrix &Pinf, const Matrix &T, const Matrix &RQRt, int &info)
+InitializeKalmanFilter::setPstar(Matrix &Pstar, Matrix &Pinf, const Matrix &T, const Matrix &RQRt) throw (DiscLyapFast::DLPException)
 {
 
-  try
-    {
-      // disclyap_fast(T, RQR, Pstar, lyapunov_tol, 0 or 1 to check chol)
-      discLyapFast.solve_lyap(T, RQRt, Pstar, lyapunov_tol, 0);
+  discLyapFast.solve_lyap(T, RQRt, Pstar, lyapunov_tol, 0);
 
-      Pinf.setAll(0.0);
-    }
-  catch (const DiscLyapFast::DLPException &e)
-    {
-      if (e.info > 0) // The matrix is not positive definite in NormCholesky calculator
-        {
-          puts(e.message.c_str());
-          info = -1; //likelihood = penalty;
-          return;
-        }
-      else if (e.info < 0)
-        {
-          printf("Caugth unhandled TS exception with Pstar matrix: ");
-          puts(e.message.c_str());
-          info = -1; //likelihood = penalty;
-          throw;
-        }
-    }
+  Pinf.setAll(0.0);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2012 Dynare Team
+ * Copyright (C) 2010-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -47,7 +47,7 @@ public:
   template<class VEC1>
   double compute(VectorView &mhLogPostDens, MatrixView &mhParams, VEC1 &steadyState,
 		 Vector &estParams, VectorView &deepParams, const MatrixConstView &data, MatrixView &Q, Matrix &H,
-		 const size_t presampleStart, int &info, const size_t startDraw, size_t nMHruns,
+		 const size_t presampleStart, const size_t startDraw, size_t nMHruns,
 		 LogPosteriorDensity &lpd, Proposal &pDD, EstimatedParametersDescription &epd)
   {
     //streambuf *likbuf, *drawbuf *backup;
@@ -60,7 +60,7 @@ public:
     size_t count, accepted = 0;
     parDraw = estParams;
 
-    logpost = -lpd.compute(steadyState, estParams, deepParams, data, Q, H, presampleStart, info);
+    logpost = -lpd.compute(steadyState, estParams, deepParams, data, Q, H, presampleStart);
 
     for (size_t run = startDraw - 1; run < nMHruns; ++run)
       {
@@ -79,7 +79,7 @@ public:
 	  {
 	    try
 	      {
-		newLogpost = -lpd.compute(steadyState, newParDraw, deepParams, data, Q, H, presampleStart, info);
+		newLogpost = -lpd.compute(steadyState, newParDraw, deepParams, data, Q, H, presampleStart);
 	      }
 	    catch (const std::exception &e)
 	      {

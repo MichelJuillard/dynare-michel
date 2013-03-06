@@ -104,7 +104,7 @@ double
 logposterior(VEC1 &estParams, const MatrixConstView &data,
              const mxArray *options_, const mxArray *M_, const mxArray *estim_params_,
 	     const mxArray *bayestopt_, const mxArray *oo_, VEC2 &steadyState, double *trend_coeff,
-	     int &info, VectorView &deepParams, Matrix &H, MatrixView &Q)
+	     VectorView &deepParams, Matrix &H, MatrixView &Q)
 {
   double loglinear = *mxGetPr(mxGetField(options_, 0, "loglinear"));
   if (loglinear == 1)
@@ -183,12 +183,12 @@ logposterior(VEC1 &estParams, const MatrixConstView &data,
 
   // Allocate LogPosteriorDensity object
   LogPosteriorDensity lpd(basename, epd, n_endo, n_exo, zeta_fwrd, zeta_back, zeta_mixed, zeta_static,
-                          qz_criterium, varobs, riccati_tol, lyapunov_tol, noconstant, info);
+                          qz_criterium, varobs, riccati_tol, lyapunov_tol, noconstant);
 
   // Construct arguments of compute() method
 
   // Compute the posterior
-  double logPD = lpd.compute(steadyState, estParams, deepParams, data, Q, H, presample, info);
+  double logPD = lpd.compute(steadyState, estParams, deepParams, data, Q, H, presample);
 
   // Cleanups
   for (std::vector<EstimatedParameter>::iterator it = estParamsInfo.begin();
@@ -268,11 +268,10 @@ mexFunction(int nlhs, mxArray *plhs[],
   // Compute and return the value
   try
     {
-      int info;
       *lik = logposterior(estParams, data, options_, M_, estim_params_, bayestopt_, oo_,
-				steadyState, trend_coeff, info, deepParams, H, Q);
-      *info_mx = info;
-      *exit_flag = info;
+				steadyState, trend_coeff, deepParams, H, Q);
+      *info_mx = 0;
+      *exit_flag = 0;
     }
   catch (LogposteriorMexErrMsgTxtException e)
     {

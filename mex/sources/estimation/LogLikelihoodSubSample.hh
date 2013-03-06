@@ -39,35 +39,33 @@ public:
   LogLikelihoodSubSample(const std::string &basename, EstimatedParametersDescription &estiParDesc, size_t n_endo, size_t n_exo,
                          const std::vector<size_t> &zeta_fwrd_arg, const std::vector<size_t> &zeta_back_arg,
                          const std::vector<size_t> &zeta_mixed_arg, const std::vector<size_t> &zeta_static_arg, const double qz_criterium,
-                         const std::vector<size_t> &varobs_arg, double riccati_tol_in, double lyapunov_tol, bool noconstant_arg, int &info);
+                         const std::vector<size_t> &varobs_arg, double riccati_tol_in, double lyapunov_tol, bool noconstant_arg);
 
   template <class VEC1, class VEC2>
   double compute(VEC1 &steadyState, const MatrixConstView &dataView, VEC2 &estParams, VectorView &deepParams,
-		 MatrixView &Q, Matrix &H, VectorView &vll, MatrixView &detrendedDataView, int &info, size_t start, size_t period)
+		 MatrixView &Q, Matrix &H, VectorView &vll, MatrixView &detrendedDataView, size_t start, size_t period)
   {
-    penalty = startPenalty;
-    logLikelihood = startPenalty;
-
     updateParams(estParams, deepParams, Q, H, period);
-    if (info == 0)
-      logLikelihood = kalmanFilter.compute(dataView, steadyState,  Q, H, deepParams, vll, detrendedDataView, start, period, penalty,  info);
-    //  else
-    //    logLikelihood+=penalty;
 
-    return logLikelihood;
-
-  };
+    return kalmanFilter.compute(dataView, steadyState,  Q, H, deepParams, vll, detrendedDataView, start, period);
+  }
 
   virtual ~LogLikelihoodSubSample();
 
+  class UpdateParamsException
+  {
+  public:
+    double penalty;
+    UpdateParamsException(double penalty_arg) : penalty(penalty_arg)
+    {
+    }
+  };
+
 private:
-  double startPenalty, penalty;
-  double logLikelihood;
   EstimatedParametersDescription &estiParDesc;
   KalmanFilter kalmanFilter;
   VDVEigDecomposition eigQ;
   VDVEigDecomposition eigH;
-  int &info;
 
   // methods
   template <class VEC>
@@ -78,7 +76,6 @@ private:
     int test;
     bool found;
     std::vector<size_t>::const_iterator it;
-    info = 0;
 
     for (i = 0; i <  estParams.getSize(); ++i)
       {
@@ -108,13 +105,9 @@ private:
 		Q(k2, k1) = Q(k1, k2);
 		//   [CholQ,testQ] = chol(Q);
 		test = lapack::choleskyDecomp(Q, "L");
+                assert(test >= 0);
+                
 		if (test > 0)
-		  {
-		    mexPrintf("Caught unhandled exception with cholesky of Q matrix: ");
-		    logLikelihood = penalty;
-		    info = 1;
-		  }
-		else if (test < 0)
 		  {
 		    // The variance-covariance matrix of the structural innovations is not definite positive.
 		    // We have to compute the eigenvalues of this matrix in order to build the penalty.
@@ -129,8 +122,7 @@ private:
 			    delta -= evQ(i);
 		      }
 
-		    logLikelihood = penalty+delta;
-		    info = 43;
+		    throw UpdateParamsException(delta);
 		  } // if
 		break;
 
@@ -144,13 +136,9 @@ private:
 
 		//[CholH,testH] = chol(H);
 		test = lapack::choleskyDecomp(H, "L");
+		assert(test >= 0);
+
 		if (test > 0)
-		  {
-		    mexPrintf("Caught unhandled exception with cholesky of Q matrix: ");
-		    logLikelihood = penalty;
-		    info = 1;
-		  }
-		else if (test < 0)
 		  {
 		    // The variance-covariance matrix of the measurement errors is not definite positive.
 		    // We have to compute the eigenvalues of this matrix in order to build the penalty.
@@ -165,8 +153,7 @@ private:
 			  if (evH(i) < 0)
 			    delta -= evH(i);
 		      }
-		    logLikelihood = penalty+delta;
-		    info = 44;
+		    throw UpdateParamsException(delta);
 		  } //   end if
 		break;
 
@@ -176,8 +163,7 @@ private:
 		deepParams(k) = estParams(i);
 		break;
 	      default:
-		logLikelihood = penalty;
-		info = 1;
+                assert(false);
 	      } // end switch
 	  } // end found
       } //end for
