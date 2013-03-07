@@ -3,10 +3,10 @@ function o = createGraph(o)
 % Create the graph
 %
 % INPUTS
-%   none
+%   o   - Graph Object
 %
 % OUTPUTS
-%   none
+%   o   - Graph Object
 %
 % SPECIAL REQUIREMENTS
 %   none
@@ -37,9 +37,14 @@ end
 
 %o = readConfig(o);
 
+disp('creating plot..........');
 h = figure('visible','off');
 hold on;
 box on;
+if o.grid
+    grid on;
+    set(gca, 'GridLineStyle', '--');
+end
 %set(0, 'CurrentFigure',h);
 %set(h, 'PaperPositionMode', 'auto');
 %set(h, 'units', 'normalized', 'outerposition', [0 0 1 1]);
@@ -90,16 +95,18 @@ if ~isempty(o.ylabel)
 end
 
 if ~isempty(o.title)
-    title(['$\textbf{\large ' o.title '}$'],'Interpreter','LaTex');
+    title( o.title , 'interpreter', 'none', 'FontSize', 20);
 end
 drawnow;
 
 o.figname = ['figure-' num2str(cputime) '.tex'];
+disp('  converting to tex....');
 matlab2tikz('filename', o.figname, ...
             'showInfo', false, ...
             'showWarnings', false, ...
             'checkForUpdates', false);
 
+grid off;
 box off;
 hold off;
 close(h);

@@ -41,10 +41,18 @@ if strcmpi(o.orientation, 'landscape')
     fprintf(fid, ',landscape');
 end
 fprintf(fid, ']{geometry}\n');
-fprintf(fid, '\\usepackage{graphicx}\n');
-fprintf(fid, '\\usepackage{pdflscape}\n');
-fprintf(fid, '\\usepackage{pgf}\n');
-fprintf(fid, '\\usepackage{pgfplots}\n');
+fprintf(fid, '\\usepackage{graphicx, pdflscape, pgf, pgfplots}\n');
+fprintf(fid, ['\\makeatletter\n' ...
+              '\\def\\blfootnote{\\gdef\\@thefnmark{}\\@footnotetext}\n' ...
+              '\\makeatother\n']);
+if o.showdate
+    fprintf(fid, '\\usepackage{fancyhdr, datetime}\n');
+    fprintf(fid, '\\newdateformat{reportdate}{\\THEDAY\\ \\shortmonthname\\ \\THEYEAR}\n');
+    fprintf(fid, '\\pagestyle{fancy}\n');
+    fprintf(fid, '\\renewcommand{\\headrulewidth}{0pt}\n');
+    fprintf(fid, '\\renewcommand{\\footrulewidth}{0.5pt}\n');
+    fprintf(fid, '\\rfoot{\\scriptsize\\reportdate\\today\\ -- \\currenttime}\n');
+end
 fprintf(fid, '\\begin{document}\n');
 
 o.pages.write(fid);

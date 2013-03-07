@@ -44,6 +44,8 @@ o.data = '';
 o.seriestoplot = 'all';
 o.shade = ''; %{1959q1:1964q4}
 
+o.grid = true;
+
 o.legend = false;
 o.legend_location = 'SouthEast';
 o.legend_orientation = 'horizontal';

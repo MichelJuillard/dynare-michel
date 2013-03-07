@@ -34,10 +34,11 @@ o = struct;
 o.title = '';
 o.orientation = 'portrait';
 o.paper = 'a4';
-o.margin = '2cm';
+o.margin = '2.5cm';
 o.pages = pages();
 o.filename = 'report.tex';
 o.config = '';
+o.showdate = true;
 
 if nargin == 1
     assert(isa(varargin{1}, 'report'),['With one arg to Report constructor, ' ...

@@ -33,6 +33,7 @@ o = struct;
 o.paper = '';
 o.title = '';
 o.orientation = '';
+o.footnote = '';
 o.sections = sections();
 
 if nargin == 1

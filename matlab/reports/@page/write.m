@@ -32,8 +32,15 @@ assert(fid ~= -1);
 
 fprintf(fid, '\n%% Page Object\n');
 if ~isempty(o.title)
-    fprintf(fid, '\\centerline{{\\Large %s}}\n', o.title);
+    fprintf(fid, '\\centerline{\\large\\textbf{%s}}\n', o.title);
 end
+
+if ~isempty(o.footnote)
+    for i=1:length(o.footnote)
+        fprintf(fid, '\\blfootnote{\\tiny %d. %s}', i, o.footnote{i});
+    end
+end
+
 if strcmpi(o.orientation, 'landscape')
     fprintf(fid, '\\begin{landscape}\n')
 end
