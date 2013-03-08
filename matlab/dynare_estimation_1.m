@@ -104,6 +104,10 @@ dr = oo_.dr;
 %% load mode file is necessary
 if ~isempty(options_.mode_file) && ~options_.mh_posterior_mode_estimation
     load(options_.mode_file);
+
+    if length(xparam1) ~= nx
+        error([ 'ESTIMATION: the posterior mode file ' options_.mode_file ' has been generated using another specification. Please delete it and recompute the posterior mode.'])
+    end
 end
 
 %% load optimal_mh_scale parameter if previous run was with
