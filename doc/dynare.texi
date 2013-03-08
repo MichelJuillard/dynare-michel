@@ -4577,7 +4577,7 @@ where @var{THEORETICAL_MOMENT} is one of the following:
 Variance-covariance of endogenous variables
 
 @item correlation
-Correlation between endogenous variables
+Autocorrelation of endogenous variables
 
 @item VarianceDecomposition
 Decomposition of variance@footnote{When the shocks are correlated, it
