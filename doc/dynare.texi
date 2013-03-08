@@ -5025,7 +5025,7 @@ values 2, 5;
 var r
 periods 1:5;
 values 3;
-expectation perfect_forsight;
+expectation perfect_foresight;
 end;
 
 conditional_forecast(parameter_set = calibration, controlled_varexo = (e, u), simulation_type=deterministic);
