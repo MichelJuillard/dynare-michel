@@ -31,29 +31,27 @@ function o = write(o, fid)
 assert(fid ~= -1);
 
 fprintf(fid, '%% Section Object\n');
-fprintf(fid, '\\begin{table}[%shtpb]\n', o.align);
-fprintf(fid, '\\resizebox{\\textwidth}{!}{\n');
-fprintf(fid, '\\begin{tabular}{');
+%fprintf(fid, '\\begin{table}[%shtpb]%%\n', o.align);
+fprintf(fid, ' \\vspace{15px}\n');
+fprintf(fid, '\\centering\n');
+fprintf(fid, '\\noindent\\maxsizebox{\\textwidth}{!}{%%\n');
+fprintf(fid, '\\begin{tabular}[t]{');
 for i=1:o.cols
     fprintf(fid, 'c');
 end
 fprintf(fid, '}\n');
-
-% Calculate scaling factor
-%sf = round(100/o.cols)/100-.01;
-
 ne = numElements(o);
 for i=1:ne
     o.elements(i).write(fid);
     if rem(i, o.cols)
         fprintf(fid, ' & ');
     else
-        fprintf(fid, '\\\\\n');
+        fprintf(fid, ' \\\\\n');
     end
 end
 
-fprintf(fid, '\\end{tabular}\n');
-fprintf(fid, '}\n');
-fprintf(fid, '\\end{table}\n');
+fprintf(fid, '\\end{tabular}%%\n');
+fprintf(fid, '}%%\n');
+%fprintf(fid, '\\end{table}%%\n');
 fprintf(fid, '%% End Section Object\n\n');
 end

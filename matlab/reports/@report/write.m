@@ -41,7 +41,7 @@ if strcmpi(o.orientation, 'landscape')
     fprintf(fid, ',landscape');
 end
 fprintf(fid, ']{geometry}\n');
-fprintf(fid, '\\usepackage{graphicx, pdflscape, pgf, pgfplots}\n');
+fprintf(fid, '\\usepackage{pdflscape, pgf, pgfplots, booktabs}\n');
 fprintf(fid, ['\\makeatletter\n' ...
               '\\def\\blfootnote{\\gdef\\@thefnmark{}\\@footnotetext}\n' ...
               '\\makeatother\n']);
@@ -53,6 +53,12 @@ if o.showdate
     fprintf(fid, '\\renewcommand{\\footrulewidth}{0.5pt}\n');
     fprintf(fid, '\\rfoot{\\scriptsize\\reportdate\\today\\ -- \\currenttime}\n');
 end
+
+% May not need these.....
+fprintf(fid, '\\renewcommand{\\textfraction}{0.05}\n');
+fprintf(fid, '\\renewcommand{\\topfraction}{0.8}\n');
+fprintf(fid, '\\renewcommand{\\bottomfraction}{0.8}\n');
+fprintf(fid, '\\usepackage[Export,PGF]{adjustbox}\n');
 fprintf(fid, '\\begin{document}\n');
 
 o.pages.write(fid);

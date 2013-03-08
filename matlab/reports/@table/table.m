@@ -30,11 +30,19 @@ function o = table(varargin)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 o = struct;
-o.caption = '';
+
+o.title = '';
 o.footnote = '';
+
+o.config = '';
 o.hlines = false;
 o.vlines = false;
+
 o.data = '';
+o.datatitles = '';
+o.seriestouse = 'all';
+o.range = '';
+o.precision = 1;
 
 if nargin == 1
     assert(isa(varargin{1}, 'table'),['With one arg to Table constructor, ' ...

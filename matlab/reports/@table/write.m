@@ -3,10 +3,11 @@ function o = write(o, fid)
 % Write a Table object
 %
 % INPUTS
+%   o   - Table Object
 %   fid - int, file id
 %
 % OUTPUTS
-%   o   - this
+%   o   - Table Object
 %
 % SPECIAL REQUIREMENTS
 %   none
@@ -28,10 +29,104 @@ function o = write(o, fid)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(fid > 0);
-assert(isnumeric(texIndent));
+assert(fid ~= -1);
+if isempty(o.data)
+    return
+end
 
-fprintf(fid, '%% Page Object\n');
+%number of left-hand columns, 1 until we allow the user to group data,
+% e.g.: GDP Europe
+%         GDP France
+%         GDP Germany
+% this example would be two lh columns, with GDP Europe spanning both
+nlhc = 1;
 
-fprintf(fid, '%% End Page Object\n');
+disp('creating table.........');
+fprintf(fid, '%% Table Object\n');
+fprintf(fid, '\\begin{tabular}{l');
+
+dates = o.data.time;
+ndates = dates.ndat;
+
+for i=1:ndates
+    fprintf(fid, 'r');
+end
+fprintf(fid, '}%%\n');
+if ~isempty(o.title)
+    fprintf(fid, '\\multicolumn{%d}{c}{%s} \\\\\n', ndates+nlhc, o.title);
+end
+fprintf(fid, '\\toprule%%\n');
+
+datedata = dates.time;
+years = unique(datedata(:, 1));
+thdr = num2cell(years, size(years, 1));
+lind = nlhc;
+switch dates.freq
+    case 1
+        for i=1:size(thdr, 1)
+            fprintf(fid, ' & %d', thdr{i, 1});
+        end
+        fprintf(fid, '\\\\%%\n');
+        for i=1:size(thdr, 1)
+            rind = lind + 1;
+            fprintf(fid, '\\cmidrule(l{.5em}r{.5em}){%d-%d}', lind+1, rind);
+            lind = rind;
+        end
+    case 4
+        thdr{1, 2} = datedata(:, 2)';
+        if size(thdr, 1) > 1
+            for i=2:size(thdr, 1)
+                split = find(thdr{i-1, 2} == 4, 1, 'first');
+                if isempty(split)
+                    error('@table.write: Shouldn''t arrive here');
+                else
+                    thdr{i, 2} = thdr{i-1, 2}(split+1:end);
+                    thdr{i-1, 2} = thdr{i-1, 2}(1:split);
+                end
+            end
+        end
+
+        for i=1:size(thdr, 1)
+            fprintf(fid, ' & \\multicolumn{%d}{c}{%d}', size(thdr{i,2}, 2), thdr{i,1});
+        end
+        fprintf(fid, '\\\\%%\n');
+        for i=1:size(thdr, 1)
+            rind = lind + size(thdr{i,2}, 2);
+            fprintf(fid, '\\cmidrule(l{.5em}r{.5em}){%d-%d}', lind+1, rind);
+            lind = rind;
+        end
+        for i=1:size(thdr, 1)
+            quarters = thdr{i, 2};
+            for j=1:size(quarters, 2)
+                fprintf(fid, ' & Q%d', quarters(j));
+            end
+        end
+        fprintf(fid, '\\\\%%\n');
+        for i=1:ndates
+            fprintf(fid, '\\cmidrule(l{.5em}r{.5em}){%d-%d}', i+nlhc, i+nlhc);
+        end
+    case 12
+    otherwise
+        error('@table.write: invalid dynSeries Dates');
+end
+fprintf(fid, '%%\n');
+
+vars = o.data.name;
+nvars = size(vars);
+data = o.data.data;
+assert(isint(o.precision));
+precision = 10^o.precision;
+dataString = [' & %.' num2str(o.precision) 'f'];
+for i=1:nvars
+    fprintf(fid, '%% Table Row %d\n', i);
+    fprintf(fid, '%s', vars{i});
+    for j=1:ndates
+        fprintf(fid, dataString, round(data(j,i)*precision)/precision);
+    end
+    fprintf(fid, ' \\\\\n\n');
+end
+
+fprintf(fid, '\\bottomrule%%\n');
+fprintf(fid, '\\end{tabular}%%\n');
+fprintf(fid, '%% End Table Object\n');
 end

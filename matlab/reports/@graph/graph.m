@@ -41,7 +41,7 @@ o.footnote = '';
 
 o.figname = '';
 o.data = '';
-o.seriestoplot = 'all';
+o.seriestouse = 'all';
 o.shade = ''; %{1959q1:1964q4}
 
 o.grid = true;

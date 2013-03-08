@@ -49,10 +49,10 @@ end
 %set(h, 'PaperPositionMode', 'auto');
 %set(h, 'units', 'normalized', 'outerposition', [0 0 1 1]);
 
-if strcmpi(o.seriestoplot, 'all')
+if strcmpi(o.seriestouse, 'all')
     data = o.data.data;
 else
-    data = o.data{o.seriestoplot{:}}.data;
+    data = o.data{o.seriestouse{:}}.data;
 end
 
 x=[1:1:o.data.nobs];
@@ -65,6 +65,13 @@ if ~isempty(o.shade)
     x2 = strmatch(lower(o.shade{2}), xlabels, 'exact');
     yrange = get(gca, 'YLim');
 
+    if isempty(x1)
+        error([o.shade{1} ' not in date range of provided data']);
+    end
+    if isempty(x2)
+        error([o.shade{2} ' not in date range of provided data']);
+    end
+
     % From ShadePlotForEmpahsis (Matlab Exchange)
     % use patch bc area doesn't work with matlab2tikz
     patch([repmat(x1, 1, 2) repmat(x2, 1, 2)], [yrange fliplr(yrange)], ...
@@ -75,10 +82,10 @@ set(gca,'XTick', x);
 set(gca,'XTickLabel', xlabels);
 
 if o.legend
-    if strcmpi(o.seriestoplot, 'all')
+    if strcmpi(o.seriestouse, 'all')
         lh = legend(o.data.name);
     else
-        lh = legend(o.seriestoplot{:});
+        lh = legend(o.seriestouse{:});
     end
     set(lh, 'orientation', o.legend_orientation);
     set(lh, 'Location', o.legend_location);
@@ -87,15 +94,15 @@ if o.legend
 end
 
 if ~isempty(o.xlabel)
-    xlabel(['$\textbf{\footnotesize ' o.xlabel '}$'],'Interpreter','LaTex');
+    xlabel(['$\textbf{\footnotesize ' o.xlabel '}$'], 'Interpreter', 'LaTex');
 end
 
 if ~isempty(o.ylabel)
-    ylabel(['$\textbf{\footnotesize ' o.ylabel '}$'],'Interpreter','LaTex');
+    ylabel(['$\textbf{\footnotesize ' o.ylabel '}$'], 'Interpreter', 'LaTex');
 end
 
 if ~isempty(o.title)
-    title( o.title , 'interpreter', 'none', 'FontSize', 20);
+    title( o.title, 'Interpreter', 'LaTex');
 end
 drawnow;
 
