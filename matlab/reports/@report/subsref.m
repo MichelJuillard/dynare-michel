@@ -31,14 +31,14 @@ switch S(1).type
                     A = feval(S(1).subs, A);
                 end
             otherwise
-                error(['Report Class: unknown field or method: ' S(1).subs]);
+                error(['@report.subsasgn: unknown field or method: ' S(1).subs]);
         end
     case '()'
         A = A.pages.getPages(S(1).subs{:});
     case '{}'
-        error(['Report Class: ' S(1).type ' indexing not supported.']);
+        error(['@report.subsasgn: ' S(1).type ' indexing not supported.']);
     otherwise
-        error('Report Class: subsref.m impossible case');
+        error('@report.subsasgn: impossible case');
 end
 
 S = shiftS(S);

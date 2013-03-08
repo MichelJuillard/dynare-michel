@@ -26,7 +26,7 @@ switch nargin
             'valid arguments are sections objects']);
         s = varargin{1};
     otherwise
-        error('Sections constructor: invalid number of arguments');
+        error('@sections.sections: invalid number of arguments');
 end
 end
 

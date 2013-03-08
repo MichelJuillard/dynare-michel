@@ -34,10 +34,10 @@ switch nargin
     oa.objs = cell(0);
     oa = class(oa, 'objArray');
   case 1
-    assert(isa(varargin{1}, 'objArray'), ['ObjArray constructor: the only ' ...
+    assert(isa(varargin{1}, 'objArray'), ['@objArray.objArray: the only ' ...
                         'valid arguments are objArray objects']);
     oa = varargin{1};
   otherwise
-    error('ObjArray constructor: invalid number of arguments');
+    error('@objArray.objArray: invalid number of arguments');
 end
 end

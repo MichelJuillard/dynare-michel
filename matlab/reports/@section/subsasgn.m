@@ -34,6 +34,6 @@ switch S.type
         assert(isnumeric(index));
         B(index) = V;
     otherwise
-        error('objArray subsasign syntax error')
+        error('@section.subsasgn: syntax error')
 end
 end

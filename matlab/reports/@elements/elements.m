@@ -33,10 +33,10 @@ switch nargin
         e = class(struct, 'elements', objArray());
     case 1
         assert(isa(varargin{1}, 'elements'), ...
-            ['With one arg to elements constructor, you must pass an ' ...
-            'elements object or a char.']);
+            ['@elements.elements: with one arg, you must pass an elements ' ...
+             'object or a char.']);
         e = varargin{1};
     otherwise
-        error('Elements constructor: invalid number of arguments');
+        error('@elements.elements: invalid number of arguments');
 end
 end

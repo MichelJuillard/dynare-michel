@@ -41,14 +41,14 @@ o.config = '';
 o.showdate = true;
 
 if nargin == 1
-    assert(isa(varargin{1}, 'report'),['With one arg to Report constructor, ' ...
+    assert(isa(varargin{1}, 'report'), ['@report.report: with one arg, ' ...
                         'you must pass a report object']);
     r = varargin{1};
     return;
 elseif nargin > 1
     if round(nargin/2) ~= nargin/2
-        error(['Options to Report constructor must be supplied in name/value ' ...
-               'pairs.']);
+        error(['@report.report: options must be supplied in name/value ' ...
+               'pairs']);
     end
 
     optNames = lower(fieldnames(o));
@@ -64,7 +64,7 @@ elseif nargin > 1
             end
             o.(field) = pair{2};
         else
-            error('%s is not a recognized option to the Report constructor.', ...
+            error('@report.report: %s is not a recognized option.', ...
                   field);
         end
     end

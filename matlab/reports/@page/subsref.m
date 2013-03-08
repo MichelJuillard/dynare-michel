@@ -31,14 +31,14 @@ switch S(1).type
                     A = feval(S(1).subs, A);
                 end
             otherwise
-                error(['Page Class: unknown field or method: ' S(1).subs]);
+                error(['@page.subsref: unknown field or method: ' S(1).subs]);
         end
     case '()'
         A = getSections(A, S(1).subs{:});
     case '{}'
-        error(['Page Class: ' S(1).type ' indexing not supported.']);
+        error(['@page.subsref: ' S(1).type ' indexing not supported.']);
     otherwise
-        error('Page Class: subsref.m impossible case')
+        error('@page.subsref: impossible case')
 end
 
 S = shiftS(S);

@@ -34,9 +34,9 @@ switch S.type
             case fieldnames(A)
                 B.(S.subs) = V;
             otherwise
-                error(['field ' S.subs 'does not exist in the page class'])
+                error(['@graph.subsasgn: field ' S.subs 'does not exist']);
         end
     otherwise
-        error('report subsasign syntax error')
+        error('@graph.subsasgn: syntax error');
 end
 end

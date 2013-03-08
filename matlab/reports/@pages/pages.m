@@ -33,10 +33,10 @@ switch nargin
         ps = class(struct, 'pages', objArray());
     case 1
         assert(isa(varargin{1}, 'pages'), ...
-            ['With one arg to pages constructor, you must pass an ' ...
-            'pages object or a char.']);
+            ['@pages.pages: With one arg to pages constructor, you must ' ...
+             'pass an pages object or a char.']);
         ps = varargin{1};
     otherwise
-        error('Pages constructor: invalid number of arguments');
+        error('@pages.pages: invalid number of arguments');
 end
 end

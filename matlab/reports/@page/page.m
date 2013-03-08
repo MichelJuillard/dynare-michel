@@ -37,13 +37,13 @@ o.footnote = '';
 o.sections = sections();
 
 if nargin == 1
-    assert(isa(varargin{1}, 'page'), ['With one arg to Page constructor, ' ...
-                        'you must pass a page object']);
+    assert(isa(varargin{1}, 'page'), ['@page.page: with one arg to Page ' ...
+                        'constructor, you must pass a page object']);
     o = varargin{1};
     return;
 elseif nargin > 1
     if round(nargin/2) ~= nargin/2
-        error(['Options to Page constructor must be supplied in name/value ' ...
+        error(['@page.page: options must be supplied in name/value ' ...
                'pairs.']);
     end
 
@@ -55,8 +55,7 @@ elseif nargin > 1
         if any(strmatch(field, optNames, 'exact'))
             o.(field) = pair{2};
         else
-            error('%s is not a recognized option to the Page constructor.', ...
-                  field);
+            error('@page.page: %s is not a recognized option.', field);
         end
     end
 end

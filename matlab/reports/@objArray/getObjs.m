@@ -25,6 +25,6 @@ switch nargin
         assert(isnumeric(varargin{1}));
         e = oa.objs{varargin{1}};
     otherwise
-        error('objArray getObjs: invalid number of arguments');
+        error('@objArray.getObjs: invalid number of arguments');
 end
 end

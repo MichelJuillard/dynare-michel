@@ -32,7 +32,8 @@ assert(~isempty(o.data));
 assert(isa(o.data, 'dynSeries')) ;
 
 if ~isempty(o.figname)
-    warning('Will overwrite %s with new graph\n', o.figname);
+    warning('@graph.createGraph: will overwrite %s with new graph\n', ...
+            o.figname);
 end
 
 %o = readConfig(o);
@@ -66,10 +67,12 @@ if ~isempty(o.shade)
     yrange = get(gca, 'YLim');
 
     if isempty(x1)
-        error([o.shade{1} ' not in date range of provided data']);
+        error(['@graph.createGraph: ' o.shade{1} ' not in date range of ' ...
+               'provided data']);
     end
     if isempty(x2)
-        error([o.shade{2} ' not in date range of provided data']);
+        error(['@graph.createGraph: ' o.shade{2} ' not in date range of ' ...
+               'provided data']);
     end
 
     % From ShadePlotForEmpahsis (Matlab Exchange)

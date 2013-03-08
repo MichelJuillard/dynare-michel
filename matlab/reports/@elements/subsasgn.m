@@ -34,6 +34,6 @@ switch S.type
         assert(isnumeric(index));
         B.objArray(index) = V;
     otherwise
-        error('Elements subsasign syntax error')
+        error('@elements.subsasign: syntax error');
 end
 end

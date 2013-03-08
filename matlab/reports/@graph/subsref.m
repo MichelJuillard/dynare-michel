@@ -31,12 +31,12 @@ switch S(1).type
                     A = feval(S(1).subs, A);
                 end
             otherwise
-                error(['Graph Class: unknown field or method: ' S(1).subs]);
+                error(['@graph.subsref: unknown field or method: ' S(1).subs]);
         end
     case {'()', '{}'}
-        error(['Graph Class: ' S(1).type ' indexing not supported.']);
+        error(['@graph.subsref: ' S(1).type ' indexing not supported.']);
     otherwise
-        error('Graph Class: subsref.m impossible case')
+        error('@graph.subsref: impossible case')
 end
 
 S = shiftS(S);

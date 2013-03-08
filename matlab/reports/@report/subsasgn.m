@@ -38,9 +38,9 @@ switch S.type
             case fieldnames(A)
                 B.(S.subs) = V;
             otherwise
-                error(['field ' S.subs 'does not exist in the report class']);
+                error(['@report.subsasgn: field ' S.subs 'does not exist']);
         end
     otherwise
-        error('report subsasign syntax error');
+        error('@report.subsasgn: syntax error');
 end
 end

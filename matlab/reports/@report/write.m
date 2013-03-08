@@ -30,7 +30,7 @@ function o = write(o)
 
 [fid, msg] = fopen(o.filename, 'w');
 if fid == -1
-    error(msg);
+    error(['@report.subsasgn: ' msg]);
 end
 
 fprintf(fid, '%% Report Object\n');
@@ -67,6 +67,6 @@ fprintf(fid, '\\end{document}\n');
 fprintf(fid, '%% End Report Object\n');
 status = fclose(fid);
 if status == -1
-    error('Error closing %s\n', o.filename);
+    error('@report.wrie: closing %s\n', o.filename);
 end
 end

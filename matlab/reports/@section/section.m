@@ -32,8 +32,8 @@ if nargin == 1
     return;
 elseif nargin > 1
     if round(nargin/2) ~= nargin/2
-        error(['Options to Section constructor must be supplied in name/' ...
-               'value pairs.']);
+        error(['@section.section: options must be supplied in name/value ' ...
+               'pairs.']);
     end
 
     optNames = lower(fieldnames(o));
@@ -44,7 +44,7 @@ elseif nargin > 1
         if any(strmatch(field, optNames, 'exact'))
             o.(field) = pair{2};
         else
-            error('%s is not a recognized option to the Section constructor.', ...
+            error('@section.section: %s is not a recognized option.', ...
                   field);
         end
     end

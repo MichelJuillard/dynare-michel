@@ -52,13 +52,13 @@ o.legend_orientation = 'horizontal';
 o.legend_font_size = 8;
 
 if nargin == 1
-    assert(isa(varargin{1}, 'graph'),['With one arg to Graph constructor, ' ...
-                        'you must pass a graph object']);
+    assert(isa(varargin{1}, 'graph'),['@graph.graph: with one arg you ' ...
+                        'must pass a graph object']);
     o = varargin{1};
     return;
 elseif nargin > 1
     if round(nargin/2) ~= nargin/2
-        error(['Options to Graph constructor must be supplied in name/value ' ...
+        error(['@graph.graph: options must be supplied in name/value ' ...
                'pairs.']);
     end
 
@@ -70,8 +70,7 @@ elseif nargin > 1
         if any(strmatch(field, optNames, 'exact'))
             o.(field) = pair{2};
         else
-            error('%s is not a recognized option to the Graph constructor.', ...
-                  field);
+            error('@graph.graph: %s is not a recognized option.', field);
         end
     end
 end

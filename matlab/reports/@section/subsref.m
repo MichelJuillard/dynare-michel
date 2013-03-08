@@ -31,14 +31,14 @@ switch S(1).type
                     A = feval(S(1).subs, A);
                 end
             otherwise
-                error(['Section Class: unknown field or method: ' S(1).subs]);
+                error(['@section.subsref: unknown field or method: ' S(1).subs]);
         end
     case '()'
         A = A.elements.getElements(S(1).subs{:});
     case '{}'
-        error(['Section Class: ' S(1).type ' indexing not supported.']);
+        error(['@section.subsref: ' S(1).type ' indexing not supported.']);
     otherwise
-        error('Section Class: subsref.m impossible case')
+        error('@section.subsref: impossible case')
 end
 
 S = shiftS(S);

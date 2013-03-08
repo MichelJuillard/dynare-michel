@@ -31,14 +31,14 @@ switch S(1).type
                     A = feval(S(1).subs, A);
                 end
             otherwise
-                error(['ObjArray Class: unknown field or method: ' S(1).subs]);
+                error(['objArray.subsref: unknown field or method: ' S(1).subs]);
         end
     case '()'
         A = getObjs(A, S(1).subs{:});
     case '{}'
-        error(['ObjArray Class: ' S(1).type ' indexing not supported.']);
+        error(['objArray.subsref: ' S(1).type ' indexing not supported.']);
     otherwise
-        error('ObjArray Class: subsref.m impossible case')
+        error('objArray.subsref: impossible case')
 end
 
 S = shiftS(S);
