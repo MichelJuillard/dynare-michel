@@ -120,6 +120,11 @@ if (length(S)==2) && (isequal(S(1).subs,'init'))
     return
 end
 
+if (length(S)==2) && (isequal(S(1).type,'.')) && (isequal(S(1).subs,'data')) && (isequal(S(2).type,'()')) 
+    us = builtin('subsref',ts.data,S(2));
+    return
+end
+
 if (length(S)==1) && isequal(S(1).type,'{}')
     us = extract(ts,S(1).subs{:});
     return
