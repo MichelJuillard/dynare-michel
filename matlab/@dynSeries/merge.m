@@ -50,35 +50,35 @@ A.vobs=length(A.name);
 
 if B.init >= C.init
     diff = B.init - C.init;
-	A.nobs = max(B.nobs + diff, C.nobs);
-	A.data = NaN(A.nobs, A.vobs);
-	Z1 = [NaN(diff,B.vobs);B.data];
-	if A.nobs > B.nobs + diff
-	  Z1 = [Z1;NaN(A.nobs-(B.nobs + diff),B.vobs)];
-	end;
-	Z2 = C.data;
-	if A.nobs > C.nobs 
-	  Z2 = [Z2;NaN(A.nobs - C.nobs,C.vobs)];
-	end;
+    A.nobs = max(B.nobs + diff, C.nobs);
+    A.data = NaN(A.nobs, A.vobs);
+    Z1 = [NaN(diff,B.vobs);B.data];
+    if A.nobs > B.nobs + diff
+        Z1 = [Z1; NaN(A.nobs-(B.nobs + diff),B.vobs)];
+    end;
+    Z2 = C.data;
+    if A.nobs > C.nobs 
+        Z2 = [Z2; NaN(A.nobs - C.nobs,C.vobs)];
+    end;
     Z = [Z1 Z2];
     A.data = Z(:,IA);
     A.init = C.init;
 else
     diff = C.init - B.init;
-	A.nobs = max(C.nobs + diff, B.nobs);
-	A.data = NaN(A.nobs, A.vobs);
-	Z1 = [NaN(diff,C.vobs);C.data];
-	if A.nobs > C.nobs + diff
-	  Z1 = [Z1;NaN(A.nobs-(C.nobs + diff),C.vobs)];
-	end;
-	Z2 = B.data;
-	if A.nobs > B.nobs 
-	  Z2 = [Z2;NaN(A.nobs - B.nobs,B.vobs)];
-	end;
-    Z = [Z1 Z2];
+    A.nobs = max(C.nobs + diff, B.nobs);
+    A.data = NaN(A.nobs, A.vobs);
+    Z1 = [NaN(diff,C.vobs);C.data];
+    if A.nobs > C.nobs + diff
+        Z1 = [Z1; NaN(A.nobs-(C.nobs + diff),C.vobs)];
+    end;
+    Z2 = B.data;
+    if A.nobs > B.nobs 
+        Z2 = [Z2; NaN(A.nobs - B.nobs,B.vobs)];
+    end;
+    Z = [Z2 Z1];
     A.data = Z(:,IA);
     A.init = B.init;
-end;
+end
 
 %@test:1
 %$ % Define a datasets.
