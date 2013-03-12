@@ -123,6 +123,17 @@ t  = 0;
 hh = dyn_waitbar(0,'Please wait. Extended Path simulations...');
 set(hh,'Name','EP simulations.');
 
+% hybrid correction
+pfm.hybrid_order = options_.ep.stochastic.hybrid_order;
+if pfm.hybrid_order
+    oo_.dr = set_state_space(oo_.dr,M_,options_);
+    options = options_;
+    options.order = pfm.hybrid_order;
+    pfm.dr = resol(0,M_,options,oo_);
+else
+    pfm.dr = [];
+end
+
 % Main loop.
 while (t<sample_size)
     if ~mod(t,10)
@@ -164,7 +175,14 @@ while (t<sample_size)
                 if options_.ep.stochastic.order == 0
                     [flag,tmp,err] = solve_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1);
                 else
-                    [flag,tmp] = solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1,options_.ep.stochastic.quadrature.nodes,options_.ep.stochastic.order);
+                    switch(options_.ep.stochastic.algo)
+                        case 0
+                        [flag,tmp] = ...
+                            solve_stochastic_perfect_foresight_model(endo_simul_1,exo_simul_1,pfm1,options_.ep.stochastic.quadrature.nodes,options_.ep.stochastic.order);
+                        case 1
+                          [flag,tmp] = ...
+                              solve_stochastic_perfect_foresight_model_1(endo_simul_1,exo_simul_1,pfm1,options_.ep.stochastic.quadrature.nodes,options_.ep.stochastic.order);
+                    end
                 end
             end
             info_convergence = ~flag;
