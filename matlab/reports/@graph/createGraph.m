@@ -51,29 +51,34 @@ end
 %set(h, 'units', 'normalized', 'outerposition', [0 0 1 1]);
 
 if strcmpi(o.seriestouse, 'all')
-    data = o.data.data;
+    ds = o.data;
 else
-    data = o.data{o.seriestouse{:}}.data;
+    ds = o.data{o.seriestouse{:}};
 end
 
-x=[1:1:o.data.nobs];
-xlabels=getDatesCellStringArray(o.data.time);
+if ~strcmp(o.xrange, 'all')
+    dd1 = dynDate(o.xrange{1});
+    dd2 = dynDate(o.xrange{2});
+    ds  = ds(dd1:dd2);
+end
+data = ds.data;
+
+x = 1:1:ds.nobs;
+xlabels = getDatesCellStringArray(ds.time);
 
 plot(x, data);
 
-if ~isempty(o.shade)
-    x1 = strmatch(lower(o.shade{1}), xlabels, 'exact');
-    x2 = strmatch(lower(o.shade{2}), xlabels, 'exact');
-    yrange = get(gca, 'YLim');
+if ~strcmp(o.yrange, 'all')
+    ylim([o.yrange{:}]);
+end
 
-    if isempty(x1)
-        error(['@graph.createGraph: ' o.shade{1} ' not in date range of ' ...
-               'provided data']);
-    end
-    if isempty(x2)
-        error(['@graph.createGraph: ' o.shade{2} ' not in date range of ' ...
-               'provided data']);
-    end
+if ~isempty(o.shade)
+    x1 = find(strcmp(o.shade{1}, xlabels));
+    x2 = find(strcmp(o.shade{2}, xlabels));
+    assert(~isempty(x1) && ~isempty(x2), ['@graph.createGraph: either ' ...
+                        o.shade{1} ' or ' o.shade{2} 'is not in the date ' ...
+                        'range of data selected.']);
+    yrange = get(gca, 'YLim');
 
     % From ShadePlotForEmpahsis (Matlab Exchange)
     % use patch bc area doesn't work with matlab2tikz
@@ -85,11 +90,7 @@ set(gca,'XTick', x);
 set(gca,'XTickLabel', xlabels);
 
 if o.legend
-    if strcmpi(o.seriestouse, 'all')
-        lh = legend(o.data.name);
-    else
-        lh = legend(o.seriestouse{:});
-    end
+    lh = legend(ds.name);
     set(lh, 'orientation', o.legend_orientation);
     set(lh, 'Location', o.legend_location);
     set(lh, 'FontSize', o.legend_font_size);
