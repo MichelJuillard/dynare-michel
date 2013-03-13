@@ -1,13 +1,13 @@
 function o = addTable(o, varargin)
 %function o = addTable(o, varargin)
-% Add a section to the current page in the current report
+% Add a table to the current section of the current page in the report
 %
 % INPUTS
-%   o        - report object
-%   varargin - arguments to @section/addTable.m
+%   o          [report]  report object
+%   varargin             arguments to @section/addTable.m
 %
 % OUTPUTS
-%   o        - updated report object
+%   o          [report]  updated report object
 %
 % SPECIAL REQUIREMENTS
 %   none

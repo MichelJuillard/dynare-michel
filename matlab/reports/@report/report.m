@@ -3,11 +3,12 @@ function o = report(varargin)
 % Report Class Constructor
 %
 % INPUTS
-%   1 report class object => make a copy
-%   Otherwise, option/value pairs (see structure below for options)
+%   varargin        0 args  : empty report object
+%                   1 arg   : must be report object (return a copy of arg)
+%                   > 1 args: option/value pairs (see structure below for options)
 %
 % OUTPUTS
-%   none
+%   o     [report]  report object
 %
 % SPECIAL REQUIREMENTS
 %   none

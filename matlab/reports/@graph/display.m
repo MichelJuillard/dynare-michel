@@ -3,7 +3,7 @@ function display(o)
 % Display a Graph object
 %
 % INPUTS
-%   none
+%   o   [graph] graph object
 %
 % OUTPUTS
 %   none

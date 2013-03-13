@@ -1,12 +1,12 @@
-function np = numPages(r)
-%function np = numPages(r)
+function n = numPages(o)
+%function n = numPages(o)
 % return the number of pages currently in the report
 %
 % INPUTS
-%   none
+%   o     [report]  report object
 %
 % OUTPUTS
-%   none
+%   n     [integer] number of pages in the report object
 %
 % SPECIAL REQUIREMENTS
 %   none
@@ -28,5 +28,5 @@ function np = numPages(r)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-np = r.pages.numPages();
+n = o.pages.numPages();
 end

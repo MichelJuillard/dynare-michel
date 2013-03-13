@@ -1,13 +1,13 @@
 function o = addGraph(o, varargin)
 %function o = addGraph(o, varargin)
-% Add a section to the current page in the current report
+% Add a graph to the current section of the current page in the report
 %
 % INPUTS
-%   o        - report object
-%   varargin - arguments to @section/addGraph.m
+%   o          [report]  report object
+%   varargin             arguments to @section/addGraph.m
 %
 % OUTPUTS
-%   o        - updated report object
+%   o          [report]  updated report object
 %
 % SPECIAL REQUIREMENTS
 %   none

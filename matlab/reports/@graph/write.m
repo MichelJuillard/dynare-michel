@@ -3,10 +3,11 @@ function o = write(o, fid)
 % Write a Graph object
 %
 % INPUTS
-%   fid - int, file id
+%   o   [graph]   graph object
+%   fid [integer] file id
 %
 % OUTPUTS
-%   o   - this
+%   o   [graph] graph object
 %
 % SPECIAL REQUIREMENTS
 %   none

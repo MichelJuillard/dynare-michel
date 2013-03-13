@@ -3,10 +3,10 @@ function o = createGraph(o)
 % Create the graph
 %
 % INPUTS
-%   o   - Graph Object
+%   o   [graph] graph object
 %
 % OUTPUTS
-%   o   - Graph Object
+%   o   [graph] graph object
 %
 % SPECIAL REQUIREMENTS
 %   none

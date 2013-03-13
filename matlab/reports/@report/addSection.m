@@ -1,13 +1,13 @@
 function o = addSection(o, varargin)
 %function o = addSection(o, varargin)
-% Add a section to the current page in the current report
+% Add a section to the current page in the report
 %
 % INPUTS
-%   o        - report object
-%   varargin - arguments to @page/addSection.m
+%   o          [report]  report object
+%   varargin             arguments to @section/addGraph.m
 %
 % OUTPUTS
-%   o        - updated report object
+%   o          [report]  updated report object
 %
 % SPECIAL REQUIREMENTS
 %   none

@@ -3,11 +3,13 @@ function o = graph(varargin)
 % Graph Class Constructor
 %
 % INPUTS
-%   0 args => empty graph
-%   1 arg (graph class) => copy object
+%   varargin        0 args  : empty graph object
+%                   1 arg   : must be graph object (return a copy of arg)
+%                   > 1 args: option/value pairs (see structure below for
+%                   options)
 %
 % OUTPUTS
-%   none
+%   o   [graph] graph object
 %
 % SPECIAL REQUIREMENTS
 %   none
