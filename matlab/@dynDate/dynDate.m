@@ -1,4 +1,4 @@
-function date = dynDate(a)
+function date = dynDate(a,b)
 
 %@info:
 %! @deftypefn {Function File} {@var{date} =} dynDate (@var{a})
@@ -129,6 +129,23 @@ switch nargin
             error('dynDate:: Can''t instantiate the class, wrong calling sequence!')
         end            
     end
+  case 2 % provide time and freq to instantiate a dynDate object
+    date = dynDate();
+    if isnumeric(b) && isscalar(b) && (b==1 || b==4 || b==12 || b==52)
+        date.freq = b;
+        if ~isnumeric(a) && size(a)~=2 && size(a,2)~=2
+            error(['dynDate:: Can''t instantiate the class! The first argument ' inputname(a) ' must be a 1*2 vector of integers.'])
+        end
+        if b==1 && a(2)~1
+            error(['dynDate:: Can''t instantiate the class! The second element of the first argument ' inputname(a) ' must be equal to one.'])
+        end
+        if a(2)<=0 || a(2)>b
+            error(['dynDate:: Can''t instantiate the class! The second element of the first argument ' inputname(a) ' must be <=' int2str(b) '.' ])
+        end
+        date.time = a;
+    else
+        error(['dynDate:: Can''t instantiate the class! The second argument ' inputname(b) ' must be equal to 1, 4, 12 or 52.'])
+    end
   otherwise
     error('dynDate:: Can''t instantiate the class, wrong calling sequence!')
 end
@@ -188,4 +205,21 @@ end
 %$ t(5) = dyn_assert(all(isnan(mm.time)),1);
 %$ t(6) = dyn_assert(all(isnan(ww.time)),1);
 %$ T = all(t);
-%@eof:1
+%@eof:2
+
+%@test:3
+%$ % Try to instatiate dynDate objects.
+%$ try
+%$    a = dynDate([1950 1],4);
+%$    t(1) = 1;
+%$ catch
+%$    t(1) = 0;
+%$ end
+%$ try
+%$    a = dynDate([1950 5],4);
+%$    t(1) = 0;
+%$ catch
+%$    t(1) = 1;
+%$ end
+%$ T = all(t);
+%@eof:3
