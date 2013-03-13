@@ -108,5 +108,6 @@ else
         c.data = [c.data; NaN(b_last_date-c_last_date,c.vobs)];
     end
     a.data = [b.data, c.data];
-    a.time = unique([b.time, c.time]);
+    a.time = unique(b.time.append(c.time));
 end
+a.nobs = size(a.data,1);

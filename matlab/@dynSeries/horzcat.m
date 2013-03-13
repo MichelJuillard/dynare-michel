@@ -58,11 +58,11 @@ function a = horzcat(varargin)
 
 % Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
 
-if nargin==0 || nargin==1
-    error('dynSeries::horzcat: I need at least two input arguments!')
-end
-
-if nargin==2
+if nargin==0 
+    a = DynSeries();
+elseif nargin == 1
+    a = varargin{1};
+elseif nargin==2
     a = horzcat2(varargin{1},varargin{2});
 else
     a = horzcat2(varargin{1},varargin{2});
