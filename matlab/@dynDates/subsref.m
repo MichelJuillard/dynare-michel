@@ -49,44 +49,47 @@ function B = subsref(A,S)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
-
-if isequal(S(1).type,'.')
+switch S(1).type
+  case '.'
     switch S(1).subs
-      case {'time','freq','ndat'}                                   % Public members.
+      case {'time','freq','ndat'}% Access public members.
         B = builtin('subsref', A, S(1));
-      case {'sort','append','pop','unique'}                         % Give "dot access" to public methods.
-        if length(S)==1 || (strcmp(S(2).type,'()') && isempty(S(2).subs))
-            B = feval(S(1).subs,A);
+      case {'sort','unique'}% Public methods (without arguments)
+        B = feval(S(1).subs,A);
+      case {'append','pop'}% Public methods (with arguments).
+        if isequal(S(2).type,'()')
+            B = feval(S(1).subs,A,S(2).subs{:});
+            S = shiftS(S);
         else
-            if isequal(S(2).type,'()')
-                B = feval(S(1).subs,A,S(2).subs{:});
-            else
-                error('dynDates::subsref: Something is wrong in your syntax!')
-            end
+            error('dynDates::subsref: Something is wrong in your syntax!')
         end
       otherwise
-        error('dynDates::subsref: Unknown public method or member!')
+        error('dynDates::subsref: Unknown public member or method!')
     end
-elseif isequal(S.type,'()')                                                    % Extract a sub-sample.
-    if isscalar(S.subs{1}) 
-        if isint(S.subs{1}) && S.subs{1}>0 && S.subs{1}<A.ndat
-            B = dynDate(A.time(S.subs{1},:),A.freq);
+  case '()'
+    if isscalar(S(1).subs{1})
+        if isint(S(1).subs{1}) && S(1).subs{1}>0 && S(1).subs{1}<A.ndat
+            B = dynDate(A.time(S(1).subs{1},:),A.freq);
         else
-            error('dynDates::subsref: Something is wrong in your syntax!')
+            error(['dynDates::subsref: the index have to be a positive integer less than or equal to ' int2str(A.ndat) '!'])
         end
     else
-        if all(isint(S.subs{1})) && all(S.subs{1}>0) && all(S.subs{1}<A.ndat)
+        if isvector(S(1).subs{1}) && all(isint(S(1).subs{1})) && all(S(1).subs{1}>0) && all(S(1).subs{1}<A.ndat)
             B = dynDates();
             B.freq = A.freq;
-            B.time = A.time(S.subs{1},:);
-            B.ndat = length(S.subs{1});
+            B.time = A.time(S(1).subs{1},:);
+            B.ndat = length(S(1).subs{1});
         else
-            error('dynDates::subsref: Something is wrong in your syntax!')
+            error(['dynDates::subsref: indices have to be a vector of positive integers less than or equal to ' int2str(A.ndat) '!'])
         end
     end
-else
+  otherwise
     error('dynDates::subsref: Something is wrong in your syntax!')
+end
+
+S = shiftS(S);
+if ~isempty(S)
+    B = subsref(B, S);
 end
 
 %@test:1
@@ -109,3 +112,25 @@ end
 %$ end
 %$ T = all(t);
 %@eof:1
+
+%@test:2
+%$ % Define a dynDates object
+%$ B = dynDate('1950Q1'):dynDate('1960Q3');
+%$
+%$ % Try to extract a sub-dynDates object and apply a method
+%$ 
+%$ d = B(2:3).sort ;
+%$
+%$ if isa(d,'dynDates')
+%$     t(1) = 1;
+%$ else
+%$     t(1) = 0;
+%$ end
+%$
+%$ if t(1)
+%$     t(2) = dyn_assert(d.freq,B.freq);
+%$     t(3) = dyn_assert(d.time,[1950 2; 1950 3]);
+%$     t(4) = dyn_assert(d.ndat,2);
+%$ end
+%$ T = all(t);
+%@eof:2
