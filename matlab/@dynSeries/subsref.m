@@ -94,6 +94,16 @@ end
 if length(S)==1 && isequal(S.type,'()')
     if ischar(S.subs{1})
         us = dynSeries(S.subs{1});
+    elseif isa(S.subs{1},'dynDates')
+        [junk,tdx] = intersect(ts.time.time,S.subs{1}.time,'rows');
+        us = dynSeries();
+        us.data = ts.data(tdx,:);
+        us.name = deblank(ts.name);
+        us.tex  = deblank(ts.tex);
+        us.nobs = length(tdx);
+        us.vobs = ts.vobs;
+        us.freq = ts.freq;
+        us.init = ts.init+tdx(1);
     else
         % Extract a sub-object by selecting a sub-sample.
         if size(ts.data,2)>1
@@ -376,3 +386,34 @@ end
 %$
 %$ T = all(t);
 %@eof:8
+
+%@test:9
+%$ % Define a data set.
+%$ A = [transpose(1:60),2*transpose(1:60),3*transpose(1:60)];
+%$
+%$ % Define names
+%$ A_name = {'A1';'A2';'B1'};
+%$
+%$ % Instantiate a time series object.
+%$ ts1 = dynSeries(A,'1971Q1',A_name,[]);
+%$
+%$ % Define the range of a subsample.
+%$ range = dynDate('1971Q2'):dynDate('1971Q4');
+%$ % Call the tested method.
+%$ a = ts1(range);
+%$
+%$ % Expected results.
+%$ e.data = A(2:4,:);
+%$ e.nobs = 3;
+%$ e.vobs = 3;
+%$ e.name = {'A1';'A2';'B1'};
+%$ e.freq = 4;
+%$ e.init = dynDate('1971Q2');
+%$
+%$ t(1) = dyn_assert(e.data,a.data);
+%$ t(2) = dyn_assert(e.nobs,a.nobs);
+%$ t(3) = dyn_assert(e.vobs,a.vobs);
+%$ t(4) = dyn_assert(e.name,a.name);
+%$ t(5) = dyn_assert(e.init,a.init);
+%$ T = all(t);
+%@eof:9
