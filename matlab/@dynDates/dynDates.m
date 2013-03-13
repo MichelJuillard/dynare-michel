@@ -62,8 +62,6 @@ function dd = dynDates(varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-
 dd = struct;
 
 dd.ndat = 0;
@@ -104,8 +102,6 @@ switch nargin
 end
 
 %@test:1
-%$ addpath ../matlab
-%$
 %$ % Define some dates
 %$ B1 = '1945Q3';
 %$ B2 = '1950Q2';
@@ -128,8 +124,6 @@ end
 %@eof:1
 
 %@test:2
-%$ addpath ../matlab
-%$
 %$ % Define some dates
 %$ B1 = '1945M3';
 %$ B2 = '1950M2';
@@ -152,8 +146,6 @@ end
 %@eof:2
 
 %@test:3
-%$ addpath ../matlab
-%$
 %$ % Define some dates
 %$ B1 = '1945';
 %$ B2 = '1950';
@@ -176,8 +168,6 @@ end
 %@eof:3
 
 %@test:4
-%$ addpath ../matlab
-%$
 %$ % Define some dates
 %$ B1 = '1945Q1';
 %$ B2 = '1950Q3';
