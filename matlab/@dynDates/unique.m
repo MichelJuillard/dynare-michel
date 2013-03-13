@@ -74,7 +74,7 @@ dd.ndat = size(dd.time,1);
 %$
 %$ % Call the tested routine.
 %$ d = dynDates(B1,B2,B3,B4,B5);
-%$ d = d.unique();
+%$ d = d.unique;
 %$ 
 %$ % Check the results.
 %$ t(1) = dyn_assert(d.time,e.time);

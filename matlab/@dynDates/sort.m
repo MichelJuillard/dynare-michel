@@ -73,7 +73,7 @@ dd.time = sortrows(dd.time,[1,2]);
 %$
 %$ % Call the tested routine.
 %$ d = dynDates(B1,B2,B3,B4);
-%$ d = d.sort();
+%$ d = d.sort;
 %$ 
 %$ % Check the results.
 %$ t(1) = dyn_assert(d.time,e.time);
