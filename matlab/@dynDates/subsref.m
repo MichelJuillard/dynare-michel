@@ -76,8 +76,36 @@ elseif isequal(S.type,'()')                                                    %
             error('dynDates::subsref: Something is wrong in your syntax!')
         end
     else
-        B = builtin('subsref', A.time, S);
+        if all(isint(S.subs{1})) && all(S.subs{1}>0) && all(S.subs{1}<A.ndat)
+            B = dynDates();
+            B.freq = A.freq;
+            B.time = A.time(S.subs{1},:);
+            B.ndat = length(S.subs{1});
+        else
+            error('dynDates::subsref: Something is wrong in your syntax!')
+        end
     end
 else
     error('dynDates::subsref: Something is wrong in your syntax!')
 end
+
+%@test:1
+%$ % Define a dynDates object
+%$ B = dynDate('1950Q1'):dynDate('1960Q3');
+%$
+%$ % Try to extract a sub-dynDates object.
+%$ d = B(2:3);
+%$
+%$ if isa(d,'dynDates')
+%$     t(1) = 1;
+%$ else
+%$     t(1) = 0;
+%$ end
+%$
+%$ if t(1)
+%$     t(2) = dyn_assert(d.freq,B.freq);
+%$     t(3) = dyn_assert(d.time,[1950 2; 1950 3]);
+%$     t(4) = dyn_assert(d.ndat,2);
+%$ end
+%$ T = all(t);
+%@eof:1
