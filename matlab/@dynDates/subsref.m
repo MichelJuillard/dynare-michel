@@ -69,8 +69,12 @@ if isequal(S(1).type,'.')
         error('dynDates::subsref: Unknown public method or member!')
     end
 elseif isequal(S.type,'()')                                                    % Extract a sub-sample.
-    if isscalar(S.subs) && isint(S.subs{1}) && S.subs{1}>0 && S.subs{1}<A.ndat
-        B = dynDate(A.time(S.subs{1},:),A.freq);
+    if isscalar(S.subs{1}) 
+        if isint(S.subs{1}) && S.subs{1}>0 && S.subs{1}<A.ndat
+            B = dynDate(A.time(S.subs{1},:),A.freq);
+        else
+            error('dynDates::subsref: Something is wrong in your syntax!')
+        end
     else
         B = builtin('subsref', A.time, S);
     end
