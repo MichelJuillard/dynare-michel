@@ -168,21 +168,21 @@ end
 %@eof:3
 
 %@test:4
-%$ % Define some dates
-%$ B1 = '1945Q1';
-%$ B2 = '1950Q3';
-%$ B3 = '1950M10';
-%$ B4 = '1953Q1';
+%$ % Define a dynDates object
+%$ B = dynDate('1950Q1'):dynDate('1960Q3');
 %$
 %$
 %$ % Call the tested routine.
-%$ try
-%$     d = dynDates(B1,B2,B3,B4);
-%$     t(1) = 0;
-%$     T = 0;
-%$ catch
-%$     % Expected issue...
+%$ d = B(2);
+%$ if isa(d,'dynDate')
 %$     t(1) = 1;
-%$     T = 1;
+%$ else
+%$     t(1) = 0;
 %$ end
+%$
+%$ if t(1)
+%$     t(2) = dyn_assert(d.freq,B.freq);
+%$     t(3) = dyn_assert(d.time,[1950 2]);
+%$ end
+%$ T = all(t);
 %@eof:4
