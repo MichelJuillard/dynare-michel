@@ -49,10 +49,11 @@ for i = 1:length(idVariableName)
     if isempty(idx)
         error(['dynSeries::extract: Variable ' VariableName_{i} ' is not a member of ' inputname(1) '!'])
     end
-    idVariableName(i) = idx;  
+    idVariableName(i) = idx;
 end
 
 A.data = B.data(:,idVariableName);
+A.time = B.time;
 A.init = B.init;
 A.freq = B.freq;
 A.nobs = B.nobs;
