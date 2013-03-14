@@ -39,8 +39,6 @@ function A = mrdivide(B,C)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-
 if isa(B,'dynSeries') && isa(C,'dynSeries')
     % Element by element divisions of two dynSeries object
     if ~isequal(B.vobs,C.vobs) && ~(isequal(B.vobs,1) || isequal(C.vobs,1))
@@ -58,6 +56,7 @@ if isa(B,'dynSeries') && isa(C,'dynSeries')
     A = dynSeries();
     A.freq = B.freq;
     A.init = B.init;
+    A.time = B.time;
     A.nobs = max(B.nobs,C.nobs);
     A.vobs = max(B.vobs,C.vobs);
     A.name = repmat({'--NA--'},A.vobs,1);
@@ -67,6 +66,7 @@ elseif isnumeric(C) &&  isreal(C) && isequal(length(C),1) && isa(B,'dynSeries')
     % division of a dynSeries object by a real scalar.
     A = dynSeries();
     A.freq = B.freq;
+    A.time = B.time;
     A.init = B.init;
     A.nobs = B.nobs;
     A.vobs = B.vobs;
@@ -77,6 +77,7 @@ elseif isnumeric(B) && isreal(B) && isequal(length(B),1) && isa(C,'dynSeries')
     % division of a real scalar by a dynSeries object.
     A = dynSeries();
     A.freq = C.freq;
+    A.time = C.time;
     A.init = C.init;
     A.nobs = C.nobs;
     A.vobs = C.vobs;

@@ -39,14 +39,13 @@ function A = uminus(B)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-
 A = dynSeries();
 
 A.freq = B.freq;
 A.nobs = B.nobs;
 A.vobs = B.vobs;
 A.init = B.init;
+A.time = B.time;
 A.name = repmat({'--NA--'},A.vobs,1);
 A.data = -(B.data);
 
