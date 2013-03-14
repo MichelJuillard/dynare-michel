@@ -60,8 +60,6 @@ function date = dynDate(a,b)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
-
 date = struct;
 
 date.freq = NaN;
@@ -75,6 +73,7 @@ switch nargin
     return
   case 1
     if ischar(a)% Weekly, Monthly or Quaterly data.
+        a = upper(a);
         if length(a)>1
             quaterly = findstr('Q',a);
             monthly  = findstr('M',a);
@@ -154,8 +153,8 @@ end
 %$ % Define some dates
 %$ date_1 = 1950;
 %$ date_2 = '1950Q2';
-%$ date_3 = '1950M10';
-%$ date_4 = '1950W50';
+%$ date_3 = '1950m10';
+%$ date_4 = '1950w50';
 %$ date_5 = '1950';
 %$
 %$ % Define expected results.
@@ -223,3 +222,19 @@ end
 %$ end
 %$ T = all(t);
 %@eof:3
+
+%@test:4
+%$ % Instatiate an empty objects for quaterly, monthly and weekly dates.
+%$ qq = dynDate('q');
+%$ mm = dynDate('m');
+%$ ww = dynDate('w');
+%$
+%$ % Check the results.
+%$ t(1) = dyn_assert(qq.freq,4);
+%$ t(2) = dyn_assert(mm.freq,12);
+%$ t(3) = dyn_assert(ww.freq,52);
+%$ t(4) = dyn_assert(all(isnan(qq.time)),1);
+%$ t(5) = dyn_assert(all(isnan(mm.time)),1);
+%$ t(6) = dyn_assert(all(isnan(ww.time)),1);
+%$ T = all(t);
+%@eof:4
