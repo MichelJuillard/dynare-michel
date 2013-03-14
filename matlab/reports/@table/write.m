@@ -34,6 +34,12 @@ if isempty(o.data)
     return
 end
 
+if strcmpi(o.seriestouse, 'all')
+    ds = o.data;
+else
+    ds = o.data{o.seriestouse{:}};
+end
+
 %number of left-hand columns, 1 until we allow the user to group data,
 % e.g.: GDP Europe
 %         GDP France
@@ -45,7 +51,7 @@ disp('creating table.........');
 fprintf(fid, '%% Table Object\n');
 fprintf(fid, '\\begin{tabular}{l');
 
-dates = o.data.time;
+dates = ds.time;
 ndates = dates.ndat;
 
 for i=1:ndates
@@ -57,6 +63,7 @@ if ~isempty(o.title)
 end
 fprintf(fid, '\\toprule%%\n');
 
+% Column Headers
 datedata = dates.time;
 years = unique(datedata(:, 1));
 thdr = num2cell(years, size(years, 1));
@@ -111,9 +118,10 @@ switch dates.freq
 end
 fprintf(fid, '%%\n');
 
-vars = o.data.name;
+% Table Data
+vars = ds.name;
 nvars = size(vars);
-data = o.data.data;
+data = ds.data;
 assert(isint(o.precision));
 precision = 10^o.precision;
 dataString = [' & %.' num2str(o.precision) 'f'];
