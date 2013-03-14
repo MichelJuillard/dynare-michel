@@ -17,5 +17,4 @@ function display(d)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    fprintf('%s = <dynDate: %s>\n', inputname(1), format(d));
-end
+fprintf('%s = <dynDate: %s>\n', inputname(1), format(d));
