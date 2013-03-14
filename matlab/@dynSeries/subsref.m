@@ -98,6 +98,7 @@ if length(S)==1 && isequal(S.type,'()')
         [junk,tdx] = intersect(ts.time.time,S.subs{1}.time,'rows');
         us = dynSeries();
         us.data = ts.data(tdx,:);
+        us.time = ts.time(tdx,:);
         us.name = deblank(ts.name);
         us.tex  = deblank(ts.tex);
         us.nobs = length(tdx);
