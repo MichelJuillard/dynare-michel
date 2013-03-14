@@ -109,7 +109,7 @@ if ~isempty(o.title)
 end
 drawnow;
 
-o.figname = ['figure-' num2str(cputime) '.tex'];
+o.figname = [tempname '.tex'];
 disp('  converting to tex....');
 matlab2tikz('filename', o.figname, ...
             'showInfo', false, ...
