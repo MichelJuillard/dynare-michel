@@ -60,13 +60,13 @@ function dd = dynDates(varargin)
 % GNU General Public License for more details.
 %
 % You should have received a copy of the GNU General Public License
-% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+ % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 dd = struct;
 
 dd.ndat = 0;
-dd.freq = [];
-dd.time = [];
+dd.freq = NaN;
+dd.time = NaN(1,2);
 
 dd = class(dd,'dynDates');
 
