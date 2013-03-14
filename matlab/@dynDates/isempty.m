@@ -39,7 +39,7 @@ function B = isempty(A)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
     
-B = all(isnan(A.time)) && isnan(A.freq) && isequal(A.ndat,0);
+B = all(isnan(A.time(:))) && isnan(A.freq) && isequal(A.ndat,0);
 
 %@test:1
 %$ % Instantiate an empty dynDate object
