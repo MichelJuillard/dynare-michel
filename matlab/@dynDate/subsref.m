@@ -191,18 +191,19 @@ end
 
 %@test:3
 %$ % Try more complex call to overloaded subsref
-%$ t = zeros(1,1);
+%$ t = zeros(3,1);
 %$ try
-%$     a = dynDate();
+%$     a = dynDate('M');
 %$     time = a('1973M1').time;
 %$     t(1) = 1;
+%$     t(2) = dyn_assert(time,[1973,1]);
+%$     t(3) = dyn_assert(a.freq,12);
 %$ catch
 %$     % Nothing to do here.
 %$ end
 %$
 %$ T = all(t);
 %@eof:3
-
 
 %@test:4
 %$ t = NaN(3,1);
@@ -221,4 +222,17 @@ end
 %$ t(1) = dyn_assert(a.freq,4);
 %$ t(2) = dyn_assert(a.time,[1938,4]);
 %$ T = all(t);
-%@eof:3
+%@eof:4
+
+%@test:5
+%$ t = NaN(2,1);
+%$ % Instantiate an empty object for quaterly date
+%$ qq = dynDate('Q');
+%$ % Populate this object and get the time member
+%$ time = qq(1938,4).time;
+%$ 
+%$ % Check the results
+%$ t(1) = dyn_assert(qq.freq,4);
+%$ t(2) = dyn_assert(time,[1938,4]);
+%$ T = all(t);
+%@eof:5
