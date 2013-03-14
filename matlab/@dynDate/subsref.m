@@ -32,7 +32,7 @@ function B = subsref(A,S)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011, 2012 Dynare Team
+% Copyright (C) 2011, 2012, 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -49,74 +49,97 @@ function B = subsref(A,S)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
-
-% Allow to populate an empty dynDate object or update a dynDate object
-if isequal(length(S),1) && isequal(S.type,'()')
-    if isequal(length(S.subs),1) && ischar(S.subs{1})
-        B = dynDate(S.subs{1});
-        return
-    elseif isequal(length(S.subs),1) && isnumeric(S.subs{1})
-        % Yearly data are assumed.
-        if isequal(A.freq,1)
-            B = dynDate(S.subs{1});
-            return
-        end
-    elseif isequal(length(S.subs),2) && isequal(length(S.subs{1}),1) && isequal(length(S.subs{2}),1)
-        tmp = [];
-        switch A.freq
-          case 4
-            % Quaterly data
-            if S.subs{2}<5 && S.subs{2}>0
-                tmp = [num2str(S.subs{1}), 'Q' num2str(S.subs{2})];
-            end
-          case 12
-            % Monthly data
-            if S.subs{2}<13 && S.subs{2}>0
-                tmp = [num2str(S.subs{1}), 'M' num2str(S.subs{2})];
-            end
-          case 52
-            % Weekly data
-            if S.subs{2}<53 && S.subs{2}>0
-                tmp = [num2str(S.subs{1}), 'W' num2str(S.subs{2})];
-            end
-          otherwise
-            %
-        end
-        if ~isempty(tmp)
-            B = dynDate(tmp);
-            return
-        end
+switch S(1).type
+  case '.'
+    switch S(1).subs
+      case 'format'
+        B = format(A);
+      case {'time', 'freq'}
+        B = builtin('subsref', A, S(1));
+      otherwise
+        error('dynDate::subsref: Unknown public member of method!')
     end
+  case '()'
+    switch length(S(1).subs)
+      case 1
+        if ischar(S(1).subs{1})
+            if numel(S(1).subs{1})==1 && isempty(strmatch(S(1).subs{1},{'W','M','Q','Y'},'exact'))
+                error(['dynDate::subsref: To set the frequency, the input argument of dynDate object ''' inputname(1) ''' should be ''W'', ''M'', ''Q'' or ''Y''.'])
+            end
+            % Set the frequency (if numel==1) of an empty dynDate object or set the date (if numel>1).
+            B = dynDate(S(1).subs{1});
+        elseif isnumeric(S(1).subs{1}) && isscalar(S(1).subs{1}) && isint(S(1).subs{1})
+            if (~isnan(A.freq) && A.freq==1) || isnan(A.freq)
+                B = dynDate(S(1).subs{1});
+            else
+                error(['dynDate::subsref: dynDate object ''' inputname(1) ''' was not instantiated for years.'])
+            end
+        else
+            error('dynDate::subsref: Something is wrong in your syntax!')
+        end
+      case 2% Populate an empty dynDate object
+        if isnan(A.freq)
+            error(['dynDate::subsref: I cannot interpret the two inputs of dynDate object ''' inputname(1) ''' because frequency is not set.'])
+        else
+            tmp = [];
+            switch A.freq
+              case 4
+                % Quaterly data
+                if isint(S(1).subs{2}) && isint(S(1).subs{1}) && S(1).subs{2}<5 && S(1).subs{2}>0
+                    tmp = [int2str(S(1).subs{1}), 'Q' int2str(S(1).subs{2})];
+                else
+                    if ~isint(S(1).subs{2}) || ~(S(1).subs{2}<5 && S(1).subs{2}>0)
+                        error(['dynDate::subsref: The second input argument of dynDate object ''' inputname(1) ''' (' num2str(S(1).subs{2})  ') should be a positive integer less than or equal to 4.'])
+                    end
+                    if ~isint(S(1).subs{2})
+                        error(['dynDate::subsref: The first input argument of dynDate object ''' inputname(1) ''' (' num2str(S(1).subs{1})  ') should be an integer.'])
+                    end
+                end
+              case 12
+                % Monthly data
+                if isint(S(1).subs{2}) && isint(S(1).subs{1}) && S(1).subs{2}<13 && S(1).subs{2}>0
+                    tmp = [num2str(S(1).subs{1}), 'M' num2str(S(1).subs{2})];
+                else
+                    if ~isint(S(1).subs{2}) || ~(S(1).subs{2}<13 && S(1).subs{2}>0)
+                        error(['dynDate::subsref: The second input argument of dynDate object ''' inputname(1) ''' (' num2str(S(1).subs{2})  ') should be a positive integer less than or equal to 12.'])
+                    end
+                    if ~isint(S(1).subs{2})
+                        error(['dynDate::subsref: The first input argument of dynDate object ''' inputname(1) ''' (' num2str(S(1).subs{1})  ') should be an integer.'])
+                    end
+                end
+              case 52
+                % Weekly data
+                if isint(S(1).subs{2}) && isint(S(1).subs{1}) && S(1).subs{2}<53 && S(1).subs{2}>0
+                    tmp = [num2str(S(1).subs{1}), 'W' num2str(S(1).subs{2})];
+                else
+                    if ~isint(S(1).subs{2}) || ~(S(1).subs{2}<53 && S(1).subs{2}>0)
+                        error(['dynDate::subsref: The second input argument of dynDate object ''' inputname(1) ''' (' num2str(S(1).subs{2})  ') should be a positive integer less than or equal to 52.'])
+                    end
+                    if ~isint(S(1).subs{2})
+                        error(['dynDate::subsref: The first input argument of dynDate object ''' inputname(1) ''' (' num2str(S(1).subs{1})  ') should be an integer.'])
+                    end                    
+                end
+              case 1
+                % Yearly data
+                error('dynDate::subsref: Frequency is set for years. You should not provide more than one integer input argument (to set the year)!')
+              otherwise
+                error('dynDate::subsref: Unknown frequency!')
+            end
+            if ~isempty(tmp)
+                B = dynDate(tmp);
+            end
+        end
+      otherwise
+        error(['dynDate::subsref: dynDate object ''' inputname(1) ''' cannot have more than two inputs.'])
+    end
+  otherwise
+    error('dynDate::subsref: Something is wrong in your syntax!')
 end
 
-% Give access to dynDate methods (format).
-if isequal(length(S),1) && isequal(S.type,'.') && ( strcmp(S.subs,'format') )
-    B = format(A);
-    return
+S = shiftS(S);
+if ~isempty(S)
+    B = subsref(B, S);
 end
-
-
-% Give access to dynDate properties (time and freq).
-if isequal(length(S),1) && isequal(S.type,'.') && ( strcmp(S.subs,'time') || strcmp(S.subs,'freq') )
-    B = builtin('subsref', A, S);
-    return
-end
-
-% Allow more complex call to subsref such that:
-%
-% a = dynDate();
-% a('2009M4').time
-%
-% should return a row vector [2009 4]. Note that the object name should not match any function name
-% declared in the matlab's path.
-if length(S)>1 && isequal(S(1).type,'()') && isequal(S(2).type,'.')
-    tmp = dynDate(S(1).subs{1});
-    B = builtin('subsref', tmp, S(2));
-    return
-end
-
-error('dynDate::subsref: You''re trying to do something wrong!')
 
 %@test:1
 %$ t = zeros(3,1);
