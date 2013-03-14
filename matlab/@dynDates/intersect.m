@@ -56,16 +56,16 @@ if ~isequal(A.freq,B.freq)
     return
 end
 
-[tmp,ia,ib] = intersect(A.time,B.time,'rows');
+time = intersect(A.time,B.time,'rows');
 
 C = dynDates();
-if isempty(tmp)
+if isempty(time)
     return
 end
 
 C.freq = A.freq;
-C.time = tmp;
-C.ndat = rows(tmp); 
+C.time = time;
+C.ndat = rows(time); 
 
 %@test:1
 %$ % Define some dynDates objects
