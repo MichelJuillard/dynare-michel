@@ -45,8 +45,6 @@ function dd = sort(dd)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-
 if ~isa(dd,'dynDates')
     error(['dynDates::sort: Input argument ' inputname(dd) ' has to be a dynDates object.'])
 end
@@ -58,8 +56,6 @@ end
 dd.time = sortrows(dd.time,[1,2]);
 
 %@test:1
-%$ addpath ../matlab
-%$
 %$ % Define some dates
 %$ B1 = '1953Q4';
 %$ B2 = '1950Q2';
