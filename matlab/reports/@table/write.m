@@ -34,7 +34,7 @@ if isempty(o.data)
     return
 end
 
-if strcmpi(o.seriestouse, 'all')
+if isempty(o.seriestouse)
     ds = o.data;
 else
     ds = o.data{o.seriestouse{:}};
