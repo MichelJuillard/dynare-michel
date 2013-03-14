@@ -30,7 +30,7 @@ function c = ge(a,b)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011, 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -47,8 +47,6 @@ function c = ge(a,b)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
-
 if a>b
     c=1;
 else
@@ -60,8 +58,6 @@ else
 end
 
 %@test:1
-%$ addpath ../matlab
-%$
 %$ % Define some dates
 %$ date_1 = '1950Q3';
 %$ date_2 = '1950Q3';

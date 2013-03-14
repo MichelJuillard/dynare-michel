@@ -46,8 +46,6 @@ function c = ne(a,b)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
-
 if nargin~=2
     error('dynDate::ne: I need exactly two input arguments!')
 end
@@ -63,11 +61,9 @@ end
 c = ~isequal(a.time,b.time);
 
 %@test:1
-%$ addpath ../matlab
-%$
 %$ % Define some dates
 %$ date_1 = 1950;
-%$ date_2 = '1950Q2';
+%$ date_2 = '1950q2';
 %$ date_3 = '1950M10';
 %$ date_4 = '1950W50';
 %$ date_5 = '1950W32';

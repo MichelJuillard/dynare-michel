@@ -46,8 +46,6 @@ function c = max(a,b)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
-
 if nargin~=2
     error('dynDate::min: I need exactly two input arguments!')
 end
@@ -67,14 +65,12 @@ else
 end
 
 %@test:1
-%$ addpath ../matlab
-%$
 %$ % Define some dates
 %$ date_1 = 1950;
 %$ date_2 = 2000;
-%$ date_3 = '1950Q2';
+%$ date_3 = '1950q2';
 %$ date_4 = '1950Q3';
-%$ date_5 = '1950M1';
+%$ date_5 = '1950m1';
 %$ date_6 = '1948M6';
 %$
 %$ % Call the tested routine.

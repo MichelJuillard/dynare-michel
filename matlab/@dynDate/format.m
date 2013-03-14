@@ -69,8 +69,6 @@ switch date.freq
 end
 
 %@test:1
-%$ addpath ../matlab
-%$
 %$ % Define some dates
 %$ date_1 = 1950;
 %$ date_2 = '1950Q2';
