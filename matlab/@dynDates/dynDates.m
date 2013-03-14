@@ -105,7 +105,7 @@ end
 %$ % Define some dates
 %$ B1 = '1945Q3';
 %$ B2 = '1950Q2';
-%$ B3 = '1950Q1';
+%$ B3 = '1950q1';
 %$ B4 = '1953Q4';
 %$
 %$ % Define expected results.
