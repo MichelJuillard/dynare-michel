@@ -55,7 +55,8 @@ if ~( isa(a,'dynDate') && isa(b,'dynDate'))
 end
 
 if ~isequal(a.freq,b.freq)
-    error(['dynDate::eq: Input arguments ' inputname(1) 'and ' inputname(2) ' have no common frequencies!'])
+    c = 0;
+    return
 end
 
 c = isequal(a.time,b.time);
@@ -76,10 +77,11 @@ c = isequal(a.time,b.time);
 %$ d5 = dynDate(date_5);
 %$ try 
 %$    i1 = (d1==d2);
-%$    t1 = 0;
-%$ catch
 %$    t1 = 1;
+%$ catch
+%$    t1 = 0;
 %$ end
+%$ t1 = t1 & ~i1;
 %$ i2 = (d2==d2);
 %$ i3 = (d4==d5);
 %$
@@ -106,10 +108,11 @@ c = isequal(a.time,b.time);
 %$ d5 = dynDate(date_5);
 %$ try 
 %$    i1 = (d1==d2);
-%$    t1 = 0;
-%$ catch
 %$    t1 = 1;
+%$ catch
+%$    t1 = 0;
 %$ end
+%$ t1 = t1 & ~i1;
 %$ i2 = (d2==d2);
 %$ i3 = (d4==d5);
 %$
