@@ -51,7 +51,7 @@ if nargin~=2
 end
 
 if ~( isa(a,'dynDate') && isa(b,'dynDate'))
-    error(['dynDate::eq: Input arguments ' inputname(1) 'and ' inputname(2) ' have to be a dynDate objects!'])
+    error(['dynDate::eq: Input arguments ' inputname(1) ' and ' inputname(2) ' have to be a dynDate objects!'])
 end
 
 if ~isequal(a.freq,b.freq)
