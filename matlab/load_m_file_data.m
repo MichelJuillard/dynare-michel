@@ -1,4 +1,4 @@
-function [freq,init,data,varlist] = load_m_file_data(file)
+function [freq,init,data,varlist,tex] = load_m_file_data(file)
 
 %@info:
 %! @deftypefn {Function File} {@var{freq}, @var{init}, @var{data}, @var{varlist} =} load_m_file_data (@var{file})
@@ -33,7 +33,7 @@ function [freq,init,data,varlist] = load_m_file_data(file)
 %@eod:
 
 
-% Copyright (C) 2012 Dynare Team
+% Copyright (C) 2012, 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -49,8 +49,6 @@ function [freq,init,data,varlist] = load_m_file_data(file)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr    
 
 [basename, ext] = strtok(file,'.');
     
@@ -70,27 +68,52 @@ else
     freq = 1;
 end
 
-list_of_variables = whos();
+if exist('NAMES__','var')
+    varlist0 = NAMES__;
+    clear('NAMES__');
+else
+    varlist0 = [];
+    list_of_variables = [];
+end
+
+if exist('TEX__','var')
+    tex = TEX__;
+    clear('TEX__');
+else
+    tex = [];
+end
+
+
+if isempty(varlist0)
+    list_of_variables = whos();
+end
 
 data = [];
 varlist = {};
 
-for i=1:length(list_of_variables)
-    if isequal(list_of_variables(i).name,'freq') || isequal(list_of_variables(i).name,'time') || isequal(list_of_variables(i).name,'data') || isequal(list_of_variables(i).name,'varlist')
-        continue
+if isempty(varlist0)
+    for i=1:length(list_of_variables)
+        if isequal(list_of_variables(i).name,'freq') || isequal(list_of_variables(i).name,'time') || isequal(list_of_variables(i).name,'data') || isequal(list_of_variables(i).name,'varlist')
+            continue
+        end
+        if list_of_variables(i).global || list_of_variables(i).persistent
+            continue
+        end
+        if list_of_variables(i).complex || ~strcmp(list_of_variables(i).class,'double')
+            continue
+        end
+        try
+            eval(['data = [data, ' list_of_variables(i).name '];'])
+            eval(['varlist = {varlist{:}, ''' list_of_variables(i).name '''};']) 
+        catch
+            error(['load_m_file:: All the vectors (variables) in ' inputname(1) ' must have the same number of rows (observations)!'])
+        end
     end
-    if list_of_variables(i).global || list_of_variables(i).persistent
-        continue
+else
+    for i=1:length(varlist0)
+       eval(['data = [data, ' varlist0{i} '];']) 
     end
-    if list_of_variables(i).complex || ~strcmp(list_of_variables(i).class,'double')
-        continue
-    end
-    try
-        eval(['data = [data, ' list_of_variables(i).name '];'])
-        eval(['varlist = {varlist{:}, ''' list_of_variables(i).name '''};']) 
-    catch
-        error(['load_m_file:: All the vectors (variables) in ' inputname(1) ' must have the same number of rows (observations)!'])
-    end
+    varlist = varlist0;
 end
 
 %@test:1
@@ -98,6 +121,8 @@ end
 %$ fid = fopen('data_m_file.m','w');
 %$ fprintf(fid,'FREQ__ = 4;');
 %$ fprintf(fid,'INIT__ = ''1938Q4'';');
+%$ fprintf(fid,'NAMES__ = {''azert'';''yuiop''};');
+%$ fprintf(fid,'TEX__ = {''azert'';''yuiop''};');
 %$ fprintf(fid,'azert = [1; 2; 3; 4; 5];');
 %$ fprintf(fid,'yuiop = [2; 3; 4; 5; 6];');
 %$ fclose(fid);
@@ -105,7 +130,7 @@ end
 %$ % Try to read the data m-file
 %$ try
 %$     datafile = 'data_m_file';
-%$     [freq,init,data,varlist] = load_m_file_data(datafile);
+%$     [freq,init,data,varlist,tex] = load_m_file_data(datafile);
 %$     t(1) = 1;
 %$ catch exception
 %$     t(1) = 0;
@@ -119,8 +144,9 @@ end
 %$ t(3) = dyn_assert(isa(init,'dynDate'),1);
 %$ t(4) = dyn_assert(init.freq,4);
 %$ t(5) = dyn_assert(init.time,[1938 4]);
-%$ t(6) = dyn_assert(varlist,{'azert','yuiop'});
-%$ t(7) = dyn_assert(data(:,1),[1;2;3;4;5]);
-%$ t(8) = dyn_assert(data(:,2),[2;3;4;5;6]);
+%$ t(6) = dyn_assert(varlist,{'azert';'yuiop'});
+%$ t(7) = dyn_assert(tex,{'azert';'yuiop'});
+%$ t(8) = dyn_assert(data(:,1),[1;2;3;4;5]);
+%$ t(9) = dyn_assert(data(:,2),[2;3;4;5;6]);
 %$ T = all(t);
 %@eof:1

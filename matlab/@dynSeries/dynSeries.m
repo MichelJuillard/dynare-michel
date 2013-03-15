@@ -106,11 +106,12 @@ switch nargin
     elseif ischar(varargin{1})
         % Create a dynSeries object loading data in a file (*.csv, *.m, *.mat).
         if check_file_extension(varargin{1},'m')
-            [freq,init,data,varlist] = load_m_file_data(varargin{1});
+            [freq,init,data,varlist,tex] = load_m_file_data(varargin{1});
         elseif check_file_extension(varargin{1},'mat')
-            [freq,init,data,varlist] = load_mat_file_data(varargin{1});
+            [freq,init,data,varlist,tex] = load_mat_file_data(varargin{1});
         elseif check_file_extension(varargin{1},'csv')
             [freq,init,data,varlist] = load_csv_file_data(varargin{1});
+            tex = [];
         else
             error(['dynSeries:: I''m not able to load data from ' inputname(1) '!'])
         end
@@ -120,9 +121,13 @@ switch nargin
         ts.name = varlist;
         ts.vobs = length(varlist);
         ts.nobs = size(data,1);
-        ts.tex = cell(ts.vobs,1);
-        for i=1:ts.vobs
-            ts.tex(i) = {name2tex(varlist{i})};
+        if isempty(tex)
+            ts.tex = cell(ts.vobs,1);
+            for i=1:ts.vobs
+                ts.tex(i) = {name2tex(varlist{i})};
+            end
+        else
+           ts.tex = tex;
         end
     end
   case {2,3,4}
