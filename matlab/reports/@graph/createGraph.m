@@ -29,7 +29,6 @@ function o = createGraph(o)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 assert(~isempty(o.data));
-assert(isa(o.data, 'dynSeries')) ;
 
 if ~isempty(o.figname)
     warning('@graph.createGraph: will overwrite %s with new graph\n', ...
@@ -50,13 +49,13 @@ end
 %set(h, 'PaperPositionMode', 'auto');
 %set(h, 'units', 'normalized', 'outerposition', [0 0 1 1]);
 
-if strcmpi(o.seriestouse, 'all')
+if isempty(o.seriestouse)
     ds = o.data;
 else
     ds = o.data{o.seriestouse{:}};
 end
 
-if ~strcmp(o.xrange, 'all')
+if ~isempty(o.xrange)
     dd1 = dynDate(o.xrange{1});
     dd2 = dynDate(o.xrange{2});
     ds  = ds(dd1:dd2);
@@ -68,7 +67,7 @@ xlabels = getDatesCellStringArray(ds.time);
 
 plot(x, data);
 
-if ~strcmp(o.yrange, 'all')
+if ~isempty(o.yrange)
     ylim([o.yrange{:}]);
 end
 

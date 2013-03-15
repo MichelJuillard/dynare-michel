@@ -38,15 +38,14 @@ o.config = '';
 o.title = '';
 o.ylabel = '';
 o.xlabel = '';
-o.zlabel = '';
 o.footnote = '';
 
 o.figname = '';
 o.data = '';
-o.seriestouse = 'all';
+o.seriestouse = '';
 o.shade = '';
-o.xrange = 'all';
-o.yrange = 'all';
+o.xrange = '';
+o.yrange = '';
 
 o.grid = true;
 
@@ -76,6 +75,60 @@ elseif nargin > 1
         else
             error('@graph.graph: %s is not a recognized option.', field);
         end
+    end
+end
+
+% Check options provided by user
+assert(ischar(o.title), '@graph.graph: title must be a string');
+assert(ischar(o.footnote), '@graph.graph: footnote must be a string');
+assert(ischar(o.config), '@graph.graph: config file must be a string');
+assert(ischar(o.xlabel), '@graph.graph: xlabel file must be a string');
+assert(ischar(o.ylabel), '@graph.graph: ylabel file must be a string');
+assert(ischar(o.figname), '@graph.graph: figname must be a string');
+assert(islogical(o.grid), '@graph.graph: grid must be either true or false');
+assert(islogical(o.legend), '@graph.graph: legend must be either true or false');
+assert(isint(o.legend_font_size), '@graph.graph: legend_font_size must be an integer');
+valid_legend_locations = ...
+    {'North', 'South', 'East', 'West', ...
+     'NorthEast', 'SouthEast', 'NorthWest', 'SouthWest', ...
+     'NorthOutside', 'SouthOutside', 'EastOutside', 'WestOutside', ...
+     'NorthEastOutside', 'SouthEastOutside', 'NorthWestOutside', 'SouthWestOutside', ...
+     'Best', 'BestOutside', ...
+    };
+assert(any(strcmp(o.legend_location, valid_legend_locations)), ...
+       ['@graph.graph: legend_location must be one of ' strjoin(valid_legend_locations, ' ')]);
+
+valid_legend_orientations = {'vertical', 'horizontal'};
+assert(any(strcmp(o.legend_orientation, valid_legend_orientations)), ...
+       ['@graph.graph: legend_orientation must be one of ' strjoin(valid_legend_orientations, ' ')]);
+
+assert(isempty(o.shade) || (iscell(o.shade) && length(o.shade) == 2 && ...
+                            ischar(o.shade{1}) && ischar(o.shade{2})), ...
+       ['@graph.graph: yrange is specified as ''{''1999q1'',''1999q2''}''.']);
+assert(isempty(o.xrange) || (iscell(o.xrange) && length(o.xrange) == 2 && ...
+                             ischar(o.xrange{1}) && ischar(o.xrange{2})), ...
+       ['@graph.graph: xrange is specified as ''{''1999q1'',''1999q2''}''.']);
+assert(isempty(o.yrange) || (iscell(o.yrange) && length(o.yrange) == 2 && ...
+                             ischar(o.yrange{1}) && ischar(o.yrange{2})), ...
+       ['@graph.graph: yrange is specified as ''{''1999q1'',''1999q2''}''.']);
+
+assert(~isempty(o.data), '@graph.graph: must provide data');
+msg = ['@graph.graph: data must either be a dynSeries or a cell array of ' ...
+       'dynSeries'];
+if length(o.data) == 1
+    assert(isa(o.data, 'dynSeries'), msg);
+else
+    assert(iscell(o.data), msg);
+    for i=1:length(o.data)
+        assert(isa(o.data{i}, 'dynSeries'), msg);
+    end
+end
+
+msg = ['@graph.graph: series to use must be a cell array of string(s)'];
+if ~isempty(o.seriestouse)
+    assert(iscell(o.seriestouse), msg);
+    for i=1:length(o.seriestouse)
+        assert(ischar(o.seriestouse{i}), msg);
     end
 end
 
