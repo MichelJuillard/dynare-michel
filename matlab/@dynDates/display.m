@@ -17,33 +17,28 @@ function display(dd)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    max_displayed = 5;
-
-    fprintf('%s = <dynDates: ', inputname(1));
+max_displayed = 5;
+first_displayed = 2;
     
-    for i = 1:min(max_displayed, dd.ndat)
-
-        fprintf('%d', dd.time(i,1))
-        switch dd.freq
-          case 1
-          case 4
-            fprintf('Q')
-          case 12
-            fprintf('M')
-          case 52
-            fprintf('W')
-          otherwise
-            error('Unknown frequency %d', dd.freq)
-        end
-        if dd.freq ~= 1
-            fprintf('%d', dd.time(i,2))
-        end
-        if i ~= min(dd.ndat, max_displayed)
+fprintf('%s = <dynDates: ', inputname(1));
+    
+if dd.ndat<=max_displayed
+    for i=1:ndat
+        fprintf(format(dynDate(dd.time(i,:),dd.freq)))
+        if i<ndat
             fprintf(', ')
+        else
+            fprintf('>\n')
         end
     end
-    if dd.ndat > max_displayed
-        fprintf(', ...')
+else
+    for i=1:first_displayed
+        fprintf(format(dynDate(dd.time(i,:),dd.freq)))
+        fprintf(', ')
     end
+    fprintf(' ..., ')
+    fprintf(format(dynDate(dd.time(dd.ndat-1,:),dd.freq)))
+    fprintf(', ')
+    fprintf(format(dynDate(dd.time(dd.ndat,:),dd.freq)))
     fprintf('>\n')
 end
