@@ -60,9 +60,7 @@ else
 end
 
 if ~isempty(o.xrange)
-    dd1 = dynDate(o.xrange{1});
-    dd2 = dynDate(o.xrange{2});
-    ds  = ds(dd1:dd2);
+    ds  = ds(o.xrange);
 end
 data = ds.data;
 
@@ -72,14 +70,14 @@ xlabels = getDatesCellStringArray(ds.time);
 plot(x, data);
 
 if ~isempty(o.yrange)
-    ylim([o.yrange{:}]);
+    ylim(o.yrange);
 end
 
 if ~isempty(o.shade)
-    x1 = find(strcmp(o.shade{1}, xlabels));
-    x2 = find(strcmp(o.shade{2}, xlabels));
+    x1 = find(strcmpi(o.shade(1).format(), xlabels));
+    x2 = find(strcmpi(o.shade(o.shade.ndat).format(), xlabels));
     assert(~isempty(x1) && ~isempty(x2), ['@graph.createGraph: either ' ...
-                        o.shade{1} ' or ' o.shade{2} 'is not in the date ' ...
+                        o.shade(1).format() ' or ' o.shade(o.shade.ndat).format() ' is not in the date ' ...
                         'range of data selected.']);
     yrange = get(gca, 'YLim');
 
