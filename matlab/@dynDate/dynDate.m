@@ -1,4 +1,4 @@
-function date = dynDate(a)
+function date = dynDate(a,b)
 
 %@info:
 %! @deftypefn {Function File} {@var{date} =} dynDate (@var{a})
@@ -60,8 +60,6 @@ function date = dynDate(a)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
-
 date = struct;
 
 date.freq = NaN;
@@ -75,6 +73,7 @@ switch nargin
     return
   case 1
     if ischar(a)% Weekly, Monthly or Quaterly data.
+        a = upper(a);
         if length(a)>1
             quaterly = findstr('Q',a);
             monthly  = findstr('M',a);
@@ -129,6 +128,23 @@ switch nargin
             error('dynDate:: Can''t instantiate the class, wrong calling sequence!')
         end            
     end
+  case 2 % provide time and freq to instantiate a dynDate object
+    date = dynDate();
+    if isnumeric(b) && isscalar(b) && (b==1 || b==4 || b==12 || b==52)
+        date.freq = b;
+        if ~isnumeric(a) && size(a)~=2 && size(a,2)~=2
+            error(['dynDate:: Can''t instantiate the class! The first argument ' inputname(a) ' must be a 1*2 vector of integers.'])
+        end
+        if b==1 && a(2)~1
+            error(['dynDate:: Can''t instantiate the class! The second element of the first argument ' inputname(a) ' must be equal to one.'])
+        end
+        if a(2)<=0 || a(2)>b
+            error(['dynDate:: Can''t instantiate the class! The second element of the first argument ' inputname(a) ' must be <=' int2str(b) '.' ])
+        end
+        date.time = a;
+    else
+        error(['dynDate:: Can''t instantiate the class! The second argument ' inputname(b) ' must be equal to 1, 4, 12 or 52.'])
+    end
   otherwise
     error('dynDate:: Can''t instantiate the class, wrong calling sequence!')
 end
@@ -137,8 +153,8 @@ end
 %$ % Define some dates
 %$ date_1 = 1950;
 %$ date_2 = '1950Q2';
-%$ date_3 = '1950M10';
-%$ date_4 = '1950W50';
+%$ date_3 = '1950m10';
+%$ date_4 = '1950w50';
 %$ date_5 = '1950';
 %$
 %$ % Define expected results.
@@ -188,4 +204,37 @@ end
 %$ t(5) = dyn_assert(all(isnan(mm.time)),1);
 %$ t(6) = dyn_assert(all(isnan(ww.time)),1);
 %$ T = all(t);
-%@eof:1
+%@eof:2
+
+%@test:3
+%$ % Try to instatiate dynDate objects.
+%$ try
+%$    a = dynDate([1950 1],4);
+%$    t(1) = 1;
+%$ catch
+%$    t(1) = 0;
+%$ end
+%$ try
+%$    a = dynDate([1950 5],4);
+%$    t(1) = 0;
+%$ catch
+%$    t(1) = 1;
+%$ end
+%$ T = all(t);
+%@eof:3
+
+%@test:4
+%$ % Instatiate an empty objects for quaterly, monthly and weekly dates.
+%$ qq = dynDate('q');
+%$ mm = dynDate('m');
+%$ ww = dynDate('w');
+%$
+%$ % Check the results.
+%$ t(1) = dyn_assert(qq.freq,4);
+%$ t(2) = dyn_assert(mm.freq,12);
+%$ t(3) = dyn_assert(ww.freq,52);
+%$ t(4) = dyn_assert(all(isnan(qq.time)),1);
+%$ t(5) = dyn_assert(all(isnan(mm.time)),1);
+%$ t(6) = dyn_assert(all(isnan(ww.time)),1);
+%$ T = all(t);
+%@eof:4

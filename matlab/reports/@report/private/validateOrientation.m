@@ -3,10 +3,10 @@ function validateOrientation(orientation)
 % Validate orientation string
 %
 % INPUTS
-%   char : the orientation
+%   orientation     [char] orientation (one of 'portrait' or 'landscape')
 %
 % OUTPUTS
-%   char : lowercase orientation
+%   none
 %
 % SPECIAL REQUIREMENTS
 %   none
@@ -29,5 +29,6 @@ function validateOrientation(orientation)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 assert(any(strcmpi(orientation, {'portrait', 'landscape'})), ['Valid ' ...
-                    'orientation arguments are: ''portrait'' and ''landscape''.']);
+                    'orientation arguments are: ''portrait'' and ' ...
+                    '''landscape''.']);
 end

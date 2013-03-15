@@ -46,8 +46,6 @@ function c = lt(a,b)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
-
 if nargin~=2
     error('dynDate::eq: I need exactly two input arguments!')
 end
@@ -73,8 +71,6 @@ else
 end
 
 %@test:1
-%$ addpath ../matlab
-%$
 %$ % Define some dates
 %$ date_1 = 1950;
 %$ date_2 = '1950Q2';

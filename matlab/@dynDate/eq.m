@@ -46,8 +46,6 @@ function c = eq(a,b)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
-
 if nargin~=2
     error('dynDate::eq: I need exactly two input arguments!')
 end
@@ -57,14 +55,13 @@ if ~( isa(a,'dynDate') && isa(b,'dynDate'))
 end
 
 if ~isequal(a.freq,b.freq)
-    error(['dynDate::eq: Input arguments ' inputname(1) 'and ' inputname(2) ' have no common frequencies!'])
+    c = 0;
+    return
 end
 
 c = isequal(a.time,b.time);
 
 %@test:1
-%$ addpath ../matlab
-%$
 %$ % Define some dates
 %$ date_1 = 1950;
 %$ date_2 = '1950Q2';
@@ -80,10 +77,11 @@ c = isequal(a.time,b.time);
 %$ d5 = dynDate(date_5);
 %$ try 
 %$    i1 = (d1==d2);
-%$    t1 = 0;
-%$ catch
 %$    t1 = 1;
+%$ catch
+%$    t1 = 0;
 %$ end
+%$ t1 = t1 & ~i1;
 %$ i2 = (d2==d2);
 %$ i3 = (d4==d5);
 %$
@@ -94,3 +92,33 @@ c = isequal(a.time,b.time);
 %$ T = all(t);
 %@eof:1
 
+%@test:2
+%$ % Define some dates
+%$ date_1 = 1950;
+%$ date_2 = '1950q2';
+%$ date_3 = '1950m10';
+%$ date_4 = '1950w50';
+%$ date_5 = '1950w32';
+%$
+%$ % Call the tested routine.
+%$ d1 = dynDate(date_1);
+%$ d2 = dynDate(date_2);
+%$ d3 = dynDate(date_3);
+%$ d4 = dynDate(date_4);
+%$ d5 = dynDate(date_5);
+%$ try 
+%$    i1 = (d1==d2);
+%$    t1 = 1;
+%$ catch
+%$    t1 = 0;
+%$ end
+%$ t1 = t1 & ~i1;
+%$ i2 = (d2==d2);
+%$ i3 = (d4==d5);
+%$
+%$ % Check the results.
+%$ t(1) = t1;
+%$ t(2) = dyn_assert(i2,1);
+%$ t(3) = dyn_assert(i3,0);
+%$ T = all(t);
+%@eof:2

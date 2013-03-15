@@ -1,4 +1,16 @@
-function display(d)
+function o = addGraph(o, varargin)
+%function o = addGraph(o, varargin)
+% Add a graph to the current section of the current page in the report
+%
+% INPUTS
+%   o          [report]  report object
+%   varargin             arguments to @section/addGraph.m
+%
+% OUTPUTS
+%   o          [report]  updated report object
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -17,4 +29,8 @@ function display(d)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-fprintf('%s = <dynDate: %s>\n', inputname(1), format(d));
+lastPage = o.pages.numPages();
+lastSection = o.pages(lastPage).numSections();
+o.pages(lastPage).sections(lastSection) = ...
+    o.pages(lastPage).sections(lastSection).addGraph(varargin{:});
+end

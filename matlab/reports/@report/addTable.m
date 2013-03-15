@@ -1,5 +1,18 @@
-function b = isint(a)
-% Copyright (C) 2012 Dynare Team
+function o = addTable(o, varargin)
+%function o = addTable(o, varargin)
+% Add a table to the current section of the current page in the report
+%
+% INPUTS
+%   o          [report]  report object
+%   varargin             arguments to @section/addTable.m
+%
+% OUTPUTS
+%   o          [report]  updated report object
+%
+% SPECIAL REQUIREMENTS
+%   none
+
+% Copyright (C) 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -16,6 +29,8 @@ function b = isint(a)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-
-b = (floor(a)==a);
+lastPage = o.pages.numPages();
+lastSection = o.pages(lastPage).numSections();
+o.pages(lastPage).sections(lastSection) = ...
+    o.pages(lastPage).sections(lastSection).addTable(varargin{:});
+end

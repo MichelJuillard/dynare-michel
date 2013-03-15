@@ -39,9 +39,8 @@ o.hlines = false;
 o.vlines = false;
 
 o.data = '';
-o.datatitles = '';
-o.seriestouse = 'all';
-o.range = '';
+o.seriestouse = '';
+o.range = {};
 o.precision = 1;
 
 if nargin == 1
@@ -65,6 +64,42 @@ elseif nargin > 1
         else
             error('%s is not a recognized option to the Table constructor.', ...
                   field);
+        end
+    end
+end
+
+% Check options provided by user
+assert(ischar(o.title), '@table.table: title must be a string');
+assert(ischar(o.footnote), '@table.table: footnote must be a string');
+assert(ischar(o.config), '@table.table: config file must be a string');
+assert(islogical(o.hlines), '@table.table: hlines must be true or false');
+assert(islogical(o.vlines), '@table.table: vlines must be true or false');
+assert(isint(o.precision), '@table.table: precision must be an int');
+assert(isempty(o.range) || (iscell(o.range) && length(o.range) == 2 && ...
+                            ischar(o.range{1}) && ischar(o.range{2})), ...
+       ['@table.table: range is specified as ''{''1999q1'',''999q2''}''.']);
+
+assert(~isempty(o.data), '@table.table: must provide data');
+msg = ['@table.table: data must either be a dynSeries or a cell array of ' ...
+       'dynSeries'];
+if length(o.data) == 1
+    assert(isa(o.data, 'dynSeries'), msg);
+else
+    assert(iscell(o.data), msg);
+    for i=1:length(o.data)
+        assert(isa(o.data{i}, 'dynSeries'), msg);
+    end
+end
+
+msg = ['@table.table: series to use must either be a string or a cell array ' ...
+       'of strings'];
+if ~isempty(o.seriestouse)
+    if length(o.seriestouse) == 1
+        assert(ischar(o.seriestouse), msg);
+    else
+        assert(iscell(o.seriestouse), msg);
+        for i=1:length(o.seriestouse)
+            assert(ischar(o.seriestouse{i}), msg);
         end
     end
 end

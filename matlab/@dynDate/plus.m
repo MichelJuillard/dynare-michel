@@ -31,7 +31,7 @@ function c = plus(a,b)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011, 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -48,8 +48,6 @@ function c = plus(a,b)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHORS(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-
 if ~isa(a,'dynDate')
     error(['dynDate::plus: Input argument ' inputname(1) ' must be a dynDate object!'])
 end
@@ -57,7 +55,6 @@ end
 if b<0 || ~isint(b)
     error(['dynDate::plus: Input argument ' inputname(2) ' must be a positive integer'])
 end
-
 
 if b==0
     c = a;
@@ -80,8 +77,6 @@ switch a.freq
 end
 
 %@test:1
-%$ addpath ../matlab
-%$
 %$ % Define some dates
 %$ date_1 = 1950;
 %$ date_2 = '1950Q4';

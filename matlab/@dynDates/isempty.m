@@ -1,4 +1,26 @@
-function display(d)
+function B = isempty(A)
+
+%@info:
+%! @deftypefn {Function File} {@var{B} =} isempty (@var{A})
+%! @anchor{@dynDates/isempty}
+%! @sp 1
+%! Overloads the isempty function for the @ref{dynDates} class.
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item A
+%! @ref{dynDates} object.
+%! @end table
+%! @sp 1
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item b
+%! Integer scalar (equal to zero if @var{A} is not empty).
+%! @end table
+%! @end deftypefn
+%@eod:
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -16,5 +38,13 @@ function display(d)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+    
+B = all(isnan(A.time(:))) && isnan(A.freq) && isequal(A.ndat,0);
 
-fprintf('%s = <dynDate: %s>\n', inputname(1), format(d));
+%@test:1
+%$ % Instantiate an empty dynDate object
+%$ d = dynDates();
+%$ % Test if this object is empty
+%$ t(1) = isempty(d);
+%$ T = all(t);
+%@eof:1

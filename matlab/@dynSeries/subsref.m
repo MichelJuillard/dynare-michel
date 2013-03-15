@@ -1,4 +1,4 @@
-function us = subsref(ts, S)
+function B = subsref(A, S)
 %@info:
 %! @deftypefn {Function File} {@var{us} =} subsref (@var{ts},S)
 %! @anchor{@dynSeries/subsref}
@@ -44,7 +44,7 @@ function us = subsref(ts, S)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011, 2012 Dynare Team
+% Copyright (C) 2011, 2012, 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -61,99 +61,87 @@ function us = subsref(ts, S)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-
-if length(S)==1 && isequal(S.type,'.')
-    switch S.subs
+switch S(1).type
+  case '.'
+    switch S(1).subs
       case {'data','nobs','vobs','name','tex','freq','time','init'}        % Public members.
-        us = builtin('subsref', ts, S);
+        B = builtin('subsref', A, S(1));
       case {'log','exp','ygrowth','qgrowth','ydiff','qdiff'}               % Give "dot access" to public methods.
-        us = feval(S.subs,ts);
-      case {'save'}
+        B = feval(S(1).subs,A);
+      case {'save'}                                                        % Save dynSeries object on disk (default is a csv file). 
         us = NaN;
-        save(ts);
+        if length(S)==2 && strcmp(S(2).type,'()')
+            save(A,S(2).subs{:});
+            S = shiftS(S);
+        else
+            save(A);
+        end
       otherwise                                                            % Extract a sub-object by selecting one variable.
-        ndx = strmatch(S.subs,ts.name);
+        ndx = strmatch(S(1).subs,A.name,'exact');
         if ~isempty(ndx)
-            us = dynSeries();
-            us.data = ts.data(:,ndx);
-            us.name = deblank(ts.name(ndx,:));
-            us.tex  = deblank(ts.tex(ndx,:));
-            us.nobs = ts.nobs;
-            us.vobs = 1;
-            us.freq = ts.freq;
-            us.init = ts.init;
-            return
+            B = dynSeries();
+            B.data = A.data(:,ndx);
+            B.name = deblank(A.name(ndx,:));
+            B.tex  = deblank(A.tex(ndx,:));
+            B.nobs = A.nobs;
+            B.vobs = 1;
+            B.freq = A.freq;
+            B.init = A.init;
+            B.time = A.time;
         else
             error('dynSeries::subsref: Unknown public method, public member or variable!')
         end
-    end
-    return
-end
-
-if length(S)==1 && isequal(S.type,'()')
-    if ischar(S.subs{1})
-        us = dynSeries(S.subs{1});
-    else
-        % Extract a sub-object by selecting a sub-sample.
-        if size(ts.data,2)>1
-            S.subs = [S.subs, ':'];
+    end    
+  case '()'
+    if ischar(S(1).subs{1})
+        % If ts is an empty dynSeries object, populate this object by reading data in a file.
+        if isempty(A)
+            B = dynSeries(S(1).subs{1});
+        else
+            error(['dynSeries::subsref: dynSeries object ''' inputname(1) '''  is not empty!'])
         end
-        us.data = builtin('subsref', ts.data, S);
-        us.nobs = size(us.data,1);
-        us.vobs = ts.vobs;
-        us.freq = ts.freq;
-        us.time = builtin('subsref', ts.time, S);
-        us.init = ts.init+S.subs{1}(1);
-        us.name = ts.name;
-        us.tex  = ts.tex;
-        return
-    end
-end
-
-if (length(S)==2) && (isequal(S(1).subs,'init'))
-    if isequal(S(2).type,'.') && ( isequal(S(2).subs,'freq') || isequal(S(2).subs,'time') )
-        us = builtin('subsref', ts.init, S(2));
+    elseif isa(S(1).subs{1},'dynDates')
+        % Extract a subsample using a dynDates object
+        [junk,tdx] = intersect(A.time.time,S(1).subs{1}.time,'rows');
+        B = dynSeries();
+        B.data = A.data(tdx,:);
+        B.name = deblank(A.name);
+        B.tex  = deblank(A.tex);
+        B.nobs = length(tdx);
+        B.vobs = A.vobs;
+        B.freq = A.freq;
+        B.init = A.init+tdx(1);
+        B.time = A.time(tdx,:);
+    elseif isvector(S(1).subs{1}) && all(isint(S(1).subs{1}))
+        % Extract a subsample using a vector of integers (observation index).
+        if all(S(1).subs{1}>0) && all(S(1).subs{1}<=A.nobs)
+            if size(A.data,2)>1
+                S(1).subs = [S(1).subs, ':'];
+            end
+            B.data = builtin('subsref', A.data, S(1));
+            B.nobs = size(B.data,1);
+            B.vobs = A.vobs;
+            B.freq = A.freq;
+            B.time = builtin('subsref', A.time, S(1));
+            B.init = A.init+S(1).subs{1}(1);
+            B.name = A.name;
+            B.tex  = A.tex;
+        else
+            error('dynSeries::subsref: Indices are out of bounds!')
+        end
     else
-        error('dynSeries:subsref:: I don''t understand what you are trying to do!')
+        error('dynSeries::subsref: I have no idea of what you are trying to do!')
     end
-    return
+  case '{}'
+    B = extract(A,S(1).subs{:});
+  otherwise
+    error('dynSeries::subsref: What the Hell are you doin'' here?!')
 end
 
-if (length(S)==2) && (isequal(S(1).type,'.')) && (isequal(S(1).subs,'data')) && (isequal(S(2).type,'()')) 
-    us = builtin('subsref',ts.data,S(2));
-    return
+S = shiftS(S);
+if ~isempty(S)
+    B = subsref(B, S);
 end
-
-if (length(S)==1) && isequal(S(1).type,'{}')
-    us = extract(ts,S(1).subs{:});
-    return
-end
-
-if (length(S)==2) && isequal(S(1).type,'{}')
-    us = extract(ts,S(1).subs{:});
-    us = subsref(us, S(2));
-    return
-end
-
-
-if (length(S)==2) && isequal(S(1).subs,'save') && isequal(S(1).type,'.') && isequal(S(2).type,'()')
-    us = NaN;
-    save(ts,S(2).subs{:});
-    return
-end
-
-if (length(S)==2) && isequal(S(1).subs,'set_names') && isequal(S(1).type,'.') && isequal(S(2).type,'()')
-    us = set_names(ts,S(2).subs{:});
-    return
-end
-
-if (length(S)==2) && isequal(S(1).subs,'name') && isequal(S(1).type,'.') && isequal(S(2).type,'{}')
-    us = ts.name{S(2).subs{1}};
-    return
-end
-
-
 
 %@test:1
 %$ % Define a data set.
@@ -376,3 +364,34 @@ end
 %$
 %$ T = all(t);
 %@eof:8
+
+%@test:9
+%$ % Define a data set.
+%$ A = [transpose(1:60),2*transpose(1:60),3*transpose(1:60)];
+%$
+%$ % Define names
+%$ A_name = {'A1';'A2';'B1'};
+%$
+%$ % Instantiate a time series object.
+%$ ts1 = dynSeries(A,'1971Q1',A_name,[]);
+%$
+%$ % Define the range of a subsample.
+%$ range = dynDate('1971Q2'):dynDate('1971Q4');
+%$ % Call the tested method.
+%$ a = ts1(range);
+%$
+%$ % Expected results.
+%$ e.data = A(2:4,:);
+%$ e.nobs = 3;
+%$ e.vobs = 3;
+%$ e.name = {'A1';'A2';'B1'};
+%$ e.freq = 4;
+%$ e.init = dynDate('1971Q2');
+%$
+%$ t(1) = dyn_assert(e.data,a.data);
+%$ t(2) = dyn_assert(e.nobs,a.nobs);
+%$ t(3) = dyn_assert(e.vobs,a.vobs);
+%$ t(4) = dyn_assert(e.name,a.name);
+%$ t(5) = dyn_assert(e.init,a.init);
+%$ T = all(t);
+%@eof:9

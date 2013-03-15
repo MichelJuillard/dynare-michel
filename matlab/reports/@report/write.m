@@ -3,10 +3,10 @@ function o = write(o)
 % Write Report object
 %
 % INPUTS
-%   o   - Report Object
+%   o     [report]  report object
 %
 % OUTPUTS
-%   o   - Report Object
+%   o     [report]  report object
 %
 % SPECIAL REQUIREMENTS
 %   none

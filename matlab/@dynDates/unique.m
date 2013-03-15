@@ -45,8 +45,6 @@ function dd = unique(dd)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-
 if ~isa(dd,'dynDates')
     error(['dynDates::unique: Input argument ' inputname(dd) ' has to be a dynDates object.'])
 end
@@ -63,7 +61,7 @@ dd.ndat = size(dd.time,1);
 %$ % Define some dates
 %$ B1 = '1953Q4';
 %$ B2 = '1950Q2';
-%$ B3 = '1950Q1';
+%$ B3 = '1950q1';
 %$ B4 = '1945Q3';
 %$ B5 = '1950Q2'; 
 %$
@@ -74,7 +72,7 @@ dd.ndat = size(dd.time,1);
 %$
 %$ % Call the tested routine.
 %$ d = dynDates(B1,B2,B3,B4,B5);
-%$ d = d.unique();
+%$ d = d.unique;
 %$ 
 %$ % Check the results.
 %$ t(1) = dyn_assert(d.time,e.time);

@@ -27,7 +27,7 @@ function b = isempty(a)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2012 Dynare Team
+% Copyright (C) 2012, 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -44,10 +44,16 @@ function b = isempty(a)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
-
 if ~isa(a,'dynDate')
     error(['dynDate::isempty: Input argument ' inputname(1) ' have to be a dynDate object!'])
 end
 
 b = all(isnan(a.time)) && isnan(a.freq);
+
+%@test:1
+%$ % Instantiate an empty dynDate object
+%$ d = dynDate();
+%$ % Test if this object is empty
+%$ t(1) = isempty(d);
+%$ T = all(t);
+%@eof:1

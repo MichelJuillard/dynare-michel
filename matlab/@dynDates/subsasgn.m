@@ -17,5 +17,4 @@ function val = subsasgn(val, idx, rhs)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-    error('Members of dynDates class are private')
-end
+error('dynDates::subsasgn: Members of dynDates class are private')

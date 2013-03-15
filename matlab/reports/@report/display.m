@@ -3,7 +3,7 @@ function display(o)
 % Display a Report object
 %
 % INPUTS
-%   none
+%   o     [report]  report object
 %
 % OUTPUTS
 %   none

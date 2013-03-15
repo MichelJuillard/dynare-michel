@@ -1,5 +1,7 @@
 function S = shiftS(S)
 %function S = shiftS(S)
+%
+% Removes the first element of a one dimensional cell array.
 
 % Copyright (C) 2013 Dynare Team
 %

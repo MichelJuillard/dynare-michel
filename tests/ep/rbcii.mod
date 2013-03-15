@@ -22,9 +22,7 @@ effstar =  1.000;
 sigma   =  0.100;
 
 
-@#if extended_path_version
-    rho = 0.800;
-@#endif
+rho = 0.800;
 
 model(use_dll);
 

@@ -45,7 +45,7 @@ function dd = dynDates(varargin)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -60,15 +60,13 @@ function dd = dynDates(varargin)
 % GNU General Public License for more details.
 %
 % You should have received a copy of the GNU General Public License
-% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
+ % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 dd = struct;
 
 dd.ndat = 0;
-dd.freq = [];
-dd.time = [];
+dd.freq = NaN;
+dd.time = NaN(1,2);
 
 dd = class(dd,'dynDates');
 
@@ -104,12 +102,10 @@ switch nargin
 end
 
 %@test:1
-%$ addpath ../matlab
-%$
 %$ % Define some dates
 %$ B1 = '1945Q3';
 %$ B2 = '1950Q2';
-%$ B3 = '1950Q1';
+%$ B3 = '1950q1';
 %$ B4 = '1953Q4';
 %$
 %$ % Define expected results.
@@ -128,8 +124,6 @@ end
 %@eof:1
 
 %@test:2
-%$ addpath ../matlab
-%$
 %$ % Define some dates
 %$ B1 = '1945M3';
 %$ B2 = '1950M2';
@@ -152,8 +146,6 @@ end
 %@eof:2
 
 %@test:3
-%$ addpath ../matlab
-%$
 %$ % Define some dates
 %$ B1 = '1945';
 %$ B2 = '1950';
@@ -176,23 +168,21 @@ end
 %@eof:3
 
 %@test:4
-%$ addpath ../matlab
-%$
-%$ % Define some dates
-%$ B1 = '1945Q1';
-%$ B2 = '1950Q3';
-%$ B3 = '1950M10';
-%$ B4 = '1953Q1';
+%$ % Define a dynDates object
+%$ B = dynDate('1950Q1'):dynDate('1960Q3');
 %$
 %$
 %$ % Call the tested routine.
-%$ try
-%$     d = dynDates(B1,B2,B3,B4);
-%$     t(1) = 0;
-%$     T = 0;
-%$ catch
-%$     % Expected issue...
+%$ d = B(2);
+%$ if isa(d,'dynDate')
 %$     t(1) = 1;
-%$     T = 1;
+%$ else
+%$     t(1) = 0;
 %$ end
+%$
+%$ if t(1)
+%$     t(2) = dyn_assert(d.freq,B.freq);
+%$     t(3) = dyn_assert(d.time,[1950 2]);
+%$ end
+%$ T = all(t);
 %@eof:4

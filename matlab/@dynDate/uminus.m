@@ -29,7 +29,7 @@ function b = uminus(a)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011, 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -45,8 +45,6 @@ function b = uminus(a)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
 
 if ~isa(a,'dynDate')
     error(['dynDate::uminus: Input argument ' inputname(1) ' must be a dynDate object.'])
@@ -83,14 +81,12 @@ switch b.freq
 end
 
 %@test:1
-%$ addpath ../matlab
-%$
 %$ % Define some dates
 %$ date_1 = '1950Q1';
 %$ date_2 = '1950Q4';
 %$ date_3 = '1950M1';
 %$ date_4 = '1950M12';
-%$ date_5 = '1950W1';
+%$ date_5 = '1950w1';
 %$ date_6 = '1950W52';
 %$ date_7 = 2000;
 %$

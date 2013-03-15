@@ -59,7 +59,7 @@ function ts = dynSeries(varargin)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011, 2012 Dynare Team
+% Copyright (C) 2011, 2012, 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -75,8 +75,6 @@ function ts = dynSeries(varargin)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
 
 ts = struct;
 
@@ -143,26 +141,8 @@ switch nargin
     % Get the first date and set the frequency.
     if ~isempty(b)
         if ischar(b)% Weekly, Monthly or Quaterly data.
-            quaterly = findstr('Q',b);
-            monthly  = findstr('M',b);
-            weekly   = findstr('W',b);
-            yearly   = findstr('Y',b);
-            if ~isempty(quaterly)
-                ts.freq = 4;
-            end
-            if ~isempty(monthly)
-                ts.freq = 12;
-            end
-            if ~isempty(weekly)
-                ts.freq = 52;
-            end
-            if ~isempty(yearly)
-                ts.freq = 1;
-            end
-            if isempty(quaterly) && isempty(monthly) && isempty(weekly)  && isempty(yearly)
-                error('dynSeries:: Using a string as a second input argument, I can only handle weekly (W), monthly (M), quaterly (Q) or yearly (Y) data!');
-            end
             ts.init = dynDate(b);
+            ts.freq = ts.init.freq;
         elseif isa(b,'dynDate') && ~isempty(b)
             ts.freq = b.freq;
             ts.init = b;
@@ -354,7 +334,7 @@ ts.time = ts.init:(ts.init+ts.nobs);
 %$ t = zeros(7,1);
 %$
 %$ try
-%$     ts = dynSeries([transpose(1:5), transpose(6:10)],'1950Q1',{'Output'; 'Consumption'}, {'Y_t'; 'C_t'});
+%$     ts = dynSeries([transpose(1:5), transpose(6:10)],'1950q1',{'Output'; 'Consumption'}, {'Y_t'; 'C_t'});
 %$     t(1) = 1;
 %$ catch
 %$     t = 0;

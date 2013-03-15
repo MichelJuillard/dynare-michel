@@ -177,12 +177,14 @@ ep.set_dynare_seed_to_default = 1;
 ep.stack_solve_algo = 4;
 % Stochastic extended path related options.
 ep.stochastic.method = '';
+ep.stochastic.algo = 0;
 ep.stochastic.quadrature.ortpol = 'hermite';
 ep.stochastic.order = 0;
 ep.stochastic.quadrature.nodes = 5;
 ep.stochastic.quadrature.pruned.status = 0;
 ep.stochastic.quadrature.pruned.relative = 1e-5;
 ep.stochastic.quadrature.pruned.level = 1e-5;
+ep.stochastic.hybrid_order = 0;
 % Copy ep structure in options_ global structure
 options_.ep = ep;
 
@@ -345,6 +347,7 @@ options_.filter_step_ahead = [];
 options_.filtered_vars = 0;
 options_.first_obs = 1;
 options_.kalman_algo = 0;
+options_.fast_kalman = 0;
 options_.kalman_tol = 1e-10;
 options_.use_univariate_filters_if_singularity_is_detected = 1;
 options_.riccati_tol = 1e-6;

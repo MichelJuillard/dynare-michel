@@ -47,8 +47,6 @@ function sp = colon(a,b)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% Original author: stephane DOT adjemian AT univ DASH lemans DOT fr
-
 if nargin~=2
     error('dynDate::colon: I need exactly two input arguments!')
 end
@@ -71,22 +69,6 @@ for t=1:n
     a = +a;
     sp = sp.append(a);
 end
-% $$$ if a==b% Time range with only one date.
-% $$$     sp = dynDates(a);
-% $$$     sp = sp.setFreq(a.freq);
-% $$$     sp = sp.setSize(1);
-% $$$     sp = sp.setTime(1,a.time);
-% $$$ else
-% $$$     n = b-a;
-% $$$     sp = dynDates();
-% $$$     sp = sp.setFreq(a.freq);
-% $$$     sp = sp.setSize(n+1);
-% $$$     sp = sp.setTime(1,a.time);
-% $$$     for t=2:n+1
-% $$$         a = +a;
-% $$$         sp = sp.setTime(t,a.time);
-% $$$     end
-% $$$ end
 
 %@test:1
 %$ % Define two dates

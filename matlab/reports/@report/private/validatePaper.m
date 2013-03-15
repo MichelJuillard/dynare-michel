@@ -3,10 +3,10 @@ function validatePaper(paper)
 % Validate paper string
 %
 % INPUTS
-%   char : paper size
+%   paper    [char]  valid LaTeX paper type
 %
 % OUTPUTS
-%   char : lowercase paper
+%   none
 %
 % SPECIAL REQUIREMENTS
 %   none

@@ -3,11 +3,13 @@ function o = graph(varargin)
 % Graph Class Constructor
 %
 % INPUTS
-%   0 args => empty graph
-%   1 arg (graph class) => copy object
+%   varargin        0 args  : empty graph object
+%                   1 arg   : must be graph object (return a copy of arg)
+%                   > 1 args: option/value pairs (see structure below for
+%                   options)
 %
 % OUTPUTS
-%   none
+%   o   [graph] graph object
 %
 % SPECIAL REQUIREMENTS
 %   none
@@ -42,7 +44,9 @@ o.footnote = '';
 o.figname = '';
 o.data = '';
 o.seriestouse = 'all';
-o.shade = ''; %{1959q1:1964q4}
+o.shade = '';
+o.xrange = 'all';
+o.yrange = 'all';
 
 o.grid = true;
 
