@@ -36,7 +36,7 @@ end
 fprintf(fid, '%% Report Object\n');
 fprintf(fid, '\\documentclass[11pt]{article}\n');
 
-fprintf(fid, '\\usepackage[%spaper,margin=%s', o.paper, o.margin);
+fprintf(fid, '\\usepackage[%spaper,margin=%f%s', o.paper, o.margin, o.margin_unit);
 if strcmpi(o.orientation, 'landscape')
     fprintf(fid, ',landscape');
 end

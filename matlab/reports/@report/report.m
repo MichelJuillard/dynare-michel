@@ -35,7 +35,8 @@ o = struct;
 o.title = '';
 o.orientation = 'portrait';
 o.paper = 'a4';
-o.margin = '2.5cm';
+o.margin = 2.5;
+o.margin_unit = 'cm';
 o.pages = pages();
 o.filename = 'report.tex';
 o.config = '';
@@ -58,11 +59,6 @@ elseif nargin > 1
     for pair = reshape(varargin, 2, [])
         field = lower(pair{1});
         if any(strmatch(field, optNames, 'exact'))
-            if strcmp(field, 'orientation')
-                validateOrientation(pair{2});
-            elseif strcmp(field, 'paper')
-                validatePaper(pair{2});
-            end
             o.(field) = pair{2};
         else
             error('@report.report: %s is not a recognized option.', ...
@@ -70,6 +66,25 @@ elseif nargin > 1
         end
     end
 end
+
+% Check options provided by user
+assert(ischar(o.title), '@report.report: title must be a string');
+assert(ischar(o.filename), '@report.report: filename must be a string');
+assert(ischar(o.config), '@report.report: config file must be a string');
+assert(islogical(o.showdate), '@report.report: showdate must be either true or false');
+assert(isfloat(o.margin) && o.margin > 0, '@report.report: margin must be a float > 0.');
+
+valid_margin_unit = {'cm', 'in'};
+assert(any(strcmp(o.margin_unit, valid_margin_unit)), ...
+       ['@report.report: margin_unit must be one of ' strjoin(valid_margin_unit, ' ')]);
+
+valid_paper = {'a4', 'letter'};
+assert(any(strcmp(o.paper, valid_paper)), ...
+       ['@report.report: paper must be one of ' strjoin(valid_paper, ' ')]);
+
+valid_orientation = {'portrait', 'landscape'};
+assert(any(strcmp(o.orientation, valid_orientation)), ...
+       ['@report.report: orientation must be one of ' strjoin(valid_orientation, ' ')]);
 
 % Create report object
 o = class(o, 'report');
