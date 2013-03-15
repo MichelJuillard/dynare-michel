@@ -21,7 +21,6 @@ function o = section(varargin)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 o = struct;
-o.align = 't';
 o.elements = elements();
 o.cols = 1;
 
@@ -49,6 +48,9 @@ elseif nargin > 1
         end
     end
 end
+
+% Check options provided by user
+assert(isint(o.cols), '@graph.graph: cols must be an integer');
 
 % Create section object
 o = class(o, 'section');

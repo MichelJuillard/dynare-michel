@@ -31,7 +31,6 @@ function o = write(o, fid)
 assert(fid ~= -1);
 
 fprintf(fid, '%% Section Object\n');
-%fprintf(fid, '\\begin{table}[%shtpb]%%\n', o.align);
 fprintf(fid, ' \\vspace{15px}\n');
 fprintf(fid, '\\centering\n');
 fprintf(fid, '\\noindent\\maxsizebox{\\textwidth}{!}{%%\n');
@@ -52,6 +51,5 @@ end
 
 fprintf(fid, '\\end{tabular}%%\n');
 fprintf(fid, '}%%\n');
-%fprintf(fid, '\\end{table}%%\n');
 fprintf(fid, '%% End Section Object\n\n');
 end
