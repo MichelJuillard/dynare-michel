@@ -49,6 +49,10 @@ end
 %set(h, 'PaperPositionMode', 'auto');
 %set(h, 'units', 'normalized', 'outerposition', [0 0 1 1]);
 
+if length(o.data) > 1
+    o.data = [o.data{:}];
+end
+
 if isempty(o.seriestouse)
     ds = o.data;
 else
