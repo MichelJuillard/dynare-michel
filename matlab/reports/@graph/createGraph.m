@@ -81,8 +81,8 @@ if ~isempty(o.shade)
 
     % From ShadePlotForEmpahsis (Matlab Exchange)
     % use patch bc area doesn't work with matlab2tikz
-    patch([repmat(x1, 1, 2) repmat(x2, 1, 2)], [yrange fliplr(yrange)], ...
-          'b', 'FaceAlpha', .2);
+    patch([repmat(x1, 1, 2) repmat(x2, 1, 2)], ...
+          [yrange fliplr(yrange)], 'b', 'FaceAlpha', .2);
 end
 
 set(gca,'XTick', x);

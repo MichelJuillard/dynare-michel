@@ -3,7 +3,7 @@ function display(o)
 % Display a Pages object
 %
 % INPUTS
-%   none
+%   ps              [pages]  pages object
 %
 % OUTPUTS
 %   none

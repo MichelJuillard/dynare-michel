@@ -1,5 +1,16 @@
-function ps = addPage(ps, varargin)
-% function ps = addPage(ps, varargin)
+function o = addPage(o, varargin)
+% function o = addPage(o, varargin)
+% Sections Class Constructor
+%
+% INPUTS
+%   o              [pages]  pages object
+%   varargin                options to @page.page
+%
+% OUTPUTS
+%   o              [pages] pages object
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,5 +29,5 @@ function ps = addPage(ps, varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-ps.objArray = ps.objArray.addObj(page(varargin{:}));
+o.objArray = o.objArray.addObj(page(varargin{:}));
 end

@@ -1,5 +1,16 @@
 function e = getPages(ps, varargin)
 % function e = getPages(ps, varargin)
+% Sections Class Constructor
+%
+% INPUTS
+%   ps              [pages]  pages object
+%   varargin                 options to @objArray.getObjs
+%
+% OUTPUTS
+%   ps              [pages] array of page objects
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %

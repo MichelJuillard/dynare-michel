@@ -1,5 +1,15 @@
-function np = numPages(ps)
-% function np = numPages(ps)
+function n = numPages(o)
+% function n = numPages(o)
+% Sections Class Constructor
+%
+% INPUTS
+%   o              [page]  pages object
+%
+% OUTPUTS
+%   n              [integer] number of pages in o
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,5 +28,5 @@ function np = numPages(ps)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-np = ps.objArray.numObjs();
+n = o.objArray.numObjs();
 end

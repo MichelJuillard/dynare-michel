@@ -1,5 +1,16 @@
 function s = sections(varargin)
 %function s = sections(varargin)
+% Sections Class Constructor
+%
+% INPUTS
+%   varargin        0 args  : empty sections object
+%                   1 arg   : must be sections object (return a copy of arg)
+%
+% OUTPUTS
+%   ps     [sections] sections object
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -22,8 +33,8 @@ switch nargin
     case 0
         s = class(struct, 'sections', objArray());
     case 1
-        assert(isa(varargin{1}, 'sections'), ['Sections constructor: the only ' ...
-            'valid arguments are sections objects']);
+        assert(isa(varargin{1}, 'sections'), ['@sections.sections: the ' ...
+                            'only valid arguments are sections objects']);
         s = varargin{1};
     otherwise
         error('@sections.sections: invalid number of arguments');
