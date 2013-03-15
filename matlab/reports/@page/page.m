@@ -60,6 +60,25 @@ elseif nargin > 1
     end
 end
 
+% Check options provided by user
+assert(ischar(o.title), '@page.page: title must be a string');
+
+valid_paper = {'a4', 'letter'};
+assert(any(strcmp(o.paper, valid_paper)), ...
+       ['@page.page: paper must be one of ' strjoin(valid_paper, ' ')]);
+
+valid_orientation = {'portrait', 'landscape'};
+assert(any(strcmp(o.orientation, valid_orientation)), ...
+       ['@page.page: orientation must be one of ' strjoin(valid_orientation, ' ')]);
+
+msg = ['@page.page: footnote must be a cell array of string(s)'];
+if ~isempty(o.footnote)
+    assert(iscell(o.footnote), msg);
+    for i=1:length(o.footnote)
+        assert(ischar(o.footnote{i}), msg);
+    end
+end
+
 % Create page object
 o = class(o, 'page');
 end
