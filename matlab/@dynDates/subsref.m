@@ -68,7 +68,7 @@ switch S(1).type
     end
   case '()'
     if isscalar(S(1).subs{1})
-        if isint(S(1).subs{1}) && S(1).subs{1}>0 && S(1).subs{1}<A.ndat
+        if isint(S(1).subs{1}) && S(1).subs{1}>0 && S(1).subs{1}<=A.ndat
             B = dynDate(A.time(S(1).subs{1},:),A.freq);
         else
             error(['dynDates::subsref: the index have to be a positive integer less than or equal to ' int2str(A.ndat) '!'])
