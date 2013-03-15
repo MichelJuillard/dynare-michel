@@ -77,7 +77,7 @@ assert(islogical(o.vlines), '@table.table: vlines must be true or false');
 assert(isint(o.precision), '@table.table: precision must be an int');
 assert(isempty(o.range) || (iscell(o.range) && length(o.range) == 2 && ...
                             ischar(o.range{1}) && ischar(o.range{2})), ...
-       ['@table.table: range is specified as ''{''1999q1'',''999q2''}''.']);
+       ['@table.table: range is specified as ''{''1999q1'',''1999q2''}''.']);
 
 assert(~isempty(o.data), '@table.table: must provide data');
 msg = ['@table.table: data must either be a dynSeries or a cell array of ' ...
@@ -91,16 +91,11 @@ else
     end
 end
 
-msg = ['@table.table: series to use must either be a string or a cell array ' ...
-       'of strings'];
+msg = ['@table.table: series to use must be a cell array of string(s)'];
 if ~isempty(o.seriestouse)
-    if length(o.seriestouse) == 1
-        assert(ischar(o.seriestouse), msg);
-    else
-        assert(iscell(o.seriestouse), msg);
-        for i=1:length(o.seriestouse)
-            assert(ischar(o.seriestouse{i}), msg);
-        end
+    assert(iscell(o.seriestouse), msg);
+    for i=1:length(o.seriestouse)
+        assert(ischar(o.seriestouse{i}), msg);
     end
 end
 
