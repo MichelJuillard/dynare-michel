@@ -119,18 +119,22 @@ switch nargin
         ts.data = data;
         ts.name = varlist;
         ts.vobs = length(varlist);
-        ts.nobs = size(data,1); 
+        ts.nobs = size(data,1);
+        ts.tex = cell(ts.vobs,1);
+        for i=1:ts.vobs
+            ts.tex(i) = {name2tex(varlist{i})};
+        end
     end
   case {2,3,4}
     a = varargin{1};
     b = varargin{2};
     if nargin<4
-        d = [];
+        d = {};
     else
         d = varargin{4};
     end
     if nargin<3
-        c = [];
+        c = {};
     else
         c = varargin{3};
     end
@@ -179,8 +183,14 @@ switch nargin
             error('dynSeries::dynSeries: The number of declared tex names does not match the number of variables!')
         end
     else
-        for i=1:ts.vobs
-            ts.tex = vertcat(ts.tex, {'--NA--'});
+        if ~isempty(c)
+            for i=1:ts.vobs
+                ts.tex = vertcat(ts.tex, {name2tex(c{i})});
+            end
+        else
+            for i=1:ts.vobs
+                ts.tex = vertcat(ts.tex, {'--NA--'});
+            end
         end
     end
   otherwise
@@ -264,7 +274,7 @@ ts.time = ts.init:(ts.init+ts.nobs);
 %@eof:4
 
 %@test:5
-%$ t = zeros(7,1);
+%$ t = zeros(8,1);
 %$
 %$ try
 %$     ts = dynSeries('dynseries_test_data.csv');
@@ -279,14 +289,15 @@ ts.time = ts.init:(ts.init+ts.nobs);
 %$     t(4) = dyn_assert(ts.init.time,[1990, 1]);
 %$     t(5) = dyn_assert(ts.vobs,4);
 %$     t(6) = dyn_assert(ts.nobs,4);
-%$     t(7) = dyn_assert(ts.name,{'azert';'yuiop';'qsdfg';'jklm'}); 
+%$     t(7) = dyn_assert(ts.name,{'azert';'yuiop';'qsdfg';'jklm'});
+%$     t(8) = dyn_assert(ts.tex,{'azert';'yuiop';'qsdfg';'jklm'});
 %$ end
 %$
 %$ T = all(t);
 %@eof:5
 
 %@test:6
-%$ t = zeros(7,1);
+%$ t = zeros(8,1);
 %$
 %$ try
 %$     ts = dynSeries(transpose(1:5),[]);
@@ -301,14 +312,15 @@ ts.time = ts.init:(ts.init+ts.nobs);
 %$     t(4) = dyn_assert(ts.init.time,[1, 1]);
 %$     t(5) = dyn_assert(ts.vobs,1);
 %$     t(6) = dyn_assert(ts.nobs,5);
-%$     t(7) = dyn_assert(ts.name,{'--NA--'}); 
+%$     t(7) = dyn_assert(ts.name,{'--NA--'});
+%$     t(8) = dyn_assert(ts.tex,{'--NA--'});
 %$ end
 %$
 %$ T = all(t);
 %@eof:6
 
 %@test:7
-%$ t = zeros(7,1);
+%$ t = zeros(8,1);
 %$
 %$ try
 %$     ts = dynSeries(transpose(1:5),'1950Q1');
@@ -323,7 +335,8 @@ ts.time = ts.init:(ts.init+ts.nobs);
 %$     t(4) = dyn_assert(ts.init.time,[1950, 1]);
 %$     t(5) = dyn_assert(ts.vobs,1);
 %$     t(6) = dyn_assert(ts.nobs,5);
-%$     t(7) = dyn_assert(ts.name,{'--NA--'}); 
+%$     t(7) = dyn_assert(ts.name,{'--NA--'});
+%$     t(8) = dyn_assert(ts.tex,{'--NA--'});
 %$ end
 %$
 %$ T = all(t);
@@ -331,7 +344,7 @@ ts.time = ts.init:(ts.init+ts.nobs);
 
 
 %@test:8
-%$ t = zeros(7,1);
+%$ t = zeros(8,1);
 %$
 %$ try
 %$     ts = dynSeries([transpose(1:5), transpose(6:10)],'1950q1',{'Output'; 'Consumption'}, {'Y_t'; 'C_t'});
@@ -346,7 +359,8 @@ ts.time = ts.init:(ts.init+ts.nobs);
 %$     t(4) = dyn_assert(ts.init.time,[1950, 1]);
 %$     t(5) = dyn_assert(ts.vobs,2);
 %$     t(6) = dyn_assert(ts.nobs,5);
-%$     t(7) = dyn_assert(ts.name,{'Output'; 'Consumption'}); 
+%$     t(7) = dyn_assert(ts.name,{'Output'; 'Consumption'});
+%$     t(8) = dyn_assert(ts.tex,{'Y_t'; 'C_t'});
 %$ end
 %$
 %$ T = all(t);
