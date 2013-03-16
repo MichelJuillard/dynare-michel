@@ -13,7 +13,7 @@ function dyn_saveas(h,fname,DynareOptions)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2012 Dynare Team
+% Copyright (C) 2012-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -31,11 +31,7 @@ function dyn_saveas(h,fname,DynareOptions)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if any(strcmp('eps',cellstr(DynareOptions.graph_format)))
-    if exist('OCTAVE_VERSION')
-        eval(['print -depsc2 ' fname '.eps']); % still need to be fixed to take handle into account
-    else
-        print(h,'-depsc2',[fname,'.eps']) 
-    end
+    print(h,'-depsc2',[fname,'.eps']) 
 end
 if any(strcmp('pdf',cellstr(DynareOptions.graph_format)))
     if exist('OCTAVE_VERSION')
