@@ -3161,7 +3161,7 @@ period(s). The periods must be strictly positive. Conditional variances are give
 decomposition provides the decomposition of the effects of shocks upon
 impact. The results are stored in
 @code{oo_.conditional_variance_decomposition}
-(@pxref{oo_.conditional_variance_decomposition}).
+(@pxref{oo_.conditional_variance_decomposition}). The variance decomposition is only conducted, if theoretical moments are requested, i.e. using the @code{periods=0}-option. Currently, variance decompositions are only implemented for @code{order=1}. In case of @code{order=2}, Dynare will thus not display the variance decomposition based on a second order approximation, but on a first order approximation. 
 
 @item pruning
 Discard higher order terms when iteratively computing simulations of
@@ -4230,7 +4230,7 @@ period 1, the conditional variance decomposition provides the
 decomposition of the effects of shocks upon impact. The results are
 stored in
 @code{oo_.PosteriorTheoreticalMoments.dsge.ConditionalVarianceDecomposition},
-but currently there is not output. Note that this option requires the
+but currently there is no output. Note that this option requires the
 option @code{moments_varendo} to be specified.
 
 @item filtered_vars
