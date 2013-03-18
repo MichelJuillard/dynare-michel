@@ -46,7 +46,12 @@ A.nobs = B.nobs;
 A.vobs = B.vobs;
 A.init = B.init;
 A.time = B.time;
-A.name = repmat({'--NA--'},A.vobs,1);
+A.name = cell(A.vobs,1);
+A.tex = cell(A.vobs,1);
+for i = 1:A.vobs
+    A.name(i) = {[ '-' B.name{i}]};
+    A.tex(i) = {[ '-' B.tex{i}]};
+end
 A.data = -(B.data);
 
 %@test:1
@@ -55,12 +60,12 @@ A.data = -(B.data);
 %$
 %$ % Define names
 %$ A_name = {'A1';'A2'};
-%$
-%$ t = zeros(4,1);
+%$ A_tex = {'A_1';'A_2'};
+%$ t = zeros(6,1);
 %$
 %$ % Instantiate a time series object.
 %$ try
-%$    ts1 = dynSeries(A,[],A_name,[]);
+%$    ts1 = dynSeries(A,[],A_name,A_tex);
 %$    ts2 = -ts1;
 %$    t(1) = 1;
 %$ catch
@@ -71,6 +76,8 @@ A.data = -(B.data);
 %$    t(2) = dyn_assert(ts2.vobs,2);
 %$    t(3) = dyn_assert(ts2.nobs,10);
 %$    t(4) = dyn_assert(ts2.data,-A,1e-15);
+%$    t(5) = dyn_assert(ts2.name,{'-A1';'-A2'});
+%$    t(6) = dyn_assert(ts2.tex,{'-A_1';'-A_2'});
 %$ end
 %$ T = all(t);
 %@eof:1
