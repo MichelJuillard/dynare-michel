@@ -23,7 +23,7 @@ function us = ydiff(ts)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2012 Dynare Team
+% Copyright (C) 2012, 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -39,8 +39,6 @@ function us = ydiff(ts)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
 
 us = ts;
 
@@ -148,3 +146,27 @@ end
 %$
 %$ T = all(t);
 %@eof:3
+
+%@test:4
+%$ t = zeros(4,1);
+%$
+%$ try
+%$     data = transpose(1:100);
+%$     ts = dynSeries(data,1950,{'A1'},{'A_1'});
+%$     ts = ts.ydiff;
+%$     t(1) = 1;
+%$ catch
+%$     t = 0;
+%$ end
+%$
+%$
+%$ if length(t)>1
+%$     DATA = NaN(1,ts.vobs);
+%$     DATA = [DATA; ones(ts.nobs-1,ts.vobs)];
+%$     t(2) = dyn_assert(ts.data,DATA);
+%$     t(3) = dyn_assert(ts.name{1},['YDIFF_A1']);
+%$     t(4) = dyn_assert(ts.tex{1},['\\Delta A_1']);
+%$ end
+%$
+%$ T = all(t);
+%@eof:4
