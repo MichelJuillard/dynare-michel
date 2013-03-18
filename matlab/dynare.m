@@ -111,7 +111,7 @@ for i=2:nargin
     no_log = no_log || strcmp(varargin{i-1}, 'nolog');
 end
 if ~no_log
-    logname = [ substr(fname, 1, -4) '.log' ];
+    logname = [fname(1:end-4) '.log'];
     fid = fopen(logname, 'w');
     fputs(fid, result);
     fclose(fid);
