@@ -108,11 +108,11 @@ disp(result)
 % Save preprocessor result in logfile (if `no_log' option not present)
 no_log = 0;
 for i=2:nargin
-    no_log = no_log || strcmp(varargin{i-1}, "nolog");
+    no_log = no_log || strcmp(varargin{i-1}, 'nolog');
 end
 if ~no_log
-    logname = [ substr(fname, 1, -4) ".log" ];
-    fid = fopen(logname, "w");
+    logname = [ substr(fname, 1, -4) '.log' ];
+    fid = fopen(logname, 'w');
     fputs(fid, result);
     fclose(fid);
 end
