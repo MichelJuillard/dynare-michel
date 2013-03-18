@@ -1,3 +1,4 @@
+
 function us = ydiff(ts)
 
 %@info:
@@ -47,25 +48,41 @@ switch ts.freq
   case 1
     us.data(2:end,:) = ts.data(2:end,:)-ts.data(1:end-1,:);
     us.data(1,:) = NaN;
+    for i = 1:ts.vobs
+        us.name(i) = {['YDIFF_' us.name{i}]};
+        us.tex(i) = {['\Delta ' us.tex{i}]};
+    end
   case 4
     us.data(5:end,:) = ts.data(5:end,:)-ts.data(1:end-4,:);
     us.data(1:4,:) = NaN;
+    for i = 1:ts.vobs
+        us.name(i) = {['YDIFF_' us.name{i}]};
+        us.tex(i) = {['\Delta_4 ' us.tex{i}]};
+    end  
   case 12
     us.data(13:end,:) = ts.data(13:end,:)-ts.data(1:end-12,:);
     us.data(1:12,:) = NaN;
+    for i = 1:ts.vobs
+        us.name(i) = {['YDIFF_' us.name{i}]};
+        us.tex(i) = {['\Delta_{12} ' us.tex{i}]};
+    end    
   case 52
     us.data(53:end,:) = ts.data(53:end,:)-ts.data(1:end-52,:);
     us.data(1:52,:) = NaN;
+    for i = 1:ts.vobs
+        us.name(i) = {['YDIFF_' us.name{i}]};
+        us.tex(i) = {['\Delta_{52} ' us.tex{i}]};
+    end    
   otherwise
     error(['dynSeries::ygrowth: object ' inputname(1) ' has unknown frequency']);
 end
 
 %@test:1
-%$ t = zeros(2,1);
+%$ t = zeros(4,1);
 %$
 %$ try
 %$     data = transpose(1:100);
-%$     ts = dynSeries(data,'1950Q1');
+%$     ts = dynSeries(data,'1950Q1',{'A1'},{'A_1'});
 %$     ts = ts.ydiff;
 %$     t(1) = 1;
 %$ catch
@@ -77,17 +94,19 @@ end
 %$     DATA = NaN(4,ts.vobs);
 %$     DATA = [DATA; 4*ones(ts.nobs-4,ts.vobs)];
 %$     t(2) = dyn_assert(ts.data,DATA);
+%$     t(3) = dyn_assert(ts.name{1},['YDIFF_A1']);
+%$     t(4) = dyn_assert(ts.tex{1},['\\Delta_4 A_1']);
 %$ end
 %$
 %$ T = all(t);
 %@eof:1
 
 %@test:2
-%$ t = zeros(2,1);
+%$ t = zeros(4,1);
 %$
 %$ try
 %$     data = transpose(1:100);
-%$     ts = dynSeries(data,'1950M1');
+%$     ts = dynSeries(data,'1950M1',{'A1'},{'A_1'});
 %$     ts = ts.ydiff;
 %$     t(1) = 1;
 %$ catch
@@ -99,6 +118,8 @@ end
 %$     DATA = NaN(12,ts.vobs);
 %$     DATA = [DATA; 12*ones(ts.nobs-12,ts.vobs)];
 %$     t(2) = dyn_assert(ts.data,DATA);
+%$     t(3) = dyn_assert(ts.name{1},['YDIFF_A1']);
+%$     t(4) = dyn_assert(ts.tex{1},['\\Delta_{12} A_1']);
 %$ end
 %$
 %$ T = all(t);
@@ -109,7 +130,7 @@ end
 %$
 %$ try
 %$     data = transpose(1:100);
-%$     ts = dynSeries(data,'1950W1');
+%$     ts = dynSeries(data,'1950W1',{'A1'},{'A_1'});
 %$     ts = ts.ydiff;
 %$     t(1) = 1;
 %$ catch
@@ -121,6 +142,8 @@ end
 %$     DATA = NaN(52,ts.vobs);
 %$     DATA = [DATA; 52*ones(ts.nobs-52,ts.vobs)];
 %$     t(2) = dyn_assert(ts.data,DATA);
+%$     t(3) = dyn_assert(ts.name{1},['YDIFF_A1']);
+%$     t(4) = dyn_assert(ts.tex{1},['\\Delta_{52} A_1']);
 %$ end
 %$
 %$ T = all(t);
