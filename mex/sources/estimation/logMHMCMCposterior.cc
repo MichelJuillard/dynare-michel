@@ -643,6 +643,9 @@ logMCMCposterior(VectorConstView &estParams, const MatrixConstView &data,
   if (loglinear == 1)
     throw LogMHMCMCposteriorMexErrMsgTxtException("Option loglinear is not supported");
 
+  if (*mxGetPr(mxGetField(options_, 0, "endogenous_prior")) == 1)
+    throw LogMHMCMCposteriorMexErrMsgTxtException("Option endogenous_prior is not supported");
+
   double with_trend = *mxGetPr(mxGetField(bayestopt_, 0, "with_trend"));
   if (with_trend == 1)
     throw LogMHMCMCposteriorMexErrMsgTxtException("Observation trends are not supported");

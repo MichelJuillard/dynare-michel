@@ -4406,6 +4406,10 @@ missing observations.
 @item ar = @var{INTEGER}
 @xref{ar}. Only useful in conjuction with option @code{moments_varendo}.
 
+@item endogenous_prior
+Use endogenous priors as in @cite{Christiano, Trabandt and Walentin
+(2011)}.
+
 @end table
 
 @customhead{Note}
@@ -7670,6 +7674,12 @@ Collard, Fabrice and Michel Juillard (2001b): ``A Higher-Order Taylor
 Expansion Approach to Simulation of Stochastic Forward-Looking Models
 with an Application to a Non-Linear Phillips Curve,'' @i{Computational
 Economics}, 17, 125--139
+
+@item
+Christiano, Lawrence J., Mathias Trabandt and Karl Walentin (2011):
+``Introducing financial frictions and unemployment into a small open
+economy model,'' @i{Journal of Economic Dynamics and Control}, 35(12),
+1999--2041
 
 @item
 Dennis, Richard (2007): ``Optimal Policy In Rational Expectations
