@@ -113,7 +113,7 @@ end
 if ~no_log
     logname = [fname(1:end-4) '.log'];
     fid = fopen(logname, 'w');
-    fputs(fid, result);
+    fprintf(fid, '%s', result);
     fclose(fid);
 end
 
