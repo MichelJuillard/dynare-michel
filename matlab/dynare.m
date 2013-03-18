@@ -102,7 +102,21 @@ for i=2:nargin
 end
 
 [status, result] = system(command);
+
 disp(result)
+
+% Save preprocessor result in logfile (if `no_log' option not present)
+no_log = 0;
+for i=2:nargin
+    no_log = no_log || strcmp(varargin{i-1}, "nolog");
+end
+if ~no_log
+    logname = [ substr(fname, 1, -4) ".log" ];
+    fid = fopen(logname, "w");
+    fputs(fid, result);
+    fclose(fid);
+end
+
 if status
     % Should not use "error(result)" since message will be truncated if too long
     error('DYNARE: preprocessing failed')
