@@ -40,6 +40,10 @@ else
     ds = o.data{o.seriestouse{:}};
 end
 
+if ~isempty(o.range)
+    ds  = ds(o.range);
+end
+
 %number of left-hand columns, 1 until we allow the user to group data,
 % e.g.: GDP Europe
 %         GDP France
