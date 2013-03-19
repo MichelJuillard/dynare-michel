@@ -8,7 +8,7 @@ function A = subsasgn(A,S,B)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2012 Dynare Team
+% Copyright (C) 2012, 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -25,31 +25,27 @@ function A = subsasgn(A,S,B)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-
-if isa(A,'dynSeries') && isa(B,'dynSeries') 
-    if length(S)==1 && isequal(S.type,'{}')
-        if isequal(A.nobs,B.nobs) && isequal(A.init,B.init)
-            id = NaN(length(S.subs),1);
-            for i=1:length(S.subs)
-                tmp = strmatch(S.subs{i},A.name,'exact');
-                if isempty(tmp)
-                    error(['dynSeries::subsasgn: variable ' S.subs{i} ' is not a member of ' inputname(1) ' dynSeries object!'])
-                else
-                    id(i) = tmp;
-                end 
-            end
-            if isequal(B.vobs,length(S.subs))
-                A.name(id) = B.name;
-                A.data(:,id) = B.data;
-                return
-            end
+if length(S)==1 && isequal(S.type,'{}')
+    if isequal(A.nobs,B.nobs) && isequal(A.init,B.init)
+        id = NaN(length(S.subs),1);
+        for i=1:length(S.subs)
+            tmp = strmatch(S.subs{i},A.name,'exact');
+            if isempty(tmp)
+                error(['dynSeries::subsasgn: variable ' S.subs{i} ' is not a member of ' inputname(1) ' dynSeries object!'])
+            else
+                id(i) = tmp;
+            end 
         end
-        return
-    elseif length(S)==1 && isequal(S.type,'.')
-        A = merge(A,B);
-        return
+        if isequal(B.vobs,length(S.subs))
+            A.name(id) = B.name;
+            A.data(:,id) = B.data;
+            return
+        end
     end
+    return
+elseif length(S)==1 && isequal(S.type,'.')
+    A = merge(A,B);
+    return
 end
 
 error('dynSeries::subsasgn: Wrong calling sequence!')
