@@ -48,7 +48,7 @@ end
 nlhc = 1;
 
 disp('creating table.........');
-fprintf(fid, '%% Table Object\n');
+fprintf(fid, '{%% Table Object\n');
 fprintf(fid, '\\begin{tabular}{l');
 
 dates = ds.time;
@@ -73,12 +73,6 @@ switch dates.freq
         for i=1:size(thdr, 1)
             fprintf(fid, ' & %d', thdr{i, 1});
         end
-        fprintf(fid, '\\\\%%\n');
-        for i=1:size(thdr, 1)
-            rind = lind + 1;
-            fprintf(fid, '\\cmidrule(l{.5em}r{.5em}){%d-%d}', lind+1, rind);
-            lind = rind;
-        end
     case 4
         thdr{1, 2} = datedata(:, 2)';
         if size(thdr, 1) > 1
@@ -96,26 +90,27 @@ switch dates.freq
         for i=1:size(thdr, 1)
             fprintf(fid, ' & \\multicolumn{%d}{c}{%d}', size(thdr{i,2}, 2), thdr{i,1});
         end
-        fprintf(fid, '\\\\%%\n');
+        fprintf(fid, '\\\\[-10pt]%%\n');
         for i=1:size(thdr, 1)
-            rind = lind + size(thdr{i,2}, 2);
-            fprintf(fid, '\\cmidrule(l{.5em}r{.5em}){%d-%d}', lind+1, rind);
-            lind = rind;
+            fprintf(fid, ' & \\multicolumn{%d}{c}{\\hrulefill}', size(thdr{i,2}, 2));
         end
+        fprintf(fid, '\\\\%%\n');
         for i=1:size(thdr, 1)
             quarters = thdr{i, 2};
             for j=1:size(quarters, 2)
-                fprintf(fid, ' & Q%d', quarters(j));
+                fprintf(fid, ' & \\multicolumn{1}{c}{Q%d}', quarters(j));
             end
         end
-        fprintf(fid, '\\\\%%\n');
-        for i=1:ndates
-            fprintf(fid, '\\cmidrule(l{.5em}r{.5em}){%d-%d}', i+nlhc, i+nlhc);
-        end
     case 12
+        error('@table.write: weekly dates not yet implemented');
     otherwise
-        error('@table.write: invalid dynSeries Dates');
+        error('@table.write: invalid dynSeries frequency');
 end
+fprintf(fid, '\\\\[-10pt]%%\n');
+for i=1:ndates
+    fprintf(fid, ' & \\hrulefill');
+end
+fprintf(fid, '\\\\%%\n');
 fprintf(fid, '%%\n');
 
 % Table Data
@@ -135,6 +130,6 @@ for i=1:nvars
 end
 
 fprintf(fid, '\\bottomrule%%\n');
-fprintf(fid, '\\end{tabular}%%\n');
+fprintf(fid, '\\end{tabular}}%%\n');
 fprintf(fid, '%% End Table Object\n');
 end
