@@ -22,7 +22,7 @@ function A = merge(B,C)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011, 2012, 2013 Dynare Team
+% Copyright (C) 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -39,14 +39,16 @@ function A = merge(B,C)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-
 if ~isequal(B.freq,C.freq)
     error(['dynSeries::merge: Cannot merge ' inputname(1) ' and ' inputname(2) ' (frequencies are different)!'])
 end
+
 A = dynSeries();
 A.freq = B.freq;
-[A.name, IA, IB] = unique([B.name; C.name], 'last');
-A.vobs=length(A.name);
+[A.name, IBC, junk] = unique([B.name; C.name], 'last');
+tex = [B.tex; C.tex];
+A.tex = tex(IBC); 
+A.vobs=length(IBC);
 
 if B.init >= C.init
     diff = B.init - C.init;
@@ -61,7 +63,7 @@ if B.init >= C.init
         Z2 = [Z2; NaN(A.nobs - C.nobs,C.vobs)];
     end;
     Z = [Z1 Z2];
-    A.data = Z(:,IA);
+    A.data = Z(:,IBC);
     A.init = C.init;
 else
     diff = C.init - B.init;
@@ -76,7 +78,7 @@ else
         Z2 = [Z2; NaN(A.nobs - B.nobs,B.vobs)];
     end;
     Z = [Z2 Z1];
-    A.data = Z(:,IA);
+    A.data = Z(:,IBC);
     A.init = B.init;
 end
 
