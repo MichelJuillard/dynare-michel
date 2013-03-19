@@ -176,7 +176,8 @@ switch nargin
         end
     else
         for i=1:ts.vobs
-            ts.name = vertcat(ts.name, {'--NA--'});
+            ts.name = vertcat(ts.name, {['Variable_' int2str(i)]});
+            %ts.name = vertcat(ts.name, {'--NA--'});
         end
     end
     if ~isempty(d)
@@ -188,14 +189,8 @@ switch nargin
             error('dynSeries::dynSeries: The number of declared tex names does not match the number of variables!')
         end
     else
-        if ~isempty(c)
-            for i=1:ts.vobs
-                ts.tex = vertcat(ts.tex, {name2tex(c{i})});
-            end
-        else
-            for i=1:ts.vobs
-                ts.tex = vertcat(ts.tex, {'--NA--'});
-            end
+        for i=1:ts.vobs
+            ts.tex = vertcat(ts.tex, {name2tex(ts.name{i})});
         end
     end
   otherwise
@@ -304,12 +299,12 @@ ts.time = ts.init:(ts.init+ts.nobs);
 %@test:6
 %$ t = zeros(8,1);
 %$
-%$ try
+%$ %try
 %$     ts = dynSeries(transpose(1:5),[]);
 %$     t(1) = 1;
-%$ catch
-%$     t = 0;
-%$ end
+%$ %catch
+%$ %    t = 0;
+%$ %end
 %$
 %$ if length(t)>1
 %$     t(2) = dyn_assert(ts.freq,1);
@@ -317,8 +312,8 @@ ts.time = ts.init:(ts.init+ts.nobs);
 %$     t(4) = dyn_assert(ts.init.time,[1, 1]);
 %$     t(5) = dyn_assert(ts.vobs,1);
 %$     t(6) = dyn_assert(ts.nobs,5);
-%$     t(7) = dyn_assert(ts.name,{'--NA--'});
-%$     t(8) = dyn_assert(ts.tex,{'--NA--'});
+%$     t(7) = dyn_assert(ts.name,{'Variable_1'});
+%$     t(8) = dyn_assert(ts.tex,{'Variable\\_1'});
 %$ end
 %$
 %$ T = all(t);
@@ -340,8 +335,8 @@ ts.time = ts.init:(ts.init+ts.nobs);
 %$     t(4) = dyn_assert(ts.init.time,[1950, 1]);
 %$     t(5) = dyn_assert(ts.vobs,1);
 %$     t(6) = dyn_assert(ts.nobs,5);
-%$     t(7) = dyn_assert(ts.name,{'--NA--'});
-%$     t(8) = dyn_assert(ts.tex,{'--NA--'});
+%$     t(7) = dyn_assert(ts.name,{'Variable_1'});
+%$     t(8) = dyn_assert(ts.tex,{'Variable\\_1'});
 %$ end
 %$
 %$ T = all(t);
