@@ -31,9 +31,10 @@ function o = page(varargin)
 
 o = struct;
 o.paper = '';
-o.title = '';
+o.title = {};
+o.title_format = {};
 o.orientation = '';
-o.footnote = '';
+o.footnote = {};
 o.sections = sections();
 
 if nargin == 1
@@ -61,7 +62,18 @@ elseif nargin > 1
 end
 
 % Check options provided by user
-assert(ischar(o.title), '@page.page: title must be a string');
+if ischar(o.title)
+    o.title = {o.title}
+end
+if ischar(o.title_format)
+    o.title_format = {o.title_format}
+end
+assert(iscellstr(o.title), ...
+       '@page.page: title must be a cell array of strings');
+assert(iscellstr(o.title_format), ...
+       '@page.page: title_format must be a cell array of strings');
+assert(length(o.title)==length(o.title_format), ...
+       '@page.page: title and title_format must be of the same length');
 
 valid_paper = {'a4', 'letter'};
 assert(any(strcmp(o.paper, valid_paper)), ...
@@ -71,13 +83,11 @@ valid_orientation = {'portrait', 'landscape'};
 assert(any(strcmp(o.orientation, valid_orientation)), ...
        ['@page.page: orientation must be one of ' strjoin(valid_orientation, ' ')]);
 
-msg = ['@page.page: footnote must be a cell array of string(s)'];
-if ~isempty(o.footnote)
-    assert(iscell(o.footnote), msg);
-    for i=1:length(o.footnote)
-        assert(ischar(o.footnote{i}), msg);
-    end
+if ischar(o.footnote)
+    o.footnote = {o.footnote}
 end
+assert(iscellstr(o.footnote), ...
+       '@page.page: footnote must be a cell array of string(s)');
 
 % Create page object
 o = class(o, 'page');

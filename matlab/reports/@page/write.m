@@ -31,18 +31,18 @@ function o = write(o, fid)
 assert(fid ~= -1);
 
 fprintf(fid, '\n%% Page Object\n');
-if ~isempty(o.title)
-    fprintf(fid, '\\centerline{\\large\\textbf{%s}}\n', o.title);
-end
-
-if ~isempty(o.footnote)
-    for i=1:length(o.footnote)
-        fprintf(fid, '\\blfootnote{\\tiny %d. %s}', i, o.footnote{i});
-    end
-end
-
 if strcmpi(o.orientation, 'landscape')
     fprintf(fid, '\\begin{landscape}\n')
+end
+
+for i=1:length(o.footnote)
+    fprintf(fid, '\\blfootnote{\\tiny %d. %s}', i, o.footnote{i});
+end
+fprintf(fid,'\n');
+
+fprintf(fid, '\\begin{tabular}[t]{@{\\hspace*{-3pt}}c@{}}\n');
+for i=1:length(o.title)
+    fprintf(fid,'\\multicolumn{1}{c}{%s %s}\\\\\n', o.title_format{i}, o.title{i});
 end
 
 o.sections.write(fid);
@@ -50,6 +50,7 @@ o.sections.write(fid);
 if strcmpi(o.orientation, 'landscape')
     fprintf(fid, '\\end{landscape}\n');
 end
+fprintf(fid, '\\end{tabular}\n');
 fprintf(fid, '\\clearpage\n');
 fprintf(fid, '%% End Page Object\n\n');
 end
