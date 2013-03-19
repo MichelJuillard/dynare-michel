@@ -76,6 +76,7 @@ A.freq = B.freq;
 A.nobs = B.nobs;
 A.vobs = length(idVariableName);
 A.name = B.name(idVariableName);
+A.tex = B.tex(idVariableName);
 
 
 
