@@ -39,7 +39,7 @@ function a = horzcat2(b,c)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011, 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -55,13 +55,7 @@ function a = horzcat2(b,c)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-
-if ~(isa(b,'dynSeries') && isa(c,'dynSeries'))
-    error('dynSeries::horzcat: All input arguments have to be Dynare time series objects!')
-end
-
+  
 if b.freq ~= c.freq
     error('dynSeries::horzcat: All time series objects must have common frequency!')
 else
