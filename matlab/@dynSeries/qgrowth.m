@@ -22,7 +22,7 @@ function us = qgrowth(ts)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2012 Dynare Team
+% Copyright (C) 2012, 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -39,8 +39,6 @@ function us = qgrowth(ts)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-
 us = ts;
 
 switch ts.freq
@@ -49,9 +47,17 @@ switch ts.freq
   case 4
     us.data(2:end,:) = ts.data(2:end,:)./ts.data(1:end-1,:) - 1;
     us.data(1,:) = NaN;
+    for i = 1:ts.vobs
+        us.name(i) = {['QGROWTH_' us.name{i}]};
+        us.tex(i) = {['\delta ' us.tex{i}]};
+    end
   case 12
     us.data(4:end,:) = ts.data(4:end,:)./ts.data(1:end-3,:) - 1;
     us.data(1:3,:) = NaN;
+    for i = 1:ts.vobs
+        us.name(i) = {['QGROWTH_' us.name{i}]};
+        us.tex(i) = {['\delta_3 ' us.tex{i}]};
+    end
   case 52
     error('dynSeries::qgrowth: I do not know yet how to compute quaterly growth rates from weekly data!')
   otherwise
