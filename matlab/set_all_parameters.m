@@ -83,7 +83,7 @@ offset = nvx+nvn;
 
 % setting shocks covariances
 if ~isempty(M.Correlation_matrix)
-    Sigma_e = diag(sqrt(diag(Sigma_e)))*M.Correlation_matrix*diag(sqrt(diag(Sigma_e)));
+    Sigma_e = diag(sqrt(diag(Sigma_e)))*M.Correlation_matrix*diag(sqrt(diag(Sigma_e))); % use of old correlation matrix is correct due to the diagonal structure and later only using the hence correctly updated diagonal entries of Sigma_e
 end
 if ncx
     corrx = estim_params.corrx;
