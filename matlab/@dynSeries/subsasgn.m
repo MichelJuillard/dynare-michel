@@ -117,21 +117,18 @@ error('dynSeries::subsasgn: Wrong calling sequence!')
 
 %@test:4
 %$ % Define a datasets.
-%$ A = rand(10,3); B = rand(10,3);
+%$ A = rand(10,3);
 %$
 %$ % Instantiate two dynSeries object.
 %$ ts1 = dynSeries(A,[],{'A1';'A2';'A3'},[]);
-%$ ts2 = dynSeries(B,[],{'B1';'B2';'B3'},[]);
 %$
-%$ % Apply the logarithm function to the first and third variables.
-%$ ts1.A1 = ts2.B1;
+%$ % Apply the logarithm function to the first and third variables of ts1.
+%$ ts1{'A1','A3'} = ts1{'A1','A3'}.log;
 %$
-%$ % Instantiate a time series object.
-%$
-%$ t(1) = dyn_assert(ts1.vobs,4);
+%$ t(1) = dyn_assert(ts1.vobs,3);
 %$ t(2) = dyn_assert(ts1.nobs,10);
-%$ t(3) = dyn_assert(ts1.name{1},'A1');
-%$ t(3) = dyn_assert(ts1.name{4},'B1');
+%$ t(3) = dyn_assert(ts1.name{1},'A1') && dyn_assert(ts1.name{2},'A2') && dyn_assert(ts1.name{3},'A3');
+%$ t(4) = dyn_assert(ts1.data,[log(A(:,1)), A(:,2), log(A(:,3))],1e-15);
 %$ T = all(t);
 %@eof:4
 
