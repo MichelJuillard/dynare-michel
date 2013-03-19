@@ -48,7 +48,7 @@ end
 nlhc = 1;
 
 disp('creating table.........');
-fprintf(fid, '{%% Table Object\n');
+fprintf(fid, '%% Table Object\n');
 fprintf(fid, '\\begin{tabular}{l');
 
 dates = ds.time;
@@ -130,6 +130,7 @@ for i=1:nvars
 end
 
 fprintf(fid, '\\bottomrule%%\n');
-fprintf(fid, '\\end{tabular}}%%\n');
+fprintf(fid, '\\end{tabular}%%\n\n');
+fprintf(fid, '\\medskip\\par\n\n');
 fprintf(fid, '%% End Table Object\n');
 end
