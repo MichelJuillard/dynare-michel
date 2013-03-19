@@ -22,7 +22,7 @@ function us = ygrowth(ts)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2012 Dynare Team
+% Copyright (C) 2012, 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -39,23 +39,37 @@ function us = ygrowth(ts)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-
 us = ts;
 
 switch ts.freq
   case 1
     us.data(2:end,:) = ts.data(2:end,:)./ts.data(1:end-1,:) - 1;
     us.data(1,:) = NaN;
+    for i = 1:ts.vobs
+        us.name(i) = {['YGROWTH_' us.name{i}]};
+        us.tex(i) = {['\delta ' us.tex{i}]};
+    end
   case 4
     us.data(5:end,:) = ts.data(5:end,:)./ts.data(1:end-4,:) - 1;
     us.data(1:4,:) = NaN;
+    for i = 1:ts.vobs
+        us.name(i) = {['YDIFF_' us.name{i}]};
+        us.tex(i) = {['\delta_4 ' us.tex{i}]};
+    end  
   case 12
     us.data(13:end,:) = ts.data(13:end,:)./ts.data(1:end-12,:) - 1;
     us.data(1:12,:) = NaN;
+    for i = 1:ts.vobs
+        us.name(i) = {['YDIFF_' us.name{i}]};
+        us.tex(i) = {['\delta_{12} ' us.tex{i}]};
+    end
   case 52
     us.data(53:end,:) = ts.data(53:end,:)./ts.data(1:end-52,:) - 1;
     us.data(1:52,:) = NaN;
+    for i = 1:ts.vobs
+        us.name(i) = {['YDIFF_' us.name{i}]};
+        us.tex(i) = {['\delta_{52} ' us.tex{i}]};
+    end
   otherwise
     error(['dynSeries::ygrowth: object ' inputname(1) ' has unknown frequency']);
 end
