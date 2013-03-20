@@ -59,6 +59,7 @@ fprintf(fid, '\\renewcommand{\\textfraction}{0.05}\n');
 fprintf(fid, '\\renewcommand{\\topfraction}{0.8}\n');
 fprintf(fid, '\\renewcommand{\\bottomfraction}{0.8}\n');
 fprintf(fid, '\\usepackage[Export,PGF]{adjustbox}\n');
+fprintf(fid, '\\setlength{\\parindent}{0in}\n');
 fprintf(fid, '\\begin{document}\n');
 fprintf(fid, '\\centering\n');
 

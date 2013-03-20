@@ -31,11 +31,10 @@ function o = write(o, fid)
 assert(fid ~= -1);
 
 fprintf(fid, '%% Section Object\n');
-fprintf(fid, ' \\vspace{15px}\n');
-fprintf(fid, '\\noindent\\maxsizebox{\\textwidth}{!}{%%\n');
+fprintf(fid, '\\maxsizebox{\\textwidth}{!}{%%\n');
 fprintf(fid, '\\begin{tabular}[t]{');
 for i=1:o.cols
-    fprintf(fid, '@{\\hspace*{-3pt}}c@{}');
+    fprintf(fid, 'c');
 end
 fprintf(fid, '}\n');
 ne = numElements(o);
@@ -44,9 +43,9 @@ for i=1:ne
     if rem(i, o.cols)
         fprintf(fid, ' & ');
     else
-        fprintf(fid, ' \\\\\n');
+        fprintf(fid, '\\\\\n');
     end
 end
-fprintf(fid, '\\end{tabular}}%%\n');
+fprintf(fid, '\\end{tabular}}\n');
 fprintf(fid, '%% End Section Object\n\n');
 end

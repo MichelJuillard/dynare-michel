@@ -53,7 +53,8 @@ nlhc = 1;
 
 disp('creating table.........');
 fprintf(fid, '%% Table Object\n');
-fprintf(fid, '\\begin{tabular}{l');
+fprintf(fid, '\\setlength{\\tabcolsep}{4pt}\n');
+fprintf(fid, '\\begin{tabular}{@{}l');
 
 dates = ds.time;
 ndates = dates.ndat;
@@ -64,7 +65,7 @@ for i=1:ndates
     end
     fprintf(fid, 'r');
 end
-fprintf(fid, '}%%\n');
+fprintf(fid, '@{}}%%\n');
 if ~isempty(o.title)
     fprintf(fid, '\\multicolumn{%d}{c}{%s} \\\\\n', ndates+nlhc, o.title);
 end
@@ -136,8 +137,7 @@ for i=1:nvars
     fprintf(fid, ' \\\\\n\n');
 end
 
-fprintf(fid, '\\bottomrule%%\n');
-fprintf(fid, '\\end{tabular}%%\n\n');
-fprintf(fid, '\\medskip\\par\n\n');
+fprintf(fid, '\\bottomrule\n');
+fprintf(fid, '\\end{tabular} \\par \\medskip\n\n');
 fprintf(fid, '%% End Table Object\n');
 end
