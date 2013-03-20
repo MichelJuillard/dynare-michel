@@ -108,3 +108,30 @@ end
 %$ end
 %$ T = all(t);
 %@eof:1
+
+%@test:2
+%$ % Define a datasets.
+%$ A = rand(10,2); B = randn(10,1);
+%$
+%$ % Define names
+%$ A_name = {'A1';'A2'}; B_name = {'B1'};
+%$
+%$ t = zeros(4,1);
+%$
+%$ % Instantiate a time series object.
+%$ try
+%$    ts1 = dynSeries(A,[],A_name,[]);
+%$    ts2 = dynSeries(B,[],B_name,[]);
+%$    ts3 = merge(ts1,ts2);
+%$    t(1) = 1;
+%$ catch
+%$    t = 0;
+%$ end
+%$
+%$ if length(t)>1
+%$    t(2) = dyn_assert(ts3.vobs,3);
+%$    t(3) = dyn_assert(ts3.nobs,10);
+%$    t(4) = dyn_assert(ts3.data,[A, B],1e-15);
+%$ end
+%$ T = all(t);
+%@eof:2
