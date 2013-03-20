@@ -81,7 +81,8 @@ switch S(1).type
         if ~isempty(ndx)
             B = dynSeries();
             B.data = A.data(:,ndx);
-            B.name = deblank(A.name(ndx,:));
+            B.name = A.name(ndx);
+            B.tex = A.tex(ndx);
             B.tex  = deblank(A.tex(ndx,:));
             B.nobs = A.nobs;
             B.vobs = 1;
@@ -105,8 +106,8 @@ switch S(1).type
         [junk,tdx] = intersect(A.time.time,S(1).subs{1}.time,'rows');
         B = dynSeries();
         B.data = A.data(tdx,:);
-        B.name = deblank(A.name);
-        B.tex  = deblank(A.tex);
+        B.name = A.name;
+        B.tex  = A.tex;
         B.nobs = length(tdx);
         B.vobs = A.vobs;
         B.freq = A.freq;
