@@ -59,6 +59,9 @@ dates = ds.time;
 ndates = dates.ndat;
 
 for i=1:ndates
+    if o.vlines
+        fprintf(fid, '|');
+    end
     fprintf(fid, 'r');
 end
 fprintf(fid, '}%%\n');
