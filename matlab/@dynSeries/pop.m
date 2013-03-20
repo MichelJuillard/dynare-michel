@@ -45,6 +45,10 @@ function [ts,id] = pop(ts,a)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 id = strmatch(a,ts.name,'exact');
+if isempty(id)
+    id = 0;
+    return
+end
 ts.vobs = ts.vobs-1; 
 ts.data(:,id) = [];
 ts.name(id) = [];
@@ -72,6 +76,31 @@ ts.tex(id) = [];
 %$    t(2) = dyn_assert(ts2.vobs,2);
 %$    t(3) = dyn_assert(ts2.nobs,10);
 %$    t(4) = dyn_assert(ts2.data,[A(:,1), A(:,3)],1e-15);
+%$ end
+%$ T = all(t);
+%@eof:1
+
+%@test:1
+%$ % Define a datasets.
+%$ A = rand(10,3);
+%$
+%$ % Define names
+%$ A_name = {'A1';'A2';'A3'};
+%$
+%$ t = zeros(2,1);
+%$
+%$ % Instantiate a time series object.
+%$ try
+%$    ts1 = dynSeries(A,[],A_name,[]);
+%$    [ts2,id] = pop(ts1,'A4');
+%$    t(1) = 1;
+%$ catch
+%$    t = 0;
+%$ end
+%$
+%$ if length(t)>1
+%$    t(2) = dyn_assert(id,0);
+%$    t(2) = dyn_assert(ts1==ts2,1);
 %$ end
 %$ T = all(t);
 %@eof:1
