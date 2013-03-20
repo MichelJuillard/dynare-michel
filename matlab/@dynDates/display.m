@@ -23,9 +23,9 @@ first_displayed = 2;
 fprintf('%s = <dynDates: ', inputname(1));
     
 if dd.ndat<=max_displayed
-    for i=1:ndat
+    for i=1:dd.ndat
         fprintf(format(dynDate(dd.time(i,:),dd.freq)))
-        if i<ndat
+        if i<dd.ndat
             fprintf(', ')
         else
             fprintf('>\n')
