@@ -38,12 +38,23 @@ for i=1:o.cols
 end
 fprintf(fid, '}\n');
 ne = numElements(o);
+nvspace = numVspace(o);
+nlcounter = 0;
 for i=1:ne
-    o.elements(i).write(fid);
-    if rem(i, o.cols)
-        fprintf(fid, ' & ');
-    else
+    if isa(o.elements(i), 'vspace')
+        assert(rem(nlcounter, o.cols) == 0, ['@section.write: must place ' ...
+                            'vspace command after a linebreak in the table ' ...
+                            'or series of charts']);
+        o.elements(i).write(fid);
         fprintf(fid, '\\\\\n');
+    else
+        o.elements(i).write(fid);
+        nlcounter = nlcounter + 1;
+        if rem(nlcounter, o.cols)
+            fprintf(fid, ' & ');
+        else
+            fprintf(fid, '\\\\\n');
+        end
     end
 end
 fprintf(fid, '\\end{tabular}}\n');
