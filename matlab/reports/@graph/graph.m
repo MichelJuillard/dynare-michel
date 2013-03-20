@@ -112,26 +112,10 @@ assert(isempty(o.yrange) || (isfloat(o.yrange) && length(o.yrange) == 2 && ...
                              o.yrange(1) < o.yrange(2)), ...
        ['@graph.graph: yrange is specified an array with two float entries, ' ...
         'the lower bound and upper bound.']);
-
-assert(~isempty(o.data), '@graph.graph: must provide data');
-msg = ['@graph.graph: data must either be a dynSeries or a cell array of ' ...
-       'dynSeries'];
-if length(o.data) == 1
-    assert(isa(o.data, 'dynSeries'), msg);
-else
-    assert(iscell(o.data), msg);
-    for i=1:length(o.data)
-        assert(isa(o.data{i}, 'dynSeries'), msg);
-    end
-end
-
-msg = ['@graph.graph: series to use must be a cell array of string(s)'];
-if ~isempty(o.seriestouse)
-    assert(iscell(o.seriestouse), msg);
-    for i=1:length(o.seriestouse)
-        assert(ischar(o.seriestouse{i}), msg);
-    end
-end
+assert(~isempty(o.data) && isa(o.data, 'dynSeries'), ['@graph.graph: must ' ...
+                    'provide data as a dynSeries']);
+assert(isempty(o.seriestouse) || iscellstr(o.seriestouse), ['@graph.graph: ' ...
+                    'series to use must be a cell array of string(s)']);
 
 % Create graph object
 o = class(o, 'graph');

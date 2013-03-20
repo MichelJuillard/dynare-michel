@@ -78,26 +78,10 @@ assert(isint(o.precision), '@table.table: precision must be an int');
 assert(isempty(o.range) || (isa(o.range, 'dynDates') && o.range.ndat >= 2), ...
        ['@table.table: range is specified as a dynDates range, e.g. ' ...
         '''dynDates(''1999q1''):dynDates(''1999q3'')''.']);
-
-assert(~isempty(o.data), '@table.table: must provide data');
-msg = ['@table.table: data must either be a dynSeries or a cell array of ' ...
-       'dynSeries'];
-if length(o.data) == 1
-    assert(isa(o.data, 'dynSeries'), msg);
-else
-    assert(iscell(o.data), msg);
-    for i=1:length(o.data)
-        assert(isa(o.data{i}, 'dynSeries'), msg);
-    end
-end
-
-msg = ['@table.table: series to use must be a cell array of string(s)'];
-if ~isempty(o.seriestouse)
-    assert(iscell(o.seriestouse), msg);
-    for i=1:length(o.seriestouse)
-        assert(ischar(o.seriestouse{i}), msg);
-    end
-end
+assert(~isempty(o.data) && isa(o.data, 'dynSeries'), ['@table.table: must ' ...
+                    'provide data as a dynSeries']);
+assert(isempty(o.seriestouse) || iscellstr(o.seriestouse), ['@table.table: ' ...
+                    'series to use must be a cell array of string(s)']);
 
 % Create table object
 o = class(o, 'table');
