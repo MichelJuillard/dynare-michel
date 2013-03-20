@@ -55,7 +55,12 @@ function a = horzcat2(b,c)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
-  
+
+[n,message] = common_strings_in_cell_arrays(b.name,c.name);
+if n
+    error(['dynSeries::horzcat: I cannot concatenate dynSeries objects with common variable names (' message ')!'])
+end
+    
 if b.freq ~= c.freq
     error('dynSeries::horzcat: All time series objects must have common frequency!')
 else

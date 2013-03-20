@@ -237,3 +237,27 @@ end
 %$ t(4) = dyn_assert(ts4.name,e.name);
 %$ T = all(t);
 %@eof:5
+
+%@test:6
+%$ % Define a data set.
+%$ A = [transpose(1:10),2*transpose(1:10)];
+%$ B = [transpose(1:10),2*transpose(1:10)];
+%$
+%$ % Define names
+%$ A_name = {'A1';'A2'};
+%$ B_name = {'B1';'A2'};
+%$
+%$ % Instantiate two time series objects.
+%$ ts1 = dynSeries(A,[],A_name,[]);
+%$ ts2 = dynSeries(B,[],B_name,[]);
+%$
+%$ % Call the tested method.
+%$ try
+%$   ts3 = [ts1,ts2];
+%$   t = 0;
+%$ catch
+%$   t = 1;
+%$ end
+%$
+%$ T = t;
+%@eof:6
