@@ -15,7 +15,7 @@ function dynareroot = dynare_config(path_to_dynare,verbose)
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2012 Dynare Team
+% Copyright (C) 2001-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -108,7 +108,7 @@ else
                 addpath(mexpath)
             end
         else
-            mexpath = [dynareroot '../mex/matlab/win32-7.5-8.0'];
+            mexpath = [dynareroot '../mex/matlab/win32-7.5-8.1'];
             if exist(mexpath, 'dir')
                 addpath(mexpath)
             end
@@ -128,7 +128,7 @@ else
                 addpath(mexpath)
             end
         else
-            mexpath = [dynareroot '../mex/matlab/win64-7.8-8.0'];
+            mexpath = [dynareroot '../mex/matlab/win64-7.8-8.1'];
             if exist(mexpath, 'dir')
                 addpath(mexpath)
             end
@@ -142,7 +142,7 @@ else
                 addpath(mexpath)
             end
         else
-            mexpath = [dynareroot '../mex/matlab/osx32-7.5-8.0'];
+            mexpath = [dynareroot '../mex/matlab/osx32-7.5-8.1'];
             if exist(mexpath, 'dir')
                 addpath(mexpath)
             end
