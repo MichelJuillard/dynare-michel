@@ -43,6 +43,17 @@ if isa(B,'dynSeries') && isa(C,'dynSeries')
     % Element by element divisions of two dynSeries object
     if ~isequal(B.vobs,C.vobs) && ~(isequal(B.vobs,1) || isequal(C.vobs,1))
         error(['dynSeries::times: Cannot divide ' inputname(1) ' and ' inputname(2) ' (wrong number of variables)!'])
+    else
+        if B.vobs>C.vobs
+            idB = 1:B.vobs;
+            idC = ones(1:B.vobs);
+        elseif B.vobs<C.vobs
+            idB = ones(1,C.vobs);
+            idC = 1:C.vobs;
+        else
+            idB = 1:B.vobs;
+            idC = 1:C.vobs;
+        end
     end
     if ~isequal(B.nobs,C.nobs)
         error(['dynSeries::times: Cannot divide ' inputname(1) ' and ' inputname(2) ' (wrong number of observations)!'])
@@ -59,8 +70,12 @@ if isa(B,'dynSeries') && isa(C,'dynSeries')
     A.time = B.time;
     A.nobs = max(B.nobs,C.nobs);
     A.vobs = max(B.vobs,C.vobs);
-    A.name = repmat({'--NA--'},A.vobs,1);
-    A.tex = repmat({'--NA--'},A.vobs,1);
+    A.name = cell(A.vobs,1);
+    A.tex = cell(A.vobs,1);
+    for i=1:A.vobs
+        A.name(i) = {['divide(' B.name{idB(i)} ',' C.name{idC(i)} ')']};
+        A.tex(i) = {['(' B.tex{idB(i)} '/' C.tex{idC(i)} ')']};
+    end
     A.data = bsxfun(@rdivide,B.data,C.data);
 elseif isnumeric(C) &&  isreal(C) && isequal(length(C),1) && isa(B,'dynSeries') 
     % division of a dynSeries object by a real scalar.
@@ -70,8 +85,12 @@ elseif isnumeric(C) &&  isreal(C) && isequal(length(C),1) && isa(B,'dynSeries')
     A.init = B.init;
     A.nobs = B.nobs;
     A.vobs = B.vobs;
-    A.name = repmat({'--NA--'},A.vobs,1);
-    A.tex = repmat({'--NA--'},A.vobs,1);
+    A.name = cell(A.vobs,1);
+    A.tex = cell(A.vobs,1);
+    for i=1:A.vobs
+        A.name(i) = {['divide(' B.name{i} ',' num2str(C) ')']};
+        A.tex(i) = {['(' B.tex{i} '/' num2str(C) ')']};
+    end
     A.data = B.data/C;    
 elseif isnumeric(B) && isreal(B) && isequal(length(B),1) && isa(C,'dynSeries')
     % division of a real scalar by a dynSeries object.
@@ -81,8 +100,12 @@ elseif isnumeric(B) && isreal(B) && isequal(length(B),1) && isa(C,'dynSeries')
     A.init = C.init;
     A.nobs = C.nobs;
     A.vobs = C.vobs;
-    A.name = repmat({'--NA--'},A.vobs,1);
-    A.tex = repmat({'--NA--'},A.vobs,1);
+    A.name = cell(A.vobs,1);
+    A.tex = cell(A.vobs,1);
+    for i=1:A.vobs
+        A.name(i) = {['divide(' num2str(B) ',' C.name{i} ')']};
+        A.tex(i) = {['(' num2str(B) '/'  C.tex{i} ')']};
+    end
     A.data = B./C.data;
 else
     error()

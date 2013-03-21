@@ -41,6 +41,17 @@ function A = minus(B,C)
 
 if ~isequal(B.vobs,C.vobs) && ~(isequal(B.vobs,1) || isequal(C.vobs,1))
     error(['dynSeries::plus: Cannot substract ' inputname(1) ' and ' inputname(2) ' (wrong number of variables)!'])
+else
+    if B.vobs>C.vobs
+        idB = 1:B.vobs;
+        idC = ones(1:B.vobs);
+    elseif B.vobs<C.vobs
+        idB = ones(1,C.vobs);
+        idC = 1:C.vobs;
+    else
+        idB = 1:B.vobs;
+        idC = 1:C.vobs;
+    end
 end
 
 if ~isequal(B.nobs,C.nobs)
@@ -72,8 +83,12 @@ A.init = B.init;
 A.time = B.time;
 A.nobs = max(B.nobs,C.nobs);
 A.vobs = max(B.vobs,C.vobs);
-A.name = repmat({'--NA--'},A.vobs,1);
-A.tex = repmat({'--NA--'},A.vobs,1);
+A.name = cell(A.vobs,1);
+A.tex = cell(A.vobs,1);
+for i=1:A.vobs
+    A.name(i) = {['minus(' B.name{idB(i)} ',' C.name{idC(i)} ')']};
+    A.tex(i) = {['(' B.tex{idB(i)} '-' C.tex{idC(i)} ')']};
+end
 A.data = bsxfun(@minus,B.data,C.data);
 
 %@test:1
@@ -83,7 +98,7 @@ A.data = bsxfun(@minus,B.data,C.data);
 %$ % Define names
 %$ A_name = {'A1';'A2'}; B_name = {'B1'};
 %$
-%$ t = zeros(4,1);
+%$ t = zeros(5,1);
 %$
 %$ % Instantiate a time series object.
 %$ try
@@ -99,6 +114,7 @@ A.data = bsxfun(@minus,B.data,C.data);
 %$    t(2) = dyn_assert(ts3.vobs,2);
 %$    t(3) = dyn_assert(ts3.nobs,10);
 %$    t(4) = dyn_assert(ts3.data,[A(:,1)-B, A(:,2)-B],1e-15);
+%$    t(5) = dyn_assert(ts3.name,{'minus(A1,B1)';'minus(A2,B1)'});
 %$ end
 %$ T = all(t);
 %@eof:1

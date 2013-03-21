@@ -43,6 +43,17 @@ if isa(B,'dynSeries') && isa(C,'dynSeries')
     % Element by element multiplication of two dynSeries object
     if ~isequal(B.vobs,C.vobs) && ~(isequal(B.vobs,1) || isequal(C.vobs,1))
         error(['dynSeries::times: Cannot multiply ' inputname(1) ' and ' inputname(2) ' (wrong number of variables)!'])
+    else
+        if B.vobs>C.vobs
+            idB = 1:B.vobs;
+            idC = ones(1:B.vobs);
+        elseif B.vobs<C.vobs
+            idB = ones(1,C.vobs);
+            idC = 1:C.vobs;
+        else
+            idB = 1:B.vobs;
+            idC = 1:C.vobs;
+        end
     end
     if ~isequal(B.nobs,C.nobs)
         error(['dynSeries::times: Cannot multiply ' inputname(1) ' and ' inputname(2) ' (wrong number of observations)!'])
@@ -59,8 +70,12 @@ if isa(B,'dynSeries') && isa(C,'dynSeries')
     A.time = B.time;
     A.nobs = max(B.nobs,C.nobs);
     A.vobs = max(B.vobs,C.vobs);
-    A.name = repmat({'--NA--'},A.vobs,1);
-    A.tex = repmat({'--NA--'},A.vobs,1);
+    A.name = cell(A.vobs,1);
+    A.tex = cell(A.vobs,1);
+    for i=1:A.vobs
+        A.name(i) = {['multiply(' B.name{idB(i)} ',' C.name{idC(i)} ')']};
+        A.tex(i) = {['(' B.tex{idB(i)} '*' C.tex{idC(i)} ')']};
+    end
     A.data = bsxfun(@times,B.data,C.data);
 elseif isnumeric(C) &&  isreal(C) && isequal(length(C),1) && isa(B,'dynSeries') 
     % Multiplication of a dynSeries object by a real scalar.
@@ -70,8 +85,12 @@ elseif isnumeric(C) &&  isreal(C) && isequal(length(C),1) && isa(B,'dynSeries')
     A.time = B.time;
     A.nobs = B.nobs;
     A.vobs = B.vobs;
-    A.name = repmat({'--NA--'},A.vobs,1);
-    A.tex = repmat({'--NA--'},A.vobs,1);
+    A.name = cell(A.vobs,1);
+    A.tex = cell(A.vobs,1);
+    for i=1:A.vobs
+        A.name(i) = {['multiply(' B.name{i} ',' num2str(C) ')']};
+        A.tex(i) = {['(' B.tex{i} '*' num2str(C) ')']};
+    end
     A.data = B.data*C;    
 elseif isnumeric(B) && isreal(B) && isequal(length(B),1) && isa(C,'dynSeries')
     % Multiplication of a dynSeries object by a real scalar.
@@ -81,8 +100,12 @@ elseif isnumeric(B) && isreal(B) && isequal(length(B),1) && isa(C,'dynSeries')
     A.time = C.time;
     A.nobs = C.nobs;
     A.vobs = C.vobs;
-    A.name = repmat({'--NA--'},A.vobs,1);
-    A.tex = repmat({'--NA--'},A.vobs,1);
+    A.name = cell(A.vobs,1);
+    A.tex = cell(A.vobs,1);
+    for i=1:A.vobs
+        A.name(i) = {['multiply(' num2str(B) ',' C.name{i} ')']};
+        A.tex(i) = {['(' num2str(B) '*'  C.tex{i} ')']};
+    end
     A.data = C.data*B;
 else
     error()
@@ -111,6 +134,7 @@ end
 %$    t(2) = dyn_assert(ts3.vobs,2);
 %$    t(3) = dyn_assert(ts3.nobs,10);
 %$    t(4) = dyn_assert(ts3.data,[A(:,1).*B, A(:,2).*B],1e-15);
+%$    t(5) = dyn_assert(ts3.name,{'multiply(A1,B1)';'multiply(A2,B1)'});
 %$ end
 %$ T = all(t);
 %@eof:1
@@ -122,7 +146,7 @@ end
 %$ % Define names
 %$ A_name = {'A1';'A2'};
 %$
-%$ t = zeros(4,1);
+%$ t = zeros(5,1);
 %$
 %$ % Instantiate a time series object.
 %$ try
@@ -137,6 +161,7 @@ end
 %$    t(2) = dyn_assert(ts2.vobs,2);
 %$    t(3) = dyn_assert(ts2.nobs,10);
 %$    t(4) = dyn_assert(ts2.data,A*B,1e-15);
+%$    t(5) = dyn_assert(ts2.name,{['multiply(A1,' num2str(pi) ')'];['multiply(A2,' num2str(pi) ')']});
 %$ end
 %$ T = all(t);
 %@eof:2
@@ -163,6 +188,7 @@ end
 %$    t(2) = dyn_assert(ts2.vobs,2);
 %$    t(3) = dyn_assert(ts2.nobs,10);
 %$    t(4) = dyn_assert(ts2.data,A*B,1e-15);
+%$    t(5) = dyn_assert(ts2.name,{['multiply(' num2str(pi) ',A1)'];['multiply(' num2str(pi) ',A2)']});
 %$ end
 %$ T = all(t);
 %@eof:3

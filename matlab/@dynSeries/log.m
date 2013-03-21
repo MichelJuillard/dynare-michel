@@ -43,14 +43,13 @@ function ts = log(ts)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-
-if ~isa(ts,'dynSeries')
-    error('dynSeries::log: Input argument has to be a Dynare time series object!')
-end
-
 if any(ts.data<eps)
     error('dynSeries::log: Input argument has to be strictly positive!')
+end
+
+for i=1:ts.vobs
+    ts.name(i) = {['log(' ts.name{i} ')']};
+    ts.tex(i) = {['\log(' ts.tex{i} ')']};
 end
 
 ts.data = log(ts.data);

@@ -44,10 +44,9 @@ function ts = exp(ts)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-
-if ~isa(ts,'dynSeries')
-    error('dynSeries::exp: Input argument has to be a Dynare time series object!')
-end
-
 ts.data = exp(ts.data);
+
+for i=1:ts.vobs
+    ts.name(i) = {['exp(' ts.name{i} ')']};
+    ts.tex(i) = {['\exp(' ts.tex{i} ')']};
+end
