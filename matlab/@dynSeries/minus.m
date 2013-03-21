@@ -40,19 +40,19 @@ function A = minus(B,C)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if ~isequal(B.vobs,C.vobs) && ~(isequal(B.vobs,1) || isequal(C.vobs,1))
-    error(['dynSeries::plus: Cannot add ' inputname(1) ' and ' inputname(2) ' (wrong number of variables)!'])
+    error(['dynSeries::plus: Cannot substract ' inputname(1) ' and ' inputname(2) ' (wrong number of variables)!'])
 end
 
 if ~isequal(B.nobs,C.nobs)
-    error(['dynSeries::plus: Cannot add ' inputname(1) ' and ' inputname(2) ' (wrong number of observations)!'])
+    error(['dynSeries::plus: Cannot substract ' inputname(1) ' and ' inputname(2) ' (wrong number of observations)!'])
 end
 
 if ~isequal(B.freq,C.freq)
-    error(['dynSeries::plus: Cannot add ' inputname(1) ' and ' inputname(2) ' (frequencies are different)!'])
+    error(['dynSeries::plus: Cannot substract ' inputname(1) ' and ' inputname(2) ' (frequencies are different)!'])
 end
 
 if ~isequal(B.init,C.init)
-    error(['dynSeries::plus: Cannot add ' inputname(1) ' and ' inputname(2) ' (initial dates are different)!'])
+    error(['dynSeries::plus: Cannot substract ' inputname(1) ' and ' inputname(2) ' (initial dates are different)!'])
 end
 
 if isempty(B)
