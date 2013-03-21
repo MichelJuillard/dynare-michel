@@ -69,13 +69,16 @@ switch S(1).type
       case {'log','exp','ygrowth','qgrowth','ydiff','qdiff'}               % Give "dot access" to public methods.
         B = feval(S(1).subs,A);
       case {'save'}                                                        % Save dynSeries object on disk (default is a csv file). 
-        us = NaN;
+        B = NaN;
         if length(S)==2 && strcmp(S(2).type,'()')
             save(A,S(2).subs{:});
             S = shiftS(S);
         else
             save(A);
         end
+      case {'rename','tex_rename'}
+        B = feval(S(1).subs,A,S(2).subs{:});
+        S = shiftS(S);
       otherwise                                                            % Extract a sub-object by selecting one variable.
         ndx = strmatch(S(1).subs,A.name,'exact');
         if ~isempty(ndx)
