@@ -25,30 +25,43 @@ function A = subsasgn(A,S,B)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if length(S)==1 && isequal(S.type,'{}')
-    if isequal(A.nobs,B.nobs) && isequal(A.init,B.init)
-        id = NaN(length(S.subs),1);
-        for i=1:length(S.subs)
-            tmp = strmatch(S.subs{i},A.name,'exact');
-            if isempty(tmp)
-                error(['dynSeries::subsasgn: variable ' S.subs{i} ' is not a member of ' inputname(1) ' dynSeries object!'])
-            else
-                id(i) = tmp;
-            end 
-        end
-        if isequal(B.vobs,length(S.subs))
-            A.name(id) = B.name;
-            A.data(:,id) = B.data;
-            return
-        end
-    end
-    return
-elseif length(S)==1 && isequal(S.type,'.')
-    A = merge(A,B);
-    return
+if length(S)>1
+    error('dynSeries::subsasgn: Wrong syntax!')
 end
 
-error('dynSeries::subsasgn: Wrong calling sequence!')
+switch S.type
+  case '{}'
+    if ~isequal(numel(S.subs),numel(unique(S.subs)))
+        error('dynSeries::subsasgn: Wrong syntax!')
+    end
+    if ~isequal(length(S.subs),B.vobs)
+        error('dynSeries::subsasgn: Wrong syntax!')
+    end
+    if ~isequal(S.subs(:),B.name)
+        for i = 1:B.vobs
+            if ~isequal(S.subs{i},B.name{i})
+                % Rename a variable.
+                id = strmatch(S.subs{i},A.name);
+                if isempty(id)
+                    % Add a new variable a change its name.
+                    B.name(i) = {S.subs{i}};
+                    B.tex(i) = {name2tex(S.subs{i})};
+                else
+                    % Rename variable and change its content.
+                    B.name(i) = A.name(id);
+                    B.tex(i) = A.tex(id);
+                end
+                A = merge(A,B);
+            end
+        end
+    else
+        A = merge(A,B);
+    end
+  case '.'
+    A = merge(A,B);
+  otherwise
+    error('dynSeries::subsasgn: Wrong syntax!')
+end
     
 %@test:1
 %$ % Define a datasets.
@@ -59,16 +72,22 @@ error('dynSeries::subsasgn: Wrong calling sequence!')
 %$ ts2 = dynSeries(B,[],{'B1'},[]);
 %$
 %$ % modify first object.
-%$ ts1{'A2'} = ts2;
-%$ t(1) = 1;
+%$ try
+%$     ts1{'A2'} = ts2;
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end 
+%$ 
 %$ % Instantiate a time series object.
-%$
+%$ if t(1)
 %$    t(2) = dyn_assert(ts1.vobs,3);
 %$    t(3) = dyn_assert(ts1.nobs,10);
-%$    t(4) = dyn_assert(ts1.name{2},'B1');
+%$    t(4) = dyn_assert(ts1.name{2},'A2');
 %$    t(5) = dyn_assert(ts1.name{1},'A1');
 %$    t(6) = dyn_assert(ts1.name{3},'A3');
 %$    t(7) = dyn_assert(ts1.data,[A(:,1), B, A(:,3)],1e-15);
+%$ end
 %$ T = all(t);
 %@eof:1
 
@@ -153,3 +172,113 @@ error('dynSeries::subsasgn: Wrong calling sequence!')
 %$ T = all(t);
 %@eof:5
 
+%@test:6
+%$ % Define a datasets.
+%$ A = rand(10,3); B = rand(10,2);
+%$
+%$ % Instantiate two dynSeries object.
+%$ ts1 = dynSeries(A,[],{'A1';'A2';'A3'},[]);
+%$ ts2 = dynSeries(B,[],{'B1';'B2'},[]);
+%$
+%$ % Call tested routine.
+%$ try
+%$     ts1.B2 = ts2.B2.log;
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ % Instantiate a time series object.
+%$ if t(1)
+%$    t(2) = dyn_assert(ts1.vobs,4);
+%$    t(3) = dyn_assert(ts1.nobs,10);
+%$    t(4) = dyn_assert(ts1.name{1},'A1');
+%$    t(5) = dyn_assert(ts1.name{2},'A2');
+%$    t(6) = dyn_assert(ts1.name{3},'A3');
+%$    t(7) = dyn_assert(ts1.name{4},'B2');
+%$    t(8) = dyn_assert(ts1.data,[A(:,1), A(:,2), A(:,3), log(B(:,2))],1e-15);
+%$ end
+%$ T = all(t);
+%@eof:6
+
+%@test:7
+%$ % Define a datasets.
+%$ A = rand(10,3); B = rand(10,2);
+%$
+%$ % Instantiate two dynSeries object.
+%$ ts1 = dynSeries(A,[],{'A1';'A2';'A3'},[]);
+%$ ts2 = dynSeries(B,[],{'B1';'B2'},[]);
+%$
+%$ % Append B2 to the first object.
+%$ ts1{'B2'} = ts2{'B2'};
+%$ t(1) = 1;
+%$ % Instantiate a time series object.
+%$ if t(1)
+%$    t(2) = dyn_assert(ts1.vobs,4);
+%$    t(3) = dyn_assert(ts1.nobs,10);
+%$    t(4) = dyn_assert(ts1.name{1},'A1');
+%$    t(5) = dyn_assert(ts1.name{2},'A2');
+%$    t(6) = dyn_assert(ts1.name{3},'A3');
+%$    t(6) = dyn_assert(ts1.name{4},'B2');
+%$    t(7) = dyn_assert(ts1.data,[A(:,1), A(:,2), A(:,3), B(:,2)],1e-15);
+%$ end
+%$ T = all(t);
+%@eof:6
+
+%@test:7
+%$ % Define a datasets.
+%$ A = rand(10,3); B = rand(10,1);
+%$
+%$ % Instantiate two dynSeries object.
+%$ ts1 = dynSeries(A,[],{'A1';'A2';'A3'},[]);
+%$ ts2 = dynSeries(B,[],{'B1'},[]);
+%$
+%$ % modify first object.
+%$ try
+%$     ts1{'A4'} = ts2;
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end 
+%$ 
+%$ % Instantiate a time series object.
+%$ if t(1)
+%$    t(2) = dyn_assert(ts1.vobs,4);
+%$    t(3) = dyn_assert(ts1.nobs,10);
+%$    t(4) = dyn_assert(ts1.name{2},'A2');
+%$    t(5) = dyn_assert(ts1.name{1},'A1');
+%$    t(6) = dyn_assert(ts1.name{3},'A3');
+%$    t(7) = dyn_assert(ts1.name{4},'A4');
+%$    t(8) = dyn_assert(ts1.data,[A, B],1e-15);
+%$ end
+%$ T = all(t);
+%@eof:7
+
+%@test:8
+%$ % Define a datasets.
+%$ A = rand(10,3); B = rand(10,2);
+%$
+%$ % Instantiate two dynSeries object.
+%$ ts1 = dynSeries(A,[],{'A1';'A2';'A3'},[]);
+%$ ts2 = dynSeries(B,[],{'A1';'B1'},[]);
+%$
+%$ % modify first object.
+%$ try
+%$     ts1{'A1','A4'} = ts2;
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end 
+%$ 
+%$ % Instantiate a time series object.
+%$ if t(1)
+%$    t(2) = dyn_assert(ts1.vobs,4);
+%$    t(3) = dyn_assert(ts1.nobs,10);
+%$    t(4) = dyn_assert(ts1.name{2},'A2');
+%$    t(5) = dyn_assert(ts1.name{1},'A1');
+%$    t(6) = dyn_assert(ts1.name{3},'A3');
+%$    t(7) = dyn_assert(ts1.name{4},'A4');
+%$    t(8) = dyn_assert(ts1.data,[B(:,1), A(:,2:3), B(:,2)],1e-15);
+%$ end
+%$ T = all(t);
+%@eof:8
