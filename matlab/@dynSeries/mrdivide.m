@@ -42,16 +42,16 @@ function A = mrdivide(B,C)
 if isa(B,'dynSeries') && isa(C,'dynSeries')
     % Element by element divisions of two dynSeries object
     if ~isequal(B.vobs,C.vobs) && ~(isequal(B.vobs,1) || isequal(C.vobs,1))
-        error(['dynSeries::times: Cannot add ' inputname(1) ' and ' inputname(2) ' (wrong number of variables)!'])
+        error(['dynSeries::times: Cannot divide ' inputname(1) ' and ' inputname(2) ' (wrong number of variables)!'])
     end
     if ~isequal(B.nobs,C.nobs)
-        error(['dynSeries::times: Cannot add ' inputname(1) ' and ' inputname(2) ' (wrong number of observations)!'])
+        error(['dynSeries::times: Cannot divide ' inputname(1) ' and ' inputname(2) ' (wrong number of observations)!'])
     end
     if ~isequal(B.freq,C.freq)
-        error(['dynSeries::times: Cannot add ' inputname(1) ' and ' inputname(2) ' (frequencies are different)!'])
+        error(['dynSeries::times: Cannot divide ' inputname(1) ' and ' inputname(2) ' (frequencies are different)!'])
     end
     if ~isequal(B.init,C.init)
-        error(['dynSeries::times: Cannot add ' inputname(1) ' and ' inputname(2) ' (initial dates are different)!'])
+        error(['dynSeries::times: Cannot divide ' inputname(1) ' and ' inputname(2) ' (initial dates are different)!'])
     end
     A = dynSeries();
     A.freq = B.freq;
