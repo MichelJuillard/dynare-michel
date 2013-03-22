@@ -145,7 +145,8 @@ MODFILES = \
 	deterministic_simulations/rbc_det3.mod \
 	deterministic_simulations/rbc_det4.mod \
 	deterministic_simulations/rbc_det5.mod \
-	walsh.mod
+	walsh.mod \
+	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME.mod
 
 XFAIL_MODFILES = ramst_xfail.mod
 
@@ -257,6 +258,9 @@ EXTRA_DIST = \
 	k_order_perturbation/run_fs2000kplusplus.m \
 	ls2003/data_ca1.m \
 	measurement_errors/data_ca1.m \
+	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME_mh_mode.mat \
+	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME_steadystate.m \
+	measurement_errors/fs2000_corr_me_ml_mcmc/fsdat_simul.m \
 	missing/simulate_data_with_missing_observations.m \
 	objectives/sgu_ex1.mat \
 	conditional_forecasts/fsdat_simul.m \
