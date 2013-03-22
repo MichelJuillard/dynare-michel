@@ -107,12 +107,21 @@ fclose(fid);
 % Set newline code (ok for *nix, check for mac and windows)
 if isunix
     newline_code = 10;
+elseif ispc
+    newline_code = 13;
+elseif ismac
+    newline_code = 10;
 else
     error('readcsv:: Not implemented for your OS!')
 end
 
 % Get the positions of the end-of-line code;
 end_of_line_locations = find(bfile==newline_code);
+if ispc && isempty(end_of_line_locations)
+    newline_code=10;
+    end_of_line_locations = find(bfile==newline_code);
+end;
+
 tmp = find(bfile==newline_code);
 
 % Get the number of lines in the file.
@@ -138,7 +147,7 @@ if withnames
     varlist = cell(length(B),1);
     number_of_variables = length(varlist);
     for i=1:number_of_variables
-        varlist(i) = {linee(B(i):C(i))};
+        varlist(i) = {strtrim(linee(B(i):C(i)))};
     end
     linea = linea+1;
 end
