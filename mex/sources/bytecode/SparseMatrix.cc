@@ -32,16 +32,10 @@
 #endif
 
 using namespace std;
-#if (defined _MSC_VER || defined OCTAVE_MEX_FILE)
-
 #ifdef _MSC_VER
 #include <windows.h>
 HINSTANCE hinstLib;
-#else
-#include <sys/types.h>
-#include <dlfcn.h>
-void* hinstLib;
-#endif
+
 #define UMFPACK_INFO 90
 #define UMFPACK_CONTROL 20
 /* used in all UMFPACK_report_* routines: */
@@ -49,9 +43,6 @@ void* hinstLib;
 /* returned by all routines that use Info: */
 #define UMFPACK_OK (0)
 #define UMFPACK_STATUS 0	/* UMFPACK_OK, or other result */
-
-
-
 
 typedef void (*t_umfpack_dl_free_numeric)(void **Numeric);
 t_umfpack_dl_free_numeric umfpack_dl_free_numeric;
@@ -117,17 +108,12 @@ dynSparseMatrix::dynSparseMatrix()
   lu_inc_tol = 1e-10;
   Symbolic = NULL;
   Numeric = NULL;
-#if (defined _MSC_VER || defined OCTAVE_MEX_FILE)
-  // Get a handle to the DLL module.
 #ifdef _MSC_VER
+  // Get a handle to the DLL module.
   hinstLib = LoadLibrary(TEXT("libmwumfpack.dll"));
-#else
-  hinstLib = dlopen("libmwumfpack.dll",RTLD_LAZY);
-#endif
   // If the handle is valid, try to get the function address.
   if (hinstLib)
     {
-#ifdef _MSC_VER
       umfpack_dl_free_numeric = (t_umfpack_dl_free_numeric) GetProcAddress(hinstLib, "umfpack_dl_free_numeric");
       if (!umfpack_dl_free_numeric)
         {
@@ -185,97 +171,6 @@ dynSparseMatrix::dynSparseMatrix()
           tmp << " in libmwumfpack.dll, the function umfpack_dl_defaults is not found.";
           throw FatalExceptionHandling(tmp.str());
         }
-/*#else
-      mexPrintf("loading libmwumpfpack\n");
-      // reset errors
-      dlerror();
-      umfpack_dl_free_numeric = (t_umfpack_dl_free_numeric)  dlsym(hinstLib, "umfpack_dl_free_numeric");
-      const char* dlsym_error = dlerror();
-      if (dlsym_error)
-        {
-          mexPrintf("umfpack_dl_free_numeric not found\n");
-          ostringstream tmp;
-          tmp << " in libmwumfpack.dll, the function umfpack_dl_free_numeric is not found.";
-          throw FatalExceptionHandling(tmp.str());
-        }
-      // reset errors
-      dlerror();
-      umfpack_dl_free_symbolic = (t_umfpack_dl_free_symbolic)  dlsym(hinstLib, "umfpack_dl_free_symbolic");
-      dlsym_error = dlerror();
-      if (dlsym_error)
-        {
-          mexPrintf("umfpack_dl_free_symbolic not found\n");
-          ostringstream tmp;
-          tmp << " in libmwumfpack.dll, the function umfpack_dl_free_symbolic is not found.";
-          throw FatalExceptionHandling(tmp.str());
-        }
-      // reset errors
-      dlerror();
-      umfpack_dl_solve = (t_umfpack_dl_solve)  dlsym(hinstLib, "umfpack_dl_solve");
-      dlsym_error = dlerror();
-      if (dlsym_error)
-        {
-          mexPrintf("umfpack_dl_solve not found\n");
-          ostringstream tmp;
-          tmp << " in libmwumfpack.dll, the function umfpack_dl_solve is not found.";
-          throw FatalExceptionHandling(tmp.str());
-        }
-      // reset errors
-      dlerror();
-      umfpack_dl_numeric = (t_umfpack_dl_numeric)  dlsym(hinstLib, "umfpack_dl_numeric");
-      dlsym_error = dlerror();
-      if (dlsym_error)
-        {
-          mexPrintf("umfpack_dl_numeric not found\n");
-          ostringstream tmp;
-          tmp << " in libmwumfpack.dll, the function umfpack_dl_numeric is not found.";
-          throw FatalExceptionHandling(tmp.str());
-        }
-      // reset errors
-      dlerror();
-      umfpack_dl_symbolic = (t_umfpack_dl_symbolic)  dlsym(hinstLib, "umfpack_dl_symbolic");
-      dlsym_error = dlerror();
-      if (dlsym_error)
-        {
-          mexPrintf("umfpack_dl_symbolic not found\n");
-          ostringstream tmp;
-          tmp << " in libmwumfpack.dll, the function umfpack_dl_symbolic is not found.";
-          throw FatalExceptionHandling(tmp.str());
-        }
-      // reset errors
-      dlerror();
-      umfpack_dl_report_info = (t_umfpack_dl_report_info)  dlsym(hinstLib, "umfpack_dl_report_info");
-      dlsym_error = dlerror();
-      if (dlsym_error)
-        {
-          mexPrintf("umfpack_dl_report_info not found\n");
-          ostringstream tmp;
-          tmp << " in libmwumfpack.dll, the function umfpack_dl_report_info is not found.";
-          throw FatalExceptionHandling(tmp.str());
-        }
-      // reset errors
-      dlerror();
-      umfpack_dl_report_status = (t_umfpack_dl_report_status)  dlsym(hinstLib, "umfpack_dl_report_status");
-      dlsym_error = dlerror();
-      if (dlsym_error)
-        {
-          mexPrintf("umfpack_dl_report_status not found\n");
-          ostringstream tmp;
-          tmp << " in libmwumfpack.dll, the function umfpack_dl_report_status is not found.";
-          throw FatalExceptionHandling(tmp.str());
-        }
-      // reset errors
-      dlerror();
-      umfpack_dl_defaults = (t_umfpack_dl_defaults)  dlsym(hinstLib, "umfpack_dl_defaults");
-      dlsym_error = dlerror();
-      if (dlsym_error)
-        {
-          mexPrintf("umfpack_dl_defaults not found\n");
-          ostringstream tmp;
-          tmp << " in libmwumfpack.dll, the function umfpack_dl_defaults is not found.";
-          throw FatalExceptionHandling(tmp.str());
-        }*/
-#endif
     }
   else
     {
