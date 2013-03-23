@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Copyright (C) 2009-2012 Dynare Team
+dnl Copyright (C) 2009-2013 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -67,6 +67,9 @@ AM_CONDITIONAL([HAVE_MATIO], [test "x$has_matio" = "xyes"])
 # Check for libslicot, needed by kalman_steady_state
 AX_SLICOT([octave])
 AM_CONDITIONAL([HAVE_SLICOT], [test "x$has_slicot" = "xyes"])
+
+# Check for UMFPACK, needed by bytecode
+AC_CHECK_LIB([umfpack], [umfpack_dl_defaults], [], [AC_MSG_ERROR([Can't find UMFPACK])])
 
 AM_CONDITIONAL([DO_SOMETHING], [test "x$MKOCTFILE" != "x"])
 
