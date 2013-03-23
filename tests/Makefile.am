@@ -104,8 +104,6 @@ MODFILES = \
 	identification/kim/kim2.mod \
 	identification/as2007/as2007.mod \
 	simul/example1.mod \
-	conditional_forecasts/fs2000_cal.mod \
-	conditional_forecasts/fs2000_est.mod \
 	recursive/ls2003.mod \
 	recursive/ls2003_bayesian.mod \
 	ms-sbvar/test_exclusions.mod \
@@ -147,6 +145,9 @@ MODFILES = \
 	deterministic_simulations/rbc_det5.mod \
 	walsh.mod \
 	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME.mod
+
+#	conditional_forecasts/fs2000_cal.mod \
+#	conditional_forecasts/fs2000_est.mod \
 
 XFAIL_MODFILES = ramst_xfail.mod
 
