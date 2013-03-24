@@ -3,6 +3,7 @@ SUBDIRS = estimation
 EXTRA_DIST = \
 	dynblas.h \
 	dynlapack.h \
+	dynumfpack.h \
 	dynmex.h \
 	mjdgges \
 	kronecker \
