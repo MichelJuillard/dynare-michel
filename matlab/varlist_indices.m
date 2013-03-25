@@ -13,7 +13,7 @@ function [i_var,nvar] = varlist_indices(sublist,list)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2010-2011 Dynare Team
+% Copyright (C) 2010-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -32,7 +32,12 @@ function [i_var,nvar] = varlist_indices(sublist,list)
 
 % In Octave, ismember() doesn't operate on character arrays
 if ~exist('OCTAVE_VERSION')
-    [check,i_var] = ismember(sublist,list,'rows');
+    if isempty(sublist)
+        check = [];
+        i_var = [];
+    else
+        [check,i_var] = ismember(sublist,list,'rows');
+    end
 else
     check = [];
     i_var = [];
