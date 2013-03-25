@@ -26,6 +26,7 @@ for i=1:nargin-1
     VariableName = varargin{i};
     idArobase = strfind(VariableName,'@');
     if length(idArobase)==2
+        % Regular expression
         first_block_id = 0;
         last_block_id = 0;
         if idArobase(1)>1
@@ -89,3 +90,46 @@ function b = isnotempty_cell(CellArray)
             b(i,j) = ~isempty(CellArray{i,j});
         end
     end
+    
+    
+%@test:1
+%$ % Define a data set.
+%$ A = rand(10,24);
+%$
+%$ % Define names
+%$ A_name = {'GDP_1';'GDP_2';'GDP_3'; 'GDP_4'; 'GDP_5'; 'GDP_6'; 'GDP_7'; 'GDP_8'; 'GDP_9'; 'GDP_10'; 'GDP_11'; 'GDP_12'; 'HICP_1';'HICP_2';'HICP_3'; 'HICP_4'; 'HICP_5'; 'HICP_6'; 'HICP_7'; 'HICP_8'; 'HICP_9'; 'HICP_10'; 'HICP_11'; 'HICP_12';};
+%$
+%$ % Instantiate a time series object.
+%$ ts1 = dynSeries(A,[],A_name,[]);
+%$
+%$ % Call the tested method.
+%$ a = ts1{'GDP_@1,2,3,4,5@'};
+%$ b = ts1{'@GDP,HICP@_1'};
+%$ a.name
+%$ % Expected results.
+%$ e1.data = A(:,1:5);
+%$ e1.nobs = 10;
+%$ e1.vobs = 5;
+%$ e1.name = {'GDP_1';'GDP_2';'GDP_3'; 'GDP_4'; 'GDP_5'};
+%$ e1.freq = 1;
+%$ e1.init = dynDate(1);
+%$ e2.data = A(:,[1, 13]);
+%$ e2.nobs = 10;
+%$ e2.vobs = 2;
+%$ e2.name = {'GDP_1';'HICP_1'};
+%$ e2.freq = 1;
+%$ e2.init = dynDate(1);
+%$
+%$ % Check results.
+%$ t(1) = dyn_assert(e1.data,a.data);
+%$ t(2) = dyn_assert(e1.nobs,a.nobs);
+%$ t(3) = dyn_assert(e1.vobs,a.vobs);
+%$ t(4) = dyn_assert(e1.name,a.name);
+%$ t(5) = dyn_assert(e1.init,a.init);
+%$ t(6) = dyn_assert(e2.data,b.data);
+%$ t(7) = dyn_assert(e2.nobs,b.nobs);
+%$ t(8) = dyn_assert(e2.vobs,b.vobs);
+%$ t(9) = dyn_assert(e2.name,b.name);
+%$ t(10) = dyn_assert(e2.init,b.init);
+%$ T = all(t);
+%@eof:1
