@@ -24,7 +24,9 @@ config.guess
 config.sub
 depcomp
 install-sh
-missing
+/missing
+/mex/build/matlab/missing
+/mex/build/octave/missing
 ylwrap
 ar-lib
 
