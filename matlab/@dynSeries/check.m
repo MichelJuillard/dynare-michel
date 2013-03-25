@@ -76,3 +76,11 @@ if ~isequal(numel(unique(A.tex)),numel(A.tex));
     end
     return
 end
+
+if ~eq(A.time,A.init:A.init+A.nobs)
+    error_flag = 1;
+    if nargout>1
+        message = ['dynSeries: Wrong definition of the time member in dynSeries object ''' inputname(1) '''!']:
+    end
+    return
+end
