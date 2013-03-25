@@ -82,6 +82,8 @@ else
     A.init = B.init;
 end
 
+A.time = A.init:A.init+A.nobs;
+
 %@test:1
 %$ % Define a datasets.
 %$ A = rand(10,2); B = randn(10,1);
