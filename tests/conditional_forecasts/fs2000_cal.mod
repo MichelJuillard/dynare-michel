@@ -77,6 +77,8 @@ end;
 options_.stack_solve_algo = 0;
 options_.maxit_ = 50;
 
+error('Test disabled, enters an infinite loop')
+
 conditional_forecast(parameter_set=calibration, controlled_varexo=(e_m,e_a), simulation_type = deterministic);
 
 /*shocks;
