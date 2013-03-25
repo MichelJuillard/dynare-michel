@@ -55,7 +55,7 @@ function [y, info] = solve_one_boundary(fname, y, x, params, steady_state, ...
 %   none.
 %  
 
-% Copyright (C) 1996-2012 Dynare Team
+% Copyright (C) 1996-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -77,7 +77,7 @@ Blck_size=size(y_index_eq,2);
 g2 = [];
 g3 = [];
 correcting_factor=0.01;
-luinc_tol=1e-10;
+ilu_setup.droptol=1e-10;
 max_resa=1e100;
 reduced = 0;
 if(forward_backward)
@@ -316,7 +316,7 @@ for it_=start:incr:finish
                     disp('steady: GMRES ');
                 end
                 while(flag1>0)
-                    [L1, U1]=luinc(g1,luinc_tol);
+                    [L1, U1]=ilu(g1,ilu_setup);
                     [dx,flag1] = gmres(g1,-r,Blck_size,1e-6,Blck_size,L1,U1);
                     if (flag1>0 || reduced)
                         if(flag1==1)
@@ -326,7 +326,7 @@ for it_=start:incr:finish
                         elseif(flag1==3)
                             disp(['Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block' num2str(Block_Num,'%3d')]);
                         end;
-                        luinc_tol = luinc_tol/10;
+                        ilu_setup.droptol = ilu_setup.droptol/10;
                         reduced = 0;
                     else
                         ya = ya + lambda*dx;
@@ -343,7 +343,7 @@ for it_=start:incr:finish
                     disp('steady: BiCGStab');
                 end
                 while(flag1>0)
-                    [L1, U1]=luinc(g1,luinc_tol);
+                    [L1, U1]=ilu(g1,ilu_setup);
                     phat = ya - U1 \ (L1 \ r);
                     if(is_dynamic)
                         y(it_,y_index_eq) = phat;
@@ -370,7 +370,7 @@ for it_=start:incr:finish
                         elseif(flag1==3)
                             disp(['Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block' num2str(Block_Num,'%3d')]);
                         end;
-                        luinc_tol = luinc_tol/10;
+                        ilu_setup.droptol = ilu_setup.droptol/10;
                         reduced = 0;
                     else
                         ya = ya + lambda*dx;

@@ -43,7 +43,7 @@ function y = solve_two_boundaries(fname, y, x, params, steady_state, y_index, nz
 %   none.
 %  
 
-% Copyright (C) 1996-2011 Dynare Team
+% Copyright (C) 1996-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -67,7 +67,7 @@ g2 = [];
 g3 = [];
 Blck_size=size(y_index,2);
 correcting_factor=0.01;
-luinc_tol=1e-10;
+ilu_setup.droptol=1e-10;
 max_resa=1e100;
 Jacobian_Size=Blck_size*(y_kmin+y_kmax_l +periods);
 g1=spalloc( Blck_size*periods, Jacobian_Size, nze*periods);
@@ -198,7 +198,7 @@ while ~(cvg==1 || iter>maxit_),
             flag1=1;
             while(flag1>0)
                 if preconditioner == 2
-                    [L1, U1]=luinc(g1a,luinc_tol);
+                    [L1, U1]=ilu(g1a,ilu_setup);
                 elseif preconditioner == 3
                     Size = Blck_size;
                      gss1 =  g1a(Size + 1: 2*Size,Size + 1: 2*Size) + g1a(Size + 1: 2*Size,2*Size+1: 3*Size);
@@ -233,7 +233,7 @@ while ~(cvg==1 || iter>maxit_),
                     elseif(flag1==3)
                         disp(['Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block' num2str(Block_Size,'%3d')]);
                     end;
-                    luinc_tol = luinc_tol/10;
+                    ilu_setup.droptol = ilu_setup.droptol/10;
                     reduced = 0;
                 else
                     dx = za - ya;
@@ -271,7 +271,7 @@ while ~(cvg==1 || iter>maxit_),
                     elseif(flag1==3)
                         disp(['Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block' num2str(Block_Size,'%3d')]);
                     end;
-                    luinc_tol = luinc_tol/10;
+                    ilu_setup.droptol = ilu_setup.droptol/10;
                     reduced = 0;
                 else
                     dx = za - ya;
