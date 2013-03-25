@@ -177,7 +177,6 @@ switch nargin
     else
         for i=1:ts.vobs
             ts.name = vertcat(ts.name, {['Variable_' int2str(i)]});
-            %ts.name = vertcat(ts.name, {'--NA--'});
         end
     end
     if ~isempty(d)
