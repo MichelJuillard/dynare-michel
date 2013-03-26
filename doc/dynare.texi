@@ -1129,7 +1129,7 @@ trend_var (growth_factor=gA) A;
 
 @end deffn
 
-@deffn Command log_trend_var (growth_factor = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
+@deffn Command log_trend_var (log_growth_factor = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
 
 @descriptionhead
 

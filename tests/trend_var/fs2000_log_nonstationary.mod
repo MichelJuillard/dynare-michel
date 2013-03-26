@@ -27,8 +27,8 @@
  */
 
 var gM gA;
-log_trend_var(growth_factor=gA) A;
-log_trend_var(growth_factor=gM) M;
+log_trend_var(log_growth_factor=gA) A;
+log_trend_var(log_growth_factor=gM) M;
 var(log_deflator=A) k c y;
 var(log_deflator=M(-1)-A) P;
 var(log_deflator=M(-1)) W l d;
