@@ -884,6 +884,7 @@ Declarations of variables and parameters are made with the following commands:
 
 @deffn Command var @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
 @deffnx Command var (deflator = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
+@deffnx Command var (log_deflator = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
 
 @descriptionhead
 
@@ -910,7 +911,15 @@ trend.
 The expression used to detrend an endogenous variable. All trend
 variables, endogenous variables and parameters referenced in
 @var{MODEL_EXPRESSION} must already have been declared by the
-@code{trend_var}, @code{var} and @code{parameters} commands.
+@code{trend_var}, @code{log_trend_var}, @code{var} and
+@code{parameters} commands. The deflator is assumed to be
+multiplicative; for an additive deflator, use @code{log_deflator}.
+
+@item log_deflator = @var{MODEL_EXPRESSION}
+Same as @code{deflator}, except that the deflator is assumed to be
+additive instead of multiplicative (or, to put it otherwise, the
+declared variable is equal to the log of a variable with a
+multiplicative trend).
 @end table
 
 @examplehead
@@ -1093,6 +1102,9 @@ model. @xref{Conventions}, for the syntax of @var{MODEL_EXPRESSION} and
 @var{VARIABLE_NAME}. Optionally it is possible to give a LaTeX name to
 the variable.
 
+The variable is assumed to have a multiplicative growth trend. For an
+additive growth trend, use @code{log_trend_var} instead.
+
 Trend variables are required if the user wants to be able to write a
 nonstationary model in the @code{model} block. The @code{trend_var}
 command must appear before the @code{var} command that references the
@@ -1116,6 +1128,17 @@ trend_var (growth_factor=gA) A;
 @end example
 
 @end deffn
+
+@deffn Command log_trend_var (growth_factor = @var{MODEL_EXPRESSION}) @var{VARIABLE_NAME} [$@var{LATEX_NAME}$]@dots{};
+
+@descriptionhead
+
+Same as @code{trend_var}, except that the variable is supposed to have
+an additive trend (or, to put it otherwise, to be equal to the log of
+a variable with a multiplicative trend).
+
+@end deffn
+
 
 @node Expressions
 @section Expressions

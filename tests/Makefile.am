@@ -146,7 +146,9 @@ MODFILES = \
 	deterministic_simulations/rbc_det4.mod \
 	deterministic_simulations/rbc_det5.mod \
 	walsh.mod \
-	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME.mod
+	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME.mod \
+	trend_var/fs2000_nonstationary.mod \
+	trend_var/fs2000_log_nonstationary.mod
 
 XFAIL_MODFILES = ramst_xfail.mod
 
