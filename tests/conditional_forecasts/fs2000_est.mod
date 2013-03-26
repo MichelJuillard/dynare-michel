@@ -97,8 +97,6 @@ varobs gp_obs gy_obs;
 
 options_.solve_tolf = 1e-12;
 
-error('Test disabled, enters an infinite loop')
-
 // Metropolis replications are too few, this is only for testing purpose
 estimation(order=1,datafile=fsdat_simul,nobs=192,loglinear,mh_replic=10000,mh_nblocks=1,mh_jscale=0.8);
 
