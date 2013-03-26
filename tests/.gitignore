@@ -5,6 +5,7 @@
 *.cod
 *.c
 *.tex
+*.TeX
 *.jnl
 *.swp
 *.dat
