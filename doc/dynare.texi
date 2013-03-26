@@ -364,7 +364,7 @@ If you want to give a URL, use the address of the Dynare website:
 @node Software requirements
 @section Software requirements
 
-Packaged versions of Dynare are available for Windows XP/Vista/Seven,
+Packaged versions of Dynare are available for Windows XP/Vista/7/8,
 @uref{http://www.debian.org,Debian GNU/Linux},
 @uref{http://www.ubuntu.com/,Ubuntu} and Mac OS X Leopard/Snow
 Leopard.  Dynare should work on other systems, but some compilation
@@ -7287,7 +7287,7 @@ is @file{$HOME/.dynare}, while on Windows it is
 @file{%APPDATA%\dynare.ini} (typically @file{C:\Documents and
 Settings\@var{USERNAME}\Application Data\dynare.ini} under Windows XP,
 or @file{C:\Users\@var{USERNAME}\AppData\dynare.ini} under Windows
-Vista or Windows 7). You can specify a non standard location using the
+Vista/7/8). You can specify a non standard location using the
 @code{conffile} option of the @code{dynare} command (@pxref{Dynare
 invocation}).
 
