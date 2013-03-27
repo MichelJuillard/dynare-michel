@@ -49,9 +49,9 @@ if isfield(oo_,[TYPE 'TheoreticalMoments'])
         eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments.dsge;'])
         if isfield(temporary_structure,'correlation')
             eval(['temporary_structure = oo_.' TYPE 'TheoreticalMoments.dsge.correlation.Mean;'])
-            if isfield(temporary_structure,var1)
+            if isfield(temporary_structure,deblank(var1))
                 eval(['temporary_structure_1 = oo_.' TYPE 'TheoreticalMoments.dsge.correlation.Mean.' var1 ';']) 
-                if isfield(temporary_structure_1,var2)
+                if isfield(temporary_structure_1,deblank(var2))
                     eval(['temporary_structure_2 = temporary_structure_1.' var2 ';'])
                     l1 = length(temporary_structure_2);
                     if l1<nar
