@@ -51,18 +51,31 @@ switch S.type
                     B.name(i) = A.name(id);
                     B.tex(i) = A.tex(id);
                 end
-                A = merge(A,B);
             end
         end
-    else
-        A = merge(A,B);
     end
   case '.'
-    A = merge(A,B);
+    if ~isequal(S.subs,B.name)
+        if ~isequal(S.subs,B.name{1})
+                % Rename a variable.
+                id = strmatch(S.subs,A.name);
+                if isempty(id)
+                    % Add a new variable a change its name.
+                    B.name(1) = {S.subs};
+                    B.tex(1) = {name2tex(S.subs)};
+                else
+                    % Rename variable and change its content.
+                    B.name(1) = A.name(id);
+                    B.tex(1) = A.tex(id);
+                end
+            end
+        end
   otherwise
     error('dynSeries::subsasgn: Wrong syntax!')
 end
-    
+  
+A = merge(A,B);
+
 %@test:1
 %$ % Define a datasets.
 %$ A = rand(10,3); B = rand(10,1);
