@@ -1003,19 +1003,14 @@ ModelTree::computeJacobian(const set<int> &vars)
   for (set<int>::const_iterator it = vars.begin();
        it != vars.end(); it++)
     {
-        int prev_deriv = NNZDerivatives[0];
-        for (int eq = 0; eq < (int) equations.size(); eq++)
-          {
-            expr_t d1 = equations[eq]->getDerivative(*it);
-            if (d1 == Zero)
-              continue;
-            first_derivatives[make_pair(eq, *it)] = d1;
-            ++NNZDerivatives[0];
-          } 
-        if (NNZDerivatives[0] == prev_deriv)
-          {
-            cout << "the derivatives w.r. to "  << symbol_table.getName(*it) << " is always equal to 0\n";
-          }
+      for (int eq = 0; eq < (int) equations.size(); eq++)
+        {
+          expr_t d1 = equations[eq]->getDerivative(*it);
+          if (d1 == Zero)
+            continue;
+          first_derivatives[make_pair(eq, *it)] = d1;
+          ++NNZDerivatives[0];
+        } 
     }
 }
 
@@ -1418,14 +1413,14 @@ ModelTree::addTrendVariables(vector<int> trend_vars, expr_t growth_factor) throw
 }
 
 void
-ModelTree::addNonstationaryVariables(vector<int> nonstationary_vars, expr_t deflator) throw (TrendException)
+ModelTree::addNonstationaryVariables(vector<int> nonstationary_vars, bool log_deflator, expr_t deflator) throw (TrendException)
 {
   while (!nonstationary_vars.empty())
     if (nonstationary_symbols_map.find(nonstationary_vars.back()) != nonstationary_symbols_map.end())
       throw TrendException(symbol_table.getName(nonstationary_vars.back()));
     else
       {
-        nonstationary_symbols_map[nonstationary_vars.back()] = deflator;
+        nonstationary_symbols_map[nonstationary_vars.back()] = make_pair(log_deflator, deflator);
         nonstationary_vars.pop_back();
       }
 }
