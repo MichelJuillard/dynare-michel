@@ -26,7 +26,7 @@ for i=1:nargin-1
     VariableName = varargin{i};
     idArobase = strfind(VariableName,'@');
     if length(idArobase)==2
-        % Regular expression
+        idComma = strfind(VariableName(idArobase(1)+1:idArobase(2)-1),',');
         first_block_id = 0;
         last_block_id = 0;
         if idArobase(1)>1
@@ -35,29 +35,48 @@ for i=1:nargin-1
         if idArobase(2)<length(VariableName)
             last_block_id = length(VariableName)-idArobase(2)-1;
         end
-        VariableName(idArobase(1)) = '[';
-        VariableName(idArobase(2)) = ']';
-        idVariables = find(isnotempty_cell(regexp(B.name,VariableName,'match')));
-        if isempty(idVariables)
-            error(['dynSeries::extract: Can''t find any variable matching ' VariableName ' pattern!'])
+        if isempty(idComma)
+            % Matlab's regular expressions
+            VariableName(idArobase(1)) = '[';
+            VariableName(idArobase(2)) = ']';
+            idVariables = find(isnotempty_cell(regexp(B.name,VariableName,'match')));
+            if isempty(idVariables)
+                error(['dynSeries::extract: Can''t find any variable matching ' VariableName ' pattern!'])
+            end
+            idVariables_ = [];
+            for j = 1:length(idVariables)
+                first_block_flag = 0;
+                if (first_block_id && strcmp(B.name{idVariables(j)}(1:first_block_id),VariableName(1:first_block_id))) || ~first_block_id
+                    first_block_flag = 1;
+                end
+                last_block_flag = 0;
+                if (last_block_id && strcmp(B.name{idVariables(j)}(end-last_block_id:end),VariableName(end-last_block_id:end))) || ~last_block_id
+                    last_block_flag = 1;
+                end
+                if first_block_flag && last_block_flag
+                    idVariables_ = [idVariables_; idVariables(j)];
+                end
+            end
+            VariableName = B.name(idVariables_);
+        else
+            expression = VariableName(idArobase(1)+1:idArobase(2)-1);
+            idVariables_ = [];
+            while ~isempty(expression)
+                [token, expression] = strtok(expression,',');             
+                candidate = [VariableName(1:idArobase(1)-1), token, VariableName(idArobase(2)+1:end)];
+                id = strmatch(candidate,B.name,'exact');
+                if isempty(id)
+                    error(['dynSeries::extract: Variable ''' candidate ''' does not exist in dynSeries object ''' inputname(1) '''!'])
+                else
+                    idVariables_ = [idVariables_; id];
+                end
+            end
+            VariableName = B.name(idVariables_);
         end
-        idVariables_ = [];
-        for j = 1:length(idVariables)
-            first_block_flag = 0;
-            if (first_block_id && strcmp(B.name{idVariables(j)}(1:first_block_id),VariableName(1:first_block_id))) || ~first_block_id
-                first_block_flag = 1;
-            end
-            last_block_flag = 0;
-            if (last_block_id && strcmp(B.name{idVariables(j)}(end-last_block_id:end),VariableName(end-last_block_id:end))) || ~last_block_id
-                last_block_flag = 1;
-            end
-            if first_block_flag && last_block_flag
-                idVariables_ = [idVariables_; idVariables(j)];
-            end
-        end
-        VariableName = B.name(idVariables_);
+        VariableName_ = vertcat(VariableName_,VariableName);
+    else
+        error('dynSeries::extract: Cannot handle more than one regular expression!')
     end
-    VariableName_ = vertcat(VariableName_,VariableName);
 end
 
 % Get indices of the selected variables
@@ -78,8 +97,6 @@ A.nobs = B.nobs;
 A.vobs = length(idVariableName);
 A.name = B.name(idVariableName);
 A.tex = B.tex(idVariableName);
-
-
 
 
 function b = isnotempty_cell(CellArray)
@@ -105,7 +122,7 @@ function b = isnotempty_cell(CellArray)
 %$ % Call the tested method.
 %$ a = ts1{'GDP_@1,2,3,4,5@'};
 %$ b = ts1{'@GDP,HICP@_1'};
-%$ a.name
+%$
 %$ % Expected results.
 %$ e1.data = A(:,1:5);
 %$ e1.nobs = 10;
@@ -131,5 +148,27 @@ function b = isnotempty_cell(CellArray)
 %$ t(8) = dyn_assert(e2.vobs,b.vobs);
 %$ t(9) = dyn_assert(e2.name,b.name);
 %$ t(10) = dyn_assert(e2.init,b.init);
+%$ T = all(t);
+%@eof:1
+
+
+%@test:1
+%$ % Define a data set.
+%$ A = rand(10,24);
+%$
+%$ % Define names
+%$ A_name = {'GDP_1';'GDP_2';'GDP_3'; 'GDP_4'; 'GDP_5'; 'GDP_6'; 'GDP_7'; 'GDP_8'; 'GDP_9'; 'GDP_10'; 'GDP_11'; 'GDP_12'; 'HICP_1';'HICP_2';'HICP_3'; 'HICP_4'; 'HICP_5'; 'HICP_6'; 'HICP_7'; 'HICP_8'; 'HICP_9'; 'HICP_10'; 'HICP_11'; 'HICP_12';};
+%$
+%$ % Instantiate a time series object.
+%$ ts1 = dynSeries(A,[],A_name,[]);
+%$
+%$ % Call the tested method.
+%$ try
+%$   a = ts1{'GDP_@1,2,3,4,55@'};
+%$   t = 0;
+%$ catch
+%$   t = 1;
+%$ end
+%$
 %$ T = all(t);
 %@eof:1
