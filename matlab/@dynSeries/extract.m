@@ -75,7 +75,9 @@ for i=1:nargin-1
         end
         VariableName_ = vertcat(VariableName_,VariableName);
     else
-        if ~isempty(idArobase)
+        if isempty(idArobase)
+            VariableName_ = varargin(:);
+        else
             error('dynSeries::extract: Cannot handle more than one regular expression!')
         end
     end
