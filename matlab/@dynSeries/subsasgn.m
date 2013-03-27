@@ -236,9 +236,9 @@ A = merge(A,B);
 %$    t(7) = dyn_assert(ts1.data,[A(:,1), A(:,2), A(:,3), B(:,2)],1e-15);
 %$ end
 %$ T = all(t);
-%@eof:6
+%@eof:7
 
-%@test:7
+%@test:8
 %$ % Define a datasets.
 %$ A = rand(10,3); B = rand(10,1);
 %$
@@ -265,9 +265,9 @@ A = merge(A,B);
 %$    t(8) = dyn_assert(ts1.data,[A, B],1e-15);
 %$ end
 %$ T = all(t);
-%@eof:7
+%@eof:8
 
-%@test:8
+%@test:9
 %$ % Define a datasets.
 %$ A = rand(10,3); B = rand(10,2);
 %$
