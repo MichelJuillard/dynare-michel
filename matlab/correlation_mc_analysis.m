@@ -116,7 +116,7 @@ else
             if isfield(temporary_structure,'correlation')
                 oo_ = fill_output_structure(var1,var2,TYPE,oo_,'Mean',nar,NaN);
                 oo_ = fill_output_structure(var1,var2,TYPE,oo_,'Median',nar,NaN);
-                oo_ = fill_output_structure(var1,var2,TYPE,oo_,'Nariance',nar,NaN);
+                oo_ = fill_output_structure(var1,var2,TYPE,oo_,'Variance',nar,NaN);
                 oo_ = fill_output_structure(var1,var2,TYPE,oo_,'HPDinf',nar,NaN);
                 oo_ = fill_output_structure(var1,var2,TYPE,oo_,'HPDsup',nar,NaN);
                 oo_ = fill_output_structure(var1,var2,TYPE,oo_,'deciles',nar,NaN);
