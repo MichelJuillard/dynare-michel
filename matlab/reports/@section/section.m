@@ -50,7 +50,7 @@ elseif nargin > 1
 end
 
 % Check options provided by user
-assert(isint(o.cols), '@graph.graph: cols must be an integer');
+assert(isint(o.cols), '@section.section: cols must be an integer');
 
 % Create section object
 o = class(o, 'section');
