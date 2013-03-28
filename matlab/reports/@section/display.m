@@ -29,10 +29,6 @@ function display(o)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 name = 'report.page.section';
-disp(' ');
-disp([name '.align = ']);
-disp(' ');
-disp(['     ''' o.align '''']);
 
 disp(' ');
 disp([name '.cols = ']);
