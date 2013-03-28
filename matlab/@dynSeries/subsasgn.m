@@ -313,4 +313,34 @@ A = merge(A,B);
 %$    t(8) = dyn_assert(ts1.data,[B(:,1), A(:,2:3), B(:,2)],1e-15);
 %$ end
 %$ T = all(t);
-%@eof:8
+%@eof:9
+
+
+%@test:10
+%$ % Define a datasets.
+%$ A = rand(10,3); B = rand(10,3);
+%$
+%$ % Instantiate two dynSeries object.
+%$ ts1 = dynSeries(A,[],{'A1';'A2';'A3'},[]);
+%$ ts2 = dynSeries(B,[],{'A1';'B1';'B2'},[]);
+%$
+%$ % modify first object.
+%$ try
+%$     ts1{'A@1,2@','A4'} = ts2;
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end 
+%$ 
+%$ % Instantiate a time series object.
+%$ if t(1)
+%$    t(2) = dyn_assert(ts1.vobs,4);
+%$    t(3) = dyn_assert(ts1.nobs,10);
+%$    t(4) = dyn_assert(ts1.name{1},'A1');
+%$    t(5) = dyn_assert(ts1.name{2},'A2');
+%$    t(6) = dyn_assert(ts1.name{3},'A3');
+%$    t(7) = dyn_assert(ts1.name{4},'A4');
+%$    t(8) = dyn_assert(ts1.data,[B(:,1:2), A(:,3), B(:,3)],1e-15);
+%$ end
+%$ T = all(t);
+%@eof:10
