@@ -1,5 +1,15 @@
-function n = numElements(o)
-% function n = numElements(o)
+function n = numel(o)
+% function n = numel(o)
+% Sections Class Constructor
+%
+% INPUTS
+%   o              [page]  pages object
+%
+% OUTPUTS
+%   n              [integer] number of pages in o
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,5 +28,5 @@ function n = numElements(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-n = o.elements.numElements();
+n = o.objArray.numObjs();
 end

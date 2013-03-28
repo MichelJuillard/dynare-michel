@@ -31,7 +31,7 @@ function o = write(o, fid)
 
 assert(fid ~= -1);
 fprintf(fid, '\n%% Pages Object\n');
-nps = numPages(o);
+nps = numel(o);
 for i=1:nps
     o.objArray(i).write(fid);
 end

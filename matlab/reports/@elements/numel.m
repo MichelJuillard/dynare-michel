@@ -1,5 +1,5 @@
-function n = numElements(o)
-% function n = numElements(o)
+function n = numel(o)
+% function n = numel(o)
 
 % Copyright (C) 2013 Dynare Team
 %

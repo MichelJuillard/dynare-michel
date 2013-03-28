@@ -1,15 +1,5 @@
-function n = numPages(o)
-% function n = numPages(o)
-% Sections Class Constructor
-%
-% INPUTS
-%   o              [page]  pages object
-%
-% OUTPUTS
-%   n              [integer] number of pages in o
-%
-% SPECIAL REQUIREMENTS
-%   none
+function n = numel(o)
+% function n = numel(o)
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -28,5 +18,5 @@ function n = numPages(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-n = o.objArray.numObjs();
+n = o.elements.numel();
 end
