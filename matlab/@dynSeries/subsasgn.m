@@ -34,6 +34,25 @@ switch S.type
     if ~isequal(numel(S.subs),numel(unique(S.subs)))
         error('dynSeries::subsasgn: Wrong syntax!')
     end
+    for i=1:numel(S.subs)
+        element = S.subs{i};
+        idArobase = strfind(element,'@');
+        if ~isempty(idArobase)
+            idComma = strfind(element(idArobase(1)+1:idArobase(2)-1),',');
+            if numel(idArobase)==2 && ~isempty(idComma)
+                elements = cell(1,numel(idComma)+1); j = 1;
+                expression = element(idArobase(1)+1:idArobase(2)-1);
+                while ~isempty(expression)
+                    [token, expression] = strtok(expression,',');             
+                    elements(j) = {[element(1:idArobase(1)-1), token, element(idArobase(2)+1:end)]};
+                    j = j + 1;
+                end
+                S.subs = replace_object_in_a_one_dimensional_cell_array(S.subs, elements(:), i);
+            else
+                error('dynSeries::subsasgn: Wrong syntax!')
+            end
+        end
+    end
     if ~isequal(length(S.subs),B.vobs)
         error('dynSeries::subsasgn: Wrong syntax!')
     end
