@@ -33,7 +33,9 @@ switch S(1).type
             otherwise
                 error(['@graph.subsref: unknown field or method: ' S(1).subs]);
         end
-    case {'()', '{}'}
+    case '()'
+        A = A.seriesElements.getSeriesElements(S(1).subs{:});
+    case '{}'
         error(['@graph.subsref: ' S(1).type ' indexing not supported.']);
     otherwise
         error('@graph.subsref: impossible case')

@@ -1,5 +1,15 @@
-function B = subsasgn(A, S, V)
-% function B = subsasgn(A, S, V)
+function o = seriesElements(varargin)
+%function o = seriesElements(varargin)
+% SeriesElements Class Constructor
+%
+% INPUTS
+%   Optional seriesElements object
+%
+% OUTPUTS
+%   seriesElements object
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,29 +28,15 @@ function B = subsasgn(A, S, V)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-B = A;
-if length(S) > 1
-    for i=1:(length(S)-1)
-        B = subsref(B, S(i));
-    end
-    B = subsasgn(B, S(end), V);
-    B = subsasgn(A, S(1:(end-1)), B);
-    return
-end
-
-switch S.type
-    case '()'
-        index = S.subs{:};
-        assert(isnumeric(index));
-        B.elements(index) = V;
-    case '.'
-        switch S.subs
-            case fieldnames(A)
-                B.(S.subs) = V;
-            otherwise
-                error(['@section.subsasgn: field ' S.subs 'does not exist']);
-        end
+switch nargin
+    case 0
+        o = class(struct, 'seriesElements', objArray());
+    case 1
+        assert(isa(varargin{1}, 'seriesElements'), ...
+            ['@seriesElements.seriesElements: with one arg, you must pass an seriesElements ' ...
+             'object or a char.']);
+        o = varargin{1};
     otherwise
-        error('@section.subsasgn: syntax error');
+        error('@seriesElements.seriesElements: invalid number of arguments');
 end
 end

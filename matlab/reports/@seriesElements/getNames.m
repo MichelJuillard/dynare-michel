@@ -1,5 +1,5 @@
-function B = subsasgn(A, S, V)
-% function B = subsasgn(A, S, V)
+function names = getNames(o, varargin)
+% function names = getNames(o, varargin)
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,29 +18,9 @@ function B = subsasgn(A, S, V)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-B = A;
-if length(S) > 1
-    for i=1:(length(S)-1)
-        B = subsref(B, S(i));
-    end
-    B = subsasgn(B, S(end), V);
-    B = subsasgn(A, S(1:(end-1)), B);
-    return
-end
-
-switch S.type
-    case '()'
-        index = S.subs{:};
-        assert(isnumeric(index));
-        B.elements(index) = V;
-    case '.'
-        switch S.subs
-            case fieldnames(A)
-                B.(S.subs) = V;
-            otherwise
-                error(['@section.subsasgn: field ' S.subs 'does not exist']);
-        end
-    otherwise
-        error('@section.subsasgn: syntax error');
+se = o.objArray.getObjs(varargin{:});
+names = {};
+for i=1:length(se)
+    names(i) = se{i}.getName();
 end
 end

@@ -28,14 +28,10 @@ function o = createGraph(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(~isempty(o.data));
-
 if ~isempty(o.figname)
     warning('@graph.createGraph: will overwrite %s with new graph\n', ...
             o.figname);
 end
-
-%o = readConfig(o);
 
 disp('creating plot..........');
 h = figure('visible','off');
@@ -45,25 +41,25 @@ if o.grid
     grid on;
     set(gca, 'GridLineStyle', '--');
 end
-%set(0, 'CurrentFigure',h);
-%set(h, 'PaperPositionMode', 'auto');
-%set(h, 'units', 'normalized', 'outerposition', [0 0 1 1]);
 
-if isempty(o.seriestouse)
-    ds = o.data;
-else
-    ds = o.data{o.seriestouse{:}};
+ne = o.seriesElements.numel();
+dd = dynDates();
+for i=1:ne
+    ddt = o.seriesElements(i).getLine(o.xrange);
+    if isempty(dd)
+        dd = ddt;
+        continue
+    end
+    if ddt(1) < dd(1)
+        dd = union(ddt(1):dd(1), dd);
+    end
+    if ddt(ddt.ndat) > dd(dd.ndat)
+        dd = union(dd, dd(dd.ndat):ddt(ddt.ndat));
+    end
 end
 
-if ~isempty(o.xrange)
-    ds  = ds(o.xrange);
-end
-data = ds.data;
-
-x = 1:1:ds.nobs;
-xlabels = getDatesCellStringArray(ds.time);
-
-plot(x, data);
+x = 1:1:dd.ndat;
+xlabels = getDatesCellStringArray(dd);
 
 if ~isempty(o.yrange)
     ylim(o.yrange);
@@ -87,7 +83,7 @@ set(gca,'XTick', x);
 set(gca,'XTickLabel', xlabels);
 
 if o.legend
-    lh = legend(ds.name);
+    lh = legend(o.seriesElements.getNames());
     set(lh, 'orientation', o.legend_orientation);
     set(lh, 'Location', o.legend_location);
     set(lh, 'FontSize', o.legend_font_size);

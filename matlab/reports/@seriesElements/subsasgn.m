@@ -32,15 +32,8 @@ switch S.type
     case '()'
         index = S.subs{:};
         assert(isnumeric(index));
-        B.elements(index) = V;
-    case '.'
-        switch S.subs
-            case fieldnames(A)
-                B.(S.subs) = V;
-            otherwise
-                error(['@section.subsasgn: field ' S.subs 'does not exist']);
-        end
+        B.objArray(index) = V;
     otherwise
-        error('@section.subsasgn: syntax error');
+        error('@seriesElements.subsasign: syntax error');
 end
 end

@@ -35,6 +35,8 @@ o = struct;
 
 o.config = '';
 
+o.seriesElements = seriesElements();
+
 o.title = '';
 o.ylabel = '';
 o.xlabel = '';
@@ -112,10 +114,25 @@ assert(isempty(o.yrange) || (isfloat(o.yrange) && length(o.yrange) == 2 && ...
                              o.yrange(1) < o.yrange(2)), ...
        ['@graph.graph: yrange is specified an array with two float entries, ' ...
         'the lower bound and upper bound.']);
-assert(~isempty(o.data) && isa(o.data, 'dynSeries'), ['@graph.graph: must ' ...
-                    'provide data as a dynSeries']);
+assert(isempty(o.data) || isa(o.data, 'dynSeries'), ['@graph.graph: data must ' ...
+                    'be a dynSeries']);
 assert(isempty(o.seriestouse) || iscellstr(o.seriestouse), ['@graph.graph: ' ...
                     'series to use must be a cell array of string(s)']);
+
+% using o.seriestouse, create series objects and put them in o.seriesElements
+if ~isempty(o.data)
+    if isempty(o.seriestouse)
+        for i=1:o.data.vobs
+            o.seriesElements = o.seriesElements.addSeries('data', o.data{o.name{i}});
+        end
+    else
+        for i=1:length(o.seriestouse)
+            o.seriesElements = o.seriesElements.addSeries('data', o.data{o.seriestouse{i}});
+        end
+    end
+end
+o = rmfield(o, 'seriestouse');
+o = rmfield(o, 'data');
 
 % Create graph object
 o = class(o, 'graph');

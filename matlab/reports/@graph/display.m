@@ -55,16 +55,6 @@ disp(' ');
 disp(['     ''' o.figname '''']);
 
 disp(' ');
-disp([name '.data = ']);
-disp(' ');
-display(o.data);
-
-disp(' ');
-disp([name '.seriestoplot = ']);
-disp(' ');
-disp(o.seriestoplot);
-
-disp(' ');
 disp([name '.config = ']);
 disp(' ');
 disp(['     ''' o.config '''']);
@@ -78,4 +68,9 @@ disp(' ');
 disp([name '.shade = ']);
 disp(' ');
 disp(o.shade);
+
+disp(' ');
+disp([name '.seriesElements = ']);
+disp(' ');
+o.seriesElements.getSeriesElements()
 end

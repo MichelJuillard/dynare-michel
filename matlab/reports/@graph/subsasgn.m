@@ -29,6 +29,10 @@ if length(S) > 1
 end
 
 switch S.type
+    case '()'
+        index = S.subs{:};
+        assert(isnumeric(index));
+        B.seriesElements(index) = V;
     case '.'
         switch S.subs
             case fieldnames(A)
