@@ -17,7 +17,7 @@ function dyn_data_01=read_variables(file_name_01,var_names_01,dyn_data_01,xls_sh
 % all local variables have complicated names in order to avoid name
 % conflicts with possible user variable names
 
-% Copyright (C) 2005-2012 Dynare Team
+% Copyright (C) 2005-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -54,8 +54,10 @@ if isempty(extension)
         extension = '.xls';
     elseif exist([basename '.xlsx'],'file')
         extension = '.xlsx';
+    elseif exist([basename '.csv'],'file')
+        extension = '.csv';
     else
-        error(['Can''t find datafile: ' basename '.{m,mat,xls,xlsx}']);
+        error(['Can''t find datafile: ' basename '.{m,mat,xls,xlsx,csv}']);
     end
 end
 

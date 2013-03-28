@@ -3961,7 +3961,7 @@ graphs of smoothed shocks, smoothed observation errors, smoothed and historical 
 
 @item datafile = @var{FILENAME}
 @anchor{datafile}
-The datafile: a @file{.m} file, a @file{.mat} file or, a
+The datafile: a @file{.m} file, a @file{.mat} file, a @file{.csv} file, or a
 @file{.xls}/@file{.xlsx} file (the latter format is supported under Octave
 if the @uref{http://octave.sourceforge.net/io/,io} and
 @uref{http://octave.sourceforge.net/java/,java} packages from
