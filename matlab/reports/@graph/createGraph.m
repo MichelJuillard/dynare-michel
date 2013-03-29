@@ -53,13 +53,13 @@ for i=1:ne
     ddt = o.seriesElements(i).getLine(o.xrange);
     if isempty(dd)
         dd = ddt;
-        continue
-    end
-    if ddt(1) < dd(1)
-        dd = union(ddt(1):dd(1), dd);
-    end
-    if ddt(ddt.ndat) > dd(dd.ndat)
-        dd = union(dd, dd(dd.ndat):ddt(ddt.ndat));
+    else
+        if ddt(1) < dd(1)
+            dd = union(ddt(1):dd(1), dd);
+        end
+        if ddt(ddt.ndat) > dd(dd.ndat)
+            dd = union(dd, dd(dd.ndat):ddt(ddt.ndat));
+        end
     end
 end
 
