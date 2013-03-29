@@ -51,11 +51,11 @@ if nargin~=2
 end
 
 if ~( isa(a,'dynDate') && isa(b,'dynDate'))
-    error(['dynDate::eq: Input arguments ' inputname(1) 'and ' inputname(2) ' have to be a dynDate objects!'])
+    error(['dynDate::lt: Input arguments ' inputname(1) ' and ' inputname(2) ' have to be a dynDate objects!'])
 end
 
 if ~isequal(a.freq,b.freq)
-    error(['dynDate::eq: Input arguments ' inputname(1) 'and ' inputname(2) ' have no common frequencies!'])
+    error(['dynDate::lq: Input arguments ' inputname(1) ' and ' inputname(2) ' have no common frequencies!'])
 end
 
 if a.time(1)<b.time(1)
