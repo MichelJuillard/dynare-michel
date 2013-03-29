@@ -37,7 +37,7 @@ for i=1:o.cols
     fprintf(fid, 'c');
 end
 fprintf(fid, '}\n');
-ne = numel(o);
+ne = numElements(o);
 nvspace = numVspace(o);
 nlcounter = 0;
 for i=1:ne

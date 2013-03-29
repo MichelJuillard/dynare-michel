@@ -42,7 +42,7 @@ if o.grid
     set(gca, 'GridLineStyle', '--');
 end
 
-ne = o.seriesElements.numel();
+ne = o.seriesElements.numElements();
 dd = dynDates();
 for i=1:ne
     ddt = o.seriesElements(i).getLine(o.xrange);
