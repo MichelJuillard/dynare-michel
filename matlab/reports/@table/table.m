@@ -31,6 +31,8 @@ function o = table(varargin)
 
 o = struct;
 
+o.seriesElements = seriesElements();
+
 o.title = '';
 o.footnote = '';
 
@@ -78,10 +80,25 @@ assert(isint(o.precision), '@table.table: precision must be an int');
 assert(isempty(o.range) || (isa(o.range, 'dynDates') && o.range.ndat >= 2), ...
        ['@table.table: range is specified as a dynDates range, e.g. ' ...
         '''dynDates(''1999q1''):dynDates(''1999q3'')''.']);
-assert(~isempty(o.data) && isa(o.data, 'dynSeries'), ['@table.table: must ' ...
-                    'provide data as a dynSeries']);
+assert(isempty(o.data) || isa(o.data, 'dynSeries'), ['@table.table: data must ' ...
+                    'be a dynSeries']);
 assert(isempty(o.seriestouse) || iscellstr(o.seriestouse), ['@table.table: ' ...
-                    'series to use must be a cell array of string(s)']);
+                    'seriestouse must be a cell array of string(s)']);
+
+% using o.seriestouse, create series objects and put them in o.seriesElements
+if ~isempty(o.data)
+    if isempty(o.seriestouse)
+        for i=1:o.data.vobs
+            o.seriesElements = o.seriesElements.addSeries('data', o.data{o.data.name{i}});
+        end
+    else
+        for i=1:length(o.seriestouse)
+            o.seriesElements = o.seriesElements.addSeries('data', o.data{o.seriestouse{i}});
+        end
+    end
+end
+o = rmfield(o, 'seriestouse');
+o = rmfield(o, 'data');
 
 % Create table object
 o = class(o, 'table');

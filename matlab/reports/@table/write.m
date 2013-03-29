@@ -30,18 +30,9 @@ function o = write(o, fid)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 assert(fid ~= -1);
-if isempty(o.data)
-    return
-end
-
-if isempty(o.seriestouse)
-    ds = o.data;
-else
-    ds = o.data{o.seriestouse{:}};
-end
-
-if ~isempty(o.range)
-    ds  = ds(o.range);
+if ~o.seriesElements.numElements()
+    warning('@table.write: no series to plot, returning');
+    return;
 end
 
 %number of left-hand columns, 1 until we allow the user to group data,
@@ -51,13 +42,27 @@ end
 % this example would be two lh columns, with GDP Europe spanning both
 nlhc = 1;
 
+if isempty(o.range)
+    dates = o.seriesElements.getMaxRange();
+else
+    dates = o.range;
+end
+ndates = dates.ndat;
+
+ne = o.seriesElements.numElements();
+ds = dynSeries();
+for i=1:ne
+    if isempty(ds)
+        ds = o.seriesElements(i).getData(dates);
+    else
+        ds = [ds o.seriesElements(i).getData(dates)];
+    end
+end
+
 disp('creating table.........');
 fprintf(fid, '%% Table Object\n');
 fprintf(fid, '\\setlength{\\tabcolsep}{4pt}\n');
 fprintf(fid, '\\begin{tabular}{@{}l');
-
-dates = ds.time;
-ndates = dates.ndat;
 
 for i=1:ndates
     if o.vlines
