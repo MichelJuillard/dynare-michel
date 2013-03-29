@@ -74,7 +74,7 @@ switch S(1).type
             error(['dynDates::subsref: the index have to be a positive integer less than or equal to ' int2str(A.ndat) '!'])
         end
     else
-        if isvector(S(1).subs{1}) && all(isint(S(1).subs{1})) && all(S(1).subs{1}>0) && all(S(1).subs{1}<A.ndat)
+        if isvector(S(1).subs{1}) && all(isint(S(1).subs{1})) && all(S(1).subs{1}>0) && all(S(1).subs{1}<=A.ndat)
             B = dynDates();
             B.freq = A.freq;
             B.time = A.time(S(1).subs{1},:);
