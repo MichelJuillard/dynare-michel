@@ -1,4 +1,4 @@
-function [a,b] = size(c)
+function [a,b] = size(c,dim)
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -19,3 +19,20 @@ function [a,b] = size(c)
 
 a = c.nobs;
 b = c.vobs;
+
+if nargin>1
+    if nargout>1
+        error('dynSeries::size: Wrong calling sequence!')
+    end
+    switch dim
+      case 1
+        a = c.nobs;
+      case 2
+        a = c.vobs;
+      otherwise
+        error(['dynSeries::size: Wrong calling sequence! Argument ''' inputname(2) ''' must be equal to 1 or 2.' ])
+    end
+else
+    a = c.nobs;
+    b = c.vobs;
+end
