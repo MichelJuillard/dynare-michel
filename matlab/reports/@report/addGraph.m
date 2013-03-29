@@ -29,8 +29,6 @@ function o = addGraph(o, varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-lastPage = o.pages.numPages();
-lastSection = o.pages(lastPage).numSections();
-o.pages(lastPage).sections(lastSection) = ...
-    o.pages(lastPage).sections(lastSection).addGraph(varargin{:});
+o.pages(end).sections(end) = ...
+    o.pages(end).sections(end).addGraph(varargin{:});
 end

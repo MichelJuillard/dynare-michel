@@ -29,6 +29,5 @@ function o = addSection(o, varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-o.pages(o.pages.numPages()) = ...
-    o.pages(o.pages.numPages()).addSection(varargin{:});
+o.pages(end) = o.pages(end).addSection(varargin{:});
 end
