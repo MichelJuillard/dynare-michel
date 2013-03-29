@@ -18,6 +18,6 @@ function s = getName(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(~isempty(o.data) && numel(o.data) == 1);
+assert(~isempty(o.data) && size(o.data, 2) == 1);
 s = o.data(1).name();
 end
