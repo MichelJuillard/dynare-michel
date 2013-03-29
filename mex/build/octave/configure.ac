@@ -70,7 +70,8 @@ AX_SLICOT([octave])
 AM_CONDITIONAL([HAVE_SLICOT], [test "x$has_slicot" = "xyes"])
 
 # Check for UMFPACK, needed by bytecode
-AC_CHECK_LIB([umfpack], [umfpack_dl_defaults], [], [AC_MSG_ERROR([Can't find UMFPACK])])
+AC_CHECK_LIB([umfpack], [umfpack_dl_defaults], [LIBADD_UMFPACK="-lumfpack"], [AC_MSG_ERROR([Can't find UMFPACK])])
+AC_SUBST([LIBADD_UMFPACK])
 
 AM_CONDITIONAL([DO_SOMETHING], [test "x$MKOCTFILE" != "x"])
 
