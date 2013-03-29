@@ -145,7 +145,25 @@ switch S(1).type
         error('dynSeries::subsref: I have no idea of what you are trying to do!')
     end
   case '{}'
-    B = extract(A,S(1).subs{:});
+    if iscellofchar(S(1).subs)
+        B = extract(A,S(1).subs{:});
+    elseif isequal(length(S(1).subs),1) && all(isint(S(1).subs{1}))
+        idx = S(1).subs{1};
+        if max(idx)>A.vobs || min(idx)<1
+            error('dynSeries::subsref: Indices are out of bounds!')
+        end
+        B = dynSeries();
+        B.data = A.data(:,idx);
+        B.name = A.name(idx);
+        B.tex  = A.tex(idx);
+        B.nobs = A.nobs;
+        B.vobs = length(idx);
+        B.freq = A.freq;
+        B.init = A.init;
+        B.time = A.time;
+    else
+        error('dynSeries::subsref: What the Hell are you tryin'' to do?!')
+    end
   otherwise
     error('dynSeries::subsref: What the Hell are you doin'' here?!')
 end
