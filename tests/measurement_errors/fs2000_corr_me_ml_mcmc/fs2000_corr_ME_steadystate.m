@@ -18,7 +18,7 @@
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-function [ys,check] = fs2000_steadystate(ys,exe)
+function [ys,check] = fs2000_corr_ME_steadystate(ys,exe)
   global M_
   
   alp = M_.params(1); 

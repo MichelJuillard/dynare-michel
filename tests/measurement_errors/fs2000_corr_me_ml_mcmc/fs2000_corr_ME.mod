@@ -120,6 +120,6 @@ stderr gp_obs, inv_gamma_pdf, 0.001, inf;
 //corr gp_obs, gy_obs,normal_pdf, 0, 0.2;
 end;
 
-estimation(mode_compute=0,mode_file=fs2000_corr_ME_mh_mode,order=1,datafile=fsdat_simul,mode_check,smoother,filter_decomposition,mh_replic=2000, mh_nblocks=2, mh_jscale=0.8,forecast = 8,bayesian_irf,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y;
+estimation(mode_compute=9,order=1,datafile=fsdat_simul,mode_check,smoother,filter_decomposition,mh_replic=2000, mh_nblocks=2, mh_jscale=0.8,forecast = 8,bayesian_irf,filtered_vars,filter_step_ahead=[1,3],irf=20) m P c e W R k d y;
 shock_decomposition y W R;
 //identification(advanced=1,max_dim_cova_group=3,prior_mc=250);
