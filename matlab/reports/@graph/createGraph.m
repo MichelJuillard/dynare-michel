@@ -47,20 +47,15 @@ if o.grid
     set(gca, 'GridLineStyle', '--');
 end
 
+if isempty(o.xrange)
+    dd = o.seriesElements.getMaxRange();
+else
+    dd = o.xrange;
+end
+
 ne = o.seriesElements.numElements();
-dd = dynDates();
 for i=1:ne
-    ddt = o.seriesElements(i).getLine(o.xrange);
-    if isempty(dd)
-        dd = ddt;
-    else
-        if ddt(1) < dd(1)
-            dd = union(ddt(1):dd(1), dd);
-        end
-        if ddt(ddt.ndat) > dd(dd.ndat)
-            dd = union(dd, dd(dd.ndat):ddt(ddt.ndat));
-        end
-    end
+    o.seriesElements(i).getLine(dd);
 end
 
 x = 1:1:dd.ndat;

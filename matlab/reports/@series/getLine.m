@@ -1,5 +1,5 @@
-function dd = getLine(o, xrange)
-%function dd = getLine(o, xrange)
+function o = getLine(o, xrange)
+%function o = getLine(o, xrange)
 % Create the series
 %
 % INPUTS
@@ -7,7 +7,7 @@ function dd = getLine(o, xrange)
 %   xrange  [dynDates]  range of x values for line
 %
 % OUTPUTS
-%   dd      [dynDates]  dynDates representing the range of the line
+%   o       [series]    series object
 %
 % SPECIAL REQUIREMENTS
 %   none
@@ -61,11 +61,11 @@ assert(~(strcmp(o.line_style, 'none') && isempty(o.marker)), ['@series.series: '
 assert(isempty(xrange) || isa(xrange, 'dynDates'));
 
 %%
-ds = o.data;
-if ~isempty(xrange)
+if isempty(xrange) || xrange == o.data.time
+    ds = o.data;
+else
     ds = o.data(xrange);
 end
-dd = ds.time;
 
 opt = {'XData', 1:length(ds.data)};
 opt = {opt{:}, 'YData', ds.data};
