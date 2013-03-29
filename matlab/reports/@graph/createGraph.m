@@ -33,6 +33,11 @@ if ~isempty(o.figname)
             o.figname);
 end
 
+if ~o.seriesElements.numElements()
+    warning('@graph.crepateGraph: no series to plot, returning');
+    return;
+end
+
 disp('creating plot..........');
 h = figure('visible','off');
 hold on;

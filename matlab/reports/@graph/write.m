@@ -33,5 +33,8 @@ assert(fid ~= -1);
 if isempty(o.figname)
     o = createGraph(o);
 end
-fprintf(fid, '\\input{%s}', o.figname);
+
+if ~isempty(o.figname)
+    fprintf(fid, '\\input{%s}', o.figname);
+end
 end
