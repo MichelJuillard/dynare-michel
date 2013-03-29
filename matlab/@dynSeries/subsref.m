@@ -407,3 +407,26 @@ end
 %$ t(5) = dyn_assert(e.init,a.init);
 %$ T = all(t);
 %@eof:9
+
+%@test:10
+%$ % Define a data set.
+%$ A = [transpose(1:60),2*transpose(1:60),3*transpose(1:60)];
+%$
+%$ % Define names
+%$ A_name = {'A1';'A2';'B1'};
+%$
+%$ % Instantiate a time series object.
+%$ ts1 = dynSeries(A,'1971Q1',A_name,[]);
+%$
+%$ % Test the size method.
+%$ B = ts1.size();
+%$ C = ts1.size(1);
+%$ D = ts1.size(2);
+%$ E = ts1.size;
+%$
+%$ t(1) = dyn_assert(B,[60, 3]);
+%$ t(2) = dyn_assert(E,[60, 3]);
+%$ t(3) = dyn_assert(C,60);
+%$ t(4) = dyn_assert(D,3);
+%$ T = all(t);
+%@eof:10
