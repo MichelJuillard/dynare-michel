@@ -123,7 +123,7 @@ assert(isempty(o.seriestouse) || iscellstr(o.seriestouse), ['@graph.graph: ' ...
 if ~isempty(o.data)
     if isempty(o.seriestouse)
         for i=1:o.data.vobs
-            o.seriesElements = o.seriesElements.addSeries('data', o.data{o.name{i}});
+            o.seriesElements = o.seriesElements.addSeries('data', o.data{o.data.name{i}});
         end
     else
         for i=1:length(o.seriestouse)
