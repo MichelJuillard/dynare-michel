@@ -76,6 +76,14 @@ switch S(1).type
         else
             save(A);
         end
+      case {'size'}
+        if length(S)==2 && strcmp(S(2).type,'()') && ~isempty(S(2).subs)
+            B = size(A,S(2).subs{1});
+            S = shiftS(S);
+        else
+            [x,y] = size(A);
+            B = [x, y];
+        end
       case {'rename','tex_rename'}
         B = feval(S(1).subs,A,S(2).subs{:});
         S = shiftS(S);
