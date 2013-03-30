@@ -65,6 +65,22 @@ if strcmp(method,'Stroud') && isequal(n,3)
     return
 end
 
+
+if strcmp(method,'Unscented') && isequal(n,3)
+    info = 1;
+    alpha = .01;
+    beta = 2;
+    kappa = 0;
+    lambda = (alpha^2)*(d+kappa) - d;
+    nodes = [ zeros(d,1) ( sqrt(d+lambda).*([ eye(d), -eye(d)]) ) ];
+    w0 = lambda/(d+lambda);
+    if info
+        w0 = w0 + (1-alpha^2+beta);
+    end
+    weights = [w0 ; ones(2*d,1)/(2*(d+lambda))];
+    return
+end
+
 if strcmp(method,'Stroud') &&  isequal(n,5)
     r = sqrt((d+2));
     s = sqrt((d+2)/2);
@@ -310,3 +326,43 @@ function m = ee(n,i,j)
 %$ t(6) = dyn_assert(m5,zeros(d,1),1e-12);
 %$ T = all(t);
 %@eof:5
+
+%@test:6
+%$ % Set problem
+%$ d = 3;
+%$ 
+%$ t = zeros(5,1);
+%$
+%$ % Call the tested routine
+%$ try
+%$     [nodes,weights] = cubature_with_gaussian_weight(d,3,'Unscented');
+%$     nodes
+%$     weights
+%$     t(1) = 1;
+%$ catch exception
+%$     t = t(1);
+%$     T = all(t);
+%$     LOG = getReport(exception,'extended');
+%$     return
+%$ end
+%$
+%$ % Check the results.
+%$
+%$ % Compute (approximated) first order moments.
+%$ m1 = nodes*weights;
+%$
+%$ % Compute (approximated) second order moments.
+%$ m2 = nodes.^2*weights;
+%$
+%$ % Compute (approximated) third order moments.
+%$ m3 = nodes.^3*weights;
+%$
+%$ % Compute (approximated) fourth order moments.
+%$ m4 = nodes.^4*weights;
+%$ 
+%$ t(2) = dyn_assert(m1,zeros(d,1),1e-12);
+%$ t(3) = dyn_assert(m2,ones(d,1),1e-12);
+%$ t(4) = dyn_assert(m3,zeros(d,1),1e-12);
+%$ t(5) = dyn_assert(m4,d*ones(d,1),1e-10);
+%$ T = all(t);
+%@eof:6
