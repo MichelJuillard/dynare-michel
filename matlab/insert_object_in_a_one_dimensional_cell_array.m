@@ -27,7 +27,7 @@ end
 
 [nr, nc] = size(one_dimensional_cell_array);
 
-if ~isequal(max([nr,nc]),numel(one_dimensional_cell_array))
+if ~isequal(nr*nc,numel(one_dimensional_cell_array))
     error(['insert_column_vector_in_a_matrix: First input ''' inputname(1) ''' must be a one dimensional cell array!'])
 end
 
