@@ -39,10 +39,10 @@ o.color = 'k';
 o.line_style = '-';
 o.line_width = 0.5;
 
-o.marker = '';
-o.marker_edge_color = 'auto';
-o.marker_face_color = 'auto';
-o.marker_size = 6;
+o.graph_marker = '';
+o.graph_marker_edge_color = 'auto';
+o.graph_marker_face_color = 'auto';
+o.graph_marker_size = 6;
 
 if nargin == 1
     assert(isa(varargin{1}, 'series'),['@series.series: with one arg you ' ...

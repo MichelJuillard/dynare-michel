@@ -41,21 +41,21 @@ assert(any(strcmp(o.line_style, valid_line_style)), ...
 assert(isfloat(o.line_width), ['@series.series: line_width must be a ' ...
                     'positive number']);
 
-% Marker
-valid_marker = {'+', 'o', '*', '.', 'x', 's', 'square', 'd', 'diamond', ...
+% Graph_Marker
+valid_graph_marker = {'+', 'o', '*', '.', 'x', 's', 'square', 'd', 'diamond', ...
                 '^', 'v', '>', '<', 'p', 'pentagram', 'h', 'hexagram', ...
                 'none'};
-assert(isempty(o.marker) || any(strcmp(o.marker, valid_marker)), ...
-       ['@series.series: marker must be one of ' strjoin(valid_marker)]);
+assert(isempty(o.graph_marker) || any(strcmp(o.graph_marker, valid_graph_marker)), ...
+       ['@series.series: graph_marker must be one of ' strjoin(valid_graph_marker)]);
 
-assert(ischar(o.marker_edge_color), '@series.series: marker_edge_color must be a string');
-assert(ischar(o.marker_face_color), '@series.series: marker_face_color must be a string');
-assert(isfloat(o.marker_size), ['@series.series: marker_size must be a ' ...
+assert(ischar(o.graph_marker_edge_color), '@series.series: graph_marker_edge_color must be a string');
+assert(ischar(o.graph_marker_face_color), '@series.series: graph_marker_face_color must be a string');
+assert(isfloat(o.graph_marker_size), ['@series.series: graph_marker_size must be a ' ...
                     'positive number']);
 
 % Marker & Line
-assert(~(strcmp(o.line_style, 'none') && isempty(o.marker)), ['@series.series: ' ...
-                    'you must provide at least one of line_style and marker']);
+assert(~(strcmp(o.line_style, 'none') && isempty(o.graph_marker)), ['@series.series: ' ...
+                    'you must provide at least one of line_style and graph_marker']);
 
 % Validate xrange
 assert(isempty(xrange) || isa(xrange, 'dynDates'));
@@ -74,11 +74,11 @@ opt = {opt{:}, 'Color', o.color};
 opt = {opt{:}, 'LineStyle', o.line_style};
 opt = {opt{:}, 'LineWidth', o.line_width};
 
-if ~isempty(o.marker)
-    opt = {opt{:}, 'Marker', o.marker};
-    opt = {opt{:}, 'MarkerSize', o.marker_size};
-    opt = {opt{:}, 'MarkerEdgeColor', o.marker_edge_color};
-    opt = {opt{:}, 'MarkerFaceColor', o.marker_face_color};
+if ~isempty(o.graph_marker)
+    opt = {opt{:}, 'Marker', o.graph_marker};
+    opt = {opt{:}, 'MarkerSize', o.graph_marker_size};
+    opt = {opt{:}, 'MarkerEdgeColor', o.graph_marker_edge_color};
+    opt = {opt{:}, 'MarkerFaceColor', o.graph_marker_face_color};
 end
 
 line(opt{:});

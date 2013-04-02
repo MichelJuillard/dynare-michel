@@ -50,22 +50,22 @@ disp(' ');
 disp(['     ''' o.line_width '''']);
 
 disp(' ');
-disp([name '.marker = ']);
+disp([name '.graph_marker = ']);
 disp(' ');
-disp(['     ''' o.marker '''']);
+disp(['     ''' o.graph_marker '''']);
 
 disp(' ');
-disp([name '.marker_edge_color = ']);
+disp([name '.graph_marker_edge_color = ']);
 disp(' ');
-disp(['     ''' o.marker_edge_color '''']);
+disp(['     ''' o.graph_marker_edge_color '''']);
 
 disp(' ');
-disp([name '.marker_face_color = ']);
+disp([name '.graph_marker_face_color = ']);
 disp(' ');
-disp(['     ''' o.marker_face_color '''']);
+disp(['     ''' o.graph_marker_face_color '''']);
 
 disp(' ');
-disp([name '.marker_size = ']);
+disp([name '.graph_marker_size = ']);
 disp(' ');
-disp(['     ''' o.marker_size '''']);
+disp(['     ''' o.graph_marker_size '''']);
 end
