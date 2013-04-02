@@ -30,15 +30,15 @@ function o = getLine(o, xrange)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 %% Validate options provided by user
-assert(~isempty(o.data) && isa(o.data, 'dynSeries'), ['@series.series: must ' ...
+assert(~isempty(o.data) && isa(o.data, 'dynSeries'), ['@series.getLine: must ' ...
                     'provide data as a dynSeries']);
 
 % Line
-assert(ischar(o.color), '@series.series: color must be a string');
+assert(ischar(o.color), '@series.getLine: color must be a string');
 valid_line_style = {'none', '-', '--', ':', '-.'};
 assert(any(strcmp(o.line_style, valid_line_style)), ...
-       ['@series.series: line_style must be one of ' strjoin(valid_line_style, ' ')]);
-assert(isfloat(o.line_width), ['@series.series: line_width must be a ' ...
+       ['@series.getLine: line_style must be one of ' strjoin(valid_line_style, ' ')]);
+assert(isfloat(o.line_width), ['@series.getLine: line_width must be a ' ...
                     'positive number']);
 
 % Graph_Marker
@@ -46,15 +46,15 @@ valid_graph_marker = {'+', 'o', '*', '.', 'x', 's', 'square', 'd', 'diamond', ..
                 '^', 'v', '>', '<', 'p', 'pentagram', 'h', 'hexagram', ...
                 'none'};
 assert(isempty(o.graph_marker) || any(strcmp(o.graph_marker, valid_graph_marker)), ...
-       ['@series.series: graph_marker must be one of ' strjoin(valid_graph_marker)]);
+       ['@series.getLine: graph_marker must be one of ' strjoin(valid_graph_marker)]);
 
-assert(ischar(o.graph_marker_edge_color), '@series.series: graph_marker_edge_color must be a string');
-assert(ischar(o.graph_marker_face_color), '@series.series: graph_marker_face_color must be a string');
-assert(isfloat(o.graph_marker_size), ['@series.series: graph_marker_size must be a ' ...
+assert(ischar(o.graph_marker_edge_color), '@series.getLine: graph_marker_edge_color must be a string');
+assert(ischar(o.graph_marker_face_color), '@series.getLine: graph_marker_face_color must be a string');
+assert(isfloat(o.graph_marker_size), ['@series.getLine: graph_marker_size must be a ' ...
                     'positive number']);
 
 % Marker & Line
-assert(~(strcmp(o.line_style, 'none') && isempty(o.graph_marker)), ['@series.series: ' ...
+assert(~(strcmp(o.line_style, 'none') && isempty(o.graph_marker)), ['@series.getLine: ' ...
                     'you must provide at least one of line_style and graph_marker']);
 
 % Validate xrange
