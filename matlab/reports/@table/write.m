@@ -49,16 +49,6 @@ else
 end
 ndates = dates.ndat;
 
-ne = o.seriesElements.numElements();
-ds = dynSeries();
-for i=1:ne
-    if isempty(ds)
-        ds = o.seriesElements(i).getData(dates);
-    else
-        ds = [ds o.seriesElements(i).getData(dates)];
-    end
-end
-
 disp('creating table.........');
 fprintf(fid, '%% Table Object\n');
 fprintf(fid, '\\setlength{\\tabcolsep}{4pt}\n');
@@ -126,20 +116,10 @@ end
 fprintf(fid, '\\\\%%\n');
 fprintf(fid, '%%\n');
 
-% Table Data
-vars = ds.name;
-nvars = size(vars);
-data = ds.data;
-assert(isint(o.precision));
-precision = 10^o.precision;
-dataString = [' & %.' num2str(o.precision) 'f'];
-for i=1:nvars
-    fprintf(fid, '%% Table Row %d\n', i);
-    fprintf(fid, '%s', vars{i});
-    for j=1:ndates
-        fprintf(fid, dataString, round(data(j,i)*precision)/precision);
-    end
-    fprintf(fid, ' \\\\\n\n');
+% Write Table Data
+ne = o.seriesElements.numElements();
+for i=1:ne
+    o.seriesElements(i).write(fid, dates, o.precision);
 end
 
 fprintf(fid, '\\bottomrule\n');

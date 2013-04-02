@@ -44,6 +44,10 @@ o.graph_marker_edge_color = 'auto';
 o.graph_marker_face_color = 'auto';
 o.graph_marker_size = 6;
 
+o.table_markers = false;
+o.table_neg_color = 'red';
+o.table_pos_color = 'blue';
+
 if nargin == 1
     assert(isa(varargin{1}, 'series'),['@series.series: with one arg you ' ...
                         'must pass a series object']);
