@@ -1,5 +1,17 @@
-function dd = getMaxRange(o)
-% function dd = getMaxRange(o)
+function lastIndex = end(o, k, n)
+% function lastIndex = end(o, k, n)
+% End keyword
+%
+% INPUTS
+%   o              [dynDates] dynDates object
+%   k              [integer]  index where end appears
+%   n              [integer]  number of indices
+%
+% OUTPUTS
+%   lastIndex      [integer] last dynDates index
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,18 +30,6 @@ function dd = getMaxRange(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-ne = numElements(o);
-ddmin = dynDate();
-ddmax = dynDate();
-for i=1:ne
-    a = getSeriesElements(o, 1);
-    ddt = a.getRange();
-    if isempty(ddmin)
-        ddmin = ddt(1);
-        ddmax = ddt(end);
-    else
-        ddmin = min(ddt(1), ddmin);
-        ddmax = max(ddt(end), ddmax);
-    end
+assert(k==1 && n==1, '@dynDates/end: dynDates only has one dimension');
+lastIndex = o.ndat;
 end
-dd = ddmin:ddmax;
