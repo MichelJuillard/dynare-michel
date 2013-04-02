@@ -22,7 +22,7 @@ ne = numElements(o);
 ddmin = dynDate();
 ddmax = dynDate();
 for i=1:ne
-    a = getSeriesElements(o, 1);
+    a = getSeriesElements(o, i);
     ddt = a.getRange();
     if isempty(ddmin)
         ddmin = ddt(1);
