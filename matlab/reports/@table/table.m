@@ -34,6 +34,7 @@ o = struct;
 o.seriesElements = seriesElements();
 
 o.title = '';
+o.title_size = 'large';
 o.footnote = '';
 
 o.config = '';
@@ -84,6 +85,11 @@ assert(isempty(o.data) || isa(o.data, 'dynSeries'), ['@table.table: data must ' 
                     'be a dynSeries']);
 assert(isempty(o.seriestouse) || iscellstr(o.seriestouse), ['@table.table: ' ...
                     'seriestouse must be a cell array of string(s)']);
+
+valid_title_sizes = {'Huge', 'huge', 'LARGE', 'Large', 'large', 'normalsize', ...
+                    'small', 'footnotesize', 'scriptsize', 'tiny'};
+assert(any(strcmp(o.title_size, valid_title_sizes)), ...
+       ['@table.table: title_size must be one of ' strjoin(valid_title_sizes, ' ')]);
 
 % using o.seriestouse, create series objects and put them in o.seriesElements
 if ~isempty(o.data)

@@ -62,7 +62,8 @@ for i=1:ndates
 end
 fprintf(fid, '@{}}%%\n');
 if ~isempty(o.title)
-    fprintf(fid, '\\multicolumn{%d}{c}{%s} \\\\\n', ndates+nlhc, o.title);
+    fprintf(fid, '\\multicolumn{%d}{c}{\\%s %s}\\\\\n', ...
+            ndates+nlhc, o.title_size, o.title);
 end
 fprintf(fid, '\\toprule%%\n');
 
