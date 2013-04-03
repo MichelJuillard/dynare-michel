@@ -59,6 +59,11 @@ for i=1:ndates
         fprintf(fid, '|');
     end
     fprintf(fid, 'r');
+    if ~isempty(o.vline_after)
+        if dates(i) == o.vline_after
+            fprintf(fid, '|');
+        end
+    end
 end
 fprintf(fid, '@{}}%%\n');
 if ~isempty(o.title)
