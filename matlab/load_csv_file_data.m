@@ -165,7 +165,7 @@ if withtime
     end
     if isyearly(tmp)==2
         % Remove the Y (gpm/iris date format) if necessary
-        tmp = { tmp(1:end-1) };
+        tmp = tmp(1:end-1);
     end
     init = dynDate(tmp);
     freq = init.freq;
