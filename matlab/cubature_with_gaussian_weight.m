@@ -65,19 +65,17 @@ if strcmp(method,'Stroud') && isequal(n,3)
     return
 end
 
-
-if strcmp(method,'Unscented') && isequal(n,3)
-    info = 1;
-    alpha = .01;
-    beta = 2;
-    kappa = 0;
+if strcmp(method,'ScaledUnscentedTransform') && isequal(n,3)
+    % For alpha=1 and beta=kappa=0 we obtain the same weights and nodes than the 'Stroud' method (with n=3).
+    % For alpha=1, beta=0 and kappa=.5 we obtain sigma points with equal weights.
+    alpha = 1;
+    beta = 0;
+    kappa = 0.5;
     lambda = (alpha^2)*(d+kappa) - d;
     nodes = [ zeros(d,1) ( sqrt(d+lambda).*([ eye(d), -eye(d)]) ) ];
-    w0 = lambda/(d+lambda);
-    if info
-        w0 = w0 + (1-alpha^2+beta);
-    end
-    weights = [w0 ; ones(2*d,1)/(2*(d+lambda))];
+    w0_m = lambda/(d+lambda);
+    w0_c = w0_m + (1-alpha^2+beta);
+    weights = [w0_c; .5/(d+lambda)*ones(2*d,1)];
     return
 end
 
@@ -331,11 +329,11 @@ function m = ee(n,i,j)
 %$ % Set problem
 %$ d = 3;
 %$ 
-%$ t = zeros(5,1);
+%$ t = zeros(4,1);
 %$
 %$ % Call the tested routine
 %$ try
-%$     [nodes,weights] = cubature_with_gaussian_weight(d,3,'Unscented');
+%$     [nodes,weights] = cubature_with_gaussian_weight(d,3,'ScaledUnscentedTransform');
 %$     nodes
 %$     weights
 %$     t(1) = 1;
@@ -357,12 +355,8 @@ function m = ee(n,i,j)
 %$ % Compute (approximated) third order moments.
 %$ m3 = nodes.^3*weights;
 %$
-%$ % Compute (approximated) fourth order moments.
-%$ m4 = nodes.^4*weights;
-%$ 
 %$ t(2) = dyn_assert(m1,zeros(d,1),1e-12);
 %$ t(3) = dyn_assert(m2,ones(d,1),1e-12);
 %$ t(4) = dyn_assert(m3,zeros(d,1),1e-12);
-%$ t(5) = dyn_assert(m4,d*ones(d,1),1e-10);
 %$ T = all(t);
 %@eof:6
