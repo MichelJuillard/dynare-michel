@@ -52,7 +52,7 @@ fprintf(fid, '%% Table Row (series)\n');
 if o.table_align_right
     fprintf(fid, '\\multicolumn{1}{r}{');
 end
-fprintf(fid, '%s', o.data.name{:});
+fprintf(fid, '%s', o.data.tex{:});
 if o.table_align_right
     fprintf(fid, '}');
 end
