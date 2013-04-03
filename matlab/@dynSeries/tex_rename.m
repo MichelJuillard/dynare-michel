@@ -1,4 +1,4 @@
-function ts = tex_rename(ts,name,newtex)
+function ts = tex_rename(ts, varargin)
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -17,16 +17,26 @@ function ts = tex_rename(ts,name,newtex)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if ~ischar(name) || ~ischar(newtex)
-    error(['dynSeries::rename: Input arguments ''' inputname(2) ''' and ''' inputname(3) '''  have to be strings!'])
+assert(nargin <= 3, 'dynSeries::tex_rename: accepts at most two args');
+if nargin == 2
+    newtex = varargin{1};
+    assert(ts.vobs == 1, ['dynSeries::tex_rename: with one argument, the ' ...
+                        'dynSeries contain only one variable.']);
+else
+    newtex = varargin{2};
+    name = varargin{1};
+    assert(ischar(name), 'dynSeries::tex_rename: name must be a string');
 end
-    
-idname = strmatch(name,ts.name,'exact');
+assert(ischar(newtex), 'dynSeries::tex_rename: the newtex name must be a string');
 
-if isempty(idname)
-    error(['dynSeries::rename: Variable ' name ' is unknown in dynSeries object ' inputname(1)  '!'])
+if nargin == 2
+    idname = 1;
+else
+    idname = strmatch(name, ts.name, 'exact');
+    if isempty(idname)
+        error(['dynSeries::tex_rename: Variable ' name ' is unknown in dynSeries object ' inputname(1)  '!'])
+    end
 end
-
 ts.tex(idname) = {newtex};
 
 %@test:1
