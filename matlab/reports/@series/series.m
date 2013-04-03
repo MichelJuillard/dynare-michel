@@ -48,6 +48,8 @@ o.table_markers = false;
 o.table_neg_color = 'red';
 o.table_pos_color = 'blue';
 
+o.table_align_right = false;
+
 if nargin == 1
     assert(isa(varargin{1}, 'series'),['@series.series: with one arg you ' ...
                         'must pass a series object']);
