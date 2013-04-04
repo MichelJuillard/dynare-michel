@@ -30,9 +30,9 @@ function display(o)
 
 name = 'report.page.section.table';
 disp(' ');
-disp([name '.caption = ']);
+disp([name '.title = ']);
 disp(' ');
-disp(['     ''' o.caption '''']);
+disp(['     ''' o.title '''']);
 
 disp(' ');
 disp([name '.footnote = ']);
@@ -42,16 +42,20 @@ disp(['     ''' o.footnote '''']);
 disp(' ');
 disp([name '.hlines = ']);
 disp(' ');
-disp(['     ''' o.hlines '''']);
+disp(o.hlines);
 
 disp(' ');
 disp([name '.vlines = ']);
 disp(' ');
-disp(['     ''' o.vlines '''']);
+disp(o.vlines);
 
 disp(' ');
-disp([name '.data = ']);
+disp([name '.precision = ']);
 disp(' ');
-disp(['     ''' o.data '''']);
+disp(o.precision);
 
+disp(' ');
+disp([name '.seriesElements = ']);
+disp(' ');
+o.seriesElements.getSeriesElements()
 end
