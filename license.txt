@@ -68,6 +68,11 @@ Files: matlab/missing/bicgstab/bicgstab.m
 Copyright: 2008 Radek Salac
 License: GPL-3+
 
+Files: matlab/missing/strjoin/strjoin.m
+Copyright: 2007 Muthiah Annamalai <muthiah.annamalai@uta.edu>
+           2013 Dynare Team
+License: GPL-3+
+
 Files: doc/dynare.texi doc/*.tex doc/*.svg doc/*.dia doc/*.pdf doc/*.bib
 Copyright: 1996-2013 Dynare Team
 License: GFDL-NIV-1.3+

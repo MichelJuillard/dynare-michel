@@ -94,6 +94,11 @@ if exist('OCTAVE_VERSION') || matlab_ver_less_than('7.4')
     addpath([dynareroot '/missing/ilu'])
 end
 
+% strjoin is missing in older versions of MATLAB and in Octave
+if exist('OCTAVE_VERSION') || matlab_ver_less_than('8.1')
+    addpath([dynareroot '/missing/strjoin'])
+end
+
 % nanmean is in Octave Forge Statistics package and in MATLAB Statistics
 % toolbox
 if (exist('OCTAVE_VERSION') && ~user_has_octave_forge_package('statistics')) ...
