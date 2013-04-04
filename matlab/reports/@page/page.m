@@ -63,10 +63,10 @@ end
 
 % Check options provided by user
 if ischar(o.title)
-    o.title = {o.title}
+    o.title = {o.title};
 end
 if ischar(o.title_format)
-    o.title_format = {o.title_format}
+    o.title_format = {o.title_format};
 end
 assert(iscellstr(o.title), ...
        '@page.page: title must be a cell array of strings');
@@ -84,7 +84,7 @@ assert(any(strcmp(o.orientation, valid_orientation)), ...
        ['@page.page: orientation must be one of ' strjoin(valid_orientation, ' ')]);
 
 if ischar(o.footnote)
-    o.footnote = {o.footnote}
+    o.footnote = {o.footnote};
 end
 assert(iscellstr(o.footnote), ...
        '@page.page: footnote must be a cell array of string(s)');
