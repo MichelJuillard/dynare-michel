@@ -101,6 +101,13 @@ end
 if ~isempty(o.title)
     title( o.title, 'Interpreter', 'LaTex');
 end
+
+if o.zeroline
+    a = ylim;
+    if 0 > a(1) && 0 < a(2)
+        plot(xlim, [0 0], 'color', 'k', 'LineWidth', 0.25);
+    end
+end
 drawnow;
 
 o.figname = [tempname '.tex'];

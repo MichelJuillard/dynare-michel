@@ -56,6 +56,8 @@ o.legend_location = 'SouthEast';
 o.legend_orientation = 'horizontal';
 o.legend_font_size = 8;
 
+o.zeroline = false;
+
 if nargin == 1
     assert(isa(varargin{1}, 'graph'),['@graph.graph: with one arg you ' ...
                         'must pass a graph object']);
@@ -90,6 +92,7 @@ assert(ischar(o.figname), '@graph.graph: figname must be a string');
 assert(islogical(o.grid), '@graph.graph: grid must be either true or false');
 assert(islogical(o.legend), '@graph.graph: legend must be either true or false');
 assert(isint(o.legend_font_size), '@graph.graph: legend_font_size must be an integer');
+assert(islogical(o.zeroline), '@graph.graph: zeroline must be either true or false');
 valid_legend_locations = ...
     {'North', 'South', 'East', 'West', ...
      'NorthEast', 'SouthEast', 'NorthWest', 'SouthWest', ...
