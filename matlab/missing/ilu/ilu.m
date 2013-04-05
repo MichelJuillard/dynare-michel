@@ -25,12 +25,6 @@ function [L, U, P] = ilu(A, setup)
       error('Only two input arguments supported')
   end
 
-  if isfield(setup, 'type')
-      if setup.type ~= 'ilutp'
-          error(['Unsupported type: ' setup.type ])
-      end
-  end
-  
   if isfield(setup, 'milu')
       if setup.milu == 'off'
           setup.milu = 0;
