@@ -105,7 +105,8 @@ end
 if o.zeroline
     a = ylim;
     if 0 > a(1) && 0 < a(2)
-        plot(xlim, [0 0], 'color', 'k', 'LineWidth', 0.25);
+        lh = line(xlim, [0 0], 'color', 'k', 'LineWidth', 0.25);
+        uistack(lh, 'bottom');
     end
 end
 drawnow;
