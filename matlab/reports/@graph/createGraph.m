@@ -98,10 +98,11 @@ set(gca,'XTick', x);
 set(gca,'XTickLabel', xlabels);
 
 if o.legend
-    lh = legend(o.seriesElements.getNames());
+    lh = legend(o.seriesElements.getTexNames());
     set(lh, 'orientation', o.legend_orientation);
     set(lh, 'Location', o.legend_location);
     set(lh, 'FontSize', o.legend_font_size);
+    set(lh, 'interpreter', 'latex');
     legend('boxoff');
 end
 
