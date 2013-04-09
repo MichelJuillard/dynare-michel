@@ -59,6 +59,7 @@ for i=1:ne
 end
 
 x = 1:1:dd.ndat;
+xlim([1 dd.ndat]);
 xlabels = getDatesCellStringArray(dd);
 
 if ~isempty(o.yrange)
