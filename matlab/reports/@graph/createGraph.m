@@ -54,8 +54,9 @@ else
 end
 
 ne = o.seriesElements.numElements();
+line_handles = zeros(ne, 1);
 for i=1:ne
-    o.seriesElements(i).getLine(dd);
+    line_handles(i) = o.seriesElements(i).getLine(dd);
 end
 
 x = 1:1:dd.ndat;
@@ -98,7 +99,7 @@ set(gca,'XTick', x);
 set(gca,'XTickLabel', xlabels);
 
 if o.legend
-    lh = legend(o.seriesElements.getTexNames());
+    lh = legend(line_handles, o.seriesElements.getTexNames());
     set(lh, 'orientation', o.legend_orientation);
     set(lh, 'Location', o.legend_location);
     set(lh, 'FontSize', o.legend_font_size);

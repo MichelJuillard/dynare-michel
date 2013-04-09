@@ -1,5 +1,5 @@
-function o = getLine(o, xrange)
-%function o = getLine(o, xrange)
+function h = getLine(o, xrange)
+%function h = getLine(o, xrange)
 % Create the series
 %
 % INPUTS
@@ -7,7 +7,7 @@ function o = getLine(o, xrange)
 %   xrange  [dynDates]  range of x values for line
 %
 % OUTPUTS
-%   o       [series]    series object
+%   h       [handle]    handle to line
 %
 % SPECIAL REQUIREMENTS
 %   none
@@ -81,5 +81,5 @@ if ~isempty(o.graph_marker)
     opt = {opt{:}, 'MarkerFaceColor', o.graph_marker_face_color};
 end
 
-line(opt{:});
+h = line(opt{:});
 end
