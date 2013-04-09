@@ -65,6 +65,16 @@ if ~isempty(o.yrange)
     ylim(o.yrange);
 end
 
+if o.zeroline
+    a = ylim;
+    if 0 > a(1) && 0 < a(2)
+        lh = line(xlim, [0 0], 'color', 'k', 'LineWidth', 0.25);
+        children =get(gca(), 'children');
+        children = [children(2:end); lh];
+        set(gca(), 'children', children);
+    end
+end
+
 if ~isempty(o.shade)
     x1 = find(strcmpi(o.shade(1).format(), xlabels));
     x2 = find(strcmpi(o.shade(o.shade.ndat).format(), xlabels));
@@ -100,14 +110,6 @@ end
 
 if ~isempty(o.title)
     title( o.title, 'Interpreter', 'LaTex');
-end
-
-if o.zeroline
-    a = ylim;
-    if 0 > a(1) && 0 < a(2)
-        lh = line(xlim, [0 0], 'color', 'k', 'LineWidth', 0.25);
-        uistack(lh, 'bottom');
-    end
 end
 drawnow;
 
