@@ -41,6 +41,7 @@ o.pages = pages();
 o.filename = 'report.tex';
 o.config = '';
 o.showdate = true;
+o.compiler = '';
 
 if nargin == 1
     assert(isa(varargin{1}, 'report'), ['@report.report: with one arg, ' ...
@@ -71,6 +72,7 @@ end
 assert(ischar(o.title), '@report.report: title must be a string');
 assert(ischar(o.filename), '@report.report: filename must be a string');
 assert(ischar(o.config), '@report.report: config file must be a string');
+assert(ischar(o.compiler), '@report.report: compiler file must be a string');
 assert(islogical(o.showdate), '@report.report: showdate must be either true or false');
 assert(isfloat(o.margin) && o.margin > 0, '@report.report: margin must be a float > 0.');
 
