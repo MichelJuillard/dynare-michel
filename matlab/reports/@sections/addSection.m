@@ -1,5 +1,5 @@
-function ss = addSection(ss, varargin)
-% function ss = addSection(ss, varargin)
+function o = addSection(o, varargin)
+% function o = addSection(o, varargin)
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,5 +18,6 @@ function ss = addSection(ss, varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-ss.objArray = ss.objArray.addObj(section(varargin{:}));
+disp(['Processing Section: ' num2str(numSections(o)+1)]);
+o.objArray = o.objArray.addObj(section(varargin{:}));
 end

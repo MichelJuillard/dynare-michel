@@ -38,7 +38,6 @@ if ~o.seriesElements.numElements()
     return;
 end
 
-disp('creating plot..........');
 h = figure('visible','off');
 hold on;
 box on;

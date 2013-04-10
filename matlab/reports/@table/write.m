@@ -49,7 +49,6 @@ else
 end
 ndates = dates.ndat;
 
-disp('creating table.........');
 fprintf(fid, '%% Table Object\n');
 fprintf(fid, '\\setlength{\\tabcolsep}{4pt}\n');
 fprintf(fid, '\\begin{tabular}{@{}l');

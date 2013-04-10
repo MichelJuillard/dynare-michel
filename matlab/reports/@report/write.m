@@ -72,4 +72,5 @@ status = fclose(fid);
 if status == -1
     error('@report.wrie: closing %s\n', o.filename);
 end
+disp('Finished Writing Report!');
 end

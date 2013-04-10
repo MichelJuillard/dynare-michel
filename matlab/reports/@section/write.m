@@ -51,6 +51,7 @@ ne = numElements(o);
 nvspace = numVspace(o);
 nlcounter = 0;
 for i=1:ne
+    disp(['Writing Section Element: ' num2str(i)]);
     if isa(o.elements(i), 'vspace')
         assert(rem(nlcounter, o.cols) == 0, ['@section.write: must place ' ...
                             'vspace command after a linebreak in the table ' ...

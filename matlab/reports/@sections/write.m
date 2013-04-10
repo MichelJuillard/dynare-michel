@@ -33,6 +33,7 @@ assert(fid ~= -1);
 fprintf(fid, '\n%% Sections Object\n');
 nps = numSections(o);
 for i=1:nps
+    disp(['Writing Section: ' num2str(i)]);
     o.objArray(i).write(fid);
 end
 fprintf(fid, '%% End Sections Object\n\n');

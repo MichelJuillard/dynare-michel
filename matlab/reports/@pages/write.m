@@ -33,6 +33,7 @@ assert(fid ~= -1);
 fprintf(fid, '\n%% Pages Object\n');
 nps = numPages(o);
 for i=1:nps
+    disp(['Writing Page: ' num2str(i)]);
     o.objArray(i).write(fid);
 end
 fprintf(fid, '%% End Pages Object\n\n');

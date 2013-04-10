@@ -29,5 +29,6 @@ function o = addPage(o, varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+disp(['Processing Page: ' num2str(numPages(o)+1)]);
 o.objArray = o.objArray.addObj(page(varargin{:}));
 end
