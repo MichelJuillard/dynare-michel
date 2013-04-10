@@ -23,6 +23,7 @@ function o = section(varargin)
 o = struct;
 o.elements = elements();
 o.cols = 1;
+o.height = '';
 
 if nargin == 1
     assert(isa(varargin{1}, 'section'),['With one arg to Section constructor, ' ...
@@ -51,6 +52,8 @@ end
 
 % Check options provided by user
 assert(isint(o.cols), '@section.section: cols must be an integer');
+assert(isempty(o.height) || ischar(o.height), ...
+       '@section.section: cols must be a string');
 
 % Create section object
 o = class(o, 'section');

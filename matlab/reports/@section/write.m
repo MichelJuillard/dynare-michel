@@ -31,7 +31,16 @@ function o = write(o, fid)
 assert(fid ~= -1);
 
 fprintf(fid, '%% Section Object\n');
-fprintf(fid, '\\maxsizebox{\\textwidth}{!}{%%\n');
+if ~isempty(o.height)
+    fprintf(fid, '\\setlength\\sectionheight{%s}\n', o.height);
+end
+fprintf(fid, '\\maxsizebox{\\textwidth}{');
+if isempty(o.height)
+    fprintf(fid, '!');
+else
+    fprintf(fid, '\\sectionheight');
+end
+fprintf(fid, '}{%%\n');
 fprintf(fid, '\\begin{tabular}[t]{');
 for i=1:o.cols
     fprintf(fid, 'c');
