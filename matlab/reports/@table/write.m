@@ -3,11 +3,11 @@ function o = write(o, fid)
 % Write a Table object
 %
 % INPUTS
-%   o   - Table Object
-%   fid - int, file id
+%   o           [table]    table object
+%   fid         [integer]  file id
 %
 % OUTPUTS
-%   o   - Table Object
+%   o           [table]    table object
 %
 % SPECIAL REQUIREMENTS
 %   none

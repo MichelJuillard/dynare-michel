@@ -3,11 +3,11 @@ function o = write(o, fid)
 % Write a Vspace object
 %
 % INPUTS
-%   o   [vspace] vspace object
-%   fid [integer] file id
+%   o           [vspace]   vspace object
+%   fid         [integer]  file id
 %
 % OUTPUTS
-%   o   [vspace] vspace object
+%   o           [vspace]   vspace object
 %
 % SPECIAL REQUIREMENTS
 %   none

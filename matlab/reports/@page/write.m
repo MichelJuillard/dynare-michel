@@ -3,10 +3,11 @@ function o = write(o, fid)
 % Write a Page object
 %
 % INPUTS
-%   fid - int, file id
+%   o              [page]     page object
+%   fid            [integer]  file id
 %
 % OUTPUTS
-%   o   - this
+%   o              [page]     page object
 %
 % SPECIAL REQUIREMENTS
 %   none

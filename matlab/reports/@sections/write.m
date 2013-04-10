@@ -3,10 +3,11 @@ function o = write(o, fid)
 % Write Sections object
 %
 % INPUTS
-%   fid - int, file id
+%   o           [sections] sections object
+%   fid         [integer]  file id
 %
 % OUTPUTS
-%   o   - this
+%   o           [sections] sections object
 %
 % SPECIAL REQUIREMENTS
 %   none

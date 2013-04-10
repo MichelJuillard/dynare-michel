@@ -3,11 +3,12 @@ function o = write(o, fid, dates, precision)
 % Write Table Row
 %
 % INPUTS
-%   o       [series]    series object
-%   xrange  [dynDates]  range of x values for line
+%   o            [series]    series object
+%   dates        [dynDates]  dates for series slice
+%   precision    [float]     precision with which to print the data
 %
 % OUTPUTS
-%   o       [series]    series object
+%   o            [series]    series object
 %
 % SPECIAL REQUIREMENTS
 %   none
