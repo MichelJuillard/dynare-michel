@@ -10,7 +10,7 @@ function [freq, init, data, varlist] = load_csv_file_data(file, withtime, withna
 %! @sp 1
 %! @table @ @var
 %! @item file
-%! string, name of the m file (matlab/octave script).
+%! string, name of the csv file
 %! @item withtime
 %! Scalar integer, non zero iff the first column is for the dates of the observations.
 %! @item withnames
@@ -77,11 +77,11 @@ if ~withtime && ~withnames && noemptycell
 end
 
 if ~( isequal(withtime,0) || isequal(withtime,1) )
-    error('readcsv:: Second input argument has to be equal to 1 or 0!')
+    error('load_csv_file_data:: Second input argument has to be equal to 1 or 0!')
 end
 
 if ~( isequal(withnames,0) || isequal(withnames,1) )
-    error('readcsv:: Third input argument has to be equal to 1 or 0!')
+    error('load_csv_file_data:: Third input argument has to be equal to 1 or 0!')
 end
 
 % Output initialization 
@@ -92,10 +92,10 @@ if check_file_extension(file,'csv')
     try
         fid = fopen(file,'r');
     catch
-        error(['readcsv: I can''t find file ' file '!'])
+        error(['load_csv_file_data: I can''t find file ' file '!'])
     end
 else
-    error('readcsv: Wrong file extension!')
+    error('load_csv_file_data: Wrong file extension!')
 end
 
 % bfile contains a vector of ascii codes.
@@ -112,7 +112,7 @@ elseif ispc
 elseif ismac
     newline_code = 10;
 else
-    error('readcsv:: Not implemented for your OS!')
+    error('load_csv_file_data:: Not implemented for your OS!')
 end
 
 % Get the positions of the end-of-line code;
@@ -161,7 +161,7 @@ if withtime
     tmp = linee(B:C);
     % Check the dates formatting
     if ~(isyearly(tmp) || isquaterly(tmp) || ismonthly(tmp) || isweekly(tmp))
-        error('readcsv:: Formatting error. I can''t read the dates!')
+        error('load_csv_file_data:: Formatting error. I can''t read the dates!')
     end
     if isyearly(tmp)==2
         % Remove the Y (gpm/iris date format) if necessary
