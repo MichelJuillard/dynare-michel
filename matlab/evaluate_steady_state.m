@@ -22,7 +22,7 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2001-2012 Dynare Team
+% Copyright (C) 2001-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -97,6 +97,31 @@ function [ys,params,info] = evaluate_steady_state(ys_init,M,options,oo,steadysta
         return
     end
 
+    % If some equations are tagged [static] or [dynamic], verify consistency
+    if M.static_and_dynamic_models_differ
+        % Evaluate residual of *dynamic* model using the steady state
+        % computed on the *static* one
+        z = repmat(ys,1,M.maximum_lead + M.maximum_lag + 1);
+        zx = repmat([oo.exo_simul oo.exo_det_simul],M.maximum_lead + M.maximum_lag + 1, 1);
+        if options.bytecode
+            [chck, r, junk]= bytecode('dynamic','evaluate', z, zx, M.params, ys, 1);
+            mexErrCheck('bytecode', chck);
+        elseif options.block
+            [r, data] = feval([M.fname '_dynamic'], z', zx, M.params, ys, M.maximum_lag+1, data);
+        else
+            iyv = M.lead_lag_incidence';
+            iyr0 = find(iyv(:));
+            xys = z(iyr0);
+            r = feval([M.fname '_dynamic'], z(iyr0), zx, M.params, ys, M.maximum_lag + 1);
+        end
+
+        % Fail if residual greater than tolerance
+        if max(abs(r)) > options.solve_tolf
+            info(1) = 25;
+            return
+        end
+    end
+    
     if ~isreal(ys)
         info(1) = 21;
         info(2) = sum(imag(ys).^2);

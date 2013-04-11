@@ -6,6 +6,7 @@ MODFILES = \
 	gsa/ls2003.mod \
 	ramst.mod \
 	ramst_a.mod \
+	ramst_static_tag.mod \
 	example1.mod \
 	example2.mod \
 	example1_use_dll.mod \

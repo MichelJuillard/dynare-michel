@@ -10,7 +10,7 @@ function print_info(info,noprint)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2005-2012 Dynare Team
+% Copyright (C) 2005-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -78,6 +78,8 @@ if ~noprint
         error('Some updated params are complex')
       case 24
         error('Some updated params contain NaN or Inf')
+      case 25
+        error('The solution to the static equations is not a steady state of the dynamic model: verify that the equations tagged by [static] and [dynamic] are consistent')
       case 30
         error('Variance can''t be computed')
       case 41
