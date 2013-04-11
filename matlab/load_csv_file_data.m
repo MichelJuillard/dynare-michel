@@ -84,8 +84,8 @@ if ~( isequal(withnames,0) || isequal(withnames,1) )
     error('load_csv_file_data:: Third input argument has to be equal to 1 or 0!')
 end
 
-% Output initialization 
-time = []; data = []; varlist = [];
+% Output initialization
+varlist = [];
 
 % Check if file exists.
 if check_file_extension(file,'csv')
