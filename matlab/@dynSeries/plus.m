@@ -56,16 +56,12 @@ else
     end
 end
 
-if ~isequal(B.nobs,C.nobs)
-    error(['dynSeries::plus: Cannot add ' inputname(1) ' and ' inputname(2) ' (wrong number of observations)!'])
-end
-
 if ~isequal(B.freq,C.freq)
     error(['dynSeries::plus: Cannot add ' inputname(1) ' and ' inputname(2) ' (frequencies are different)!'])
 end
 
-if ~isequal(B.init,C.init)
-    error(['dynSeries::plus: Cannot add ' inputname(1) ' and ' inputname(2) ' (initial dates are different)!'])
+if ~isequal(B.nobs,C.nobs) || ~isequal(B.init,C.init)
+    [B, C] = align(B, C);
 end
 
 if isempty(B)
@@ -148,3 +144,32 @@ A.data = bsxfun(@plus,B.data,C.data);
 %$ end
 %$ T = all(t);
 %@eof:2
+
+
+%@test:3
+%$ % Define a datasets.
+%$ A = rand(10,2); B = randn(5,1);
+%$
+%$ % Define names
+%$ A_name = {'A1';'A2'}; B_name = {'B1'};
+%$
+%$ t = zeros(5,1);
+%$
+%$ % Instantiate a time series object.
+%$ try
+%$    ts1 = dynSeries(A,[],A_name,[]);
+%$    ts2 = dynSeries(B,[],B_name,[]);
+%$    ts3 = ts1+ts2;
+%$    t(1) = 1;
+%$ catch
+%$    t = 0;
+%$ end
+%$
+%$ if length(t)>1
+%$    t(2) = dyn_assert(ts3.vobs,2);
+%$    t(3) = dyn_assert(ts3.nobs,10);
+%$    t(4) = dyn_assert(ts3.data,[A(1:5,1)+B(1:5), A(1:5,2)+B(1:5) ; NaN(5,2)],1e-15);
+%$    t(5) = dyn_assert(ts3.name,{'plus(A1,B1)';'plus(A2,B1)'});
+%$ end
+%$ T = all(t);
+%@eof:3
