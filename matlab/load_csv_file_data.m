@@ -148,6 +148,7 @@ if withnames
     for i=1:number_of_variables
         varlist(i) = {linee(B(i):C(i))};
     end
+    varlist = strtrim(varlist);
     linea = linea+1;
 end
 
