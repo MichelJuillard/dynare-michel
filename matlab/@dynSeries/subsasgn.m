@@ -38,17 +38,41 @@ switch S.type
         element = S.subs{i};
         idArobase = strfind(element,'@');
         if ~isempty(idArobase)
-            idComma = strfind(element(idArobase(1)+1:idArobase(2)-1),',');
-            if numel(idArobase)==2 && ~isempty(idComma)
-                elements = cell(1,numel(idComma)+1); j = 1;
-                expression = element(idArobase(1)+1:idArobase(2)-1);
-                while ~isempty(expression)
-                    [token, expression] = strtok(expression,',');             
-                    elements(j) = {[element(1:idArobase(1)-1), token, element(idArobase(2)+1:end)]};
-                    j = j + 1;
+            switch length(idArobase)
+              case 2
+                idComma = strfind(element(idArobase(1)+1:idArobase(2)-1),',');
+                if ~isempty(idComma)
+                    elements = cell(1,numel(idComma)+1); j = 1;
+                    expression = element(idArobase(1)+1:idArobase(2)-1);
+                    while ~isempty(expression)
+                        [token, expression] = strtok(expression,',');
+                        elements(j) = {[element(1:idArobase(1)-1), token, element(idArobase(2)+1:end)]};
+                        j = j + 1;
+                    end
+                    S.subs = replace_object_in_a_one_dimensional_cell_array(S.subs, elements(:), i);
+                else
+                    error('dynSeries::subsasgn: Wrong syntax, matlab''s regular expressions cannot be used here!')
                 end
-                S.subs = replace_object_in_a_one_dimensional_cell_array(S.subs, elements(:), i);
-            else
+              case 4
+                idComma_1 = strfind(element(idArobase(1)+1:idArobase(2)-1),',');
+                idComma_2 = strfind(element(idArobase(3)+1:idArobase(4)-1),',');
+                if ~isempty(idComma_1)
+                    elements = cell(1,(numel(idComma_1)+1)*(numel(idComma_2)+1)); j = 1;
+                    expression_1 = element(idArobase(1)+1:idArobase(2)-1);
+                    while ~isempty(expression_1)
+                        [token_1, expression_1] = strtok(expression_1,',');
+                        expression_2 = element(idArobase(3)+1:idArobase(4)-1);
+                        while ~isempty(expression_2)
+                            [token_2, expression_2] = strtok(expression_2,',');
+                            elements(j) = {[element(1:idArobase(1)-1), token_1, element(idArobase(2)+1:idArobase(3)-1), token_2, element(idArobase(4)+1:end)]};
+                            j = j+1;
+                        end
+                    end
+                    S.subs = replace_object_in_a_one_dimensional_cell_array(S.subs, elements(:), i);
+                else
+                    error('dynSeries::subsasgn: Wrong syntax, matlab''s regular expressions cannot be used here!')
+                end
+              otherwise
                 error('dynSeries::subsasgn: Wrong syntax!')
             end
         end
