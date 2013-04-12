@@ -2467,11 +2467,12 @@ Default is @code{0}.
 
 @item nocheck
 Don't check the steady state values when they are provided explicitely either by a steady state file or a @code{steady_state_model} block. This is useful for models with unit roots as, in this case, the steady state is not unique or doesn't exist.
-@end table
 
 @item markowitz = @var{DOUBLE}
 Value of the Markowitz criterion, used to select the pivot. Only used
 when @code{solve_algo = 5}. Default: @code{0.5}.
+
+@end table
 
 @examplehead
 
