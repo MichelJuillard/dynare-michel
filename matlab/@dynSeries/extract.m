@@ -25,7 +25,8 @@ VariableName_ = {};
 for i=1:nargin-1
     VariableName = varargin{i};
     idArobase = strfind(VariableName,'@');
-    if length(idArobase)==2
+    switch length(idArobase)
+      case 2
         idComma = strfind(VariableName(idArobase(1)+1:idArobase(2)-1),',');
         first_block_id = 0;
         last_block_id = 0;
@@ -74,11 +75,35 @@ for i=1:nargin-1
             VariableName = B.name(idVariables_);
         end
         VariableName_ = vertcat(VariableName_,VariableName);
-    else
+      case 4
+        idComma_1 = strfind(VariableName(idArobase(1)+1:idArobase(2)-1),',');
+        idComma_2 = strfind(VariableName(idArobase(3)+1:idArobase(4)-1),',');
+        if ~(isempty(idComma_1) || isempty(idComma_1))
+            idVariables_ = [];
+            expression_1 = VariableName(idArobase(1)+1:idArobase(2)-1);
+            while ~isempty(expression_1)
+                [token_1, expression_1] = strtok(expression_1,',');
+                expression_2 = VariableName(idArobase(3)+1:idArobase(4)-1);
+                while ~isempty(expression_2)
+                    [token_2, expression_2] = strtok(expression_2,',');
+                    candidate = [VariableName(1:idArobase(1)-1), token_1, VariableName(idArobase(2)+1:idArobase(3)-1),  token_2, VariableName(idArobase(4)+1:end)];
+                    id = strmatch(candidate,B.name,'exact');
+                    if isempty(id)
+                        error(['dynSeries::extract: Variable ''' candidate ''' does not exist in dynSeries object ''' inputname(1) '''!'])
+                    else
+                        idVariables_ = [idVariables_; id];
+                    end
+                end
+            end
+            VariableName_ = B.name(idVariables_);
+        else
+            error('dynSeries::extract: This kind of selection is not implemented!')
+        end
+      otherwise
         if isempty(idArobase)
             VariableName_ = varargin(:);
         else
-            error('dynSeries::extract: Cannot handle more than one regular expression!')
+            error('dynSeries::extract: Cannot handle more than two regular expressions!')
         end
     end
 end
