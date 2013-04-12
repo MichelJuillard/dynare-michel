@@ -171,8 +171,3 @@ for t=1:sample_size
 end
 
 LIK = -sum(lik(start:end));
-
-
-
-function n = neff(w)
-    n = dot(w,w);
