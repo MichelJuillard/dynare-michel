@@ -1,7 +1,7 @@
 function [a,b] = align(a, b)
     
 %@info:
-%! @deftypefn {Function File} {[@var{a}, @var{b}] =} merge_dates (@var{a}, @var{b})
+%! @deftypefn {Function File} {[@var{a}, @var{b}] =} align (@var{a}, @var{b})
 %! @anchor{dynSeries/align}
 %! @sp 1
 %! If dynSeries objects @var{a} and @var{b} are defined on different time ranges, extend @var{a} and/or
