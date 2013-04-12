@@ -55,14 +55,11 @@ if isa(B,'dynSeries') && isa(C,'dynSeries')
             idC = 1:C.vobs;
         end
     end
-    if ~isequal(B.nobs,C.nobs)
-        error(['dynSeries::times: Cannot multiply ' inputname(1) ' and ' inputname(2) ' (wrong number of observations)!'])
-    end
     if ~isequal(B.freq,C.freq)
         error(['dynSeries::times: Cannot multiply ' inputname(1) ' and ' inputname(2) ' (frequencies are different)!'])
     end
-    if ~isequal(B.init,C.init)
-        error(['dynSeries::times: Cannot multiply ' inputname(1) ' and ' inputname(2) ' (initial dates are different)!'])
+    if ~isequal(B.nobs,C.nobs) || ~isequal(B.init,C.init)
+        [B, C] = align(B, C);
     end
     A = dynSeries();
     A.freq = B.freq;
