@@ -181,7 +181,7 @@ function b = isnotempty_cell(CellArray)
 %@eof:1
 
 
-%@test:1
+%@test:2
 %$ % Define a data set.
 %$ A = rand(10,24);
 %$
@@ -200,4 +200,30 @@ function b = isnotempty_cell(CellArray)
 %$ end
 %$
 %$ T = all(t);
-%@eof:1
+%@eof:2
+
+
+%@test:3
+%$ % Define a data set.
+%$ A = rand(10,24);
+%$
+%$ % Define names
+%$ A_name = {'GDP_1';'GDP_2';'GDP_3'; 'GDP_4'; 'GDP_5'; 'GDP_6'; 'GDP_7'; 'GDP_8'; 'GDP_9'; 'GDP_10'; 'GDP_11'; 'GDP_12'; 'HICP_1';'HICP_2';'HICP_3'; 'HICP_4'; 'HICP_5'; 'HICP_6'; 'HICP_7'; 'HICP_8'; 'HICP_9'; 'HICP_10'; 'HICP_11'; 'HICP_12';};
+%$
+%$ % Instantiate a time series object.
+%$ ts1 = dynSeries(A,[],A_name,[]);
+%$
+%$ % Call the tested method.
+%$ try
+%$   a = ts1{'@GDP,HICP@_@1,2,3,4,5@'};
+%$   t = 1;
+%$ catch
+%$   t = 0;
+%$ end
+%$
+%$ if t(1)
+%$   t(2) = dyn_assert(a.name,{'GDP_1';'GDP_2';'GDP_3';'GDP_4';'GDP_5';'HICP_1';'HICP_2';'HICP_3';'HICP_4';'HICP_5'});
+%$ end
+%$
+%$ T = all(t);
+%@eof:3
