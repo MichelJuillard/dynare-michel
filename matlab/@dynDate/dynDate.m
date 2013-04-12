@@ -135,7 +135,7 @@ switch nargin
         if ~isnumeric(a) && size(a)~=2 && size(a,2)~=2
             error(['dynDate:: Can''t instantiate the class! The first argument ' inputname(a) ' must be a 1*2 vector of integers.'])
         end
-        if b==1 && a(2)~1
+        if b==1 && a(2)~=1
             error(['dynDate:: Can''t instantiate the class! The second element of the first argument ' inputname(a) ' must be equal to one.'])
         end
         if a(2)<=0 || a(2)>b
