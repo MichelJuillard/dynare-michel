@@ -18,12 +18,13 @@
  */
 
 #if defined(MATLAB_MEX_FILE) || defined(OCTAVE_MEX_FILE)
+
+#include <dynmex.h>
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-
-#include <dynmex.h>
 
   int constant_seed;
 
