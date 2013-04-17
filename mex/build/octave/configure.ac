@@ -71,6 +71,13 @@ AM_CONDITIONAL([HAVE_SLICOT], [test "x$has_slicot" = "xyes"])
 
 # Check for UMFPACK, needed by bytecode
 AC_CHECK_LIB([umfpack], [umfpack_dl_defaults], [LIBADD_UMFPACK="-lumfpack"], [AC_MSG_ERROR([Can't find UMFPACK])])
+# For OS X, explicitly add libraries that libumfpack depends on as Homebrew
+# doesn't support the creation of shared libraries for suite-sparse 3.7.0
+case ${host_os} in
+  darwin*)
+    LIBADD_UMFPACK="-lumfpack -lcholmod -lcolamd -lamd"
+    ;;
+esac
 AC_SUBST([LIBADD_UMFPACK])
 
 AM_CONDITIONAL([DO_SOMETHING], [test "x$MKOCTFILE" != "x"])
