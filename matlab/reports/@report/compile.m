@@ -60,4 +60,8 @@ end
 fprintf(1, '\n\nDone.\n')
 disp('Your compiled report is located here:');
 disp(['     ' pwd filesep rfn '.pdf']);
+
+if ~exist('OCTAVE_VERSION')
+    open([pwd filesep rfn '.pdf']);
+end
 end
