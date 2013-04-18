@@ -146,6 +146,7 @@ if DynareOptions.estimation_dll
     [fval,exit_flag,ys,trend_coeff,info,params,H,Q] ...
         = logposterior(xparam1,DynareDataset, DynareOptions,Model, ...
                           EstimatedParameters,BayesInfo,DynareResults);
+    mexErrCheck('logposterior', exit_flag);
     Model.params = params;
     if ~isequal(Model.H,0)
         Model.H = H;

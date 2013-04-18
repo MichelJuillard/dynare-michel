@@ -280,4 +280,8 @@ mexFunction(int nlhs, mxArray *plhs[],
     {
       DYN_MEX_FUNC_ERR_MSG_TXT(e.getErrMsg());
     }
+  catch (SteadyStateSolver::SteadyStateException e)
+    {
+      DYN_MEX_FUNC_ERR_MSG_TXT(e.message.c_str());
+    }
 }

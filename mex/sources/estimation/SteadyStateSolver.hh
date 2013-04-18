@@ -17,6 +17,8 @@
  * along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <string>
+
 #include "Vector.hh"
 #include "static_dll.hh"
 
@@ -27,6 +29,7 @@ class SteadyStateSolver
 {
 private:
   StaticModelDLL static_dll;
+  size_t n_endo;
   Vector residual; // Will be discarded, only used by df()
   Matrix g1; // Temporary buffer for computing transpose
 
@@ -45,32 +48,39 @@ private:
   static int static_df(const gsl_vector *yy, void *p, gsl_matrix *J);
   static int static_fdf(const gsl_vector *yy, void *p, gsl_vector *F, gsl_matrix *J);
 
-  const static double tolerance = 1e-5;
+  const static double tolerance = 1e-7;
   const static size_t max_iterations = 1000;
 public:
   class SteadyStateException
   {
+  public:
+    std::string message;
+    SteadyStateException(const std::string &message_arg) : message(message_arg) 
+    {
+    }
   };
 
-  SteadyStateSolver(const std::string &basename, size_t n_endo);
+  SteadyStateSolver(const std::string &basename, size_t n_endo_arg);
 
   template <class Vec1, class Mat, class Vec2>
-  void compute(Vec1 &steadyState, const Mat Mx, const Vec2 &deepParams) throw (SteadyStateException)
+  void compute(Vec1 &steadyState, const Mat &Mx, const Vec2 &deepParams) throw (SteadyStateException)
   {
     assert(steadyState.getStride() == 1);
     assert(deepParams.getStride() == 1);
 
-    const size_t n = steadyState.getSize();
+    assert(steadyState.getSize() == n_endo);
+
+    std::cout << "In:  " << steadyState << std::endl;
     
-    gsl_vector_view ss = gsl_vector_view_array(steadyState.getData(), n);
+    gsl_vector_view ss = gsl_vector_view_array(steadyState.getData(), n_endo);
 
     params p = { &static_dll, deepParams.getData(), deepParams.getSize(), Mx.getData(), Mx.getCols(), &residual, &g1 };
 
     gsl_multiroot_function_fdf f = {&static_f, &static_df, &static_fdf,
-                                    n, &p};
+                                    n_endo, &p};
 
-    const gsl_multiroot_fdfsolver_type *T = gsl_multiroot_fdfsolver_gnewton;
-    gsl_multiroot_fdfsolver *s = gsl_multiroot_fdfsolver_alloc(T, n);
+    const gsl_multiroot_fdfsolver_type *T = gsl_multiroot_fdfsolver_hybridsj;
+    gsl_multiroot_fdfsolver *s = gsl_multiroot_fdfsolver_alloc(T, n_endo);
 
     gsl_multiroot_fdfsolver_set(s, &f, &ss.vector);
 
@@ -91,11 +101,13 @@ public:
     while(status == GSL_CONTINUE && iter < max_iterations);
 
     if (status != GSL_SUCCESS)
-      throw SteadyStateException();
+      throw SteadyStateException(std::string(gsl_strerror(status)));
 
     gsl_vector_memcpy(&ss.vector, gsl_multiroot_fdfsolver_root(s));
 
     gsl_multiroot_fdfsolver_free(s);
+
+    std::cout << "Out: " << steadyState << std::endl;
   }
 };
 
