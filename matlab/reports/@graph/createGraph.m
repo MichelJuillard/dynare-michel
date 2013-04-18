@@ -94,8 +94,9 @@ if ~isempty(o.shade)
     set(gca(), 'children', children);
 end
 
-set(gca,'XTick', x);
-set(gca,'XTickLabel', xlabels);
+xticks = get(gca, 'XTick');
+[junk, ix, junk] = intersect(x, xticks);
+set(gca, 'XTickLabel', xlabels(ix));
 
 if o.legend
     lh = legend(line_handles, o.seriesElements.getTexNames());
