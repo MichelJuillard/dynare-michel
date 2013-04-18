@@ -29,7 +29,7 @@ mkdir -p "$INSTALLDIR/contrib/ms-sbvar/TZcode"
 mkdir -p "$INSTALLDIR/mex/octave"
 mkdir -p "$INSTALLDIR/mex/matlab/osx64"
 mkdir "$INSTALLDIR/mex/matlab/osx32-7.4"
-mkdir "$INSTALLDIR/mex/matlab/osx32-7.5-8.1"
+mkdir "$INSTALLDIR/mex/matlab/osx32-7.5-7.11"
 
 
 # top level
@@ -116,17 +116,17 @@ cd $TOP_DYN_DIR/mex/build/matlab
 make
 
 # Matlab
-cp $TOP_DYN_DIR/mex/build/matlab/block_kalman_filter/*.mexmaci                      $INSTALLDIR/mex/matlab/osx32-7.5-8.1
-cp $TOP_DYN_DIR/mex/build/matlab/bytecode/*.mexmaci                                 $INSTALLDIR/mex/matlab/osx32-7.5-8.1
-cp $TOP_DYN_DIR/mex/build/matlab/dynare_simul_/*.mexmaci                            $INSTALLDIR/mex/matlab/osx32-7.5-8.1
-cp $TOP_DYN_DIR/mex/build/matlab/gensylv/*.mexmaci                                  $INSTALLDIR/mex/matlab/osx32-7.5-8.1
-cp $TOP_DYN_DIR/mex/build/matlab/k_order_perturbation/*.mexmaci                     $INSTALLDIR/mex/matlab/osx32-7.5-8.1
-cp $TOP_DYN_DIR/mex/build/matlab/kalman_steady_state/*.mexmaci                      $INSTALLDIR/mex/matlab/osx32-7.5-8.1
-cp $TOP_DYN_DIR/mex/build/matlab/kronecker/*.mexmaci                                $INSTALLDIR/mex/matlab/osx32-7.5-8.1
-cp $TOP_DYN_DIR/mex/build/matlab/local_state_space_iterations/*.mexmaci             $INSTALLDIR/mex/matlab/osx32-7.5-8.1
-cp $TOP_DYN_DIR/mex/build/matlab/mjdgges/*.mexmaci                                  $INSTALLDIR/mex/matlab/osx32-7.5-8.1
-cp $TOP_DYN_DIR/mex/build/matlab/ms_sbvar/*.mexmaci                                 $INSTALLDIR/mex/matlab/osx32-7.5-8.1
-cp $TOP_DYN_DIR/mex/build/matlab/sobol/*.mexmaci                                    $INSTALLDIR/mex/matlab/osx32-7.5-8.1
+cp $TOP_DYN_DIR/mex/build/matlab/block_kalman_filter/*.mexmaci                      $INSTALLDIR/mex/matlab/osx32-7.5-7.11
+cp $TOP_DYN_DIR/mex/build/matlab/bytecode/*.mexmaci                                 $INSTALLDIR/mex/matlab/osx32-7.5-7.11
+cp $TOP_DYN_DIR/mex/build/matlab/dynare_simul_/*.mexmaci                            $INSTALLDIR/mex/matlab/osx32-7.5-7.11
+cp $TOP_DYN_DIR/mex/build/matlab/gensylv/*.mexmaci                                  $INSTALLDIR/mex/matlab/osx32-7.5-7.11
+cp $TOP_DYN_DIR/mex/build/matlab/k_order_perturbation/*.mexmaci                     $INSTALLDIR/mex/matlab/osx32-7.5-7.11
+cp $TOP_DYN_DIR/mex/build/matlab/kalman_steady_state/*.mexmaci                      $INSTALLDIR/mex/matlab/osx32-7.5-7.11
+cp $TOP_DYN_DIR/mex/build/matlab/kronecker/*.mexmaci                                $INSTALLDIR/mex/matlab/osx32-7.5-7.11
+cp $TOP_DYN_DIR/mex/build/matlab/local_state_space_iterations/*.mexmaci             $INSTALLDIR/mex/matlab/osx32-7.5-7.11
+cp $TOP_DYN_DIR/mex/build/matlab/mjdgges/*.mexmaci                                  $INSTALLDIR/mex/matlab/osx32-7.5-7.11
+cp $TOP_DYN_DIR/mex/build/matlab/ms_sbvar/*.mexmaci                                 $INSTALLDIR/mex/matlab/osx32-7.5-7.11
+cp $TOP_DYN_DIR/mex/build/matlab/sobol/*.mexmaci                                    $INSTALLDIR/mex/matlab/osx32-7.5-7.11
 
 
 #####################################
