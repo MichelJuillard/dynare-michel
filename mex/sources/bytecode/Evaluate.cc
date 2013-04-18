@@ -1729,12 +1729,12 @@ Evaluate::compute_complete(double lambda, double *crit)
   double res1_ = 0, res2_ = 0, max_res_ = 0;
   //double res1 = 0, res2, max_res;
   int max_res_idx_ = 0;
-  #ifdef USE_OMP
-  #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-  #endif
   if (steady_state)
     {
       it_ = 0;
+#ifdef USE_OMP
+#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
+#endif
       for (int i = 0; i < size; i++)
         {
           int eq = index_vara[i];
