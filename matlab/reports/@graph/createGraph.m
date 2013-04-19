@@ -114,10 +114,6 @@ end
 if ~isempty(o.ylabel)
     ylabel(['$\textbf{\footnotesize ' o.ylabel '}$'], 'Interpreter', 'LaTex');
 end
-
-if ~isempty(o.title)
-    title( o.title, 'Interpreter', 'LaTex');
-end
 drawnow;
 
 o.figname = [tempname '.tex'];

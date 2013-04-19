@@ -34,7 +34,15 @@ if isempty(o.figname)
     o = createGraph(o);
 end
 
+if ~isempty(o.title)
+    fprintf(fid,'\\begin{tabular}[x]{@{}c@{}}%s\\\\',o.title);
+end
+
 if ~isempty(o.figname)
     fprintf(fid, '\\input{%s}', o.figname);
+end
+
+if ~isempty(o.title)
+    fprintf(fid,'\\end{tabular}',o.title);
 end
 end
