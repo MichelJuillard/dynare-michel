@@ -33,7 +33,7 @@ assert(fid ~= -1);
 
 fprintf(fid, '%% Section Object\n');
 if ~isempty(o.height)
-    fprintf(fid, '\\setlength\\sectionheight{%s}\n', o.height);
+    fprintf(fid, '\\setlength\\sectionheight{%s}%%\n', o.height);
 end
 fprintf(fid, '\\maxsizebox{\\textwidth}{');
 if isempty(o.height)
