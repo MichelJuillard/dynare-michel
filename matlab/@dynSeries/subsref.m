@@ -66,7 +66,7 @@ switch S(1).type
     switch S(1).subs
       case {'data','nobs','vobs','name','tex','freq','time','init'}        % Public members.
         B = builtin('subsref', A, S(1));
-      case {'log','exp','ygrowth','qgrowth','ydiff','qdiff'}               % Give "dot access" to public methods.
+      case {'log','exp','ygrowth','qgrowth','ydiff','qdiff','lag'}         % Give "dot access" to public methods.
         B = feval(S(1).subs,A);
       case {'save'}                                                        % Save dynSeries object on disk (default is a csv file). 
         B = NaN;
