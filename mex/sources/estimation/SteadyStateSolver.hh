@@ -67,11 +67,10 @@ public:
   {
     assert(steadyState.getStride() == 1);
     assert(deepParams.getStride() == 1);
+    assert(Mx.getLd() == Mx.getRows());
 
     assert(steadyState.getSize() == n_endo);
 
-    std::cout << "In:  " << steadyState << std::endl;
-    
     gsl_vector_view ss = gsl_vector_view_array(steadyState.getData(), n_endo);
 
     params p = { &static_dll, deepParams.getData(), deepParams.getSize(), Mx.getData(), Mx.getCols(), &residual, &g1 };
@@ -106,8 +105,6 @@ public:
     gsl_vector_memcpy(&ss.vector, gsl_multiroot_fdfsolver_root(s));
 
     gsl_multiroot_fdfsolver_free(s);
-
-    std::cout << "Out: " << steadyState << std::endl;
   }
 };
 
