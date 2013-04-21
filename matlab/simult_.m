@@ -139,6 +139,9 @@ else
          end
       case 3
         % only with pruning
+        % the third moments of the shocks are assumed null. We don't have
+        % an interface for specifying them
+        constant = dr.ys(order_var) + 0.5*dr.ghs2;
         ghx = dr.ghx;
         ghu = dr.ghu;
         ghxx = dr.ghxx;
@@ -182,7 +185,7 @@ else
                     + gyy12 + ghxss*yhat1 + ghuss*u);
             yhat2 = ghx*yhat2 + gyy + guu + 2*gyu + ghs2;
             yhat1 = ghx*yhat1 + ghu*u;
-            y_(order_var,i) = yhat1 + (1/2)*yhat2 + (1/6)*yhat3;
+            y_(order_var,i) = constant + yhat1 + (1/2)*yhat2 + (1/6)*yhat3;
             yhat1 = yhat1(ipred);
             yhat2 = yhat2(ipred);
             yhat3 = yhat3(ipred);
