@@ -146,6 +146,7 @@ for i=1:n
             y(:,(i-1)*n*n+(k-1)*n+j) = xx;
             y(:,(k-1)*n*n+(i-1)*n+j) = xx;
             y(:,(k-1)*n*n+(j-1)*n+i) = xx;
+            m = m + 1;
         end
     end
 end
@@ -161,9 +162,10 @@ for i=1:n1
             if j ~= i
                 y(:,(j-1)*n1*n2+(i-1)*n2+k) = xx;
             end
+            m = m + 1;
         end
     end
-end
+end 
 
 function y = unfold12(x,n1,n2)
 y = zeros(size(x,1),n1*n2*n2);
@@ -176,6 +178,7 @@ for i=1:n1
             if k ~= j
                 y(:,(i-1)*n2*n2+(k-1)*n2+j) = xx;
             end
+            m = m + 1;
         end
     end
 end
