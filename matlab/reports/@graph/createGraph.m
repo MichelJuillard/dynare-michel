@@ -104,7 +104,9 @@ if o.legend
                 'location', o.legend_location);
     set(lh, 'FontSize', o.legend_font_size);
     set(lh, 'interpreter', 'latex');
-    legend('boxoff');
+    if o.legend_boxoff
+        legend('boxoff');
+    end
 end
 
 if ~isempty(o.xlabel)
