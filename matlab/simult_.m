@@ -53,7 +53,7 @@ if ~options_.k_order_solver
     end
 end
 
-if options_.k_order_solver && ~options_.pruning % Call dynare++ routines.
+if options_.k_order_solver && ~options_.pruning && ~options_.pruning_forecast_approximation% Call dynare++ routines.
     ex_ = [zeros(1,exo_nbr); ex_];
     switch options_.order
       case 1
@@ -107,7 +107,7 @@ else
         y_ = bsxfun(@plus,y_,dr.ys);
       case 2
         constant = dr.ys(order_var)+.5*dr.ghs2;
-        if options_.pruning
+        if options_.pruning || options_.pruning_forecast_approximation
             y__ = y0;
             for i = 2:iter+M_.maximum_lag
                 yhat1 = y__(order_var(k2))-dr.ys(order_var(k2));
@@ -157,38 +157,87 @@ else
         threads = options_.threads.kronecker.A_times_B_kronecker_C;
         nspred = M_.nspred;
         ipred = M_.nstatic+(1:nspred);
-        yhat1 = y0(order_var(k2))-dr.ys(order_var(k2));
-        yhat2 = zeros(nspred,1);
-        yhat3 = zeros(nspred,1);
-        for i=2:iter+M_.maximum_lag
-            u = ex_(i-1,:)';
-            [gyy, err] = A_times_B_kronecker_C(ghxx,yhat1,threads);
-            mexErrCheck('A_times_B_kronecker_C', err);
-            [guu, err] = A_times_B_kronecker_C(ghuu,u,threads);
-            mexErrCheck('A_times_B_kronecker_C', err);
-            [gyu, err] = A_times_B_kronecker_C(ghxu,yhat1,u,threads);
-            mexErrCheck('A_times_B_kronecker_C', err);
-            y2a = kron(yhat1,yhat1);
-            [gyyy, err] = A_times_B_kronecker_C(ghxxx,y2a,yhat1,threads);
-            mexErrCheck('A_times_B_kronecker_C', err);
-            u2a = kron(u,u);
-            [guuu, err] = A_times_B_kronecker_C(ghuuu,u2a,u,threads);
-            mexErrCheck('A_times_B_kronecker_C', err);
-            yu = kron(yhat1,u);
-            [gyyu, err] = A_times_B_kronecker_C(ghxxu,yhat1,yu,threads);
-            mexErrCheck('A_times_B_kronecker_C', err);
-            [gyuu, err] = A_times_B_kronecker_C(ghxuu,yu,u,threads);
-            mexErrCheck('A_times_B_kronecker_C', err);
-            [gyy12, err] = A_times_B_kronecker_C(ghxx,yhat1,yhat2,threads);
-            mexErrCheck('A_times_B_kronecker_C', err);
-            yhat3 = ghx*yhat3 + gyyy + guuu + 3*(gyyu + gyuu  ...
-                    + gyy12 + ghxss*yhat1 + ghuss*u);
-            yhat2 = ghx*yhat2 + gyy + guu + 2*gyu + ghs2;
-            yhat1 = ghx*yhat1 + ghu*u;
-            y_(order_var,i) = constant + yhat1 + (1/2)*yhat2 + (1/6)*yhat3;
-            yhat1 = yhat1(ipred);
-            yhat2 = yhat2(ipred);
-            yhat3 = yhat3(ipred);
+        if options_.pruning_forecast_approximation
+            yhat1 = y0(order_var(k2))-dr.ys(order_var(k2));
+            yhat2 = zeros(nspred,1);
+            yhat3 = zeros(nspred,1);
+            for i=2:iter+M_.maximum_lag
+                u = ex_(i-1,:)';
+                [gyy, err] = A_times_B_kronecker_C(ghxx,yhat1,threads);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                [guu, err] = A_times_B_kronecker_C(ghuu,u,threads);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                [gyu, err] = A_times_B_kronecker_C(ghxu,yhat1,u,threads);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                y2a = kron(yhat1,yhat1);
+                [gyyy, err] = A_times_B_kronecker_C(ghxxx,y2a,yhat1,threads);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                u2a = kron(u,u);
+                [guuu, err] = A_times_B_kronecker_C(ghuuu,u2a,u,threads);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                yu = kron(yhat1,u);
+                [gyyu, err] = A_times_B_kronecker_C(ghxxu,yhat1,yu,threads);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                [gyuu, err] = A_times_B_kronecker_C(ghxuu,yu,u,threads);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                [gyy12, err] = A_times_B_kronecker_C(ghxx,yhat1,yhat2,threads);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                yhat3 = ghx*yhat3 + gyyy + guuu + 3*(gyyu + gyuu  ...
+                        + gyy12 + ghxss*yhat1 + ghuss*u);
+                yhat2 = ghx*yhat2 + gyy + guu + 2*gyu + ghs2;
+                yhat1 = ghx*yhat1 + ghu*u;
+                y_(order_var,i) = constant + yhat1 + (1/2)*yhat2 + (1/6)*yhat3;
+                yhat1 = yhat1(ipred);
+                yhat2 = yhat2(ipred);
+                yhat3 = yhat3(ipred);
+            end
+        else
+            %construction follows Andreasen et al (2013), Technical
+            %Appendix, Formulas (65) and (66)
+            %split into first, second, and third order terms
+            yhat1 = y0(order_var(k2))-dr.ys(order_var(k2));
+            yhat2 = zeros(nspred,1);
+            yhat3 = zeros(nspred,1);
+            for i=2:iter+M_.maximum_lag
+                u = ex_(i-1,:)';
+                %construct terms of order 2 from second order part, based
+                %on linear component yhat1
+                [gyy, err] = A_times_B_kronecker_C(ghxx,yhat1,threads);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                [guu, err] = A_times_B_kronecker_C(ghuu,u,threads);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                [gyu, err] = A_times_B_kronecker_C(ghxu,yhat1,u,threads);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                %construct terms of order 3 from second order part, based
+                %on order 2 component yhat2
+                [gyy12, err] = A_times_B_kronecker_C(ghxx,yhat1,yhat2,threads);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                [gy2u, err] = A_times_B_kronecker_C(ghxu,yhat2,u,threads);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                %construct terms of order 3, all based on first order component yhat1              
+                y2a = kron(yhat1,yhat1);
+                [gyyy, err] = A_times_B_kronecker_C(ghxxx,y2a,yhat1,threads);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                u2a = kron(u,u);
+                [guuu, err] = A_times_B_kronecker_C(ghuuu,u2a,u,threads);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                yu = kron(yhat1,u);
+                [gyyu, err] = A_times_B_kronecker_C(ghxxu,yhat1,yu,threads);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                [gyuu, err] = A_times_B_kronecker_C(ghxuu,yu,u,threads);
+                mexErrCheck('A_times_B_kronecker_C', err);
+                %add all terms of order 3, linear component based on third
+                %order yhat3
+                yhat3 = ghx*yhat3 +gyy12 ... prefactor is 1/2*2=1, see (65) Appendix Andreasen et al.
+                        + gy2u ... prefactor is 1/2*2=1, see (65) Appendix Andreasen et al.
+                        + 1/6*(gyyy + guuu + 3*(gyyu + gyuu +  ghxss*yhat1 + ghuss*u)); %note: s is treated as variable, thus xss and uss are third order
+                yhat2 = ghx*yhat2 + 1/2*(gyy + guu + 2*gyu + ghs2);
+                yhat1 = ghx*yhat1 + ghu*u;
+                y_(order_var,i) = dr.ys(order_var)+yhat1 + yhat2 + yhat3; %combine terms again
+                yhat1 = yhat1(ipred);
+                yhat2 = yhat2(ipred);
+                yhat3 = yhat3(ipred);
+            end   
         end
     end
 end
