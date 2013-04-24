@@ -99,9 +99,9 @@ xticks = get(gca, 'XTick');
 set(gca, 'XTickLabel', xlabels(ix));
 
 if o.legend
-    lh = legend(line_handles, o.seriesElements.getTexNames());
-    set(lh, 'orientation', o.legend_orientation);
-    set(lh, 'Location', o.legend_location);
+    lh = legend(line_handles, o.seriesElements.getTexNames(), ...
+                'orientation', o.legend_orientation, ...
+                'location', o.legend_location);
     set(lh, 'FontSize', o.legend_font_size);
     set(lh, 'interpreter', 'latex');
     legend('boxoff');
