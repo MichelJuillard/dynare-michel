@@ -85,7 +85,42 @@ if ~( isequal(withnames,0) || isequal(withnames,1) )
 end
 
 % Output initialization
+freq = 1;
+init = dynDate(1);
 varlist = [];
+if ~exist('OCTAVE_VERSION')
+    % Under Matlab, save time by using importdata
+    assert(exist(file, 'file'), 'load_csv_file_data: I can''t find file ' file '!');
+    A = importdata(file, ',', withnames);
+    if withnames && withtime
+        if size(A.textdata, 1) == 1
+            % year dates confused for data
+            varlist = A.textdata(1, 2:end);
+            init = dynDate(A.data(1, 1));
+            data = A.data(:, 2:end);
+        else
+            varlist = A.textdata(1, 2:end);
+            init = dynDate(strrep(A.textdata{2, 1}, 'Y', ''));
+            data = A.data;
+        end
+    elseif withnames && ~withtime
+        varlist = A.textdata;
+        data = A.data;
+    elseif ~withnames && withtime
+        if ~isstruct(A)
+            % year dates confused for data
+            init = dynDate(A(1, 1));
+            data = A(:, 2:end);
+        else
+            init = dynDate(strrep(A.textdata{1, 1}, 'Y', ''));
+            data = A.data;
+        end
+    else
+        error('load_csv_file_data:: Shouldn''t arrive here');
+    end
+    freq = init.freq;
+    return
+end
 
 % Check if file exists.
 if check_file_extension(file,'csv')
@@ -172,8 +207,6 @@ if withtime
     freq = init.freq;
     first = 2;
 else
-    init = dynDate(1);
-    freq = 1;
     first = 1;
 end
 
