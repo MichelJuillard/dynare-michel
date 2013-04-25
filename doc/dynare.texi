@@ -3240,9 +3240,6 @@ impact. The results are stored in
 Discard higher order terms when iteratively computing simulations of 
 the solution. At second order, Dynare uses the algorithm of @cite{Kim, Kim, Schaumburg and Sims (2008)}, while at third order its generalization by @cite{Andreasen, Fernández-Villaverde and Rubio-Ramírez (2013)} is used.
 
-@item pruning_forecast_approximation
-This type of pruning generalizes the @cite{Kim, Kim, Schaumburg and Sims (2008)} approach to higher orders based on the k-order approximation of the forecasting function.
-
 @item partial_information
 @anchor{partial_information}
 
