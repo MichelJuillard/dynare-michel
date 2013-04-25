@@ -11,20 +11,20 @@ state_vars=dr.order_var(klag(:,1));
 %order of endogenous variables in FV et al. paper: c, invest, y, h, r, dp, kp, lambda, pi
 varlist_FV={'C';'I';'Y';'H';'r';'D';'K';'lambda';'phi'};
 for ii=1: length(varlist_FV)
-    FV_endo_order(ii,1)=strmatch(varlist_FV(ii),M_.endo_names(dr.order_var,:),'exact');
+    FV_endo_order(ii,1)=strmatch(varlist_FV{ii},M_.endo_names(dr.order_var,:),'exact');
 end
 
 % order in states of FV et al. paper:
 % exogenous: usigmar usigmatb ur utb ug 
 varlist_FV_exo_states={'u_sigma_r';'u_sigma_tb';'u_r';'u_tb';'u_x'}; 
 for ii=1: length(varlist_FV_exo_states)
-    FV_exo_order(ii)=strmatch(varlist_FV_exo_states(ii),M_.exo_names,'exact');
+    FV_exo_order(ii)=strmatch(varlist_FV_exo_states{ii},M_.exo_names,'exact');
 end
 
 %followed by endogenous: sigmarlag sigmatblag erlag etblag glag investlag debt capital Lambda        
 varlist_FV_endo_states={'sigma_r';'sigma_tb';'eps_r';'eps_tb';'X';'I';'D';'K'};
 for ii=1: length(varlist_FV_endo_states)
-    FV_endo_state_order(ii)=strmatch(varlist_FV_endo_states(ii),M_.endo_names(state_vars,:),'exact');
+    FV_endo_state_order(ii)=strmatch(varlist_FV_endo_states{ii},M_.endo_names(state_vars,:),'exact');
 end
 
 %% First order
@@ -117,7 +117,7 @@ gxxx_dyn(14,14,14,:)=0;
 gxxx_dyn(14,nu+1:13,14,:)=oo_.dr.ghxss(FV_endo_order,FV_endo_state_order)';
 gxxx_dyn(nu+1:13,14,14,:)=oo_.dr.ghxss(FV_endo_order,FV_endo_state_order)';
 
-if max(max(max(max(abs(gxxx-gxxx_dyn))))) > 1e-9
+if max(max(max(max(abs(gxxx-gxxx_dyn))))) > 1e-8
     max(max(max(max(abs(gxxx-gxxx_dyn)))))
     error('Third order wrong')
 else max(max(max(max(abs(gxxx-gxxx_dyn)))))
