@@ -49,6 +49,7 @@ o.xrange = '';
 o.yrange = '';
 
 o.shade = '';
+o.shade_color = [0 1 0];
 o.shade_opacity = .2;
 
 o.grid = true;
