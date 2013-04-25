@@ -149,7 +149,8 @@ MODFILES = \
 	walsh.mod \
 	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME.mod \
 	trend_var/fs2000_nonstationary.mod \
-	trend_var/fs2000_log_nonstationary.mod
+	trend_var/fs2000_log_nonstationary.mod \
+	third_order/FV2011.mod
 
 XFAIL_MODFILES = ramst_xfail.mod
 
@@ -287,7 +288,9 @@ EXTRA_DIST = \
 	kalman_filter_smoother/fs2000a_steadystate.m \
 	identification/kim/kim2_steadystate.m \
 	estimation/fsdat_simul.m \
-	ep/mean_preserving_spread.m
+	ep/mean_preserving_spread.m \
+	third_order/comparison_policy_functions_dynare_mathematica.m \
+	third_order/policyfunctions.mat
 
 TARGETS =
 
