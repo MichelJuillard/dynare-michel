@@ -192,8 +192,8 @@ else
             mexErrCheck('A_times_B_kronecker_C', err);
             %add all terms of order 3, linear component based on third
             %order yhat3
-            yhat3 = ghx*yhat3 +gyy12 ... prefactor is 1/2*2=1, see (65) Appendix Andreasen et al.
-                    + gy2u ... prefactor is 1/2*2=1, see (65) Appendix Andreasen et al.
+            yhat3 = ghx*yhat3 +gyy12 ... % prefactor is 1/2*2=1, see (65) Appendix Andreasen et al.
+                    + gy2u ... % prefactor is 1/2*2=1, see (65) Appendix Andreasen et al.
                     + 1/6*(gyyy + guuu + 3*(gyyu + gyuu +  ghxss*yhat1 + ghuss*u)); %note: s is treated as variable, thus xss and uss are third order
             yhat2 = ghx*yhat2 + 1/2*(gyy + guu + 2*gyu + ghs2);
             yhat1 = ghx*yhat1 + ghu*u;
