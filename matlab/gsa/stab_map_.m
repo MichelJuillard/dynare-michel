@@ -334,7 +334,7 @@ if fload==0,
         ys_=real(dr_.ys);
         yys(:,j) = ys_;
         ys_=yys(:,1);
-        dyn_waitbar(j/Nsam,h,['MC iteration ',int2str(j),filesep,int2str(Nsam)])
+        dyn_waitbar(j/Nsam,h,['MC iteration ',int2str(j),'/',int2str(Nsam)])
     end
     dyn_waitbar_close(h);
     if prepSA && jstab,
@@ -451,7 +451,7 @@ else
             ys_=real(dr_.ys);
             yys(:,j) = ys_;
             ys_=yys(:,1);
-            dyn_waitbar(j/ntrans,h,['MC iteration ',int2str(j),filesep,int2str(ntrans)])
+            dyn_waitbar(j/ntrans,h,['MC iteration ',int2str(j),'/',int2str(ntrans)])
         end
         dyn_waitbar_close(h);
         save(filetoload,'T','-append')
