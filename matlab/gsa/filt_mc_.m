@@ -289,9 +289,18 @@ else
     if ~options_.nograph,
     ifig=0;
     for i=1:size(vvarvecm,1),
+        if options_.opt_gsa.ppost
+            temp_name='RMSE Posterior: Log Prior';
+        else
+            if options_.opt_gsa.pprior
+                temp_name='RMSE Prior: Log Prior';
+            else
+                temp_name='RMSE MC: Log Prior';
+            end
+        end
         if mod(i,9)==1,
             ifig=ifig+1;
-            hh=dyn_figure(options_,'name',['Prior ',int2str(ifig)]);
+            hh=dyn_figure(options_,'name',[temp_name,' ',int2str(ifig)]);
         end
         subplot(3,3,i-9*(ifig-1))
         h=cumplot(lnprior(ixx(1:nfilt0(i),i)));
@@ -314,9 +323,18 @@ else
     end
     ifig=0;
     for i=1:size(vvarvecm,1),
+        if options_.opt_gsa.ppost
+            temp_name='RMSE Posterior: Log Likelihood';
+        else
+            if options_.opt_gsa.pprior
+                temp_name='RMSE Prior: Log Likelihood';
+            else
+                temp_name='RMSE MC: Log Likelihood';
+            end
+        end
         if mod(i,9)==1,
             ifig=ifig+1;
-            hh = dyn_figure(options_,'Name',['Likelihood ',int2str(ifig)]);
+            hh = dyn_figure(options_,'Name',[temp_name,' ',int2str(ifig)]);
         end
         subplot(3,3,i-9*(ifig-1))
         h=cumplot(likelihood(ixx(1:nfilt0(i),i)));
@@ -342,9 +360,18 @@ else
     end
     ifig=0;
     for i=1:size(vvarvecm,1),
+        if options_.opt_gsa.ppost
+            temp_name='RMSE Posterior: Log Posterior';
+        else
+            if options_.opt_gsa.pprior
+                temp_name='RMSE Prior: Log Posterior';
+            else
+                temp_name='RMSE MC: Log Posterior';
+            end
+        end
         if mod(i,9)==1,
             ifig=ifig+1;
-            hh = dyn_figure(options_,'Name',['Posterior ',int2str(ifig)]);
+            hh = dyn_figure(options_,'Name',[temp_name,' ',int2str(ifig)]);
         end
         subplot(3,3,i-9*(ifig-1))
         h=cumplot(logpo2(ixx(1:nfilt0(i),i)));
@@ -466,7 +493,16 @@ else
     if ~options_.nograph
     a00=jet(size(vvarvecm,1));
     for ix=1:ceil(length(nsnam)/5),
-        hh = dyn_figure(options_);
+        if options_.opt_gsa.ppost
+            temp_name='RMSE Posterior Tradeoffs: Log Posterior';
+        else
+            if options_.opt_gsa.pprior
+                temp_name='RMSE Prior Tradeoffs: Log Posterior';
+            else
+                temp_name='RMSE MC Tradeoffs: Log Posterior';
+            end
+        end        
+        hh = dyn_figure(options_,'name',[temp_name,' ',int2str(ix)]);
         for j=1+5*(ix-1):min(size(snam2,1),5*ix),
             subplot(2,3,j-5*(ix-1))
             %h0=cumplot(x(:,nsnam(j)+nshock));
