@@ -181,6 +181,6 @@ if pltinfo
         ylabel('f(\omega)')
         box on
         axis tight        
-        dyn_saveas(hh,[M_.fname '/graphs/SpectralDensity_' deblank(M_.endo_names(ivar(i),:))],options_)
+        dyn_saveas(hh,[M_.fname ,filesep,'graphs', filesep, 'SpectralDensity_' deblank(M_.endo_names(ivar(i),:))],options_)
     end
 end

@@ -92,7 +92,7 @@ elseif rplottype == 2
         axis tight;
     end
 end
-dyn_saveas(hh,[M_.fname '/graphs/SimulatedTrajectory_' deblank(s1(1,:))],options_)
+dyn_saveas(hh,[M_.fname, filesep, 'graphs', filesep, 'SimulatedTrajectory_' deblank(s1(1,:))],options_)
 
 
 % 02/28/01 MJ replaced bseastr by MATLAB's strmatch

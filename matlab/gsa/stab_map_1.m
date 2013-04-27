@@ -100,6 +100,6 @@ for i=1:ceil(nparplot/12),
 %     title([ftit{j},'. D-stat ', num2str(dproba(ipar(j)),2)],'interpreter','none')
     title([ftit{j},'. p-value ', num2str(proba(ipar(j)),2)],'interpreter','none')
   end
-  dyn_saveas(hh,[dirname,'/',fname_,'_',aname,'_SA_',int2str(i)],options_);
+  dyn_saveas(hh,[dirname,filesep,fname_,'_',aname,'_SA_',int2str(i)],options_);
 end
 end

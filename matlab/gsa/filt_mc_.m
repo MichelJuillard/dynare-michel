@@ -74,11 +74,11 @@ end
 for j=1:length(a),
     if strmatch([fname_,tmp],a(j).name),
         disp(a(j).name)
-        delete([OutDir,'/',a(j).name])
+        delete([OutDir,filesep,a(j).name])
     end,
     if strmatch([fname_,tmp1],a(j).name),
         disp(a(j).name)
-        delete([OutDir,'/',a(j).name])
+        delete([OutDir,filesep,a(j).name])
     end,
 end
 disp('done !')
@@ -126,14 +126,14 @@ if ~loadSA,
     obs = dat_fil_(options_.datafile);
     %stock_gend=data_info.gend;
     %stock_data = data_info.data;
-    load([DirectoryName '/' M_.fname '_data.mat']);    
+    load([DirectoryName filesep M_.fname '_data.mat']);    
     filfilt = dir([DirectoryName filesep M_.fname '_filter_step_ahead*.mat']);
     filparam = dir([DirectoryName filesep M_.fname '_param*.mat']);
     x=[];
     logpo2=[];
     sto_ys=[];
     for j=1:length(filparam),
-        %load([DirectoryName '/' M_.fname '_param',int2str(j),'.mat']);
+        %load([DirectoryName filesep M_.fname '_param',int2str(j),'.mat']);
         if isempty(strmatch([M_.fname '_param_irf'],filparam(j).name))
             load([DirectoryName filesep filparam(j).name]);
             x=[x; stock];
@@ -311,12 +311,12 @@ else
         title(vvarvecm(i,:),'interpreter','none')
         if mod(i,9)==0 || i==size(vvarvecm,1)
             if options_.opt_gsa.ppost
-                dyn_saveas(hh,[OutDir '/' fname_ '_rmse_post_lnprior',int2str(ifig)],options_);
+                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_post_lnprior',int2str(ifig)],options_);
             else
                 if options_.opt_gsa.pprior
-                    dyn_saveas(hh,[OutDir '/' fname_ '_rmse_prior_lnprior',int2str(ifig) ],options_);
+                    dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_lnprior',int2str(ifig) ],options_);
                 else
-                    dyn_saveas(hh,[OutDir '/' fname_ '_rmse_mc_lnprior',int2str(ifig) ],options_);
+                    dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_lnprior',int2str(ifig) ],options_);
                 end
             end
         end
@@ -348,12 +348,12 @@ else
         end
         if mod(i,9)==0 || i==size(vvarvecm,1)
             if options_.opt_gsa.ppost
-                dyn_saveas(hh,[OutDir '/' fname_ '_rmse_post_lnlik',int2str(ifig) ],options_);
+                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_post_lnlik',int2str(ifig) ],options_);
             else
                 if options_.opt_gsa.pprior
-                    dyn_saveas(hh,[OutDir '/' fname_ '_rmse_prior_lnlik',int2str(ifig)],options_);
+                    dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_lnlik',int2str(ifig)],options_);
                 else
-                    dyn_saveas(hh,[OutDir '/' fname_ '_rmse_mc_lnlik',int2str(ifig) ],options_);
+                    dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_lnlik',int2str(ifig) ],options_);
                 end
             end
         end
@@ -385,12 +385,12 @@ else
         end
         if mod(i,9)==0 || i==size(vvarvecm,1)
             if options_.opt_gsa.ppost
-                dyn_saveas(hh,[OutDir '/' fname_ '_rmse_post_lnpost',int2str(ifig) ],options_);
+                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_post_lnpost',int2str(ifig) ],options_);
             else
                 if options_.opt_gsa.pprior
-                    dyn_saveas(hh,[OutDir '/' fname_ '_rmse_prior_lnpost',int2str(ifig)],options_);
+                    dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_lnpost',int2str(ifig)],options_);
                 else
-                    dyn_saveas(hh,[OutDir '/' fname_ '_rmse_mc_lnpost',int2str(ifig)],options_);
+                    dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_lnpost',int2str(ifig)],options_);
                 end
             end
         end
@@ -542,12 +542,12 @@ else
         %h0=legend({'base',vnam{np}}',0);
         %set(findobj(get(h0,'children'),'type','text'),'interpreter','none')
         if options_.opt_gsa.ppost
-            dyn_saveas(hh,[ OutDir '/' fname_ '_rmse_post_' int2str(ix)],options_);
+            dyn_saveas(hh,[ OutDir filesep fname_ '_rmse_post_' int2str(ix)],options_);
         else
             if options_.opt_gsa.pprior
-                dyn_saveas(hh,[OutDir '/' fname_ '_rmse_prior_' int2str(ix) ],options_);
+                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_prior_' int2str(ix) ],options_);
             else
-                dyn_saveas(hh,[OutDir '/' fname_ '_rmse_mc_' int2str(ix)],options_);
+                dyn_saveas(hh,[OutDir filesep fname_ '_rmse_mc_' int2str(ix)],options_);
             end
         end
     end

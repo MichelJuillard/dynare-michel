@@ -334,7 +334,7 @@ if fload==0,
         ys_=real(dr_.ys);
         yys(:,j) = ys_;
         ys_=yys(:,1);
-        dyn_waitbar(j/Nsam,h,['MC iteration ',int2str(j),'/',int2str(Nsam)])
+        dyn_waitbar(j/Nsam,h,['MC iteration ',int2str(j),filesep,int2str(Nsam)])
     end
     dyn_waitbar_close(h);
     if prepSA && jstab,
@@ -388,31 +388,31 @@ if fload==0,
     bkpprior.p4=bayestopt_.p4;
     if pprior,
         if ~prepSA
-            save([OutputDirectoryName '/' fname_ '_prior.mat'], ...
+            save([OutputDirectoryName filesep fname_ '_prior.mat'], ...
                 'bkpprior','lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
                 'egg','yys','nspred','nboth','nfwrd','infox')
         else
-            save([OutputDirectoryName '/' fname_ '_prior.mat'], ...
+            save([OutputDirectoryName filesep fname_ '_prior.mat'], ...
                 'bkpprior','lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
                 'egg','yys','T','nspred','nboth','nfwrd','infox')
         end
 
     else
         if ~prepSA
-            save([OutputDirectoryName '/' fname_ '_mc.mat'], ...
+            save([OutputDirectoryName filesep fname_ '_mc.mat'], ...
                 'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
                 'egg','yys','nspred','nboth','nfwrd','infox')
         else
-            save([OutputDirectoryName '/' fname_ '_mc.mat'], ...
+            save([OutputDirectoryName filesep fname_ '_mc.mat'], ...
                 'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong', ...
                 'egg','yys','T','nspred','nboth','nfwrd','infox')
         end
     end
 else
     if pprior,
-        filetoload=[OutputDirectoryName '/' fname_ '_prior.mat'];
+        filetoload=[OutputDirectoryName filesep fname_ '_prior.mat'];
     else
-        filetoload=[OutputDirectoryName '/' fname_ '_mc.mat'];
+        filetoload=[OutputDirectoryName filesep fname_ '_mc.mat'];
     end
     load(filetoload,'lpmat','lpmat0','iunstable','istable','iindeterm','iwrong','egg','yys','nspred','nboth','nfwrd','infox')
     Nsam = size(lpmat,1);
@@ -451,7 +451,7 @@ else
             ys_=real(dr_.ys);
             yys(:,j) = ys_;
             ys_=yys(:,1);
-            dyn_waitbar(j/ntrans,h,['MC iteration ',int2str(j),'/',int2str(ntrans)])
+            dyn_waitbar(j/ntrans,h,['MC iteration ',int2str(j),filesep,int2str(ntrans)])
         end
         dyn_waitbar_close(h);
         save(filetoload,'T','-append')
@@ -485,12 +485,12 @@ else
     awrongname='mc_wrong'; awrongtitle='Posterior No Solution Found';
     asname='mc_stable'; astitle='Posterior Stable';
 end
-delete([OutputDirectoryName,'/',fname_,'_',aname,'_*.*']);
-%delete([OutputDirectoryName,'/',fname_,'_',aname,'_SA_*.*']);
-delete([OutputDirectoryName,'/',fname_,'_',asname,'_corr_*.*']);
-delete([OutputDirectoryName,'/',fname_,'_',auname,'_corr_*.*']);
-delete([OutputDirectoryName,'/',fname_,'_',aunstname,'_corr_*.*']);
-delete([OutputDirectoryName,'/',fname_,'_',aindname,'_corr_*.*']);
+delete([OutputDirectoryName,filesep,fname_,'_',aname,'_*.*']);
+%delete([OutputDirectoryName,filesep,fname_,'_',aname,'_SA_*.*']);
+delete([OutputDirectoryName,filesep,fname_,'_',asname,'_corr_*.*']);
+delete([OutputDirectoryName,filesep,fname_,'_',auname,'_corr_*.*']);
+delete([OutputDirectoryName,filesep,fname_,'_',aunstname,'_corr_*.*']);
+delete([OutputDirectoryName,filesep,fname_,'_',aindname,'_corr_*.*']);
 
 if length(iunstable)>0 && length(iunstable)<Nsam,
     fprintf(['%4.1f%% of the prior support gives unique saddle-path solution.\n'],length(istable)/Nsam*100)

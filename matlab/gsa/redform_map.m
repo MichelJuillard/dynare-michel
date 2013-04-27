@@ -60,18 +60,18 @@ if nargin==0,
 end
 
 if pprior
-    load([dirname,'/',M_.fname,'_prior'],'lpmat', 'lpmat0', 'istable','T');
-    adir=[dirname '/redform_stab'];
+    load([dirname,filesep,M_.fname,'_prior'],'lpmat', 'lpmat0', 'istable','T');
+    adir=[dirname filesep 'redform_stab'];
 else
-    load([dirname,'/',M_.fname,'_mc'],'lpmat', 'lpmat0', 'istable','T');
-    adir=[dirname '/redform_mc'];
+    load([dirname,filesep,M_.fname,'_mc'],'lpmat', 'lpmat0', 'istable','T');
+    adir=[dirname filesep 'redform_mc'];
 end
 if ~exist('T')
     stab_map_(dirname,options_gsa_);
     if pprior
-        load([dirname,'/',M_.fname,'_prior'],'T');
+        load([dirname,filesep,M_.fname,'_prior'],'T');
     else
-        load([dirname,'/',M_.fname,'_mc'],'T');
+        load([dirname,filesep,M_.fname,'_mc'],'T');
     end
     if ~exist('T'),
         disp('The model is too large!')
@@ -131,7 +131,7 @@ for j=1:size(anamendo,1)
                 end
                 iplo=iplo+1;
                 js=js+1;
-                xdir0 = [adir,'/',namendo,'_vs_', namexo];
+                xdir0 = [adir,filesep,namendo,'_vs_', namexo];
                 if ilog==0,
                     if isempty(threshold)
                         if isempty(dir(xdir0))
@@ -147,7 +147,7 @@ for j=1:size(anamendo,1)
                         end
                         if ~options_.nograph,
                             hf=dyn_figure(options_,'name',['Reduced Form Mapping: ',namendo,' vs. ', namexo]); hist(y0,30), title([namendo,' vs. ', namexo],'interpreter','none')
-                            dyn_saveas(hf,[xdir,'/', namendo,'_vs_', namexo],options_);
+                            dyn_saveas(hf,[xdir,filesep, namendo,'_vs_', namexo],options_);
                         end
                         %             if ~isempty(iy),
                         %               si(:,js) = redform_private(x0(iy,:), y0(iy), pshape, pd, iload, pnames, namendo, namexo, xdir, options_gsa_);
@@ -203,7 +203,7 @@ for j=1:size(anamendo,1)
                     end
                     title([logflag,' ',namendo,' vs. ',namexo],'interpreter','none')
                     if iplo==9,
-                        dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)],options_);
+                        dyn_saveas(hfig,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)],options_);
                     end
                 end
                 
@@ -211,7 +211,7 @@ for j=1:size(anamendo,1)
         end
     end
     if iplo<9 && iplo>0 && ifig && ~options_.nograph,
-        dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)],options_);
+        dyn_saveas(hfig,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_shocks_',logflag,num2str(ifig)],options_);
     end
     ifig=0;
     iplo=0;
@@ -232,7 +232,7 @@ for j=1:size(anamendo,1)
                 end
                 iplo=iplo+1;
                 js=js+1;
-                xdir0 = [adir,'/',namendo,'_vs_', namlagendo];
+                xdir0 = [adir,filesep,namendo,'_vs_', namlagendo];
                 if ilog==0,
                     if isempty(threshold)
                         if isempty(dir(xdir0))
@@ -251,7 +251,7 @@ for j=1:size(anamendo,1)
                         %           end
                         if ~options_.nograph,
                             hf=dyn_figure(options_,'name',['Reduced Form Mapping: ',namendo,' vs. lagged ', namlagendo]); hist(y0,30), title([namendo,' vs. lagged ', namlagendo],'interpreter','none')
-                            dyn_saveas(hf,[xdir,'/', namendo,'_vs_', namlagendo],options_);
+                            dyn_saveas(hf,[xdir,filesep, namendo,'_vs_', namlagendo],options_);
                         end
                         if length(iy)>size(x0,2) && length(iyc)>size(x0,2),
                             delete([xdir, '/*threshold*.*'])
@@ -303,7 +303,7 @@ for j=1:size(anamendo,1)
                     end
                     title([logflag,' ',namendo,' vs. ',namlagendo,'(-1)'],'interpreter','none')
                     if iplo==9,
-                        dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],options_);
+                        dyn_saveas(hfig,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],options_);
                     end
                 end
                 
@@ -311,7 +311,7 @@ for j=1:size(anamendo,1)
         end
     end
     if iplo<9 && iplo>0 && ifig && ~options_.nograph,
-        dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],options_);
+        dyn_saveas(hfig,[dirname,filesep,M_.fname,'_redform_', namendo,'_vs_lags_',logflag,num2str(ifig)],options_);
     end
 end
 
@@ -329,7 +329,7 @@ if isempty(threshold) && ~options_.nograph,
             text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
         end
         title('Reduced form GSA')
-        dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_gsa'],options_);
+        dyn_saveas(hfig,[dirname,filesep,M_.fname,'_redform_gsa'],options_);
         
     else
         hfig=dyn_figure(options_,'name','Reduced Form GSA'); %bar(silog)
@@ -344,7 +344,7 @@ if isempty(threshold) && ~options_.nograph,
             text(ip,-0.02,deblank(pnames(ip,:)),'rotation',90,'HorizontalAlignment','right','interpreter','none')
         end
         title('Reduced form GSA - Log-transformed elements')
-        dyn_saveas(hfig,[dirname,'/',M_.fname,'_redform_gsa_log'],options_);
+        dyn_saveas(hfig,[dirname,filesep,M_.fname,'_redform_gsa_log'],options_);
         
     end
 end
@@ -370,7 +370,7 @@ if iload==0,
     end
     if ~options_.nograph,
         hfig=dyn_figure(options_,'name',['Reduced Form Mapping: ', namy,' vs. ', namx]); hist(y0,30), title([namy,' vs. ', namx],'interpreter','none')
-        dyn_saveas(hfig,[xdir,'/', namy,'_vs_', namx],options_);
+        dyn_saveas(hfig,[xdir,filesep, namy,'_vs_', namx],options_);
     end
     %   gsa_ = gsa_sdp_dyn(y0, x0, -2, [],[],[],1,fname, pnames);
     nrun=length(y0);
@@ -396,14 +396,14 @@ if iload==0,
         hfig=dyn_figure(options_,'name',['Reduced Form Mapping: ' namy,'_vs_', namx,'_fit']);
         plot(y0(1:nfit),[gsa_.fit y0(1:nfit)],'.'),
         title([namy,' vs. ', namx,' fit'],'interpreter','none')
-        dyn_saveas(hfig,[xdir,'/', namy,'_vs_', namx,'_fit'],options_);
+        dyn_saveas(hfig,[xdir,filesep, namy,'_vs_', namx,'_fit'],options_);
         if nfit<nrun,
             npred=[nfit+1:nrun];
             yf = ss_anova_fcast(x0(npred,:), gsa_);
             hfig=dyn_figure(options_,'name',['Reduced Form Mapping: ' namy,'_vs_', namx,'_pred']);
             plot(y0(npred),[yf y0(npred)],'.'),
             title([namy,' vs. ', namx,' pred'],'interpreter','none')
-            dyn_saveas(hfig,[xdir,'/', namy,'_vs_', namx,'_pred'],options_);
+            dyn_saveas(hfig,[xdir,filesep, namy,'_vs_', namx,'_pred'],options_);
         end
         
     end
@@ -415,7 +415,7 @@ else
         hfig=dyn_figure(options_,['Reduced Form Mapping: ' namy,'_vs_', namx,'_pred']);
         plot(y0,[yf y0],'.'),
         title([namy,' vs. ', namx,' pred'],'interpreter','none')
-        dyn_saveas(hfig,[xdir,'/', namy,'_vs_', namx,'_pred'],options_);
+        dyn_saveas(hfig,[xdir,filesep, namy,'_vs_', namx,'_pred'],options_);
     end
 end
 % si = gsa_.multivariate.si;
