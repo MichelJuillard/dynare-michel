@@ -97,7 +97,17 @@ if options_.mh_nblck>1
     FigureName = [ FigureName , ' (block number' int2str(blck)  ').']; 
 end
 
+hh=dyn_figure(options_,'Name',FigureName);
 
-figure('Name',FigureName)
 bar(0:options_.mh_autocorrelation_function_size,autocor,'k');
 axis tight
+% create subdirectory <fname>/graphs if it doesn't exist
+if ~exist(M_.fname, 'dir')
+    mkdir('.',M_.fname);
+end
+if ~exist([M_.fname filesep 'graphs'])
+    mkdir(M_.fname,'graphs');
+end
+
+plot_name=get_the_name(column,0,M_,estim_params_,options_);
+dyn_saveas(hh,[M_.fname, filesep, 'graphs', filesep, 'MH_Autocorrelation_' plot_name],options_)
