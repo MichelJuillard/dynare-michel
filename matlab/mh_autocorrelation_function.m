@@ -88,9 +88,9 @@ elseif strcmpi(type,'MeasurementError')
 end
 
 if nargin<7
-    FigureName = ['autocorrelogram for ' TYPE name1];
+    FigureName = ['Autocorrelogram for ' TYPE name1];
 else
-    FigureName = ['autocorrelogram for ' TYPE name1 ' and ' name2];
+    FigureName = ['Autocorrelogram for ' TYPE name1 ' and ' name2];
 end
 
 if options_.mh_nblck>1
