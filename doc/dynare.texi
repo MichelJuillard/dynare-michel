@@ -1555,6 +1555,22 @@ belong to the set of feedback variables.
 @item no_static
 Don't create the static model file. This can be useful for models which
 don't have a steady state.
+
+@item differentiate_forward_vars
+Tells Dynare to create a new auxiliary variable for each endogenous
+variable that appears with a lead, such that the new variable is the
+time differentiate of the original one. More precisely, if the model
+contains @code{x(+1)}, then a variable @code{AUX_DIFF_VAR} will be
+created such that @code{AUX_DIFF_VAR=x-x(-1)}, and @code{x(+1)} will
+be replaced with @code{x+AUX_DIFF_VAR(+1)}.
+
+This option can useful for some deterministic simulations where
+convergence is hard to obtain. Bad values for terminal conditions in
+the case of very persistent dynamics or permanent shocks can hinder
+correct solutions or any convergence. The new differentiated variables
+have obvious zero terminal conditions (if the terminal condition is a
+steady state) and this in many cases helps convergence of simulations.
+
 @end table
 
 @customhead{Example 1: elementary RBC model}
@@ -1724,6 +1740,11 @@ multipliers when first order conditions of the Ramsey problem are computed.
 The new variables take the form @code{MULT_@var{i}}, where @var{i} represents
 the constraint with which the multiplier is associated (counted from the
 order of declaration in the model block).
+
+The last type of auxiliary variables is introduced by the
+@code{differentiate_forward_vars} option of the @code{model} block.
+The new variables take the form @code{AUX_DIFF_FWRD_@var{i}}, and are
+equal to @code{x-x(-1)} for some endogenous variable @code{x}.
 
 Once created, all auxiliary variables are included in the set of
 endogenous variables. The output of decision rules (see below) is such
