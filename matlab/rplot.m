@@ -92,6 +92,14 @@ elseif rplottype == 2
         axis tight;
     end
 end
+% create subdirectory <fname>/graphs if it doesn't exist
+if ~exist(M_.fname, 'dir')
+    mkdir('.',M_.fname);
+end
+if ~exist([M_.fname filesep 'graphs'])
+    mkdir(M_.fname,'graphs');
+end
+
 dyn_saveas(hh,[M_.fname, filesep, 'graphs', filesep, 'SimulatedTrajectory_' deblank(s1(1,:))],options_)
 
 
