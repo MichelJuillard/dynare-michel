@@ -89,9 +89,9 @@ if ~isempty(o.shade)
     sh = patch([repmat(x1, 1, 2) repmat(x2, 1, 2)], ...
                [yrange fliplr(yrange)], o.shade_color, ...
                'facealpha', o.shade_opacity);
-    children =get(gca(), 'children');
+    children = get(gca, 'children');
     children = [children(2:end); sh];
-    set(gca(), 'children', children);
+    set(gca, 'children', children);
 end
 
 xticks = get(gca, 'XTick');
