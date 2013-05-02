@@ -63,7 +63,8 @@ if ~noprint
         else
           error(['The Jacobian contains NaNs'])
         end
-
+      case 9
+        error(['k_order_pert was unable to compute the solution'])           
       case 19
         error('The steadystate file did not compute the steady state')
       case 20
