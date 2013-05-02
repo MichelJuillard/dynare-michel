@@ -83,19 +83,9 @@ if ~noprint
       case 30
         error('Variance can''t be computed')
       case 41
-          global bayestopt_;
-          disp_string=deblank(bayestopt_.name{info(2),1});
-          for ii=1:length(info)-2
-            disp_string=[disp_string,', ',deblank(bayestopt_.name{info(2+ii),:})];
-          end
-        error(['The following parameter(s) do(es) not satisfy the lower bound: ' disp_string]);
+        error('one (many) parameter(s) do(es) not satisfy the lower bound');
       case 42
-          global bayestopt_;
-          disp_string=deblank(bayestopt_.name{info(2),1});
-          for ii=1:length(info)-2
-            disp_string=[disp_string,', ',deblank(bayestopt_.name{info(2+ii),:})];
-          end
-        error(['The following parameter(s) do(es) not satisfy the upper bound: ' disp_string]);
+        error('one (many) parameter(s) do(es) not satisfy the upper bound');
       case 43
         error('Covariance matrix of structural shocks is not positive definite')
       case 44 %DsgeLikelihood_hh / dsge_likelihood
