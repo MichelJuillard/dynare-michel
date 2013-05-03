@@ -95,8 +95,16 @@ if ~isempty(o.shade)
 end
 
 xticks = get(gca, 'XTick');
-[junk, ix, junk] = intersect(x, xticks);
-set(gca, 'XTickLabel', xlabels(ix));
+xTickLabels = cell(1, length(xticks));
+for i=1:length(xticks)
+    if xticks(i) >= x(1) && ...
+            xticks(i) <= x(end)
+        xTickLabels{i} = xlabels{xticks(i)};
+    else
+        xTickLabels{i} = '';
+    end
+end
+set(gca, 'XTickLabel', xTickLabels);
 
 if o.legend
     lh = legend(line_handles, o.seriesElements.getTexNames(), ...
