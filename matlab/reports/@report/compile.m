@@ -50,7 +50,12 @@ if isempty(compiler)
     compiler = strtrim(compiler);
     o.compiler = compiler;
 end
-[status output] = system([compiler ' ./' o.filename], '-echo');
+
+if exist('OCTAVE_VERSION')
+    status = system([compiler ' ./' o.filename], 0);
+else
+    status = system([compiler ' ./' o.filename], '-echo');
+end
 [junk, rfn, junk] = fileparts(o.filename);
 
 if status ~= 0
