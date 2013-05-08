@@ -27,6 +27,10 @@ endo_nbr = M.endo_nbr;
 exo_nbr = M.exo_nbr;
 nspred = M.nspred;
 
+if order>1 && options.loglinear 
+   error('The loglinear-option currently only works at order 1') 
+end
+
 switch(order)
   case 1
     [err, g_1] = k_order_perturbation(dr,M,options);
