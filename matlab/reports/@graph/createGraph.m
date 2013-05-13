@@ -112,7 +112,7 @@ if o.showLegend
                 'location', o.legend_location);
     set(lh, 'FontSize', o.legend_font_size);
     set(lh, 'interpreter', 'latex');
-    if o.legend_boxoff
+    if ~o.showLegendBox
         legend('boxoff');
     end
 end
