@@ -66,7 +66,7 @@ if ~isempty(o.yrange)
     ylim(o.yrange);
 end
 
-if o.zeroline
+if o.showZeroline
     a = ylim;
     if 0 > a(1) && 0 < a(2)
         lh = line(xlim, [0 0], 'color', 'k', 'LineWidth', 0.25);

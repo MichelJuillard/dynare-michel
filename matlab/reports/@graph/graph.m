@@ -60,7 +60,7 @@ o.legendLocation = 'SouthEast';
 o.legendOrientation = 'horizontal';
 o.legendFontSize = 8;
 
-o.zeroline = false;
+o.showZeroline = false;
 
 if nargin == 1
     assert(isa(varargin{1}, 'graph'),['@graph.graph: with one arg you ' ...
@@ -99,7 +99,7 @@ assert(islogical(o.showGrid), '@graph.graph: showGrid must be either true or fal
 assert(islogical(o.showLegend), '@graph.graph: showLegend must be either true or false');
 assert(islogical(o.showLegendBox), '@graph.graph: showLegendBox must be either true or false');
 assert(isint(o.legendFontSize), '@graph.graph: legendFontSize must be an integer');
-assert(islogical(o.zeroline), '@graph.graph: zeroline must be either true or false');
+assert(islogical(o.showZeroline), '@graph.graph: showZeroline must be either true or false');
 assert(isfloat(o.shadeOpacity) && length(o.shadeOpacity)==1 && ...
        o.shadeOpacity >= 0 && o.shadeOpacity <= 1, ...
        '@graph.graph: o.shadeOpacity must be a real in [0 1]');
