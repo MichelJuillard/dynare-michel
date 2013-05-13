@@ -106,7 +106,7 @@ for i=1:length(xticks)
 end
 set(gca, 'XTickLabel', xTickLabels);
 
-if o.legend
+if o.showLegend
     lh = legend(line_handles, o.seriesElements.getTexNames(), ...
                 'orientation', o.legend_orientation, ...
                 'location', o.legend_location);
