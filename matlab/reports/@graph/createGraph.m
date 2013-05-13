@@ -126,7 +126,9 @@ if ~isempty(o.ylabel)
 end
 drawnow;
 
-o.figname = [tempname '.tex'];
+if isempty(o.figname)
+    o.figname = [tempname '.tex'];
+end
 disp('  converting to tex....');
 if exist('OCTAVE_VERSION')
     print(o.figname, '-dtikz');
