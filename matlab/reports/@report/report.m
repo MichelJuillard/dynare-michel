@@ -40,7 +40,7 @@ o.margin_unit = 'cm';
 o.pages = pages();
 o.filename = 'report.tex';
 o.config = '';
-o.showdate = true;
+o.showDate = true;
 o.compiler = '';
 
 if nargin == 1
@@ -73,7 +73,7 @@ assert(ischar(o.title), '@report.report: title must be a string');
 assert(ischar(o.filename), '@report.report: filename must be a string');
 assert(ischar(o.config), '@report.report: config file must be a string');
 assert(ischar(o.compiler), '@report.report: compiler file must be a string');
-assert(islogical(o.showdate), '@report.report: showdate must be either true or false');
+assert(islogical(o.showDate), '@report.report: showDate must be either true or false');
 assert(isfloat(o.margin) && o.margin > 0, '@report.report: margin must be a float > 0.');
 
 valid_margin_unit = {'cm', 'in'};

@@ -54,7 +54,7 @@ else
     fprintf(fid, '\\usepackage{pgfplots}\n');
 end
 
-if o.showdate
+if o.showDate
     fprintf(fid, '\\usepackage{fancyhdr, datetime}\n');
     fprintf(fid, '\\newdateformat{reportdate}{\\THEDAY\\ \\shortmonthname\\ \\THEYEAR}\n');
     fprintf(fid, '\\pagestyle{fancy}\n');
