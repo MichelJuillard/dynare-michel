@@ -44,7 +44,7 @@ o.graph_marker_edge_color = 'auto';
 o.graph_marker_face_color = 'auto';
 o.graph_marker_size = 6;
 
-o.table_markers = false;
+o.showTableMarkers = false;
 o.table_neg_color = 'red';
 o.table_pos_color = 'blue';
 

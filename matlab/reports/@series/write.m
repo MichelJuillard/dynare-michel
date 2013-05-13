@@ -42,7 +42,7 @@ assert(~isempty(o.data) && isa(o.data, 'dynSeries'), ...
 assert(ischar(o.color), '@series.write: color must be a string');
 assert(ischar(o.table_neg_color), '@series.write: table_neg_color must be a string');
 assert(ischar(o.table_pos_color), '@series.write: table_pos_color must be a string');
-assert(islogical(o.table_markers), '@series.write: table_markers must be a string');
+assert(islogical(o.showTableMarkers), '@series.write: showTableMarkers must be a string');
 assert(islogical(o.table_align_right), '@series.write: table_align_right must be a string');
 
 %% Write Output
@@ -63,7 +63,7 @@ for i=1:size(data,1)
     thisCellData = round(data(i)*precision)/precision;
 
     fprintf(fid, ' &');
-    if o.table_markers
+    if o.showTableMarkers
         if thisCellData < 0
             fprintf(fid, '\\color{%s}', o.table_neg_color);
         elseif thisCellData > 0
@@ -74,7 +74,7 @@ for i=1:size(data,1)
 
     fprintf(fid, dataString, thisCellData);
 
-    if o.table_markers
+    if o.showTableMarkers
         fprintf(fid, ']');
     end
 end
