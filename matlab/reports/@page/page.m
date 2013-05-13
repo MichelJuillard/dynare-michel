@@ -32,7 +32,7 @@ function o = page(varargin)
 o = struct;
 o.paper = '';
 o.title = {};
-o.title_format = {};
+o.titleFormat = {};
 o.orientation = '';
 o.footnote = {};
 o.sections = sections();
@@ -67,15 +67,15 @@ end
 if ischar(o.title)
     o.title = {o.title};
 end
-if ischar(o.title_format)
-    o.title_format = {o.title_format};
+if ischar(o.titleFormat)
+    o.titleFormat = {o.titleFormat};
 end
 assert(iscellstr(o.title), ...
        '@page.page: title must be a cell array of strings');
-assert(iscellstr(o.title_format), ...
-       '@page.page: title_format must be a cell array of strings');
-assert(length(o.title)==length(o.title_format), ...
-       '@page.page: title and title_format must be of the same length');
+assert(iscellstr(o.titleFormat), ...
+       '@page.page: titleFormat must be a cell array of strings');
+assert(length(o.title)==length(o.titleFormat), ...
+       '@page.page: title and titleFormat must be of the same length');
 
 valid_paper = {'a4', 'letter'};
 assert(any(strcmp(o.paper, valid_paper)), ...

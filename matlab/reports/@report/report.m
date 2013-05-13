@@ -36,7 +36,7 @@ o.title = '';
 o.orientation = 'portrait';
 o.paper = 'a4';
 o.margin = 2.5;
-o.margin_unit = 'cm';
+o.marginUnit = 'cm';
 o.pages = pages();
 o.filename = 'report.tex';
 o.config = '';
@@ -79,8 +79,8 @@ assert(islogical(o.showDate), '@report.report: showDate must be either true or f
 assert(isfloat(o.margin) && o.margin > 0, '@report.report: margin must be a float > 0.');
 
 valid_margin_unit = {'cm', 'in'};
-assert(any(strcmp(o.margin_unit, valid_margin_unit)), ...
-       ['@report.report: margin_unit must be one of ' strjoin(valid_margin_unit, ' ')]);
+assert(any(strcmp(o.marginUnit, valid_margin_unit)), ...
+       ['@report.report: marginUnit must be one of ' strjoin(valid_margin_unit, ' ')]);
 
 valid_paper = {'a4', 'letter'};
 assert(any(strcmp(o.paper, valid_paper)), ...

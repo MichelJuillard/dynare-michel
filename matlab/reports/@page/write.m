@@ -43,7 +43,7 @@ fprintf(fid,'\n');
 
 fprintf(fid, '\\begin{tabular}[t]{c}\n');
 for i=1:length(o.title)
-    fprintf(fid,'\\multicolumn{1}{c}{%s %s}\\\\\n', o.title_format{i}, o.title{i});
+    fprintf(fid,'\\multicolumn{1}{c}{%s %s}\\\\\n', o.titleFormat{i}, o.title{i});
 end
 
 o.sections.write(fid);

@@ -58,8 +58,8 @@ for i=1:ndates
         fprintf(fid, '|');
     end
     fprintf(fid, 'r');
-    if ~isempty(o.vline_after)
-        if dates(i) == o.vline_after
+    if ~isempty(o.vlineAfter)
+        if dates(i) == o.vlineAfter
             fprintf(fid, '|');
         end
     end
@@ -67,7 +67,7 @@ end
 fprintf(fid, '@{}}%%\n');
 if ~isempty(o.title)
     fprintf(fid, '\\multicolumn{%d}{c}{\\%s %s}\\\\\n', ...
-            ndates+nlhc, o.title_size, o.title);
+            ndates+nlhc, o.titleSize, o.title);
 end
 fprintf(fid, '\\toprule%%\n');
 

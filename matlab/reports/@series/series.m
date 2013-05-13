@@ -36,19 +36,19 @@ o = struct;
 o.data = '';
 
 o.color = 'k';
-o.line_style = '-';
-o.line_width = 0.5;
+o.lineStyle = '-';
+o.lineWidth = 0.5;
 
-o.graph_marker = '';
-o.graph_marker_edge_color = 'auto';
-o.graph_marker_face_color = 'auto';
-o.graph_marker_size = 6;
+o.graphMarker = '';
+o.graphMarkerEdgeColor = 'auto';
+o.graphMarkerFaceColor = 'auto';
+o.graphMarkerSize = 6;
 
 o.showTableMarkers = false;
-o.table_neg_color = 'red';
-o.table_pos_color = 'blue';
+o.tableNegColor = 'red';
+o.tablePosColor = 'blue';
 
-o.table_align_right = false;
+o.tableAlignRight = false;
 
 if nargin == 1
     assert(isa(varargin{1}, 'series'),['@series.series: with one arg you ' ...

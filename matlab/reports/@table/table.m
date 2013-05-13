@@ -34,16 +34,16 @@ o = struct;
 o.seriesElements = seriesElements();
 
 o.title = '';
-o.title_size = 'large';
+o.titleSize = 'large';
 o.footnote = '';
 
 o.config = '';
 o.hlines = false;
 o.vlines = false;
-o.vline_after = '';
+o.vlineAfter = '';
 
 o.data = '';
-o.seriestouse = '';
+o.seriesToUse = '';
 o.range = {};
 o.precision = 1;
 
@@ -86,31 +86,31 @@ assert(isempty(o.range) || (isa(o.range, 'dynDates') && o.range.ndat >= 2), ...
         '''dynDates(''1999q1''):dynDates(''1999q3'')''.']);
 assert(isempty(o.data) || isa(o.data, 'dynSeries'), ...
        '@table.table: data must be a dynSeries');
-assert(isempty(o.seriestouse) || iscellstr(o.seriestouse), ...
-       '@table.table: seriestouse must be a cell array of string(s)');
-assert(isempty(o.vline_after) || isa(o.vline_after, 'dynDate'), ...
-       '@table.table: vline_after must be a dynDate');
+assert(isempty(o.seriesToUse) || iscellstr(o.seriesToUse), ...
+       '@table.table: seriesToUse must be a cell array of string(s)');
+assert(isempty(o.vlineAfter) || isa(o.vlineAfter, 'dynDate'), ...
+       '@table.table: vlineAfter must be a dynDate');
 if o.vlines
-    o.vline_after = '';
+    o.vlineAfter = '';
 end
 valid_title_sizes = {'Huge', 'huge', 'LARGE', 'Large', 'large', 'normalsize', ...
                     'small', 'footnotesize', 'scriptsize', 'tiny'};
-assert(any(strcmp(o.title_size, valid_title_sizes)), ...
-       ['@table.table: title_size must be one of ' strjoin(valid_title_sizes, ' ')]);
+assert(any(strcmp(o.titleSize, valid_title_sizes)), ...
+       ['@table.table: titleSize must be one of ' strjoin(valid_title_sizes, ' ')]);
 
-% using o.seriestouse, create series objects and put them in o.seriesElements
+% using o.seriesToUse, create series objects and put them in o.seriesElements
 if ~isempty(o.data)
-    if isempty(o.seriestouse)
+    if isempty(o.seriesToUse)
         for i=1:o.data.vobs
             o.seriesElements = o.seriesElements.addSeries('data', o.data{o.data.name{i}});
         end
     else
-        for i=1:length(o.seriestouse)
-            o.seriesElements = o.seriesElements.addSeries('data', o.data{o.seriestouse{i}});
+        for i=1:length(o.seriesToUse)
+            o.seriesElements = o.seriesElements.addSeries('data', o.data{o.seriesToUse{i}});
         end
     end
 end
-o = rmfield(o, 'seriestouse');
+o = rmfield(o, 'seriesToUse');
 o = rmfield(o, 'data');
 
 % Create table object

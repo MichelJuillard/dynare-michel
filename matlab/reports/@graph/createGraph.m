@@ -87,8 +87,8 @@ if ~isempty(o.shade)
     % From ShadePlotForEmpahsis (Matlab Exchange)
     % use patch bc area doesn't work with matlab2tikz
     sh = patch([repmat(x1, 1, 2) repmat(x2, 1, 2)], ...
-               [yrange fliplr(yrange)], o.shade_color, ...
-               'facealpha', o.shade_opacity);
+               [yrange fliplr(yrange)], o.shadeColor, ...
+               'facealpha', o.shadeOpacity);
     children = get(gca, 'children');
     children = [children(2:end); sh];
     set(gca, 'children', children);
@@ -108,9 +108,9 @@ set(gca, 'XTickLabel', xTickLabels);
 
 if o.showLegend
     lh = legend(line_handles, o.seriesElements.getTexNames(), ...
-                'orientation', o.legend_orientation, ...
-                'location', o.legend_location);
-    set(lh, 'FontSize', o.legend_font_size);
+                'orientation', o.legendOrientation, ...
+                'location', o.legendLocation);
+    set(lh, 'FontSize', o.legendFontSize);
     set(lh, 'interpreter', 'latex');
     if ~o.showLegendBox
         legend('boxoff');

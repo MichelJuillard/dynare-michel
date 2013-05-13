@@ -40,21 +40,21 @@ assert(~isempty(o.data) && isa(o.data, 'dynSeries'), ...
        '@series.write: must provide data as a dynSeries');
 
 assert(ischar(o.color), '@series.write: color must be a string');
-assert(ischar(o.table_neg_color), '@series.write: table_neg_color must be a string');
-assert(ischar(o.table_pos_color), '@series.write: table_pos_color must be a string');
+assert(ischar(o.tableNegColor), '@series.write: tableNegColor must be a string');
+assert(ischar(o.tablePosColor), '@series.write: tablePosColor must be a string');
 assert(islogical(o.showTableMarkers), '@series.write: showTableMarkers must be a string');
-assert(islogical(o.table_align_right), '@series.write: table_align_right must be a string');
+assert(islogical(o.tableAlignRight), '@series.write: tableAlignRight must be a string');
 
 %% Write Output
 dataString = ['%.' num2str(precision) 'f'];
 precision  = 10^precision;
 
 fprintf(fid, '%% Table Row (series)\n');
-if o.table_align_right
+if o.tableAlignRight
     fprintf(fid, '\\multicolumn{1}{r}{');
 end
 fprintf(fid, '%s', o.data.tex{:});
-if o.table_align_right
+if o.tableAlignRight
     fprintf(fid, '}');
 end
 data = o.data(dates);
@@ -65,9 +65,9 @@ for i=1:size(data,1)
     fprintf(fid, ' &');
     if o.showTableMarkers
         if thisCellData < 0
-            fprintf(fid, '\\color{%s}', o.table_neg_color);
+            fprintf(fid, '\\color{%s}', o.tableNegColor);
         elseif thisCellData > 0
-            fprintf(fid, '\\color{%s}', o.table_pos_color);
+            fprintf(fid, '\\color{%s}', o.tablePosColor);
         end
         fprintf(fid, '[');
     end
