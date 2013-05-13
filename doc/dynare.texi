@@ -577,7 +577,7 @@ addpath /Applications/Dynare/4.@var{x}.@var{y}/matlab
 
 If you don't want to type this command every time you run Octave, you
 can put it in a file called @file{.octaverc} in your home directory
-(under Windows this will generally by @file{c:\Documents and
+(under Windows this will generally be @file{c:\Documents and
 Settings\USERNAME\}). This file is run by Octave at every startup.
 
 @node Some words of warning
@@ -595,8 +595,8 @@ your configuration). You must verify that there is no directory coming
 from another version of Dynare than the one you are planning to use.
 
 You have to be aware that adding other directories to your path can
-potentially create problems, if some of your M-files have the same names
-than Dynare files. Your files would then override Dynare files, and make
+potentially create problems if any of your M-files have the same name
+as a Dynare file. Your file would then override the Dynare file, making
 Dynare unusable.
 
 @node Dynare invocation
