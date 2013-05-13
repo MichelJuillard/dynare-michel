@@ -578,7 +578,8 @@ addpath /Applications/Dynare/4.@var{x}.@var{y}/matlab
 If you don't want to type this command every time you run Octave, you
 can put it in a file called @file{.octaverc} in your home directory
 (under Windows this will generally be @file{c:\Documents and
-Settings\USERNAME\}). This file is run by Octave at every startup.
+Settings\USERNAME\} while under Mac OS X it is @file{/Users/USERNAME/}).
+This file is run by Octave at every startup.
 
 @node Some words of warning
 @subsection Some words of warning
