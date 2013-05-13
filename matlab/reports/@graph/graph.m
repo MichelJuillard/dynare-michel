@@ -52,7 +52,7 @@ o.shade = '';
 o.shade_color = [0 1 0];
 o.shade_opacity = .2;
 
-o.grid = true;
+o.showGrid = true;
 
 o.legend = false;
 o.legend_boxoff = false;
@@ -93,7 +93,7 @@ assert(ischar(o.config), '@graph.graph: config file must be a string');
 assert(ischar(o.xlabel), '@graph.graph: xlabel file must be a string');
 assert(ischar(o.ylabel), '@graph.graph: ylabel file must be a string');
 assert(ischar(o.figname), '@graph.graph: figname must be a string');
-assert(islogical(o.grid), '@graph.graph: grid must be either true or false');
+assert(islogical(o.showGrid), '@graph.graph: showGrid must be either true or false');
 assert(islogical(o.legend), '@graph.graph: legend must be either true or false');
 assert(islogical(o.legend_boxoff), '@graph.graph: legend_boxoff must be either true or false');
 assert(isint(o.legend_font_size), '@graph.graph: legend_font_size must be an integer');

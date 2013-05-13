@@ -41,7 +41,7 @@ end
 h = figure('visible','off');
 hold on;
 box on;
-if o.grid
+if o.showGrid
     grid on;
     set(gca, 'GridLineStyle', '--');
 end
