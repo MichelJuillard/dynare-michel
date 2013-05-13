@@ -7656,6 +7656,354 @@ MatlabOctavePath = matlab
 
 @end deffn
 
+@node Reporting
+@chapter Reporting
+
+Dynare provides a simple interface for creating @LaTeX{} reports,
+comprised of @LaTeX{} tables and TikZ graphs. You can use the report as
+created through Dynare or pick out the pieces you want for inclusion
+in your own paper.
+
+Reports are created and modified by calling methods on class
+objects. The objects are hierarchichal, with the following order (from
+highest to lowest): @code{Report, Page, Section, Graph/Table/Vspace,
+Series}. For simplicity of syntax, we abstract away from these
+classes, allowing you to operate directly on a @code{Report} object,
+while maintaining the names of these classes in the @code{Report}
+Class methods you will use.
+
+The report is created sequentially, command by command, hence the
+order of the commands matters. When an object of a certain hierarchy
+is inserted, all methods will function on that object until an object
+of equal or greater hierarchy is added. Hence, once you add a
+@code{Page} to the report, every time you add a @code{Section} object,
+it will be added to this @code{Page} until another @code{Page} is
+added to the report (via @ref{addPage}). This will become more clear
+with the example at the end of the section.
+
+Options to the methods are passed differently than those to Dynare
+commands. They take the form of named options to Matlab functions
+where the arguments come in pairs (@i{e.g.}
+@code{function_name(`option_1_name', `option_1_value',
+`option_2_name', `option_2_value', ...)}, where @code{option_X_name}
+is the name of the option while @code{option_X_value} is the value
+assigned to that option). The ordering of the option pairs matters
+only in the unusual case when an option is provided twice (probably
+erroneously). In this case, the last value passed is the one that is
+used.
+
+Below, you will see a list of methods available for the Report class and
+a clarifying example.
+
+@defmethod Report report compiler, showDate, filename, margin, marginUnit, orientation, paper, title
+Instantiates a @code{Report} object.
+@optionshead
+@table @code
+@item compiler, @var{FILENAME}
+The full path to the @LaTeX{} compiler on your system. If this option
+is not provided, Dynare will try to find the appropriate program to
+compile @LaTeX{} on your system. Default is system dependent: Windows:
+?, Mac OS X: @code{/usr/texbin/pdflatex}, Linux: the result of
+@code{which pdflatex}
+
+@item showDate, @code{BOOLEAN}
+Display the date and time when the report was compiled. Default:
+@code{true}
+
+@anchor{filename}
+@item filename, @var{FILENAME}
+The filename to use when saving this report. Default:
+@code{report.tex}
+
+@item margin, @var{DOUBLE}
+The margin size. Default: @code{2.5}
+
+@item marginUnit, `cm' | `in'
+Units associated with the margin. Default: @code{`cm'}
+
+@anchor{orientation}
+@item orientation, `landscape' | `portrait'
+Paper orientation: Default: @code{`portrait'}
+
+@anchor{paper}
+@item paper, `a4' | `letter'
+Paper size. Default: @code{`a4'}
+
+@item title, @code{STRING}
+Report Title. Default: @code{none}
+@end table
+@end defmethod
+
+@anchor{addPage}
+@defmethod Report addPage footnote, orientation, paper, title, titleFormat
+Adds a @code{Page} to the @code{Report}.
+@optionshead
+@table @code
+@item footnote, @code{STRING}
+A footnote to be included at the bottom of this page. Default: @code{none}
+
+@item orientation, `landscape' | `portrait'
+@xref{orientation}.
+
+@item paper, `a4' | `letter'
+@xref{paper}.
+
+@anchor{title}
+@item title, @code{STRING} | @code{CELL_ARRAY_STRINGS}
+With one entry (a @code{STRING}), the title of the page. With more
+than one entry (a @code{CELL_ARRAY_STRINGS}), the title and subtitle(s)
+of the page. Default: @code{none}
+
+@anchor{titleFormat}
+@item titleFormat, @code{STRING} | @code{CELL_ARRAY_STRINGS}
+A string representing the @LaTeX{} markup to use on the
+@ref{title}. The number of cell array entries must be equal to that of
+the @ref{title} option. Default: @code{none}
+
+@end table
+@end defmethod
+
+@defmethod Report addSection cols, height
+Adds a @code{Section} to a @code{Page}.
+@optionshead
+@table @code
+@item cols, @code{INTEGER}
+The number of columns in the section. Default: @code{1}
+
+@item height, @code{STRING}
+A string to be used with the @code{\sectionheight} @LaTeX{}
+command. Default: @code{`!'}
+@end table
+@end defmethod
+
+@defmethod Report addGraph data, figname, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, xlabel, ylabel, xrange, yrange, showZeroline
+Adds a @code{Graph} to a @code{Section}.
+@optionshead
+@table @code
+@anchor{data}
+@item data, @code{dynSeries}
+The @code{dynSeries} that provides the data for the graph. Default:
+@code{none}
+
+@item figname, @code{STRING}
+The name to use when saving this figure. Default: @code{[tempname
+`.tex']}
+
+@item showGrid, @code{BOOLEAN}
+Whether or not to display the minor grid on the graph. Default:
+@code{true}
+
+@item showLegend, @code{BOOLEAN}
+Whether or not to display the legend. Default: @code{false}
+
+@item showLegendBox, @code{BOOLEAN}
+Whether or not to display a box around the legend. Default:
+@code{false}
+
+@item legendLocation, `North' | `South' | `East' | `West' | `NorthEast' | `SouthEast' | `NorthWest' | `SouthWest' | `NorthOutside' | `SouthOutside' | `EastOutside' | `WestOutside' | `NorthEastOutside' | `SouthEastOutside' | `NorthWestOutside' | `SouthWestOutside' | `Best' | `BestOutside'
+Where to place the legend in the graph. NB: some of these are not
+available under Octave. Default: @code{`SouthEast'}
+
+@item legendOrientation, `vertical' | `horizontal'
+Orientation of the legend. Default: @code{`horizontal'}
+
+@item legendFontSize, @code{DOUBLE}
+The font size for legend entries. Default: @code{8}
+
+@anchor{seriesToUse}
+@item seriesToUse, @code{CELL_ARRAY_STRINGS}
+The names of the series contained in the @code{dynSeries} provided to
+the @xref{data} option. If empty, use all series provided to
+@xref{data}. Default: @code{empty}
+
+@item shade, @code{dynDate}:@code{dynDate}
+A @code{dynDates} range showing the portion of the graph that should
+be shaded. Default: @code{none}
+
+@item shadeColor, @code{MATLAB_COLOR_NAME}
+The color to use in the shaded portion of the graph. Default:
+@code{`green'}
+
+@item shadeOpacity, @code{DOUBLE}
+The opacity of the shaded area, must be in [0,1]. Default: @code{.2}
+
+@item title, @code{STRING}
+Title for the graph. Default: @code{none}
+
+@item xlabel, @code{STRING}
+The x-axis label. Default: @code{none}
+
+@item ylabel, @code{STRING}
+The y-axis label. Default: @code{none}
+
+@item xrange, @code{dynDate}:@code{dynDate}
+The boundary on the x-axis to display in the graph, represented as a
+@code{dynDate} range. Default: all
+
+@item yrange, @code{dynDate}:@code{dynDate}
+The boundary on the y-axis to display in the graph, represented as a
+@code{dynDate} range. Default: all
+
+@item showZeroline, @code{BOOLEAN}
+Display a solid black line at y = 0. Default: @code{false}
+
+@end table
+@end defmethod
+
+@defmethod Report addTable data, showHlines, precision, range, seriesToUse, title, titleSize, vlineAfter, showVlines
+Adds a @code{Table} to a @code{Section}.
+@optionshead
+@table @code
+
+@item data, @code{dynSeries}
+@xref{data}
+
+@item showHlines, @code{BOOLEAN}
+Whether or not to show horizontal lines separating the rows. Default: @code{false}
+
+@item precision, @code{INTEGER}
+The number of decimal places to report in the table data. Default: @code{1}
+
+@item range, @code{dynDate}:@code{dynDate}
+The date range of the data to be displayed. Default: @code{all}
+
+@item seriesToUse, @code{CELL_ARRAY_STRINGS}
+@xref{seriesToUse}
+
+@item title, @code{STRING}
+Title for the table. Default: @code{none}
+
+@item titleSize, @code{STRING}
+@LaTeX{} string representing the size of the table title. Default: @code{large}
+
+@item vlineAfter, @code{dynDate}
+Show a vertical line after the specified date. Default: @code{empty}
+
+@item showVlines, @code{BOOLEAN}
+Whether or not to show vertical lines separating the columns. Default: @code{false}
+@end table
+@end defmethod
+
+@anchor{addSeries}
+@defmethod Report addSeries data, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor
+Adds a @code{Series} to a @code{Graph} or a @code{Table}.
+@optionshead
+@table @code
+
+@item data, @code{dynSeries}
+@xref{data}
+
+@item graphLineColor, @code{MATLAB_COLOR}
+Color to use for the series in a graph. Default: @code{`k'}
+
+@item graphLineStyle, @code{`none'} | @code{`-'} | @code{`--'} | @code{`:'} | @code{`-.'}
+Line style for this series in a graph. Default: @code{'-'}
+
+@item graphLineWidth @code{DOUBLE}
+Line width for this series in a graph. Default: @code{0.5}
+
+@item graphMarker, @code{`+'} | @code{`o'} | @code{`*'} | @code{`.'} | @code{`x'} | @code{`s'} | @code{`square'} | @code{`d'} | @code{`diamond'} | @code{`^'} | @code{`v'} | @code{`>'} | @code{`<'} | @code{`p'} | @code{`pentagram'} | @code{`h'} | @code{`hexagram'} | @code{`none'}
+The Marker to use on this series in a graph. Default: @code{none}
+
+@item graphMarkerEdgeColor, @code{MATLAB_COLOR}
+The edge color of the graph marker. Default: @code{`auto'}
+
+@item graphMarkerFaceColor, @code{MATLAB_COLOR}
+The face color of the graph marker. Default: @code{`auto'}
+
+@item graphMarkerSize, @code{DOUBLE}
+The size of the graph marker. Default: @code{6}
+
+@item tableShowMarkers, @code{BOOLEAN}
+In a Table, if @code{true}, surround each cell with brackets and color
+it according to @ref{tableNegColor} and @ref{tablePosColor}. No effect
+for graphs. Default: @code{false}
+
+@item tableAlignRight, @code{BOOLEAN}
+Whether or not to align the series name to the right of the
+cell. Default: @code{false}
+
+@anchor{tableNegColor}
+@item tableNegColor, @code{LATEX_COLOR}
+The color to use when marking Table data that is less than
+zero. Default: @code{`red'}
+
+@anchor{tablePosColor}
+@item tablePosColor, @code{LATEX_COLOR}
+The color to use when marking Table data that is greater than
+zero. Default: @code{`blue'}
+
+@end table
+@end defmethod
+
+@defmethod Report addVspace hline, number
+Adds a @code{Vspace} (vertical space) to a @code{Section}.
+@optionshead
+@table @code
+@item hline, @code{INTEGER}
+The number of horizontal lines to be inserted. Default: @code{0}
+
+@item number, @code{INTEGER}
+The number of new lines to be inserted. Default: @code{1}
+@end table
+@end defmethod
+
+@anchor{write}
+@defmethod Report write
+Writes the @LaTeX{} representation of this @code{Report}, saving it to
+the file specified by @ref{filename}.
+@end defmethod
+
+@defmethod Report compile
+Compiles the report written by @ref{write} into a @code{pdf} file. If
+the report has not already been written (determined by the existence
+of the file specified by @ref{filename}, @ref{write} is called.
+@end defmethod
+
+@examplehead
+
+The following code creates a one page report. The first part of the
+page contains two graphs displayed across two columns and one
+row. The bottom of the page displays a centered table.
+@example
+dsq = dynSeries(`quarterly.csv');
+dsa = dynSeries(`annual.csv');
+dsca = dynSeries(`annual_control.csv');
+rep = report();
+rep = rep.addPage(`title', `My Page Title', `titleFormat', `\large\bfseries');
+rep = rep.addSection(`cols', 2);
+rep = rep.addGraph(`title', `Graph (1,1)', `showLegend', true, ...
+                   `xrange', dynDate(`2007q1'):dynDate(`2013q4'), ...
+                   `shade', dynDate(`2012q2'):dynDate(`2013q4'));
+rep = rep.addSeries(`data', dsq@{`SERIES1'@}, `color', `b', ...
+                    `graphLineWidth', 1);
+rep = rep.addSeries(`data', dsq@{`SERIES2'@}, `color', `g', ...
+                    `graphLineStyle', '--', `graphLineWidth', 1.5);
+rep = rep.addGraph(`title', `Graph (1,2)', `showLegend', true, ...
+                   `xrange', dynDate(`2007q1'):dynDate(`2013q4'), ...
+                   `shade', dynDate(`2012q2'):dynDate(`2013q4'));
+rep = rep.addSeries(`data', dsq@{`SERIES3'@}, `color', `b', ...
+                    `graphLineWidth', 1);
+rep = rep.addSeries(`data', dsq@{`SERIES4'@}, `color', `g', ...
+                    `graphLineStyle', '--', `graphLineWidth', 1.5);
+rep = rep.addSection();
+rep = rep.addTable(`title', `Table 1', ...
+                   `range', dynDate(`2012'):dynDate(`2014'));
+shortNames = @{`US', `EU'@};
+longNames  = @{`United States', `Euro Area'@};
+for i=1:length(shortNames)
+    rep = rep.addSeries(`data', dsa@{[`GDP_' shortNames@{i@}]@});
+    delta = dsa@{[`GDP_' shortNames@{i@}]@}-dsca@{[`GDP_' shortNames@{i@}]@};
+    delta = delta.tex_rename(`$\Delta$');
+    rep = rep.addSeries(`data', delta, ...
+                        `tableShowMarkers', true, ...
+                        `tableAlignRight', true);
+end
+rep.write();
+rep.compile();
+@end example
+
+
 @node Examples
 @chapter Examples
 
