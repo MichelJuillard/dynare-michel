@@ -1669,7 +1669,7 @@ for a stochastic model, exogenous variables with leads or lags will
 also have been replaced by new auxiliary variables and equations.
 @end itemize
 
-Compiling the TeX file requires the following Latex packages: 
+Compiling the TeX file requires the following LaTeX packages:
 @code{geometry}, @code{fullpage}, @code{breqn}.
 
 @end deffn
@@ -1697,7 +1697,7 @@ optional @code{steady_state_model} block (@pxref{steady_state_model});
 it will rather output a static version (@i{i.e.} without leads and
 lags) of the dynamic model declared in the @code{model} block.
 
-Compiling the TeX file requires the following Latex packages: 
+Compiling the TeX file requires the following LaTeX packages:
 @code{geometry}, @code{fullpage}, @code{breqn}.
 
 @end deffn
