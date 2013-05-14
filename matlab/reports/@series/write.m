@@ -39,7 +39,6 @@ assert(isint(precision));
 assert(~isempty(o.data) && isa(o.data, 'dynSeries'), ...
        '@series.write: must provide data as a dynSeries');
 
-assert(ischar(o.color), '@series.write: color must be a string');
 assert(ischar(o.tableNegColor), '@series.write: tableNegColor must be a string');
 assert(ischar(o.tablePosColor), '@series.write: tablePosColor must be a string');
 assert(islogical(o.showTableMarkers), '@series.write: showTableMarkers must be true or false');
