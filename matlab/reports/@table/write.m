@@ -125,7 +125,7 @@ fprintf(fid, '%%\n');
 ne = o.seriesElements.numElements();
 for i=1:ne
     o.seriesElements(i).write(fid, dates, o.precision);
-    if o.hlines
+    if o.showHlines
         fprintf(fid, '\\hline\n');
     end
 end

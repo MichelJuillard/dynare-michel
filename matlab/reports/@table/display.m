@@ -40,9 +40,9 @@ disp(' ');
 disp(['     ''' o.footnote '''']);
 
 disp(' ');
-disp([name '.hlines = ']);
+disp([name '.showHlines = ']);
 disp(' ');
-disp(o.hlines);
+disp(o.showHlines);
 
 disp(' ');
 disp([name '.showVlines = ']);

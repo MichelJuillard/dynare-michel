@@ -38,7 +38,7 @@ o.titleSize = 'large';
 o.footnote = '';
 
 o.config = '';
-o.hlines = false;
+o.showHlines = false;
 o.showVlines = false;
 o.vlineAfter = '';
 
@@ -78,7 +78,7 @@ end
 assert(ischar(o.title), '@table.table: title must be a string');
 assert(ischar(o.footnote), '@table.table: footnote must be a string');
 assert(ischar(o.config), '@table.table: config file must be a string');
-assert(islogical(o.hlines), '@table.table: hlines must be true or false');
+assert(islogical(o.showHlines), '@table.table: showHlines must be true or false');
 assert(islogical(o.showVlines), '@table.table: showVlines must be true or false');
 assert(isint(o.precision), '@table.table: precision must be an int');
 assert(isempty(o.range) || (isa(o.range, 'dynDates') && o.range.ndat >= 2), ...
