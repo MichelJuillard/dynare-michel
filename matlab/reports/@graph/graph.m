@@ -49,7 +49,7 @@ o.xrange = '';
 o.yrange = '';
 
 o.shade = '';
-o.shadeColor = [0 1 0];
+o.shadeColor = 'green';
 o.shadeOpacity = .2;
 
 o.showGrid = true;
@@ -99,6 +99,7 @@ assert(islogical(o.showLegend), '@graph.graph: showLegend must be either true or
 assert(islogical(o.showLegendBox), '@graph.graph: showLegendBox must be either true or false');
 assert(isint(o.legendFontSize), '@graph.graph: legendFontSize must be an integer');
 assert(islogical(o.showZeroline), '@graph.graph: showZeroline must be either true or false');
+assert(ischar(o.shadeColor), '@graph.graph: shadeColor must be a string');
 assert(isfloat(o.shadeOpacity) && length(o.shadeOpacity)==1 && ...
        o.shadeOpacity >= 0 && o.shadeOpacity <= 1, ...
        '@graph.graph: o.shadeOpacity must be a real in [0 1]');
