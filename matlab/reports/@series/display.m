@@ -50,22 +50,43 @@ disp(' ');
 disp(['     ''' o.graphLineWidth '''']);
 
 disp(' ');
-disp([name '.graph_marker = ']);
+disp([name '.graphMarker = ']);
 disp(' ');
-disp(['     ''' o.graph_marker '''']);
+disp(['     ''' o.graphMarker '''']);
 
 disp(' ');
-disp([name '.graph_marker_edge_color = ']);
+disp([name '.graphMarkerEdgeColor = ']);
 disp(' ');
-disp(['     ''' o.graph_marker_edge_color '''']);
+disp(['     ''' o.graphMarkerEdgeColor '''']);
 
 disp(' ');
-disp([name '.graph_marker_face_color = ']);
+disp([name '.graphMarkerFaceColor = ']);
 disp(' ');
-disp(['     ''' o.graph_marker_face_color '''']);
+disp(['     ''' o.graphMarkerFaceColor '''']);
 
 disp(' ');
-disp([name '.graph_marker_size = ']);
+disp([name '.graphMarkerSize = ']);
 disp(' ');
-disp(['     ''' o.graph_marker_size '''']);
+disp(['     ''' o.graphMarkerSize '''']);
+
+disp(' ');
+disp([name '.tableAlignRight = ']);
+disp(' ');
+disp(['     ''' o.tableAlignRight '''']);
+
+disp(' ');
+disp([name '.tableNegColor = ']);
+disp(' ');
+disp(['     ''' o.tableNegColor '''']);
+
+disp(' ');
+disp([name '.tablePosColor = ']);
+disp(' ');
+disp(['     ''' o.tablePosColor '''']);
+
+disp(' ');
+disp([name '.tableShowMarkers = ']);
+disp(' ');
+disp(['     ''' o.tableShowMarkers '''']);
+
 end
