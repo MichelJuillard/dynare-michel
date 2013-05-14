@@ -36,8 +36,8 @@ assert(~isempty(o.data) && isa(o.data, 'dynSeries'), ['@series.getLine: must ' .
 % Line
 assert(ischar(o.graphLineColor), '@series.getLine: graphLineColor must be a string');
 valid_line_style = {'none', '-', '--', ':', '-.'};
-assert(any(strcmp(o.lineStyle, valid_line_style)), ...
-       ['@series.getLine: lineStyle must be one of ' strjoin(valid_line_style, ' ')]);
+assert(any(strcmp(o.graphLineStyle, valid_line_style)), ...
+       ['@series.getLine: graphLineStyle must be one of ' strjoin(valid_line_style, ' ')]);
 assert(isfloat(o.lineWidth), ['@series.getLine: lineWidth must be a ' ...
                     'positive number']);
 
@@ -54,8 +54,8 @@ assert(isfloat(o.graphMarkerSize), ['@series.getLine: graphMarkerSize must be a 
                     'positive number']);
 
 % Marker & Line
-assert(~(strcmp(o.lineStyle, 'none') && isempty(o.graphMarker)), ['@series.getLine: ' ...
-                    'you must provide at least one of lineStyle and graphMarker']);
+assert(~(strcmp(o.graphLineStyle, 'none') && isempty(o.graphMarker)), ['@series.getLine: ' ...
+                    'you must provide at least one of graphLineStyle and graphMarker']);
 
 % Validate xrange
 assert(isempty(xrange) || isa(xrange, 'dynDates'));
@@ -71,7 +71,7 @@ opt = {'XData', 1:length(ds.data)};
 opt = {opt{:}, 'YData', ds.data};
 
 opt = {opt{:}, 'Color', o.graphLineColor};
-opt = {opt{:}, 'LineStyle', o.lineStyle};
+opt = {opt{:}, 'LineStyle', o.graphLineStyle};
 opt = {opt{:}, 'LineWidth', o.lineWidth};
 
 if ~isempty(o.graphMarker)

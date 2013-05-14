@@ -40,9 +40,9 @@ disp(' ');
 disp(['     ''' o.graphLineColor '''']);
 
 disp(' ');
-disp([name '.line_style = ']);
+disp([name '.graphLineStyle = ']);
 disp(' ');
-disp(['     ''' o.line_style '''']);
+disp(['     ''' o.graphLineStyle '''']);
 
 disp(' ');
 disp([name '.line_width = ']);
