@@ -45,9 +45,9 @@ disp(' ');
 disp(['     ''' o.graphLineStyle '''']);
 
 disp(' ');
-disp([name '.line_width = ']);
+disp([name '.graphLineWidth = ']);
 disp(' ');
-disp(['     ''' o.line_width '''']);
+disp(['     ''' o.graphLineWidth '''']);
 
 disp(' ');
 disp([name '.graph_marker = ']);

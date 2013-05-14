@@ -37,7 +37,7 @@ o.data = '';
 
 o.graphLineColor = 'k';
 o.graphLineStyle = '-';
-o.lineWidth = 0.5;
+o.graphLineWidth = 0.5;
 
 o.graphMarker = '';
 o.graphMarkerEdgeColor = 'auto';

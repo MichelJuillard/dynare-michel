@@ -38,7 +38,7 @@ assert(ischar(o.graphLineColor), '@series.getLine: graphLineColor must be a stri
 valid_line_style = {'none', '-', '--', ':', '-.'};
 assert(any(strcmp(o.graphLineStyle, valid_line_style)), ...
        ['@series.getLine: graphLineStyle must be one of ' strjoin(valid_line_style, ' ')]);
-assert(isfloat(o.lineWidth), ['@series.getLine: lineWidth must be a ' ...
+assert(isfloat(o.graphLineWidth), ['@series.getLine: graphLineWidth must be a ' ...
                     'positive number']);
 
 % GraphMarker
@@ -72,7 +72,7 @@ opt = {opt{:}, 'YData', ds.data};
 
 opt = {opt{:}, 'Color', o.graphLineColor};
 opt = {opt{:}, 'LineStyle', o.graphLineStyle};
-opt = {opt{:}, 'LineWidth', o.lineWidth};
+opt = {opt{:}, 'LineWidth', o.graphLineWidth};
 
 if ~isempty(o.graphMarker)
     opt = {opt{:}, 'Marker', o.graphMarker};
