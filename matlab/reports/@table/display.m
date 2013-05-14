@@ -45,9 +45,9 @@ disp(' ');
 disp(o.hlines);
 
 disp(' ');
-disp([name '.vlines = ']);
+disp([name '.showVlines = ']);
 disp(' ');
-disp(o.vlines);
+disp(o.showVlines);
 
 disp(' ');
 disp([name '.precision = ']);

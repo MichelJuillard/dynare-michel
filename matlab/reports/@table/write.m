@@ -54,7 +54,7 @@ fprintf(fid, '\\setlength{\\tabcolsep}{4pt}\n');
 fprintf(fid, '\\begin{tabular}{@{}l');
 
 for i=1:ndates
-    if o.vlines
+    if o.showVlines
         fprintf(fid, '|');
     end
     fprintf(fid, 'r');
