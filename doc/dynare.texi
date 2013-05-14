@@ -866,8 +866,8 @@ alphabetical character and can't contain: @samp{()+-*/^=!;:@@#.} or
 accentuated characters;
 
 @item
-@var{LATEX_NAME} indicates a valid LaTeX expression in math mode (not
-including the dollar signs);
+@var{LATEX_NAME} indicates a valid @LaTeX{} expression in math mode
+(not including the dollar signs);
 
 @item
 @var{FUNCTION_NAME} indicates a valid MATLAB function name;
@@ -892,9 +892,9 @@ Declarations of variables and parameters are made with the following commands:
 
 This required command declares the endogenous variables in the
 model. @xref{Conventions}, for the syntax of @var{VARIABLE_NAME} and
-@var{MODEL_EXPRESSION}. Optionally it is possible to give a LaTeX name
-to the variable or, if it is nonstationary, provide information regarding
-its deflator.
+@var{MODEL_EXPRESSION}. Optionally it is possible to give a @LaTeX{}
+name to the variable or, if it is nonstationary, provide information
+regarding its deflator.
 
 @code{var} commands can appear several times in the file and Dynare will
 concatenate them.
@@ -939,7 +939,7 @@ var(deflator=A) i b;
 
 This optional command declares the exogenous variables in the model.
 @xref{Conventions}, for the syntax of @var{VARIABLE_NAME}. Optionally it
-is possible to give a LaTeX name to the variable.
+is possible to give a @LaTeX{} name to the variable.
 
 Exogenous variables are required if the user wants to be able to apply
 shocks to her model.
@@ -961,8 +961,8 @@ varexo m gov;
 
 This optional command declares exogenous deterministic variables in a
 stochastic model. See @ref{Conventions}, for the syntax of
-@var{VARIABLE_NAME}. Optionally it is possible to give a LaTeX name to
-the variable.
+@var{VARIABLE_NAME}. Optionally it is possible to give a @LaTeX{} name
+to the variable.
 
 It is possible to mix deterministic and stochastic shocks to build
 models where agents know from the start of the simulation about future
@@ -993,7 +993,7 @@ varexo_det tau;
 This command declares parameters used in the model, in variable
 initialization or in shocks declarations. See @ref{Conventions}, for the
 syntax of @var{PARAMETER_NAME}. Optionally it is possible to give a
-LaTeX name to the parameter.
+@LaTeX{} name to the parameter.
 
 The parameters must subsequently be assigned values (@pxref{Parameter
 initialization}).
@@ -1100,9 +1100,9 @@ end;
 @descriptionhead
 
 This optional command declares the trend variables in the
-model. @xref{Conventions}, for the syntax of @var{MODEL_EXPRESSION} and
-@var{VARIABLE_NAME}. Optionally it is possible to give a LaTeX name to
-the variable.
+model. @xref{Conventions}, for the syntax of @var{MODEL_EXPRESSION}
+and @var{VARIABLE_NAME}. Optionally it is possible to give a @LaTeX{}
+name to the variable.
 
 The variable is assumed to have a multiplicative growth trend. For an
 additive growth trend, use @code{log_trend_var} instead.
@@ -1621,7 +1621,7 @@ end;
 @end deffn
 
 Dynare has the ability to output the list of model equations to a
-LaTeX file, using the @code{write_latex_dynamic_model} command. The
+@LaTeX{} file, using the @code{write_latex_dynamic_model} command. The
 static model can also be written with the
 @code{write_latex_static_model} command.
 
@@ -1631,21 +1631,21 @@ static model can also be written with the
 
 @descriptionhead
 
-This command creates a LaTeX file containing the (dynamic) model.
+This command creates a @LaTeX{} file containing the (dynamic) model.
 
 If your @file{.mod} file is @file{@var{FILENAME}.mod}, then Dynare
 will create a file called @file{@var{FILENAME}_dynamic.tex},
 containing the list of all the dynamic model equations.
 
-If LaTeX names were given for variables and parameters
+If @LaTeX{} names were given for variables and parameters
 (@pxref{Variable declarations}), then those will be used; otherwise,
 the plain text names will be used.
 
 Time subscripts (@code{t}, @code{t+1}, @code{t-1}, @dots{}) will be
-appended to the variable names, as LaTeX subscripts.
+appended to the variable names, as @LaTeX{} subscripts.
 
-Note that the model written in the TeX file will differ from the model
-declared by the user in the following dimensions:
+Note that the model written in the @TeX{} file will differ from the
+model declared by the user in the following dimensions:
 
 @itemize
 
@@ -1669,7 +1669,7 @@ for a stochastic model, exogenous variables with leads or lags will
 also have been replaced by new auxiliary variables and equations.
 @end itemize
 
-Compiling the TeX file requires the following LaTeX packages:
+Compiling the @TeX{} file requires the following @LaTeX{} packages:
 @code{geometry}, @code{fullpage}, @code{breqn}.
 
 @end deffn
@@ -1678,18 +1678,18 @@ Compiling the TeX file requires the following LaTeX packages:
 
 @descriptionhead
 
-This command creates a LaTeX file containing the static model.
+This command creates a @LaTeX{} file containing the static model.
 
 If your @file{.mod} file is @file{@var{FILENAME}.mod}, then Dynare
 will create a file called @file{@var{FILENAME}_static.tex}, containing
 the list of all the equations of the steady state model.
 
-If LaTeX names were given for variables and parameters
+If @LaTeX{} names were given for variables and parameters
 (@pxref{Variable declarations}), then those will be used; otherwise,
 the plain text names will be used.
 
-Note that the model written in the TeX file will differ from the model
-declared by the user in the some dimensions
+Note that the model written in the @TeX{} file will differ from the
+model declared by the user in the some dimensions
 (@pxref{write_latex_dynamic_model} for details).
 
 Also note that this command will not output the contents of the
@@ -1697,7 +1697,7 @@ optional @code{steady_state_model} block (@pxref{steady_state_model});
 it will rather output a static version (@i{i.e.} without leads and
 lags) of the dynamic model declared in the @code{model} block.
 
-Compiling the TeX file requires the following LaTeX packages:
+Compiling the @TeX{} file requires the following @LaTeX{} packages:
 @code{geometry}, @code{fullpage}, @code{breqn}.
 
 @end deffn
@@ -4361,9 +4361,9 @@ distribution of forecasts is stored in variables
 these variables.
 
 @item tex
-@anchor{tex} Requests the printing of results and graphs in TeX tables
-and graphics that can be later directly included in LaTeX files (not
-yet implemented)
+@anchor{tex} Requests the printing of results and graphs in @TeX{}
+tables and graphics that can be later directly included in @LaTeX{}
+files (not yet implemented)
 
 @item kalman_algo = @var{INTEGER}
 @anchor{kalman_algo}
