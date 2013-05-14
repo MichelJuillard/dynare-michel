@@ -34,7 +34,7 @@ assert(~isempty(o.data) && isa(o.data, 'dynSeries'), ['@series.getLine: must ' .
                     'provide data as a dynSeries']);
 
 % Line
-assert(ischar(o.color), '@series.getLine: color must be a string');
+assert(ischar(o.graphLineColor), '@series.getLine: graphLineColor must be a string');
 valid_line_style = {'none', '-', '--', ':', '-.'};
 assert(any(strcmp(o.lineStyle, valid_line_style)), ...
        ['@series.getLine: lineStyle must be one of ' strjoin(valid_line_style, ' ')]);
@@ -70,7 +70,7 @@ end
 opt = {'XData', 1:length(ds.data)};
 opt = {opt{:}, 'YData', ds.data};
 
-opt = {opt{:}, 'Color', o.color};
+opt = {opt{:}, 'Color', o.graphLineColor};
 opt = {opt{:}, 'LineStyle', o.lineStyle};
 opt = {opt{:}, 'LineWidth', o.lineWidth};
 

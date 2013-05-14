@@ -35,9 +35,9 @@ disp(' ');
 display(o.data);
 
 disp(' ');
-disp([name '.color = ']);
+disp([name '.graphLineColor = ']);
 disp(' ');
-disp(['     ''' o.color '''']);
+disp(['     ''' o.graphLineColor '''']);
 
 disp(' ');
 disp([name '.line_style = ']);
