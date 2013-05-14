@@ -44,7 +44,7 @@ o.graphMarkerEdgeColor = 'auto';
 o.graphMarkerFaceColor = 'auto';
 o.graphMarkerSize = 6;
 
-o.showTableMarkers = false;
+o.tableShowMarkers = false;
 o.tableNegColor = 'red';
 o.tablePosColor = 'blue';
 
