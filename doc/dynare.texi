@@ -7700,6 +7700,7 @@ a clarifying example.
 Instantiates a @code{Report} object.
 @optionshead
 @table @code
+@anchor{compiler}
 @item compiler, @var{FILENAME}
 The full path to the @LaTeX{} compiler on your system. If this option
 is not provided, Dynare will try to find the appropriate program to
@@ -7955,10 +7956,18 @@ Writes the @LaTeX{} representation of this @code{Report}, saving it to
 the file specified by @ref{filename}.
 @end defmethod
 
-@defmethod Report compile
+@defmethod Report compile compiler
 Compiles the report written by @ref{write} into a @code{pdf} file. If
 the report has not already been written (determined by the existence
 of the file specified by @ref{filename}, @ref{write} is called.
+optionshead
+@table @code
+@item compiler, @code{FILENAME}
+Like @ref{compiler}, except will not overwrite the value of
+@code{compiler} contained in the report object. Hence, passing the
+value here is useful for using different @LaTeX{} compilers or just
+for passing the value at the last minute.
+@end table
 @end defmethod
 
 @examplehead
