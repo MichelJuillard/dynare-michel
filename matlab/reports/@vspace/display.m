@@ -1,9 +1,9 @@
 function display(o)
 %function display(o)
-% Display a Sections object
+% Display a Vspace object
 %
 % INPUTS
-%   o   [sections] sections object
+%   o   [vspace] vspace object
 %
 % OUTPUTS
 %   none

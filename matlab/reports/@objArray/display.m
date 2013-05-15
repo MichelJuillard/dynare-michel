@@ -3,7 +3,7 @@ function display(oa)
 % Display an objArray object
 %
 % INPUTS
-%   none
+%   o   [objArray] objArray object
 %
 % OUTPUTS
 %   none
@@ -28,8 +28,5 @@ function display(oa)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-disp(' ');
-disp([inputname(1) '.objs = ']);
-disp(' ');
-disp(oa.objs);
+reporting_object_display(o);
 end
