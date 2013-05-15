@@ -41,7 +41,9 @@ if isempty(compiler)
             system(['PATH=$PATH:/usr/texbin:/usr/local/bin:/usr/local/sbin;' ...
                     'which pdflatex'], '-echo');
     elseif strcmp(computer, 'PCWIN') || strcmp(computer, 'PCWIN64')
-        % need to fill in for Windows
+        error(['@report.compile: On Windows machines, you must explicitly ' ...
+               'provide the ''compiler'' option or set the compiler ' ...
+               'variable in the Report class']);
     else % gnu/linux
         [status, compiler] = system('which pdflatex', '-echo');
     end
