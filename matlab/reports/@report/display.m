@@ -50,11 +50,6 @@ disp(' ');
 disp(['     ''' o.filename '''']);
 
 disp(' ')
-disp([name '.config = ']);
-disp(' ');
-disp(['     ''' o.config '''']);
-
-disp(' ')
 disp([name '.numPages() = ']);
 disp(' ');
 disp(['     ' num2str(numPages(o))]);

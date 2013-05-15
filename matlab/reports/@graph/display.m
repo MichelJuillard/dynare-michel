@@ -55,11 +55,6 @@ disp(' ');
 disp(['     ''' o.figname '''']);
 
 disp(' ');
-disp([name '.config = ']);
-disp(' ');
-disp(['     ''' o.config '''']);
-
-disp(' ');
 disp([name '.legend = ']);
 disp(' ');
 disp(o.legend);
