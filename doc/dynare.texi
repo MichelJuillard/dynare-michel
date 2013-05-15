@@ -7826,7 +7826,7 @@ The color to use in the shaded portion of the graph. Default:
 @code{`green'}
 
 @item shadeOpacity, @code{DOUBLE}
-The opacity of the shaded area, must be in [0,1]. Default: @code{.2}
+The opacity of the shaded area, must be in @math{[0,1]}. Default: @code{.2}
 
 @item title, @code{STRING}
 Title for the graph. Default: @code{none}
@@ -7846,7 +7846,7 @@ The boundary on the y-axis to display in the graph, represented as a
 @code{dynDate} range. Default: all
 
 @item showZeroline, @code{BOOLEAN}
-Display a solid black line at y = 0. Default: @code{false}
+Display a solid black line at @math{y = 0}. Default: @code{false}
 
 @end table
 @end defmethod
