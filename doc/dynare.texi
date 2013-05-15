@@ -7814,8 +7814,8 @@ The font size for legend entries. Default: @code{8}
 @anchor{seriesToUse}
 @item seriesToUse, @code{CELL_ARRAY_STRINGS}
 The names of the series contained in the @code{dynSeries} provided to
-the @xref{data} option. If empty, use all series provided to
-@xref{data}. Default: @code{empty}
+the @code{data} option. If empty, use all series provided to
+@code{data} option. Default: @code{empty}
 
 @item shade, @code{dynDate}:@code{dynDate}
 A @code{dynDates} range showing the portion of the graph that should
@@ -7857,7 +7857,7 @@ Adds a @code{Table} to a @code{Section}.
 @table @code
 
 @item data, @code{dynSeries}
-@xref{data}
+@xref{data}.
 
 @item showHlines, @code{BOOLEAN}
 Whether or not to show horizontal lines separating the rows. Default: @code{false}
@@ -7869,7 +7869,7 @@ The number of decimal places to report in the table data. Default: @code{1}
 The date range of the data to be displayed. Default: @code{all}
 
 @item seriesToUse, @code{CELL_ARRAY_STRINGS}
-@xref{seriesToUse}
+@xref{seriesToUse}.
 
 @item title, @code{STRING}
 Title for the table. Default: @code{none}
@@ -7892,7 +7892,7 @@ Adds a @code{Series} to a @code{Graph} or a @code{Table}.
 @table @code
 
 @item data, @code{dynSeries}
-@xref{data}
+@xref{data}.
 
 @item graphLineColor, @code{MATLAB_COLOR}
 Color to use for the series in a graph. Default: @code{`k'}
