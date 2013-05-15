@@ -7814,8 +7814,8 @@ The font size for legend entries. Default: @code{8}
 @anchor{seriesToUse}
 @item seriesToUse, @code{CELL_ARRAY_STRINGS}
 The names of the series contained in the @code{dynSeries} provided to
-the @code{data} option. If empty, use all series provided to
-@code{data} option. Default: @code{empty}
+the @ref{data} option. If empty, use all series provided to
+@ref{data} option. Default: @code{empty}
 
 @item shade, @code{dynDate}:@code{dynDate}
 A @code{dynDates} range showing the portion of the graph that should
