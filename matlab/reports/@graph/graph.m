@@ -38,7 +38,6 @@ o.seriesElements = seriesElements();
 o.title = '';
 o.ylabel = '';
 o.xlabel = '';
-o.footnote = '';
 
 o.figname = '';
 o.data = '';
@@ -87,7 +86,6 @@ end
 
 % Check options provided by user
 assert(ischar(o.title), '@graph.graph: title must be a string');
-assert(ischar(o.footnote), '@graph.graph: footnote must be a string');
 assert(ischar(o.xlabel), '@graph.graph: xlabel file must be a string');
 assert(ischar(o.ylabel), '@graph.graph: ylabel file must be a string');
 assert(ischar(o.figname), '@graph.graph: figname must be a string');

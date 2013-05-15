@@ -35,11 +35,6 @@ disp(' ');
 disp(['     ''' o.title '''']);
 
 disp(' ');
-disp([name '.footnote = ']);
-disp(' ');
-disp(['     ''' o.footnote '''']);
-
-disp(' ');
 disp([name '.showHlines = ']);
 disp(' ');
 disp(o.showHlines);

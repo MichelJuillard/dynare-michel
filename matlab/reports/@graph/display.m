@@ -45,11 +45,6 @@ disp(' ');
 disp(['     ''' o.ylabel '''']);
 
 disp(' ');
-disp([name '.footnote = ']);
-disp(' ');
-disp(['     ''' o.footnote '''']);
-
-disp(' ');
 disp([name '.figname = ']);
 disp(' ');
 disp(['     ''' o.figname '''']);
