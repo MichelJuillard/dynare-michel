@@ -7976,11 +7976,18 @@ The following code creates a one page report. The first part of the
 page contains two graphs displayed across two columns and one
 row. The bottom of the page displays a centered table.
 @example
+%% Create dynSeries
 dsq = dynSeries(`quarterly.csv');
 dsa = dynSeries(`annual.csv');
 dsca = dynSeries(`annual_control.csv');
+
+%% Report
 rep = report();
+
+%% Page 1
 rep = rep.addPage(`title', `My Page Title', `titleFormat', `\large\bfseries');
+
+% Section 1
 rep = rep.addSection(`cols', 2);
 rep = rep.addGraph(`title', `Graph (1,1)', `showLegend', true, ...
                    `xrange', dynDate(`2007q1'):dynDate(`2013q4'), ...
@@ -7996,6 +8003,8 @@ rep = rep.addSeries(`data', dsq@{`SERIES3'@}, `color', `b', ...
                     `graphLineWidth', 1);
 rep = rep.addSeries(`data', dsq@{`SERIES4'@}, `color', `g', ...
                     `graphLineStyle', '--', `graphLineWidth', 1.5);
+
+% Section 2
 rep = rep.addSection();
 rep = rep.addTable(`title', `Table 1', ...
                    `range', dynDate(`2012'):dynDate(`2014'));
@@ -8009,6 +8018,8 @@ for i=1:length(shortNames)
                         `tableShowMarkers', true, ...
                         `tableAlignRight', true);
 end
+
+%% Write & Compile Report
 rep.write();
 rep.compile();
 @end example
