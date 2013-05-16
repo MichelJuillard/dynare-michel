@@ -130,7 +130,7 @@ if isempty(o.figname)
     o.figname = [tempname '.tex'];
 end
 disp('  converting to tex....');
-if exist('OCTAVE_VERSION')
+if exist('OCTAVE_VERSION') && isempty(regexpi(computer, '.*apple.*', 'once'))
     print(o.figname, '-dtikz');
 else
     matlab2tikz('filename', o.figname, ...

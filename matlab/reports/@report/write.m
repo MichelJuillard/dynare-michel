@@ -46,7 +46,7 @@ fprintf(fid, ['\\makeatletter\n' ...
               '\\def\\blfootnote{\\gdef\\@thefnmark{}\\@footnotetext}\n' ...
               '\\makeatother\n']);
 
-if exist('OCTAVE_VERSION')
+if exist('OCTAVE_VERSION') && isempty(regexpi(computer, '.*apple.*', 'once'))
     fprintf(fid, '\\usepackage[T1]{fontenc}\n');
     fprintf(fid, '\\usepackage[utf8x]{inputenc}\n');
     fprintf(fid, '\\usepackage{gnuplot-lua-tikz}\n');
