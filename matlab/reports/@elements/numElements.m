@@ -18,5 +18,5 @@ function n = numElements(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-n = o.objArray.numObjs();
+n = o.objArray.numObjArray();
 end

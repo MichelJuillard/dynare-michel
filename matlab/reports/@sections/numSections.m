@@ -1,5 +1,5 @@
-function ns = numSections(ss)
-% function ns = numSections(ss)
+function n = numSections(o)
+% function n = numSections(o)
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,5 +18,5 @@ function ns = numSections(ss)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-ns = ss.objArray.numObjs();
+n = o.objArray.numObjArray();
 end

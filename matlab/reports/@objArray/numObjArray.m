@@ -1,5 +1,5 @@
-function no = numObjs(oa)
-%function no = numObjs(oa)
+function n = numObjArray(o)
+%function n = numObjArray(o)
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,5 +18,5 @@ function no = numObjs(oa)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-no = size(oa.objs, 2);
+n = size(o.objs, 2);
 end
