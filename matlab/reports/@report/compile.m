@@ -47,7 +47,7 @@ if ~exist(o.filename, 'file')
 end
 
 if isempty(compiler)
-    if strcmp(computer, 'MACI') || strcmp(computer, 'MACI64')
+    if strncmp(computer, 'MACI', 4)
         % Add most likely places for pdflatex to exist outside of default $PATH
         [status, compiler] = ...
             system(['PATH=$PATH:/usr/texbin:/usr/local/bin:/usr/local/sbin;' ...
