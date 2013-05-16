@@ -30,7 +30,7 @@ function o = write(o, fid)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 assert(fid ~= -1);
-if ~o.seriesElements.numElements()
+if ~o.seriesElements.numSeriesElements()
     warning('@table.write: no series to plot, returning');
     return;
 end
@@ -122,7 +122,7 @@ fprintf(fid, '\\\\%%\n');
 fprintf(fid, '%%\n');
 
 % Write Table Data
-ne = o.seriesElements.numElements();
+ne = o.seriesElements.numSeriesElements();
 for i=1:ne
     o.seriesElements(i).write(fid, dates, o.precision);
     if o.showHlines

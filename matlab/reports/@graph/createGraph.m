@@ -33,7 +33,7 @@ if ~isempty(o.figname)
             o.figname);
 end
 
-if ~o.seriesElements.numElements()
+if ~o.seriesElements.numSeriesElements()
     warning('@graph.crepateGraph: no series to plot, returning');
     return;
 end
@@ -52,7 +52,7 @@ else
     dd = o.xrange;
 end
 
-ne = o.seriesElements.numElements();
+ne = o.seriesElements.numSeriesElements();
 line_handles = zeros(ne, 1);
 for i=1:ne
     line_handles(i) = o.seriesElements(i).getLine(dd);

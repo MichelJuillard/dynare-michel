@@ -1,5 +1,5 @@
-function n = numElements(o)
-% function n = numElements(o)
+function n = numSeriesElements(o)
+% function n = numSeriesElements(o)
 
 % Copyright (C) 2013 Dynare Team
 %

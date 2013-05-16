@@ -18,7 +18,7 @@ function dd = getMaxRange(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-ne = numElements(o);
+ne = numSeriesElements(o);
 ddmin = dynDate();
 ddmax = dynDate();
 for i=1:ne
