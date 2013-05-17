@@ -169,6 +169,7 @@ Expressions
 * Parameters and variables::
 * Operators::
 * Functions::
+* A few words of warning in stochastic context::
 
 Parameters and variables
 
@@ -1180,6 +1181,7 @@ Represents infinity.
 * Parameters and variables::
 * Operators::
 * Functions::
+* A few words of warning in stochastic context::
 @end menu
 
 @node Parameters and variables
@@ -1252,6 +1254,13 @@ unary arithmetic operators: @code{+}, @code{-}
 binary comparison operators (which evaluate to either @code{0} or
 @code{1}): @code{<}, @code{>}, @code{<=}, @code{>=}, @code{==},
 @code{!=}
+
+Note that these operators are differentiable everywhere except on a
+line of the 2-dimensional real plane. However for facilitating
+convergence of Newton-type methods, Dynare assumes that, at the points
+of non-differentiability, the partial derivatives of these operators
+with respect to both arguments is equal to @math{0} (since this is the
+value of the partial derivatives everywhere else).
 @end itemize
 
 The following special operators are accepted in @var{MODEL_EXPRESSION}
@@ -1307,10 +1316,23 @@ Square root.
 
 @defun abs (@var{x})
 Absolute value.
+
+Note that this function is not differentiable at @math{x=0}. However,
+for facilitating convergence of Newton-type methods, Dynare assumes
+that the derivative at @math{x=0} is equal to @math{0} (this
+assumption comes from the observation that the derivative of
+@math{abs(x)} is equal to @math{sign(x)} for @math{x\neq 0} and from
+the convention for the derivative of @math{sign(x)} at @math{x=0}).
 @end defun
 
 @defun sign (@var{x})
 Signum function.
+
+Note that this function is not differentiable at @math{x=0}. However,
+for facilitating convergence of Newton-type methods, Dynare assumes
+that the derivative at @math{x=0} is equal to @math{0} (this assumption
+comes from the observation that both the right- and left-derivatives
+at this point exist and are equal to @math{0}).
 @end defun
 
 @defun sin (@var{x})
@@ -1325,6 +1347,15 @@ Trigonometric functions.
 @defun max (@var{a}, @var{b})
 @defunx min (@var{a}, @var{b})
 Maximum and minimum of two reals.
+
+Note that these functions are differentiable everywhere except on a
+line of the 2-dimensional real plane defined by @math{a=b}. However
+for facilitating convergence of Newton-type methods, Dynare assumes
+that, at the points of non-differentiability, the partial derivative
+of these functions with respect to the first (resp. the second)
+argument is equal to @math{1} (resp. to @math{0}) (@i{i.e.} the
+derivatives at the kink are equal to the derivatives observed on the
+half-plane where the function is equal to its first argument).
 @end defun
 
 @defun normcdf (@var{x})
@@ -1406,6 +1437,25 @@ external_function(name = yetotherfuncname, nargs = 3,
 @end example
 
 @end deffn
+
+@node A few words of warning in stochastic context
+@subsection A few words of warning in stochastic context
+
+The use of the following functions and operators is strongly
+discouraged in a stochastic context: @code{max}, @code{min},
+@code{abs}, @code{sign}, @code{<}, @code{>}, @code{<=}, @code{>=},
+@code{==}, @code{!=}.
+
+The reason is that the local approximation used by @code{stoch_simul}
+or @code{estimation} will by nature ignore the non-linearities
+introduced by these functions if the steady state is away from the
+kink. And, if the steady state is exactly at the kink, then the
+approximation will be bogus because the derivative of these functions
+at the kink is bogus (as explained in the respective documentations of
+these functions and operators).
+
+Note that @code{extended_path} is not affected by this problem,
+because it uses a global approximation method, not a local one.
 
 @node Parameter initialization
 @section Parameter initialization
