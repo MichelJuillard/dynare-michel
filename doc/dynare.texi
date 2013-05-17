@@ -1609,12 +1609,18 @@ Don't create the static model file. This can be useful for models which
 don't have a steady state.
 
 @item differentiate_forward_vars
+@itemx differentiate_forward_vars = ( @var{VARIABLE_NAME} [@var{VARIABLE_NAME} @dots{}] )
 Tells Dynare to create a new auxiliary variable for each endogenous
 variable that appears with a lead, such that the new variable is the
 time differentiate of the original one. More precisely, if the model
 contains @code{x(+1)}, then a variable @code{AUX_DIFF_VAR} will be
 created such that @code{AUX_DIFF_VAR=x-x(-1)}, and @code{x(+1)} will
 be replaced with @code{x+AUX_DIFF_VAR(+1)}.
+
+The transformation is applied to all endogenous variables with a lead
+if the option is given without a list of variables. If there is a
+list, the transformation is restricted to endogenous with a lead that
+also appear in the list.
 
 This option can useful for some deterministic simulations where
 convergence is hard to obtain. Bad values for terminal conditions in
