@@ -4,6 +4,7 @@ function o = write(o, fid, dates, precision)
 %
 % INPUTS
 %   o            [series]    series object
+%   fid          [int]       file id
 %   dates        [dynDates]  dates for series slice
 %   precision    [float]     precision with which to print the data
 %
