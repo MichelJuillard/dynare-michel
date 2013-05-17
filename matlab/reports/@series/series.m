@@ -47,6 +47,7 @@ o.graphMarkerSize = 6;
 o.tableShowMarkers = false;
 o.tableNegColor = 'red';
 o.tablePosColor = 'blue';
+o.tableMarkerLimit = 1e-4;
 
 o.tableAlignRight = false;
 

@@ -44,6 +44,7 @@ assert(ischar(o.tableNegColor), '@series.write: tableNegColor must be a string')
 assert(ischar(o.tablePosColor), '@series.write: tablePosColor must be a string');
 assert(islogical(o.tableShowMarkers), '@series.write: tableShowMarkers must be true or false');
 assert(islogical(o.tableAlignRight), '@series.write: tableAlignRight must be true or false');
+assert(isfloat(o.tableMarkerLimit), '@series,write: tableMarkerLimit must be a float');
 
 %% Write Output
 dataString = ['%.' num2str(precision) 'f'];
@@ -62,9 +63,9 @@ data = data.data;
 for i=1:size(data,1)
     fprintf(fid, ' &');
     if o.tableShowMarkers
-        if data(i) < 0
+        if data(i) < -o.tableMarkerLimit
             fprintf(fid, '\\color{%s}', o.tableNegColor);
-        elseif data(i) > 0
+        elseif data(i) > o.tableMarkerLimit
             fprintf(fid, '\\color{%s}', o.tablePosColor);
         end
         fprintf(fid, '[');

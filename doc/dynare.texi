@@ -7925,6 +7925,12 @@ for graphs. Default: @code{false}
 Whether or not to align the series name to the right of the
 cell. Default: @code{false}
 
+@item tableMarkerLimit, @code{DOUBLE}
+For values less than @math{-1*@code{tableMarkerLimit}}, mark the cell
+with the color denoted by @ref{tableNegColor}. For those greater than
+@code{tableMarkerLimit}, mark the cell with the color denoted by
+@ref{tablePosColor}. Default: @code{1e-4}
+
 @anchor{tableNegColor}
 @item tableNegColor, @code{LATEX_COLOR}
 The color to use when marking Table data that is less than
