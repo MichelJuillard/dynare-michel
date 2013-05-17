@@ -59,19 +59,17 @@ end
 data = o.data(dates);
 data = data.data;
 for i=1:size(data,1)
-    thisCellData = round(data(i)*precision)/precision;
-
     fprintf(fid, ' &');
     if o.tableShowMarkers
-        if thisCellData < 0
+        if data(i) < 0
             fprintf(fid, '\\color{%s}', o.tableNegColor);
-        elseif thisCellData > 0
+        elseif data(i) > 0
             fprintf(fid, '\\color{%s}', o.tablePosColor);
         end
         fprintf(fid, '[');
     end
 
-    fprintf(fid, dataString, thisCellData);
+    fprintf(fid, dataString, round(data(i)*precision)/precision);
 
     if o.tableShowMarkers
         fprintf(fid, ']');
