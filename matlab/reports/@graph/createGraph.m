@@ -33,7 +33,7 @@ if ~isempty(o.figname)
             o.figname);
 end
 
-if ~o.seriesElements.numElements()
+if ~o.seriesElements.numSeriesElements()
     warning('@graph.crepateGraph: no series to plot, returning');
     return;
 end
@@ -41,7 +41,7 @@ end
 h = figure('visible','off');
 hold on;
 box on;
-if o.grid
+if o.showGrid
     grid on;
     set(gca, 'GridLineStyle', '--');
 end
@@ -52,7 +52,7 @@ else
     dd = o.xrange;
 end
 
-ne = o.seriesElements.numElements();
+ne = o.seriesElements.numSeriesElements();
 line_handles = zeros(ne, 1);
 for i=1:ne
     line_handles(i) = o.seriesElements(i).getLine(dd);
@@ -66,7 +66,7 @@ if ~isempty(o.yrange)
     ylim(o.yrange);
 end
 
-if o.zeroline
+if o.showZeroline
     a = ylim;
     if 0 > a(1) && 0 < a(2)
         lh = line(xlim, [0 0], 'color', 'k', 'LineWidth', 0.25);
@@ -87,24 +87,32 @@ if ~isempty(o.shade)
     % From ShadePlotForEmpahsis (Matlab Exchange)
     % use patch bc area doesn't work with matlab2tikz
     sh = patch([repmat(x1, 1, 2) repmat(x2, 1, 2)], ...
-               [yrange fliplr(yrange)], o.shade_color, ...
-               'facealpha', o.shade_opacity);
-    children =get(gca(), 'children');
+               [yrange fliplr(yrange)], o.shadeColor, ...
+               'facealpha', o.shadeOpacity);
+    children = get(gca, 'children');
     children = [children(2:end); sh];
-    set(gca(), 'children', children);
+    set(gca, 'children', children);
 end
 
 xticks = get(gca, 'XTick');
-[junk, ix, junk] = intersect(x, xticks);
-set(gca, 'XTickLabel', xlabels(ix));
+xTickLabels = cell(1, length(xticks));
+for i=1:length(xticks)
+    if xticks(i) >= x(1) && ...
+            xticks(i) <= x(end)
+        xTickLabels{i} = xlabels{xticks(i)};
+    else
+        xTickLabels{i} = '';
+    end
+end
+set(gca, 'XTickLabel', xTickLabels);
 
-if o.legend
+if o.showLegend
     lh = legend(line_handles, o.seriesElements.getTexNames(), ...
-                'orientation', o.legend_orientation, ...
-                'location', o.legend_location);
-    set(lh, 'FontSize', o.legend_font_size);
+                'orientation', o.legendOrientation, ...
+                'location', o.legendLocation);
+    set(lh, 'FontSize', o.legendFontSize);
     set(lh, 'interpreter', 'latex');
-    if o.legend_boxoff
+    if ~o.showLegendBox
         legend('boxoff');
     end
 end
@@ -118,12 +126,18 @@ if ~isempty(o.ylabel)
 end
 drawnow;
 
-o.figname = [tempname '.tex'];
+if isempty(o.figname)
+    o.figname = [tempname '.tex'];
+end
 disp('  converting to tex....');
-matlab2tikz('filename', o.figname, ...
-            'showInfo', false, ...
-            'showWarnings', false, ...
-            'checkForUpdates', false);
+if exist('OCTAVE_VERSION') && isempty(regexpi(computer, '.*apple.*', 'once'))
+    print(o.figname, '-dtikz');
+else
+    matlab2tikz('filename', o.figname, ...
+                'showInfo', false, ...
+                'showWarnings', false, ...
+                'checkForUpdates', false);
+end
 
 grid off;
 box off;

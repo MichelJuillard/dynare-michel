@@ -3,7 +3,7 @@ function display(o)
 % Display a Page object
 %
 % INPUTS
-%   none
+%   o   [page] page object
 %
 % OUTPUTS
 %   none
@@ -28,9 +28,5 @@ function display(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-name = 'report.page';
-disp(' ');
-disp([name '.sections = ']);
-disp(' ');
-disp(o.sections());
+reporting_object_display(o);
 end

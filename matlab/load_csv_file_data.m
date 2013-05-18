@@ -90,7 +90,7 @@ init = dynDate(1);
 varlist = [];
 if ~exist('OCTAVE_VERSION')
     % Under Matlab, save time by using importdata
-    assert(exist(file, 'file'), 'load_csv_file_data: I can''t find file ' file '!');
+    assert(exist(file, 'file') == 2, ['load_csv_file_data: I can''t find file ' file '!']);
     A = importdata(file, ',', withnames);
     if withnames && withtime
         if size(A.textdata, 1) == 1

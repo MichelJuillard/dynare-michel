@@ -36,16 +36,25 @@ end
 fprintf(fid, '%% Report Object\n');
 fprintf(fid, '\\documentclass[11pt]{article}\n');
 
-fprintf(fid, '\\usepackage[%spaper,margin=%f%s', o.paper, o.margin, o.margin_unit);
+fprintf(fid, '\\usepackage[%spaper,margin=%f%s', o.paper, o.margin, o.marginUnit);
 if strcmpi(o.orientation, 'landscape')
     fprintf(fid, ',landscape');
 end
 fprintf(fid, ']{geometry}\n');
-fprintf(fid, '\\usepackage{pdflscape, pgf, pgfplots, booktabs}\n');
+fprintf(fid, '\\usepackage{pdflscape, pgf, booktabs}\n');
 fprintf(fid, ['\\makeatletter\n' ...
               '\\def\\blfootnote{\\gdef\\@thefnmark{}\\@footnotetext}\n' ...
               '\\makeatother\n']);
-if o.showdate
+
+if exist('OCTAVE_VERSION') && isempty(regexpi(computer, '.*apple.*', 'once'))
+    fprintf(fid, '\\usepackage[T1]{fontenc}\n');
+    fprintf(fid, '\\usepackage[utf8x]{inputenc}\n');
+    fprintf(fid, '\\usepackage{gnuplot-lua-tikz}\n');
+else
+    fprintf(fid, '\\usepackage{pgfplots}\n');
+end
+
+if o.showDate
     fprintf(fid, '\\usepackage{fancyhdr, datetime}\n');
     fprintf(fid, '\\newdateformat{reportdate}{\\THEDAY\\ \\shortmonthname\\ \\THEYEAR}\n');
     fprintf(fid, '\\pagestyle{fancy}\n');

@@ -1,15 +1,5 @@
-function display(o)
-%function display(o)
-% Display a Sections object
-%
-% INPUTS
-%   o   [sections] sections object
-%
-% OUTPUTS
-%   none
-%
-% SPECIAL REQUIREMENTS
-%   none
+function n = numSeriesElements(o)
+% function n = numSeriesElements(o)
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -28,5 +18,5 @@ function display(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-reporting_object_display(o);
+n = o.objArray.numObjArray();
 end

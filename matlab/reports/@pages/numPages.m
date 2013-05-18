@@ -1,6 +1,5 @@
 function n = numPages(o)
 % function n = numPages(o)
-% Sections Class Constructor
 %
 % INPUTS
 %   o              [page]  pages object
@@ -28,5 +27,5 @@ function n = numPages(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-n = o.objArray.numObjs();
+n = o.objArray.numObjArray();
 end

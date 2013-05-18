@@ -35,20 +35,21 @@ o = struct;
 
 o.data = '';
 
-o.color = 'k';
-o.line_style = '-';
-o.line_width = 0.5;
+o.graphLineColor = 'k';
+o.graphLineStyle = '-';
+o.graphLineWidth = 0.5;
 
-o.graph_marker = '';
-o.graph_marker_edge_color = 'auto';
-o.graph_marker_face_color = 'auto';
-o.graph_marker_size = 6;
+o.graphMarker = '';
+o.graphMarkerEdgeColor = 'auto';
+o.graphMarkerFaceColor = 'auto';
+o.graphMarkerSize = 6;
 
-o.table_markers = false;
-o.table_neg_color = 'red';
-o.table_pos_color = 'blue';
+o.tableShowMarkers = false;
+o.tableNegColor = 'red';
+o.tablePosColor = 'blue';
+o.tableMarkerLimit = 1e-4;
 
-o.table_align_right = false;
+o.tableAlignRight = false;
 
 if nargin == 1
     assert(isa(varargin{1}, 'series'),['@series.series: with one arg you ' ...
@@ -61,15 +62,16 @@ elseif nargin > 1
                'pairs.']);
     end
 
-    optNames = lower(fieldnames(o));
+    optNames = fieldnames(o);
 
     % overwrite default values
     for pair = reshape(varargin, 2, [])
-        field = lower(pair{1});
-        if any(strmatch(field, optNames, 'exact'))
-            o.(field) = pair{2};
+        ind = strmatch(lower(pair{1}), lower(optNames), 'exact');
+        assert(isempty(ind) || length(ind) == 1);
+        if ~isempty(ind)
+            o.(optNames{ind}) = pair{2};
         else
-            error('@series.series: %s is not a recognized option.', field);
+            error('@series.series: %s is not a recognized option.', pair{1});
         end
     end
 end

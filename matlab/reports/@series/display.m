@@ -28,44 +28,5 @@ function display(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-name = 'report.page.section.graph.series';
-disp(' ');
-disp([name '.data = ']);
-disp(' ');
-display(o.data);
-
-disp(' ');
-disp([name '.color = ']);
-disp(' ');
-disp(['     ''' o.color '''']);
-
-disp(' ');
-disp([name '.line_style = ']);
-disp(' ');
-disp(['     ''' o.line_style '''']);
-
-disp(' ');
-disp([name '.line_width = ']);
-disp(' ');
-disp(['     ''' o.line_width '''']);
-
-disp(' ');
-disp([name '.graph_marker = ']);
-disp(' ');
-disp(['     ''' o.graph_marker '''']);
-
-disp(' ');
-disp([name '.graph_marker_edge_color = ']);
-disp(' ');
-disp(['     ''' o.graph_marker_edge_color '''']);
-
-disp(' ');
-disp([name '.graph_marker_face_color = ']);
-disp(' ');
-disp(['     ''' o.graph_marker_face_color '''']);
-
-disp(' ');
-disp([name '.graph_marker_size = ']);
-disp(' ');
-disp(['     ''' o.graph_marker_size '''']);
+reporting_object_display(o);
 end

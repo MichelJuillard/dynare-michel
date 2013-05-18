@@ -44,15 +44,16 @@ elseif nargin > 1
                'pairs.']);
     end
 
-    optNames = lower(fieldnames(o));
+    optNames = fieldnames(o);
 
     % overwrite default values
     for pair = reshape(varargin, 2, [])
-        field = lower(pair{1});
-        if any(strmatch(field, optNames, 'exact'))
-            o.(field) = pair{2};
+        ind = strmatch(lower(pair{1}), lower(optNames), 'exact');
+        assert(isempty(ind) || length(ind) == 1);
+        if ~isempty(ind)
+            o.(optNames{ind}) = pair{2};
         else
-            error('@vspace.vspace: %s is not a recognized option.', field);
+            error('@vspace.vspace: %s is not a recognized option.', pair{1});
         end
     end
 end

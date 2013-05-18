@@ -100,127 +100,129 @@ This is Dynare Reference Manual, version @value{VERSION}.
 @end ifnottex
 
 @menu
-* Introduction::                
-* Installation and configuration::  
-* Dynare invocation::           
-* The Model file::              
-* The Configuration File::      
-* Examples::                    
-* Dynare internal documentation and unitary tests::  
-* Bibliography::                
-* Command and Function Index::  
-* Variable Index::              
+* Introduction::
+* Installation and configuration::
+* Dynare invocation::
+* The Model file::
+* The Configuration File::
+* Reporting::
+* Examples::
+* Dynare internal documentation and unitary tests::
+* Bibliography::
+* Command and Function Index::
+* Variable Index::
 
 @detailmenu
  --- The Detailed Node Listing ---
 
 Introduction
 
-* What is Dynare ?::            
-* Documentation sources::       
-* Citing Dynare in your research::  
+* What is Dynare ?::
+* Documentation sources::
+* Citing Dynare in your research::
 
 Installation and configuration
 
-* Software requirements::       
-* Installation of Dynare::      
-* Configuration::               
+* Software requirements::
+* Installation of Dynare::
+* Configuration::
 
 Installation of Dynare
 
-* On Windows::                  
-* On Debian GNU/Linux and Ubuntu::  
-* On Mac OS X::                 
-* For other systems::           
+* On Windows::
+* On Debian GNU/Linux and Ubuntu::
+* On Mac OS X::
+* For other systems::
 
 Configuration
 
-* For MATLAB::                  
-* For GNU Octave::              
-* Some words of warning::       
+* For MATLAB::
+* For GNU Octave::
+* Some words of warning::
 
 The Model file
 
-* Conventions::                 
-* Variable declarations::       
-* Expressions::                 
-* Parameter initialization::    
-* Model declaration::           
-* Auxiliary variables::         
-* Initial and terminal conditions::  
-* Shocks on exogenous variables::  
-* Other general declarations::  
-* Steady state::                
-* Getting information about the model::  
-* Deterministic simulation::    
-* Stochastic solution and simulation::  
-* Estimation::                  
-* Forecasting::                 
-* Optimal policy::              
-* Sensitivity and identification analysis::  
-* Markov-switching SBVAR::      
-* Displaying and saving results::  
-* Macro-processing language::   
-* Misc commands::               
+* Conventions::
+* Variable declarations::
+* Expressions::
+* Parameter initialization::
+* Model declaration::
+* Auxiliary variables::
+* Initial and terminal conditions::
+* Shocks on exogenous variables::
+* Other general declarations::
+* Steady state::
+* Getting information about the model::
+* Deterministic simulation::
+* Stochastic solution and simulation::
+* Estimation::
+* Forecasting::
+* Optimal policy::
+* Sensitivity and identification analysis::
+* Markov-switching SBVAR::
+* Displaying and saving results::
+* Macro-processing language::
+* Misc commands::
 
 Expressions
 
-* Parameters and variables::    
-* Operators::                   
-* Functions::                   
+* Parameters and variables::
+* Operators::
+* Functions::
+* A few words of warning in stochastic context::
 
 Parameters and variables
 
-* Inside the model::            
-* Outside the model::           
+* Inside the model::
+* Outside the model::
 
 Functions
 
-* Built-in Functions::          
-* External Functions::          
+* Built-in Functions::
+* External Functions::
 
 Steady state
 
-* Finding the steady state with Dynare nonlinear solver::  
-* Using a steady state file::   
-* Replace some equations during steady state computations::  
+* Finding the steady state with Dynare nonlinear solver::
+* Using a steady state file::
+* Replace some equations during steady state computations::
 
 Stochastic solution and simulation
 
-* Computing the stochastic solution::  
-* Typology and ordering of variables::  
-* First order approximation::   
-* Second order approximation::  
-* Third order approximation::   
+* Computing the stochastic solution::
+* Typology and ordering of variables::
+* First order approximation::
+* Second order approximation::
+* Third order approximation::
 
 Sensitivity and identification analysis
 
-* Sampling::                    
-* Stability Mapping::           
-* Reduced Form Mapping::        
-* RMSE::                        
-* Screening Analysis::          
-* Identification Analysis::     
-* Performing Sensitivity and Identification Analysis::  
+* Sampling::
+* Stability Mapping::
+* Reduced Form Mapping::
+* RMSE::
+* Screening Analysis::
+* Identification Analysis::
+* Performing Sensitivity and Identification Analysis::
 
 Macro-processing language
 
-* Macro expressions::           
-* Macro directives::            
-* Typical usages::              
-* MATLAB/Octave loops versus macro-processor loops::  
+* Macro expressions::
+* Macro directives::
+* Typical usages::
+* MATLAB/Octave loops versus macro-processor loops::
 
 Typical usages
 
-* Modularization::              
-* Indexed sums or products::    
-* Multi-country models::        
-* Endogeneizing parameters::    
+* Modularization::
+* Indexed sums or products::
+* Multi-country models::
+* Endogeneizing parameters::
 
 The Configuration File
 
-* Dynare Configuration::        
-* Parallel Configuration::      
+* Dynare Configuration::
+* Parallel Configuration::
 
 @end detailmenu
 @end menu
@@ -229,9 +231,9 @@ The Configuration File
 @chapter Introduction
 
 @menu
-* What is Dynare ?::            
-* Documentation sources::       
-* Citing Dynare in your research::  
+* What is Dynare ?::
+* Documentation sources::
+* Citing Dynare in your research::
 @end menu
 
 @node What is Dynare ?
@@ -357,9 +359,9 @@ If you want to give a URL, use the address of the Dynare website:
 @chapter Installation and configuration
 
 @menu
-* Software requirements::       
-* Installation of Dynare::      
-* Configuration::               
+* Software requirements::
+* Installation of Dynare::
+* Configuration::
 @end menu
 
 @node Software requirements
@@ -429,10 +431,10 @@ upgrade Dynare and discard the previous version without having to worry
 about your own files.
 
 @menu
-* On Windows::                  
-* On Debian GNU/Linux and Ubuntu::  
-* On Mac OS X::                 
-* For other systems::           
+* On Windows::
+* On Debian GNU/Linux and Ubuntu::
+* On Mac OS X::
+* For other systems::
 @end menu
 
 @node On Windows
@@ -498,9 +500,9 @@ Wiki}.
 @section Configuration
 
 @menu
-* For MATLAB::                  
-* For GNU Octave::              
-* Some words of warning::       
+* For MATLAB::
+* For GNU Octave::
+* Some words of warning::
 @end menu
 
 @node For MATLAB
@@ -577,8 +579,9 @@ addpath /Applications/Dynare/4.@var{x}.@var{y}/matlab
 
 If you don't want to type this command every time you run Octave, you
 can put it in a file called @file{.octaverc} in your home directory
-(under Windows this will generally by @file{c:\Documents and
-Settings\USERNAME\}). This file is run by Octave at every startup.
+(under Windows this will generally be @file{c:\Documents and
+Settings\USERNAME\} while under Mac OS X it is @file{/Users/USERNAME/}).
+This file is run by Octave at every startup.
 
 @node Some words of warning
 @subsection Some words of warning
@@ -595,8 +598,8 @@ your configuration). You must verify that there is no directory coming
 from another version of Dynare than the one you are planning to use.
 
 You have to be aware that adding other directories to your path can
-potentially create problems, if some of your M-files have the same names
-than Dynare files. Your files would then override Dynare files, and make
+potentially create problems if any of your M-files have the same name
+as a Dynare file. Your file would then override the Dynare file, making
 Dynare unusable.
 
 @node Dynare invocation
@@ -781,27 +784,27 @@ Structure containing the various results of the computations.
 @chapter The Model file
 
 @menu
-* Conventions::                 
-* Variable declarations::       
-* Expressions::                 
-* Parameter initialization::    
-* Model declaration::           
-* Auxiliary variables::         
-* Initial and terminal conditions::  
-* Shocks on exogenous variables::  
-* Other general declarations::  
-* Steady state::                
-* Getting information about the model::  
-* Deterministic simulation::    
-* Stochastic solution and simulation::  
-* Estimation::                  
-* Forecasting::                 
-* Optimal policy::              
-* Sensitivity and identification analysis::  
-* Markov-switching SBVAR::      
-* Displaying and saving results::  
-* Macro-processing language::   
-* Misc commands::               
+* Conventions::
+* Variable declarations::
+* Expressions::
+* Parameter initialization::
+* Model declaration::
+* Auxiliary variables::
+* Initial and terminal conditions::
+* Shocks on exogenous variables::
+* Other general declarations::
+* Steady state::
+* Getting information about the model::
+* Deterministic simulation::
+* Stochastic solution and simulation::
+* Estimation::
+* Forecasting::
+* Optimal policy::
+* Sensitivity and identification analysis::
+* Markov-switching SBVAR::
+* Displaying and saving results::
+* Macro-processing language::
+* Misc commands::
 @end menu
 
 @node Conventions
@@ -865,8 +868,8 @@ alphabetical character and can't contain: @samp{()+-*/^=!;:@@#.} or
 accentuated characters;
 
 @item
-@var{LATEX_NAME} indicates a valid LaTeX expression in math mode (not
-including the dollar signs);
+@var{LATEX_NAME} indicates a valid @LaTeX{} expression in math mode
+(not including the dollar signs);
 
 @item
 @var{FUNCTION_NAME} indicates a valid MATLAB function name;
@@ -891,9 +894,9 @@ Declarations of variables and parameters are made with the following commands:
 
 This required command declares the endogenous variables in the
 model. @xref{Conventions}, for the syntax of @var{VARIABLE_NAME} and
-@var{MODEL_EXPRESSION}. Optionally it is possible to give a LaTeX name
-to the variable or, if it is nonstationary, provide information regarding
-its deflator.
+@var{MODEL_EXPRESSION}. Optionally it is possible to give a @LaTeX{}
+name to the variable or, if it is nonstationary, provide information
+regarding its deflator.
 
 @code{var} commands can appear several times in the file and Dynare will
 concatenate them.
@@ -938,7 +941,7 @@ var(deflator=A) i b;
 
 This optional command declares the exogenous variables in the model.
 @xref{Conventions}, for the syntax of @var{VARIABLE_NAME}. Optionally it
-is possible to give a LaTeX name to the variable.
+is possible to give a @LaTeX{} name to the variable.
 
 Exogenous variables are required if the user wants to be able to apply
 shocks to her model.
@@ -960,8 +963,8 @@ varexo m gov;
 
 This optional command declares exogenous deterministic variables in a
 stochastic model. See @ref{Conventions}, for the syntax of
-@var{VARIABLE_NAME}. Optionally it is possible to give a LaTeX name to
-the variable.
+@var{VARIABLE_NAME}. Optionally it is possible to give a @LaTeX{} name
+to the variable.
 
 It is possible to mix deterministic and stochastic shocks to build
 models where agents know from the start of the simulation about future
@@ -992,7 +995,7 @@ varexo_det tau;
 This command declares parameters used in the model, in variable
 initialization or in shocks declarations. See @ref{Conventions}, for the
 syntax of @var{PARAMETER_NAME}. Optionally it is possible to give a
-LaTeX name to the parameter.
+@LaTeX{} name to the parameter.
 
 The parameters must subsequently be assigned values (@pxref{Parameter
 initialization}).
@@ -1099,9 +1102,9 @@ end;
 @descriptionhead
 
 This optional command declares the trend variables in the
-model. @xref{Conventions}, for the syntax of @var{MODEL_EXPRESSION} and
-@var{VARIABLE_NAME}. Optionally it is possible to give a LaTeX name to
-the variable.
+model. @xref{Conventions}, for the syntax of @var{MODEL_EXPRESSION}
+and @var{VARIABLE_NAME}. Optionally it is possible to give a @LaTeX{}
+name to the variable.
 
 The variable is assumed to have a multiplicative growth trend. For an
 additive growth trend, use @code{log_trend_var} instead.
@@ -1175,9 +1178,10 @@ Represents infinity.
 @end deffn
 
 @menu
-* Parameters and variables::    
-* Operators::                   
-* Functions::                   
+* Parameters and variables::
+* Operators::
+* Functions::
+* A few words of warning in stochastic context::
 @end menu
 
 @node Parameters and variables
@@ -1188,8 +1192,8 @@ typing their names. The semantics of parameters and variables is quite
 different whether they are used inside or outside the model block.
 
 @menu
-* Inside the model::            
-* Outside the model::           
+* Inside the model::
+* Outside the model::
 @end menu
 
 @node Inside the model
@@ -1250,6 +1254,13 @@ unary arithmetic operators: @code{+}, @code{-}
 binary comparison operators (which evaluate to either @code{0} or
 @code{1}): @code{<}, @code{>}, @code{<=}, @code{>=}, @code{==},
 @code{!=}
+
+Note that these operators are differentiable everywhere except on a
+line of the 2-dimensional real plane. However for facilitating
+convergence of Newton-type methods, Dynare assumes that, at the points
+of non-differentiability, the partial derivatives of these operators
+with respect to both arguments is equal to @math{0} (since this is the
+value of the partial derivatives everywhere else).
 @end itemize
 
 The following special operators are accepted in @var{MODEL_EXPRESSION}
@@ -1276,8 +1287,8 @@ internally and how this affects the output.
 @subsection Functions
 
 @menu
-* Built-in Functions::          
-* External Functions::          
+* Built-in Functions::
+* External Functions::
 @end menu
 
 @node Built-in Functions
@@ -1305,10 +1316,23 @@ Square root.
 
 @defun abs (@var{x})
 Absolute value.
+
+Note that this function is not differentiable at @math{x=0}. However,
+for facilitating convergence of Newton-type methods, Dynare assumes
+that the derivative at @math{x=0} is equal to @math{0} (this
+assumption comes from the observation that the derivative of
+@math{abs(x)} is equal to @math{sign(x)} for @math{x\neq 0} and from
+the convention for the derivative of @math{sign(x)} at @math{x=0}).
 @end defun
 
 @defun sign (@var{x})
 Signum function.
+
+Note that this function is not differentiable at @math{x=0}. However,
+for facilitating convergence of Newton-type methods, Dynare assumes
+that the derivative at @math{x=0} is equal to @math{0} (this assumption
+comes from the observation that both the right- and left-derivatives
+at this point exist and are equal to @math{0}).
 @end defun
 
 @defun sin (@var{x})
@@ -1323,6 +1347,15 @@ Trigonometric functions.
 @defun max (@var{a}, @var{b})
 @defunx min (@var{a}, @var{b})
 Maximum and minimum of two reals.
+
+Note that these functions are differentiable everywhere except on a
+line of the 2-dimensional real plane defined by @math{a=b}. However
+for facilitating convergence of Newton-type methods, Dynare assumes
+that, at the points of non-differentiability, the partial derivative
+of these functions with respect to the first (resp. the second)
+argument is equal to @math{1} (resp. to @math{0}) (@i{i.e.} the
+derivatives at the kink are equal to the derivatives observed on the
+half-plane where the function is equal to its first argument).
 @end defun
 
 @defun normcdf (@var{x})
@@ -1404,6 +1437,25 @@ external_function(name = yetotherfuncname, nargs = 3,
 @end example
 
 @end deffn
+
+@node A few words of warning in stochastic context
+@subsection A few words of warning in stochastic context
+
+The use of the following functions and operators is strongly
+discouraged in a stochastic context: @code{max}, @code{min},
+@code{abs}, @code{sign}, @code{<}, @code{>}, @code{<=}, @code{>=},
+@code{==}, @code{!=}.
+
+The reason is that the local approximation used by @code{stoch_simul}
+or @code{estimation} will by nature ignore the non-linearities
+introduced by these functions if the steady state is away from the
+kink. And, if the steady state is exactly at the kink, then the
+approximation will be bogus because the derivative of these functions
+at the kink is bogus (as explained in the respective documentations of
+these functions and operators).
+
+Note that @code{extended_path} is not affected by this problem,
+because it uses a global approximation method, not a local one.
 
 @node Parameter initialization
 @section Parameter initialization
@@ -1557,12 +1609,18 @@ Don't create the static model file. This can be useful for models which
 don't have a steady state.
 
 @item differentiate_forward_vars
+@itemx differentiate_forward_vars = ( @var{VARIABLE_NAME} [@var{VARIABLE_NAME} @dots{}] )
 Tells Dynare to create a new auxiliary variable for each endogenous
 variable that appears with a lead, such that the new variable is the
 time differentiate of the original one. More precisely, if the model
 contains @code{x(+1)}, then a variable @code{AUX_DIFF_VAR} will be
 created such that @code{AUX_DIFF_VAR=x-x(-1)}, and @code{x(+1)} will
 be replaced with @code{x+AUX_DIFF_VAR(+1)}.
+
+The transformation is applied to all endogenous variables with a lead
+if the option is given without a list of variables. If there is a
+list, the transformation is restricted to endogenous with a lead that
+also appear in the list.
 
 This option can useful for some deterministic simulations where
 convergence is hard to obtain. Bad values for terminal conditions in
@@ -1620,7 +1678,7 @@ end;
 @end deffn
 
 Dynare has the ability to output the list of model equations to a
-LaTeX file, using the @code{write_latex_dynamic_model} command. The
+@LaTeX{} file, using the @code{write_latex_dynamic_model} command. The
 static model can also be written with the
 @code{write_latex_static_model} command.
 
@@ -1630,21 +1688,21 @@ static model can also be written with the
 
 @descriptionhead
 
-This command creates a LaTeX file containing the (dynamic) model.
+This command creates a @LaTeX{} file containing the (dynamic) model.
 
 If your @file{.mod} file is @file{@var{FILENAME}.mod}, then Dynare
 will create a file called @file{@var{FILENAME}_dynamic.tex},
 containing the list of all the dynamic model equations.
 
-If LaTeX names were given for variables and parameters
+If @LaTeX{} names were given for variables and parameters
 (@pxref{Variable declarations}), then those will be used; otherwise,
 the plain text names will be used.
 
 Time subscripts (@code{t}, @code{t+1}, @code{t-1}, @dots{}) will be
-appended to the variable names, as LaTeX subscripts.
+appended to the variable names, as @LaTeX{} subscripts.
 
-Note that the model written in the TeX file will differ from the model
-declared by the user in the following dimensions:
+Note that the model written in the @TeX{} file will differ from the
+model declared by the user in the following dimensions:
 
 @itemize
 
@@ -1668,7 +1726,7 @@ for a stochastic model, exogenous variables with leads or lags will
 also have been replaced by new auxiliary variables and equations.
 @end itemize
 
-Compiling the TeX file requires the following Latex packages: 
+Compiling the @TeX{} file requires the following @LaTeX{} packages:
 @code{geometry}, @code{fullpage}, @code{breqn}.
 
 @end deffn
@@ -1677,18 +1735,18 @@ Compiling the TeX file requires the following Latex packages:
 
 @descriptionhead
 
-This command creates a LaTeX file containing the static model.
+This command creates a @LaTeX{} file containing the static model.
 
 If your @file{.mod} file is @file{@var{FILENAME}.mod}, then Dynare
 will create a file called @file{@var{FILENAME}_static.tex}, containing
 the list of all the equations of the steady state model.
 
-If LaTeX names were given for variables and parameters
+If @LaTeX{} names were given for variables and parameters
 (@pxref{Variable declarations}), then those will be used; otherwise,
 the plain text names will be used.
 
-Note that the model written in the TeX file will differ from the model
-declared by the user in the some dimensions
+Note that the model written in the @TeX{} file will differ from the
+model declared by the user in the some dimensions
 (@pxref{write_latex_dynamic_model} for details).
 
 Also note that this command will not output the contents of the
@@ -1696,7 +1754,7 @@ optional @code{steady_state_model} block (@pxref{steady_state_model});
 it will rather output a static version (@i{i.e.} without leads and
 lags) of the dynamic model declared in the @code{model} block.
 
-Compiling the TeX file requires the following Latex packages: 
+Compiling the @TeX{} file requires the following @LaTeX{} packages:
 @code{geometry}, @code{fullpage}, @code{breqn}.
 
 @end deffn
@@ -2349,9 +2407,9 @@ give more guidance to Dynare, using your knowledge of the model, by
 providing it with a ``steady state file''.
 
 @menu
-* Finding the steady state with Dynare nonlinear solver::  
-* Using a steady state file::   
-* Replace some equations during steady state computations::  
+* Finding the steady state with Dynare nonlinear solver::
+* Using a steady state file::
+* Replace some equations during steady state computations::
 @end menu
 
 @node Finding the steady state with Dynare nonlinear solver
@@ -3052,11 +3110,11 @@ there are strong nonlinearities or binding constraints. Such a
 solution is computed using the @code{extended_path} command.
 
 @menu
-* Computing the stochastic solution::  
-* Typology and ordering of variables::  
-* First order approximation::   
-* Second order approximation::  
-* Third order approximation::   
+* Computing the stochastic solution::
+* Typology and ordering of variables::
+* First order approximation::
+* Second order approximation::
+* Third order approximation::
 @end menu
 
 @node Computing the stochastic solution
@@ -4360,9 +4418,9 @@ distribution of forecasts is stored in variables
 these variables.
 
 @item tex
-@anchor{tex} Requests the printing of results and graphs in TeX tables
-and graphics that can be later directly included in LaTeX files (not
-yet implemented)
+@anchor{tex} Requests the printing of results and graphs in @TeX{}
+tables and graphics that can be later directly included in @LaTeX{}
+files (not yet implemented)
 
 @item kalman_algo = @var{INTEGER}
 @anchor{kalman_algo}
@@ -5438,13 +5496,13 @@ Sensitivity analysis results are saved locally in @code{<mod_file>/GSA},
 where @code{<mod_file>.mod} is the name of the DYNARE model file.
 
 @menu
-* Sampling::                    
-* Stability Mapping::           
-* Reduced Form Mapping::        
-* RMSE::                        
-* Screening Analysis::          
-* Identification Analysis::     
-* Performing Sensitivity and Identification Analysis::  
+* Sampling::
+* Stability Mapping::
+* Reduced Form Mapping::
+* RMSE::
+* Screening Analysis::
+* Identification Analysis::
+* Performing Sensitivity and Identification Analysis::
 @end menu
 
 @node Sampling
@@ -6806,10 +6864,10 @@ types: integer, character string, array of integers, array of
 strings.
 
 @menu
-* Macro expressions::           
-* Macro directives::            
-* Typical usages::              
-* MATLAB/Octave loops versus macro-processor loops::  
+* Macro expressions::
+* Macro directives::
+* Typical usages::
+* MATLAB/Octave loops versus macro-processor loops::
 @end menu
 
 @node Macro expressions
@@ -7035,10 +7093,10 @@ and to abort. The argument must evaluate to a string.
 @subsection Typical usages
 
 @menu
-* Modularization::              
-* Indexed sums or products::    
-* Multi-country models::        
-* Endogeneizing parameters::    
+* Modularization::
+* Indexed sums or products::
+* Multi-country models::
+* Endogeneizing parameters::
 @end menu
 
 @node Modularization
@@ -7399,8 +7457,8 @@ Is @code{true} or @code{false}.
 @end table
 
 @menu
-* Dynare Configuration::        
-* Parallel Configuration::      
+* Dynare Configuration::
+* Parallel Configuration::
 @end menu
 
 @node Dynare Configuration
@@ -7654,6 +7712,380 @@ MatlabOctavePath = matlab
 @end example
 
 @end deffn
+
+@node Reporting
+@chapter Reporting
+
+Dynare provides a simple interface for creating @LaTeX{} reports,
+comprised of @LaTeX{} tables and TikZ graphs. You can use the report as
+created through Dynare or pick out the pieces you want for inclusion
+in your own paper.
+
+Reports are created and modified by calling methods on class
+objects. The objects are hierarchichal, with the following order (from
+highest to lowest): @code{Report, Page, Section, Graph/Table/Vspace,
+Series}. For simplicity of syntax, we abstract away from these
+classes, allowing you to operate directly on a @code{Report} object,
+while maintaining the names of these classes in the @code{Report}
+Class methods you will use.
+
+The report is created sequentially, command by command, hence the
+order of the commands matters. When an object of a certain hierarchy
+is inserted, all methods will function on that object until an object
+of equal or greater hierarchy is added. Hence, once you add a
+@code{Page} to the report, every time you add a @code{Section} object,
+it will be added to this @code{Page} until another @code{Page} is
+added to the report (via @ref{addPage}). This will become more clear
+with the example at the end of the section.
+
+Options to the methods are passed differently than those to Dynare
+commands. They take the form of named options to Matlab functions
+where the arguments come in pairs (@i{e.g.}
+@code{function_name(`option_1_name', `option_1_value',
+`option_2_name', `option_2_value', ...)}, where @code{option_X_name}
+is the name of the option while @code{option_X_value} is the value
+assigned to that option). The ordering of the option pairs matters
+only in the unusual case when an option is provided twice (probably
+erroneously). In this case, the last value passed is the one that is
+used.
+
+Below, you will see a list of methods available for the Report class and
+a clarifying example.
+
+@defmethod Report report compiler, showDate, filename, margin, marginUnit, orientation, paper, title
+Instantiates a @code{Report} object.
+@optionshead
+@table @code
+@anchor{compiler}
+@item compiler, @var{FILENAME}
+The full path to the @LaTeX{} compiler on your system. If this option
+is not provided, Dynare will try to find the appropriate program to
+compile @LaTeX{} on your system. Default is system dependent: Windows:
+?, Mac OS X: @code{/usr/texbin/pdflatex}, Linux: the result of
+@code{which pdflatex}
+
+@item showDate, @code{BOOLEAN}
+Display the date and time when the report was compiled. Default:
+@code{true}
+
+@anchor{filename}
+@item filename, @var{FILENAME}
+The filename to use when saving this report. Default:
+@code{report.tex}
+
+@item margin, @var{DOUBLE}
+The margin size. Default: @code{2.5}
+
+@item marginUnit, `cm' | `in'
+Units associated with the margin. Default: @code{`cm'}
+
+@anchor{orientation}
+@item orientation, `landscape' | `portrait'
+Paper orientation: Default: @code{`portrait'}
+
+@anchor{paper}
+@item paper, `a4' | `letter'
+Paper size. Default: @code{`a4'}
+
+@item title, @code{STRING}
+Report Title. Default: @code{none}
+@end table
+@end defmethod
+
+@anchor{addPage}
+@defmethod Report addPage footnote, orientation, paper, title, titleFormat
+Adds a @code{Page} to the @code{Report}.
+@optionshead
+@table @code
+@item footnote, @code{STRING}
+A footnote to be included at the bottom of this page. Default: @code{none}
+
+@item orientation, `landscape' | `portrait'
+@xref{orientation}.
+
+@item paper, `a4' | `letter'
+@xref{paper}.
+
+@anchor{title}
+@item title, @code{STRING} | @code{CELL_ARRAY_STRINGS}
+With one entry (a @code{STRING}), the title of the page. With more
+than one entry (a @code{CELL_ARRAY_STRINGS}), the title and subtitle(s)
+of the page. Default: @code{none}
+
+@anchor{titleFormat}
+@item titleFormat, @code{STRING} | @code{CELL_ARRAY_STRINGS}
+A string representing the @LaTeX{} markup to use on the
+@ref{title}. The number of cell array entries must be equal to that of
+the @ref{title} option. Default: @code{none}
+
+@end table
+@end defmethod
+
+@defmethod Report addSection cols, height
+Adds a @code{Section} to a @code{Page}.
+@optionshead
+@table @code
+@item cols, @code{INTEGER}
+The number of columns in the section. Default: @code{1}
+
+@item height, @code{STRING}
+A string to be used with the @code{\sectionheight} @LaTeX{}
+command. Default: @code{`!'}
+@end table
+@end defmethod
+
+@defmethod Report addGraph data, figname, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, xlabel, ylabel, xrange, yrange, showZeroline
+Adds a @code{Graph} to a @code{Section}.
+@optionshead
+@table @code
+@anchor{data}
+@item data, @code{dynSeries}
+The @code{dynSeries} that provides the data for the graph. Default:
+@code{none}
+
+@item figname, @code{STRING}
+The name to use when saving this figure. Default: @code{[tempname
+`.tex']}
+
+@item showGrid, @code{BOOLEAN}
+Whether or not to display the minor grid on the graph. Default:
+@code{true}
+
+@item showLegend, @code{BOOLEAN}
+Whether or not to display the legend. Default: @code{false}
+
+@item showLegendBox, @code{BOOLEAN}
+Whether or not to display a box around the legend. Default:
+@code{false}
+
+@item legendLocation, `North' | `South' | `East' | `West' | `NorthEast' | `SouthEast' | `NorthWest' | `SouthWest' | `NorthOutside' | `SouthOutside' | `EastOutside' | `WestOutside' | `NorthEastOutside' | `SouthEastOutside' | `NorthWestOutside' | `SouthWestOutside' | `Best' | `BestOutside'
+Where to place the legend in the graph. NB: some of these are not
+available under Octave. Default: @code{`SouthEast'}
+
+@item legendOrientation, `vertical' | `horizontal'
+Orientation of the legend. Default: @code{`horizontal'}
+
+@item legendFontSize, @code{DOUBLE}
+The font size for legend entries. Default: @code{8}
+
+@anchor{seriesToUse}
+@item seriesToUse, @code{CELL_ARRAY_STRINGS}
+The names of the series contained in the @code{dynSeries} provided to
+the @ref{data} option. If empty, use all series provided to
+@ref{data} option. Default: @code{empty}
+
+@item shade, @code{dynDate}:@code{dynDate}
+A @code{dynDates} range showing the portion of the graph that should
+be shaded. Default: @code{none}
+
+@item shadeColor, @code{MATLAB_COLOR_NAME}
+The color to use in the shaded portion of the graph. Default:
+@code{`green'}
+
+@item shadeOpacity, @code{DOUBLE}
+The opacity of the shaded area, must be in @math{[0,1]}. Default: @code{.2}
+
+@item title, @code{STRING}
+Title for the graph. Default: @code{none}
+
+@item xlabel, @code{STRING}
+The x-axis label. Default: @code{none}
+
+@item ylabel, @code{STRING}
+The y-axis label. Default: @code{none}
+
+@item xrange, @code{dynDate}:@code{dynDate}
+The boundary on the x-axis to display in the graph, represented as a
+@code{dynDate} range. Default: all
+
+@item yrange, @code{dynDate}:@code{dynDate}
+The boundary on the y-axis to display in the graph, represented as a
+@code{dynDate} range. Default: all
+
+@item showZeroline, @code{BOOLEAN}
+Display a solid black line at @math{y = 0}. Default: @code{false}
+
+@end table
+@end defmethod
+
+@defmethod Report addTable data, showHlines, precision, range, seriesToUse, title, titleSize, vlineAfter, showVlines
+Adds a @code{Table} to a @code{Section}.
+@optionshead
+@table @code
+
+@item data, @code{dynSeries}
+@xref{data}.
+
+@item showHlines, @code{BOOLEAN}
+Whether or not to show horizontal lines separating the rows. Default: @code{false}
+
+@item precision, @code{INTEGER}
+The number of decimal places to report in the table data. Default: @code{1}
+
+@item range, @code{dynDate}:@code{dynDate}
+The date range of the data to be displayed. Default: @code{all}
+
+@item seriesToUse, @code{CELL_ARRAY_STRINGS}
+@xref{seriesToUse}.
+
+@item title, @code{STRING}
+Title for the table. Default: @code{none}
+
+@item titleSize, @code{STRING}
+@LaTeX{} string representing the size of the table title. Default: @code{large}
+
+@item vlineAfter, @code{dynDate}
+Show a vertical line after the specified date. Default: @code{empty}
+
+@item showVlines, @code{BOOLEAN}
+Whether or not to show vertical lines separating the columns. Default: @code{false}
+@end table
+@end defmethod
+
+@anchor{addSeries}
+@defmethod Report addSeries data, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor
+Adds a @code{Series} to a @code{Graph} or a @code{Table}.
+@optionshead
+@table @code
+
+@item data, @code{dynSeries}
+@xref{data}.
+
+@item graphLineColor, @code{MATLAB_COLOR}
+Color to use for the series in a graph. Default: @code{`k'}
+
+@item graphLineStyle, @code{`none'} | @code{`-'} | @code{`--'} | @code{`:'} | @code{`-.'}
+Line style for this series in a graph. Default: @code{'-'}
+
+@item graphLineWidth @code{DOUBLE}
+Line width for this series in a graph. Default: @code{0.5}
+
+@item graphMarker, @code{`+'} | @code{`o'} | @code{`*'} | @code{`.'} | @code{`x'} | @code{`s'} | @code{`square'} | @code{`d'} | @code{`diamond'} | @code{`^'} | @code{`v'} | @code{`>'} | @code{`<'} | @code{`p'} | @code{`pentagram'} | @code{`h'} | @code{`hexagram'} | @code{`none'}
+The Marker to use on this series in a graph. Default: @code{none}
+
+@item graphMarkerEdgeColor, @code{MATLAB_COLOR}
+The edge color of the graph marker. Default: @code{`auto'}
+
+@item graphMarkerFaceColor, @code{MATLAB_COLOR}
+The face color of the graph marker. Default: @code{`auto'}
+
+@item graphMarkerSize, @code{DOUBLE}
+The size of the graph marker. Default: @code{6}
+
+@item tableShowMarkers, @code{BOOLEAN}
+In a Table, if @code{true}, surround each cell with brackets and color
+it according to @ref{tableNegColor} and @ref{tablePosColor}. No effect
+for graphs. Default: @code{false}
+
+@item tableAlignRight, @code{BOOLEAN}
+Whether or not to align the series name to the right of the
+cell. Default: @code{false}
+
+@item tableMarkerLimit, @code{DOUBLE}
+For values less than @math{-1*@code{tableMarkerLimit}}, mark the cell
+with the color denoted by @ref{tableNegColor}. For those greater than
+@code{tableMarkerLimit}, mark the cell with the color denoted by
+@ref{tablePosColor}. Default: @code{1e-4}
+
+@anchor{tableNegColor}
+@item tableNegColor, @code{LATEX_COLOR}
+The color to use when marking Table data that is less than
+zero. Default: @code{`red'}
+
+@anchor{tablePosColor}
+@item tablePosColor, @code{LATEX_COLOR}
+The color to use when marking Table data that is greater than
+zero. Default: @code{`blue'}
+
+@end table
+@end defmethod
+
+@defmethod Report addVspace hline, number
+Adds a @code{Vspace} (vertical space) to a @code{Section}.
+@optionshead
+@table @code
+@item hline, @code{INTEGER}
+The number of horizontal lines to be inserted. Default: @code{0}
+
+@item number, @code{INTEGER}
+The number of new lines to be inserted. Default: @code{1}
+@end table
+@end defmethod
+
+@anchor{write}
+@defmethod Report write
+Writes the @LaTeX{} representation of this @code{Report}, saving it to
+the file specified by @ref{filename}.
+@end defmethod
+
+@defmethod Report compile compiler
+Compiles the report written by @ref{write} into a @code{pdf} file. If
+the report has not already been written (determined by the existence
+of the file specified by @ref{filename}, @ref{write} is called.
+optionshead
+@table @code
+@item compiler, @code{FILENAME}
+Like @ref{compiler}, except will not overwrite the value of
+@code{compiler} contained in the report object. Hence, passing the
+value here is useful for using different @LaTeX{} compilers or just
+for passing the value at the last minute.
+@end table
+@end defmethod
+
+@examplehead
+
+The following code creates a one page report. The first part of the
+page contains two graphs displayed across two columns and one
+row. The bottom of the page displays a centered table.
+@example
+%% Create dynSeries
+dsq = dynSeries(`quarterly.csv');
+dsa = dynSeries(`annual.csv');
+dsca = dynSeries(`annual_control.csv');
+
+%% Report
+rep = report();
+
+%% Page 1
+rep = rep.addPage(`title', `My Page Title', `titleFormat', `\large\bfseries');
+
+% Section 1
+rep = rep.addSection(`cols', 2);
+rep = rep.addGraph(`title', `Graph (1,1)', `showLegend', true, ...
+                   `xrange', dynDate(`2007q1'):dynDate(`2013q4'), ...
+                   `shade', dynDate(`2012q2'):dynDate(`2013q4'));
+rep = rep.addSeries(`data', dsq@{`SERIES1'@}, `color', `b', ...
+                    `graphLineWidth', 1);
+rep = rep.addSeries(`data', dsq@{`SERIES2'@}, `color', `g', ...
+                    `graphLineStyle', '--', `graphLineWidth', 1.5);
+rep = rep.addGraph(`title', `Graph (1,2)', `showLegend', true, ...
+                   `xrange', dynDate(`2007q1'):dynDate(`2013q4'), ...
+                   `shade', dynDate(`2012q2'):dynDate(`2013q4'));
+rep = rep.addSeries(`data', dsq@{`SERIES3'@}, `color', `b', ...
+                    `graphLineWidth', 1);
+rep = rep.addSeries(`data', dsq@{`SERIES4'@}, `color', `g', ...
+                    `graphLineStyle', '--', `graphLineWidth', 1.5);
+
+% Section 2
+rep = rep.addSection();
+rep = rep.addTable(`title', `Table 1', ...
+                   `range', dynDate(`2012'):dynDate(`2014'));
+shortNames = @{`US', `EU'@};
+longNames  = @{`United States', `Euro Area'@};
+for i=1:length(shortNames)
+    rep = rep.addSeries(`data', dsa@{[`GDP_' shortNames@{i@}]@});
+    delta = dsa@{[`GDP_' shortNames@{i@}]@}-dsca@{[`GDP_' shortNames@{i@}]@};
+    delta = delta.tex_rename(`$\Delta$');
+    rep = rep.addSeries(`data', delta, ...
+                        `tableShowMarkers', true, ...
+                        `tableAlignRight', true);
+end
+
+%% Write & Compile Report
+rep.write();
+rep.compile();
+@end example
+
 
 @node Examples
 @chapter Examples

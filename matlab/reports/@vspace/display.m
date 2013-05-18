@@ -1,5 +1,15 @@
-function n = numElements(o)
-% function n = numElements(o)
+function display(o)
+%function display(o)
+% Display a Vspace object
+%
+% INPUTS
+%   o   [vspace] vspace object
+%
+% OUTPUTS
+%   none
+%
+% SPECIAL REQUIREMENTS
+%   none
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,5 +28,5 @@ function n = numElements(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-n = o.objArray.numObjs();
+reporting_object_display(o);
 end

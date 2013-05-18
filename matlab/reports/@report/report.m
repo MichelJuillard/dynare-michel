@@ -36,11 +36,10 @@ o.title = '';
 o.orientation = 'portrait';
 o.paper = 'a4';
 o.margin = 2.5;
-o.margin_unit = 'cm';
+o.marginUnit = 'cm';
 o.pages = pages();
 o.filename = 'report.tex';
-o.config = '';
-o.showdate = true;
+o.showDate = true;
 o.compiler = '';
 
 if nargin == 1
@@ -54,16 +53,16 @@ elseif nargin > 1
                'pairs']);
     end
 
-    optNames = lower(fieldnames(o));
+    optNames = fieldnames(o);
 
     % overwrite default values
     for pair = reshape(varargin, 2, [])
-        field = lower(pair{1});
-        if any(strmatch(field, optNames, 'exact'))
-            o.(field) = pair{2};
+        ind = strmatch(lower(pair{1}), lower(optNames), 'exact');
+        assert(isempty(ind) || length(ind) == 1);
+        if ~isempty(ind)
+            o.(optNames{ind}) = pair{2};
         else
-            error('@report.report: %s is not a recognized option.', ...
-                  field);
+            error('@report.report: %s is not a recognized option.', pair{1});
         end
     end
 end
@@ -71,14 +70,13 @@ end
 % Check options provided by user
 assert(ischar(o.title), '@report.report: title must be a string');
 assert(ischar(o.filename), '@report.report: filename must be a string');
-assert(ischar(o.config), '@report.report: config file must be a string');
 assert(ischar(o.compiler), '@report.report: compiler file must be a string');
-assert(islogical(o.showdate), '@report.report: showdate must be either true or false');
+assert(islogical(o.showDate), '@report.report: showDate must be either true or false');
 assert(isfloat(o.margin) && o.margin > 0, '@report.report: margin must be a float > 0.');
 
 valid_margin_unit = {'cm', 'in'};
-assert(any(strcmp(o.margin_unit, valid_margin_unit)), ...
-       ['@report.report: margin_unit must be one of ' strjoin(valid_margin_unit, ' ')]);
+assert(any(strcmp(o.marginUnit, valid_margin_unit)), ...
+       ['@report.report: marginUnit must be one of ' strjoin(valid_margin_unit, ' ')]);
 
 valid_paper = {'a4', 'letter'};
 assert(any(strcmp(o.paper, valid_paper)), ...

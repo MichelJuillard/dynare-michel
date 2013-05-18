@@ -31,5 +31,5 @@ function lastIndex = end(o, k, n)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 assert(k==1 && n==1, '@graph/end: graph only has one dimension');
-lastIndex = o.seriesElements.numElements();
+lastIndex = o.seriesElements.numSeriesElements();
 end

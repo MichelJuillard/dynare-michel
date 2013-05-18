@@ -28,49 +28,5 @@ function display(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-name = 'report.page.section.graph';
-disp(' ');
-disp([name '.title = ']);
-disp(' ');
-disp(['     ''' o.title '''']);
-
-disp(' ');
-disp([name '.xlabel = ']);
-disp(' ');
-disp(['     ''' o.xlabel '''']);
-
-disp(' ');
-disp([name '.ylabel = ']);
-disp(' ');
-disp(['     ''' o.ylabel '''']);
-
-disp(' ');
-disp([name '.footnote = ']);
-disp(' ');
-disp(['     ''' o.footnote '''']);
-
-disp(' ');
-disp([name '.figname = ']);
-disp(' ');
-disp(['     ''' o.figname '''']);
-
-disp(' ');
-disp([name '.config = ']);
-disp(' ');
-disp(['     ''' o.config '''']);
-
-disp(' ');
-disp([name '.legend = ']);
-disp(' ');
-disp(o.legend);
-
-disp(' ');
-disp([name '.shade = ']);
-disp(' ');
-disp(o.shade);
-
-disp(' ');
-disp([name '.seriesElements = ']);
-disp(' ');
-o.seriesElements.getSeriesElements()
+reporting_object_display(o);
 end

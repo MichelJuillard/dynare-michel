@@ -3,7 +3,7 @@ function display(o)
 % Display a Table object
 %
 % INPUTS
-%   none
+%   o   [table] table object
 %
 % OUTPUTS
 %   none
@@ -28,34 +28,5 @@ function display(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-name = 'report.page.section.table';
-disp(' ');
-disp([name '.title = ']);
-disp(' ');
-disp(['     ''' o.title '''']);
-
-disp(' ');
-disp([name '.footnote = ']);
-disp(' ');
-disp(['     ''' o.footnote '''']);
-
-disp(' ');
-disp([name '.hlines = ']);
-disp(' ');
-disp(o.hlines);
-
-disp(' ');
-disp([name '.vlines = ']);
-disp(' ');
-disp(o.vlines);
-
-disp(' ');
-disp([name '.precision = ']);
-disp(' ');
-disp(o.precision);
-
-disp(' ');
-disp([name '.seriesElements = ']);
-disp(' ');
-o.seriesElements.getSeriesElements()
+reporting_object_display(o);
 end

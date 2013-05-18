@@ -33,34 +33,31 @@ function o = graph(varargin)
 
 o = struct;
 
-o.config = '';
-
 o.seriesElements = seriesElements();
 
 o.title = '';
 o.ylabel = '';
 o.xlabel = '';
-o.footnote = '';
 
 o.figname = '';
 o.data = '';
-o.seriestouse = '';
+o.seriesToUse = '';
 o.xrange = '';
 o.yrange = '';
 
 o.shade = '';
-o.shade_color = [0 1 0];
-o.shade_opacity = .2;
+o.shadeColor = 'green';
+o.shadeOpacity = .2;
 
-o.grid = true;
+o.showGrid = true;
 
-o.legend = false;
-o.legend_boxoff = false;
-o.legend_location = 'SouthEast';
-o.legend_orientation = 'horizontal';
-o.legend_font_size = 8;
+o.showLegend = false;
+o.showLegendBox = false;
+o.legendLocation = 'SouthEast';
+o.legendOrientation = 'horizontal';
+o.legendFontSize = 8;
 
-o.zeroline = false;
+o.showZeroline = false;
 
 if nargin == 1
     assert(isa(varargin{1}, 'graph'),['@graph.graph: with one arg you ' ...
@@ -73,34 +70,34 @@ elseif nargin > 1
                'pairs.']);
     end
 
-    optNames = lower(fieldnames(o));
+    optNames = fieldnames(o);
 
     % overwrite default values
     for pair = reshape(varargin, 2, [])
-        field = lower(pair{1});
-        if any(strmatch(field, optNames, 'exact'))
-            o.(field) = pair{2};
+        ind = strmatch(lower(pair{1}), lower(optNames), 'exact');
+        assert(isempty(ind) || length(ind) == 1);
+        if ~isempty(ind)
+            o.(optNames{ind}) = pair{2};
         else
-            error('@graph.graph: %s is not a recognized option.', field);
+            error('@graph.graph: %s is not a recognized option.', pair{1});
         end
     end
 end
 
 % Check options provided by user
 assert(ischar(o.title), '@graph.graph: title must be a string');
-assert(ischar(o.footnote), '@graph.graph: footnote must be a string');
-assert(ischar(o.config), '@graph.graph: config file must be a string');
 assert(ischar(o.xlabel), '@graph.graph: xlabel file must be a string');
 assert(ischar(o.ylabel), '@graph.graph: ylabel file must be a string');
 assert(ischar(o.figname), '@graph.graph: figname must be a string');
-assert(islogical(o.grid), '@graph.graph: grid must be either true or false');
-assert(islogical(o.legend), '@graph.graph: legend must be either true or false');
-assert(islogical(o.legend_boxoff), '@graph.graph: legend_boxoff must be either true or false');
-assert(isint(o.legend_font_size), '@graph.graph: legend_font_size must be an integer');
-assert(islogical(o.zeroline), '@graph.graph: zeroline must be either true or false');
-assert(isfloat(o.shade_opacity) && length(o.shade_opacity)==1 && ...
-       o.shade_opacity >= 0 && o.shade_opacity <= 1, ...
-       '@graph.graph: o.shade_opacity must be a real in [0 1]');
+assert(islogical(o.showGrid), '@graph.graph: showGrid must be either true or false');
+assert(islogical(o.showLegend), '@graph.graph: showLegend must be either true or false');
+assert(islogical(o.showLegendBox), '@graph.graph: showLegendBox must be either true or false');
+assert(isint(o.legendFontSize), '@graph.graph: legendFontSize must be an integer');
+assert(islogical(o.showZeroline), '@graph.graph: showZeroline must be either true or false');
+assert(ischar(o.shadeColor), '@graph.graph: shadeColor must be a string');
+assert(isfloat(o.shadeOpacity) && length(o.shadeOpacity)==1 && ...
+       o.shadeOpacity >= 0 && o.shadeOpacity <= 1, ...
+       '@graph.graph: o.shadeOpacity must be a real in [0 1]');
 valid_legend_locations = ...
     {'North', 'South', 'East', 'West', ...
      'NorthEast', 'SouthEast', 'NorthWest', 'SouthWest', ...
@@ -108,12 +105,12 @@ valid_legend_locations = ...
      'NorthEastOutside', 'SouthEastOutside', 'NorthWestOutside', 'SouthWestOutside', ...
      'Best', 'BestOutside', ...
     };
-assert(any(strcmp(o.legend_location, valid_legend_locations)), ...
-       ['@graph.graph: legend_location must be one of ' strjoin(valid_legend_locations, ' ')]);
+assert(any(strcmp(o.legendLocation, valid_legend_locations)), ...
+       ['@graph.graph: legendLocation must be one of ' strjoin(valid_legend_locations, ' ')]);
 
 valid_legend_orientations = {'vertical', 'horizontal'};
-assert(any(strcmp(o.legend_orientation, valid_legend_orientations)), ...
-       ['@graph.graph: legend_orientation must be one of ' strjoin(valid_legend_orientations, ' ')]);
+assert(any(strcmp(o.legendOrientation, valid_legend_orientations)), ...
+       ['@graph.graph: legendOrientation must be one of ' strjoin(valid_legend_orientations, ' ')]);
 
 assert(isempty(o.shade) || (isa(o.shade, 'dynDates') && o.shade.ndat >= 2), ...
        ['@graph.graph: shade is specified as a dynDates range, e.g. ' ...
@@ -127,22 +124,22 @@ assert(isempty(o.yrange) || (isfloat(o.yrange) && length(o.yrange) == 2 && ...
         'the lower bound and upper bound.']);
 assert(isempty(o.data) || isa(o.data, 'dynSeries'), ['@graph.graph: data must ' ...
                     'be a dynSeries']);
-assert(isempty(o.seriestouse) || iscellstr(o.seriestouse), ['@graph.graph: ' ...
+assert(isempty(o.seriesToUse) || iscellstr(o.seriesToUse), ['@graph.graph: ' ...
                     'series to use must be a cell array of string(s)']);
 
-% using o.seriestouse, create series objects and put them in o.seriesElements
+% using o.seriesToUse, create series objects and put them in o.seriesElements
 if ~isempty(o.data)
-    if isempty(o.seriestouse)
+    if isempty(o.seriesToUse)
         for i=1:o.data.vobs
             o.seriesElements = o.seriesElements.addSeries('data', o.data{o.data.name{i}});
         end
     else
-        for i=1:length(o.seriestouse)
-            o.seriesElements = o.seriesElements.addSeries('data', o.data{o.seriestouse{i}});
+        for i=1:length(o.seriesToUse)
+            o.seriesElements = o.seriesElements.addSeries('data', o.data{o.seriesToUse{i}});
         end
     end
 end
-o = rmfield(o, 'seriestouse');
+o = rmfield(o, 'seriesToUse');
 o = rmfield(o, 'data');
 
 % Create graph object

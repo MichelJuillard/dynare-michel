@@ -1,9 +1,11 @@
-function o = compile(o)
+function o = compile(o, varargin)
 %function o = compile(o)
 % Compile Report Object
 %
 % INPUTS
-%   o     [report]  report object
+%   o            [report]  report object
+%   varargin     [char]    allows user to change report compiler for a
+%                          given run of compile.
 %
 % OUTPUTS
 %   o     [report]  report object
@@ -28,20 +30,32 @@ function o = compile(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+assert(length(varargin) == 0 || length(varargin) == 2, ...
+       '@report.compile: calling form: compiler, ''/path/to/compiler''.');
+if length(varargin) == 2
+    assert(ischar(varargin{1}) && strcmp(lower(varargin{1}), 'compiler'), ...
+           '@report.compile: ''compiler'' is the only option.');
+    assert(ischar(varargin{2}), ...
+           '@report.compile: the argument to ''compiler'' must be a char');
+    compiler = varargin{2};
+else
+    compiler = o.compiler;
+end
+
 if ~exist(o.filename, 'file')
     o.write();
 end
 
-compiler = o.compiler;
 if isempty(compiler)
-    if strcmp(computer, 'MACI') || strcmp(computer, 'MACI64')
-        % Add most likely places for pdflatex to
-        % exist outside of default $PATH
+    if strncmp(computer, 'MACI', 4) || ~isempty(regexpi(computer, '.*apple.*', 'once'))
+        % Add most likely places for pdflatex to exist outside of default $PATH
         [status, compiler] = ...
             system(['PATH=$PATH:/usr/texbin:/usr/local/bin:/usr/local/sbin;' ...
                     'which pdflatex'], '-echo');
     elseif strcmp(computer, 'PCWIN') || strcmp(computer, 'PCWIN64')
-        % need to fill in for Windows
+        error(['@report.compile: On Windows machines, you must explicitly ' ...
+               'provide the ''compiler'' option or set the compiler ' ...
+               'variable in the Report class']);
     else % gnu/linux
         [status, compiler] = system('which pdflatex', '-echo');
     end
@@ -50,7 +64,12 @@ if isempty(compiler)
     compiler = strtrim(compiler);
     o.compiler = compiler;
 end
-[status output] = system([compiler ' ./' o.filename], '-echo');
+
+if exist('OCTAVE_VERSION')
+    status = system([compiler ' ./' o.filename], 0);
+else
+    status = system([compiler ' ./' o.filename], '-echo');
+end
 [junk, rfn, junk] = fileparts(o.filename);
 
 if status ~= 0

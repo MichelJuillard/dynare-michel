@@ -30,7 +30,7 @@ function o = write(o, fid)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 assert(fid ~= -1);
-if ~o.seriesElements.numElements()
+if ~o.seriesElements.numSeriesElements()
     warning('@table.write: no series to plot, returning');
     return;
 end
@@ -54,12 +54,12 @@ fprintf(fid, '\\setlength{\\tabcolsep}{4pt}\n');
 fprintf(fid, '\\begin{tabular}{@{}l');
 
 for i=1:ndates
-    if o.vlines
+    if o.showVlines
         fprintf(fid, '|');
     end
     fprintf(fid, 'r');
-    if ~isempty(o.vline_after)
-        if dates(i) == o.vline_after
+    if ~isempty(o.vlineAfter)
+        if dates(i) == o.vlineAfter
             fprintf(fid, '|');
         end
     end
@@ -67,7 +67,7 @@ end
 fprintf(fid, '@{}}%%\n');
 if ~isempty(o.title)
     fprintf(fid, '\\multicolumn{%d}{c}{\\%s %s}\\\\\n', ...
-            ndates+nlhc, o.title_size, o.title);
+            ndates+nlhc, o.titleSize, o.title);
 end
 fprintf(fid, '\\toprule%%\n');
 
@@ -122,9 +122,12 @@ fprintf(fid, '\\\\%%\n');
 fprintf(fid, '%%\n');
 
 % Write Table Data
-ne = o.seriesElements.numElements();
+ne = o.seriesElements.numSeriesElements();
 for i=1:ne
     o.seriesElements(i).write(fid, dates, o.precision);
+    if o.showHlines
+        fprintf(fid, '\\hline\n');
+    end
 end
 
 fprintf(fid, '\\bottomrule\n');

@@ -1,9 +1,9 @@
 function display(o)
 %function display(o)
-% Display a Elements object
+% Display a seriesElements object
 %
 % INPUTS
-%   none
+%   o   [seriesElements] seriesElements object
 %
 % OUTPUTS
 %   none
@@ -28,10 +28,5 @@ function display(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-name = 'report.page.section.elements.seriesElement';
-
-disp(' ');
-disp([name ' = ']);
-disp(' ');
-disp(getSeriesElements(o));
+reporting_object_display(o);
 end
