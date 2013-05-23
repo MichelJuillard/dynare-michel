@@ -227,11 +227,11 @@ while ~(cvg==1 || iter>maxit_),
                 [za,flag1] = gmres(g1a,b,Blck_size,1e-6,Blck_size*periods,L1,U1);
                 if (flag1>0 || reduced)
                     if(flag1==1)
-                        disp(['Error in simul: No convergence inside GMRES after ' num2str(periods*10,'%6d') ' iterations, in block' num2str(Block_Size,'%3d')]);
+                        disp(['Error in simul: No convergence inside GMRES after ' num2str(periods*10,'%6d') ' iterations, in block ' num2str(Blck_size,'%3d')]);
                     elseif(flag1==2)
-                        disp(['Error in simul: Preconditioner is ill-conditioned, in block' num2str(Block_Size,'%3d')]);
+                        disp(['Error in simul: Preconditioner is ill-conditioned, in block ' num2str(Blck_size,'%3d')]);
                     elseif(flag1==3)
-                        disp(['Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block' num2str(Block_Size,'%3d')]);
+                        disp(['Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block ' num2str(Blck_size,'%3d')]);
                     end;
                     ilu_setup.droptol = ilu_setup.droptol/10;
                     reduced = 0;
@@ -265,11 +265,11 @@ while ~(cvg==1 || iter>maxit_),
                 end;
                 if (flag1>0 || reduced)
                     if(flag1==1)
-                        disp(['Error in simul: No convergence inside BICGSTAB after ' num2str(periods*10,'%6d') ' iterations, in block' num2str(Block_Size,'%3d')]);
+                        disp(['Error in simul: No convergence inside BICGSTAB after ' num2str(periods*10,'%6d') ' iterations, in block ' num2str(Blck_size,'%3d')]);
                     elseif(flag1==2)
-                        disp(['Error in simul: Preconditioner is ill-conditioned, in block' num2str(Block_Size,'%3d')]);
+                        disp(['Error in simul: Preconditioner is ill-conditioned, in block ' num2str(Blck_size,'%3d')]);
                     elseif(flag1==3)
-                        disp(['Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block' num2str(Block_Size,'%3d')]);
+                        disp(['Error in simul: GMRES stagnated (Two consecutive iterates were the same.), in block ' num2str(Blck_size,'%3d')]);
                     end;
                     ilu_setup.droptol = ilu_setup.droptol/10;
                     reduced = 0;
