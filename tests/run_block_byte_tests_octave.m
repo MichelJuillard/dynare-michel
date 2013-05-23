@@ -95,7 +95,9 @@ for blockFlag = 0:1
                     endif
                 catch
                     load wsOct
+                    e = lasterror(); # The path() command alters the lasterror, because of io package
                     path(old_path);
+                    lasterror(e);
                     failedBlock{size(failedBlock,2)+1} = ['block_bytecode' filesep 'run_ls2003.m(' num2str(blockFlag) ',' num2str(bytecodeFlag) ',' num2str(solve_algos(i)) ',' num2str(default_stack_solve_algo) ')'];
                     printMakeCheckOctaveErrMsg(['block_bytecode' filesep 'run_ls2003.m(' num2str(blockFlag) ',' num2str(bytecodeFlag) ',' num2str(solve_algos(i)) ',' num2str(default_stack_solve_algo) ')'], lasterror);
                 end_try_catch
@@ -119,7 +121,9 @@ for blockFlag = 0:1
                 endif
             catch
                 load wsOct
+                e = lasterror(); # The path() command alters the lasterror, because of io package
                 path(old_path);
+                lasterror(e);
                 failedBlock{size(failedBlock,2)+1} = ['block_bytecode' filesep 'run_ls2003.m(' num2str(blockFlag) ',' num2str(bytecodeFlag) ',' num2str(default_solve_algo) ',' num2str(stack_solve_algos(i)) ')'];
                 printMakeCheckOctaveErrMsg(['block_bytecode' filesep 'run_ls2003.m(' num2str(blockFlag) ',' num2str(bytecodeFlag) ',' num2str(default_solve_algo) ',' num2str(stack_solve_algos(i)) ')'], lasterror);
             end_try_catch
