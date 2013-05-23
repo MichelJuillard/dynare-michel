@@ -54,7 +54,7 @@ isf1 = [nyp+ny+1:nyf+nyp+ny+1] ;
 stop = 0 ;
 iz = [1:ny+nyp+nyf];
 
-periods = options_.periods
+periods = options_.periods;
 steady_state = oo_.steady_state;
 params = M_.params;
 endo_simul = oo_.endo_simul;
