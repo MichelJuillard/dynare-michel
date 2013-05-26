@@ -1,4 +1,4 @@
-% Copyright (C) 2011-2012 Dynare Team
+% Copyright (C) 2011-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -124,8 +124,8 @@ for blockFlag = 0:1
             catch exception
                 load wsMat
                 path(old_path);
-                failedBlock{size(failedBlock,2)+1} = ['block_bytecode' filesep 'run_ls2003.m(' num2str(blockFlag) ',' num2str(bytecodeFlag) ',' num2str(solve_algos(i)) ',' num2str(default_stack_solve_algo) ')'];
-                printMakeCheckMatlabErrMsg(['block_bytecode' filesep 'run_ls2003.m(' num2str(blockFlag) ',' num2str(bytecodeFlag) ',' num2str(solve_algos(i)) ',' num2str(default_stack_solve_algo) ')'], exception);
+                failedBlock{size(failedBlock,2)+1} = ['block_bytecode' filesep 'run_ls2003.m(' num2str(blockFlag) ',' num2str(bytecodeFlag) ',' num2str(default_solve_algo) ',' num2str(stack_solve_algos(i)) ')'];
+                printMakeCheckMatlabErrMsg(['block_bytecode' filesep 'run_ls2003.m(' num2str(blockFlag) ',' num2str(bytecodeFlag) ',' num2str(default_solve_algo) ',' num2str(stack_solve_algos(i)) ')'], exception);
                 clear exception
             end
         end

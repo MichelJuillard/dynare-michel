@@ -4312,6 +4312,22 @@ Tells Dynare to plot the posterior density for values around the
 computed mode for each estimated parameter in turn. This is helpful to
 diagnose problems with the optimizer
 
+@item mode_check_neighbourhood_size = @var{DOUBLE}
+Used in conjunction with option @code{mode_check}, gives the width of
+the window around the posterior mode to be displayed on the diagnostic
+plots. This width is expressed in percentage deviation. The @code{Inf}
+value is allowed, and will trigger a plot over the entire domain
+(see also @code{mode_check_symmetric_plots}).
+Default: @code{0.5}.
+
+@item mode_check_symmetric_plots = @var{INTEGER}
+Used in conjunction with option @code{mode_check}, if set to @code{1},
+tells Dynare to ensure that the check plots are symmetric around the
+posterior mode. A value of @code{0} allows to have asymmetric plots,
+which can be useful if the posterior mode is close to a domain
+boundary, or in conjunction with @code{mode_check_neighbourhood_size =
+Inf} when the domain in not the entire real line. Default: @code{1}.
+
 @item prior_trunc = @var{DOUBLE}
 @anchor{prior_trunc} Probability of extreme values of the prior
 density that is ignored when computing bounds for the
@@ -4424,10 +4440,32 @@ files (not yet implemented)
 
 @item kalman_algo = @var{INTEGER}
 @anchor{kalman_algo}
-@dots{}
+
+@table @code
+
+@item 0
+Automatically use the Multivariate Kalman Filter for stationary models and the Multivariate Diffuse Kalman Filter for non-stationary models
+
+@item 1
+Use the Multivariate Kalman Filter
+
+@item 2
+Use the Univariate Kalman Filter
+
+@item 3
+Use the Multivariate Diffuse Kalman Filter
+
+@item 4
+Use the Univariate Diffuse Kalman Filter
+
+@end table
+@noindent
+Default value is @code{0}.
+
 
 @item kalman_tol = @var{DOUBLE}
-@dots{}
+@anchor{kalman_tol} Numerical tolerance for determining the singularity of the covariance matrix of the prediction errors during the Kalman filter (minimum allowed reciprocal of the matrix condition number). Default value is @code{1e-10}
+
 
 @item filter_covariance
 @anchor{filter_covariance} Saves the series of one step ahead error of

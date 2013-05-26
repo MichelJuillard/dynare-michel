@@ -4589,15 +4589,17 @@ dynSparseMatrix::Solve_Matlab_GMRES(mxArray *A_m, mxArray *b_m, int Size, double
   throw FatalExceptionHandling(tmp.str());
 #endif
   size_t n = mxGetM(A_m);
-  const char *field_names[] = {"droptol"};
+  const char *field_names[] = {"droptol", "type"};
   mwSize dims[1] = { 1 };
-  mxArray *Setup = mxCreateStructArray(1, dims, 1, field_names);
+  mxArray *Setup = mxCreateStructArray(1, dims, 2, field_names);
   mxSetFieldByNumber(Setup, 0, 0, mxCreateDoubleScalar(lu_inc_tol));
+  mxSetFieldByNumber(Setup, 0, 1, mxCreateString("ilutp"));
   mxArray *lhs0[2];
   mxArray *rhs0[2];
   rhs0[0] = A_m;
   rhs0[1] = Setup;
-  mexCallMATLAB(2, lhs0, 2, rhs0, "ilu");
+  if (mexCallMATLAB(2, lhs0, 2, rhs0, "ilu"))
+    throw FatalExceptionHandling("In GMRES, the incomplet LU decomposition (ilu) ahs failed.");
   mxArray *L1 = lhs0[0];
   mxArray *U1 = lhs0[1];
   /*[za,flag1] = gmres(g1a,b,Blck_size,1e-6,Blck_size*periods,L1,U1);*/

@@ -1,4 +1,4 @@
-## Copyright (C) 2009-2012 Dynare Team
+## Copyright (C) 2009-2013 Dynare Team
 ##
 ## This file is part of Dynare.
 ##
@@ -95,7 +95,9 @@ for blockFlag = 0:1
                     endif
                 catch
                     load wsOct
+                    e = lasterror(); # The path() command alters the lasterror, because of io package
                     path(old_path);
+                    lasterror(e);
                     failedBlock{size(failedBlock,2)+1} = ['block_bytecode' filesep 'run_ls2003.m(' num2str(blockFlag) ',' num2str(bytecodeFlag) ',' num2str(solve_algos(i)) ',' num2str(default_stack_solve_algo) ')'];
                     printMakeCheckOctaveErrMsg(['block_bytecode' filesep 'run_ls2003.m(' num2str(blockFlag) ',' num2str(bytecodeFlag) ',' num2str(solve_algos(i)) ',' num2str(default_stack_solve_algo) ')'], lasterror);
                 end_try_catch
@@ -106,6 +108,9 @@ for blockFlag = 0:1
             try
                 old_path = path;
                 save wsOct
+                if blockFlag && ~bytecodeFlag && stack_solve_algos(i) == 3
+                    error('This test currently enters an infinite loop, skipping')
+                end
                 run_ls2003(blockFlag, bytecodeFlag, default_solve_algo, stack_solve_algos(i))
                 load wsOct
                 path(old_path);
@@ -119,9 +124,11 @@ for blockFlag = 0:1
                 endif
             catch
                 load wsOct
+                e = lasterror(); # The path() command alters the lasterror, because of io package
                 path(old_path);
-                failedBlock{size(failedBlock,2)+1} = ['block_bytecode' filesep 'run_ls2003.m(' num2str(blockFlag) ',' num2str(bytecodeFlag) ',' num2str(solve_algos(i)) ',' num2str(default_stack_solve_algo) ')'];
-                printMakeCheckOctaveErrMsg(['block_bytecode' filesep 'run_ls2003.m(' num2str(blockFlag) ',' num2str(bytecodeFlag) ',' num2str(solve_algos(i)) ',' num2str(default_stack_solve_algo) ')'], lasterror);
+                lasterror(e);
+                failedBlock{size(failedBlock,2)+1} = ['block_bytecode' filesep 'run_ls2003.m(' num2str(blockFlag) ',' num2str(bytecodeFlag) ',' num2str(default_solve_algo) ',' num2str(stack_solve_algos(i)) ')'];
+                printMakeCheckOctaveErrMsg(['block_bytecode' filesep 'run_ls2003.m(' num2str(blockFlag) ',' num2str(bytecodeFlag) ',' num2str(default_solve_algo) ',' num2str(stack_solve_algos(i)) ')'], lasterror);
             end_try_catch
         endfor
     endfor
