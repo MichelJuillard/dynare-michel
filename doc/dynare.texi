@@ -1971,7 +1971,8 @@ For this last reason, it necessary to provide values for all the
 endogenous variables in an @code{endval} block (even though,
 theoretically, initial conditions are only necessary for forward
 variables). If some variables, endogenous or exogenous, are not mentionned in the
-@code{endval} block, a zero value is assumed.
+@code{endval} block, the value assumed is that of the last
+@code{initval} block or @code{steady} command.
 
 Note that if the @code{endval} block is immediately followed by a
 @code{steady} command, its semantics is changed. The @code{steady}
