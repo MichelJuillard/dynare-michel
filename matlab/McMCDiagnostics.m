@@ -372,7 +372,8 @@ files=ls([MhDirectoryName ,filesep, fname '_mh*_blck' int2str(blck) '.mat']); %l
 right_string=files(:,length([fname '_mh'])+1:end); %cut off left part of filename
 k = cell2mat(strfind(cellstr(right_string),['_blck' int2str(blck) '.mat'])); %find index of position after number
 file_numbers=str2num(right_string(:,1:k-1)); %get file number
-if sum(sort(file_numbers)-(min(file_numbers):max(file_numbers))')~=0
+if ~isempty(file_numbers) && ...
+        sum(sort(file_numbers)-(min(file_numbers):max(file_numbers))')~=0
     error(['There are MH draw files missing within chain ', int2str(blck)]) 
 end
 
