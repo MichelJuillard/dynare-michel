@@ -1971,7 +1971,8 @@ For this last reason, it necessary to provide values for all the
 endogenous variables in an @code{endval} block (even though,
 theoretically, initial conditions are only necessary for forward
 variables). If some variables, endogenous or exogenous, are not mentionned in the
-@code{endval} block, a zero value is assumed.
+@code{endval} block, the value assumed is that of the last
+@code{initval} block or @code{steady} command.
 
 Note that if the @code{endval} block is immediately followed by a
 @code{steady} command, its semantics is changed. The @code{steady}
@@ -4598,6 +4599,14 @@ missing observations.
 @item endogenous_prior
 Use endogenous priors as in @cite{Christiano, Trabandt and Walentin
 (2011)}.
+
+@item use_univariate_filters_if_singularity_is_detected = @var{INTEGER}
+Decide whether Dynare should automatically switch to univariate filter
+if a singularity is encountered in the likelihood computation (this is
+the behaviour if the option is equal to @code{1}). Alternatively, if
+the option is equal to @code{0}, Dynare will not automatically change
+the filter, but rather use a penalty value for the likelihood when
+such a singularity is encountered. Default: @code{1}.
 
 @end table
 
