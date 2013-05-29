@@ -1,8 +1,6 @@
 if HAVE_PDFLATEX
 if HAVE_BIBTEX
-if HAVE_ECONOMETRICA
 pdf-local: UserGuide.pdf
-endif
 endif
 endif
 
