@@ -7363,10 +7363,19 @@ array stored in a MATLAB/Octave variable.
 
 @deffn Command set_dynare_seed (@var{INTEGER})
 @deffnx Command set_dynare_seed ('default')
+@deffnx Command set_dynare_seed ('clock')
 @deffnx Command set_dynare_seed ('reset')
 @deffnx Command set_dynare_seed ('@var{ALGORITHM}', @var{INTEGER})
 
-Sets the seed used for random number generation.
+Sets the seed used for random number generation. It is possible to set
+a given integer value, to use a default value, or to use the clock (by
+using the latter, one will therefore get different results across
+different Dynare runs). The @code{reset} option serves to reset the
+seed to the value set by the last @code{set_dynare_seed} command. On
+MATLAB 7.8 or above, it is also possible to choose a specific
+algorithm for random number generation; accepted values are
+@code{mcg16807}, @code{mlfg6331_64}, @code{mrg32k3a}, @code{mt19937ar}
+(the default), @code{shr3cong} and @code{swb2712}.
 
 @end deffn
 
