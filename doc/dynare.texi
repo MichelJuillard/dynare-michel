@@ -1629,6 +1629,10 @@ correct solutions or any convergence. The new differentiated variables
 have obvious zero terminal conditions (if the terminal condition is a
 steady state) and this in many cases helps convergence of simulations.
 
+@item parallel_local_files = ( @var{FILENAME} [, @var{FILENAME}]@dots{} )
+Declares a list of extra files that should be transferred to slave
+nodes when doing a parallel computation (@pxref{Parallel Configuration}).
+
 @end table
 
 @customhead{Example 1: elementary RBC model}
