@@ -102,7 +102,7 @@ This is Dynare Reference Manual, version @value{VERSION}.
 @menu
 * Introduction::
 * Installation and configuration::
-* Dynare invocation::
+* Running Dynare::
 * The Model file::
 * The Configuration File::
 * Reporting::
@@ -139,6 +139,15 @@ Configuration
 * For MATLAB::
 * For GNU Octave::
 * Some words of warning::
+
+Running Dynare
+
+* Dynare invocation::
+* Understanding Preprocessor Error Messages::
+
+Dynare invocation
+
+* Understanding Preprocessor Error Messages::
 
 The Model file
 
@@ -602,13 +611,21 @@ potentially create problems if any of your M-files have the same name
 as a Dynare file. Your file would then override the Dynare file, making
 Dynare unusable.
 
-@node Dynare invocation
-@chapter Dynare invocation
+@node Running Dynare
+@chapter Running Dynare
 
 In order to give instructions to Dynare, the user has to write a
 @emph{model file} whose filename extension must be @file{.mod}. This
 file contains the description of the model and the computing tasks
 required by the user. Its contents is described in @ref{The Model file}.
+
+@menu
+* Dynare invocation::
+* Understanding Preprocessor Error Messages::
+@end menu
+
+@node Dynare invocation
+@section Dynare invocation
 
 Once the model file is written, Dynare is invoked using the
 @code{dynare} command at the MATLAB or Octave prompt (with the filename
@@ -779,6 +796,48 @@ during the computation.
 @defvr {MATLAB/Octave variable} oo_
 Structure containing the various results of the computations.
 @end defvr
+
+@menu
+* Understanding Preprocessor Error Messages::
+@end menu
+
+@node Understanding Preprocessor Error Messages
+@section Understanding Preprocessor Error Messages
+
+If the preprocessor runs into an error while processing your
+@file{.mod} file, it will issue an error. Due to the way that a parser
+works, sometimes these errors can be misleading. Here, we aim to
+demystify these error messages.
+
+The preprocessor issues error messages of the form:
+@enumerate
+@item @code{ERROR: <<file.mod>>: line A, col B: <<error message>>}
+@item @code{ERROR: <<file.mod>>: line A, cols B-C: <<error message>>}
+@item @code{ERROR: <<file.mod>>: line A, col B - line C, col D: <<error message>>}
+@end enumerate
+@noindent The first two errors occur on a single line, with error
+two spanning multiple columns. Error three spans multiple rows.
+
+Often, the line and column numbers are precise, leading you directly
+to the offending syntax. Infrequently however, because of the way the
+parser works, this is not the case. The most common example of
+misleading line and column numbers (and error message for that matter)
+is the case of a missing semicolon, as seen in the following example:
+@example
+varexo a, b
+parameters c, ...;
+@end example
+@noindent In this case, the parser doesn't know a semicolon is missing at the
+end of the @code{varexo} command until it begins parsing the second
+line and bumps into the @code{parameters} command. This is because we
+allow commands to span multiple lines and, hence, the parser cannot
+know that the second line will not have a semicolon on it until it
+gets there. Once the parser begins parsing the second line, it
+realizes that it has encountered a keyword, @code{parameters}, which
+it did not expect. Hence, it throws an error of the form: @code{ERROR:
+<<file.mod>>: line 2, cols 0-9: syntax error, unexpected
+PARAMETERS}. In this case, you would simply place a semicolon at the
+end of line one and the parser would continue processing.
 
 @node The Model file
 @chapter The Model file
