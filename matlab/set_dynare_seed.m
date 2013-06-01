@@ -2,7 +2,7 @@ function set_dynare_seed(a,b)
 % Set seeds depending on matlab (octave) version. This routine is called in dynare_config and can be called by the 
 % user in the mod file.
 %    
-% Copyright (C) 2010-2012 Dynare Team
+% Copyright (C) 2010-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -48,12 +48,13 @@ if matlab_random_streams% Use new matlab interface.
             end
             return
         end
-        if ischar(a)
-            error('set_dynare_seed:: something is wrong in the calling sequence!')
-        end
-        if ~ischar(a)
+        if ~ischar(a) || (ischar(a) && strcmpi(a, 'clock'))
             options_.DynareRandomStreams.algo = 'mt19937ar';
-            options_.DynareRandomStreams.seed = a;
+            if ischar(a)
+                options_.DynareRandomStreams.seed = rem(floor(now*24*60*60), 2^32);
+            else
+                options_.DynareRandomStreams.seed = a;
+            end
             s = RandStream(options_.DynareRandomStreams.algo,'Seed',options_.DynareRandomStreams.seed);
             if matlab_ver_less_than('7.12')
                 reset(RandStream.setDefaultStream(s));
@@ -62,6 +63,7 @@ if matlab_random_streams% Use new matlab interface.
             end
             return
         end
+        error('set_dynare_seed:: something is wrong in the calling sequence!')
     elseif nargin==2
         if ~ischar(a) || ~( strcmpi(a,'mcg16807') || ...
                             strcmpi(a,'mlfg6331_64') || ...
@@ -107,13 +109,17 @@ else% Use old matlab interface.
             randn('state',options_.DynareRandomStreams.seed);
             return
         end
-        if ~ischar(a) && isint(a)
-            options_.DynareRandomStreams.seed = a;
+        if (~ischar(a) && isint(a)) || (ischar(a) && strcmpi(a,'clock'))
+            if ischar(a)
+                options_.DynareRandomStreams.seed = floor(now*24*60*60);
+            else
+                options_.DynareRandomStreams.seed = a;
+            end
             rand(options_.DynareRandomStreams.algo,options_.DynareRandomStreams.seed);
             randn('state',options_.DynareRandomStreams.seed);
-        else
-            error('set_dynare_seed:: Something is wrong in the calling sequence!')
+            return
         end
+        error('set_dynare_seed:: Something is wrong in the calling sequence!')
     else
         error('set_dynare_seed:: Cannot use more than one input argument with your version of Matlab/Octave!')
     end

@@ -102,7 +102,7 @@ This is Dynare Reference Manual, version @value{VERSION}.
 @menu
 * Introduction::
 * Installation and configuration::
-* Dynare invocation::
+* Running Dynare::
 * The Model file::
 * The Configuration File::
 * Reporting::
@@ -139,6 +139,15 @@ Configuration
 * For MATLAB::
 * For GNU Octave::
 * Some words of warning::
+
+Running Dynare
+
+* Dynare invocation::
+* Understanding Preprocessor Error Messages::
+
+Dynare invocation
+
+* Understanding Preprocessor Error Messages::
 
 The Model file
 
@@ -602,13 +611,21 @@ potentially create problems if any of your M-files have the same name
 as a Dynare file. Your file would then override the Dynare file, making
 Dynare unusable.
 
-@node Dynare invocation
-@chapter Dynare invocation
+@node Running Dynare
+@chapter Running Dynare
 
 In order to give instructions to Dynare, the user has to write a
 @emph{model file} whose filename extension must be @file{.mod}. This
 file contains the description of the model and the computing tasks
 required by the user. Its contents is described in @ref{The Model file}.
+
+@menu
+* Dynare invocation::
+* Understanding Preprocessor Error Messages::
+@end menu
+
+@node Dynare invocation
+@section Dynare invocation
 
 Once the model file is written, Dynare is invoked using the
 @code{dynare} command at the MATLAB or Octave prompt (with the filename
@@ -779,6 +796,48 @@ during the computation.
 @defvr {MATLAB/Octave variable} oo_
 Structure containing the various results of the computations.
 @end defvr
+
+@menu
+* Understanding Preprocessor Error Messages::
+@end menu
+
+@node Understanding Preprocessor Error Messages
+@section Understanding Preprocessor Error Messages
+
+If the preprocessor runs into an error while processing your
+@file{.mod} file, it will issue an error. Due to the way that a parser
+works, sometimes these errors can be misleading. Here, we aim to
+demystify these error messages.
+
+The preprocessor issues error messages of the form:
+@enumerate
+@item @code{ERROR: <<file.mod>>: line A, col B: <<error message>>}
+@item @code{ERROR: <<file.mod>>: line A, cols B-C: <<error message>>}
+@item @code{ERROR: <<file.mod>>: line A, col B - line C, col D: <<error message>>}
+@end enumerate
+@noindent The first two errors occur on a single line, with error
+two spanning multiple columns. Error three spans multiple rows.
+
+Often, the line and column numbers are precise, leading you directly
+to the offending syntax. Infrequently however, because of the way the
+parser works, this is not the case. The most common example of
+misleading line and column numbers (and error message for that matter)
+is the case of a missing semicolon, as seen in the following example:
+@example
+varexo a, b
+parameters c, ...;
+@end example
+@noindent In this case, the parser doesn't know a semicolon is missing at the
+end of the @code{varexo} command until it begins parsing the second
+line and bumps into the @code{parameters} command. This is because we
+allow commands to span multiple lines and, hence, the parser cannot
+know that the second line will not have a semicolon on it until it
+gets there. Once the parser begins parsing the second line, it
+realizes that it has encountered a keyword, @code{parameters}, which
+it did not expect. Hence, it throws an error of the form: @code{ERROR:
+<<file.mod>>: line 2, cols 0-9: syntax error, unexpected
+PARAMETERS}. In this case, you would simply place a semicolon at the
+end of line one and the parser would continue processing.
 
 @node The Model file
 @chapter The Model file
@@ -1628,6 +1687,10 @@ the case of very persistent dynamics or permanent shocks can hinder
 correct solutions or any convergence. The new differentiated variables
 have obvious zero terminal conditions (if the terminal condition is a
 steady state) and this in many cases helps convergence of simulations.
+
+@item parallel_local_files = ( @var{FILENAME} [, @var{FILENAME}]@dots{} )
+Declares a list of extra files that should be transferred to slave
+nodes when doing a parallel computation (@pxref{Parallel Configuration}).
 
 @end table
 
@@ -7359,10 +7422,19 @@ array stored in a MATLAB/Octave variable.
 
 @deffn Command set_dynare_seed (@var{INTEGER})
 @deffnx Command set_dynare_seed ('default')
+@deffnx Command set_dynare_seed ('clock')
 @deffnx Command set_dynare_seed ('reset')
 @deffnx Command set_dynare_seed ('@var{ALGORITHM}', @var{INTEGER})
 
-Sets the seed used for random number generation.
+Sets the seed used for random number generation. It is possible to set
+a given integer value, to use a default value, or to use the clock (by
+using the latter, one will therefore get different results across
+different Dynare runs). The @code{reset} option serves to reset the
+seed to the value set by the last @code{set_dynare_seed} command. On
+MATLAB 7.8 or above, it is also possible to choose a specific
+algorithm for random number generation; accepted values are
+@code{mcg16807}, @code{mlfg6331_64}, @code{mrg32k3a}, @code{mt19937ar}
+(the default), @code{shr3cong} and @code{swb2712}.
 
 @end deffn
 
