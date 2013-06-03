@@ -48,7 +48,12 @@ cp -r $TOP_DYN_DIR/examples                                      $INSTALLDIR
 # FIRST BUILD 32 BIT EVERYTHING, 32 BIT MATLAB < 7.5 MEX #
 ##########################################################
 ./configure FFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' CPPFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' LDFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' --with-matlab=/Applications/MATLAB_OLD/R2007a MATLAB_VERSION=7.4 --with-slicot=/usr/local32 --with-matio=/usr/localStatic --with-gsl=/usr/localStatic
+cd $TOP_DYN_DIR/doc
+texi2dvi --pdf --batch --build-dir=dynare.t2p dynare.texi
+
+cd $TOP_DYN_DIR
 make pdf
+make html
 
 cd $TOP_DYN_DIR/preprocessor
 make
