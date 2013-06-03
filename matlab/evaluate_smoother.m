@@ -1,9 +1,10 @@
-function oo = evaluate_smoother(parameters)
+function oo = evaluate_smoother(parameters,var_list)
 % Evaluate the smoother at parameters.
 %
 % INPUTS
 %    o parameters  a string ('posterior mode','posterior mean','posterior median','prior mode','prior mean') or a vector of values for
 %                  the (estimated) parameters of the model.
+%    o var_list    subset of endogenous variables
 %
 %
 % OUTPUTS
@@ -24,7 +25,7 @@ function oo = evaluate_smoother(parameters)
 % [1] This function use persistent variables for the dataset and the description of the missing observations. Consequently, if this function
 %     is called more than once (by changing the value of parameters) the sample *must not* change.
 
-% Copyright (C) 2010-2012 Dynare Team
+% Copyright (C) 2010-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -41,9 +42,16 @@ function oo = evaluate_smoother(parameters)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-global options_ M_ bayestopt_ oo_
+global options_ M_ bayestopt_ oo_ estim_params_   % estim_params_ may be emty
 
 persistent dataset_
+
+
+if isempty(dataset_) || isempty(bayestopt_)
+    options = options_;
+    options.smoother = 1;    % this is necessary because of a check in dynare_estimation_init()
+    [dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list, M_.fname, [], M_, options, oo_, estim_params_, bayestopt_);
+end
 
 if nargin==0
     parameters = 'posterior_mode';
@@ -75,49 +83,6 @@ if ischar(parameters)
         disp('                     ''prior_mean''.')
         disp('                     ''calibration''.')
         error
-    end
-end
-
-if isempty(dataset_)
-    % Load and transform data.
-    transformation = [];
-    if options_.loglinear && ~options_.logdata
-        transformation = @log;
-    end
-    xls.sheet = options_.xls_sheet;
-    xls.range = options_.xls_range;
-
-    if ~isfield(options_,'nobs')
-        options_.nobs = [];
-    end
-
-    dataset_ = initialize_dataset(options_.datafile,options_.varobs,options_.first_obs,options_.nobs,transformation,options_.prefilter,xls);
-    options_.nobs = dataset_.info.ntobs;
-
-    % Determine if a constant is needed.
-    if options_.steadystate_flag% if the *_steadystate.m file is provided.
-        [ys,params,info] = evaluate_steady_state(oo_.steady_state,M_,options_,oo_,1);
-        if size(ys,1) < M_.endo_nbr
-            if length(M_.aux_vars) > 0
-                ys = add_auxiliary_variables_to_steadystate(ys,M_.aux_vars,...
-                                                            M_.fname,...
-                                                            zeros(M_.exo_nbr,1),...
-                                                            oo_.exo_det_steady_state,...
-                                                            M_.params,...
-                                                            options_.bytecode);
-            else
-                error([M_.fname '_steadystate.m doesn''t match the model']);
-            end
-        end
-        oo_.steady_state = ys;
-    else% if the steady state file is not provided.
-        [dd,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
-        oo_.steady_state = dd.ys; clear('dd');
-    end
-    if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
-        options_.noconstant = 1;
-    else
-        options_.noconstant = 0;
     end
 end
 
