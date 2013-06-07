@@ -105,6 +105,8 @@ switch nargin
             end
         else
             switch a
+              case 'Y'
+                date.freq = 1;
               case 'Q'
                 date.freq = 4;
               case 'M'
@@ -112,8 +114,9 @@ switch nargin
               case 'W'
                 date.freq = 52;
               otherwise
-                % Yearly data are assumed.
-                date.freq = 1;
+                error(['dynDate:: With one string argument of length one, ' ...
+                       'you must provide one of weekly (''W''), monthly (''M''), ' ...
+                       'quaterly (''Q'') or yearly (''Y'').']);
             end
         end
     elseif isa(a,'dynDate') % If input argument is a dynDate object then do a copy.
