@@ -3600,6 +3600,12 @@ default value, mandatory option.
 The number of periods used to compute the approximate solution
 at every iteration of the algorithm. Default: @code{200}.
 
+@item order = @var{INTEGER}
+... Default: @code{0}.
+
+@item hybrid
+...
+
 @end table
 
 @end deffn
