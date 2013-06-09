@@ -39,7 +39,7 @@ var_list = check_list_of_variables(options_, M_, var_list);
 options_.varlist = var_list;
 
 if isfield(options_,'nobs')
-    nobs = options_.nobs;
+    nobs = sort(options_.nobs); 
 else
     nobs = [];
 end
