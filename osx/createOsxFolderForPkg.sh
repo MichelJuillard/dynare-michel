@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -ex
 
 TOP_DIR=/Users/Houtan/Documents/DYNARE/PACKAGES
@@ -7,8 +6,9 @@ TOP_DYN_DIR=$TOP_DIR/dynare
 
 VERSION=4.3
 INSTALLDIRNAME=dynare-$VERSION-osx
-mkdir $INSTALLDIRNAME
 INSTALLDIR=$TOP_DIR/$INSTALLDIRNAME
+mkdir $INSTALLDIRNAME
+
 
 ########################
 # UPDATE DYNARE SOURCE #
@@ -22,9 +22,9 @@ autoreconf -si
 ########################
 # create directories
 mkdir "$INSTALLDIR/scripts"
-mkdir "$INSTALLDIR/dynare++"
 mkdir -p "$INSTALLDIR/doc/dynare++"
 mkdir "$INSTALLDIR/doc/dynare.html"
+mkdir "$INSTALLDIR/dynare++"
 mkdir -p "$INSTALLDIR/contrib/ms-sbvar/TZcode"
 mkdir -p "$INSTALLDIR/mex/octave"
 mkdir -p "$INSTALLDIR/mex/matlab/osx64"
@@ -47,8 +47,13 @@ cp -r $TOP_DYN_DIR/examples                                      $INSTALLDIR
 ##########################################################
 # FIRST BUILD 32 BIT EVERYTHING, 32 BIT MATLAB < 7.5 MEX #
 ##########################################################
-./configure FFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' CPPFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' LDFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' --with-matlab=/Applications/MATLAB/R2007a MATLAB_VERSION=7.4 --with-gsl=/usr/local32 --with-slicot=/usr/local32 --with-matio=/usr/local32
+./configure FFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' CPPFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' LDFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' --with-matlab=/Applications/MATLAB_OLD/R2007a MATLAB_VERSION=7.4 --with-slicot=/usr/local32 --disable-octave --with-matio=/usr/localStatic --with-gsl=/usr/localStatic
+cd $TOP_DYN_DIR/doc
+texi2dvi --pdf --batch --build-dir=dynare.t2p dynare.texi
+
+cd $TOP_DYN_DIR
 make pdf
+make html
 
 cd $TOP_DYN_DIR/preprocessor
 make
@@ -74,6 +79,7 @@ cp $TOP_DYN_DIR/preprocessor/dynare_m                            $INSTALLDIR/mat
 cp $TOP_DYN_DIR/mex/build/matlab/block_kalman_filter/*.mexmaci                      $INSTALLDIR/mex/matlab/osx32-7.4
 cp $TOP_DYN_DIR/mex/build/matlab/bytecode/*.mexmaci                                 $INSTALLDIR/mex/matlab/osx32-7.4
 cp $TOP_DYN_DIR/mex/build/matlab/dynare_simul_/*.mexmaci                            $INSTALLDIR/mex/matlab/osx32-7.4
+cp $TOP_DYN_DIR/mex/build/matlab/estimation/*.mexmaci                               $INSTALLDIR/mex/matlab/osx32-7.4
 cp $TOP_DYN_DIR/mex/build/matlab/gensylv/*.mexmaci                                  $INSTALLDIR/mex/matlab/osx32-7.4
 cp $TOP_DYN_DIR/mex/build/matlab/k_order_perturbation/*.mexmaci                     $INSTALLDIR/mex/matlab/osx32-7.4
 cp $TOP_DYN_DIR/mex/build/matlab/kalman_steady_state/*.mexmaci                      $INSTALLDIR/mex/matlab/osx32-7.4
@@ -112,13 +118,14 @@ cp $TOP_DYN_DIR/dynare++/kord/kord.pdf                                          
 ##############################################
 make clean
 cd $TOP_DYN_DIR/mex/build/matlab
-./configure FFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' CPPFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' LDFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' --with-matlab=/Applications/MATLAB/MATLAB_R2009b_32bit/MATLAB_R2009b.app MATLAB_VERSION=7.9 MEXEXT='mexmaci' --with-gsl=/usr/local32 --with-slicot=/usr/local32 --with-matio=/usr/local32
+./configure FFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' CPPFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' LDFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.6.sdk -mmacosx-version-min=10.6 -arch i386' --with-matlab=/Applications/MATLAB_OLD/MATLAB_R2009b_32bit/MATLAB_R2009b.app MATLAB_VERSION=7.9 MEXEXT='mexmaci' --with-slicot=/usr/local32 --with-matio=/usr/localStatic --with-gsl=/usr/localStatic
 make
 
 # Matlab
 cp $TOP_DYN_DIR/mex/build/matlab/block_kalman_filter/*.mexmaci                      $INSTALLDIR/mex/matlab/osx32-7.5-7.11
 cp $TOP_DYN_DIR/mex/build/matlab/bytecode/*.mexmaci                                 $INSTALLDIR/mex/matlab/osx32-7.5-7.11
 cp $TOP_DYN_DIR/mex/build/matlab/dynare_simul_/*.mexmaci                            $INSTALLDIR/mex/matlab/osx32-7.5-7.11
+cp $TOP_DYN_DIR/mex/build/matlab/estimation/*.mexmaci                               $INSTALLDIR/mex/matlab/osx32-7.5-7.11
 cp $TOP_DYN_DIR/mex/build/matlab/gensylv/*.mexmaci                                  $INSTALLDIR/mex/matlab/osx32-7.5-7.11
 cp $TOP_DYN_DIR/mex/build/matlab/k_order_perturbation/*.mexmaci                     $INSTALLDIR/mex/matlab/osx32-7.5-7.11
 cp $TOP_DYN_DIR/mex/build/matlab/kalman_steady_state/*.mexmaci                      $INSTALLDIR/mex/matlab/osx32-7.5-7.11
@@ -134,13 +141,14 @@ cp $TOP_DYN_DIR/mex/build/matlab/sobol/*.mexmaci                                
 #####################################
 make clean
 cd $TOP_DYN_DIR/mex/build/matlab
-./configure --with-matlab=/Applications/MATLAB/MATLAB_R2009b.app MATLAB_VERSION=7.9
+./configure --with-matlab=/Applications/MATLAB_OLD/MATLAB_R2009b.app MATLAB_VERSION=7.9 MEXEXT=mexmaci64 --with-matio=/usr/localStatic --with-gsl=/usr/localStatic
 make
 
 # Matlab
 cp $TOP_DYN_DIR/mex/build/matlab/block_kalman_filter/*.mexmaci64                      $INSTALLDIR/mex/matlab/osx64
 cp $TOP_DYN_DIR/mex/build/matlab/bytecode/*.mexmaci64                                 $INSTALLDIR/mex/matlab/osx64
 cp $TOP_DYN_DIR/mex/build/matlab/dynare_simul_/*.mexmaci64                            $INSTALLDIR/mex/matlab/osx64
+cp $TOP_DYN_DIR/mex/build/matlab/estimation/*.mexmaci64                               $INSTALLDIR/mex/matlab/osx64
 cp $TOP_DYN_DIR/mex/build/matlab/gensylv/*.mexmaci64                                  $INSTALLDIR/mex/matlab/osx64
 cp $TOP_DYN_DIR/mex/build/matlab/k_order_perturbation/*.mexmaci64                     $INSTALLDIR/mex/matlab/osx64
 cp $TOP_DYN_DIR/mex/build/matlab/kalman_steady_state/*.mexmaci64                      $INSTALLDIR/mex/matlab/osx64
@@ -155,17 +163,19 @@ cp $TOP_DYN_DIR/mex/build/matlab/sobol/*.mexmaci64                              
 #####################################
 make clean
 cd $TOP_DYN_DIR/mex/build/octave
-./configure
+./configure CC="gcc" CXX="g++" --with-matio=/usr/localStatic --with-gsl=/usr/localStatic
 make
 
 # Octave
 cp $TOP_DYN_DIR/mex/build/octave/block_kalman_filter/*.mex                          $INSTALLDIR/mex/octave
 cp $TOP_DYN_DIR/mex/build/octave/bytecode/*.mex                                     $INSTALLDIR/mex/octave
 cp $TOP_DYN_DIR/mex/build/octave/dynare_simul_/*.mex                                $INSTALLDIR/mex/octave
+cp $TOP_DYN_DIR/mex/build/octave/estimation/*.mex                                   $INSTALLDIR/mex/octave
 cp $TOP_DYN_DIR/mex/build/octave/gensylv/*.mex                                      $INSTALLDIR/mex/octave
 cp $TOP_DYN_DIR/mex/build/octave/k_order_perturbation/*.mex                         $INSTALLDIR/mex/octave
 cp $TOP_DYN_DIR/mex/build/octave/kalman_steady_state/*.mex                          $INSTALLDIR/mex/octave
 cp $TOP_DYN_DIR/mex/build/octave/kronecker/*.mex                                    $INSTALLDIR/mex/octave
+cp $TOP_DYN_DIR/mex/build/octave/linsolve/*.oct                                     $INSTALLDIR/mex/octave
 cp $TOP_DYN_DIR/mex/build/octave/local_state_space_iterations/*.mex                 $INSTALLDIR/mex/octave
 cp $TOP_DYN_DIR/mex/build/octave/mjdgges/*.mex                                      $INSTALLDIR/mex/octave
 cp $TOP_DYN_DIR/mex/build/octave/ms_sbvar/*.mex                                     $INSTALLDIR/mex/octave
@@ -186,5 +196,3 @@ find . -name *.DS_Store -type f -exec rm {} \;
 chmod -R g+w $INSTALLDIR
 
 echo DONE
-# NEED TO BUILD DYNARE.HTML DOCUMENTION ON DEBIAN
-# AND INCLUDE IN DISTRIBUTION BY HAND

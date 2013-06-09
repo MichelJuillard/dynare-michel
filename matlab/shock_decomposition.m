@@ -14,7 +14,7 @@ function oo_ = shock_decomposition(M_,oo_,options_,varlist)
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2009-2011 Dynare Team
+% Copyright (C) 2009-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -57,7 +57,7 @@ if isempty(parameter_set)
     end
 end
 
-oo = evaluate_smoother(parameter_set);
+oo = evaluate_smoother(parameter_set,varlist);
 
 % reduced form
 dr = oo.dr;
