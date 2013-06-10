@@ -105,6 +105,7 @@ This is Dynare Reference Manual, version @value{VERSION}.
 * Running Dynare::
 * The Model file::
 * The Configuration File::
+* Time Series::
 * Reporting::
 * Examples::
 * Dynare internal documentation and unitary tests::
@@ -7869,6 +7870,115 @@ MatlabOctavePath = matlab
 @end example
 
 @end deffn
+
+@node Time Series
+@chapter Time Series
+
+Dynare provides a Matlab class for handling time series data, which is
+based on classes for handling dates. Below, you will first find the
+classes and methods used for creating and dealing with dates and then
+the class used for using time series.
+
+@section dynDate
+
+@deftypefn  {dynDate} dynDate (@code{INTEGER})
+@deftypefnx {dynDate} dynDate (@code{STRING})
+@deftypefnx {dynDate} dynDate (@var{NUMERICAL_VECTOR}, @code{INTEGER})
+Returns a @code{dynDate} object that represents a date.
+
+If the value passed is an @code{INTEGER}, return a date of annual
+frequency.
+
+If the value passed is a @code{STRING}, you can declare an empty or
+non-empty @code{dynDate} object. If instantiating an empty
+@code{dynDate} object, the argument can take one of the following
+values representing its frequency: @code{`Y'}, @code{`Q'}, @code{`M'},
+or @code{`W'}. If creating a date with a value, it should be passed in
+one of the following formats: @code{`1999'} for an annual date,
+@code{`1999q4'} for a quarterly date, @code{`1999m12'} for a monthly
+date, and @code{`1999w52'} for a weekly date.
+
+If the value passed is a @code{NUMERICAL_VECTOR} it should be a vector
+of size @code{2}. The format should be: @code{[year period]}. In this
+case, you must pass a second argument to the @code{dynDate} consructor
+indicating the freqency of the date as an @code{INTEGER}. This
+argument can take the following possible values: @code{1} for annual,
+@code{4} for quarterly, @code{12} for monthly and @code{52} for
+weekly.
+
+@examplehead
+
+An example of various ways to create a @code{dynDate} object:
+
+@example
+do1 = dynDate(`1999');            % 1999
+do2 = dynDate(`Q');               % NaNqNan
+do3 = dynDate([1999 2], 12);      % 1999m2
+@end example
+@end deftypefn
+
+
+@section dynDates
+
+@deftypefn  {dynDates} dynDates (@code{STRING} [, @code{STRING} @dots{}])
+Returns a @code{dynDates} object that represents a list of dates.
+
+Providing a @code{STRING} argument populates the object with the date
+represented by said @code{STRING}. If more than one argument is
+provided, they should all be dates represented as @code{STRINGS}.
+
+@examplehead
+
+An example of various ways to create a @code{dynDates} object:
+
+@example
+do1 = dynDates(`1999', `2000', `2001', `2002');
+do2 = dynDates(`1999', `2003', `2002');
+do3 = dynDate(`1999Q2'):dynDate(`2000Q3');
+@end example
+Here, @code{do1} and @code{do2} contain the dates specified in the
+order specified. @code{do3} contains a quarterly list of all dates
+between @code{1999q2} and @code{2000q3} inclusive.
+@end deftypefn
+
+@section dynSeries
+
+@deftypefn  {dynSeries} dynSeries (@code{dynDate})
+@deftypefnx {dynSeries} dynSeries (@code{FILENAME})
+@deftypefnx {dynSeries} dynSeries (@code{DOUBLE_MATRIX}, @code{dynDate}, @code{CELLSTR}, @code{CELLSTR})
+@deftypefnx {dynSeries} dynSeries (@code{DOUBLE_MATRIX}, @code{STRING}, @code{CELLSTR}, @code{CELLSTR})
+Returns a @code{dynSeries} object that represents one or more time
+series.
+
+If a @code{dynDate} argument is provided, instantiate an empty
+@code{dynSeries} with an inital date equal to the input argument.
+
+If a @code{FILENAME} is passed as input, a @code{dynSeries} object
+will be created from the named file. Valid file types are @file{.m}
+file, @file{.mat} file, and @file{.csv}.
+
+If the data is not read from a file, it can be provided via a
+@math{T}x@math{N} matrix as the first argument to @code{dynSeries}, with
+@math{T} representing the number of observations on @math{N}
+variables. The second argument in such a calling sequence can be
+either a @code{dynDate} representing the period of the first
+observation or a @code{STRING} which would be used to instantiate a
+@code{dynDate}. The third argument is a @code{CELLSTR} of size
+@math{N} with one entry for each variable name. The final argument is
+a @code{CELLSTR} of size @math{N} composed of the @LaTeX{} names
+associated with the variables. Input arguments three and four are
+optional.
+
+@examplehead
+
+An example of various ways to create a @code{dynSeries} object:
+
+@example
+do1 = dynSeries(dynDate(1999));
+do2 = dynSeries(`filename.csv');
+do3 = dynSeries([1; 2; 3], dynDate(1999), @{`var123'@}, @{`var_@{123@}'@});
+@end example
+@end deftypefn
 
 @node Reporting
 @chapter Reporting
