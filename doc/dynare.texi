@@ -8164,9 +8164,10 @@ The y-axis label. Default: @code{none}
 @item xrange, @code{dynDates}
 The boundary on the x-axis to display in the graph. Default: all
 
-@item yrange, @code{dynDate}:@code{dynDate}
+@item yrange, @code{NUMERICAL_VECTOR}
 The boundary on the y-axis to display in the graph, represented as a
-@code{dynDate} range. Default: all
+@code{NUMERICAL_VECTOR} of size @math{2}, with the first entry less
+than the second entry. Default: all
 
 @item showZeroline, @code{BOOLEAN}
 Display a solid black line at @math{y = 0}. Default: @code{false}
