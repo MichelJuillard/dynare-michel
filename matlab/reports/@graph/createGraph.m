@@ -127,7 +127,11 @@ end
 drawnow;
 
 if isempty(o.figname)
-    o.figname = [tempname '.tex'];
+    tn = tempname;
+    if strcmp(computer, 'PCWIN') || strcmp(computer, 'PCWIN64')
+        tn = strrep(tn, '\', '/');
+    end
+    o.figname = [tn '.tex'];
 end
 disp('  converting to tex....');
 if exist('OCTAVE_VERSION') && isempty(regexpi(computer, '.*apple.*', 'once'))
