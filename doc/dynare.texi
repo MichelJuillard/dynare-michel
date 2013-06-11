@@ -798,10 +798,6 @@ during the computation.
 Structure containing the various results of the computations.
 @end defvr
 
-@menu
-* Understanding Preprocessor Error Messages::
-@end menu
-
 @node Understanding Preprocessor Error Messages
 @section Understanding Preprocessor Error Messages
 
@@ -4189,7 +4185,8 @@ the file
 @anchor{nobs1}
 Runs a recursive estimation and forecast for samples of size ranging
 of @var{INTEGER1} to @var{INTEGER2}. Option @code{forecast} must
-also be specified. The forecasts are stored in the @code{RecursiveForecast} field of the results structure. @xref{RecursiveForecast}
+also be specified. The forecasts are stored in the
+@code{RecursiveForecast} field of the results structure (@pxref{RecursiveForecast}).
 
 @item first_obs = @var{INTEGER}
 @anchor{first_obs}
@@ -4948,7 +4945,7 @@ Variable set by the @code{estimation} command. Stores log-posterior of final MCM
 
 @defvr {MATLAB/Octave variable} oo_.RecursiveForecast
 @anchor{RecursiveForecast}
-Variable set by the @code{forecast} option of the @code{estimation} command when used with the nobs = [@var{INTEGER1}:@var{INTEGER2}] option (@xref{nobs1,,nobs}). 
+Variable set by the @code{forecast} option of the @code{estimation} command when used with the nobs = [@var{INTEGER1}:@var{INTEGER2}] option (@pxref{nobs1,,nobs}).
 
 Fields are of the form:
 @example
