@@ -8141,9 +8141,9 @@ The names of the series contained in the @code{dynSeries} provided to
 the @ref{data} option. If empty, use all series provided to
 @ref{data} option. Default: @code{empty}
 
-@item shade, @code{dynDate}:@code{dynDate}
-A @code{dynDates} range showing the portion of the graph that should
-be shaded. Default: @code{none}
+@item shade, @code{dynDates}
+The date range showing the portion of the graph that should be
+shaded. Default: @code{none}
 
 @item shadeColor, @code{MATLAB_COLOR_NAME}
 The color to use in the shaded portion of the graph. Default:
@@ -8161,9 +8161,8 @@ The x-axis label. Default: @code{none}
 @item ylabel, @code{STRING}
 The y-axis label. Default: @code{none}
 
-@item xrange, @code{dynDate}:@code{dynDate}
-The boundary on the x-axis to display in the graph, represented as a
-@code{dynDate} range. Default: all
+@item xrange, @code{dynDates}
+The boundary on the x-axis to display in the graph. Default: all
 
 @item yrange, @code{dynDate}:@code{dynDate}
 The boundary on the y-axis to display in the graph, represented as a
@@ -8189,7 +8188,7 @@ Whether or not to show horizontal lines separating the rows. Default: @code{fals
 @item precision, @code{INTEGER}
 The number of decimal places to report in the table data. Default: @code{1}
 
-@item range, @code{dynDate}:@code{dynDate}
+@item range, @code{dynDates}
 The date range of the data to be displayed. Default: @code{all}
 
 @item seriesToUse, @code{CELL_ARRAY_STRINGS}
