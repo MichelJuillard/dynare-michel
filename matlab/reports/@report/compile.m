@@ -59,9 +59,9 @@ if isempty(compiler)
             system(['PATH=$PATH:/usr/texbin:/usr/local/bin:/usr/local/sbin;' ...
                     'which pdflatex'], echo);
     elseif strcmp(computer, 'PCWIN') || strcmp(computer, 'PCWIN64')
-        error(['@report.compile: On Windows machines, you must explicitly ' ...
-               'provide the ''compiler'' option or set the compiler ' ...
-               'variable in the Report class']);
+        [status, compiler] = system('findtexmf --file-type=exe pdflatex', echo);
+        middle = ' ';
+        compiler = ['"' strtrim(compiler) '"'];
     else % gnu/linux
         [status, compiler] = system('which pdflatex', echo);
     end
