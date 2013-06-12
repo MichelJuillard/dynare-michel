@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2009-2010 Dynare Team
+ * Copyright (C) 2009-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -54,4 +54,6 @@ Prior::constructPrior(pShape shape, double mean, double standard, double lower_b
     case Inv_gamma_2:
       return new InvGamma2_Prior(mean, standard, lower_bound, upper_bound, fhp, shp);
     }
+  std::cerr << "Unreacheable point" << std::endl;
+  exit(EXIT_FAILURE);
 }

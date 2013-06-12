@@ -381,7 +381,7 @@ public:
     size_t n = Variable_list.size();
     int i = 0;
     bool notfound = true;
-    while (notfound && i < n)
+    while (notfound && i < (int) n)
       {
         if (variable_name == Variable_list[i].first)
           {

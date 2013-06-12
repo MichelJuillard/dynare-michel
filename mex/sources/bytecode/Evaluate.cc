@@ -1608,7 +1608,6 @@ Evaluate::evaluate_complete(const bool no_derivatives)
 void
 Evaluate::compute_complete_2b(const bool no_derivatives, double *_res1, double *_res2, double *_max_res, int *_max_res_idx)
 {
-  bool result;
   res1 = 0;
   *_res1 = 0;
   *_res2 = 0;
