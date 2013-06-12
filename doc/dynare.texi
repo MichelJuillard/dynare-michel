@@ -7886,12 +7886,8 @@ Returns a @code{dynDate} object that represents a date.
 If the value passed is an @code{INTEGER}, return a date of annual
 frequency.
 
-If the value passed is a @code{STRING}, you can declare an empty or
-non-empty @code{dynDate} object. If instantiating an empty
-@code{dynDate} object, the argument can take one of the following
-values representing its frequency: @code{`Y'}, @code{`Q'}, @code{`M'},
-or @code{`W'}. If creating a date with a value, it should be passed in
-one of the following formats: @code{`1999'} for an annual date,
+If the value passed is a @code{STRING}, it should be passed in one of
+the following formats: @code{`1999'} for an annual date,
 @code{`1999q4'} for a quarterly date, @code{`1999m12'} for a monthly
 date, and @code{`1999w52'} for a weekly date.
 
