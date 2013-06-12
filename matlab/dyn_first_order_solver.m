@@ -213,7 +213,7 @@ else
     E(row_indx_de_1,index_e1) = -aa(row_indx,index_e);
     E(row_indx_de_2,index_e2) = eye(nboth);
     
-    [err, ss, tt, w, sdim, dr.eigval, info1] = mjdgges(E,D,DynareOptions.qz_criterium);
+    [err, ss, tt, w, sdim, dr.eigval, info1] = mjdgges(E, D, DynareOptions.qz_criterium, DynareOptions.qz_zero_threshold);
     mexErrCheck('mjdgges', err);
 
     if info1
