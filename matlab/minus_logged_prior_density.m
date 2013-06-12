@@ -12,7 +12,7 @@ function [fval,fake_1, fake_2, exit_flag ] = minus_logged_prior_density(xparams,
 % OUTPUTS 
 %   f          [double]  value of minus the logged prior density.
 
-% Copyright (C) 2009 Dynare Team
+% Copyright (C) 2009-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

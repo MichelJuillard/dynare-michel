@@ -16,7 +16,7 @@ function myoutput = independent_metropolis_hastings_core(myinputs,fblck,nblck,wh
 % SPECIAL REQUIREMENTS.
 %   None.
 %
-% Copyright (C) 2006-2011 Dynare Team
+% Copyright (C) 2006-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -33,7 +33,7 @@ function dataset_ = compute_corr(dataset_)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %    
 % This file is part of Dynare.
 %

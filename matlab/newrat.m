@@ -23,7 +23,7 @@ function [xparam1, hh, gg, fval, igg] = newrat(func0, x, analytic_derivation, ft
 %
 %  varargin = list of parameters for func0
 
-% Copyright (C) 2004-2012 Dynare Team
+% Copyright (C) 2004-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

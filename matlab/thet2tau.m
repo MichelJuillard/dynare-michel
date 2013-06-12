@@ -1,7 +1,7 @@
 function tau = thet2tau(params, M_, oo_, indx, indexo, flagmoments,mf,nlags,useautocorr,iv)
 
 %
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

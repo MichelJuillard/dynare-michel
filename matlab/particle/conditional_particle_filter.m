@@ -37,7 +37,7 @@ function [LIK,lik] = conditional_particle_filter(ReducedForm,Y,start,DynareOptio
 %
 % NOTES
 %   The vector "lik" is used to evaluate the jacobian of the likelihood.
-% Copyright (C) 2009-2010 Dynare Team
+% Copyright (C) 2009-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

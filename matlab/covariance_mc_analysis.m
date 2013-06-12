@@ -2,7 +2,7 @@ function oo_ = covariance_mc_analysis(NumberOfSimulations,type,dname,fname,varta
 % This function analyses the (posterior or prior) distribution of the
 % endogenous variables covariance matrix.
 
-% Copyright (C) 2008-2009 Dynare Team
+% Copyright (C) 2008-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

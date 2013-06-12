@@ -22,7 +22,7 @@ function record=independent_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv
 % PARALLEL CONTEXT
 % See the comment in random_walk_metropolis_hastings.m funtion.
 
-% Copyright (C) 2006-2011 Dynare Team
+% Copyright (C) 2006-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -1,6 +1,6 @@
 /* kalman_steady_state.cc
 **
-** Copyright (C) 2009-2011 Dynare Team.
+** Copyright (C) 2009-2013 Dynare Team.
 **
 ** This file is part of Dynare.
 **

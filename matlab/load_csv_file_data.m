@@ -38,7 +38,7 @@ function [freq, init, data, varlist] = load_csv_file_data(file, withtime, withna
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2012 Dynare Team
+% Copyright (C) 2012-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

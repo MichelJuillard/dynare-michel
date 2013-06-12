@@ -8,7 +8,7 @@ function [AHess, DLIK, LIK] = AHessian(T,R,Q,H,P,Y,DT,DYss,DOm,DH,DP,start,mf,ka
 % NOTE: the derivative matrices (DT,DR ...) are 3-dim. arrays with last
 % dimension equal to the number of structural parameters
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

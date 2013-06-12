@@ -22,7 +22,7 @@ function A = plus(B,C)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011, 2012 Dynare Team
+% Copyright (C) 2011-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

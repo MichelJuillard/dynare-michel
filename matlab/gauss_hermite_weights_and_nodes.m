@@ -31,7 +31,7 @@ function [nodes,weights] = gauss_hermite_weights_and_nodes(n)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -1,6 +1,6 @@
 function [JJ, H, gam, gp, dA, dOm, dYss] = getJJ(A, B, M_,oo_,options_,kronflag,indx,indexo,mf,nlags,useautocorr)
 
-% Copyright (C) 2010-2011 Dynare Team
+% Copyright (C) 2010-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

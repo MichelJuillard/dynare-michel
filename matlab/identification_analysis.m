@@ -25,7 +25,7 @@ function [ide_hess, ide_moments, ide_model, ide_lre, derivatives_info, info] = i
 % SPECIAL REQUIREMENTS
 %    None
 
-% Copyright (C) 2008-2012 Dynare Team
+% Copyright (C) 2008-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
