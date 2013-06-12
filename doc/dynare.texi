@@ -2899,6 +2899,12 @@ must have full rank.
 
 @item solve_algo = @var{INTEGER}
 @xref{solve_algo}, for the possible values and their meaning.
+
+@item qz_zero_threshold = @var{DOUBLE}
+Value used to test if a generalized eigenvalue is 0/0 in the generalized
+Schur decomposition  (in which case  the model  does not admit  a unique
+solution). Default: @code{1e-6}.
+
 @end table
 
 @outputhead
@@ -3338,6 +3344,11 @@ Generalized Schur decomposition used for solving 1^st order
 problems. Default: @code{1.000001} (except when estimating with
 @code{lik_init} option equal to @code{1}: the default is
 @code{0.999999} in that case; @pxref{Estimation}).
+
+@item qz_zero_threshold = @var{DOUBLE}
+Value used to test if a generalized eigenvalue is 0/0 in the generalized
+Schur decomposition  (in which case  the model  does not admit  a unique
+solution). Default: @code{1e-6}.
 
 @item replic = @var{INTEGER}
 Number of simulated series used to compute the IRFs. Default: @code{1}
@@ -4681,6 +4692,11 @@ the behaviour if the option is equal to @code{1}). Alternatively, if
 the option is equal to @code{0}, Dynare will not automatically change
 the filter, but rather use a penalty value for the likelihood when
 such a singularity is encountered. Default: @code{1}.
+
+@item qz_zero_threshold = @var{DOUBLE}
+Value used to test if a generalized eigenvalue is 0/0 in the generalized
+Schur decomposition  (in which case  the model  does not admit  a unique
+solution). Default: @code{1e-6}.
 
 @end table
 
