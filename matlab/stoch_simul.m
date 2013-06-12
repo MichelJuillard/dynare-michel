@@ -78,7 +78,7 @@ end
 
 if info(1)
     options_ = options_old;
-    print_info(info, options_.noprint);
+    print_info(info, options_.noprint, options_);
     return
 end
 

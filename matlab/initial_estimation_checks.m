@@ -66,7 +66,7 @@ end
 
 if info(1) > 0
     disp('Error in computing likelihood for initial parameter values')
-    print_info(info, DynareOptions.noprint)
+    print_info(info, DynareOptions.noprint, DynareOptions)
 end
 
 if any(abs(DynareResults.steady_state(BayesInfo.mfys))>1e-9) && (DynareOptions.prefilter==1)
