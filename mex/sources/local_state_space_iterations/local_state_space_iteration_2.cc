@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2012 Dynare Team
+ * Copyright (C) 2010-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -267,10 +267,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       mexErrMsgTxt("Too many output arguments.");
     }
   // Get dimensions.
-  mwSize n = mxGetM(prhs[0]);// Number of states.
-  mwSize s = mxGetN(prhs[0]);// Number of particles.
-  mwSize q = mxGetM(prhs[1]);// Number of innovations.
-  mwSize m = mxGetM(prhs[2]);// Number of elements in the union of states and observed variables.
+  size_t n = mxGetM(prhs[0]);// Number of states.
+  size_t s = mxGetN(prhs[0]);// Number of particles.
+  size_t q = mxGetM(prhs[1]);// Number of innovations.
+  size_t m = mxGetM(prhs[2]);// Number of elements in the union of states and observed variables.
   //mexPrintf("\n s (the number of column of yhat) is equal to %d.", s);
   //mexPrintf("\n The number of column of epsilon is %d.", mxGetN(prhs[1]));
   // Check the dimensions.

@@ -9,7 +9,7 @@ function [pars, cosnJ] = ident_bruteforce(J,n,TeX, pnames_TeX)
 %  pars  : cell array with groupf of params for each column of J for 1 to n
 %  cosnJ : the cosn of each column with the selected group of columns
 
-% Copyright (C) 2009-2011 Dynare Team
+% Copyright (C) 2009-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

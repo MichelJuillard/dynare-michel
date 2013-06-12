@@ -22,7 +22,7 @@ function us = qdiff(ts)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2012, 2013 Dynare Team
+% Copyright (C) 2012-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

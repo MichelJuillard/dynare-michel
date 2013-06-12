@@ -43,7 +43,7 @@ function [D, err] = A_times_B_kronecker_C(A,B,C,fake)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 1996-2011 Dynare Team
+% Copyright (C) 1996-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

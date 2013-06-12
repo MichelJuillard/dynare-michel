@@ -2,7 +2,7 @@ dnl Detect GSL.
 dnl We don't use the official M4 macro since it relies on the script gsl-config,
 dnl which does not work when cross-compiling.
 dnl
-dnl Copyright (C) 2010 Dynare Team
+dnl Copyright (C) 2010-2012 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl

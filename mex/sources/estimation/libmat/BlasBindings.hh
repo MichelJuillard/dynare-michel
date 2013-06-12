@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2010-2011 Dynare Team
+ * Copyright (C) 2010-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -63,16 +63,19 @@ namespace blas
   gemv(const char *transa, double alpha, const Mat1 &A,
        const Vec2 &B, double beta, Vec3 &C)
   {
-    blas_int m = A.getRows(), n = B.getSize(), k = A.getCols(), l = C.getSize();
+    blas_int m = A.getRows(), n = A.getCols();
     if (*transa == 'T')
       {
-        m = A.getCols();
-        k = A.getRows();
+        assert(C.getSize() == A.getCols());
+        assert(B.getSize() == A.getRows());
       }
-    assert(m == l);
-    assert(k == n);
+    else
+      {
+        assert(C.getSize() == A.getRows());
+        assert(B.getSize() == A.getCols());
+      }
     blas_int lda = A.getLd(), ldb = B.getStride(), ldc = C.getStride();
-    dgemv(transa,  &m, &n, &alpha, A.getData(), &lda,
+    dgemv(transa, &m, &n, &alpha, A.getData(), &lda,
           B.getData(), &ldb, &beta, C.getData(), &ldc);
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2012 Dynare Team
+ * Copyright (C) 2007-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -224,7 +224,7 @@ GPU_close(cublasHandle_t cublas_handle, cusparseHandle_t cusparse_handle, cuspar
 string
 deblank(string x)
 {
-  for(int i = 0; i < x.length(); i++)
+  for(int i = 0; i < (int) x.length(); i++)
     if (x[i] == ' ')
       x.erase(i--, 1);
   return x;
@@ -316,28 +316,28 @@ Get_Arguments_and_global_variables(int nrhs,
           else
             {
               ;
-              if ((pos = Get_Argument(prhs[i]).find("block")) != (int) string::npos)
+              if ((pos = Get_Argument(prhs[i]).find("block")) != string::npos)
                 {
                   size_t pos1 = Get_Argument(prhs[i]).find("=", pos+5);
-                  if (pos1 != (int) string::npos)
+                  if (pos1 != string::npos)
                     pos = pos1 + 1;
                   else
                     pos += 5;
                   block =  atoi(Get_Argument(prhs[i]).substr(pos, string::npos).c_str())-1;
                 }
-              else if ((pos = Get_Argument(prhs[i]).find("pfplan")) != (int) string::npos)
+              else if ((pos = Get_Argument(prhs[i]).find("pfplan")) != string::npos)
                 {
                   size_t pos1 = Get_Argument(prhs[i]).find("=", pos+6);
-                  if (pos1 != (int) string::npos)
+                  if (pos1 != string::npos)
                     pos = pos1 + 1;
                   else
                     pos += 6;
                   *pfplan_struct_name =  deblank(Get_Argument(prhs[i]).substr(pos, string::npos));
                 }
-              else if ((pos = Get_Argument(prhs[i]).find("plan")) != (int) string::npos)
+              else if ((pos = Get_Argument(prhs[i]).find("plan")) != string::npos)
                 {
                   size_t pos1 = Get_Argument(prhs[i]).find("=", pos+4);
-                  if (pos1 != (int) string::npos)
+                  if (pos1 != string::npos)
                     pos = pos1 + 1;
                   else
                     pos += 4;
@@ -405,7 +405,7 @@ main(int nrhs, const char *prhs[])
   char *plhs[1];
   load_global((char *) prhs[1]);
 #endif
-  mxArray *plan_struct = NULL, *pfplan_struct = NULL;
+  mxArray *pfplan_struct = NULL;
   size_t i, row_y = 0, col_y = 0, row_x = 0, col_x = 0, nb_row_xd = 0;
   size_t steady_row_y, steady_col_y;
   int y_kmin = 0, y_kmax = 0, y_decal = 0;
@@ -473,7 +473,7 @@ main(int nrhs, const char *prhs[])
         }
       size_t n_plan = mxGetN(plan_struct);
       splan.resize(n_plan);
-      for (int i = 0; i < n_plan; i++)
+      for (int i = 0; i < (int) n_plan; i++)
         {
           splan[i].var = "";
           splan[i].exo = "";
@@ -519,11 +519,11 @@ main(int nrhs, const char *prhs[])
               size_t num_shocks = mxGetM(tmp);
               (splan[i]).per_value.resize(num_shocks);
               double * per_value = mxGetPr(tmp);
-              for (int j = 0; j < num_shocks; j++)
+              for (int j = 0; j < (int) num_shocks; j++)
                 (splan[i]).per_value[j] = make_pair(ceil(per_value[j]), per_value[j + num_shocks]);
             }
         }
-      int i;
+      int i = 0;
       for (vector<s_plan>::iterator it = splan.begin(); it != splan.end(); it++)
         {
           mexPrintf("----------------------------------------------------------------------------------------------------\n");
@@ -551,7 +551,7 @@ main(int nrhs, const char *prhs[])
         }
       size_t n_plan = mxGetN(pfplan_struct);
       spfplan.resize(n_plan);
-      for (int i = 0; i < n_plan; i++)
+      for (int i = 0; i < (int) n_plan; i++)
         {
           spfplan[i].var = "";
           spfplan[i].exo = "";
@@ -597,11 +597,11 @@ main(int nrhs, const char *prhs[])
               size_t num_shocks = mxGetM(tmp);
               double * per_value = mxGetPr(tmp);
               (spfplan[i]).per_value.resize(num_shocks);
-              for (int j = 0; j < num_shocks; j++)
+              for (int j = 0; j < (int) num_shocks; j++)
                 spfplan[i].per_value[j] = make_pair(ceil(per_value[j]), per_value[j+ num_shocks]);
             }
         }
-      int i;
+      int i = 0;
       for (vector<s_plan>::iterator it = spfplan.begin(); it != spfplan.end(); it++)
         {
           mexPrintf("----------------------------------------------------------------------------------------------------\n");

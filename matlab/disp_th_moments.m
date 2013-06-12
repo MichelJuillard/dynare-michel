@@ -1,7 +1,7 @@
 function disp_th_moments(dr,var_list)
 % Display theoretical moments of variables
 
-% Copyright (C) 2001-2011 Dynare Team
+% Copyright (C) 2001-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

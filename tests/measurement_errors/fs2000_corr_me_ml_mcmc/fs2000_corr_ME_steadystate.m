@@ -1,7 +1,7 @@
 % computes the steady state of fs2000 analyticaly
 % largely inspired by the program of F. Schorfheide
 
-% Copyright (C) 2004-2010 Dynare Team
+% Copyright (C) 2004-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2012 Dynare Team
+ * Copyright (C) 2007-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -487,8 +487,6 @@ Interpreter::simulate_a_block()
               res1 = 0;
               max_res = 0;
               max_res_idx = 0;
-              double res1_, res2_, max_res_;
-              int max_res_idx_;
               memcpy(y_save, y, y_size*sizeof(double)*(periods+y_kmax+y_kmin));
 
               compute_complete_2b(false, &res1, &res2, &max_res, &max_res_idx);
@@ -523,8 +521,6 @@ Interpreter::simulate_a_block()
           res1 = 0;
           res2 = 0;
           max_res = 0; max_res_idx = 0;
-          double res1_, res2_, max_res_;
-          int max_res_idx_;
 
           compute_complete_2b(false, &res1, &res2, &max_res, &max_res_idx);
           end_code = it_code;

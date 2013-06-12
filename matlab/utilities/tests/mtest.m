@@ -1,7 +1,7 @@
 function check = mtest(fname,fpath)
 % Extract test sections from matlab's routine executes the test and report errors.
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

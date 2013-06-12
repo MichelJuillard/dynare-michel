@@ -1,7 +1,7 @@
 function t = dyn_assert(A,B,tol)
 % This function tests the equality of two objects.
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

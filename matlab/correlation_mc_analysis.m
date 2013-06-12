@@ -2,7 +2,7 @@ function oo_ = correlation_mc_analysis(SampleSize,type,dname,fname,vartan,nvar,v
 % This function analyses the (posterior or prior) distribution of the
 % endogenous variables correlation function.
 
-% Copyright (C) 2008-2009 Dynare Team
+% Copyright (C) 2008-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

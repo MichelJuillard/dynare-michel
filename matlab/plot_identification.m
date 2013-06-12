@@ -18,7 +18,7 @@ function plot_identification(params,idemoments,idehess,idemodel, idelre, advance
 % SPECIAL REQUIREMENTS
 %    None
 
-% Copyright (C) 2008-2012 Dynare Team
+% Copyright (C) 2008-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

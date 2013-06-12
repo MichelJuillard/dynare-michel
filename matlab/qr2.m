@@ -17,7 +17,7 @@ function [Q,R] = qr2(varargin)
 % SPECIAL REQUIREMENTS
 %   None.
 
-% Copyright (C) 2006-2009 Dynare Team
+% Copyright (C) 2006-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -1,6 +1,6 @@
 function forecast_graphs(var_list)
 
-% Copyright (C) 2008-2012 Dynare Team
+% Copyright (C) 2008-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

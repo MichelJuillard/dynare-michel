@@ -46,18 +46,24 @@ if ~exist(o.filename, 'file')
     o.write();
 end
 
+middle = './';
+if exist('OCTAVE_VERSION')
+    echo = 0;
+else
+    echo = '-echo';
+end
 if isempty(compiler)
     if strncmp(computer, 'MACI', 4) || ~isempty(regexpi(computer, '.*apple.*', 'once'))
         % Add most likely places for pdflatex to exist outside of default $PATH
         [status, compiler] = ...
             system(['PATH=$PATH:/usr/texbin:/usr/local/bin:/usr/local/sbin;' ...
-                    'which pdflatex'], '-echo');
+                    'which pdflatex'], echo);
     elseif strcmp(computer, 'PCWIN') || strcmp(computer, 'PCWIN64')
-        error(['@report.compile: On Windows machines, you must explicitly ' ...
-               'provide the ''compiler'' option or set the compiler ' ...
-               'variable in the Report class']);
+        [status, compiler] = system('findtexmf --file-type=exe pdflatex', echo);
+        middle = ' ';
+        compiler = ['"' strtrim(compiler) '"'];
     else % gnu/linux
-        [status, compiler] = system('which pdflatex', '-echo');
+        [status, compiler] = system('which pdflatex', echo);
     end
     assert(status == 0, ...
            '@report.compile: Could not find a tex compiler on your system');
@@ -65,11 +71,7 @@ if isempty(compiler)
     o.compiler = compiler;
 end
 
-if exist('OCTAVE_VERSION')
-    status = system([compiler ' ./' o.filename], 0);
-else
-    status = system([compiler ' ./' o.filename], '-echo');
-end
+status = system([compiler middle o.filename], echo);
 [junk, rfn, junk] = fileparts(o.filename);
 
 if status ~= 0

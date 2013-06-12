@@ -124,8 +124,6 @@ logposterior(VEC1 &estParams, const MatrixConstView &data,
 
   size_t n_endo = (size_t) *mxGetPr(mxGetField(M_, 0, "endo_nbr"));
   size_t n_exo = (size_t) *mxGetPr(mxGetField(M_, 0, "exo_nbr"));
-  size_t n_param = (size_t) *mxGetPr(mxGetField(M_, 0, "param_nbr"));
-  size_t n_estParams = estParams.getSize();
 
   std::vector<size_t> zeta_fwrd, zeta_back, zeta_mixed, zeta_static;
   const mxArray *lli_mx = mxGetField(M_, 0, "lead_lag_incidence");

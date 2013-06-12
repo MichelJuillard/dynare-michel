@@ -16,7 +16,7 @@ function oo_ = display_conditional_variance_decomposition(Steps, SubsetOfVariabl
 % [1] The covariance matrix of the state innovations needs to be diagonal.
 % [2] In this version, absence of measurement errors is assumed...
 
-% Copyright (C) 2010-2012 Dynare Team
+% Copyright (C) 2010-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
