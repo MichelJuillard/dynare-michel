@@ -4192,7 +4192,7 @@ the convergence  diagnostics are  based on  comparing pooled  and within
 MCMC moments  (Dynare displays the  second and third order  moments, and
 the length of  the Highest Probability Density interval  covering 80% of
 the  posterior   distribution).   Due  to  computational   reasons,  the
-multivariate convergence diagnostic does  not follow of @cite{Brooks and
+multivariate  convergence diagnostic  does not  follow @cite{Brooks  and
 Gelman (1998)}  strictly, but rather  applies their idea  for univariate
 convergence  diagnostics  to  the  range  of  the  posterior  likelihood
 function instead of the individual  parameters.  The posterior kernel is
