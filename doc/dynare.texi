@@ -4182,6 +4182,24 @@ graphs with prior, posterior and mode
 graphs of smoothed shocks, smoothed observation errors, smoothed and historical variables
 @end itemize
 
+@algorithmshead
+
+The Monte Carlo Markov Chain (MCMC) univariate diagnostics are generated
+by  the estimation  command if  @ref{mh_nblocks}  is larger  than 1,  if
+@ref{mh_replic} is larger than 2000, and if option @ref{nodiagnostic} is
+not used.  As described in section  3 of @cite{Brooks and Gelman (1998)}
+the convergence  diagnostics are  based on  comparing pooled  and within
+MCMC moments  (Dynare displays the  second and third order  moments, and
+the length of  the Highest Probability Density interval  covering 80% of
+the  posterior   distribution).   Due  to  computational   reasons,  the
+multivariate convergence diagnostic does  not follow of @cite{Brooks and
+Gelman (1998)}  strictly, but rather  applies their idea  for univariate
+convergence  diagnostics  to  the  range  of  the  posterior  likelihood
+function instead of the individual  parameters.  The posterior kernel is
+used  to  aggregate  the  parameters   into  a  scalar  statistic  whose
+convergence is  then checked using  the @cite{Brooks and  Gelman (1998)}
+univariate convergence diagnostic.
+
 @optionshead
 
 @table @code
@@ -4308,7 +4326,7 @@ the total number of Metropolis draws available. Default:
 
 
 @item mh_nblocks = @var{INTEGER}
-Number of parallel chains for Metropolis-Hastings algorithm. Default:
+@anchor{mh_nblocks} Number of parallel chains for Metropolis-Hastings algorithm. Default:
 @code{2}
 
 @item mh_drop = @var{DOUBLE}
@@ -4445,7 +4463,7 @@ options. Default:
 @code{('display','iter','LargeScale','off','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6)}
 
 @item nodiagnostic
-Doesn't compute the convergence diagnostics for
+@anchor{nodiagnostic} Does not compute the convergence diagnostics for
 Metropolis-Hastings. Default: diagnostics are computed and displayed
 
 @item bayesian_irf
@@ -8481,6 +8499,11 @@ Economy}, 100(4), 745--775
 Boucekkine, Raouf (1995): ``An alternative methodology for solving
 nonlinear forward-looking models,'' @i{Journal of Economic Dynamics
 and Control}, 19, 711--734
+
+@item
+Brooks,  Stephen P.,  and Andrew  Gelman (1998):  ``General methods  for
+monitoring  convergence   of  iterative  simulations,''   @i{Journal  of
+computational and graphical statistics}, 7, pp. 434--455
 
 @item
 Collard, Fabrice (2001): ``Stochastic simulations with Dynare: A practical guide''
