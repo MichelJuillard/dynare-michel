@@ -108,9 +108,6 @@ for blockFlag = 0:1
             try
                 old_path = path;
                 save wsOct
-                if blockFlag && ~bytecodeFlag && stack_solve_algos(i) == 3
-                    error('This test currently enters an infinite loop, skipping')
-                end
                 run_ls2003(blockFlag, bytecodeFlag, default_solve_algo, stack_solve_algos(i))
                 load wsOct
                 path(old_path);
