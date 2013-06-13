@@ -49,6 +49,14 @@
 @emph{Output}
 @end macro
 
+@macro algorithmhead
+@iftex
+@sp 1
+@end iftex
+@emph{Algorithm}
+@end macro
+
+
 @macro customhead{title}
 @iftex
 @sp 1
