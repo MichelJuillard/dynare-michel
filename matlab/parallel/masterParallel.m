@@ -4,7 +4,7 @@ function [fOutVar,nBlockPerCPU, totCPU] = masterParallel(Parallel,fBlock,nBlock,
 % computing.
 % It is the top-level function called on the master computer when parallelizing a task.
 
-% This function has two main computational strategiues for managing the matlab worker (slave process).
+% This function has two main computational strategies for managing the matlab worker (slave process).
 % 0 Simple Close/Open Stategy:
 % In this case the new Matlab instances (slave process) are open when
 % necessary and then closed. This can happen many times during the
