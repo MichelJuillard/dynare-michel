@@ -31,7 +31,7 @@ function cprod = cartesian_product_of_sets(varargin)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

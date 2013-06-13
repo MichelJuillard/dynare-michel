@@ -1,6 +1,6 @@
 /* kalman_steady_state.cc
 **
-** Copyright (C) 2009-2011 Dynare Team.
+** Copyright (C) 2009-2013 Dynare Team.
 **
 ** This file is part of Dynare.
 **
@@ -93,7 +93,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
   // Check the type of the input arguments and get the size of the matrices.
   mwSize n = mxGetM(prhs[0]);
-  if (n != mxGetN(prhs[0]))
+  if ((size_t) n != mxGetN(prhs[0]))
     {
       DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state: The first input argument (T) must be a square matrix!");
     }
@@ -102,7 +102,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state: The first input argument (T) must be a real matrix!");
     }
   mwSize q = mxGetM(prhs[1]);
-  if (q != mxGetN(prhs[1]))
+  if ((size_t) q != mxGetN(prhs[1]))
     {
       DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state: The second input argument (QQ) must be a square matrix!");
     }
@@ -115,7 +115,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
       DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state: The size of the second input argument (QQ) must match the size of the first argument (T)!");
     }
   mwSize p = mxGetN(prhs[2]);
-  if (mxGetM(prhs[2]) != n)
+  if (mxGetM(prhs[2]) != (size_t) n)
     {
       DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state: The number of rows of the third argument (Z) must match the number of rows of the first argument (T)!");
     }
@@ -129,7 +129,7 @@ mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         {
           DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state: The fourth input argument (H) must be a square matrix!");
         }
-      if (mxGetM(prhs[3]) != p)
+      if (mxGetM(prhs[3]) != (size_t) p)
         {
           DYN_MEX_FUNC_ERR_MSG_TXT("kalman_steady_state: The number of rows of the fourth input argument (H) must match the number of rows of the third input argument!");
         }

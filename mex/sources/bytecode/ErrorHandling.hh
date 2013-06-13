@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2012 Dynare Team
+ * Copyright (C) 2007-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -59,6 +59,7 @@
 #define isinf(x) (!_finite(x))
 #define fpu_error(x) (isinf(x) || isnan(x))
 
+#define finite(x) _finite(x)
 
 class MSVCpp_missings
 {
@@ -380,7 +381,7 @@ public:
     size_t n = Variable_list.size();
     int i = 0;
     bool notfound = true;
-    while (notfound && i < n)
+    while (notfound && i < (int) n)
       {
         if (variable_name == Variable_list[i].first)
           {

@@ -1,4 +1,4 @@
-function [err,ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
+function [err,ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium, fake)
 %function [err,ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
 % QZ decomposition, Sims' codes are used.
 %
@@ -40,7 +40,7 @@ function [err,ss,tt,w,sdim,eigval,info] = mjdgges(e,d,qz_criterium)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 % Check number of inputs and outputs.
-if nargin>3 || nargin<2 || nargout>7 || nargout==0
+if nargin>4 || nargin<2 || nargout>7 || nargout==0
     error('MJDGGES: takes 2 or 3 input arguments and between 1 and 7 output arguments.')
 end
 % Check the first two inputs.

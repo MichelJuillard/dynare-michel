@@ -73,7 +73,7 @@ oo.dr=set_state_space(oo.dr,M,options);
 [dr,info,M,options,oo] = resol(1,M,options,oo);
 
 if info(1) ~= 0 && info(1) ~= 3 && info(1) ~= 4
-    print_info(info, options.noprint);
+    print_info(info, options.noprint, options);
 end
 
 eigenvalues_ = dr.eigval;

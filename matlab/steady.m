@@ -89,7 +89,7 @@ else
     if options_.noprint == 0
         resid;
     end
-    print_info(info,options_.noprint);
+    print_info(info,options_.noprint, options_);
 end
 
 M_.Sigma_e = Sigma_e;

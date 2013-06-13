@@ -60,8 +60,6 @@ public:
                  const Mat1 &Q, const Matrix &H, const Vec2 &deepParams,
                  VectorView &vll, MatrixView &detrendedDataView, size_t start, size_t period)
   {
-    double lik = INFINITY;
-
 	if (period == 0) // initialise all KF matrices
 	  initKalmanFilter.initialize(steadyState, deepParams, R, Q, RQRt, T, Pstar, Pinf,
                                 dataView, detrendedDataView);

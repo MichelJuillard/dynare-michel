@@ -40,7 +40,7 @@ function mode_check(fun,x,hessian,DynareDataset,DynareOptions,Model,EstimatedPar
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2003-2012 Dynare Team
+% Copyright (C) 2003-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Copyright (C) 2009-2012 Dynare Team
+dnl Copyright (C) 2009-2013 Dynare Team
 dnl
 dnl This file is part of Dynare.
 dnl
@@ -128,9 +128,6 @@ AM_CONDITIONAL([HAVE_BEAMER], [test "x$ax_latex_have_beamer" = "xyes"])
 AC_CHECK_PROG([DOXYGEN], [doxygen], [doxygen])
 AM_CONDITIONAL([HAVE_DOXYGEN], [test "x$DOXYGEN" != "x"])
 
-AC_CHECK_PROG([OCTAVE], [octave], [octave])
-AM_CONDITIONAL([HAVE_OCTAVE], [test "x$OCTAVE" != "x"])
-
 AC_CHECK_PROG([CTANGLE], [ctangle], [ctangle])
 AM_CONDITIONAL([HAVE_CTANGLE], [test "x$CTANGLE" != "x"])
 if test "x$CTANGLE" = "x"; then
@@ -212,8 +209,10 @@ AM_CONDITIONAL([HAVE_CMD_LINE_MATLAB], [test "x$ax_enable_matlab" = "xyes" -a "x
 AC_ARG_ENABLE([octave], AS_HELP_STRING([--disable-octave], [disable compilation of MEX files for Octave]), [], [enable_octave=yes])
 if test "x$enable_octave" = "xyes"; then
   AC_CONFIG_SUBDIRS([mex/build/octave])
+  AC_CHECK_PROG([OCTAVE], [octave], [octave])
 fi
 AM_CONDITIONAL([ENABLE_OCTAVE], [test "x$enable_octave" = "xyes"])
+AM_CONDITIONAL([HAVE_OCTAVE], [test "x$enable_octave" = "xyes" -a test "x$OCTAVE" != "x"])
 
 # Enable exporting of Org files
 # The clean way would be to test for Emacs, Org-mode, latex, dvipng...

@@ -31,7 +31,7 @@ function [dLIK,dlik,a,Pstar] = kalman_filter_d(Y, start, last, a, Pinf, Pstar, k
 %   Models", S.J. Koopman and J. Durbin (2003, in Journal of Time Series 
 %   Analysis, vol. 24(1), pp. 85-98). 
 
-% Copyright (C) 2004-2012 Dynare Team
+% Copyright (C) 2004-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

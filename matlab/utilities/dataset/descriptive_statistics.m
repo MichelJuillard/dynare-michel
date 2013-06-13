@@ -45,7 +45,7 @@ function dataset_ = descriptive_statistics(dataset_,statistic,varagin)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2011 Dynare Team
+% Copyright (C) 2011-2012 Dynare Team
 %    
 % This file is part of Dynare.
 %

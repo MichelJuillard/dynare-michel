@@ -1,6 +1,6 @@
 function disp_identification(pdraws, idemodel, idemoments, name, advanced)
 
-% Copyright (C) 2008-2011 Dynare Team
+% Copyright (C) 2008-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -1,6 +1,6 @@
 function a = iscellofchar(b)
 
-% Copyright (C) 2012 Dynare Team
+% Copyright (C) 2012-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

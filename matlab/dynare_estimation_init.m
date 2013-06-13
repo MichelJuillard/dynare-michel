@@ -18,7 +18,7 @@ function [dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_, fake] =
 % SPECIAL REQUIREMENTS
 %   none
 
-% Copyright (C) 2003-2012 Dynare Team
+% Copyright (C) 2003-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

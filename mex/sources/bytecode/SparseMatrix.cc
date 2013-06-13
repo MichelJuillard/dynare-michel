@@ -1568,7 +1568,7 @@ PrintM(int n, double* Ax, mwIndex *Ap, mwIndex *Ai)
   int k = 0;
   for (int i = 0; i< n; i++)
     {
-      for (int j = Ap[i]; j < Ap[i + 1]; j++)
+      for (int j = Ap[i]; j < (int) Ap[i + 1]; j++)
         {
           int row = Ai[j];
           A[row *n + i] = Ax[j];
@@ -2430,7 +2430,7 @@ dynSparseMatrix::substract_A_B(mxArray *A_m, mxArray *B_m)
 #ifdef USE_OMP
 #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
 #endif
-  for (int j = 0; j < n_A; j++)
+  for (int j = 0; j < (int) n_A; j++)
     for (unsigned int i = 0; i < m_A; i++)
       {
         size_t index = j*m_A+i;
@@ -3157,7 +3157,7 @@ dynSparseMatrix::Solve_Matlab_LU_UMFPack(mxArray *A_m, mxArray *b_m, int Size, d
 #ifdef USE_OMP
 #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
 #endif
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < (int) n; i++)
       {
         int eq = index_vara[i+Size*y_kmin];
         double yy = -(res[i] + y[eq]);
@@ -3168,7 +3168,7 @@ dynSparseMatrix::Solve_Matlab_LU_UMFPack(mxArray *A_m, mxArray *b_m, int Size, d
 #ifdef USE_OMP
 #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
 #endif
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < (int) n; i++)
       {
         int eq = index_vara[i];
         double yy = -(res[i] + y[eq+it_*y_size]);
@@ -4073,7 +4073,7 @@ dynSparseMatrix::Solve_CUDA_BiCGStab(int *Ap, int *Ai, double *Ax, int *Ap_tild,
       mexWarnMsgTxt(tmp.str().c_str());
       return 4;*/
 
-      /* /**Apply the permutation matrices (P and Q) to the b vector of system to solve :
+      /* Apply the permutation matrices (P and Q) to the b vector of system to solve :
        b_tild = P-1 . b  = P' . b */
       /*cudaChk(cudaMalloc((void**)&b_tild, n * sizeof(double)), "  in Solve_Cuda_BiCGStab, can't allocate b_tild on the graphic card\n");
       cusparseChk(cusparseDcsrmv(cusparse_handle, CUSPARSE_OPERATION_TRANSPOSE,
@@ -4661,7 +4661,7 @@ dynSparseMatrix::Solve_Matlab_GMRES(mxArray *A_m, mxArray *b_m, int Size, double
 #ifdef USE_OMP
 #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
 #endif
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < (int) n; i++)
           {
             int eq = index_vara[i+Size*y_kmin];
             double yy = -(res[i] + y[eq]);
@@ -4672,7 +4672,7 @@ dynSparseMatrix::Solve_Matlab_GMRES(mxArray *A_m, mxArray *b_m, int Size, double
 #ifdef USE_OMP
 #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
 #endif
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < (int) n; i++)
           {
             int eq = index_vara[i];
             double yy = -(res[i] + y[eq+it_*y_size]);
@@ -4870,7 +4870,7 @@ dynSparseMatrix::Solve_Matlab_BiCGStab(mxArray *A_m, mxArray *b_m, int Size, dou
 #ifdef USE_OMP
 #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
 #endif
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < (int) n; i++)
           {
             int eq = index_vara[i+Size*y_kmin];
             double yy = -(res[i] + y[eq]);
@@ -4881,7 +4881,7 @@ dynSparseMatrix::Solve_Matlab_BiCGStab(mxArray *A_m, mxArray *b_m, int Size, dou
 #ifdef USE_OMP
 #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
 #endif
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < (int) n; i++)
           {
             int eq = index_vara[i];
             double yy = -(res[i] + y[eq+it_*y_size]);

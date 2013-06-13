@@ -113,7 +113,7 @@ if nargout == 0
 end
 
 if info(1)
-    print_info(info,options_.noprint)
+    print_info(info,options_.noprint, options_)
 end
 
 

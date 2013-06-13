@@ -3,7 +3,7 @@ function oo_ = ...
 % This function analyses the (posterior or prior) distribution of the
 % endogenous conditional variance decomposition.
 
-% Copyright (C) 2009-2010 Dynare Team
+% Copyright (C) 2009-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

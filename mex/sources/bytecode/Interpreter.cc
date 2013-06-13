@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2012 Dynare Team
+ * Copyright (C) 2007-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -39,7 +39,7 @@ Interpreter::Interpreter(double *params_arg, double *y_arg, double *ya_arg, doub
                          , const int CUDA_device_arg, cublasHandle_t cublas_handle_arg, cusparseHandle_t cusparse_handle_arg, cusparseMatDescr_t descr_arg
 #endif
                          )
-                         : dynSparseMatrix(y_size_arg, y_kmin_arg, y_kmax_arg, print_it_arg, steady_state_arg, periods_arg, minimal_solving_periods_arg
+                         : dynSparseMatrix(y_size_arg, y_kmin_arg, y_kmax_arg, print_it_arg, steady_state_arg, periods_arg, minimal_solving_periods_arg, slowc_arg
 #ifdef CUDA
                                         , CUDA_device_arg, cublas_handle_arg, cusparse_handle_arg, descr_arg
 #endif
@@ -487,8 +487,6 @@ Interpreter::simulate_a_block()
               res1 = 0;
               max_res = 0;
               max_res_idx = 0;
-              double res1_, res2_, max_res_;
-              int max_res_idx_;
               memcpy(y_save, y, y_size*sizeof(double)*(periods+y_kmax+y_kmin));
 
               compute_complete_2b(false, &res1, &res2, &max_res, &max_res_idx);
@@ -523,8 +521,6 @@ Interpreter::simulate_a_block()
           res1 = 0;
           res2 = 0;
           max_res = 0; max_res_idx = 0;
-          double res1_, res2_, max_res_;
-          int max_res_idx_;
 
           compute_complete_2b(false, &res1, &res2, &max_res, &max_res_idx);
           end_code = it_code;

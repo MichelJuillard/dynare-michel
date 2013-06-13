@@ -1,9 +1,10 @@
-function print_info(info,noprint)
+function print_info(info, noprint, DynareOptions)
 % Prints error messages
 %
 % INPUTS
-%   info    [double]   vector returned by resol.m 
-%   noprint [integer]  equal to 0 if the error message has to be printed. 
+%   info              [double]     vector returned by resol.m 
+%   noprint           [integer]    equal to 0 if the error message has to be printed.
+%   DynareOptions     [structure]  --> options_
 % OUTPUTS
 %    none
 %
@@ -49,8 +50,7 @@ if ~noprint
         error(['The Jacobian matrix evaluated at the steady state contains elements ' ...
                'that are not real or are infinite'])
       case 7
-        error(['One of the eigenvalues is close to 0/0 (the absolute ' ...
-               'value of numerator and denominator is smaller than 1e-6)'])
+        error('One of the eigenvalues is close to 0/0 (the absolute value of numerator and denominator is smaller than %s!\n If you believe that the model has a unique solution you can try to reduce the value of qz_zero_threshold.',num2str(DynareOptions.qz_zero_threshold))
       case 8
         if size(info,2)>=2
           global M_;

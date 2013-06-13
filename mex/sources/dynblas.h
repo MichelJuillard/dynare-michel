@@ -8,7 +8,7 @@
  * and MATLAB_VERSION (for version 7.4, define it to 0x0704).
  *
  *
- * Copyright (C) 2009-2011 Dynare Team
+ * Copyright (C) 2009-2013 Dynare Team
  *
  * This file is part of Dynare.
  *

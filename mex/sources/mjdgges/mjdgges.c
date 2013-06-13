@@ -32,7 +32,7 @@ my_criteria(const double *alphar, const double *alphai, const double *beta)
 }
 
 void
-mjdgges(double *a, double *b, double *z, double *n, double *sdim, double *eval_r, double *eval_i, double *info)
+mjdgges(double *a, double *b, double *z, double *n, double *sdim, double *eval_r, double *eval_i, double zhreshold, double *info)
 {
   lapack_int i_n, i_info, i_sdim, lwork;
   double *alphar, *alphai, *beta, *work, *par, *pai, *pb, *per, *pei;
@@ -60,7 +60,7 @@ mjdgges(double *a, double *b, double *z, double *n, double *sdim, double *eval_r
   pei = eval_i;
   for (per = eval_r; per <= &eval_r[i_n-1]; ++per)
     {
-      if ((fabs(*par) > 1e-6) || (fabs(*pb) > 1e-6)) 
+      if ((fabs(*par) > zhreshold) || (fabs(*pb) > zhreshold)) 
 	*per = *par / *pb;
       else
 	{
@@ -92,8 +92,8 @@ mexFunction(int nlhs, mxArray *plhs[],
 
   /* Check for proper number of arguments */
 
-  if (nrhs < 2 || nrhs > 3 || nlhs == 0 || nlhs > 7)
-    DYN_MEX_FUNC_ERR_MSG_TXT("MJDGGES: takes 2 or 3 input arguments and between 1 and 7 output arguments.");
+  if (nrhs < 2 || nrhs > 4 || nlhs == 0 || nlhs > 7)
+    DYN_MEX_FUNC_ERR_MSG_TXT("MJDGGES: takes 2, 3 or 4 input arguments and between 1 and 7 output arguments.");
 
   /* Check that A and B are real matrices of the same dimension.*/
 
@@ -136,6 +136,18 @@ mexFunction(int nlhs, mxArray *plhs[],
       criterium = 1+1e-6;
     }
 
+  /* set criterium for 0/0 generalized eigenvalues */
+  double zhreshold;
+  if (nrhs == 4 && mxGetM(prhs[3]) > 0)
+    {
+      zhreshold = *mxGetPr(prhs[3]);
+    }
+  else
+    {
+      zhreshold = 1e-6;
+    }
+
+
   /* keep a and b intact */
   memcpy(s, a, sizeof(double)*n1*n1);
   memcpy(t, b, sizeof(double)*n1*n1);
@@ -143,7 +155,7 @@ mexFunction(int nlhs, mxArray *plhs[],
   n = n1;
 
   /* Do the actual computations in a subroutine */
-  mjdgges(s, t, z, &n, sdim, eval_r, eval_i, info);
+  mjdgges(s, t, z, &n, sdim, eval_r, eval_i, zhreshold, info);
 
   plhs[0] = mxCreateDoubleScalar(0);
 }

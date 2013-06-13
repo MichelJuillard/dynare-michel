@@ -11,7 +11,7 @@ function global_initialization()
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2012 Dynare Team
+% Copyright (C) 2003-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -51,6 +51,7 @@ options_.initval_file = 0;
 options_.Schur_vec_tol = 1e-11; % used to find nonstationary variables in Schur decomposition of the
                                 % transition matrix
 options_.qz_criterium = [];
+options_.qz_zero_threshold = 1e-6;
 options_.lyapunov_complex_threshold = 1e-15;
 options_.solve_tolf = eps^(1/3);
 options_.solve_tolx = eps^(2/3);

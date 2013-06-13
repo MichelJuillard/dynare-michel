@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008-2011 Dynare Team
+ * Copyright (C) 2008-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -46,8 +46,8 @@ KordpDynare::KordpDynare(const vector<string> &endo, int num_endo,
   nYs(npred + nboth), nYss(nboth + nforw), nY(num_endo), nJcols(jcols), NNZD(nnzd), nSteps(nsteps),
   nOrder(norder), journal(jr), ySteady(ysteady), params(inParams), vCov(vcov),
   md(1), dnl(*this, endo), denl(*this, exo), dsnl(*this, dnl, denl), ss_tol(sstol), varOrder(var_order),
-  ll_Incidence(llincidence), qz_criterium(criterium), dynamicModelFile(dynamicModelFile_arg), g1p(NULL),
-  g2p(NULL), g3p(NULL)
+  ll_Incidence(llincidence), qz_criterium(criterium), g1p(NULL),
+  g2p(NULL), g3p(NULL), dynamicModelFile(dynamicModelFile_arg)
 {
   ReorderDynareJacobianIndices();
 
@@ -68,8 +68,8 @@ KordpDynare::KordpDynare(const vector<string> &endo, int num_endo,
   nYs(npred + nboth), nYss(nboth + nforw), nY(num_endo), nJcols(jcols), NNZD(nnzd), nSteps(nsteps),
   nOrder(norder), journal(jr), ySteady(ysteady), params(inParams), vCov(vcov),
   md(1), dnl(*this, endo), denl(*this, exo), dsnl(*this, dnl, denl), ss_tol(sstol), varOrder(var_order),
-  ll_Incidence(llincidence), qz_criterium(criterium), dynamicModelFile(dynamicModelFile_arg), 
-  g1p(g1_arg), g2p(g2_arg), g3p(g3_arg)
+  ll_Incidence(llincidence), qz_criterium(criterium),
+  g1p(g1_arg), g2p(g2_arg), g3p(g3_arg), dynamicModelFile(dynamicModelFile_arg)
 {
   ReorderDynareJacobianIndices();
 

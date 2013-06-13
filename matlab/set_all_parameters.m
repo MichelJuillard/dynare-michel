@@ -33,7 +33,7 @@ function M = set_all_parameters(xparam1,estim_params,M)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2003-2012 Dynare Team
+% Copyright (C) 2003-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

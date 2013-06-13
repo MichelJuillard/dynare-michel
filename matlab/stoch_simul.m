@@ -1,6 +1,6 @@
 function info=stoch_simul(var_list)
 
-% Copyright (C) 2001-2012 Dynare Team
+% Copyright (C) 2001-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -78,7 +78,7 @@ end
 
 if info(1)
     options_ = options_old;
-    print_info(info, options_.noprint);
+    print_info(info, options_.noprint, options_);
     return
 end
 

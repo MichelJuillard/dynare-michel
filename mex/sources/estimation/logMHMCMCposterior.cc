@@ -501,7 +501,7 @@ sampleMHMC(LogPosteriorDensity &lpd, RandomWalkMetropolisHastings &rwmh,
           matClose(drawmat);
 #else
 
-          printf("   MH: Computing Metropolis-Hastings (chain %d/%d): %3.f \b%% done, acceptance rate: %3.f \b%%\r", b, nBlocks, 100 * j/nruns(b-1), 100 * sux / j);
+          printf("   MH: Computing Metropolis-Hastings (chain %ld/%ld): %3.f \b%% done, acceptance rate: %3.f \b%%\r", b, nBlocks, 100 * j/nruns(b-1), 100 * sux / j);
           // % Now I save the simulations
           // save draw  2 mat file ([MhDirectoryName '/' ModelName '_mh' int2str(NewFile(b)) '_blck' int2str(b) '.mat'],'x2','logpo2');
           ssFName.clear();
@@ -716,7 +716,6 @@ logMCMCposterior(VectorConstView &estParams, const MatrixConstView &data,
   bool noconstant = (bool) *mxGetPr(mxGetField(options_, 0, "noconstant"));
 
   // Allocate LogPosteriorDensity object
-  int info;
   LogPosteriorDensity lpd(basename, epd, n_endo, n_exo, zeta_fwrd, zeta_back, zeta_mixed, zeta_static,
                           qz_criterium, varobs, riccati_tol, lyapunov_tol, noconstant);
 

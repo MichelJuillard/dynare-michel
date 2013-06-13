@@ -2,7 +2,7 @@ function oo_ = variance_decomposition_mc_analysis(NumberOfSimulations,type,dname
 % This function analyses the (posterior or prior) distribution of the
 % endogenous variance decomposition.
 
-% Copyright (C) 2008-2009 Dynare Team
+% Copyright (C) 2008-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

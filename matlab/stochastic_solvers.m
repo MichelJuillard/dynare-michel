@@ -29,7 +29,7 @@ function [dr,info] = stochastic_solvers(dr,task,M_,options_,oo_)
 %   none.
 %  
 
-% Copyright (C) 1996-2012 Dynare Team
+% Copyright (C) 1996-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

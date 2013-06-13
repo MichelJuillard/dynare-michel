@@ -303,21 +303,15 @@ TARGETS += check-octave
 endif
 
 check-local: $(TARGETS)
-
-if HAVE_OCTAVE
-	./read_trs_files.sh "$(O_TRS_FILES)" "$(O_XFAIL_TRS_FILES)"
-endif
-
-if HAVE_CMD_LINE_MATLAB
-	./read_trs_files.sh "$(M_TRS_FILES)" "$(M_XFAIL_TRS_FILES)"
-endif
 	@cat run_test_matlab_output.txt
 	@cat run_test_octave_output.txt
 
 check-matlab: $(M_XFAIL_TRS_FILES) $(M_TRS_FILES)
+	./read_trs_files.sh "$(M_TRS_FILES)" "$(M_XFAIL_TRS_FILES)"
 	@echo 'Matlab Tests Done'
 
 check-octave: $(O_XFAIL_TRS_FILES) $(O_TRS_FILES)
+	./read_trs_files.sh "$(O_TRS_FILES)" "$(O_XFAIL_TRS_FILES)"
 	@echo 'Octave Tests Done'
 
 %.m.trs %.m.log: %.mod

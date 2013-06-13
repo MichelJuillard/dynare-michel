@@ -45,12 +45,17 @@ Files: matlab/bfgsi1.m matlab/csolve.m matlab/csminit1.m matlab/numgrad2.m
  matlab/bvar_toolbox.m matlab/partial_information/PI_gensys.m matlab/qzswitch.m
  matlab/qzdiv.m
 Copyright: 1993-2009 Christopher Sims
-           2006-2011 Dynare Team
+           2006-2012 Dynare Team
 License: GPL-3+
 
 Files: matlab/cmaes.m
 Copyright: 2001-2012 Nikolaus Hansen
            2012 Dynare Team
+License: GPL-3+
+
+Files: matlab/endogenous_prior.m
+Copyright: 2011 Lawrence J. Christiano, Mathias Trabandt and Karl Walentin
+           2013 Dynare Team
 License: GPL-3+
 
 Files: matlab/missing/stats/normpdf.m matlab/missing/stats/gamcdf.m

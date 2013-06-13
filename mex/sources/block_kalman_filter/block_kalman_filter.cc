@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2012 Dynare Team
+ * Copyright (C) 2007-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -289,7 +289,7 @@ BlockKalmanFilter::BlockKalmanFilter(int nlhs, mxArray *plhs[], int nrhs, const 
   iw = (lapack_int*)mxMalloc(pp * sizeof(lapack_int));
   ipiv = (lapack_int*)mxMalloc(pp * sizeof(lapack_int));
   info = 0;
-#ifdef BLAS || CUBLAS
+#if defined(BLAS) || defined(CUBLAS)
   p_tmp = mxCreateDoubleMatrix(n, n, mxREAL);
   *tmp = mxGetPr(p_tmp);
   p_P_t_t1 = mxCreateDoubleMatrix(n, n, mxREAL);

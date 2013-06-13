@@ -34,7 +34,7 @@ function record=adaptive_metropolis_hastings(TargetFun,ProposalFun,xparam1,vv,mh
 % Then the comments write here can be used for all the other pairs of
 % parallel functions and also for management funtions.
 
-% Copyright (C) 2006-2011 Dynare Team
+% Copyright (C) 2006-2013 Dynare Team
 %
 % This file is part of Dynare.
 %

@@ -271,7 +271,7 @@ function dr_np = first_step_ds(x,pm,M,dr,options,oo)
     
     [dr_np,info] = dyn_first_order_solver(d1_np,pm.M_np,pm.dr_np,options,0);
     if info
-        print_info(info,0);
+        print_info(info, 0, options);
         return
     end
     
@@ -309,7 +309,7 @@ function [resid,dr] = risky_residuals_k_order(ys,pm,M,dr,options,oo)
         
         [dr_np,info] = dyn_first_order_solver(d1_np,pm.M_np,pm.dr_np,options,0);
         if info
-            print_info(info,0);
+            print_info(info, 0, options);
             return
         end
         
@@ -386,7 +386,7 @@ function [resid,dr] = risky_residuals_k_order(ys,pm,M,dr,options,oo)
         disp(aa3(:,kk2))
         [dr,info] = dyn_first_order_solver(d1b,M,dr,options,0);
         if info
-            print_info(info,0);
+            print_info(info, 0, options);
             return
         end
         

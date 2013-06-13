@@ -7,7 +7,7 @@ function [co, b, yhat] = cosn(H);
 % Not the same as multiple correlation coefficient since the means are not
 % zero
 %
-% Copyright (C) 2008-2011 Dynare Team
+% Copyright (C) 2008-2012 Dynare Team
 %
 % This file is part of Dynare.
 %

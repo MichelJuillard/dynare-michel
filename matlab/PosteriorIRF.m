@@ -16,7 +16,7 @@ function PosteriorIRF(type)
 % functions associated with it(the _core1 and _core2).
 % See also the comments random_walk_metropolis_hastings.m funtion.
 
-% Copyright (C) 2006-2012 Dynare Team
+% Copyright (C) 2006-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
