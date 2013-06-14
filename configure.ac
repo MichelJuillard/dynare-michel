@@ -212,7 +212,7 @@ if test "x$enable_octave" = "xyes"; then
   AC_CHECK_PROG([OCTAVE], [octave], [octave])
 fi
 AM_CONDITIONAL([ENABLE_OCTAVE], [test "x$enable_octave" = "xyes"])
-AM_CONDITIONAL([HAVE_OCTAVE], [test "x$enable_octave" = "xyes" -a test "x$OCTAVE" != "x"])
+AM_CONDITIONAL([HAVE_OCTAVE], [test "x$enable_octave" = "xyes" -a "x$OCTAVE" != "x"])
 
 # Enable exporting of Org files
 # The clean way would be to test for Emacs, Org-mode, latex, dvipng...
