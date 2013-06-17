@@ -172,7 +172,6 @@ A.data = bsxfun(@plus,B.data,C.data);
 %$ T = all(t);
 %@eof:3
 
-
 %@test:4
 %$ t = zeros(7,1);
 %$
