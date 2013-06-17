@@ -121,3 +121,35 @@ end
 %$ end
 %$ T = all(t);
 %@eof:1
+
+%@test:2
+%$ % Define a datasets.
+%$ A = rand(8,3); B = rand(7,2);
+%$
+%$ % Define names
+%$ A_name = {'A1';'A2';'A3'};
+%$ B_name = {'B1';'B2'};
+%$
+%$ % Define initial dates
+%$ A_init = '1990Q1';
+%$ B_init = '1990Q1';
+%$
+%$ % Instantiate two dynSeries objects
+%$ ts1 = dynSeries(A,A_init,A_name);
+%$ ts2 = dynSeries(B,B_init,B_name);
+%$
+%$ try
+%$   [ts1, ts2] = align(ts1, ts2);
+%$   t(1) = 1;
+%$ catch
+%$   t(1) = 0;
+%$ end
+%$
+%$ if t(1)
+%$   t(2) = dyn_assert(ts1.nobs,ts2.nobs);
+%$   t(3) = dyn_assert(ts1.init==ts2.init,1);
+%$   t(4) = dyn_assert(ts1.data,A, 1e-15);
+%$   t(5) = dyn_assert(ts2.data,[B; NaN(1,2)], 1e-15);
+%$ end
+%$ T = all(t);
+%@eof:2
