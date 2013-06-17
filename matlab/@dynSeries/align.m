@@ -56,7 +56,6 @@ time_range_of_b = b.init:b.init+b.nobs;
 last_a = time_range_of_a(a.nobs);
 last_b = time_range_of_b(b.nobs);
 
-
 common_time_range = intersect(time_range_of_a,time_range_of_b);
 
 if isempty(common_time_range)
