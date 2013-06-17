@@ -106,6 +106,8 @@ for i=1:nargin-1
             error('dynSeries::extract: Cannot handle more than two regular expressions!')
         end
     end
+    % Remove trailing white spaces if any
+    VariableName_ = strtrim(VariableName_);
 end
 
 % Get indices of the selected variables
