@@ -39,8 +39,6 @@ function A = plus(B,C)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-%[B, C] = align(B, C);
 if ~isequal(B.vobs,C.vobs) && ~(isequal(B.vobs,1) || isequal(C.vobs,1))
     error(['dynSeries::plus: Cannot add ' inputname(1) ' and ' inputname(2) ' (wrong number of variables)!'])
 else
