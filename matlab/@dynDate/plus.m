@@ -94,9 +94,9 @@ end
 %$
 %$ % Expected results.
 %$ e1 = dynDate(1952);
-%$ e2 = dynDate('1951Q4');
-%$ e3 = dynDate('2001M5');
-%$ e4 = dynDate('2000M12');
+%$ e2 = dynDate('1952Q1');
+%$ e3 = dynDate('2001M6');
+%$ e4 = dynDate('2001M1');
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(e1.time,d1.time);
