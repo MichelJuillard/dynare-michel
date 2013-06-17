@@ -84,9 +84,10 @@ if last_a>last_b
 end
 
 if last_a<last_b
-    n = last_a-last_b;
-    a.data = [a.data; NaN(n,b.vobs)];
+    n = last_b-last_a;
+    a.data = [a.data; NaN(n,a.vobs)];
     a.nobs = a.nobs+n;
+    return
 end
 
 %@test:1
