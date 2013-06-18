@@ -11,7 +11,7 @@ function global_initialization()
 % SPECIAL REQUIREMENTS
 %    none
 
-% Copyright (C) 2003-2012 Dynare Team
+% Copyright (C) 2003-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -51,16 +51,17 @@ options_.initval_file = 0;
 options_.Schur_vec_tol = 1e-11; % used to find nonstationary variables in Schur decomposition of the
                                 % transition matrix
 options_.qz_criterium = [];
+options_.qz_zero_threshold = 1e-6;
 options_.lyapunov_complex_threshold = 1e-15;
 options_.solve_tolf = eps^(1/3);
 options_.solve_tolx = eps^(2/3);
 options_.solve_maxit = 500;
 
-options_.mode_check_neighbourhood_size = 0.01;
+options_.mode_check_neighbourhood_size = .5;
+options_.mode_check_symmetric_plots = 1;
 options_.mode_check_node_number = 1000;
 
-
-% Default number of thread. for parallelized mex files.
+% Default number of threads for parallelized mex files.
 options_.threads.kronecker.A_times_B_kronecker_C = 1;
 options_.threads.kronecker.sparse_hessian_times_B_kronecker_C = 1;
 options_.threads.local_state_space_iteration_2 = 1;
@@ -561,6 +562,7 @@ options_.risky_steadystate = 0;
 
 % endogenous prior
 options_.endogenous_prior = 0;
+options_.endogenous_prior_restrictions.irf={};
 
 % use GPU
 options_.gpu = 0;

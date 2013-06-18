@@ -40,7 +40,7 @@ function mode_check(fun,x,hessian,DynareDataset,DynareOptions,Model,EstimatedPar
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2003-2012 Dynare Team
+% Copyright (C) 2003-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -85,6 +85,9 @@ if TeX
 end
 
 ll = DynareOptions.mode_check_neighbourhood_size;
+if isinf(ll),
+    DynareOptions.mode_check_symmetric_plots = 0;
+end
 half_number_nodes = .5*DynareOptions.mode_check_node_number ;
 
 for plt = 1:nbplt,
@@ -107,18 +110,19 @@ for plt = 1:nbplt,
             end
         end
         xx = x;
-        l1 = max(BayesInfo.lb(kk),(1-ll)*x(kk)); 
-        l2 = min(BayesInfo.ub(kk),(1+ll)*x(kk));
-        m1 = 0;
-        if l2<(1+ll)*x(kk)
-            l1 = x(kk) - (l2-x(kk));
-            m1 = 1;
+        l1 = max(BayesInfo.lb(kk),(1-sign(x(kk))*ll)*x(kk)); m1 = 0;
+        l2 = min(BayesInfo.ub(kk),(1+sign(x(kk))*ll)*x(kk));
+        if DynareOptions.mode_check_symmetric_plots,
+            if l2<(1+ll)*x(kk)
+                l1 = x(kk) - (l2-x(kk));
+                m1 = 1;
+            end
+            if ~m1 && (l1>(1-ll)*x(kk)) && (x(kk)+(x(kk)-l1)<BayesInfo.ub(kk))
+                l2 = x(kk) + (x(kk)-l1);
+            end
         end
-        if ~m1 && (l1>(1-ll)*x(kk)) && (x(kk)+(x(kk)-l1)<BayesInfo.ub(kk))
-            l2 = x(kk) + (x(kk)-l1);
-        end
-        z1 = l1:((x(kk)-l1)/half_number_nodes):x(kk);
-        z2 = x(kk):((l2-x(kk))/half_number_nodes):l2;
+        z1 = l1:((x(kk)-l1)/10):x(kk);
+        z2 = x(kk):((l2-x(kk))/10):l2;
         z  = union(z1,z2);
         if DynareOptions.mode_check_nolik==0,
             y = zeros(length(z),2);
