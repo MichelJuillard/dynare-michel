@@ -41,7 +41,6 @@ persistent Y init_flag mf0 mf1 bounds number_of_particles number_of_parameters l
 persistent start_param sample_size number_of_observed_variables number_of_structural_innovations
 
 % Set seed for randn().
-%set_dynare_seed('mt19937ar',1234) ;
 set_dynare_seed('default') ;
 pruning = DynareOptions.particle.pruning;
 second_resample = 1 ;
@@ -62,11 +61,10 @@ if isempty(init_flag)
     number_of_observed_variables = length(mf1);
     number_of_structural_innovations = length(ReducedForm.Q);
     liu_west_delta = DynareOptions.particle.liu_west_delta ;
-    liu_west_chol_sigma_bar = DynareOptions.particle.liu_west_chol_sigma_bar*eye(number_of_parameters) ;
-    %start_param = xparam1 ; 
-    % Conditions initiales 
-    %liu_west_chol_sigma_bar = bsxfun(@times,eye(number_of_parameters),BayesInfo.p2) ; 
-    start_param = BayesInfo.p1 ;
+    %liu_west_chol_sigma_bar = DynareOptions.particle.liu_west_chol_sigma_bar*eye(number_of_parameters) ;
+    start_param = xparam1 ; 
+    %liu_west_chol_sigma_bar = sqrt(bsxfun(@times,eye(number_of_parameters),BayesInfo.p2)) ; 
+    %start_param = BayesInfo.p1 ;
     bounds = [BayesInfo.lb BayesInfo.ub] ;
     init_flag = 1;
 end
@@ -87,11 +85,12 @@ small_a = sqrt(1-h_square) ;
 
 % Initialization of parameter particles 
 xparam = zeros(number_of_parameters,number_of_particles) ;
-stderr = sqrt(bsxfun(@power,bounds(:,2)+bounds(:,1),2)/12)/1000 ;
+stderr = sqrt(bsxfun(@power,bounds(:,2)+bounds(:,1),2)/12)/100 ;
+stderr = sqrt(bsxfun(@power,bounds(:,2)+bounds(:,1),2)/12)/50 ;
 i = 1 ;
 while i<=number_of_particles
-    candidate = start_param + 10*liu_west_chol_sigma_bar*randn(number_of_parameters,1) ;
-    %candidate = start_param + bsxfun(@times,stderr,randn(number_of_parameters,1)) ;
+    %candidate = start_param + .001*liu_west_chol_sigma_bar*randn(number_of_parameters,1) ;
+    candidate = start_param + bsxfun(@times,stderr,randn(number_of_parameters,1)) ;
     if all(candidate(:) >= bounds(:,1)) && all(candidate(:) <= bounds(:,2))
         xparam(:,i) = candidate(:) ;
         i = i+1 ;
@@ -113,7 +112,7 @@ ub95_xparam = zeros(number_of_parameters,sample_size) ;
 
 %% The Online filter 
 for t=1:sample_size
-    disp(t) 
+    disp(t)
     % Moments of parameters particles distribution 
     m_bar = xparam*(weights') ;
     temp = bsxfun(@minus,xparam,m_bar) ;
@@ -210,7 +209,7 @@ for t=1:sample_size
     if (variance_update==1) && (neff(weights)<DynareOptions.particle.resampling.neff_threshold*sample_size)
         variance_update = 0 ;
     end
-        % final resampling (advised)
+    % final resampling (advised)
     if second_resample==1 
         indx = index_resample(0,weights,DynareOptions);
         StateVectors = StateVectors(:,indx) ;
@@ -259,7 +258,8 @@ for t=1:sample_size
     end
     disp([lb95_xparam(:,t) mean_xparam(:,t) ub95_xparam(:,t)])
 end
-xparam = mean_xparam(:,sample_size) ; 
+distrib_param = xparam ;
+xparam = mean_xparam(:,sample_size) ;
 std_param = std_xparam(:,sample_size) ;
 lb_95 = lb95_xparam(:,sample_size) ;
 ub_95 = ub95_xparam(:,sample_size) ;
@@ -345,8 +345,8 @@ for plt = 1:nbplt,
                 TeXNAMES = char(TeXNAMES,texname);
             end
         end
-        optimal_bandwidth = mh_optimal_bandwidth(xparam(kk,:)',number_of_particles,bandwidth,kernel_function);
-        [density(:,1),density(:,2)] = kernel_density_estimate(xparam(kk,:)',number_of_grid_points,...
+        optimal_bandwidth = mh_optimal_bandwidth(distrib_param(kk,:)',number_of_particles,bandwidth,kernel_function);
+        [density(:,1),density(:,2)] = kernel_density_estimate(distrib_param(kk,:)',number_of_grid_points,...
                                                           number_of_particles,optimal_bandwidth,kernel_function);
         plot(density(:,1),density(:,2));
         hold on
@@ -370,3 +370,4 @@ for plt = 1:nbplt,
         fprintf(fidTeX,' \n');
     end
 end    
+    

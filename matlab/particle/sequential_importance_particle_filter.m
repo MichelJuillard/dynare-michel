@@ -161,7 +161,7 @@ for t=1:sample_size
             StateVectors = temp(:,1:number_of_state_variables)' ;
             StateVectors_ = temp(:,number_of_state_variables+1:2*number_of_state_variables)';
         else
-            StateVectors = resample(tmp(mf0,:)',weights,DynareOptions)';
+            StateVectors = resample(tmp(mf0,:)',weights',DynareOptions)';
         end
         weights = ones(1,number_of_particles)/number_of_particles;
     elseif strcmp(DynareOptions.particle.resampling.status,'none')

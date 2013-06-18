@@ -168,8 +168,7 @@ end
 offset = EstimatedParameters.nvx;
 if EstimatedParameters.nvn
     for i=1:EstimatedParameters.nvn
-        k = EstimatedParameters.var_endo(i,1);
-        H(k,k) = xparam1(i+offset)*xparam1(i+offset);
+        H(i,i) = xparam1(i+offset)*xparam1(i+offset);
     end
     offset = offset+EstimatedParameters.nvn;
 else
