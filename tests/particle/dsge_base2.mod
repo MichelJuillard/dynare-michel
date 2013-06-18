@@ -104,4 +104,4 @@ options_.particle.approximation_method = 'cubature' ;
 options_.particle.liu_west_delta = 0.9 ;
 options_.mode_check_node_number = 250 ;
 
-estimation(datafile=data_risky_perturb3,nograph,order=2,nobs=100,mh_replic=0,mode_compute=7,mode_check);
+estimation(datafile=data_risky_perturb2,nograph,order=2,nobs=100,mh_replic=0,mode_compute=7,mode_check);
