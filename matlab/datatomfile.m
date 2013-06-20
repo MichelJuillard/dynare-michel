@@ -1,4 +1,4 @@
-function datatomfile (s,var_list)
+function datatomfile (s,var_list, names)
 % function datatomfile (s,var_list)
 % This optional command saves the simulation results in a text file. The name of each
 % variable preceeds the corresponding results. This command must follow SIMUL.
@@ -6,6 +6,7 @@ function datatomfile (s,var_list)
 % INPUTS
 %    s:              data file name
 %    var_list:       vector of selected endogenous variables
+%    names:          vector of strings (alternative names for the endogenous variables in the data file)
 %
 % OUTPUTS
 %    none
@@ -32,14 +33,26 @@ function datatomfile (s,var_list)
 
 global M_ oo_
 
+% Open the data file. 
 sm=[s,'.m'];
 fid=fopen(sm,'w') ;
 
 if nargin < 2 || size(var_list,1) == 0
     var_list = M_.endo_names(1:M_.orig_endo_nbr,:);
 end
+
 n = size(var_list,1);
 ivar=zeros(n,1);
+
+if nargin==3
+    if ~isequal(size(var_list,1),n)
+        error('datatomfile:: Second and third arguments must have the same number of rows (variables)!')
+    end
+else
+    names = var_list;
+end
+
+% Get indices for the endogenous variables.
 for i=1:n
     i_tmp = strmatch(var_list(i,:),M_.endo_names,'exact');
     if isempty(i_tmp)
@@ -49,15 +62,15 @@ for i=1:n
     end
 end
 
-
-
+% Save the selected data.
 for i = 1:n
-    fprintf(fid,[M_.endo_names(ivar(i),:), '=['],'\n') ;
+    fprintf(fid,[strtrim(names(i,:)), ' = ['],'\n') ;
     fprintf(fid,'\n') ;
     fprintf(fid,'%15.8g\n',oo_.endo_simul(ivar(i),:)') ;
-    fprintf(fid,'\n') ;
     fprintf(fid,'];\n') ;
     fprintf(fid,'\n') ;
 end
+
+% Close the data file.
 fclose(fid) ;
 

@@ -57,8 +57,11 @@ options_.solve_tolf = eps^(1/3);
 options_.solve_tolx = eps^(2/3);
 options_.solve_maxit = 500;
 
-options_.mode_check_neighbourhood_size = 0.5;
-options_.mode_check_symmetric_plots = 1;
+options_.mode_check.status = 0;
+options_.mode_check.neighbourhood_size = .5;
+options_.mode_check.symmetric_plots = 1;
+options_.mode_check.number_of_points = 20;
+options_.mode_check.nolik = 0;
 
 % Default number of threads for parallelized mex files.
 options_.threads.kronecker.A_times_B_kronecker_C = 1;
@@ -237,6 +240,9 @@ particle.resampling.number_of_partitions = 200;
 particle.mixture_state_variables = 5 ;
 particle.mixture_structural_shocks = 1 ;
 particle.mixture_measurement_shocks = 1 ;
+% Online approach 
+particle.liu_west_delta = 0.99 ;
+particle.liu_west_chol_sigma_bar = .01 ;
 % Copy ep structure in options_ global structure
 options_.particle = particle;
 
@@ -368,8 +374,7 @@ options_.mh_nblck = 2;
 options_.mh_recover = 0;
 options_.mh_replic = 20000;
 options_.recursive_estimation_restart = 0;
-options_.mode_check = 0;
-options_.mode_check_nolik = 0;
+
 options_.mode_compute = 4;
 options_.mode_file = '';
 options_.moments_varendo = 0;

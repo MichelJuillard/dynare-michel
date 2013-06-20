@@ -54,6 +54,7 @@ function resampled_particles = resample(particles,weights,DynareOptions)
 % AUTHOR(S) frederic DOT karame AT univ DASH evry DOT fr
 %           stephane DOT adjemian AT univ DASH lemans DOT fr
 
+
 switch DynareOptions.particle.resampling.method1
   case 'residual'
     if strcmpi(DynareOptions.particle.resampling.method2,'kitagawa')

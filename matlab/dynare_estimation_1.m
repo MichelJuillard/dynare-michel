@@ -399,6 +399,9 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         [x, fval, COUNTEVAL, STOPFLAG, OUT, BESTEVER] = cmaes(func2str(objective_function),xparam1,H0,options_.cmaes,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         xparam1=BESTEVER.x;
         disp(sprintf('\n Objective function at mode: %f',fval))
+      case 10 
+         options_.cova_compute = 0 ;
+         [xparam1,stdh,lb_95,ub_95,med_param] = online_auxiliary_filter(xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_) ;
       case 101
         myoptions=soptions;
         myoptions(2)=1e-6; %accuracy of argument
@@ -492,7 +495,7 @@ if ~options_.mh_posterior_mode_estimation && options_.cova_compute
     end
 end
 
-if options_.mode_check == 1 && ~options_.mh_posterior_mode_estimation
+if options_.mode_check.status == 1 && ~options_.mh_posterior_mode_estimation
     ana_deriv = options_.analytic_derivation;
     options_.analytic_derivation = 0;
     mode_check(objective_function,xparam1,hh,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
@@ -572,7 +575,7 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
         if options_.cova_compute
             oo_.MC_record=feval(options_.posterior_sampling_method,objective_function,options_.proposal_distribution,xparam1,invhess,bounds,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         else
-            error('I Cannot start the MCMC because the hessian of the posterior kernel at the mode was not computed.')
+            error('I Cannot start the MCMC because the Hessian of the posterior kernel at the mode was not computed.')
         end
         options_.analytic_derivation = ana_deriv;
     end
@@ -580,7 +583,7 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
         CutSample(M_, options_, estim_params_);
         return
     else
-        if ~options_.nodiagnostic && options_.mh_replic > 1000 && options_.mh_nblck > 1
+        if ~options_.nodiagnostic && options_.mh_replic > 2000 && options_.mh_nblck > 1
             McMCDiagnostics(options_, estim_params_, M_);
         end
         %% Here i discard first half of the draws:

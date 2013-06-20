@@ -59,7 +59,6 @@ function new_particles = multivariate_smooth_resampling(particles,weights)
 %           stephane DOT adjemian AT univ DASH lemans DOT fr
 
 number_of_particles = length(weights);
-weights = weights' ;
 number_of_states = size(particles,2);
 [P,D] = eig(particles'*(bsxfun(@times,1/number_of_particles,particles))) ;
 D = diag(D) ;

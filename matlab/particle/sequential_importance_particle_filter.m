@@ -101,7 +101,7 @@ ghxu = ReducedForm.ghxu;
 
 % Get covariance matrices.
 Q = ReducedForm.Q; % Covariance matrix of the structural innovations.
-H = ReducedForm.H; % COvariance matrix of the measurement errors.
+H = ReducedForm.H; % Covariance matrix of the measurement errors.
 if isempty(H)
     H = 0;
 end
@@ -123,7 +123,6 @@ state_variance_rank = size(StateVectorVarianceSquareRoot,2);
 
 % Factorize the covariance matrix of the structural innovations
 Q_lower_triangular_cholesky = chol(Q)';
-StateVectors = bsxfun(@plus,StateVectorVarianceSquareRoot*randn(state_variance_rank,number_of_particles),StateVectorMean) ;
 
 % Set seed for randn().
 set_dynare_seed('default');
@@ -161,7 +160,7 @@ for t=1:sample_size
             StateVectors = temp(:,1:number_of_state_variables)' ;
             StateVectors_ = temp(:,number_of_state_variables+1:2*number_of_state_variables)';
         else
-            StateVectors = resample(tmp(mf0,:)',weights,DynareOptions)';
+            StateVectors = resample(tmp(mf0,:)',weights',DynareOptions)';
         end
         weights = ones(1,number_of_particles)/number_of_particles;
     elseif strcmp(DynareOptions.particle.resampling.status,'none')

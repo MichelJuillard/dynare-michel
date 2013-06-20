@@ -158,80 +158,30 @@ if (DynareOptions.mode_compute~=1) && any(xparam1>BayesInfo.ub)
     return
 end
 
-% Get the diagonal elements of the covariance matrices for the structural innovations (Q) and the measurement error (H).
+Model = set_all_parameters(xparam1,EstimatedParameters,Model);
+
 Q = Model.Sigma_e;
 H = Model.H;
-for i=1:EstimatedParameters.nvx
-    k =EstimatedParameters.var_exo(i,1);
-    Q(k,k) = xparam1(i)*xparam1(i);
-end
-offset = EstimatedParameters.nvx;
-if EstimatedParameters.nvn
-    for i=1:EstimatedParameters.nvn
-        k = EstimatedParameters.var_endo(i,1);
-        H(k,k) = xparam1(i+offset)*xparam1(i+offset);
+
+if ~isscalar(Q) &&  EstimatedParameters.ncx
+    [Q_is_positive_definite, penalty] = ispd(Q);
+    if ~Q_is_positive_definite
+        fval = objective_function_penalty_base+penalty;
+        exit_flag = 0;
+        info = 43;
+        return
     end
-    offset = offset+EstimatedParameters.nvn;
-else
-    H = zeros(nvobs);
 end
 
-% Get the off-diagonal elements of the covariance matrix for the structural innovations. Test if Q is positive definite.
-if EstimatedParameters.ncx
-    for i=1:EstimatedParameters.ncx
-        k1 =EstimatedParameters.corrx(i,1);
-        k2 =EstimatedParameters.corrx(i,2);
-        Q(k1,k2) = xparam1(i+offset)*sqrt(Q(k1,k1)*Q(k2,k2));
-        Q(k2,k1) = Q(k1,k2);
+if ~isscalar(H) && EstimatedParameters.ncn
+    [H_is_positive_definite, penalty] = ispd(H);
+    if ~H_is_positive_definite
+        fval = objective_function_penalty_base+penalty;
+        exit_flag = 0;
+        info = 44;
+        return
     end
-    % Try to compute the cholesky decomposition of Q (possible iff Q is positive definite)
-    [CholQ,testQ] = chol(Q);
-    if testQ
-        % The variance-covariance matrix of the structural innovations is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty.
-        a = diag(eig(Q));
-        k = find(a < 0);
-        if k > 0
-            fval = objective_function_penalty_base+sum(-a(k));
-            exit_flag = 0;
-            info = 43;
-            return
-        end
-    end
-    offset = offset+EstimatedParameters.ncx;
 end
-
-% Get the off-diagonal elements of the covariance matrix for the measurement errors. Test if H is positive definite.
-if EstimatedParameters.ncn
-    for i=1:EstimatedParameters.ncn
-        k1 = DynareOptions.lgyidx2varobs(EstimatedParameters.corrn(i,1));
-        k2 = DynareOptions.lgyidx2varobs(EstimatedParameters.corrn(i,2));
-        H(k1,k2) = xparam1(i+offset)*sqrt(H(k1,k1)*H(k2,k2));
-        H(k2,k1) = H(k1,k2);
-    end
-    % Try to compute the cholesky decomposition of H (possible iff H is positive definite)
-    [CholH,testH] = chol(H);
-    if testH
-        % The variance-covariance matrix of the measurement errors is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty.
-        a = diag(eig(H));
-        k = find(a < 0);
-        if k > 0
-            fval = objective_function_penalty_base+sum(-a(k));
-            exit_flag = 0;
-            info = 44;
-            return
-        end
-    end
-    offset = offset+EstimatedParameters.ncn;
-end
-
-% Update estimated structural parameters in Mode.params.
-if EstimatedParameters.np > 0
-    Model.params(EstimatedParameters.param_vals(:,1)) = xparam1(offset+1:end);
-end
-
-% Update Model.Sigma_e and Model.H.
-Model.Sigma_e = Q;
-Model.H = H;
 
 %------------------------------------------------------------------------------
 % 2. call model setup & reduction program
@@ -345,11 +295,9 @@ ReducedForm.StateVectorVariance = StateVectorVariance;
 % 4. Likelihood evaluation
 %------------------------------------------------------------------------------
 DynareOptions.warning_for_steadystate = 0;
-seed_norm_old = randn('state') ;
-seed_uniform_old = rand('state') ;
+[s1,s2] = get_dynare_random_generator_state();
 LIK = feval(DynareOptions.particle.algorithm,ReducedForm,Y,[],DynareOptions);
-randn('state',seed_norm_old);
-rand('state',seed_uniform_old);
+set_dynare_random_generator_state(s1,s2);
 if imag(LIK)
     likelihood = objective_function_penalty_base;
     exit_flag  = 0;

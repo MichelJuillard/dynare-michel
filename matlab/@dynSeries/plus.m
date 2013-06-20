@@ -39,8 +39,6 @@ function A = plus(B,C)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-% AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
-
 if ~isequal(B.vobs,C.vobs) && ~(isequal(B.vobs,1) || isequal(C.vobs,1))
     error(['dynSeries::plus: Cannot add ' inputname(1) ' and ' inputname(2) ' (wrong number of variables)!'])
 else
@@ -173,3 +171,51 @@ A.data = bsxfun(@plus,B.data,C.data);
 %$ end
 %$ T = all(t);
 %@eof:3
+
+%@test:4
+%$ t = zeros(7,1);
+%$
+%$ try
+%$     ts = dynSeries(transpose(1:5),'1950q1',{'Output'}, {'Y_t'});
+%$     us = dynSeries(transpose(1:5),'1949q4',{'Consumption'}, {'C_t'});
+%$     vs = ts+us;
+%$     t(1) = 1;
+%$ catch
+%$     t = 0;
+%$ end
+%$
+%$ if length(t)>1
+%$     t(2) = dyn_assert(ts.freq,4);
+%$     t(3) = dyn_assert(us.freq,4);
+%$     t(4) = dyn_assert(ts.init.time,[1950, 1]);
+%$     t(5) = dyn_assert(us.init.time,[1949, 4]);
+%$     t(6) = dyn_assert(vs.init.time,[1949, 4]);
+%$     t(7) = dyn_assert(vs.nobs,6);
+%$ end
+%$
+%$ T = all(t);
+%@eof:4
+
+%@test:5
+%$ t = zeros(7,1);
+%$
+%$ try
+%$     ts = dynSeries(transpose(1:5),'1950q1',{'Output'}, {'Y_t'});
+%$     us = dynSeries(transpose(1:7),'1950q1',{'Consumption'}, {'C_t'});
+%$     vs = ts+us;
+%$     t(1) = 1;
+%$ catch
+%$     t = 0;
+%$ end
+%$
+%$ if length(t)>1
+%$     t(2) = dyn_assert(ts.freq,4);
+%$     t(3) = dyn_assert(us.freq,4);
+%$     t(4) = dyn_assert(ts.init.time,[1950, 1]);
+%$     t(5) = dyn_assert(us.init.time,[1950, 1]);
+%$     t(6) = dyn_assert(vs.init.time,[1950, 1]);
+%$     t(7) = dyn_assert(vs.nobs,7);
+%$ end
+%$
+%$ T = all(t);
+%@eof:5

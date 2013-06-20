@@ -224,10 +224,9 @@ if ~isinf(dsge_prior_weight)% Evaluation of the likelihood of the dsge-var model
     tmp1 = dsge_prior_weight*DynareDataset.info.ntobs*GYX + mYX;
     tmp2 = inv(dsge_prior_weight*DynareDataset.info.ntobs*GXX+mXX);
     SIGMAu = tmp0 - tmp1*tmp2*tmp1'; clear('tmp0');
-    if ~ispd(SIGMAu)
-        v = diag(SIGMAu);
-        k = find(v<0);
-        fval = objective_function_penalty_base + sum(v(k).^2);
+    [SIGMAu_is_positive_definite, penalty] = ispd(SIGMAu)
+    if ~SIGMAu_is_positive_definite
+        fval = objective_function_penalty_base + penalty;
         info = 52;
         exit_flag = 0;
         return;

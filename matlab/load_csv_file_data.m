@@ -119,6 +119,7 @@ if ~exist('OCTAVE_VERSION')
         error('load_csv_file_data:: Shouldn''t arrive here');
     end
     freq = init.freq;
+    varlist = transpose(varlist);
     return
 end
 

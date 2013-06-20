@@ -96,14 +96,23 @@ if length(d) == 0
     error(['DYNARE: can''t open ' fname])
 end
 
+% pre-dynare-preprocessor-hook
+if exist([fname(1:end-4) '_pre_dynare_preprocessor_hook.m'],'file')
+    eval([fname(1:end-4) '_pre_dynare_preprocessor_hook'])
+end
+
 command = ['"' dynareroot 'dynare_m" ' fname] ;
 for i=2:nargin
     command = [command ' ' varargin{i-1}];
 end
 
 [status, result] = system(command);
-
 disp(result)
+
+% post-dynare-prerocessor-hook
+if exist([fname(1:end-4) '_post_dynare_preprocessor_hook.m'],'file')
+    eval([fname(1:end-4) '_post_dynare_preprocessor_hook'])
+end
 
 % Save preprocessor result in logfile (if `no_log' option not present)
 no_log = 0;
