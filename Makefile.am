@@ -23,6 +23,7 @@ EXTRA_DIST = \
 	contrib \
 	NEWS \
 	license.txt \
+	README.md \
 	windows/dynare.nsi \
 	windows/mexopts-win32.bat \
 	windows/mexopts-win64.bat \

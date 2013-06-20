@@ -521,8 +521,7 @@ You need to download Dynare source code from the
 
 Then you will need to recompile the pre-processor and the dynamic
 loadable libraries. Please refer to
-@uref{http://www.dynare.org/DynareWiki/BuildingDynareFromSource,Dynare
-Wiki}.
+@uref{https://github.com/DynareTeam/dynare/blob/master/README.md,README.md}.
 
 @node Configuration
 @section Configuration
