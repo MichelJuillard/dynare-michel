@@ -4462,6 +4462,9 @@ which can be useful if the posterior mode is close to a domain
 boundary, or in conjunction with @code{mode_check_neighbourhood_size =
 Inf} when the domain in not the entire real line. Default: @code{1}.
 
+@item mode_check_number_of_points = @var{INTEGER}
+Number of points around the posterior mode where the posterior kernel is evaluated (for each parameter). Default is @code{20}  
+
 @item prior_trunc = @var{DOUBLE}
 @anchor{prior_trunc} Probability of extreme values of the prior
 density that is ignored when computing bounds for the

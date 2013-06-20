@@ -84,11 +84,10 @@ if TeX
     fprintf(fidTeX,' \n');
 end
 
-ll = DynareOptions.mode_check_neighbourhood_size;
+ll = DynareOptions.mode_check.neighbourhood_size;
 if isinf(ll),
-    DynareOptions.mode_check_symmetric_plots = 0;
+    DynareOptions.mode_check.symmetric_plots = 0;
 end
-half_number_nodes = .5*DynareOptions.mode_check_node_number ;
 
 for plt = 1:nbplt,
     if TeX
@@ -112,7 +111,7 @@ for plt = 1:nbplt,
         xx = x;
         l1 = max(BayesInfo.lb(kk),(1-sign(x(kk))*ll)*x(kk)); m1 = 0;
         l2 = min(BayesInfo.ub(kk),(1+sign(x(kk))*ll)*x(kk));
-        if DynareOptions.mode_check_symmetric_plots,
+        if DynareOptions.mode_check.symmetric_plots,
             if l2<(1+ll)*x(kk)
                 l1 = x(kk) - (l2-x(kk));
                 m1 = 1;
@@ -121,10 +120,10 @@ for plt = 1:nbplt,
                 l2 = x(kk) + (x(kk)-l1);
             end
         end
-        z1 = l1:((x(kk)-l1)/10):x(kk);
-        z2 = x(kk):((l2-x(kk))/10):l2;
+        z1 = l1:((x(kk)-l1)/(DynareOptions.mode_check.number_of_points/2)):x(kk);
+        z2 = x(kk):((l2-x(kk))/(DynareOptions.mode_check.number_of_points/2)):l2;
         z  = union(z1,z2);
-        if DynareOptions.mode_check_nolik==0,
+        if DynareOptions.mode_check.nolik==0,
             y = zeros(length(z),2);
             dy = priordens(xx,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
         end
@@ -136,7 +135,7 @@ for plt = 1:nbplt,
             else
                 y(i,1) = NaN;
             end
-            if DynareOptions.mode_check_nolik==0
+            if DynareOptions.mode_check.nolik==0
                 lnprior = priordens(xx,BayesInfo.pshape,BayesInfo.p6,BayesInfo.p7,BayesInfo.p3,BayesInfo.p4);
                 y(i,2)  = (y(i,1)+lnprior-dy);
             end
@@ -154,7 +153,7 @@ for plt = 1:nbplt,
         axis tight
         drawnow
     end
-    if DynareOptions.mode_check_nolik==0,
+    if DynareOptions.mode_check.nolik==0,
         if exist('OCTAVE_VERSION'),
             axes('outerposition',[0.3 0.93 0.42 0.07],'box','on'),
         else

@@ -495,7 +495,7 @@ if ~options_.mh_posterior_mode_estimation && options_.cova_compute
     end
 end
 
-if options_.mode_check == 1 && ~options_.mh_posterior_mode_estimation
+if options_.mode_check.status == 1 && ~options_.mh_posterior_mode_estimation
     ana_deriv = options_.analytic_derivation;
     options_.analytic_derivation = 0;
     mode_check(objective_function,xparam1,hh,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
