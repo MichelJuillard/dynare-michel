@@ -123,7 +123,6 @@ state_variance_rank = size(StateVectorVarianceSquareRoot,2);
 
 % Factorize the covariance matrix of the structural innovations
 Q_lower_triangular_cholesky = chol(Q)';
-StateVectors = bsxfun(@plus,StateVectorVarianceSquareRoot*randn(state_variance_rank,number_of_particles),StateVectorMean) ;
 
 % Set seed for randn().
 set_dynare_seed('default');
