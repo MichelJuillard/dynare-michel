@@ -206,36 +206,24 @@ Q = Model.Sigma_e;
 H = Model.H;
 
 % Test if Q is positive definite.
-if EstimatedParameters.ncx
-    % Try to compute the cholesky decomposition of Q (possible iff Q is positive definite)
-    [CholQ,testQ] = chol(Q);
-    if testQ
-        % The variance-covariance matrix of the structural innovations is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty.
-        a = diag(eig(Q));
-        k = find(a < 0);
-        if k > 0
-            fval = objective_function_penalty_base+sum(-a(k));
-            exit_flag = 0;
-            info = 43;
-            return
-        end
+if ~issquare(Q) && EstimatedParameters.ncx
+    [Q_is_positive_definite, penalty] = ispd(Q);
+    if ~Q_is_positive_definite
+        fval = objective_function_penalty_base+penalty;
+        exit_flag = 0;
+        info = 43;
+        return
     end
 end
 
 % Test if H is positive definite.
-if EstimatedParameters.ncn
-    % Try to compute the cholesky decomposition of H (possible iff H is positive definite)
-    [CholH,testH] = chol(H);
-    if testH
-        % The variance-covariance matrix of the measurement errors is not definite positive. We have to compute the eigenvalues of this matrix in order to build the endogenous penalty.
-        a = diag(eig(H));
-        k = find(a < 0);
-        if k > 0
-            fval = objective_function_penalty_base+sum(-a(k));
-            exit_flag = 0;
-            info = 44;
-            return
-        end
+if ~issquare(H) && EstimatedParameters.ncn
+    [H_is_positive_definite, penalty] = ispd(H);
+    if ~H_is_positive_definite
+        fval = objective_function_penalty_base+penalty;
+        exit_flag = 0;
+        info = 44;
+        return
     end
 end
 
