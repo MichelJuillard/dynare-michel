@@ -345,11 +345,9 @@ ReducedForm.StateVectorVariance = StateVectorVariance;
 % 4. Likelihood evaluation
 %------------------------------------------------------------------------------
 DynareOptions.warning_for_steadystate = 0;
-seed_norm_old = randn('state') ;
-seed_uniform_old = rand('state') ;
+[s1,s2] = get_dynare_random_generator_state();
 LIK = feval(DynareOptions.particle.algorithm,ReducedForm,Y,[],DynareOptions);
-randn('state',seed_norm_old);
-rand('state',seed_uniform_old);
+set_dynare_random_generator_state(s1,s2);
 if imag(LIK)
     likelihood = objective_function_penalty_base;
     exit_flag  = 0;
