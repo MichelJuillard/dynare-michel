@@ -1,18 +1,30 @@
-function test = ispd(A)
+function [test, penalty] = ispd(A)
 
-% function test = ispd(A)
-% Tests if a square matrix is positive definite. 
-% 
-% INPUTS 
-%   o A       [double]   a square matrix. 
-%  
-% OUTPUTS 
-%   o test    [integer]  is equal to one if A is pd, 0 otherwise. 
-%
-% SPECIAL REQUIREMENTS
-%   None.
+%@info:
+%! @deftypefn {Function File} {[@var{test}, @var{penalty}  =} ispd (@var{A})
+%! @anchor{ispd}
+%! @sp 1
+%! Tests if the square matrix @var{A} is positive definite.
+%! @sp 2
+%! @strong{Inputs}
+%! @sp 1
+%! @table @ @var
+%! @item A
+%! A square matrix.
+%! @end table
+%! @sp 2
+%! @strong{Outputs}
+%! @sp 1
+%! @table @ @var
+%! @item test
+%! Integer scalar equal to 1 if @var{A} is a positive definite sqquare matrix, 0 otherwise.
+%! @item penalty
+%! Absolute value of the uum of the negative eigenvalues of A. This output argument is optional.
+%! @end table
+%! @end deftypefn
+%@eod:
 
-% Copyright (C) 2007-2009 Dynare Team
+% Copyright (C) 2007-2009, 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -29,12 +41,20 @@ function test = ispd(A)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-m = length(A);% I do not test for a square matrix...
-test = 1;
+if ~isquare(A)
+    error(['ispd:: Input argument ' inputname(1) ' has to be a square matrix!'])
+end
+    
+[cholA, info] = chol(A);
+test = ~info;
 
-for i=1:m
-    if ( det( A(1:i, 1:i) ) < 2.0*eps )
-        test = 0;
-        break
+if nargout>1
+    penalty = 0;
+    if info
+        a = diag(eig(A));
+        k = find(a<0);
+        if k > 0
+            penalty = sum(-a(k));
+        end
     end
 end
