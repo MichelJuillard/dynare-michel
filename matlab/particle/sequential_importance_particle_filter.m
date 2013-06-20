@@ -101,7 +101,7 @@ ghxu = ReducedForm.ghxu;
 
 % Get covariance matrices.
 Q = ReducedForm.Q; % Covariance matrix of the structural innovations.
-H = ReducedForm.H; % COvariance matrix of the measurement errors.
+H = ReducedForm.H; % Covariance matrix of the measurement errors.
 if isempty(H)
     H = 0;
 end
