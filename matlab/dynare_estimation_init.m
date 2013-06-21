@@ -121,7 +121,6 @@ n_varobs = size(options_.varobs,1);
 % Set priors over the estimated parameters.
 if ~isempty(estim_params_)
     [xparam1,estim_params_,bayestopt_,lb,ub,M_] = set_prior(estim_params_,M_,options_);
-    
     if ~isempty(options_.mode_file) && ~options_.mh_posterior_mode_estimation
         junk=length(xparam1);
         load(options_.mode_file,'xparam1');
@@ -129,7 +128,6 @@ if ~isempty(estim_params_)
             error([ 'ESTIMATION: the posterior mode file ' options_.mode_file ' has been generated using another specification. Please delete it and recompute the posterior mode.'])
         end
     end
-
     if any(bayestopt_.pshape > 0)
         % Plot prior densities.
         if ~options_.nograph && options_.plot_priors
@@ -372,14 +370,12 @@ nvx = estim_params_.nvx;
 ncx = estim_params_.ncx;
 nvn = estim_params_.nvn;
 ncn = estim_params_.ncn;
-if estim_params_.np,
+if estim_params_.np
   M.params(estim_params_.param_vals(:,1)) = xparam1(nvx+ncx+nvn+ncn+1:end);
-end;
+end
 [oo_.steady_state, params] = evaluate_steady_state(oo_.steady_state,M,options_,oo_,steadystate_check_flag);
 if all(abs(oo_.steady_state(bayestopt_.mfys))<1e-9)
     options_.noconstant = 1;
 else
     options_.noconstant = 0;
 end
-
-
