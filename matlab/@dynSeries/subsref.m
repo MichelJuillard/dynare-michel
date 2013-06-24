@@ -74,7 +74,7 @@ switch S(1).type
             save(A,S(2).subs{:});
             S = shiftS(S);
         else
-            save(A);
+            save(A,inputname(1));
         end
       case {'size'}
         if length(S)==2 && strcmp(S(2).type,'()') && ~isempty(S(2).subs)
@@ -122,7 +122,7 @@ switch S(1).type
         B.nobs = length(tdx);
         B.vobs = A.vobs;
         B.freq = A.freq;
-        B.init = A.init+tdx(1);
+        B.init = A.init+(tdx(1)-1);
         B.time = A.time(tdx,:);
     elseif isvector(S(1).subs{1}) && all(isint(S(1).subs{1}))
         % Extract a subsample using a vector of integers (observation index).

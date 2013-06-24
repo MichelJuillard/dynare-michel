@@ -170,6 +170,23 @@ else
     addpath([dynareroot '../mex/matlab/']);
 end
 
+% matlab2tikz
+if strncmp(computer, 'GLNX', 4) || ~isempty(regexpi(computer, '.*linux.*', 'once'))
+    if exist('matlab2tikz.m') == 0 && exist('/usr/share/matlab2tikz/matlab2tikz.m') == 2
+        addpath('/usr/share/matlab2tikz');
+    end
+elseif strncmp(computer, 'MACI', 4) || ~isempty(regexpi(computer, '.*apple.*', 'once'))
+    if exist([dynareroot '/contrib/matlab2tikz/matlab2tikz.m']) == 2
+        addpath([dynareroot '/contrib/matlab2tikz']);
+    elseif exist('/usr/local/share/matlab2tikz/matlab2tikz.m') == 2
+        addpath('/usr/local/share/matlab2tikz');
+    end
+else
+    if exist([dynareroot '/contrib/matlab2tikz/matlab2tikz.m']) == 2
+        addpath([dynareroot '/contrib/matlab2tikz']);
+    end
+end
+
 %% Set mex routine names
 mex_status = cell(1,3);
 mex_status(1,1) = {'mjdgges'};

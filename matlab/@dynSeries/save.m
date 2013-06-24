@@ -28,7 +28,11 @@ end
 
 switch format
   case 'm'
-    fid = fopen([basename, '.m'],'w');
+    if exist([basename, '.m'],'file')
+        fid = fopen([basename, '.new', '.m'],'w');
+    else
+        fid = fopen([basename, '.m'],'w');
+    end
     fprintf(fid,'%% File created on %s.\n',datestr(now));
     fprintf(fid,'\n');
     fprintf(fid,'FREQ__ = %s;\n',num2str(A.freq));
@@ -66,9 +70,18 @@ switch format
         str = [str, A.name{v} ' = A.data(:,' num2str(v) ');' ];
     end
     eval(str);
-    save([basename '.mat'],'INIT__','FREQ__','NAMES__','TEX__',A.name{:});
+    if exist([basename, '.mat'],'file')
+        save([basename '.new.mat'],'INIT__','FREQ__','NAMES__','TEX__',A.name{:});
+    else
+        save([basename '.mat'],'INIT__','FREQ__','NAMES__','TEX__',A.name{:});
+    end
+    
   case 'csv'
-    fid = fopen([basename, '.csv'],'w');
+    if exist([basename, '.csv'],'file')
+        fid = fopen([basename, '.new', '.csv'],'w');
+    else
+        fid = fopen([basename, '.csv'],'w');
+    end
     fprintf(fid,', %s', A.name{:});
     fprintf(fid,'\n');
     for t=1:A.nobs

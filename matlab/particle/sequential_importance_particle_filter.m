@@ -148,7 +148,12 @@ for t=1:sample_size
     PredictionError = bsxfun(@minus,Y(:,t),tmp(mf1,:));
     dPredictedObservedMean = bsxfun(@minus,tmp(mf1,:),PredictedObservedMean);
     PredictedObservedVariance = bsxfun(@times,dPredictedObservedMean,weights)*dPredictedObservedMean' + H;
-    lnw = -.5*(const_lik+log(det(PredictedObservedVariance))+sum(PredictionError.*(PredictedObservedVariance\PredictionError),1));
+    if rcond(PredictedObservedVariance) > 1e-16
+        lnw = -.5*(const_lik+log(det(PredictedObservedVariance))+sum(PredictionError.*(PredictedObservedVariance\PredictionError),1));
+    else
+        LIK = NaN;
+        return
+    end
     dfac = max(lnw);
     wtilde = weights.*exp(lnw-dfac);
     lik(t) = log(sum(wtilde))+dfac;
@@ -156,8 +161,8 @@ for t=1:sample_size
     if (strcmp(DynareOptions.particle.resampling.status,'generic') && neff(weights)<DynareOptions.particle.resampling.neff_threshold*sample_size ) || ...
         strcmp(DynareOptions.particle.resampling.status,'systematic')
         if pruning
-            temp = resample([tmp(mf0,:)' tmp_(mf0,:)'],weights,DynareOptions);
-            StateVectors = temp(:,1:number_of_state_variables)' ;
+            temp = resample([tmp(mf0,:)' tmp_(mf0,:)'],weights',DynareOptions);
+            StateVectors = temp(:,1:number_of_state_variables)';
             StateVectors_ = temp(:,number_of_state_variables+1:2*number_of_state_variables)';
         else
             StateVectors = resample(tmp(mf0,:)',weights',DynareOptions)';

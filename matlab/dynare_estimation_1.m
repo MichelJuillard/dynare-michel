@@ -518,7 +518,6 @@ else
     xparam1 = bayestopt_.p5;
     idNaN = isnan(xparam1);
     xparam1(idNaN) = bayestopt_.p1(idNaN);
-    xparam1 = transpose(xparam1);
 end
 
 if ~options_.cova_compute
