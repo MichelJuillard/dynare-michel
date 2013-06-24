@@ -148,7 +148,12 @@ for t=1:sample_size
     PredictionError = bsxfun(@minus,Y(:,t),tmp(mf1,:));
     dPredictedObservedMean = bsxfun(@minus,tmp(mf1,:),PredictedObservedMean);
     PredictedObservedVariance = bsxfun(@times,dPredictedObservedMean,weights)*dPredictedObservedMean' + H;
-    lnw = -.5*(const_lik+log(det(PredictedObservedVariance))+sum(PredictionError.*(PredictedObservedVariance\PredictionError),1));
+    if rcond(PredictedObservedVariance) > 1e-16
+        lnw = -.5*(const_lik+log(det(PredictedObservedVariance))+sum(PredictionError.*(PredictedObservedVariance\PredictionError),1));
+    else
+        LIK = NaN;
+        return
+    end
     dfac = max(lnw);
     wtilde = weights.*exp(lnw-dfac);
     lik(t) = log(sum(wtilde))+dfac;
