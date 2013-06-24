@@ -156,8 +156,8 @@ for t=1:sample_size
     if (strcmp(DynareOptions.particle.resampling.status,'generic') && neff(weights)<DynareOptions.particle.resampling.neff_threshold*sample_size ) || ...
         strcmp(DynareOptions.particle.resampling.status,'systematic')
         if pruning
-            temp = resample([tmp(mf0,:)' tmp_(mf0,:)'],weights,DynareOptions);
-            StateVectors = temp(:,1:number_of_state_variables)' ;
+            temp = resample([tmp(mf0,:)' tmp_(mf0,:)'],weights',DynareOptions);
+            StateVectors = temp(:,1:number_of_state_variables)';
             StateVectors_ = temp(:,number_of_state_variables+1:2*number_of_state_variables)';
         else
             StateVectors = resample(tmp(mf0,:)',weights',DynareOptions)';
