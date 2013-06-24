@@ -172,7 +172,7 @@ end
 
 % matlab2tikz
 if strncmp(computer, 'GLNX', 4) || ~isempty(regexpi(computer, '.*linux.*', 'once'))
-    if exist('/usr/share/matlab2tikz/matlab2tikz.m') == 2
+    if exist('matlab2tikz.m') == 0 && exist('/usr/share/matlab2tikz/matlab2tikz.m') == 2
         addpath('/usr/share/matlab2tikz');
     end
 elseif strncmp(computer, 'MACI', 4) || ~isempty(regexpi(computer, '.*apple.*', 'once'))
