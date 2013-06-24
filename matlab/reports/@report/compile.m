@@ -46,7 +46,7 @@ if ~exist(o.filename, 'file')
     o.write();
 end
 
-middle = './';
+middle = ' ./';
 if exist('OCTAVE_VERSION')
     echo = 0;
 else
