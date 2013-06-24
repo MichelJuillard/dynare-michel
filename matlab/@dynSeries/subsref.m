@@ -74,7 +74,7 @@ switch S(1).type
             save(A,S(2).subs{:});
             S = shiftS(S);
         else
-            save(A);
+            save(A,inputname(1));
         end
       case {'size'}
         if length(S)==2 && strcmp(S(2).type,'()') && ~isempty(S(2).subs)
