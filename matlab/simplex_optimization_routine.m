@@ -1,4 +1,4 @@
-function [x,fval,exitflag] = simplex_optimization_routine(objective_function,x,options,varargin)
+Xfunction [x,fval,exitflag] = simplex_optimization_routine(objective_function,x,options,varargin)
 % Nelder-Mead like optimization routine.
 % By default, we use standard values for the reflection, the expansion, the contraction and the shrink coefficients (alpha = 1, chi = 2, psi = 1 / 2 and σ = 1 / 2).
 % See http://en.wikipedia.org/wiki/Nelder-Mead_method
@@ -201,7 +201,9 @@ max_simplex_algo_iterations = 3;
 simplex_algo_iterations = 1;
 best_point = v(:,1);
 best_point_score = fv(1);
+
 convergence = 0;
+tooslow = 0;
 
 iter_no_improvement_break = 0;
 max_no_improvement_break = 1;
@@ -212,6 +214,9 @@ while (func_count < max_func_calls) && (iter_count < max_iterations) && (simplex
     critX = max(max(abs(v(:,trend_vector_2)-v(:,unit_vector))));
     if critF <= max(f_tolerance,10*eps(fv(1))) && critX <= max(x_tolerance,10*eps(max(v(:,1))))
         convergence = 1;
+    end
+    if critX <= x_tolerance^2 && critF>1
+        tooslow = 1;
     end
     % Set random reflection and expansion parameters if needed.
     if randomize_rho
@@ -435,7 +440,7 @@ while (func_count < max_func_calls) && (iter_count < max_iterations) && (simplex
             disp(' ')
         end
     end
-    if ((func_count==max_func_calls) || (iter_count==max_iterations) || (iter_no_improvement_break==max_no_improvement_break) || convergence)
+    if ((func_count==max_func_calls) || (iter_count==max_iterations) || (iter_no_improvement_break==max_no_improvement_break) || convergence || tooslow)
         [v,fv,delta] = simplex_initialization(objective_function,best_point,best_point_score,DELTA,1,varargin{:});
         if func_count==max_func_calls
             if verbose
@@ -454,6 +459,8 @@ while (func_count < max_func_calls) && (iter_count < max_iterations) && (simplex
                 max_no_improvements = Inf;% Do not stop until convergence is reached!
                 continue
             end
+        elseif tooslow
+            disp(['CONVERGENCE NOT ACHIEVED AFTER ' int2str(simplex_iterations) ' ITERATIONS! IMPROVING TOO SLOWLY!'])
         else
             disp(['CONVERGENCE ACHIEVED AFTER ' int2str(simplex_iterations) ' ITERATIONS!'])
         end
