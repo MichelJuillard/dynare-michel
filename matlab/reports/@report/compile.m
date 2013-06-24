@@ -48,7 +48,7 @@ end
 
 middle = ' ./';
 if exist('OCTAVE_VERSION')
-    echo = 0;
+    echo = 1;
 else
     echo = '-echo';
 end
