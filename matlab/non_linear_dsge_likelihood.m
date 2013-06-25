@@ -296,7 +296,7 @@ ReducedForm.StateVectorVariance = StateVectorVariance;
 %------------------------------------------------------------------------------
 DynareOptions.warning_for_steadystate = 0;
 [s1,s2] = get_dynare_random_generator_state();
-LIK = feval(DynareOptions.particle.algorithm,ReducedForm,Y,[],DynareOptions);
+LIK = feval(DynareOptions.particle.algorithm,ReducedForm,Y,start,DynareOptions);
 set_dynare_random_generator_state(s1,s2);
 if imag(LIK)
     likelihood = objective_function_penalty_base;
