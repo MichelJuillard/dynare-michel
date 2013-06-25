@@ -6406,6 +6406,68 @@ Specifies a Markov chain defined by @ref{markov_switching}. Default:
 @end deffn
 
 
+@deffn Command sbvar (@var{OPTIONS}@dots{});
+@descriptionhead
+
+To be documented. For now, see the wiki: @uref{http://www.dynare.org/DynareWiki/SbvarOptions}
+
+@optionshead
+
+@table @code
+
+@item datafile
+@item freq
+@item initial_year
+@item initial_subperiod
+@item final_year
+@item final_subperiod
+@item data
+@item vlist
+@item vlistlog
+@item vlistper
+@item restriction_fname
+@item nlags
+@item cross_restrictions
+@item contemp_reduced_form
+@item real_pseudo_forecast
+@item no_bayesian_prior
+@item dummy_obs
+@item nstates
+@item indxscalesstates
+@item alpha
+@item beta
+@item gsig2_lmdm
+@item q_diag
+@item flat_prior
+@item ncsk
+@item nstd
+@item ninv
+@item indxparr
+@item indxovr
+@item aband
+@item indxap
+@item apband
+@item indximf
+@item indxfore
+@item foreband
+@item indxgforhat
+@item indxgimfhat
+@item indxestima
+@item indxgdls
+@item eq_ms
+@item cms
+@item ncms
+@item eq_cms
+@item tlindx
+@item tlnumber
+@item cnum
+@item forecast
+@item coefficients_prior_hyperparameters
+
+@end table
+@end deffn
+
+
 @anchor{ms_estimation}
 @deffn Command ms_estimation (@var{OPTIONS}@dots{});
 @descriptionhead
