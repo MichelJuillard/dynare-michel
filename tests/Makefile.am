@@ -240,16 +240,16 @@ EXTRA_DIST = \
 	run_block_byte_tests_octave.m \
 	run_reporting_test_matlab.m \
 	run_reporting_test_octave.m \
-	AnnualTable.m \
-	CommResidTablePage.m \
-	CountryGraphPage.m \
-	CountryTablePage.m \
-	ResidTablePage.m \
-	db_a.mat \
-	db_q.mat \
-	dc_a.mat \
-	dc_q.mat \
-	runDynareReport.m \
+	reporting/AnnualTable.m \
+	reporting/CommResidTablePage.m \
+	reporting/CountryGraphPage.m \
+	reporting/CountryTablePage.m \
+	reporting/ResidTablePage.m \
+	reporting/db_a.csv \
+	reporting/db_q.csv \
+	reporting/dc_a.csv \
+	reporting/dc_q.csv \
+	reporting/runDynareReport.m \
 	homotopy/common.mod \
 	block_bytecode/ls2003.mod \
 	fs2000_ssfile_aux.m \
@@ -396,7 +396,7 @@ clean-local:
 
 	rm -rf block_bytecode/ls2003_tmp*
 
-	rm reporting/report.*
+	rm -f reporting/report.*
 
 	rm -f $(shell find -name wsOct) \
 		$(shell find -name wsMat.mat)

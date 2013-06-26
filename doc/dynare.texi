@@ -4261,7 +4261,7 @@ the data. Default: @code{0}, @i{i.e.} no prefiltering
 @item presample = @var{INTEGER}
 @anchor{presample}
 The number of observations to be skipped before evaluating the
-likelihood. Default: @code{0}
+likelihood. These first observations are used as a training sample. Default: @code{0}
 
 @item loglinear
 @anchor{loglinear}
@@ -5521,12 +5521,22 @@ The parameters to be optimized must be listed with @code{osr_params}.
 
 The quadratic objectives must be listed with @code{optim_weights}.
 
-This problem is solved using a numerical optimizer.
+This problem is solved using the numerical optimizer @code{csminwel} of Chris Sims.
 
 @optionshead
 
-This command accept the same options than @code{stoch_simul}
-(@pxref{Computing the stochastic solution}).
+This command accepts the same options as @code{stoch_simul}
+(@pxref{Computing the stochastic solution}) plus 
+
+@table @code
+
+@item maxit = @var{INTEGER}
+Determines the maximum number of iterations used in the non-linear solver. Default: @code{1000}
+
+@item tolf = @var{DOUBLE}
+Convergence criterion for termination based on the function value. Iteration will 
+cease when it proves impossible to improve the function value by more than tolf. Default: @code{1e-7}
+@end table
 
 The value of the objective is stored in the variable
 @code{oo_.osr.objective_function}, which is described below.
@@ -6401,6 +6411,68 @@ then all equations are controlled by @code{chain}. Default: @code{none}
 @item chain = @var{INTEGER}
 Specifies a Markov chain defined by @ref{markov_switching}. Default:
 @code{none}
+
+@end table
+@end deffn
+
+
+@deffn Command sbvar (@var{OPTIONS}@dots{});
+@descriptionhead
+
+To be documented. For now, see the wiki: @uref{http://www.dynare.org/DynareWiki/SbvarOptions}
+
+@optionshead
+
+@table @code
+
+@item datafile
+@item freq
+@item initial_year
+@item initial_subperiod
+@item final_year
+@item final_subperiod
+@item data
+@item vlist
+@item vlistlog
+@item vlistper
+@item restriction_fname
+@item nlags
+@item cross_restrictions
+@item contemp_reduced_form
+@item real_pseudo_forecast
+@item no_bayesian_prior
+@item dummy_obs
+@item nstates
+@item indxscalesstates
+@item alpha
+@item beta
+@item gsig2_lmdm
+@item q_diag
+@item flat_prior
+@item ncsk
+@item nstd
+@item ninv
+@item indxparr
+@item indxovr
+@item aband
+@item indxap
+@item apband
+@item indximf
+@item indxfore
+@item foreband
+@item indxgforhat
+@item indxgimfhat
+@item indxestima
+@item indxgdls
+@item eq_ms
+@item cms
+@item ncms
+@item eq_cms
+@item tlindx
+@item tlnumber
+@item cnum
+@item forecast
+@item coefficients_prior_hyperparameters
 
 @end table
 @end deffn

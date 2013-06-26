@@ -176,14 +176,14 @@ if strncmp(computer, 'GLNX', 4) || ~isempty(regexpi(computer, '.*linux.*', 'once
         addpath('/usr/share/matlab2tikz');
     end
 elseif strncmp(computer, 'MACI', 4) || ~isempty(regexpi(computer, '.*apple.*', 'once'))
-    if exist([dynareroot '/contrib/matlab2tikz/matlab2tikz.m']) == 2
-        addpath([dynareroot '/contrib/matlab2tikz']);
+    if exist([dynareroot '../contrib/matlab2tikz/matlab2tikz.m']) == 2
+        addpath([dynareroot '../contrib/matlab2tikz']);
     elseif exist('/usr/local/share/matlab2tikz/matlab2tikz.m') == 2
         addpath('/usr/local/share/matlab2tikz');
     end
 else
-    if exist([dynareroot '/contrib/matlab2tikz/matlab2tikz.m']) == 2
-        addpath([dynareroot '/contrib/matlab2tikz']);
+    if exist([dynareroot '../contrib/matlab2tikz/matlab2tikz.m']) == 2
+        addpath([dynareroot '../contrib/matlab2tikz']);
     end
 end
 
