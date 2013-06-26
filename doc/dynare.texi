@@ -5530,10 +5530,10 @@ This command accepts the same options as @code{stoch_simul}
 
 @table @code
 
-@item maxit =  = @var{INTEGER}
+@item maxit = @var{INTEGER}
 Determines the maximum number of iterations used in the non-linear solver. Default: @code{1000}
 
-@item tolf =  = @var{DOUBLE}
+@item tolf = @var{DOUBLE}
 Convergence criterion for termination based on the function value. Iteration will 
 cease when it proves impossible to improve the function value by more than tolf. Default: @code{1e-7}
 @end table
