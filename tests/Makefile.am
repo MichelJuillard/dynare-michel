@@ -396,7 +396,7 @@ clean-local:
 
 	rm -rf block_bytecode/ls2003_tmp*
 
-	rm reporting/report.*
+	rm -f reporting/report.*
 
 	rm -f $(shell find -name wsOct) \
 		$(shell find -name wsMat.mat)
