@@ -82,7 +82,7 @@ switch format
     else
         fid = fopen([basename, '.csv'],'w');
     end
-    fprintf(fid,', %s', A.name{:});
+    fprintf(fid,',%s', A.name{:});
     fprintf(fid,'\n');
     for t=1:A.nobs
         date = A.init+(t-1);
