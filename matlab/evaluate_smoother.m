@@ -105,7 +105,7 @@ if options_.nk ~= 0
     end
 end
 for i=bayestopt_.smoother_saved_var_list'
-    i1 = order_var(bayestopt_.smoother_var_list(i));
+    i1 = oo_.dr.order_var(bayestopt_.smoother_var_list(i));
     eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(i1,:)) ' = atT(i,:)'';']);
     if options_.nk>0
         eval(['oo_.FilteredVariables.' deblank(M_.endo_names(i1,:)) ' = squeeze(aK(1,i,:));']);
