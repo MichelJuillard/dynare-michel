@@ -42,14 +42,14 @@ if any(strcmp('eps',cellstr(DynareOptions.graph_format)))
 end
 if any(strcmp('pdf',cellstr(DynareOptions.graph_format)))
     if exist('OCTAVE_VERSION')
-        warning('Octave cannot create pdf files!')
+        error('Octave cannot create pdf files!')
     else
         print(h,'-dpdf',[fname,'.pdf']) 
     end
 end
 if any(strcmp('fig',cellstr(DynareOptions.graph_format)))
     if exist('OCTAVE_VERSION')
-        warning('Octave cannot create fig files!')
+        error('Octave cannot create fig files!')
     else
         if DynareOptions.nodisplay
             set(h, 'Visible','on');
