@@ -83,10 +83,6 @@ if ischar(parameters)
     end
 end
 
-%pshape_original   = bayestopt_.pshape;
-%bayestopt_.pshape = Inf(size(bayestopt_.pshape));
-%clear('priordens')
-
 [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp] = ...
     DsgeSmoother(parameters,dataset_.info.ntobs,dataset_.data,dataset_.missing.aindex,dataset_.missing.state);
 
@@ -119,6 +115,3 @@ end
 for i=1:M_.exo_nbr
     eval(['oo_.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
 end
-
-%oo.dr = oo_.dr;
-%bayestopt_.pshape = pshape_original;
