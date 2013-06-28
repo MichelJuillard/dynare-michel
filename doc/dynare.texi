@@ -4632,7 +4632,7 @@ Uses the diffuse Kalman filter (as described in
 @cite{Durbin and Koopman (2001)} and @cite{Koopman and Durbin
 (2003)}) to estimate models with non-stationary observed variables.
 
-When @code{diffused_filter} is used the @code{lik_init} option of
+When @code{diffuse_filter} is used the @code{lik_init} option of
 @code{estimation} has no effect.
 
 When there  are nonstationary exogenous variables in  a model, there is  no unique deterministic  steady state.  For instance,  if productivity  is a  pure random walk:
