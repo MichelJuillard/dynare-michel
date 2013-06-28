@@ -118,25 +118,50 @@ if options_.lik_init == 1               % Kalman filter
     end
     Pstar = lyapunov_symm(T,R*Q*transpose(R),options_.qz_criterium,options_.lyapunov_complex_threshold);
     Pinf        = [];
-elseif options_.lik_init == 2 % Old Diffuse Kalman filter
+elseif options_.lik_init == 2           % Old Diffuse Kalman filter
     if kalman_algo ~= 2
         kalman_algo = 1;
     end
     Pstar = options_.Harvey_scale_factor*eye(np);
     Pinf        = [];
-elseif options_.lik_init == 3 % Diffuse Kalman filter
+elseif options_.lik_init == 3           % Diffuse Kalman filter
     if kalman_algo ~= 4
         kalman_algo = 3;
     end
     [Z,ST,R1,QT,Pstar,Pinf] = schur_statespace_transformation(mf,T,R,Q,options_.qz_criterium);
-elseif options_.lik_init == 4
-    % Start from the solution of the Riccati equation.
+elseif options_.lik_init == 4           % Start from the solution of the Riccati equation.
     [err, Pstar] = kalman_steady_state(transpose(T),R*Q*transpose(R),transpose(build_selection_matrix(mf,np,nobs)),H);
     mexErrCheck('kalman_steady_state',err);
     Pinf  = [];
     if kalman_algo~=2
         kalman_algo = 1;
     end
+elseif options_.lik_init == 5            % Old diffuse Kalman filter only for the non stationary variables
+    [eigenvect, eigenv] = eig(T);
+    eigenv = diag(eigenv);
+    nstable = length(find(abs(abs(eigenv)-1) > 1e-7));
+    unstable = find(abs(abs(eigenv)-1) < 1e-7);
+    V = eigenvect(:,unstable);
+    indx_unstable = find(sum(abs(V),2)>1e-5);
+    stable = find(sum(abs(V),2)<1e-5);
+    nunit = length(eigenv) - nstable;
+    Pstar = options_.Harvey_scale_factor*eye(np);
+    if kalman_algo ~= 2
+        kalman_algo = 1;
+    end
+    R_tmp = R(stable, :);
+    T_tmp = T(stable,stable);
+    if DynareOptions.lyapunov_fp == 1
+        Pstar_tmp = lyapunov_symm(T_tmp,Q,DynareOptions.lyapunov_fixed_point_tol,DynareOptions.lyapunov_complex_threshold, 3, R_tmp);
+    elseif DynareOptions.lyapunov_db == 1
+        Pstar_tmp = disclyap_fast(T_tmp,R_tmp*Q*R_tmp',DynareOptions.lyapunov_doubling_tol);
+    elseif DynareOptions.lyapunov_srs == 1
+        Pstar_tmp = lyapunov_symm(T_tmp,Q,DynareOptions.lyapunov_fixed_point_tol,DynareOptions.lyapunov_complex_threshold, 4, R_tmp);
+    else
+        Pstar_tmp = lyapunov_symm(T_tmp,R_tmp*Q*R_tmp',DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
+    end
+    Pstar(stable, stable) = Pstar_tmp;
+    Pinf  = [];
 end
 kalman_tol = options_.kalman_tol;
 riccati_tol = options_.riccati_tol;

@@ -373,7 +373,6 @@ switch DynareOptions.lik_init
             error(['diffuse filter: options_.kalman_algo can only be equal ' ...
                    'to 0 (default), 3 or 4'])
     end
-
     [Z,T,R,QT,Pstar,Pinf] = schur_statespace_transformation(Z,T,R,Q,DynareOptions.qz_criterium);
     Zflag = 1;
     % Run diffuse kalman filter on first periods.
@@ -453,6 +452,32 @@ switch DynareOptions.lik_init
     Pinf  = [];
     a = zeros(mm,1);
     Zflag = 0;
+elseif options_.lik_init == 5            % Old diffuse Kalman filter only for the non stationary variables
+    [eigenvect, eigenv] = eig(T);
+    eigenv = diag(eigenv);
+    nstable = length(find(abs(abs(eigenv)-1) > 1e-7));
+    unstable = find(abs(abs(eigenv)-1) < 1e-7);
+    V = eigenvect(:,unstable);
+    indx_unstable = find(sum(abs(V),2)>1e-5);
+    stable = find(sum(abs(V),2)<1e-5);
+    nunit = length(eigenv) - nstable;
+    Pstar = options_.Harvey_scale_factor*eye(np);
+    if kalman_algo ~= 2
+        kalman_algo = 1;
+    end
+    R_tmp = R(stable, :);
+    T_tmp = T(stable,stable);
+    if DynareOptions.lyapunov_fp == 1
+        Pstar_tmp = lyapunov_symm(T_tmp,Q,DynareOptions.lyapunov_fixed_point_tol,DynareOptions.lyapunov_complex_threshold, 3, R_tmp);
+    elseif DynareOptions.lyapunov_db == 1
+        Pstar_tmp = disclyap_fast(T_tmp,R_tmp*Q*R_tmp',DynareOptions.lyapunov_doubling_tol);
+    elseif DynareOptions.lyapunov_srs == 1
+        Pstar_tmp = lyapunov_symm(T_tmp,Q,DynareOptions.lyapunov_fixed_point_tol,DynareOptions.lyapunov_complex_threshold, 4, R_tmp);
+    else
+        Pstar_tmp = lyapunov_symm(T_tmp,R_tmp*Q*R_tmp',DynareOptions.qz_criterium,DynareOptions.lyapunov_complex_threshold);
+    end    
+    Pstar(stable, stable) = Pstar_tmp;
+    Pinf  = [];
   otherwise
     error('dsge_likelihood:: Unknown initialization approach for the Kalman filter!')
 end
