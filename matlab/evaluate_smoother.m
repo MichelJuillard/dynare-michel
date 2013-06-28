@@ -86,9 +86,9 @@ if ischar(parameters)
     end
 end
 
-pshape_original   = bayestopt_.pshape;
-bayestopt_.pshape = Inf(size(bayestopt_.pshape));
-clear('priordens')
+%pshape_original   = bayestopt_.pshape;
+%bayestopt_.pshape = Inf(size(bayestopt_.pshape));
+%clear('priordens')
 
 [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp] = ...
     DsgeSmoother(parameters,dataset_.info.ntobs,dataset_.data,dataset_.missing.aindex,dataset_.missing.state);
@@ -111,18 +111,17 @@ if options_.nk ~= 0
             decomp(options_.filter_step_ahead,i_endo,:,:);
     end
 end
-dr = oo_.dr;
-order_var = oo_.dr.order_var;
 for i=bayestopt_.smoother_saved_var_list'
     i1 = order_var(bayestopt_.smoother_var_list(i));
     eval(['oo.SmoothedVariables.' deblank(M_.endo_names(i1,:)) ' = atT(i,:)'';']);
-    eval(['oo.FilteredVariables.' deblank(M_.endo_names(i1,:)) ' = squeeze(aK(1,i,:));']);
+    if options_.nk>0
+        eval(['oo.FilteredVariables.' deblank(M_.endo_names(i1,:)) ' = squeeze(aK(1,i,:));']);
+    end
     eval(['oo.UpdatedVariables.' deblank(M_.endo_names(i1,:)) ' = updated_variables(i,:)'';']);
 end
 for i=1:M_.exo_nbr
     eval(['oo.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
 end
 
-oo.dr = oo_.dr;
-
-bayestopt_.pshape = pshape_original;
+%oo.dr = oo_.dr;
+%bayestopt_.pshape = pshape_original;
