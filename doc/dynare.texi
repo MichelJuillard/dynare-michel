@@ -8162,8 +8162,8 @@ Instantiates a @code{Report} object.
 The full path to the @LaTeX{} compiler on your system. If this option
 is not provided, Dynare will try to find the appropriate program to
 compile @LaTeX{} on your system. Default is system dependent: Windows:
-?, Mac OS X: @code{/usr/texbin/pdflatex}, Linux: the result of
-@code{which pdflatex}
+the result of @code{findtexmf --file-type=exe pdflatex}, Mac OS X and
+Linux: the result of @code{which pdflatex}
 
 @item showDate, @code{BOOLEAN}
 Display the date and time when the report was compiled. Default:
