@@ -1,4 +1,4 @@
-function oo = evaluate_smoother(parameters,var_list)
+function evaluate_smoother(parameters,var_list)
 % Evaluate the smoother at parameters.
 %
 % INPUTS
