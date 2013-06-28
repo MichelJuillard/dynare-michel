@@ -46,11 +46,8 @@ global options_ M_ bayestopt_ oo_ estim_params_   % estim_params_ may be emty
 
 persistent dataset_
 
-
 if isempty(dataset_) || isempty(bayestopt_)
-    options = options_;
-    options.smoother = 1;    % this is necessary because of a check in dynare_estimation_init()
-    [dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list, M_.fname, [], M_, options, oo_, estim_params_, bayestopt_);
+    [dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list, M_.fname, [], M_, options_, oo_, estim_params_, bayestopt_);
 end
 
 if nargin==0
