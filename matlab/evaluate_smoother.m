@@ -90,34 +90,34 @@ end
 [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp] = ...
     DsgeSmoother(parameters,dataset_.info.ntobs,dataset_.data,dataset_.missing.aindex,dataset_.missing.state);
 
-oo.Smoother.SteadyState = ys;
-oo.Smoother.TrendCoeffs = trend_coeff;
+oo_.Smoother.SteadyState = ys;
+oo_.Smoother.TrendCoeffs = trend_coeff;
 if options_.filter_covariance
-    oo.Smoother.Variance = P;
+    oo_.Smoother.Variance = P;
 end
 i_endo = bayestopt_.smoother_saved_var_list;
 if options_.nk ~= 0
-    oo.FilteredVariablesKStepAhead = ...
+    oo_.FilteredVariablesKStepAhead = ...
         aK(options_.filter_step_ahead,i_endo,:);
     if ~isempty(PK)
-        oo.FilteredVariablesKStepAheadVariances = ...
+        oo_.FilteredVariablesKStepAheadVariances = ...
             PK(options_.filter_step_ahead,i_endo,i_endo,:);
     end
     if ~isempty(decomp)
-        oo.FilteredVariablesShockDecomposition = ...
+        oo_.FilteredVariablesShockDecomposition = ...
             decomp(options_.filter_step_ahead,i_endo,:,:);
     end
 end
 for i=bayestopt_.smoother_saved_var_list'
     i1 = order_var(bayestopt_.smoother_var_list(i));
-    eval(['oo.SmoothedVariables.' deblank(M_.endo_names(i1,:)) ' = atT(i,:)'';']);
+    eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(i1,:)) ' = atT(i,:)'';']);
     if options_.nk>0
-        eval(['oo.FilteredVariables.' deblank(M_.endo_names(i1,:)) ' = squeeze(aK(1,i,:));']);
+        eval(['oo_.FilteredVariables.' deblank(M_.endo_names(i1,:)) ' = squeeze(aK(1,i,:));']);
     end
-    eval(['oo.UpdatedVariables.' deblank(M_.endo_names(i1,:)) ' = updated_variables(i,:)'';']);
+    eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(i1,:)) ' = updated_variables(i,:)'';']);
 end
 for i=1:M_.exo_nbr
-    eval(['oo.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
+    eval(['oo_.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
 end
 
 %oo.dr = oo_.dr;
