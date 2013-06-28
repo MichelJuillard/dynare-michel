@@ -452,7 +452,7 @@ switch DynareOptions.lik_init
     Pinf  = [];
     a = zeros(mm,1);
     Zflag = 0;
-elseif options_.lik_init == 5            % Old diffuse Kalman filter only for the non stationary variables
+  case options_.lik_init == 5            % Old diffuse Kalman filter only for the non stationary variables
     [eigenvect, eigenv] = eig(T);
     eigenv = diag(eigenv);
     nstable = length(find(abs(abs(eigenv)-1) > 1e-7));
