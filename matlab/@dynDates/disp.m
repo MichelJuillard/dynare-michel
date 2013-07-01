@@ -18,14 +18,14 @@ function disp(dd)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if isempty(dd)
-    fprintf('%s is an empty dynDates object.\n', inputname(1));
+    fprintf('Empty dynDates object.\n');
     return
 end
     
 max_displayed = 5;
 first_displayed = 2;
     
-fprintf('%s = <dynDates: ', inputname(1));
+fprintf('<dynDates: ');
     
 if dd.ndat<=max_displayed
     for i=1:dd.ndat

@@ -18,7 +18,7 @@ function disp(d)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if isempty(d)
-    fprintf('%s is an empty dynDate object.\n', inputname(1));
+    fprintf('Empty dynDate object.\n');
 else
-    fprintf('%s = <dynDate: %s>\n', inputname(1), format(d));
+    fprintf('<dynDate: %s>\n', format(d));
 end
