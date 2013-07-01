@@ -30,7 +30,7 @@ if length(S)>1
 end
 
 switch S.type
-  case '{}'
+  case '{}' % Multiple variable selection.
     if ~isequal(numel(S.subs),numel(unique(S.subs)))
         error('dynSeries::subsasgn: Wrong syntax!')
     end
@@ -97,7 +97,7 @@ switch S.type
             end
         end
     end
-  case '.'
+  case '.' % Single variable selection.
     if ~isequal(S.subs,B.name)
         if ~isequal(S.subs,B.name{1})
                 % Rename a variable.
