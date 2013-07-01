@@ -25,99 +25,168 @@ function A = subsasgn(A,S,B)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if length(S)>1
-    error('dynSeries::subsasgn: Wrong syntax!')
-end
+merge_dynSeries_objects = 1;    
 
-switch S.type
-  case '{}'
-    if ~isequal(numel(S.subs),numel(unique(S.subs)))
-        error('dynSeries::subsasgn: Wrong syntax!')
-    end
-    for i=1:numel(S.subs)
-        element = S.subs{i};
-        idArobase = strfind(element,'@');
-        if ~isempty(idArobase)
-            switch length(idArobase)
-              case 2
-                idComma = strfind(element(idArobase(1)+1:idArobase(2)-1),',');
-                if ~isempty(idComma)
-                    elements = cell(1,numel(idComma)+1); j = 1;
-                    expression = element(idArobase(1)+1:idArobase(2)-1);
-                    while ~isempty(expression)
-                        [token, expression] = strtok(expression,',');
-                        elements(j) = {[element(1:idArobase(1)-1), token, element(idArobase(2)+1:end)]};
-                        j = j + 1;
+switch length(S)
+    case 1
+      switch S(1).type
+        case '{}' % Multiple variable selection.
+          if ~isequal(numel(S(1).subs),numel(unique(S(1).subs)))
+              error('dynSeries::subsasgn: Wrong syntax!')
+          end
+          for i=1:numel(S(1).subs)
+              element = S(1).subs{i};
+              idArobase = strfind(element,'@');
+              if ~isempty(idArobase)
+                  switch length(idArobase)
+                    case 2
+                      idComma = strfind(element(idArobase(1)+1:idArobase(2)-1),',');
+                      if ~isempty(idComma)
+                          elements = cell(1,numel(idComma)+1); j = 1;
+                          expression = element(idArobase(1)+1:idArobase(2)-1);
+                          while ~isempty(expression)
+                              [token, expression] = strtok(expression,',');
+                              elements(j) = {[element(1:idArobase(1)-1), token, element(idArobase(2)+1:end)]};
+                              j = j + 1;
+                          end
+                          S(1).subs = replace_object_in_a_one_dimensional_cell_array(S(1).subs, elements(:), i);
+                      else
+                          error('dynSeries::subsasgn: Wrong syntax, matlab''s regular expressions cannot be used here!')
+                      end
+                    case 4
+                      idComma_1 = strfind(element(idArobase(1)+1:idArobase(2)-1),',');
+                      idComma_2 = strfind(element(idArobase(3)+1:idArobase(4)-1),',');
+                      if ~isempty(idComma_1)
+                          elements = cell(1,(numel(idComma_1)+1)*(numel(idComma_2)+1)); j = 1;
+                          expression_1 = element(idArobase(1)+1:idArobase(2)-1);
+                          while ~isempty(expression_1)
+                              [token_1, expression_1] = strtok(expression_1,',');
+                              expression_2 = element(idArobase(3)+1:idArobase(4)-1);
+                              while ~isempty(expression_2)
+                                  [token_2, expression_2] = strtok(expression_2,',');
+                                  elements(j) = {[element(1:idArobase(1)-1), token_1, element(idArobase(2)+1:idArobase(3)-1), token_2, element(idArobase(4)+1:end)]};
+                                  j = j+1;
+                              end
+                          end
+                          S(1).subs = replace_object_in_a_one_dimensional_cell_array(S(1).subs, elements(:), i);
+                      else
+                          error('dynSeries::subsasgn: Wrong syntax, matlab''s regular expressions cannot be used here!')
+                      end
+                    otherwise
+                      error('dynSeries::subsasgn: Wrong syntax!')
+                  end
+              end
+          end
+          if ~isequal(length(S(1).subs),B.vobs)
+              error('dynSeries::subsasgn: Wrong syntax!')
+          end
+          if ~isequal(S(1).subs(:),B.name)
+              for i = 1:B.vobs
+                  if ~isequal(S(1).subs{i},B.name{i})
+                      % Rename a variable.
+                      id = strmatch(S(1).subs{i},A.name);
+                      if isempty(id)
+                          % Add a new variable a change its name.
+                          B.name(i) = {S(1).subs{i}};
+                          B.tex(i) = {name2tex(S(1).subs{i})};
+                      else
+                          % Rename variable and change its content.
+                          B.name(i) = A.name(id);
+                          B.tex(i) = A.tex(id);
+                      end
+                  end
+              end
+          end
+        case '.' % Single variable selection.
+          if ~isequal(S(1).subs,B.name)
+              if ~isequal(S(1).subs,B.name{1})
+                  % Rename a variable.
+                  id = strmatch(S(1).subs,A.name);
+                  if isempty(id)
+                      % Add a new variable a change its name.
+                      B.name(1) = {S(1).subs};
+                      B.tex(1) = {name2tex(S(1).subs)};
+                  else
+                      % Rename variable and change its content.
+                      B.name(1) = A.name(id);
+                      B.tex(1) = A.tex(id);
+                  end
+              end
+          end
+        case '()' % Date(s) selection
+          if isa(S(1).subs{1},'dynDates') || isa(S(1).subs{1},'dynDate')
+              [junk, tdx] = intersect(A.time.time,S(1).subs{1}.time,'rows');
+              if isa(B,'dynSeries')
+                  [junk, tdy] = intersect(B.time.time,S(1).subs{1}.time,'rows');
+                  if isempty(tdy)
+                      error('dynSeries::subsasgn: Periods of the dynSeries objects on the left and right hand sides must intersect!')
+                  end
+                  if ~isequal(A.vobs,B.vobs)
+                      error('dynSeries::subsasgn: Dimension error! The number of variables on the left and right hand side must match.')
+                  end
+                  A.data(tdx,:) = B.data(tdy,:);
+              elseif isnumeric(B)
+                  merge_dynSeries_objects = 0;
+                  if isequal(length(tdx),rows(B))
+                      if isequal(columns(A.data),columns(B))
+                          A.data(tdx,:) = B;
+                      else
+                          error('dynSeries::subsasgn: Dimension error! The number of variables on the left and right hand side must match.')
+                      end
+                  else
+                      error('dynSeries::subsassgn: Dimension error! The number of periods on the left and right hand side must match.')
+                  end
+              else
+                  error('dynSeries::subsasgn: The object on the right hand side must be a dynSeries object or a numeric array!')
+              end
+          else
+              error('dynSeries::subsasgn: Wrong syntax!')
+          end
+        otherwise
+          error('dynSeries::subsasgn: Wrong syntax!')
+      end
+  case 2
+    merge_dynSeries_objects = 0;
+    if ((isequal(S(1).type,'{}') || isequal(S(1).type,'.')) && isequal(S(2).type,'()'))
+        sA = extract(A,S(1).subs{:});
+        if (isa(B,'dynSeries') && isequal(sA.vobs,B.vobs)) || (isnumeric(B) && isequal(sA.vobs,columns(B))) 
+            if isa(S(2).subs{1},'dynDates') || isa(S(2).subs{1},'dynDate')
+                [junk, tdx] = intersect(sA.time.time,S(2).subs{1}.time,'rows');
+                if isa(B,'dynSeries')
+                    [junk, tdy] = intersect(B.time.time,S(2).subs{1}.time,'rows');
+                    if isempty(tdy)
+                        error('dynSeries::subsasgn: Periods of the dynSeries objects on the left and right hand sides must intersect!')
                     end
-                    S.subs = replace_object_in_a_one_dimensional_cell_array(S.subs, elements(:), i);
-                else
-                    error('dynSeries::subsasgn: Wrong syntax, matlab''s regular expressions cannot be used here!')
-                end
-              case 4
-                idComma_1 = strfind(element(idArobase(1)+1:idArobase(2)-1),',');
-                idComma_2 = strfind(element(idArobase(3)+1:idArobase(4)-1),',');
-                if ~isempty(idComma_1)
-                    elements = cell(1,(numel(idComma_1)+1)*(numel(idComma_2)+1)); j = 1;
-                    expression_1 = element(idArobase(1)+1:idArobase(2)-1);
-                    while ~isempty(expression_1)
-                        [token_1, expression_1] = strtok(expression_1,',');
-                        expression_2 = element(idArobase(3)+1:idArobase(4)-1);
-                        while ~isempty(expression_2)
-                            [token_2, expression_2] = strtok(expression_2,',');
-                            elements(j) = {[element(1:idArobase(1)-1), token_1, element(idArobase(2)+1:idArobase(3)-1), token_2, element(idArobase(4)+1:end)]};
-                            j = j+1;
+                    sA.data(tdx,:) = B.data(tdy,:);
+                elseif isnumeric(B)
+                    merge_dynSeries_objects = 0;
+                    if isequal(length(tdx),rows(B))
+                        if isequal(columns(sA.data),columns(B))
+                            sA.data(tdx,:) = B;
+                        else
+                            error('dynSeries::subsasgn: Dimension error! The number of variables on the left and right hand side must match.')
                         end
+                    else
+                        error('dynSeries::subsassgn: Dimension error! The number of periods on the left and right hand side must match.')
                     end
-                    S.subs = replace_object_in_a_one_dimensional_cell_array(S.subs, elements(:), i);
                 else
-                    error('dynSeries::subsasgn: Wrong syntax, matlab''s regular expressions cannot be used here!')
+                    error('dynSeries::subsasgn: The object on the right hand side must be a dynSeries object or a numeric array!')
                 end
-              otherwise
+            else
                 error('dynSeries::subsasgn: Wrong syntax!')
             end
+            A = merge(A,sA);
+        else
+            error('dynSeries::subsasgn: Dimension error! The number of variables on the left and right hand side must match.')
         end
     end
-    if ~isequal(length(S.subs),B.vobs)
-        error('dynSeries::subsasgn: Wrong syntax!')
-    end
-    if ~isequal(S.subs(:),B.name)
-        for i = 1:B.vobs
-            if ~isequal(S.subs{i},B.name{i})
-                % Rename a variable.
-                id = strmatch(S.subs{i},A.name);
-                if isempty(id)
-                    % Add a new variable a change its name.
-                    B.name(i) = {S.subs{i}};
-                    B.tex(i) = {name2tex(S.subs{i})};
-                else
-                    % Rename variable and change its content.
-                    B.name(i) = A.name(id);
-                    B.tex(i) = A.tex(id);
-                end
-            end
-        end
-    end
-  case '.'
-    if ~isequal(S.subs,B.name)
-        if ~isequal(S.subs,B.name{1})
-                % Rename a variable.
-                id = strmatch(S.subs,A.name);
-                if isempty(id)
-                    % Add a new variable a change its name.
-                    B.name(1) = {S.subs};
-                    B.tex(1) = {name2tex(S.subs)};
-                else
-                    % Rename variable and change its content.
-                    B.name(1) = A.name(id);
-                    B.tex(1) = A.tex(id);
-                end
-            end
-        end
   otherwise
     error('dynSeries::subsasgn: Wrong syntax!')
 end
-  
-A = merge(A,B);
+
+if merge_dynSeries_objects
+    A = merge(A,B);
+end
 
 %@test:1
 %$ % Define a datasets.
@@ -369,7 +438,7 @@ A = merge(A,B);
 %$ T = all(t);
 %@eof:10
 
-%@test:10
+%@test:11
 %$ % Define a datasets.
 %$ A = rand(10,3); B = rand(10,5);
 %$
@@ -393,4 +462,66 @@ A = merge(A,B);
 %$    %t(5) = dyn_assert(ts1.data,[B(:,1:2), A(:,3), B(:,3:4)],1e-15);
 %$ end
 %$ T = all(t);
-%@eof:10
+%@eof:11
+
+%@test:12
+%$ % Define a datasets.
+%$ A = rand(40,3); B = rand(40,1);
+%$
+%$ % Instantiate two dynSeries object.
+%$ ts1 = dynSeries(A,'1950Q1',{'A1';'A2';'A3'},[]);
+%$ ts2 = dynSeries(B,'1950Q1',{'B1'},[]);
+%$
+%$ % modify first object.
+%$ try
+%$     d1 = dynDate('1950Q3');
+%$     d2 = dynDate('1951Q3');
+%$     rg = d1:d2;
+%$     ts1{'A1'}(rg) = ts2{'B1'}(rg);
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ % Instantiate a time series object.
+%$ if t(1)
+%$    t(2) = dyn_assert(ts1.vobs,3);
+%$    t(3) = dyn_assert(ts1.nobs,40);
+%$    t(4) = dyn_assert(ts1.name{2},'A2');
+%$    t(5) = dyn_assert(ts1.name{1},'A1');
+%$    t(6) = dyn_assert(ts1.name{3},'A3');
+%$    t(7) = dyn_assert(ts1.data,[[A(1:2,1); B(3:7); A(8:end,1)], A(:,2:3)],1e-15);
+%$ end
+%$ T = all(t);
+%@eof:12
+
+%@test:13
+%$ % Define a datasets.
+%$ A = rand(40,3); B = rand(40,1);
+%$
+%$ % Instantiate two dynSeries object.
+%$ ts1 = dynSeries(A,'1950Q1',{'A1';'A2';'A3'},[]);
+%$ ts2 = dynSeries(B,'1950Q1',{'B1'},[]);
+%$
+%$ % modify first object.
+%$ try
+%$     d1 = dynDate('1950Q3');
+%$     d2 = dynDate('1951Q3');
+%$     rg = d1:d2;
+%$     ts1{'A1'}(rg) = B(3:7);
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ % Instantiate a time series object.
+%$ if t(1)
+%$    t(2) = dyn_assert(ts1.vobs,3);
+%$    t(3) = dyn_assert(ts1.nobs,40);
+%$    t(4) = dyn_assert(ts1.name{2},'A2');
+%$    t(5) = dyn_assert(ts1.name{1},'A1');
+%$    t(6) = dyn_assert(ts1.name{3},'A3');
+%$    t(7) = dyn_assert(ts1.data,[[A(1:2,1); B(3:7); A(8:end,1)], A(:,2:3)],1e-15);
+%$ end
+%$ T = all(t);
+%@eof:13

@@ -1,4 +1,4 @@
-function oo = evaluate_smoother(parameters,var_list)
+function evaluate_smoother(parameters,var_list)
 % Evaluate the smoother at parameters.
 %
 % INPUTS
@@ -46,11 +46,8 @@ global options_ M_ bayestopt_ oo_ estim_params_   % estim_params_ may be emty
 
 persistent dataset_
 
-
 if isempty(dataset_) || isempty(bayestopt_)
-    options = options_;
-    options.smoother = 1;    % this is necessary because of a check in dynare_estimation_init()
-    [dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list, M_.fname, [], M_, options, oo_, estim_params_, bayestopt_);
+    [dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list, M_.fname, [], M_, options_, oo_, estim_params_, bayestopt_);
 end
 
 if nargin==0
@@ -86,43 +83,35 @@ if ischar(parameters)
     end
 end
 
-pshape_original   = bayestopt_.pshape;
-bayestopt_.pshape = Inf(size(bayestopt_.pshape));
-clear('priordens')
-
 [atT,innov,measurement_error,updated_variables,ys,trend_coeff,aK,T,R,P,PK,decomp] = ...
     DsgeSmoother(parameters,dataset_.info.ntobs,dataset_.data,dataset_.missing.aindex,dataset_.missing.state);
 
-oo.Smoother.SteadyState = ys;
-oo.Smoother.TrendCoeffs = trend_coeff;
+oo_.Smoother.SteadyState = ys;
+oo_.Smoother.TrendCoeffs = trend_coeff;
 if options_.filter_covariance
-    oo.Smoother.Variance = P;
+    oo_.Smoother.Variance = P;
 end
 i_endo = bayestopt_.smoother_saved_var_list;
 if options_.nk ~= 0
-    oo.FilteredVariablesKStepAhead = ...
+    oo_.FilteredVariablesKStepAhead = ...
         aK(options_.filter_step_ahead,i_endo,:);
     if ~isempty(PK)
-        oo.FilteredVariablesKStepAheadVariances = ...
+        oo_.FilteredVariablesKStepAheadVariances = ...
             PK(options_.filter_step_ahead,i_endo,i_endo,:);
     end
     if ~isempty(decomp)
-        oo.FilteredVariablesShockDecomposition = ...
+        oo_.FilteredVariablesShockDecomposition = ...
             decomp(options_.filter_step_ahead,i_endo,:,:);
     end
 end
-dr = oo_.dr;
-order_var = oo_.dr.order_var;
 for i=bayestopt_.smoother_saved_var_list'
-    i1 = order_var(bayestopt_.smoother_var_list(i));
-    eval(['oo.SmoothedVariables.' deblank(M_.endo_names(i1,:)) ' = atT(i,:)'';']);
-    eval(['oo.FilteredVariables.' deblank(M_.endo_names(i1,:)) ' = squeeze(aK(1,i,:));']);
-    eval(['oo.UpdatedVariables.' deblank(M_.endo_names(i1,:)) ' = updated_variables(i,:)'';']);
+    i1 = oo_.dr.order_var(bayestopt_.smoother_var_list(i));
+    eval(['oo_.SmoothedVariables.' deblank(M_.endo_names(i1,:)) ' = atT(i,:)'';']);
+    if options_.nk>0
+        eval(['oo_.FilteredVariables.' deblank(M_.endo_names(i1,:)) ' = squeeze(aK(1,i,:));']);
+    end
+    eval(['oo_.UpdatedVariables.' deblank(M_.endo_names(i1,:)) ' = updated_variables(i,:)'';']);
 end
 for i=1:M_.exo_nbr
-    eval(['oo.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
+    eval(['oo_.SmoothedShocks.' deblank(M_.exo_names(i,:)) ' = innov(i,:)'';']);
 end
-
-oo.dr = oo_.dr;
-
-bayestopt_.pshape = pshape_original;

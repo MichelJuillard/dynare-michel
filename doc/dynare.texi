@@ -2855,6 +2855,7 @@ steady;
 
 @end deffn
 
+@anchor{equation_tag_for_conditional_steady_state}
 @node Replace some equations during steady state computations
 @subsection Replace some equations during steady state computations
 
@@ -4631,19 +4632,16 @@ Uses the diffuse Kalman filter (as described in
 @cite{Durbin and Koopman (2001)} and @cite{Koopman and Durbin
 (2003)}) to estimate models with non-stationary observed variables.
 
-When @code{diffused_filter} is used the @code{lik_init} option of
+When @code{diffuse_filter} is used the @code{lik_init} option of
 @code{estimation} has no effect.
 
-When there are nonstationary variables in a model, there is no unique
-deterministic steady state. The user must supply a MATLAB/Octave
-function that computes the steady state values of the stationary
-variables in the model and returns dummy values for the nonstationary
-ones. The function should be called with the name of the @file{.mod}
-file followed by @file{_steadystate}. See @file{fs2000_steadystate.m}
-in @file{examples} directory for an example.
+When there  are nonstationary exogenous variables in  a model, there is  no unique deterministic  steady state.  For instance,  if productivity  is a  pure random walk:
 
-Note that the nonstationary variables in the model must be integrated
-processes (their first difference or k-difference must be stationary).
+@math{a_t = a_{t-1} + e_t}
+
+any value of  @math{\bar a} of @math{a} is a  deterministic steady state for productivity.  Consequently, the  model admits  an infinity  of steady states. In this situation, the user must help Dynare in selecting one steady state, except if zero is a trivial model's steady state, which happens when the @code{linear} option is used in the model declaration. The user can either provide the steady state to Dynare using a @code{steady_state_model} block (or writing a steady state file) if a closed form solution is available, @pxref{steady_state_model}, or specify some constraints on the steady state, @pxref{equation_tag_for_conditional_steady_state}, so that Dynare computes the steady state conditionally on some predefined levels for the non stationary variables. In both cases, the idea is to use dummy values for the steady state level of the exogenous non stationary variables.
+
+Note that the nonstationary variables in the model must be integrated processes (their first difference or k-difference must be stationary).
 
 @item selected_variables_only
 Only run the smoother on the variables listed just after the
