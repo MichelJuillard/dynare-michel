@@ -112,7 +112,9 @@ switch S.type
                     B.tex(1) = A.tex(id);
                 end
             end
-        end
+    end
+  case '()' % Date(s) selection
+    error('Not yet implemented!')
   otherwise
     error('dynSeries::subsasgn: Wrong syntax!')
 end
