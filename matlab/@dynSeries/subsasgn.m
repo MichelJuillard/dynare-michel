@@ -25,17 +25,13 @@ function A = subsasgn(A,S,B)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-if length(S)>1
-    error('dynSeries::subsasgn: Wrong syntax!')
-end
-
-switch S.type
+switch S(1).type
   case '{}' % Multiple variable selection.
-    if ~isequal(numel(S.subs),numel(unique(S.subs)))
+    if ~isequal(numel(S(1).subs),numel(unique(S(1).subs)))
         error('dynSeries::subsasgn: Wrong syntax!')
     end
-    for i=1:numel(S.subs)
-        element = S.subs{i};
+    for i=1:numel(S(1).subs)
+        element = S(1).subs{i};
         idArobase = strfind(element,'@');
         if ~isempty(idArobase)
             switch length(idArobase)
@@ -49,7 +45,7 @@ switch S.type
                         elements(j) = {[element(1:idArobase(1)-1), token, element(idArobase(2)+1:end)]};
                         j = j + 1;
                     end
-                    S.subs = replace_object_in_a_one_dimensional_cell_array(S.subs, elements(:), i);
+                    S(1).subs = replace_object_in_a_one_dimensional_cell_array(S(1).subs, elements(:), i);
                 else
                     error('dynSeries::subsasgn: Wrong syntax, matlab''s regular expressions cannot be used here!')
                 end
@@ -68,7 +64,7 @@ switch S.type
                             j = j+1;
                         end
                     end
-                    S.subs = replace_object_in_a_one_dimensional_cell_array(S.subs, elements(:), i);
+                    S(1).subs = replace_object_in_a_one_dimensional_cell_array(S(1).subs, elements(:), i);
                 else
                     error('dynSeries::subsasgn: Wrong syntax, matlab''s regular expressions cannot be used here!')
                 end
@@ -77,18 +73,18 @@ switch S.type
             end
         end
     end
-    if ~isequal(length(S.subs),B.vobs)
+    if ~isequal(length(S(1).subs),B.vobs)
         error('dynSeries::subsasgn: Wrong syntax!')
     end
-    if ~isequal(S.subs(:),B.name)
+    if ~isequal(S(1).subs(:),B.name)
         for i = 1:B.vobs
-            if ~isequal(S.subs{i},B.name{i})
+            if ~isequal(S(1).subs{i},B.name{i})
                 % Rename a variable.
-                id = strmatch(S.subs{i},A.name);
+                id = strmatch(S(1).subs{i},A.name);
                 if isempty(id)
                     % Add a new variable a change its name.
-                    B.name(i) = {S.subs{i}};
-                    B.tex(i) = {name2tex(S.subs{i})};
+                    B.name(i) = {S(1).subs{i}};
+                    B.tex(i) = {name2tex(S(1).subs{i})};
                 else
                     % Rename variable and change its content.
                     B.name(i) = A.name(id);
@@ -98,14 +94,14 @@ switch S.type
         end
     end
   case '.' % Single variable selection.
-    if ~isequal(S.subs,B.name)
-        if ~isequal(S.subs,B.name{1})
+    if ~isequal(S(1).subs,B.name)
+        if ~isequal(S(1).subs,B.name{1})
                 % Rename a variable.
-                id = strmatch(S.subs,A.name);
+                id = strmatch(S(1).subs,A.name);
                 if isempty(id)
                     % Add a new variable a change its name.
-                    B.name(1) = {S.subs};
-                    B.tex(1) = {name2tex(S.subs)};
+                    B.name(1) = {S(1).subs};
+                    B.tex(1) = {name2tex(S(1).subs)};
                 else
                     % Rename variable and change its content.
                     B.name(1) = A.name(id);
@@ -120,6 +116,12 @@ switch S.type
 end
   
 A = merge(A,B);
+
+S = shiftS(S);
+if ~isempty(S)
+    error('dynSeries::subsasgn: Wrong syntax!')
+    A = subsasgn(A, S, B);
+end
 
 %@test:1
 %$ % Define a datasets.
