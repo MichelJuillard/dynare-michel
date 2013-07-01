@@ -371,7 +371,7 @@ A = merge(A,B);
 %$ T = all(t);
 %@eof:10
 
-%@test:10
+%@test:11
 %$ % Define a datasets.
 %$ A = rand(10,3); B = rand(10,5);
 %$
@@ -395,4 +395,4 @@ A = merge(A,B);
 %$    %t(5) = dyn_assert(ts1.data,[B(:,1:2), A(:,3), B(:,3:4)],1e-15);
 %$ end
 %$ T = all(t);
-%@eof:10
+%@eof:11
