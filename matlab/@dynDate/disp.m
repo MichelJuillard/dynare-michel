@@ -1,4 +1,4 @@
-function display(d)
+function disp(d)
 
 % Copyright (C) 2013 Dynare Team
 %
