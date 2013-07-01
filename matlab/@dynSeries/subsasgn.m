@@ -490,7 +490,38 @@ end
 %$    t(4) = dyn_assert(ts1.name{2},'A2');
 %$    t(5) = dyn_assert(ts1.name{1},'A1');
 %$    t(6) = dyn_assert(ts1.name{3},'A3');
-%$    t(7) = dyn_assert(ts1.data,[[A(1:2,1); B(3:6); A(7:end,1)], B, A(:,3)],1e-15);
+%$    t(7) = dyn_assert(ts1.data,[[A(1:2,1); B(3:7); A(8:end,1)], A(:,2:3)],1e-15);
 %$ end
 %$ T = all(t);
 %@eof:12
+
+%@test:13
+%$ % Define a datasets.
+%$ A = rand(40,3); B = rand(40,1);
+%$
+%$ % Instantiate two dynSeries object.
+%$ ts1 = dynSeries(A,'1950Q1',{'A1';'A2';'A3'},[]);
+%$ ts2 = dynSeries(B,'1950Q1',{'B1'},[]);
+%$
+%$ % modify first object.
+%$ try
+%$     d1 = dynDate('1950Q3');
+%$     d2 = dynDate('1951Q3');
+%$     rg = d1:d2;
+%$     ts1{'A1'}(rg) = B(3:7);
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ % Instantiate a time series object.
+%$ if t(1)
+%$    t(2) = dyn_assert(ts1.vobs,3);
+%$    t(3) = dyn_assert(ts1.nobs,40);
+%$    t(4) = dyn_assert(ts1.name{2},'A2');
+%$    t(5) = dyn_assert(ts1.name{1},'A1');
+%$    t(6) = dyn_assert(ts1.name{3},'A3');
+%$    t(7) = dyn_assert(ts1.data,[[A(1:2,1); B(3:7); A(8:end,1)], A(:,2:3)],1e-15);
+%$ end
+%$ T = all(t);
+%@eof:13
