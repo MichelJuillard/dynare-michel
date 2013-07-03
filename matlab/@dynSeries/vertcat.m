@@ -104,6 +104,7 @@ end
 %$ t(2) = dyn_assert(ts3.freq,e.freq);
 %$ t(3) = dyn_assert(ts3.data,e.data);
 %$ t(4) = dyn_assert(ts3.name,e.name);
+%$ t(5) = dyn_assert(ts3.nobs,20);
 %$ T = all(t);
 %@eof:1
 
@@ -131,7 +132,7 @@ end
 %$ ts3 = dynSeries(C,[],C_name,[]);
 %$
 %$ % Call the tested method.
-%$ ts4 = [ts1;ts2;ts3];
+%$ ts4 = [ts1; ts2; ts3];
 %$
 %$ % Check the results.
 %$
@@ -139,5 +140,6 @@ end
 %$ t(2) = dyn_assert(ts4.freq,e.freq);
 %$ t(3) = dyn_assert(ts4.data,e.data);
 %$ t(4) = dyn_assert(ts4.name,e.name);
+%$ t(5) = dyn_assert(ts4.nobs,30);
 %$ T = all(t);
 %@eof:2
