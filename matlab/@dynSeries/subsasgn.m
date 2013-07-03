@@ -176,7 +176,7 @@ switch length(S)
                         if isequal(columns(sA.data),columns(B)) && isequal(rows(B),1)
                             sA.data(tdx,:) = repmat(B,length(tdx),1);
                         elseif isequal(rows(B),1)
-                            sA.data(tdx,:) = B
+                            sA.data(tdx,:) = B;
                         else
                             error('dynSeries::subsassgn: Dimension error! The number of periods on the left and right hand side must match.')
                         end
