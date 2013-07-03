@@ -153,7 +153,7 @@ switch length(S)
         else
             sA = extract(A,S(1).subs);
         end
-        if (isa(B,'dynSeries') && isequal(sA.vobs,B.vobs)) || (isnumeric(B) && isequal(sA.vobs,columns(B))) 
+        if (isa(B,'dynSeries') && isequal(sA.vobs,B.vobs)) || (isnumeric(B) && isequal(sA.vobs,columns(B))) || (isnumeric(B) && isequal(columns(B),1)) 
             if isa(S(2).subs{1},'dynDates') || isa(S(2).subs{1},'dynDate')
                 [junk, tdx] = intersect(sA.time.time,S(2).subs{1}.time,'rows');
                 if isa(B,'dynSeries')
