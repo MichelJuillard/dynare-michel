@@ -1,4 +1,4 @@
-function files = get_directory_description(basedir)
+function flist = get_directory_description(basedir)
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -18,15 +18,15 @@ function files = get_directory_description(basedir)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 dd = dir(basedir);
-filelist = {};
+flist = {};
 file = 1;
 
 for f=1:length(dd)
     if ~(isequal(dd(f).name,'.') || isequal(dd(f).name,'..'))
         if dd(f).isdir
-            filelist(file) = { get_directory_description([ basedir filesep dd(f).name]) };
+            flist(file) = { get_directory_description([ basedir filesep dd(f).name]) };
         else
-            filelist(file) = { [basedir filesep dd(f).name] };
+            flist(file) = { [basedir filesep dd(f).name] };
         end
         file = file + 1; 
     end
