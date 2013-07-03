@@ -167,11 +167,19 @@ switch length(S)
                     if isequal(length(tdx),rows(B))
                         if isequal(columns(sA.data),columns(B))
                             sA.data(tdx,:) = B;
+                        elseif isequal(size(B,2),1)
+                            sA.data(tdx,:) = repmat(B,1,columns(sA.data));
                         else
                             error('dynSeries::subsasgn: Dimension error! The number of variables on the left and right hand side must match.')
                         end
                     else
-                        error('dynSeries::subsassgn: Dimension error! The number of periods on the left and right hand side must match.')
+                        if isequal(columns(sA.data),columns(B)) && isequal(rows(B),1)
+                            sA.data(tdx,:) = repmat(B,length(tdx),1);
+                        elseif isequal(rows(B),1)
+                            sA.data(tdx,:) = B
+                        else
+                            error('dynSeries::subsassgn: Dimension error! The number of periods on the left and right hand side must match.')
+                        end
                     end
                 else
                     error('dynSeries::subsasgn: The object on the right hand side must be a dynSeries object or a numeric array!')
