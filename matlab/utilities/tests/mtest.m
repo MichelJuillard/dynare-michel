@@ -24,7 +24,10 @@ function [check, info] = mtest(fname, fpath)
 check = 1;
 
 % Open the matlab file.
-if isempty(fpath)
+if nargin<2 || isempty(fpath)
+    if nargout<2
+        error('mtest:: Wrong calling sequence!')
+    end
     % The full path to the matlab routine (with extension) is given.
     fid = fopen(fname,'r');
 else
