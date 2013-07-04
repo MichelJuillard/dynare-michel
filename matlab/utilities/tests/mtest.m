@@ -113,6 +113,7 @@ for i=1:nn
             end
         end
         info(i,4) = {tmp};
+        info(i,5) = {NaN};
         check = 0;
     else
         if nargout>1
