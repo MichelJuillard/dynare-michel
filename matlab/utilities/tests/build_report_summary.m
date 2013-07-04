@@ -29,7 +29,7 @@ else
         mailto = mailreport;
         mailreport = 1;
         fid = fopen('~/.matlab-send-report');
-        system(['scp ' fgetl(fid) reportfile])
+        system(['scp ' reportfile ' ' fgetl(fid)]);
         fclose(fid);
     else
         if ~isequal(mailreport,0)
