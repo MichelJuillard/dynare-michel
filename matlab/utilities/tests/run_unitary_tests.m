@@ -1,4 +1,4 @@
-function report = run_unitary_tests(listoffiles)
+function [report, time] = run_unitary_tests(listoffiles)
     
 % Copyright (C) 2013 Dynare Team
 %
@@ -34,4 +34,8 @@ for f=1:length(listoffiles)
             end
         end
     end
+end
+
+if nargout>1
+    time = clock;
 end
