@@ -21,15 +21,14 @@ report = {};
     
 for f=1:length(listoffiles)
     if iscell(listoffiles{f})
-        info = run_all_unitary_tests(listoffiles{f});
+        info = run_unitary_tests(listoffiles{f});
         report = [report; info];
     else
         if isequal(listoffiles{f}(end-1:end),'.m') && ~isequal(listoffiles{f}(1:2),'.#')
             if is_unitary_test_available(listoffiles{f})
-                fprintf(['***** Process unitary tests in     ' listoffiles{f} ' ... '])
+                disp(['***** Process unitary tests in     ' listoffiles{f}])
                 [check, info] = mtest(listoffiles{f});
                 report = [report; info];
-                fprintf(['Done!\n'])
             else
                 disp(['Booh! No unitay tests available in ' listoffiles{f}])
             end
