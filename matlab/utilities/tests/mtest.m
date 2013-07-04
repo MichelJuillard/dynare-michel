@@ -30,8 +30,10 @@ if nargin<2 || isempty(fpath)
     end
     % The full path to the matlab routine (with extension) is given.
     fid = fopen(fname,'r');
+    [junk, FNAME, vessel] = fileparts(fname);
 else
     fid = fopen([fpath '/' fname '.m'],'r');
+    FNAME = fname;
 end
 
 % Read the matlab file.
@@ -67,8 +69,8 @@ for i=1:nn
         info(i,2) = {i};
     end
     % Write the temporary test routine.
-    tid = fopen([fname '_test_' int2str(i) '.m'],'w');
-    fprintf(tid,['function [T,t,LOG] = ' fname '_test_' int2str(i) '()\n']);
+    tid = fopen([FNAME '_test_' int2str(i) '.m'],'w');
+    fprintf(tid,['function [T,t,LOG] = ' FNAME '_test_' int2str(i) '()\n']);
     fprintf(tid,['try\n']);
     for j=b1(i):b2(i)
         str = file{j};
@@ -83,11 +85,11 @@ for i=1:nn
     fclose(tid);
     % Call the temporary test routine.
     init = cputime;
-    [TestFlag,TestDetails,LOG] = feval([fname '_test_' int2str(i)]);
+    [TestFlag,TestDetails,LOG] = feval([FNAME '_test_' int2str(i)]);
     time = cputime-init;
     if isnan(TestFlag)
         fprintf(['\n'])
-        fprintf(['Call to ' fname ' test routine n°' int2str(i) ' failed (' datestr(now) ')!\n'])
+        fprintf(['Call to ' FNAME ' test routine n°' int2str(i) ' failed (' datestr(now) ')!\n'])
         fprintf(['\n'])
         disp(LOG)
         check = 0;
@@ -101,7 +103,7 @@ for i=1:nn
             info(i,3) = {0};
             tmp = ones(length(TestDetails),1);
         end
-        fprintf(['Test n°' int2str(i) ' for routine ' fname ' failed (' datestr(now) ')!\n']);
+        fprintf(['Test n°' int2str(i) ' for routine ' FNAME ' failed (' datestr(now) ')!\n']);
         for j=1:length(TestDetails)
             if ~TestDetails(j)
                 if nargout>1
@@ -118,6 +120,6 @@ for i=1:nn
             info(i,4) = {ones(length(TestDetails),1)};
             info(i,5) = {time};
         end
-        delete([fname '_test_' int2str(i) '.m'])
+        delete([FNAME '_test_' int2str(i) '.m'])
     end
 end
