@@ -26,11 +26,11 @@ for f=1:length(listoffiles)
     else
         if isequal(listoffiles{f}(end-1:end),'.m') && isempty(strfind(listoffiles{f},'.#'))
             if is_unitary_test_available(listoffiles{f})
-                disp(['***** Process unitary tests in     ' listoffiles{f}])
+                disp(['***** Process unitary tests in      ' listoffiles{f}])
                 [check, info] = mtest(listoffiles{f});
                 report = [report; info];
             else
-                disp(['Booh! No unitay tests available in ' listoffiles{f}])
+                disp(['Booh! No unitary tests available in ' listoffiles{f}])
             end
         end
     end
