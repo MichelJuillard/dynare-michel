@@ -28,6 +28,9 @@ else
     if ischar(mailreport)
         mailto = mailreport;
         mailreport = 1;
+        fid = fopen('~/.matlab-send-report');
+        system(['scp ' fgetl(fid) reportfile])
+        fclose(fid);
     else
         if ~isequal(mailreport,0)
             error('build_report_summary:: Third argument must be an adress email!')
@@ -42,7 +45,8 @@ gitlastcommithash = reportfilecontent.gitlastcommithash;
 
 str = 'Hi,';
 str = char(str,'');
-str = char(str,'This is a summary report for the unitary tests in Dynare.');
+str = char(str,'This is a summary report for the unitary tests in Dynare. Full report can be');
+str = char(str,['found at http://www.dynare.org/stepan/dynare/tests/' reportfile]);
 str = char(str,'');
 
 str = char(str,gitinfo(1,:));
