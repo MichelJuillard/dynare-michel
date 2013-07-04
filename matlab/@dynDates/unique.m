@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function dd = unique(dd)
 % unique method for dynDates class.
 

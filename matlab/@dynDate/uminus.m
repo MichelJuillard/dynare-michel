@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function b = uminus(a)
 
 %@info:

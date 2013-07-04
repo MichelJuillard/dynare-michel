@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function [a,b] = align(a, b)
     
 %@info:

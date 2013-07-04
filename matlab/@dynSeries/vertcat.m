@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function a = vertcat(varargin)
 
 %@info:

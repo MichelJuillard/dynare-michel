@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function c = min(a,b)
 
 %@info:

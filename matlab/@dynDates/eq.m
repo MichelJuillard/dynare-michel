@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function C = eq(A,B)
 
 %@info:

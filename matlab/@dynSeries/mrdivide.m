@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function A = mrdivide(B,C)
 %@info:
 %! @deftypefn {Function File} {@var{A} =} mrdivide (@var{B},@var{C})

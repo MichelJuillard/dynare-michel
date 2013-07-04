@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function ts = dynSeries(varargin)
 
 %@info:

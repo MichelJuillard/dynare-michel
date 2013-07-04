@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function C = intersect(A,B)
 
 %@info:

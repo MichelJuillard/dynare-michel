@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function A = extract(B,varargin)
 % Extract some variables from a database.
     

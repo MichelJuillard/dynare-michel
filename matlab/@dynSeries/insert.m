@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function ts = insert(ts,us,id)
 % Add a variable in a dynSeries object.
 

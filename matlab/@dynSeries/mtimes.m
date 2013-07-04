@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function A = mtimes(B,C)
 %@info:
 %! @deftypefn {Function File} {@var{A} =} mtimes (@var{B},@var{C})

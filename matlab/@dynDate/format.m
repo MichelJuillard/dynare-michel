@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function p = format(date)
 
 %@info:

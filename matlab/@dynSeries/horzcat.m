@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function a = horzcat(varargin)
 
 %@info:
