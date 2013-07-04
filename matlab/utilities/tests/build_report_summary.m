@@ -1,4 +1,4 @@
-function str = build_report_summary(report, printonscreen, mailreport)
+function str = build_report_summary(reportfile, printonscreen, mailreport)
 
 % Copyright (C) 2013 Dynare Team
 %
@@ -19,6 +19,7 @@ function str = build_report_summary(report, printonscreen, mailreport)
 
 if isequal(nargin,1)
     printonscreen = 1;
+    mailreport = 0;
 end
 
 if nargin<3
@@ -28,22 +29,24 @@ else
         mailto = mailreport;
         mailreport = 1;
     else
-        error('build_report_summary:: Third argument must be an adress email!')
+        if ~isequal(mailreport,0)
+            error('build_report_summary:: Third argument must be an adress email!')
+        end
     end
-        
 end
 
-system('git show --pretty=format:"Last commit %H by %an, %ar %n-> %s" HEAD > git.info');
+reportfilecontent = load(reportfile);
+reportcell = reportfilecontent.report;
+gitinfo = reportfilecontent.gitinfo;
+gitlastcommithash = reportfilecontent.gitlastcommithash;
 
 str = 'Hi,';
 str = char(str,'');
 str = char(str,'This is a summary report for the unitary tests in Dynare.');
 str = char(str,'');
 
-fid = fopen('git.info');
-str = char(str,fgetl(fid));
-str = char(str,fgetl(fid));
-fclose(fid);
+str = char(str,gitinfo(1,:));
+str = char(str,gitinfo(2,:));
 
 str = char(str,'');
 str = char(str,'');
@@ -51,14 +54,14 @@ str = char(str,'');
 str = char(str,['===========================']);
 str = char(str,'DYNARE/MATLAB UNITARY TESTS');
 str = char(str,'===========================');
-str = char(str,['| TOTAL: ' int2str(size(report,1))]);
-str = char(str,['|  PASS: ' int2str(length(find(cell2mat(report(:,3)))))]);
-str = char(str,['|  FAIL: ' int2str(length(find(~cell2mat(report(:,3)))))]);
+str = char(str,['| TOTAL: ' int2str(size(reportcell,1))]);
+str = char(str,['|  PASS: ' int2str(length(find(cell2mat(reportcell(:,3)))))]);
+str = char(str,['|  FAIL: ' int2str(length(find(~cell2mat(reportcell(:,3)))))]);
 str = char(str,'|');
 str = char(str,'| LIST OF FAILED TESTS:');
-for i=1:size(report,1)
-    if ~report{i,3}
-        str = char(str,['|    * ' report{i,1} ' (test #'  int2str(report{i,2}) '{' strrep(int2str(transpose(find(~report{i,4}))),' ',',') '})']);
+for i=1:size(reportcell,1)
+    if ~reportcell{i,3}
+        str = char(str,['|    * ' reportcell{i,1} ' (test #'  int2str(reportcell{i,2}) '{' strrep(int2str(transpose(find(~reportcell{i,4}))),' ',',') '})']);
     end
 end
 
