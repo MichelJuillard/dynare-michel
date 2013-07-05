@@ -125,13 +125,18 @@ switch nargin
         ts.vobs = length(varlist);
         ts.nobs = size(data,1);
         if isempty(tex)
-            ts.tex = cell(ts.vobs,1);
-            for i=1:ts.vobs
-                ts.tex(i) = {name2tex(varlist{i})};
-            end
+            ts.tex = name2tex(varlist);
         else
-           ts.tex = tex;
+            ts.tex = tex;
         end
+    elseif isnumeric(varargin{1}) && isequal(ndims(varargin{1}),2)
+        ts.data = varargin{1};
+        [ts.nobs, ts.vobs] = size(ts.data);
+        ts.freq = 1;
+        ts.init = dynDate(1);
+        ts.time = ts.init:ts.init+ts.nobs;
+        ts.name = default_name(ts.vobs);
+        ts.tex = name2tex(ts.name);
     end
   case {2,3,4}
     a = varargin{1};
@@ -178,9 +183,7 @@ switch nargin
             error('dynSeries::dynSeries: The number of declared names does not match the number of variables!')
         end
     else
-        for i=1:ts.vobs
-            ts.name = vertcat(ts.name, {['Variable_' int2str(i)]});
-        end
+        ts.name = default_name(ts.vobs);
     end
     if ~isempty(d)
         if ts.vobs==length(d)
@@ -191,9 +194,7 @@ switch nargin
             error('dynSeries::dynSeries: The number of declared tex names does not match the number of variables!')
         end
     else
-        for i=1:ts.vobs
-            ts.tex = vertcat(ts.tex, {name2tex(ts.name{i})});
-        end
+        ts.tex = name2tex(ts.name);
     end
   otherwise
     error('dynSeries::dynSeries: Can''t instantiate the class, wrong calling sequence!')
