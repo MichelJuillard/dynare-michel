@@ -105,7 +105,9 @@ switch nargin
         return
     elseif ischar(varargin{1})
         % Create a dynSeries object loading data in a file (*.csv, *.m, *.mat).
-        if check_file_extension(varargin{1},'m')
+        if isempty(varargin{1})
+            error('dynSeries:: Wrong calling sequence! Input argument cannot be an empty string.')
+        elseif check_file_extension(varargin{1},'m')
             [freq,init,data,varlist,tex] = load_m_file_data(varargin{1});
         elseif check_file_extension(varargin{1},'mat')
             [freq,init,data,varlist,tex] = load_mat_file_data(varargin{1});
