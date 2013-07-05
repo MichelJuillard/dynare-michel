@@ -22,57 +22,87 @@ if nargin<2
     info = 0;
 end
 
-id = findstr('_',name);
+if iscell(name)
+    nn = length(name);
+    id = findstr(cell2mat(transpose(name)),'_');
+else
+    nn = 1;
+    id = findstr(name,'_');
+end
+
 if isempty(id)
     tex = name;
     return
 end
 
 if iscell(name)
-    nn = length(name);
-else
-    nn = 1;
+    tex = cell(nn,1);
 end
 
 for i=1:nn
     if info
         if iscell(name)
-            tex = name{i};
+            tex(i) = {name{i}};
+            id = findstr(name{i},'_');
+            len = length(tex{i});
         else
             tex = name;
+            id = findstr(name,'_');
+            len = length(tex);
         end
         n = length(id);
         if id(1)==1
-            tex = ['\_', tex(2:end)];
+            if iscell(name)
+                tex(i) = {['\_', tex{i}(2:end)]};
+            else
+                tex = ['\_', tex(2:end)];
+            end
             if n>1
                 id = id(2:end)+1;
                 n = n-1;
+                len = len+1;
             else
-                return
+                continue
             end
         end
-        if id(end)==length(tex)
-            tex = [tex(1:end-1) '\_'];
+        if id(end)==len
+            if iscell(name)
+                tex(i) = {[tex{i}(1:end-1) '\_']};
+            else
+                tex = [tex(1:end-1) '\_'];
+            end
             if n>1
                 id = id(1:end-1);
                 n = n-1;
             else
-                return
+                continue
             end
         end
         if n==1
-            tex = [ tex(1:(id-1)) '_{'  tex((id+1):end) '}' ];
-            return
+            if iscell(name)
+                tex(i) = {[ tex{i}(1:(id-1)) '_{'  tex{i}((id+1):end) '}' ]};
+            else
+                tex = [ tex(1:(id-1)) '_{'  tex((id+1):end) '}' ];
+            end
+            continue
         else
-            for i=1:n-1
-                tex = [tex(1:id(1)-1) '\_' tex((id(1)+1):end)];
+            for j=1:n-1
+                if iscell(name)
+                    tex(i) = {[tex{i}(1:id(j)-1) '\_' tex{i}((id(j)+1):end)]};
+                else
+                    tex = [tex(1:id(j)-1) '\_' tex((id(j)+1):end)];
+                end
                 id = id(2:end)+1;
             end
-            tex = [tex(1:(id-1)) '_{'  tex((id+1):end) '}'];
+            if iscell(name)
+                tex(i) = {[tex{i}(1:(id-1)) '_{'  tex{i}((id+1):end) '}']};
+            else
+                tex = [tex(1:(id-1)) '_{'  tex((id+1):end) '}'];
+            end
         end
     else
         if iscell(name)
-            tex = strrep(name{i}, '_', '\_');
+            tex(i) = {strrep(name{i}, '_', '\_')};
         else
             tex = strrep(name, '_', '\_');
         end
@@ -108,7 +138,7 @@ end
 %$ t(8) = dyn_assert(strcmp(t8,'\\_azert\\_uiop\\_qsdfg\\_'),1);
 %$ t(9) = dyn_assert(strcmp(t11,'\\_azert'),1);
 %$ t(10) = dyn_assert(strcmp(t12,'azert\\_'),1);
-%$ t(11) = dyn_assert(strcmp(t13,'\\_azert\\_'),1);
+%$ t(11) = dyn_assert(strcmp(t13,'\\_azert\\_'),1); 
 %$ t(12) = dyn_assert(strcmp(t14,'azert_{uiop}'),1);
 %$ t(13) = dyn_assert(strcmp(t15,'azert\\_uiop_{qsdfg}'),1);
 %$ t(14) = dyn_assert(strcmp(t16,'azert\\_uiop_{qsdfg\\_}'),1);
