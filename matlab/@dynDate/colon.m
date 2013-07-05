@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function sp = colon(a,b)
 
 %@info:

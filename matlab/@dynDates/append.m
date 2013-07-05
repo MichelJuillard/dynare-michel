@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function dd = append(dd,a)
 % append method for dynDates class.
 

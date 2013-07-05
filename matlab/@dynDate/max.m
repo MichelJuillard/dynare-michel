@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function c = max(a,b)
 
 %@info:

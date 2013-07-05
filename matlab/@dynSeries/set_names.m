@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function A = set_names(B,varargin)
 
 %@info:

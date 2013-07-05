@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function c = ne(a,b)
 
 %@info:

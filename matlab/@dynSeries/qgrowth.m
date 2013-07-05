@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function us = qgrowth(ts)
 
 %@info:

@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function ts = rename(ts,old,new)
 
 % Copyright (C) 2013 Dynare Team

@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function save(A,basename,format)
 % Saves a dynSeries object on disk.
 

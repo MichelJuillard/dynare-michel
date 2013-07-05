@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function [X, info] = cycle_reduction(A0, A1, A2, cvg_tol, ch)
 
 %@info:
@@ -43,7 +44,7 @@ function [X, info] = cycle_reduction(A0, A1, A2, cvg_tol, ch)
 %! @end deftypefn
 %@eod:
 
-% Copyright (C) 2012 Dynare Team
+% Copyright (C) 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -112,23 +113,39 @@ if (nargin == 5 && ~isempty(ch) )
 end
 
 %@test:1
-%$ addpath ../matlab
 %$
-%$ % Set the dimension of the problem to be solved
+%$ t = zeros(3,1);
+%$
+%$ % Set the dimension of the problem to be solved.
 %$ n = 2000;
+%$
 %$ % Set the equation to be solved
 %$ A = eye(n);
 %$ B = diag(30*ones(n,1)); B(1,1) = 20; B(end,end) = 20; B = B - diag(10*ones(n-1,1),-1); B = B - diag(10*ones(n-1,1),1);
 %$ C = diag(15*ones(n,1)); C = C - diag(5*ones(n-1,1),-1); C = C - diag(5*ones(n-1,1),1);
 %$
 %$ % Solve the equation with the cycle reduction algorithm
-%$ tic, X1 = cycle_reduction(C,B,A,1e-7); toc
+%$ try
+%$     t=cputime; X1 = cycle_reduction(C,B,A,1e-7); elapsedtime = cputime-t;
+%$     disp(['cputime for cycle reduction algorithm is: ' num2str(elapsedtime) ' (n=' int2str(n) ').'])
+%$     t(1) = 1;
+%$ catch
+%$     % nothing to do here.
+%$ end
 %$
 %$ % Solve the equation with the logarithmic reduction algorithm
-%$ tic, X2 = logarithmic_reduction(A,B,C,1e-16,100); toc
+%$ try
+%$     t=cputime; X2 = logarithmic_reduction(A,B,C,1e-16,100); elapsedtime = cputime-t;
+%$     disp(['cputime for logarithmic reduction algorithm is: ' num2str(elapsedtime) ' (n=' int2str(n) ').'])
+%$     t(2) = 1;
+%$ catch
+%$     % nothing to do here.
+%$ end
 %$
 %$ % Check the results.
-%$ t(1) = dyn_assert(X1,X2,1e-12);
+%$ if t(1) && t(2)
+%$     t(3) = dyn_assert(X1,X2,1e-12);
+%$ end
 %$
 %$ T = all(t);
 %@eof:1

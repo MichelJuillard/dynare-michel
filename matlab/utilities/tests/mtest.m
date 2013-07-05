@@ -1,7 +1,7 @@
-function check = mtest(fname,fpath)
+function [check, info] = mtest(fname, fpath)
 % Extract test sections from matlab's routine executes the test and report errors.
 
-% Copyright (C) 2011-2012 Dynare Team
+% Copyright (C) 2011-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -24,7 +24,17 @@ function check = mtest(fname,fpath)
 check = 1;
 
 % Open the matlab file.
-fid = fopen([fpath '/' fname '.m'],'r');
+if nargin<2 || isempty(fpath)
+    if nargout<2
+        error('mtest:: Wrong calling sequence!')
+    end
+    % The full path to the matlab routine (with extension) is given.
+    fid = fopen(fname,'r');
+    [junk, FNAME, vessel] = fileparts(fname);
+else
+    fid = fopen([fpath '/' fname '.m'],'r');
+    FNAME = fname;
+end
 
 % Read the matlab file.
 file = textscan(fid,'%s','delimiter','\n');
@@ -42,11 +52,25 @@ if length(b1)-length(b2)
     error('test:: There is a problem with the test blocks definition!')
 end
 
+% Initialize the second output if necessary.
+if nargout>1
+    % First column   name of the tested routine.
+    % Second column  number of the unitary test.
+    % Third column   status of the unitary test (0 if the test fails, 1 otherwise)
+    % Fourth column  details about the failure (vector of integers)
+    % Fifth column   elapsed time in seconds (cpu time).
+    info = cell(nn,4);
+end
+
 % Perform the tests.
 for i=1:nn
+    if nargout>1
+        info(i,1) = {fname};
+        info(i,2) = {i};
+    end
     % Write the temporary test routine.
-    tid = fopen([fname '_test_' int2str(i) '.m'],'w');
-    fprintf(tid,['function [T,t,LOG] = ' fname '_test_' int2str(i) '()\n']);
+    tid = fopen([FNAME '_test_' int2str(i) '.m'],'w');
+    fprintf(tid,['function [T,t,LOG] = ' FNAME '_test_' int2str(i) '()\n']);
     fprintf(tid,['try\n']);
     for j=b1(i):b2(i)
         str = file{j};
@@ -60,24 +84,43 @@ for i=1:nn
     fprintf(tid,['end\n']);
     fclose(tid);
     % Call the temporary test routine.
-    [TestFlag,TestDetails,LOG] = feval([fname '_test_' int2str(i)]);
+    init = cputime;
+    [TestFlag,TestDetails,LOG] = feval([FNAME '_test_' int2str(i)]);
+    time = cputime-init;
     if isnan(TestFlag)
         fprintf(['\n'])
-        fprintf(['Call to ' fname ' test routine n°' int2str(i) ' failed (' datestr(now) ')!\n'])
+        fprintf(['Call to ' FNAME ' test routine n°' int2str(i) ' failed (' datestr(now) ')!\n'])
         fprintf(['\n'])
         disp(LOG)
         check = 0;
+        if nargout>1
+            info(i,3) = {0};
+        end
         continue
     end
     if ~TestFlag
-        fprintf(['Test n°' int2str(i) ' for routine ' fname ' failed (' datestr(now) ')!\n']);
+        if nargout>1
+            info(i,3) = {0};
+            tmp = ones(length(TestDetails),1);
+        end
+        fprintf(['Test n°' int2str(i) ' for routine ' FNAME ' failed (' datestr(now) ')!\n']);
         for j=1:length(TestDetails)
             if ~TestDetails(j)
+                if nargout>1
+                    tmp(j) = 0;
+                end
                 fprintf(['Output argument n°' int2str(j) ' didn''t give the expected result.\n']);
             end
         end
+        info(i,4) = {tmp};
+        info(i,5) = {NaN};
         check = 0;
     else
-        delete([fname '_test_' int2str(i) '.m'])
+        if nargout>1
+            info(i,3) = {1};
+            info(i,4) = {ones(length(TestDetails),1)};
+            info(i,5) = {time};
+        end
+        delete([FNAME '_test_' int2str(i) '.m'])
     end
 end

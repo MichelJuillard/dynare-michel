@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function C = plus(A,B)
 
 %@info:

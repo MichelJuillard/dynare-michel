@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function A = merge(B,C)
 %@info:
 %! @deftypefn {Function File} {@var{A} =} merge (@var{B},@var{C})

@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function A = plus(B,C)
 %@info:
 %! @deftypefn {Function File} {@var{A} =} plus (@var{B},@var{C})

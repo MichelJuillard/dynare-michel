@@ -1,27 +1,25 @@
-% --*-- Unitary tests --*--
-function C = eq(A,B)
+function info = is_unitary_test_available(fun)
 
 %@info:
-%! @deftypefn {Function File} {@var{C} =} eq (@var{A},@var{B})
-%! @anchor{@dynSeries/eq}
+%! @deftypefn {Function File} {@var{info} =} is_unitary_test_available (@var{fun})
+%! @anchor{is_unitary_test_available}
 %! @sp 1
-%! Overloads the eq (equal) operator for the @ref{dynSeries} class.
+%! Tests if matlab/octave routine @var{fun} has unitary tests.
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
 %! @table @ @var
-%! @item A
-%! @ref{dynSeries} object.
-%! @item B
-%! @ref{dynSeries} object.
+%! @item fun
+%! string, name of the matlab/octave routine to be tested.
 %! @end table
-%! @sp 1
+%! @sp 2
 %! @strong{Outputs}
 %! @sp 1
 %! @table @ @var
-%! @item C
-%! scalar integer equal to one if a==b, 0 otherwise.
+%! @item info
+%! Integer scalar equal to one if unitary tests are available, zero otherwise.
 %! @end table
+%! @sp 2
 %! @end deftypefn
 %@eod:
 
@@ -41,35 +39,14 @@ function C = eq(A,B)
 %
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+    
+info = 0;
 
-if nargin~=2
-    error('dynDates::eq: I need exactly two input arguments!')
+fid = fopen(fun,'r');
+first_line = fgetl(fid);
+
+if strcmp(first_line,'% --*-- Unitary tests --*--')
+    info = 1;
 end
 
-C = isequal(A,B);
-
-
-%@test:1
-%$ % Define a datasets.
-%$ A = rand(10,3);
-%$
-%$ % Define names
-%$ A_name = {'A1';'A2';'A3'};
-%$
-%$ t = zeros(2,1);
-%$
-%$ % Instantiate a time series object.
-%$ try
-%$    ts1 = dynSeries(A,[],A_name,[]);
-%$    ts2 = ts1;
-%$    a = isequal(ts1,ts2);
-%$    t(1) = 1;
-%$ catch
-%$    t = 0;
-%$ end
-%$
-%$ if length(t)>1
-%$    t(2) = dyn_assert(a,1);
-%$ end
-%$ T = all(t);
-%@eof:1
+fclose(fid);
