@@ -27,40 +27,56 @@ if isempty(id)
     tex = name;
     return
 end
-    
-if info
-    tex = name;
-    n = length(id);
-    if id(1)==1
-        tex = ['\_', tex(2:end)];
-        if n>1
-            id = id(2:end)+1;
-            n = n-1;
-        else
-            return
-        end
-    end
-    if id(end)==length(tex)
-        tex = [tex(1:end-1) '\_'];
-        if n>1
-            id = id(1:end-1);
-            n = n-1;
-        else
-            return
-        end
-    end
-    if n==1
-        tex = [ tex(1:(id-1)) '_{'  tex((id+1):end) '}' ];
-        return
-    else
-        for i=1:n-1
-            tex = [tex(1:id(1)-1) '\_' tex((id(1)+1):end)];
-            id = id(2:end)+1;
-        end
-        tex = [tex(1:(id-1)) '_{'  tex((id+1):end) '}'];
-    end
+
+if iscell(name)
+    nn = length(name);
 else
-    tex = strrep(name, '_', '\_');
+    nn = 1;
+end
+
+for i=1:nn
+    if info
+        if iscell(name)
+            tex = name{i};
+        else
+            tex = name;
+        end
+        n = length(id);
+        if id(1)==1
+            tex = ['\_', tex(2:end)];
+            if n>1
+                id = id(2:end)+1;
+                n = n-1;
+            else
+                return
+            end
+        end
+        if id(end)==length(tex)
+            tex = [tex(1:end-1) '\_'];
+            if n>1
+                id = id(1:end-1);
+                n = n-1;
+            else
+                return
+            end
+        end
+        if n==1
+            tex = [ tex(1:(id-1)) '_{'  tex((id+1):end) '}' ];
+            return
+        else
+            for i=1:n-1
+                tex = [tex(1:id(1)-1) '\_' tex((id(1)+1):end)];
+                id = id(2:end)+1;
+            end
+            tex = [tex(1:(id-1)) '_{'  tex((id+1):end) '}'];
+        end
+    else
+        if iscell(name)
+            tex = strrep(name{i}, '_', '\_');
+        else
+            tex = strrep(name, '_', '\_');
+        end
+    end
 end
 
 %@test:1
