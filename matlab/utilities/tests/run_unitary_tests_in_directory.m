@@ -29,11 +29,14 @@ fid = fopen('git.last-commit-hash');
 gitlastcommithash = fgetl(fid);
 fclose(fid);
 
+matlabverion = version;
+platform = computer;
+
 listoffiles = get_directory_description(dirname);
 [report, time] = run_unitary_tests(listoffiles);
 
 if nargin>1 && savereport>0
-    save(['report-' gitlastcommithash '.mat'],'report','time','gitinfo','gitlastcommithash');
+    save(['report-' gitlastcommithash '.mat'],'report','time','gitinfo','gitlastcommithash','matlabverion','platform');
 end
 
 if nargin>2
