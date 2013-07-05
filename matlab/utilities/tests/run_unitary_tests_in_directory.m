@@ -33,7 +33,10 @@ matlabverion = version;
 platform = computer;
 
 listoffiles = get_directory_description(dirname);
+
+diary(['report-' gitlastcommithash '.log'] )
 [report, time] = run_unitary_tests(listoffiles);
+diary off
 
 if nargin>1 && savereport>0
     save(['report-' gitlastcommithash '.mat'],'report','time','gitinfo','gitlastcommithash','matlabverion','platform');

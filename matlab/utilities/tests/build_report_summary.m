@@ -29,10 +29,12 @@ else
         mailto = mailreport;
         mailreport = 1;
         fid = fopen('~/.matlab-send-report');
+        server = fgetl(fid);
+        fclose(fid);
         fprintf('\n\n');
         disp('Send report...')
-        system(['scp ' reportfile ' ' fgetl(fid)]);
-        fclose(fid);
+        system(['scp ' reportfile ' ' server]);
+        system(['scp ' reportfile(1:end-3) 'log ' server]);
     else
         if ~isequal(mailreport,0)
             error('build_report_summary:: Third argument must be an adress email!')
@@ -50,6 +52,7 @@ str = char(str,'');
 str = char(str,'This is a summary report for the unitary tests in Dynare. Full report can be found at');
 str = char(str,'');
 str = char(str,['http://www.dynare.org/stepan/dynare/tests/' reportfile]);
+str = char(str,['http://www.dynare.org/stepan/dynare/tests/' reportfile(1:end-3) 'log']);
 str = char(str,'');
 str = char(str,gitinfo(1,:));
 str = char(str,gitinfo(2,:));
