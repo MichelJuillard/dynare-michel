@@ -1,3 +1,4 @@
+% --*-- Unitary tests --*--
 function tex = name2tex(name, info)
 % Converts plain text name into tex name.
  
