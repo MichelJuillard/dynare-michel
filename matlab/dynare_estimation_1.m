@@ -491,6 +491,24 @@ if ~options_.mh_posterior_mode_estimation && options_.cova_compute
         disp('=> posterior variance of the estimated parameters are not positive.')
         disp('You should  try  to change the initial values of the parameters using')
         disp('the estimated_params_init block, or use another optimization routine.')
+        params_at_bound=find(xparam1==ub | xparam1==lb);
+        if ~isempty(params_at_bound)
+            for ii=1:length(params_at_bound)
+            params_at_bound_name{ii,1}=get_the_name(ii,0,M_,estim_params_,options_);
+            end
+            disp_string=[params_at_bound_name{1,:}];
+            for ii=2:size(params_at_bound_name,1)
+                disp_string=[disp_string,', ',params_at_bound_name{ii,:}];
+            end
+            fprintf('\nThe following parameters are at the prior bound: %s\n', disp_string)
+            fprintf('Some potential solutions are:\n')
+            fprintf('   - Check your model for mistakes.\n')
+            fprintf('   - Check whether model and data are consistent (correct observation equation).\n')
+            fprintf('   - Shut off prior_trunc.\n')
+            fprintf('   - Use a different mode_compute like 6 or 9.\n')
+            fprintf('   - Check whether the parameters estimated are identified.\n')
+            fprintf('   - Increase the informativeness of the prior.\n')
+        end
         warning('The results below are most likely wrong!');
     end
 end
