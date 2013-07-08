@@ -182,7 +182,7 @@ function [resid,dr] = risky_residuals(ys,pm,M,dr,options,oo)
         pm = model_structure(M,options);
         [dr,info] = dyn_first_order_solver(d1,M,dr,options,0);
         if info
-            print_info();
+            print_info(info,options.noprint,options);
         end
         dr = dyn_second_order_solver(d1,d2,dr,M,...
                                      options.threads.kronecker.A_times_B_kronecker_C,...
