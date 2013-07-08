@@ -49,17 +49,17 @@ gitlastcommithash = reportfilecontent.gitlastcommithash;
 
 str = 'Hi,';
 str = char(str,'');
-str = char(str,'This is a summary report for the unitary tests in Dynare. Full report can be found at');
+str = char(str,'This is a summary report for the unitary tests in Dynare. Full report can be found at:');
+str = char(str,'');
 str = char(str,'');
 str = char(str,['http://www.dynare.org/stepan/dynare/tests/' reportfile]);
+str = char(str,'');
 str = char(str,['http://www.dynare.org/stepan/dynare/tests/' reportfile(1:end-3) 'log']);
 str = char(str,'');
 str = char(str,gitinfo(1,:));
 str = char(str,gitinfo(2,:));
-
 str = char(str,'');
 str = char(str,'');
-
 str = char(str,['===========================']);
 str = char(str,'DYNARE/MATLAB UNITARY TESTS');
 str = char(str,'===========================');
@@ -75,9 +75,9 @@ for i=1:size(reportcell,1)
 end
 
 if printonscreen
-    fprintf('\n\n')
+    skipline(2);
     disp(str)
-    fprintf('\n\n')
+    skipline(2);
 end
 
 if mailreport
