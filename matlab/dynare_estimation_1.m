@@ -38,7 +38,7 @@ if options_.order > 1
         disp('Estimation using a non linear filter!')
         disp(' ')
         if ~options_.nointeractive && ismember(options_.mode_compute,[1,3,4]) % Known gradient-based optimizers
-            warning('You are using a gradient-based mode-finder. Particle filtering introduces discontinuities in the objective function w.r.t the parameters. Thus, should use a non-gradient based optimizer.')
+            disp('You are using a gradient-based mode-finder. Particle filtering introduces discontinuities in the objective function w.r.t the parameters. Thus, should use a non-gradient based optimizer.')
             fprintf('\nPlease choose a mode-finder:\n')
             fprintf('\t 0 - Continue using gradient-based method (it is most likely that you will no get any sensible result).\n')
             fprintf('\t 6 - Monte Carlo based algorithm\n')
