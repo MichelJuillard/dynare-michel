@@ -34,9 +34,9 @@ global M_ options_ oo_ estim_params_ bayestopt_ dataset_
 % Set particle filter flag.
 if options_.order > 1
     if options_.particle.status && options_.order==2
-        disp(' ')
+        skipline()
         disp('Estimation using a non linear filter!')
-        disp(' ')
+        skipline()
         if ~options_.nointeractive && ismember(options_.mode_compute,[1,3,4]) % Known gradient-based optimizers
             disp('You are using a gradient-based mode-finder. Particle filtering introduces discontinuities in the') 
             disp('objective function w.r.t the parameters. Thus, should use a non-gradient based optimizer.')
@@ -357,7 +357,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                 fval = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 options_.mh_jscale = Scale;
                 mouvement = max(max(abs(PostVar-OldPostVar)));
-                disp(' ')
+                skipline()
                 disp('========================================================== ')
                 disp(['   Change in the covariance matrix = ' num2str(mouvement) '.'])
                 disp(['   Mode improvement = ' num2str(abs(OldMode-fval))])
@@ -378,7 +378,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                 options_.mh_jscale = Scale;
                 mouvement = max(max(abs(PostVar-OldPostVar)));
                 fval = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
-                disp(' ')
+                skipline()
                 disp('========================================================== ')
                 disp(['   Change in the covariance matrix = ' num2str(mouvement) '.'])
                 disp(['   Mode improvement = ' num2str(abs(OldMode-fval))])
@@ -391,11 +391,11 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
             save([M_.fname '_optimal_mh_scale_parameter.mat'],'Scale');
             bayestopt_.jscale = ones(length(xparam1),1)*Scale;
         end
-        disp(' ')
+        skipline()
         disp(['Optimal value of the scale parameter = ' num2str(Scale)])
-        disp(' ')
+        skipline()
         disp(['Final value of the log posterior (or likelihood): ' num2str(fval)])
-        disp(' ')
+        skipline()
         parameter_names = bayestopt_.name;
         save([M_.fname '_mode.mat'],'xparam1','hh','parameter_names');
       case 7
@@ -507,7 +507,7 @@ if ~options_.mh_posterior_mode_estimation && options_.cova_compute
     try
         chol(hh);
     catch
-        disp(' ')
+        skipline()
         disp('POSTERIOR KERNEL OPTIMIZATION PROBLEM!')
         disp(' (minus) the hessian matrix at the "mode" is not positive definite!')
         disp('=> posterior variance of the estimated parameters are not positive.')
@@ -556,9 +556,9 @@ if any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
         log_det_invhess = -estim_params_nbr*log(scale_factor)+log(det(scale_factor*invhess));
         likelihood = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         oo_.MarginalDensity.LaplaceApproximation = .5*estim_params_nbr*log(2*pi) + .5*log_det_invhess - likelihood;
-        disp(' ')
+        skipline()
         disp(sprintf('Log data density [Laplace approximation] is %f.',oo_.MarginalDensity.LaplaceApproximation))
-        disp(' ')
+        skipline()
     end
 elseif ~any(bayestopt_.pshape > 0) && ~options_.mh_posterior_mode_estimation
     oo_=display_estimation_results_table(xparam1,stdh,M_,options_,estim_params_,bayestopt_,oo_,pnames,'Maximum Likelihood','mle');
