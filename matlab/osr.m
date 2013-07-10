@@ -34,9 +34,9 @@ for i=1:np
     i_params(i) = strmatch(deblank(params(i,:)),M_.param_names,'exact');
 end
 
-disp(' ')
+skipline()
 disp('OPTIMAL SIMPLE RULE')
-disp(' ')
+skipline()
 osr1(i_params,i_var,W);
 
 stoch_simul(var_list);

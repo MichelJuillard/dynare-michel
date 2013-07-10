@@ -24,9 +24,9 @@ function disp_model_summary(M,dr)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-disp(' ')
+skipline()
 disp('MODEL SUMMARY')
-disp(' ')
+skipline()
 disp(['  Number of variables:         ' int2str(M.endo_nbr)])
 disp(['  Number of stochastic shocks: ' int2str(M.exo_nbr)])
 disp(['  Number of state variables:   ' ...

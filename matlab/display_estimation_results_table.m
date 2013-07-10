@@ -44,7 +44,7 @@ ncn = estim_params_.ncn;  % Covariance of the measurement innovations (number of
 np  = estim_params_.np ;  % Number of deep parameters.
 nx  = nvx+nvn+ncx+ncn+np; % Total number of parameters to be estimated.
 
-disp(' ')
+skipline()
 disp(['RESULTS FROM ' upper(table_title) ' ESTIMATION'])
 LaTeXtitle=strrep(table_title,' ','_');
 tstath = abs(xparam1)./stdh;
@@ -76,7 +76,7 @@ if np
         eval(['oo_.' field_name '_std.parameters.' name ' = stdh(ip);']);
         ip = ip+1;
     end
-    disp(' ')
+    skipline()
 end
 if nvx
     ip = 1;
@@ -98,7 +98,7 @@ if nvx
         eval(['oo_.' field_name '_std.shocks_std.' name ' = stdh(ip);']);
         ip = ip+1;
     end
-    disp(' ')
+    skipline()
  end
  if nvn
     disp('standard deviation of measurement errors')
@@ -119,7 +119,7 @@ if nvx
         eval(['oo_.' field_name '_std.measurement_errors_std.' name ' = stdh(ip);']);
         ip = ip+1;
     end
-    disp(' ')
+    skipline()
  end
 
 if ncx
@@ -144,7 +144,7 @@ if ncx
         eval(['oo_.' field_name '_std.shocks_corr.' NAME ' = stdh(ip);']);
         ip = ip+1;
     end
-    disp(' ')
+    skipline()
 end
 
 if ncn
@@ -167,7 +167,7 @@ if ncn
         eval(['oo_.' field_name '_std.measurement_errors_corr.' NAME ' = stdh(ip);']);
         ip = ip+1;
     end
-    disp(' ')
+    skipline()
 end
 
 OutputDirectoryName = CheckPath('Output',M_.dname);

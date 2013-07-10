@@ -130,7 +130,7 @@ for b = fblck:nblck,
     end
     if exist('OCTAVE_VERSION') || options_.console_mode
         diary off
-        disp(' ')
+        skipline()
     elseif whoiam
         %       keyboard;
         waitbarString = ['Please wait... Metropolis-Hastings (' int2str(b) '/' int2str(options_.mh_nblck) ')...'];

@@ -83,12 +83,10 @@ M_.Sigma_e = Sigma_e;
 
 % Display the non-zero residuals if no return value
 if nargout == 0
-    for i = 1:4
-        disp(' ')
-    end
+    skipline(4)
     ind = [];
     disp('Residuals of the static equations:')
-    disp(' ')
+    skipline()
     for i=1:M_.orig_endo_nbr
         if abs(z(i)) < options_.dynatol.f/100
             tmp = 0;
@@ -107,9 +105,7 @@ if nargout == 0
             disp( ['Equation number ', int2str(i) ,' : ', num2str(tmp) ,' : ' s])
         end
     end
-    for i = 1:2
-        disp(' ')
-    end
+    skipline(2)
 end
 
 if info(1)

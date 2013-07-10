@@ -50,11 +50,10 @@ fname_ = M_.fname;
 lgy_ = M_.endo_names;
 dr_ = oo_.dr;
 
-disp(' ')
-disp(' ')
+skipline(2)
 disp('Starting sensitivity analysis')
 disp('for the fit of EACH observed series ...')
-disp(' ')
+skipline()
 disp('Deleting old SA figures...')
 a=dir([OutDir,filesep,'*.*']);
 tmp1='0';
@@ -149,7 +148,7 @@ if ~loadSA,
     nruns=size(x,1);
     nfilt=floor(pfilt*nruns);
     if options_.opt_gsa.ppost || (options_.opt_gsa.ppost==0 && options_.opt_gsa.lik_only==0)
-        disp(' ')
+        skipline()
         disp('Computing RMSE''s...')
         fobs = options_.first_obs;
         nobs=options_.nobs;
@@ -408,7 +407,7 @@ else
     end
     param_names=param_names(2:end,:);
     
-    disp(' ')
+    skipline()
     disp('RMSE over the MC sample:')
     disp('            min yr RMSE    max yr RMSE')
     for j=1:size(vvarvecm,1),
@@ -416,8 +415,7 @@ else
     end
     invar = find( std(rmse_MC)./mean(rmse_MC)<=0.0001 );
     if ~isempty(invar)
-        disp(' ')
-        disp(' ')
+        skipline(2)
         disp('RMSE is not varying significantly over the MC sample for the following variables:')
         disp(vvarvecm(invar,:))
         disp('These variables are excluded from SA')
@@ -427,7 +425,7 @@ else
     vvarvecm=vvarvecm(ivar,:);
     rmse_MC=rmse_MC(:,ivar);
     
-    disp(' ')
+    skipline()
     % if options_.opt_gsa.ppost==0 && options_.opt_gsa.pprior,
     disp(['Sample filtered the ',num2str(pfilt*100),'% best RMSE''s for each observed series ...' ])
     % else
@@ -437,8 +435,7 @@ else
     % set(gca,'xticklabel',vvarvecm)
     % saveas(gcf,[fname_,'_SA_RMSE'])
     
-    disp(' ')
-    disp(' ')
+    skipline(2)
     disp('RMSE ranges after filtering:')
     if options_.opt_gsa.ppost==0 && options_.opt_gsa.pprior,
         disp(['             best ',num2str(pfilt*100),'% filtered             remaining 90%'])
@@ -461,7 +458,7 @@ else
     
     %%%%% R2 table
     
-    disp(' ')
+    skipline()
     disp('R2 over the MC sample:')
     disp('            min yr R2      max yr R2')
     for j=1:size(vvarvecm,1),
@@ -469,11 +466,10 @@ else
     end
     r2_MC=r2_MC(:,ivar);
     
-    disp(' ')
+    skipline()
     disp(['Sample filtered the ',num2str(pfilt*100),'% best R2''s for each observed series ...' ])
     
-    disp(' ')
-    disp(' ')
+    skipline()
     disp('R2 ranges after filtering:')
     if options_.opt_gsa.ppost==0 && options_.opt_gsa.pprior,
         disp(['             best ',num2str(pfilt*100),'% filtered             remaining 90%'])
@@ -511,14 +507,13 @@ else
     % snam=bayestopt_.name(find(nsp>0));
     nsnam=(find(nsp>1));
     
-    disp(' ')
-    disp(' ')
+    skipline(2
     disp('These parameters do not affect significantly the fit of ANY observed series:')
     disp(snam0)
-    disp(' ')
+    skipline()
     disp('These parameters affect ONE single observed series:')
     disp(snam1)
-    disp(' ')
+    skipline()
     disp('These parameters affect MORE THAN ONE observed series: trade off exists!')
     disp(snam2)
     
@@ -594,8 +589,7 @@ else
         nsx(j)=length(find(SP(:,j)));
     end
     
-    disp(' ')
-    disp(' ')
+    skipline(2
     disp('Sensitivity table (significance and direction):')
     vav=char(zeros(1, size(param_names,2)+3 ));
     ibl = 12-size(vvarvecm,2);
@@ -610,8 +604,7 @@ else
     end
     
     
-    disp(' ')
-    disp(' ')
+    skipline()
     disp('Starting bivariate analysis:')
     
     for i=1:size(vvarvecm,1)

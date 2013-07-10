@@ -167,11 +167,11 @@ trend_vector_2 = 2:(number_of_variables+1);
 
 % Set initial simplex around the initial guess (x).
 if verbose
-    for i=1:3, disp(' '), end
+    skipline(3)
     disp('+----------------------+')
     disp(' SIMPLEX INITIALIZATION ')
     disp('+----------------------+')
-    disp(' ')
+    skipline()
 end
 initial_point = x;
 [initial_score,junk1,junk2,nopenalty] = feval(objective_function,x,varargin{:});
@@ -188,7 +188,7 @@ else
         for i=1:number_of_variables
             fprintf(1,'%s: \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \n',bayestopt_.name{i},v(i,1), v(i,end), mean(v(i,:),2), min(v(i,:),[],2), max(v(i,:),[],2));
         end
-        disp(' ')
+        skipline()
     end
 end
 
@@ -247,8 +247,7 @@ while (func_count < max_func_calls) && (iter_count < max_iterations) && (simplex
         if fxe < fxr% xe is even better than xr.
             if optimize_expansion_parameter
                 if verbose>1
-                    disp('')
-                    disp('')
+                    skipline(2)
                     disp('Compute optimal expansion...')
                 end
                 xee  = xbar + rho*chi*1.01*(xbar-v(:,end));
@@ -316,8 +315,7 @@ while (func_count < max_func_calls) && (iter_count < max_iterations) && (simplex
                 end
                 if verbose>1
                     disp('Done!')
-                    disp(' ')
-                    disp(' ')
+                    skipline(2)
                 end
             end
             v(:,end) = xe;
@@ -384,7 +382,7 @@ while (func_count < max_func_calls) && (iter_count < max_iterations) && (simplex
         disp(['Norm of dSimplex:         ' num2str(norm(v-vold,'fro'))])
         disp(['Crit. f:                  ' num2str(critF)])
         disp(['Crit. x:                  ' num2str(critX)])
-        disp(' ')
+        skipline()
     end
     if verbose && max(abs(best_point-v(:,1)))>x_tolerance;
         if verbose<2
@@ -395,14 +393,14 @@ while (func_count < max_func_calls) && (iter_count < max_iterations) && (simplex
             disp(['Norm of dSimplex:         ' num2str(norm(v-vold,'fro'))])
             disp(['Crit. f:                  ' num2str(critF)])
             disp(['Crit. x:                  ' num2str(critX)])
-            disp(' ')
+            skipline()
         end
         disp(['Current parameter values: '])
         fprintf(1,'%s: \t\t\t %s \t\t\t %s \t\t\t %s \t\t\t %s \t\t\t %s \n','Names','Best point', 'Worst point', 'Mean values', 'Min values', 'Max values');
         for i=1:number_of_variables
             fprintf(1,'%s: \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \t\t\t %+8.6f \n',bayestopt_.name{i}, v(i,1), v(i,end), mean(v(i,:),2), min(v(i,:),[],2), max(v(i,:),[],2));
         end
-        disp(' ')
+        skipline()
     end
     if abs(best_point_score-fv(1))<f_tolerance
         no_improvements = no_improvements+1;
@@ -436,8 +434,7 @@ while (func_count < max_func_calls) && (iter_count < max_iterations) && (simplex
             iter_no_improvement_break = iter_no_improvement_break + 1;
             simplex_init = simplex_init+1;
             simplex_iterations = simplex_iterations+1;
-            disp(' ')
-            disp(' ')
+            skipline(2)
         end
     end
     if ((func_count==max_func_calls) || (iter_count==max_iterations) || (iter_no_improvement_break==max_no_improvement_break) || convergence || tooslow)
@@ -486,8 +483,7 @@ while (func_count < max_func_calls) && (iter_count < max_iterations) && (simplex
             iter_count = iter_count+1;
             simplex_iterations = simplex_iterations+1;
             simplex_algo_iterations = simplex_algo_iterations+1;
-            disp(' ')
-            disp(' ')
+            skipline(2)
         else
             break
         end

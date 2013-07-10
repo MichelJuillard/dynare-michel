@@ -67,4 +67,4 @@ fprintf('MH: Total number of generated MH files: %d.\n',TotalNumberOfMhFiles);
 fprintf('MH: I''ll use mh-files %d to %d.\n',FirstMhFile,TotalNumberOfMhFiles);
 fprintf('MH: In MH-file number %d I''ll start at line %d.\n',FirstMhFile,FirstLine);
 fprintf('MH: Finally I keep %d draws.\n',TotalNumberOfMhDraws-FirstDraw);
-disp(' ');
+skipline()

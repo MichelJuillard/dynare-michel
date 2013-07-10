@@ -39,10 +39,10 @@ for nlags = 1:maxnlags
     
     log_dnsty = posterior_int - prior_int - 0.5*ny*lik_nobs*log(2*pi);
     
-    disp(' ')
+    skipline()
     fprintf('The marginal log density of the BVAR(%g) model is equal to %10.4f\n', ...
             nlags, log_dnsty);
-    disp(' ')
+    skipline()
 end
 
 

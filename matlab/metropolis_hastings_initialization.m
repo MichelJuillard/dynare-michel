@@ -146,7 +146,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
         end
         fprintf(fidlog,' \n');
         disp('MH: Initial values found!')
-        disp(' ')
+        skipline()
     else% Case 2: one chain (we start from the posterior mode)
         fprintf(fidlog,['  Initial values of the parameters:\n']);
         candidate = transpose(xparam1(:));%
@@ -154,7 +154,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
             ix2 = candidate;
             ilogpo2 = - feval(TargetFun,ix2',dataset_,options_,M_,estim_params_,bayestopt_,oo_);
             disp('MH: Initialization at the posterior mode.')
-            disp(' ')
+            skipline()
             fprintf(fidlog,['    Blck ' int2str(1) 'params:\n']);
             for i=1:length(ix2(1,:))
                 fprintf(fidlog,['      ' int2str(i)  ':' num2str(ix2(1,i)) '\n']);
@@ -276,13 +276,13 @@ elseif options_.load_mh_file && ~options_.mh_recover
     record.MhDraws(end,3) = AnticipatedNumberOfLinesInTheLastFile;
     save([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
     disp(['MH: ... It''s done. I''ve loaded ' int2str(NumberOfPreviousSimulations) ' simulations.'])
-    disp(' ')
+    skipline()
     fclose(fidlog);
 elseif options_.mh_recover
     %% The previous metropolis-hastings crashed before the end! I try to
     %% recover the saved draws...
     disp('MH: Recover mode!')
-    disp(' ')
+    skipline()
     file = dir([MhDirectoryName '/'  ModelName '_mh_history.mat']);
     if ~length(file)
         error('MH:: FAILURE! there is no MH-history file!')

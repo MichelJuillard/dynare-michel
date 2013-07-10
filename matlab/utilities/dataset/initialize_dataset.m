@@ -48,10 +48,10 @@ dataset_.info.varobs = varobs;
 
 % Test the number of variables in the database.
 if dataset_.info.nvobs-size(rawdata,2)
-    disp(' ')
+    skipline()
     disp(['Declared number of observed variables = ' int2str(dataset.info.nvobs)])
     disp(['Number of variables in the database   = ' int2str(size(rawdata,2))])
-    disp(' ')
+    skipline()
     error(['Estimation can''t take place because the declared number of observed' ...
            'variables doesn''t match the number of variables in the database.'])
 end

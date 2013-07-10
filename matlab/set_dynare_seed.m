@@ -73,9 +73,9 @@ if matlab_random_streams% Use new matlab interface.
                             strcmpi(a,'swb2712') )
             disp('set_dynare_seed:: First argument must be string designing the uniform random number algorithm!')
             RandStream.list
-            disp(' ')
+            skipline()
             disp('set_dynare_seed:: Change the first input accordingly...')
-            disp(' ')
+            skipline()
             error(' ')
         end
         if ~isint(b)

@@ -116,7 +116,7 @@ for j=1:size(anamendo,1)
     for jx=1:size(anamexo,1)
         namexo=deblank(anamexo(jx,:));
         iexo=strmatch(namexo,M_.exo_names,'exact');
-        disp(' ')
+        skipline()
         disp(['[', namendo,' vs. ',namexo,']'])
 
         
@@ -162,7 +162,7 @@ for j=1:size(anamendo,1)
                             for jp=1:length(indsmirnov),
                                 disp([M_.param_names(estim_params_.param_vals(indsmirnov(jp),1),:),'   d-stat = ', num2str(dproba(indsmirnov(jp)),'%1.3f'),'   p-value = ', num2str(proba(indsmirnov(jp)),'%1.3f')])
                             end
-                            disp(' ');
+                            skipline()
                             stab_map_1(x0, iy, iyc, 'threshold',pvalue_ks,indsmirnov,xdir,[],['Reduced Form Mapping (Threshold) for ', namendo,' vs. lagged ', namexo]);
                             stab_map_2(x0(iy,:),alpha2,pvalue_corr,'inside_threshold',xdir,[],['Reduced Form Mapping (Inside Threshold)for ', namendo,' vs. lagged ', namexo])
                             stab_map_2(x0(iyc,:),alpha2,pvalue_corr,'outside_threshold',xdir,[],['Reduced Form Mapping (Outside Threshold) for ', namendo,' vs. lagged ', namexo])
@@ -218,7 +218,7 @@ for j=1:size(anamendo,1)
     for je=1:size(anamlagendo,1)
         namlagendo=deblank(anamlagendo(je,:));
         ilagendo=strmatch(namlagendo,M_.endo_names(oo_.dr.order_var(M_.nstatic+1:M_.nstatic+nsok),:),'exact');
-        disp(' ')
+        skipline()
         disp(['[', namendo,' vs. lagged ',namlagendo,']'])
         
         if ~isempty(ilagendo),
@@ -261,7 +261,7 @@ for j=1:size(anamendo,1)
                             for jp=1:length(indsmirnov),
                                 disp([M_.param_names(estim_params_.param_vals(indsmirnov(jp),1),:),'   d-stat = ', num2str(dproba(indsmirnov(jp)),'%1.3f'),'   p-value = ', num2str(proba(indsmirnov(jp)),'%1.3f')])
                             end
-                            disp(' ');
+                            skipline()
                             stab_map_1(x0, iy, iyc, 'threshold',pvalue_ks,indsmirnov,xdir,[],['Reduced Form Mapping (Threshold) for ', namendo,' vs. lagged ', namlagendo]);
                             stab_map_2(x0(iy,:),alpha2,pvalue_corr,'inside_threshold',xdir,[],['Reduced Form Mapping (Inside Threshold) for ', namendo,' vs. lagged ', namlagendo])
                             stab_map_2(x0(iyc,:),alpha2,pvalue_corr,'outside_threshold',xdir,[],['Reduced Form Mapping (Outside Threshold) for ', namendo,' vs. lagged ', namlagendo])

@@ -45,9 +45,9 @@ if options_.dsge_var && options_.bayesian_irf
             msg = 1;
         end
         if msg
-            disp(' ')
+            skipline()
             disp('Posterior IRFs will be computed for all observed variables.')
-            disp(' ')
+            skipline()
         end
     end
     varlist = options_.varobs;
@@ -55,7 +55,7 @@ if options_.dsge_var && options_.bayesian_irf
 end
 
 if isempty(varlist)
-    disp(' ')
+    skipline()
     disp(['You did not declare endogenous variables after the estimation/calib_smoother command.'])
     cas = [];
     if options_.bayesian_irf
@@ -99,14 +99,13 @@ if isempty(varlist)
         else
             choice = [];
             while isempty(choice)
-                disp(' ')
-                disp(' ')
+                skipline(2)
                 disp('Choose one of the following options:')
-                disp(' ')
+                skipline()
                 disp(' [1] Consider all the endogenous variables.')
                 disp(' [2] Consider all the observed endogenous variables.')
                 disp(' [3] Stop Dynare and change the mod file.')
-                disp(' ')
+                skipline()
                 choice = input('options [default is 1] =  ');
                 if isempty(choice)
                     choice=1;
@@ -118,9 +117,9 @@ if isempty(varlist)
                 elseif choice==3
                     varlist = NaN;
                 else
-                    disp('')
+                    skipline()
                     disp('YOU HAVE TO ANSWER 1, 2 or 3!')
-                    disp('')
+                    skipline()
                 end
             end
         end
@@ -128,7 +127,7 @@ if isempty(varlist)
     if isnan(varlist)
         edit([M_.fname '.mod'])
     end
-    disp('')
+    skipline()
 end
 
 

@@ -91,7 +91,7 @@ if any(idemodel.ino),
     else
         disp(['The rank of H (model) is deficient!'  ]),
     end
-    disp(' ')
+    skipline()
     for j=1:npar,
         if any(idemodel.ind0(:,j)==0),
             pno = 100*length(find(idemodel.ind0(:,j)==0))/SampleSize;
@@ -106,7 +106,7 @@ if any(idemodel.ino),
     npairs=size(idemodel.jweak_pair,2);
     jmap_pair=dyn_unvech(1:npairs);
     jstore=[];
-    disp(' ')
+    skipline()
     for j=1:npairs,
         iweak = length(find(idemodel.jweak_pair(:,j)));
         if iweak,
@@ -120,7 +120,7 @@ if any(idemodel.ino),
         end
         
     end
-    disp(' ')
+    skipline()
     for j=1:npar,
         iweak = length(find(idemodel.jweak(:,j)));
         if iweak && ~ismember(j,jstore),
@@ -154,11 +154,11 @@ end
 
 if ~any(idemodel.ino) && ~any(any(idemodel.ind0==0))
     disp(['All parameters are identified in the model (rank of H).' ]),
-    disp(' ')
+    skipline()
 end
 
 if any(idemoments.ino),
-    disp(' ')
+    skipline()
     disp('WARNING !!!')
     if SampleSize > 1,
         disp(['The rank of J (moments) is deficient for ', num2str(length(find(idemoments.ino))),' out of ',int2str(SampleSize),' MC runs!'  ]),
@@ -172,7 +172,7 @@ if any(idemoments.ino),
 %     freqno = mean(indno)*100;
 %     ifreq=find(freqno);
     %     disp('MOMENT RANK FAILURE DUE TO COLLINEARITY OF PARAMETERS:');
-    disp(' ')
+    skipline()
     for j=1:npar,
         if any(idemoments.ind0(:,j)==0),
             pno = 100*length(find(idemoments.ind0(:,j)==0))/SampleSize;
@@ -184,7 +184,7 @@ if any(idemoments.ino),
             disp(['    [dJ/d(',name{j},')=0 for all J moments!]' ])
         end
     end
-    disp(' ')
+    skipline()
     npairs=size(idemoments.jweak_pair,2);
     jmap_pair=dyn_unvech(1:npairs);
     jstore=[];
@@ -201,7 +201,7 @@ if any(idemoments.ino),
         end
         
     end
-    disp(' ')
+    skipline()
     for j=1:npar,
         iweak = length(find(idemoments.jweak(:,j)));
         if iweak && ~ismember(j,jstore),
@@ -235,9 +235,9 @@ if any(idemoments.ino),
 %     end
 end
 if ~any(idemoments.ino) && ~any(any(idemoments.ind0==0))
-    disp(' ')
+    skipline()
     disp(['All parameters are identified by J moments (rank of J)' ]),
-    disp(' ')
+    skipline()
 end
 
 % if ~ options_.noprint && advanced,
@@ -267,7 +267,7 @@ end
 
 % identificaton patterns
 if SampleSize==1 && advanced,
-    disp(' ')
+    skipline()
     disp('Press ENTER to print advanced diagnostics'), pause(5),
     for  j=1:size(idemoments.cosnJ,2),
         pax=NaN(npar,npar);

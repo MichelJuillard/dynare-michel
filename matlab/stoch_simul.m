@@ -83,9 +83,9 @@ if info(1)
 end
 
 if ~options_.noprint
-    disp(' ')
+    skipline()
     disp('MODEL SUMMARY')
-    disp(' ')
+    skipline()
     disp(['  Number of variables:         ' int2str(M_.endo_nbr)])
     disp(['  Number of stochastic shocks: ' int2str(M_.exo_nbr)])
     disp(['  Number of state variables:   ' int2str(M_.nspred)])
@@ -97,9 +97,9 @@ if ~options_.noprint
     lh = size(labels,2)+2;
     dyntable(my_title,headers,labels,M_.Sigma_e,lh,10,6);
     if options_.partial_information
-        disp(' ')
+        skipline()
         disp('SOLUTION UNDER PARTIAL INFORMATION')
-        disp(' ')
+        skipline()
 
         if isfield(options_,'varobs')&& ~isempty(options_.varobs)
             PCL_varobs=options_.varobs;
@@ -113,7 +113,7 @@ if ~options_.noprint
             disp(['    ' PCL_varobs(i,:)])
         end
     end
-    disp(' ')
+    skipline()
     if options_.order <= 2 && ~PI_PCL_solver
         disp_dr(oo_.dr,options_.order,var_list);
     end

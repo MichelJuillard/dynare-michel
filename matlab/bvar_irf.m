@@ -92,10 +92,10 @@ for draw=1:options_.bvar_replic
 end
 
 if p > 0
-    disp(' ')
+    skipline()
     disp(['Some of the VAR models sampled from the posterior distribution'])
     disp(['were found to be explosive (' int2str(p) ' samples).'])
-    disp(' ')
+    skipline()
 end
 
 posterior_mean_irfs = mean(sampled_irfs,4);

@@ -129,5 +129,5 @@ if nvar > 0 && options_.noprint == 0
     end
     lh = size(labels,2)+2;
     dyntable(my_title,headers,labels,res_table,lh,10,6);
-    disp(' ')
+    skipline()
 end

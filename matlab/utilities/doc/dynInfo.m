@@ -68,8 +68,7 @@ if strcmp(ext(2:end),'m')
             fprintf(fid,'%s\n',deblank(block(i,:)));
         end
         fclose(fid);
-        disp(' ')
-        disp(' ')
+        skipline(2)
         system(['makeinfo --plaintext --no-split --no-validate ' fun '.texi']);
         delete([fun '.texi']);
     else

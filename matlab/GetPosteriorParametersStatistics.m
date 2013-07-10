@@ -62,7 +62,10 @@ header_width = row_header_width(M_,estim_params_,bayestopt_);
 tit2 = sprintf('%-*s %10s %10s %16s %6s %10s\n',header_width+2,' ','prior mean','post. mean','conf. interval','prior','pstdev');
 pformat = '%-*s %10.3f %10.4f %10.4f %8.4f %6s %10.4f';
 
-disp(' ');disp(' ');disp('ESTIMATION RESULTS');disp(' ');
+skipline(2)
+disp('ESTIMATION RESULTS')
+skipline()
+
 try
     disp(sprintf('Log data density is %f.',oo_.MarginalDensity.ModifiedHarmonicMean))
 catch
@@ -74,7 +77,7 @@ if np
     if TeX
         fid = TeXBegin(OutputDirectoryName,M_.fname,1,type);
     end
-    disp(' ')
+    skipline()
     disp(type)
     disp(tit2)
     ip = nvx+nvn+ncx+ncn+1;
@@ -120,7 +123,7 @@ if nvx
         fid = TeXBegin(OutputDirectoryName,M_.fname,2,'standard deviation of structural shocks');
     end
     ip = 1;
-    disp(' ')
+    skipline()
     disp('standard deviation of shocks')
     disp(tit2)
     for i=1:nvx
@@ -165,7 +168,7 @@ if nvn
     if TeX
         fid = TeXBegin(OutputDirectoryName,M_.fname,3,'standard deviation of measurement errors');
     end
-    disp(' ')
+    skipline()
     disp('standard deviation of measurement errors')
     disp(tit2)
     ip = nvx+1;
@@ -207,7 +210,7 @@ if ncx
     if TeX
         fid = TeXBegin(OutputDirectoryName,M_.fname,4,'correlation of structural shocks');
     end
-    disp(' ')
+    skipline()
     disp('correlation of shocks')
     disp(tit2)
     ip = nvx+nvn+1;
@@ -261,7 +264,7 @@ if ncn
     if TeX
         fid = TeXBegin(OutputDirectoryName,M_.fname,5,'correlation of measurement errors');
     end
-    disp(' ')
+    skipline()
     disp('correlation of measurement errors')
     disp(tit2)
     ip = nvx+nvn+ncx+1;

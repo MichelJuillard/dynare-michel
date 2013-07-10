@@ -213,9 +213,9 @@ options_ident.max_dim_cova_group = min([options_ident.max_dim_cova_group,nparam-
 
 MaxNumberOfBytes=options_.MaxNumberOfBytes;
 store_options_ident = options_ident;
-disp(' ')
+skipline()
 disp(['==== Identification analysis ====' ]),
-disp(' ')
+skipline()
 
 if iload <=0,
     
@@ -272,11 +272,11 @@ if iload <=0,
     [idehess_point, idemoments_point, idemodel_point, idelre_point, derivatives_info_point, info] = ...
         identification_analysis(params,indx,indexo,options_ident,dataset_, prior_exist, name_tex,1);
     if info(1)~=0,
-        disp(' ')
+        skipline()
         disp('----------- ')
         disp('Parameter error:')
         disp(['The model does not solve for ', parameters, ' with error code info = ', int2str(info(1))]),
-        disp(' ')
+        skipline()
         if info(1)==1,
         disp('info==1 %! The model doesn''t determine the current variables uniquely.')
         elseif info(1)==2,
@@ -305,7 +305,7 @@ if iload <=0,
         disp('info==30 %! Ergodic variance can''t be computed. ')
         end
         disp('----------- ')
-        disp(' ')
+        skipline()
         if any(bayestopt_.pshape)
             disp('Try sampling up to 50 parameter sets from the prior.')
             kk=0;
@@ -317,15 +317,15 @@ if iload <=0,
             end
         end
         if info(1)
-            disp(' ')
+            skipline()
             disp('----------- ')
             disp('Identification stopped:')
             if any(bayestopt_.pshape)
                 disp('The model did not solve for any of 50 attempts of random samples from the prior')
             end
             disp('----------- ')
-            disp(' ')
-            return,           
+            skipline()
+            return
         end
     else
     idehess_point.params=params;
@@ -343,7 +343,7 @@ if iload <=0,
     end
 
     if SampleSize > 1,
-        disp(' ')
+        skipline()
         disp('Monte Carlo Testing')
         h = dyn_waitbar(0,'Monte Carlo identification checks ...');
         iteration = 0;
@@ -587,7 +587,6 @@ else
     warning on,
 end
 
-disp(' ')
+skipline()
 disp(['==== Identification analysis completed ====' ]),
-disp(' ')
-disp(' ')
+skipline(2)

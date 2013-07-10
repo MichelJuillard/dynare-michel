@@ -31,8 +31,7 @@ function PosteriorOddsTable = model_comparison(ModelNames,ModelPriors,oo,options
 
 NumberOfModels = size(ModelNames,2);
 
-disp(' ')
-disp(' ')
+skipline(2)
 if isempty(ModelPriors)
     prior_flag = 0;% empty_prior=0
     ModelPriors = ones(NumberOfModels,1)/NumberOfModels;

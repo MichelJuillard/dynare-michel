@@ -96,18 +96,18 @@ if (nyf == n_explod) && (dr.full_rank)
 end
 
 if options.noprint == 0
-    disp(' ')
+    skipline()
     disp('EIGENVALUES:')
     disp(sprintf('%16s %16s %16s\n','Modulus','Real','Imaginary'))
     z=[m_lambda real(eigenvalues_(i)) imag(eigenvalues_(i))]';
     disp(sprintf('%16.4g %16.4g %16.4g\n',z))
     disp(sprintf('\nThere are %d eigenvalue(s) larger than 1 in modulus ', n_explod));
     disp(sprintf('for %d forward-looking variable(s)',nyf));
-    disp(' ')
+    skipline()
     if result
         disp('The rank condition is verified.')
     else
         disp('The rank conditions ISN''T verified!')
     end
-    disp(' ')
+    skipline()
 end

@@ -113,13 +113,13 @@ if nargin>2
         estimated_parameters_optimization_path = [NaN;xparam];
         save('optimization_path.mat','estimated_parameters_optimization_path');
     end
-    disp(' ')
+    skipline()
     disp('Master talks to its slaves...')
-    disp(' ')
+    skipline()
     % Save the workspace.
     save('master_variables.mat','options_','M_','oo_');
     % Send the workspace to each remote computer.
-    disp('')
+    skipline()
     for i = 1:length(parallel)
         if ~strcmpi(hostname,parallel(i).machine)
             unix(['scp master_variables.mat ' , parallel(i).login , '@' , parallel(i).machine , ':' parallel(i).folder]);
@@ -191,9 +191,9 @@ if nargin>2
             end
         end
     end
-    disp(' ')
+    skipline()
     disp('... And slaves do as ordered.')
-    disp(' ')
+    skipline()
     if exist('intermediary_results_from_master_and_slaves','dir')
         unix('rm -rf intermediary_results_from_master_and_slaves');
     end
@@ -201,7 +201,7 @@ if nargin>2
     unix('chmod -R u+x intermediary_results_from_master_and_slaves');
 end
 
-disp('');
+skipline()
 
 if options.optimization_routine==1
     % Set options for csminwel. 

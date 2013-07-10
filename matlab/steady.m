@@ -55,7 +55,7 @@ end
 
 if info(1)
     hv = options_.homotopy_values;
-    disp(' ')
+    skipline()
     disp('WARNING: homotopy step was not completed')
     disp('The last values for which a solution was found are:')
     for i=1:length(ip)

@@ -499,9 +499,9 @@ if length(iunstable)>0 && length(iunstable)<Nsam,
         fprintf(['%4.1f%% of the prior support gives indeterminacy.'],length(iindeterm)/Nsam*100)
     end
     if ~isempty(iwrong),
-        disp(' ');
+        skipline()
         disp(['For ',num2str(length(iwrong)/Nsam*100,'%1.3f'),'\% of the prior support dynare could not find a solution.'])
-        disp(' ');
+        skipline()
         if any(infox==1),
             disp(['    For ',num2str(length(find(infox==1))/Nsam*100,'%1.3f'),'\% The model doesn''t determine the current variables uniquely.'])
         end
@@ -534,7 +534,7 @@ if length(iunstable)>0 && length(iunstable)<Nsam,
         end
 
     end
-    disp(' ');
+    skipline()
     % Blanchard Kahn
     [proba, dproba] = stab_map_1(lpmat, istable, iunstable, aname,0);
 %     indstab=find(dproba>ksstat);
@@ -543,7 +543,7 @@ if length(iunstable)>0 && length(iunstable)<Nsam,
     for j=1:length(indstab),
         disp([M_.param_names(estim_params_.param_vals(indstab(j),1),:),'   d-stat = ', num2str(dproba(indstab(j)),'%1.3f'),'   p-value = ', num2str(proba(indstab(j)),'%1.3f')])
     end
-    disp(' ');
+    skipline()
     if ~isempty(indstab)
         stab_map_1(lpmat, istable, iunstable, aname, 1, indstab, OutputDirectoryName,[],atitle);
     end
@@ -556,7 +556,7 @@ if length(iunstable)>0 && length(iunstable)<Nsam,
         for j=1:length(indindet),
             disp([M_.param_names(estim_params_.param_vals(indindet(j),1),:),'   d-stat = ', num2str(dproba(indindet(j)),'%1.3f'),'   p-value = ', num2str(proba(indindet(j)),'%1.3f')])
         end
-        disp(' ');
+        skipline()
         if ~isempty(indindet)
             stab_map_1(lpmat, [1:Nsam], iindeterm, aindetname, 1, indindet, OutputDirectoryName,[],aindettitle);
         end
@@ -570,7 +570,7 @@ if length(iunstable)>0 && length(iunstable)<Nsam,
         for j=1:length(indunst),
             disp([M_.param_names(estim_params_.param_vals(indunst(j),1),:),'   d-stat = ', num2str(dproba(indunst(j)),'%1.3f'),'   p-value = ', num2str(proba(indunst(j)),'%1.3f')])
         end
-        disp(' ');
+        skipline()
         if ~isempty(indunst)
             stab_map_1(lpmat, [1:Nsam], ixun, aunstablename, 1, indunst, OutputDirectoryName,[],aunstabletitle);
         end
@@ -584,13 +584,13 @@ if length(iunstable)>0 && length(iunstable)<Nsam,
         for j=1:length(indwrong),
             disp([M_.param_names(estim_params_.param_vals(indwrong(j),1),:),'   d-stat = ', num2str(dproba(indwrong(j)),'%1.3f'),'   p-value = ', num2str(proba(indwrong(j)),'%1.3f')])
         end
-        disp(' ');
+        skipline()
         if ~isempty(indwrong)
             stab_map_1(lpmat, [1:Nsam], iwrong, awronguniname, 1, indwrong, OutputDirectoryName,[],awrongunititle);
         end
     end
 
-    disp(' ')
+    skipline()
     disp('Starting bivariate analysis:')
 
     c0=corrcoef(lpmat(istable,:));

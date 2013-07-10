@@ -136,7 +136,7 @@ for its = 1:maxit
 end
 
 check = 1;
-disp(' ')
+skipline()
 disp('SOLVE: maxit has been reached')
 
 % 01/14/01 MJ lnsearch is now a separate function
