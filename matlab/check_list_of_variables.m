@@ -93,30 +93,35 @@ if isempty(varlist)
         string = [ cas , ' will be computed for the ' num2str(M_.endo_nbr)  ' endogenous variables'];
         string = [ string ' of your model, this can be very long....']; 
         format_text(string, 10)
-        choice = [];
-        while isempty(choice)
-            disp(' ')
-            disp(' ')
-            disp('Choose one of the following options:')
-            disp(' ')
-            disp(' [1] Consider all the endogenous variables.')
-            disp(' [2] Consider all the observed endogenous variables.')
-            disp(' [3] Stop Dynare and change the mod file.')
-            disp(' ')
-            choice = input('options [default is 1] =  ');
-            if isempty(choice)
-                choice=1;
-            end
-            if choice==1
-                varlist = M_.endo_names(1:M_.orig_endo_nbr, :);
-            elseif choice==2
-                varlist = options_.varobs;
-            elseif choice==3
-                varlist = NaN;
-            else
-                disp('')
-                disp('YOU HAVE TO ANSWER 1, 2 or 3!')
-                disp('')
+        if options_.nointeractive
+            % Default behaviour is to consider all the endogenous variables.
+            varlist = M_.endo_names(1:M_.orig_endo_nbr, :);
+        else
+            choice = [];
+            while isempty(choice)
+                disp(' ')
+                disp(' ')
+                disp('Choose one of the following options:')
+                disp(' ')
+                disp(' [1] Consider all the endogenous variables.')
+                disp(' [2] Consider all the observed endogenous variables.')
+                disp(' [3] Stop Dynare and change the mod file.')
+                disp(' ')
+                choice = input('options [default is 1] =  ');
+                if isempty(choice)
+                    choice=1;
+                end
+                if choice==1
+                    varlist = M_.endo_names(1:M_.orig_endo_nbr, :);
+                elseif choice==2
+                    varlist = options_.varobs;
+                elseif choice==3
+                    varlist = NaN;
+                else
+                    disp('')
+                    disp('YOU HAVE TO ANSWER 1, 2 or 3!')
+                    disp('')
+                end
             end
         end
     end

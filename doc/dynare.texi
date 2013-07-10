@@ -747,6 +747,9 @@ computations.
 Activate the @code{nograph} option (@xref{nograph}), so that Dynare will not produce any
 graph
 
+@item nointeractive
+Instructs Dynare to not request user input
+
 @item cygwin
 Tells Dynare that your MATLAB is configured for compiling MEX files with
 Cygwin (@pxref{Software requirements}). This option is only available

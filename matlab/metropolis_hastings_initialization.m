@@ -127,9 +127,15 @@ if ~options_.load_mh_file && ~options_.mh_recover
                 init_iter = init_iter + 1;
                 if init_iter > 100 && validate == 0
                     disp(['MH: I couldn''t get a valid initial value in 100 trials.'])
-                    disp(['MH: You should Reduce mh_init_scale...'])
-                    disp(sprintf('MH: Parameter mh_init_scale is equal to %f.',options_.mh_init_scale))
-                    options_.mh_init_scale = input('MH: Enter a new value...  ');
+                    if options_.nointeractive
+                        disp(['MH: I reduce mh_init_scale by ten percent:'])
+                        options_.mh_init_scale = .9*options_.mh_init_scale;
+                        disp(sprintf('MH: Parameter mh_init_scale is now equal to %f.',options_.mh_init_scale))
+                    else
+                        disp(['MH: You should Reduce mh_init_scale...'])
+                        disp(sprintf('MH: Parameter mh_init_scale is equal to %f.',options_.mh_init_scale))
+                        options_.mh_init_scale = input('MH: Enter a new value...  ');
+                    end
                     trial = trial+1;
                 end
             end
