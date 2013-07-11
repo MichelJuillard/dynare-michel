@@ -77,7 +77,7 @@ fprintf('\n') ;
 model_dynamic = str2func([M_.fname,'_dynamic']);
 z = Y(find(lead_lag_incidence'));
 [d1,jacobian] = model_dynamic(z,oo_.exo_simul, params, ...
-                              steady_state,2);
+                              steady_state,M_.maximum_lag+1);
 
 A = sparse([],[],[],periods*ny,periods*ny,periods*nnz(jacobian));
 res = zeros(periods*ny,1);
@@ -91,15 +91,15 @@ for iter = 1:options_.maxit_
     i_cols = find(lead_lag_incidence');
     i_cols_A = i_cols;
     
-    for it = 2:(periods+1)
+    for it = (M_.maximum_lag+1):(M_.maximum_lag+periods)
 
         [d1,jacobian] = model_dynamic(Y(i_cols),exo_simul, params, ...
                                       steady_state,it);
-        if it == periods+1 && it == 2
+        if it == M_.maximum_lag+periods && it == M_.maximum_lag+1
             A(i_rows,i_cols_A0) = jacobian(:,i_cols_0);
-        elseif it == periods+1
+        elseif it == M_.maximum_lag+periods
             A(i_rows,i_cols_A(i_cols_T)) = jacobian(:,i_cols_T);
-        elseif it == 2
+        elseif it == M_.maximum_lag+1
             A(i_rows,i_cols_A1) = jacobian(:,i_cols_1);
         else
             A(i_rows,i_cols_A) = jacobian(:,i_cols_j);
@@ -109,7 +109,7 @@ for iter = 1:options_.maxit_
         
         i_rows = i_rows + ny;
         i_cols = i_cols + ny;
-        if it > 2
+        if it > M_.maximum_lag+1
             i_cols_A = i_cols_A + ny;
         end
     end
