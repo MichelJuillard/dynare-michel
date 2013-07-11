@@ -93,15 +93,9 @@ Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basen
         {
           compute_block_time(0, true, /*block_num, size, steady_state, */false);
           if (block >= 0)
-            #ifdef USE_OMP
-            #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-            #endif
             for (int j = 0; j < size; j++)
               residual[j] = y[Block_Contain[j].Variable] - ya[Block_Contain[j].Variable];
           else
-            #ifdef USE_OMP
-            #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-            #endif
             for (int j = 0; j < size; j++)
               residual[Block_Contain[j].Equation] = y[Block_Contain[j].Variable] - ya[Block_Contain[j].Variable];
         }
@@ -114,15 +108,9 @@ Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basen
               Per_y_ = it_*y_size;
               compute_block_time(0, true, /*block_num, size, steady_state, */false);
               if (block >= 0)
-                #ifdef USE_OMP
-                #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-                #endif
                 for (int j = 0; j < size; j++)
                   residual[it_*size+j] = y[it_*y_size+Block_Contain[j].Variable] - ya[it_*y_size+Block_Contain[j].Variable];
               else
-                #ifdef USE_OMP
-                #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-                #endif
                 for (int j = 0; j < size; j++)
                   residual[it_*size+Block_Contain[j].Equation] = y[it_*y_size+Block_Contain[j].Variable] - ya[it_*y_size+Block_Contain[j].Variable];
             }
@@ -135,15 +123,9 @@ Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basen
         {
           compute_block_time(0, true, /*block_num, size, steady_state,*/ false);
           if (block < 0)
-             #ifdef USE_OMP
-             #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-             #endif
             for (int j = 0; j < size; j++)
               residual[Block_Contain[j].Equation] = r[j];
           else
-            #ifdef USE_OMP
-            #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-            #endif
             for (int j = 0; j < size; j++)
               residual[j] = r[j];
         }
@@ -156,15 +138,9 @@ Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basen
               Per_y_ = it_*y_size;
               compute_block_time(0, true, /*block_num, size, steady_state,*/ false);
               if (block < 0)
-                #ifdef USE_OMP
-                #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-                #endif
                 for (int j = 0; j < size; j++)
                   residual[Per_y_+Block_Contain[j].Equation] = r[j];
               else
-                #ifdef USE_OMP
-                #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-                #endif
                 for (int j = 0; j < size; j++)
                   residual[it_*size+j] = r[j];
             }
@@ -183,15 +159,9 @@ Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basen
         {
           compute_block_time(0, true, /*block_num, size, steady_state,*/ false);
           if (block < 0)
-            #ifdef USE_OMP
-            #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-            #endif
             for (int j = 0; j < size; j++)
               residual[Block_Contain[j].Equation] = r[j];
           else
-            #ifdef USE_OMP
-            #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-            #endif
             for (int j = 0; j < size; j++)
               residual[j] = r[j];
         }
@@ -204,15 +174,9 @@ Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basen
               Per_y_ = it_*y_size;
               compute_block_time(0, true, /*block_num, size, steady_state,*/ false);
               if (block < 0)
-                #ifdef USE_OMP
-                #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-                #endif
                 for (int j = 0; j < size; j++)
                   residual[it_*y_size+Block_Contain[j].Equation] = r[j];
               else
-                #ifdef USE_OMP
-                #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-                #endif
                 for (int j = 0; j < size; j++)
                   residual[it_*size+j] = r[j];
             }
@@ -224,15 +188,9 @@ Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basen
         {
           compute_block_time(0, true, /*block_num, size, steady_state,*/ false);
           if (block >= 0)
-            #ifdef USE_OMP
-            #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-            #endif
             for (int j = 0; j < size; j++)
               residual[j] = y[Block_Contain[j].Variable] - ya[Block_Contain[j].Variable];
           else
-            #ifdef USE_OMP
-            #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-            #endif
             for (int j = 0; j < size; j++)
               residual[Block_Contain[j].Equation] = y[Block_Contain[j].Variable] - ya[Block_Contain[j].Variable];
         }
@@ -245,15 +203,9 @@ Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basen
               Per_y_ = it_*y_size;
               compute_block_time(0, true, /*block_num, size, steady_state,*/ false);
               if (block >= 0)
-                #ifdef USE_OMP
-                #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-                #endif
                 for (int j = 0; j < size; j++)
                   residual[it_*size+j] = y[it_*y_size+Block_Contain[j].Variable] - ya[it_*y_size+Block_Contain[j].Variable];
               else
-                #ifdef USE_OMP
-                #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-                #endif
                 for (int j = 0; j < size; j++)
                   residual[it_*size+Block_Contain[j].Equation] = y[it_*y_size+Block_Contain[j].Variable] - ya[it_*y_size+Block_Contain[j].Variable];
             }
@@ -266,15 +218,9 @@ Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basen
         {
           compute_block_time(0, true, /*block_num, size, steady_state,*/ false);
           if (block < 0)
-            #ifdef USE_OMP
-            #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-            #endif
             for (int j = 0; j < size; j++)
               residual[Block_Contain[j].Equation] = r[j];
           else
-            #ifdef USE_OMP
-            #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-            #endif
             for (int j = 0; j < size; j++)
               residual[j] = r[j];
         }
@@ -287,15 +233,9 @@ Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basen
               Per_y_ = it_*y_size;
               compute_block_time(0, true, /*block_num, size, steady_state,*/ false);
               if (block < 0)
-                #ifdef USE_OMP
-                #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-                #endif
                 for (int j = 0; j < size; j++)
                   residual[Per_y_+Block_Contain[j].Equation] = r[j];
               else
-                #ifdef USE_OMP
-                #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-                #endif
                 for (int j = 0; j < size; j++)
                   residual[it_*size+j] = r[j];
             }
@@ -311,15 +251,9 @@ Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basen
         {
           compute_block_time(0, true, /*block_num, size, steady_state,*/ false);
           if (block < 0)
-            #ifdef USE_OMP
-            #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-            #endif
             for (int j = 0; j < size; j++)
               residual[Block_Contain[j].Equation] = r[j];
           else
-            #ifdef USE_OMP
-            #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-            #endif
             for (int j = 0; j < size; j++)
               residual[j] = r[j];
         }
@@ -332,15 +266,9 @@ Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basen
               Per_y_ = it_*y_size;
               compute_block_time(0, true, /*block_num, size, steady_state, */false);
               if (block < 0)
-                #ifdef USE_OMP
-                #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-                #endif
                 for (int j = 0; j < size; j++)
                   residual[Per_y_+Block_Contain[j].Equation] = r[j];
               else
-                #ifdef USE_OMP
-                #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-                #endif
                 for (int j = 0; j < size; j++)
                   residual[it_*size+j] = r[j];
             }
@@ -361,15 +289,9 @@ Interpreter::evaluate_a_block(/*const int size, const int type, string bin_basen
           it_code = begining;
           compute_block_time(Per_u_, true, /*block_num, size, steady_state,*/ false);
           if (block < 0)
-            #ifdef USE_OMP
-            #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-            #endif
             for (int j = 0; j < size; j++)
               residual[it_*y_size+Block_Contain[j].Equation] = r[j];
           else
-            #ifdef USE_OMP
-            #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-            #endif
             for (int j = 0; j < size; j++)
               residual[it_*size+j] = r[j];
         }
