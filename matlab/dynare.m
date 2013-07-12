@@ -34,11 +34,11 @@ function dynare(fname, varargin)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if strcmpi(fname,'help')
-    disp(' ')
+    skipline()
     disp(['This is dynare version ' dynare_version() '.'])
-    disp(' ')
+    skipline()
     disp('USAGE: dynare FILENAME[.mod,.dyn] [OPTIONS]')
-    disp(' ')
+    skipline()
     disp('dynare executes instruction included in FILENAME.mod.')
     disp('See the reference manual for the available options.')
     return

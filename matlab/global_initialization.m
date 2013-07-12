@@ -107,6 +107,9 @@ gmhmaxlik.nclimb = 200000;
 gmhmaxlik.nscale = 200000;
 options_.gmhmaxlik = gmhmaxlik;
 
+% Request user input.
+options_.nointeractive = 0;
+
 % Graphics
 options_.graphics.nrows = 3;
 options_.graphics.ncols = 3;

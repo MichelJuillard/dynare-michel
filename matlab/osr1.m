@@ -63,14 +63,14 @@ oo_.osr.objective_function = f;
 
 
 
-disp('')
+skipline()
 disp('OPTIMAL VALUE OF THE PARAMETERS:')
-disp('')
+skipline()
 for i=1:np
     disp(sprintf('%16s %16.6g\n',M_.param_names(i_params(i),:),p(i)))
 end
 disp(sprintf('Objective function : %16.6g\n',f));
-disp(' ')
+skipline()
 [oo_.dr,info,M_,options_,oo_] = resol(0,M_,options_,oo_);
 
 % 05/10/03 MJ modified to work with osr.m and give full report

@@ -65,11 +65,11 @@ end
 fval = feval(fun,x,DynareDataset,DynareOptions,Model,EstimatedParameters,BayesInfo,DynareResults);
 
 if ~isempty(hessian);
-    disp(' ')
+    skipline()
     disp('MODE CHECK')
-    disp(' ')
+    skipline()
     disp(sprintf('Fval obtained by the minimization routine: %f', fval))
-    disp(' ')
+    skipline()
     if s_min<eps
         disp(sprintf('Most negative variance %f for parameter %d (%s = %f)', s_min, k , BayesInfo.name{k}, x(k)))
     end

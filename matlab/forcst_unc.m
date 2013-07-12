@@ -91,13 +91,11 @@ end
 oo_.forecast.accept_rate = (replic-m1)/replic;
 
 if options_.noprint == 0 && m1 < replic
-    disp(' ')
-    disp(' ')
+    skipline(2)
     disp('FORECASTING WITH PARAMETER UNCERTAINTY:')
     disp(sprintf(['The model  couldn''t be solved for %f%% of the parameter' ...
                   ' values'],100*oo_.forecast.accept_rate))
-    disp(' ')
-    disp(' ')
+    skipline(2)
 end
 
 % compute moments

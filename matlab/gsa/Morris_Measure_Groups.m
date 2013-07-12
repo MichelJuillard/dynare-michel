@@ -40,7 +40,7 @@ function [SAmeas, OutMatrix] = Morris_Measure_Groups(NumFact, Sample, Output, p,
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if nargin==0,
-  disp(' ')
+  skipline()
   disp('[SAmeas, OutMatrix] = Morris_Measure_Groups(NumFact, Sample, Output, p, Group);')
   return
 end

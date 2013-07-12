@@ -39,5 +39,5 @@ global options_ M_
     dyn_waitbar(j/nsam,h)
   end
   dyn_waitbar_close(h)
-  disp(' ')
+  skipline()
   disp('... done !')

@@ -50,10 +50,10 @@ conditional_decomposition_array = conditional_variance_decomposition(StateSpaceM
 
 if options_.noprint == 0
   if options_.order == 2
-    disp(' ')                
+    skipline()                
     disp('APPROXIMATED CONDITIONAL VARIANCE DECOMPOSITION (in percent)')
   else
-    disp(' ')                
+    skipline()               
     disp('CONDITIONAL VARIANCE DECOMPOSITION (in percent)')
   end
 end

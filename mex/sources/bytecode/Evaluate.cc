@@ -1640,38 +1640,6 @@ Evaluate::compute_complete_2b(const bool no_derivatives, double *_res1, double *
       compute_block_time(Per_u_, false, no_derivatives);
       if (!(isnan(res1) || isinf(res1)))
         {
-#ifdef USE_OMP
-          if (size > 10)
-            {
-              double res1_ = 0;
-              double res2_ = 0;
-              double max_res_ = 0;
-              int max_res_idx_ = 0;
-              #ifdef USE_OMP
-              #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) reduction(+:res1_, res2_) shared(max_res_, max_res_idx_)
-              #endif
-              for (int i = 0; i < size; i++)
-                {
-                  double rr = r[i];
-                  res[i+shift] = rr;
-                  if (max_res_ < fabs(rr))
-                    {
-                      max_res_ = fabs(rr);
-                      max_res_idx_ = i;
-                    }
-                  res2_ += rr*rr;
-                  res1_ += fabs(rr);
-                }
-              *_res1 += res1_;
-              *_res2 += res2_;
-              if (max_res_ > *_max_res)
-                {
-                  *_max_res = max_res_;
-                  *_max_res_idx = max_res_idx_;
-                }
-            }
-          else
-#endif
             {
               for (int i = 0; i < size; i++)
                 {
@@ -1704,39 +1672,6 @@ Evaluate::compute_complete(const bool no_derivatives, double &_res1, double &_re
   compute_block_time(0, false, no_derivatives);
   if (!(isnan(res1) || isinf(res1)))
     {
-#ifdef USE_OMP
-      if (size > 10)
-        {
-          double res1_ = 0;
-          double res2_ = 0;
-          double max_res_ = 0;
-          int max_res_idx_ = 0;
-          #ifdef USE_OMP
-          #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) reduction(+:res1_, res2_) shared(max_res_, max_res_idx_)
-          #endif
-          for (int i = 0; i < size; i++)
-            {
-              double rr = r[i];
-              if (max_res_ < fabs(rr))
-                {
-                  #ifdef USE_OMP
-                  #pragma omp critical
-                  #endif
-                    {
-                      max_res_ = fabs(rr);
-                      max_res_idx_ = i;
-                    }
-                }
-              res2_ += rr*rr;
-              res1_ += fabs(rr);
-            }
-          _res1 = res1_;
-          _res2 = res2_;
-          _max_res = max_res_;
-          _max_res_idx = max_res_idx_;
-        }
-      else
-#endif
         {
           _res1 = 0;
           _res2 = 0;
@@ -1771,9 +1706,6 @@ Evaluate::compute_complete(double lambda, double *crit)
   if (steady_state)
     {
       it_ = 0;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
       for (int i = 0; i < size; i++)
         {
           int eq = index_vara[i];

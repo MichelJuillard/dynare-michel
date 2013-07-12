@@ -64,7 +64,7 @@ if ~options_.noprint %options_.nomoments == 0
     lh = size(labels,2)+2;
     dyntable(title,headers,labels,z,lh,11,4);
     if M_.exo_nbr > 1 && size(stationary_vars, 1) > 0
-        disp(' ')
+        skipline()
         if options_.order == 2
             title='APPROXIMATED VARIANCE DECOMPOSITION (in percent)';            
         else
@@ -91,16 +91,16 @@ if ~options_.noprint %options_.nomoments == 0
 end
 
 if length(i1) == 0
-    disp(' ')
+    skipline()
     disp('All endogenous are constant or non stationary, not displaying correlations and auto-correlations')
-    disp(' ')
-    return;
+    skipline()
+    return
 end
 
 if options_.nocorr == 0 && size(stationary_vars, 1) > 0
     corr = oo_.gamma_y{1}(i1,i1)./(sd(i1)*sd(i1)');
     if ~options_.noprint,
-        disp(' ')
+        skipline()
         if options_.order == 2
             title='APPROXIMATED MATRIX OF CORRELATIONS';            
         else
@@ -122,7 +122,7 @@ if options_.ar > 0 && size(stationary_vars, 1) > 0
         z(:,i) = diag(oo_.gamma_y{i+1}(i1,i1));
     end
     if ~options_.noprint,      
-        disp(' ')    
+        skipline()    
         if options_.order == 2
             title='APPROXIMATED COEFFICIENTS OF AUTOCORRELATION';            
         else

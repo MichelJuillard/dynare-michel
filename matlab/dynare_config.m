@@ -220,7 +220,7 @@ end
 %% Test if valid mex files are available, if a mex file is not available
 %% a matlab version of the routine is included in the path.
 if verbose
-    disp(' ')
+    skipline()
     disp('Configuring Dynare ...')
 end
 
@@ -285,7 +285,7 @@ else
 end
 if verbose
     disp([ message 'Markov Switching SBVAR.' ])
-    disp(' ')
+    skipline()
 end
 
 cd(origin);

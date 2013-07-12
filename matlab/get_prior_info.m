@@ -167,18 +167,17 @@ if info==2% Prior optimization.
                                bayestopt_.p3, ...
                                bayestopt_.p4,options_,M_,estim_params_,oo_);
     % Display the results.
-    disp(' ')
-    disp(' ')
+    skipline(2)
     disp('------------------')
     disp('PRIOR OPTIMIZATION')
     disp('------------------')
-    disp(' ')
+    skipline()
     for i = 1:length(xparams)
         disp(['deep parameter ' int2str(i) ': ' get_the_name(i,0,M_,estim_params_,options_) '.'])
         disp(['  Initial condition ....... ' num2str(xinit(i)) '.'])
         disp(['  Prior mode .............. ' num2str(bayestopt_.p5(i)) '.'])
         disp(['  Optimized prior mode .... ' num2str(xparams(i)) '.'])
-        disp(' ')
+        skipline()
     end
 end
 

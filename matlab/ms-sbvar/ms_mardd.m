@@ -129,7 +129,7 @@ for k=1:nvar
       %--------- The 1st set of draws to be tossed away. ------------------
       for draws = 1:ndraws1
          if ~mod(draws,nbuffer)
-            disp(' ')
+            skipline()
             disp(sprintf('The %dth column or equation in A0 with %d 1st tossed-away draws in Gibbs',k,draws))
          end
          A0gbs1 = fn_gibbsrvar(A0gbs0,UT,nvar,fss,n0,indx_ks);
@@ -140,7 +140,7 @@ for k=1:nvar
       %--------- The 2nd set of draws to be used. ------------------
       for draws = 1:ndraws2
          if ~mod(draws,nbuffer)
-            disp(' ')
+            skipline()
             disp(sprintf('The %dth column or equation in A0 with %d usable draws in Gibbs',k,draws))
          end
          [A0gbs1, Wcell] = fn_gibbsrvar(A0gbs0,UT,nvar,fss,n0,indx_ks);
@@ -162,7 +162,7 @@ for k=1:nvar
       vlog_a0_Yao(k) = vlogxhat;
          % The log value of p(a0_k|Y,a_others) where a_others: other a's at some point such as the peak of ONLY some a0's
    else
-      disp(' ')
+      skipline()
       disp(sprintf('The last(6th) column or equation in A0 with no Gibbs draws'))
       [A0gbs1, Wcell] = fn_gibbsrvar(A0gbs0,UT,nvar,fss,n0,indx_ks)
       %------ See p.71, Forecast (II).
@@ -191,7 +191,6 @@ disp('Posterior pdf -- log(p(aphat|a0hat, Y)):');
 vlog_ap_Ya0
 
 %--------- The value of marginal density p(Y) ----------
-disp(' ');
-disp(' ');
+skipline()
 disp('************ Marginal Likelihood of Y or Marginal Data Density: ************');
 vlogY = vlog_a0p+vlog_Y_a-sum(vlog_a0_Yao)-vlog_ap_Ya0

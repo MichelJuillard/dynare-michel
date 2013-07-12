@@ -131,7 +131,7 @@ else
 end
 
 UDIAG(:,[2 4 6],:) = UDIAG(:,[2 4 6],:)/nblck;
-disp(' ')
+skipline()
 clear pmet temp moyenne CSUP CINF csup cinf n linea iter tmp;    
 pages = floor(npar/3);
 k = 0;  

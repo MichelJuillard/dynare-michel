@@ -88,7 +88,7 @@ if SampleSize == 1,
     
     if advanced,
         if ~options_.nodisplay,
-            disp(' ')
+            skipline()
             disp('Press ENTER to plot advanced diagnostics'), pause(5),
         end
         hh = dyn_figure(options_,'Name',[tittxt, ' - Sensitivity plot']);
@@ -152,7 +152,7 @@ if SampleSize == 1,
             xlabel([tittxt,' - Collinearity patterns with ', int2str(j) ,' parameter(s)'],'interpreter','none')
             dyn_saveas(hh,[ IdentifDirectoryName '/' M_.fname '_ident_collinearity_' tittxt1 '_' int2str(j) ],options_);
         end
-        disp('')
+        skipline()
         if idehess.flag_score,
             [U,S,V]=svd(idehess.AHess,0);
             S=diag(S);
@@ -232,7 +232,7 @@ else
     dyn_saveas(hh,[ IdentifDirectoryName '/' M_.fname '_MC_sensitivity' ],options_);
     if advanced,
         if ~options_.nodisplay,
-            disp(' ')
+            skipline()
             disp('Press ENTER to display advanced diagnostics'), pause(5),
         end
 %         options_.nograph=1;

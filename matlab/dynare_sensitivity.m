@@ -215,7 +215,7 @@ if (options_gsa.load_stab || options_gsa.load_rmse || options_gsa.load_redform) 
                     any(bayestopt_.p4(~isnan(bayestopt_.p4))~=bkpprior.p4(~isnan(bkpprior.p4))),
                 disp('WARNING!')
                 disp('The saved sample has different priors w.r.t. to current ones!!')
-                disp('')
+                skipline()
                 disp('Press ENTER to continue')
                 pause;
             end
@@ -226,7 +226,7 @@ end
 if options_gsa.stab && ~options_gsa.ppost,
     x0 = stab_map_(OutputDirectoryName,options_gsa);
     if isempty(x0),
-        disp(' ')
+        skipline()
         disp('Sensitivity computations stopped: no parameter set provided a unique solution')
         return
     end

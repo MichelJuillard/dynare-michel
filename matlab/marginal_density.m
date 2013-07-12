@@ -60,8 +60,7 @@ fprintf(' Done!\n');
 %% (usefull if the user wants to perform some computations using
 %% the posterior mean instead of the posterior mode ==> ). 
 save([M_.fname '_mean.mat'],'xparam1','hh','SIGMA');
-
-disp(' ');
+skipline()
 disp('MH: I''m computing the posterior log marginal density (modified harmonic mean)... ');
 detSIGMA = det(SIGMA);
 invSIGMA = inv(SIGMA);

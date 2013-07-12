@@ -137,11 +137,11 @@ if options.ramsey_policy
 end
 
 if ~options.noprint
-    disp(' ')
+    skipline()
     disp('Approximated value of planner objective function')
     disp(['    - with initial Lagrange multipliers set to 0: ' ...
           num2str(planner_objective_value(2)) ])
     disp(['    - with initial Lagrange multipliers set to steady state: ' ...
           num2str(planner_objective_value(1)) ])
-    disp(' ')
+    skipline()
 end

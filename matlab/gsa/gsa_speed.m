@@ -56,6 +56,6 @@ for i=1:nrun,
   end
   dyn_waitbar(i/nrun,h)
 end
-disp(' ')
+skipline()
 disp('.. done !')
 dyn_waitbar_close(h)

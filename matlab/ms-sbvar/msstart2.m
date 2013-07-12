@@ -154,7 +154,7 @@ if cnum
 end
 %
 pause(1)
-disp(' ')
+skipline()
 disp('For uncondtional forecasts, set nconstr = options_.ms.cms = cnum = 0')
 pause(1)
 %
@@ -296,12 +296,12 @@ if options_.ms.indxestima
    %* Obtain linear restrictions
    [Uiconst,Viconst,n0,np,ixmC0Pres] = feval(options_.ms.restriction_fname,nvar,nexo,options_.ms );
    if min(n0)==0
-      disp(' ')
+      skipline()
       warning('A0: restrictions in dlrprior.m give no free parameter in one of equations')
       disp('Press ctrl-c to abort')
       pause
    elseif min(np)==0
-      disp(' ')
+      skipline()
       warning('Ap: Restrictions in dlrprior.m give no free parameter in one of equations')
       disp('Press ctrl-c to abort')
       pause

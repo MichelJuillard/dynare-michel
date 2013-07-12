@@ -214,10 +214,10 @@ while norm(gg)>gtol && check==0 && jit<nit
             end
             if htol0>htol
                 htol=htol0;
-                disp(' ')
+                skipline()
                 disp('Numerical noise in the likelihood')
                 disp('Tolerance has to be relaxed')
-                disp(' ')
+                skipline()
             end
             if ~outer_product_gradient,
                 H = bfgsi1(H,gg-g(:,icount),xparam1-x(:,icount));
@@ -256,16 +256,16 @@ end
 
 save m1.mat x hh g hhg igg fval0 nig
 if ftol>ftol0
-    disp(' ')
+    skipline()
     disp('Numerical noise in the likelihood')
     disp('Tolerance had to be relaxed')
-    disp(' ')
+    skipline()
 end
 
 if jit==nit
-    disp(' ')
+    skipline()
     disp('Maximum number of iterations reached')
-    disp(' ')
+    skipline()
 end
 
 if norm(gg)<=gtol

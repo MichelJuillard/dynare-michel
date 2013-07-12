@@ -53,7 +53,7 @@ for i = 1:size(M_.endo_names,1)
     tmp = strmatch(deblank(M_.endo_names(i,:)),options_.varobs,'exact');
     if ~isempty(tmp)
         if length(tmp)>1
-            disp(' ')
+            skipline()
             error(['Multiple declarations of ' deblank(M_.endo_names(i,:)) ' as an observed variable is not allowed!'])
         end
         options_.lgyidx2varobs(i) = tmp;

@@ -794,17 +794,10 @@ main(int nrhs, const char *prhs[])
   direction = (double *) mxMalloc(size_of_direction);
   memset(direction, 0, size_of_direction);
   double *x = (double *) mxMalloc(col_x*row_x*sizeof(double));
-  #ifdef USE_OMP
-  #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-  #endif
   for (i = 0; i < row_x*col_x; i++)
     {
       x[i] = double (xd[i]);
     }
-
-  #ifdef USE_OMP
-  #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-  #endif
   for (i = 0; i < row_y*col_y; i++)
     {
       y[i]  = double (yd[i]);

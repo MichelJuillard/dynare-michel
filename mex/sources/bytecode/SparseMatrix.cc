@@ -622,9 +622,6 @@ dynSparseMatrix::Read_SparseMatrix(string file_name, const int Size, int periods
   if (periods+y_kmin+y_kmax > 1)
     for (int i = 1; i < periods+y_kmin+y_kmax; i++)
       {
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
         for (int j = 0; j < Size; j++)
           index_vara[j+Size*i] = index_vara[j+Size*(i-1)] + y_size;
       }
@@ -660,9 +657,6 @@ dynSparseMatrix::Simple_Init(int Size, map<pair<pair<int, int>, int>, int> &IM, 
   NbNZCol = (int *) mxMalloc(i);
   it4 = IM.begin();
   eq = -1;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (i = 0; i < Size; i++)
     {
       line_done[i] = 0;
@@ -705,9 +699,6 @@ dynSparseMatrix::Simple_Init(int Size, map<pair<pair<int, int>, int>, int> &IM, 
       it4++;
     }
   double cum_abs_sum = 0;
-#if USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) reduction(+:cum_abs_sum)
-#endif
   for (int i = 0; i < Size; i++)
     {
       b[i] = i;
@@ -763,9 +754,6 @@ dynSparseMatrix::Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, in
       throw FatalExceptionHandling(tmp.str());
     }
   map<pair<pair<int, int>, int>, int>::iterator it4;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int i = 0; i < y_size*(periods+y_kmin); i++)
     ya[i] = y[i];
 #ifdef DEBUG
@@ -774,9 +762,6 @@ dynSparseMatrix::Init_Matlab_Sparse_Simple(int Size, map<pair<pair<int, int>, in
   unsigned int NZE = 0;
   int last_var = 0;
   double cum_abs_sum = 0;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) reduction(+:cum_abs_sum)
-#endif
   for (int i = 0; i < Size; i++)
     {
       b[i] = u[i];
@@ -887,9 +872,6 @@ dynSparseMatrix::Init_UMFPACK_Sparse_Simple(int Size, map<pair<pair<int, int>, i
     }
 
   map<pair<pair<int, int>, int>, int>::iterator it4;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int i = 0; i < Size; i++)
     {
       int eq = index_vara[i];
@@ -901,10 +883,6 @@ dynSparseMatrix::Init_UMFPACK_Sparse_Simple(int Size, map<pair<pair<int, int>, i
   unsigned int NZE = 0;
   int last_var = 0;
   double cum_abs_sum = 0;
-
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) reduction(+:cum_abs_sum)
-#endif
   for (int i = 0; i < Size; i++)
     {
       (*b)[i] = u[i];
@@ -1014,9 +992,6 @@ dynSparseMatrix::Init_UMFPACK_Sparse(int periods, int y_kmin, int y_kmax, int Si
       throw FatalExceptionHandling(tmp.str());
     }
   map<pair<pair<int, int>, int>, int>::iterator it4;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int i = 0; i < y_size*(periods+y_kmin); i++)
     ya[i] = y[i];
 #ifdef DEBUG
@@ -1024,10 +999,6 @@ dynSparseMatrix::Init_UMFPACK_Sparse(int periods, int y_kmin, int y_kmax, int Si
 #endif
   unsigned int NZE = 0;
   int last_var = 0;
-
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int i = 0; i < periods*Size; i++)
     {
       (*b)[i] = 0;
@@ -1193,9 +1164,6 @@ dynSparseMatrix::Init_CUDA_Sparse_Simple(int Size, map<pair<pair<int, int>, int>
     }
 
   map<pair<pair<int, int>, int>, int>::iterator it4;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int i = 0; i < Size; i++)
     {
       int eq = index_vara[i];
@@ -1208,10 +1176,6 @@ dynSparseMatrix::Init_CUDA_Sparse_Simple(int Size, map<pair<pair<int, int>, int>
   unsigned int NZE = 0;
   int last_var = 0;
   double cum_abs_sum = 0;
-
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) reduction(+:cum_abs_sum)
-#endif
   for (int i = 0; i < Size; i++)
     {
       (*b)[i] = u[i];
@@ -1334,9 +1298,6 @@ dynSparseMatrix::Init_CUDA_Sparse(int periods, int y_kmin, int y_kmax, int Size,
 
 
   map<pair<pair<int, int>, int>, int>::iterator it4;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int i = 0; i < y_size*(periods+y_kmin); i++)
     ya[i] = y[i];
 #ifdef DEBUG
@@ -1344,9 +1305,6 @@ dynSparseMatrix::Init_CUDA_Sparse(int periods, int y_kmin, int y_kmax, int Size,
 #endif
   unsigned int NZE = 0, NZE_tild = 0;
   int last_eq = 0;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int i = 0; i < periods*Size; i++)
     {
       Host_b[i] = 0;
@@ -1630,9 +1588,6 @@ dynSparseMatrix::Init_Matlab_Sparse(int periods, int y_kmin, int y_kmax, int Siz
     }
 
   map<pair<pair<int, int>, int>, int>::iterator it4;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int i = 0; i < y_size*(periods+y_kmin); i++)
     ya[i] = y[i];
 #ifdef DEBUG
@@ -1640,9 +1595,6 @@ dynSparseMatrix::Init_Matlab_Sparse(int periods, int y_kmin, int y_kmax, int Siz
 #endif
   unsigned int NZE = 0;
   int last_var = 0;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int i = 0; i < periods*Size; i++)
     {
       b[i] = 0;
@@ -1765,17 +1717,11 @@ dynSparseMatrix::Init_GE(int periods, int y_kmin, int y_kmax, int Size, map<pair
   NbNZRow = (int *) mxMalloc(i);
   NbNZCol = (int *) mxMalloc(i);
 
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int i = 0; i < periods*Size; i++)
     {
       b[i] = 0;
       line_done[i] = 0;
     }
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int i = 0; i < (periods+y_kmax+1)*Size; i++)
     {
       FNZE_C[i] = NULL;
@@ -1975,9 +1921,6 @@ dynSparseMatrix::compare(int *save_op, int *save_opa, int *save_opaa, int beg_t,
     {
       for (int i = beg_t; i < periods; i++)
         {
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
           for (int j = 0; j < Size; j++)
             pivot[i*Size+j] = pivot[(i-1)*Size+j]+Size;
         }
@@ -1992,9 +1935,6 @@ dynSparseMatrix::compare(int *save_op, int *save_opa, int *save_opaa, int beg_t,
               throw FatalExceptionHandling(tmp.str());
             }
         }
-      /*#ifdef USE_OMP
-      #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-      #endif*/
       for (int t = 1; t < periods-beg_t-y_kmax; t++)
         {
           int i = j = 0;
@@ -2027,16 +1967,10 @@ dynSparseMatrix::compare(int *save_op, int *save_opa, int *save_opaa, int beg_t,
         }
       int t1 = max(1, periods-beg_t-y_kmax);
       int periods_beg_t = periods-beg_t;
-      /*#ifdef USE_OMP
-      #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-      #endif*/
       for (int t = t1; t < periods_beg_t; t++)
         {
           int i = j = 0;
           int gap = periods_beg_t-t;
-          /*#ifdef USE_OMP
-          #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-          #endif*/
           while (i < nop4)
             {
               t_save_op_s *save_op_s = (t_save_op_s *) (&(save_op[i]));
@@ -2199,9 +2133,6 @@ dynSparseMatrix::complete(int beg_t, int Size, int periods, int *b)
     }
   max_var = (periods+y_kmin)*y_size;
   min_var = y_kmin*y_size;
-  /*#ifdef USE_OMP
-  #pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-  #endif*/
   for (int t = periods+y_kmin-1; t >= beg_t+y_kmin; t--)
     {
       int j = 0, k;
@@ -2243,9 +2174,6 @@ dynSparseMatrix::bksub(int tbreak, int last_period, int Size, double slowc_l)
   NonZeroElem *first;
   int i, j, k;
   double yy;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int i = 0; i < y_size*(periods+y_kmin); i++)
     y[i] = ya[i];
   if (symbolic && tbreak)
@@ -2284,9 +2212,6 @@ dynSparseMatrix::simple_bksub(int it_, int Size, double slowc_l)
   int i, k;
   double yy;
   NonZeroElem *first;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int i = 0; i < y_size; i++)
     y[i+it_*y_size] = ya[i+it_*y_size];
   for (i = Size-1; i >= 0; i--)
@@ -2427,9 +2352,6 @@ dynSparseMatrix::substract_A_B(mxArray *A_m, mxArray *B_m)
   double *B_d = mxGetPr(B_m);
   mxArray *C_m = mxCreateDoubleMatrix(m_A, n_B, mxREAL);
   double *C_d = mxGetPr(C_m);
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int j = 0; j < (int) n_A; j++)
     for (unsigned int i = 0; i < m_A; i++)
       {
@@ -2558,10 +2480,6 @@ dynSparseMatrix::mult_SAT_B(mxArray *A_m, mxArray *B_m)
   double *B_d = mxGetPr(B_m);
   mxArray *C_m = mxCreateDoubleMatrix(m_A, n_B, mxREAL);
   double *C_d = mxGetPr(C_m);
-  //unsigned int nze_A = 0;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int j = 0; j < (int)n_B; j++)
     {
       for (unsigned int i = 0; i < n_A; i++)
@@ -3154,9 +3072,6 @@ dynSparseMatrix::Solve_Matlab_LU_UMFPack(mxArray *A_m, mxArray *b_m, int Size, d
   mexCallMATLAB(1, &z, 2, rhs, "mldivide");
   double *res = mxGetPr(z);
   if (is_two_boundaries)
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
     for (int i = 0; i < (int) n; i++)
       {
         int eq = index_vara[i+Size*y_kmin];
@@ -3165,9 +3080,6 @@ dynSparseMatrix::Solve_Matlab_LU_UMFPack(mxArray *A_m, mxArray *b_m, int Size, d
         y[eq] += slowc_l * yy;
       }
   else
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
     for (int i = 0; i < (int) n; i++)
       {
         int eq = index_vara[i];
@@ -3256,9 +3168,6 @@ dynSparseMatrix::Solve_LU_UMFPack(SuiteSparse_long *Ap, SuiteSparse_long *Ai, do
     }
 
   if (is_two_boundaries)
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
     for (int i = 0; i < n; i++)
       {
         int eq = index_vara[i+Size*y_kmin];
@@ -3267,9 +3176,6 @@ dynSparseMatrix::Solve_LU_UMFPack(SuiteSparse_long *Ap, SuiteSparse_long *Ai, do
         y[eq] += slowc_l * yy;
       }
   else
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
     for (int i = 0; i < n; i++)
       {
         int eq = index_vara[i];
@@ -3325,9 +3231,6 @@ dynSparseMatrix::Solve_LU_UMFPack(mxArray *A_m, mxArray *b_m, int Size, double s
     umfpack_dl_report_info ((double*) NULL, Info) ;
   //double *res = mxGetPr(z);
   if (is_two_boundaries)
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
     for (int i = 0; i < n; i++)
       {
         int eq = index_vara[i+Size*y_kmin];
@@ -3336,9 +3239,6 @@ dynSparseMatrix::Solve_LU_UMFPack(mxArray *A_m, mxArray *b_m, int Size, double s
         y[eq] += slowc_l * yy;
       }
   else
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
     for (int i = 0; i < n; i++)
       {
         int eq = index_vara[i];
@@ -3561,9 +3461,6 @@ dynSparseMatrix::Solve_CUDA_BiCGStab(int *Ap, int *Ai, double *Ax, int *Ap_tild,
       cudaChk(cudaFree(x0), "  in Solve_Cuda_BiCGStab, can't free x0\n");
       cudaChk(cudaFree(b), "  in Solve_Cuda_BiCGStab, can't free b\n");
       if (is_two_boundaries)
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
         for (int i = 0; i < n; i++)
           {
             int eq = index_vara[i+Size*y_kmin];
@@ -3572,9 +3469,6 @@ dynSparseMatrix::Solve_CUDA_BiCGStab(int *Ap, int *Ai, double *Ax, int *Ap_tild,
             y[eq] += slowc * yy;
           }
       else
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
         for (int i = 0; i < n; i++)
           {
             int eq = index_vara[i];
@@ -4552,9 +4446,6 @@ dynSparseMatrix::Solve_CUDA_BiCGStab(int *Ap, int *Ai, double *Ax, int *Ap_tild,
   cudaChk(cudaMemcpy(tmp_vect_host, x0, n * sizeof(double), cudaMemcpyDeviceToHost), "  in Solve_Cuda_BiCGStab, cudaMemcpy tmp_vect_host = x0 has failed\n");
 
   if (is_two_boundaries)
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
     for (int i = 0; i < n; i++)
       {
         int eq = index_vara[i+Size*y_kmin];
@@ -4563,9 +4454,6 @@ dynSparseMatrix::Solve_CUDA_BiCGStab(int *Ap, int *Ai, double *Ax, int *Ap_tild,
         y[eq] += slowc * yy;
       }
   else
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
     for (int i = 0; i < n; i++)
       {
         int eq = index_vara[i];
@@ -4658,9 +4546,6 @@ dynSparseMatrix::Solve_Matlab_GMRES(mxArray *A_m, mxArray *b_m, int Size, double
     {
       double *res = mxGetPr(z);
       if (is_two_boundaries)
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
         for (int i = 0; i < (int) n; i++)
           {
             int eq = index_vara[i+Size*y_kmin];
@@ -4669,9 +4554,6 @@ dynSparseMatrix::Solve_Matlab_GMRES(mxArray *A_m, mxArray *b_m, int Size, double
             y[eq] += slowc * yy;
           }
       else
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
         for (int i = 0; i < (int) n; i++)
           {
             int eq = index_vara[i];
@@ -4752,9 +4634,6 @@ dynSparseMatrix::Solve_Matlab_BiCGStab(mxArray *A_m, mxArray *b_m, int Size, dou
       mxArray *res = mult_SAT_B(Sparse_transpose(A_m), x0_m);
       double *resid = mxGetPr(res);
       double *b = mxGetPr(b_m);
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
       for (int i = 0; i < (int)n; i++)
         resid[i] = b[i] - resid[i];
       mxArray *rhs[2];
@@ -4768,9 +4647,6 @@ dynSparseMatrix::Solve_Matlab_BiCGStab(mxArray *A_m, mxArray *b_m, int Size, dou
       z = lhs[0];
       double *phat = mxGetPr(z);
       double *x0 = mxGetPr(x0_m);
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
       for (int i = 0; i < (int)n; i++)
         phat[i] = x0[i] + phat[i];
 
@@ -4778,9 +4654,6 @@ dynSparseMatrix::Solve_Matlab_BiCGStab(mxArray *A_m, mxArray *b_m, int Size, dou
       res = mult_SAT_B(Sparse_transpose(A_m), z);
       resid = mxGetPr(res);
       double cum_abs = 0;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) reduction(+:cum_abs)
-#endif
       for (int i = 0; i < (int)n; i++)
         {
           resid[i] = b[i] - resid[i];
@@ -4867,9 +4740,6 @@ dynSparseMatrix::Solve_Matlab_BiCGStab(mxArray *A_m, mxArray *b_m, int Size, dou
     {
       double *res = mxGetPr(z);
       if (is_two_boundaries)
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
         for (int i = 0; i < (int) n; i++)
           {
             int eq = index_vara[i+Size*y_kmin];
@@ -4878,9 +4748,6 @@ dynSparseMatrix::Solve_Matlab_BiCGStab(mxArray *A_m, mxArray *b_m, int Size, dou
             y[eq] += slowc * yy;
           }
       else
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
         for (int i = 0; i < (int) n; i++)
           {
             int eq = index_vara[i];
@@ -4904,9 +4771,6 @@ dynSparseMatrix::Singular_display(int block, int Size)
   rhs[0] = mxCreateDoubleMatrix(Size, Size, mxREAL);
   double *pind;
   pind = mxGetPr(rhs[0]);
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int j = 0; j < Size * Size; j++)
     pind[j] = 0.0;
   for (int ii = 0; ii < Size; ii++)
@@ -5233,9 +5097,6 @@ dynSparseMatrix::Solve_ByteCode_Sparse_GaussianElimination(int Size, int blck, i
         }
     }
   double slowc_lbx = slowc;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int i = 0; i < y_size; i++)
     ya[i+it_*y_size] = y[i+it_*y_size];
 
@@ -5844,9 +5705,6 @@ dynSparseMatrix::Solve_ByteCode_Symbolic_Sparse_GaussianElimination(int Size, bo
 
   /*The backward substitution*/
   double slowc_lbx = slowc;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
   for (int i = 0; i < y_size*(periods+y_kmin); i++)
     ya[i] = y[i];
   slowc_save = slowc;
@@ -5863,9 +5721,6 @@ dynSparseMatrix::Grad_f_product(int n, mxArray *b_m, double* vectr, mxArray *A_m
   if ((solve_algo == 5 && steady_state) || (stack_solve_algo == 5 && !steady_state))
     {
       NonZeroElem *first;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) private(first)
-#endif
       for (int i = 0; i < n; i++)
         {
           double sum = 0;
@@ -5913,9 +5768,6 @@ dynSparseMatrix::Grad_f_product(int n, mxArray *b_m, double* vectr, mxArray *A_m
             }
         }
       memset(vectr, 0, n * sizeof(double));
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) /*shared(vectr)*/
-#endif
       for (int i = 0; i < n; i++)
         for (SuiteSparse_long j = Ap[i]; j < Ap[i+1]; j++)
           vectr[Ai[j]] += Ax[j] * b_[i];
@@ -5934,9 +5786,6 @@ dynSparseMatrix::Check_and_Correct_Previous_Iteration(int block_num, int y_size,
         {
           prev_slowc_save = slowc_save;
           slowc_save /= 1.1;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
           for (int i = 0; i < size; i++)
             {
               int eq = index_vara[i];
@@ -5952,9 +5801,6 @@ dynSparseMatrix::Check_and_Correct_Previous_Iteration(int block_num, int y_size,
         {
           prev_slowc_save = slowc_save;
           slowc_save /= 1.5;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
           for (int i = 0; i < size; i++)
             {
               int eq = index_vara[i];
@@ -5979,9 +5825,6 @@ dynSparseMatrix::Check_and_Correct_Previous_Iteration(int block_num, int y_size,
           double *p = (double*)mxMalloc(size * sizeof(double));
           Grad_f_product(size, b_m_save, p, A_m_save, Ap_save, Ai_save, Ax_save, b_save);
           double slope=0.0;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS"))) reduction(+:slope)
-#endif
           for (int i = 1; i < size; i++)
             slope += - direction[i] * p[i];
           /*if (slope > 0)
@@ -6037,9 +5880,6 @@ dynSparseMatrix::Check_and_Correct_Previous_Iteration(int block_num, int y_size,
                   prev_slowc_save = slowc_save;
                   glambda2 = crit_opt;
                   try_at_iteration++;
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
                   for (int i = 0; i < size; i++)
                     {
                       int eq = index_vara[i];
@@ -6051,10 +5891,7 @@ dynSparseMatrix::Check_and_Correct_Previous_Iteration(int block_num, int y_size,
           mxFree(p);
         }
       //if (print_it)
-        mexPrintf("Error: Simulation diverging, trying to correct it using slowc=%f\n", slowc_save);
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
+      mexPrintf("Error: Simulation diverging, trying to correct it using slowc=%f\n", slowc_save);
       for (int i = 0; i < size; i++)
         {
           int eq = index_vara[i];
@@ -6222,9 +6059,6 @@ dynSparseMatrix::Simulate_One_Boundary(int block_num, int y_size, int y_kmin, in
     }
   if (zero_solution)
     {
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
       for (int i = 0; i < size; i++)
         {
           int eq = index_vara[i];
@@ -6467,9 +6301,6 @@ dynSparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int y_kmin
           try_at_iteration++;
           if (slowc_save <= bottom)
             {
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
               for (int i = 0; i < y_size*(periods+y_kmin); i++)
                 y[i] = ya[i]+direction[i];
               g0 = res2;
@@ -6491,9 +6322,6 @@ dynSparseMatrix::Simulate_Newton_Two_Boundaries(int blck, int y_size, int y_kmin
           else
             mexPrintf("Simulation diverging, trying to correct it using slowc=%f\n", slowc_save);
         }
-#ifdef USE_OMP
-#pragma omp parallel for num_threads(atoi(getenv("DYNARE_NUM_THREADS")))
-#endif
       for (int i = 0; i < y_size*(periods+y_kmin); i++)
         y[i] = ya[i]+slowc_save*direction[i];
       iter--;

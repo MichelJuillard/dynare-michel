@@ -1,6 +1,6 @@
-function osr(var_list,params,i_var,W)
-
-% Copyright (C) 2001-2012 Dynare Team
+function skipline(n,fid)
+    
+% Copyright (C) 2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -15,28 +15,20 @@ function osr(var_list,params,i_var,W)
 % GNU General Public License for more details.
 %
 % You should have received a copy of the GNU General Public License
-% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
+% along with Dynare.  If not, see <http://www.gnu.org/licenses/>.    
 
-global M_ options_ oo_  
-
-options_.order = 1;
-options_ = set_default_option(options_,'simul',0);
-
-if isempty(options_.qz_criterium)
-    options_.qz_criterium = 1+1e-6;
+if nargin<2
+    fid = 1;
 end
 
-make_ex_;
-
-np = size(params,1);
-i_params = zeros(np,1);
-for i=1:np
-    i_params(i) = strmatch(deblank(params(i,:)),M_.param_names,'exact');
+if nargin<1
+    fid = 1;
 end
-
-skipline()
-disp('OPTIMAL SIMPLE RULE')
-skipline()
-osr1(i_params,i_var,W);
-
-stoch_simul(var_list);
+    
+if ~nargin || isequal(n,1)
+    fprintf(fid,'\n');
+else
+    for i=1:n
+        fprintf(fid,'\n');
+    end
+end

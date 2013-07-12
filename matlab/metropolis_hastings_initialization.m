@@ -127,9 +127,15 @@ if ~options_.load_mh_file && ~options_.mh_recover
                 init_iter = init_iter + 1;
                 if init_iter > 100 && validate == 0
                     disp(['MH: I couldn''t get a valid initial value in 100 trials.'])
-                    disp(['MH: You should Reduce mh_init_scale...'])
-                    disp(sprintf('MH: Parameter mh_init_scale is equal to %f.',options_.mh_init_scale))
-                    options_.mh_init_scale = input('MH: Enter a new value...  ');
+                    if options_.nointeractive
+                        disp(['MH: I reduce mh_init_scale by ten percent:'])
+                        options_.mh_init_scale = .9*options_.mh_init_scale;
+                        disp(sprintf('MH: Parameter mh_init_scale is now equal to %f.',options_.mh_init_scale))
+                    else
+                        disp(['MH: You should Reduce mh_init_scale...'])
+                        disp(sprintf('MH: Parameter mh_init_scale is equal to %f.',options_.mh_init_scale))
+                        options_.mh_init_scale = input('MH: Enter a new value...  ');
+                    end
                     trial = trial+1;
                 end
             end
@@ -140,7 +146,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
         end
         fprintf(fidlog,' \n');
         disp('MH: Initial values found!')
-        disp(' ')
+        skipline()
     else% Case 2: one chain (we start from the posterior mode)
         fprintf(fidlog,['  Initial values of the parameters:\n']);
         candidate = transpose(xparam1(:));%
@@ -148,7 +154,7 @@ if ~options_.load_mh_file && ~options_.mh_recover
             ix2 = candidate;
             ilogpo2 = - feval(TargetFun,ix2',dataset_,options_,M_,estim_params_,bayestopt_,oo_);
             disp('MH: Initialization at the posterior mode.')
-            disp(' ')
+            skipline()
             fprintf(fidlog,['    Blck ' int2str(1) 'params:\n']);
             for i=1:length(ix2(1,:))
                 fprintf(fidlog,['      ' int2str(i)  ':' num2str(ix2(1,i)) '\n']);
@@ -270,13 +276,13 @@ elseif options_.load_mh_file && ~options_.mh_recover
     record.MhDraws(end,3) = AnticipatedNumberOfLinesInTheLastFile;
     save([MhDirectoryName '/' ModelName '_mh_history.mat'],'record');
     disp(['MH: ... It''s done. I''ve loaded ' int2str(NumberOfPreviousSimulations) ' simulations.'])
-    disp(' ')
+    skipline()
     fclose(fidlog);
 elseif options_.mh_recover
     %% The previous metropolis-hastings crashed before the end! I try to
     %% recover the saved draws...
     disp('MH: Recover mode!')
-    disp(' ')
+    skipline()
     file = dir([MhDirectoryName '/'  ModelName '_mh_history.mat']);
     if ~length(file)
         error('MH:: FAILURE! there is no MH-history file!')

@@ -29,9 +29,9 @@ function disp_steady_state(M,oo)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-disp(' ')
+skipline()
 disp('STEADY-STATE RESULTS:')
-disp(' ')
+skipline()
 endo_names = M.endo_names;
 steady_state = oo.steady_state;
 for i=1:M.orig_endo_nbr

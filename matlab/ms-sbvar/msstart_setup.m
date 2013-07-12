@@ -61,7 +61,7 @@ nvar = size(options_.varobs,1);   % number of endogenous variables
 nlogeno = length(options_.ms.log_var);  % number of endogenous variables in options_.ms.log_var
 npereno = length(options_.ms.percent_var);  % number of endogenous variables in options_.ms.percent_var
 if (nvar~=(nlogeno+npereno))
-   disp(' ')
+   skipline()
    warning('Check xlab, nlogeno or npereno to make sure of endogenous variables in options_.ms.vlist')
    disp('Press ctrl-c to abort')
    return
@@ -70,7 +70,7 @@ elseif (nvar==length(options_.ms.vlist))
 elseif (nvar<length(options_.ms.vlist))
    nexo=length(options_.ms.vlist)-nvar+1;
 else
-   disp(' ')
+   skipline()
    warning('Make sure there are only nvar endogenous variables in options_.ms.vlist')
    disp('Press ctrl-c to abort')
    return
