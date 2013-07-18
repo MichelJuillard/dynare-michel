@@ -40,6 +40,36 @@ function A = plus(B,C)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+if isscalar(B)
+    assert(isa(C, 'dynSeries'));
+    b(1:size(C)) = B;
+    BB = dynSeries(b, C.time(1));
+    BB.freq = C.freq;
+    BB.time = C.time;
+    BB.nobs = C.nobs;
+    BB.vobs = C.vobs;
+    BB.name = cell(BB.vobs,1);
+    BB.tex = cell(BB.vobs,1);
+    BB.name(1) = {num2str(B)};
+    A = BB + C;
+    return;
+end
+
+if isscalar(C)
+    assert(isa(B, 'dynSeries'));
+    c(1:size(C)) = C;
+    CC = dynSeries(C, B.time(1));
+    CC.freq = B.freq;
+    CC.time = B.time;
+    CC.nobs = B.nobs;
+    CC.vobs = B.vobs;
+    CC.name = cell(CC.vobs,1);
+    CC.tex = cell(CC.vobs,1);
+    CC.name(1) = {num2str(C)};
+    A = B + CC;
+    return;
+end
+
 if ~isequal(B.vobs,C.vobs) && ~(isequal(B.vobs,1) || isequal(C.vobs,1))
     error(['dynSeries::plus: Cannot add ' inputname(1) ' and ' inputname(2) ' (wrong number of variables)!'])
 else
