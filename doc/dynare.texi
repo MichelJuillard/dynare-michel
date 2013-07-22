@@ -8240,7 +8240,7 @@ command. Default: @code{`!'}
 @end table
 @end defmethod
 
-@defmethod Report addGraph data, figname, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, xlabel, ylabel, xrange, yrange, showZeroline
+@defmethod Report addGraph data, figname, graphSize, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, xlabel, ylabel, xrange, yrange, showZeroline
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
@@ -8252,6 +8252,12 @@ The @code{dynSeries} that provides the data for the graph. Default:
 @item figname, @code{STRING}
 The name to use when saving this figure. Default: @code{[tempname
 `.tex']}
+
+@item graphSize, @code{NUMERICAL_VECTOR}
+The width and height to be passed to the third and fourth elements of
+the array passed to the @code{`Position'} option of Matlab's
+@code{figure} command, passed as a vector of size @math{2}. Default:
+Matlab sets width and height
 
 @item showGrid, @code{BOOLEAN}
 Whether or not to display the minor grid on the graph. Default:

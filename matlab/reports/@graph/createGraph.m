@@ -38,7 +38,11 @@ if ~o.seriesElements.numSeriesElements()
     return;
 end
 
-h = figure('visible','off');
+if isempty(o.graphSize)
+    h = figure('visible','off');
+else
+    h = figure('visible','off','position',[1, 1, o.graphSize(1), o.graphSize(2)]);
+end
 hold on;
 box on;
 if o.showGrid

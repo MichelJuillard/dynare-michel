@@ -59,6 +59,8 @@ o.legendFontSize = 8;
 
 o.showZeroline = false;
 
+o.graphSize = [];
+
 if nargin == 1
     assert(isa(varargin{1}, 'graph'),['@graph.graph: with one arg you ' ...
                         'must pass a graph object']);
@@ -126,6 +128,10 @@ assert(isempty(o.data) || isa(o.data, 'dynSeries'), ['@graph.graph: data must ' 
                     'be a dynSeries']);
 assert(isempty(o.seriesToUse) || iscellstr(o.seriesToUse), ['@graph.graph: ' ...
                     'series to use must be a cell array of string(s)']);
+
+assert(isempty(o.graphSize) || ((isfloat(o.graphSize) && length(o.graphSize) == 2)),...
+       ['@graph.graph: graphSize is specified as an array with two float ' ...
+        'entries, [width height]']);
 
 % using o.seriesToUse, create series objects and put them in o.seriesElements
 if ~isempty(o.data)
