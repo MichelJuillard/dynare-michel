@@ -8240,7 +8240,7 @@ command. Default: @code{`!'}
 @end table
 @end defmethod
 
-@defmethod Report addGraph data, figname, graphSize, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, xlabel, ylabel, xrange, yrange, showZeroline
+@defmethod Report addGraph data, figname, graphSize, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, xlabel, ylabel, xrange, xTickLabels, yrange, showZeroline
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
@@ -8308,6 +8308,10 @@ The y-axis label. Default: @code{none}
 
 @item xrange, @code{dynDates}
 The boundary on the x-axis to display in the graph. Default: all
+
+@item xTickLabels, @code{CELL_ARRAY_STRINGS}
+The labels to use for the xticks in the graph. Default: the dates of
+the @code{dynSeries}
 
 @item yrange, @code{NUMERICAL_VECTOR}
 The boundary on the y-axis to display in the graph, represented as a

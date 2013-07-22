@@ -60,6 +60,7 @@ o.legendFontSize = 8;
 o.showZeroline = false;
 
 o.graphSize = [];
+o.xTickLabels = {};
 
 if nargin == 1
     assert(isa(varargin{1}, 'graph'),['@graph.graph: with one arg you ' ...
@@ -132,7 +133,8 @@ assert(isempty(o.seriesToUse) || iscellstr(o.seriesToUse), ['@graph.graph: ' ...
 assert(isempty(o.graphSize) || ((isfloat(o.graphSize) && length(o.graphSize) == 2)),...
        ['@graph.graph: graphSize is specified as an array with two float ' ...
         'entries, [width height]']);
-
+assert(iscellstr(o.xTickLabels), ...
+       '@graph.graph: xTickLabels must be a cell array of strings');
 % using o.seriesToUse, create series objects and put them in o.seriesElements
 if ~isempty(o.data)
     if isempty(o.seriesToUse)
