@@ -60,6 +60,9 @@ assert(~(strcmp(o.graphLineStyle, 'none') && isempty(o.graphMarker)), ['@series.
 % Validate xrange
 assert(isempty(xrange) || isa(xrange, 'dynDates'));
 
+% Zero tolerance
+assert(isfloat(o.zerotol), '@series.write: zerotol must be a float');
+
 %%
 if isempty(xrange) || xrange == o.data.time
     ds = o.data;
@@ -67,8 +70,18 @@ else
     ds = o.data(xrange);
 end
 
-opt = {'XData', 1:length(ds.data)};
-opt = {opt{:}, 'YData', ds.data};
+% if graphing data that is within zerotol, set to zero, create series and
+% get line:
+thedata = ds.data;
+stz = bsxfun(@and, ...
+             bsxfun(@lt, thedata, o.zerotol), ...
+             bsxfun(@gt, thedata, -o.zerotol));
+if any(stz)
+    thedata(stz) = 0;
+end
+
+opt = {'XData', 1:length(thedata)};
+opt = {opt{:}, 'YData', thedata};
 
 opt = {opt{:}, 'Color', o.graphLineColor};
 opt = {opt{:}, 'LineStyle', o.graphLineStyle};

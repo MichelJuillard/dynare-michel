@@ -51,6 +51,8 @@ o.tableMarkerLimit = 1e-4;
 
 o.tableAlignRight = false;
 
+o.zerotol = 1e-6;
+
 if nargin == 1
     assert(isa(varargin{1}, 'series'),['@series.series: with one arg you ' ...
                         'must pass a series object']);
