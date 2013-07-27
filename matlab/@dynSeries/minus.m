@@ -40,6 +40,41 @@ function A = minus(B,C)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+if isnumeric(B) && isreal(B) && isequal(length(B),1) && isa(C,'dynSeries')
+    keyboard
+    A = dynSeries();
+    A.freq = C.freq;
+    A.init = C.init;
+    A.time = C.time;
+    A.nobs = C.nobs;
+    A.vobs = C.vobs;
+    A.name = cell(A.vobs,1);
+    A.tex = cell(A.vobs,1);
+    for i=1:A.vobs
+        A.name(i) = {['minus(' num2str(B) ',' C.name{i} ')']};
+        A.tex(i) = {['(' num2str(B) '-' C.tex{i} ')']};
+    end
+    A.data = bsxfun(@minus, B, C.data);
+    return;
+end
+
+if isnumeric(C) && isreal(C) && isequal(length(C),1) && isa(B,'dynSeries')
+    A = dynSeries();
+    A.freq = B.freq;
+    A.init = B.init;
+    A.time = B.time;
+    A.nobs = B.nobs;
+    A.vobs = B.vobs;
+    A.name = cell(A.vobs,1);
+    A.tex = cell(A.vobs,1);
+    for i=1:A.vobs
+        A.name(i) = {['minus(' B.name{i} ',' num2str(C) ')']};
+        A.tex(i) = {['(' B.tex{i} '-' num2str(C) ')']};
+    end
+    A.data = bsxfun(@minus, B.data, C);
+    return;
+end
+
 if ~isequal(B.vobs,C.vobs) && ~(isequal(B.vobs,1) || isequal(C.vobs,1))
     error(['dynSeries::minus: Cannot substract ' inputname(1) ' and ' inputname(2) ' (wrong number of variables)!'])
 else

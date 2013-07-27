@@ -38,7 +38,11 @@ if ~o.seriesElements.numSeriesElements()
     return;
 end
 
-h = figure('visible','off');
+if isempty(o.graphSize)
+    h = figure('visible','off');
+else
+    h = figure('visible','off','position',[1, 1, o.graphSize(1), o.graphSize(2)]);
+end
 hold on;
 box on;
 if o.showGrid
@@ -94,15 +98,19 @@ if ~isempty(o.shade)
     set(gca, 'children', children);
 end
 
-xticks = get(gca, 'XTick');
-xTickLabels = cell(1, length(xticks));
-for i=1:length(xticks)
-    if xticks(i) >= x(1) && ...
-            xticks(i) <= x(end)
-        xTickLabels{i} = xlabels{xticks(i)};
-    else
-        xTickLabels{i} = '';
+if isempty(o.xTickLabels)
+    xticks = get(gca, 'XTick');
+    xTickLabels = cell(1, length(xticks));
+    for i=1:length(xticks)
+        if xticks(i) >= x(1) && ...
+                xticks(i) <= x(end)
+            xTickLabels{i} = xlabels{xticks(i)};
+        else
+            xTickLabels{i} = '';
+        end
     end
+else
+    xTickLabels = o.xTickLabels;
 end
 set(gca, 'XTickLabel', xTickLabels);
 

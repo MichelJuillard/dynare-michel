@@ -8240,7 +8240,7 @@ command. Default: @code{`!'}
 @end table
 @end defmethod
 
-@defmethod Report addGraph data, figname, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, xlabel, ylabel, xrange, yrange, showZeroline
+@defmethod Report addGraph data, figname, graphSize, showGrid, showLegend, showLegendBox, legendLocation, legendOrientation, legendFontSize, seriesToUse, shade, shadeColor, shadeOpacity, title, xlabel, ylabel, xrange, xTickLabels, yrange, showZeroline
 Adds a @code{Graph} to a @code{Section}.
 @optionshead
 @table @code
@@ -8252,6 +8252,12 @@ The @code{dynSeries} that provides the data for the graph. Default:
 @item figname, @code{STRING}
 The name to use when saving this figure. Default: @code{[tempname
 `.tex']}
+
+@item graphSize, @code{NUMERICAL_VECTOR}
+The width and height to be passed to the third and fourth elements of
+the array passed to the @code{`Position'} option of Matlab's
+@code{figure} command, passed as a vector of size @math{2}. Default:
+Matlab sets width and height
 
 @item showGrid, @code{BOOLEAN}
 Whether or not to display the minor grid on the graph. Default:
@@ -8303,6 +8309,10 @@ The y-axis label. Default: @code{none}
 @item xrange, @code{dynDates}
 The boundary on the x-axis to display in the graph. Default: all
 
+@item xTickLabels, @code{CELL_ARRAY_STRINGS}
+The labels to use for the xticks in the graph. Default: the dates of
+the @code{dynSeries}
+
 @item yrange, @code{NUMERICAL_VECTOR}
 The boundary on the y-axis to display in the graph, represented as a
 @code{NUMERICAL_VECTOR} of size @math{2}, with the first entry less
@@ -8349,7 +8359,7 @@ Whether or not to show vertical lines separating the columns. Default: @code{fal
 @end defmethod
 
 @anchor{addSeries}
-@defmethod Report addSeries data, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor
+@defmethod Report addSeries data, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, zerotol
 Adds a @code{Series} to a @code{Graph} or a @code{Table}.
 @optionshead
 @table @code
@@ -8402,6 +8412,11 @@ zero. Default: @code{`red'}
 @item tablePosColor, @code{LATEX_COLOR}
 The color to use when marking Table data that is greater than
 zero. Default: @code{`blue'}
+
+@item zerotol, @code{DOUBLE}
+The zero tolerance. Anything smaller than @code{zerotol} and larger
+than @code{-zerotol} will be set to zero before being
+graphed. Default: @math{1e-6}
 
 @end table
 @end defmethod
