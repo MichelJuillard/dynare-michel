@@ -379,3 +379,40 @@ ModFileMeasurementErrorCorrPrior::ModFileMeasurementErrorCorrPrior(const int ind
   assert(index2 >= 0);
 }
 
+BasicModFileOption::BasicModFileOption(const int index_arg,
+                                       const double init_arg) :
+  index(index_arg),
+  init(init_arg)
+{
+  assert(index >= 0);
+  assert(!isnan(init));
+}
+
+ModFileOption::ModFileOption(const int index_arg, const double init_arg) :
+  BasicModFileOption(index_arg, init_arg)
+{
+}
+
+ModFileStructuralInnovationOption::ModFileStructuralInnovationOption(const int index_arg, const double init_arg) :
+  BasicModFileOption(index_arg, init_arg)
+{
+}
+
+ModFileMeasurementErrorOption::ModFileMeasurementErrorOption(const int index_arg, const double init_arg) :
+  BasicModFileOption(index_arg, init_arg)
+{
+}
+
+ModFileStructuralInnovationCorrOption::ModFileStructuralInnovationCorrOption(const int index1_arg, const int index2_arg, const double init_arg) :
+  BasicModFileOption(index1_arg, init_arg),
+  index2(index2_arg)
+{
+  assert(index2 >= 0);
+}
+
+ModFileMeasurementErrorCorrOption::ModFileMeasurementErrorCorrOption(const int index1_arg, const int index2_arg, const double init_arg) :
+  BasicModFileOption(index1_arg, init_arg),
+  index2(index2_arg)
+{
+  assert(index2 >= 0);
+}

@@ -167,6 +167,62 @@ public:
                                    const vector <double> domain_arg);
 };
 
+class BasicModFileOption
+{
+private:
+  inline bool isnan(double x) const { return (x!=x); };
+protected:
+  const int index;
+  const double init;
+
+  BasicModFileOption(const int index_arg,
+                     const double init_arg);
+public:
+  inline int get_index() const { return index; };
+  inline double get_init() const { return init; };
+};
+
+class ModFileOption : public BasicModFileOption
+{
+public:
+  ModFileOption(const int index_arg,
+                const double init_arg);
+};
+
+class ModFileStructuralInnovationOption: public BasicModFileOption
+{
+public:
+  ModFileStructuralInnovationOption(const int index_arg,
+                                    const double init_arg);
+};
+
+class ModFileMeasurementErrorOption : public BasicModFileOption
+{
+public:
+  ModFileMeasurementErrorOption(const int index_arg,
+                                const double init_arg);
+};
+
+class ModFileStructuralInnovationCorrOption : public BasicModFileOption
+{
+private:
+  const int index2;
+public:
+  ModFileStructuralInnovationCorrOption(const int index1_arg,
+                                        const int index2_arg,
+                                        const double init_arg);
+};
+
+class ModFileMeasurementErrorCorrOption : public BasicModFileOption
+{
+private:
+  const int index2;
+public:
+  ModFileMeasurementErrorCorrOption(const int index1_arg,
+                                    const int index2_arg,
+                                    const double init_arg);
+};
+
 class MsDsgeInfo
 {
 private:
@@ -176,6 +232,11 @@ private:
   vector<ModFileMeasurementErrorPrior *> measurement_error_prior_vector;
   vector<ModFileStructuralInnovationCorrPrior *> structural_innovation_corr_prior_vector;
   vector<ModFileMeasurementErrorCorrPrior *> measurement_error_corr_prior_vector;
+  vector<ModFileOption *> option_vector;
+  vector<ModFileStructuralInnovationOption *> structural_innovation_option_vector;
+  vector<ModFileMeasurementErrorOption *> measurement_error_option_vector;
+  vector<ModFileStructuralInnovationCorrOption *> structural_innovation_corr_option_vector;
+  vector<ModFileMeasurementErrorCorrOption *> measurement_error_corr_option_vector;
   map<string, int > exo_names, exo_det_names, endo_names, param_names;
   map<int, double > params;
   vector<aux_vars_t> aux_vars;
@@ -197,11 +258,18 @@ public:
   ~MsDsgeInfo();
 
   inline void addMarkovSwitching(MarkovSwitching *ms) { markov_switching_vector.push_back(ms); };
+
   inline void addPrior(ModFilePrior *p) { prior_vector.push_back(p); };
   inline void addStructuralInnovationPrior(ModFileStructuralInnovationPrior *sip) { structural_innovation_prior_vector.push_back(sip); };
   inline void addMeasurementErrorPrior(ModFileMeasurementErrorPrior *mep) { measurement_error_prior_vector.push_back(mep); };
   inline void addStructuralInnovationCorrPrior(ModFileStructuralInnovationCorrPrior *sicp) { structural_innovation_corr_prior_vector.push_back(sicp); };
   inline void addMeasurementErrorCorrPrior(ModFileMeasurementErrorCorrPrior *mecp) { measurement_error_corr_prior_vector.push_back(mecp); };
+
+  inline void addOption(ModFileOption *o) { option_vector.push_back(o); };
+  inline void addStructuralInnovationOption(ModFileStructuralInnovationOption *sio) { structural_innovation_option_vector.push_back(sio); };
+  inline void addMeasurementErrorOption(ModFileMeasurementErrorOption *meo) { measurement_error_option_vector.push_back(meo); };
+  inline void addStructuralInnovationCorrOption(ModFileStructuralInnovationCorrOption *sico) { structural_innovation_corr_option_vector.push_back(sico); };
+  inline void addMeasurementErrorCorrOption(ModFileMeasurementErrorCorrOption *meco) { measurement_error_corr_option_vector.push_back(meco); };
 
   inline bool markov_switching_has_val() { return !markov_switching_vector.empty(); };
   inline bool prior_has_val() { return !prior_vector.empty(); };
@@ -210,12 +278,25 @@ public:
   inline bool structural_innovation_corr_prior_has_val() { return !structural_innovation_corr_prior_vector.empty(); };
   inline bool measurement_error_corr_prior_has_val() { return !measurement_error_corr_prior_vector.empty(); };
 
+  inline bool option_has_val() { return !option_vector.empty(); };
+  inline bool structural_innovation_option_has_val() { return !structural_innovation_option_vector.empty(); };
+  inline bool measurement_error_option_has_val() { return !measurement_error_option_vector.empty(); };
+  inline bool structural_innovation_corr_option_has_val() { return !structural_innovation_corr_option_vector.empty(); };
+  inline bool measurement_error_corr_option_has_val() { return !measurement_error_corr_option_vector.empty(); };
+
   inline vector<MarkovSwitching *>get_markov_switching() { return markov_switching_vector; };
   inline vector<ModFilePrior *> get_prior() { return prior_vector; };
   inline vector<ModFileStructuralInnovationPrior *> get_structural_innovation_prior() { return structural_innovation_prior_vector; };
   inline vector<ModFileMeasurementErrorPrior *> get_measurement_error_prior() { return measurement_error_prior_vector; };
   inline vector<ModFileStructuralInnovationCorrPrior *> get_structural_innovation_corr_prior() { return structural_innovation_corr_prior_vector; };
   inline vector<ModFileMeasurementErrorCorrPrior *> get_measurement_error_corr_prior() { return measurement_error_corr_prior_vector; };
+
+  inline vector<ModFileOption *> get_option() { return option_vector; };
+  inline vector<ModFileStructuralInnovationOption *> get_structural_innovation_option() { return structural_innovation_option_vector; };
+  inline vector<ModFileMeasurementErrorOption *> get_measurement_error_option() { return measurement_error_option_vector; };
+  inline vector<ModFileStructuralInnovationCorrOption *> get_structural_innovation_corr_option() { return structural_innovation_corr_option_vector; };
+  inline vector<ModFileMeasurementErrorCorrOption *> get_measurement_error_corr_option() { return measurement_error_corr_option_vector; };
+
   inline map<string, int > get_exo_names() { return exo_names; };
   inline map<string, int > get_exo_det_names() { return exo_det_names; };
   inline map<string, int > get_endo_names() { return endo_names; };
