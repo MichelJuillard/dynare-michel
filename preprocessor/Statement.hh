@@ -97,6 +97,20 @@ public:
   bool estimation_data_statement_present;
   //! Last chain number for Markov Switching statement
   int last_markov_switching_chain;
+  //! Whether there is a prior statement present
+  bool prior_statement_present;
+  //! Whether there is a std prior statement present
+  bool std_prior_statement_present;
+  //! Whether there is a corr prior statement present
+  bool corr_prior_statement_present;
+  //! Whether there is a options statement present
+  bool options_statement_present;
+  //! Whether there is a std options statement present
+  bool std_options_statement_present;
+  //! Whether there is a corr options statement present
+  bool corr_options_statement_present;
+  //! Whether a Markov Switching DSGE is present
+  bool ms_dsge_present;
 };
 
 class Statement

@@ -1585,6 +1585,9 @@ MarkovSwitchingStatement::checkPass(ModFileStructure &mod_file_struct, WarningCo
             }
         }
     }
+
+  if (options_list.symbol_list_options.find("ms.parameters") != options_list.symbol_list_options.end())
+    mod_file_struct.ms_dsge_present = true;
 }
 
 void
