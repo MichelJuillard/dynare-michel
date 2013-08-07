@@ -18,7 +18,7 @@ MatrixParser* mparser;
  * matrix_tab.cc generated from matrix.lex and matrix.y. */
 void* matrix__scan_buffer(char*, size_t);
 void matrix__destroy_buffer(void*);
-void matrix_parse();
+int matrix_parse();
 extern ogp::location_type matrix_lloc;
 
 void MatrixParser::parse(int length, const char* stream)

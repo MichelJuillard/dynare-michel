@@ -110,7 +110,7 @@ FormulaParser* fparser;
  * formula_tab.cc generated from formula.lex and formula.y */
 void* fmla__scan_buffer(char*, size_t);
 void fmla__destroy_buffer(void*);
-void fmla_parse();
+int fmla_parse();
 extern location_type fmla_lloc; 
 
 /** This makes own copy of provided data, sets the buffer for the

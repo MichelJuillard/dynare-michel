@@ -14,7 +14,7 @@ CSVParser* csv_parser;
  * csv_tab.cc generated from csv.lex and csv.y. */
 void* csv__scan_buffer(char*, unsigned int);
 void csv__destroy_buffer(void*);
-void csv_parse();
+int csv_parse();
 
 extern ogp::location_type csv_lloc;
 
