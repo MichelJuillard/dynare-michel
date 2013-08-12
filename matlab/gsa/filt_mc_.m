@@ -507,7 +507,7 @@ else
     % snam=bayestopt_.name(find(nsp>0));
     nsnam=(find(nsp>1));
     
-    skipline(2
+    skipline(2)
     disp('These parameters do not affect significantly the fit of ANY observed series:')
     disp(snam0)
     skipline()
