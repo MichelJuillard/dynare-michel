@@ -4041,7 +4041,8 @@ being optional:
 @table @code
 
 @item @var{INITIAL_VALUE}
-Specifies a starting value for maximum likelihood estimation
+Specifies a starting value for the posterior mode optimizer or the
+maximum likelihood estimation. If unset, defaults to the prior mean.
 
 @item @var{LOWER_BOUND}
 Specifies a lower bound for the parameter value in maximum likelihood estimation
