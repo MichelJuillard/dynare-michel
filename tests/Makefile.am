@@ -152,8 +152,8 @@ MODFILES = \
 	trend_var/fs2000_log_nonstationary.mod \
 	third_order/FV2011.mod \
 	shock_decomp_calibrated_model/example1_calib_shock_decomp.mod \
-	tests/stochastic_purely_forward/stochastic_purely_forward.mod
-	tests/stochastic_purely_forward/stochastic_purely_forward_with_static.mod
+	stochastic_purely_forward/stochastic_purely_forward.mod \
+	stochastic_purely_forward/stochastic_purely_forward_with_static.mod
 
 XFAIL_MODFILES = ramst_xfail.mod
 
