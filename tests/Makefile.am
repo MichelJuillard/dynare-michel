@@ -150,7 +150,10 @@ MODFILES = \
 	measurement_errors/fs2000_corr_me_ml_mcmc/fs2000_corr_ME.mod \
 	trend_var/fs2000_nonstationary.mod \
 	trend_var/fs2000_log_nonstationary.mod \
-	third_order/FV2011.mod
+	third_order/FV2011.mod \
+	shock_decomp_calibrated_model/example1_calib_shock_decomp.mod \
+	tests/stochastic_purely_forward/stochastic_purely_forward.mod
+	tests/stochastic_purely_forward/stochastic_purely_forward_with_static.mod
 
 XFAIL_MODFILES = ramst_xfail.mod
 
@@ -302,7 +305,8 @@ EXTRA_DIST = \
 	estimation/fsdat_simul.m \
 	ep/mean_preserving_spread.m \
 	third_order/comparison_policy_functions_dynare_mathematica.m \
-	third_order/policyfunctions.mat
+	third_order/policyfunctions.mat \
+	shock_decomp_calibrated_model/example1_calib_shock_decomp_data.mat
 
 TARGETS =
 
