@@ -41,7 +41,6 @@ function A = minus(B,C)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if isnumeric(B) && isreal(B) && isequal(length(B),1) && isa(C,'dynSeries')
-    keyboard
     A = dynSeries();
     A.freq = C.freq;
     A.init = C.init;
