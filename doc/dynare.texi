@@ -7219,6 +7219,11 @@ extraction of sub-arrays: @i{e.g.} @code{@var{v}[4:6]}
 @item
 testing membership of an array: @code{in} operator (for example:
 @code{"b" in ["a", "b", "c"]} returns @code{1})
+@item
+getting the length of an array: @code{length} operator (for example:
+@code{length(["a", "b", "c"])} returns @code{3} and, hence,
+@code{1:length(["a", "b", "c"])} is equivalent to integer array
+@code{[1,2,3]})
 @end itemize
 
 Macro-expressions can be used at two places:
