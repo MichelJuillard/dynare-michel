@@ -116,141 +116,137 @@ This is Dynare Reference Manual, version @value{VERSION}.
 @end ifnottex
 
 @menu
-* Introduction::
-* Installation and configuration::
-* Running Dynare::
-* The Model file::
-* The Configuration File::
-* Time Series::
-* Reporting::
-* Examples::
-* Dynare internal documentation and unitary tests::
-* Bibliography::
-* Command and Function Index::
-* Variable Index::
+* Introduction::                
+* Installation and configuration::  
+* Running Dynare::              
+* The Model file::              
+* The Configuration File::      
+* Time Series::                 
+* Reporting::                   
+* Examples::                    
+* Dynare internal documentation and unitary tests::  
+* Bibliography::                
+* Command and Function Index::  
+* Variable Index::              
 
 @detailmenu
  --- The Detailed Node Listing ---
 
 Introduction
 
-* What is Dynare ?::
-* Documentation sources::
-* Citing Dynare in your research::
+* What is Dynare ?::            
+* Documentation sources::       
+* Citing Dynare in your research::  
 
 Installation and configuration
 
-* Software requirements::
-* Installation of Dynare::
-* Configuration::
+* Software requirements::       
+* Installation of Dynare::      
+* Configuration::               
 
 Installation of Dynare
 
-* On Windows::
-* On Debian GNU/Linux and Ubuntu::
-* On Mac OS X::
-* For other systems::
+* On Windows::                  
+* On Debian GNU/Linux and Ubuntu::  
+* On Mac OS X::                 
+* For other systems::           
 
 Configuration
 
-* For MATLAB::
-* For GNU Octave::
-* Some words of warning::
+* For MATLAB::                  
+* For GNU Octave::              
+* Some words of warning::       
 
 Running Dynare
 
-* Dynare invocation::
-* Dynare hooks::
-* Understanding Preprocessor Error Messages::
-
-Dynare invocation
-
-* Dynare hooks
-* Understanding Preprocessor Error Messages::
+* Dynare invocation::           
+* Dynare hooks::                
+* Understanding Preprocessor Error Messages::  
 
 The Model file
 
-* Conventions::
-* Variable declarations::
-* Expressions::
-* Parameter initialization::
-* Model declaration::
-* Auxiliary variables::
-* Initial and terminal conditions::
-* Shocks on exogenous variables::
-* Other general declarations::
-* Steady state::
-* Getting information about the model::
-* Deterministic simulation::
-* Stochastic solution and simulation::
-* Estimation::
-* Forecasting::
-* Optimal policy::
-* Sensitivity and identification analysis::
-* Markov-switching SBVAR::
-* Displaying and saving results::
-* Macro-processing language::
-* Misc commands::
+* Conventions::                 
+* Variable declarations::       
+* Expressions::                 
+* Parameter initialization::    
+* Model declaration::           
+* Auxiliary variables::         
+* Initial and terminal conditions::  
+* Shocks on exogenous variables::  
+* Other general declarations::  
+* Steady state::                
+* Getting information about the model::  
+* Deterministic simulation::    
+* Stochastic solution and simulation::  
+* Estimation::                  
+* Forecasting::                 
+* Optimal policy::              
+* Sensitivity and identification analysis::  
+* Markov-switching SBVAR::      
+* Displaying and saving results::  
+* Macro-processing language::   
+* Verbatim inclusion::          
+* Misc commands::               
 
 Expressions
 
-* Parameters and variables::
-* Operators::
-* Functions::
-* A few words of warning in stochastic context::
+* Parameters and variables::    
+* Operators::                   
+* Functions::                   
+* A few words of warning in stochastic context::  
 
 Parameters and variables
 
-* Inside the model::
-* Outside the model::
+* Inside the model::            
+* Outside the model::           
 
 Functions
 
-* Built-in Functions::
-* External Functions::
+* Built-in Functions::          
+* External Functions::          
 
 Steady state
 
-* Finding the steady state with Dynare nonlinear solver::
-* Using a steady state file::
-* Replace some equations during steady state computations::
+* Finding the steady state with Dynare nonlinear solver::  
+* Using a steady state file::   
+* Replace some equations during steady state computations::  
 
 Stochastic solution and simulation
 
-* Computing the stochastic solution::
-* Typology and ordering of variables::
-* First order approximation::
-* Second order approximation::
-* Third order approximation::
+* Computing the stochastic solution::  
+* Typology and ordering of variables::  
+* First order approximation::   
+* Second order approximation::  
+* Third order approximation::   
 
 Sensitivity and identification analysis
 
-* Sampling::
-* Stability Mapping::
-* Reduced Form Mapping::
-* RMSE::
-* Screening Analysis::
-* Identification Analysis::
-* Performing Sensitivity and Identification Analysis::
+* Sampling::                    
+* Stability Mapping::           
+* Reduced Form Mapping::        
+* RMSE::                        
+* Screening Analysis::          
+* Identification Analysis::     
+* Performing Sensitivity and Identification Analysis::  
 
 Macro-processing language
 
-* Macro expressions::
-* Macro directives::
-* Typical usages::
-* MATLAB/Octave loops versus macro-processor loops::
+* Macro expressions::           
+* Macro directives::            
+* Typical usages::              
+* MATLAB/Octave loops versus macro-processor loops::  
 
 Typical usages
 
-* Modularization::
-* Indexed sums or products::
-* Multi-country models::
-* Endogeneizing parameters::
+* Modularization::              
+* Indexed sums or products::    
+* Multi-country models::        
+* Endogeneizing parameters::    
 
 The Configuration File
 
-* Dynare Configuration::
-* Parallel Configuration::
+* Dynare Configuration::        
+* Parallel Configuration::      
 
 @end detailmenu
 @end menu
@@ -259,9 +255,9 @@ The Configuration File
 @chapter Introduction
 
 @menu
-* What is Dynare ?::
-* Documentation sources::
-* Citing Dynare in your research::
+* What is Dynare ?::            
+* Documentation sources::       
+* Citing Dynare in your research::  
 @end menu
 
 @node What is Dynare ?
@@ -387,9 +383,9 @@ If you want to give a URL, use the address of the Dynare website:
 @chapter Installation and configuration
 
 @menu
-* Software requirements::
-* Installation of Dynare::
-* Configuration::
+* Software requirements::       
+* Installation of Dynare::      
+* Configuration::               
 @end menu
 
 @node Software requirements
@@ -459,10 +455,10 @@ upgrade Dynare and discard the previous version without having to worry
 about your own files.
 
 @menu
-* On Windows::
-* On Debian GNU/Linux and Ubuntu::
-* On Mac OS X::
-* For other systems::
+* On Windows::                  
+* On Debian GNU/Linux and Ubuntu::  
+* On Mac OS X::                 
+* For other systems::           
 @end menu
 
 @node On Windows
@@ -527,9 +523,9 @@ loadable libraries. Please refer to
 @section Configuration
 
 @menu
-* For MATLAB::
-* For GNU Octave::
-* Some words of warning::
+* For MATLAB::                  
+* For GNU Octave::              
+* Some words of warning::       
 @end menu
 
 @node For MATLAB
@@ -638,9 +634,9 @@ file contains the description of the model and the computing tasks
 required by the user. Its contents is described in @ref{The Model file}.
 
 @menu
-* Dynare invocation::
-* Dynare hooks::
-* Understanding Preprocessor Error Messages::
+* Dynare invocation::           
+* Dynare hooks::                
+* Understanding Preprocessor Error Messages::  
 @end menu
 
 @node Dynare invocation
@@ -880,27 +876,28 @@ end of line one and the parser would continue processing.
 @chapter The Model file
 
 @menu
-* Conventions::
-* Variable declarations::
-* Expressions::
-* Parameter initialization::
-* Model declaration::
-* Auxiliary variables::
-* Initial and terminal conditions::
-* Shocks on exogenous variables::
-* Other general declarations::
-* Steady state::
-* Getting information about the model::
-* Deterministic simulation::
-* Stochastic solution and simulation::
-* Estimation::
-* Forecasting::
-* Optimal policy::
-* Sensitivity and identification analysis::
-* Markov-switching SBVAR::
-* Displaying and saving results::
-* Macro-processing language::
-* Misc commands::
+* Conventions::                 
+* Variable declarations::       
+* Expressions::                 
+* Parameter initialization::    
+* Model declaration::           
+* Auxiliary variables::         
+* Initial and terminal conditions::  
+* Shocks on exogenous variables::  
+* Other general declarations::  
+* Steady state::                
+* Getting information about the model::  
+* Deterministic simulation::    
+* Stochastic solution and simulation::  
+* Estimation::                  
+* Forecasting::                 
+* Optimal policy::              
+* Sensitivity and identification analysis::  
+* Markov-switching SBVAR::      
+* Displaying and saving results::  
+* Macro-processing language::   
+* Verbatim inclusion::          
+* Misc commands::               
 @end menu
 
 @node Conventions
@@ -1274,10 +1271,10 @@ Represents infinity.
 @end deffn
 
 @menu
-* Parameters and variables::
-* Operators::
-* Functions::
-* A few words of warning in stochastic context::
+* Parameters and variables::    
+* Operators::                   
+* Functions::                   
+* A few words of warning in stochastic context::  
 @end menu
 
 @node Parameters and variables
@@ -1288,8 +1285,8 @@ typing their names. The semantics of parameters and variables is quite
 different whether they are used inside or outside the model block.
 
 @menu
-* Inside the model::
-* Outside the model::
+* Inside the model::            
+* Outside the model::           
 @end menu
 
 @node Inside the model
@@ -1383,8 +1380,8 @@ internally and how this affects the output.
 @subsection Functions
 
 @menu
-* Built-in Functions::
-* External Functions::
+* Built-in Functions::          
+* External Functions::          
 @end menu
 
 @node Built-in Functions
@@ -2508,9 +2505,9 @@ give more guidance to Dynare, using your knowledge of the model, by
 providing it with a ``steady state file''.
 
 @menu
-* Finding the steady state with Dynare nonlinear solver::
-* Using a steady state file::
-* Replace some equations during steady state computations::
+* Finding the steady state with Dynare nonlinear solver::  
+* Using a steady state file::   
+* Replace some equations during steady state computations::  
 @end menu
 
 @node Finding the steady state with Dynare nonlinear solver
@@ -3218,11 +3215,11 @@ there are strong nonlinearities or binding constraints. Such a
 solution is computed using the @code{extended_path} command.
 
 @menu
-* Computing the stochastic solution::
-* Typology and ordering of variables::
-* First order approximation::
-* Second order approximation::
-* Third order approximation::
+* Computing the stochastic solution::  
+* Typology and ordering of variables::  
+* First order approximation::   
+* Second order approximation::  
+* Third order approximation::   
 @end menu
 
 @node Computing the stochastic solution
@@ -5718,13 +5715,13 @@ Sensitivity analysis results are saved locally in @code{<mod_file>/GSA},
 where @code{<mod_file>.mod} is the name of the DYNARE model file.
 
 @menu
-* Sampling::
-* Stability Mapping::
-* Reduced Form Mapping::
-* RMSE::
-* Screening Analysis::
-* Identification Analysis::
-* Performing Sensitivity and Identification Analysis::
+* Sampling::                    
+* Stability Mapping::           
+* Reduced Form Mapping::        
+* RMSE::                        
+* Screening Analysis::          
+* Identification Analysis::     
+* Performing Sensitivity and Identification Analysis::  
 @end menu
 
 @node Sampling
@@ -7148,10 +7145,10 @@ types: integer, character string, array of integers, array of
 strings.
 
 @menu
-* Macro expressions::
-* Macro directives::
-* Typical usages::
-* MATLAB/Octave loops versus macro-processor loops::
+* Macro expressions::           
+* Macro directives::            
+* Typical usages::              
+* MATLAB/Octave loops versus macro-processor loops::  
 @end menu
 
 @node Macro expressions
@@ -7382,10 +7379,10 @@ and to abort. The argument must evaluate to a string.
 @subsection Typical usages
 
 @menu
-* Modularization::
-* Indexed sums or products::
-* Multi-country models::
-* Endogeneizing parameters::
+* Modularization::              
+* Indexed sums or products::    
+* Multi-country models::        
+* Endogeneizing parameters::    
 @end menu
 
 @node Modularization
@@ -7596,6 +7593,31 @@ array stored in a MATLAB/Octave variable.
 
 @end table
 
+@node Verbatim   inclusion
+@section Verbatim inclusion
+
+Pass everything contained within the @code{verbatim} block to the @code{<mod_file>.m} file.
+
+@deffn Block verbatim ;
+
+@descriptionhead
+
+By default, whenever Dynare encounters code that is not understood by the parser, it is directly passed to the preprocessor output.
+
+In order to force this behavior you can use the @code{verbatim} block. This is useful when the code you want passed to the @code{<mod_file>.m} file contains tokens recognized by the Dynare preprocessor.
+
+@examplehead
+
+@example
+verbatim;
+% Anything contained in this block will be passed
+% directly to the <modfile>.m file, including comments
+var = 1;
+end;
+@end example
+
+@end deffn
+
 @node Misc commands
 @section Misc commands
 
@@ -7755,8 +7777,8 @@ Is @code{true} or @code{false}.
 @end table
 
 @menu
-* Dynare Configuration::
-* Parallel Configuration::
+* Dynare Configuration::        
+* Parallel Configuration::      
 @end menu
 
 @node Dynare Configuration

@@ -2,6 +2,13 @@
 var y, c, k, a, h, b;
 varexo e, u;
 
+verbatim;
+% I want these comments included in
+% example1.m
+%
+var = 1;
+end;
+
 parameters beta, rho, alpha, delta, theta, psi, tau;
 
 alpha = 0.36;
