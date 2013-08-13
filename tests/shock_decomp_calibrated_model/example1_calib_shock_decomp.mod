@@ -68,4 +68,4 @@ end;
 stoch_simul(periods=500, order=1, irf=0);
 varobs y c;
 shock_decomposition(parameter_set=calibration,datafile=example1_calib_shock_decomp_data) y c k;
-shock_decomposition(parameter_set=calibration,datafile=example1_calib_shock_decomp_data,shocks=(y)) y c k;
+

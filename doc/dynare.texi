@@ -5085,12 +5085,6 @@ Specify the parameter set to use for running the smoother. The
 @code{posterior_median}. Default value: @code{posterior_mean} if
 Metropolis has been run, else @code{posterior_mode}.
 
-@item shocks = (@var{VARIABLE_NAME} [@var{VARIABLE_NAME} @dots{}]  [ ; @var{VARIABLE_NAME} [@var{VARIABLE_NAME} @dots{}] @dots{}] )
-@dots{}
-
-@item labels = ( @var{VARIABLE_NAME} [@var{VARIABLE_NAME} @dots{}] )
-@dots{}
-
 @item datafile = @var{FILENAME}
 @xref{datafile}. Useful when computing the shock decomposition on a
 calibrated model.
