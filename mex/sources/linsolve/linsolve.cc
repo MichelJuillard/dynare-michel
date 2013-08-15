@@ -10,7 +10,7 @@
  */
 
 /*
- * Copyright (C) 2012 Dynare Team
+ * Copyright (C) 2012-2013 Dynare Team
  *
  * This file is part of Dynare.
  *
@@ -114,7 +114,12 @@ If requested, @var{r} will contain the reciprocal condition number.\n\
   retval(0) = A.solve(typA, B, info, rcond, NULL, true, transa ? blas_trans : blas_no_trans);
 
   if (nargout == 2)
-    retval(1) = rcond;
+    {
+      if (dimB(1) > 0)
+        retval(1) = rcond;
+      else // If B has zero columns, A.solve() apparently does not compute A's rcond
+        retval(1) = A.rcond();
+    }
 
   return retval;
 }
