@@ -56,6 +56,12 @@ if (options_.aim_solver == 1) && (options_.order > 1)
         error('Option "aim_solver" is incompatible with order >= 2')
 end
 
+
+if M_.maximum_endo_lag == 0 && options_.order >= 2
+    error(['2nd and 3rd order approximation not implemented for purely ' ...
+           'forward models'])
+end
+
 if options_.k_order_solver;
     if options_.risky_steadystate
         [dr,info] = dyn_risky_steadystate_solver(oo_.steady_state,M_,dr, ...
