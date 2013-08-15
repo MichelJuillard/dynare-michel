@@ -2,9 +2,9 @@ function dr = dyn_second_order_solver(jacobia,hessian,dr,M_,threads_ABC,threads_
 
 %@info:
 %! @deftypefn {Function File} {@var{dr} =} dyn_second_order_solver (@var{jacobia},@var{hessian},@var{dr},@var{M_},@var{threads_ABC},@var{threads_BC})
-%! @anchor{dyn_first_order_solver}
+%! @anchor{dyn_second_order_solver}
 %! @sp 1
-%! Computes the first order reduced form of the DSGE model
+%! Computes the second order reduced form of the DSGE model
 %! @sp 2
 %! @strong{Inputs}
 %! @sp 1
