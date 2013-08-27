@@ -119,6 +119,11 @@ void AtomAssignings::add_assignment(int asgn_off, const char* str, int name_len,
 
 	// register name of the left hand side and put to lname2expr
 	const char* ss = left_names.insert(buf);
+	if (lname2expr.find(ss) != lname2expr.end()) {
+		// Prevent the occurrence of #415
+		std::cerr << "Changing the value of " << ss << " is not supported. Aborting." << std::endl;
+		exit(EXIT_FAILURE);
+	}
 	lname2expr[ss] = order.size()-1;
 
 	// delete name
