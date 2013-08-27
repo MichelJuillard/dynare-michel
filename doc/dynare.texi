@@ -3495,6 +3495,8 @@ The convergence criterion used in the logarithmic reduction algorithm. Its defau
 @anchor{dr_logarithmic_reduction_maxiter}
 The maximum number of iterations used in the logarithmic reduction algorithm. Its default value is 100.
 
+@item loglinear
+@xref{loglinear}.
 
 @end table
 
