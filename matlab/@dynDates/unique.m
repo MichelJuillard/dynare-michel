@@ -67,7 +67,7 @@ dd.ndat = size(dd.time,1);
 %$ B5 = '1950Q2'; 
 %$
 %$ % Define expected results.
-%$ e.time = [1953 4; 1950 1; 1945 3; 1950 2];
+%$ e.time = [1953 4; 1950 2; 1950 1; 1945 3];
 %$ e.freq = 4;
 %$ e.ndat = 4;
 %$
