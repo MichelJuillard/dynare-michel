@@ -56,6 +56,9 @@ switch S(1).type
       case 'format'
         B = format(A);
       case {'time', 'freq'}
+        if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
+            error(['dynDate::subsref: ' S(1).subs ' is not a method but a member!'])
+        end
         B = builtin('subsref', A, S(1));
       otherwise
         error('dynDate::subsref: Unknown public member of method!')
