@@ -54,9 +54,15 @@ switch S(1).type
   case '.'
     switch S(1).subs
       case {'time','freq','ndat'}% Access public members.
+        if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
+            error(['dynDates::subsref: ' S(1).subs ' is not a method but a member!'])
+        end
         B = builtin('subsref', A, S(1));
       case {'sort','unique'}% Public methods (without arguments)
         B = feval(S(1).subs,A);
+        if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
+           S = shiftS(S);
+        end
       case {'append','pop'}% Public methods (with arguments).
         if isequal(S(2).type,'()')
             B = feval(S(1).subs,A,S(2).subs{:});
@@ -121,6 +127,28 @@ end
 %$ % Try to extract a sub-dynDates object and apply a method
 %$ 
 %$ d = B(2:3).sort ;
+%$
+%$ if isa(d,'dynDates')
+%$     t(1) = 1;
+%$ else
+%$     t(1) = 0;
+%$ end
+%$
+%$ if t(1)
+%$     t(2) = dyn_assert(d.freq,B.freq);
+%$     t(3) = dyn_assert(d.time,[1950 2; 1950 3]);
+%$     t(4) = dyn_assert(d.ndat,2);
+%$ end
+%$ T = all(t);
+%@eof:2
+
+%@test:3
+%$ % Define a dynDates object
+%$ B = dynDate('1950Q1'):dynDate('1960Q3');
+%$
+%$ % Try to extract a sub-dynDates object and apply a method
+%$
+%$ d = B(2:3).sort() ;
 %$
 %$ if isa(d,'dynDates')
 %$     t(1) = 1;
