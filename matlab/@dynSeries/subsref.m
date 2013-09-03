@@ -511,3 +511,22 @@ end
 %$ t(8) = dyn_assert(D.data,A(:,1));
 %$ T = all(t);
 %@eof:11
+
+%@test:12
+%$ % Define a data set.
+%$ A = [transpose(1:10),2*transpose(1:10)];
+%$
+%$ % Define names
+%$ A_name = {'A1';'A2'};
+%$
+%$ % Instantiate a time series object.
+%$ try
+%$    ts1 = dynSeries(A,[],A_name,[]);
+%$    ts1.save();
+%$    t = 1;
+%$ catch
+%$    t = 0;
+%$ end
+%$
+%$ T = all(t);
+%@eof:12
