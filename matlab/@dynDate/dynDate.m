@@ -142,7 +142,7 @@ switch nargin
     end
   case 2 % provide time and freq to instantiate a dynDate object
     date = dynDate();
-    if isnumeric(b) && isscalar(b) && (b==1 || b==4 || b==12 || b==52)
+    if isnumeric(b) && isscalar(b) &&  ismember(b,[1,4,12,52])
         date.freq = b;
         if ~isnumeric(a) && size(a)~=2 && size(a,2)~=2
             error(['dynDate:: Can''t instantiate the class! The first argument ' inputname(a) ' must be a 1*2 vector of integers.'])
