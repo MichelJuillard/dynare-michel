@@ -90,19 +90,36 @@ switch S(1).type
         end
       case {'save'}                                                        % Save dynSeries object on disk (default is a csv file). 
         B = NaN;
-        if length(S)==2 && strcmp(S(2).type,'()')
-            save(A,S(2).subs{:});
-            S = shiftS(S);
-        else
+        if isequal(length(S),2)
+            if strcmp(S(2).type,'()')
+                if isempty(S(2).subs)
+                    save(A,inputname(1));
+                else
+                    save(A,S(2).subs{:});
+                end
+                S = shiftS(S);
+            else
+                error('dynSeries::subsref: Wrong syntax.')
+            end
+        elseif isequal(length(S),1)
             save(A,inputname(1));
+        else
+            error('dynSeries::subsref: Call to save method must come in last position!')
         end
       case {'size'}
-        if length(S)==2 && strcmp(S(2).type,'()') && ~isempty(S(2).subs)
-            B = size(A,S(2).subs{1});
+        if isequal(length(S),2) && strcmp(S(2).type,'()')
+            if isempty(S(2).subs)
+                [x,y] = size(A);
+                B = [x, y];
+            else
+                B = size(A,S(2).subs{1});
+            end
             S = shiftS(S);
-        else
+        elseif isequal(length(S),1)
             [x,y] = size(A);
             B = [x, y];
+        else
+            error('dynSeries::subsref: Call to size method must come in last position!')
         end
       case {'rename','tex_rename'}
         B = feval(S(1).subs,A,S(2).subs{:});
