@@ -66,9 +66,28 @@ switch S(1).type
   case '.'
     switch S(1).subs
       case {'data','nobs','vobs','name','tex','freq','time','init'}        % Public members.
+        if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
+            error(['dynSeries::subsref: ' S(1).subs ' is not a method but a member!'])
+        end
         B = builtin('subsref', A, S(1));
-      case {'log','exp','ygrowth','qgrowth','ydiff','qdiff','lag'}         % Give "dot access" to public methods.
+      case {'log','exp','ygrowth','qgrowth','ydiff','qdiff'}         % Give "dot access" to public methods without args.
         B = feval(S(1).subs,A);
+        if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
+            S = shiftS(S);
+        end
+      case {'lag'}
+        if length(S)>1 && isequal(S(2).type,'()')
+            if isempty(S(2).subs)
+                B = feval(S(1).subs,A);
+                S = shiftS(S);
+            else
+                if length(S(2).subs{1})>1
+                    error('dynSeries::subsref: lag method admits no more than one argument (default value is one)!')
+                end
+                B = feval(S(1).subs,A,S(2).subs{1})
+                S = shiftS(S);
+            end
+        end
       case {'save'}                                                        % Save dynSeries object on disk (default is a csv file). 
         B = NaN;
         if length(S)==2 && strcmp(S(2).type,'()')
