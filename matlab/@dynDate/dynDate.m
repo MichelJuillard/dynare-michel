@@ -131,7 +131,7 @@ switch nargin
     elseif isa(a,'dynDate') % If input argument is a dynDate object then do a copy.
         date = a;
     else
-        if isequal(length(a),1) && isnumeric(a)
+        if isequal(length(a),1) && isnumeric(a) && isint(a)
             % If b is not a string then yearly data are assumed.
             date.freq = 1;
             date.time(1) = a;
