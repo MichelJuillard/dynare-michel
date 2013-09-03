@@ -18,4 +18,4 @@ function info = isaletter(str)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-info = any(islatter(str));
+info = any(isletter(str));
