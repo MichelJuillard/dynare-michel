@@ -82,7 +82,7 @@ end
 
 % Set sigma_e_is_diagonal flag (needed if the shocks block is not declared in the mod file).
 M_.sigma_e_is_diagonal = 1;
-if estim_params_.ncx || ~isequal(nnz(M_.Sigma_e),length(M_.Sigma_e))
+if estim_params_.ncx || any(nnz(tril(M_.Sigma_e,-1)))
     M_.sigma_e_is_diagonal = 0;
 end
 
