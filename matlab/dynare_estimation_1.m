@@ -99,11 +99,6 @@ if ~isequal(estim_params_.ncx,nnz(tril(M_.Sigma_e,-1)))
     end
 end
 
-M_.H_is_diagonal = 1;
-if estim_params_.ncn || ~isequal(nnz(M_.H),length(M_.H))
-    M_.H_is_diagonal = 0;
-end
-
 % Set the correlation matrix of measurement errors if necessary.
 if ~isequal(estim_params_.ncn,nnz(tril(M_.H,-1)))
     M_.Correlation_matrix_ME = diag(1./sqrt(diag(M_.H)))*M_.H*diag(1./sqrt(diag(M_.H)));
