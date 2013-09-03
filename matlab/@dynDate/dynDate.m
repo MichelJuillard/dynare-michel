@@ -70,15 +70,24 @@ date = class(date,'dynDate');
 
 switch nargin
   case 0
-    % Return an empty dynDate object.
+    % Return an empty dynDate object (without specified frequency).
     return
   case 1
     if ischar(a)% Weekly, Monthly or Quaterly data.
         a = upper(a);
         if length(a)>1
+            yearly = findstr('Y',a);
+            if isempty(yearly)
+                yearly = findstr('A',a);
+            end
             quaterly = findstr('Q',a);
             monthly  = findstr('M',a);
             weekly   = findstr('W',a);
+            if ~isempty(yearly)
+                date.freq = 1;
+                date.time(1) = str2num(a(1:yearly-1));
+                date.time(2) = 1;
+            end
             if ~isempty(quaterly)
                 date.freq = 4;
                 date.time(1) = str2num(a(1:quaterly-1));
@@ -94,9 +103,9 @@ switch nargin
                 date.time(1) = str2num(a(1:weekly-1));
                 date.time(2) = str2num(a(weekly+1:end));
             end
-            if isempty(quaterly) && isempty(monthly) && isempty(weekly)
-                if any(isletter(a))
-                    error('dynDate:: Using a string as an input argument, I can only handle weekly (W), monthly (M) or quaterly (Q) data!');
+            if isempty(yearly) && isempty(quaterly) && isempty(monthly) && isempty(weekly)
+                if isaletter(a)
+                    error('dynDate:: Using a string as an input argument, I can only handle weekly (W), monthly (M), quaterly (Q) or yearly (Y, A), data!');
                 else
                     % Yearly data declared with a string
                     date.freq = 1;
@@ -105,8 +114,9 @@ switch nargin
                 end
             end
         else
+            % Return an empty dynDate object (with a specified frequency).
             switch a
-              case 'Y'
+              case {'Y','A'}
                 date.freq = 1;
               case 'Q'
                 date.freq = 4;
@@ -115,9 +125,7 @@ switch nargin
               case 'W'
                 date.freq = 52;
               otherwise
-                error(['dynDate:: With one string argument of length one, ' ...
-                       'you must provide one of weekly (''W''), monthly (''M''), ' ...
-                       'quaterly (''Q'') or yearly (''Y'').']);
+                error(['dynDate:: With one string argument of length one, you must provide one of weekly (''W''), monthly (''M''), quaterly (''Q'') or yearly (''Y'').']);
             end
         end
     elseif isa(a,'dynDate') % If input argument is a dynDate object then do a copy.
@@ -160,6 +168,8 @@ end
 %$ date_3 = '1950m10';
 %$ date_4 = '1950w50';
 %$ date_5 = '1950';
+%$ date_6 = '1967y';
+%$ date_7 = '2009A';
 %$
 %$ % Define expected results.
 %$ e_date_1 = [1950 1];
@@ -172,6 +182,10 @@ end
 %$ e_freq_4 = 52;
 %$ e_date_5 = [1950 1];
 %$ e_freq_5 = 1;
+%$ e_date_6 = [1967 1];
+%$ e_freq_6 = 1;
+%$ e_date_7 = [2009 1];
+%$ e_freq_7 = 1;
 %$
 %$ % Call the tested routine.
 %$ d1 = dynDate(date_1);
@@ -179,6 +193,8 @@ end
 %$ d3 = dynDate(date_3);
 %$ d4 = dynDate(date_4);
 %$ d5 = dynDate(date_5);
+%$ d6 = dynDate(date_6);
+%$ d7 = dynDate(date_7);
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(d1.time,e_date_1);
@@ -191,6 +207,10 @@ end
 %$ t(8) = dyn_assert(d3.freq,e_freq_3);
 %$ t(9) = dyn_assert(d4.freq,e_freq_4);
 %$ t(10)= dyn_assert(d5.freq,e_freq_5);
+%$ t(11)= dyn_assert(d6.freq,e_freq_6);
+%$ t(12)= dyn_assert(d7.freq,e_freq_7);
+%$ t(13)= dyn_assert(d6.time,e_date_6);
+%$ t(14)= dyn_assert(d7.time,e_date_7);
 %$ T = all(t);
 %@eof:1
 
@@ -199,14 +219,17 @@ end
 %$ qq = dynDate('Q');
 %$ mm = dynDate('M');
 %$ ww = dynDate('W');
+%$ yy = dynDate('Y');
 %$
 %$ % Check the results.
 %$ t(1) = dyn_assert(qq.freq,4);
 %$ t(2) = dyn_assert(mm.freq,12);
 %$ t(3) = dyn_assert(ww.freq,52);
-%$ t(4) = dyn_assert(all(isnan(qq.time)),1);
-%$ t(5) = dyn_assert(all(isnan(mm.time)),1);
-%$ t(6) = dyn_assert(all(isnan(ww.time)),1);
+%$ t(4) = dyn_assert(yy.freq,1);
+%$ t(5) = dyn_assert(all(isnan(qq.time)),1);
+%$ t(6) = dyn_assert(all(isnan(mm.time)),1);
+%$ t(7) = dyn_assert(all(isnan(ww.time)),1);
+%$ t(8) = dyn_assert(all(isnan(yy.time)),1);
 %$ T = all(t);
 %@eof:2
 
