@@ -144,16 +144,29 @@ switch nargin
     date = dynDate();
     if isnumeric(b) && isscalar(b) && ismember(b,[1,4,12,52])
         date.freq = b;
-        if ~isnumeric(a) && size(a)~=2 && size(a,2)~=2
-            error(['dynDate:: Can''t instantiate the class! The first argument ' inputname(a) ' must be a 1*2 vector of integers.'])
+        if ~isnumeric(a)
+            error(['dynDate:: Can''t instantiate the class! The first argument ' inputname(a) ' must be numeric!'])
         end
-        if b==1 && a(2)~=1
-            error(['dynDate:: Can''t instantiate the class! The second element of the first argument ' inputname(a) ' must be equal to one.'])
+        if ~all(isint(a))
+            error(['dynDate:: Can''t instantiate the class! The first argument ' inputname(a) ' must be a scalar or a 1*2 vector of integers!'])
+        end
+        if ~isequal(size(a),[1,2])
+            if b>1
+                error(['dynDate:: Can''t instantiate the class! The first argument ' inputname(a) ' must be a 1*2 vector of integers.'])
+            end
+        else
+            if isequal(b,1) && isequal(a(2),1)
+                error(['dynDate:: Can''t instantiate the class! The second element of the first input argument ' inputname(a) ' must be equal to one (because freq==1)!'])
+            end
         end
         if a(2)<=0 || a(2)>b
-            error(['dynDate:: Can''t instantiate the class! The second element of the first argument ' inputname(a) ' must be <=' int2str(b) '.' ])
+            error(['dynDate:: Can''t instantiate the class! The second element of the first argument ' inputname(a) ' must be a positive integer be <=' int2str(b) '!' ])
         end
-        date.time = a;
+        if length(a)==1
+            date.time = [a, 1];
+        else
+            date.time = a;
+        end
     else
         error(['dynDate:: Can''t instantiate the class! The second argument ' inputname(b) ' must be equal to 1, 4, 12 or 52.'])
     end
