@@ -292,3 +292,20 @@ end
 %$ t(6) = dyn_assert(all(isnan(ww.time)),1);
 %$ T = all(t);
 %@eof:4
+
+%@test:5
+%$ % Try to instatiate dynDate objects.
+%$ try
+%$    a = dynDate([1950 1],'Q');
+%$    t(1) = 1;
+%$ catch
+%$    t(1) = 0;
+%$ end
+%$ try
+%$    a = dynDate([1950 5],'Q');
+%$    t(2) = 0;
+%$ catch
+%$    t(2) = 1;
+%$ end
+%$ T = all(t);
+%@eof:5
