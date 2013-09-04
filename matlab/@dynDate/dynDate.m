@@ -256,9 +256,9 @@ end
 %$ end
 %$ try
 %$    a = dynDate([1950 5],4);
-%$    t(1) = 0;
+%$    t(2) = 0;
 %$ catch
-%$    t(1) = 1;
+%$    t(2) = 1;
 %$ end
 %$ T = all(t);
 %@eof:3
