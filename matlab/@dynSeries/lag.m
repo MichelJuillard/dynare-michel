@@ -78,4 +78,4 @@ end
 %$ end
 %$
 %$ T = all(t);
-%@eof:1b
+%@eof:1
