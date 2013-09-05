@@ -87,6 +87,8 @@ switch S(1).type
                 B = feval(S(1).subs,A,S(2).subs{1})
                 S = shiftS(S);
             end
+        else
+            B = feval(S(1).subs,A);
         end
       case {'save'}                                                        % Save dynSeries object on disk (default is a csv file). 
         B = NaN;
