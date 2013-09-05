@@ -17,7 +17,7 @@ function display(A)
 %! None
 %! @end deftypefn
 %@eod:
-    
+
 vspace = ' ';
 TABLE = ' ';
 
@@ -50,10 +50,10 @@ else
         for t=1:10
             tmp = char(tmp,num2str(A.data(t,i)));
         end
-        tmp = char(tmp,vspace)
+        tmp = char(tmp,vspace);
         for t=A.nobs-10:A.nobs
             tmp = char(tmp,num2str(A.data(t,i)));
-        end 
+        end
         TABLE = horzcat(TABLE, tmp);
     end
 end
