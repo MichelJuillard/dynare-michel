@@ -75,7 +75,7 @@ switch S(1).type
         if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
             S = shiftS(S);
         end
-      case {'lag'}
+      case 'lag'
         if length(S)>1 && isequal(S(2).type,'()')
             if isempty(S(2).subs)
                 B = feval(S(1).subs,A);
@@ -90,7 +90,7 @@ switch S(1).type
         else
             B = feval(S(1).subs,A);
         end
-      case {'save'}                                                        % Save dynSeries object on disk (default is a csv file). 
+      case 'save'                                                        % Save dynSeries object on disk (default is a csv file).
         B = NaN;
         if isequal(length(S),2)
             if strcmp(S(2).type,'()')
@@ -108,7 +108,7 @@ switch S(1).type
         else
             error('dynSeries::subsref: Call to save method must come in last position!')
         end
-      case {'size'}
+      case 'size'
         if isequal(length(S),2) && strcmp(S(2).type,'()')
             if isempty(S(2).subs)
                 [x,y] = size(A);
@@ -142,7 +142,7 @@ switch S(1).type
         else
             error('dynSeries::subsref: Unknown public method, public member or variable!')
         end
-    end    
+    end
   case '()'
     if ischar(S(1).subs{1})
         % If ts is an empty dynSeries object, populate this object by reading data in a file.
