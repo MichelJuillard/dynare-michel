@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function c = eq(a,b)
+function c = eq(a,b) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{c} =} eq (@var{a},@var{b})

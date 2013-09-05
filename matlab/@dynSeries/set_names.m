@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function A = set_names(B,varargin)
+function A = set_names(B,varargin) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{A} =} times (@var{B},@code{varargin})

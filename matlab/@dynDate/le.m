@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function c = le(a,b)
+function c = le(a,b)  % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{c} =} le (@var{a},@var{b})

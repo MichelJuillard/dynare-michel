@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function date = dynDate(a,b)
+function date = dynDate(a,b) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{date} =} dynDate (@var{a})

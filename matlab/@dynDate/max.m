@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function c = max(a,b)
+function c = max(a,b) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{c} =} max (@var{a},@var{b})

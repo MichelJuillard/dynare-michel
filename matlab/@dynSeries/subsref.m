@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function B = subsref(A, S)
+function B = subsref(A, S) % --*-- Unitary tests --*--
+
 %@info:
 %! @deftypefn {Function File} {@var{us} =} subsref (@var{ts},S)
 %! @anchor{@dynSeries/subsref}

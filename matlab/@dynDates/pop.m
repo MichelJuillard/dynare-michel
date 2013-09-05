@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function dd = pop(dd,a)
+function dd = pop(dd,a) % --*-- Unitary tests --*--
+
 % pop method for dynDates class (removes a date)).
 
 %@info:

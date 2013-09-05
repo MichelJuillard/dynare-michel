@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function dd = unique(dd)
+function dd = unique(dd) % --*-- Unitary tests --*--
+
 % unique method for dynDates class.
 
 %@info:

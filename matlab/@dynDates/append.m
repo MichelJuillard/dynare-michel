@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function dd = append(dd,a)
+function dd = append(dd,a) % --*-- Unitary tests --*--
+
 % append method for dynDates class.
 
 %@info:

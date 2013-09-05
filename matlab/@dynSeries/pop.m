@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function [ts,id] = pop(ts,a)
+function [ts,id] = pop(ts,a) % --*-- Unitary tests --*--
+
 % Removes a variable from a dynSeries object.
 
 %@info:

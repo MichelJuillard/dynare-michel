@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function ts = dynSeries(varargin)
+function ts = dynSeries(varargin) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{ts} =} dynSeries (@var{a},@var{b},@var{c},@var{d})

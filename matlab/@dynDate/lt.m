@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function c = lt(a,b)
+function c = lt(a,b) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{c} =} lt (@var{a},@var{b})

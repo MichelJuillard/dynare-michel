@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function us = lag(ts,p)
+function us = lag(ts,p) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{us} =} lag (@var{ts})

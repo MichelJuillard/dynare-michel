@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function c = min(a,b)
+function c = min(a,b) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{c} =} min (@var{a},@var{b})

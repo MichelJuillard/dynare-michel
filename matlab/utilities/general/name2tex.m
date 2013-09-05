@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function tex = name2tex(name, info)
+function tex = name2tex(name, info) % --*-- Unitary tests --*--
+
 % Converts plain text name into tex name.
  
 % Copyright (C) 2013 Dynare Team

@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function C = intersect(A,B)
+function C = intersect(A,B) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{C} =} intersect (@var{A},@var{B})

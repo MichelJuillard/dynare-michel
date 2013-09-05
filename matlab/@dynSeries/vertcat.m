@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function a = vertcat(varargin)
+function a = vertcat(varargin) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function file} {@var{a} =} vertcat (@var{b},@var{c}, ...)

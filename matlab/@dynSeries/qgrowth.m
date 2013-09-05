@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function us = qgrowth(ts)
+function us = qgrowth(ts) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{us} =} qgrowth (@var{ts})

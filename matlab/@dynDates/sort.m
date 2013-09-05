@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function dd = sort(dd)
+function dd = sort(dd) % --*-- Unitary tests --*--
+
 % sort method for dynDates class.
 
 %@info:

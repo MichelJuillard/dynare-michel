@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function p = format(date)
+function p = format(date) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{p} =} format (@var{date})
