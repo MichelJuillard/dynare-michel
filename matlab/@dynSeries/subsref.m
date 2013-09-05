@@ -151,6 +151,17 @@ switch S(1).type
         else
             error(['dynSeries::subsref: dynSeries object ''' inputname(1) '''  is not empty!'])
         end
+    elseif isa(S(1).subs{1},'dynTimeIndex')
+        % shift backward/forward (lag/lead) dynSeries object
+        shift = S(1).subs{1}.index;
+        if shift>0
+            B = feval('lead',A,shift);
+        elseif shift<0
+            B = feval('lag',A,-shift);
+        else
+            % Do nothing.
+            B = A;
+        end
     elseif isa(S(1).subs{1},'dynDates')
         % Extract a subsample using a dynDates object
         [junk,tdx] = intersect(A.time.time,S(1).subs{1}.time,'rows');
@@ -532,3 +543,25 @@ end
 %$
 %$ T = all(t);
 %@eof:12
+
+%@test:13
+%$ try
+%$     data = transpose(0:1:50);
+%$     ts = dynSeries(data,'1950Q1');
+%$     a = ts.lag;
+%$     b = ts.lead;
+%$     tt = dynTimeIndex();
+%$     c = ts(tt-1);
+%$     d = ts(tt+1);
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ if t(1)>1
+%$     t(2) = (a==c);
+%$     t(3) = (b==d);
+%$ end
+%$
+%$ T = all(t);
+%@eof:13
