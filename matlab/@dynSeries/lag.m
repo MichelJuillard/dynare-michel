@@ -44,6 +44,10 @@ if nargin<2
     p = 1;
 end
 
+if p<=0
+    error('dynSeries::lag: Second input argument must be strictly positive! Use lead method instead.')
+end
+
 % Copy of ts dynSeries object
 us = ts;
 
