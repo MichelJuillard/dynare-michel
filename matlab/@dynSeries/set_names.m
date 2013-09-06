@@ -65,7 +65,7 @@ end
 %$ A = rand(10,3);
 %$
 %$ % Define names
-%$ A_name = {'A1';'--NA--';'A3'};
+%$ A_name = {'A1';'Variable_2';'A3'};
 %$
 %$ t = zeros(4,1);
 %$
@@ -91,7 +91,7 @@ end
 %$ A = rand(10,3);
 %$
 %$ % Define names
-%$ A_name = {'A1';'--NA--';'A3'};
+%$ A_name = {'A1';'Variable_2';'A3'};
 %$
 %$ t = zeros(4,1);
 %$
