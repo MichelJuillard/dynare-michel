@@ -123,7 +123,7 @@ switch S(1).type
         else
             error('dynSeries::subsref: Call to size method must come in last position!')
         end
-      case {'rename','tex_rename'}
+      case {'set_names','rename','tex_rename'}
         B = feval(S(1).subs,A,S(2).subs{:});
         S = shiftS(S);
       otherwise                                                            % Extract a sub-object by selecting one variable.
