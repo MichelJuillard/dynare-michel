@@ -155,28 +155,28 @@ switch nargin
           case 'Q'
             date.freq = 4;
           otherwise
-            error(['dynDate:: Can''t instantiate the class! The second argument ' inputname(b) ' must be an integer equal to 1, 4, 12 or 52, or a character equal to ''Y'', ''A'', ''W'', ''M'' or ''Q''!'])
+            error(['dynDate:: Can''t instantiate the class! The second argument ' inputname(2) ' must be an integer equal to 1, 4, 12 or 52, or a character equal to ''Y'', ''A'', ''W'', ''M'' or ''Q''!'])
         end
     else
-        error(['dynDate:: Can''t instantiate the class! The second argument ' inputname(b) ' must be an integer equal to 1, 4, 12 or 52, or a character equal to ''Y'', ''A'', ''W'', ''M'' or ''Q''!'])
+        error(['dynDate:: Can''t instantiate the class! The second argument ' inputname(2) ' must be an integer equal to 1, 4, 12 or 52, or a character equal to ''Y'', ''A'', ''W'', ''M'' or ''Q''!'])
     end
     if ~isnumeric(a)
-        error(['dynDate:: Can''t instantiate the class! The first argument ' inputname(a) ' must be numeric!'])
+        error(['dynDate:: Can''t instantiate the class! The first argument ' inputname(1) ' must be numeric!'])
     end
     if ~all(isint(a))
-        error(['dynDate:: Can''t instantiate the class! The first argument ' inputname(a) ' must be a scalar or a 1*2 vector of integers!'])
+        error(['dynDate:: Can''t instantiate the class! The first argument ' inputname(1) ' must be a scalar or a 1*2 vector of integers!'])
     end
     if ~isequal(size(a),[1,2])
         if date.freq>1
-            error(['dynDate:: Can''t instantiate the class! The first argument ' inputname(a) ' must be a 1*2 vector of integers.'])
+            error(['dynDate:: Can''t instantiate the class! The first argument ' inputname(1) ' must be a 1*2 vector of integers.'])
         end
     else
         if isequal(date.freq,1) && ~isequal(a(2),1)
-            error(['dynDate:: Can''t instantiate the class! The second element of the first input argument ' inputname(a) ' must be equal to one (because freq==1)!'])
+            error(['dynDate:: Can''t instantiate the class! The second element of the first input argument ' inputname(1) ' must be equal to one (because freq==1)!'])
         end
     end
     if a(2)<=0 || a(2)>date.freq
-        error(['dynDate:: Can''t instantiate the class! The second element of the first argument ' inputname(a) ' must be a positive integer be <=' int2str(b) '!' ])
+        error(['dynDate:: Can''t instantiate the class! The second element of the first argument ' inputname(1) ' must be a positive integer be <=' int2str(2) '!' ])
     end
     if length(a)==1
         date.time = [a, 1];
