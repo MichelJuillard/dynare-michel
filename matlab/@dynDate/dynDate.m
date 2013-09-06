@@ -171,7 +171,7 @@ switch nargin
             error(['dynDate:: Can''t instantiate the class! The first argument ' inputname(a) ' must be a 1*2 vector of integers.'])
         end
     else
-        if isequal(date.freq,1) && isequal(a(2),1)
+        if isequal(date.freq,1) && ~isequal(a(2),1)
             error(['dynDate:: Can''t instantiate the class! The second element of the first input argument ' inputname(a) ' must be equal to one (because freq==1)!'])
         end
     end
