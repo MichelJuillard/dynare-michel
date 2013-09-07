@@ -55,7 +55,7 @@ if ~isa(dd,'dynDates')
 end
 
 if ~(isa(a,'dynDate') || isa(a,'dynDates') || ischar(a))
-    error(['dynDates::append: Input argument ' inputname(a) ' has to be ' ...
+    error(['dynDates::append: Input argument ' inputname(2) ' has to be ' ...
                         'a dynDate object or a dynDates object or a string (formatted date).'])
 end
 

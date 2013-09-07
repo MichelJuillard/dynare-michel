@@ -47,7 +47,7 @@ function dd = sort(dd) % --*-- Unitary tests --*--
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if ~isa(dd,'dynDates')
-    error(['dynDates::sort: Input argument ' inputname(dd) ' has to be a dynDates object.'])
+    error(['dynDates::sort: Input argument ' inputname(1) ' has to be a dynDates object.'])
 end
 
 if dd.ndat==1
