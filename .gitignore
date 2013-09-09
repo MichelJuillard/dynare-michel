@@ -27,6 +27,9 @@ install-sh
 /missing
 /mex/build/matlab/missing
 /mex/build/octave/missing
+/compile
+/mex/build/matlab/compile
+/mex/build/octave/compile
 ylwrap
 ar-lib
 
