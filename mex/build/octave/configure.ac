@@ -20,7 +20,7 @@ dnl along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 AC_PREREQ([2.62])
 AC_INIT([dynare], [4.4-unstable])
 AC_CONFIG_SRCDIR([configure.ac])
-AM_INIT_AUTOMAKE([-Wall -Wno-portability -Werror foreign subdir-objects])
+AM_INIT_AUTOMAKE([-Wall -Wno-portability -Werror foreign])
 
 AC_CHECK_PROG([MKOCTFILE], [mkoctfile], [mkoctfile])
 
