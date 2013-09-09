@@ -25,15 +25,8 @@ end
 
 if iscell(name)
     nn = length(name);
-    id = findstr(cell2mat(transpose(name)),'_');
 else
     nn = 1;
-    id = findstr(name,'_');
-end
-
-if isempty(id)
-    tex = name;
-    return
 end
 
 if iscell(name)
@@ -50,6 +43,9 @@ for i=1:nn
             tex = name;
             id = findstr(name,'_');
             len = length(tex);
+        end
+        if isempty(id)
+            continue
         end
         n = length(id);
         if id(1)==1
