@@ -51,7 +51,7 @@ if ischar(parameters) && strcmp(parameters,'calibration')
 end
 
 if isempty(dataset_) || isempty(bayestopt_)
-    [dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list, M_.fname, [], M_, options_, oo_, estim_params_, bayestopt_);
+    [dataset_,xparam1, hh, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list, M_.fname, [], M_, options_, oo_, estim_params_, bayestopt_);
 end
 
 if nargin==0

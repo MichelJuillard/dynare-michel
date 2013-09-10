@@ -78,7 +78,7 @@ else
     objective_function = str2func('DsgeVarLikelihood');
 end
 
-[dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list_, dname, [], M_, options_, oo_, estim_params_, bayestopt_);
+[dataset_,xparam1, hh, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list_, dname, [], M_, options_, oo_, estim_params_, bayestopt_);
 
 % Set sigma_e_is_diagonal flag (needed if the shocks block is not declared in the mod file).
 M_.sigma_e_is_diagonal = 1;
@@ -135,15 +135,6 @@ lb = bayestopt_.lb;
 ub = bayestopt_.ub;
 
 dr = oo_.dr;
-
-%% load mode file is necessary
-if ~isempty(options_.mode_file) && ~options_.mh_posterior_mode_estimation
-    load(options_.mode_file);
-
-    if length(xparam1) ~= nx
-        error([ 'ESTIMATION: the posterior mode file ' options_.mode_file ' has been generated using another specification. Please delete it and recompute the posterior mode.'])
-    end
-end
 
 %% load optimal_mh_scale parameter if previous run was with
 %% mode_compute=6
