@@ -702,7 +702,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             fprintf(fidTeX,' \n');
         end
         for plt = 1:nbplt,
-            hh = dyn_figure(options_,'Name','Smoothed shocks');
+            fh = dyn_figure(options_,'Name','Smoothed shocks');
             NAMES = [];
             if options_.TeX, TeXNAMES = []; end
             nstar0=min(nstar,M_.exo_nbr-(plt-1)*nstar);
@@ -743,7 +743,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 end
                 title(name,'Interpreter','none')
             end
-            dyn_saveas(hh,[M_.fname '_SmoothedShocks' int2str(plt)],options_);
+            dyn_saveas(fh,[M_.fname '_SmoothedShocks' int2str(plt)],options_);
             if options_.TeX
                 fprintf(fidTeX,'\\begin{figure}[H]\n');
                 for jj = 1:nstar0
@@ -795,7 +795,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 fprintf(fidTeX,' \n');
             end
             for plt = 1:nbplt
-                hh = dyn_figure(options_,'Name','Smoothed observation errors');
+                fh = dyn_figure(options_,'Name','Smoothed observation errors');
                 NAMES = [];
                 if options_.TeX, TeXNAMES = []; end
                 nstar0=min(nstar,number_of_plots_to_draw-(nbplt-1)*nstar);
@@ -837,7 +837,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     end
                     title(name,'Interpreter','none')
                 end
-                dyn_saveas(hh,[M_.fname '_SmoothedObservationErrors' int2str(plt)],options_);
+                dyn_saveas(fh,[M_.fname '_SmoothedObservationErrors' int2str(plt)],options_);
                 if options_.TeX
                     fprintf(fidTeX,'\\begin{figure}[H]\n');
                     for jj = 1:nstar0
@@ -870,7 +870,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         fprintf(fidTeX,' \n');
     end
     for plt = 1:nbplt,
-        hh = dyn_figure(options_,'Name','Historical and smoothed variables');
+        fh = dyn_figure(options_,'Name','Historical and smoothed variables');
         NAMES = [];
         if options_.TeX, TeXNAMES = []; end
         nstar0=min(nstar,n_varobs-(plt-1)*nstar);
@@ -912,7 +912,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             end
             title(name,'Interpreter','none')
         end
-        dyn_saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(plt)],options_);
+        dyn_saveas(fh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(plt)],options_);
         if options_.TeX
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:nstar0,
