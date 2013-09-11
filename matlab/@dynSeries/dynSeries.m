@@ -357,7 +357,6 @@ ts.time = ts.init:(ts.init+ts.nobs);
 %$ T = all(t);
 %@eof:7
 
-
 %@test:8
 %$ t = zeros(8,1);
 %$
@@ -381,3 +380,86 @@ ts.time = ts.init:(ts.init+ts.nobs);
 %$ T = all(t);
 %@eof:8
 
+%@test:9
+%$ try
+%$     ts = dynSeries('dynseries_test_data-1.xls');
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ if t(1)
+%$     t(2) = dyn_assert(ts.freq,4);
+%$     t(3) = dyn_assert(ts.init.freq,4);
+%$     t(4) = dyn_assert(ts.init.time,[1990, 1]);
+%$     t(5) = dyn_assert(ts.vobs,3);
+%$     t(6) = dyn_assert(ts.nobs,5);
+%$     t(7) = dyn_assert(ts.name,{'GDP';'Consumption';'CPI'});
+%$     t(8) = dyn_assert(ts.tex,{'GDP';'Consumption';'CPI'});
+%$ end
+%$
+%$ T = all(t);
+%@eof:9
+
+%@test:10
+%$ try
+%$     ts = dynSeries('dynseries_test_data-2.xls');
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ if t(1)
+%$     t(2) = dyn_assert(ts.freq,4);
+%$     t(3) = dyn_assert(ts.init.freq,4);
+%$     t(4) = dyn_assert(ts.init.time,[1990, 1]);
+%$     t(5) = dyn_assert(ts.vobs,3);
+%$     t(6) = dyn_assert(ts.nobs,5);
+%$     t(7) = dyn_assert(ts.name,{'Variable_1';'Variable_2';'Variable_3'});
+%$     t(8) = dyn_assert(ts.tex,{'Variable\\_1';'Variable\\_2';'Variable\\_3'});
+%$ end
+%$
+%$ T = all(t);
+%@eof:10
+
+%@test:11
+%$ try
+%$     ts = dynSeries('dynseries_test_data-3.xls');
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ if t(1)
+%$     t(2) = dyn_assert(ts.freq,1);
+%$     t(3) = dyn_assert(ts.init.freq,1);
+%$     t(4) = dyn_assert(ts.init.time,[1, 1]);
+%$     t(5) = dyn_assert(ts.vobs,3);
+%$     t(6) = dyn_assert(ts.nobs,5);
+%$     t(7) = dyn_assert(ts.name,{'Variable_1';'Variable_2';'Variable_3'});
+%$     t(8) = dyn_assert(ts.tex,{'Variable\\_1';'Variable\\_2';'Variable\\_3'});
+%$ end
+%$
+%$ T = all(t);
+%@eof:11
+
+%@test:12
+%$ try
+%$     ts = dynSeries('dynseries_test_data-4.xls');
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ if t(1)
+%$     t(2) = dyn_assert(ts.freq,1);
+%$     t(3) = dyn_assert(ts.init.freq,1);
+%$     t(4) = dyn_assert(ts.init.time,[1, 1]);
+%$     t(5) = dyn_assert(ts.vobs,3);
+%$     t(6) = dyn_assert(ts.nobs,5);
+%$     t(7) = dyn_assert(ts.name,{'GDP';'Consumption';'CPI'});
+%$     t(8) = dyn_assert(ts.tex,{'GDP';'Consumption';'CPI'});
+%$ end
+%$
+%$ T = all(t);
+%@eof:12
