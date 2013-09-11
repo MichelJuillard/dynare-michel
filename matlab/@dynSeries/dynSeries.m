@@ -114,6 +114,19 @@ switch nargin
         elseif check_file_extension(varargin{1},'csv')
             [freq,init,data,varlist] = load_csv_file_data(varargin{1});
             tex = [];
+        elseif check_file_extension(varargin{1},'xls') || check_file_extension(varargin{1},'xlsx')
+            if ~isempty(who('global','options_'));
+                % Check that the object is instantiated within a dynare session so that options_ global structure exists.
+                % Should provide latter a mechanism to pass range and sheet to dynSeries constructor...
+                range = evalin('base','options_.xls_range');
+                sheet = evalin('base','options_.xls_sheet');
+            else
+                % By default only the (whole) first sheet is loaded.
+                range = [];
+                sheet = [];
+            end
+            [freq,init,data,varlist] = load_xls_file_data(varargin{1}, sheet, range);
+            tex = [];
         else
             error(['dynSeries:: I''m not able to load data from ' inputname(1) '!'])
         end
