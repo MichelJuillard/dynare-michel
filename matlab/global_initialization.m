@@ -149,6 +149,7 @@ options_.SpectralDensity.trigger = 0;
 options_.SpectralDensity.plot  = 1; 
 options_.SpectralDensity.cutoff  = 150; 
 options_.SpectralDensity.sdl = 0.01; 
+options_.nofunctions = false;
 
 % Extended path options
 %
