@@ -93,8 +93,7 @@ init = dynDate(1);
 varlist = [];
 data = num;
 
-% Update f
-req.
+% Update freq.
 if ~notime
     if isempty(txt{1,1})
         first_date = txt{2,1};
