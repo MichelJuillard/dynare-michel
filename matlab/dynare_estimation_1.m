@@ -310,7 +310,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         if ~exist('MeanPar','var')
             MeanPar = xparam1;
         end
-        if exist('hh','var')
+        if ~isempty(hh)
             CovJump = inv(hh);
         else% The covariance matrix is initialized with the prior
             % covariance (a diagonal matrix) %%Except for infinite variances ;-)
