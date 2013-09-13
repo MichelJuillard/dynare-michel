@@ -31,7 +31,7 @@ function [hptrend,hpcycle] = sample_hp_filter(y,s)
 
 [T,n] = size(y);
 
-if nargin<2
+if nargin<2 || isempty(s)
     s = 1600;
 end
 
@@ -41,4 +41,7 @@ D(1,2) = -2.0*s; D(2,1) = D(1,2); D(T-1,T) = D(1,2); D(T,T-1) = D(1,2);
 D(2,2) = 1.0+5.0*s; D(T-1,T-1) = D(2,2);
 
 hptrend = D\y;
-hpcycle = y-hptrend;
+
+if nargout>1
+    hpcycle = y-hptrend;
+end
