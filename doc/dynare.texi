@@ -788,7 +788,7 @@ the Macro directive @code{@@#define} in a model file, @pxref{Macro-processing la
 Allows Dynare to issue a warning and continue processing when
 @enumerate
 @item there are more endogenous variables than equations
-@item an undeclared symbol is assigned in @code{initval}
+@item an undeclared symbol is assigned in @code{initval} or @code{endval}
 @end enumerate
 @end table
 
