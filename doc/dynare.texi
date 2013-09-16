@@ -785,9 +785,11 @@ Defines a macro-variable from the command line (the same effect as using
 the Macro directive @code{@@#define} in a model file, @pxref{Macro-processing language}).
 
 @item nostrict
-Allows Dynare to continue processing when there are more endogenous
-variables than equations, issuing a warning for each endogenous
-variable ignored.
+Allows Dynare to issue a warning and continue processing when
+@enumerate
+@item there are more endogenous variables than equations
+@item an undeclared symbol is assigned in @code{initval}
+@end enumerate
 @end table
 
 @outputhead
