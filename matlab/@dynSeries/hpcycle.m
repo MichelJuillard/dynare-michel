@@ -1,4 +1,4 @@
-function ts = hpcycle(ts, lambda)
+function ts = hpcycle(ts, lambda) % --*-- Unitary tests --*--
 
 % Copyright (C) 2013 Dynare Team
 %

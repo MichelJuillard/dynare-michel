@@ -1,4 +1,4 @@
-function ts = hptrend(ts, lambda)
+function ts = hptrend(ts, lambda) % --*-- Unitary tests --*--
 
 % Copyright (C) 2013 Dynare Team
 %
