@@ -90,6 +90,18 @@ switch S(1).type
         else
             B = feval(S(1).subs,A);
         end
+      case 'baxter_king_filter'
+        if length(S)>1 && isequal(S(2).type,'()')
+            if isempty(S(2).subs)
+                B = feval(S(1).subs,A);
+                S = shiftS(S);
+            else
+                B = feval(S(1).subs,A,S(2).subs{1})
+                S = shiftS(S);
+            end
+        else
+            B = feval(S(1).subs,A);
+        end
       case 'save'                                                        % Save dynSeries object on disk (default is a csv file).
         B = NaN;
         if isequal(length(S),2)
