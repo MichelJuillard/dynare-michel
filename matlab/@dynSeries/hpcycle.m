@@ -34,7 +34,7 @@ end
 ts.data = data;
 
 %@test:1
-%$ plot_flag = 1; 
+%$ plot_flag = 0;
 %$
 %$ % Create a dataset.
 %$ e = .2*randn(200,1);
@@ -43,7 +43,7 @@ ts.data = data;
 %$ deterministic_trend = .1*transpose(1:200);
 %$ x = zeros(200,1);
 %$ for i=2:200
-%$    x(i) = .75*x(i-1) + e(i);
+%$    x(i) = .9*x(i-1) + e(i);
 %$ end
 %$ y = x + stochastic_trend + deterministic_trend;
 %$
