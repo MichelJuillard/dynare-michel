@@ -50,7 +50,7 @@ usage()
 {
   cerr << "Dynare usage: dynare mod_file [debug] [noclearall] [savemacro[=macro_file]] [onlymacro] [nolinemacro] [notmpterms] [nolog] [warn_uninit]"
        << " [console] [nograph] [nointeractive] [parallel[=cluster_name]] [conffile=parallel_config_path_and_filename] [parallel_slave_open_mode] [parallel_test] "
-       << " [-D<variable>[=<value>]] [-double=dynamic|first|second|third] [cuda]"
+       << "  [output=dynamic|first|second|third] [cuda] [-D<variable>[=<value>]]"
 #if defined(_WIN32) || defined(__CYGWIN32__)
        << " [cygwin] [msvc]"
 #endif
@@ -198,13 +198,15 @@ main(int argc, char **argv)
 	      cerr << "Incorrect syntax for ouput option" << endl;
 	      usage();
 	    }
+	  // we don't want temp terms in CC functions
+	  no_tmp_terms = true;
 	  if (strlen(argv[arg]) == 14 && !strncmp(argv[arg] + 7, "dynamic", 7))
 	    output_mode = dynamic;
-	    else if (strlen(argv[arg]) ==  12 && !strncmp(argv[arg] + 7, "first", 5))
+	  else if (strlen(argv[arg]) ==  12 && !strncmp(argv[arg] + 7, "first", 5))
 	    output_mode = first;
-	    else if (strlen(argv[arg]) == 13 && !strncmp(argv[arg] + 7, "second", 6))
+	  else if (strlen(argv[arg]) == 13 && !strncmp(argv[arg] + 7, "second", 6))
 	    output_mode = second;
-	    else if (strlen(argv[arg]) == 12 && !strncmp(argv[arg] + 7, "third", 5))
+	  else if (strlen(argv[arg]) == 12 && !strncmp(argv[arg] + 7, "third", 5))
 	    output_mode = third;
 	  else
 	    {

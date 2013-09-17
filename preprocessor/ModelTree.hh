@@ -158,7 +158,6 @@ protected:
   void computeThirdDerivatives(const set<int> &vars);
   //! Computes derivatives of the Jacobian and Hessian w.r. to parameters
   void computeParamsDerivatives();
-
   //! Write derivative of an equation w.r. to a variable
   void writeDerivative(ostream &output, int eq, int symb_id, int lag, ExprNodeOutputType output_type, const temporary_terms_t &temporary_terms) const;
   //! Computes temporary terms (for all equations and derivatives)
@@ -295,6 +294,7 @@ public:
     3 : the variables belonging to a non normalizable non linear equation are considered as feedback variables
     default value = 0 */
   int mfs;
+
   //! Declare a node as an equation of the model
   void addEquation(expr_t eq);
   //! Declare a node as an equation of the model, also giving its tags
