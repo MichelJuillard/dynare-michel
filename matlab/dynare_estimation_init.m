@@ -218,8 +218,8 @@ if ~isempty(estim_params_) && ~isempty(options_.mode_file) && ~options_.mh_poste
     skipline()
 end
 
-if ~isempty(estim_params_) % estimated parameters
-    if any(bayestopt_.pshape > 0)  % declared priors
+if ~isempty(estim_params_) 
+    if ~isempty(bayestopt_) && any(bayestopt_.pshape > 0)
         % Plot prior densities.
         if ~options_.nograph && options_.plot_priors
             plot_priors(bayestopt_,M_,estim_params_,options_)
@@ -235,11 +235,7 @@ if ~isempty(estim_params_) % estimated parameters
         bounds(:,1) = lb;
         bounds(:,2) = ub;
     end
-end
-
-if ~isempty(estim_params_)
-    % Test if initial values of the estimated parameters are all between
-    % the prior lower and upper bounds.
+    % Test if initial values of the estimated parameters are all between the prior lower and upper bounds.
     outside_bound_pars=find(xparam1 < bounds(:,1) | xparam1 > bounds(:,2));
     if ~isempty(outside_bound_pars)
         for ii=1:length(outside_bound_pars)
@@ -256,7 +252,6 @@ if ~isempty(estim_params_)
     bayestopt_.lb = lb;
     bayestopt_.ub = ub;
 end
-
 
 if isempty(estim_params_)% If estim_params_ is empty (e.g. when running the smoother on a calibrated model)
     if ~options_.smoother
