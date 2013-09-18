@@ -218,7 +218,8 @@ if ~isempty(estim_params_) && ~isempty(options_.mode_file) && ~options_.mh_poste
     skipline()
 end
 
-if ~isempty(estim_params_) && any(bayestopt_.pshape > 0)
+if ~isempty(estim_params_) % estimated parameters
+    if any(bayestopt_.pshape > 0)  % declared priors
         % Plot prior densities.
         if ~options_.nograph && options_.plot_priors
             plot_priors(bayestopt_,M_,estim_params_,options_)
@@ -227,12 +228,13 @@ if ~isempty(estim_params_) && any(bayestopt_.pshape > 0)
         bounds = prior_bounds(bayestopt_,options_);
         bounds(:,1)=max(bounds(:,1),lb);
         bounds(:,2)=min(bounds(:,2),ub);
-    else
+    else  % estimated parameters but no declared priors
         % No priors are declared so Dynare will estimate the model by
         % maximum likelihood with inequality constraints for the parameters.
         options_.mh_replic = 0;% No metropolis.
         bounds(:,1) = lb;
         bounds(:,2) = ub;
+    end
 end
 
 if ~isempty(estim_params_)
