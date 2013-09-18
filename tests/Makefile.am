@@ -151,7 +151,9 @@ MODFILES = \
 	trend_var/fs2000_nonstationary.mod \
 	trend_var/fs2000_log_nonstationary.mod \
 	third_order/FV2011.mod \
-	shock_decomp_calibrated_model/example1_calib_shock_decomp.mod \
+	shock_decomposition/example1_calib_shock_decomp.mod \
+	shock_decomposition/fs2000_est.mod \
+	shock_decomposition/fs2000_est_varlist.mod \
 	stochastic_purely_forward/stochastic_purely_forward.mod \
 	stochastic_purely_forward/stochastic_purely_forward_with_static.mod
 
@@ -306,7 +308,8 @@ EXTRA_DIST = \
 	ep/mean_preserving_spread.m \
 	third_order/comparison_policy_functions_dynare_mathematica.m \
 	third_order/policyfunctions.mat \
-	shock_decomp_calibrated_model/example1_calib_shock_decomp_data.mat
+	shock_decomposition/example1_calib_shock_decomp_data.mat \
+	shock_decomposition/fsdat_simul.m
 
 TARGETS =
 
