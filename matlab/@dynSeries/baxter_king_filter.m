@@ -1,8 +1,23 @@
 function ts = baxter_king_filter(ts, high_frequency, low_frequency, K) % --*-- Unitary tests --*--
 
-% Implementation of Baxter and King (1999) band pass filter for dynSeries objects.
+% ts = baxter_king_filter(ts, high_frequency, low_frequency, K)
 %
-% Adapted from the code provided by Baxter and King. 
+% Implementation of Baxter and King (1999) band pass filter for dynSeries objects. The code is adapted from
+% the one provided by Baxter and King. This filter isolates business cycle fluctuations with a period of length 
+% ranging between high_frequency to low_frequency (quarters).
+%
+% INPUTS 
+%  o ts                 dynSeries object.
+%  o high_frequency     positive scalar, period length (default value is 6).
+%  o low_frequency      positive scalar, period length (default value is 32).
+%  o K                  positive scalar integer, truncation parameter (default value is 12).
+%
+% OUTPUTS 
+%  o ts                 dynSeries object.
+%
+% REMARKS 
+% This filter use a (symmetric) moving average smoother, so that K observations at the beginning and at the end of the 
+% sample are lost in the computation of the filter.
 
 % Copyright (C) 2013 Dynare Team
 %

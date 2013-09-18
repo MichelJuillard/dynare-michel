@@ -1,5 +1,16 @@
 function ts = hptrend(ts, lambda) % --*-- Unitary tests --*--
 
+% ts = hptrend(ts, lambda)
+%
+% Extracts the trend component form a dynSeries object using Hodrick Prescott filter.
+%
+% INPUTS 
+%  o ts         dynSeries object.
+%  o lambda     positive scalar, trend smoothness parameter.
+%
+% OUTPUTS 
+%  o ts         dynSeries object, with time series replaced by the trend component of the original time series.
+
 % Copyright (C) 2013 Dynare Team
 %
 % This file is part of Dynare.

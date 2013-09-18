@@ -1,5 +1,16 @@
 function ts = hpcycle(ts, lambda) % --*-- Unitary tests --*--
 
+% ts = hpcycle(ts, lambda)
+%
+% Extracts the cycle component form a dynSeries object using Hodrick Prescott filter.
+%
+% INPUTS 
+%  o ts         dynSeries object.
+%  o lambda     positive scalar, trend smoothness parameter.
+%
+% OUTPUTS 
+%  o ts         dynSeries object, with time series replaced by the cyclical component of the original time series.
+
 % Copyright (C) 2013 Dynare Team
 %
 % This file is part of Dynare.
