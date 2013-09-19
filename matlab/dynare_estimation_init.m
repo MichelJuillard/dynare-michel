@@ -176,7 +176,9 @@ if ~isempty(estim_params_) && ~isempty(options_.mode_file) && ~options_.mh_poste
                 disp('==> Fix mode file (remove unused parameters).')
                 mode_file.parameter_names = mode_file.parameter_names(Id,:);
                 mode_file.xparam1 = mode_file.xparam1(Id);
-                mode_file.hh = mode_file.hh(Id,Id);
+                if isfield(mode_file,'hh')
+                    mode_file.hh = mode_file.hh(Id,Id);
+                end
             end
         end
     else
@@ -208,13 +210,17 @@ if ~isempty(estim_params_) && ~isempty(options_.mode_file) && ~options_.mh_poste
                     disp('==> Fix mode file (reorder the parameters).')
                     mode_file.parameter_names = mode_file.parameter_names(Id,:);
                     mode_file.xparam1 = mode_file.xparam1(Id);
-                    mode_file.hh = mode_file.hh(Id,Id);
+                    if isfield(mode_file,'hh')
+                        mode_file.hh = mode_file.hh(Id,Id);
+                    end
                 end
             end
         end
     end
     xparam1 = mode_file.xparam1;
-    hh = mode_file.hh;
+    if isfield(mode_file,'hh')
+        hh = mode_file.hh;
+    end
     skipline()
 end
 
