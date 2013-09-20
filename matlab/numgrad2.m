@@ -22,31 +22,24 @@ function [g, badg] = numgrad2(fcn,f0,x,epsilon,varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-fh = NaN;
-
-delta = epsilon;
-n=length(x);
-tvec=delta*eye(n);
-g=zeros(n,1);
-
-badg=0;
-scale=1;
-g0 = 0;
-
 right_derivative = 1;
 
+h = epsilon;
+n = length(x);
+g = zeros(n,1);
+
+badg = 0;
+
 for i=1:n
-    if size(x,1)>size(x,2)
-        tvecv=tvec(i,:);
-    else
-        tvecv=tvec(:,i);
-    end
+    xiold = x(i);
     if right_derivative
-        [fh,junk1,junk2,cost_flag] = feval(fcn, x+scale*transpose(tvecv), varargin{:});
-        g0 = (fh - f0) / (scale*delta);
+        x(i) = x(i)+h;
+        fh = feval(fcn, x, varargin{:});
+        g0 = (fh-f0)/h;
     else
-        [fh,junk1,junk2,cost_flag] = feval(fcn, x-scale*transpose(tvecv), varargin{:});
-        g0 = (f0-fh) / (scale*delta);
+        x(i) = x(i)-h;
+        fh = feval(fcn, x, varargin{:});
+        g0 = (f0-fh)/h;
     end
     if abs(g0)< 1e15
         g(i) = g0;
@@ -54,4 +47,5 @@ for i=1:n
         g(i) = 0;
         badg = 1;
     end
+    x(i) = xiold;
 end
