@@ -5,7 +5,7 @@ function [g, badg] = numgrad2(fcn,f0,x,epsilon,varargin)
 % http://sims.princeton.edu/yftp/optimize/mfiles/numgrad.m
 
 % Copyright (C) 1993-2007 Christopher Sims
-% Copyright (C) 2008-2012 Dynare Team
+% Copyright (C) 2008-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -30,31 +30,27 @@ tvec=delta*eye(n);
 g=zeros(n,1);
 
 badg=0;
-goog=1;
 scale=1;
 g0 = 0;
+
+right_derivative = 1;
+
 for i=1:n
     if size(x,1)>size(x,2)
         tvecv=tvec(i,:);
     else
         tvecv=tvec(:,i);
     end
-    [fh,junk1,junk2,cost_flag] = feval(fcn, x+scale*transpose(tvecv), varargin{:});
-    if cost_flag
+    if right_derivative
+        [fh,junk1,junk2,cost_flag] = feval(fcn, x+scale*transpose(tvecv), varargin{:});
         g0 = (fh - f0) / (scale*delta);
     else
         [fh,junk1,junk2,cost_flag] = feval(fcn, x-scale*transpose(tvecv), varargin{:});
-        if cost_flag
-            g0 = (f0-fh) / (scale*delta);
-        else
-            goog = 0;
-        end
+        g0 = (f0-fh) / (scale*delta);
     end
-    if goog && abs(g0)< 1e15
+    if abs(g0)< 1e15
         g(i) = g0;
     else
-        disp('bad gradient ------------------------')
-        % fprintf('Gradient w.r.t. %3d: %10g\n',i,g0)
         g(i) = 0;
         badg = 1;
     end
