@@ -324,7 +324,7 @@ researchers who devote part of their time to software development.
 Currently the development team of Dynare is composed of Stéphane
 Adjemian (Université du Maine, Gains and Cepremap), Houtan Bastani
 (Cepremap), Michel Juillard (Banque de France), Frédéric Karamé
-(Université du Maine, Gains and Cepremap), Junior Maih (IMF),
+(Université du Maine, Gains and Cepremap), Junior Maih (Norges Bank),
 Ferhat Mihoubi (Université Paris-Est Créteil, Epee and Cepremap), George
 Perendia, Johannes Pfeifer (Universität Tübingen), Marco Ratto (JRC)
 and Sébastien Villemot (Cepremap).
