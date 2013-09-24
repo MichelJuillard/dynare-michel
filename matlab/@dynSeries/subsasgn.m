@@ -97,8 +97,25 @@ switch length(S)
                   end
               end
           end
-        case '.' % Single variable selection.
-          if ~isequal(S(1).subs,B.name)
+        case '.'
+          if isequal(S(1).subs,'init') && isa(B,'dynDate')
+              % Overwrite the init member...
+              A.init = B;
+              % ... and update freq and time members.
+              A.freq = A.init.freq;
+              A.time = A.init:(A.init+(A.nobs-1));
+              return
+          elseif isequal(S(1).subs,'time') && isa(B,'dynDates')
+              % Overwrite the time member...
+              A.time = B;
+              % ... and update the freq and init members.
+              A.init = B(1);
+              A.freq = A.init.freq;
+              return
+          elseif ismember(S(1).subs,{'freq','nobs','vobs'})
+              error(['dynSeries::subsasgn: You cannot overwrite ' S(1).subs ' member!'])
+          elseif ~isequal(S(1).subs,B.name)
+              % Single variable selection.
               if ~isequal(S(1).subs,B.name{1})
                   % Rename a variable.
                   id = strmatch(S(1).subs,A.name);
