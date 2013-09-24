@@ -112,7 +112,7 @@ switch length(S)
               A.init = B(1);
               A.freq = A.init.freq;
               return
-          elseif ismember(S(1).subs,{'freq','nobs','vobs'})
+          elseif ismember(S(1).subs,{'freq','nobs','vobs','data','name','tex'})
               error(['dynSeries::subsasgn: You cannot overwrite ' S(1).subs ' member!'])
           elseif ~isequal(S(1).subs,B.name)
               % Single variable selection.
