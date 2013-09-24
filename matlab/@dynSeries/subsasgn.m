@@ -709,3 +709,67 @@ end
 %$ end
 %$ T = all(t);
 %@eof:18
+
+%@test:19
+%$ % Define a datasets.
+%$ A = rand(40,3);
+%$
+%$ % Instantiate two dynSeries object.
+%$ ts1 = dynSeries(A,'1950Q1',{'A1';'A2';'A3'},[]);
+%$
+%$ % Instantiate a dynDate object.
+%$ dd = dynDate('1952Q1');
+%$
+%$ % modify first object.
+%$ try
+%$     ts1.init = dd;
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ % Instantiate a time series object.
+%$ if t(1)
+%$    t(2) = dyn_assert(ts1.vobs,3);
+%$    t(3) = dyn_assert(ts1.nobs,40);
+%$    t(4) = dyn_assert(ts1.name{2},'A2');
+%$    t(5) = dyn_assert(ts1.name{1},'A1');
+%$    t(6) = dyn_assert(ts1.name{3},'A3');
+%$    t(7) = dyn_assert(ts1.data,A,1e-15);
+%$    t(8) = dyn_assert(isequal(ts1.init,dd),1);
+%$    t(9) = dyn_assert(isequal(ts1.time(1),dd),1);
+%$ end
+%$ T = all(t);
+%@eof:19
+
+%@test:20
+%$ % Define a datasets.
+%$ A = rand(40,3);
+%$
+%$ % Instantiate two dynSeries object.
+%$ ts1 = dynSeries(A,'1950Q1',{'A1';'A2';'A3'},[]);
+%$
+%$ % Instantiate a dynDate object.
+%$ dd = dynDate('1952Q1');
+%$
+%$ % modify first object.
+%$ try
+%$     ts1.time = dd:(dd+(ts1.nobs-1));
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ % Instantiate a time series object.
+%$ if t(1)
+%$    t(2) = dyn_assert(ts1.vobs,3);
+%$    t(3) = dyn_assert(ts1.nobs,40);
+%$    t(4) = dyn_assert(ts1.name{2},'A2');
+%$    t(5) = dyn_assert(ts1.name{1},'A1');
+%$    t(6) = dyn_assert(ts1.name{3},'A3');
+%$    t(7) = dyn_assert(ts1.data,A,1e-15);
+%$    t(8) = dyn_assert(isequal(ts1.init,dd),1);
+%$    t(9) = dyn_assert(isequal(ts1.time(1),dd),1);
+%$ end
+%$ T = all(t);
+%@eof:20
