@@ -51,7 +51,7 @@ o.tableMarkerLimit = 1e-4;
 
 o.tableAlignRight = false;
 
-o.tableRowColor = '';
+o.tableRowColor = 'white';
 
 o.zerotol = 1e-6;
 
