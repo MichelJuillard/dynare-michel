@@ -54,6 +54,9 @@ else
     fprintf(fid, '\\usepackage{pgfplots}\n');
 end
 
+fprintf(fid, '\\usepackage{color, colortbl}\n');
+fprintf(fid, '\\definecolor{LightCyan}{rgb}{0.88,1,1}\n');
+fprintf(fid, '\\definecolor{Gray}{gray}{0.9}\n');
 if o.showDate
     fprintf(fid, '\\usepackage{fancyhdr, datetime}\n');
     fprintf(fid, '\\newdateformat{reportdate}{\\THEDAY\\ \\shortmonthname\\ \\THEYEAR}\n');

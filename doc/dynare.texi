@@ -8446,6 +8446,10 @@ The zero tolerance. Anything smaller than @code{zerotol} and larger
 than @code{-zerotol} will be set to zero before being
 graphed. Default: @math{1e-6}
 
+@item tableRowColor, @code{STRING}
+The color that you want the row to be. Predefined values include
+@code{LightCyan} and @code{Gray}. Default: white.
+
 @end table
 @end defmethod
 

@@ -51,6 +51,8 @@ o.tableMarkerLimit = 1e-4;
 
 o.tableAlignRight = false;
 
+o.tableRowColor = '';
+
 o.zerotol = 1e-6;
 
 if nargin == 1

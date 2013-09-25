@@ -51,6 +51,9 @@ dataString = ['%.' num2str(precision) 'f'];
 precision  = 10^precision;
 
 fprintf(fid, '%% Table Row (series)\n');
+if ~isempty(o.tableRowColor)
+    fprintf(fid, '\\rowcolor{%s}', o.tableRowColor);
+end
 if o.tableAlignRight
     fprintf(fid, '\\multicolumn{1}{r}{');
 end
