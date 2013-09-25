@@ -8421,7 +8421,7 @@ Display a solid black line at @math{y = 0}. Default: @code{false}
 @end table
 @end defmethod
 
-@defmethod Report addTable data, showHlines, precision, range, seriesToUse, title, titleSize, vlineAfter, showVlines
+@defmethod Report addTable data, showHlines, precision, range, seriesToUse, title, titleSize, vlineAfter, vlineAfterEndOfPeriod, showVlines
 Adds a @code{Table} to a @code{Section}.
 @optionshead
 @table @code
@@ -8449,6 +8449,10 @@ Title for the table. Default: @code{none}
 
 @item vlineAfter, @code{dynDate}
 Show a vertical line after the specified date. Default: @code{empty}
+
+@item vlineAfterEndOfPeriod, @code{BOOLEAN}
+Show a vertical line after the end of every period (@i{i.e.} after
+every year, after the fourth quarter, etc.). Default: @code{false}
 
 @item showVlines, @code{BOOLEAN}
 Whether or not to show vertical lines separating the columns. Default: @code{false}

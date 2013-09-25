@@ -39,6 +39,7 @@ o.titleSize = 'large';
 o.showHlines = false;
 o.showVlines = false;
 o.vlineAfter = '';
+o.vlineAfterEndOfPeriod = false;
 
 o.data = '';
 o.seriesToUse = '';
@@ -87,6 +88,8 @@ assert(isempty(o.vlineAfter) || isa(o.vlineAfter, 'dynDate'), ...
 if o.showVlines
     o.vlineAfter = '';
 end
+assert(islogical(o.vlineAfterEndOfPeriod), ...
+       '@table.table: vlineAfterEndOfPeriod must be true or false');
 valid_title_sizes = {'Huge', 'huge', 'LARGE', 'Large', 'large', 'normalsize', ...
                     'small', 'footnotesize', 'scriptsize', 'tiny'};
 assert(any(strcmp(o.titleSize, valid_title_sizes)), ...

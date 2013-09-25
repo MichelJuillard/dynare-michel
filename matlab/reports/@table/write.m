@@ -55,12 +55,20 @@ fprintf(fid, '\\begin{tabular}{@{}l');
 
 for i=1:ndates
     if o.showVlines
-        fprintf(fid, '|');
-    end
-    fprintf(fid, 'r');
-    if ~isempty(o.vlineAfter)
-        if dates(i) == o.vlineAfter
-            fprintf(fid, '|');
+        fprintf(fid, 'r|');
+    else
+        fprintf(fid, 'r');
+        if o.vlineAfterEndOfPeriod
+            if dates(i).time(2) == dates(i).freq
+                fprintf(fid, '|');
+            end
+        end
+        if ~isempty(o.vlineAfter)
+            if dates(i) == o.vlineAfter
+                if ~(o.vlineAfterEndOfPeriod && dates(i).time(2) == dates(i).freq)
+                    fprintf(fid, '|');
+                end
+            end
         end
     end
 end
