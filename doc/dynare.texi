@@ -8460,7 +8460,7 @@ Whether or not to show vertical lines separating the columns. Default: @code{fal
 @end defmethod
 
 @anchor{addSeries}
-@defmethod Report addSeries data, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, zerotol
+@defmethod Report addSeries data, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, tableRowColor, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, zerotol
 Adds a @code{Series} to a @code{Graph} or a @code{Table}.
 @optionshead
 @table @code
@@ -8488,6 +8488,10 @@ The face color of the graph marker. Default: @code{`auto'}
 
 @item graphMarkerSize, @code{DOUBLE}
 The size of the graph marker. Default: @code{6}
+
+@item tableRowColor, @code{STRING}
+The color that you want the row to be. Predefined values include
+@code{LightCyan} and @code{Gray}. Default: @code{white}.
 
 @item tableShowMarkers, @code{BOOLEAN}
 In a Table, if @code{true}, surround each cell with brackets and color
@@ -8518,10 +8522,6 @@ zero. Default: @code{`blue'}
 The zero tolerance. Anything smaller than @code{zerotol} and larger
 than @code{-zerotol} will be set to zero before being
 graphed. Default: @math{1e-6}
-
-@item tableRowColor, @code{STRING}
-The color that you want the row to be. Predefined values include
-@code{LightCyan} and @code{Gray}. Default: white.
 
 @end table
 @end defmethod
