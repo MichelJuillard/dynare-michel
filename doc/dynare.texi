@@ -8466,7 +8466,7 @@ Whether or not to show vertical lines separating the columns. Default: @code{fal
 @end defmethod
 
 @anchor{addSeries}
-@defmethod Report addSeries data, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, tableRowColor, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, zerotol
+@defmethod Report addSeries data, graphLineColor, graphLineStyle, graphLineWidth, graphMarker, graphMarkerEdgeColor, graphMarkerFaceColor, graphMarkerSize, tableRowColor, tableShowMarkers, tableAlignRight, tableNegColor, tablePosColor, tableSubSectionHeader, zerotol
 Adds a @code{Series} to a @code{Graph} or a @code{Table}.
 @optionshead
 @table @code
@@ -8523,6 +8523,11 @@ zero. Default: @code{`red'}
 @item tablePosColor, @code{LATEX_COLOR}
 The color to use when marking Table data that is greater than
 zero. Default: @code{`blue'}
+
+@item tableSubSectionHeader, @code{STRING}
+A header for a subsection of the table. No data will be associated
+with it. It is equivalent to adding an empty series with a
+name. Default: @code{''}
 
 @item zerotol, @code{DOUBLE}
 The zero tolerance. Anything smaller than @code{zerotol} and larger

@@ -49,6 +49,7 @@ o.tableNegColor = 'red';
 o.tablePosColor = 'blue';
 o.tableMarkerLimit = 1e-4;
 
+o.tableSubSectionHeader = '';
 o.tableAlignRight = false;
 
 o.tableRowColor = 'white';

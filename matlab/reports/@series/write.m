@@ -37,8 +37,11 @@ assert(isa(dates, 'dynDates'));
 assert(isint(precision));
 
 %% Validate options provided by user
-assert(~isempty(o.data) && isa(o.data, 'dynSeries'), ...
-       '@series.write: must provide data as a dynSeries');
+assert(ischar(o.tableSubSectionHeader), '@series.write: tableSubSectionHeader must be a string');
+if isempty(o.tableSubSectionHeader)
+    assert(~isempty(o.data) && isa(o.data, 'dynSeries'), ...
+           '@series.write: must provide data as a dynSeries');
+end
 
 assert(ischar(o.tableNegColor), '@series.write: tableNegColor must be a string');
 assert(ischar(o.tablePosColor), '@series.write: tablePosColor must be a string');
@@ -53,6 +56,14 @@ precision  = 10^precision;
 fprintf(fid, '%% Table Row (series)\n');
 if ~isempty(o.tableRowColor)
     fprintf(fid, '\\rowcolor{%s}', o.tableRowColor);
+end
+if ~isempty(o.tableSubSectionHeader)
+    fprintf(fid, '%s', o.tableSubSectionHeader);
+    for i=1:size(dates)
+        fprintf(fid, ' & ');
+    end
+    fprintf(fid, '\\\\%%\n');
+    return;
 end
 if o.tableAlignRight
     fprintf(fid, '\\multicolumn{1}{r}{');
