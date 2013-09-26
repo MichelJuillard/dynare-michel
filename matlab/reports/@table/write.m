@@ -121,11 +121,8 @@ switch dates.freq
     otherwise
         error('@table.write: invalid dynSeries frequency');
 end
-fprintf(fid, '\\\\[-10pt]%%\n');
-for i=1:ndates
-    fprintf(fid, ' & \\hrulefill');
-end
-fprintf(fid, '\\\\%%\n');
+fprintf(fid, '\\\\[-2pt]%%\n');
+fprintf(fid, '\\hline%%\n');
 fprintf(fid, '%%\n');
 
 % Write Table Data
