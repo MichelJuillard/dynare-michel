@@ -83,7 +83,6 @@ fprintf(fid, '\\toprule%%\n');
 datedata = dates.time;
 years = unique(datedata(:, 1));
 thdr = num2cell(years, size(years, 1));
-lind = nlhc;
 switch dates.freq
     case 1
         for i=1:size(thdr, 1)
