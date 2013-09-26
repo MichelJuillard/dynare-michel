@@ -60,7 +60,7 @@ end
 if ~isempty(o.tableSubSectionHeader)
     fprintf(fid, '%s', o.tableSubSectionHeader);
     for i=1:size(dates)
-        fprintf(fid, ' & ');
+        fprintf(fid, '&');
     end
     fprintf(fid, '\\\\%%\n');
     return;
@@ -75,7 +75,7 @@ end
 data = o.data(dates);
 data = data.data;
 for i=1:size(data,1)
-    fprintf(fid, ' &');
+    fprintf(fid, '&');
     if o.tableShowMarkers
         if data(i) < -o.tableMarkerLimit
             fprintf(fid, '\\color{%s}', o.tableNegColor);
@@ -91,5 +91,5 @@ for i=1:size(data,1)
         fprintf(fid, ']');
     end
 end
-fprintf(fid, ' \\\\\n\n');
+fprintf(fid, '\\\\%%\n');
 end
