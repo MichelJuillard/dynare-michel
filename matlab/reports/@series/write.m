@@ -45,6 +45,7 @@ end
 
 assert(ischar(o.tableNegColor), '@series.write: tableNegColor must be a string');
 assert(ischar(o.tablePosColor), '@series.write: tablePosColor must be a string');
+assert(ischar(o.tableRowColor), '@series.write: tableRowColor must be a string');
 assert(islogical(o.tableShowMarkers), '@series.write: tableShowMarkers must be true or false');
 assert(islogical(o.tableAlignRight), '@series.write: tableAlignRight must be true or false');
 assert(isfloat(o.tableMarkerLimit), '@series,write: tableMarkerLimit must be a float');
