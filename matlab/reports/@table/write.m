@@ -72,6 +72,19 @@ for i=1:ndates
         end
     end
 end
+datedata = dates.time;
+years = unique(datedata(:, 1));
+if o.annualAverages
+    yrsForAvgs = years;
+else
+    yrsForAvgs = [];
+end
+for i=1:length(yrsForAvgs)
+    fprintf(fid, 'r');
+    if o.showVlines
+        fprintf(fid, '|');
+    end
+end
 fprintf(fid, '@{}}%%\n');
 if ~isempty(o.title)
     fprintf(fid, '\\multicolumn{%d}{c}{\\%s %s}\\\\\n', ...
@@ -80,8 +93,6 @@ end
 fprintf(fid, '\\toprule%%\n');
 
 % Column Headers
-datedata = dates.time;
-years = unique(datedata(:, 1));
 thdr = num2cell(years, size(years, 1));
 switch dates.freq
     case 1
@@ -101,7 +112,6 @@ switch dates.freq
                 end
             end
         end
-
         for i=1:size(thdr, 1)
             fprintf(fid, ' & \\multicolumn{%d}{c}{%d}', size(thdr{i,2}, 2), thdr{i,1});
         end
@@ -121,6 +131,9 @@ switch dates.freq
     otherwise
         error('@table.write: invalid dynSeries frequency');
 end
+for i=1:length(yrsForAvgs)
+    fprintf(fid, ' & %d', years(i));
+end
 fprintf(fid, '\\\\[-2pt]%%\n');
 fprintf(fid, '\\hline%%\n');
 fprintf(fid, '%%\n');
@@ -128,7 +141,7 @@ fprintf(fid, '%%\n');
 % Write Table Data
 ne = o.seriesElements.numSeriesElements();
 for i=1:ne
-    o.seriesElements(i).write(fid, dates, o.precision);
+    o.seriesElements(i).write(fid, dates, o.precision, yrsForAvgs);
     if o.showHlines
         fprintf(fid, '\\hline\n');
     end

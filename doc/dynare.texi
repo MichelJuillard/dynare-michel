@@ -8427,10 +8427,15 @@ Display a solid black line at @math{y = 0}. Default: @code{false}
 @end table
 @end defmethod
 
-@defmethod Report addTable data, showHlines, precision, range, seriesToUse, title, titleSize, vlineAfter, vlineAfterEndOfPeriod, showVlines
+@defmethod Report addTable annualAverages, data, showHlines, precision, range, seriesToUse, title, titleSize, vlineAfter, vlineAfterEndOfPeriod, showVlines
 Adds a @code{Table} to a @code{Section}.
 @optionshead
 @table @code
+
+@item annualAverages, @code{bool}
+Compute the average over every year in the table and display it in a
+column to the right of the data (one column for every year). Only
+works for quarterly data. Default: @code{false}
 
 @item data, @code{dynSeries}
 @xref{data}.
