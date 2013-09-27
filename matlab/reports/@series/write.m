@@ -62,7 +62,7 @@ if ~isempty(o.tableRowColor)
 end
 if ~isempty(o.tableSubSectionHeader)
     fprintf(fid, '%s', o.tableSubSectionHeader);
-    for i=1:size(dates)
+    for i=1:size(dates)+length(yrsForAvgs)
         fprintf(fid, '&');
     end
     fprintf(fid, '\\\\%%\n');
