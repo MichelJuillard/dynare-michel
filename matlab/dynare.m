@@ -108,6 +108,10 @@ end
 
 [status, result] = system(command);
 disp(result)
+if ismember('onlymacro', varargin)
+    disp('Preprocesser stopped after macroprocessing step because of ''onlymacro'' option.');
+    return;
+end
 
 % post-dynare-prerocessor-hook
 if exist([fname(1:end-4) '_post_dynare_preprocessor_hook.m'],'file')
