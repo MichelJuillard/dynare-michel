@@ -407,7 +407,9 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         [x, fval, COUNTEVAL, STOPFLAG, OUT, BESTEVER] = cmaes(func2str(objective_function),xparam1,H0,options_.cmaes,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         xparam1=BESTEVER.x;
         disp(sprintf('\n Objective function at mode: %f',fval))
-      case 10 
+      case 10
+        [xparam1, fval, exitflag] = simpsa(func2str(objective_function),xparam1,-inf(size(xparam1)),inf(size(xparam1)),[],dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+      case 11 
          options_.cova_compute = 0 ;
          [xparam1,stdh,lb_95,ub_95,med_param] = online_auxiliary_filter(xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_) ;
       case 101
