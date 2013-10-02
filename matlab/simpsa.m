@@ -120,26 +120,21 @@ EXITFLAG = -2;
 
 NDIM = length(X0);
 
-% seed the random number generator
-
-rand('state',sum(100*clock));
-
 % set default options
-
 DEFAULT_OPTIONS = simpsaset('TEMP_START',[],...  % starting temperature (if none provided, an optimal one will be estimated)
-             'TEMP_END',1,...                    % end temperature
+             'TEMP_END',.1,...                    % end temperature
              'COOL_RATE',10,...                  % small values (<1) means slow convergence,large values (>1) means fast convergence
              'INITIAL_ACCEPTANCE_RATIO',0.95,... % when initial temperature is estimated, this will be the initial acceptance ratio in the first round
              'MIN_COOLING_FACTOR',0.9,...        % minimum cooling factor (<1)
              'MAX_ITER_TEMP_FIRST',50,...        % number of iterations in the preliminary temperature loop
-             'MAX_ITER_TEMP_LAST',50,...         % number of iterations in the last temperature loop (pure simplex)
+             'MAX_ITER_TEMP_LAST',2000,...         % number of iterations in the last temperature loop (pure simplex)
              'MAX_ITER_TEMP',10,...              % number of iterations in the remaining temperature loops
              'MAX_ITER_TOTAL',2500,...           % maximum number of iterations tout court
              'MAX_TIME',2500,...                 % maximum duration of optimization
-             'MAX_FUN_EVALS',2500,...            % maximum number of function evaluations
+             'MAX_FUN_EVALS',20000,...            % maximum number of function evaluations
              'TOLX',1e-6,...                     % maximum difference between best and worst function evaluation in simplex
-             'TOLFUN',1e-3,...                   % maximum difference between the coordinates of the vertices
-             'DISPLAY','none',...                % 'iter' or 'none' indicating whether user wants feedback
+             'TOLFUN',1e-6,...                   % maximum difference between the coordinates of the vertices
+             'DISPLAY','iter',...                % 'iter' or 'none' indicating whether user wants feedback
              'OUTPUT_FCN',[]);                   % string with output function name
 
 % update default options with supplied options
