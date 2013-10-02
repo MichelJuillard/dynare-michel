@@ -235,7 +235,7 @@ while 1,
     
     % if output function given then run output function to plot intermediate result
     if ~isempty(OPTIONS.OUTPUT_FCN),
-        feval(OPTIONS.OUTPUT_FCN,P(1,:),Y(1));
+        feval(OPTIONS.OUTPUT_FCN,transpose(P(1,:)),Y(1));
     end
     
     % remaining vertices of simplex
@@ -321,7 +321,7 @@ while 1,
         
         % if output function given then run output function to plot intermediate result
         if ~isempty(OPTIONS.OUTPUT_FCN),
-            feval(OPTIONS.OUTPUT_FCN,P(1,:),Y(1));
+            feval(OPTIONS.OUTPUT_FCN,transpose(P(1,:)),Y(1));
         end
         
         % end the optimization if one of the stopping criteria is met
@@ -449,7 +449,7 @@ while 1,
 end
 
 % return solution
-X = PBEST;
+X = transpose(PBEST);
 FVAL = YBEST;
 
 % store number of function evaluations
@@ -516,7 +516,7 @@ for i = 1:NDIM,
 end
 
 % calculate cost associated with PTRY
-YTRY = feval(FUN,PTRY,varargin{:});
+YTRY = feval(FUN,PTRY(:),varargin{:});
 
 % add one to number of function evaluations
 nFUN_EVALS = nFUN_EVALS + 1;
