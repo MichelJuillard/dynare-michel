@@ -4457,6 +4457,10 @@ available with @code{mode_compute=7})
 @item 9
 Uses the CMA-ES (Covariance Matrix Adaptation Evolution Strategy) algorithm, an evolutionary algorithm for difficult non-linear non-convex optimization 
 
+@item 10
+Uses the simpsa algorithm, based on the combination of the non-linear simplex and simulated annealing algorithms and proposed by 
+@cite{Cardoso, Salcedo and Feyo de Azevedo (1996)}. 
+
 @item @var{FUNCTION_NAME}
 It is also possible to give a @var{FUNCTION_NAME} to this option,
 instead of an @var{INTEGER}. In that case, Dynare takes the return
@@ -8736,6 +8740,10 @@ and Control}, 19, 711--734
 Brooks,  Stephen P.,  and Andrew  Gelman (1998):  ``General methods  for
 monitoring  convergence   of  iterative  simulations,''   @i{Journal  of
 computational and graphical statistics}, 7, pp. 434--455
+
+@item
+Cardoso, Margarida F., R. L. Salcedo and S. Feyo de Azevedo (1996): ``The simplex simulated annealing approach to continuous non-linear optimization'', @i{Computers chem. Engng}, 20(9), 1065-1080
+
 
 @item
 Collard, Fabrice (2001): ``Stochastic simulations with Dynare: A practical guide''
