@@ -257,19 +257,48 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
             [xparam1,fval,exitflag] = fminunc(func,xparam1,optim_options);
         end
       case 4
+        % Set default options.
         H0 = 1e-4*eye(nx);
         crit = 1e-7;
         nit = 1000;
         verbose = 2;
-        if options_.analytic_derivation,
+        numgrad = options_.gradient_method;
+        epsilon = options_.gradient_epsilon;
+        % Change some options.
+        if isfield(options_,'optim_opt')
+            options_list = strsplit(options_.optim_opt,',');
+            number_of_options = length(options_list)/2;
+            o = 1;
+            while o<=number_of_options
+                switch strtrim(options_list{2*(o-1)+1})
+                  case '''MaxIter'''
+                    nit = str2num(options_list{2*(o-1)+2});
+                  case '''InitialHessian'''
+                    H0 = eval(eval(options_list{2*(o-1)+2}));
+                  case '''TolF'''
+                    crit = str2double(options_list{2*(o-1)+2});
+                  case '''NumgradAlgorithm'''
+                    numgrad = str2num(options_list{2*(o-1)+2});
+                  case '''NumgradEpsilon'''
+                    epsilon = str2double(options_list{2*(o-1)+2});
+                  otherwise
+                    error(['csminwel: Unknown option (' options_list{2*(o-1)+1}  ')!'])
+                end
+                o = o + 1;
+            end
+        end
+        % Set flag for analytical gradient.
+        if options_.analytic_derivation
             analytic_grad=1;
         else
             analytic_grad=[];
         end
-
-            [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-                csminwel1(objective_function,xparam1,H0,analytic_grad,crit,nit,options_.gradient_method,options_.gradient_epsilon,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
-            disp(sprintf('Objective function at mode: %f',fval))
+        % Call csminwell.
+        H0
+        [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
+            csminwel1(objective_function, xparam1, H0, analytic_grad, crit, nit, numgrad, epsilon, dataset_, options_, M_, estim_params_, bayestopt_, oo_);
+        % Disp value at the mode.
+        disp(sprintf('Objective function at mode: %f',fval))
       case 5
         if isfield(options_,'hess')
             flag = options_.hess;
