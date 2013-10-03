@@ -4407,7 +4407,7 @@ Specifies the optimizer for the mode computation:
 
 @item 0
 The mode isn't computed. When @code{mode_file} option is specified, the
-mode is simply read from that file. 
+mode is simply read from that file.
 
 When @code{mode_file} option is not
 specified, Dynare reports the value of the log posterior (log likelihood)

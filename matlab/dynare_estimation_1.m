@@ -241,7 +241,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         elseif ~exist('OCTAVE_VERSION') && ~user_has_matlab_license('optimization_toolbox')
             error('Option mode_compute=3 requires the Optimization Toolbox')
         end
-
+        % Set default optimization options for fminunc.
         optim_options = optimset('display','iter','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
         if isfield(options_,'optim_opt')
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
@@ -256,7 +256,6 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
             func = @(x) objective_function(x, dataset_,options_,M_,estim_params_,bayestopt_,oo_);
             [xparam1,fval,exitflag] = fminunc(func,xparam1,optim_options);
         end
-
       case 4
         H0 = 1e-4*eye(nx);
         crit = 1e-7;
