@@ -214,8 +214,7 @@ if isequal(options_.mode_compute,0) && isempty(options_.mode_file) && options_.m
     return
 end
 
-
-%% Estimation of the posterior mode or likelihood mode
+% Estimation of the posterior mode or likelihood mode
 if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
     switch options_.mode_compute
       case 1
@@ -224,17 +223,16 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         elseif ~user_has_matlab_license('optimization_toolbox')
             error('Option mode_compute=1 requires the Optimization Toolbox')
         end
-
-        optim_options = optimset('display','iter','LargeScale','off', ...
-                                 'MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
+        % Set default optimization options for fmincon.
+        optim_options = optimset('display','iter', 'LargeScale','off', 'MaxFunEvals',100000, 'TolFun',1e-8, 'TolX',1e-6);
         if isfield(options_,'optim_opt')
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
         end
         if options_.analytic_derivation,
             optim_options = optimset(optim_options,'GradObj','on','TolX',1e-7);
         end
-            [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
-                fmincon(objective_function,xparam1,[],[],[],[],lb,ub,[],optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
+            fmincon(objective_function,xparam1,[],[],[],[],lb,ub,[],optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 2
         error('ESTIMATION: mode_compute=2 option (Lester Ingber''s Adaptive Simulated Annealing) is no longer available')
       case 3
