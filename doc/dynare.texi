@@ -4401,6 +4401,7 @@ hessian (@code{hh}, only if @code{cova_compute=1}) in a file called
 @file{@var{MODEL_FILENAME}_mode.mat}
 
 @item mode_compute = @var{INTEGER} | @var{FUNCTION_NAME}
+@anchor{mode_compute}
 Specifies the optimizer for the mode computation:
 
 @table @code
@@ -4504,11 +4505,45 @@ parameters. Default: @code{1e-32}
 Metropolis-Hastings simulations instead of starting from
 scratch. Shouldn't be used together with @code{mh_recover}
 
-@item optim = (@var{fmincon options})
-Can be used to set options for @code{fmincon}, the optimizing function
-of MATLAB Optimization toolbox. Use MATLAB's syntax for these
-options. Default:
-@code{('display','iter','LargeScale','off','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6)}
+@item optim = (@var{NAME}, @var{VALUE}, ...)
+A list of @var{NAME} and @var{VALUE} pairs. Can be used to set options for the optimization routines. The set of available options depends on the selected optimization routine (ie on the value of option @ref{mode_compute}):
+
+@table @code
+
+@item 1, 3, 7
+Available options are given in the documentation of the MATLAB optimization toolbox or in Octave's documentation.
+
+@item 4
+Available options are:
+
+@table @code
+
+@item 'MaxIter'
+Maximum number of iterations. Default: @code{1000}
+
+@item 'NumgradAlgorithm'
+Possible values are @code{2}, @code{3} and @code{5} respectively corresponding to the two, three and five points formula used to compute the gradient of the objective function (see @cite{Abramowitz and Stegun (1964)}). Values @code{13} and @code{15} are more experimental. If perturbations on the right and the left increase the value of the objective function (we minimize this function) then we force the corresponding element of the gradient to be zero. The idea is to temporarly reduce the size of the optimization problem. Default: @code{2}.
+
+@item 'NumgradEpsilon'
+Size of the perturbation used to compute numerically the gradient of the objective function. Default: @code{1e-6}
+
+@item 'TolFun'
+Stopping criteria. Default: @code{1e-7}
+
+@item 'InitialInverseHessian'
+Initial approximation for the inverse of the Hessian matrix of the posterior kernel (or likelihood). Obviously this approximation has to be a square, positive definite and symmetric matrix. Default: @code{'1e-4*eye(nx)'}, where @code{nx} is the number of parameters to be estimated.
+
+@end table
+
+@item
+
+@end table
+
+@customhead{Example 1}
+To change the defaults of csminwel (@code{mode_compute=4}):
+
+@code{estimation(..., mode_compute=4, optim=('NumgradAlgorithm',3,'TolFun',1e-5), ...);}
+
 
 @item nodiagnostic
 @anchor{nodiagnostic} Does not compute the convergence diagnostics for
@@ -8718,6 +8753,9 @@ internals --test particle/local_state_iteration
 @chapter Bibliography
 
 @itemize
+
+@item
+Milton Abramowitz, Irene A. Stegun (1964): ``Handbook of Mathematical Functions'', Courier Dover Publications
 
 @item
 Aguiar, Mark and Gopinath, Gita (2004): ``Emerging Market Business
