@@ -273,9 +273,9 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                 switch strtrim(options_list{2*(o-1)+1})
                   case '''MaxIter'''
                     nit = str2num(options_list{2*(o-1)+2});
-                  case '''InitialHessian'''
+                  case '''InitialInverseHessian'''
                     H0 = eval(eval(options_list{2*(o-1)+2}));
-                  case '''TolF'''
+                  case '''TolFun'''
                     crit = str2double(options_list{2*(o-1)+2});
                   case '''NumgradAlgorithm'''
                     numgrad = str2num(options_list{2*(o-1)+2});
