@@ -4535,7 +4535,32 @@ Initial approximation for the inverse of the Hessian matrix of the posterior ker
 
 @end table
 
-@item
+@item 6
+Available options are:
+
+@table @code
+
+@item 'NumberOfMh'
+Number of MCMC run sequentially. Default: @code{3}
+
+@item 'ncov-mh'
+Number of iterations used for updating the covariance matrix of the jumping distribution. Default: @code{20000}
+
+@item 'nscale-mh'
+Maximum number of iterations used for adjusting the scale parameter of the jumping distribution.  @code{200000}
+
+@item 'nclimb'
+Number of iterations in the last MCMC (climbing mode).
+
+@item 'InitialCovarianceMatrix'
+Initial covariance matrix of the jumping distribution. Default is @code{'previous'} if option @code{mode_file} is used, @code{'prior'} otherwise.
+
+@item 'AcceptanceRateTarget'
+A real number between zero and one. The scale parameter of the jumping distribution is adjusted so that the effective acceptance rate matches the value of option @code{'AcceptanceRateTarget'}. Default: @code{1.0/3.0}  
+
+@end table
+
+
 
 @end table
 
