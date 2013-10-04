@@ -282,7 +282,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                   case '''NumgradEpsilon'''
                     epsilon = str2double(options_list{2*(o-1)+2});
                   otherwise
-                    error(['csminwel: Unknown option (' options_list{2*(o-1)+1}  ')!'])
+                    warning(['csminwel: Unknown option (' options_list{2*(o-1)+1}  ')!'])
                 end
                 o = o + 1;
             end
