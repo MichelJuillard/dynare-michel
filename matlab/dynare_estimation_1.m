@@ -331,41 +331,85 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         parameter_names = bayestopt_.name;
         save([M_.fname '_mode.mat'],'xparam1','hh','gg','fval','invhess','parameter_names');
       case 6
+        % Set default options
+        gmhmaxlikOptions = options_.gmhmaxlik;
+        if ~isempty(hh);
+            gmhmaxlikOptions.varinit = 'previous';
+        else
+            gmhmaxlikOptions.varinit = 'prior';
+        end
+        if isfield(options_,'optim_opt')
+            options_list = strsplit(options_.optim_opt,',');
+            number_of_options = length(options_list)/2;
+            o = 1;
+            while o<=number_of_options
+                switch strtrim(options_list{2*(o-1)+1})
+                  case '''NumberOfMh'''
+                    gmhmaxlikOptions.iterations = str2num(options_list{2*(o-1)+2});
+                  case '''ncov-mh'''
+                    gmhmaxlikOptions.number = str2num(options_list{2*(o-1)+2});
+                  case '''nscale'''
+                    gmhmaxlikOptions.nscale = str2double(options_list{2*(o-1)+2});
+                  case '''nclimb'''
+                    gmhmaxlikOptions.nclimb = str2num(options_list{2*(o-1)+2});
+                  case '''InitialCovarianceMatrix'''
+                    switch eval(options_list{2*(o-1)+2})
+                      case 'previous'
+                        if isempty(hh)
+                            error('gmhmaxlik: No previous estimate of the Hessian matrix available!')
+                        else
+                            gmhmaxlikOptions.varinit = 'previous'
+                        end
+                      case {'prior', 'identity'}
+                        gmhmaxlikOptions.varinit = eval(options_list{2*(o-1)+2});
+                      otherwise
+                        error('gmhmaxlik: Unknown value for option ''InitialCovarianceMatrix''!')
+                    end
+                  case '''AcceptanceRateTarget'''
+                    gmhmaxlikOptions.target = str2num(options_list{2*(o-1)+2});
+                    if gmhmaxlikOptions.target>1 || gmhmaxlikOptions.target<eps
+                        error('gmhmaxlik: The value of option AcceptanceRateTarget should be a double between 0 and 1!')
+                    end
+                  otherwise
+                    Warning(['gmhmaxlik: Unknown option (' options_list{2*(o-1)+1}  ')!'])
+                end
+                o = o + 1;
+            end
+        end        
+        % Evaluate the objective function.
         fval = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         OldMode = fval;
         if ~exist('MeanPar','var')
             MeanPar = xparam1;
         end
-        if ~isempty(hh)
+        switch gmhmaxlikOptions.varinit
+          case 'previous'
             CovJump = inv(hh);
-        else% The covariance matrix is initialized with the prior
+          case 'prior'
+            % The covariance matrix is initialized with the prior
             % covariance (a diagonal matrix) %%Except for infinite variances ;-)
-            varinit = 'prior';
-            if strcmpi(varinit,'prior')
-                stdev = bayestopt_.p2;
-                indx = find(isinf(stdev));
-                stdev(indx) = ones(length(indx),1)*sqrt(10);
-                vars = stdev.^2;
-                CovJump = diag(vars);
-            elseif strcmpi(varinit,'eye')
-                vars = ones(length(bayestopt_.p2),1)*0.1;
-                CovJump = diag(vars);
-            else
-                disp('gmhmaxlik :: Error!')
-                return
-            end
+            stdev = bayestopt_.p2;
+            indx = find(isinf(stdev));
+            stdev(indx) = ones(length(indx),1)*sqrt(10);
+            vars = stdev.^2;
+            CovJump = diag(vars);
+          case 'identity'
+            vars = ones(length(bayestopt_.p2),1)*0.1;
+            CovJump = diag(vars);
+          otherwise
+            error('gmhmaxlik: This is a bug! Please contact the developers.')
         end
         OldPostVar = CovJump;
         Scale = options_.mh_jscale;
-        for i=1:options_.gmhmaxlik.iterations
+        for i=1:gmhmaxlikOptions.iterations
             if i == 1
-                if options_.gmhmaxlik.iterations>1
+                if gmhmaxlikOptions.iterations>1
                     flag = '';
                 else
                     flag = 'LastCall';
                 end
                 [xparam1,PostVar,Scale,PostMean] = ...
-                    gmhmaxlik(objective_function,xparam1,[lb ub],options_.gmhmaxlik,Scale,flag,MeanPar,CovJump,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+                    gmhmaxlik(objective_function,xparam1,[lb ub],gmhmaxlikOptions,Scale,flag,MeanPar,CovJump,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 fval = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 options_.mh_jscale = Scale;
                 mouvement = max(max(abs(PostVar-OldPostVar)));
@@ -378,14 +422,14 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                 OldMode = fval;
             else
                 OldPostVar = PostVar;
-                if i<options_.gmhmaxlik.iterations
+                if i<gmhmaxlikOptions.iterations
                     flag = '';
                 else
                     flag = 'LastCall';
                 end
                 [xparam1,PostVar,Scale,PostMean] = ...
                     gmhmaxlik(objective_function,xparam1,[lb ub],...
-                              options_.gmhmaxlik,Scale,flag,PostMean,PostVar,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+                              gmhmaxlikOptions,Scale,flag,PostMean,PostVar,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 fval = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 options_.mh_jscale = Scale;
                 mouvement = max(max(abs(PostVar-OldPostVar)));
@@ -399,7 +443,8 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                 OldMode = fval;
             end
             hh = inv(PostVar);
-            save([M_.fname '_mode.mat'],'xparam1','hh');
+            parameter_names = bayestopt_.name;
+            save([M_.fname '_mode.mat'],'xparam1','hh','parameter_names');
             save([M_.fname '_optimal_mh_scale_parameter.mat'],'Scale');
             bayestopt_.jscale = ones(length(xparam1),1)*Scale;
         end

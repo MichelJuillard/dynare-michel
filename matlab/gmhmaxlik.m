@@ -84,7 +84,7 @@ npar = length(xparam1);
 NumberOfIterations = options.number;
 MaxNumberOfTuningSimulations   = options.nscale;
 MaxNumberOfClimbingSimulations = options.nclimb;
-AcceptanceTarget               = 1/3;
+AcceptanceTarget               = options.target;
 
 CovJump = VarCov;
 ModePar = xparam1;

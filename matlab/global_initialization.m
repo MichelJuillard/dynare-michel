@@ -105,6 +105,7 @@ gmhmaxlik.iterations = 3;
 gmhmaxlik.number = 20000;
 gmhmaxlik.nclimb = 200000;
 gmhmaxlik.nscale = 200000;
+gmhmaxlik.target = 1/3; % Target for the acceptance rate.
 options_.gmhmaxlik = gmhmaxlik;
 
 % Request user input.
