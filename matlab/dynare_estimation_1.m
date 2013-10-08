@@ -502,8 +502,32 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         xparam1=BESTEVER.x;
         disp(sprintf('\n Objective function at mode: %f',fval))
       case 10
-        options = simpsaset('TOLX', options_.dynatol.x,'TOLFUN', options_.dynatol.f);
-        [xparam1, fval, exitflag] = simpsa(func2str(objective_function),xparam1,lb,ub,options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        simpsaOptions = options_.simpsa;
+        if isfield(options_,'optim_opt')
+            options_list = strsplit(options_.optim_opt,',');
+            number_of_options = length(options_list)/2;
+            o = 1;
+            while o<=number_of_options
+                switch strtrim(options_list{2*(o-1)+1})
+                  case '''MaxIter'''
+                    simpsaOptions.MAX_ITER_TOTAL = str2num(options_list{2*(o-1)+2});
+                  case '''TolFun'''
+                    simpsaOptions.TOLFUN = str2double(options_list{2*(o-1)+2});
+                  case '''TolX'''
+                    simpsaOptions.TOLX = str2double(options_list{2*(o-1)+2});
+                  case '''EndTemparature'''
+                    simpsaOptions.TEMP_END = str2double(options_list{2*(o-1)+2});
+                  case '''MaxFunEvals'''
+                    simpsaOptions.MAX_FUN_EVALS = str2num(options_list{2*(o-1)+2});
+                  otherwise
+                    warning(['simpsa: Unknown option (' options_list{2*(o-1)+1}  ')!'])
+                end
+                o = o + 1;
+            end
+        end
+        simpsaOptionsList = options2cell(simpsaOptions);
+        simpsaOptions = simpsaset(simpsaOptionsList{:});
+        [xparam1, fval, exitflag] = simpsa(func2str(objective_function),xparam1,lb,ub,simpsaOptions,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 11 
          options_.cova_compute = 0 ;
          [xparam1,stdh,lb_95,ub_95,med_param] = online_auxiliary_filter(xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_) ;

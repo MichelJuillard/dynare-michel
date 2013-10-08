@@ -459,6 +459,21 @@ cmaes.LogModulo='0';
 cmaes.LogTime='0';
 options_.cmaes = cmaes;
 
+% simpsa optimization routine.
+simpsa.TOLFUN = 1e-4;
+simpsa.TOLX = 1e-4;
+simpsa.TEMP_END = .1;
+simpsa.COOL_RATE = 10;
+simpsa.INITIAL_ACCEPTANCE_RATIO = .95;
+simpsa.MIN_COOLING_FACTOR = .9;
+simpsa.MAX_ITER_TEMP_FIRST = 50;
+simpsa.MAX_ITER_TEMP_LAST = 2000;
+simpsa.MAX_ITER_TEMP = 10;
+simpsa.MAX_ITER_TOTAL = 5000;
+simpsa.MAX_TIME = 2500;
+simpsa.MAX_FUN_EVALS = 20000;
+simpsa.DISPLAY = 'iter';
+options_.simpsa = simpsa;
 
 % prior analysis
 options_.prior_mc = 20000;
