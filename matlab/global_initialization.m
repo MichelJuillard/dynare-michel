@@ -443,7 +443,9 @@ options_.homotopy_steps = 1;
 options_.homotopy_force_continue = 0;
 
 % Simplex optimization routine (variation on Nelder Mead algorithm).
-options_.simplex = [];
+simplex.maxfcallfactor = 500;
+simplex.maxfcall = [];
+options_.simplex = simplex;
 
 % CMAES optimization routine.
 cmaes.SaveVariables='off';

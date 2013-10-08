@@ -41,6 +41,11 @@ verbose = 2;
 % Set number of control variables.
 number_of_variables = length(x);
 
+% get options.
+if isempty(simplex.maxfcall)
+    max_func_calls = simplex.maxfcallfactor*number_of_variables
+end
+
 % Set tolerance parameter.
 if isfield(options,'tolerance') && isfield(options.tolerance,'x')
     x_tolerance = options.tolerance.x;
@@ -60,12 +65,6 @@ if isfield(options,'maxiter')
     max_iterations = options.maxiter;
 else
     max_iterations = 1000;
-end
-% Set maximum number of iterations.
-if isfield(options,'maxfcall')
-    max_func_calls = options.maxfcall;
-else
-    max_func_calls = 500*number_of_variables;
 end
 
 % Set reflection parameter.
