@@ -495,10 +495,35 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         end
         [xparam1,fval,exitflag] = simplex_optimization_routine(objective_function,xparam1,simplexOptions,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 9
+        % Set defaults
         H0 = 1e-4*ones(nx,1);
+        cmaesOptions = options_.cmaes;
+        % Modify defaults
+        if isfield(options_,'optim_opt')
+            options_list = strsplit(options_.optim_opt,',');
+            number_of_options = length(options_list)/2;
+            o = 1;
+            while o<=number_of_options
+                switch strtrim(options_list{2*(o-1)+1})
+                  case '''MaxIter'''
+                    cmaesOptions.MaxIter = str2num(options_list{2*(o-1)+2});
+                  case '''TolFun'''
+                    cmaesOptions.TolFun = str2double(options_list{2*(o-1)+2});
+                  case '''TolX'''
+                    cmaesOptions.TolX = str2double(options_list{2*(o-1)+2});
+                  case '''MaxFunEvals'''
+                    cmaesOptions.MaxFunEvals = str2num(options_list{2*(o-1)+2});
+                  case '''H0'''
+                    H0 = eval(eval(options_list{2*(o-1)+2}));
+                  otherwise
+                    warning(['cmaes: Unknown option (' options_list{2*(o-1)+1}  ')!'])
+                end
+                o = o + 1;
+            end
+        end
         warning('off','CMAES:NonfinitenessRange');
         warning('off','CMAES:InitialSigma');
-        [x, fval, COUNTEVAL, STOPFLAG, OUT, BESTEVER] = cmaes(func2str(objective_function),xparam1,H0,options_.cmaes,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        [x, fval, COUNTEVAL, STOPFLAG, OUT, BESTEVER] = cmaes(func2str(objective_function),xparam1,H0,cmaesOptions,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         xparam1=BESTEVER.x;
         disp(sprintf('\n Objective function at mode: %f',fval))
       case 10
