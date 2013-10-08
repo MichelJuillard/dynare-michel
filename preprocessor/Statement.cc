@@ -76,7 +76,7 @@ NativeStatement::computingPass()
 {
   using namespace boost::xpressive;
   // Return if this is a comment
-  sregex comment_expr = sregex::compile( "\%.*" );
+  sregex comment_expr = sregex::compile( "\\s*\%.*" );
   match_results<string::const_iterator> results;
   if (regex_match(native_statement, results, comment_expr))
       return;
@@ -93,38 +93,41 @@ NativeStatement::computingPass()
       else
         apostrophes.push_back(idx);
 
-  if (apostrophes.size() % 2)
-    {
-      cerr << native_statement <<
-        " seems to be invalid Matlab syntax (an odd number of apostrophes was encountered)" << endl;
-      exit(EXIT_FAILURE);
-    }
-
   bool skip = false;
   string newstr = "";
-  int lastidx = 0;
-  sregex date_expr = sregex::compile( "-?[0-9]+[Mm]([1-9]|1[0-2])|-?[0-9]+[Qq][1-4]|-?[0-9]+[Ww]([1-9]{1}|[1-4][0-9]|5[0-2])" );
+  sregex date_expr = sregex::compile( "-?[0-9]+[Mm](1[0-2]|[1-9])|-?[0-9]+[Qq][1-4]|-?[0-9]+[Ww]([1-4][0-9]|5[0-2]|[1-9])" );
   string format( "dynDate('$&')" );
+  size_t lastidx = 0;
   for (size_t i = 0; i < apostrophes.size(); i++)
     if (apostrophes[i] == 0)
       skip = true;
     else
-      {
-        if (skip)
-          {
-            skip = false;
-            newstr.append(native_statement.substr(lastidx, apostrophes[i] - lastidx));
-          }
-        else
-          {
-            skip = true;
-            newstr.append(regex_replace(native_statement.substr(lastidx, apostrophes[i] - lastidx),
-                                        date_expr, format));
-          }
-        lastidx = apostrophes[i];
-      }
-  newstr.append(regex_replace(native_statement.substr(lastidx, native_statement.size() - lastidx),
-                              date_expr, format));
+      if (skip)
+        {
+          newstr.append(native_statement.substr(lastidx, apostrophes[i] - lastidx));
+          lastidx = apostrophes[i];
+          skip = false;
+        }
+      else
+        {
+          newstr.append(regex_replace(native_statement.substr(lastidx, apostrophes[i] - lastidx),
+                                      date_expr, format));
+          lastidx = apostrophes[i];
+          skip = true;
+        }
+  size_t length = native_statement.length() - lastidx;
+  size_t commentidx = native_statement.substr(lastidx, length).find("%", 0);
+  if (commentidx != string::npos)
+    length = commentidx;
+
+  newstr.append(regex_replace(native_statement.substr(lastidx, length), date_expr, format));
+
+  if (commentidx != string::npos)
+    {
+      lastidx += commentidx;
+      newstr.append(native_statement.substr(lastidx, native_statement.length() - lastidx));
+    }
+
   native_statement = newstr;
 }
 
