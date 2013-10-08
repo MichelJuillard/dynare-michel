@@ -457,6 +457,8 @@ cmaes.WarnOnEqualFunctionValues='no';
 cmaes.DispModulo='10';
 cmaes.LogModulo='0';
 cmaes.LogTime='0';
+cmaes.TolFun = 1e-7;
+cmaes.TolX = 1e-7;
 options_.cmaes = cmaes;
 
 % simpsa optimization routine.
