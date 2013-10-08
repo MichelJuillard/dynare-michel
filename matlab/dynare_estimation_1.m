@@ -294,7 +294,6 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
             analytic_grad=[];
         end
         % Call csminwell.
-        H0
         [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
             csminwel1(objective_function, xparam1, H0, analytic_grad, crit, nit, numgrad, epsilon, dataset_, options_, M_, estim_params_, bayestopt_, oo_);
         % Disp value at the mode.
