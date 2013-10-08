@@ -4581,7 +4581,27 @@ Tolerance parameter (w.r.t the objective function). Default: @code{1e-4}
 Tolerance parameter (w.r.t the instruments). Default: @code{1e-4}
 
 @item 'InitialSimplexSize'
+
 Initial size of the simplex, expressed as percentage deviation from the provided initial guess in each direction. Default: @code{.05}
+
+@end table
+
+@item 9
+Available options are:
+
+@table @code
+
+@item 'MaxIter'
+Maximum number of iterations.
+
+@item 'MaxFunEvals'
+Maximum number of objective function evaluations. Default: @code{Inf}.
+
+@item 'TolFun'
+Tolerance parameter (w.r.t the objective function). Default: @code{1e-7}
+
+@item 'TolX'
+Tolerance parameter (w.r.t the instruments). Default: @code{1e-7}
 
 @end table
 
