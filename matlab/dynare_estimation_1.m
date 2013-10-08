@@ -461,7 +461,6 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         elseif ~exist('OCTAVE_VERSION') && ~user_has_matlab_license('optimization_toolbox')
             error('Option mode_compute=7 requires the Optimization Toolbox')
         end
-
         optim_options = optimset('display','iter','MaxFunEvals',1000000,'MaxIter',6000,'TolFun',1e-8,'TolX',1e-6);
         if isfield(options_,'optim_opt')
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
@@ -469,7 +468,32 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         [xparam1,fval,exitflag] = fminsearch(objective_function,xparam1,optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 8
         % Dynare implementation of the simplex algorithm.
-        [xparam1,fval,exitflag] = simplex_optimization_routine(objective_function,xparam1,options_.simplex,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        simplexOptions = options_.simplex;
+        if isfield(options_,'optim_opt')
+            options_list = strsplit(options_.optim_opt,',');
+            number_of_options = length(options_list)/2;
+            o = 1;
+            while o<=number_of_options
+                switch strtrim(options_list{2*(o-1)+1})
+                  case '''MaxIter'''
+                    simplexOptions.maxiter = str2num(options_list{2*(o-1)+2});
+                  case '''TolFun'''
+                    simplexOptions.tolerance.f = str2double(options_list{2*(o-1)+2});
+                  case '''TolX'''
+                    simplexOptions.tolerance.x = str2double(options_list{2*(o-1)+2});
+                  case '''MaxFunEvals'''
+                    simplexOptions.maxfcall = str2num(options_list{2*(o-1)+2});
+                  case '''MaxFunEvalFactor'''
+                    simplexOptions.maxfcallfactor = str2num(options_list{2*(o-1)+2});
+                  case '''InitialSimplexSize'''
+                    simplexOptions.delta_factor = str2double(options_list{2*(o-1)+2});
+                  otherwise
+                    warning(['simplex: Unknown option (' options_list{2*(o-1)+1}  ')!'])
+                end
+                o = o + 1;
+            end
+        end
+        [xparam1,fval,exitflag] = simplex_optimization_routine(objective_function,xparam1,simplexOptions,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 9
         H0 = 1e-4*ones(nx,1);
         warning('off','CMAES:NonfinitenessRange');

@@ -443,6 +443,9 @@ options_.homotopy_steps = 1;
 options_.homotopy_force_continue = 0;
 
 % Simplex optimization routine (variation on Nelder Mead algorithm).
+simplex.tolerance.x = 1e-4;
+simplex.tolerance.f = 1e-4;
+simplex.maxiter = 5000;
 simplex.maxfcallfactor = 500;
 simplex.maxfcall = [];
 options_.simplex = simplex;
