@@ -513,8 +513,6 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                     cmaesOptions.TolX = str2double(options_list{2*(o-1)+2});
                   case '''MaxFunEvals'''
                     cmaesOptions.MaxFunEvals = str2num(options_list{2*(o-1)+2});
-                  case '''H0'''
-                    H0 = eval(eval(options_list{2*(o-1)+2}));
                   otherwise
                     warning(['cmaes: Unknown option (' options_list{2*(o-1)+1}  ')!'])
                 end
