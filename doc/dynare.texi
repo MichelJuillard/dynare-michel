@@ -4560,6 +4560,30 @@ A real number between zero and one. The scale parameter of the jumping distribut
 
 @end table
 
+@item 8
+Available options are:
+
+@table @code
+
+@item 'MaxIter'
+Maximum number of iterations. Default: @code{5000}
+
+@item 'MaxFunvEvals'
+Maximum number of objective function evaluations. No default.
+
+@item 'MaxFunvEvalFactor'
+Set @code{MaxFunvEvals} equal to @code{MaxFunvEvalFactor} times the number of estimated parameters. Default: @code{500}.
+
+@item 'TolFun'
+Tolerance parameter (w.r.t the objective function). Default: @code{1e-4}
+
+@item 'TolX'
+Tolerance parameter (w.r.t the instruments). Default: @code{1e-4}
+
+@item 'InitialSimplexSize'
+Initial size of the simplex, expressed as percentage deviation from the provided initial guess in each direction. Default: @code{.05}
+
+@end table
 
 
 @end table
