@@ -145,7 +145,7 @@ else
 end
 
 % Set delta parameter.
-if isfield(options,'delta_parameter')
+if isfield(options,'delta_parameter')% Size of the simplex
     delta = options.delta_parameter;
 else
     delta = 0.05;
