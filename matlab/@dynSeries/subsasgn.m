@@ -142,6 +142,7 @@ switch length(S)
                       error('dynSeries::subsasgn: Dimension error! The number of variables on the left and right hand side must match.')
                   end
                   A.data(tdx,:) = B.data(tdy,:);
+                  merge_dynSeries_objects = 0;
               elseif isnumeric(B)
                   merge_dynSeries_objects = 0;
                   if isequal(length(tdx),rows(B))
