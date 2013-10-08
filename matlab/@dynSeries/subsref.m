@@ -601,3 +601,24 @@ end
 %$
 %$ T = all(t);
 %@eof:13
+
+%@test:14
+%$ try
+%$     data = transpose(0:1:50);
+%$     ts = dynSeries(data,'1950Q1');
+%$     a = ts.lag;
+%$     b = ts.lead;
+%$     c = ts(-1);
+%$     d = ts(1);
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ if t(1)>1
+%$     t(2) = (a==c);
+%$     t(3) = (b==d);
+%$ end
+%$
+%$ T = all(t);
+%@eof:14
