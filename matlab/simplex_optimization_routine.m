@@ -64,7 +64,7 @@ end
 if isfield(options,'maxiter')
     max_iterations = options.maxiter;
 else
-    max_iterations = 1000;
+    max_iterations = 5000;
 end
 
 % Set reflection parameter.
