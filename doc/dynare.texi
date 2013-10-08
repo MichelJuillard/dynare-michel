@@ -4585,6 +4585,27 @@ Initial size of the simplex, expressed as percentage deviation from the provided
 
 @end table
 
+@item 10
+Available options are:
+
+@table @code
+
+@item 'MaxIter'
+Maximum number of iterations. Default: @code{5000}
+
+@item 'MaxFunvEvals'
+Maximum number of objective function evaluations. No default.
+
+@item 'TolFun'
+Tolerance parameter (w.r.t the objective function). Default: @code{1e-4}
+
+@item 'TolX'
+Tolerance parameter (w.r.t the instruments). Default: @code{1e-4}
+
+@item 'EndTemperature'
+Terminal condition w.r.t the temperature. When the temperature reaches @code{EndTemperature}, the temperature is set to zero and the algorithm falls back into a standard simplex algorithm. Default: @code{.1}
+
+@end table
 
 @end table
 
