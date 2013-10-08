@@ -4568,7 +4568,7 @@ Available options are:
 @item 'MaxIter'
 Maximum number of iterations. Default: @code{5000}
 
-@item 'MaxFunvEvals'
+@item 'MaxFunEvals'
 Maximum number of objective function evaluations. No default.
 
 @item 'MaxFunvEvalFactor'
