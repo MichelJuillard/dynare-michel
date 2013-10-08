@@ -537,7 +537,12 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                   case '''TolFun'''
                     simpsaOptions.TOLFUN = str2double(options_list{2*(o-1)+2});
                   case '''TolX'''
-                    simpsaOptions.TOLX = str2double(options_list{2*(o-1)+2});
+                    tolx = str2double(options_list{2*(o-1)+2});
+                    if tolx<0
+                        simpsaOptions = rmfield(simpsaOptions,'TOLX'); % Let cmaes choose the default.
+                    else
+                        simpsaOptions.TOLX = tolx;
+                    end
                   case '''EndTemparature'''
                     simpsaOptions.TEMP_END = str2double(options_list{2*(o-1)+2});
                   case '''MaxFunEvals'''
