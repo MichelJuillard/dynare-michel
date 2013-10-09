@@ -61,7 +61,7 @@ end;
 
 options_.dynatol.f=1e-12;
 options_.slowc=1;
-steady(solve_algo=2,maxit=20);
+steady(solve_algo=2,maxit=50);
 
 options_.dynatol.f=4e-5;
 
@@ -73,6 +73,6 @@ end;
 
 model_info;
 
-simul(periods=2000, stack_solve_algo = 0,maxit=50);
+simul(periods=2000, stack_solve_algo = 0,maxit=10);
 rplot y;
 rplot k;
