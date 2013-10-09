@@ -113,7 +113,7 @@ B=jacobia_(:,nnz(iyv)+1:end);
 
 %%% MAIN ENGINE %%%
 qz_criterium = options_.qz_criterium;
-solve_maxit = options_.solve_maxit;
+solve_maxit = options_.dp.maxit;
 discretion_tol = options_.discretionary_tol;
 
 if ~isempty(Hold)
