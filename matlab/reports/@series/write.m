@@ -1,5 +1,5 @@
-function o = write(o, fid, dates, precision)
-%function o = write(o, fid, dates, precision)
+function o = write(o, fid, dates, precision, yrsForAvgs)
+%function o = write(o, fid, dates, precision, yrsForAvgs)
 % Write Table Row
 %
 % INPUTS
@@ -7,6 +7,8 @@ function o = write(o, fid, dates, precision)
 %   fid          [int]       file id
 %   dates        [dynDates]  dates for series slice
 %   precision    [float]     precision with which to print the data
+%   yrsForAvgs   [bool]      the years for which to compute averages
+%
 %
 % OUTPUTS
 %   o            [series]    series object
@@ -37,11 +39,15 @@ assert(isa(dates, 'dynDates'));
 assert(isint(precision));
 
 %% Validate options provided by user
-assert(~isempty(o.data) && isa(o.data, 'dynSeries'), ...
-       '@series.write: must provide data as a dynSeries');
+assert(ischar(o.tableSubSectionHeader), '@series.write: tableSubSectionHeader must be a string');
+if isempty(o.tableSubSectionHeader)
+    assert(~isempty(o.data) && isa(o.data, 'dynSeries'), ...
+           '@series.write: must provide data as a dynSeries');
+end
 
 assert(ischar(o.tableNegColor), '@series.write: tableNegColor must be a string');
 assert(ischar(o.tablePosColor), '@series.write: tablePosColor must be a string');
+assert(ischar(o.tableRowColor), '@series.write: tableRowColor must be a string');
 assert(islogical(o.tableShowMarkers), '@series.write: tableShowMarkers must be true or false');
 assert(islogical(o.tableAlignRight), '@series.write: tableAlignRight must be true or false');
 assert(isfloat(o.tableMarkerLimit), '@series,write: tableMarkerLimit must be a float');
@@ -51,6 +57,17 @@ dataString = ['%.' num2str(precision) 'f'];
 precision  = 10^precision;
 
 fprintf(fid, '%% Table Row (series)\n');
+if ~isempty(o.tableRowColor)
+    fprintf(fid, '\\rowcolor{%s}', o.tableRowColor);
+end
+if ~isempty(o.tableSubSectionHeader)
+    fprintf(fid, '%s', o.tableSubSectionHeader);
+    for i=1:size(dates)+length(yrsForAvgs)
+        fprintf(fid, '&');
+    end
+    fprintf(fid, '\\\\%%\n');
+    return;
+end
 if o.tableAlignRight
     fprintf(fid, '\\multicolumn{1}{r}{');
 end
@@ -61,7 +78,7 @@ end
 data = o.data(dates);
 data = data.data;
 for i=1:size(data,1)
-    fprintf(fid, ' &');
+    fprintf(fid, '&');
     if o.tableShowMarkers
         if data(i) < -o.tableMarkerLimit
             fprintf(fid, '\\color{%s}', o.tableNegColor);
@@ -77,5 +94,26 @@ for i=1:size(data,1)
         fprintf(fid, ']');
     end
 end
-fprintf(fid, ' \\\\\n\n');
+
+% Calculate and display annual averages
+for i=1:length(yrsForAvgs)
+    slice = o.data(dynDate([num2str(yrsForAvgs(i)) 'q1']):dynDate([num2str(yrsForAvgs(i)) 'q4']));
+    avg = sum(slice.data)/size(slice);
+    fprintf(fid, '&');
+    if o.tableShowMarkers
+        if avg < -o.tableMarkerLimit
+            fprintf(fid, '\\color{%s}', o.tableNegColor);
+        elseif avg > o.tableMarkerLimit
+            fprintf(fid, '\\color{%s}', o.tablePosColor);
+        end
+        fprintf(fid, '[');
+    end
+
+    fprintf(fid, dataString, round(avg*precision)/precision);
+
+    if o.tableShowMarkers
+        fprintf(fid, ']');
+    end
+end
+fprintf(fid, '\\\\%%\n');
 end

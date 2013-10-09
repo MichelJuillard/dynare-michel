@@ -39,6 +39,9 @@ o.titleSize = 'large';
 o.showHlines = false;
 o.showVlines = false;
 o.vlineAfter = '';
+o.vlineAfterEndOfPeriod = false;
+
+o.annualAverages = false;
 
 o.data = '';
 o.seriesToUse = '';
@@ -72,6 +75,7 @@ end
 
 % Check options provided by user
 assert(ischar(o.title), '@table.table: title must be a string');
+assert(islogical(o.annualAverages), '@table.table: annualAverages must be true or false');
 assert(islogical(o.showHlines), '@table.table: showHlines must be true or false');
 assert(islogical(o.showVlines), '@table.table: showVlines must be true or false');
 assert(isint(o.precision), '@table.table: precision must be an int');
@@ -87,6 +91,8 @@ assert(isempty(o.vlineAfter) || isa(o.vlineAfter, 'dynDate'), ...
 if o.showVlines
     o.vlineAfter = '';
 end
+assert(islogical(o.vlineAfterEndOfPeriod), ...
+       '@table.table: vlineAfterEndOfPeriod must be true or false');
 valid_title_sizes = {'Huge', 'huge', 'LARGE', 'Large', 'large', 'normalsize', ...
                     'small', 'footnotesize', 'scriptsize', 'tiny'};
 assert(any(strcmp(o.titleSize, valid_title_sizes)), ...

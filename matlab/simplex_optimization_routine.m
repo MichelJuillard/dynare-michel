@@ -41,6 +41,11 @@ verbose = 2;
 % Set number of control variables.
 number_of_variables = length(x);
 
+% get options.
+if isempty(simplex.maxfcall)
+    max_func_calls = simplex.maxfcallfactor*number_of_variables
+end
+
 % Set tolerance parameter.
 if isfield(options,'tolerance') && isfield(options.tolerance,'x')
     x_tolerance = options.tolerance.x;
@@ -59,13 +64,7 @@ end
 if isfield(options,'maxiter')
     max_iterations = options.maxiter;
 else
-    max_iterations = 1000;
-end
-% Set maximum number of iterations.
-if isfield(options,'maxfcall')
-    max_func_calls = options.maxfcall;
-else
-    max_func_calls = 500*number_of_variables;
+    max_iterations = 5000;
 end
 
 % Set reflection parameter.
@@ -145,7 +144,7 @@ else
 end
 
 % Set delta parameter.
-if isfield(options,'delta_parameter')
+if isfield(options,'delta_parameter')% Size of the simplex
     delta = options.delta_parameter;
 else
     delta = 0.05;

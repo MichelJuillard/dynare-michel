@@ -97,8 +97,25 @@ switch length(S)
                   end
               end
           end
-        case '.' % Single variable selection.
-          if ~isequal(S(1).subs,B.name)
+        case '.'
+          if isequal(S(1).subs,'init') && isa(B,'dynDate')
+              % Overwrite the init member...
+              A.init = B;
+              % ... and update freq and time members.
+              A.freq = A.init.freq;
+              A.time = A.init:(A.init+(A.nobs-1));
+              return
+          elseif isequal(S(1).subs,'time') && isa(B,'dynDates')
+              % Overwrite the time member...
+              A.time = B;
+              % ... and update the freq and init members.
+              A.init = B(1);
+              A.freq = A.init.freq;
+              return
+          elseif ismember(S(1).subs,{'freq','nobs','vobs','data','name','tex'})
+              error(['dynSeries::subsasgn: You cannot overwrite ' S(1).subs ' member!'])
+          elseif ~isequal(S(1).subs,B.name)
+              % Single variable selection.
               if ~isequal(S(1).subs,B.name{1})
                   % Rename a variable.
                   id = strmatch(S(1).subs,A.name);
@@ -125,6 +142,7 @@ switch length(S)
                       error('dynSeries::subsasgn: Dimension error! The number of variables on the left and right hand side must match.')
                   end
                   A.data(tdx,:) = B.data(tdy,:);
+                  merge_dynSeries_objects = 0;
               elseif isnumeric(B)
                   merge_dynSeries_objects = 0;
                   if isequal(length(tdx),rows(B))
@@ -692,3 +710,67 @@ end
 %$ end
 %$ T = all(t);
 %@eof:18
+
+%@test:19
+%$ % Define a datasets.
+%$ A = rand(40,3);
+%$
+%$ % Instantiate two dynSeries object.
+%$ ts1 = dynSeries(A,'1950Q1',{'A1';'A2';'A3'},[]);
+%$
+%$ % Instantiate a dynDate object.
+%$ dd = dynDate('1952Q1');
+%$
+%$ % modify first object.
+%$ try
+%$     ts1.init = dd;
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ % Instantiate a time series object.
+%$ if t(1)
+%$    t(2) = dyn_assert(ts1.vobs,3);
+%$    t(3) = dyn_assert(ts1.nobs,40);
+%$    t(4) = dyn_assert(ts1.name{2},'A2');
+%$    t(5) = dyn_assert(ts1.name{1},'A1');
+%$    t(6) = dyn_assert(ts1.name{3},'A3');
+%$    t(7) = dyn_assert(ts1.data,A,1e-15);
+%$    t(8) = dyn_assert(isequal(ts1.init,dd),1);
+%$    t(9) = dyn_assert(isequal(ts1.time(1),dd),1);
+%$ end
+%$ T = all(t);
+%@eof:19
+
+%@test:20
+%$ % Define a datasets.
+%$ A = rand(40,3);
+%$
+%$ % Instantiate two dynSeries object.
+%$ ts1 = dynSeries(A,'1950Q1',{'A1';'A2';'A3'},[]);
+%$
+%$ % Instantiate a dynDate object.
+%$ dd = dynDate('1952Q1');
+%$
+%$ % modify first object.
+%$ try
+%$     ts1.time = dd:(dd+(ts1.nobs-1));
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ % Instantiate a time series object.
+%$ if t(1)
+%$    t(2) = dyn_assert(ts1.vobs,3);
+%$    t(3) = dyn_assert(ts1.nobs,40);
+%$    t(4) = dyn_assert(ts1.name{2},'A2');
+%$    t(5) = dyn_assert(ts1.name{1},'A1');
+%$    t(6) = dyn_assert(ts1.name{3},'A3');
+%$    t(7) = dyn_assert(ts1.data,A,1e-15);
+%$    t(8) = dyn_assert(isequal(ts1.init,dd),1);
+%$    t(9) = dyn_assert(isequal(ts1.time(1),dd),1);
+%$ end
+%$ T = all(t);
+%@eof:20
