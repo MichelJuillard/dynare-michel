@@ -80,15 +80,13 @@ if last_a>last_b
     n = last_a-last_b;
     b.data = [b.data; NaN(n,b.vobs)];
     b.nobs = b.nobs+n;
-    return
-end
-
-if last_a<last_b
+elseif last_a<last_b
     n = last_b-last_a;
     a.data = [a.data; NaN(n,a.vobs)];
     a.nobs = a.nobs+n;
-    return
 end
+
+a.time = a.init:a.init+(a.nobs-1);
 
 %@test:1
 %$ % Define a datasets.

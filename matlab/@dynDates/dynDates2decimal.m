@@ -1,6 +1,8 @@
-function s = getTexName(o)
-%function s = getTexName(o)
-
+function y = dynDates2decimal(dd)
+% function y = dynDates2decimal(dd)
+%     returns a vector of doubles with the fractional part corresponding
+%     to the subperiod. Mostly used for plots.
+    
 % Copyright (C) 2013 Dynare Team
 %
 % This file is part of Dynare.
@@ -18,6 +20,4 @@ function s = getTexName(o)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-assert(~isempty(o.data) && size(o.data, 2) == 1);
-s = o.data.tex;
-end
+    y = dd.time(:,1)+(dd.time(:,2)-1)/dd.freq;

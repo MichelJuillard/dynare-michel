@@ -19,5 +19,5 @@ function s = getName(o)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 assert(~isempty(o.data) && size(o.data, 2) == 1);
-s = o.data(1).name();
+s = o.data.name;
 end

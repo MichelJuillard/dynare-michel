@@ -103,7 +103,7 @@ switch length(S)
               A.init = B;
               % ... and update freq and time members.
               A.freq = A.init.freq;
-              A.time = A.init:(A.init+(A.nobs-1));
+              A.time = A.init:A.init+(A.nobs-1);
               return
           elseif isequal(S(1).subs,'time') && isa(B,'dynDates')
               % Overwrite the time member...
