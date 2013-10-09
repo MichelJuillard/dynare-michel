@@ -39,7 +39,6 @@ options_.rplottype = 0;
 options_.smpl = 0;
 options_.dynatol.f = 1e-5;
 options_.dynatol.x = 1e-5;
-options_.maxit_ = 10;
 options_.slowc = 1;
 options_.timing = 0;
 options_.gstep = ones(2,1);
