@@ -11,6 +11,7 @@
 *.dat
 *.prn
 *_simul
+*-macroexp.mod
 
 wsOct
 /run_test_octave_output.txt
