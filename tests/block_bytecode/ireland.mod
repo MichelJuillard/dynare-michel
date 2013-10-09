@@ -60,7 +60,7 @@ k=k+0.000001;
 end;
 
 options_.dynatol.f=1e-12;
-options_.maxit_=5;
+options_.simul.maxit=5;
 options_.slowc=1;
 steady(solve_algo=2);
 
@@ -72,7 +72,7 @@ periods 1;
 values 0.02;
 end;
 
-options_.maxit_=20;
+options_.simul.maxit=20;
 model_info;
 
 simul(periods=2000, stack_solve_algo = 0);

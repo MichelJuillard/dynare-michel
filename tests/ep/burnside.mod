@@ -43,7 +43,7 @@ set_dynare_seed('default');
 stoch_simul(order=2,pruning,irf=0,periods=5000);
 y_perturbation_2_pruning = oo_.endo_simul(1,:)';
 
-options_.maxit_ = 100;
+options_.simul.maxit = 100;
 options_.ep.verbosity = 0;
 options_.ep.stochastic.order = 0;
 options_.ep.stochastic.nodes = 2;

@@ -707,9 +707,9 @@ main(int nrhs, const char *prhs[])
     DYN_MEX_FUNC_ERR_MSG_TXT("verbosity is not a field of options_");
   if (verbose)
     print_it = true;
-  field = mxGetFieldNumber(options_, "maxit_");
+  field = mxGetFieldNumber(options_, "simul.maxit");// Not sure of that...
   if (field < 0)
-    DYN_MEX_FUNC_ERR_MSG_TXT("maxit_ is not a field of options_");
+    DYN_MEX_FUNC_ERR_MSG_TXT("simul.maxit is not a field of options_");
   int maxit_ = int (floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, field)))));
   field = mxGetFieldNumber(options_, "slowc");
   if (field < 0)
