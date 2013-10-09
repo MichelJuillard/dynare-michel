@@ -95,7 +95,7 @@ end
 ts.data = tmp(K+1:end-K,:);
 ts.nobs = ts.nobs-2*K;
 ts.init = ts.init+K;
-ts.time = ts.init:ts.init+ts.nobs;
+ts.time = ts.init:ts.init+(ts.nobs-1);
 
 %@test:1
 %$ plot_flag = 0; 

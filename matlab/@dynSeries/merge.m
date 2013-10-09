@@ -83,7 +83,7 @@ else
     A.init = B.init;
 end
 
-A.time = A.init:A.init+A.nobs;
+A.time = A.init:A.init+(A.nobs-1);
 
 %@test:1
 %$ % Define a datasets.

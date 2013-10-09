@@ -116,7 +116,7 @@ for i=1:A.vobs
     A.tex(i) = {['(' B.tex{idB(i)} '+' C.tex{idC(i)} ')']};
 end
 A.data = bsxfun(@plus,B.data,C.data);
-A.time = A.init:A.init+A.nobs;
+A.time = A.init:A.init+(A.nobs-1);
 
 %@test:1
 %$ % Define a datasets.

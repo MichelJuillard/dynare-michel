@@ -146,7 +146,6 @@ switch nargin
         [ts.nobs, ts.vobs] = size(ts.data);
         ts.freq = 1;
         ts.init = dynDate(1);
-        ts.time = ts.init:ts.init+ts.nobs;
         ts.name = default_name(ts.vobs);
         ts.tex = name2tex(ts.name);
     end
@@ -212,7 +211,7 @@ switch nargin
     error('dynSeries::dynSeries: Can''t instantiate the class, wrong calling sequence!')
 end
 
-ts.time = ts.init:(ts.init+ts.nobs);
+ts.time = ts.init:ts.init+(ts.nobs-1);
 
 %@test:1
 %$ % Test if we can instantiate an empty dynSeries object.
