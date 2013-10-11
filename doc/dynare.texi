@@ -3774,7 +3774,7 @@ variables in declaration order.
 
 Of course, the shown form of the approximation is only stylized, because it neglects the required different ordering in @math{y^s} and @math{y^h_t}. The precise form of the approximation that shows the way Dynare deals with differences between declaration and DR-order, is
 
-@math{y_t(oo_.dr.order_var) = y^s(oo_.dr.order_var) + A (y_{t-1}(oo_.dr.order_var(k2))-y^s(oo_.dr.order_var(k2))) + B u_t}
+@math{y_t(oo\_.dr.order\_var) = y^s(oo\_.dr.order\_var) + A \cdot y_{t-1}(oo\_.dr.order\_var(k2))-y^s(oo\_.dr.order\_var(k2)) + B\cdot u_t}
 
 where @math{k2} selects the state variables, @math{y_t} and @math{y^s} are in declaration order and the coefficient matrices are in DR-order. Effectively, all variables on the right hand side are brought into DR order for computations and then assigned to @math{y_t} in declaration order.
 
