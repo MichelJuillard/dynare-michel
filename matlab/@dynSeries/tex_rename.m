@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function ts = tex_rename(ts, varargin)
+function ts = tex_rename(ts, varargin) % --*-- Unitary tests --*--
 
 % Copyright (C) 2013 Dynare Team
 %

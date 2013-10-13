@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function A = merge(B,C)
+function A = merge(B,C) % --*-- Unitary tests --*--
+
 %@info:
 %! @deftypefn {Function File} {@var{A} =} merge (@var{B},@var{C})
 %! @anchor{@dynSeries/plus}

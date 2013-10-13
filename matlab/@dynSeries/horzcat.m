@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function a = horzcat(varargin)
+function a = horzcat(varargin) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function file} {@var{a} =} horzcat (@var{b},@var{c}, ...)

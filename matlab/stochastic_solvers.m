@@ -56,6 +56,15 @@ if (options_.aim_solver == 1) && (options_.order > 1)
         error('Option "aim_solver" is incompatible with order >= 2')
 end
 
+
+if M_.maximum_endo_lag == 0 && options_.order >= 2
+    fprintf('\nSTOCHASTIC_SOLVER: Dynare does not solve purely forward models at higher order.\n')
+    fprintf('STOCHASTIC_SOLVER: To circumvent this restriction, you can add a backward-looking dummy equation of the form:\n')
+    fprintf('STOCHASTIC_SOLVER: junk=0.9*junk(-1);\n')
+    error(['2nd and 3rd order approximation not implemented for purely ' ...
+           'forward models'])
+end
+
 if options_.k_order_solver;
     if options_.risky_steadystate
         [dr,info] = dyn_risky_steadystate_solver(oo_.steady_state,M_,dr, ...
@@ -190,6 +199,9 @@ if M_.maximum_endo_lead == 0
             info(2) = temp'*temp;
         end
     else
+        fprintf('\nSTOCHASTIC_SOLVER: Dynare does not solve purely backward models at higher order.\n')
+        fprintf('STOCHASTIC_SOLVER: To circumvent this restriction, you can add a forward-looking dummy equation of the form:\n')
+        fprintf('STOCHASTIC_SOLVER: junk=0.9*junk(+1);\n')
         error(['2nd and 3rd order approximation not implemented for purely ' ...
                'backward models'])
     end

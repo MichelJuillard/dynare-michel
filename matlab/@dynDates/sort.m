@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function dd = sort(dd)
+function dd = sort(dd) % --*-- Unitary tests --*--
+
 % sort method for dynDates class.
 
 %@info:
@@ -47,7 +47,7 @@ function dd = sort(dd)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if ~isa(dd,'dynDates')
-    error(['dynDates::sort: Input argument ' inputname(dd) ' has to be a dynDates object.'])
+    error(['dynDates::sort: Input argument ' inputname(1) ' has to be a dynDates object.'])
 end
 
 if dd.ndat==1
@@ -72,6 +72,29 @@ dd.time = sortrows(dd.time,[1,2]);
 %$ d = dynDates(B1,B2,B3,B4);
 %$ d = d.sort;
 %$ 
+%$ % Check the results.
+%$ t(1) = dyn_assert(d.time,e.time);
+%$ t(2) = dyn_assert(d.freq,e.freq);
+%$ t(3) = dyn_assert(d.ndat,e.ndat);
+%$ T = all(t);
+%@eof:1
+
+%@test:1
+%$ % Define some dates
+%$ B1 = '1953Q4';
+%$ B2 = '1950Q2';
+%$ B3 = '1950Q1';
+%$ B4 = '1945Q3';
+%$
+%$ % Define expected results.
+%$ e.time = [1945 3; 1950 1; 1950 2; 1953 4];
+%$ e.freq = 4;
+%$ e.ndat = 4;
+%$
+%$ % Call the tested routine.
+%$ d = dynDates(B1,B2,B3,B4);
+%$ d = d.sort();
+%$
 %$ % Check the results.
 %$ t(1) = dyn_assert(d.time,e.time);
 %$ t(2) = dyn_assert(d.freq,e.freq);

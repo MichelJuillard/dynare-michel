@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function A = mtimes(B,C)
+function A = mtimes(B,C) % --*-- Unitary tests --*--
+
 %@info:
 %! @deftypefn {Function File} {@var{A} =} mtimes (@var{B},@var{C})
 %! @anchor{@dynSeries/mtimes}

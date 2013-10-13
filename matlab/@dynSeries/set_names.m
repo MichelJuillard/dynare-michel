@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function A = set_names(B,varargin)
+function A = set_names(B,varargin) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{A} =} times (@var{B},@code{varargin})
@@ -66,7 +65,7 @@ end
 %$ A = rand(10,3);
 %$
 %$ % Define names
-%$ A_name = {'A1';'--NA--';'A3'};
+%$ A_name = {'A1';'Variable_2';'A3'};
 %$
 %$ t = zeros(4,1);
 %$
@@ -92,7 +91,7 @@ end
 %$ A = rand(10,3);
 %$
 %$ % Define names
-%$ A_name = {'A1';'--NA--';'A3'};
+%$ A_name = {'A1';'Variable_2';'A3'};
 %$
 %$ t = zeros(4,1);
 %$

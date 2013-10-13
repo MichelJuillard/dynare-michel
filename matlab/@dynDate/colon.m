@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function sp = colon(a,b)
+function sp = colon(a,b) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{sp} =} colon (@var{a},@var{b})

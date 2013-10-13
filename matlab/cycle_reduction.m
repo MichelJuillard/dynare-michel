@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function [X, info] = cycle_reduction(A0, A1, A2, cvg_tol, ch)
+function [X, info] = cycle_reduction(A0, A1, A2, cvg_tol, ch) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {[@var{X}, @var{info}] =} cycle_reduction (@var{A0},@var{A1},@var{A2},@var{cvg_tol},@var{ch})

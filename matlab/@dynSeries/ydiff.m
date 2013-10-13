@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function us = ydiff(ts)
+function us = ydiff(ts) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{us} =} ydiff (@var{ts})

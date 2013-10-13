@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function [a,b] = align(a, b)
+function [a,b] = align(a, b) % --*-- Unitary tests --*--
     
 %@info:
 %! @deftypefn {Function File} {[@var{a}, @var{b}] =} align (@var{a}, @var{b})

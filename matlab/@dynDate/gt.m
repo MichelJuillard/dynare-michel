@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function c = gt(a,b)
+function c = gt(a,b) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{c} =} gt (@var{a},@var{b})

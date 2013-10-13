@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function B = subsref(A, S)
+function B = subsref(A, S) % --*-- Unitary tests --*--
+
 %@info:
 %! @deftypefn {Function File} {@var{us} =} subsref (@var{ts},S)
 %! @anchor{@dynSeries/subsref}
@@ -66,26 +66,64 @@ switch S(1).type
   case '.'
     switch S(1).subs
       case {'data','nobs','vobs','name','tex','freq','time','init'}        % Public members.
-        B = builtin('subsref', A, S(1));
-      case {'log','exp','ygrowth','qgrowth','ydiff','qdiff','lag'}         % Give "dot access" to public methods.
-        B = feval(S(1).subs,A);
-      case {'save'}                                                        % Save dynSeries object on disk (default is a csv file). 
-        B = NaN;
-        if length(S)==2 && strcmp(S(2).type,'()')
-            save(A,S(2).subs{:});
-            S = shiftS(S);
-        else
-            save(A,inputname(1));
+        if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
+            error(['dynSeries::subsref: ' S(1).subs ' is not a method but a member!'])
         end
-      case {'size'}
-        if length(S)==2 && strcmp(S(2).type,'()') && ~isempty(S(2).subs)
-            B = size(A,S(2).subs{1});
+        B = builtin('subsref', A, S(1));
+      case {'log','exp','ygrowth','qgrowth','ydiff','qdiff'}         % Give "dot access" to public methods without args.
+        B = feval(S(1).subs,A);
+        if length(S)>1 && isequal(S(2).type,'()') && isempty(S(2).subs)
             S = shiftS(S);
+        end
+      case {'lag','lead'}
+        if length(S)>1 && isequal(S(2).type,'()')
+            if isempty(S(2).subs)
+                B = feval(S(1).subs,A);
+                S = shiftS(S);
+            else
+                if length(S(2).subs{1})>1
+                    error(['dynSeries::subsref: ' S(1).subs{1} ' method admits no more than one argument (default value is one)!'])
+                end
+                B = feval(S(1).subs,A,S(2).subs{1})
+                S = shiftS(S);
+            end
         else
+            B = feval(S(1).subs,A);
+        end
+      case 'save'                                                        % Save dynSeries object on disk (default is a csv file).
+        B = NaN;
+        if isequal(length(S),2)
+            if strcmp(S(2).type,'()')
+                if isempty(S(2).subs)
+                    save(A,inputname(1));
+                else
+                    save(A,S(2).subs{:});
+                end
+                S = shiftS(S);
+            else
+                error('dynSeries::subsref: Wrong syntax.')
+            end
+        elseif isequal(length(S),1)
+            save(A,inputname(1));
+        else
+            error('dynSeries::subsref: Call to save method must come in last position!')
+        end
+      case 'size'
+        if isequal(length(S),2) && strcmp(S(2).type,'()')
+            if isempty(S(2).subs)
+                [x,y] = size(A);
+                B = [x, y];
+            else
+                B = size(A,S(2).subs{1});
+            end
+            S = shiftS(S);
+        elseif isequal(length(S),1)
             [x,y] = size(A);
             B = [x, y];
+        else
+            error('dynSeries::subsref: Call to size method must come in last position!')
         end
-      case {'rename','tex_rename'}
+      case {'set_names','rename','tex_rename'}
         B = feval(S(1).subs,A,S(2).subs{:});
         S = shiftS(S);
       otherwise                                                            % Extract a sub-object by selecting one variable.
@@ -104,7 +142,7 @@ switch S(1).type
         else
             error('dynSeries::subsref: Unknown public method, public member or variable!')
         end
-    end    
+    end
   case '()'
     if ischar(S(1).subs{1})
         % If ts is an empty dynSeries object, populate this object by reading data in a file.
@@ -112,6 +150,17 @@ switch S(1).type
             B = dynSeries(S(1).subs{1});
         else
             error(['dynSeries::subsref: dynSeries object ''' inputname(1) '''  is not empty!'])
+        end
+    elseif isa(S(1).subs{1},'dynTimeIndex')
+        % shift backward/forward (lag/lead) dynSeries object
+        shift = S(1).subs{1}.index;
+        if shift>0
+            B = feval('lead',A,shift);
+        elseif shift<0
+            B = feval('lag',A,-shift);
+        else
+            % Do nothing.
+            B = A;
         end
     elseif isa(S(1).subs{1},'dynDates')
         % Extract a subsample using a dynDates object
@@ -475,3 +524,44 @@ end
 %$ t(8) = dyn_assert(D.data,A(:,1));
 %$ T = all(t);
 %@eof:11
+
+%@test:12
+%$ % Define a data set.
+%$ A = [transpose(1:10),2*transpose(1:10)];
+%$
+%$ % Define names
+%$ A_name = {'A1';'A2'};
+%$
+%$ % Instantiate a time series object.
+%$ try
+%$    ts1 = dynSeries(A,[],A_name,[]);
+%$    ts1.save();
+%$    t = 1;
+%$ catch
+%$    t = 0;
+%$ end
+%$
+%$ T = all(t);
+%@eof:12
+
+%@test:13
+%$ try
+%$     data = transpose(0:1:50);
+%$     ts = dynSeries(data,'1950Q1');
+%$     a = ts.lag;
+%$     b = ts.lead;
+%$     tt = dynTimeIndex();
+%$     c = ts(tt-1);
+%$     d = ts(tt+1);
+%$     t(1) = 1;
+%$ catch
+%$     t(1) = 0;
+%$ end
+%$
+%$ if t(1)>1
+%$     t(2) = (a==c);
+%$     t(3) = (b==d);
+%$ end
+%$
+%$ T = all(t);
+%@eof:13

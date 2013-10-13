@@ -128,7 +128,7 @@ options_ = set_default_option(options_,'datafile','');
 options_.mode_compute = 0;
 options_.plot_priors = 0;
 options_.smoother=1;
-[dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_]=dynare_estimation_init(M_.endo_names,fname_,1, M_, options_, oo_, estim_params_, bayestopt_);
+[dataset_,xparam1,hh, M_, options_, oo_, estim_params_,bayestopt_]=dynare_estimation_init(M_.endo_names,fname_,1, M_, options_, oo_, estim_params_, bayestopt_);
 options_ident.analytic_derivation_mode = options_.analytic_derivation_mode;
 if isempty(dataset_),
     dataset_.info.ntobs = periods;

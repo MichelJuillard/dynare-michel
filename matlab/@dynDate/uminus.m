@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function b = uminus(a)
+function b = uminus(a) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{b} =} uminus (@var{a})

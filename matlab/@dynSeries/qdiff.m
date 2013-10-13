@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function us = qdiff(ts)
+function us = qdiff(ts) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{us} =} qdiff (@var{ts})

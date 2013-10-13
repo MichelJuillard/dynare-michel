@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function C = union(A,varargin)
+function C = union(A,varargin) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{C} =} union (@var{A},@var{B})

@@ -78,11 +78,11 @@ else
     objective_function = str2func('DsgeVarLikelihood');
 end
 
-[dataset_,xparam1, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list_, dname, [], M_, options_, oo_, estim_params_, bayestopt_);
+[dataset_,xparam1, hh, M_, options_, oo_, estim_params_,bayestopt_] = dynare_estimation_init(var_list_, dname, [], M_, options_, oo_, estim_params_, bayestopt_);
 
 % Set sigma_e_is_diagonal flag (needed if the shocks block is not declared in the mod file).
 M_.sigma_e_is_diagonal = 1;
-if estim_params_.ncx || ~isequal(nnz(M_.Sigma_e),length(M_.Sigma_e))
+if estim_params_.ncx || any(nnz(tril(M_.Sigma_e,-1)))
     M_.sigma_e_is_diagonal = 0;
 end
 
@@ -97,11 +97,6 @@ if ~isequal(estim_params_.ncx,nnz(tril(M_.Sigma_e,-1)))
             M_.Correlation_matrix(:,zero_variance_idx(i)) = 0;
         end
     end
-end
-
-M_.H_is_diagonal = 1;
-if estim_params_.ncn || ~isequal(nnz(M_.H),length(M_.H))
-    M_.H_is_diagonal = 0;
 end
 
 % Set the correlation matrix of measurement errors if necessary.
@@ -140,15 +135,6 @@ lb = bayestopt_.lb;
 ub = bayestopt_.ub;
 
 dr = oo_.dr;
-
-%% load mode file is necessary
-if ~isempty(options_.mode_file) && ~options_.mh_posterior_mode_estimation
-    load(options_.mode_file);
-
-    if length(xparam1) ~= nx
-        error([ 'ESTIMATION: the posterior mode file ' options_.mode_file ' has been generated using another specification. Please delete it and recompute the posterior mode.'])
-    end
-end
 
 %% load optimal_mh_scale parameter if previous run was with
 %% mode_compute=6
@@ -324,7 +310,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         if ~exist('MeanPar','var')
             MeanPar = xparam1;
         end
-        if exist('hh','var')
+        if ~isempty(hh)
             CovJump = inv(hh);
         else% The covariance matrix is initialized with the prior
             % covariance (a diagonal matrix) %%Except for infinite variances ;-)
@@ -707,16 +693,23 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             fprintf(fidTeX,' \n');
         end
         for plt = 1:nbplt,
-            hh = dyn_figure(options_,'Name','Smoothed shocks');
+            fh = dyn_figure(options_,'Name','Smoothed shocks');
             NAMES = [];
             if options_.TeX, TeXNAMES = []; end
             nstar0=min(nstar,M_.exo_nbr-(plt-1)*nstar);
+            if gend==1
+                marker_string{1,1}='-ro';
+                marker_string{2,1}='-ko';
+            else
+                marker_string{1,1}='-r';
+                marker_string{2,1}='-k';
+            end
             for i=1:nstar0,
                 k = (plt-1)*nstar+i;
                 subplot(nr,nc,i);
-                plot([1 gend],[0 0],'-r','linewidth',.5)
+                plot([1 gend],[0 0],marker_string{1,1},'linewidth',.5)
                 hold on
-                plot(1:gend,innov(k,:),'-k','linewidth',1)
+                plot(1:gend,innov(k,:),marker_string{2,1},'linewidth',1)
                 hold off
                 name = deblank(M_.exo_names(k,:));
                 if isempty(NAMES)
@@ -728,7 +721,9 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     set(gca,'XTick',options_.XTick)
                     set(gca,'XTickLabel',options_.XTickLabel)
                 end
-                xlim([1 gend])
+                if gend>1
+                    xlim([1 gend])
+                end
                 if options_.TeX
                     texname = M_.exo_names_tex(k,:);
                     if isempty(TeXNAMES)
@@ -739,7 +734,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 end
                 title(name,'Interpreter','none')
             end
-            dyn_saveas(hh,[M_.fname '_SmoothedShocks' int2str(plt)],options_);
+            dyn_saveas(fh,[M_.fname '_SmoothedShocks' int2str(plt)],options_);
             if options_.TeX
                 fprintf(fidTeX,'\\begin{figure}[H]\n');
                 for jj = 1:nstar0
@@ -791,19 +786,28 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 fprintf(fidTeX,' \n');
             end
             for plt = 1:nbplt
-                hh = dyn_figure(options_,'Name','Smoothed observation errors');
+                fh = dyn_figure(options_,'Name','Smoothed observation errors');
                 NAMES = [];
                 if options_.TeX, TeXNAMES = []; end
                 nstar0=min(nstar,number_of_plots_to_draw-(nbplt-1)*nstar);
+                if gend==1
+                    marker_string{1,1}='-ro';
+                    marker_string{2,1}='-ko';
+                else
+                    marker_string{1,1}='-r';
+                    marker_string{2,1}='-k';
+                end
                 for i=1:nstar0
                     k = (plt-1)*nstar+i;
                     subplot(nr,nc,i);
-                    plot([1 gend],[0 0],'-r','linewidth',.5)
+                    plot([1 gend],[0 0],marker_string{1,1},'linewidth',.5)
                     hold on
-                    plot(1:gend,measurement_error(index(k),:),'-k','linewidth',1)
+                    plot(1:gend,measurement_error(index(k),:),marker_string{2,1},'linewidth',1)
                     hold off
                     name = deblank(options_.varobs(index(k),:));
-                    xlim([1 gend])
+                    if gend>1
+                        xlim([1 gend])
+                    end
                     if isempty(NAMES)
                         NAMES = name;
                     else
@@ -824,7 +828,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                     end
                     title(name,'Interpreter','none')
                 end
-                dyn_saveas(hh,[M_.fname '_SmoothedObservationErrors' int2str(plt)],options_);
+                dyn_saveas(fh,[M_.fname '_SmoothedObservationErrors' int2str(plt)],options_);
                 if options_.TeX
                     fprintf(fidTeX,'\\begin{figure}[H]\n');
                     for jj = 1:nstar0
@@ -857,16 +861,23 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
         fprintf(fidTeX,' \n');
     end
     for plt = 1:nbplt,
-        hh = dyn_figure(options_,'Name','Historical and smoothed variables');
+        fh = dyn_figure(options_,'Name','Historical and smoothed variables');
         NAMES = [];
         if options_.TeX, TeXNAMES = []; end
         nstar0=min(nstar,n_varobs-(plt-1)*nstar);
+        if gend==1
+           marker_string{1,1}='-ro';
+           marker_string{2,1}='--ko';
+        else
+           marker_string{1,1}='-r';
+           marker_string{2,1}='--k';
+        end
         for i=1:nstar0,
             k = (plt-1)*nstar+i;
             subplot(nr,nc,i);
-            plot(1:gend,yf(k,:),'-r','linewidth',1)
+            plot(1:gend,yf(k,:),marker_string{1,1},'linewidth',1)
             hold on
-            plot(1:gend,rawdata(:,k),'--k','linewidth',1)
+            plot(1:gend,rawdata(:,k),marker_string{2,1},'linewidth',1)
             hold off
             name = deblank(options_.varobs(k,:));
             if isempty(NAMES)
@@ -878,7 +889,9 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
                 set(gca,'XTick',options_.XTick)
                 set(gca,'XTickLabel',options_.XTickLabel)
             end
-            xlim([1 gend])
+            if gend>1
+                xlim([1 gend])
+            end
             if options_.TeX
                 idx = strmatch(options_.varobs(k,:),M_.endo_names,'exact');
                 texname = M_.endo_names_tex(idx,:);
@@ -890,7 +903,7 @@ if (~((any(bayestopt_.pshape > 0) && options_.mh_replic) || (any(bayestopt_.psha
             end
             title(name,'Interpreter','none')
         end
-        dyn_saveas(hh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(plt)],options_);
+        dyn_saveas(fh,[M_.fname '_HistoricalAndSmoothedVariables' int2str(plt)],options_);
         if options_.TeX
             fprintf(fidTeX,'\\begin{figure}[H]\n');
             for jj = 1:nstar0,

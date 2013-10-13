@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function B = isempty(A)
+function B = isempty(A) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{B} =} isempty (@var{A})

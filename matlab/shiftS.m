@@ -1,4 +1,4 @@
-function S = shiftS(S)
+function S = shiftS(S,n)
 %function S = shiftS(S)
 %
 % Removes the first element of a one dimensional cell array.
@@ -20,9 +20,18 @@ function S = shiftS(S)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
+if nargin<2
+    n = 1;
+end
+    
 if length(S) > 1
     S = S(2:end);
+    n = n-1;
 else
     S = {};
+    n = 0;
 end
+
+if n
+    S = shiftS(S,n);
 end

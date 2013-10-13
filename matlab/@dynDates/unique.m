@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function dd = unique(dd)
+function dd = unique(dd) % --*-- Unitary tests --*--
+
 % unique method for dynDates class.
 
 %@info:
@@ -47,7 +47,7 @@ function dd = unique(dd)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 if ~isa(dd,'dynDates')
-    error(['dynDates::unique: Input argument ' inputname(dd) ' has to be a dynDates object.'])
+    error(['dynDates::unique: Input argument ' inputname(1) ' has to be a dynDates object.'])
 end
 
 if dd.ndat==1
@@ -67,7 +67,7 @@ dd.ndat = size(dd.time,1);
 %$ B5 = '1950Q2'; 
 %$
 %$ % Define expected results.
-%$ e.time = [1953 4; 1950 1; 1945 3; 1950 2];
+%$ e.time = [1953 4; 1950 2; 1950 1; 1945 3];
 %$ e.freq = 4;
 %$ e.ndat = 4;
 %$

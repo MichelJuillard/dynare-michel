@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function c = minus(a,b)
+function c = minus(a,b) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{c} =} minus (@var{a},@var{b})

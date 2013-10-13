@@ -589,7 +589,7 @@ else
         nsx(j)=length(find(SP(:,j)));
     end
     
-    skipline(2
+    skipline(2)
     disp('Sensitivity table (significance and direction):')
     vav=char(zeros(1, size(param_names,2)+3 ));
     ibl = 12-size(vvarvecm,2);

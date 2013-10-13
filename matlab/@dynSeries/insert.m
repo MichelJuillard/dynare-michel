@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function ts = insert(ts,us,id)
+function ts = insert(ts,us,id) % --*-- Unitary tests --*--
+
 % Add a variable in a dynSeries object.
 
 %@info:

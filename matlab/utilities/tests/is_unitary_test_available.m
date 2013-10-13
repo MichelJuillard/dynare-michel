@@ -44,9 +44,8 @@ info = 0;
 
 fid = fopen(fun,'r');
 first_line = fgetl(fid);
+fclose(fid);
 
-if strcmp(first_line,'% --*-- Unitary tests --*--')
+if strfind(first_line,'% --*-- Unitary tests --*--')
     info = 1;
 end
-
-fclose(fid);

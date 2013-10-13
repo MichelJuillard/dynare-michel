@@ -112,8 +112,10 @@ for i=1:nn
                 fprintf(['Output argument n°' int2str(j) ' didn''t give the expected result.\n']);
             end
         end
-        info(i,4) = {tmp};
-        info(i,5) = {NaN};
+        if nargout>1
+            info(i,4) = {tmp};
+            info(i,5) = {NaN};
+        end
         check = 0;
     else
         if nargout>1

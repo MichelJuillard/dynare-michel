@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function us = ygrowth(ts)
+function us = ygrowth(ts) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{us} =} ygrowth (@var{ts})

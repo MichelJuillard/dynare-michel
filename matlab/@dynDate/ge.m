@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function c = ge(a,b)
+function c = ge(a,b) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{c} =} ge (@var{a},@var{b})

@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function save(A,basename,format)
+function save(A,basename,format) % --*-- Unitary tests --*--
+
 % Saves a dynSeries object on disk.
 
 % Copyright (C) 2013 Dynare Team

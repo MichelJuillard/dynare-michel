@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function A = uminus(B)
+function A = uminus(B) % --*-- Unitary tests --*--
+
 %@info:
 %! @deftypefn {Function File} {@var{A} =} plus (@var{B},@var{C})
 %! @anchor{@dynSeries/uminus}

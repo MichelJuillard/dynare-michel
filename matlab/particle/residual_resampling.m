@@ -59,7 +59,7 @@ switch length(noise)
   case number_of_particles
     kitagawa_resampling = 0;
   otherwise
-    error(['particle::resampling: Unknown method! The size of the second argument (' inputname(noise) ') is wrong.'])
+    error(['particle::resampling: Unknown method! The size of the second argument (' inputname(3) ') is wrong.'])
 end
 
 % Set vectors of indices.

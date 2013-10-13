@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function c = ne(a,b)
+function c = ne(a,b) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{c} =} ne (@var{a},@var{b})

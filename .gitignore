@@ -27,6 +27,9 @@ install-sh
 /missing
 /mex/build/matlab/missing
 /mex/build/octave/missing
+/compile
+/mex/build/matlab/compile
+/mex/build/octave/compile
 ylwrap
 ar-lib
 
@@ -49,6 +52,8 @@ ar-lib
 *.lof
 /doc/dynare.html
 /doc/dynare.info
+/doc/dynare.info-1
+/doc/dynare.info-2
 /doc/dynare.cp
 /doc/dynare.fn
 /doc/dynare.fns

@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function A = minus(B,C)
+function A = minus(B,C) % --*-- Unitary tests --*--
+
 %@info:
 %! @deftypefn {Function File} {@var{A} =} minus (@var{B},@var{C})
 %! @anchor{@dynSeries/minus}

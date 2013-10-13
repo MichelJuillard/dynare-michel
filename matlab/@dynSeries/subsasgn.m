@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function A = subsasgn(A,S,B)
+function A = subsasgn(A,S,B) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{A} =} subsasgn (@var{A}, @var{S}, @var{B})

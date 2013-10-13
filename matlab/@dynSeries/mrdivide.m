@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function A = mrdivide(B,C)
+function A = mrdivide(B,C) % --*-- Unitary tests --*--
+
 %@info:
 %! @deftypefn {Function File} {@var{A} =} mrdivide (@var{B},@var{C})
 %! @anchor{@dynSeries/mrdivide}

@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function dd = pop(dd,a)
+function dd = pop(dd,a) % --*-- Unitary tests --*--
+
 % pop method for dynDates class (removes a date)).
 
 %@info:
@@ -51,7 +51,7 @@ function dd = pop(dd,a)
 % AUTHOR(S) stephane DOT adjemian AT univ DASH lemans DOT fr
 
 if ~isa(dd,'dynDates')
-    error(['dynDates::pop: Input argument ' inputname(dd) ' has to be a dynDates object.'])
+    error(['dynDates::pop: Input argument ' inputname(1) ' has to be a dynDates object.'])
 end
 
 if nargin<2
@@ -62,7 +62,7 @@ if nargin<2
 end
 
 if nargin>1 && ~(isa(a,'dynDate') || ischar(a))
-    error(['dynDates::pop: Input argument ' inputname(a) ' has to be a dynDate object or a string (formatted date).'])
+    error(['dynDates::pop: Input argument ' inputname(2) ' has to be a dynDate object or a string (formatted date).'])
 end
 
 if ~isa(a,'dynDate')

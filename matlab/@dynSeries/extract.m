@@ -1,5 +1,5 @@
-% --*-- Unitary tests --*--
-function A = extract(B,varargin)
+function A = extract(B,varargin) % --*-- Unitary tests --*--
+
 % Extract some variables from a database.
     
 % Copyright (C) 2012-2013 Dynare Team

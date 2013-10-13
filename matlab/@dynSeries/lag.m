@@ -1,5 +1,4 @@
-% --*-- Unitary tests --*--
-function us = lag(ts,p)
+function us = lag(ts,p) % --*-- Unitary tests --*--
 
 %@info:
 %! @deftypefn {Function File} {@var{us} =} lag (@var{ts})
@@ -45,6 +44,10 @@ if nargin<2
     p = 1;
 end
 
+if p<=0
+    error('dynSeries::lag: Second input argument must be strictly positive! Use lead method instead.')
+end
+
 % Copy of ts dynSeries object
 us = ts;
 
@@ -79,4 +82,4 @@ end
 %$ end
 %$
 %$ T = all(t);
-%@eof:1b
+%@eof:1
