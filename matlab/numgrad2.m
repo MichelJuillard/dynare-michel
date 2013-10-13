@@ -5,7 +5,7 @@ function [g, badg] = numgrad2(fcn,f0,x,epsilon,varargin)
 % http://sims.princeton.edu/yftp/optimize/mfiles/numgrad.m
 
 % Copyright (C) 1993-2007 Christopher Sims
-% Copyright (C) 2008-2012 Dynare Team
+% Copyright (C) 2008-2013 Dynare Team
 %
 % This file is part of Dynare.
 %
@@ -22,40 +22,30 @@ function [g, badg] = numgrad2(fcn,f0,x,epsilon,varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-fh = NaN;
+right_derivative = 1;
 
-delta = epsilon;
-n=length(x);
-tvec=delta*eye(n);
-g=zeros(n,1);
+h = epsilon;
+n = length(x);
+g = zeros(n,1);
 
-badg=0;
-goog=1;
-scale=1;
-g0 = 0;
+badg = 0;
+
 for i=1:n
-    if size(x,1)>size(x,2)
-        tvecv=tvec(i,:);
+    xiold = x(i);
+    if right_derivative
+        x(i) = x(i)+h;
+        fh = feval(fcn, x, varargin{:});
+        g0 = (fh-f0)/h;
     else
-        tvecv=tvec(:,i);
+        x(i) = x(i)-h;
+        fh = feval(fcn, x, varargin{:});
+        g0 = (f0-fh)/h;
     end
-    [fh,junk1,junk2,cost_flag] = feval(fcn, x+scale*transpose(tvecv), varargin{:});
-    if cost_flag
-        g0 = (fh - f0) / (scale*delta);
-    else
-        [fh,junk1,junk2,cost_flag] = feval(fcn, x-scale*transpose(tvecv), varargin{:});
-        if cost_flag
-            g0 = (f0-fh) / (scale*delta);
-        else
-            goog = 0;
-        end
-    end
-    if goog && abs(g0)< 1e15
+    if abs(g0)< 1e15
         g(i) = g0;
     else
-        disp('bad gradient ------------------------')
-        % fprintf('Gradient w.r.t. %3d: %10g\n',i,g0)
         g(i) = 0;
         badg = 1;
     end
+    x(i) = xiold;
 end

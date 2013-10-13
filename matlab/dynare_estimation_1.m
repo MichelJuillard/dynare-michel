@@ -214,8 +214,7 @@ if isequal(options_.mode_compute,0) && isempty(options_.mode_file) && options_.m
     return
 end
 
-
-%% Estimation of the posterior mode or likelihood mode
+% Estimation of the posterior mode or likelihood mode
 if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
     switch options_.mode_compute
       case 1
@@ -224,17 +223,16 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         elseif ~user_has_matlab_license('optimization_toolbox')
             error('Option mode_compute=1 requires the Optimization Toolbox')
         end
-
-        optim_options = optimset('display','iter','LargeScale','off', ...
-                                 'MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
+        % Set default optimization options for fmincon.
+        optim_options = optimset('display','iter', 'LargeScale','off', 'MaxFunEvals',100000, 'TolFun',1e-8, 'TolX',1e-6);
         if isfield(options_,'optim_opt')
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
         end
         if options_.analytic_derivation,
             optim_options = optimset(optim_options,'GradObj','on','TolX',1e-7);
         end
-            [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
-                fmincon(objective_function,xparam1,[],[],[],[],lb,ub,[],optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        [xparam1,fval,exitflag,output,lamdba,grad,hessian_fmincon] = ...
+            fmincon(objective_function,xparam1,[],[],[],[],lb,ub,[],optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 2
         error('ESTIMATION: mode_compute=2 option (Lester Ingber''s Adaptive Simulated Annealing) is no longer available')
       case 3
@@ -243,7 +241,7 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         elseif ~exist('OCTAVE_VERSION') && ~user_has_matlab_license('optimization_toolbox')
             error('Option mode_compute=3 requires the Optimization Toolbox')
         end
-
+        % Set default optimization options for fminunc.
         optim_options = optimset('display','iter','MaxFunEvals',100000,'TolFun',1e-8,'TolX',1e-6);
         if isfield(options_,'optim_opt')
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
@@ -258,21 +256,48 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
             func = @(x) objective_function(x, dataset_,options_,M_,estim_params_,bayestopt_,oo_);
             [xparam1,fval,exitflag] = fminunc(func,xparam1,optim_options);
         end
-
       case 4
+        % Set default options.
         H0 = 1e-4*eye(nx);
         crit = 1e-7;
         nit = 1000;
         verbose = 2;
-        if options_.analytic_derivation,
+        numgrad = options_.gradient_method;
+        epsilon = options_.gradient_epsilon;
+        % Change some options.
+        if isfield(options_,'optim_opt')
+            options_list = strsplit(options_.optim_opt,',');
+            number_of_options = length(options_list)/2;
+            o = 1;
+            while o<=number_of_options
+                switch strtrim(options_list{2*(o-1)+1})
+                  case '''MaxIter'''
+                    nit = str2num(options_list{2*(o-1)+2});
+                  case '''InitialInverseHessian'''
+                    H0 = eval(eval(options_list{2*(o-1)+2}));
+                  case '''TolFun'''
+                    crit = str2double(options_list{2*(o-1)+2});
+                  case '''NumgradAlgorithm'''
+                    numgrad = str2num(options_list{2*(o-1)+2});
+                  case '''NumgradEpsilon'''
+                    epsilon = str2double(options_list{2*(o-1)+2});
+                  otherwise
+                    warning(['csminwel: Unknown option (' options_list{2*(o-1)+1}  ')!'])
+                end
+                o = o + 1;
+            end
+        end
+        % Set flag for analytical gradient.
+        if options_.analytic_derivation
             analytic_grad=1;
         else
             analytic_grad=[];
         end
-
-            [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
-                csminwel1(objective_function,xparam1,H0,analytic_grad,crit,nit,options_.gradient_method,options_.gradient_epsilon,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
-            disp(sprintf('Objective function at mode: %f',fval))
+        % Call csminwell.
+        [fval,xparam1,grad,hessian_csminwel,itct,fcount,retcodehat] = ...
+            csminwel1(objective_function, xparam1, H0, analytic_grad, crit, nit, numgrad, epsilon, dataset_, options_, M_, estim_params_, bayestopt_, oo_);
+        % Disp value at the mode.
+        disp(sprintf('Objective function at mode: %f',fval))
       case 5
         if isfield(options_,'hess')
             flag = options_.hess;
@@ -305,41 +330,85 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         parameter_names = bayestopt_.name;
         save([M_.fname '_mode.mat'],'xparam1','hh','gg','fval','invhess','parameter_names');
       case 6
+        % Set default options
+        gmhmaxlikOptions = options_.gmhmaxlik;
+        if ~isempty(hh);
+            gmhmaxlikOptions.varinit = 'previous';
+        else
+            gmhmaxlikOptions.varinit = 'prior';
+        end
+        if isfield(options_,'optim_opt')
+            options_list = strsplit(options_.optim_opt,',');
+            number_of_options = length(options_list)/2;
+            o = 1;
+            while o<=number_of_options
+                switch strtrim(options_list{2*(o-1)+1})
+                  case '''NumberOfMh'''
+                    gmhmaxlikOptions.iterations = str2num(options_list{2*(o-1)+2});
+                  case '''ncov-mh'''
+                    gmhmaxlikOptions.number = str2num(options_list{2*(o-1)+2});
+                  case '''nscale'''
+                    gmhmaxlikOptions.nscale = str2double(options_list{2*(o-1)+2});
+                  case '''nclimb'''
+                    gmhmaxlikOptions.nclimb = str2num(options_list{2*(o-1)+2});
+                  case '''InitialCovarianceMatrix'''
+                    switch eval(options_list{2*(o-1)+2})
+                      case 'previous'
+                        if isempty(hh)
+                            error('gmhmaxlik: No previous estimate of the Hessian matrix available!')
+                        else
+                            gmhmaxlikOptions.varinit = 'previous'
+                        end
+                      case {'prior', 'identity'}
+                        gmhmaxlikOptions.varinit = eval(options_list{2*(o-1)+2});
+                      otherwise
+                        error('gmhmaxlik: Unknown value for option ''InitialCovarianceMatrix''!')
+                    end
+                  case '''AcceptanceRateTarget'''
+                    gmhmaxlikOptions.target = str2num(options_list{2*(o-1)+2});
+                    if gmhmaxlikOptions.target>1 || gmhmaxlikOptions.target<eps
+                        error('gmhmaxlik: The value of option AcceptanceRateTarget should be a double between 0 and 1!')
+                    end
+                  otherwise
+                    Warning(['gmhmaxlik: Unknown option (' options_list{2*(o-1)+1}  ')!'])
+                end
+                o = o + 1;
+            end
+        end        
+        % Evaluate the objective function.
         fval = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         OldMode = fval;
         if ~exist('MeanPar','var')
             MeanPar = xparam1;
         end
-        if ~isempty(hh)
+        switch gmhmaxlikOptions.varinit
+          case 'previous'
             CovJump = inv(hh);
-        else% The covariance matrix is initialized with the prior
+          case 'prior'
+            % The covariance matrix is initialized with the prior
             % covariance (a diagonal matrix) %%Except for infinite variances ;-)
-            varinit = 'prior';
-            if strcmpi(varinit,'prior')
-                stdev = bayestopt_.p2;
-                indx = find(isinf(stdev));
-                stdev(indx) = ones(length(indx),1)*sqrt(10);
-                vars = stdev.^2;
-                CovJump = diag(vars);
-            elseif strcmpi(varinit,'eye')
-                vars = ones(length(bayestopt_.p2),1)*0.1;
-                CovJump = diag(vars);
-            else
-                disp('gmhmaxlik :: Error!')
-                return
-            end
+            stdev = bayestopt_.p2;
+            indx = find(isinf(stdev));
+            stdev(indx) = ones(length(indx),1)*sqrt(10);
+            vars = stdev.^2;
+            CovJump = diag(vars);
+          case 'identity'
+            vars = ones(length(bayestopt_.p2),1)*0.1;
+            CovJump = diag(vars);
+          otherwise
+            error('gmhmaxlik: This is a bug! Please contact the developers.')
         end
         OldPostVar = CovJump;
         Scale = options_.mh_jscale;
-        for i=1:options_.gmhmaxlik.iterations
+        for i=1:gmhmaxlikOptions.iterations
             if i == 1
-                if options_.gmhmaxlik.iterations>1
+                if gmhmaxlikOptions.iterations>1
                     flag = '';
                 else
                     flag = 'LastCall';
                 end
                 [xparam1,PostVar,Scale,PostMean] = ...
-                    gmhmaxlik(objective_function,xparam1,[lb ub],options_.gmhmaxlik,Scale,flag,MeanPar,CovJump,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+                    gmhmaxlik(objective_function,xparam1,[lb ub],gmhmaxlikOptions,Scale,flag,MeanPar,CovJump,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 fval = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 options_.mh_jscale = Scale;
                 mouvement = max(max(abs(PostVar-OldPostVar)));
@@ -352,14 +421,14 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                 OldMode = fval;
             else
                 OldPostVar = PostVar;
-                if i<options_.gmhmaxlik.iterations
+                if i<gmhmaxlikOptions.iterations
                     flag = '';
                 else
                     flag = 'LastCall';
                 end
                 [xparam1,PostVar,Scale,PostMean] = ...
                     gmhmaxlik(objective_function,xparam1,[lb ub],...
-                              options_.gmhmaxlik,Scale,flag,PostMean,PostVar,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+                              gmhmaxlikOptions,Scale,flag,PostMean,PostVar,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 fval = feval(objective_function,xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
                 options_.mh_jscale = Scale;
                 mouvement = max(max(abs(PostVar-OldPostVar)));
@@ -373,7 +442,8 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
                 OldMode = fval;
             end
             hh = inv(PostVar);
-            save([M_.fname '_mode.mat'],'xparam1','hh');
+            parameter_names = bayestopt_.name;
+            save([M_.fname '_mode.mat'],'xparam1','hh','parameter_names');
             save([M_.fname '_optimal_mh_scale_parameter.mat'],'Scale');
             bayestopt_.jscale = ones(length(xparam1),1)*Scale;
         end
@@ -391,7 +461,6 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         elseif ~exist('OCTAVE_VERSION') && ~user_has_matlab_license('optimization_toolbox')
             error('Option mode_compute=7 requires the Optimization Toolbox')
         end
-
         optim_options = optimset('display','iter','MaxFunEvals',1000000,'MaxIter',6000,'TolFun',1e-8,'TolX',1e-6);
         if isfield(options_,'optim_opt')
             eval(['optim_options = optimset(optim_options,' options_.optim_opt ');']);
@@ -399,15 +468,95 @@ if ~isequal(options_.mode_compute,0) && ~options_.mh_posterior_mode_estimation
         [xparam1,fval,exitflag] = fminsearch(objective_function,xparam1,optim_options,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 8
         % Dynare implementation of the simplex algorithm.
-        [xparam1,fval,exitflag] = simplex_optimization_routine(objective_function,xparam1,options_.simplex,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        simplexOptions = options_.simplex;
+        if isfield(options_,'optim_opt')
+            options_list = strsplit(options_.optim_opt,',');
+            number_of_options = length(options_list)/2;
+            o = 1;
+            while o<=number_of_options
+                switch strtrim(options_list{2*(o-1)+1})
+                  case '''MaxIter'''
+                    simplexOptions.maxiter = str2num(options_list{2*(o-1)+2});
+                  case '''TolFun'''
+                    simplexOptions.tolerance.f = str2double(options_list{2*(o-1)+2});
+                  case '''TolX'''
+                    simplexOptions.tolerance.x = str2double(options_list{2*(o-1)+2});
+                  case '''MaxFunEvals'''
+                    simplexOptions.maxfcall = str2num(options_list{2*(o-1)+2});
+                  case '''MaxFunEvalFactor'''
+                    simplexOptions.maxfcallfactor = str2num(options_list{2*(o-1)+2});
+                  case '''InitialSimplexSize'''
+                    simplexOptions.delta_factor = str2double(options_list{2*(o-1)+2});
+                  otherwise
+                    warning(['simplex: Unknown option (' options_list{2*(o-1)+1}  ')!'])
+                end
+                o = o + 1;
+            end
+        end
+        [xparam1,fval,exitflag] = simplex_optimization_routine(objective_function,xparam1,simplexOptions,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
       case 9
+        % Set defaults
         H0 = 1e-4*ones(nx,1);
+        cmaesOptions = options_.cmaes;
+        % Modify defaults
+        if isfield(options_,'optim_opt')
+            options_list = strsplit(options_.optim_opt,',');
+            number_of_options = length(options_list)/2;
+            o = 1;
+            while o<=number_of_options
+                switch strtrim(options_list{2*(o-1)+1})
+                  case '''MaxIter'''
+                    cmaesOptions.MaxIter = str2num(options_list{2*(o-1)+2});
+                  case '''TolFun'''
+                    cmaesOptions.TolFun = str2double(options_list{2*(o-1)+2});
+                  case '''TolX'''
+                    cmaesOptions.TolX = str2double(options_list{2*(o-1)+2});
+                  case '''MaxFunEvals'''
+                    cmaesOptions.MaxFunEvals = str2num(options_list{2*(o-1)+2});
+                  otherwise
+                    warning(['cmaes: Unknown option (' options_list{2*(o-1)+1}  ')!'])
+                end
+                o = o + 1;
+            end
+        end
         warning('off','CMAES:NonfinitenessRange');
         warning('off','CMAES:InitialSigma');
-        [x, fval, COUNTEVAL, STOPFLAG, OUT, BESTEVER] = cmaes(func2str(objective_function),xparam1,H0,options_.cmaes,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+        [x, fval, COUNTEVAL, STOPFLAG, OUT, BESTEVER] = cmaes(func2str(objective_function),xparam1,H0,cmaesOptions,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
         xparam1=BESTEVER.x;
         disp(sprintf('\n Objective function at mode: %f',fval))
-      case 10 
+      case 10
+        simpsaOptions = options_.simpsa;
+        if isfield(options_,'optim_opt')
+            options_list = strsplit(options_.optim_opt,',');
+            number_of_options = length(options_list)/2;
+            o = 1;
+            while o<=number_of_options
+                switch strtrim(options_list{2*(o-1)+1})
+                  case '''MaxIter'''
+                    simpsaOptions.MAX_ITER_TOTAL = str2num(options_list{2*(o-1)+2});
+                  case '''TolFun'''
+                    simpsaOptions.TOLFUN = str2double(options_list{2*(o-1)+2});
+                  case '''TolX'''
+                    tolx = str2double(options_list{2*(o-1)+2});
+                    if tolx<0
+                        simpsaOptions = rmfield(simpsaOptions,'TOLX'); % Let cmaes choose the default.
+                    else
+                        simpsaOptions.TOLX = tolx;
+                    end
+                  case '''EndTemparature'''
+                    simpsaOptions.TEMP_END = str2double(options_list{2*(o-1)+2});
+                  case '''MaxFunEvals'''
+                    simpsaOptions.MAX_FUN_EVALS = str2num(options_list{2*(o-1)+2});
+                  otherwise
+                    warning(['simpsa: Unknown option (' options_list{2*(o-1)+1}  ')!'])
+                end
+                o = o + 1;
+            end
+        end
+        simpsaOptionsList = options2cell(simpsaOptions);
+        simpsaOptions = simpsaset(simpsaOptionsList{:});
+        [xparam1, fval, exitflag] = simpsa(func2str(objective_function),xparam1,lb,ub,simpsaOptions,dataset_,options_,M_,estim_params_,bayestopt_,oo_);
+      case 11 
          options_.cova_compute = 0 ;
          [xparam1,stdh,lb_95,ub_95,med_param] = online_auxiliary_filter(xparam1,dataset_,options_,M_,estim_params_,bayestopt_,oo_) ;
       case 101
@@ -502,7 +651,7 @@ if ~options_.mh_posterior_mode_estimation && options_.cova_compute
         params_at_bound=find(xparam1==ub | xparam1==lb);
         if ~isempty(params_at_bound)
             for ii=1:length(params_at_bound)
-            params_at_bound_name{ii,1}=get_the_name(ii,0,M_,estim_params_,options_);
+            params_at_bound_name{ii,1}=get_the_name(params_at_bound(ii),0,M_,estim_params_,options_);
             end
             disp_string=[params_at_bound_name{1,:}];
             for ii=2:size(params_at_bound_name,1)
@@ -611,8 +760,8 @@ if (any(bayestopt_.pshape  >0 ) && options_.mh_replic) || ...
         CutSample(M_, options_, estim_params_);
         return
     else
-        if ~options_.nodiagnostic && options_.mh_replic > 2000 && options_.mh_nblck > 1
-            McMCDiagnostics(options_, estim_params_, M_);
+        if ~options_.nodiagnostic && options_.mh_replic > 2000
+            oo_= McMCDiagnostics(options_, estim_params_, M_,oo_);
         end
         %% Here i discard first half of the draws:
         CutSample(M_, options_, estim_params_);

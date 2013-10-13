@@ -75,7 +75,7 @@ if ~isequal(B.vobs,C.vobs) && ~(isequal(B.vobs,1) || isequal(C.vobs,1))
 else
     if B.vobs>C.vobs
         idB = 1:B.vobs;
-        idC = ones(1:B.vobs);
+        idC = ones(1,B.vobs);
     elseif B.vobs<C.vobs
         idB = ones(1,C.vobs);
         idC = 1:C.vobs;
@@ -116,6 +116,7 @@ for i=1:A.vobs
     A.tex(i) = {['(' B.tex{idB(i)} '+' C.tex{idC(i)} ')']};
 end
 A.data = bsxfun(@plus,B.data,C.data);
+A.time = A.init:A.init+(A.nobs-1);
 
 %@test:1
 %$ % Define a datasets.

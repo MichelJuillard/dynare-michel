@@ -105,6 +105,7 @@ gmhmaxlik.iterations = 3;
 gmhmaxlik.number = 20000;
 gmhmaxlik.nclimb = 200000;
 gmhmaxlik.nscale = 200000;
+gmhmaxlik.target = 1/3; % Target for the acceptance rate.
 options_.gmhmaxlik = gmhmaxlik;
 
 % Request user input.
@@ -442,7 +443,12 @@ options_.homotopy_steps = 1;
 options_.homotopy_force_continue = 0;
 
 % Simplex optimization routine (variation on Nelder Mead algorithm).
-options_.simplex = [];
+simplex.tolerance.x = 1e-4;
+simplex.tolerance.f = 1e-4;
+simplex.maxiter = 5000;
+simplex.maxfcallfactor = 500;
+simplex.maxfcall = [];
+options_.simplex = simplex;
 
 % CMAES optimization routine.
 cmaes.SaveVariables='off';
@@ -451,8 +457,25 @@ cmaes.WarnOnEqualFunctionValues='no';
 cmaes.DispModulo='10';
 cmaes.LogModulo='0';
 cmaes.LogTime='0';
+cmaes.TolFun = 1e-7;
+cmaes.TolX = 1e-7;
 options_.cmaes = cmaes;
 
+% simpsa optimization routine.
+simpsa.TOLFUN = 1e-4;
+simpsa.TOLX = 1e-4;
+simpsa.TEMP_END = .1;
+simpsa.COOL_RATE = 10;
+simpsa.INITIAL_ACCEPTANCE_RATIO = .95;
+simpsa.MIN_COOLING_FACTOR = .9;
+simpsa.MAX_ITER_TEMP_FIRST = 50;
+simpsa.MAX_ITER_TEMP_LAST = 2000;
+simpsa.MAX_ITER_TEMP = 10;
+simpsa.MAX_ITER_TOTAL = 5000;
+simpsa.MAX_TIME = 2500;
+simpsa.MAX_FUN_EVALS = 20000;
+simpsa.DISPLAY = 'iter';
+options_.simpsa = simpsa;
 
 % prior analysis
 options_.prior_mc = 20000;
@@ -576,6 +599,10 @@ options_.osr.verbose=2;
 
 % use GPU
 options_.gpu = 0;
+
+%Geweke convergence diagnostics
+options_.convergence.geweke.taper_steps=[4 8 15];
+options_.convergence.geweke.geweke_interval=[0.2 0.5];
 
 % initialize persistent variables in priordens()
 priordens([],[],[],[],[],[],1);

@@ -28,41 +28,25 @@ function [g, badg, f0, f1, f2] = numgrad3(fcn,f0,x,epsilon,varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-f1 = NaN;
-f2 = NaN;
-
-delta = epsilon;
-n=length(x);
-tvec=delta*eye(n);
-g=zeros(n,1);
+h = epsilon;
+n = length(x);
+g = zeros(n,1);
+H = 2*h;
 
 badg=0;
-goog=1;
-scale=1;
+
 for i=1:n
-    if size(x,1)>size(x,2)
-        tvecv=tvec(i,:);
-    else
-        tvecv=tvec(:,i);
-    end
-    [f1,junk1,junk2,cost_flag1] = feval(fcn, x+scale*transpose(tvecv), varargin{:});
-    [f2,junk1,junk2,cost_flag2] = feval(fcn, x-scale*transpose(tvecv), varargin{:});
-    if cost_flag1 && cost_flag2
-        g0 = (f1 - f2) / (2*scale*delta);
-    else
-        if cost_flag1
-            g0 = (f1-f0) / (scale*delta);
-        elseif cost_flag2
-            g0 = (f0-f2) / (scale*delta);
-        else
-            goog=0;
-        end
-    end
-    if goog && abs(g0)< 1e15 
+    xiold = x(i);
+    x(i) = xiold+h; 
+    f1 = feval(fcn, x, varargin{:});
+    x(i) = xiold-h;
+    f2 = feval(fcn, x, varargin{:});
+    g0 = (f1-f2)/H;
+    if abs(g0)< 1e15 
         g(i)=g0;
     else
-        disp('bad gradient ------------------------')
         g(i)=0;
         badg=1;
     end
+    x(i) = xiold;
 end

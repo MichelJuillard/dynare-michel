@@ -55,13 +55,34 @@ fprintf(fid, '\\begin{tabular}{@{}l');
 
 for i=1:ndates
     if o.showVlines
-        fprintf(fid, '|');
-    end
-    fprintf(fid, 'r');
-    if ~isempty(o.vlineAfter)
-        if dates(i) == o.vlineAfter
-            fprintf(fid, '|');
+        fprintf(fid, 'r|');
+    else
+        fprintf(fid, 'r');
+        if o.vlineAfterEndOfPeriod
+            if dates(i).time(2) == dates(i).freq
+                fprintf(fid, '|');
+            end
         end
+        if ~isempty(o.vlineAfter)
+            if dates(i) == o.vlineAfter
+                if ~(o.vlineAfterEndOfPeriod && dates(i).time(2) == dates(i).freq)
+                    fprintf(fid, '|');
+                end
+            end
+        end
+    end
+end
+datedata = dates.time;
+years = unique(datedata(:, 1));
+if o.annualAverages
+    yrsForAvgs = years;
+else
+    yrsForAvgs = [];
+end
+for i=1:length(yrsForAvgs)
+    fprintf(fid, 'r');
+    if o.showVlines
+        fprintf(fid, '|');
     end
 end
 fprintf(fid, '@{}}%%\n');
@@ -72,10 +93,7 @@ end
 fprintf(fid, '\\toprule%%\n');
 
 % Column Headers
-datedata = dates.time;
-years = unique(datedata(:, 1));
 thdr = num2cell(years, size(years, 1));
-lind = nlhc;
 switch dates.freq
     case 1
         for i=1:size(thdr, 1)
@@ -94,7 +112,6 @@ switch dates.freq
                 end
             end
         end
-
         for i=1:size(thdr, 1)
             fprintf(fid, ' & \\multicolumn{%d}{c}{%d}', size(thdr{i,2}, 2), thdr{i,1});
         end
@@ -114,17 +131,17 @@ switch dates.freq
     otherwise
         error('@table.write: invalid dynSeries frequency');
 end
-fprintf(fid, '\\\\[-10pt]%%\n');
-for i=1:ndates
-    fprintf(fid, ' & \\hrulefill');
+for i=1:length(yrsForAvgs)
+    fprintf(fid, ' & %d', years(i));
 end
-fprintf(fid, '\\\\%%\n');
+fprintf(fid, '\\\\[-2pt]%%\n');
+fprintf(fid, '\\hline%%\n');
 fprintf(fid, '%%\n');
 
 % Write Table Data
 ne = o.seriesElements.numSeriesElements();
 for i=1:ne
-    o.seriesElements(i).write(fid, dates, o.precision);
+    o.seriesElements(i).write(fid, dates, o.precision, yrsForAvgs);
     if o.showHlines
         fprintf(fid, '\\hline\n');
     end

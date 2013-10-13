@@ -1,11 +1,11 @@
-function [g, badg, f0, f1, f2] = numgrad3_(fcn,f0,x,epsilon,scale,varargin)
+function [g, badg, f0, f1, f2] = numgrad3_(fcn,f0,x,epsilon,varargin)
 % Computes the gradient of the objective function fcn using a three points
 % formula if possible.
 %
 % Adapted from Sims' numgrad routine.
 %
 % See section 25.3.4 in Abramovitz and Stegun (1972, Tenth Printing, December) Handbook of Mathematical Functions.
-% http://www.math.sfu.ca/~cbm/aands/
+% http://www.math.sfu.ca/~cbm/aands/ 
 
 % Original file downloaded from:
 % http://sims.princeton.edu/yftp/optimize/mfiles/numgrad.m
@@ -28,45 +28,40 @@ function [g, badg, f0, f1, f2] = numgrad3_(fcn,f0,x,epsilon,scale,varargin)
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-f1 = NaN;
-f2 = NaN;
-
 delta = epsilon;
 n = length(x);
 g = zeros(n,1);
 
-badg=0;
-goog=1;
+badg = 0;
 
-zgrad = 1;
+scale = []; % one(n,1);
 
 for i=1:n
     xiold = x(i);
     h = step_length_correction(xiold,scale,i)*delta;
     x(i) = xiold + h;
     [f1,junk1,junk2,cost_flag1] = feval(fcn, x, varargin{:});
-    x(i) = xiold - h;
-    [f2,junk1,junk2,cost_flag2] = feval(fcn, x, varargin{:});
-    if cost_flag1 && cost_flag2
-        g0 = (f1 - f2) / (2*h);
-        if zgrad && f1>f0 && f2>f0 % Note that this condition is consistent with a minimization problem!
-            g0 = 0;
-        end
-    else
-        if cost_flag1
-            g0 = (f1-f0)/h;
-        elseif cost_flag2
-            g0 = (f0-f2)/h;
-        else
-            goog=0;
-        end
+    if ~cost_flag1
+        fprintf('Gradient w.r.t. parameter number %3d (x=%16.8f,+h=%16.8f,f0=%16.8f,f1=%16.8f,f2=%16.8f,g0=%16.8f): penalty on the right!\n',i,xiold,h,f0,f1,f2,(f1 - f2) / (2*h))
     end
-    if goog && abs(g0)< 1e15
-        g(i)=g0;
+    x(i) = xiold - h;
+    [f2,junk2,junk2,cost_flag2] = feval(fcn, x, varargin{:});
+    if ~cost_flag2
+        fprintf('Gradient w.r.t. parameter number %3d (x=%16.8f,+h=%16.8f,f0=%16.8f,f1=%16.8f,f2=%16.8f,g0=%16.8f): penalty on the left!\n',i,xiold,h,f0,f1,f2,(f1 - f2) / (2*h))
+    end
+    if f0<f1 && f0<f2
+        fprintf('Gradient w.r.t. parameter number %3d (x=%16.8f,h=%16.8f,f0=%16.8f,f1=%16.8f,f2=%16.8f,g0=%16.8f)\n',i,xiold,h,f0,f1,f2,(f1 - f2) / (2*h))
+        g0 = 0;
     else
-        disp('bad gradient ------------------------')
-        g(i)=0;
-        badg=1;
+        g0 = (f1 - f2) / (2*h);
+    end
+    if abs(g0)< 1e15 
+        g(i) = g0;
+    else
+        disp('Bad gradient -----------------------------------')
+        fprintf('Gradient w.r.t. parameter number %3d (x=%16.8f,h=%16.8f,g0=%16.8f)\n',i,xiold,h,g0)
+        g(i) = 0;
+        badg = 1;
     end
     x(i) = xiold;
 end

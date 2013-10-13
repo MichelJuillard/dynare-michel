@@ -81,12 +81,10 @@ if NumGrad
         [g,badg] = numgrad3(fcn, f0, x0, epsilon, varargin{:});
       case 5
         [g,badg] = numgrad5(fcn, f0, x0, epsilon, varargin{:});
-      case {12, 22}
-        [g,badg] = numgrad2_(fcn, f0, x0, epsilon, [], varargin{:});
-      case {13, 23}
-        [g,badg] = numgrad3_(fcn, f0, x0, epsilon, [], varargin{:});
-      case {15, 25}
-        [g,badg] = numgrad5_(fcn, f0, x0, epsilon, [], varargin{:});
+      case 13
+        [g,badg] = numgrad3_(fcn, f0, x0, epsilon, varargin{:});
+      case 15
+        [g,badg] = numgrad5_(fcn, f0, x0, epsilon, varargin{:});
       otherwise
         error('csminwel1: Unknown method for gradient evaluation!')
     end
@@ -141,18 +139,10 @@ while ~done
                     [g1 badg1] = numgrad3(fcn, f1, x1, epsilon, varargin{:});
                   case 5
                     [g1,badg1] = numgrad5(fcn, f1, x1, epsilon, varargin{:});
-                  case 12
-                    [g1,badg1] = numgrad2_(fcn, f1, x1, epsilon, [], varargin{:});
                   case 13
-                    [g1,badg1] = numgrad3_(fcn, f1, x1, epsilon, [], varargin{:});
+                    [g1,badg1] = numgrad3_(fcn, f1, x1, epsilon, varargin{:});
                   case 15
-                    [g1,badg1] = numgrad5_(fcn, f1, x1, epsilon, [], varargin{:});
-                  case 22
-                    [g1,badg1] = numgrad2_(fcn, f1, x1, epsilon, abs(diag(H)), varargin{:});
-                  case 23
-                    [g1,badg1] = numgrad3_(fcn, f1, x1, epsilon, abs(diag(H)), varargin{:});
-                  case 25
-                    [g1,badg1] = numgrad5_(fcn, f1, x1, epsilon, abs(diag(H)), varargin{:});
+                    [g1,badg1] = numgrad5_(fcn, f1, x1, epsilon, varargin{:});
                   otherwise
                     error('csminwel1: Unknown method for gradient evaluation!')
                 end
@@ -192,18 +182,10 @@ while ~done
                             [g2 badg2] = numgrad3(fcn, f2, x2, epsilon, varargin{:});
                           case 5
                             [g2,badg2] = numgrad5(fcn, f2, x2, epsilon, varargin{:});
-                          case 12
-                            [g2,badg2] = numgrad2_(fcn, f2, x2, epsilon, [], varargin{:});
                           case 13
-                            [g2,badg2] = numgrad3_(fcn, f2, x2, epsilon, [], varargin{:});
+                            [g2,badg2] = numgrad3_(fcn, f2, x2, epsilon, varargin{:});
                           case 15
-                            [g2,badg2] = numgrad5_(fcn, f2, x2, epsilon, [], varargin{:});
-                          case 22
-                            [g2,badg2] = numgrad2_(fcn, f2, x2, epsilon, abs(diag(H)), varargin{:});
-                          case 23
-                            [g2,badg2] = numgrad3_(fcn, f2, x2, epsilon, abs(diag(H)), varargin{:});
-                          case 25
-                            [g2,badg2] = numgrad5_(fcn, f2, x2, epsilon, abs(diag(H)), varargin{:});
+                            [g2,badg2] = numgrad5_(fcn, f2, x2, epsilon, varargin{:});
                           otherwise
                             error('csminwel1: Unknown method for gradient evaluation!')
                         end
@@ -244,18 +226,10 @@ while ~done
                                     [g3 badg3] = numgrad3(fcn, f3, x3, epsilon, varargin{:});
                                   case 5
                                     [g3,badg3] = numgrad5(fcn, f3, x3, epsilon, varargin{:});
-                                  case 12
-                                    [g3,badg3] = numgrad2_(fcn, f3, x3, epsilon, [], varargin{:});
                                   case 13
-                                    [g3,badg3] = numgrad3_(fcn, f3, x3, epsilon, [], varargin{:});
+                                    [g3,badg3] = numgrad3_(fcn, f3, x3, epsilon, varargin{:});
                                   case 15
-                                    [g3,badg3] = numgrad5_(fcn, f3, x3, epsilon, [], varargin{:});
-                                  case 22
-                                    [g3,badg3] = numgrad2_(fcn, f3, x3, epsilon, abs(diag(H)), varargin{:});
-                                  case 23
-                                    [g3,badg3] = numgrad3_(fcn, f3, x3, epsilon, abs(diag(H)), varargin{:});
-                                  case 25
-                                    [g3,badg3] = numgrad5_(fcn, f3, x3, epsilon, abs(diag(H)), varargin{:});
+                                    [g3,badg3] = numgrad5_(fcn, f3, x3, epsilon, varargin{:});
                                   otherwise
                                     error('csminwel1: Unknown method for gradient evaluation!')
                                 end
@@ -325,18 +299,10 @@ while ~done
                     [gh,badgh] = numgrad3(fcn, fh, xh, epsilon, varargin{:});
                   case 5
                     [gh,badgh] = numgrad5(fcn, fh, xh, epsilon, varargin{:});
-                  case 12
-                    [gh,badgh] = numgrad2_(fcn, fh, xh, epsilon, [], varargin{:});
                   case 13
-                    [gh,badgh] = numgrad3_(fcn, fh, xh, epsilon, [], varargin{:});
+                    [gh,badgh] = numgrad3_(fcn, fh, xh, epsilon, varargin{:});
                   case 15
-                    [gh,badgh] = numgrad5_(fcn, fh, xh, epsilon, [], varargin{:});
-                  case 22
-                    [gh,badgh] = numgrad2_(fcn, fh, xh, epsilon, abs(diag(H)), varargin{:});
-                  case 23
-                    [gh,badgh] = numgrad3_(fcn, fh, xh, epsilon, abs(diag(H)), varargin{:});
-                  case 25
-                    [gh,badgh] = numgrad5_(fcn, fh, xh, epsilon, abs(diag(H)), varargin{:});
+                    [gh,badgh] = numgrad5_(fcn, fh, xh, epsilon, varargin{:});
                   otherwise
                     error('csminwel1: Unknown method for gradient evaluation!')
                 end

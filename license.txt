@@ -40,12 +40,12 @@ License: public-domain
  pages 472-489
 
 Files: matlab/bfgsi1.m matlab/csolve.m matlab/csminit1.m matlab/numgrad2.m
- matlab/numgrad2_.m matlab/numgrad3.m matlab/numgrad3_.m matlab/numgrad5.m
+ matlab/numgrad3.m matlab/numgrad3_.m matlab/numgrad5.m
  matlab/numgrad5_.m matlab/csminwel1.m matlab/bvar_density.m
  matlab/bvar_toolbox.m matlab/partial_information/PI_gensys.m matlab/qzswitch.m
  matlab/qzdiv.m
 Copyright: 1993-2009 Christopher Sims
-           2006-2012 Dynare Team
+           2006-2013 Dynare Team
 License: GPL-3+
 
 Files: matlab/cmaes.m
@@ -55,6 +55,12 @@ License: GPL-3+
 
 Files: matlab/endogenous_prior.m
 Copyright: 2011 Lawrence J. Christiano, Mathias Trabandt and Karl Walentin
+           2013 Dynare Team
+License: GPL-3+
+
+Files: matlab/simpsa.m matlab/simpsaget.m matlab/simpsaset.m
+Copyright: 2005 Henning Schmidt, FCC, henning@fcc.chalmers.se
+           2006 Brecht Donckels, BIOMATH, brecht.donckels@ugent.be
            2013 Dynare Team
 License: GPL-3+
 

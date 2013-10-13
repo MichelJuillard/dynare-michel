@@ -1,11 +1,11 @@
-function [g, badg, f0, f1, f2, f3, f4] = numgrad5_(fcn,f0,x,epsilon,scale,varargin)
+function [g, badg, f0, f1, f2, f3, f4] = numgrad5(fcn,f0,x,epsilon,varargin)
 % Computes the gradient of the objective function fcn using a five points
 % formula if possible.
 %
 % Adapted from Sims' numgrad.m routine.
 %
 % See section 25.3.6 Abramovitz and Stegun (1972, Tenth Printing, December) Handbook of Mathematical Functions.
-% http://www.math.sfu.ca/~cbm/aands/
+% http://www.math.sfu.ca/~cbm/aands/ 
 %
 % TODO Try Four points formula when cost_flag3=0 or cost_flag4=0.
 
@@ -30,20 +30,12 @@ function [g, badg, f0, f1, f2, f3, f4] = numgrad5_(fcn,f0,x,epsilon,scale,vararg
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-f1 = NaN;
-f2 = NaN;
-f3 = NaN;
-f4 = NaN;
-
 delta = epsilon;
-n=length(x);
-tvec=delta*eye(n);
-g=zeros(n,1);
+n = length(x);
+g = zeros(n,1);
 
-badg=0;
-goog=1;
-
-zgrad = 1;
+badg = 0;
+scale = []; % ones(n,1);
 
 for i=1:n
     xiold = x(i);
@@ -52,40 +44,21 @@ for i=1:n
     [f1,junk1,junk2,cost_flag1] = feval(fcn, x, varargin{:});
     x(i) = xiold-h;
     [f2,junk1,junk2,cost_flag2] = feval(fcn, x, varargin{:});
-    if ~cost_flag1 || ~cost_flag2
-        cost_flag3 = 0;
-        cost_flag4 = 0;
-        disp('numgrad:: I cannot use the five points formula!!')
+    x(i) = xiold+2*h;
+    [f3,junk1,junk2,cost_flag3] = feval(fcn, x, varargin{:});
+    x(i) = xiold-2*h;
+    [f4,junk1,junk2,cost_flag4] = feval(fcn, x, varargin{:});
+    if f0<f1 && f1<f3 && f0<f2 && f2<f4
+        g0 = 0;
     else
-        x(i) = xiold+2*h;
-        [f3,junk1,junk2,cost_flag3] = feval(fcn, x, varargin{:});
-        x(i) = xiold-2*h;
-        [f4,junk1,junk2,cost_flag4] = feval(fcn, x, varargin{:});
-    end
-    if cost_flag1 && cost_flag2 && cost_flag3 && cost_flag4% Five Points formula
         g0 = (8*(f1 - f2)+ f4-f3) / (12*h);
-        if zgrad && f0<f1 && f0<f2 && f1<f3 && f2<f4 % Note that this condition is consistent with a minimization problem!
-            g0 = 0;
-        end
-    elseif ~cost_flag3 || ~cost_flag4
-        if cost_flag1 && cost_flag2% Three points formula
-            g0 = (f1-f2)/(2*h);
-        else
-            if cost_flag1% Two points formula
-                g0 = (f1-f0)/h;
-            elseif cost_flag2% Two points formula
-                g0 = (f0-f2)/h;
-            else% Bad gradient!
-                goog=0;
-            end
-        end
     end
-    if goog && abs(g0)< 1e15
-        g(i)=g0;
+    if abs(g0)< 1e15
+        g(i) = g0;
     else
-        disp('bad gradient ------------------------')
-        g(i)=0;
-        badg=1;
+        disp('Bad gradient -----------------------------------')
+        fprintf('Gradient w.r.t. parameter number %3d (x=%16.8f,h=%16.8f,g0=%16.8f)\n',i,xiold,h,g0)
+        g(i) = 0;
+        badg = 1;
     end
-    x(i) = xiold;
 end
