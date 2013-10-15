@@ -32,7 +32,7 @@ assert(ischar(newtex), 'dynSeries::tex_rename: the newtex name must be a string'
 if nargin == 2
     idname = 1;
 else
-    idname = strmatch(name, ts.name, 'exact');
+    idname = find(strcmp(name, ts.name));
     if isempty(idname)
         error(['dynSeries::tex_rename: Variable ' name ' is unknown in dynSeries object ' inputname(1)  '!'])
     end

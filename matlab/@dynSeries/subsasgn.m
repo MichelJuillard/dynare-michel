@@ -84,7 +84,7 @@ switch length(S)
               for i = 1:B.vobs
                   if ~isequal(S(1).subs{i},B.name{i})
                       % Rename a variable.
-                      id = strmatch(S(1).subs{i},A.name);
+                      id = find(strcmp(S(1).subs{i},A.name));
                       if isempty(id)
                           % Add a new variable a change its name.
                           B.name(i) = {S(1).subs{i}};
@@ -118,7 +118,7 @@ switch length(S)
               % Single variable selection.
               if ~isequal(S(1).subs,B.name{1})
                   % Rename a variable.
-                  id = strmatch(S(1).subs,A.name);
+                  id = find(strcmp(S(1).subs,A.name));
                   if isempty(id)
                       % Add a new variable a change its name.
                       B.name(1) = {S(1).subs};
