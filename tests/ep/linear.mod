@@ -26,7 +26,7 @@ end;
 
 steady;
 
-options_.maxit_ = 100;
+options_.simul.maxit = 100;
 options_.ep.verbosity = 0;
 options_.ep.stochastic.status = 0;
 options_.ep.order = 0;

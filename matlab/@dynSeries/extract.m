@@ -66,7 +66,7 @@ for i=1:nargin-1
             while ~isempty(expression)
                 [token, expression] = strtok(expression,',');             
                 candidate = [VariableName(1:idArobase(1)-1), token, VariableName(idArobase(2)+1:end)];
-                id = strmatch(candidate,B.name,'exact');
+                id = find(strcmp(candidate,B.name));
                 if isempty(id)
                     error(['dynSeries::extract: Variable ''' candidate ''' does not exist in dynSeries object ''' inputname(1) '''!'])
                 else
@@ -88,7 +88,7 @@ for i=1:nargin-1
                 while ~isempty(expression_2)
                     [token_2, expression_2] = strtok(expression_2,',');
                     candidate = [VariableName(1:idArobase(1)-1), token_1, VariableName(idArobase(2)+1:idArobase(3)-1),  token_2, VariableName(idArobase(4)+1:end)];
-                    id = strmatch(candidate,B.name,'exact');
+                    id = find(strcmp(candidate,B.name));
                     if isempty(id)
                         error(['dynSeries::extract: Variable ''' candidate ''' does not exist in dynSeries object ''' inputname(1) '''!'])
                     else
@@ -114,7 +114,7 @@ end
 % Get indices of the selected variables
 idVariableName = NaN(length(VariableName_),1);
 for i = 1:length(idVariableName)
-    idx = strmatch(VariableName_{i},B.name,'exact');
+    idx = find(strcmp(VariableName_{i},B.name));
     if isempty(idx)
         error(['dynSeries::extract: Variable ' VariableName_{i} ' is not a member of ' inputname(1) '!'])
     end

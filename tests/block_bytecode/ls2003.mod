@@ -63,7 +63,7 @@ var e_ys = 1.89;
 var e_pies = 1.89;
 end;
 
-options_.maxit_=100;
+options_.simul.maxit=100;
 steady(solve_algo = @{solve_algo});
 
 @#if block

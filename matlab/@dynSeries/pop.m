@@ -45,7 +45,7 @@ function [ts,id] = pop(ts,a) % --*-- Unitary tests --*--
 % You should have received a copy of the GNU General Public License
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
-id = strmatch(a,ts.name,'exact');
+id = find(strcmp(a,ts.name));
 if isempty(id)
     id = 0;
     return

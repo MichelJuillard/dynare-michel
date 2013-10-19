@@ -707,10 +707,25 @@ main(int nrhs, const char *prhs[])
     DYN_MEX_FUNC_ERR_MSG_TXT("verbosity is not a field of options_");
   if (verbose)
     print_it = true;
-  field = mxGetFieldNumber(options_, "maxit_");
-  if (field < 0)
-    DYN_MEX_FUNC_ERR_MSG_TXT("maxit_ is not a field of options_");
-  int maxit_ = int (floor(*(mxGetPr(mxGetFieldByNumber(options_, 0, field)))));
+  if (!steady_state)
+    field = mxGetFieldNumber(options_, "simul");
+  else
+    field = mxGetFieldNumber(options_, "steady");
+  mxArray *temporaryfield;
+  if (field >= 0)
+    temporaryfield = mxGetFieldByNumber(options_, 0, field);
+  else
+    if (!steady_state)
+      DYN_MEX_FUNC_ERR_MSG_TXT("simul is not a field of options_");
+    else
+      DYN_MEX_FUNC_ERR_MSG_TXT("steady is not a field of options_");
+  field = mxGetFieldNumber(temporaryfield, "maxit");
+  if (field<0)
+    if (!steady_state)
+      DYN_MEX_FUNC_ERR_MSG_TXT("maxit is not a field of options_.simul");
+    else
+      DYN_MEX_FUNC_ERR_MSG_TXT("maxit is not a field of options_.steady");
+  int maxit_ = int (floor(*(mxGetPr(mxGetFieldByNumber(temporaryfield, 0, field)))));
   field = mxGetFieldNumber(options_, "slowc");
   if (field < 0)
     DYN_MEX_FUNC_ERR_MSG_TXT("slows is not a field of options_");

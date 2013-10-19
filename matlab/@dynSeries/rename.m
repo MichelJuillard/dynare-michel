@@ -21,7 +21,7 @@ if ~ischar(old) || ~ischar(new)
     error(['dynSeries::rename: Input arguments ''' inputname(2) ''' and ''' inputname(3) '''  have to be strings!'])
 end
     
-idname = strmatch(old,ts.name,'exact');
+idname = find(strcmp(old,ts.name));
 
 if isempty(idname)
     error(['dynSeries::rename: Variable ' old ' is unknown in dynSeries object ' inputname(1)  '!'])

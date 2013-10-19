@@ -100,7 +100,7 @@ else
 end;
 
 eps = options_.solve_tolf;
-maxit = options_.solve_maxit;
+maxit = options_.simul.maxit;
 
 initial_conditions = oo_.steady_state;
 past_val = 0;

@@ -9,6 +9,7 @@
 #include "utils/cc/exception.h"
 
 #include <limits>
+#include <iostream>
 
 using namespace ogp;
 

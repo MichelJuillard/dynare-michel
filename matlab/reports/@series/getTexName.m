@@ -19,5 +19,5 @@ function s = getTexName(o)
 % along with Dynare.  If not, see <http://www.gnu.org/licenses/>.
 
 assert(~isempty(o.data) && size(o.data, 2) == 1);
-s = o.data(1).tex();
+s = o.data.tex;
 end

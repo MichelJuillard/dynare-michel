@@ -139,7 +139,7 @@ switch S(1).type
         B = feval(S(1).subs,A,S(2).subs{:});
         S = shiftS(S);
       otherwise                                                            % Extract a sub-object by selecting one variable.
-        ndx = strmatch(S(1).subs,A.name,'exact');
+        ndx = find(strcmp(S(1).subs,A.name));
         if ~isempty(ndx)
             B = dynSeries();
             B.data = A.data(:,ndx);

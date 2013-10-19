@@ -93,14 +93,14 @@ it_init = M_.maximum_lag+1;
 info.convergence = 1;
 info.time  = 0;
 info.error = 0;
-info.iterations.time  = zeros(options_.maxit_,1);
+info.iterations.time  = zeros(options_.simul.maxit,1);
 info.iterations.error = info.iterations.time;
 
-last_line = options_.maxit_;
+last_line = options_.simul.maxit;
 error_growth = 0;
 
 h1 = clock;
-for iter = 1:options_.maxit_
+for iter = 1:options_.simul.maxit
     h2 = clock;
     if options_.terminal_condition
         c = zeros(ny*(periods+1),nrc);

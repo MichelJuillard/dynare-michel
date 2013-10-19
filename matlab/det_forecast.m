@@ -98,7 +98,7 @@ else
 end;
 
 eps = options_.solve_tolf;
-maxit = options_.solve_maxit;
+maxit = options_.simul.maxit;
 
 % Check the solution using a unconditional forecast (soft tune)
 

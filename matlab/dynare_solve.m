@@ -122,7 +122,7 @@ if options_.solve_algo == 0
 elseif options_.solve_algo == 1
     [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag,1,options_.gstep, ...
                     tolf,options_.solve_tolx, ...
-                    options_.solve_maxit,options_.debug,varargin{:});
+                    options_.steady.maxit,options_.debug,varargin{:});
 elseif options_.solve_algo == 2 || options_.solve_algo == 4
     if ~jacobian_flag
         fjac = zeros(nn,nn) ;
@@ -150,7 +150,7 @@ elseif options_.solve_algo == 2 || options_.solve_algo == 4
         [x,info]=solve1(func,x,j1(r(i):r(i+1)-1),j2(r(i):r(i+1)-1),jacobian_flag, ...
                         bad_cond_flag, options_.gstep, ...
                         tolf,options_.solve_tolx, ...
-                        options_.solve_maxit,options_.debug,varargin{:});
+                        options_.steady.maxit,options_.debug,varargin{:});
         if info
             return
         end
@@ -159,7 +159,7 @@ elseif options_.solve_algo == 2 || options_.solve_algo == 4
     if max(abs(fvec)) > tolf
         [x,info]=solve1(func,x,1:nn,1:nn,jacobian_flag, bad_cond_flag, ...
                         options_.gstep, tolf,options_.solve_tolx, ...
-                        options_.solve_maxit,options_.debug,varargin{:});
+                        options_.steady.maxit,options_.debug,varargin{:});
     end
 elseif options_.solve_algo == 3
     if jacobian_flag

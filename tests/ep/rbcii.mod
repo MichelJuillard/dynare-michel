@@ -68,7 +68,7 @@ copyfile('rbcii_steady_state.m','rbcii_steadystate2.m');
 
     steady(nocheck);
 
-    options_.maxit_ = 100;
+    options_.simul.maxit = 100;
     options_.ep.verbosity = 0;
     options_.ep.stochastic.order = 0;
     options_.ep.stochastic.nodes = 2;
@@ -91,7 +91,7 @@ copyfile('rbcii_steady_state.m','rbcii_steadystate2.m');
 
     steady;//(nocheck);
 
-    options_.maxit_ = 100;
+    options_.simul.maxit = 100;
 
     simul(periods=4000);
 

@@ -426,7 +426,6 @@ string eofbuff;
 <DYNARE_STATEMENT>max_block_iterations {return token::MAX_BLOCK_ITERATIONS;}
 <DYNARE_STATEMENT>max_repeated_optimization_runs {return token::MAX_REPEATED_OPTIMIZATION_RUNS;}
 <DYNARE_STATEMENT>maxit {return token::MAXIT;}
-<DYNARE_STATEMENT>solve_maxit {return token::SOLVE_MAXIT;}
 <DYNARE_STATEMENT>function_convergence_criterion {return token::FUNCTION_CONVERGENCE_CRITERION;}
 <DYNARE_STATEMENT>parameter_convergence_criterion {return token::PARAMETER_CONVERGENCE_CRITERION;}
 <DYNARE_STATEMENT>number_of_large_perturbations {return token::NUMBER_OF_LARGE_PERTURBATIONS;}
@@ -692,7 +691,7 @@ string eofbuff;
   return token::INT_NUMBER;
 }
 
-<DYNARE_STATEMENT,DYNARE_BLOCK>-?[0-9]+[Mm]([1-9]|1[0-2])|-?[0-9]+[Qq][1-4]|-?[0-9]+[Ww]([1-9]{1}|[1-4][0-9]|5[0-2]) {
+<DYNARE_STATEMENT,DYNARE_BLOCK>-?[0-9]+([YyAa]|[Mm]([1-9]|1[0-2])|[Qq][1-4]|[Ww]([1-9]{1}|[1-4][0-9]|5[0-2])) {
   yylval->string_val = new string(yytext);
   return token::DATE_NUMBER;
 }

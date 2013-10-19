@@ -50,7 +50,7 @@ if isempty(initial_conditions)
 end
 
 % Set maximum number of iterations for the deterministic solver.
-options_.maxit_ = options_.ep.maxit;
+options_.simul.maxit = options_.ep.maxit;
 
 % Set the number of periods for the perfect foresight model
 periods = options_.ep.periods;

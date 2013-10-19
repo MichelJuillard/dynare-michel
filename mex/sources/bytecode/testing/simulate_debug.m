@@ -4,7 +4,7 @@ fid = fopen([M_.fname '_options.txt'],'wt');
 if steady_state~=1
   fprintf(fid,'%d\n',options_.periods);
 end;
-fprintf(fid,'%d\n',options_.maxit_);
+fprintf(fid,'%d\n',options_.simul.maxit);
 fprintf(fid,'%6.20f\n',options_.slowc);
 fprintf(fid,'%6.20f\n',options_.markowitz);
 fprintf(fid,'%6.20f\n',options_.dynatol.f);

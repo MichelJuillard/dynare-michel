@@ -66,7 +66,7 @@ pfm.i_cols_j = 1:pfm.nd;
 pfm.i_upd = pfm.ny+(1:pfm.periods*pfm.ny);
 pfm.dynamic_model = str2func([DynareModel.fname,'_dynamic']);
 pfm.verbose = DynareOptions.ep.verbosity;
-pfm.maxit_ = DynareOptions.maxit_;
+pfm.maxit_ = DynareOptions.simul.maxit;
 pfm.tolerance = DynareOptions.dynatol.f;
 
 if nargin>3 && DynareOptions.ep.stochastic.order

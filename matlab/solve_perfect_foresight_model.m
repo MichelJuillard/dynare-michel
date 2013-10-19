@@ -96,7 +96,7 @@ function [flag,endo_simul,err] = solve_perfect_foresight_model(endo_simul,exo_si
             fprintf('\n') ;
             disp(['     Total time of simulation        :' num2str(etime(clock,h1))]) ;
             fprintf('\n') ;
-            disp(['WARNING : maximum number of iterations is reached (modify options_.maxit_).']) ;
+            disp(['WARNING : maximum number of iterations is reached (modify options_.simul.maxit).']) ;
             fprintf('\n') ;
         end
         flag = 1;% more iterations are needed.

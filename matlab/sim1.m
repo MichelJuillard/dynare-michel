@@ -82,7 +82,7 @@ res = zeros(periods*ny,1);
 
     
 h1 = clock ;
-for iter = 1:options_.maxit_
+for iter = 1:options_.simul.maxit
     h2 = clock ;
     
     i_rows = 1:ny;
@@ -156,11 +156,11 @@ elseif ~stop
     skipline();
     fprintf('\nSimulation terminated after %d iterations.\n',iter);
     fprintf('Total time of simulation        : %10.3f\n',etime(clock,h1));
-    fprintf('WARNING : maximum number of iterations is reached (modify options_.maxit_).\n') ;
+    fprintf('WARNING : maximum number of iterations is reached (modify options_.simul.maxit).\n') ;
     oo_.deterministic_simulation.status = 0;% more iterations are needed.
     oo_.deterministic_simulation.error = err;
     %oo_.deterministic_simulation.errors = c/abs(err)    
-    oo_.deterministic_simulation.iterations = options_.maxit_;
+    oo_.deterministic_simulation.iterations = options_.simul.maxit;
 end
 disp (['-----------------------------------------------------']) ;
 skipline();
