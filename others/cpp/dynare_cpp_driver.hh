@@ -238,23 +238,23 @@ private:
   vector<ModFileStructuralInnovationCorrOption *> structural_innovation_corr_option_vector;
   vector<ModFileMeasurementErrorCorrOption *> measurement_error_corr_option_vector;
   map<string, int > exo_names, exo_det_names, endo_names, param_names;
-  map<int, double > params;
+  vector< double > params;
   vector<aux_vars_t> aux_vars;
   vector<int> predetermined_variables;
   vector<int> varobs;
   vector<vector<int > >lead_lag_incidence;
-  vector<double> NNZDerivatives;
+  vector<int> NNZDerivatives;
 public:
   DynareInfo(map<string, int > exo_names_arg,
              map<string, int > exo_det_names_arg,
              map<string, int > endo_names_arg,
              map<string, int > param_names_arg,
-             map<int, double > params_arg,
+             vector< double > params_arg,
              vector<aux_vars_t> aux_vars_arg,
              vector<int> predetermined_variables_arg,
              vector<int> varobs_arg,
-             vector<vector<int > > lead_lag_incidence_arg,
-             vector<double> NNZDerivatives_arg);
+             vector< vector<int > > lead_lag_incidence_arg,
+             vector<int> NNZDerivatives_arg);
   ~DynareInfo();
 
   inline void addMarkovSwitching(MarkovSwitching *ms) { markov_switching_vector.push_back(ms); };
@@ -301,12 +301,12 @@ public:
   inline map<string, int > get_exo_det_names() { return exo_det_names; };
   inline map<string, int > get_endo_names() { return endo_names; };
   inline map<string, int > get_param_names() { return param_names; };
-  inline map<int, double > get_params() { return params; };
+  inline vector<double> get_params() { return params; };
   inline vector <aux_vars_t> get_aux_vars() { return aux_vars; };
   inline vector <int> get_predetermined_variables() { return predetermined_variables; };
   inline vector <int> get_varobs() { return varobs; };
   inline vector<vector<int > > get_lead_lag_incidence() { return lead_lag_incidence; };
-  inline vector<double> get_NNZDerivatives() { return NNZDerivatives; };
+  inline vector<int> get_NNZDerivatives() { return NNZDerivatives; };
 
   string get_exo_name_by_index(int index) throw (ValueNotSetException);
   int get_exo_index_by_name(string name) throw (ValueNotSetException);
