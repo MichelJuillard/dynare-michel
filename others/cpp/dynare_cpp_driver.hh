@@ -244,6 +244,7 @@ private:
   vector<int> varobs;
   vector<vector<int > >lead_lag_incidence;
   vector<int> NNZDerivatives;
+  int endo_nbr, exo_nbr, exo_det_nbr, param_nbr;
 public:
   DynareInfo(map<string, int > exo_names_arg,
              map<string, int > exo_det_names_arg,
@@ -307,6 +308,11 @@ public:
   inline vector <int> get_varobs() { return varobs; };
   inline vector<vector<int > > get_lead_lag_incidence() { return lead_lag_incidence; };
   inline vector<int> get_NNZDerivatives() { return NNZDerivatives; };
+
+  inline int get_endo_nbr(void) { return endo_nbr; };
+  inline int get_exo_nbr(void) { return exo_nbr; };
+  inline int get_exo_det_nbr(void) { return exo_det_nbr; };
+  inline int get_param_nbr(void) { return param_nbr; };
 
   string get_exo_name_by_index(int index) throw (ValueNotSetException);
   int get_exo_index_by_name(string name) throw (ValueNotSetException);

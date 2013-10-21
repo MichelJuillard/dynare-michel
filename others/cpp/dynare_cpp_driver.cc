@@ -45,6 +45,10 @@ DynareInfo::DynareInfo(map<string, int > exo_names_arg,
   lead_lag_incidence(lead_lag_incidence_arg),
   NNZDerivatives(NNZDerivatives_arg)
 {
+  endo_nbr = endo_names.size();
+  exo_nbr = exo_names.size();
+  exo_det_nbr = exo_det_names.size();
+  param_nbr = param_names.size();
 }
 
 DynareInfo::~DynareInfo()
