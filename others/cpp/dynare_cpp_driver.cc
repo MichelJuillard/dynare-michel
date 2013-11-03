@@ -32,23 +32,23 @@ DynareInfo::DynareInfo(map<string, int > exo_names_arg,
                        vector<aux_vars_t> aux_vars_arg,
                        vector<int> predetermined_variables_arg,
                        vector<int> varobs_arg,
-                       vector<vector<int > > lead_lag_incidence_arg,
                        vector<int> NNZDerivatives_arg) :
-  exo_names(exo_names_arg),
-  exo_det_names(exo_det_names_arg),
-  endo_names(endo_names_arg),
-  param_names(param_names_arg),
-  params(params_arg),
-  aux_vars(aux_vars_arg),
-  predetermined_variables(predetermined_variables_arg),
-  varobs(varobs_arg),
-  lead_lag_incidence(lead_lag_incidence_arg),
   NNZDerivatives(NNZDerivatives_arg)
 {
   endo_nbr = endo_names.size();
   exo_nbr = exo_names.size();
   exo_det_nbr = exo_det_names.size();
   param_nbr = param_names.size();
+  
+  exo_names = exo_names_arg;
+  exo_det_names = exo_det_names_arg;
+  endo_names = endo_names_arg;
+  param_names = param_names_arg;
+  params = params_arg;
+  std::cout << params_arg[0] << std::endl;
+  std::cout << params[0] << std::endl;
+  aux_vars = aux_vars_arg;
+  predetermined_variables = predetermined_variables_arg;
 }
 
 DynareInfo::~DynareInfo()
@@ -91,7 +91,6 @@ DynareInfo::~DynareInfo()
   aux_vars.clear();
   predetermined_variables.clear();
   varobs.clear();
-  lead_lag_incidence.clear();
   NNZDerivatives.clear();
 }
 
@@ -179,14 +178,6 @@ DynareInfo::get_param_value_by_index(int index) throw (ValueNotSetException)
   //  if (it != params.end())
   //    return it->second;
   //  throw ValueNotSetException("get_param_value_by_index" + index);
-}
-
-vector<int >
-DynareInfo::get_lead_lag_incidence_for_endo_var_by_index(int index) throw (ValueNotSetException)
-{
-  if (index < lead_lag_incidence.size())
-    return lead_lag_incidence.at(index);
-  throw ValueNotSetException("get_lead_lag_incidence_for_endo_var_by_index" + index);
 }
 
 MarkovSwitching::MarkovSwitching(const int chain_arg,

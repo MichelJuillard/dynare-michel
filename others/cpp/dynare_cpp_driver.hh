@@ -242,10 +242,11 @@ private:
   vector<aux_vars_t> aux_vars;
   vector<int> predetermined_variables;
   vector<int> varobs;
-  vector<vector<int > >lead_lag_incidence;
+  vector<size_t> zeta_fwrd, zeta_back, zeta_mixed, zeta_static;
   vector<int> NNZDerivatives;
-  int endo_nbr, exo_nbr, exo_det_nbr, param_nbr;
+  int endo_nbr, exo_nbr, exo_det_nbr, param_nbr, nstatic, nfwrd, nback, nmixed;
 public:
+  DynareInfo(void); // this function is automatically written by the Dynare preprocessor
   DynareInfo(map<string, int > exo_names_arg,
              map<string, int > exo_det_names_arg,
              map<string, int > endo_names_arg,
@@ -254,7 +255,6 @@ public:
              vector<aux_vars_t> aux_vars_arg,
              vector<int> predetermined_variables_arg,
              vector<int> varobs_arg,
-             vector< vector<int > > lead_lag_incidence_arg,
              vector<int> NNZDerivatives_arg);
   ~DynareInfo();
 
@@ -303,16 +303,20 @@ public:
   inline map<string, int > get_endo_names() { return endo_names; };
   inline map<string, int > get_param_names() { return param_names; };
   inline vector<double> get_params() { return params; };
+  inline double *get_params_data(void) { return params.data(); };
   inline vector <aux_vars_t> get_aux_vars() { return aux_vars; };
   inline vector <int> get_predetermined_variables() { return predetermined_variables; };
   inline vector <int> get_varobs() { return varobs; };
-  inline vector<vector<int > > get_lead_lag_incidence() { return lead_lag_incidence; };
   inline vector<int> get_NNZDerivatives() { return NNZDerivatives; };
 
   inline int get_endo_nbr(void) { return endo_nbr; };
   inline int get_exo_nbr(void) { return exo_nbr; };
   inline int get_exo_det_nbr(void) { return exo_det_nbr; };
   inline int get_param_nbr(void) { return param_nbr; };
+  inline vector<size_t>  get_zeta_back(void) { return zeta_back; };
+  inline vector<size_t>  get_zeta_fwrd(void) { return zeta_fwrd; };
+  inline vector<size_t>  get_zeta_mixed(void) { return zeta_mixed; };
+  inline vector<size_t>  get_zeta_static(void) { return zeta_static; };
 
   string get_exo_name_by_index(int index) throw (ValueNotSetException);
   int get_exo_index_by_name(string name) throw (ValueNotSetException);
@@ -323,7 +327,7 @@ public:
   string get_param_name_by_index(int index) throw (ValueNotSetException);
   int get_param_index_by_name(string name) throw (ValueNotSetException);
   double get_param_value_by_index(int index) throw (ValueNotSetException);
-  vector<int >get_lead_lag_incidence_for_endo_var_by_index(int index) throw (ValueNotSetException);
+
 };
 
 #endif // ! _DYNARE_CPP_DRIVER_HH
