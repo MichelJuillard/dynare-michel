@@ -1,0 +1,75 @@
+In branch extended-preprocessor, we develop a version of Dynare
+preprocessor that produces C and Cuda routine that can be later
+linked within another program.
+
+* dynare_m options
+- new option output=dynamic|first|second|third
+  - output=dynamic generates <fname>_dynamic
+  - output=first generates <fname>_first_derivatives
+  - output=second generates <fname>_first_derivatives and <fname>_second_derivatives
+  - output=third generates <fname>_first_derivatives,
+    <fname>_second_derivatives and <fname>_third_derivatives
+  - routine <fname>_static is always generated
+  - routine <fname>_steady_state is generated if the *.mod file contains a
+    steady_state_model block
+  - routine <fname>_auxiliary_variables_steady_state is always
+    generated but doesn't contain any instruction is the preprocessor
+    didn't add any auxiliary variable
+* Functions
+- <fname>_model: returns a structure containting fields describing
+  the model, analogous to the M_ structure in Dynare. This structure
+  is defined in dynare_model.h and must be accessible when compiling
+  the second stage program.
+- <fname>_dynamic: the historical Dynare dynamic function, returns
+  residuals, first, second and third order derivatives of the model,
+  if needed.
+- <fname>_static: the historical Dynare static function, returns
+  residuals of the static model
+- <fname>_steady_state: a function computing the steady state of the
+  model, given the parameters. It comes from parsing a
+  steady_state_model block in the *.mod file. Currently, there is no provision for
+  calling a non-linear solver for a subset of equations/variables.
+- <fname>_auxiliary_variables_steady_state: a function to compute the steady state
+  values of auxiliary variables automatically added by the
+  preprocessor
+- <fname>_first_derivatives: returns the Jacobian of the model at the steady
+  state, given the
+  steady state. It is more efficient than <fname>_dynamic. Doesn't
+  exist in Dynare yet.
+- <fname>_second_derivatives: returns the second order derivatives of
+  the model. There are as many rows as equations and as many column
+  as the square of the number of endogenous and exogenous
+  variables. The matrix is stored in compressed sparse row format. It
+  is more efficient than compressed column format as there many more
+  columns than rows and many columns are empty. Note that the
+  transpose of the second derivatives matrix in compressed column
+  format can be obtained directly from the same function by inverting
+  the role of the two index vectors.
+- <fname>_third_derivatives: returns the third order derivatives of
+  the model. See above for the storage format of this matrix.
+* Implementation
+** C++ version
+- the routines use C++ and classes from the STL
+** Cuda version
+- the routines have the __global__ keyword necessary to create CUDA
+  kernls
+- vector addressing uses a stride parameter to allow for various
+  storage schemes on the device  
+* Changes with dynare-msdsge
+  - removed erasing previous files as all files should be always
+    written to faciliate application building
+  - added back creating variables with the parameter name (otherwise
+    it doesn't work in Matlab backend) TO BE FIXED
+* Pre-processor
+  - in DynareMain2.cc, in main2() option output != none calls ModFile::write_external_files() 
+  - in ModFile.cc, ModFile::writeExternalFiles() calls
+    - ModFile::writeModelCC()
+    - SteadyStateMode::writeSteadyStateFileCC()
+    - DynamicModel::writeDynamicFile()
+    - StaticModel::writeStaticFile()
+    - DynamicModel::writeResidualsCC()
+    - DynamicModel::writeParamsDerivativesFileCC()
+    - DynamicModel::writeFirstDerivativesCC()
+    - DynamicModel::writeSecondDerivativesCC_csr()
+    - DynamicModel::writeThirdDerivativesCC_csr()
+
